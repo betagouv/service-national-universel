@@ -236,9 +236,9 @@ export default function Phase1(props) {
       <div className="p-[30px]">
         <div className="bg-white rounded mt-[30px] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
           <div className="mx-8 py-4">
-            <div className="flex flex-row justify-between items-center">
-              <div className="flex flex-row items-center justify-center">
-                <div className="text-lg leading-4 font-medium mr-2">Séjour de cohésion</div>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center justify-center gap-2">
+                <div className="text-lg leading-4 font-medium">Séjour de cohésion</div>
                 <Badge
                   minify
                   text={translatePhase1(young.statusPhase1)}

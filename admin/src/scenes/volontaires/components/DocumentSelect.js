@@ -22,8 +22,8 @@ const DocumentSelect = ({ title, onClickMail, onClickPdf }) => {
     <div className="relative" ref={ref}>
       <div
         onClick={() => setOpen((open) => !open)}
-        className="cursor-pointer flex flex-row justify-center items-center gap-2 text-blue-700 border-[1px] rounded-full border-blue-700 px-3 py-2 ml-2">
-        <div className="text-xs font-medium">{title}</div>
+        className="cursor-pointer flex justify-center items-center gap-2 text-blue-700 border-[1px] rounded-full border-blue-700 px-4 py-1">
+        <span className="text-sm font-medium">{title}</span>
         <BiChevronDown />
       </div>
       <div
