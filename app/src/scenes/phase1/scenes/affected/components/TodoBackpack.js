@@ -38,7 +38,7 @@ export default function TodoBackpack({ lunchBreak }) {
             <input type="checkbox" name="convocation" id="convocation" checked={todo.convocation} onChange={handleCheck} />
             <label htmlFor="convocation">
               Votre{" "}
-              <button onClick={() => setModalConvocationOpen(true)} className="font-semibold underline-offset-4 underline decoration-2">
+              <button onClick={() => setModalConvocationOpen(true)} className="h-6 font-semibold underline-offset-4 underline decoration-2">
                 convocation
               </button>
             </label>
@@ -77,7 +77,7 @@ export default function TodoBackpack({ lunchBreak }) {
       </div>
       <Arrow className="absolute hidden md:block left-80 top-0" />
       <DontForget className="absolute hidden md:block left-80 top-10" />
-      <SnuBackPack className="absolute -right-4 md:-right-16 top-4 md:w-64 md:h-64" />
+      <SnuBackPack className="block md:hidden xl:block absolute -right-4 md:-right-16 top-4 md:w-64 md:h-64" />
 
       <ModalConvocation open={modalConvocationOpen} setOpen={setModalConvocationOpen} />
     </div>

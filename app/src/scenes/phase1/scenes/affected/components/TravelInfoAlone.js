@@ -11,7 +11,7 @@ export default function TravelInfoAlone({ center, cohortDetails }) {
   }
 
   return (
-    <div className="border-l-4 border-gray-500 flex-none ml-[1rem] px-[1rem] md:ml-[4rem] md:pl-[3rem]">
+    <div className="border-l-4 border-gray-500 flex-none ml-[1rem] px-[1rem] md:ml-[4rem] md:pl-[3rem] max-w-sm">
       <h1 className="text-xl font-bold">Résumé du voyage</h1>
       <p className="text-sm mb-4">Je me rends au centre et en reviens par mes propres moyens.</p>
       <div className="space-y-4 my-2">

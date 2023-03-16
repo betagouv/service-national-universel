@@ -10,15 +10,11 @@ const FaqAffected = ({ className }) => {
         <QuestionBlock
           questionText="Comment se passe le transport ?"
           answerText={
-            <>
-              <p className="m-0 text-sm">
-                Vous serez pris en charge d&apos;un point de rassemblement situé au sein de votre département jusqu&apos;à votre centre du séjour de cohésion à l&apos;aller et au
-                retour.
-              </p>
-              <p className="m-0 text-sm">
-                Si exceptionnellement vous êtes affecté au sein de votre département, vous devrez vous rendre au centre du séjour de cohésion et en revenir par vos propres moyens.
-              </p>
-            </>
+            <p className="text-sm">
+              Vous serez pris en charge d&apos;un point de rassemblement situé au sein de votre département jusqu&apos;à votre centre du séjour de cohésion à l&apos;aller et au
+              retour. Si exceptionnellement vous êtes affecté au sein de votre département, vous devrez vous rendre au centre du séjour de cohésion et en revenir par vos propres
+              moyens.
+            </p>
           }
           readMoreLink="https://support.snu.gouv.fr/base-de-connaissance/le-transport"
         />
@@ -26,7 +22,7 @@ const FaqAffected = ({ className }) => {
         <QuestionBlock
           questionText="Que prendre dans ma valise ?"
           answerText={
-            <p>
+            <p className="text-sm">
               Une tenue complète vous sera donnée à votre arrivée sur le centre de séjour. Cette tenue est à compléter avec vos effets personnels. Vous pouvez consulter la liste
               des affaires à apporter en cliquant sur “Lire plus”.
             </p>

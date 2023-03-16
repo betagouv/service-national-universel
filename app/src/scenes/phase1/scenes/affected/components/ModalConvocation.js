@@ -13,6 +13,7 @@ import ButtonPrimaryOutline from "../../../../../components/ui/buttons/ButtonPri
 import CloseSvg from "../../../../../assets/Close";
 import ModalConfirm from "../../../../../components/modals/ModalConfirm";
 import ModalTailwind from "../../../../../components/ui/modals/Modal";
+import downloadPDF from "../../../../../utils/download-pdf";
 
 export function ModalConvocation({ open, setOpen }) {
   const young = useSelector((state) => state.Auth.young);
@@ -20,6 +21,11 @@ export function ModalConvocation({ open, setOpen }) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const handleDownload = async () => {
+    await downloadPDF({
+      url: `/young/${young._id}/documents/convocation/cohesion`,
+      fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
+      errorTitle: "Une erreur est survenue lors de l'édition de votre convocation",
+    });
     if (young?.convocationFileDownload === "true") return;
     const { data } = await API.put(`/young/phase1/convocation`, { convocationFileDownload: "true" });
     plausibleEvent("affecté_step3");

@@ -99,8 +99,8 @@ export default function Affected() {
 
         {environment !== "production" && (
           <div
-            className={`md:border-t-[1px] flex flex-col md:flex-row flex-none gap-12 md:gap-32 pt-[1rem] md:pt-[4rem] order-2 overflow-hidden transition-all ease-in-out duration-500
-            ${areStepsDone ? "h-[720px] md:h-[350px]" : "h-0"}`}>
+            className={`md:border-t-[1px] flex flex-col md:flex-row flex-none gap-6 md:gap-16 pt-[1rem] md:pt-[4rem] order-2 overflow-hidden transition-all ease-in-out duration-500
+            ${areStepsDone ? "h-[680px] md:h-[360px]" : "h-0"}`}>
             {young.meetingPointId ? (
               <TravelInfoBus meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
             ) : young.deplacementPhase1Autonomous === "true" ? (

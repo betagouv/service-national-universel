@@ -8,7 +8,7 @@ export default function TravelInfoBus({ meetingPoint, cohortDetails }) {
   }
 
   return (
-    <div className="border-l-4 border-gray-500 flex-none ml-[1rem] pl-[1rem] md:ml-[4rem] md:pl-[3rem]">
+    <div className="border-l-4 border-gray-500 flex-none ml-[1rem] pl-[1rem] md:ml-[4rem] md:pl-[3rem] min-w-1/4">
       <h1 className="text-xl font-bold mb-6">Résumé du voyage</h1>
       <div className="space-y-4 my-2">
         <div>
@@ -20,7 +20,7 @@ export default function TravelInfoBus({ meetingPoint, cohortDetails }) {
           </p>
           <p className="leading-relaxed text-sm">
             <span className="capitalize">{dayjs(cohortDetails.dateStart).locale("fr").format("dddd")}</span>{" "}
-            <span>{dayjs(cohortDetails.dateStart).locale("fr").format("D MMMM")}</span> à {meetingPoint?.ligneToPoint?.departureHour}
+            <span>{dayjs(cohortDetails.dateStart).locale("fr").format("D MMMM")}</span> à {meetingPoint?.ligneToPoint?.meetingHour}
             <br />
             {meetingPoint.name},
             <br />
