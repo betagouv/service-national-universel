@@ -37,7 +37,7 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
                       return (
                         <div key={item}>
                           <ToolTipView selectedFilters={selectedFilters} filter={filter} />
-                          <div data-tip="" data-for="tooltip-filtre" className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">
+                          <div data-tip="" data-for={"tooltip-filtre" + filter.name} className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">
                             +{index - 2}
                           </div>
                         </div>
@@ -77,7 +77,7 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
 
 const ToolTipView = ({ selectedFilters, filter }) => {
   return (
-    <ReactTooltip id="tooltip-filtre" className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
+    <ReactTooltip id={"tooltip-filtre" + filter.name} className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
       <div className="flex flex-row gap-2 flex-wrap max-w-[600px] rounded">
         {selectedFilters[filter.name].filter.map((item) => (
           <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500" key={item}>
