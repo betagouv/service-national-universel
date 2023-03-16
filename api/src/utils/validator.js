@@ -512,6 +512,8 @@ function validateYoung(young, user) {
     consentment: Joi.string().allow(null, ""),
     imageRight: Joi.string().allow(null, ""),
     imageRightFiles: Joi.array().items(Joi.string().allow(null, "")),
+    autoTestPCR: Joi.string().allow(null, ""),
+    autoTestPCRFiles: Joi.array().items(Joi.string().allow(null, "")),
     rulesYoung: Joi.string().allow(null, ""),
     rulesParent1: Joi.string().allow(null, ""),
     rulesParent2: Joi.string().allow(null, ""),
