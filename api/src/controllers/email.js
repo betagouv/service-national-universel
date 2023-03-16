@@ -135,7 +135,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     const formattedDate = `${year}-${month}-${day}`;
 
     const emails = await getEmailsList({ email, messageId, startDate: formattedDate, endDate: formattedDate });
-    if (!emails?.count || emails.code) {
+    if (!emails?.countDocuments || emails.code) {
       captureMessage("Error while fetching email" + JSON.stringify({ emails, email, messageId, startDate: formattedDate, endDate: formattedDate }));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
