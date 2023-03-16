@@ -574,24 +574,12 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     } else if (template === SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION) {
       if (isYoung(req.user)) {
         //second email
-        const emailTo2 = [{ name: referent.youngFirstName, lastName: referent.youngLastName, email: referent.email }];
-        const params2 = {
-          ...params,
-          cta: `${ADMIN_URL}/mission/${mission._id}/youngs`,
-          firstName: application.youngFirstName,
-          lastName: application.youngLastName,
-          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
-        };
-        await sendTemplate(template, {
-          emailTo: emailTo2,
-          params: params2,
-        });
-
         const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
         emailTo = referentManagerPhase2.map((referent) => ({
           name: `${referent.firstName} ${referent.lastName}`,
           email: referent.email,
         }));
+        emailTo.push({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email });
         params = {
           ...params,
           cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,
@@ -601,18 +589,11 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         };
       } else {
         // envoyer le mail au jeune / RP
-        if (req.user.role === ROLES.REFERENT_DEPARTMENT || req.user.role === ROLES.REFERENT_REGION) {
+        if (req.user.role === ROLES.REFERENT_DEPARTMENT) {
           // envoyer à tuteur de mission + jeune // RP
-          emailTo = [{ name: young.firstName, lastName: young.lastName, email: young.email }];
-          params = {
-            ...params,
-            cta: `${APP_URL}/mission/${mission.structureId}`,
-            firstName: referent.firstName,
-            lastName: referent.lastName,
-            type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
-          };
+          emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
         } else if (req.user.role === ROLES.RESPONSIBLE) {
-        } else if (req.user.role === ROLES.ADMIN) {
+        } else if (req.user.role === ROLES.ADMIN || req.user.role === ROLES.REFERENT_REGION) {
         }
       }
     } else {
