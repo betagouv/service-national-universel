@@ -387,7 +387,7 @@ router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { se
 
     return res.status(200).send({ data: young.files[key], ok: true });
   } catch (e) {
-    console.error(e);
+    capture(e);
   }
 });
 
