@@ -20,7 +20,8 @@ const Badge = styled.div`
   padding: 0.25rem 1rem;
   margin: 0.25rem 0.25rem;
   border-radius: 99999px;
-  font-size: 0.8rem;
+  font-size: 14px;
+  line-height: 1.25rem;
   font-weight: 500;
   color: #9a9a9a;
   background-color: #f6f6f6;
@@ -28,7 +29,7 @@ const Badge = styled.div`
   ${({ color, backgroundColor }) => `
     color: ${color};
     background-color: ${backgroundColor ? backgroundColor : `${color}11`};
-    border: 0.5px solid ${color};
+    border: 1px solid ${color};
   `};
   /* Tooltip text */
   .minTooltipText,
