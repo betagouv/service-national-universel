@@ -39,11 +39,6 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
   const [firstLoad, setFirstLoad] = React.useState(true);
 
   React.useEffect(() => {
-    const newFilters = search !== "" ? filters.filter((f) => f.title.toLowerCase().includes(search.toLowerCase())) : filters;
-    setFiltersVisible(newFilters);
-  }, [search]);
-
-  React.useEffect(() => {
     init();
     getDBFilters();
     const handleClickOutside = (event) => {
@@ -57,25 +52,39 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
     };
   }, []);
 
-  React.useEffect(() => {
-    if (filtersVisible.length === 0) {
-      setCategories([]);
-      return;
-    }
-    const newCategories = [];
-    filtersVisible?.forEach((f) => {
-      if (!newCategories.includes(f.parentGroup)) {
-        newCategories.push(f.parentGroup);
-      }
-    });
-    setCategories(newCategories);
-  }, [filtersVisible]);
+  React.useEffect(
+    function updateSearchSelectedFilter() {
+      const newFilters = search !== "" ? filters.filter((f) => f.title.toLowerCase().includes(search.toLowerCase())) : filters;
+      setFiltersVisible(newFilters);
+    },
+    [search],
+  );
 
-  React.useEffect(() => {
-    if (!selectedFilters) return;
-    getData();
-    setURL();
-  }, [selectedFilters, paramData.page, paramData.sort]);
+  React.useEffect(
+    function updateCategories() {
+      if (filtersVisible.length === 0) {
+        setCategories([]);
+        return;
+      }
+      const newCategories = [];
+      filtersVisible?.forEach((f) => {
+        if (!newCategories.includes(f.parentGroup)) {
+          newCategories.push(f.parentGroup);
+        }
+      });
+      setCategories(newCategories);
+    },
+    [filtersVisible],
+  );
+
+  React.useEffect(
+    function updateOnParamChange() {
+      if (!selectedFilters) return;
+      getData();
+      setURL();
+    },
+    [selectedFilters, paramData.page, paramData.sort],
+  );
 
   const init = async () => {
     // load des defaults value des filtres
