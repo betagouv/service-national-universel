@@ -15,7 +15,6 @@ import api from "../../../../services/api";
     translate: translate,
     defaultValue: ["value par défaut 1", "value par défaut 2", ...]
     isSingle: true/false (si true, le filtre ne peut avoir qu'une seule valeur)
-    displayOnStart: true/false (si true, le filtre est affiché dès le chargement de la page (même sans valeur))
   },
   - Filtre avec custom query ex : 
   { 

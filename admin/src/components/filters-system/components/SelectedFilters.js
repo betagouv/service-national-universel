@@ -53,7 +53,6 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
                 })
               ) : (
                 // cas ou aucun filtre n'est selectionné mais on veut afficher le filtre par defaut (voir dashboard)
-                // mettre displayOnStart a true dans le filtre
                 <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">A choisir</div>
               )}
             </div>
