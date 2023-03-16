@@ -80,8 +80,8 @@ jobs:
         env:
           SLACK_TITLE: Failed to deploy staging admin
 
-      - name: Notification on success
-        if: ${{ success() }}
-        uses: rtCamp/action-slack-notify@master
-        env:
-          SLACK_TITLE: admin staging deployed
+      # - name: Notification on success
+      #   if: ${{ success() }}
+      #   uses: rtCamp/action-slack-notify@master
+      #   env:
+      #     SLACK_TITLE: admin staging deployed

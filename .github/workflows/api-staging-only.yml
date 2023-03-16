@@ -84,8 +84,8 @@ jobs:
         env:
           SLACK_TITLE: Failed to deploy api
 
-      - name: Notification on success
-        if: ${{ success() }}
-        uses: rtCamp/action-slack-notify@master
-        env:
-          SLACK_TITLE: api staging deployed
+      # - name: Notification on success
+      #   if: ${{ success() }}
+      #   uses: rtCamp/action-slack-notify@master
+      #   env:
+      #     SLACK_TITLE: api staging deployed
