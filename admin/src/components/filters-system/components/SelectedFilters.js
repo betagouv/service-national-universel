@@ -22,39 +22,34 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
   return (
     <>
       {filterArray
-        .filter((item) => (selectedFilters[item.name] && selectedFilters[item.name].filter.length > 0) || item?.displayOnStart)
+        .filter((item) => selectedFilters[item.name] && selectedFilters[item.name].filter.length > 0)
         .map((filter) => (
           <div key={filter.title} className="relative">
             <div
               onClick={() => setParamData((oldValue) => ({ ...oldValue, isShowing: filter.name }))}
               className=" cursor-pointer flex flex-row border-[1px] border-gray-200 rounded-md w-fit p-2 items-center gap-1">
               <div className="text-gray-700 font-medium text-xs">{filter.title} :</div>
-              {selectedFilters[filter.name] && selectedFilters[filter.name].filter.length > 0 ? (
-                selectedFilters[filter.name].filter.map((item, index) => {
-                  // on affiche que les 2 premiers filtres, apres on affiche "+x"
-                  if (index > 2) {
-                    if (index === selectedFilters[filter.name].filter.length - 1) {
-                      return (
-                        <div key={item}>
-                          <ToolTipView selectedFilters={selectedFilters} filter={filter} />
-                          <div data-tip="" data-for={"tooltip-filtre" + filter.name} className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">
-                            +{index - 2}
-                          </div>
+              {selectedFilters[filter.name].filter.map((item, index) => {
+                // on affiche que les 2 premiers filtres, apres on affiche "+x"
+                if (index > 2) {
+                  if (index === selectedFilters[filter.name].filter.length - 1) {
+                    return (
+                      <div key={item}>
+                        <ToolTipView selectedFilters={selectedFilters} filter={filter} />
+                        <div data-tip="" data-for={"tooltip-filtre" + filter.name} className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">
+                          +{index - 2}
                         </div>
-                      );
-                    }
-                    return null;
+                      </div>
+                    );
                   }
-                  return (
-                    <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500" key={item}>
-                      {item === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(item) : item}
-                    </div>
-                  );
-                })
-              ) : (
-                // cas ou aucun filtre n'est selectionné mais on veut afficher le filtre par defaut (voir dashboard)
-                <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">A choisir</div>
-              )}
+                  return null;
+                }
+                return (
+                  <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500" key={item}>
+                    {item === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(item) : item}
+                  </div>
+                );
+              })}
             </div>
             <Popover className="absolute">
               <div ref={ref}>
