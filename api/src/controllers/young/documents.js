@@ -376,13 +376,14 @@ router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { se
     if (key.includes("militaryPreparationFiles")) {
       await deleteFile(`app/young/${id}/military-preparation/${key}/${fileId}`);
     } else {
-      const res = await deleteFile(`app/young/${id}/${key}/${fileId}`);
-      console.log("res from deleteFile:", res);
+      await deleteFile(`app/young/${id}/${key}/${fileId}`);
     }
 
     // Delete record
 
-    young.files[key].id(fileId).remove();
+    const recordToDelete = young.files[key].id(fileId);
+    if (!recordToDelete) return res.status(404).send({ ok: false, code: ERRORS.FILE_NOT_FOUND });
+    recordToDelete.remove();
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ data: young.files[key], ok: true });
