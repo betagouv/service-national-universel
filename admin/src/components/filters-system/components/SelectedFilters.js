@@ -53,18 +53,16 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
             </div>
             {console.log("paramdatafilter", paramData)}
             <Popover className="absolute">
-              {({ open }) => (
-                <div ref={ref}>
-                  <DropDown
-                    filter={filter}
-                    selectedFilters={selectedFilters}
-                    setSelectedFilters={setSelectedFilters}
-                    data={paramData?.filters ? paramData.filters[filter.name] : []}
-                    isShowing={paramData?.isShowing === filter.name}
-                    inListFilter={false}
-                  />
-                </div>
-              )}
+              <div ref={ref}>
+                <DropDown
+                  filter={filter}
+                  selectedFilters={selectedFilters}
+                  setSelectedFilters={setSelectedFilters}
+                  data={paramData?.filters ? paramData.filters[filter.name] : []}
+                  isShowing={paramData?.isShowing === filter.name}
+                  inListFilter={false}
+                />
+              </div>
             </Popover>
           </div>
         ))}
