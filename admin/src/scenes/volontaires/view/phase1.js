@@ -48,14 +48,12 @@ export default function Phase1(props) {
   const [cohort, setCohort] = useState();
   const [isYoungCheckinOpen, setIsYoungCheckinOpen] = React.useState(false);
 
-  const isStayOver = () => {
-    if (cohort && cohort.dateEnd) {
-      const now = new Date();
-      const stayEndDate = new Date(cohort.dateEnd);
-      if (now < stayEndDate) {
-        return true;
-      }
-      return false;
+  const canUserDownloadConvocation = () => {
+    if (
+      young.hasMeetingInformation === "true " &&
+      (young.statusPhase1 === "AFFECTED" || young.statusPhase1 === "DONE" || young.statusPhase1 === "NOT_DONE" || young.statusPhase1 === "EXEMPTED")
+    ) {
+      return true;
     }
     return false;
   };
@@ -245,7 +243,7 @@ export default function Phase1(props) {
                   // icon={young.statusPhase1 === "AFFECTED" && <div className="w-2 h-2 rounded-full bg-blue-500 shadow-sm mr-1" />}
                   color={YOUNG_STATUS_COLORS[young.statusPhase1]}
                 />
-                {(young.statusPhase1 === "AFFECTED" || ((young.statusPhase1 === "DONE" || young.statusPhase1 === "NOT_DONE") && isStayOver())) && (
+                {canUserDownloadConvocation() && (
                   <DocumentSelect
                     title="Convocation"
                     onClickPdf={handleDownloadConvocationPdfFile}
