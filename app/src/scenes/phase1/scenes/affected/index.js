@@ -4,18 +4,19 @@ import { toastr } from "react-redux-toastr";
 import { translate, translateCohort, youngCanChangeSession } from "snu-lib";
 import { getCohortDetail } from "../../../../utils/cohorts.js";
 import api from "../../../../services/api";
+import { environment } from "../../../../config.js";
 
 import { AlertBoxInformation } from "../../../../components/Content";
 import ChangeStayLink from "../../components/ChangeStayLink.js";
+import CenterInfo from "./components/CenterInfo";
 import FaqAffected from "./components/FaqAffected.js";
-import Loader from "../../../../components/Loader";
-import StepsAffected from "./components/StepsAffected";
 import JDMA from "../../../../components/JDMA.js";
-import { Problem } from "./components/Problem";
-import { LieuAffectation } from "./components/LieuAffectation";
-import { ResumeDuVoyage } from "./components/ResumeDuVoyage";
-import { DansMonSac } from "./components/DansMonSac";
-import { environment } from "../../../../config.js";
+import Loader from "../../../../components/Loader";
+import Problem from "./components/Problem";
+import StepsAffected from "./components/StepsAffected";
+import TravelInfoAlone from "./components/TravelInfoAlone.js";
+import TravelInfoBus from "./components/TravelInfoBus";
+import TodoBackpack from "./components/TodoBackpack";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -26,9 +27,6 @@ export default function Affected() {
   const cohortDetails = getCohortDetail(young.cohort);
   const nbvalid = getNbValid(young);
   const areStepsDone = nbvalid === 4;
-
-  // Pour tester l'animation de scroll
-  // const [areStepsDone, setAreStepsDone] = useState(false);
 
   if (areStepsDone) {
     window.scrollTo(0, 0);
@@ -96,24 +94,26 @@ export default function Affected() {
             {youngCanChangeSession(young) ? <ChangeStayLink className="my-4 md:my-8" /> : null}
           </div>
 
-          <LieuAffectation center={center} />
+          <CenterInfo center={center} />
         </header>
 
         {environment !== "production" && (
           <div
-            className={`md:border-t-[1px] flex flex-col md:flex-row flex-none gap-12 md:gap-32 pt-4 order-2 overflow-hidden transition-all ease-in-out duration-500
-            ${areStepsDone ? "h-[700px] md:h-[350px]" : "h-0"}`}>
-            <ResumeDuVoyage meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
-            <DansMonSac />
+            className={`md:border-t-[1px] flex flex-col md:flex-row flex-none gap-12 md:gap-32 pt-[1rem] md:pt-[4rem] order-2 overflow-hidden transition-all ease-in-out duration-500
+            ${areStepsDone ? "h-[720px] md:h-[350px]" : "h-0"}`}>
+            {young.meetingPointId ? (
+              <TravelInfoBus meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
+            ) : young.deplacementPhase1Autonomous === "true" ? (
+              <TravelInfoAlone center={center} cohortDetails={cohortDetails} />
+            ) : (
+              <></>
+            )}
+
+            <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
           </div>
         )}
 
         <StepsAffected young={young} center={center} nbvalid={nbvalid} />
-
-        {/* Pour tester l'animation de scroll */}
-        {/* <button onClick={() => setAreStepsDone(!areStepsDone)} className="order-5">
-          {areStepsDone ? "Hide" : "Show"}
-        </button> */}
 
         <FaqAffected className={`transition-all ${areStepsDone ? "order-3" : "order-4"}`} />
       </div>

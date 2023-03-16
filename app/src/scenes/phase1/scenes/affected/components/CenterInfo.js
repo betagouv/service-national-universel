@@ -1,7 +1,7 @@
 import React from "react";
 import Iceberg from "../../../../../assets/Iceberg.js";
 
-export function LieuAffectation({ center }) {
+export default function CenterInfo({ center }) {
   return (
     <div className="bg-gray-100 md:bg-gray-50 rounded-2xl flex p-4 gap-4 md:w-auto my-2 justify-between items-center h-fit">
       <article className="md:order-last">

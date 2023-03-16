@@ -2,7 +2,7 @@ import React from "react";
 import dayjs from "dayjs";
 import LongArrow from "../../../../../assets/icons/LongArrow.js";
 
-export function ResumeDuVoyage({ meetingPoint, cohortDetails }) {
+export default function TravelInfoBus({ meetingPoint, cohortDetails }) {
   if (!meetingPoint || !cohortDetails) {
     return <></>;
   }

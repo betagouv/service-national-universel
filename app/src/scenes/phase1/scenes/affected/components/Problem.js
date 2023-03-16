@@ -2,7 +2,7 @@ import React from "react";
 import { translateCohort } from "snu-lib";
 import { RiErrorWarningLine } from "react-icons/ri";
 
-export function Problem({ young }) {
+export default function Problem({ young }) {
   return (
     <div className="my-12 mx-10 w-full">
       <div className="max-w-[80rem] rounded-xl shadow my-0 md:mx-auto px-4 md:!px-8 lg:!px-16 py-8 relative overflow-hidden justify-between bg-gray-50 md:bg-white mb-4">

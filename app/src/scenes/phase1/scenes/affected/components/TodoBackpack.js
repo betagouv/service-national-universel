@@ -5,7 +5,7 @@ import DontForget from "../assets/DontForget.js";
 import SnuBackPack from "../assets/SnuBackPack.js";
 import { ModalConvocation } from "./ModalConvocation.js";
 
-export function DansMonSac() {
+export default function TodoBackpack({ lunchBreak }) {
   const [modalConvocationOpen, setModalConvocationOpen] = useState(false);
 
   const persistedTodo = JSON.parse(localStorage.getItem("todo")) || {
@@ -65,12 +65,14 @@ export function DansMonSac() {
             </label>
           </div>
 
-          <div className="flex gap-4 items-baseline">
-            <input type="checkbox" name="collation" id="collation" checked={todo.collation} onChange={handleCheck} />
-            <label htmlFor="collation">
-              Une <strong>collation ou un déjeuner froid</strong> pour le repas.
-            </label>
-          </div>
+          {lunchBreak && (
+            <div className="flex gap-4 items-baseline">
+              <input type="checkbox" name="collation" id="collation" checked={todo.collation} onChange={handleCheck} />
+              <label htmlFor="collation">
+                Une <strong>collation ou un déjeuner froid</strong> pour le repas.
+              </label>
+            </div>
+          )}
         </div>
       </div>
       <Arrow className="absolute hidden md:block left-80 top-0" />
