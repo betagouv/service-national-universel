@@ -1,42 +1,18 @@
-import { DataSearch, MultiDropdownList, ReactiveBase, ReactiveComponent } from "@appbaseio/reactivesearch";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 import { HiOutlineLockClosed } from "react-icons/hi";
-import { formatDateFR, formatLongDateUTC, missionCandidatureExportFields, missionExportFields, translateApplication, translateMission, translatePhase2 } from "snu-lib";
-import Breadcrumbs from "../../components/Breadcrumbs";
-import Loader from "../../components/Loader";
-import api from "../../services/api";
-import { ES_NO_LIMIT, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDateTimezoneUTC, ROLES, translate, translateVisibilty } from "../../utils";
-import SelectStatusMissionV2 from "../missions/components/SelectStatusMissionV2";
+import { formatDateFR, formatStringDateTimezoneUTC, ROLES, translate } from "snu-lib";
+import Breadcrumbs from "../../Breadcrumbs";
+import Loader from "../../Loader";
+import api from "../../../services/api";
+import SelectStatusMissionV2 from "../../../scenes/missions/components/SelectStatusMissionV2";
 
-import { Filters, ResultTable, SelectedFilters, Save } from "../../components/filters-system";
+import { Filters, ResultTable, SelectedFilters, Save } from "..";
 
-import FromDate, { getQuery } from "../../components/filters-system/components/customComponent/FromDate";
-import ToDate, { getQuery as getQueryToDate } from "../../components/filters-system/components/customComponent/ToDate";
-
-const FILTERS = [
-  "DOMAIN",
-  "SEARCH",
-  "STATUS",
-  "PLACES",
-  "LOCATION",
-  "TUTOR",
-  "REGION",
-  "DEPARTMENT",
-  "STRUCTURE",
-  "MILITARY_PREPARATION",
-  "DATE",
-  "SOURCE",
-  "VISIBILITY",
-  "HEBERGEMENT",
-  "HEBERGEMENT_PAYANT",
-  "PLACESTATUS",
-  "APPLICATIONSTATUS",
-];
-
-const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
+import FromDate, { getQuery } from "../components/customComponent/FromDate";
+import ToDate, { getQuery as getQueryToDate } from "../components/customComponent/ToDate";
 
 export default function List() {
   const [mission, setMission] = useState(null);

@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { translateGrade, youngExportFields } from "snu-lib";
 
-import Chevron from "../../components/Chevron";
-import { Filter, FilterRow, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
-import api from "../../services/api";
-import { apiURL, appURL, supportURL } from "../../config";
-import plausibleEvent from "../../services/plausible";
+import Chevron from "../../Chevron";
+import { Table, ActionBox, MultiLine } from "../../list";
+import api from "../../../services/api";
+import { appURL } from "../../../config";
+import plausibleEvent from "../../../services/plausible";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
 
-import IconChangementCohorte from "../../assets/IconChangementCohorte.js";
+import IconChangementCohorte from "../../../assets/IconChangementCohorte.js";
 
-import Badge from "../../components/Badge";
+import Badge from "../../Badge";
 
-import { Filters, ResultTable, getDefaultQuery, ModalExportV2, Save, SelectedFilters, SortOption } from "../../components/filters-system";
+import { Filters, ResultTable, getDefaultQuery, ModalExportV2, Save, SelectedFilters, SortOption } from "..";
 
 import {
   translate,
@@ -33,7 +33,7 @@ import {
   ROLES,
   colors,
   YOUNG_STATUS,
-} from "../../utils";
+} from "../../../utils";
 
 export default function test_volontaire() {
   const [data, setData] = useState([]);

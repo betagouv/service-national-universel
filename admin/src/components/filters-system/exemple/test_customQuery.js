@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { translateGrade } from "snu-lib";
-import { Filters, ResultTable, SelectedFilters, Save } from "../../components/filters-system";
+import React, { useState } from "react";
+import { translate } from "snu-lib";
+import { Filters, ResultTable, SelectedFilters, Save } from "..";
 
-import plausibleEvent from "../../services/plausible";
-import { useHistory, Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
-import { translateStatus } from "../plan-transport/components/commons";
+import ArrowUp from "../../../assets/ArrowUp";
+import Comment from "../../../assets/comment";
 
-import ArrowUp from "../../assets/ArrowUp";
-import Comment from "../../assets/comment";
-
-import { getTransportIcon } from "../plan-transport/util";
+import { getTransportIcon } from "../../../scenes/plan-transport/util";
 
 export default function test_volontaire() {
   const [data, setData] = useState([]);
@@ -95,7 +92,7 @@ export default function test_volontaire() {
       datafield: "modificationBuses.status.keyword",
       parentGroup: "Modification de Statut",
       missingLabel: "Non renseigné",
-      translate: (value) => translateStatus(value),
+      translate: (value) => translate(value),
       defaultValue: ["ACCEPTED", "REJECTED"],
       isSingle: true,
     },

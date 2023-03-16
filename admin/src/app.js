@@ -50,7 +50,6 @@ import "./index.css";
 import ModalCGU from "./components/modals/ModalCGU";
 import Team from "./scenes/team";
 import * as Sentry from "@sentry/react";
-import test from "./scenes/newFilters";
 
 initSentry();
 initApi();
@@ -182,7 +181,6 @@ const Home = () => {
           <Switch>
             <SentryRoute path="/auth" component={Auth} />
             <RestrictedRoute path="/structure" component={Structure} />
-            <RestrictedRoute path="/filters" component={test} />
             <RestrictedRoute path="/settings" component={Settings} />
             <RestrictedRoute path="/profil" component={Profil} />
             <RestrictedRoute path="/volontaire" component={renderVolontaire} />
