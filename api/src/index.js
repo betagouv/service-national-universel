@@ -1,6 +1,8 @@
 require("dotenv").config({ path: "./.env-staging" });
 const { initSentry, capture } = require("./sentry");
 
+require("events").EventEmitter.defaultMaxListeners = 30; // Fix warning node (Caused by ElasticMongoose-plugin)
+
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const express = require("express");

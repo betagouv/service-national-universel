@@ -14,7 +14,7 @@ const WithdrawOrChangeDateModalContent = ({ onCancel, title, subTitle, confirmBu
         </ActionButton>
         <ActionButton onClick={onConfirm}>{confirmButtonName}</ActionButton>
       </div>
-      <CancelButton className="mt-10" onClick={onCancel} />
+      <CancelButton className="mt-10 hidden md:block" onClick={onCancel} />
     </>
   );
 };

@@ -31,8 +31,8 @@ export const steps = {
     { content: CONTENT_FORM, title: "Abandonner mon inscription", subTitle: "Veuillez précisez la raison de votre abandon.", confirmButtonName: "Abandonner" },
     {
       content: CONTENT_CONFIRM,
-      title: "Suppression du compte SNU",
-      subTitle: "Vous êtes sur le point de supprimer votre compte. Vous serez immédiatement déconnecté(e). Souhaitez-vous réellement supprimer votre compte ?",
+      title: "Êtes-vous sûr(e) ?",
+      subTitle: "Vous vous apprêtez à abandonner votre inscription au SNU. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
     },
   ],
   [ACTION_DELETE_ACCOUNT]: [

@@ -31,6 +31,13 @@ const EnrichedPointDeRassemblementSchema = PointDeRassemblementModel.discriminat
         description: "Heure de convocation lié à ce spécifique bus et point de rassemblement",
       },
     },
+    departureHour: {
+      type: String,
+      required: true,
+      documentation: {
+        description: "Heure de départ",
+      },
+    },
     returnHour: {
       type: String,
       required: true,

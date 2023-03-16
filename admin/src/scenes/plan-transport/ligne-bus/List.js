@@ -216,7 +216,7 @@ const ReactiveList = ({ cohort, history }) => {
                       pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
                       pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
                       pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr?.busArrivalHour || "";
-                      pdrs[`HEURE DE DEPART DU PDR ${num}`] = pdr?.meetingHour || "";
+                      pdrs[`HEURE DE DEPART DU PDR ${num}`] = pdr?.departureHour || "";
                       pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${num}`] = pdr?.returnHour || "";
                     }
 
@@ -659,8 +659,8 @@ const Line = ({ hit, currentTab, setPanel }) => {
 
   const meetingPoints =
     currentTab === "aller"
-      ? //sort meetingPoints by meetingHour
-        hit.pointDeRassemblements.sort((a, b) => a.meetingHour.replace(":", "") - b.meetingHour.replace(":", ""))
+      ? //sort meetingPoints by departureHour
+        hit.pointDeRassemblements.sort((a, b) => a.departureHour.replace(":", "") - b.departureHour.replace(":", ""))
       : hit.pointDeRassemblements.sort((a, b) => a.returnHour.replace(":", "") - b.returnHour.replace(":", ""));
 
   const hasPendingModification = hit.modificationBuses?.some((modification) => modification.status === "PENDING");
@@ -755,7 +755,7 @@ const TooltipMeetingPoint = ({ children, meetingPoint, currentTab, ...props }) =
           <div className="flex items-center justify-between w-[524px]">
             <div className="flex items-center">
               <div className="text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-lg">
-                {currentTab === "aller" ? meetingPoint.meetingHour : meetingPoint.returnHour}
+                {currentTab === "aller" ? meetingPoint.departureHour : meetingPoint.returnHour}
               </div>
               <svg id="triangle" viewBox="0 0 100 100" width={10} height={10} className="z-[600]">
                 <polygon points="0 0, 100 0, 50 55" transform="rotate(-90 50 50)" fill="#F5F5F5" />

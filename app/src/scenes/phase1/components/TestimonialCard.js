@@ -18,7 +18,7 @@ const TestimonialCard = ({ title, description, picture, readingTime, isVideo = f
         )}
       </div>
       <div className="p-[20px]">
-        <h3 className="text-sm font-bold mb-3">{title}</h3>
+        <h3 className="text-sm text-gray-900 font-bold mb-3">{title}</h3>
         <p className="text-xs text-gray-700">{description}</p>
       </div>
     </article>

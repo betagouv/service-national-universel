@@ -1,3 +1,33 @@
+## [1.233.1](https://github.com/betagouv/service-national-universel/compare/v1.233.0...v1.233.1) (2023-03-15)
+
+
+### Bug Fixes
+
+* **admin:** application translation statut ([cc6cce7](https://github.com/betagouv/service-national-universel/commit/cc6cce748d90f5b8d98a7d273e6f5089f02477c0))
+* **api:** Fix warning node event emitter ([#2371](https://github.com/betagouv/service-national-universel/issues/2371)) ([8f017df](https://github.com/betagouv/service-national-universel/commit/8f017df715c56897acd90cbb1a48bb6627562c25))
+* **app:** loading infini parent consent ([5a7f277](https://github.com/betagouv/service-national-universel/commit/5a7f2777a824a7efdc5e1969e2a907531d82cf07))
+* **app:** ModalResumePhase1ForWithdrawn ([29a0b8d](https://github.com/betagouv/service-national-universel/commit/29a0b8d69417072be90705adc408cfe1311981f8))
+* type and mobile design ([#2373](https://github.com/betagouv/service-national-universel/issues/2373)) ([22f7519](https://github.com/betagouv/service-national-universel/commit/22f7519481db1e81a4b755d3388a3de760af4ac9))
+
+# [1.233.0](https://github.com/betagouv/service-national-universel/compare/v1.232.0...v1.233.0) (2023-03-14)
+
+
+### Bug Fixes
+
+* **admin/api:** Add departureHour to model ([#2366](https://github.com/betagouv/service-national-universel/issues/2366)) ([6142143](https://github.com/betagouv/service-national-universel/commit/6142143beb9646ddcf9cd78f6ff3e3127eaa8646))
+* **api:** Add departureHour to plan de transport model ([b7df75d](https://github.com/betagouv/service-national-universel/commit/b7df75dbd61f52de241db9d4f0c17bc51fe6433b))
+* **api/admin:** fix duplicate email error message ([#2369](https://github.com/betagouv/service-national-universel/issues/2369)) ([d7e44e2](https://github.com/betagouv/service-national-universel/commit/d7e44e2884bcc3fb1d47c79cd61a97f8bf15d57f))
+* **app:** ajustement design page en attente d'affectation ([#2364](https://github.com/betagouv/service-national-universel/issues/2364)) ([24f37d9](https://github.com/betagouv/service-national-universel/commit/24f37d9d2602d3fb5580e05581873dfede4b108a))
+* **app:** correction de la traduction du statut d'inscription ([#2362](https://github.com/betagouv/service-national-universel/issues/2362)) ([4035ea9](https://github.com/betagouv/service-national-universel/commit/4035ea9539b47ff0ac9dabde4829740da3c3f577))
+* **app:** correction du design de la page en attente d'affectation ([#2367](https://github.com/betagouv/service-national-universel/issues/2367)) ([eccda45](https://github.com/betagouv/service-national-universel/commit/eccda451f083704164f1f27ab84bb6751d75b4a5))
+* **app:** remove production condition ([2f293a7](https://github.com/betagouv/service-national-universel/commit/2f293a7060325eeccc888b60a15994e3e2f8b722))
+
+
+### Features
+
+* **app:** déploiement de la nouvelle page "en attente d'affectation" ([#2368](https://github.com/betagouv/service-national-universel/issues/2368)) ([0ee6283](https://github.com/betagouv/service-national-universel/commit/0ee6283d1ee0aa096d80e8778f3d946efa427d1d))
+* **app:** Mise en production nouvelle navbar [#2363](https://github.com/betagouv/service-national-universel/issues/2363) ([6bd9289](https://github.com/betagouv/service-national-universel/commit/6bd9289dfb3afe7f5246f013a36550efcfcf9b5c))
+
 # [1.232.0](https://github.com/betagouv/service-national-universel/compare/v1.231.0...v1.232.0) (2023-03-13)
 
 
