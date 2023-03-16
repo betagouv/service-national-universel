@@ -577,8 +577,8 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
       if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
       params = {
-        firstName: application.youngFirstName,
-        lastName: application.youngLastName,
+        firstName: req.user.firstName,
+        lastName: req.user.lastName,
         type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
       };
       const sendYoungRPMail = async () => {
