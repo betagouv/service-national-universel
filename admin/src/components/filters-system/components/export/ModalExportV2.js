@@ -27,8 +27,6 @@ export default function ModalExportV2({
     setHasFilter(Object.keys(selectedFilters).filter((e) => selectedFilters[e]?.filter?.length).length > 0);
   }, [selectedFilters]);
 
-  console.log(selectedFilters);
-
   return (
     <ModalTailwind isOpen={isOpen} onClose={() => setIsOpen(false)} className="bg-white rounded-xl w-[900px]">
       <div className="px-8 py-6 space-y-6">

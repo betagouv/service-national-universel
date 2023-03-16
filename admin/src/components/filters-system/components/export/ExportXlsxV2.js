@@ -141,7 +141,6 @@ async function toArrayOfArray(results, transform) {
 }
 
 async function getAllResults(index, query, searchType, fieldsToExport) {
-  console.log("getAllResults", query);
   let result;
   if (searchType === "_msearch") {
     result = await api.esQuery(index, query);

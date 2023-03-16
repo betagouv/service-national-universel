@@ -130,7 +130,6 @@ export const buildBody = (selectedFilters, page, size, defaultQuery, filterArray
       multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
     });
   }
-  console.log("bodyQuery", bodyQuery);
 
   return bodyQuery;
 };
@@ -169,14 +168,6 @@ const buildAggs = (filterArray, selectedFilters, searchBarObject, defaultQuery) 
 };
 
 export const buildQuery = async (esId, selectedFilters, page = 0, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
-  console.log("selectedFilters", selectedFilters);
-  console.log("page", page);
-  console.log("size", size);
-  console.log("defaultQuery", defaultQuery);
-  console.log("filterArray", filterArray);
-  console.log("searchBarObject", searchBarObject);
-  console.log("sortSelected", sortSelected);
-
   const bodyQuery = buildBody(selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected);
   const bodyAggs = buildAggs(filterArray, selectedFilters, searchBarObject, defaultQuery);
 
@@ -315,7 +306,6 @@ export const saveTitle = (selectedFilters, filters) => {
         return;
       }
       if (selectedFilters[key]?.filter?.length > 0) {
-        console.log(selectedFilters[key]?.filter, selectedFilters[key]?.filter.length);
         return filters.find((f) => f.name === key)?.title + " (" + selectedFilters[key].filter.length + ")";
       }
     })

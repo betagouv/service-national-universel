@@ -130,7 +130,6 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
   const getDBFilters = async () => {
     try {
       const res = await api.get("/filters/" + pageId);
-      console.log("GET DB FILTERS", res.data);
       if (!res.ok) return toastr.error("Oops, une erreur est survenue lors du chargement des filtres");
       setSavedView(res.data);
     } catch (error) {
