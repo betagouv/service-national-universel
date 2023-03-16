@@ -205,7 +205,8 @@ export default function Index({ ...props }) {
               ))}
             </div>
             <div>
-              {user.role === ROLES.ADMIN || ((user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) && focusedSession.status === "WAITING_VALIDATION") ? (
+              {user.role === ROLES.ADMIN ||
+              ((user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) && focusedSession?.status === "WAITING_VALIDATION") ? (
                 <>
                   {!editingBottom ? (
                     <button
