@@ -50,7 +50,7 @@ export default function Phase1(props) {
 
   const canUserDownloadConvocation = () => {
     if (
-      young.hasMeetingInformation === "true " &&
+      young.hasMeetingInformation === "true" &&
       (young.statusPhase1 === "AFFECTED" || young.statusPhase1 === "DONE" || young.statusPhase1 === "NOT_DONE" || young.statusPhase1 === "EXEMPTED")
     ) {
       return true;
