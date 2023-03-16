@@ -7,15 +7,15 @@ import api from "../../../../services/api";
 
 import { AlertBoxInformation } from "../../../../components/Content";
 import ChangeStayLink from "../../components/ChangeStayLink.js";
-import FaqAffected from "../../components/FaqAffected.js";
+import FaqAffected from "./components/FaqAffected.js";
 import Loader from "../../../../components/Loader";
-import StepsAffected from "../../components/StepsAffected";
-import { ModalConvocation } from "./components/ModalConvocation.js";
+import StepsAffected from "./components/StepsAffected";
 import JDMA from "../../../../components/JDMA.js";
 import { Problem } from "./components/Problem";
 import { LieuAffectation } from "./components/LieuAffectation";
 import { ResumeDuVoyage } from "./components/ResumeDuVoyage";
 import { DansMonSac } from "./components/DansMonSac";
+import { environment } from "../../../../config.js";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -27,7 +27,12 @@ export default function Affected() {
   const nbvalid = getNbValid(young);
   const areStepsDone = nbvalid === 4;
 
-  const [modalConvocationOpen, setModalConvocationOpen] = useState(false);
+  // Pour tester l'animation de scroll
+  // const [areStepsDone, setAreStepsDone] = useState(false);
+
+  if (areStepsDone) {
+    window.scrollTo(0, 0);
+  }
 
   function getNbValid(young) {
     if (young) {
@@ -72,7 +77,7 @@ export default function Affected() {
 
   return (
     <div className="md:m-10">
-      <div className="max-w-[80rem] rounded-xl shadow-nina md:mx-auto px-4 md:!px-8 lg:!px-16 py-8 lg:!py-16 relative overflow-hidden flex flex-col justify-between bg-gray-50 md:bg-white mb-4">
+      <div className="max-w-[80rem] rounded-xl shadow-nina md:mx-auto py-8 relative overflow-hidden flex flex-col justify-between bg-gray-50 md:bg-white mb-4">
         {showInfoMessage && (
           <AlertBoxInformation
             title="Information"
@@ -81,7 +86,7 @@ export default function Affected() {
           />
         )}
 
-        <header className="flex flex-col items-between lg:justify-between lg:flex-row order-1">
+        <header className="flex flex-col items-between px-4 md:!px-8 lg:!px-16 py-4 lg:justify-between lg:flex-row order-1">
           <div>
             <h1 className="text-2xl md:text-5xl md:space-y-4">
               Mon séjour de cohésion
@@ -94,22 +99,26 @@ export default function Affected() {
           <LieuAffectation center={center} />
         </header>
 
-        <div
-          className={`border flex flex-col md:flex-row flex-none
-          gap-12 md:gap-32 order-2 overflow-hidden transition-all ease-in-out duration-500
-          ${areStepsDone ? "h-[800px] md:h-[400px]" : "h-0"}`}>
-          <ResumeDuVoyage meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
-          <DansMonSac setModalConvocationOpen={setModalConvocationOpen} />
-        </div>
+        {environment !== "production" && (
+          <div
+            className={`md:border-t-[1px] flex flex-col md:flex-row flex-none gap-12 md:gap-32 pt-4 order-2 overflow-hidden transition-all ease-in-out duration-500
+            ${areStepsDone ? "h-[700px] md:h-[350px]" : "h-0"}`}>
+            <ResumeDuVoyage meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
+            <DansMonSac />
+          </div>
+        )}
 
         <StepsAffected young={young} center={center} nbvalid={nbvalid} />
+
+        {/* Pour tester l'animation de scroll */}
+        {/* <button onClick={() => setAreStepsDone(!areStepsDone)} className="order-5">
+          {areStepsDone ? "Hide" : "Show"}
+        </button> */}
 
         <FaqAffected className={`transition-all ${areStepsDone ? "order-3" : "order-4"}`} />
       </div>
 
       <JDMA id="3504" />
-
-      <ModalConvocation open={modalConvocationOpen} setOpen={setModalConvocationOpen} />
     </div>
   );
 }

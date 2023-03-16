@@ -5,13 +5,13 @@ import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
 import { Modal } from "reactstrap";
-import CloseSvg from "../../../../assets/Close";
-import { ModalContainer } from "../../../../components/modals/Modal";
-import { setYoung } from "../../../../redux/auth/actions";
-import api from "../../../../services/api";
-import { translateCohort } from "../../../../utils";
-import plausibleEvent from "../../../../services/plausible";
-import { environment } from "../../../../config";
+import CloseSvg from "../../../../../../assets/Close";
+import { ModalContainer } from "../../../../../../components/modals/Modal";
+import { setYoung } from "../../../../../../redux/auth/actions";
+import api from "../../../../../../services/api";
+import { translateCohort } from "../../../../../../utils";
+import plausibleEvent from "../../../../../../services/plausible";
+import { environment } from "../../../../../../config";
 
 export default function StepAgreement({ young }) {
   const [stateDesktop, setStateDesktop] = useState(false);

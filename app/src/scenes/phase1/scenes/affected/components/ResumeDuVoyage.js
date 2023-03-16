@@ -8,9 +8,9 @@ export function ResumeDuVoyage({ meetingPoint, cohortDetails }) {
   }
 
   return (
-    <div>
-      <h1 className="text-xl font-bold m-4">Résumé du voyage</h1>
-      <div className="border-l-4 border-gray-500 pl-4 space-y-4 my-2">
+    <div className="border-l-4 border-gray-500 flex-none ml-[1rem] pl-[1rem] md:ml-[4rem] md:pl-[3rem]">
+      <h1 className="text-xl font-bold mb-6">Résumé du voyage</h1>
+      <div className="space-y-4 my-2">
         <div>
           <p className="flex gap-2 items-center">
             <strong>Aller</strong>
@@ -20,7 +20,7 @@ export function ResumeDuVoyage({ meetingPoint, cohortDetails }) {
           </p>
           <p className="leading-relaxed text-sm">
             <span className="capitalize">{dayjs(cohortDetails.dateStart).locale("fr").format("dddd")}</span>{" "}
-            <span>{dayjs(cohortDetails.dateStart).locale("fr").format("D MMMM")}</span> à {meetingPoint.ligneToPoint.departureHour}
+            <span>{dayjs(cohortDetails.dateStart).locale("fr").format("D MMMM")}</span> à {meetingPoint?.ligneToPoint?.departureHour}
             <br />
             {meetingPoint.name},
             <br />
@@ -37,7 +37,7 @@ export function ResumeDuVoyage({ meetingPoint, cohortDetails }) {
           </p>
           <p className="leading-relaxed text-sm">
             <span className="capitalize">{dayjs(cohortDetails.dateEnd).locale("fr").format("dddd")}</span> <span>{dayjs(cohortDetails.dateEnd).locale("fr").format("D MMMM")}</span>{" "}
-            à {meetingPoint.ligneToPoint.returnHour}
+            à {meetingPoint?.ligneToPoint?.returnHour}
             <br />
             {meetingPoint.name},
             <br />

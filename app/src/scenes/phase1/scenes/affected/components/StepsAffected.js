@@ -9,7 +9,7 @@ export default function StepsAffected({ young, center, nbvalid }) {
   if (!young) return null;
 
   return (
-    <section className={`flex flex-col mb-5 mt-4 md:mt-0 order-3 ${nbvalid === 4 ? "order-4" : "order-3"}`}>
+    <section className={`flex flex-col mx-[1rem] md:mx-[4rem] my-[2rem] order-3 ${nbvalid === 4 ? "order-4" : "order-3"}`}>
       <article className="mb-3">
         <div className="flex md:hidden flex-row items-center">
           {nbvalid !== 4 && (
@@ -29,7 +29,7 @@ export default function StepsAffected({ young, center, nbvalid }) {
             </div>
           )}
           <div className="flex flex-col">
-            <h1 className="text-base leading-7">{nbvalid === 4 ? "Bravo, vous avez fini !" : "4 étapes pour continuer"}</h1>
+            <h1 className="text-xl font-bold leading-7">{nbvalid === 4 ? "Bravo, vous avez fini !" : "4 étapes pour continuer"}</h1>
             <p className="text-sm text-gray-500 leading-5">{nbvalid} de 4 tâches réalisées</p>
           </div>
         </div>
