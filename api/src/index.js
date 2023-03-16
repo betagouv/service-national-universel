@@ -125,6 +125,23 @@ app.get("/testsentry", async (req, res) => {
   }
 });
 
+if (process.env.STAGING === "true") {
+  app.get("/test_error_double_res_send", (req, res) => {
+    res.send("TEST ERROR");
+    res.send("TEST ERROR 2");
+  });
+
+  app.get("/test_error_crash_app", (req, res) => {
+    try {
+      setTimeout(function () {
+        throw new Error("PM2 TEST ERROR CRASH APP");
+      }, 10);
+    } catch (e) {
+      console.log("error", e);
+    }
+  });
+}
+
 registerSentryErrorHandler();
 app.use(handleError);
 
