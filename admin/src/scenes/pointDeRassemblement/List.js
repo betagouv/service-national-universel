@@ -242,7 +242,7 @@ const ListSessions = ({ user, firstSession }) => {
     page: 0,
   });
   const filterArray = [
-    { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée", isSingle: true },
+    { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée", isSingle: true, defaultValue: [firstSession] },
     {
       title: "Région",
       name: "region",
@@ -263,11 +263,12 @@ const ListSessions = ({ user, firstSession }) => {
     datafield: ["name", "address", "region", "department", "code", "city", "zip"],
   };
 
-  const [selectedCohort, setSelectedCohort] = React.useState(firstSession);
   const [pdrIds, setPdrIds] = React.useState([]);
   const [nbYoungByPdr, setNbYoungByPdr] = React.useState([]);
   const [nbLinesByPdr, setNbLinesByPdr] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
+
+  const selectedCohort = selectedFilters?.cohorts?.filter ? selectedFilters.cohorts.filter[0] : firstSession;
 
   const getYoungsByPdr = async (ids) => {
     let body1 = {
@@ -320,7 +321,6 @@ const ListSessions = ({ user, firstSession }) => {
   }, [pdrIds]);
 
   React.useEffect(() => {
-    console.log(data);
     if (data) setPdrIds(data.map((pdr) => pdr._id));
   }, [data]);
 
