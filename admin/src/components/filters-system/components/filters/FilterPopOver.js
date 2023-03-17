@@ -98,7 +98,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
       leave="transition ease-in duration-150"
       leaveFrom="opacity-100 translate-y-0"
       leaveTo="opacity-0 translate-y-1">
-      <Popover.Panel className={`absolute left-[101%] z-20 w-[305px] ${inListFilter && "-translate-y-[36px]"}`}>
+      <Popover.Panel className={`absolute left-[101%] z-20 w-[305px] ${inListFilter ? "-translate-y-[36px]" : "translate-y-[4px]"}`}>
         <div ref={ref} className="rounded-lg shadow-lg ">
           <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100">
             <div className="flex items-center justify-between py-2 mb-1 px-3">
