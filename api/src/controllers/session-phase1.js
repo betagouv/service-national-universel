@@ -657,7 +657,6 @@ router.delete("/:sessionId/time-schedule/:fileId", passport.authenticate(["refer
       await deleteFile(`app/session/${sessionId}/time-schedule/${fileId}`);
     } catch (err) {
       capture(err);
-      console.error("Unable to delete time schedule file at " + file.path, err);
     }
 
     // --- save & return
