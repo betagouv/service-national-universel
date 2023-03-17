@@ -1,3 +1,19 @@
+# [1.235.0](https://github.com/betagouv/service-national-universel/compare/v1.234.0...v1.235.0) (2023-03-17)
+
+
+### Bug Fixes
+
+* **admin:** application export for supervisor/responsible ([3e0f2a1](https://github.com/betagouv/service-national-universel/commit/3e0f2a1c1282d8d40c0d7b0a4d0fd04503901025))
+* **admin:** export inscription / volonatire add latestCNIFileExpirationDate ([3f7fa62](https://github.com/betagouv/service-national-universel/commit/3f7fa62bc6da5a8272fb999fb0ce0145aa175a47))
+* **api:** remove console.error ([1a1341e](https://github.com/betagouv/service-national-universel/commit/1a1341e93e481bafce72e704552a4d8bb2f2c0c9))
+* **api:** replace console.error by capture ([d8c79ca](https://github.com/betagouv/service-national-universel/commit/d8c79ca38ae27fcb9b1fbf67f20ffe4d6f64da5f))
+* **api:** send mail ATTACHEMENT_PHASE_2_APPLICATION ([4ef93ec](https://github.com/betagouv/service-national-universel/commit/4ef93ec883090cef78907c9703f3af6c8c706499))
+
+
+### Features
+
+* **app:** mise en prod recap de voyage ecran affecte ([d6df6dd](https://github.com/betagouv/service-national-universel/commit/d6df6dde7a71850b30069a30997b2bdd88d79494))
+
 # [1.234.0](https://github.com/betagouv/service-national-universel/compare/v1.233.1...v1.234.0) (2023-03-16)
 
 
