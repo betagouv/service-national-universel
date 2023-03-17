@@ -4,21 +4,6 @@ import { DropDown } from "./filters/FilterPopOver";
 import { Popover } from "@headlessui/react";
 
 export default function SelectedFilters({ filterArray, selectedFilters, setSelectedFilters, paramData, setParamData }) {
-  const ref = React.useRef(null);
-  React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (ref.current && !ref.current.contains(event.target)) {
-        setParamData((oldvalue) => {
-          return { ...oldvalue, isShowing: null };
-        });
-      }
-    };
-    document.addEventListener("click", handleClickOutside, true);
-    return () => {
-      document.removeEventListener("click", handleClickOutside, true);
-    };
-  }, []);
-
   return (
     <>
       {filterArray
@@ -52,16 +37,15 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
               })}
             </div>
             <Popover className="absolute">
-              <div ref={ref}>
-                <DropDown
-                  filter={filter}
-                  selectedFilters={selectedFilters}
-                  setSelectedFilters={setSelectedFilters}
-                  data={paramData?.filters ? paramData.filters[filter.name] : []}
-                  isShowing={paramData?.isShowing === filter.name}
-                  inListFilter={false}
-                />
-              </div>
+              <DropDown
+                filter={filter}
+                selectedFilters={selectedFilters}
+                setSelectedFilters={setSelectedFilters}
+                data={paramData?.filters ? paramData.filters[filter.name] : []}
+                isShowing={paramData?.isShowing === filter.name}
+                setParamData={setParamData}
+                inListFilter={false}
+              />
             </Popover>
           </div>
         ))}
