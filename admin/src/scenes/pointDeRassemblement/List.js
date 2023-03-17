@@ -176,7 +176,7 @@ const ListPoints = ({ user }) => {
           setParamData={setParamData}
         />
 
-        <div className="mt-4 flex flex-row flex-wrap gap-4 items-center">
+        <div className="mt-4 flex flex-row flex-wrap gap-2 items-center">
           <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="young" />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
