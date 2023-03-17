@@ -90,7 +90,7 @@ async function updateMission(app, fromUser) {
 
     await mission.save({ fromUser });
   } catch (e) {
-    console.error(e);
+    capture(e);
   }
 }
 
