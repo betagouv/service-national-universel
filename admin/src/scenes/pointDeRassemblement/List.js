@@ -168,7 +168,7 @@ const ListPoints = ({ user }) => {
           />
         </div>
         <div className="mt-4 flex flex-row flex-wrap gap-2 items-center">
-          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="young" />
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="pdrList" />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
       </div>
@@ -330,7 +330,7 @@ const ListSessions = ({ user, firstSession }) => {
         <div className="mx-4">
           <div className="flex flex-row justify-between w-full">
             <Filters
-              pageId="pdrList"
+              pageId="pdrListSession"
               esId="pointderassemblement"
               defaultQuery={getDefaultQuery()}
               setData={(value) => setData(value)}
@@ -381,7 +381,7 @@ const ListSessions = ({ user, firstSession }) => {
             />
           </div>
           <div className="mt-4 flex flex-row flex-wrap gap-2 items-center">
-            <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="young" />
+            <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="pdrListSession" />
             <SelectedFilters
               filterArray={filterArray}
               selectedFilters={selectedFilters}
