@@ -126,6 +126,7 @@ export default function Inscription() {
                         "Pays de naissance": data.birthCountry || "France",
                         "Ville de naissance": data.birthCity,
                         "Code postal de naissance": data.birthCityZip,
+                        "Date de fin de validité de la pièce d'identité": formatDateFRTimezoneUTC(data?.latestCNIFileExpirationDate),
                         Sexe: translate(data.gender),
                         Email: data.email,
                         Téléphone: data.phone,
