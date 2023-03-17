@@ -4,7 +4,6 @@ import { toastr } from "react-redux-toastr";
 import { translate, translateCohort, youngCanChangeSession } from "snu-lib";
 import { getCohortDetail } from "../../../../utils/cohorts.js";
 import api from "../../../../services/api";
-import { environment } from "../../../../config.js";
 
 import { AlertBoxInformation } from "../../../../components/Content";
 import ChangeStayLink from "../../components/ChangeStayLink.js";
@@ -97,21 +96,18 @@ export default function Affected() {
           <CenterInfo center={center} />
         </header>
 
-        {environment !== "production" && (
-          <div
-            className={`md:border-t-[1px] flex flex-col md:flex-row flex-none gap-6 md:gap-16 pt-[1rem] md:pt-[4rem] order-2 overflow-hidden transition-all ease-in-out duration-500
+        <div
+          className={`md:border-t-[1px] flex flex-col md:flex-row flex-none gap-6 md:gap-16 pt-[1rem] md:pt-[4rem] order-2 overflow-hidden transition-all ease-in-out duration-500
             ${areStepsDone ? "h-[680px] md:h-[360px]" : "h-0"}`}>
-            {young.meetingPointId ? (
-              <TravelInfoBus meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
-            ) : young.deplacementPhase1Autonomous === "true" ? (
-              <TravelInfoAlone center={center} cohortDetails={cohortDetails} />
-            ) : (
-              <></>
-            )}
-
-            <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
-          </div>
-        )}
+          {young.meetingPointId ? (
+            <TravelInfoBus meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
+          ) : young.deplacementPhase1Autonomous === "true" ? (
+            <TravelInfoAlone center={center} cohortDetails={cohortDetails} />
+          ) : (
+            <></>
+          )}
+          <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
+        </div>
 
         <StepsAffected young={young} center={center} nbvalid={nbvalid} />
 
