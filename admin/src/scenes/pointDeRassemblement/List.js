@@ -19,6 +19,8 @@ import DoubleProfil from "../plan-transport/ligne-bus/components/Icons/DoublePro
 import ExternalLink from "../../assets/icons/ExternalLink";
 import BusSvg from "../../assets/icons/Bus";
 
+import { Filters, ResultTable, getDefaultQuery, Save, SelectedFilters } from "../../components/filters-system";
+
 const FILTERS = ["SEARCH", "COHORT", "REGION", "DEPARTMENT"];
 
 export default function List() {
@@ -100,36 +102,31 @@ export default function List() {
 const ListPoints = ({ user }) => {
   const [filterVisible, setFilterVisible] = React.useState(false);
 
-  const getDefaultQuery = () => {
-    return { query: { match_all: {} }, track_total_hits: true };
-  };
+  const [data, setData] = React.useState([]);
+  const [selectedFilters, setSelectedFilters] = React.useState({});
+  const [paramData, setParamData] = React.useState({
+    size: 20,
+    page: 0,
+  });
 
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
+  const filterArray = [
+    { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée" },
+    { title: "Région", name: "region", datafield: "region.keyword", missingLabel: "Non renseignée" },
+    { title: "Département", name: "department", datafield: "department.keyword", missingLabel: "Non renseignée" },
+  ];
+  const searchBarObject = {
+    placeholder: "Rechercher un point de rassemblement",
+    datafield: ["name", "address", "region", "department", "code", "city", "zip"],
+  };
+
   return (
-    <ReactiveBase url={`${apiURL}/es`} app="pointderassemblement" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-      <div className="flex flex-col bg-white py-4 mb-8 rounded-lg">
-        <div className="flex items-center justify-between bg-white py-2 px-4">
-          <div className="flex items-center gap-2">
-            <DataSearch
-              defaultQuery={getDefaultQuery}
-              showIcon={false}
-              componentId="SEARCH"
-              dataField={["name", "address", "region", "department", "code", "city", "zip"]}
-              placeholder="Rechercher un point de rassemblement"
-              react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-              URLParams={true}
-              autosuggest={false}
-              className="datasearch-searchfield"
-              innerClass={{ input: "searchbox" }}
-            />
-            <div
-              className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
-              onClick={() => setFilterVisible((e) => !e)}>
-              <FilterSvg className="text-gray-400" />
-              Filtres
-            </div>
-          </div>
+    <div className="flex flex-col bg-white py-4 mb-8 rounded-lg">
+      <div className="flex items-center justify-between bg-white py-2 px-4">
+        {/*
+          
+        
           <ExportComponent
             title="Exporter"
             defaultQuery={getExportQuery}
@@ -163,82 +160,49 @@ const ListPoints = ({ user }) => {
               return res;
             }}
           />
-        </div>
-        <div className={`flex items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            placeholder="Séjours"
-            componentId="COHORT"
-            dataField="cohorts.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-            title=""
-            URLParams={true}
-            sortBy="asc"
-            showSearch={true}
-            searchPlaceholder="Rechercher..."
-            size={1000}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Cohorte", "Cohorte")}</div>}
-          />
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            placeholder="Region"
-            componentId="REGION"
-            dataField="region.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "REGION") }}
-            title=""
-            URLParams={true}
-            sortBy="asc"
-            showSearch={true}
-            searchPlaceholder="Rechercher..."
-            size={1000}
-            defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Région", "Région")}</div>}
-          />
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            placeholder="Département"
-            componentId="DEPARTMENT"
-            dataField="department.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
-            title=""
-            URLParams={true}
-            sortBy="asc"
-            showSearch={true}
-            searchPlaceholder="Rechercher..."
-            size={1000}
-            defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : []}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Département", "Département")}</div>}
-          />
-          <DeleteFilters />
-        </div>
+          */}
+      </div>
+      <div className="mx-4">
+        <Filters
+          pageId="pdrList"
+          esId="pointderassemblement"
+          defaultQuery={getDefaultQuery()}
+          setData={(value) => setData(value)}
+          filters={filterArray}
+          searchBarObject={searchBarObject}
+          selectedFilters={selectedFilters}
+          setSelectedFilters={setSelectedFilters}
+          paramData={paramData}
+          setParamData={setParamData}
+        />
 
-        <div className="reactive-result">
-          <ReactiveListComponent
-            pageSize={50}
-            defaultQuery={getDefaultQuery}
-            react={{ and: FILTERS }}
-            paginationAt="bottom"
-            showTopResultStats={false}
-            render={({ data }) => (
-              <div className="flex w-full flex-col mt-6 mb-2">
-                <hr />
-                <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
-                  <div className="w-[40%]">Points de rassemblements</div>
-                  <div className="w-[60%]">Cohortes</div>
-                </div>
-                {data?.map((hit) => {
-                  return <Hit key={hit._id} hit={hit} user={user} />;
-                })}
-                <hr />
-              </div>
-            )}
-          />
+        <div className="mt-4 flex flex-row flex-wrap gap-4 items-center">
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="young" />
+          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
       </div>
-    </ReactiveBase>
+
+      <div className="reactive-result">
+        <ResultTable
+          paramData={paramData}
+          setParamData={setParamData}
+          currentEntryOnPage={data?.length}
+          render={
+            <div className="flex w-full flex-col mt-6 mb-2">
+              <hr />
+              <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
+                <div className="w-[40%]">Points de rassemblements</div>
+                <div className="w-[60%]">Cohortes</div>
+              </div>
+              {data?.map((hit) => {
+                return <Hit key={hit._id} hit={hit} user={user} />;
+              })}
+              <hr />
+            </div>
+          }
+        />
+      </div>
+    </div>
   );
 };
 
