@@ -1,3 +1,5 @@
+/* eslint-disable import/no-unused-modules */
+
 import React, { useState } from "react";
 import { translate } from "snu-lib";
 import { Filters, ResultTable, SelectedFilters, Save } from "..";

@@ -5,9 +5,8 @@ import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { canCreateMeetingPoint, ES_NO_LIMIT, ROLES, START_DATE_SESSION_PHASE1, COHORTS, COHESION_STAY_START, getFilterLabel } from "snu-lib";
 import FilterSvg from "../../assets/icons/Filter";
-import Breadcrumbs from "../../components/Breadcrumbs";
-import DeleteFilters from "../../components/buttons/DeleteFilters";
 import ExportComponent from "../../components/ExportXlsx";
+import Breadcrumbs from "../../components/Breadcrumbs";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import { adminURL, apiURL } from "../../config";
 import api from "../../services/api";
@@ -19,7 +18,7 @@ import DoubleProfil from "../plan-transport/ligne-bus/components/Icons/DoublePro
 import ExternalLink from "../../assets/icons/ExternalLink";
 import BusSvg from "../../assets/icons/Bus";
 
-import { Filters, ResultTable, getDefaultQuery, Save, SelectedFilters } from "../../components/filters-system";
+import { Filters, ResultTable, getDefaultQuery, Save, SelectedFilters, ExportComponentV2 } from "../../components/filters-system";
 
 const FILTERS = ["SEARCH", "COHORT", "REGION", "DEPARTMENT"];
 
@@ -100,17 +99,12 @@ export default function List() {
 }
 
 const ListPoints = ({ user }) => {
-  const [filterVisible, setFilterVisible] = React.useState(false);
-
   const [data, setData] = React.useState([]);
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({
     size: 20,
     page: 0,
   });
-
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
-
   const filterArray = [
     { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée" },
     { title: "Région", name: "region", datafield: "region.keyword", missingLabel: "Non renseignée" },
@@ -123,22 +117,26 @@ const ListPoints = ({ user }) => {
 
   return (
     <div className="flex flex-col bg-white py-4 mb-8 rounded-lg">
-      <div className="flex items-center justify-between bg-white py-2 px-4">
-        {/*
-          
-        
-          <ExportComponent
+      <div className="mx-4">
+        <div className="flex flex-row justify-between w-full">
+          <Filters
+            pageId="pdrList"
+            esId="pointderassemblement"
+            defaultQuery={getDefaultQuery()}
+            setData={(value) => setData(value)}
+            filters={filterArray}
+            searchBarObject={searchBarObject}
+            selectedFilters={selectedFilters}
+            setSelectedFilters={setSelectedFilters}
+            paramData={paramData}
+            setParamData={setParamData}
+          />
+          <ExportComponentV2
             title="Exporter"
-            defaultQuery={getExportQuery}
+            defaultQuery={getDefaultQuery()}
+            filters={filterArray}
             exportTitle="point_de_rassemblement"
             index="pointderassemblement"
-            react={{ and: FILTERS }}
-            css={{
-              override: true,
-              button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-              loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-            }}
-            icon={<BsDownload className="text-gray-400" />}
             transform={async (data) => {
               let res = [];
               for (const item of data) {
@@ -159,23 +157,16 @@ const ListPoints = ({ user }) => {
               }
               return res;
             }}
+            selectedFilters={selectedFilters}
+            searchBarObject={searchBarObject}
+            icon={<BsDownload className="text-gray-400" />}
+            css={{
+              override: true,
+              button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+              loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+            }}
           />
-          */}
-      </div>
-      <div className="mx-4">
-        <Filters
-          pageId="pdrList"
-          esId="pointderassemblement"
-          defaultQuery={getDefaultQuery()}
-          setData={(value) => setData(value)}
-          filters={filterArray}
-          searchBarObject={searchBarObject}
-          selectedFilters={selectedFilters}
-          setSelectedFilters={setSelectedFilters}
-          paramData={paramData}
-          setParamData={setParamData}
-        />
-
+        </div>
         <div className="mt-4 flex flex-row flex-wrap gap-2 items-center">
           <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="young" />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
@@ -244,18 +235,39 @@ const Hit = ({ hit }) => {
 };
 
 const ListSessions = ({ user, firstSession }) => {
-  const [filterVisible, setFilterVisible] = React.useState(false);
+  const [data, setData] = React.useState([]);
+  const [selectedFilters, setSelectedFilters] = React.useState({});
+  const [paramData, setParamData] = React.useState({
+    size: 20,
+    page: 0,
+  });
+  const filterArray = [
+    { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée", isSingle: true },
+    {
+      title: "Région",
+      name: "region",
+      datafield: "region.keyword",
+      missingLabel: "Non renseignée",
+      defaultValue: user.role === ROLES.REGION ? [user.region] : [],
+    },
+    {
+      title: "Département",
+      name: "department",
+      datafield: "department.keyword",
+      missingLabel: "Non renseignée",
+      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : [],
+    },
+  ];
+  const searchBarObject = {
+    placeholder: "Rechercher un point de rassemblement",
+    datafield: ["name", "address", "region", "department", "code", "city", "zip"],
+  };
+
   const [selectedCohort, setSelectedCohort] = React.useState(firstSession);
   const [pdrIds, setPdrIds] = React.useState([]);
   const [nbYoungByPdr, setNbYoungByPdr] = React.useState([]);
   const [nbLinesByPdr, setNbLinesByPdr] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
-
-  const getDefaultQuery = () => {
-    return { query: { match_all: {} }, track_total_hits: true };
-  };
-
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   const getYoungsByPdr = async (ids) => {
     let body1 = {
@@ -307,156 +319,108 @@ const ListSessions = ({ user, firstSession }) => {
     } else getInfoPdr();
   }, [pdrIds]);
 
+  React.useEffect(() => {
+    console.log(data);
+    if (data) setPdrIds(data.map((pdr) => pdr._id));
+  }, [data]);
+
   return (
     <ReactiveBase url={`${apiURL}/es`} app="pointderassemblement" headers={{ Authorization: `JWT ${api.getToken()}` }}>
       <div className="flex flex-col bg-white py-4 mb-8 rounded-lg">
-        <div className="flex items-center justify-between bg-white py-2 px-4">
-          <div className="flex items-center gap-2">
-            <DataSearch
-              defaultQuery={getDefaultQuery}
-              showIcon={false}
-              componentId="SEARCH"
-              dataField={["name", "address", "region", "department", "code", "city", "zip"]}
-              placeholder="Rechercher un point de rassemblement"
-              react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-              URLParams={true}
-              autosuggest={false}
-              className="datasearch-searchfield"
-              innerClass={{ input: "searchbox" }}
+        <div className="mx-4">
+          <div className="flex flex-row justify-between w-full">
+            <Filters
+              pageId="pdrList"
+              esId="pointderassemblement"
+              defaultQuery={getDefaultQuery()}
+              setData={(value) => setData(value)}
+              filters={filterArray}
+              searchBarObject={searchBarObject}
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+              paramData={paramData}
+              setParamData={setParamData}
             />
-            <div
-              className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
-              onClick={() => setFilterVisible((e) => !e)}>
-              <FilterSvg className="text-gray-400" />
-              Filtres
-            </div>
+            <ExportComponentV2
+              title="Exporter"
+              defaultQuery={getDefaultQuery()}
+              filters={filterArray}
+              exportTitle="point_de_rassemblement"
+              index="pointderassemblement"
+              transform={async (data) => {
+                const youngsByMettingPoints = await getYoungsByPdr(data.map((d) => d._id));
+                const linesByMettingPoints = await getLinesByPdr(data.map((d) => d._id));
+
+                let res = [];
+                for (const item of data) {
+                  res.push({
+                    Identifiant: item._id.toString(),
+                    Code: item.code,
+                    Cohort: selectedCohort,
+                    Nom: item.name,
+                    Adresse: item.address,
+                    "Complément d'adresse": item?.complementAddress.find((e) => e.cohort === selectedCohort)?.complement || "",
+                    Ville: item.city,
+                    "Code postal": item.zip,
+                    Département: item.department,
+                    Région: item.region,
+                    "Volontaires attendus sur le point": youngsByMettingPoints.find((e) => e.key === item._id)?.doc_count || 0,
+                    "Lignes attendues sur le point": linesByMettingPoints.find((e) => e.key === item._id)?.doc_count || 0,
+                  });
+                }
+                return res;
+              }}
+              selectedFilters={selectedFilters}
+              searchBarObject={searchBarObject}
+              icon={<BsDownload className="text-gray-400" />}
+              css={{
+                override: true,
+                button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+                loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+              }}
+            />
           </div>
-          <ExportComponent
-            title="Exporter"
-            defaultQuery={getExportQuery}
-            exportTitle="point_de_rassemblement"
-            index="pointderassemblement"
-            react={{ and: FILTERS }}
-            css={{
-              override: true,
-              button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-              loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-            }}
-            icon={<BsDownload className="text-gray-400" />}
-            transform={async (data) => {
-              const youngsByMettingPoints = await getYoungsByPdr(data.map((d) => d._id));
-              const linesByMettingPoints = await getLinesByPdr(data.map((d) => d._id));
-
-              let res = [];
-              for (const item of data) {
-                res.push({
-                  Identifiant: item._id.toString(),
-                  Code: item.code,
-                  Cohort: selectedCohort,
-                  Nom: item.name,
-                  Adresse: item.address,
-                  "Complément d'adresse": item?.complementAddress.find((e) => e.cohort === selectedCohort)?.complement || "",
-                  Ville: item.city,
-                  "Code postal": item.zip,
-                  Département: item.department,
-                  Région: item.region,
-                  "Volontaires attendus sur le point": youngsByMettingPoints.find((e) => e.key === item._id)?.doc_count || 0,
-                  "Lignes attendues sur le point": linesByMettingPoints.find((e) => e.key === item._id)?.doc_count || 0,
-                });
-              }
-              return res;
-            }}
-          />
+          <div className="mt-4 flex flex-row flex-wrap gap-2 items-center">
+            <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="young" />
+            <SelectedFilters
+              filterArray={filterArray}
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+              paramData={paramData}
+              setParamData={setParamData}
+            />
+          </div>
         </div>
-        <div className={`flex items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>
-          <SingleDropdownList
-            URLParams={true}
-            className="dropdown-filter"
-            componentId="COHORT"
-            placeholder="Séjours"
-            dataField="cohorts.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-            showSearch={true}
-            searchPlaceholder="Rechercher..."
-            renderLabel={(item) => {
-              if (!item) return <div>Cohorte</div>;
-              return <div>Cohorte : {item}</div>;
-            }}
-            defaultValue={selectedCohort}
-            onValueChange={(value) => setSelectedCohort(value)}
-          />
-
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            placeholder="Region"
-            componentId="REGION"
-            dataField="region.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "REGION") }}
-            title=""
-            URLParams={true}
-            sortBy="asc"
-            showSearch={true}
-            searchPlaceholder="Rechercher..."
-            size={1000}
-            defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Région", "Région")}</div>}
-          />
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            placeholder="Département"
-            componentId="DEPARTMENT"
-            dataField="department.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
-            title=""
-            URLParams={true}
-            sortBy="asc"
-            showSearch={true}
-            searchPlaceholder="Rechercher..."
-            size={1000}
-            defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : []}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Département", "Département")}</div>}
-          />
-        </div>
-
-        <div className="reactive-result">
-          <ReactiveListComponent
-            pageSize={50}
-            defaultQuery={getDefaultQuery}
-            react={{ and: FILTERS }}
-            paginationAt="bottom"
-            showTopResultStats={false}
-            onData={async ({ rawData }) => {
-              if (rawData?.hits?.hits) setPdrIds(rawData.hits.hits.map((pdr) => pdr._id));
-            }}
-            render={({ data }) => (
-              <div className="flex w-full flex-col mt-6 mb-2">
-                <hr />
-                <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
-                  <div className="w-[35%]">Points de rassemblements</div>
-                  <div className="w-[25%]">Cohortes</div>
-                  <div className="w-[20%]">Volontaires attendus sur le point</div>
-                  <div className="w-[20%]">Lignes attendues sur le point</div>
-                </div>
-                {data?.map((hit) => {
-                  return (
-                    <HitSession
-                      key={hit._id}
-                      hit={hit}
-                      user={user}
-                      session={selectedCohort}
-                      nbYoung={nbYoungByPdr.find((e) => e.key === hit._id)?.doc_count || 0}
-                      nbLines={nbLinesByPdr.find((e) => e.key === hit._id)?.doc_count || 0}
-                      loading={loading}
-                    />
-                  );
-                })}
-                <hr />
+        <ResultTable
+          paramData={paramData}
+          setParamData={setParamData}
+          currentEntryOnPage={data?.length}
+          render={
+            <div className="flex w-full flex-col mt-6 mb-2">
+              <hr />
+              <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
+                <div className="w-[35%]">Points de rassemblements</div>
+                <div className="w-[25%]">Cohortes</div>
+                <div className="w-[20%]">Volontaires attendus sur le point</div>
+                <div className="w-[20%]">Lignes attendues sur le point</div>
               </div>
-            )}
-          />
-        </div>
+              {data?.map((hit) => {
+                return (
+                  <HitSession
+                    key={hit._id}
+                    hit={hit}
+                    user={user}
+                    session={selectedCohort}
+                    nbYoung={nbYoungByPdr.find((e) => e.key === hit._id)?.doc_count || 0}
+                    nbLines={nbLinesByPdr.find((e) => e.key === hit._id)?.doc_count || 0}
+                    loading={loading}
+                  />
+                );
+              })}
+              <hr />
+            </div>
+          }
+        />
       </div>
     </ReactiveBase>
   );
