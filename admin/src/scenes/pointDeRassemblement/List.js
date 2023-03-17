@@ -242,7 +242,7 @@ const ListSessions = ({ user, firstSession }) => {
     page: 0,
   });
   const filterArray = [
-    { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée", isSingle: true, defaultValue: [firstSession] },
+    { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée", isSingle: true, defaultValue: [firstSession], allowEmpty: false },
     {
       title: "Région",
       name: "region",

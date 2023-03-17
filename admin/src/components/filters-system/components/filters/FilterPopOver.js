@@ -103,7 +103,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
           <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100">
             <div className="flex items-center justify-between py-2 mb-1 px-3">
               <p className="text-gray-500 text-xs leading-5 font-light">{filter?.parentGroup}</p>
-              <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={handleDelete} />
+              {filter.allowEmpty === false ? <></> : <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={handleDelete} />}
             </div>
             {filter?.customComponent ? (
               filter.customComponent(handleCustomComponent, selectedFilters[filter?.name]?.filter)
