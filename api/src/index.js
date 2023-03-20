@@ -1,6 +1,8 @@
 require("dotenv").config({ path: "./.env-staging" });
 const { initSentry, capture } = require("./sentry");
 
+require("events").EventEmitter.defaultMaxListeners = 30; // Fix warning node (Caused by ElasticMongoose-plugin)
+
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const express = require("express");
@@ -91,6 +93,7 @@ app.use("/demande-de-modification", require("./controllers/planDeTransport/deman
 app.use("/young-edition", require("./controllers/young-edition"));
 app.use("/tags", require("./controllers/tags"));
 app.use("/cohort", require("./controllers/cohort"));
+app.use("/filters", require("./controllers/filters"));
 app.use("/plan-de-transport/import", require("./controllers/planDeTransport/import"));
 
 //services
@@ -122,6 +125,23 @@ app.get("/testsentry", async (req, res) => {
     return res.status(500).send({ ok: false, code: "hihi" });
   }
 });
+
+if (process.env.STAGING === "true") {
+  app.get("/test_error_double_res_send", (req, res) => {
+    res.send("TEST ERROR");
+    res.send("TEST ERROR 2");
+  });
+
+  app.get("/test_error_crash_app", (req, res) => {
+    try {
+      setTimeout(function () {
+        throw new Error("PM2 TEST ERROR CRASH APP");
+      }, 10);
+    } catch (e) {
+      console.log("error", e);
+    }
+  });
+}
 
 registerSentryErrorHandler();
 app.use(handleError);

@@ -3,16 +3,16 @@ import { BsCheck2 } from "react-icons/bs";
 import { HiOutlineDownload, HiOutlineMail } from "react-icons/hi";
 import { useDispatch } from "react-redux";
 import { Modal } from "reactstrap";
-import CloseSvg from "../../../../assets/Close";
-import { ModalContainer } from "../../../../components/modals/Modal";
-import WithTooltip from "../../../../components/WithTooltip";
-import { setYoung } from "../../../../redux/auth/actions";
-import api from "../../../../services/api";
-import ModalConfirm from "../../../../components/modals/ModalConfirm";
-import { SENDINBLUE_TEMPLATES } from "../../../../utils";
+import CloseSvg from "../../../../../../assets/Close";
+import { ModalContainer } from "../../../../../../components/modals/Modal";
+import WithTooltip from "../../../../../../components/WithTooltip";
+import { setYoung } from "../../../../../../redux/auth/actions";
+import api from "../../../../../../services/api";
+import ModalConfirm from "../../../../../../components/modals/ModalConfirm";
+import { SENDINBLUE_TEMPLATES } from "../../../../../../utils";
 import { toastr } from "react-redux-toastr";
-import plausibleEvent from "../../../../services/plausible";
-import { CDN_BASE_URL } from "../../../representants-legaux/commons";
+import plausibleEvent from "../../../../../../services/plausible";
+import { CDN_BASE_URL } from "../../../../../representants-legaux/commons";
 
 export default function StepMedicalField({ young }) {
   const [stateMobil, setStateMobil] = useState(false);
@@ -127,10 +127,7 @@ export default function StepMedicalField({ young }) {
             <div className="w-full p-4">
               <div className="flex flex-col items-center justify-center">
                 <h1 className="text-gray-900 text-xl text-center pb-3">Choisissez une option de téléchargement</h1>
-                <button
-                  type="button"
-                  className="flex flex-row w-full items-center justify-center px-4 py-2 mb-2 rounded-lg bg-blue-600 cursor-pointer hover:scale-105"
-                  onClick={handleDownload}>
+                <button type="button" className="flex flex-row w-full items-center justify-center px-4 py-2 mb-2 rounded-lg bg-blue-600 cursor-pointer hover:scale-105">
                   <HiOutlineDownload className="h-5 w-5 text-blue-300 mr-2" />
                   <a target="blank" href={CDN_BASE_URL + "/file/fiche-sanitaire-2023.pdf"} onClick={handleDownload}>
                     <span className="text-white text-sm">Télécharger</span>

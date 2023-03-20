@@ -4,6 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { ROLES, translate } from "snu-lib";
 import Breadcrumbs from "../../../../components/Breadcrumbs";
 import Loader from "../../../../components/Loader";
+import { environment } from "../../../../config";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
 import { Title } from "../../components/commons";
@@ -97,7 +98,7 @@ export default function View(props) {
             <Title>{data.busId}</Title>
             <div className="rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF]">{data.cohort}</div>
           </div>
-          {![ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT].includes(user.role) && !["Avril 2023 - A", "Février 2023 - C"].includes(data.cohort) && (
+          {![ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT].includes(user.role) && (!["Avril 2023 - A", "Février 2023 - C"].includes(data.cohort) || environment !== "production") && (
             <button
               className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg"
               onClick={() => setPanelOpen(true)}>

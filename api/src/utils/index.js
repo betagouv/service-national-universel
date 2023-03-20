@@ -332,7 +332,7 @@ const updatePlacesBus = async (bus) => {
 
 async function updateSeatsTakenInBusLine(busline) {
   try {
-    const seatsTaken = await YoungModel.count({
+    const seatsTaken = await YoungModel.countDocuments({
       $and: [
         {
           status: "VALIDATED",

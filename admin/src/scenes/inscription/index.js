@@ -126,6 +126,7 @@ export default function Inscription() {
                         "Pays de naissance": data.birthCountry || "France",
                         "Ville de naissance": data.birthCity,
                         "Code postal de naissance": data.birthCityZip,
+                        "Date de fin de validité de la pièce d'identité": formatDateFRTimezoneUTC(data?.latestCNIFileExpirationDate),
                         Sexe: translate(data.gender),
                         Email: data.email,
                         Téléphone: data.phone,
@@ -688,7 +689,7 @@ export default function Inscription() {
 
 const Hit = ({ hit, index, onClick, selected }) => {
   dayjs.extend(relativeTime).locale("fr");
-  const diff = dayjs(new Date(hit.lastStatusAt)).fromNow();
+  const diff = dayjs(new Date(hit.updatedAt)).fromNow();
   const user = useSelector((state) => state.Auth.user);
 
   let STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WAITING_LIST];
@@ -705,7 +706,7 @@ const Hit = ({ hit, index, onClick, selected }) => {
         <td>
           <MultiLine>
             <span className="font-bold text-black">Compte supprimé</span>
-            <p>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</p>
+            <p>{`Mis à jour ${diff} • ${formatStringLongDate(hit.updatedAt)}`}</p>
           </MultiLine>
         </td>
         <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
@@ -725,7 +726,7 @@ const Hit = ({ hit, index, onClick, selected }) => {
             <span className="font-bold text-black">
               {hit.firstName} {hit.lastName} <Badge text={hit.cohort} />
             </span>
-            <p>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</p>
+            <p>{`Mis à jour ${diff} • ${formatStringLongDate(hit.updatedAt)}`}</p>
           </MultiLine>
         </td>
         <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>

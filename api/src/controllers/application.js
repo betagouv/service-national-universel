@@ -90,7 +90,7 @@ async function updateMission(app, fromUser) {
 
     await mission.save({ fromUser });
   } catch (e) {
-    console.error(e);
+    capture(e);
   }
 }
 
@@ -187,7 +187,6 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     // On vérifie que la candidature n'existe pas déjà en base de donnée.
     const doublon = await ApplicationObject.findOne({ youngId: value.youngId, missionId: value.missionId });
     if (doublon) {
-      console.error("Candidature déjà existante trouvée :", doublon);
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     value.contractStatus = "DRAFT";
@@ -572,42 +571,77 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         params = { ...params, cta: `${ADMIN_URL}/volontaire${application.youngId}/phase2` };
       }
     } else if (template === SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION) {
+      // get CC of young
+      let cc = [];
+      if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
+      if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+      params = {
+        firstName: req.user.firstName,
+        lastName: req.user.lastName,
+        type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
+      };
+      const sendYoungRPMail = async () => {
+        // prevenir jeune / RP
+        emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
+        params.cta = `${APP_URL}/mission/${application.missionId}`;
+        const mail = await sendTemplate(template, {
+          emailTo,
+          params,
+          cc,
+        });
+        return res.status(200).send({ ok: true, data: mail });
+      };
       if (isYoung(req.user)) {
         //second email
-        const emailTo2 = [{ name: referent.youngFirstName, lastName: referent.youngLastName, email: referent.email }];
-        const params2 = {
-          ...params,
-          cta: `${ADMIN_URL}/mission/${mission._id}/youngs`,
-          firstName: application.youngFirstName,
-          lastName: application.youngLastName,
-          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
-        };
-        await sendTemplate(template, {
-          emailTo: emailTo2,
-          params: params2,
-        });
-
         const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
         emailTo = referentManagerPhase2.map((referent) => ({
           name: `${referent.firstName} ${referent.lastName}`,
           email: referent.email,
         }));
-        params = {
-          ...params,
-          cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,
-          firstName: application.youngFirstName,
-          lastName: application.youngLastName,
-          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
-        };
+        emailTo.push({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email });
+
+        const mail = await sendTemplate(template, {
+          emailTo,
+          params,
+        });
+        return res.status(200).send({ ok: true, data: mail });
       } else {
-        emailTo = [{ name: young.firstName, lastName: young.lastName, email: young.email }];
-        params = {
-          ...params,
-          cta: `${APP_URL}/mission/${mission.structureId}`,
-          firstName: referent.firstName,
-          lastName: referent.lastName,
-          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
-        };
+        // envoyer le mail au jeune / RP
+        if (req.user.role === ROLES.REFERENT_DEPARTMENT) {
+          // prevenir tuteur mission
+          emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+          params.cta = `${ADMIN_URL}/volontaire/${application.youngId}/phase2`;
+
+          await sendTemplate(template, {
+            emailTo,
+            params,
+          });
+
+          return sendYoungRPMail();
+        } else if (req.user.role === ROLES.RESPONSIBLE) {
+          // prevenir referent departement pahse 2
+          const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
+          emailTo = referentManagerPhase2.map((referent) => ({
+            name: `${referent.firstName} ${referent.lastName}`,
+            email: referent.email,
+          }));
+          params.cta = `${ADMIN_URL}/volontaire/${application.youngId}/phase2`;
+
+          await sendTemplate(template, {
+            emailTo,
+            params,
+          });
+          return sendYoungRPMail();
+        } else if (req.user.role === ROLES.ADMIN || req.user.role === ROLES.REFERENT_REGION) {
+          // prevenir tutor
+          emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+          params.cta = `${ADMIN_URL}/volontaire/${application.youngId}/phase2`;
+          await sendTemplate(template, {
+            emailTo,
+            params,
+          });
+          return sendYoungRPMail();
+        }
       }
     } else {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

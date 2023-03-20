@@ -262,13 +262,47 @@ export default function List() {
     if (values && ["contact", "address", "location", "application", "status", "choices", "representative1", "representative2"].some((e) => values.includes(e))) {
       const youngIds = [...new Set(data.map((item) => item.youngId))];
       if (youngIds?.length) {
-        const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
-        if (responses.length) {
-          const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
+        const { responses: responsesYoungs } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
+        if (responsesYoungs.length) {
+          const youngs = responsesYoungs[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+          all = all.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
         }
       }
     }
+
+    if (values && ["missionInfo", "missionLocation"].some((e) => values.includes(e))) {
+      const missionIds = [...new Set(data.map((item) => item.missionId))];
+      if (missionIds?.length) {
+        const { responses: responsesMissions } = await api.esQuery("mission", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: missionIds } } });
+        if (responsesMissions.length) {
+          const missions = responsesMissions[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+          all = all.map((item) => ({ ...item, mission: missions.find((e) => e._id === item.missionId) || {} }));
+        }
+      }
+    }
+
+    if (values && ["missionTutor"].some((e) => values.includes(e))) {
+      const missionTutorIds = [...new Set(data.map((item) => item.tutorId))];
+      if (missionTutorIds?.length) {
+        const { responses: responsesTutors } = await api.esQuery("referent", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: missionTutorIds } } });
+        if (responsesTutors.length) {
+          const missionTutors = responsesTutors[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+          all = all.map((item) => ({ ...item, tutor: missionTutors.find((e) => e._id === item.tutorId) || {} }));
+        }
+      }
+    }
+
+    if (values && ["structureInfo", "structureLocation"].some((e) => values.includes(e))) {
+      const structureIds = [...new Set(data.map((item) => item.structureId))];
+      if (structureIds?.length) {
+        const { responses: responsesStructures } = await api.esQuery("structure", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: structureIds } } });
+        if (responsesStructures.length) {
+          const structures = responsesStructures[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+          all = all.map((item) => ({ ...item, structure: structures.find((e) => e._id === item.structureId) || {} }));
+        }
+      }
+    }
+
     const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
     return all.map((data) => {
@@ -312,6 +346,43 @@ export default function List() {
           "Statut du contrat d'engagement": translate(data.contractStatus),
           "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option]?.length, 0) !== 0}`),
           "Statut du dossier d'éligibilité PM": translate(data.young.statusMilitaryPreparationFiles),
+        },
+        missionInfo: {
+          "ID de la mission": data.missionId,
+          "Titre de la mission": data?.mission?.name,
+          "Date du début de la mission": formatLongDateUTCWithoutTime(data?.mission?.startAt),
+          "Date de fin de la mission": formatLongDateUTCWithoutTime(data?.mission?.endAt),
+          "Domaine d'action principal de la mission": translate(data?.mission?.mainDomain),
+          "Préparation militaire": translate(data?.mission?.isMilitaryPreparation),
+        },
+        missionTutor: {
+          "Nom du tuteur de la mission": data?.tutor?.lastName,
+          "Prénom du tuteur de la mission": data?.tutor?.firstName,
+          "Email du tuteur de la mission": data?.tutor?.email,
+          "Portable du tuteur de la mission": data?.tutor?.mobile,
+          "Téléphone du tuteur de la mission": data?.tutor?.phone,
+        },
+        missionLocation: {
+          "Adresse de la mission": data?.mission?.address,
+          "Code postal de la mission": data?.mission?.zip,
+          "Ville de la mission": data?.mission?.city,
+          "Département de la mission": data?.mission?.department,
+          "Région de la mission": data?.mission?.region,
+        },
+        structureInfo: {
+          "Id de la structure": data.structureId,
+          "Nom de la structure": data?.structure?.name,
+          "Statut juridique de la structure": translate(data?.structure?.legalStatus),
+          "Type de structure": data?.structure?.types?.map((e) => translate(e)).join(", "),
+          "Sous-type de structure": translate(data?.structure?.sousType),
+          "Présentation de la structure": data?.structure?.presentation,
+        },
+        structureLocation: {
+          "Adresse de la structure": data?.structure?.address,
+          "Code postal de la structure": data?.structure?.zip,
+          "Ville de la structure": data?.structure?.city,
+          "Département de la structure": data?.structure?.department,
+          "Région de la structure": data?.structure?.region,
         },
         status: {
           "Statut général": translate(data.young.status),

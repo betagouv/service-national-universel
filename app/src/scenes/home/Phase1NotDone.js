@@ -177,7 +177,7 @@ function ChangeCohortPrompt() {
         Choisir un nouveau séjour
       </Link>
       <div className="text-xs text-blue-600">
-        <Link to={environment === "production" ? "desistement" : "account?desistement=1"} className="flex items-center justify-center md:justify-start gap-4">
+        <Link to="account?desistement=1" className="flex items-center justify-center md:justify-start gap-4">
           <span>Se désister du SNU</span>
           <ChevronRight />
         </Link>

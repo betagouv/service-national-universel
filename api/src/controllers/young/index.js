@@ -128,7 +128,6 @@ router.post(
         "cniFiles",
         "highSkilledActivityProofFiles",
         "parentConsentmentFiles",
-        "autoTestPCRFiles",
         "imageRightFiles",
         "dataProcessingConsentmentFiles",
         "rulesFiles",
@@ -831,7 +830,6 @@ router.put("/:id/soft-delete", passport.authenticate("referent", { session: fals
             young.set({ files: { [key]: undefined } });
           } catch (e) {
             capture(e);
-            console.error(e);
           }
         }
       }
@@ -886,7 +884,7 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
 
 router.put("/phase1/:document", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const keys = ["cohesionStayMedical", "autoTestPCR", "imageRight", "rules", "agreement", "convocation"];
+    const keys = ["cohesionStayMedical", "imageRight", "rules", "agreement", "convocation"];
     const { error: documentError, value: document } = Joi.string()
       .required()
       .valid(...keys)
@@ -899,7 +897,7 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
     const { error: bodyError, value } = validatePhase1Document(req.body, document);
     if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
 
-    if (["autoTestPCR", "imageRight"].includes(document)) {
+    if (["imageRight"].includes(document)) {
       value[`${document}FilesStatus`] = "WAITING_VERIFICATION";
       value[`${document}FilesComment`] = undefined;
     }
@@ -907,7 +905,7 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
     young.set(value);
     await young.save({ fromUser: req.user });
 
-    if (["autoTestPCR", "imageRight", "rules"].includes(document)) {
+    if (["imageRight", "rules"].includes(document)) {
       let template = SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION;
       let cc = getCcOfYoung({ template, young });
       await sendTemplate(template, {

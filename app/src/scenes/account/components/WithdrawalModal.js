@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal } from "reactstrap";
+import Modal from "../../../components/ui/modals/Modal";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, translate, WITHRAWN_REASONS } from "../../../utils";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -10,6 +10,7 @@ import { ACTION_ABANDON, ACTION_DELETE_ACCOUNT, ACTION_WITHDRAW, CONTENT_CHANGE_
 import WithdrawFormModalContent from "./WithdrawFormModalContent";
 import WithdrawOrChangeDateModalContent from "./WithdrawOrChangeDateModalContent";
 import ConfirmationModalContent from "./ConfirmationModalContent";
+import Close from "../../../assets/Close";
 
 const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
   const history = useHistory();
@@ -62,8 +63,9 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
   const { content, title, subTitle, confirmButtonName } = steps[action][step];
 
   return (
-    <Modal isOpen={isOpen} onCancel={onCancel} centered size="l">
-      <div className="p-6 flex flex-col items-center">
+    <Modal isOpen={isOpen} onClose={onCancel} className="bg-white w-full md:w-[512px]">
+      <div className="p-6 flex flex-col md:items-center">
+        <Close height={10} width={10} onClick={onCancel} className="self-end md:hidden" />
         {content === CONTENT_CHANGE_DATE && (
           <WithdrawOrChangeDateModalContent
             onCancel={onCancel}
@@ -76,6 +78,9 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
         )}
         {content === CONTENT_FORM && (
           <WithdrawFormModalContent
+            withdrawnReasons={WITHRAWN_REASONS.filter(
+              (r) => !r.phase2Only || young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED,
+            )}
             withdrawnMessage={withdrawnMessage}
             setWithdrawnMessage={setWithdrawnMessage}
             withdrawnReason={withdrawnReason}

@@ -1,7 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import React, { Fragment } from "react";
 
-export default function ModalTailwind({ isOpen, onClose, children, className = "" }) {
+const Modal = ({ isOpen = false, onClose = () => {}, children = null, className = "" }) => {
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-20" onClose={onClose}>
@@ -32,4 +32,34 @@ export default function ModalTailwind({ isOpen, onClose, children, className = "
       </Dialog>
     </Transition.Root>
   );
-}
+};
+
+const ModalHeader = ({ className, children, ...rest }) => {
+  return (
+    <div className={`px-6 pt-6 text-gray-900 flex flex-col gap-7 items-center ${className}`} {...rest}>
+      {children}
+    </div>
+  );
+};
+
+const ModalContent = ({ className, children, ...rest }) => {
+  return (
+    <div className={`p-6 text-gray-900 ${className}`} {...rest}>
+      {children}
+    </div>
+  );
+};
+
+const ModalFooter = ({ className, children, ...rest }) => {
+  return (
+    <div className={`px-6 pb-6 text-gray-900 ${className}`} {...rest}>
+      {children}
+    </div>
+  );
+};
+
+Modal.Header = ModalHeader;
+Modal.Content = ModalContent;
+Modal.Footer = ModalFooter;
+
+export default Modal;

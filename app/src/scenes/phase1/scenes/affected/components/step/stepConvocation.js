@@ -2,19 +2,16 @@ import React, { useEffect, useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { BsCheck2 } from "react-icons/bs";
 import { HiOutlineDownload, HiOutlineMail } from "react-icons/hi";
-import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Modal } from "reactstrap";
-import CloseSvg from "../../../../assets/Close";
-import DownloadConvocationButton from "../../../../components/buttons/DownloadConvocationButton";
-import { ModalContainer } from "../../../../components/modals/Modal";
-import ModalConfirm from "../../../../components/modals/ModalConfirm";
-import WithTooltip from "../../../../components/WithTooltip";
-import { setYoung } from "../../../../redux/auth/actions";
-import api from "../../../../services/api";
+import CloseSvg from "../../../../../../assets/Close";
+import DownloadConvocationButton from "../../../../../../components/buttons/DownloadConvocationButton";
+import { ModalContainer } from "../../../../../../components/modals/Modal";
+import ModalConfirm from "../../../../../../components/modals/ModalConfirm";
+import WithTooltip from "../../../../../../components/WithTooltip";
+import api from "../../../../../../services/api";
 import Convocation from "../Convocation";
-import plausibleEvent from "../../../../services/plausible";
-import { capture } from "../../../../sentry";
+import { capture } from "../../../../../../sentry";
 import { translate } from "snu-lib";
 
 export default function StepConvocation({ young }) {
@@ -30,15 +27,6 @@ export default function StepConvocation({ young }) {
       setValid(young.convocationFileDownload === "true");
     }
   }, [young]);
-
-  const dispatch = useDispatch();
-
-  const handleDownload = async () => {
-    if (young?.convocationFileDownload === "true") return;
-    const { data } = await api.put(`/young/phase1/convocation`, { convocationFileDownload: "true" });
-    plausibleEvent("affecté_step3");
-    dispatch(setYoung(data));
-  };
 
   const handleMail = async () => {
     try {
@@ -107,17 +95,15 @@ export default function StepConvocation({ young }) {
                 </WithTooltip>
               </button>
 
-              <div onClick={handleDownload}>
-                <DownloadConvocationButton
-                  young={young}
-                  uri="cohesion"
-                  className={`flex flex-row  items-center justify-center px-4 py-2 rounded-lg ${
-                    valid ? "border-[1px] border-blue-700 " : "bg-blue-600"
-                  } cursor-pointer hover:scale-105 ${valid ? "text-blue-700" : "text-white"}`}>
-                  <HiOutlineDownload className={`h-5 w-5 ${valid ? "text-blue-700" : "text-blue-300"} mr-2`} />
-                  Télécharger
-                </DownloadConvocationButton>
-              </div>
+              <DownloadConvocationButton
+                young={young}
+                uri="cohesion"
+                className={`flex flex-row  items-center justify-center px-4 py-2 rounded-lg ${
+                  valid ? "border-[1px] border-blue-700 " : "bg-blue-600"
+                } cursor-pointer hover:scale-105 ${valid ? "text-blue-700" : "text-white"}`}>
+                <HiOutlineDownload className={`h-5 w-5 ${valid ? "text-blue-700" : "text-blue-300"} mr-2`} />
+                Télécharger
+              </DownloadConvocationButton>
             </div>
           </>
         ) : null}
@@ -163,15 +149,13 @@ export default function StepConvocation({ young }) {
             <div className="w-full p-4">
               <div className="flex flex-col items-center justify-center">
                 <h1 className="text-gray-900 text-xl text-center pb-3">Choisissez une option de téléchargement</h1>
-                <div className="w-full" onClick={handleDownload}>
-                  <DownloadConvocationButton
-                    young={young}
-                    uri="cohesion"
-                    className="flex flex-row w-full items-center justify-center px-4 py-2 rounded-lg bg-blue-600 cursor-pointer hover:scale-105 text-white text-sm">
-                    <HiOutlineDownload className="h-5 w-5 text-blue-300 mr-2" />
-                    Télécharger
-                  </DownloadConvocationButton>
-                </div>
+                <DownloadConvocationButton
+                  young={young}
+                  uri="cohesion"
+                  className="flex flex-row w-full items-center justify-center px-4 py-2 rounded-lg bg-blue-600 cursor-pointer hover:scale-105 text-white text-sm">
+                  <HiOutlineDownload className="h-5 w-5 text-blue-300 mr-2" />
+                  Télécharger
+                </DownloadConvocationButton>
 
                 <div className="flex w-full flex-row flex-shrink items-center py-2">
                   <button

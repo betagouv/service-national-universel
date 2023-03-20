@@ -659,11 +659,6 @@ function validateSelf(referent) {
 
 function validatePhase1Document(phase1document, key) {
   switch (key) {
-    case "autoTestPCR":
-      return Joi.object({
-        autoTestPCR: Joi.string().trim().required().valid("true", "false"),
-        autoTestPCRFiles: Joi.array().items(Joi.string().required()).required().min(1),
-      }).validate(phase1document);
     case "imageRight":
       return Joi.object({
         imageRight: Joi.string().trim().required().valid("true", "false"),

@@ -52,7 +52,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
           {feedback.isPositive && (
             <div className="flex  h-48 w-full flex-col items-center justify-center bg-white print:bg-transparent print:pb-12">
               <>
-                <p className="text-2xl font-light not-italic text-gray-600">Cet article vous à été utile ?</p>
+                <p className="text-2xl font-light not-italic text-gray-600">Cet article vous a été utile ?</p>
               </>
               <div className="mt-3 flex flex-row">
                 <div

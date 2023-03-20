@@ -180,10 +180,10 @@ export default function Index({ ...props }) {
     }
   }
 
-  if (!center || !focusedSession) return <Loader />;
+  if (!center) return <Loader />;
   return (
     <>
-      <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />
+      {user.role !== ROLES.HEAD_CENTER && <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />}
       <CenterInformations center={center} setCenter={setCenter} sessions={sessions} />
       {/* SESSION COMPONENT : */}
       {sessions.length > 0 ? (
@@ -205,7 +205,8 @@ export default function Index({ ...props }) {
               ))}
             </div>
             <div>
-              {user.role === ROLES.ADMIN || ((user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) && focusedSession.status === "WAITING_VALIDATION") ? (
+              {user.role === ROLES.ADMIN ||
+              ((user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) && focusedSession?.status === "WAITING_VALIDATION") ? (
                 <>
                   {!editingBottom ? (
                     <button

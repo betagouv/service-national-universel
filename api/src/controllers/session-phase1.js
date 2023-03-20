@@ -89,7 +89,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
 router.get("/:id/schema-repartition", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error, value: id } = validateId(req.params.id);
     if (error) {
@@ -657,7 +657,6 @@ router.delete("/:sessionId/time-schedule/:fileId", passport.authenticate(["refer
       await deleteFile(`app/session/${sessionId}/time-schedule/${fileId}`);
     } catch (err) {
       capture(err);
-      console.error("Unable to delete time schedule file at " + file.path, err);
     }
 
     // --- save & return

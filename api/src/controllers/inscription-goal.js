@@ -74,9 +74,9 @@ router.get("/:department/current", passport.authenticate("referent", { session: 
 
     if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const y2020 = await YoungModel.find({ cohort: "2020", statusPhase1: "WAITING_AFFECTATION", department: value.department }).count();
-    const y2021 = await YoungModel.find({ cohort: "2021", status: "VALIDATED", department: value.department }).count();
-    const yWL = await YoungModel.find({ status: "WAITING_LIST", department: value.department }).count();
+    const y2020 = await YoungModel.find({ cohort: "2020", statusPhase1: "WAITING_AFFECTATION", department: value.department }).countDocuments();
+    const y2021 = await YoungModel.find({ cohort: "2021", status: "VALIDATED", department: value.department }).countDocuments();
+    const yWL = await YoungModel.find({ status: "WAITING_LIST", department: value.department }).countDocuments();
     const data = { registered: y2020 + y2021, waitingList: yWL };
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -96,7 +96,7 @@ router.get("/:cohort/department/:department", passport.authenticate("referent", 
     if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { department, cohort } = value;
-    const youngCount = await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort }).count();
+    const youngCount = await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort }).countDocuments();
     const inscriptionGoal = await InscriptionGoalModel.findOne({ department, cohort });
     const fillingRate = (youngCount || 0) / (inscriptionGoal.max || 1);
     return res.status(200).send({ ok: true, data: fillingRate });
