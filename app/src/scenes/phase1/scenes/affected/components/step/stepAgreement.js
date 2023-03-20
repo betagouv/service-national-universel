@@ -11,7 +11,6 @@ import { setYoung } from "../../../../../../redux/auth/actions";
 import api from "../../../../../../services/api";
 import { translateCohort } from "../../../../../../utils";
 import plausibleEvent from "../../../../../../services/plausible";
-import { environment } from "../../../../../../config";
 
 export default function StepAgreement({ young }) {
   const [stateDesktop, setStateDesktop] = useState(false);

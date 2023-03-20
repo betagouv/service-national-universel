@@ -25,19 +25,24 @@ export default function Affected() {
   const [loading, setLoading] = useState(true);
   const cohortDetails = getCohortDetail(young.cohort);
   const nbvalid = getNbValid(young);
-  const areStepsDone = nbvalid === 4;
+  // const areStepsDone = nbvalid === 4;
 
-  if (areStepsDone) {
+  if (isStep4Done) {
     window.scrollTo(0, 0);
   }
+
+  const isStep1Done = (young) => young.meetingPointId || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true";
+  const isStep2Done = (young) => isStep1Done && young.youngPhase1Agreement === "true";
+  const isStep3Done = (young) => isStep2Done && young.convocationFileDownload === "true";
+  const isStep4Done = (young) => isStep3Done && young.cohesionStayMedicalFileDownload === "true";
 
   function getNbValid(young) {
     if (young) {
       let nb = 0;
-      if (young.meetingPointId || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true") nb++;
-      if (young.youngPhase1Agreement === "true") nb++;
-      if (young.convocationFileDownload === "true") nb++;
-      if (young.cohesionStayMedicalFileDownload === "true") nb++;
+      if (isStep1Done(young)) nb++;
+      if (isStep2Done(young)) nb++;
+      if (isStep3Done(young)) nb++;
+      if (isStep4Done(young)) nb++;
       return nb;
     }
   }
@@ -82,7 +87,6 @@ export default function Affected() {
             onClose={() => setShowInfoMessage(false)}
           />
         )}
-
         <header className="flex flex-col items-between px-4 md:!px-8 lg:!px-16 py-4 lg:justify-between lg:flex-row order-1">
           <div>
             <h1 className="text-2xl md:text-5xl md:space-y-4">
@@ -98,7 +102,7 @@ export default function Affected() {
 
         <div
           className={`md:border-t-[1px] flex flex-col md:flex-row flex-none gap-6 md:gap-16 pt-[1rem] md:pt-[4rem] order-2 overflow-hidden transition-all ease-in-out duration-500
-            ${areStepsDone ? "h-[680px] md:h-[360px]" : "h-0"}`}>
+            ${isStep4Done ? "h-[680px] md:h-[360px]" : "h-0"}`}>
           {young.meetingPointId ? (
             <TravelInfoBus meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
           ) : young.deplacementPhase1Autonomous === "true" ? (
@@ -110,7 +114,6 @@ export default function Affected() {
         </div>
 
         <StepsAffected young={young} center={center} nbvalid={nbvalid} />
-
         <FaqAffected className={`transition-all ${areStepsDone ? "order-3" : "order-4"}`} />
       </div>
 
