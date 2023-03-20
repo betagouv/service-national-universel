@@ -15,6 +15,7 @@ import api from "../../../../services/api";
     translate: translate,
     defaultValue: ["value par défaut 1", "value par défaut 2", ...]
     isSingle: true/false (si true, le filtre ne peut avoir qu'une seule valeur)
+    allowEmpty: true/false (si false, le filtre ne peut pas être vide, true par défaut)
   },
   - Filtre avec custom query ex : 
   { 

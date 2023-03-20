@@ -236,6 +236,7 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
                                     data={dataFilter[item?.name] || []}
                                     isShowing={isShowing === item.name}
                                     setIsShowing={handleFilterShowing}
+                                    setParamData={setParamData}
                                   />
                                 ))}
                             </div>
