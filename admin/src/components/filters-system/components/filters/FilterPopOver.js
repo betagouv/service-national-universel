@@ -47,7 +47,21 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   }, [data]);
 
   React.useEffect(() => {
-    const newData = search !== "" ? data.filter((f) => f.key.toLowerCase().includes(search.toLowerCase())) : data;
+    // normalize search
+    const normalizedSearch = search
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+    const newData =
+      search !== ""
+        ? data.filter((f) =>
+            f.key
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+              .toLowerCase()
+              .includes(normalizedSearch),
+          )
+        : data;
     setOptionsVisible(newData);
   }, [search]);
 
