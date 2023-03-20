@@ -17,7 +17,7 @@ export default function StepAgreement({ young }) {
   const [stateDesktop, setStateDesktop] = useState(false);
   const [stateMobil, setStateMobil] = useState(false);
   const valid = young?.youngPhase1Agreement === "true";
-  const enabled = young?.meetingPointId !== null || young?.deplacementPhase1Autonomous === "true" || young?.transportInfoGivenByLocal === "true";
+  const enabled = young?.meetingPointId !== undefined || young?.deplacementPhase1Autonomous === "true" || young?.transportInfoGivenByLocal === "true";
   const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
