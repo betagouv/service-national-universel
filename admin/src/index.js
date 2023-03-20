@@ -7,10 +7,6 @@ import ReduxToastr from "react-redux-toastr";
 import "react-redux-toastr/lib/css/react-redux-toastr.min.css";
 import "react-day-picker/dist/style.css";
 
-// eslint-disable-next-line import/namespace
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, LinearScale } from "chart.js";
-ChartJS.register(ArcElement, Tooltip, Legend, LinearScale);
-
 import store from "./redux/store";
 import App from "./app";
 
