@@ -16,6 +16,7 @@ import StepsAffected from "./components/StepsAffected";
 import TravelInfoAlone from "./components/TravelInfoAlone.js";
 import TravelInfoBus from "./components/TravelInfoBus";
 import TodoBackpack from "./components/TodoBackpack";
+import { isStepMedicalFieldDone } from "./affected.utils.js";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -24,27 +25,9 @@ export default function Affected() {
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const [loading, setLoading] = useState(true);
   const cohortDetails = getCohortDetail(young.cohort);
-  const nbvalid = getNbValid(young);
-  // const areStepsDone = nbvalid === 4;
 
-  if (isStep4Done) {
+  if (isStepMedicalFieldDone(young)) {
     window.scrollTo(0, 0);
-  }
-
-  const isStep1Done = (young) => young.meetingPointId || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true";
-  const isStep2Done = (young) => isStep1Done && young.youngPhase1Agreement === "true";
-  const isStep3Done = (young) => isStep2Done && young.convocationFileDownload === "true";
-  const isStep4Done = (young) => isStep3Done && young.cohesionStayMedicalFileDownload === "true";
-
-  function getNbValid(young) {
-    if (young) {
-      let nb = 0;
-      if (isStep1Done(young)) nb++;
-      if (isStep2Done(young)) nb++;
-      if (isStep3Done(young)) nb++;
-      if (isStep4Done(young)) nb++;
-      return nb;
-    }
   }
 
   const getMeetingPoint = async () => {
@@ -102,7 +85,7 @@ export default function Affected() {
 
         <div
           className={`md:border-t-[1px] flex flex-col md:flex-row flex-none gap-6 md:gap-16 pt-[1rem] md:pt-[4rem] order-2 overflow-hidden transition-all ease-in-out duration-500
-            ${isStep4Done ? "h-[680px] md:h-[360px]" : "h-0"}`}>
+            ${isStepMedicalFieldDone(young) ? "h-[680px] md:h-[360px]" : "h-0"}`}>
           {young.meetingPointId ? (
             <TravelInfoBus meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
           ) : young.deplacementPhase1Autonomous === "true" ? (
@@ -113,8 +96,8 @@ export default function Affected() {
           <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
         </div>
 
-        <StepsAffected young={young} center={center} nbvalid={nbvalid} />
-        <FaqAffected className={`transition-all ${areStepsDone ? "order-3" : "order-4"}`} />
+        <StepsAffected young={young} center={center} />
+        <FaqAffected className={`transition-all ${isStepMedicalFieldDone(young) ? "order-3" : "order-4"}`} />
       </div>
 
       <JDMA id="3504" />

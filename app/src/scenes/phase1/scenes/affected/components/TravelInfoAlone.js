@@ -1,11 +1,9 @@
 import React from "react";
 import dayjs from "dayjs";
 import LongArrow from "../../../../../assets/icons/LongArrow.js";
+import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR } from "../affected.utils.js";
 
 export default function TravelInfoAlone({ center, cohortDetails }) {
-  const ALONE_ARRIVAL_HOUR = "16h";
-  const ALONE_DEPARTURE_HOUR = "11h";
-
   if (!center || !cohortDetails) {
     return <></>;
   }

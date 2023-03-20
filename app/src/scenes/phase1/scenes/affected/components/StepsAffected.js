@@ -1,15 +1,17 @@
 import React from "react";
 import { HiBell } from "react-icons/hi";
+import { isStepMedicalFieldDone, numberOfStepsCompleted } from "../affected.utils.js";
 import StepAgreement from "./step/stepAgreement.js";
 import StepConvocation from "./step/stepConvocation.js";
 import StepMedicalField from "./step/stepMedicalFile.js";
 import StepPDR from "./step/StepPDR";
 
-export default function StepsAffected({ young, center, nbvalid }) {
+export default function StepsAffected({ young, center }) {
   if (!young) return null;
+  const nbvalid = numberOfStepsCompleted(young);
 
   return (
-    <section className={`flex flex-col mx-[1rem] md:mx-[4rem] my-[2rem] order-3 ${nbvalid === 4 ? "order-4" : "order-3"}`}>
+    <section className={`flex flex-col mx-[1rem] md:mx-[4rem] my-[2rem] order-3 ${isStepMedicalFieldDone(young) ? "order-4" : "order-3"}`}>
       <article className="mb-3">
         <div className="flex md:hidden flex-row items-center">
           {nbvalid !== 4 && (
@@ -18,7 +20,7 @@ export default function StepsAffected({ young, center, nbvalid }) {
             </div>
           )}
           <div className="flex flex-col">
-            <h1 className="text-xl md:text-base font-bold md:font-normal leading-7">{nbvalid === 4 ? "Bravo, vous avez fini !" : "4 étapes pour continuer"}</h1>
+            <h1 className="text-xl md:text-base font-bold md:font-normal leading-7">{isStepMedicalFieldDone(young) ? "Bravo, vous avez fini !" : "4 étapes pour continuer"}</h1>
             <p className="text-sm text-gray-500 leading-5">{nbvalid} de 4 tâches réalisées</p>
           </div>
         </div>
@@ -29,7 +31,7 @@ export default function StepsAffected({ young, center, nbvalid }) {
             </div>
           )}
           <div className="flex flex-col">
-            <h1 className="text-xl font-bold leading-7">{nbvalid === 4 ? "Bravo, vous avez fini !" : "4 étapes pour continuer"}</h1>
+            <h1 className="text-xl font-bold leading-7">{isStepMedicalFieldDone(young) ? "Bravo, vous avez fini !" : "4 étapes pour continuer"}</h1>
             <p className="text-sm text-gray-500 leading-5">{nbvalid} de 4 tâches réalisées</p>
           </div>
         </div>

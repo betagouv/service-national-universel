@@ -11,12 +11,13 @@ import { setYoung } from "../../../../../../redux/auth/actions";
 import api from "../../../../../../services/api";
 import { translateCohort } from "../../../../../../utils";
 import plausibleEvent from "../../../../../../services/plausible";
+import { isStepAgreementDone, isStepPDRDone } from "../../affected.utils";
 
 export default function StepAgreement({ young }) {
   const [stateDesktop, setStateDesktop] = useState(false);
   const [stateMobil, setStateMobil] = useState(false);
-  const valid = young?.youngPhase1Agreement === "true";
-  const enabled = young?.meetingPointId !== undefined || young?.deplacementPhase1Autonomous === "true" || young?.transportInfoGivenByLocal === "true";
+  const valid = isStepAgreementDone(young);
+  const enabled = isStepPDRDone(young);
   const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {

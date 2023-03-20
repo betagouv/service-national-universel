@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { HiOutlineDownload, HiOutlineMail } from "react-icons/hi";
 import { useDispatch } from "react-redux";
@@ -13,19 +13,13 @@ import { SENDINBLUE_TEMPLATES } from "../../../../../../utils";
 import { toastr } from "react-redux-toastr";
 import plausibleEvent from "../../../../../../services/plausible";
 import { CDN_BASE_URL } from "../../../../../representants-legaux/commons";
+import { isStepConvocationDone, isStepMedicalFieldDone } from "../../affected.utils";
 
 export default function StepMedicalField({ young }) {
   const [stateMobil, setStateMobil] = useState(false);
-  const [valid, setValid] = useState(false);
-  const [enabled, setEnabled] = useState(false);
+  const valid = isStepMedicalFieldDone(young);
+  const enabled = isStepConvocationDone(young);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-
-  useEffect(() => {
-    if (young) {
-      setEnabled(young.convocationFileDownload === "true" || young.cohesionStayMedicalFileDownload === "true");
-      setValid(young.cohesionStayMedicalFileDownload === "true");
-    }
-  }, [young]);
 
   const dispatch = useDispatch();
 
