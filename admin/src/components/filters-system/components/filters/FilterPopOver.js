@@ -55,7 +55,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     const newData =
       search !== ""
         ? data.filter((f) =>
-            f
+            f.key
               .normalize("NFD")
               .replace(/[\u0300-\u036f]/g, "")
               .toLowerCase()
