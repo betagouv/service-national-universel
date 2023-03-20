@@ -359,13 +359,8 @@ router.post("/:sessionId/share", passport.authenticate("referent", { session: fa
     const cohort = await CohortModel.findOne({ name: sessionPhase1.cohort });
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const startAt = datefns.subDays(new Date(cohort.dateStart), 7);
-    const endDate = datefns.addDays(new Date(cohort.dateEnd), 7);
-
     const sessionToken = await sessionPhase1TokenModel.create({
       token: crypto.randomBytes(50).toString("hex"),
-      startAt: startAt,
-      expireAt: endDate,
       sessionId: sessionPhase1._id,
     });
 
@@ -400,9 +395,11 @@ router.post("/check-token/:token", async (req, res) => {
 
     const sessionPhase1 = await SessionPhase1Model.findById(sessionPhase1Token.sessionId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const now = new Date();
 
-    if (now >= sessionPhase1Token.startAt && now <= sessionPhase1Token.expireAt) {
+    const cohortParam = await CohortModel.findOne({ name: sessionPhase1.cohort });
+    if (!cohortParam) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (cohortParam?.busListAvailability) {
       let result = {
         noMeetingPoint: {
           youngs: [],

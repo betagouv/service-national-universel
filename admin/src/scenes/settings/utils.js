@@ -18,6 +18,8 @@ export const uselessSettings = {
   youngCheckinForRegionReferentTo: "",
   youngCheckinForDepartmentReferentFrom: "",
   youngCheckinForDepartmentReferentTo: "",
+  busListAvailabilityFrom: "",
+  busListAvailabilityTo: "",
 };
 
 export const settings = {
@@ -36,4 +38,5 @@ export const settings = {
   youngCheckinForHeadOfCenter: false,
   youngCheckinForRegionReferent: false,
   youngCheckinForDepartmentReferent: false,
+  busListAvailability: false,
 };
