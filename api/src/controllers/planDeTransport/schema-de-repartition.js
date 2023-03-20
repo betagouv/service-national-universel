@@ -510,7 +510,7 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
     // --- assigned
     const repartitionResult = await schemaRepartitionModel
       .aggregate([
-        { $match: { cohort, centerId: { $ne: null } } },
+        { $match: { cohort, centerId: { $ne: null }, gatheringPlaces: { $exists: true, $ne: [] } } },
         {
           $group: {
             _id: "$fromRegion",
@@ -689,7 +689,7 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
 
     // --- assigned
     const schemaPipeline = [
-      { $match: { cohort, fromRegion: region, centerId: { $ne: null } } },
+      { $match: { cohort, fromRegion: region, centerId: { $ne: null }, gatheringPlaces: { $exists: true, $ne: [] } } },
       {
         $group: {
           _id: "$fromDepartment",
@@ -855,13 +855,14 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
       if (schema.intradepartmental === "true") {
         if (schema.centerId) {
           intradepartmentalAssigned += schema.youngsVolume;
+          assigned += schema.youngsVolume;
         }
         groups.intra.push(schema);
       } else {
+        if (schema.centerId && schema.gatheringPlaces && schema.gatheringPlaces.length > 0) {
+          assigned += schema.youngsVolume;
+        }
         groups.extra.push(schema);
-      }
-      if (schema.centerId) {
-        assigned += schema.youngsVolume;
       }
     }
     // limit to existing.
