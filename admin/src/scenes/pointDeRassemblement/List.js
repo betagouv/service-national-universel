@@ -33,7 +33,7 @@ export default function List() {
 
   React.useEffect(() => {
     const listTab = ["liste-points", "session"];
-    if (!listTab.includes(currentTab)) return history.push(`/point-de-rassemblement/list/liste-points`);
+    if (!listTab.includes(currentTab)) return history.push(`/point-de-rassemblement/liste/liste-points`);
   }, [currentTab]);
 
   React.useEffect(() => {
@@ -61,7 +61,7 @@ export default function List() {
               icon={<Menu />}
               title="Liste des points"
               onClick={() => {
-                history.replace(`/point-de-rassemblement/list/liste-points`);
+                history.replace(`/point-de-rassemblement/liste/liste-points`);
               }}
               active={currentTab === "liste-points"}
             />
@@ -69,7 +69,7 @@ export default function List() {
               icon={<Calendar />}
               title="Sessions"
               onClick={() => {
-                history.replace(`/point-de-rassemblement/list/session`);
+                history.replace(`/point-de-rassemblement/liste/session`);
               }}
               active={currentTab === "session"}
             />
