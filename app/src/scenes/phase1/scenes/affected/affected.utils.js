@@ -1,8 +1,8 @@
 const isStepPDRDone = (young) =>
-  (young.meetingPointId !== null && young.meetingPointId !== undefined) || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true";
-const isStepAgreementDone = (young) => isStepPDRDone && young.youngPhase1Agreement === "true";
-const isStepConvocationDone = (young) => isStepAgreementDone && young.convocationFileDownload === "true";
-const isStepMedicalFieldDone = (young) => isStepConvocationDone && young.cohesionStayMedicalFileDownload === "true";
+  (young?.meetingPointId !== null && young?.meetingPointId !== undefined) || young?.deplacementPhase1Autonomous === "true" || young?.transportInfoGivenByLocal === "true";
+const isStepAgreementDone = (young) => isStepPDRDone && young?.youngPhase1Agreement === "true";
+const isStepConvocationDone = (young) => isStepAgreementDone && young?.convocationFileDownload === "true";
+const isStepMedicalFieldDone = (young) => isStepConvocationDone && young?.cohesionStayMedicalFileDownload === "true";
 
 const numberOfStepsCompleted = (young) => {
   if (isStepMedicalFieldDone(young)) return 4;
