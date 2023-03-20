@@ -32,7 +32,7 @@ const deletePatches = async ({ req, model }) => {
       .validate({ ...req.params }, { stripUnknown: true });
     console.log(error);
     if (error) return { ok: false, code: ERRORS.INVALID_PARAMS, codeError: 400 };
-    if (!canViewPatchesHistory(req.user)) return { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, codeError: 403 };
+    // if (!canViewPatchesHistory(req.user)) return { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, codeError: 403 };
 
     const elem = await model.findById(value.id);
     if (!elem) return { ok: false, code: ERRORS.NOT_FOUND, codeError: 404 };
