@@ -8,10 +8,6 @@ import General from "./subscenes/general";
 import Inscription from "./subscenes/inscription";
 import Sejour from "./subscenes/sejour";
 
-// eslint-disable-next-line import/namespace
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, LinearScale } from "chart.js";
-ChartJS.register(ArcElement, Tooltip, Legend, LinearScale);
-
 export default function Index() {
   useDocumentTitle("Tableau de bord");
   const location = useLocation();
