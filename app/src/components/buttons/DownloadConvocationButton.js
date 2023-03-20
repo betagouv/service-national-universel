@@ -20,6 +20,7 @@ export default function DownloadConvocationButton({ young, children, uri, ...res
 
   const viewFile = async (a) => {
     setLoading(true);
+    plausibleEvent("Phase1/telechargement convocation");
     await downloadPDF({
       url: `/young/${young._id}/documents/convocation/${a}`,
       fileName: `${young.firstName} ${young.lastName} - convocation - ${a}.pdf`,

@@ -1463,7 +1463,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                     <div className="text-[14px] leading-[20px] text-[#242526] text-bold mb-[6px]">Attestation des représentants légaux</div>
                     <div className="text-[12px] leading-[20px] text-[#000000] grow">
                       Consentement parental validé via FranceConnect. Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de
-                      s’affranchir du document de consentement papier.
+                      s’affranchir du formulaire de consentement numérique.
                     </div>
                   </div>
                 </div>

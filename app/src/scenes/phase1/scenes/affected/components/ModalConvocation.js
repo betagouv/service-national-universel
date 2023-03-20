@@ -21,6 +21,7 @@ export function ModalConvocation({ open, setOpen }) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const handleDownload = async () => {
+    plausibleEvent("Phase1/telechargement convocation");
     await downloadPDF({
       url: `/young/${young._id}/documents/convocation/cohesion`,
       fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
