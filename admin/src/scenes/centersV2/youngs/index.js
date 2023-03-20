@@ -404,7 +404,6 @@ export default function CenterYoungIndex() {
         };
       });
       const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-      const fileExtension = ".xlsx";
       const wb = XLSX.utils.book_new();
       formatedRep.forEach((sheet) => {
         let ws = XLSX.utils.json_to_sheet(sheet.data);
@@ -412,7 +411,7 @@ export default function CenterYoungIndex() {
       });
       const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
       const resultData = new Blob([excelBuffer], { type: fileType });
-      FileSaver.saveAs(resultData, `transport_information_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}` + fileExtension);
+      FileSaver.saveAs(resultData, `transport_information_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`);
     } catch (e) {
       console.log(e);
       toastr.error("Erreur !", translate(e.code));
