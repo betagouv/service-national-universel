@@ -209,17 +209,8 @@ const Home = () => {
             <RestrictedRoute path="/association" component={Association} />
             <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
             <RestrictedRoute path="/boite-de-reception" component={Inbox} />
-            {environment === "production" ? (
-              <>
-                <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
-                <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
-              </>
-            ) : (
-              <RestrictedRoute path="/dashboard" component={renderDashboardV2} />
-            )}
             <RestrictedRoute path="/equipe" component={Team} />
             <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
-
             {/* Plan de transport */}
             {/* Table de répartition */}
             <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
@@ -229,10 +220,15 @@ const Home = () => {
             <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
             <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
             <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
-
             {/* Only for developper eyes... */}
             {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
-            {environment === "production" ? <RestrictedRoute path="/" component={renderDashboard} /> : <RestrictedRoute path="/" component={renderDashboardV2} />}
+
+            {/* DASHBOARD */}
+            {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
+            {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
+            {environment === "production" && <RestrictedRoute path="/" component={renderDashboard} />}
+            {environment !== "production" && <RestrictedRoute path="/dashboard" component={renderDashboardV2} />}
+            {environment !== "production" && <RestrictedRoute path="/" component={renderDashboardV2} />}
           </Switch>
         </div>
       </div>
