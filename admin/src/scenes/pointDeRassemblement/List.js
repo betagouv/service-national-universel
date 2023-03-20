@@ -1,14 +1,10 @@
-import { DataSearch, MultiDropdownList, ReactiveBase, SingleDropdownList } from "@appbaseio/reactivesearch";
 import React from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
-import { canCreateMeetingPoint, ES_NO_LIMIT, ROLES, START_DATE_SESSION_PHASE1, COHORTS, COHESION_STAY_START, getFilterLabel } from "snu-lib";
-import FilterSvg from "../../assets/icons/Filter";
-import ExportComponent from "../../components/ExportXlsx";
+import { useHistory, useParams } from "react-router-dom";
+import { canCreateMeetingPoint, ES_NO_LIMIT, ROLES, START_DATE_SESSION_PHASE1, COHORTS, COHESION_STAY_START } from "snu-lib";
 import Breadcrumbs from "../../components/Breadcrumbs";
-import ReactiveListComponent from "../../components/ReactiveListComponent";
-import { adminURL, apiURL } from "../../config";
+import { adminURL } from "../../config";
 import api from "../../services/api";
 import { Loading, TabItem, Title } from "./components/common";
 import ModalCreation from "./components/ModalCreation";
@@ -20,14 +16,12 @@ import BusSvg from "../../assets/icons/Bus";
 
 import { Filters, ResultTable, getDefaultQuery, Save, SelectedFilters, ExportComponentV2 } from "../../components/filters-system";
 
-const FILTERS = ["SEARCH", "COHORT", "REGION", "DEPARTMENT"];
-
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = React.useState({ isOpen: false });
   const [firstSession, setFirstSession] = React.useState(null);
-  const [currentTab, setCurrentTab] = React.useState("liste-points");
   const history = useHistory();
+  const { currentTab } = useParams();
 
   const getFirstCohortAvailable = () => {
     for (const session of COHORTS) {
@@ -38,11 +32,12 @@ export default function List() {
   };
 
   React.useEffect(() => {
+    const listTab = ["liste-points", "session"];
+    if (!listTab.includes(currentTab)) return history.push(`/point-de-rassemblement/list/liste-points`);
+  }, [currentTab]);
+
+  React.useEffect(() => {
     getFirstCohortAvailable();
-    history.replace({
-      search: null,
-    });
-    setCurrentTab("liste-points");
   }, []);
 
   if (!firstSession || !user) return <div></div>;
@@ -66,10 +61,7 @@ export default function List() {
               icon={<Menu />}
               title="Liste des points"
               onClick={() => {
-                history.replace({
-                  search: null,
-                });
-                setCurrentTab("liste-points");
+                history.replace(`/point-de-rassemblement/list/liste-points`);
               }}
               active={currentTab === "liste-points"}
             />
@@ -77,10 +69,7 @@ export default function List() {
               icon={<Calendar />}
               title="Sessions"
               onClick={() => {
-                history.replace({
-                  search: null,
-                });
-                setCurrentTab("session");
+                history.replace(`/point-de-rassemblement/list/session`);
               }}
               active={currentTab === "session"}
             />
@@ -325,104 +314,96 @@ const ListSessions = ({ user, firstSession }) => {
   }, [data]);
 
   return (
-    <ReactiveBase url={`${apiURL}/es`} app="pointderassemblement" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-      <div className="flex flex-col bg-white py-4 mb-8 rounded-lg">
-        <div className="mx-4">
-          <div className="flex flex-row justify-between w-full">
-            <Filters
-              pageId="pdrListSession"
-              esId="pointderassemblement"
-              defaultQuery={getDefaultQuery()}
-              setData={(value) => setData(value)}
-              filters={filterArray}
-              searchBarObject={searchBarObject}
-              selectedFilters={selectedFilters}
-              setSelectedFilters={setSelectedFilters}
-              paramData={paramData}
-              setParamData={setParamData}
-            />
-            <ExportComponentV2
-              title="Exporter"
-              defaultQuery={getDefaultQuery()}
-              filters={filterArray}
-              exportTitle="point_de_rassemblement"
-              index="pointderassemblement"
-              transform={async (data) => {
-                const youngsByMettingPoints = await getYoungsByPdr(data.map((d) => d._id));
-                const linesByMettingPoints = await getLinesByPdr(data.map((d) => d._id));
+    <div className="flex flex-col bg-white py-4 mb-8 rounded-lg">
+      <div className="mx-4">
+        <div className="flex flex-row justify-between w-full">
+          <Filters
+            pageId="pdrListSession"
+            esId="pointderassemblement"
+            defaultQuery={getDefaultQuery()}
+            setData={(value) => setData(value)}
+            filters={filterArray}
+            searchBarObject={searchBarObject}
+            selectedFilters={selectedFilters}
+            setSelectedFilters={setSelectedFilters}
+            paramData={paramData}
+            setParamData={setParamData}
+          />
+          <ExportComponentV2
+            title="Exporter"
+            defaultQuery={getDefaultQuery()}
+            filters={filterArray}
+            exportTitle="point_de_rassemblement"
+            index="pointderassemblement"
+            transform={async (data) => {
+              const youngsByMettingPoints = await getYoungsByPdr(data.map((d) => d._id));
+              const linesByMettingPoints = await getLinesByPdr(data.map((d) => d._id));
 
-                let res = [];
-                for (const item of data) {
-                  res.push({
-                    Identifiant: item._id.toString(),
-                    Code: item.code,
-                    Cohort: selectedCohort,
-                    Nom: item.name,
-                    Adresse: item.address,
-                    "Complément d'adresse": item?.complementAddress.find((e) => e.cohort === selectedCohort)?.complement || "",
-                    Ville: item.city,
-                    "Code postal": item.zip,
-                    Département: item.department,
-                    Région: item.region,
-                    "Volontaires attendus sur le point": youngsByMettingPoints.find((e) => e.key === item._id)?.doc_count || 0,
-                    "Lignes attendues sur le point": linesByMettingPoints.find((e) => e.key === item._id)?.doc_count || 0,
-                  });
-                }
-                return res;
-              }}
-              selectedFilters={selectedFilters}
-              searchBarObject={searchBarObject}
-              icon={<BsDownload className="text-gray-400" />}
-              css={{
-                override: true,
-                button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-                loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-              }}
-            />
-          </div>
-          <div className="mt-4 flex flex-row flex-wrap gap-2 items-center">
-            <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="pdrListSession" />
-            <SelectedFilters
-              filterArray={filterArray}
-              selectedFilters={selectedFilters}
-              setSelectedFilters={setSelectedFilters}
-              paramData={paramData}
-              setParamData={setParamData}
-            />
-          </div>
+              let res = [];
+              for (const item of data) {
+                res.push({
+                  Identifiant: item._id.toString(),
+                  Code: item.code,
+                  Cohort: selectedCohort,
+                  Nom: item.name,
+                  Adresse: item.address,
+                  "Complément d'adresse": item?.complementAddress.find((e) => e.cohort === selectedCohort)?.complement || "",
+                  Ville: item.city,
+                  "Code postal": item.zip,
+                  Département: item.department,
+                  Région: item.region,
+                  "Volontaires attendus sur le point": youngsByMettingPoints.find((e) => e.key === item._id)?.doc_count || 0,
+                  "Lignes attendues sur le point": linesByMettingPoints.find((e) => e.key === item._id)?.doc_count || 0,
+                });
+              }
+              return res;
+            }}
+            selectedFilters={selectedFilters}
+            searchBarObject={searchBarObject}
+            icon={<BsDownload className="text-gray-400" />}
+            css={{
+              override: true,
+              button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+              loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+            }}
+          />
         </div>
-        <ResultTable
-          paramData={paramData}
-          setParamData={setParamData}
-          currentEntryOnPage={data?.length}
-          render={
-            <div className="flex w-full flex-col mt-6 mb-2">
-              <hr />
-              <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
-                <div className="w-[35%]">Points de rassemblements</div>
-                <div className="w-[25%]">Cohortes</div>
-                <div className="w-[20%]">Volontaires attendus sur le point</div>
-                <div className="w-[20%]">Lignes attendues sur le point</div>
-              </div>
-              {data?.map((hit) => {
-                return (
-                  <HitSession
-                    key={hit._id}
-                    hit={hit}
-                    user={user}
-                    session={selectedCohort}
-                    nbYoung={nbYoungByPdr.find((e) => e.key === hit._id)?.doc_count || 0}
-                    nbLines={nbLinesByPdr.find((e) => e.key === hit._id)?.doc_count || 0}
-                    loading={loading}
-                  />
-                );
-              })}
-              <hr />
-            </div>
-          }
-        />
+        <div className="mt-4 flex flex-row flex-wrap gap-2 items-center">
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="pdrListSession" />
+          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
+        </div>
       </div>
-    </ReactiveBase>
+      <ResultTable
+        paramData={paramData}
+        setParamData={setParamData}
+        currentEntryOnPage={data?.length}
+        render={
+          <div className="flex w-full flex-col mt-6 mb-2">
+            <hr />
+            <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
+              <div className="w-[35%]">Points de rassemblements</div>
+              <div className="w-[25%]">Cohortes</div>
+              <div className="w-[20%]">Volontaires attendus sur le point</div>
+              <div className="w-[20%]">Lignes attendues sur le point</div>
+            </div>
+            {data?.map((hit) => {
+              return (
+                <HitSession
+                  key={hit._id}
+                  hit={hit}
+                  user={user}
+                  session={selectedCohort}
+                  nbYoung={nbYoungByPdr.find((e) => e.key === hit._id)?.doc_count || 0}
+                  nbLines={nbLinesByPdr.find((e) => e.key === hit._id)?.doc_count || 0}
+                  loading={loading}
+                />
+              );
+            })}
+            <hr />
+          </div>
+        }
+      />
+    </div>
   );
 };
 
