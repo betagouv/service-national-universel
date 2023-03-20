@@ -35,6 +35,12 @@ import LigneBus from "./scenes/plan-transport/ligne-bus";
 import DSNJExport from "./scenes/dsnj-export";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
 
+//DashboardV2
+import DashboardV2 from "./scenes/dashboardV2/moderator-ref";
+import DashboardResponsibleV2 from "./scenes/dashboardV2/responsible";
+import DashboardHeadCenterV2 from "./scenes/dashboardV2/head-center";
+import DashboardVisitorV2 from "./scenes/dashboardV2/visitor";
+
 import Drawer from "./components/drawer";
 import Header from "./components/header";
 import Footer from "./components/footer";
@@ -120,6 +126,15 @@ const Home = () => {
     if (user?.role === ROLES.VISITOR) return <DashboardVisitor />;
     return null;
   };
+
+  const renderDashboardV2 = () => {
+    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <DashboardV2 />;
+    if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <DashboardResponsibleV2 />;
+    if (user?.role === ROLES.HEAD_CENTER) return <DashboardHeadCenterV2 />;
+    if (user?.role === ROLES.VISITOR) return <DashboardVisitorV2 />;
+    return null;
+  };
+
   const renderVolontaire = () => {
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <VolontairesResponsible />;
     if (user?.role === ROLES.HEAD_CENTER) return <VolontairesHeadCenter />;
@@ -194,8 +209,14 @@ const Home = () => {
             <RestrictedRoute path="/association" component={Association} />
             <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
             <RestrictedRoute path="/boite-de-reception" component={Inbox} />
-            <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
-            <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
+            {environment === "production" ? (
+              <>
+                <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
+                <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
+              </>
+            ) : (
+              <RestrictedRoute path="/dashboard" component={renderDashboardV2} />
+            )}
             <RestrictedRoute path="/equipe" component={Team} />
             <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
 
@@ -211,8 +232,7 @@ const Home = () => {
 
             {/* Only for developper eyes... */}
             {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
-
-            <RestrictedRoute path="/" component={renderDashboard} />
+            {environment === "production" ? <RestrictedRoute path="/" component={renderDashboard} /> : <RestrictedRoute path="/" component={renderDashboardV2} />}
           </Switch>
         </div>
       </div>
