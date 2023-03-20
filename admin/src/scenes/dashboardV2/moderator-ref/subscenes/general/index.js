@@ -1,7 +1,5 @@
 import React from "react";
 
-// eslint-disable-next-line import/namespace
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import DashboardContainer from "../../../components/DashboardContainer";
 import FullDoughnut from "../../../components/graphs/FullDoughnut";
 import DemiDoughnut from "../../../components/graphs/DemiDoughnut";
@@ -9,8 +7,6 @@ import { Legends } from "../../../components/graphs/graph-commons";
 import BarChart from "../../../components/graphs/BarChart";
 import RoundRatio from "../../../components/graphs/RoundRatio";
 import HorizontalBar from "../../../components/graphs/HorizontalBar";
-
-ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function Index() {
   return (
