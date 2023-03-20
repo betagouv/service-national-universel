@@ -8,7 +8,11 @@ if (MONGO_URL) {
     useCreateIndex: true,
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    poolSize: 100,
+    useFindAndModify: false, // * https://stackoverflow.com/a/52572958
+    poolSize: 50_000,
+    maxPoolSize: 50_000,
+    minPoolSize: 2_000,
+    waitQueueTimeoutMS: 30_000,
   });
 } else {
   console.log("ERROR CONNEXION. MONGO URL EMPTY");
