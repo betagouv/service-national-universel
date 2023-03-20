@@ -74,8 +74,8 @@ export default function List() {
               active={currentTab === "session"}
             />
           </div>
-          <div className={`bg-white rounded-b-lg rounded-tr-lg relative items-start`}>
-            <div className="flex flex-col w-full">
+          <div className={`bg-white rounded-b-lg rounded-tr-lg mb-8 relative items-start`}>
+            <div className="flex flex-col w-full pt-4">
               {currentTab === "liste-points" && <ListPoints user={user} />}
               {currentTab === "session" && <ListSessions user={user} firstSession={firstSession} />}
             </div>
@@ -105,7 +105,7 @@ const ListPoints = ({ user }) => {
   };
 
   return (
-    <div className="flex flex-col bg-white py-4 mb-8 rounded-lg">
+    <div className="flex flex-col bg-white rounded-lg">
       <div className="mx-4">
         <div className="flex flex-row justify-between w-full">
           <Filters
@@ -156,32 +156,30 @@ const ListPoints = ({ user }) => {
             }}
           />
         </div>
-        <div className="mt-4 flex flex-row flex-wrap gap-2 items-center">
+        <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
           <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="pdrList" />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
       </div>
 
-      <div className="reactive-result">
-        <ResultTable
-          paramData={paramData}
-          setParamData={setParamData}
-          currentEntryOnPage={data?.length}
-          render={
-            <div className="flex w-full flex-col mt-6 mb-2">
-              <hr />
-              <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
-                <div className="w-[40%]">Points de rassemblements</div>
-                <div className="w-[60%]">Cohortes</div>
-              </div>
-              {data?.map((hit) => {
-                return <Hit key={hit._id} hit={hit} user={user} />;
-              })}
-              <hr />
+      <ResultTable
+        paramData={paramData}
+        setParamData={setParamData}
+        currentEntryOnPage={data?.length}
+        render={
+          <div className="flex w-full flex-col mt-6 mb-2">
+            <hr />
+            <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
+              <div className="w-[40%]">Points de rassemblements</div>
+              <div className="w-[60%]">Cohortes</div>
             </div>
-          }
-        />
-      </div>
+            {data?.map((hit) => {
+              return <Hit key={hit._id} hit={hit} user={user} />;
+            })}
+            <hr />
+          </div>
+        }
+      />
     </div>
   );
 };
@@ -314,7 +312,7 @@ const ListSessions = ({ user, firstSession }) => {
   }, [data]);
 
   return (
-    <div className="flex flex-col bg-white py-4 mb-8 rounded-lg">
+    <div className="flex flex-col bg-white rounded-lg">
       <div className="mx-4">
         <div className="flex flex-row justify-between w-full">
           <Filters
@@ -368,7 +366,7 @@ const ListSessions = ({ user, firstSession }) => {
             }}
           />
         </div>
-        <div className="mt-4 flex flex-row flex-wrap gap-2 items-center">
+        <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
           <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="pdrListSession" />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
