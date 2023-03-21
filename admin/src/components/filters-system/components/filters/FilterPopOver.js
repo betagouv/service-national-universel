@@ -141,15 +141,23 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                         ?.sort((a, b) => {
                           a.key.toString().localeCompare(b.key.toString());
                         })
-                        ?.map((option) => (
-                          <div className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer" key={option?.key} onClick={() => handleSelect(option?.key)}>
-                            <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
-                              <input type="checkbox" checked={selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.key)} />
-                              {option.key === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.key) : option?.key}
+                        ?.map((option) => {
+                          const optionSelected = selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.key);
+                          return (
+                            <div
+                              className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer"
+                              key={option?.key}
+                              onClick={() => handleSelect(option?.key)}>
+                              <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
+                                <input type="checkbox" checked={optionSelected} />
+                                <div className={`${optionSelected && "font-bold"}`}>
+                                  {option.key === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.key) : option?.key}
+                                </div>
+                              </div>
+                              <div className="text-gray-500 text-xs leading-5">{option.doc_count}</div>
                             </div>
-                            <div className="text-gray-500 text-xs leading-5">{option.doc_count}</div>
-                          </div>
-                        ))}
+                          );
+                        })}
                     </>
                   )}
                 </div>
