@@ -8,7 +8,6 @@ export default function Index() {
   const filterArray = [
     {
       name: "Région",
-      datafield: "region.keyword",
       fullValue: "Toutes",
       options: [
         { key: "Ile de france", label: "Ile de france" },
@@ -19,7 +18,6 @@ export default function Index() {
     },
     {
       name: "Département",
-      datafield: "departement.keyword",
       fullValue: "Tous",
       options: [
         { key: "Ile de france", label: "Ile de france" },
