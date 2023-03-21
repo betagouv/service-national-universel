@@ -11,7 +11,6 @@ import { apiAdress } from "../services/api-adresse";
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
-// eslint-disable-next-line prettier/prettier
 export default function AddressInputV2({ keys, values, handleChange, errors, touched, validateField, countryVisible = false, onChangeCountry = () => {}, countryByDefault = "" }) {
   const [suggestion, setSuggestion] = useState({});
   const [addressInFrance, setAddressInFrance] = useState(true);
@@ -81,14 +80,16 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
     return;
   };
 
-  const getSuggestions = async (item) => {
+  const getSuggestions = async (query, filter) => {
+    // https://adresse.data.gouv.fr/api-doc/adresse
+    // Filtres possibles : postcode, citycode (INSEE), type, limit, autocomplete
+
     const errors = await Promise.all([validateField(keys.address), validateField(keys.city), validateField(keys.zip)]).then((arr) => arr.filter((error) => error !== false));
     if (errors.length) return;
-    const text = item;
+    const text = encodeURI(query + filter ? `&${filter}` : "");
 
     setLoading(true);
-    const res = await apiAdress(encodeURI(text));
-
+    const res = await apiAdress(text);
     const arr = res?.features;
 
     setLoading(false);
@@ -187,7 +188,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
             <>
               <Col md={12} style={{ display: "flex", alignItems: "flex-end" }}>
                 {addressVerified.value !== "true" ? (
-                  <PrimaryButton style={{ marginLeft: "auto" }} onClick={() => getSuggestions(`${values[keys.address]}, ${values[keys.city]}&postcode=${values[keys.zip]}`)}>
+                  <PrimaryButton style={{ marginLeft: "auto" }} onClick={() => getSuggestions(`${values[keys.address]}, ${values[keys.city]}}`, `postcode=${values[keys.zip]}`)}>
                     {!loading ? "Vérifier" : <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
                   </PrimaryButton>
                 ) : (
