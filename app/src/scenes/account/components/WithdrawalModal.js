@@ -17,11 +17,17 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
   const history = useHistory();
   const dispatch = useDispatch();
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
+
   const [withdrawnMessage, setWithdrawnMessage] = useState("");
   const [withdrawnReason, setWithdrawnReason] = useState("");
   const [step, setStep] = useState(0);
 
   const onCancel = () => {
+    if (isLoading) {
+      return null;
+    }
     setStep(0);
     setWithdrawnMessage("");
     setWithdrawnReason("");
@@ -37,11 +43,16 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
     : ACTION_WITHDRAW;
 
   const onConfirm = async () => {
+    setIsLoading(true);
     const status = action === ACTION_DELETE_ACCOUNT ? YOUNG_STATUS.DELETED : action === ACTION_WITHDRAW ? YOUNG_STATUS.WITHDRAWN : YOUNG_STATUS.ABANDONED;
     try {
       if (action === ACTION_DELETE_ACCOUNT) {
+        setLoadingMessage(
+          "Merci de patienter, la suppression de votre compte devrait prendre moins d'une minute. Vous serez immédiatement déconnecté(e) une fois la suppression effectuée.",
+        );
         const { ok, code } = await deleteYoungAccount(young._id);
         if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
+        toastr.success("Compte supprimé:", "Votre compte a été suppromé avec succès.");
         await logoutYoung();
         dispatch(setYoung(null));
       } else {
@@ -57,10 +68,11 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
       history.push("/");
     } catch (e) {
       toastr.error("Oups, une erreur est survenue :", translate(e.code));
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
     }
   };
-
-  console.log(young.historic);
 
   const { content, title, subTitle, confirmButtonName } = steps[action][step];
 
@@ -96,7 +108,14 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
           />
         )}
         {content === CONTENT_CONFIRM && (
-          <ConfirmationModalContent onConfirm={onConfirm} onBack={action === ACTION_DELETE_ACCOUNT ? onCancel : () => setStep(step - 1)} title={title} subTitle={subTitle} />
+          <ConfirmationModalContent
+            isLoading={isLoading}
+            loadingMessage={loadingMessage}
+            onConfirm={onConfirm}
+            onBack={action === ACTION_DELETE_ACCOUNT ? onCancel : () => setStep(step - 1)}
+            title={title}
+            subTitle={subTitle}
+          />
         )}
       </div>
     </Modal>

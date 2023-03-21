@@ -852,7 +852,7 @@ router.put("/:id/soft-delete", passport.authenticate(["referent", "young"], { se
     young.set({ status: YOUNG_STATUS.DELETED });
 
     await young.save({ fromUser: req.user });
-    const result = await patches.deletePatches({ req, model: YoungObject });
+    const result = await patches.deletePatches({ id, model: YoungObject });
 
     if (!result.ok) {
       return res.status(result.codeError).send({ ok: result.ok, code: result.code });

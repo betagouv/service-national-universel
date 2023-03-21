@@ -1,20 +1,26 @@
 import React from "react";
-import { CancelButton } from "../../../components/buttons/SimpleButtons";
-import { PlainButton } from "../../phase1/components/Buttons";
+import ButtonDanger from "../../../components/ui/buttons/ButtonDanger";
+import ButtonLight from "../../../components/ui/buttons/ButtonLight";
 import { Title, SubTitle } from "./elements";
+import { BiLoaderAlt } from "react-icons/bi";
 
-const ConfirmationModalContent = ({ onConfirm, onBack, title, subTitle }) => {
+const ConfirmationModalContent = ({ onConfirm, onBack, title, subTitle, isLoading, loadingMessage }) => {
   return (
     <>
       <Title>{title}</Title>
-      <SubTitle>{subTitle}</SubTitle>
+      <SubTitle>{isLoading && loadingMessage ? loadingMessage : subTitle}</SubTitle>
       <div className="flex flex-col md:flex-row mt-3 w-full gap-3">
-        <PlainButton mode="red" className="flex-1 md:order-last" onClick={onConfirm}>
+        <ButtonDanger className="flex-1 md:order-last" onClick={onConfirm} disabled={isLoading}>
+          {isLoading && (
+            <span className="animate-spin">
+              <BiLoaderAlt />
+            </span>
+          )}
           Confirmer
-        </PlainButton>
-        <CancelButton className="flex-1" onClick={onBack}>
+        </ButtonDanger>
+        <ButtonLight className="flex-1" onClick={onBack}>
           Retour
-        </CancelButton>
+        </ButtonLight>
       </div>
     </>
   );
