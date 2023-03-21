@@ -24,9 +24,7 @@ export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArr
 const FilterComponent = ({ filter, selectedFilters, setSelectedFilters }) => {
   const selectedFilterValues = selectedFilters[filter.name]?.filter ? selectedFilters[filter.name].filter : [];
   const [visible, setVisible] = React.useState(false);
-  React.useEffect(() => {
-    console.log(selectedFilters);
-  }, [selectedFilters]);
+
   return (
     <div key={filter.label} className="relative">
       <div className={`p-0.5 border-[2px] ${visible ? "border-blue-600 rounded-xl" : "border-transparent"}`}>
