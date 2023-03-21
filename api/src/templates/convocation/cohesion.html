@@ -15,13 +15,16 @@
 	}
 
 	img.bg {
-		min-height: 100%;
+		min-height: 103%;
 
 		/* Set up proportionate scaling */
-		width: 100%;
+		width: 103%;
 		height: auto;
 		/* Set up positioning */
 		position: fixed;
+		top: 50%;
+  		left: 50%;
+  		transform: translate(-50%, -50%);
 		z-index: -1;
 	}
 
@@ -37,7 +40,7 @@
 	#convocation-cohesion>.head-infos {
 		display: flex;
 		justify-content: space-between;
-		margin-top: 200px;
+		margin-top: 160px;
 		padding-left: 50px;
 		padding-right: 60px;
 		margin-bottom: 16px;
@@ -99,7 +102,7 @@
 		padding-left: 50px;
 		width: 85%;
 		line-height: 1.4;
-		margin-bottom: 16px;
+		margin-bottom: 12px;
 	}
 
 	#convocation-cohesion>.meeting-point>.info {
@@ -116,7 +119,7 @@
 		width: 85%;
 		padding-left: 15px;
 		padding-right: 15px;
-		margin-bottom: 16px;
+		margin-bottom: 12px;
 	}
 
 	#convocation-cohesion>.stuff {
@@ -129,6 +132,7 @@
 
 	#convocation-cohesion>.stuff>.list {
 		padding-left: 15px;
+		margin-bottom: 8px;
 	}
 
 	#convocation-cohesion>.meeting-point-date-return {
@@ -177,6 +181,11 @@
       <div>{{MEETING_HOURS}}</div>
       <div>{{MEETING_ADDRESS}}</div>
       <div>{{TRANSPORT}}</div>
+	  <div>
+		Lorem ipsum dolor sit, amet consectetur adipisicing elit. Odit voluptas voluptate earum deleniti delectus praesentium ad, ipsam, fugit corrupti pariatur reiciendis, ut quaerat at error quis quia cupiditate. Optio, quisquam?
+		Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quia delectus nihil ab! Voluptatibus natus eveniet ducimus blanditiis magnam, ratione soluta possimus dolore voluptatem aut, modi, explicabo culpa? Dolore, rerum numquam!
+		Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quia delectus nihil ab! Voluptatibus natus eveniet ducimus blanditiis magnam, ratione soluta possimus dolore voluptatem aut, modi, explicabo culpa? Dolore, rerum numquam!
+	  </div>
     </div>
   </div>
   <div class="warning">
@@ -195,7 +204,6 @@
 		{{LUNCH_BREAK}}
       </div>
     <div class="info">
-      <br/>
       Enfin, nous vous demandons de bien vouloir étiqueter vos bagages.
     </div>
   </div>
