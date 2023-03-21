@@ -1,3 +1,20 @@
+# [1.237.0](https://github.com/betagouv/service-national-universel/compare/v1.236.0...v1.237.0) (2023-03-21)
+
+
+### Bug Fixes
+
+* **admin:** update schoolId on change ([7a27136](https://github.com/betagouv/service-national-universel/commit/7a27136826a41a9a3e7709725db8801f1929cc19))
+* **api:** auto-validation update ([a4dab7c](https://github.com/betagouv/service-national-universel/commit/a4dab7c1c0efea6f3113854ca7c51721b2adfda2))
+* **api:** correction des espacements dans les convocation pdf ([#2400](https://github.com/betagouv/service-national-universel/issues/2400)) ([704e939](https://github.com/betagouv/service-national-universel/commit/704e939c823b2115f88ae61f3c04e566471da363))
+* **api:** Reload api in dev mode ([6c43e41](https://github.com/betagouv/service-national-universel/commit/6c43e41eb36239f4d8186df5570acd96c50f5930))
+* **app:** long name pdr on affected page ([dafad95](https://github.com/betagouv/service-national-universel/commit/dafad95c2d9dec52ff250e1f303de83072e10619))
+
+
+### Features
+
+* **api:** Update MongoDB connections ([#2396](https://github.com/betagouv/service-national-universel/issues/2396)) ([2724192](https://github.com/betagouv/service-national-universel/commit/27241927144e5a2e14852d498e56eade11f091bb))
+* **api/admin:** Bloc "Affectation et pointage" champ “Disponibilité des listes de transport par centre ([#2392](https://github.com/betagouv/service-national-universel/issues/2392)) ([6c47898](https://github.com/betagouv/service-national-universel/commit/6c4789874a0c8feaaa875086758b6807dd6c9e09))
+
 # [1.236.0](https://github.com/betagouv/service-national-universel/compare/v1.235.0...v1.236.0) (2023-03-20)
 
 
