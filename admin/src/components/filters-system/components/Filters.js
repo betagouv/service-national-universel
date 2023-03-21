@@ -231,7 +231,7 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
                           type="text"
                           value={search}
                           onChange={(e) => setSearch(e.target.value)}
-                          className="px-3 py-2 bg-gray-100 mx-2 rounded-lg mb-2 placeholder:text-gray-600 text-sm text-gray-900"
+                          className="px-3 py-2 bg-gray-100 mx-2 rounded-lg mb-2 placeholder:text-gray-600 text-xs text-gray-900"
                           placeholder="Rechercher par..."
                         />
                         <div className="flex flex-col max-h-[590px] overflow-y-auto">
