@@ -114,11 +114,6 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
   }, [search]);
 
   React.useEffect(() => {
-    // on load si on a pas de filtre et que fullValue existe on set toutes les values
-    if (selectedFilters[filter?.name]?.filter?.length === 0 && filter?.fullValue) {
-      // on set toutes les values
-      setAllValues();
-    }
     const handleClickOutside = (event) => {
       if (ref.current && !ref.current.contains(event.target)) {
         setVisible(false);
