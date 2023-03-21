@@ -225,6 +225,7 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       youngCheckinForHeadOfCenter: Joi.boolean().required(),
       youngCheckinForRegionReferent: Joi.boolean().required(),
       youngCheckinForDepartmentReferent: Joi.boolean().required(),
+      busListAvailability: Joi.boolean().required(),
       uselessInformation: Joi.object().allow(null),
     }).validate(req.body, { stripUnknown: true });
     if (bodyError) {
@@ -258,6 +259,7 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       youngCheckinForHeadOfCenter: body.youngCheckinForHeadOfCenter,
       youngCheckinForRegionReferent: body.youngCheckinForRegionReferent,
       youngCheckinForDepartmentReferent: body.youngCheckinForDepartmentReferent,
+      busListAvailability: body.busListAvailability,
       uselessInformation: body.uselessInformation,
     });
 
