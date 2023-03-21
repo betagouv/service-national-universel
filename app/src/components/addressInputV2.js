@@ -87,7 +87,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
     const text = item;
 
     setLoading(true);
-    const res = await apiAdress(text);
+    const res = await apiAdress(encodeURI(text));
 
     const arr = res?.features;
 

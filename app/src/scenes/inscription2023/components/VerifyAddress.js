@@ -12,7 +12,7 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
   const getSuggestions = async (text) => {
     setLoading(true);
     try {
-      const res = await apiAdress(text);
+      const res = await apiAdress(encodeURI(text));
 
       const arr = res?.features;
 
