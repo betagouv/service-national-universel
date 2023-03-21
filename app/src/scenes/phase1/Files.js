@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { YOUNG_STATUS_PHASE1 } from "../../utils";
 import FileCard from "./components/FileCard";
-import MedicalFile from "./MedicalFile";
+import MedicalFileModal from "./components/MedicalFileModal.js";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 
 export default function DocumentsPhase1({ young }) {
-  const [isOpenMed, setIsOpenMed] = useState(false);
+  const [isMedicalFileModalOpen, setMedicalFileModalOpen] = useState(false);
   const [youngStatusPhase1, setYoungStatusPhase1] = useState(young.statusPhase1);
 
   useEffect(() => {
@@ -22,7 +22,9 @@ export default function DocumentsPhase1({ young }) {
 
   return (
     <section>
-      <h3 className="text-2xl font-medium">Ma fiche sanitaire</h3>
+      <MedicalFileModal isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} />
+      <h3 className="text-base font-medium">Document à préparer</h3>
+      <span className="text-sm text-[#1F2937]">Complétez votre fiche sanitaire et remettez la à votre arrivée au centre de séjour.</span>
       <div className={`flex flex-col md:flex-row items-center ${youngStatusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED && "justify-between"} overflow-x-auto scrollbar-x pt-4`}>
         {youngStatusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED ? (
           <>
@@ -31,15 +33,12 @@ export default function DocumentsPhase1({ young }) {
               icon="sanitaire"
               filled={young.cohesionStayMedicalFileDownload === "true"}
               color={young.cohesionStayMedicalFileDownload === "true" ? "bg-white text-indigo-700" : "bg-indigo-700 text-white"}
-              status={
-                young.cohesionStayMedicalFileReceived === "true" ? "Réceptionnée" : young.cohesionStayMedicalFileDownload === "true" ? "Télécharger de nouveau" : "Télécharger"
-              }
-              onClick={() => setIsOpenMed(true)}
+              status={young.cohesionStayMedicalFileReceived === "true" ? "Réceptionnée" : "Ouvrir"}
+              onClick={() => setMedicalFileModalOpen(true)}
             />
           </>
         ) : null}
       </div>
-      <MedicalFile isOpen={isOpenMed} onCancel={() => setIsOpenMed(false)} />
     </section>
   );
 }
