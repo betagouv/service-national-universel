@@ -132,7 +132,6 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
     // store localement les filtres
     if (selectedFilters[filter?.name]) {
       if (selectedFilters[filter?.name]?.filter?.includes(value)) {
-        // on doit avoir au moins une valeur dans le filtre
         newFilters = selectedFilters[filter?.name]?.filter?.filter((f) => f !== value);
       } else {
         newFilters = selectedFilters[filter?.name]?.filter?.concat(value);
