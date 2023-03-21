@@ -125,10 +125,6 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
     };
   }, []);
 
-  const setAllValues = () => {
-    setSelectedFilters((selectedFilters) => ({ ...selectedFilters, [filter?.name]: { filter: filter.options.map((f) => f.key) } }));
-  };
-
   const handleSelect = (value) => {
     // check si c'est un isSingle (un seul filtre possible)
     if (filter?.isSingle) return setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: [value] } });
