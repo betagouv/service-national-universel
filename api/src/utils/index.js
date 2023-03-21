@@ -686,7 +686,7 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
       }
     }
   } else {
-    young.set({ statusPhase1: "NOT_DONE" });
+    young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
   }
   await young.save({ fromUser: req.user });
 }
