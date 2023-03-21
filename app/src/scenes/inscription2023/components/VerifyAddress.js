@@ -12,7 +12,7 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
   const getSuggestions = async (text) => {
     setLoading(true);
     try {
-      const res = await apiAdress(`${encodeURIComponent(text)}`);
+      const res = await apiAdress(text);
 
       const arr = res?.features;
 
@@ -96,7 +96,7 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
           }
           onClick={() => {
             if (disabled || !address || !zip || !city || loading) return;
-            getSuggestions(`${address}, ${city} ${zip}`);
+            getSuggestions(`${address}, ${city}&postcode=${zip}`);
           }}
         />
       </div>

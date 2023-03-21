@@ -87,9 +87,9 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
     const text = item;
 
     setLoading(true);
-    const res = await apiAdress(`${encodeURIComponent(text)}`);
+    const res = await apiAdress(text);
 
-    const arr = res?.features.filter((e) => e.properties.type !== "municipality");
+    const arr = res?.features;
 
     setLoading(false);
     if (arr?.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
@@ -187,7 +187,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
             <>
               <Col md={12} style={{ display: "flex", alignItems: "flex-end" }}>
                 {addressVerified.value !== "true" ? (
-                  <PrimaryButton style={{ marginLeft: "auto" }} onClick={() => getSuggestions(`${values[keys.address]}, ${values[keys.city]} ${values[keys.zip]}`)}>
+                  <PrimaryButton style={{ marginLeft: "auto" }} onClick={() => getSuggestions(`${values[keys.address]}, ${values[keys.city]}&postcode=${values[keys.zip]}`)}>
                     {!loading ? "Vérifier" : <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
                   </PrimaryButton>
                 ) : (
