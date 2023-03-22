@@ -15,37 +15,37 @@ import TabSession from "./components/TabSession";
 const filterArray = [
   {
     id: "status",
-    name: "Statut d’inscription :",
+    name: "Statut d’inscription",
     fullValue: "Tous",
     options: Object.keys(YOUNG_STATUS).map((status) => ({ key: status, label: translateInscriptionStatus(status) })),
   },
   {
     id: "statusPhase1",
-    name: "Statut de phase 1 :",
+    name: "Statut de phase 1",
     fullValue: "Tous",
     options: Object.keys(YOUNG_STATUS_PHASE1).map((status) => ({ key: status, label: translatePhase1(status) })),
   },
   {
     id: "region",
-    name: "Région :",
+    name: "Région",
     fullValue: "Toutes",
     options: regionList.map((region) => ({ key: region, label: region })),
   },
   {
     id: "academy",
-    name: "Académie :",
+    name: "Académie",
     fullValue: "Toutes",
     options: academyList.map((academy) => ({ key: academy, label: academy })),
   },
   {
     id: "department",
-    name: "Département :",
+    name: "Département",
     fullValue: "Tous",
     options: departmentList.map((department) => ({ key: department, label: department })),
   },
   {
     id: "cohort",
-    name: "Cohorte :",
+    name: "Cohorte",
     fullValue: "Toutes",
     options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
   },

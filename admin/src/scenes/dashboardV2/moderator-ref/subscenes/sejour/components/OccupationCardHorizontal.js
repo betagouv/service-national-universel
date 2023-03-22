@@ -18,6 +18,7 @@ export default function OccupationCardHorizontal({ total, taken }) {
   else if (occupationPercentage < 80) width = "w-[80%]";
   else if (occupationPercentage < 100) width = "w-[90%]";
   else if (occupationPercentage >= 100) width = "w-[100%]";
+
   return (
     <div className="relative flex flex-col gap-2 bg-white w-full rounded-lg px-6 py-4 shadow-[0_8px_16px_rgba(0,0,0,0.05)] h-[102px]">
       <p className="text-base leading-5 font-bold text-gray-900">Places</p>
