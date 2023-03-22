@@ -87,7 +87,7 @@ export default function StepMedicalField({ young }) {
         {enabled ? (
           <>
             <div className="flex flex-row items-center justify-center pb-4 lg:!pb-0">
-              <ButtonLink onClick={() => setMedicalFileModalOpen(true)} className="mr-2">
+              <ButtonLink onClick={() => setMedicalFileModalOpen(true)} className="pl-4 pr-8">
                 Voir le mode d’emploi
               </ButtonLink>
               <button
