@@ -4,31 +4,23 @@ import DashboardContainer from "../../../components/DashboardContainer";
 import HorizontalBar from "../../../components/graphs/HorizontalBar";
 
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
+import { departmentList, regionList } from "snu-lib";
+
 export default function Index() {
   const filterArray = [
     {
       name: "Région",
       fullValue: "Toutes",
-      options: [
-        { key: "Ile de france", label: "Ile de france" },
-        { key: "Bretagne", label: "Bretagne" },
-        { key: "oui", label: "oui" },
-        { key: "oui oui", label: "oui oui" },
-      ],
+      options: regionList.map((region) => ({ key: region, label: region })),
     },
     {
       name: "Département",
       fullValue: "Tous",
-      options: [
-        { key: "Ile de france", label: "Ile de france" },
-        { key: "Bretagne", label: "Bretagne" },
-      ],
+      options: departmentList.map((department) => ({ key: department, label: department })),
     },
   ];
 
-  const [selectedFilters, setSelectedFilters] = React.useState({
-    Région: ["Ile de france"],
-  });
+  const [selectedFilters, setSelectedFilters] = React.useState({});
   return (
     <DashboardContainer
       active="inscription"
