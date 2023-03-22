@@ -45,7 +45,16 @@ const { cookieOptions } = require("../../cookie-options");
 const { validateYoung, validateId, validatePhase1Document } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
-const { canDeleteYoung, canGetYoungByEmail, canInviteYoung, canEditYoung, canSendTemplateToYoung, canViewYoungApplications, canEditPresenceYoung } = require("snu-lib/roles");
+const {
+  canDeleteYoung,
+  canGetYoungByEmail,
+  canInviteYoung,
+  canEditYoung,
+  canSendTemplateToYoung,
+  canViewYoungApplications,
+  canEditPresenceYoung,
+  canDeletePatchesHistory,
+} = require("snu-lib/roles");
 const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES, YOUNG_STATUS_PHASE2 } = require("snu-lib/constants");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
@@ -853,11 +862,8 @@ router.put("/:id/soft-delete", passport.authenticate(["referent", "young"], { se
     young.set({ status: YOUNG_STATUS.DELETED });
 
     await young.save({ fromUser: req.user });
-    const result = await patches.deletePatches({ id, model: YoungObject });
-
-    if (!result.ok) {
-      return res.status(result.codeError).send({ ok: result.ok, code: result.code });
-    }
+    if (!canDeletePatchesHistory(req.user, young)) return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    await patches.deletePatches({ id, model: YoungObject });
 
     console.log(`Young ${id} has been soft deleted`);
     res.status(200).send({ ok: true, data: young });

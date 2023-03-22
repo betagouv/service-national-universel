@@ -1,7 +1,7 @@
 const Joi = require("joi");
 const { capture } = require("../sentry");
 const { ERRORS } = require("../utils");
-const { canViewPatchesHistory } = require("snu-lib/roles");
+const { canViewPatchesHistory, canDeletePatchesHistory } = require("snu-lib/roles");
 const { validateId } = require("../utils/validator");
 
 const get = async (req, res, model) => {
@@ -33,7 +33,6 @@ const deletePatches = async ({ id, model }) => {
       console.error(error);
     }
     if (error) return { ok: false, code: ERRORS.INVALID_PARAMS, codeError: 400 };
-    // if (!canViewPatchesHistory(req.user)) return { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, codeError: 403 };
 
     const elem = await model.findById(validatedId);
     if (!elem) return { ok: false, code: ERRORS.NOT_FOUND, codeError: 404 };
