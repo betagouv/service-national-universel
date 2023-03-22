@@ -110,6 +110,7 @@ const getInscriptionGoals = async () => {
   const { responses } = await api.esQuery("inscriptiongoal", query);
   if (!responses.length) {
     toastr.error("Une erreur est survenue");
+    return [];
   }
   const result = responses[0].hits.hits;
   result.map((e) => {
@@ -165,6 +166,7 @@ async function getCurrentInscriptions(filters) {
   if (filters?.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filters.department } });
 
   const { responses } = await api.esQuery("young", body);
+  if (!responses.length) return {};
   const finalObject = {};
   Object.keys(responses[0].aggregations).map((key) => {
     finalObject[key] = responses[0].aggregations[key].doc_count;
