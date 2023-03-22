@@ -21,9 +21,9 @@ if (MONGO_URL) {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useFindAndModify: false, // * https://stackoverflow.com/a/52572958
-      poolSize: 8_000,
-      maxPoolSize: 8_000,
-      minPoolSize: 2_000,
+      poolSize: 500,
+      maxPoolSize: 500,
+      minPoolSize: 200,
       waitQueueTimeoutMS: 30_000,
     });
   }
