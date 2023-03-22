@@ -130,7 +130,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
-      <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
+      <DrawerTab to="/point-de-rassemblement/liste/liste-points" title="Points de rassemblement" onClick={onClick} />
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/table-repartition" title="Table de répartition" onClick={onClick} />
       <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
@@ -186,7 +186,7 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, 
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
-      <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
+      <DrawerTab to="/point-de-rassemblement/liste/liste-points" title="Points de rassemblement" onClick={onClick} />
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/table-repartition" title="Table de répartition" onClick={onClick} />
       {user.role === ROLES.REFERENT_DEPARTMENT ? (

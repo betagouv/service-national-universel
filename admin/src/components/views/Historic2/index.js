@@ -24,7 +24,7 @@ export default function Historic({ model, data, customFilterOptions, refName }) 
   const authorOptions = getOptions(data, "author");
 
   return (
-    <div className="bg-white rounded-xl shadow-md text-gray-700">
+    <div className="bg-white max-w-[1600px] rounded-xl shadow-md text-gray-700">
       {!data.length && <div className="italic p-4">Aucune donnée</div>}
       <div className="p-4 space-y-6">
         <div className="flex gap-4">
@@ -44,7 +44,7 @@ export default function Historic({ model, data, customFilterOptions, refName }) 
         )}
       </div>
       <div className="flex w-full flex-col mt-6 mb-2 divide-y divide-gray-100 border-y-[1px] border-gray-100">
-        <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 ">
+        <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
           <div className="w-[25%]">Action</div>
           <div className="w-[20%]">Détails</div>
           <div className="w-[10%]"></div>

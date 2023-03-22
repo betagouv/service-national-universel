@@ -25,7 +25,7 @@ const Modal = ({ isOpen = false, onClose: handleClose = () => {}, children = nul
               leave="ease-in duration-200"
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-              <Dialog.Panel className={`relative transform transition-all ${className}`}>{children}</Dialog.Panel>
+              <Dialog.Panel className={`relative transform transition-all rounded-md ${className}`}>{children}</Dialog.Panel>
             </Transition.Child>
           </div>
         </div>

@@ -1463,7 +1463,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                     <div className="text-[14px] leading-[20px] text-[#242526] text-bold mb-[6px]">Attestation des représentants légaux</div>
                     <div className="text-[12px] leading-[20px] text-[#000000] grow">
                       Consentement parental validé via FranceConnect. Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de
-                      s’affranchir du document de consentement papier.
+                      s’affranchir du formulaire de consentement numérique.
                     </div>
                   </div>
                 </div>
@@ -1642,7 +1642,9 @@ function SectionConsentements({ young, onChange, readonly = false }) {
             <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> puis la réalisation d&apos;une mission d&apos;intérêt général.
           </CheckRead>
           <CheckRead value={young.consentment === "true"}>S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</CheckRead>
-          <CheckRead value={young.inscriptionDoneDate !== undefined && young.inscriptionDoneDate !== null}>Certifie l&apos;exactitude des renseignements fournis</CheckRead>
+          <CheckRead value={(young.inscriptionDoneDate !== undefined && young.inscriptionDoneDate !== null) || young.informationAccuracy === "true"}>
+            Certifie l&apos;exactitude des renseignements fournis
+          </CheckRead>
         </div>
       </div>
       <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />

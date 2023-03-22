@@ -12,8 +12,8 @@ export default function Index() {
   return (
     <Switch>
       <SentryRoute path="/point-de-rassemblement/nouveau" component={Create} />
+      <SentryRoute path="/point-de-rassemblement/liste/:currentTab" component={List} />
       <SentryRoute path="/point-de-rassemblement/:id" component={View} />
-      <SentryRoute path="/point-de-rassemblement" component={List} />
     </Switch>
   );
 }

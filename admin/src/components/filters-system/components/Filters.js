@@ -54,7 +54,21 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
 
   React.useEffect(
     function updateSearchSelectedFilter() {
-      const newFilters = search !== "" ? filters.filter((f) => f.title.toLowerCase().includes(search.toLowerCase())) : filters;
+      // normalize search
+      const normalizedSearch = search
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+      const newFilters =
+        search !== ""
+          ? filters.filter((f) =>
+              f.title
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .includes(normalizedSearch),
+            )
+          : filters;
       setFiltersVisible(newFilters);
     },
     [search],
@@ -236,6 +250,7 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
                                     data={dataFilter[item?.name] || []}
                                     isShowing={isShowing === item.name}
                                     setIsShowing={handleFilterShowing}
+                                    setParamData={setParamData}
                                   />
                                 ))}
                             </div>
