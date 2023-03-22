@@ -12,7 +12,7 @@ export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArr
         <FilterSvg className="text-gray-300 h-4 w-4" />
         <div className="font-bold text-gray-900 text-lg">Filtrer</div>
       </div>
-      <div className="flex flex-row gap-2 items-center justify-center">
+      <div className="flex flex-row gap-2 items-center justify-end flex-wrap w-7/10">
         {filterArray.map((filter) => (
           <FilterComponent key={filter.name} filter={filter} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} />
         ))}
