@@ -1,12 +1,14 @@
 import React from "react";
 import { HiBell } from "react-icons/hi";
-import { isStepMedicalFieldDone, numberOfStepsCompleted } from "../affected.utils.js";
+import { useSelector } from "react-redux";
+import { isStepMedicalFieldDone, numberOfStepsCompleted } from "../utils/steps.utils.js";
 import StepAgreement from "./step/stepAgreement.js";
 import StepConvocation from "./step/stepConvocation.js";
 import StepMedicalField from "./step/stepMedicalFile.js";
 import StepPDR from "./step/StepPDR";
 
-export default function StepsAffected({ young, center }) {
+export default function StepsAffected({ center }) {
+  const young = useSelector((state) => state.Auth.young);
   if (!young) return null;
   const nbvalid = numberOfStepsCompleted(young);
 

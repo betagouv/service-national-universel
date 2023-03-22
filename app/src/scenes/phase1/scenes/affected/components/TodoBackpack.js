@@ -30,7 +30,7 @@ export default function TodoBackpack({ lunchBreak }) {
   }
 
   return (
-    <div className="relative bg-white rounded-xl shadow-nina md:shadow-none p-[1rem] md:p-[0rem] m-[1rem] md:m-[0rem] md:w-full overflow-hidden">
+    <div className="relative bg-white rounded-xl shadow-nina md:shadow-none p-[1rem] md:p-[0rem] m-[1rem] md:m-[0rem] w-full overflow-hidden">
       <div className="max-w-md">
         <h1 className="text-xl font-bold mb-6 md:pl-16">Dans mon sac...</h1>
         <div className="text-sm space-y-3 md:pl-16 md:border-l-[1px]">

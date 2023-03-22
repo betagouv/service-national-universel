@@ -13,7 +13,7 @@ import api from "../../../../../../services/api";
 import Convocation from "../Convocation";
 import { capture } from "../../../../../../sentry";
 import { translate } from "snu-lib";
-import { isStepAgreementDone, isStepConvocationDone } from "../../affected.utils";
+import { isStepAgreementDone, isStepConvocationDone } from "../../utils/steps.utils";
 
 export default function StepConvocation({ young }) {
   const [showConvocation, setShowConvocation] = useState(false);

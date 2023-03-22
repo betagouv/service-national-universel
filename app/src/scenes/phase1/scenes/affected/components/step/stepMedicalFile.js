@@ -13,7 +13,7 @@ import { SENDINBLUE_TEMPLATES } from "../../../../../../utils";
 import { toastr } from "react-redux-toastr";
 import plausibleEvent from "../../../../../../services/plausible";
 import { CDN_BASE_URL } from "../../../../../representants-legaux/commons";
-import { isStepConvocationDone, isStepMedicalFieldDone } from "../../affected.utils";
+import { isStepConvocationDone, isStepMedicalFieldDone } from "../../utils/steps.utils";
 
 export default function StepMedicalField({ young }) {
   const [stateMobil, setStateMobil] = useState(false);

@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { translate, translateCohort, youngCanChangeSession } from "snu-lib";
 import { getCohortDetail } from "../../../../utils/cohorts.js";
+import { isStepMedicalFieldDone } from "./utils/steps.utils.js";
 import api from "../../../../services/api";
 
 import { AlertBoxInformation } from "../../../../components/Content";
@@ -16,7 +17,6 @@ import StepsAffected from "./components/StepsAffected";
 import TravelInfoAlone from "./components/TravelInfoAlone.js";
 import TravelInfoBus from "./components/TravelInfoBus";
 import TodoBackpack from "./components/TodoBackpack";
-import { isStepMedicalFieldDone } from "./affected.utils.js";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -57,7 +57,7 @@ export default function Affected() {
   }
 
   if (!center && !meetingPoint) {
-    return <Problem young={young} />;
+    return <Problem cohort={young.cohort} />;
   }
 
   return (
@@ -83,21 +83,21 @@ export default function Affected() {
           <CenterInfo center={center} />
         </header>
 
-        <div
-          className={`md:border-t-[1px] flex flex-col md:flex-row flex-none gap-6 md:gap-16 pt-[1rem] md:pt-[4rem] order-2 overflow-hidden transition-all ease-in-out duration-500
-            ${isStepMedicalFieldDone(young) ? "h-[680px] md:h-[360px]" : "h-0"}`}>
-          {young.meetingPointId ? (
-            <TravelInfoBus meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
-          ) : young.deplacementPhase1Autonomous === "true" ? (
-            <TravelInfoAlone center={center} cohortDetails={cohortDetails} />
-          ) : (
-            <></>
-          )}
-          <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
-        </div>
+        {isStepMedicalFieldDone(young) && (
+          <div className="md:border-t-[1px] flex flex-col md:flex-row flex-none gap-6 md:gap-10 pt-[1rem] md:pt-[4rem] order-2 overflow-hidden">
+            {young.meetingPointId ? (
+              <TravelInfoBus meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
+            ) : young.deplacementPhase1Autonomous === "true" ? (
+              <TravelInfoAlone center={center} cohortDetails={cohortDetails} />
+            ) : (
+              <></>
+            )}
+            <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
+          </div>
+        )}
 
-        <StepsAffected young={young} center={center} />
-        <FaqAffected className={`transition-all ${isStepMedicalFieldDone(young) ? "order-3" : "order-4"}`} />
+        <StepsAffected center={center} />
+        <FaqAffected className={`${isStepMedicalFieldDone(young) ? "order-3" : "order-4"}`} />
       </div>
 
       <JDMA id="3504" />

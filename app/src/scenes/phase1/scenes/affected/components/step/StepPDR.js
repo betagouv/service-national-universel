@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
 import { getCohortDetail, getMeetingPointChoiceLimitDateForCohort } from "../../../../../../utils/cohorts";
-import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR, isStepPDRDone } from "../../affected.utils";
+import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR, isStepPDRDone } from "../../utils/steps.utils";
 import dayjs from "dayjs";
 import CohortDateSummary from "../../../../../inscription2023/components/CohortDateSummary";
 import Loader from "../../../../../../components/Loader";
