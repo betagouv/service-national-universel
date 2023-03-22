@@ -875,6 +875,14 @@ router.put("/:id/soft-delete", passport.authenticate(["referent", "young"], { se
 
 router.put("/withdraw", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error: validationError, value } = Joi.object({ withdrawnMessage: Joi.string().required(), withdrawnReason: Joi.string().required() })
+      .unknown()
+      .validate(req.body, { stripUnknown: true });
+    if (validationError) {
+      capture(validationError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -883,14 +891,6 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
 
     if (mandatoryPhasesDone || inscriptionStatus) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    const { error: validationError, value } = Joi.object({ withdrawnMessage: Joi.string().required(), withdrawnReason: Joi.string().required() })
-      .unknown()
-      .validate(req.body, { stripUnknown: true });
-    if (validationError) {
-      capture(validationError);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     const { withdrawnMessage, withdrawnReason } = value;
@@ -913,6 +913,14 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
 
 router.put("/abandon", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error: validationError, value } = Joi.object({ withdrawnMessage: Joi.string().required(), withdrawnReason: Joi.string().required() })
+      .unknown()
+      .validate(req.body, { stripUnknown: true });
+    if (validationError) {
+      capture(validationError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -921,14 +929,6 @@ router.put("/abandon", passport.authenticate("young", { session: false, failWith
 
     if (mandatoryPhasesDone || !inscriptionStatus) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    const { error: validationError, value } = Joi.object({ withdrawnMessage: Joi.string().required(), withdrawnReason: Joi.string().required() })
-      .unknown()
-      .validate(req.body, { stripUnknown: true });
-    if (validationError) {
-      capture(validationError);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     const { withdrawnMessage, withdrawnReason } = value;
