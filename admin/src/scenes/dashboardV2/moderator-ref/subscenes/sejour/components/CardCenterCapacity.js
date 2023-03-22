@@ -1,6 +1,6 @@
 import React from "react";
 
-function CardCenterCapacity() {
+export default function CardCenterCapacity() {
   return (
     <div className="flex bg-white w-full rounded-lg px-6 py-4 shadow-[0_8px_16px_rgba(0,0,0,0.05)] h-[102px]">
       <div className="flex flex-col gap-2 w-[45%]">
@@ -17,5 +17,3 @@ function CardCenterCapacity() {
     </div>
   );
 }
-
-export default CardCenterCapacity;
