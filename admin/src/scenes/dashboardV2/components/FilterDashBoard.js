@@ -8,7 +8,7 @@ import Trash from "../../../assets/icons/Trash";
 export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArray }) => {
   return (
     <div className="bg-white w-full py-4 flex flex-row justify-between px-4 rounded-lg border-[1px] border-gray-200">
-      <div className="flex flex-row gap-2 items-center justify-center">
+      <div className="flex flex-row gap-2 items-center justify-center self-start h-[50px]">
         <FilterSvg className="text-gray-300 h-4 w-4" />
         <div className="font-bold text-gray-900 text-lg">Filtrer</div>
       </div>
