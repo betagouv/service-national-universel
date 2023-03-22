@@ -1,19 +1,32 @@
 const mongoose = require("mongoose");
-const { MONGO_URL } = require("./config.js");
+const { MONGO_URL, ENVIRONMENT } = require("./config.js");
 
 //Set up default mongoose connection
 
 if (MONGO_URL) {
-  mongoose.connect(MONGO_URL, {
-    useCreateIndex: true,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false, // * https://stackoverflow.com/a/52572958
-    poolSize: 50_000,
-    maxPoolSize: 50_000,
-    minPoolSize: 2_000,
-    waitQueueTimeoutMS: 30_000,
-  });
+  if (ENVIRONMENT == "production") {
+    mongoose.connect(MONGO_URL, {
+      useCreateIndex: true,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false, // * https://stackoverflow.com/a/52572958
+      poolSize: 50_000,
+      maxPoolSize: 50_000,
+      minPoolSize: 2_000,
+      waitQueueTimeoutMS: 30_000,
+    });
+  } else {
+    mongoose.connect(MONGO_URL, {
+      useCreateIndex: true,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false, // * https://stackoverflow.com/a/52572958
+      poolSize: 8_000,
+      maxPoolSize: 8_000,
+      minPoolSize: 2_000,
+      waitQueueTimeoutMS: 30_000,
+    });
+  }
 } else {
   console.log("ERROR CONNEXION. MONGO URL EMPTY");
 }

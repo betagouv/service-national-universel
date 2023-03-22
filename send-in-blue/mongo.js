@@ -11,7 +11,7 @@ if (MONGO_URL) {
     useFindAndModify: false, // * https://stackoverflow.com/a/52572958
     poolSize: 50_000,
     maxPoolSize: 50_000,
-    minPoolSize: 2_000,
+    minPoolSize: 500,
     waitQueueTimeoutMS: 30_000,
   });
 } else {
