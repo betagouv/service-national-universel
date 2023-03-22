@@ -3,7 +3,9 @@ import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import DashboardContainer from "../../../components/DashboardContainer";
 import HorizontalBar from "../../../components/graphs/HorizontalBar";
 
-import { FilterDashBoard } from "../../../components/FilterDashBoard";
+import { FilterComponent } from "../../../components/FilterDashBoard";
+
+import api from "../../../../../services/api";
 export default function Index() {
   const filterArray = [
     {
@@ -24,13 +26,11 @@ export default function Index() {
         { key: "Bretagne", label: "Bretagne" },
       ],
     },
-    {
-      name: "Date de début",
-      customComponent: (setFilter, filter) => <div>Custom component</div>,
-    },
   ];
 
-  const [selectedFilters, setSelectedFilters] = React.useState({});
+  const [selectedFilters, setSelectedFilters] = React.useState({
+    Région: ["Ile de france"],
+  });
   return (
     <DashboardContainer
       active="inscription"
@@ -46,7 +46,7 @@ export default function Index() {
         </div>
       }>
       <div>Inscription</div>
-      <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
+      <FilterComponent selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
       <div className="bg-white my-4 p-8 rounded-lg">
         <HorizontalBar
           title="Objectif des inscriptions"

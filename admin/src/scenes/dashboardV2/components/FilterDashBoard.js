@@ -5,7 +5,7 @@ import FilterSvg from "../../../assets/icons/Filter";
 import { Popover, Transition } from "@headlessui/react";
 import Trash from "../../../assets/icons/Trash";
 
-export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArray }) => {
+export const FilterComponent = ({ selectedFilters, setSelectedFilters, filterArray }) => {
   return (
     <div className="bg-white w-full py-4 flex flex-row justify-between px-4 rounded-lg border-[1px] border-gray-200">
       <div className="flex flex-row gap-1 items-center justify-center">
@@ -14,19 +14,19 @@ export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArr
       </div>
       <div className="flex flex-row gap-2 items-center justify-center">
         {filterArray.map((filter) => (
-          <FilterComponent filter={filter} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} />
+          <FilterDashBoard key={filter.name} filter={filter} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} />
         ))}
       </div>
     </div>
   );
 };
 
-const FilterComponent = ({ filter, selectedFilters, setSelectedFilters }) => {
-  const selectedFilterValues = selectedFilters[filter.name]?.filter ? selectedFilters[filter.name].filter : [];
+const FilterDashBoard = ({ filter, selectedFilters, setSelectedFilters }) => {
+  const selectedFilterValues = selectedFilters[filter.name]?.filter ? selectedFilters[filter.name] : [];
   const [visible, setVisible] = React.useState(false);
 
   return (
-    <div key={filter.label} className="relative">
+    <div className="relative">
       <div className={`p-0.5 border-[2px] ${visible ? "border-blue-600 rounded-xl" : "border-transparent"}`}>
         <div onClick={() => setVisible(true)} className="cursor-pointer flex flex-row border-[1px] border-gray-200 rounded-md w-fit p-2 items-center gap-1">
           <div className="text-gray-700 font-medium text-xs">{filter.name}</div>
@@ -131,18 +131,18 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
     let newFilters = [];
     // store localement les filtres
     if (selectedFilters[filter?.name]) {
-      if (selectedFilters[filter?.name]?.filter?.includes(value)) {
-        newFilters = selectedFilters[filter?.name]?.filter?.filter((f) => f !== value);
+      if (selectedFilters[filter?.name]?.includes(value)) {
+        newFilters = selectedFilters[filter?.name]?.filter((f) => f !== value);
       } else {
-        newFilters = selectedFilters[filter?.name]?.filter?.concat(value);
+        newFilters = selectedFilters[filter?.name]?.concat(value);
       }
     } else {
       newFilters = [value];
     }
-    setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: newFilters } });
+    setSelectedFilters({ ...selectedFilters, [filter?.name]: newFilters });
   };
   const handleDelete = () => {
-    setSelectedFilters((selectedFilters) => ({ ...selectedFilters, [filter?.name]: { filter: [] } }));
+    setSelectedFilters((selectedFilters) => ({ ...selectedFilters, [filter?.name]: [] }));
   };
   return (
     <Transition
@@ -154,11 +154,11 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
       leave="transition ease-in duration-150"
       leaveFrom="opacity-100 translate-y-0"
       leaveTo="opacity-0 translate-y-1">
-      <Popover.Panel className="absolute right-0 z-20 w-[305px] translate-y-[4px]">
+      <Popover.Panel className={`absolute right-0 z-20 w-[305px] translate-y-[4px]`}>
         <div ref={ref} className="rounded-lg shadow-lg ">
           <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100">
             {filter?.customComponent ? (
-              filter.customComponent(handleSelect, selectedFilters[filter?.name]?.filter)
+              filter.customComponent(handleSelect, selectedFilters[filter?.name])
             ) : (
               <>
                 <div className="flex items-center justify-between py-2 mb-1 px-3">
@@ -186,7 +186,7 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
                         ?.map((option) => (
                           <div className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer" key={option?.key} onClick={() => handleSelect(option?.key)}>
                             <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
-                              <input type="checkbox" checked={selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.key)} />
+                              <input type="checkbox" checked={selectedFilters[filter.name]?.length && selectedFilters[filter?.name]?.includes(option?.key)} />
                               {option.label}
                             </div>
                           </div>
