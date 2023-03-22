@@ -198,9 +198,9 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
                   ref={ref}
                   onClick={() => handleFilterShowing(!isShowing)}
                   className={classNames(
-                    open ? "ring-2 ring-blue-500 ring-offset-2" : "",
-                    "flex gap-2 items-center px-3 h-[38px] rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer outline-none",
-                    hasSomeFilterSelected ? "bg-[#2563EB] text-white" : "",
+                    open ? "ring-2 ring-blue-500 ring-offset-2 bg-gray-200" : "",
+                    "flex gap-2 items-center px-3 h-[38px] rounded-lg bg-gray-100  hover:bg-gray-200 text-[14px] font-medium text-gray-700 cursor-pointer outline-none",
+                    hasSomeFilterSelected ? "bg-[#2563EB] hover:bg-blue-700 text-white" : "",
                   )}>
                   <FilterSvg className={`${hasSomeFilterSelected ? "text-white" : "text-gray-400"} h-4 w-4`} />
                   <span>Filtres</span>
