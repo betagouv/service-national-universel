@@ -11,28 +11,24 @@ function classNames(...classes) {
 
 export default function FilterPopOver({ filter, data, selectedFilters, setSelectedFilters, isShowing, setIsShowing, setParamData }) {
   return (
-    <Popover className="">
-      {({ open }) => (
-        <>
-          <Popover.Button
-            onClick={() => setIsShowing(filter.name)}
-            className={classNames(
-              open ? "bg-gray-100 font-bold" : "",
-              "flex items-center justify-between transition rounded-lg duration-150 ease-in-out hover:bg-gray-50 cursor-pointer py-2 px-4 outline-none w-full",
-            )}>
-            <p className="text-gray-700 text-sm leading-5">{filter.title}</p>
-            <div className="flex items-center gap-2">
-              {selectedFilters[filter?.name]?.filter?.length > 0 && (
-                <div className="flex items-center justify-center text-blue-600 bg-indigo-100 rounded-full font-normal w-6 h-6 text-xs">
-                  {selectedFilters[filter?.name]?.filter?.length}
-                </div>
-              )}
-              <BsChevronRight className="text-gray-400" />
+    <Popover>
+      <Popover.Button
+        onClick={() => setIsShowing(filter.name)}
+        className={classNames(
+          isShowing ? "bg-gray-100 font-bold" : "",
+          "flex items-center justify-between transition rounded-lg duration-150 ease-in-out hover:bg-gray-50 cursor-pointer py-2 px-4 outline-none w-full",
+        )}>
+        <p className="text-gray-700 text-sm leading-5">{filter.title}</p>
+        <div className="flex items-center gap-2">
+          {selectedFilters[filter?.name]?.filter?.length > 0 && (
+            <div className="flex items-center justify-center text-blue-600 bg-indigo-100 rounded-full font-normal w-6 h-6 text-xs">
+              {selectedFilters[filter?.name]?.filter?.length}
             </div>
-          </Popover.Button>
-          <DropDown isShowing={isShowing} filter={filter} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} data={data} setParamData={setParamData} />
-        </>
-      )}
+          )}
+          <BsChevronRight className="text-gray-400" />
+        </div>
+      </Popover.Button>
+      <DropDown isShowing={isShowing} filter={filter} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} data={data} setParamData={setParamData} />
     </Popover>
   );
 }
@@ -116,7 +112,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
         <div ref={ref} className="rounded-lg shadow-lg ">
           <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100">
             <div className="flex items-center justify-between py-2 mb-1 px-3">
-              <p className="text-gray-500 text-xs leading-5 font-light">{filter?.parentGroup}</p>
+              <p className="text-gray-500 text-xs leading-5 font-light">{filter?.title}</p>
               {filter.allowEmpty === false ? <></> : <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={handleDelete} />}
             </div>
             {filter?.customComponent ? (
@@ -141,15 +137,23 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                         ?.sort((a, b) => {
                           a.key.toString().localeCompare(b.key.toString());
                         })
-                        ?.map((option) => (
-                          <div className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer" key={option?.key} onClick={() => handleSelect(option?.key)}>
-                            <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
-                              <input type="checkbox" checked={selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.key)} />
-                              {option.key === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.key) : option?.key}
+                        ?.map((option) => {
+                          const optionSelected = selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.key);
+                          return (
+                            <div
+                              className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer"
+                              key={option?.key}
+                              onClick={() => handleSelect(option?.key)}>
+                              <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
+                                <input type="checkbox" checked={optionSelected} />
+                                <div className={`${optionSelected && "font-bold"}`}>
+                                  {option.key === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.key) : option?.key}
+                                </div>
+                              </div>
+                              <div className="text-gray-500 text-xs leading-5">{option.doc_count}</div>
                             </div>
-                            <div className="text-gray-500 text-xs leading-5">{option.doc_count}</div>
-                          </div>
-                        ))}
+                          );
+                        })}
                     </>
                   )}
                 </div>
