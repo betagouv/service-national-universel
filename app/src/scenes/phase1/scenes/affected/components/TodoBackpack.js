@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import plausibleEvent from "../../../../../services/plausible.js";
+import MedicalFileModal from "../../../components/MedicalFileModal.js";
 import Arrow from "../assets/Arrow.js";
 import DontForget from "../assets/DontForget.js";
 import SnuBackPack from "../assets/SnuBackPack.js";
@@ -7,6 +8,7 @@ import { ModalConvocation } from "./ModalConvocation.js";
 
 export default function TodoBackpack({ lunchBreak }) {
   const [modalConvocationOpen, setModalConvocationOpen] = useState(false);
+  const [isMedicalFileModalOpen, setMedicalFileModalOpen] = useState(false);
 
   const persistedTodo = JSON.parse(localStorage.getItem("todo")) || {
     convocation: false,
@@ -31,6 +33,7 @@ export default function TodoBackpack({ lunchBreak }) {
 
   return (
     <div className="relative bg-white rounded-xl shadow-nina md:shadow-none p-[1rem] md:p-[0rem] m-[1rem] md:m-[0rem] md:w-full overflow-hidden">
+      <MedicalFileModal isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} />
       <div className="max-w-md">
         <h1 className="text-xl font-bold mb-6 md:pl-16">Dans mon sac...</h1>
         <div className="text-sm space-y-3 md:pl-16 md:border-l-[1px]">
@@ -54,7 +57,11 @@ export default function TodoBackpack({ lunchBreak }) {
           <div className="flex gap-4 items-baseline">
             <input type="checkbox" name="sanitaire" id="sanitaire" checked={todo.sanitaire} onChange={handleCheck} />
             <label htmlFor="sanitaire">
-              La <strong>fiche sanitaire</strong> complétée, sous enveloppe destinée au référent sanitaire
+              La{" "}
+              <button onClick={() => setMedicalFileModalOpen(true)} className="h-6 font-semibold underline-offset-4 underline decoration-2">
+                fiche sanitaire
+              </button>{" "}
+              complétée, sous enveloppe destinée au référent sanitaire
             </label>
           </div>
 
