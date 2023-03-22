@@ -85,8 +85,8 @@ export default function Index() {
         <Presences />
         <h1 className="text-[28px] leading-8 font-bold text-gray-900">Centres</h1>
         <div className="grid grid-cols-3 gap-4">
-          <CardCenterCapacity />
-          <Cardsession />
+          <CardCenterCapacity nbCenter={7} capacity={231} />
+          <Cardsession nbValidated={1} nbPending={3} />
           <OccupationCardHorizontal total={198} taken={184} />
           <BoxWithPercentage percentage={0.61} number={12} title="Emplois du temps" subLabel="restants à renseigner" />
         </div>
