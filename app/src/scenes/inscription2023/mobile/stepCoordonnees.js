@@ -31,13 +31,15 @@ import StickyButton from "../../../components/inscription/stickyButton";
 import Toggle from "../../../components/inscription/toggle";
 import CheckBox from "../../../components/inscription/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
-import { translate, regexPhoneFrenchCountries } from "../../../utils";
+import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import { supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { apiAdress } from "../../../services/api-adresse";
+import { isPhoneNumberWellFormated, PHONE_ZONES } from "../../../utils/phone-number.utils";
+import PhoneField from "../../../components/forms/PhoneField";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -89,6 +91,7 @@ const defaultState = {
   birthCity: "",
   gender: genderOptions[0].value,
   phone: "",
+  phoneZone: "FRANCE",
   livesInFrance: inFranceOrAbroadOptions[0].value,
   addressVerified: "false",
   address: "",
@@ -139,6 +142,7 @@ export default function StepCoordonnees() {
     birthCity,
     gender,
     phone,
+    phoneZone,
     livesInFrance,
     addressVerified,
     address,
@@ -224,15 +228,15 @@ export default function StepCoordonnees() {
 
   useEffect(() => {
     setErrors(getErrors());
-  }, [phone, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
+  }, [phone, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary, phoneZone]);
 
   const trimmedPhone = phone && phone.replace(/\s/g, "");
 
   const getErrors = () => {
     let errors = {};
 
-    if (phone && !validator.matches(trimmedPhone, regexPhoneFrenchCountries)) {
-      errors.phone = errorMessages.phone;
+    if (phone && !isPhoneNumberWellFormated(trimmedPhone, phoneZone)) {
+      errors.phone = PHONE_ZONES[phoneZone].errorMessage;
     }
 
     if (wasBornInFranceBool && birthCityZip && !validator.isPostalCode(birthCityZip, "FR")) {
@@ -559,7 +563,16 @@ export default function StepCoordonnees() {
         </div>
         <Input value={birthCityZip} label="Code postal de naissance" onChange={updateData("birthCityZip")} error={errors.birthCityZip} correction={corrections?.birthCityZip} />
         <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} error={errors?.gender} correction={corrections.gender} />
-        <Input type="tel" value={phone} label="Votre téléphone" onChange={updateData("phone")} error={errors.phone} correction={corrections?.phone} />
+        <PhoneField
+          label="Votre téléphone"
+          onChange={updateData("phone")}
+          onChangeZone={updateData("phoneZone")}
+          value={phone}
+          zoneValue={phoneZone}
+          placeholder={PHONE_ZONES[phoneZone].example}
+          error={errors.phone}
+          correction={corrections.phone}
+        />
         <RadioButton
           label="Je réside..."
           options={inFranceOrAbroadOptions}

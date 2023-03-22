@@ -26,7 +26,7 @@ import SearchableSelect from "../../../components/SearchableSelect";
 import Toggle from "../../../components/inscription/toggle";
 import CheckBox from "../../../components/inscription/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
-import { translate, regexPhoneFrenchCountries } from "../../../utils";
+import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import DesktopPageContainer from "../components/DesktopPageContainer";
 import plausibleEvent from "../../../services/plausible";
@@ -34,7 +34,6 @@ import { supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { apiAdress } from "../../../services/api-adresse";
-import Form from "../../../components/forms/Form";
 import PhoneField from "../../../components/forms/PhoneField";
 import useClickOutside from "../../../hooks/useClickOutside";
 import { isPhoneNumberWellFormated, PHONE_ZONES } from "../../../utils/phone-number.utils";
@@ -562,16 +561,16 @@ export default function StepCoordonnees() {
         />
       </div>
       <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} correction={corrections.gender} error={errors?.gender} />
-      {/* <Input type="tel" value={phone} label="Votre téléphone" onChange={updateData("phone")} error={errors.phone} correction={corrections.phone} /> */}
-      <Form.Item label="Votre téléphone" error={errors.phone} correction={corrections.phone}>
-        <PhoneField
-          onChange={updateData("phone")}
-          onChangeZone={updateData("phoneZone")}
-          value={phone}
-          zoneValue={phoneZone}
-          className={errors?.phone || corrections.phone ? "border-[#CE0500]" : "border-[#3A3A3A]"}
-        />
-      </Form.Item>
+      <PhoneField
+        label="Votre téléphone"
+        onChange={updateData("phone")}
+        onChangeZone={updateData("phoneZone")}
+        value={phone}
+        zoneValue={phoneZone}
+        placeholder={PHONE_ZONES[phoneZone].example}
+        error={errors.phone}
+        correction={corrections.phone}
+      />
       <RadioButton
         label="Je réside..."
         options={inFranceOrAbroadOptions}
