@@ -1788,7 +1788,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                       toastr.error(translate(error.code), "");
                     }
                   }}>
-                  Relancer
+                  Relancer wesh
                 </BorderButton>
               )}
             </div>
