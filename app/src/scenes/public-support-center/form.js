@@ -13,8 +13,6 @@ import { SelectTag, step1Public, step2TransportPublic, step2TechnicalPublic, ste
 import { capture } from "../../sentry";
 import FileUpload, { useFileUpload } from "../../components/FileUpload";
 
-const tags = [`EMETTEUR_Exterieur`, `CANAL_Formulaire`, `AGENT_Startup_Support`];
-
 export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) {
   const [loading, setLoading] = useState(false);
   const { files, addFiles, deleteFile, error } = useFileUpload();

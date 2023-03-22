@@ -10,8 +10,6 @@ import Loader from "../../components/Loader";
 import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 
-import { Modal } from "reactstrap";
-import CloseSvg from "../../assets/Close";
 import ZammoodForm from "./form";
 
 const articles = [
@@ -203,8 +201,8 @@ export default function Index(props) {
           <KnowledgeBaseSearch path="/base-de-connaissance" className="rounded-md border border-gray-300 transition-colors focus:border-gray-400" restriction="public" />
         </div>
         <div className="w-2/3 m-auto text-center !mt-3 " style={{ color: "#6B7280" }}>
-          <strong>Une question ? </strong> Utilisez notre moteur de recherche ci-dessus pour trouver l'article ou le tutoriel pour vous aider. Pour faciliter vos recherches
-          utilisez <strong>des mots clés</strong> (ex : inscriptions, contrat d'engagement …)
+          <strong>Une question ? </strong> Utilisez notre moteur de recherche ci-dessus pour trouver l&apos;article ou le tutoriel pour vous aider. Pour faciliter vos recherches
+          utilisez <strong>des mots clés</strong> (ex : inscriptions, contrat d&apos;engagement …)
         </div>
       </Container>
       <h4 style={{ margin: "1rem 0", textAlign: "center" }}>Quelques articles pour vous aider</h4>

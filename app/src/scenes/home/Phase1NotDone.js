@@ -11,7 +11,6 @@ import Loader from "../../components/Loader";
 import ChevronRight from "../../assets/icons/ChevronRight";
 import Engagement from "./components/Engagement";
 import dayjs from "dayjs";
-import { environment } from "../../config";
 
 export default function Phase1NotDone() {
   const [loading, setLoading] = useState(false);

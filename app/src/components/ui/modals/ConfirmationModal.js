@@ -1,5 +1,4 @@
 import React from "react";
-import { CancelButton } from "../../buttons/SimpleButtons";
 import ButtonPrimary from "../buttons/ButtonPrimary";
 import ButtonLight from "../buttons/ButtonLight";
 

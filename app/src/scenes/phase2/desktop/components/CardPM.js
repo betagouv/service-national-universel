@@ -1,5 +1,5 @@
 import React from "react";
-import { translateStatusMilitaryPreparationFiles } from "../../../../utils";
+import { translateStatusMilitaryPreparationFiles, translate } from "../../../../utils";
 import { BsChevronDown } from "react-icons/bs";
 import DocumentsPM from "../../../militaryPreparation/components/DocumentsPM";
 import Prepa from "../../../../assets/icons/Prepa";

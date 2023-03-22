@@ -1,8 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import Clock from "../../assets/icons/Clock";
-import PrepareSejour from "../../assets/icons/PrepareSejour";
 
 import plausibleEvent from "../../services/plausible";
 

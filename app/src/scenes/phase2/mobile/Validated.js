@@ -1,12 +1,11 @@
 import React from "react";
-import { MdOutlineContentCopy } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import ArrowUpRight from "../../../assets/icons/ArrowUpRight";
 import Trophy from "../../../assets/icons/Trophy";
 import Loader from "../../../components/Loader";
 import api from "../../../services/api";
-import { copyToClipboard, translate } from "../../../utils";
+import { translate } from "../../../utils";
 import downloadPDF from "../../../utils/download-pdf";
 import CardEquivalence from "./components/CardEquivalence";
 import CardMission from "./components/CardMission";
@@ -20,7 +19,6 @@ export default function ValidatedMobile() {
   const young = useSelector((state) => state.Auth.young);
   const [equivalences, setEquivalences] = React.useState();
   const [applications, setApplications] = React.useState();
-  const [referentManagerPhase2, setReferentManagerPhase2] = React.useState();
   const [loading, setLoading] = React.useState({
     attestationPhase2: false,
     attestationSNU: false,
@@ -41,10 +39,6 @@ export default function ValidatedMobile() {
     (async () => {
       const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalences`);
       if (ok) return setEquivalences(data.filter((eq) => eq.status === "VALIDATED"));
-    })();
-    (async () => {
-      const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
-      if (ok) return setReferentManagerPhase2(data);
     })();
   }, []);
 
@@ -225,12 +219,12 @@ export default function ValidatedMobile() {
               </div>
               <div className="w-full flex-row">
                 <div className="flex flex-1 items-start justify-around">
-                  <div className="font-bold flex-1 text-gray-800">N'oubliez pas !</div>
+                  <div className="font-bold flex-1 text-gray-800">N&apos;oubliez pas !</div>
                   <ArrowUpRight className="text-gray-400 text-2xl group-hover:scale-105" />
                 </div>
                 <div className="text-sm text-gray-600">
-                  Vous bénéficiez d'une première présentation <strong>gratuite</strong> à l'examen du code de la route{" "}
-                  <i>(sous condition d'avoir également validé votre phase 1)</i>.
+                  Vous bénéficiez d&apos;une première présentation <strong>gratuite</strong> à l&apos;examen du code de la route{" "}
+                  <i>(sous condition d&apos;avoir également validé votre phase 1)</i>.
                 </div>
               </div>
             </a>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as FileSaver from "file-saver";
 import { Modal } from "reactstrap";
 import DndFileInput from "../../../components/dndFileInput";
@@ -6,9 +6,6 @@ import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { Formik } from "formik";
 import { translateAddFilePhase2, translate } from "../../../utils";
-import ChevronDown from "../../../assets/icons/ChevronDown";
-import { BsCheck2 } from "react-icons/bs";
-import { useEffect } from "react";
 
 function getFileName(file) {
   return (file && file.name) || file;
