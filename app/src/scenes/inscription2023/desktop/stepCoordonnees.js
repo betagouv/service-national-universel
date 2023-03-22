@@ -34,6 +34,10 @@ import { supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { apiAdress } from "../../../services/api-adresse";
+import Form from "../../../components/forms/Form";
+import PhoneField from "../../../components/forms/PhoneField";
+import useClickOutside from "../../../hooks/useClickOutside";
+import { isPhoneNumberWellFormated, PHONE_ZONES } from "../../../utils/phone-number.utils";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -84,6 +88,7 @@ const defaultState = {
   birthCityZip: "",
   birthCity: "",
   gender: genderOptions[0].value,
+  phoneZone: "FRANCE",
   phone: "",
   livesInFrance: inFranceOrAbroadOptions[0].value,
   addressVerified: "false",
@@ -125,7 +130,7 @@ export default function StepCoordonnees() {
   const dispatch = useDispatch();
   const history = useHistory();
   const { step } = useParams();
-  const ref = useRef(null);
+  const birthCitySuggestionsRef = useRef(null);
 
   const [hasSpecialSituation, setSpecialSituation] = useState(false);
 
@@ -135,6 +140,7 @@ export default function StepCoordonnees() {
     birthCity,
     gender,
     phone,
+    phoneZone,
     livesInFrance,
     addressVerified,
     address,
@@ -220,27 +226,17 @@ export default function StepCoordonnees() {
 
   useEffect(() => {
     setErrors(getErrors());
-  }, [phone, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
+  }, [phone, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary, phoneZone]);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (ref.current && !ref.current.contains(event.target)) {
-        setBirthCityZipSuggestions([]);
-      }
-    };
-    document.addEventListener("click", handleClickOutside);
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, []);
+  useClickOutside(birthCitySuggestionsRef, () => setBirthCityZipSuggestions([]));
 
   const trimmedPhone = phone.replace(/\s/g, "");
 
   const getErrors = () => {
     let errors = {};
 
-    if (phone && !validator.matches(trimmedPhone, regexPhoneFrenchCountries)) {
-      errors.phone = errorMessages.phone;
+    if (phone && !isPhoneNumberWellFormated(trimmedPhone, phoneZone)) {
+      errors.phone = PHONE_ZONES[phoneZone].errorMessage;
     }
 
     if (wasBornInFranceBool && birthCityZip && !validator.isPostalCode(birthCityZip, "FR")) {
@@ -543,7 +539,7 @@ export default function StepCoordonnees() {
             correction={corrections.birthCity}
           />
           {wasBornInFranceBool && (
-            <div ref={ref} className="w-full absolute z-50 bg-white border-3 border-red-600 shadow overflow-hidden mt-[-24px]">
+            <div ref={birthCitySuggestionsRef} className="w-full absolute z-50 bg-white border-3 border-red-600 shadow overflow-hidden mt-[-24px]">
               {birthCityZipSuggestions.map(({ city, postcode }, index) => (
                 <div
                   onClick={() => {
@@ -566,7 +562,16 @@ export default function StepCoordonnees() {
         />
       </div>
       <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} correction={corrections.gender} error={errors?.gender} />
-      <Input type="tel" value={phone} label="Votre téléphone" onChange={updateData("phone")} error={errors.phone} correction={corrections.phone} />
+      {/* <Input type="tel" value={phone} label="Votre téléphone" onChange={updateData("phone")} error={errors.phone} correction={corrections.phone} /> */}
+      <Form.Item label="Votre téléphone" error={errors.phone} correction={corrections.phone}>
+        <PhoneField
+          onChange={updateData("phone")}
+          onChangeZone={updateData("phoneZone")}
+          value={phone}
+          zoneValue={phoneZone}
+          className={errors?.phone || corrections.phone ? "border-[#CE0500]" : "border-[#3A3A3A]"}
+        />
+      </Form.Item>
       <RadioButton
         label="Je réside..."
         options={inFranceOrAbroadOptions}
@@ -623,7 +628,7 @@ export default function StepCoordonnees() {
             </div>
           </div>
           <p className="text-[14px] text-[#666666] leading-tight text-justify">
-            À noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
+            À noter : l&apos;hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
           </p>
           <div className="flex">
             <Input
@@ -646,7 +651,7 @@ export default function StepCoordonnees() {
           <Select
             options={hostRelationshipOptions}
             value={hostRelationship}
-            label="Précisez votre lien avec l’hébergeur"
+            label="Précisez votre lien avec l'hébergeur"
             onChange={updateData("hostRelationship")}
             error={errors.hostRelationship}
             correction={corrections.hostRelationship}
@@ -683,7 +688,7 @@ export default function StepCoordonnees() {
       <div className="flex justify-between items-center mb-4">
         <div>
           <h2 className="mt-0 text-[16px] font-bold">
-            Souhaitez-vous nous faire part d’une situation particulière ? (allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)
+            Souhaitez-vous nous faire part d&apos;une situation particulière ? (allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)
           </h2>
           <div className=" text-[#666666] text-[14px] leading-tight mt-1">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
         </div>
