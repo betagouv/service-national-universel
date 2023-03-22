@@ -1642,9 +1642,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
             <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> puis la réalisation d&apos;une mission d&apos;intérêt général.
           </CheckRead>
           <CheckRead value={young.consentment === "true"}>S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</CheckRead>
-          <CheckRead value={(young.inscriptionDoneDate !== undefined && young.inscriptionDoneDate !== null) || young.informationAccuracy === "true"}>
-            Certifie l&apos;exactitude des renseignements fournis
-          </CheckRead>
+          <CheckRead value={young.inscriptionDoneDate !== undefined && young.inscriptionDoneDate !== null}>Certifie l&apos;exactitude des renseignements fournis</CheckRead>
         </div>
       </div>
       <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
@@ -1763,7 +1761,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
             <MiniSwitch value={young.parent1AllowSNU === "true"} />
           </div>
         ) : (
-          !readonly && (
+          !readonly &&
+          young.inscriptionDoneDate && (
             <div className="mt-2 flex items-center justify-between">
               <div
                 className="cursor-pointer italic text-[#1D4ED8]"
