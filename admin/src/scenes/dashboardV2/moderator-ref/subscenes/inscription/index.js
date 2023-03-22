@@ -46,7 +46,6 @@ export default function Index() {
   async function fetchCurrentInscriptions() {
     const res = await getCurrentInscriptions(selectedFilters);
     setInscriptionDetailObject(res);
-    console.log(res);
   }
 
   useEffect(() => {
