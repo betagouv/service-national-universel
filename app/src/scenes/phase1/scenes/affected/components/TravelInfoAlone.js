@@ -24,9 +24,11 @@ export default function TravelInfoAlone({ center, cohortDetails }) {
             <span className="capitalize">{dayjs(cohortDetails.dateStart).locale("fr").format("dddd")}</span>{" "}
             <span>{dayjs(cohortDetails.dateStart).locale("fr").format("D MMMM")}</span> à {ALONE_ARRIVAL_HOUR}
             <br />
-            {center.name},
-            <br />
-            {center.address}
+            <div className="p-2 bg-gray-100 rounded-lg">
+              {center.name},
+              <br />
+              {center.address}
+            </div>
           </p>
         </div>
 
@@ -41,9 +43,11 @@ export default function TravelInfoAlone({ center, cohortDetails }) {
             <span className="capitalize">{dayjs(cohortDetails.dateEnd).locale("fr").format("dddd")}</span> <span>{dayjs(cohortDetails.dateEnd).locale("fr").format("D MMMM")}</span>{" "}
             à {ALONE_DEPARTURE_HOUR}
             <br />
-            {center.name},
-            <br />
-            {center.address}
+            <div className="p-2 bg-gray-100 rounded-lg">
+              {center.name},
+              <br />
+              {center.address}
+            </div>
           </p>
         </div>
       </div>

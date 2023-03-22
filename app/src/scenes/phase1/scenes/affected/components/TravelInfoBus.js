@@ -22,9 +22,11 @@ export default function TravelInfoBus({ meetingPoint, cohortDetails }) {
             <span className="capitalize">{dayjs(cohortDetails.dateStart).locale("fr").format("dddd")}</span>{" "}
             <span>{dayjs(cohortDetails.dateStart).locale("fr").format("D MMMM")}</span> à {meetingPoint?.ligneToPoint?.meetingHour}
             <br />
-            {meetingPoint.name},
-            <br />
-            {meetingPoint.address}
+            <div className="p-2 bg-gray-100 rounded-lg">
+              {meetingPoint.name},
+              <br />
+              {meetingPoint.address}
+            </div>
           </p>
         </div>
 
@@ -39,9 +41,11 @@ export default function TravelInfoBus({ meetingPoint, cohortDetails }) {
             <span className="capitalize">{dayjs(cohortDetails.dateEnd).locale("fr").format("dddd")}</span> <span>{dayjs(cohortDetails.dateEnd).locale("fr").format("D MMMM")}</span>{" "}
             à {meetingPoint?.ligneToPoint?.returnHour}
             <br />
-            {meetingPoint.name},
-            <br />
-            {meetingPoint.address}
+            <div className="p-2 bg-gray-100 rounded-lg">
+              {meetingPoint.name},
+              <br />
+              {meetingPoint.address}
+            </div>
           </p>
         </div>
       </div>
