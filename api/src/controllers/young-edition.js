@@ -395,7 +395,7 @@ router.get("/:id/remider/:idParent", passport.authenticate("referent", { session
     }
 
     const young = await YoungModel.findById(id);
-    if (!young || !young.inscriptionDoneDate) {
+    if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
     if (!young.inscriptionDoneDate) {
