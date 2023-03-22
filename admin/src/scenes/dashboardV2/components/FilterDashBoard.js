@@ -14,7 +14,7 @@ export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArr
       </div>
       <div className="flex flex-row gap-2 items-center justify-end flex-wrap w-7/10">
         {filterArray.map((filter) => (
-          <FilterComponent key={filter.name} filter={filter} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} />
+          <FilterComponent key={filter.id} filter={filter} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} />
         ))}
       </div>
     </div>
@@ -22,7 +22,7 @@ export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArr
 };
 
 const FilterComponent = ({ filter, selectedFilters, setSelectedFilters }) => {
-  const selectedFilterValues = selectedFilters[filter.name]?.length ? selectedFilters[filter.name] : [];
+  const selectedFilterValues = selectedFilters[filter.id]?.length ? selectedFilters[filter.id] : [];
   const [visible, setVisible] = React.useState(false);
 
   return (
@@ -40,7 +40,7 @@ const FilterComponent = ({ filter, selectedFilters, setSelectedFilters }) => {
                   return (
                     <div key={item}>
                       <ToolTipView selectedFilterValues={selectedFilterValues} filter={filter} />
-                      <div data-tip="" data-for={"tooltip-filtre" + filter.name} className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">
+                      <div data-tip="" data-for={"tooltip-filtre" + filter.id} className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">
                         +{index - 2}
                       </div>
                     </div>
@@ -69,7 +69,7 @@ const FilterComponent = ({ filter, selectedFilters, setSelectedFilters }) => {
 
 const ToolTipView = ({ selectedFilterValues, filter }) => {
   return (
-    <ReactTooltip id={"tooltip-filtre" + filter.name} className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
+    <ReactTooltip id={"tooltip-filtre" + filter.id} className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
       <div className="flex flex-row gap-2 flex-wrap max-w-[600px] rounded">
         {selectedFilterValues.map((item) => {
           const label = filter.options.find((option) => option.key === item).label;
@@ -127,22 +127,22 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
 
   const handleSelect = (value) => {
     // check si c'est un isSingle (un seul filtre possible)
-    if (filter?.isSingle) return setSelectedFilters({ ...selectedFilters, [filter?.name]: [value] });
+    if (filter?.isSingle) return setSelectedFilters({ ...selectedFilters, [filter?.id]: [value] });
     let newFilters = [];
     // store localement les filtres
-    if (selectedFilters[filter?.name]) {
-      if (selectedFilters[filter?.name]?.includes(value)) {
-        newFilters = selectedFilters[filter?.name]?.filter((f) => f !== value);
+    if (selectedFilters[filter?.id]) {
+      if (selectedFilters[filter?.id]?.includes(value)) {
+        newFilters = selectedFilters[filter?.id]?.filter((f) => f !== value);
       } else {
-        newFilters = selectedFilters[filter?.name]?.concat(value);
+        newFilters = selectedFilters[filter?.id]?.concat(value);
       }
     } else {
       newFilters = [value];
     }
-    setSelectedFilters({ ...selectedFilters, [filter?.name]: newFilters });
+    setSelectedFilters({ ...selectedFilters, [filter?.id]: newFilters });
   };
   const handleDelete = () => {
-    setSelectedFilters((selectedFilters) => ({ ...selectedFilters, [filter?.name]: [] }));
+    setSelectedFilters((selectedFilters) => ({ ...selectedFilters, [filter?.id]: [] }));
   };
   return (
     <Transition
@@ -158,7 +158,7 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
         <div ref={ref} className="rounded-lg shadow-lg ">
           <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100">
             {filter?.customComponent ? (
-              filter.customComponent(handleSelect, selectedFilters[filter?.name])
+              filter.customComponent(handleSelect, selectedFilters[filter?.id])
             ) : (
               <>
                 <div className="flex items-center justify-between py-2 mb-1 px-3">
@@ -186,7 +186,7 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
                         ?.map((option) => (
                           <div className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer" key={option?.key} onClick={() => handleSelect(option?.key)}>
                             <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
-                              <input type="checkbox" checked={selectedFilters[filter.name]?.length && selectedFilters[filter?.name]?.includes(option?.key)} />
+                              <input type="checkbox" checked={selectedFilters[filter.id]?.length && selectedFilters[filter?.id]?.includes(option?.key)} />
                               {option.label}
                             </div>
                           </div>
