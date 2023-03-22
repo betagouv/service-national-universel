@@ -1763,7 +1763,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
             <MiniSwitch value={young.parent1AllowSNU === "true"} />
           </div>
         ) : (
-          !readonly && (
+          !readonly &&
+          young.inscriptionDoneDate && (
             <div className="mt-2 flex items-center justify-between">
               <div
                 className="cursor-pointer italic text-[#1D4ED8]"
