@@ -3,7 +3,7 @@ import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import DashboardContainer from "../../../components/DashboardContainer";
 import HorizontalBar from "../../../components/graphs/HorizontalBar";
 
-import { FilterComponent } from "../../../components/FilterDashBoard";
+import { FilterDashBoard } from "../../../components/FilterDashBoard";
 
 import api from "../../../../../services/api";
 export default function Index() {
@@ -46,7 +46,7 @@ export default function Index() {
         </div>
       }>
       <div>Inscription</div>
-      <FilterComponent selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
+      <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
       <div className="bg-white my-4 p-8 rounded-lg">
         <HorizontalBar
           title="Objectif des inscriptions"

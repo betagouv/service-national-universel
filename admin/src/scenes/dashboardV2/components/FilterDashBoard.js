@@ -5,7 +5,7 @@ import FilterSvg from "../../../assets/icons/Filter";
 import { Popover, Transition } from "@headlessui/react";
 import Trash from "../../../assets/icons/Trash";
 
-export const FilterComponent = ({ selectedFilters, setSelectedFilters, filterArray }) => {
+export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArray }) => {
   return (
     <div className="bg-white w-full py-4 flex flex-row justify-between px-4 rounded-lg border-[1px] border-gray-200">
       <div className="flex flex-row gap-1 items-center justify-center">
@@ -14,14 +14,14 @@ export const FilterComponent = ({ selectedFilters, setSelectedFilters, filterArr
       </div>
       <div className="flex flex-row gap-2 items-center justify-center">
         {filterArray.map((filter) => (
-          <FilterDashBoard key={filter.name} filter={filter} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} />
+          <FilterComponent key={filter.name} filter={filter} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} />
         ))}
       </div>
     </div>
   );
 };
 
-const FilterDashBoard = ({ filter, selectedFilters, setSelectedFilters }) => {
+const FilterComponent = ({ filter, selectedFilters, setSelectedFilters }) => {
   const selectedFilterValues = selectedFilters[filter.name]?.filter ? selectedFilters[filter.name] : [];
   const [visible, setVisible] = React.useState(false);
 
