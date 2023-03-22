@@ -4,8 +4,6 @@ import DashboardContainer from "../../../components/DashboardContainer";
 import HorizontalBar from "../../../components/graphs/HorizontalBar";
 
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
-
-import api from "../../../../../services/api";
 export default function Index() {
   const filterArray = [
     {
