@@ -4,7 +4,7 @@ import ExportFieldCard from "../../../ExportFieldCard";
 import ModalTailwind from "../../../modals/ModalTailwind";
 import plausibleEvent from "../../../../services/plausible";
 import { capitalizeFirstLetter } from "../../../../utils";
-import ExportComponent from "./ExportXlsxV2";
+import ExportComponent from "./ExportComponentV2";
 
 export default function ModalExportV2({
   isOpen,

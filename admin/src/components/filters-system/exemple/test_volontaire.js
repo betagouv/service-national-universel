@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unused-modules */
 import React, { useState } from "react";
 import { translateGrade, youngExportFields } from "snu-lib";
 

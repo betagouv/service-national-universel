@@ -77,7 +77,6 @@ export default function SchoolEditor({ young, onChange, className, showBackgroun
       }
     } else if (field === "schoolId") {
       const school = schools ? schools.find((s) => s.id === value) : null;
-      console.log("school = ", school);
       if (onChange) {
         if (school) {
           changes.schoolName = school.fullName;
@@ -88,6 +87,7 @@ export default function SchoolEditor({ young, onChange, className, showBackgroun
           changes.schoolRegion = school.region;
           changes.schoolCity = school.city;
           changes.schoolCountry = school.country;
+          changes.schoolId = school.id;
         }
       }
     }

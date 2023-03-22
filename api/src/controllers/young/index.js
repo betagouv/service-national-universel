@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unused-modules
 const express = require("express");
 const passport = require("passport");
 const fetch = require("node-fetch");
@@ -44,9 +45,18 @@ const { cookieOptions } = require("../../cookie-options");
 const { validateYoung, validateId, validatePhase1Document } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
-const { canDeleteYoung, canGetYoungByEmail, canInviteYoung, canEditYoung, canSendTemplateToYoung, canViewYoungApplications, canEditPresenceYoung } = require("snu-lib/roles");
+const {
+  canDeleteYoung,
+  canGetYoungByEmail,
+  canInviteYoung,
+  canEditYoung,
+  canSendTemplateToYoung,
+  canViewYoungApplications,
+  canEditPresenceYoung,
+  canDeletePatchesHistory,
+} = require("snu-lib/roles");
 const { translateCohort } = require("snu-lib/translation");
-const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib/constants");
+const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES, YOUNG_STATUS_PHASE2 } = require("snu-lib/constants");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
 const { getFilteredSessions } = require("../../utils/cohort");
 
@@ -781,7 +791,7 @@ router.post("/france-connect/user-info", async (req, res) => {
 
 // Delete one user (only admin can delete user)
 // And apparently referent in same geography as well (see canDeleteYoung())
-router.put("/:id/soft-delete", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/soft-delete", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) {
@@ -852,14 +862,87 @@ router.put("/:id/soft-delete", passport.authenticate("referent", { session: fals
     young.set({ status: YOUNG_STATUS.DELETED });
 
     await young.save({ fromUser: req.user });
-    const result = await patches.deletePatches({ req: req, model: YoungObject });
-
-    if (!result.ok) {
-      return res.status(result.codeError).send({ ok: result.ok, code: result.code });
-    }
+    if (!canDeletePatchesHistory(req.user, young)) return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    await patches.deletePatches({ id, model: YoungObject });
 
     console.log(`Young ${id} has been soft deleted`);
     res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/withdraw", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: validationError, value } = Joi.object({ withdrawnMessage: Joi.string().required(), withdrawnReason: Joi.string().required() })
+      .unknown()
+      .validate(req.body, { stripUnknown: true });
+    if (validationError) {
+      capture(validationError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
+    const inscriptionStatus = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
+
+    if (mandatoryPhasesDone || inscriptionStatus) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const { withdrawnMessage, withdrawnReason } = value;
+
+    young.set({
+      status: YOUNG_STATUS.WITHDRAWN,
+      lastStatusAt: Date.now(),
+      withdrawnMessage,
+      withdrawnReason,
+    });
+
+    const updatedYoung = await young.save({ fromUser: req.user });
+
+    res.status(200).send({ ok: true, data: updatedYoung });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/abandon", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: validationError, value } = Joi.object({ withdrawnMessage: Joi.string().required(), withdrawnReason: Joi.string().required() })
+      .unknown()
+      .validate(req.body, { stripUnknown: true });
+    if (validationError) {
+      capture(validationError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
+    const inscriptionStatus = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
+
+    if (mandatoryPhasesDone || !inscriptionStatus) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const { withdrawnMessage, withdrawnReason } = value;
+
+    young.set({
+      status: YOUNG_STATUS.ABANDONED,
+      lastStatusAt: Date.now(),
+      withdrawnMessage,
+      withdrawnReason,
+    });
+
+    const updatedYoung = await young.save({ fromUser: req.user });
+
+    res.status(200).send({ ok: true, data: updatedYoung });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

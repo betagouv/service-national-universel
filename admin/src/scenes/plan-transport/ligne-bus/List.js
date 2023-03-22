@@ -569,7 +569,7 @@ const ReactiveList = ({ cohort, history }) => {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  placeholder="Status de la modification"
+                  placeholder="Statut de la modification"
                   componentId="MODIFICATION_STATUS"
                   dataField="modificationBuses.status.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "MODIFICATION_STATUS") }}
@@ -580,13 +580,13 @@ const ReactiveList = ({ cohort, history }) => {
                   searchPlaceholder="Rechercher..."
                   size={1000}
                   renderLabel={(items) => {
-                    if (Object.keys(items).length === 0) return "Status de la modification";
+                    if (Object.keys(items).length === 0) return "Statut de la modification";
                     const translated = Object.keys(items).map((item) => {
                       if (item === "Non renseigné") return item;
                       return translateStatus(item);
                     });
                     let value = translated.join(", ");
-                    value = "Status de la modification : " + value;
+                    value = "Statut de la modification : " + value;
                     return <div>{value}</div>;
                   }}
                   renderItem={(e, count) => {

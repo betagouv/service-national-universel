@@ -6,7 +6,7 @@ export { default as SelectedFilters } from "./components/SelectedFilters";
 export { default as SortOption } from "./components/SortOption";
 
 // export
-export { default as ExportXlsxV2 } from "./components/export/ExportXlsxV2.js";
+export { default as ExportComponentV2 } from "./components/export/ExportComponentV2.js";
 export { default as ModalExportV2 } from "./components/export/ModalExportV2.js";
 
 export const getDefaultQuery = () => {

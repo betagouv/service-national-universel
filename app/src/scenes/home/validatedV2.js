@@ -1,9 +1,10 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { YOUNG_STATUS_PHASE1 } from "snu-lib";
 import Clock from "../../assets/icons/Clock";
-import PrepareSejour from "../../assets/icons/PrepareSejour";
+import DiscoverStayWithArrow from "../../assets/icons/DiscoverStayWithArrow";
+import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
 
 import plausibleEvent from "../../services/plausible";
 
@@ -32,18 +33,16 @@ export default function ValidatedV2() {
                     : "Vous êtes actuellement en attente d’affectation à un lieu pour votre séjour de cohésion."}
                 </div>
               </div>
-              <div className="flex flex-col items-stretch w-fit">
-                <button
-                  className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
+              <div className="flex items-start mt-5">
+                <ButtonPrimary
+                  className="mr-2 shrink-0"
                   onClick={() => {
                     plausibleEvent("Phase1/CTA - Fill documents");
                     history.push("/phase1");
                   }}>
-                  Télécharger ma fiche sanitaire
-                </button>
-                <div className="ml-28 mt-2">
-                  <PrepareSejour />
-                </div>
+                  Préparer mon séjour
+                </ButtonPrimary>
+                <DiscoverStayWithArrow />
               </div>
             </div>
             <img className="w-1/2 object-fill" src={require("../../assets/homePhase2Desktop.png")} />
@@ -68,17 +67,14 @@ export default function ValidatedV2() {
                   : "Vous êtes actuellement en attente d’affectation à un lieu pour votre séjour de cohésion."}
               </div>
             </div>
-            <button
-              className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-3 text-white hover:!text-blue-600 text-sm leading-5 transition ease-in-out duration-150"
+            <ButtonPrimary
+              className="w-full mt-3"
               onClick={() => {
                 plausibleEvent("Phase1/CTA - Fill documents");
                 history.push("/phase1");
               }}>
-              Télécharger ma fiche sanitaire
-            </button>
-            <div className="ml-28 mt-2">
-              <PrepareSejour />
-            </div>
+              Préparer mon séjour
+            </ButtonPrimary>
           </div>
           <img src={require("../../assets/homePhase2Mobile.png")} />
         </div>

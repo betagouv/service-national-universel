@@ -18,7 +18,7 @@ export default function TravelInfoBus({ meetingPoint, cohortDetails }) {
               <LongArrow className="text-gray-500" />
             </span>
           </p>
-          <p className="leading-relaxed text-sm">
+          <p className="leading-relaxed text-sm max-w-md text-ellipsis overflow-hidden whitespace-nowrap">
             <span className="capitalize">{dayjs(cohortDetails.dateStart).locale("fr").format("dddd")}</span>{" "}
             <span>{dayjs(cohortDetails.dateStart).locale("fr").format("D MMMM")}</span> à {meetingPoint?.ligneToPoint?.meetingHour}
             <br />
@@ -35,7 +35,7 @@ export default function TravelInfoBus({ meetingPoint, cohortDetails }) {
               <LongArrow className="text-gray-500 rotate-180" />
             </span>
           </p>
-          <p className="leading-relaxed text-sm">
+          <p className="leading-relaxed text-sm max-w-md text-ellipsis overflow-hidden whitespace-nowrap">
             <span className="capitalize">{dayjs(cohortDetails.dateEnd).locale("fr").format("dddd")}</span> <span>{dayjs(cohortDetails.dateEnd).locale("fr").format("D MMMM")}</span>{" "}
             à {meetingPoint?.ligneToPoint?.returnHour}
             <br />

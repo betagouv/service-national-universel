@@ -4,7 +4,16 @@ const { MONGO_URL } = require("./config.js");
 //Set up default mongoose connection
 
 if (MONGO_URL) {
-  mongoose.connect(MONGO_URL, { useCreateIndex: true, useNewUrlParser: true, useUnifiedTopology: true, poolSize: 100 });
+  mongoose.connect(MONGO_URL, {
+    useCreateIndex: true,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false, // * https://stackoverflow.com/a/52572958
+    poolSize: 50_000,
+    maxPoolSize: 50_000,
+    minPoolSize: 2_000,
+    waitQueueTimeoutMS: 30_000,
+  });
 } else {
   console.log("ERROR CONNEXION. MONGO URL EMPTY");
 }

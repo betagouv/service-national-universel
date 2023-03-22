@@ -118,10 +118,10 @@ describe("Young", () => {
       expect(res.statusCode).toEqual(404);
     });
 
-    it("should be only accessible by referents", async () => {
+    it("should be accessible by referents or young", async () => {
       const passport = require("passport");
       await request(getAppHelper()).delete("/young/" + notExistingYoungId);
-      expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
+      expect(passport.lastTypeCalledOnAuthenticate).toEqual(["referent", "young"]);
     });
   });
 

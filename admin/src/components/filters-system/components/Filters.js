@@ -54,7 +54,21 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
 
   React.useEffect(
     function updateSearchSelectedFilter() {
-      const newFilters = search !== "" ? filters.filter((f) => f.title.toLowerCase().includes(search.toLowerCase())) : filters;
+      // normalize search
+      const normalizedSearch = search
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+      const newFilters =
+        search !== ""
+          ? filters.filter((f) =>
+              f.title
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .includes(normalizedSearch),
+            )
+          : filters;
       setFiltersVisible(newFilters);
     },
     [search],
@@ -184,9 +198,9 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
                   ref={ref}
                   onClick={() => handleFilterShowing(!isShowing)}
                   className={classNames(
-                    open ? "ring-2 ring-blue-500 ring-offset-2" : "",
-                    "flex gap-2 items-center px-3 h-[38px] rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer outline-none",
-                    hasSomeFilterSelected ? "bg-[#2563EB] text-white" : "",
+                    open ? "ring-2 ring-blue-500 ring-offset-2 bg-gray-200" : "",
+                    "flex gap-2 items-center px-3 h-[38px] rounded-lg bg-gray-100  hover:bg-gray-200 text-[14px] font-medium text-gray-700 cursor-pointer outline-none",
+                    hasSomeFilterSelected ? "bg-[#2563EB] hover:bg-blue-700 text-white" : "",
                   )}>
                   <FilterSvg className={`${hasSomeFilterSelected ? "text-white" : "text-gray-400"} h-4 w-4`} />
                   <span>Filtres</span>
@@ -217,7 +231,7 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
                           type="text"
                           value={search}
                           onChange={(e) => setSearch(e.target.value)}
-                          className="px-3 py-2 bg-gray-100 mx-2 rounded-lg mb-2 placeholder:text-gray-600 text-sm text-gray-900"
+                          className="px-3 py-2 bg-gray-100 mx-2 rounded-lg mb-2 placeholder:text-gray-600 text-xs text-gray-900"
                           placeholder="Rechercher par..."
                         />
                         <div className="flex flex-col max-h-[590px] overflow-y-auto">
@@ -236,6 +250,7 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
                                     data={dataFilter[item?.name] || []}
                                     isShowing={isShowing === item.name}
                                     setIsShowing={handleFilterShowing}
+                                    setParamData={setParamData}
                                   />
                                 ))}
                             </div>

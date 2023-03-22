@@ -570,7 +570,7 @@ export default function Settings() {
                 </div>
                 <div className="flex flex-col w-[45%] gap-4">
                   {/* TODO implementer parametres sur la plateforme */}
-                  {/* <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
                       <p className="text-gray-900  text-xs font-medium">Disponibilité des listes de transport par centre (envoi par email)</p>
                       <MdInfoOutline data-tip data-for="disponibilité_liste" className="text-gray-400 h-5 w-5 cursor-pointer" />
@@ -587,15 +587,25 @@ export default function Settings() {
                     <ToggleDate
                       label="Tout utilisateur"
                       disabled={isLoading}
-                       readOnly={readOnly}
-                      value={""}
-                      onChange={() => setData({ ...data })}
-                      range={{ from: undefined, to: undefined }}
+                      readOnly={readOnly}
+                      value={data.busListAvailability}
+                      onChange={() => setData({ ...data, busListAvailability: !data.busListAvailability })}
+                      range={{
+                        from: data?.uselessInformation?.busListAvailabilityFrom || undefined,
+                        to: data?.uselessInformation?.busListAvailabilityTo || undefined,
+                      }}
                       onChangeRange={(range) => {
-                        setData({ ...data });
+                        setData({
+                          ...data,
+                          uselessInformation: {
+                            ...data.uselessInformation,
+                            busListAvailabilityFrom: range?.from,
+                            busListAvailabilityTo: range?.to,
+                          },
+                        });
                       }}
                     />
-                  </div> */}
+                  </div>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
                       <p className="text-gray-900  text-xs font-medium">Pointage</p>
