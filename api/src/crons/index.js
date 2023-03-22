@@ -23,7 +23,6 @@ const structurePatches = require("./patch/structure");
 const youngPatches = require("./patch/young");
 const parentConsentementReminder = require("./parentConsentementReminder");
 const dsnjExport = require("./dsnjExport");
-const cluster = require("cluster");
 
 // doubt ? -> https://crontab.guru/
 
@@ -38,7 +37,7 @@ const everyHours = (x) => `0 */${x} * * *`;
 /* eslint-enable no-unused-vars */
 
 // See: https://www.clever-cloud.com/doc/administrate/cron/#deduplicating-crons (INSTANCE_NUMBER)
-if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0" && cluster.isMaster) {
+if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   // every monday at 0800
   // cron.schedule("0 8 * * 1", function () {
   //   capture("START CRON RECAP REGION");
