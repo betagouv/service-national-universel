@@ -4,7 +4,7 @@ import { useHistory } from "react-router-dom";
 export default function DashboardContainer({ active = "general", availableTab, navChildren, children }) {
   const history = useHistory();
   return (
-    <div className="flex flex-col gap-12 mt-8 w-full">
+    <div className="flex flex-col gap-12 my-8 w-full">
       <div className="flex justify-between items-center border-bottom px-8">
         <div className="flex justify-left items-center gap-8">
           {availableTab.includes("general") && <TabItem id="general" active={active} label="Vue générale" onClick={() => history.push("/dashboard")} />}
