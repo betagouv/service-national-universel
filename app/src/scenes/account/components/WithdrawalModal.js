@@ -3,7 +3,6 @@ import Modal from "../../../components/ui/modals/Modal";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, translate, WITHRAWN_REASONS } from "../../../utils";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
-import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
 import { ACTION_ABANDON, ACTION_DELETE_ACCOUNT, ACTION_WITHDRAW, CONTENT_CHANGE_DATE, CONTENT_CONFIRM, CONTENT_FORM, steps } from "../utils";
@@ -11,16 +10,23 @@ import WithdrawFormModalContent from "./WithdrawFormModalContent";
 import WithdrawOrChangeDateModalContent from "./WithdrawOrChangeDateModalContent";
 import ConfirmationModalContent from "./ConfirmationModalContent";
 import Close from "../../../assets/Close";
+import { abandonYoungAccount, deleteYoungAccount, logoutYoung, withdrawYoungAccount } from "../../../services/young.service";
 
 const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
   const history = useHistory();
   const dispatch = useDispatch();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
 
   const [withdrawnMessage, setWithdrawnMessage] = useState("");
   const [withdrawnReason, setWithdrawnReason] = useState("");
   const [step, setStep] = useState(0);
 
   const onCancel = () => {
+    if (isLoading) {
+      return null;
+    }
     setStep(0);
     setWithdrawnMessage("");
     setWithdrawnReason("");
@@ -36,27 +42,39 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
     : ACTION_WITHDRAW;
 
   const onConfirm = async () => {
-    const status = action === ACTION_DELETE_ACCOUNT ? YOUNG_STATUS.DELETED : action === ACTION_WITHDRAW ? YOUNG_STATUS.WITHDRAWN : YOUNG_STATUS.ABANDONED;
-    // @todo: is it useful?
-    young.historic.push({
-      phase: young.phase,
-      userName: `${young.firstName} ${young.lastName}`,
-      userId: young._id,
-      status,
-      note: withdrawnMessage && withdrawnReason ? WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label + " " + withdrawnMessage : null,
-    });
+    setIsLoading(true);
+
     try {
-      const { ok, data, code } = await api.put(`/young`, {
-        status,
-        lastStatusAt: Date.now(),
-        ...(withdrawnMessage && withdrawnReason ? { withdrawnMessage, withdrawnReason } : {}),
-      });
-      if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
-      dispatch(setYoung(data));
+      if (action === ACTION_DELETE_ACCOUNT) {
+        setLoadingMessage(
+          "Merci de patienter, la suppression de votre compte devrait prendre moins d'une minute. Vous serez immédiatement déconnecté(e) une fois la suppression effectuée.",
+        );
+        const { ok, code } = await deleteYoungAccount(young._id);
+        if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
+        toastr.success("Compte supprimé:", "Votre compte a été suppromé avec succès.");
+        await logoutYoung();
+        dispatch(setYoung(null));
+      }
+
+      if (action === ACTION_WITHDRAW) {
+        const { ok, data, code } = await withdrawYoungAccount({ withdrawnMessage, withdrawnReason });
+        if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
+        dispatch(setYoung(data));
+      }
+
+      if (action === ACTION_ABANDON) {
+        const { ok, data, code } = await abandonYoungAccount({ withdrawnMessage, withdrawnReason });
+        if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
+        dispatch(setYoung(data));
+      }
+
       onCancel();
       history.push("/");
     } catch (e) {
       toastr.error("Oups, une erreur est survenue :", translate(e.code));
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
     }
   };
 
@@ -94,7 +112,14 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
           />
         )}
         {content === CONTENT_CONFIRM && (
-          <ConfirmationModalContent onConfirm={onConfirm} onBack={action === ACTION_DELETE_ACCOUNT ? onCancel : () => setStep(step - 1)} title={title} subTitle={subTitle} />
+          <ConfirmationModalContent
+            isLoading={isLoading}
+            loadingMessage={loadingMessage}
+            onConfirm={onConfirm}
+            onBack={action === ACTION_DELETE_ACCOUNT ? onCancel : () => setStep(step - 1)}
+            title={title}
+            subTitle={subTitle}
+          />
         )}
       </div>
     </Modal>

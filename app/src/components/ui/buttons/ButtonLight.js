@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function ButtonLight({ children, onClick = () => {}, className = "" }) {
+export default function ButtonLight({ className = "", children = null, onClick = () => {} }) {
   return (
     <button
       onClick={onClick}
