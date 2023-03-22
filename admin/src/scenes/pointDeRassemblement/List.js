@@ -156,7 +156,7 @@ const ListPoints = ({ user }) => {
             }}
           />
         </div>
-        <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
+        <div className="mt-2 flex flex-row flex-wrap items-center">
           <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="pdrList" />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
@@ -366,7 +366,7 @@ const ListSessions = ({ user, firstSession }) => {
             }}
           />
         </div>
-        <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
+        <div className="mt-2 flex flex-row flex-wrap items-center">
           <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="pdrListSession" />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>

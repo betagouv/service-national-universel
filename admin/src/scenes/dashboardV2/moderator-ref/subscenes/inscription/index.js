@@ -9,11 +9,13 @@ import { departmentList, regionList } from "snu-lib";
 export default function Index() {
   const filterArray = [
     {
+      id: "region",
       name: "Région",
       fullValue: "Toutes",
       options: regionList.map((region) => ({ key: region, label: region })),
     },
     {
+      id: "department",
       name: "Département",
       fullValue: "Tous",
       options: departmentList.map((department) => ({ key: department, label: department })),
