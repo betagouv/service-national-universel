@@ -6,7 +6,7 @@ import { FullDoughnut, HorizontalBar } from "../../../components/graphs";
 import { FilterDashBoard, FilterComponent } from "../../../components/FilterDashBoard";
 import api from "../../../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { YOUNG_STATUS, REFERENT_ROLES, departmentList, regionList, COHORTS, ES_NO_LIMIT, translate } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_SITUATIONS, REFERENT_ROLES, departmentList, regionList, COHORTS, ES_NO_LIMIT, translate } from "snu-lib";
 import { useSelector } from "react-redux";
 import StatutPhase from "../../../components/inscription/StatutPhase.js";
 
@@ -17,8 +17,11 @@ export default function Index() {
   const [inscriptionGoals, setInscriptionGoals] = useState();
 
   const [inscriptionDetailObject, setInscriptionDetailObject] = useState({});
+
   const [age, setAge] = useState({});
   const [sexe, setSexe] = useState({});
+  const [grade, setGrade] = useState({});
+  const [situation, setSituation] = useState({});
 
   const filterArray = [
     {
@@ -76,6 +79,9 @@ export default function Index() {
     });
     setAge(objectYears);
     setSexe(res.gender);
+    setGrade(res.grade);
+    setSituation(res.situation);
+    console.log(res.grade);
   }
 
   useEffect(() => {
@@ -134,7 +140,7 @@ export default function Index() {
 
       <StatutPhase values={inscriptionDetailObject} />
 
-      <div className="min-w-[450px] w-[40%] bg-white rounded-lg my-4 py-6 px-8 flex items-center flex-col">
+      <div className="min-w-[463px] w-[40%] bg-white rounded-lg my-4 py-6 px-8 flex items-center flex-col">
         <div className="flex flex-row justify-between items-center w-full">
           <div className="text-base font-bold text-gray-900">En détail</div>
           <div className="w-fit">
@@ -148,16 +154,36 @@ export default function Index() {
           <FilterDetail selectedDetail={selectedDetail} setSelectedDetail={setSelectedDetail} />
         </div>
 
-        <div className="flex flex-col justify-center items-center w-full gap-10">
-          <FullDoughnut
-            title="Âge"
-            legendSide="right"
-            labels={["Né en 2005", "Né en 2006", "Né en 2007", "Né en 2008"]}
-            values={[age["2005"], age["2006"], age["2007"], age["2008"]]}
-            maxLegends={2}
-          />
-          <FullDoughnut title="Sexe" legendSide="left" labels={["Garçons", "Filles"]} values={[sexe.male, sexe.female]} maxLegends={2} />
-        </div>
+        {/* Displayed graphs */}
+        {selectedDetail === "age" ? (
+          <div className="flex flex-col justify-center items-center w-full gap-10">
+            <FullDoughnut
+              title="Âge"
+              legendSide="right"
+              labels={["Né en 2005", "Né en 2006", "Né en 2007", "Né en 2008"]}
+              values={[age["2005"], age["2006"], age["2007"], age["2008"]]}
+              maxLegends={2}
+            />
+            <FullDoughnut title="Sexe" legendSide="left" labels={["Garçons", "Filles"]} values={[sexe.male, sexe.female]} maxLegends={2} />
+          </div>
+        ) : selectedDetail === "class" ? (
+          <div className="flex flex-col justify-center items-center w-full gap-10">
+            <FullDoughnut
+              title="Classe"
+              legendSide="right"
+              labels={["2nde GT", "1ère GT", "2nde Pro", "1ère Pro", "3ème", "Autre", "CAP"]}
+              values={[grade["2ndeGT"], grade["1ereGT"], grade["2ndePro"], grade["1erePro"], grade["3eme"], grade["Autre"], grade["CAP"]]}
+              maxLegends={3}
+            />
+            <FullDoughnut
+              title="Situation"
+              legendSide="left"
+              labels={["En voie générale ou technologique", "En voie professionnelle (hors apprentissage)", "En enseignement adapté"]}
+              values={[situation[YOUNG_SITUATIONS.GENERAL_SCHOOL], situation[YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL], situation[YOUNG_SITUATIONS.SPECIALIZED_SCHOOL]]}
+              maxLegends={3}
+            />
+          </div>
+        ) : null}
       </div>
     </DashboardContainer>
   );
