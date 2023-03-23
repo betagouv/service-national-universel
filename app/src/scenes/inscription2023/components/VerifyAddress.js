@@ -55,26 +55,28 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
       );
     }
     return (
-      <div className="w-full">
-        <b className="mb-8">Est-ce que c&apos;est la bonne adresse ?</b>
-        <p>{suggestion.properties.name}</p>
-        <p>{`${suggestion.properties.postcode}, ${suggestion.properties.city}`}</p>
-        <div className="grid grid-cols-2 gap-4">
-          <GhostButton
-            onClick={() => {
-              onFail(formatResult(suggestion));
-              setSuggestion(null);
-            }}
-            name="Non"
-          />
-          <GhostButton
-            onClick={() => {
-              onSuccess(formatResult(suggestion));
-              setSuggestion(null);
-            }}
-            name="Oui"
-          />
-        </div>
+      <div className="my-2">
+        <p className="mb-6 leading-relaxed">
+          Est-ce que c&apos;est la bonne adresse ?
+          <br />
+          <strong>
+            {suggestion.properties.name}, {`${suggestion.properties.postcode} ${suggestion.properties.city}`}
+          </strong>
+        </p>
+        <GhostButton
+          onClick={() => {
+            onSuccess(formatResult(suggestion));
+            setSuggestion(null);
+          }}
+          name="Oui"
+        />
+        <GhostButton
+          onClick={() => {
+            onFail(formatResult(suggestion));
+            setSuggestion(null);
+          }}
+          name={`Non, garder "${address}, ${zip} ${city}"`}
+        />
       </div>
     );
   }
