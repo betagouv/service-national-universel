@@ -76,9 +76,9 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
               <h1 className="text-2xl font-light not-italic leading-8 text-gray-600">Aidez-nous à nous améliorer</h1>
               <p className="mt-8 justify-center leading-5 text-gray-600 ">
                 ⚠️ <span className="text-lg font-semibold text-gray-600">Rappel :</span> vous n'obtiendrez pas de réponse à votre question, merci de ne pas inscrire d'informations
-                personnelles. Pour obtenir une aide personnalisée,
+                personnelles. Pour obtenir une aide personnalisée,{" "}
                 <a href="https://www.snu.gouv.fr/nous-contacter/" className="text-snu-purple-200 " target="_blank" rel="noopener noreferrer">
-                  <span className="cursor-pointer text-lg font-semibold text-[#4F46E5] ">cliquez ici.</span>
+                  <span className="font-semibold text-[#4F46E5] ">cliquez ici.</span>
                 </a>
               </p>
               <div className="mt-8 mb-2 flex w-full flex-row">
