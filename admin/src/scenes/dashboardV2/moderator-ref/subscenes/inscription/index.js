@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import DashboardContainer from "../../../components/DashboardContainer";
-import HorizontalBar from "../../../components/graphs/HorizontalBar";
+import { FullDoughnut, HorizontalBar } from "../../../components/graphs";
 
-import { FilterDashBoard } from "../../../components/FilterDashBoard";
+import { FilterDashBoard, FilterComponent } from "../../../components/FilterDashBoard";
 import api from "../../../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { YOUNG_STATUS, REFERENT_ROLES, departmentList, regionList, COHORTS, ES_NO_LIMIT } from "snu-lib";
+import { YOUNG_STATUS, REFERENT_ROLES, departmentList, regionList, COHORTS, ES_NO_LIMIT, translate } from "snu-lib";
 import { useSelector } from "react-redux";
 import StatutPhase from "../../../components/inscription/StatutPhase.js";
 
@@ -39,6 +39,16 @@ export default function Index() {
   const [selectedFilters, setSelectedFilters] = React.useState({
     cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
   });
+
+  const [selectedFiltersBottom, setSelectedFiltersBottom] = React.useState({});
+  const filterArrayBottom = [
+    {
+      id: "status",
+      name: "Statuts",
+      fullValue: "Tous",
+      options: Object.keys(YOUNG_STATUS).map((status) => ({ key: status, label: translate(status) })),
+    },
+  ];
 
   async function fetchInscriptionGoals() {
     const res = await getInscriptionGoals();
@@ -98,25 +108,20 @@ export default function Index() {
           goal={goal}
         />
       </div>
-      {/*
-      <StatutPhase
-        values={[
-          inscriptionDetailObject.IN_PROGRESS,
-          inscriptionDetailObject.WAITING_VALIDATION,
-          inscriptionDetailObject.WAITING_CORRECTION,
-          inscriptionDetailObject.VALIDATED,
-          inscriptionDetailObject.WAITING_LIST,
-          inscriptionDetailObject.REFUSED,
-          inscriptionDetailObject.REINSCRIPTION,
-          inscriptionDetailObject.NOT_ELIGIBLE,
-          inscriptionDetailObject.ABANDONED,
-          inscriptionDetailObject.NOT_AUTORISED,
-          inscriptionDetailObject.DELETED,
-        ]}
-      />
-    
-        */}
+
       <StatutPhase values={inscriptionDetailObject} />
+
+      <div className="min-w-[450px] w-[40%] bg-white rounded-lg my-4 py-6 px-8">
+        <div className="flex flex-row justify-between items-center">
+          <div className="text-base font-bold text-gray-900">En détail</div>
+          <div className="w-fit">
+            {filterArrayBottom.map((filter) => (
+              <FilterComponent key={filter.id} filter={filter} selectedFilters={selectedFiltersBottom} setSelectedFilters={setSelectedFiltersBottom} />
+            ))}
+          </div>
+        </div>
+        <FullDoughnut title="Présence à l'arrivée" legendSide="right" labels={["Oui", "Non", "Non renseigné", "Autre"]} values={[45, 23, 38, 25]} maxLegends={2} />
+      </div>
     </DashboardContainer>
   );
 }
@@ -153,38 +158,11 @@ async function getCurrentInscriptions(filters) {
   const body = {
     query: { bool: { must: { match_all: {} }, filter: [] } },
     aggs: {
-      IN_PROGRESS: {
-        filter: { term: { "status.keyword": YOUNG_STATUS.IN_PROGRESS } },
-      },
-      WAITING_VALIDATION: {
-        filter: { term: { "status.keyword": YOUNG_STATUS.WAITING_VALIDATION } },
-      },
-      WAITING_CORRECTION: {
-        filter: { term: { "status.keyword": YOUNG_STATUS.WAITING_CORRECTION } },
-      },
-      VALIDATED: {
-        filter: { term: { "status.keyword": YOUNG_STATUS.VALIDATED } },
-      },
-      WAITING_LIST: {
-        filter: { term: { "status.keyword": YOUNG_STATUS.WAITING_LIST } },
-      },
-      REFUSED: {
-        filter: { term: { "status.keyword": YOUNG_STATUS.REFUSED } },
-      },
-      REINSCRIPTION: {
-        filter: { term: { "status.keyword": YOUNG_STATUS.REINSCRIPTION } },
-      },
-      NOT_ELIGIBLE: {
-        filter: { term: { "status.keyword": YOUNG_STATUS.NOT_ELIGIBLE } },
-      },
-      ABANDONED: {
-        filter: { term: { "status.Keyword": YOUNG_STATUS.ABANDONED } },
-      },
-      NOT_AUTORISED: {
-        filter: { term: { "status.Keyword": YOUNG_STATUS.NOT_AUTORISED } },
-      },
-      DELETED: {
-        filter: { term: { "status.Keyword": YOUNG_STATUS.DELETED } },
+      status: {
+        terms: {
+          field: "status.keyword",
+          size: ES_NO_LIMIT,
+        },
       },
     },
     size: 0,
@@ -205,9 +183,5 @@ async function getCurrentInscriptions(filters) {
 
   const { responses } = await api.esQuery("young", body);
   if (!responses.length) return {};
-  const finalObject = {};
-  Object.keys(responses[0].aggregations).map((key) => {
-    finalObject[key] = responses[0].aggregations[key].doc_count;
-  });
-  return finalObject;
+  return api.getAggregations(responses[0]);
 }

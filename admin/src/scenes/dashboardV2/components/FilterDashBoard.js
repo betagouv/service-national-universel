@@ -21,7 +21,7 @@ export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArr
   );
 };
 
-const FilterComponent = ({ filter, selectedFilters, setSelectedFilters }) => {
+export const FilterComponent = ({ filter, selectedFilters, setSelectedFilters }) => {
   const selectedFilterValues = selectedFilters[filter.id]?.length ? selectedFilters[filter.id] : [];
   const [visible, setVisible] = React.useState(false);
 
