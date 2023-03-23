@@ -298,7 +298,7 @@ export default function StepCoordonnees() {
   const debouncedSuggestionsRequest = useCallback(
     debounce(async (value) => {
       try {
-        const response = await apiAdress(value, [`postcode=${value?.postcode}`]);
+        const response = await apiAdress(value);
         const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
         setBirthCityZipSuggestions(suggestions);
       } catch (error) {
@@ -312,6 +312,7 @@ export default function StepCoordonnees() {
     setData({ ...data, birthCity: value });
     const trimmedValue = value.trim();
     if (trimmedValue && trimmedValue.length > 2) {
+      console.log("trimmedValue", trimmedValue);
       debouncedSuggestionsRequest(trimmedValue);
     } else {
       setBirthCityZipSuggestions([]);
