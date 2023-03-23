@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { academyList, COHORTS, departmentList, regionList, translateInscriptionStatus, translatePhase1, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import React, { useEffect, useState } from "react";
+import { academyList, COHORTS, departmentList, ES_NO_LIMIT, regionList, translateInscriptionStatus, translatePhase1, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
+import api from "../../../../../services/api";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import BoxWithPercentage from "./components/BoxWithPercentage";
@@ -23,7 +24,9 @@ const filterArray = [
     id: "statusPhase1",
     name: "Statut de phase 1",
     fullValue: "Tous",
-    options: Object.keys(YOUNG_STATUS_PHASE1).map((status) => ({ key: status, label: translatePhase1(status) })),
+    options: Object.keys(YOUNG_STATUS_PHASE1)
+      .filter((s) => ![YOUNG_STATUS_PHASE1.WAITING_LIST, YOUNG_STATUS_PHASE1.WITHDRAWN].includes(s))
+      .map((status) => ({ key: status, label: translatePhase1(status) })),
   },
   {
     id: "region",
@@ -56,7 +59,180 @@ export default function Index() {
     status: [YOUNG_STATUS.VALIDATED],
     statusPhase1: [YOUNG_STATUS_PHASE1.AFFECTED],
     cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
+    region: [],
+    department: [],
+    academy: [],
   });
+  const [data, setData] = useState({});
+
+  useEffect(() => {
+    (async () => {
+      const regionFilter = selectedFilters?.region?.length ? selectedFilters.region : null;
+      const departmentFilter = selectedFilters?.department?.length ? selectedFilters.department : null;
+      const academyFilter = selectedFilters?.academy?.length ? selectedFilters.academy : null;
+      const statusFilter = selectedFilters?.status?.length ? selectedFilters.status : null;
+      const statusPhase1Filter = selectedFilters?.statusPhase1?.length ? selectedFilters.statusPhase1 : null;
+      const cohortFilter = selectedFilters?.cohort?.length ? selectedFilters.cohort : null;
+
+      const getTerms = (field, filter) => {
+        if (filter === null || filter?.length === 0) return null;
+        return { terms: { [field]: filter } };
+      };
+
+      const body = {
+        query: { bool: { must: { match_all: {} } } },
+        aggs: {
+          statusPhase1: {
+            filter: {
+              bool: {
+                must: [],
+                filter: [
+                  getTerms("region.keyword", regionFilter),
+                  getTerms("department.keyword", departmentFilter),
+                  getTerms("academy.keyword", academyFilter),
+                  getTerms("status.keyword", statusFilter),
+                  getTerms("cohort.keyword", cohortFilter),
+                ].filter((e) => e),
+              },
+            },
+            aggs: {
+              names: { terms: { field: "statusPhase1.keyword", size: ES_NO_LIMIT } },
+            },
+          },
+          pdr: {
+            filter: {
+              bool: {
+                must: [],
+                filter: [
+                  getTerms("region.keyword", regionFilter),
+                  getTerms("department.keyword", departmentFilter),
+                  getTerms("academy.keyword", academyFilter),
+                  getTerms("status.keyword", statusFilter),
+                  getTerms("cohort.keyword", cohortFilter),
+                  getTerms("statusPhase1.keyword", statusPhase1Filter ? statusPhase1Filter?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) : null),
+                ].filter((e) => e),
+              },
+            },
+            aggs: {
+              names: { terms: { field: "hasMeetingInformation.keyword", missing: "NR", size: ES_NO_LIMIT } },
+            },
+          },
+          participation: {
+            filter: {
+              bool: {
+                must: [],
+                filter: [
+                  getTerms("region.keyword", regionFilter),
+                  getTerms("department.keyword", departmentFilter),
+                  getTerms("academy.keyword", academyFilter),
+                  getTerms("status.keyword", statusFilter),
+                  getTerms("cohort.keyword", cohortFilter),
+                  getTerms("statusPhase1.keyword", statusPhase1Filter ? statusPhase1Filter?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) : null),
+                ].filter((e) => e),
+              },
+            },
+            aggs: {
+              names: { terms: { field: "youngPhase1Agreement.keyword", size: ES_NO_LIMIT } },
+            },
+          },
+          precense: {
+            filter: {
+              bool: {
+                must: [],
+                filter: [
+                  getTerms("region.keyword", regionFilter),
+                  getTerms("department.keyword", departmentFilter),
+                  getTerms("academy.keyword", academyFilter),
+                  getTerms("status.keyword", statusFilter),
+                  getTerms("cohort.keyword", cohortFilter),
+                  getTerms("statusPhase1.keyword", statusPhase1Filter ? statusPhase1Filter?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) : null),
+                ].filter((e) => e),
+              },
+            },
+            aggs: {
+              names: { terms: { field: "cohesionStayPresence.keyword", missing: "NR", size: ES_NO_LIMIT } },
+            },
+          },
+          JDM: {
+            filter: {
+              bool: {
+                must: [],
+                filter: [
+                  getTerms("region.keyword", regionFilter),
+                  getTerms("department.keyword", departmentFilter),
+                  getTerms("academy.keyword", academyFilter),
+                  getTerms("status.keyword", statusFilter),
+                  getTerms("cohort.keyword", cohortFilter),
+                  getTerms("statusPhase1.keyword", statusPhase1Filter ? statusPhase1Filter?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) : null),
+                ].filter((e) => e),
+              },
+            },
+            aggs: {
+              names: { terms: { field: "presenceJDM.keyword", missing: "NR", size: ES_NO_LIMIT } },
+            },
+          },
+          depart: {
+            filter: {
+              bool: {
+                must: [],
+                filter: [
+                  getTerms("region.keyword", regionFilter),
+                  getTerms("department.keyword", departmentFilter),
+                  getTerms("academy.keyword", academyFilter),
+                  getTerms("status.keyword", statusFilter),
+                  getTerms("cohort.keyword", cohortFilter),
+                  getTerms("statusPhase1.keyword", statusPhase1Filter ? statusPhase1Filter?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) : null),
+                ].filter((e) => e),
+              },
+            },
+            aggs: {
+              names: { terms: { field: "departInform.keyword", size: ES_NO_LIMIT } },
+            },
+          },
+          departMotif: {
+            filter: {
+              bool: {
+                must: [],
+                filter: [
+                  getTerms("region.keyword", regionFilter),
+                  getTerms("department.keyword", departmentFilter),
+                  getTerms("academy.keyword", academyFilter),
+                  getTerms("status.keyword", statusFilter),
+                  getTerms("cohort.keyword", cohortFilter),
+                  getTerms("statusPhase1.keyword", statusPhase1Filter ? statusPhase1Filter?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) : null),
+                ].filter((e) => e),
+              },
+            },
+            aggs: {
+              names: { terms: { field: "departSejourMotif.keyword", size: ES_NO_LIMIT } },
+            },
+          },
+        },
+        size: 0,
+        track_total_hits: true,
+      };
+
+      const { responses } = await api.esQuery("young", body);
+
+      if (responses.length) {
+        let result = {};
+        result.statusPhase1 = responses[0].aggregations.statusPhase1.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
+        result.statusPhase1Total = responses[0].aggregations.statusPhase1.doc_count;
+        result.pdr = responses[0].aggregations.pdr.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
+        result.pdrTotal = responses[0].aggregations.pdr.doc_count;
+        result.participation = responses[0].aggregations.participation.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
+        result.participationTotal = responses[0].aggregations.participation.doc_count;
+        result.presence = responses[0].aggregations.precense.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
+        result.JDM = responses[0].aggregations.JDM.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
+        result.depart = responses[0].aggregations.depart.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
+        result.departTotal = responses[0].aggregations.depart.doc_count;
+        result.departMotif = responses[0].aggregations.departMotif.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
+        setData(result);
+      }
+    })();
+  }, [JSON.stringify(selectedFilters)]);
+
+  console.log(data);
 
   return (
     <DashboardContainer
@@ -77,18 +253,18 @@ export default function Index() {
         <h1 className="text-[28px] leading-8 font-bold text-gray-900">Volontaires</h1>
         <div className="flex items-stretch gap-4 ">
           <div className="flex flex-col gap-4 w-[30%]">
-            <BoxWithPercentage percentage={0.9} number={48} title="Point de rassemblement" subLabel="restants à confirmer" />
-            <BoxWithPercentage percentage={0.84} number={8} title="Participation" subLabel="restants à confirmer" />
+            <BoxWithPercentage total={data?.pdrTotal || 0} number={data?.pdr?.NR + data?.pdr?.false || 0} title="Point de rassemblement" subLabel="restants à confirmer" />
+            <BoxWithPercentage total={data?.participationTotal || 0} number={data?.participation?.false || 0} title="Participation" subLabel="restants à confirmer" />
           </div>
-          <StatusPhase1 />
+          <StatusPhase1 statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} />
         </div>
-        <Presences />
+        <Presences presence={data?.presence} JDM={data?.JDM} depart={data?.depart} departTotal={data?.departTotal} departMotif={data?.departMotif} />
         <h1 className="text-[28px] leading-8 font-bold text-gray-900">Centres</h1>
         <div className="grid grid-cols-3 gap-4">
           <CardCenterCapacity nbCenter={7} capacity={231} />
           <Cardsession nbValidated={1} nbPending={3} />
           <OccupationCardHorizontal total={198} taken={184} />
-          <BoxWithPercentage percentage={0.61} number={12} title="Emplois du temps" subLabel="restants à renseigner" />
+          <BoxWithPercentage total={0.61} number={12} title="Emplois du temps" subLabel="restants à renseigner" />
         </div>
         <div className="flex items-stretch gap-4 ">
           <MoreInfo />
