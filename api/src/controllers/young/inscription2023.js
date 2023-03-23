@@ -245,10 +245,14 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
 
     // Check quartier prioritaires.
     if (value.zip && value.city && value.address) {
-      const qpv = await getQPV(value.zip, value.city, value.address);
-      if (qpv === true) young.set({ qpv: "true" });
-      else if (qpv === false) young.set({ qpv: "false" });
-      else young.set({ qpv: "" });
+      try {
+        const qpv = await getQPV(value.zip, value.city, value.address);
+        if (qpv === true) young.set({ qpv: "true" });
+        else if (qpv === false) young.set({ qpv: "false" });
+        else young.set({ qpv: "" });
+      } catch (error) {
+        young.set({ qpv: "" });
+      }
     }
 
     // Check zone rurale.
