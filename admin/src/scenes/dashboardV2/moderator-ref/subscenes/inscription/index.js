@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import DashboardContainer from "../../../components/DashboardContainer";
-import { FullDoughnut, HorizontalBar } from "../../../components/graphs";
+import { FullDoughnut, HorizontalBar, BarChart } from "../../../components/graphs";
 
 import { FilterDashBoard, FilterComponent } from "../../../components/FilterDashBoard";
 import api from "../../../../../services/api";
@@ -22,6 +22,8 @@ export default function Index() {
   const [sexe, setSexe] = useState({});
   const [grade, setGrade] = useState({});
   const [situation, setSituation] = useState({});
+  const [qpv, setQpv] = useState({});
+  const [rural, setRural] = useState({});
 
   const filterArray = [
     {
@@ -81,7 +83,9 @@ export default function Index() {
     setSexe(res.gender);
     setGrade(res.grade);
     setSituation(res.situation);
-    console.log(res.grade);
+    setQpv(res.qpv);
+    setRural(res.rural);
+    console.log(res.rural);
   }
 
   useEffect(() => {
@@ -150,7 +154,7 @@ export default function Index() {
           </div>
         </div>
         {/* Filter to chose displayed graphs */}
-        <div className="py-10">
+        <div className="pb-10 pt-8">
           <FilterDetail selectedDetail={selectedDetail} setSelectedDetail={setSelectedDetail} />
         </div>
 
@@ -183,6 +187,15 @@ export default function Index() {
               maxLegends={3}
             />
           </div>
+        ) : selectedDetail === "situation" ? (
+          <div className="flex flex-col justify-center items-center w-full gap-10">
+            <BarChart values={[16, 9, 25, 3]} noValue className="h-[200px] mt-8" />
+          </div>
+        ) : selectedDetail === "qpv" ? (
+          <div className="flex flex-col justify-center items-center w-full gap-10">
+            <FullDoughnut title="Quartier prioritaires" legendSide="right" labels={["Oui", "Non"]} values={[qpv.true, qpv[""] + qpv.false]} maxLegends={3} />
+            <FullDoughnut title="Zone rurale" legendSide="left" labels={["Oui", "Non"]} values={[rural.true, rural.false]} maxLegends={3} />
+          </div>
         ) : null}
       </div>
     </DashboardContainer>
@@ -190,23 +203,35 @@ export default function Index() {
 }
 
 const FilterDetail = ({ selectedDetail, setSelectedDetail }) => {
+  const ref = useRef();
   const optionsDetail = [
     { key: "age", label: "Âge et sexe" },
     { key: "class", label: "Classe et situation" },
-    { key: "situtaion", label: "Situations particulières" },
+    { key: "situation", label: "Situations particulières" },
     { key: "qpv", label: "Issus quartiers prioritaires et zones rurales" },
   ];
   const [showDetailFilter, setShowDetailFilter] = useState(false);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setShowDetailFilter(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
   return (
     <div className="relative">
-      <div className="flex flex-row gap-2 items-center p-2 cursor-pointer" onClick={() => setShowDetailFilter((open) => !open)}>
+      <div className="min-w-[200px] flex flex-row gap-2 items-center p-2 cursor-pointer justify-center" onClick={() => setShowDetailFilter((open) => !open)}>
         <div>{optionsDetail.find((e) => e.key === selectedDetail).label}</div>
         {showDetailFilter && <BsChevronUp className="h-4 w-4 text-gray-900" aria-hidden="true" />}
         {!showDetailFilter && <BsChevronDown className="h-4 w-4 text-gray-900" aria-hidden="true" />}
       </div>
 
       {showDetailFilter && (
-        <div className="absolute bg-white z-50 w-fit rounded-md shadow-sm">
+        <div ref={ref} className="absolute bg-white z-50 w-fit rounded-md shadow-sm">
           {optionsDetail.map((option) => (
             <div
               key={option.key}
@@ -298,7 +323,7 @@ async function getDetailInscriptions(filters) {
           size: ES_NO_LIMIT,
         },
       },
-      isRegionRural: {
+      rural: {
         terms: {
           field: "isRegionRural.keyword",
           size: ES_NO_LIMIT,
