@@ -1,3 +1,23 @@
+# [1.238.0](https://github.com/betagouv/service-national-universel/compare/v1.237.0...v1.238.0) (2023-03-22)
+
+
+### Bug Fixes
+
+* **admin:** add ids to filter dashboard ([b639f63](https://github.com/betagouv/service-national-universel/commit/b639f636975f2f8bf1d9318ae7c2473507655418))
+* **admin:** retour design filtres ([a58467d](https://github.com/betagouv/service-national-universel/commit/a58467d4b38ec2295ff3fdc310ff2f013d550f24))
+* **api:** MongoDB allowed connections for staging ([4492e1f](https://github.com/betagouv/service-national-universel/commit/4492e1f63bf93e2d64266d1ac556e07a2eeec38e))
+* **api/sib:** Less mongoDB connections allowed on staging ([e9cc950](https://github.com/betagouv/service-national-universel/commit/e9cc950d6e716b2ce3793821f9878104ea662b3b))
+* **app:** Filtrer les recherches d'adresse par code postal ([#2398](https://github.com/betagouv/service-national-universel/issues/2398)) ([aa3e4dd](https://github.com/betagouv/service-national-universel/commit/aa3e4dd600c853fe54276a0acea4299d17833f1b))
+* **app:** fix coordinates fetching for location filter in misison search ([c73de28](https://github.com/betagouv/service-national-universel/commit/c73de28eb9f82ee16011c3c1fcf9fddc589cfd56))
+
+
+### Features
+
+* **admin:** Dashboard filtre base ([b8aa8dd](https://github.com/betagouv/service-national-universel/commit/b8aa8dd8fa45814d99a4a68058382ad82de7bba2))
+* **admin:** front dashboard sejour ([#2402](https://github.com/betagouv/service-national-universel/issues/2402)) ([650ca56](https://github.com/betagouv/service-national-universel/commit/650ca56b8f41ed096962b29d7539ea36f21b5834))
+* **app:** ajout de l'anonymisation et de la suppression des données du compte  ([#2397](https://github.com/betagouv/service-national-universel/issues/2397)) ([830b52f](https://github.com/betagouv/service-national-universel/commit/830b52fedf4f37f00345d7d0ae7819a71f2d871a))
+* **app:** new medical file modal ([#2399](https://github.com/betagouv/service-national-universel/issues/2399)) ([bbce4d1](https://github.com/betagouv/service-national-universel/commit/bbce4d19e9035aefb93bb9df7bbcf9b1f85df62f))
+
 # [1.237.0](https://github.com/betagouv/service-national-universel/compare/v1.236.0...v1.237.0) (2023-03-21)
 
 

@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { translate, translateCohort, youngCanChangeSession } from "snu-lib";
 import { getCohortDetail } from "../../../../utils/cohorts.js";
+import { isStepMedicalFieldDone } from "./utils/steps.utils.js";
 import api from "../../../../services/api";
 
 import { AlertBoxInformation } from "../../../../components/Content";
@@ -24,22 +25,9 @@ export default function Affected() {
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const [loading, setLoading] = useState(true);
   const cohortDetails = getCohortDetail(young.cohort);
-  const nbvalid = getNbValid(young);
-  const areStepsDone = nbvalid === 4;
 
-  if (areStepsDone) {
+  if (isStepMedicalFieldDone(young)) {
     window.scrollTo(0, 0);
-  }
-
-  function getNbValid(young) {
-    if (young) {
-      let nb = 0;
-      if (young.meetingPointId || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true") nb++;
-      if (young.youngPhase1Agreement === "true") nb++;
-      if (young.convocationFileDownload === "true") nb++;
-      if (young.cohesionStayMedicalFileDownload === "true") nb++;
-      return nb;
-    }
   }
 
   const getMeetingPoint = async () => {
@@ -69,7 +57,7 @@ export default function Affected() {
   }
 
   if (!center && !meetingPoint) {
-    return <Problem young={young} />;
+    return <Problem cohort={young.cohort} />;
   }
 
   return (
@@ -82,7 +70,6 @@ export default function Affected() {
             onClose={() => setShowInfoMessage(false)}
           />
         )}
-
         <header className="flex flex-col items-between px-4 md:!px-8 lg:!px-16 py-4 lg:justify-between lg:flex-row order-1">
           <div>
             <h1 className="text-2xl md:text-5xl md:space-y-4">
@@ -96,22 +83,21 @@ export default function Affected() {
           <CenterInfo center={center} />
         </header>
 
-        <div
-          className={`md:border-t-[1px] flex flex-col md:flex-row flex-none gap-6 md:gap-16 pt-[1rem] md:pt-[4rem] order-2 overflow-hidden transition-all ease-in-out duration-500
-            ${areStepsDone ? "h-[680px] md:h-[360px]" : "h-0"}`}>
-          {young.meetingPointId ? (
-            <TravelInfoBus meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
-          ) : young.deplacementPhase1Autonomous === "true" ? (
-            <TravelInfoAlone center={center} cohortDetails={cohortDetails} />
-          ) : (
-            <></>
-          )}
-          <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
-        </div>
+        {isStepMedicalFieldDone(young) && (
+          <div className="md:border-t-[1px] flex flex-col md:flex-row flex-none gap-6 md:gap-8 pt-[1rem] md:pt-[4rem] order-2 overflow-hidden">
+            {young.meetingPointId ? (
+              <TravelInfoBus meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
+            ) : young.deplacementPhase1Autonomous === "true" ? (
+              <TravelInfoAlone center={center} cohortDetails={cohortDetails} />
+            ) : (
+              <></>
+            )}
+            <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
+          </div>
+        )}
 
-        <StepsAffected young={young} center={center} nbvalid={nbvalid} />
-
-        <FaqAffected className={`transition-all ${areStepsDone ? "order-3" : "order-4"}`} />
+        <StepsAffected center={center} />
+        <FaqAffected className={`${isStepMedicalFieldDone(young) ? "order-3" : "order-4"}`} />
       </div>
 
       <JDMA id="3504" />

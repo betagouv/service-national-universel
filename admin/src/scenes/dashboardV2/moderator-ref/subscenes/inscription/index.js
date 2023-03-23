@@ -1,8 +1,28 @@
 import React from "react";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import DashboardContainer from "../../../components/DashboardContainer";
+import HorizontalBar from "../../../components/graphs/HorizontalBar";
+
+import { FilterDashBoard } from "../../../components/FilterDashBoard";
+import { departmentList, regionList } from "snu-lib";
 
 export default function Index() {
+  const filterArray = [
+    {
+      id: "region",
+      name: "Région",
+      fullValue: "Toutes",
+      options: regionList.map((region) => ({ key: region, label: region })),
+    },
+    {
+      id: "department",
+      name: "Département",
+      fullValue: "Tous",
+      options: departmentList.map((department) => ({ key: department, label: department })),
+    },
+  ];
+
+  const [selectedFilters, setSelectedFilters] = React.useState({});
   return (
     <DashboardContainer
       active="inscription"
@@ -18,6 +38,15 @@ export default function Index() {
         </div>
       }>
       <div>Inscription</div>
+      <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
+      <div className="bg-white my-4 p-8 rounded-lg">
+        <HorizontalBar
+          title="Objectif des inscriptions"
+          labels={["Sur la liste principale", "Sue liste complémentaire", "En attente de validation", "En attente de correction", "En cours"]}
+          values={[31527, 450, 901, 901, 3359]}
+          goal={45039}
+        />
+      </div>
     </DashboardContainer>
   );
 }

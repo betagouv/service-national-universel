@@ -51,10 +51,9 @@ export default function List() {
   const [marginDistance, setMarginDistance] = useState();
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
 
-  const callSingleAddressAPI = async (params) => {
+  const callSingleAddressAPI = async (q, postcode) => {
     try {
-      const url = `${params}&limit=1`;
-      const res = await apiAdress(`${encodeURIComponent(url)}`);
+      const res = await apiAdress(q, [`postcode=${postcode}`]);
       return res?.features[0];
     } catch (e) {
       console.error(e);
@@ -64,7 +63,7 @@ export default function List() {
 
   const getCoordinates = async ({ q, postcode }) => {
     try {
-      let adresse = await callSingleAddressAPI(`${q}+${postcode}`);
+      let adresse = await callSingleAddressAPI(q, postcode);
       if (!adresse) {
         console.warn("Utilisation du zip code seul");
         adresse = await callSingleAddressAPI(postcode);

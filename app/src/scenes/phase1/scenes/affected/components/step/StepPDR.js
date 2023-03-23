@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
 import { getCohortDetail, getMeetingPointChoiceLimitDateForCohort } from "../../../../../../utils/cohorts";
+import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR, isStepPDRDone } from "../../utils/steps.utils";
 import dayjs from "dayjs";
 import CohortDateSummary from "../../../../../inscription2023/components/CohortDateSummary";
 import Loader from "../../../../../../components/Loader";
@@ -20,12 +21,9 @@ import { Modal } from "reactstrap";
 import ConfirmationModal from "../../../../components/modals/ConfirmationModal";
 import Warning from "../../../../../../assets/icons/Warning";
 
-const ALONE_ARRIVAL_HOUR = "16h";
-const ALONE_DEPARTURE_HOUR = "11h";
-
 export default function StepPDR({ young, center }) {
-  const [valid, setValid] = useState(false);
-  const [enabled, setEnabled] = useState(false);
+  const enabled = young ? true : false;
+  const valid = isStepPDRDone(young);
   const [openedDesktop, setOpenedDesktop] = useState(false);
   const [openedMobile, setOpenedMobile] = useState(false);
   const [pdrChoiceLimitDate, setPdrChoiceLimitDate] = useState("?");
@@ -42,8 +40,6 @@ export default function StepPDR({ young, center }) {
 
   useEffect(() => {
     if (young) {
-      setValid((young.meetingPointId !== null && young.meetingPointId !== undefined) || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true");
-      setEnabled(true);
       setCohort(getCohortDetail(young.cohort));
 
       const date = getMeetingPointChoiceLimitDateForCohort(young.cohort);
