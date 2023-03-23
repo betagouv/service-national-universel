@@ -92,6 +92,14 @@ export const PHONE_ZONES = {
   },
 };
 
+export const isPhoneZoneKnown = ({ zoneKey, throwError = true }) => {
+  const isPhoneZoneIncluded = Object.keys(PHONE_ZONES).includes(zoneKey);
+  if (!isPhoneZoneIncluded && throwError) {
+    throw new Error(`Phone zone '${zoneKey}' unkown. Please check if this phone zone exists in PHONE_ZONES in 'src/utils/phone-number.utils.js'.`);
+  }
+  return isPhoneZoneIncluded;
+};
+
 export const isPhoneNumberWellFormated = (phoneNumberValue, zoneKey) => {
   const phoneZone = PHONE_ZONES[zoneKey];
 

@@ -48,6 +48,9 @@ import { capture } from "../../sentry";
 import Modal from "../../components/ui/modals/Modal";
 import ButtonLight from "../../components/ui/buttons/ButtonLight";
 import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
+import InputPhone from "../../components/ui/forms/InputPhone";
+import PhoneField from "./components/PhoneField";
+import { isPhoneNumberWellFormated, PHONE_ZONES } from "../../utils/phone-number.utils";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -620,10 +623,13 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
       errors.email = "L'email ne semble pas valide";
       result = false;
     }
-    if (!data.phone || !validator.matches(data.phone, regexPhoneFrenchCountries)) {
-      errors.phone = "Le téléphone doit être un numéro de téléphone mobile valide. (exemple : (+33)(0)642424242)";
+
+    if (!data.phone || !isPhoneNumberWellFormated(data.phone, data.phoneZone || "AUTRE")) {
+      console.log("ERROR PHONE", PHONE_ZONES[data.phoneZone || "AUTRE"]);
+      errors.phone = PHONE_ZONES[data.phoneZone || "AUTRE"].errorMessage;
       result = false;
     }
+
     result = validateEmpty(data, "lastName", errors) && result;
     result = validateEmpty(data, "firstName", errors) && result;
     result = validateEmpty(data, "birthCity", errors) && result;
@@ -1055,17 +1061,18 @@ function SectionIdentiteContact({ young, globalMode, currentRequest, onStartRequ
         young={young}
         copy={true}
       />
-      <Field
+      <PhoneField
         name="phone"
-        label="Téléphone"
+        young={young}
         value={young.phone}
+        onChange={(value) => onChange("phone", value)}
+        zoneValue={young.phoneZone}
+        onChangeZone={(value) => onChange("phoneZone", value)}
         mode={globalMode}
         onStartRequest={onStartRequest}
         currentRequest={currentRequest}
         correctionRequest={getCorrectionRequest(requests, "phone")}
         onCorrectionRequestChange={onCorrectionRequestChange}
-        onChange={(value) => onChange("phone", value)}
-        young={young}
       />
     </div>
   );
