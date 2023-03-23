@@ -51,11 +51,18 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     const newData =
       search !== ""
         ? data.filter((f) =>
-            f.key
-              .normalize("NFD")
-              .replace(/[\u0300-\u036f]/g, "")
-              .toLowerCase()
-              .includes(normalizedSearch),
+            filter?.translate
+              ? filter
+                  .translate(f.key)
+                  .normalize("NFD")
+                  .replace(/[\u0300-\u036f]/g, "")
+                  .toLowerCase()
+                  .includes(normalizedSearch)
+              : f.key
+                  .normalize("NFD")
+                  .replace(/[\u0300-\u036f]/g, "")
+                  .toLowerCase()
+                  .includes(normalizedSearch),
           )
         : data;
     setOptionsVisible(newData);
@@ -135,6 +142,9 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                     <>
                       {optionsVisible
                         ?.sort((a, b) => {
+                          if (filter?.translate) {
+                            return filter.translate(a.key).toString().localeCompare(filter.translate(b.key).toString());
+                          }
                           a.key.toString().localeCompare(b.key.toString());
                         })
                         ?.map((option) => {
