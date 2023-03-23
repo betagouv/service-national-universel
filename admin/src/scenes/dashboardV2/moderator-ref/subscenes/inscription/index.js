@@ -15,6 +15,7 @@ export default function Index() {
   const [inscriptionGoals, setInscriptionGoals] = useState();
 
   const [inscriptionDetailObject, setInscriptionDetailObject] = useState({});
+  const [inscriptionDetailObjectBottom, setInscriptionDetailObjectBottom] = useState({});
 
   const filterArray = [
     {
@@ -59,14 +60,25 @@ export default function Index() {
     setInscriptionDetailObject(res);
   }
 
+  async function fetchDetailInscriptions() {
+    const res = await getDetailInscriptions(selectedFiltersBottom);
+    setInscriptionDetailObjectBottom(res);
+  }
+
   useEffect(() => {
     fetchInscriptionGoals();
     fetchCurrentInscriptions();
+    fetchDetailInscriptions();
   }, []);
 
   useEffect(() => {
     fetchCurrentInscriptions();
+    fetchDetailInscriptions();
   }, [selectedFilters]);
+
+  useEffect(() => {
+    fetchDetailInscriptions();
+  }, [selectedFiltersBottom]);
 
   const goal = useMemo(
     () =>
@@ -154,6 +166,7 @@ function filterByRegionAndDepartement(e, filters, user) {
   return true;
 }
 
+async function getDetailInscriptions(filters) {}
 async function getCurrentInscriptions(filters) {
   const body = {
     query: { bool: { must: { match_all: {} }, filter: [] } },
