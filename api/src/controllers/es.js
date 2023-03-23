@@ -771,6 +771,17 @@ router.post("/modificationbus/:action(_msearch|export)", passport.authenticate([
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+router.post("/inscriptiongoal/_msearch", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { body, user } = req;
+    if (!isReferent(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const response = await esClient.msearch({ index: "inscriptiongoal", body });
+    return res.status(200).send(response.body);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 
 // Add filter to all lines of the body.
 function withFilterForMSearch(body, filter) {
