@@ -312,7 +312,6 @@ export default function StepCoordonnees() {
     setData({ ...data, birthCity: value });
     const trimmedValue = value.trim();
     if (trimmedValue && trimmedValue.length > 2) {
-      console.log("trimmedValue", trimmedValue);
       debouncedSuggestionsRequest(trimmedValue);
     } else {
       setBirthCityZipSuggestions([]);
