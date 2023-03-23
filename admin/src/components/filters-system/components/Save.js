@@ -76,7 +76,7 @@ export default function Save({ filterArray, selectedFilters, page = 1, pageId })
           data-tip=""
           data-for="tooltip-saveFilter"
           onClick={() => setModalSaveVisible(true)}
-          className="p-2 h-[42px] w-[42px] bg-gray-100 rounded flex items-center justify-center cursor-pointer">
+          className="p-2 h-[38px] w-[38px] bg-gray-100 hover:bg-gray-200 rounded flex items-center justify-center cursor-pointer">
           <FloppyDisk />
         </div>
 
