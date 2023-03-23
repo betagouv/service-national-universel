@@ -8,6 +8,7 @@ import api from "../../../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { YOUNG_STATUS, REFERENT_ROLES, departmentList, regionList, COHORTS, ES_NO_LIMIT } from "snu-lib";
 import { useSelector } from "react-redux";
+import StatutPhase from "../../../components/inscription/StatutPhase.js";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -97,6 +98,25 @@ export default function Index() {
           goal={goal}
         />
       </div>
+      {/*
+      <StatutPhase
+        values={[
+          inscriptionDetailObject.IN_PROGRESS,
+          inscriptionDetailObject.WAITING_VALIDATION,
+          inscriptionDetailObject.WAITING_CORRECTION,
+          inscriptionDetailObject.VALIDATED,
+          inscriptionDetailObject.WAITING_LIST,
+          inscriptionDetailObject.REFUSED,
+          inscriptionDetailObject.REINSCRIPTION,
+          inscriptionDetailObject.NOT_ELIGIBLE,
+          inscriptionDetailObject.ABANDONED,
+          inscriptionDetailObject.NOT_AUTORISED,
+          inscriptionDetailObject.DELETED,
+        ]}
+      />
+    
+        */}
+      <StatutPhase values={inscriptionDetailObject} />
     </DashboardContainer>
   );
 }
@@ -147,6 +167,24 @@ async function getCurrentInscriptions(filters) {
       },
       WAITING_LIST: {
         filter: { term: { "status.keyword": YOUNG_STATUS.WAITING_LIST } },
+      },
+      REFUSED: {
+        filter: { term: { "status.keyword": YOUNG_STATUS.REFUSED } },
+      },
+      REINSCRIPTION: {
+        filter: { term: { "status.keyword": YOUNG_STATUS.REINSCRIPTION } },
+      },
+      NOT_ELIGIBLE: {
+        filter: { term: { "status.keyword": YOUNG_STATUS.NOT_ELIGIBLE } },
+      },
+      ABANDONED: {
+        filter: { term: { "status.Keyword": YOUNG_STATUS.ABANDONED } },
+      },
+      NOT_AUTORISED: {
+        filter: { term: { "status.Keyword": YOUNG_STATUS.NOT_AUTORISED } },
+      },
+      DELETED: {
+        filter: { term: { "status.Keyword": YOUNG_STATUS.DELETED } },
       },
     },
     size: 0,
