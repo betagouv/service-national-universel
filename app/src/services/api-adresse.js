@@ -4,8 +4,8 @@ import { capture } from "../sentry";
 
 const baseUrl = "https://api-adresse.data.gouv.fr/search/?";
 
-const apiAdress = async (query, filters, options = {}) => {
-  const url = encodeURI(`${baseUrl}q=${query}&limit=1${filters && `&${filters.join("&")}`}`);
+const apiAdress = async (query, filters = [], options = {}) => {
+  const url = encodeURI(`${baseUrl}q=${query}${filters.length > 0 ? `&${filters.join("&")}` : ""}`);
   try {
     const res = await fetch(url, {
       ...options,
