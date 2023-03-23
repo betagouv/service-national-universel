@@ -21,6 +21,7 @@ const applicationPatches = require("./patch/application");
 const missionPatches = require("./patch/mission");
 const structurePatches = require("./patch/structure");
 const youngPatches = require("./patch/young");
+const refreshMaterializedViews = require("./patch/refresh-materialized-views");
 const parentConsentementReminder = require("./parentConsentementReminder");
 const dsnjExport = require("./dsnjExport");
 
@@ -141,5 +142,9 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule("27 8 * * *", () => {
     parentConsentementReminder.handler();
+  });
+
+  cron.schedule("0 5 * * *", () => {
+    refreshMaterializedViews.handler();
   });
 }
