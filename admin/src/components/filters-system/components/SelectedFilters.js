@@ -13,7 +13,7 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
             <div className={`p-0.5 border-[2px] ${paramData?.isShowing === filter.name ? "  border-blue-600 rounded-xl" : "border-transparent"}`}>
               <div
                 onClick={() => setParamData((oldValue) => ({ ...oldValue, isShowing: filter.name }))}
-                className=" cursor-pointer flex flex-row border-[1px] border-gray-200 rounded-md w-fit p-2 items-center gap-1">
+                className=" cursor-pointer flex flex-row border-[1px] border-gray-200 rounded-md w-fit pr-2 py-1.5 pl-[12px] items-center gap-1">
                 <div className="text-gray-700 font-medium text-xs">{filter.title} :</div>
                 {selectedFilters[filter.name].filter.map((item, index) => {
                   // on affiche que les 2 premiers filtres, apres on affiche "+x"

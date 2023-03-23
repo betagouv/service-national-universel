@@ -86,7 +86,7 @@ export default function Save({ filterArray, selectedFilters, page = 1, pageId })
             <div className="font-medium text-xs mt-3 mb-2">Nommez la vue</div>
             <Field autoFocus name="nameView" label="Nom de la vue" value={nameView} errors={{ nameView: error }} handleChange={(e) => setNameView(e.target.value)} />
             <div className="flex justify-end items-center">
-              <div onClick={handleSave} className={` ${loading && "opacity-50"} bg-blue-600 text-white px-3 py-2 rounded-md w-fit my-4 self-end cursor-pointer`}>
+              <div onClick={handleSave} className={` ${loading && "opacity-50"} bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md w-fit my-4 self-end cursor-pointer`}>
                 Enregistrer
               </div>
             </div>
