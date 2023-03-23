@@ -3,6 +3,7 @@ import { Spinner } from "reactstrap";
 import { department2region, departmentLookUp } from "snu-lib/region-and-departments";
 import InfoIcon from "../../../components/InfoIcon";
 import { apiAdress } from "../../../services/api-adresse";
+import Button from "./Button";
 import GhostButton from "./GhostButton";
 
 export default function VerifyAddress({ address, zip, city, onSuccess, onFail, disabled = false, isVerified = false, buttonClassName = "", buttonContainerClassName = "" }) {
@@ -63,13 +64,14 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
             {suggestion.properties.name}, {`${suggestion.properties.postcode} ${suggestion.properties.city}`}
           </strong>
         </p>
-        <GhostButton
+        <Button
           onClick={() => {
             onSuccess(formatResult(suggestion));
             setSuggestion(null);
           }}
-          name="Oui"
-        />
+          className="w-full my-1">
+          Oui
+        </Button>
         <GhostButton
           onClick={() => {
             onFail(formatResult(suggestion));
