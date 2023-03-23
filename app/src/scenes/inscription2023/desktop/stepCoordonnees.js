@@ -59,7 +59,19 @@ const addressFields = ["address", "zip", "city", "cityCode", "region", "departme
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
-const commonFields = [...birthPlaceFields, ...addressFields, "gender", "phone", "situation", "livesInFrance", "handicap", "allergies", "ppsBeneficiary", "paiBeneficiary"];
+const commonFields = [
+  ...birthPlaceFields,
+  ...addressFields,
+  "gender",
+  "phone",
+  "phoneZone",
+  "situation",
+  "livesInFrance",
+  "handicap",
+  "allergies",
+  "ppsBeneficiary",
+  "paiBeneficiary",
+];
 
 const commonRequiredFields = [
   ...birthPlaceFields,
@@ -190,6 +202,7 @@ export default function StepCoordonnees() {
         birthCityZip: young.birthCityZip || data.birthCityZip,
         gender: young.gender || data.gender,
         phone: young.phone || data.phone,
+        phoneZone: young.phoneZone || data.phoneZone,
         livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
         addressVerified: young.addressVerified || data.addressVerified,
         address: young.address || data.address,

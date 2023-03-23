@@ -6,6 +6,7 @@ const { ROLES_LIST } = require("snu-lib");
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
+const { PHONE_ZONES_NAMES } = require("../utils/phone-number.utils");
 const MODELNAME = "young";
 
 const File = new mongoose.Schema({
@@ -173,6 +174,14 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Numéro de télephone du volontaire",
+    },
+  },
+  phoneZone: {
+    type: String,
+    enum: PHONE_ZONES_NAMES,
+    default: "AUTRE",
+    documentation: {
+      description: "Zone géographique de provenance du numéro du volontaire",
     },
   },
   gender: {

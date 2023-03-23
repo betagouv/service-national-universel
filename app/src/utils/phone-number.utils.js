@@ -92,10 +92,10 @@ export const PHONE_ZONES = {
   },
 };
 
-export const isPhoneNumberWellFormated = (phoneNumberValue, zone) => {
-  const shouldPhoneNumberStartWithZero = PHONE_ZONES[zone].example.charAt(0);
+export const isPhoneNumberWellFormated = (phoneNumberValue, zoneKey) => {
+  const shouldPhoneNumberStartWithZero = PHONE_ZONES[zoneKey].example.charAt(0) === 0;
   const hasPhoneNumberAZero = phoneNumberValue.charAt(0) === "0";
-  const hasPhoneNumberGoodLength = PHONE_ZONES[zone].numberLength === phoneNumberValue.length;
+  const hasPhoneNumberGoodLength = PHONE_ZONES[zoneKey].numberLength === phoneNumberValue.length;
 
   if (shouldPhoneNumberStartWithZero) {
     return hasPhoneNumberAZero && hasPhoneNumberGoodLength;

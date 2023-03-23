@@ -15,6 +15,7 @@ const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { isInRuralArea } = require("snu-lib");
+const { PHONE_ZONES_NAMES } = require("../../utils/phone-number.utils");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -143,6 +144,10 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       birthCity: needRequired(Joi.string().trim(), isRequired),
       birthCityZip: Joi.string().trim().allow(null, ""),
       phone: needRequired(Joi.string().trim(), isRequired),
+      phoneZone: Joi.string()
+        .trim()
+        .valid(...PHONE_ZONES_NAMES)
+        .default("AUTRE"),
       situation: Joi.alternatives().conditional("schooled", {
         is: "true",
         then: needRequired(
@@ -309,6 +314,10 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       parent1LastName: needRequired(Joi.string().trim(), isRequired),
       parent1Email: needRequired(Joi.string().trim().email(), isRequired),
       parent1Phone: needRequired(Joi.string().trim(), isRequired),
+      parent1PhoneZone: Joi.string()
+        .trim()
+        .valid(...PHONE_ZONES_NAMES)
+        .default("AUTRE"),
       parent2: needRequired(Joi.string().trim().valid(true, false), isRequired),
       parent2Status: Joi.alternatives().conditional("parent2", {
         is: true,
@@ -331,6 +340,10 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
         then: needRequired(Joi.string().trim(), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
+      parent2PhoneZone: Joi.string()
+        .trim()
+        .valid(...PHONE_ZONES_NAMES)
+        .default("AUTRE"),
     };
 
     let { error, value } = Joi.object(representantSchema).validate(req.body, { stripUnknown: true });

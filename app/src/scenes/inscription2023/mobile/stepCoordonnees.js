@@ -62,7 +62,19 @@ const addressFields = ["address", "zip", "city", "cityCode", "region", "departme
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
-const commonFields = [...birthPlaceFields, ...addressFields, "gender", "phone", "situation", "livesInFrance", "handicap", "allergies", "ppsBeneficiary", "paiBeneficiary"];
+const commonFields = [
+  ...birthPlaceFields,
+  ...addressFields,
+  "gender",
+  "phone",
+  "phoneZone",
+  "situation",
+  "livesInFrance",
+  "handicap",
+  "allergies",
+  "ppsBeneficiary",
+  "paiBeneficiary",
+];
 
 const commonRequiredFields = [
   ...birthPlaceFields,
