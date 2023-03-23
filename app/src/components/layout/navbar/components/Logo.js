@@ -1,5 +1,5 @@
 import React from "react";
-import LogoSNU from "../assets/logoSNU.svg";
+import LogoSNU from "../../../../assets/logo-snu.svg";
 
 export default function Logo() {
   return (
