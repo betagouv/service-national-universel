@@ -1,6 +1,6 @@
 import React from "react";
-import ErrorMessage from "../../scenes/inscription2023/components/ErrorMessage";
-import { PHONE_ZONES } from "../../utils/phone-number.utils";
+import ErrorMessage from "./ErrorMessage";
+import { PHONE_ZONES } from "../../../utils/phone-number.utils";
 
 const PhoneField = ({
   value = "",
