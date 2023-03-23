@@ -4,8 +4,8 @@ import { capture } from "../sentry";
 
 const baseUrl = "https://api-adresse.data.gouv.fr/search/?";
 
-const apiAdress = async (query, filters = [], options = {}) => {
-  const url = encodeURI(`${baseUrl}q=${query}&limit=1&${filters.join("&")}`);
+const apiAdress = async (query, filters, options = {}) => {
+  const url = encodeURI(`${baseUrl}q=${query}&limit=1${filters && `&${filters.join("&")}`}`);
   try {
     const res = await fetch(url, {
       ...options,
@@ -26,7 +26,7 @@ const putLocation = async (city, zip) => {
   try {
     if (!city && !zip) return;
     // try with municipality = city + zip
-    const resMunicipality = await apiAdress(`${encodeURIComponent(city + " " + zip)}&type=municipality`);
+    const resMunicipality = await apiAdress(city, [`postcode=${zip}`, "type=municipality"]);
     if (resMunicipality?.features?.length > 0) {
       return {
         lon: resMunicipality.features[0].geometry.coordinates[0],
@@ -34,7 +34,7 @@ const putLocation = async (city, zip) => {
       };
     }
     // try with locality = city + zip
-    const resLocality = await apiAdress(`${encodeURIComponent(zip + " " + city)}&type=locality`);
+    const resLocality = await apiAdress(city, [`postcode=${zip}`, "type=locality"]);
     if (resLocality?.features?.length > 0) {
       return {
         lon: resLocality.features[0].geometry.coordinates[0],
@@ -43,8 +43,7 @@ const putLocation = async (city, zip) => {
     }
     // try with postcode = zip
     let url = `${city || zip}`;
-    if (zip) url += `&postcode=${zip}`;
-    const resPostcode = await apiAdress(url);
+    const resPostcode = await apiAdress(url, [`postcode=${zip}`]);
     if (resPostcode?.features?.length > 0) {
       return {
         lon: resPostcode.features[0].geometry.coordinates[0],
