@@ -625,7 +625,6 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     }
 
     if (!data.phone || !isPhoneNumberWellFormated(data.phone, data.phoneZone || "AUTRE")) {
-      console.log("ERROR PHONE", PHONE_ZONES[data.phoneZone || "AUTRE"]);
       errors.phone = PHONE_ZONES[data.phoneZone || "AUTRE"].errorMessage;
       result = false;
     }
@@ -1136,6 +1135,8 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
         if (data.parent1Phone) data.parent1Phone = trimmedPhones[1];
         if (data.parent2Phone) data.parent2Phone = trimmedPhones[2];
 
+        console.log(data.parent1Phone, data.parent1PhoneZone);
+
         const result = await api.put(`/young-edition/${young._id}/situationparents`, data);
         if (result.ok) {
           toastr.success("Les données ont bien été enregistrées.");
@@ -1161,8 +1162,12 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
         errors[`parent${parent}Email`] = "L'email ne semble pas valide";
         result = false;
       }
-      if ((data[`parent${parent}ContactPreference`] === "phone" || trimmedPhones[parent] !== "") && !validator.matches(data[`parent${parent}Phone`], regexPhoneFrenchCountries)) {
-        errors[`parent${parent}Phone`] = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
+
+      if (
+        (data[`parent${parent}ContactPreference`] === "phone" || trimmedPhones[parent] !== "") &&
+        !isPhoneNumberWellFormated(data[`parent${parent}Phone`], data[`parent${parent}PhoneZone`] || "AUTRE")
+      ) {
+        errors[`parent${parent}Phone`] = PHONE_ZONES[data[`parent${parent}PhoneZone`] || "AUTRE"].errorMessage;
         result = false;
       }
       result = validateEmpty(data, `parent${parent}LastName`, errors) && result;
@@ -1382,18 +1387,19 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 young={young}
                 copy={true}
               />
-              <Field
+              <PhoneField
                 name={`parent${currentParent}Phone`}
-                label="Téléphone"
-                value={data[`parent${currentParent}Phone`]}
-                mode={sectionMode}
                 className="mb-[16px]"
+                young={young}
+                value={data[`parent${currentParent}Phone`]}
+                onChange={(value) => onLocalChange(`parent${currentParent}Phone`, value)}
+                zoneValue={data[`parent${currentParent}PhoneZone`]}
+                onChangeZone={(value) => onLocalChange(`parent${currentParent}PhoneZone`, value)}
+                mode={sectionMode}
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
                 correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Phone`)}
                 onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={(value) => onLocalChange(`parent${currentParent}Phone`, value)}
-                young={young}
               />
               <Field
                 name={`parent${currentParent}OwnAddress`}

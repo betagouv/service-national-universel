@@ -988,6 +988,14 @@ const Schema = new mongoose.Schema({
       description: "Numéro de téléphone du parent 1",
     },
   },
+  parent1PhoneZone: {
+    type: String,
+    enum: PHONE_ZONES_NAMES,
+    default: "AUTRE",
+    documentation: {
+      description: "Zone géographique de provenance du numéro du parent 1",
+    },
+  },
   parent1OwnAddress: {
     type: String,
     enum: ["true", "false"],
@@ -1126,6 +1134,14 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Numéro de téléphone du parent 2",
+    },
+  },
+  parent2PhoneZone: {
+    type: String,
+    enum: PHONE_ZONES_NAMES,
+    default: "AUTRE",
+    documentation: {
+      description: "Zone géographique de provenance du numéro du parent 1",
     },
   },
   parent2OwnAddress: {
