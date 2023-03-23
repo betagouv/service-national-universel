@@ -40,7 +40,7 @@ import validator from "validator";
 import SectionContext from "./context/SectionContext";
 import VerifyAddress from "./components/VerifyAddress";
 import { FileField } from "./components/FileField";
-import { copyToClipboard, regexPhoneFrenchCountries } from "../../utils";
+import { copyToClipboard } from "../../utils";
 import Warning from "../../assets/icons/Warning";
 import { useSelector } from "react-redux";
 import { appURL } from "../../config";
@@ -48,7 +48,6 @@ import { capture } from "../../sentry";
 import Modal from "../../components/ui/modals/Modal";
 import ButtonLight from "../../components/ui/buttons/ButtonLight";
 import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
-import InputPhone from "../../components/ui/forms/InputPhone";
 import PhoneField from "./components/PhoneField";
 import { isPhoneNumberWellFormated, PHONE_ZONES } from "../../utils/phone-number.utils";
 
@@ -955,7 +954,7 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
 
       <FieldsGroup
         name="latestCNIFileExpirationDate"
-        title="Date d’expiration de la pièce d’identité"
+        title="Date d'expiration de la pièce d'identité"
         mode={globalMode}
         onStartRequest={onStartRequest}
         currentRequest={currentRequest}
