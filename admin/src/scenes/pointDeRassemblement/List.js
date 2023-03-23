@@ -2,7 +2,7 @@ import React from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
-import { canCreateMeetingPoint, ES_NO_LIMIT, ROLES, START_DATE_SESSION_PHASE1, COHORTS, COHESION_STAY_START, getDepartmentNumber } from "snu-lib";
+import { canCreateMeetingPoint, ES_NO_LIMIT, ROLES, START_DATE_SESSION_PHASE1, COHORTS, COHESION_STAY_START } from "snu-lib";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { adminURL } from "../../config";
 import api from "../../services/api";
@@ -97,13 +97,7 @@ const ListPoints = ({ user }) => {
   const filterArray = [
     { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée" },
     { title: "Région", name: "region", datafield: "region.keyword", missingLabel: "Non renseignée" },
-    {
-      title: "Département",
-      name: "department",
-      datafield: "department.keyword",
-      missingLabel: "Non renseignée",
-      translate: (e) => getDepartmentNumber(e) + " - " + e,
-    },
+    { title: "Département", name: "department", datafield: "department.keyword", missingLabel: "Non renseignée" },
   ];
   const searchBarObject = {
     placeholder: "Rechercher un point de rassemblement",
@@ -248,7 +242,6 @@ const ListSessions = ({ user, firstSession }) => {
       name: "department",
       datafield: "department.keyword",
       missingLabel: "Non renseignée",
-      translate: (e) => getDepartmentNumber(e) + " - " + e,
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : [],
     },
   ];
