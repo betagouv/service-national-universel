@@ -46,7 +46,7 @@ export default function OccupationCardHorizontal({ total, taken }) {
         </div>
       </div>
 
-      <div className="absolute top-4 right-4 bg-blue-100 text-blue-600 px-2 py-1 rounded uppercase text-xs font-bold">198 au total</div>
+      <div className="absolute top-4 right-4 bg-blue-100 text-blue-600 px-2 py-1 rounded uppercase text-xs font-bold">{total} au total</div>
     </div>
   );
 }
