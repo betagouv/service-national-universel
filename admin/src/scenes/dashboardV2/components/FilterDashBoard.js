@@ -128,7 +128,7 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
   const handleSelect = (value) => {
     // check si c'est un isSingle (un seul filtre possible)
     if (filter?.isSingle) return setSelectedFilters({ ...selectedFilters, [filter?.id]: [value] });
-    if (filter?.fixed.includes(value)) return;
+    if (filter?.fixed?.includes(value)) return;
     let newFilters = [];
     // store localement les filtres
     if (selectedFilters[filter?.id]) {
