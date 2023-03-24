@@ -1,10 +1,15 @@
 import React from "react";
 import StatusText from "./StatusText";
 
-export default function OccupationBarVertical({ percentage, nbDepart }) {
+export default function OccupationBarVertical({ percentage, nbDepart, departMotif }) {
   let height = `h-0`;
   let bgColor = "bg-blue-700";
   let occupationPercentage = percentage * 100;
+
+  const exclusion = departMotif?.Exclusion || 0;
+  const forceMajeure = departMotif && "Cas de force majeure pour le volontaire" in departMotif ? departMotif["Cas de force majeure pour le volontaire"] : 0;
+  const annulation = departMotif && "Annulation du séjour ou mesure d’éviction sanitaire" in departMotif ? departMotif["Annulation du séjour ou mesure d’éviction sanitaire"] : 0;
+  const autre = departMotif?.Autre || 0;
 
   if (isNaN(occupationPercentage)) occupationPercentage = 0;
 
@@ -28,15 +33,15 @@ export default function OccupationBarVertical({ percentage, nbDepart }) {
             <div className={`flex justify-center items-center w-16 ${height} ${bgColor} rounded-lg text-white font-bold text-xs`}>{Math.floor(occupationPercentage)}%</div>
           </div>
         )}
-        <p className="text-sm leading-4 font-bold text-gray-900">{nbDepart} départs</p>
+        <p className="text-sm leading-4 font-bold text-gray-900">{nbDepart || 0} départs</p>
       </div>
       <div className="flex flex-col gap-5">
         <p className="text-base leading-5 font-bold text-gray-900">Motifs de départ</p>
         <div className="flex flex-col gap-1">
-          <StatusText status="Exclusion" nb={2} percentage={19} />
-          <StatusText status="Cas de force majeur" nb={8} percentage={66} />
-          <StatusText status="Annulation séjour, éviction sanitaire" nb={0} percentage={0} />
-          <StatusText status="Autre" nb={2} percentage={19} />
+          <StatusText status="Exclusion" nb={exclusion} percentage={nbDepart ? Math.floor((exclusion / nbDepart) * 100) : 0} />
+          <StatusText status="Cas de force majeur" nb={forceMajeure} percentage={nbDepart ? Math.floor((forceMajeure / nbDepart) * 100) : 0} />
+          <StatusText status="Annulation séjour, éviction sanitaire" nb={annulation} percentage={nbDepart ? Math.floor((annulation / nbDepart) * 100) : 0} />
+          <StatusText status="Autre" nb={autre} percentage={nbDepart ? Math.floor((autre / nbDepart) * 100) : 0} />
         </div>
       </div>
     </div>
