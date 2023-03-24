@@ -203,7 +203,11 @@ export default function Index() {
               noValue
               className="h-[200px] mt-8"
             />
-            <Legends className="flew-wrap" labels={["En situation de handicap", "Bénéficiaire d’un PPS", "Bénéficiaire d’un PAI", "Allergie/intolérance"]} />
+            <Legends
+              className="flew-wrap"
+              values={[specificSituation.handicap.true, specificSituation.ppsBeneficiary.true, specificSituation.paiBeneficiary.true, specificSituation.allergies.true]}
+              labels={["En situation de handicap", "Bénéficiaire d’un PPS", "Bénéficiaire d’un PAI", "Allergie/intolérance"]}
+            />
 
             <div className="h-[1px] w-3/5 border-b-[1px] border-gray-300" />
 
