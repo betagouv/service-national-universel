@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import DashboardContainer from "../../../components/DashboardContainer";
-import { FullDoughnut, HorizontalBar, BarChart, Legends, Legend } from "../../../components/graphs";
+import { FullDoughnut, HorizontalBar, BarChart, Legends, Legend, graphColors } from "../../../components/graphs";
 
 import { FilterDashBoard, FilterComponent } from "../../../components/FilterDashBoard";
 import api from "../../../../../services/api";
@@ -204,10 +204,19 @@ export default function Index() {
               className="h-[200px] mt-8"
             />
             <Legends className="flew-wrap" labels={["En situation de handicap", "Bénéficiaire d’un PPS", "Bénéficiaire d’un PAI", "Allergie/intolérance"]} />
-            <div className="flex  justify-center items-center">
-              <div className="w-[1px] h-3/5 border-r-[1px] border-gray-300" />
+
+            <div className="h-[1px] w-3/5 border-b-[1px] border-gray-300" />
+
+            <div className="flex flex-row justify-between w-full">
+              <Legend className="!flex-col text-center" name="Aménagement spécifique" value={specificSituation.specificAmenagment.true} color={graphColors[1][0]} />
+              <Legend
+                className="!flex-col text-center"
+                name="Affectation dans le département de résidence"
+                value={specificSituation.handicapInSameDepartment.true}
+                color={graphColors[1][0]}
+              />
+              <Legend className="!flex-col text-center" name="Aménagement pour mobilité réduite" value={specificSituation.reducedMobilityAccess.true} color={graphColors[1][0]} />
             </div>
-            <Legend name="Aménagement spécifique" value={specificSituation.specificAmenagment.true} />
           </div>
         ) : selectedDetail === "qpv" ? (
           <div className="flex flex-col justify-center items-center w-full gap-10">
