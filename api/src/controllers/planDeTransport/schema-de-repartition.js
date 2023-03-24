@@ -510,7 +510,11 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
     // --- assigned
     const repartitionResult = await schemaRepartitionModel
       .aggregate([
-        { $match: { cohort, centerId: { $ne: null }, gatheringPlaces: { $exists: true, $ne: [] } } },
+        {
+          $match: {
+            $and: [{ cohort, centerId: { $ne: null } }, { $or: [{ intradepartmental: "true" }, { gatheringPlaces: { $exists: true, $ne: [] } }] }],
+          },
+        },
         {
           $group: {
             _id: "$fromRegion",
@@ -689,7 +693,11 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
 
     // --- assigned
     const schemaPipeline = [
-      { $match: { cohort, fromRegion: region, centerId: { $ne: null }, gatheringPlaces: { $exists: true, $ne: [] } } },
+      {
+        $match: {
+          $and: [{ cohort, fromRegion: region, centerId: { $ne: null } }, { $or: [{ intradepartmental: "true" }, { gatheringPlaces: { $exists: true, $ne: [] } }] }],
+        },
+      },
       {
         $group: {
           _id: "$fromDepartment",
