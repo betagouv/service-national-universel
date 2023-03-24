@@ -1,3 +1,23 @@
+# [1.239.0](https://github.com/betagouv/service-national-universel/compare/v1.238.0...v1.239.0) (2023-03-23)
+
+
+### Bug Fixes
+
+* **admin:** double filetype in export (.xlsx.xlsx) ([e3b65b2](https://github.com/betagouv/service-national-universel/commit/e3b65b2b87b350021df409e569fdb6f541192dde))
+* **admin:** retour design 2 filters ([af2ede6](https://github.com/betagouv/service-national-universel/commit/af2ede69e55fd4692263154740780de15235ed13))
+* **api:** coordinates next step in case of qpv erreur ([#2416](https://github.com/betagouv/service-national-universel/issues/2416)) ([3572160](https://github.com/betagouv/service-national-universel/commit/3572160b4653944be45ba83832a8caf2a3da7e72))
+* **app:** address mobile fix ([835488d](https://github.com/betagouv/service-national-universel/commit/835488d9d44de205850fb4f93da807c2dda429ec))
+* **app:** apiAdress filters array ([a174a46](https://github.com/betagouv/service-national-universel/commit/a174a465ebcf757fd582c0882c8d3aadebdaf9e8))
+* **app:** steps logic ([fcb700b](https://github.com/betagouv/service-national-universel/commit/fcb700bfc1194b178c1ec8e8fb281bb0b3c87f7c))
+* **knowledge:** design link contactform ([#2409](https://github.com/betagouv/service-national-universel/issues/2409)) ([dc9d275](https://github.com/betagouv/service-national-universel/commit/dc9d275620ea61ffa613074c0d9bd94d3eee110f))
+
+
+### Features
+
+* **admin:** add department's numbers on filters ([f38994f](https://github.com/betagouv/service-national-universel/commit/f38994fa60414f69c0cce08215b668268f791273))
+* **admin:** remove selected filters ([9a38b43](https://github.com/betagouv/service-national-universel/commit/9a38b4335fb1a0338a84b3f6900327b3f9d1a71a))
+* **admin/api:** Objectif des inscriptions new dashboard ([6dc6753](https://github.com/betagouv/service-national-universel/commit/6dc675304e07aaf506d68132554cd3b33ca619aa))
+
 # [1.238.0](https://github.com/betagouv/service-national-universel/compare/v1.237.0...v1.238.0) (2023-03-22)
 
 

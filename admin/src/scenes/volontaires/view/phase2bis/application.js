@@ -296,9 +296,14 @@ export default function Phase2Application({ young, onChange }) {
                       {contract?.isYoungAdult === "true" ? (
                         <StatusContractPeople
                           value={contract?.youngContractStatus}
+                          token={contract?.youngContractToken}
                           description="Volontaire"
                           firstName={contract?.youngFirstName}
                           lastName={contract?.youngLastName}
+                          target="young"
+                          contract={contract}
+                          status={contract?.youngContractStatus}
+                          validationDate={contract?.youngContractValidationDate}
                         />
                       ) : (
                         <>
