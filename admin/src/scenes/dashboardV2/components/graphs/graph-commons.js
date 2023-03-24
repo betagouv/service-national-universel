@@ -27,7 +27,7 @@ export function Legends({ labels, values = null, className = "" }) {
   return (
     <div className={`flex ${className}`}>
       {labels.map((label, idx) => (
-        <Legend color={colors[idx]} name={label} value={values ? values[idx] : null} key={labels} className="mr-4 last:mr-0" />
+        <Legend color={colors[idx]} name={label} value={values ? values[idx] : null} key={label} className="mr-4 last:mr-0" />
       ))}
     </div>
   );

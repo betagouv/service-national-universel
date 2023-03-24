@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import DashboardContainer from "../../../components/DashboardContainer";
-import { FullDoughnut, HorizontalBar, BarChart } from "../../../components/graphs";
+import { FullDoughnut, HorizontalBar, BarChart, Legends, Legend } from "../../../components/graphs";
 
 import { FilterDashBoard, FilterComponent } from "../../../components/FilterDashBoard";
 import api from "../../../../../services/api";
@@ -24,6 +24,7 @@ export default function Index() {
   const [situation, setSituation] = useState({});
   const [qpv, setQpv] = useState({});
   const [rural, setRural] = useState({});
+  const [specificSituation, setSpecificSituation] = useState({});
 
   const filterArray = [
     {
@@ -85,7 +86,15 @@ export default function Index() {
     setSituation(res.situation);
     setQpv(res.qpv);
     setRural(res.rural);
-    console.log(res.rural);
+    setSpecificSituation({
+      handicap: res.handicap,
+      allergies: res.allergies,
+      handicapInSameDepartment: res.handicapInSameDepartment,
+      reducedMobilityAccess: res.reducedMobilityAccess,
+      ppsBeneficiary: res.ppsBeneficiary,
+      paiBeneficiary: res.paiBeneficiary,
+      specificAmenagment: res.specificAmenagment,
+    });
   }
 
   useEffect(() => {
@@ -189,7 +198,16 @@ export default function Index() {
           </div>
         ) : selectedDetail === "situation" ? (
           <div className="flex flex-col justify-center items-center w-full gap-10">
-            <BarChart values={[16, 9, 25, 3]} noValue className="h-[200px] mt-8" />
+            <BarChart
+              values={[specificSituation.handicap.true, specificSituation.ppsBeneficiary.true, specificSituation.paiBeneficiary.true, specificSituation.allergies.true]}
+              noValue
+              className="h-[200px] mt-8"
+            />
+            <Legends className="flew-wrap" labels={["En situation de handicap", "Bénéficiaire d’un PPS", "Bénéficiaire d’un PAI", "Allergie/intolérance"]} />
+            <div className="flex  justify-center items-center">
+              <div className="w-[1px] h-3/5 border-r-[1px] border-gray-300" />
+            </div>
+            <Legend name="Aménagement spécifique" value={specificSituation.specificAmenagment.true} />
           </div>
         ) : selectedDetail === "qpv" ? (
           <div className="flex flex-col justify-center items-center w-full gap-10">
@@ -305,18 +323,6 @@ async function getDetailInscriptions(filters) {
           size: ES_NO_LIMIT,
         },
       },
-      handicap: {
-        terms: {
-          field: "handicap.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      ppsBeneficiary: {
-        terms: {
-          field: "ppsBeneficiary.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
       qpv: {
         terms: {
           field: "qpv.keyword",
@@ -326,6 +332,48 @@ async function getDetailInscriptions(filters) {
       rural: {
         terms: {
           field: "isRegionRural.keyword",
+          size: ES_NO_LIMIT,
+        },
+      },
+      handicap: {
+        terms: {
+          field: "handicap.keyword",
+          size: ES_NO_LIMIT,
+        },
+      },
+      allergies: {
+        terms: {
+          field: "allergies.keyword",
+          size: ES_NO_LIMIT,
+        },
+      },
+      handicapInSameDepartment: {
+        terms: {
+          field: "handicapInSameDepartment.keyword",
+          size: ES_NO_LIMIT,
+        },
+      },
+      reducedMobilityAccess: {
+        terms: {
+          field: "reducedMobilityAccess.keyword",
+          size: ES_NO_LIMIT,
+        },
+      },
+      ppsBeneficiary: {
+        terms: {
+          field: "ppsBeneficiary.keyword",
+          size: ES_NO_LIMIT,
+        },
+      },
+      paiBeneficiary: {
+        terms: {
+          field: "paiBeneficiary.keyword",
+          size: ES_NO_LIMIT,
+        },
+      },
+      specificAmenagment: {
+        terms: {
+          field: "specificAmenagment.keyword",
           size: ES_NO_LIMIT,
         },
       },
