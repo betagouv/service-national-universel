@@ -37,7 +37,6 @@ export default function Index() {
           id: "region",
           name: "Région",
           fullValue: "Toutes",
-          disabled: [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role),
           options: regionList.map((region) => ({ key: region, label: region })),
         }
       : null,
@@ -53,7 +52,6 @@ export default function Index() {
       id: "department",
       name: "Département",
       fullValue: "Tous",
-      disabled: [ROLES.REFERENT_DEPARTMENT].includes(user.role),
       options: departmentList.map((department) => ({ key: department, label: department })),
     },
     {
