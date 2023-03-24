@@ -146,6 +146,7 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
     setSelectedFilters({ ...selectedFilters, [filter?.id]: newFilters });
   };
   const handleDelete = () => {
+    if (filter?.fixed) return setSelectedFilters((selectedFilters) => ({ ...selectedFilters, [filter?.id]: filter.fixed }));
     setSelectedFilters((selectedFilters) => ({ ...selectedFilters, [filter?.id]: [] }));
   };
   return (
