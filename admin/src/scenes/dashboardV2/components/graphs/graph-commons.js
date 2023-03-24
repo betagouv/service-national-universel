@@ -16,7 +16,7 @@ export function Legend({ color, name, value = null, className = "" }) {
       <div className="text-xs text-gray-600 ml-2">{name}</div>
       <div className={`flex items-center`}>
         <div className={`rounded-full w-[10px] h-[10px]`} style={{ backgroundColor: color }}></div>
-        {value !== null && value !== undefined && <div className="font-medium text-lg text-gray-900 ml-2">{value}</div>}
+        <div className="font-medium text-lg text-gray-900 ml-2">{value ? value : 0}</div>
       </div>
     </div>
   );
@@ -27,7 +27,7 @@ export function Legends({ labels, values = null, className = "" }) {
   return (
     <div className={`flex ${className}`}>
       {labels.map((label, idx) => (
-        <Legend color={colors[idx]} name={label} value={values ? values[idx] : null} key={label} className="mr-4 last:mr-0" />
+        <Legend color={colors[idx]} name={label} value={values ? values[idx] : 0} key={label} className="mr-4 last:mr-0" />
       ))}
     </div>
   );
