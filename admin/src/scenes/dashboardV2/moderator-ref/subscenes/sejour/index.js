@@ -32,19 +32,23 @@ export default function Index() {
         .filter((s) => ![YOUNG_STATUS_PHASE1.WAITING_LIST, YOUNG_STATUS_PHASE1.WITHDRAWN].includes(s))
         .map((status) => ({ key: status, label: translatePhase1(status) })),
     },
-    {
-      id: "region",
-      name: "Région",
-      fullValue: "Toutes",
-      disabled: [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role),
-      options: regionList.map((region) => ({ key: region, label: region })),
-    },
-    {
-      id: "academy",
-      name: "Académie",
-      fullValue: "Toutes",
-      options: academyList.map((academy) => ({ key: academy, label: academy })),
-    },
+    ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+      ? {
+          id: "region",
+          name: "Région",
+          fullValue: "Toutes",
+          disabled: [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role),
+          options: regionList.map((region) => ({ key: region, label: region })),
+        }
+      : null,
+    ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+      ? {
+          id: "academy",
+          name: "Académie",
+          fullValue: "Toutes",
+          options: academyList.map((academy) => ({ key: academy, label: academy })),
+        }
+      : null,
     {
       id: "department",
       name: "Département",
@@ -58,7 +62,7 @@ export default function Index() {
       fullValue: "Toutes",
       options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
     },
-  ];
+  ].filter((e) => e);
 
   //useStates
   const [selectedFilters, setSelectedFilters] = useState({
@@ -73,142 +77,55 @@ export default function Index() {
   const [dataCenter, setDataCenter] = useState({});
 
   const queryYoung = async () => {
-    const getTerms = (field, filter) => {
-      if (filter === null || filter?.length === 0) return null;
-      return { terms: { [field]: filter } };
+    const statusPhaseTerms = selectedFilters?.statusPhase1?.length
+      ? { terms: { "statusPhase1.keyword": selectedFilters?.statusPhase1?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) } }
+      : null;
+
+    const aggsFilter = {
+      filter: {
+        bool: {
+          must: [],
+          filter: statusPhaseTerms ? [statusPhaseTerms] : [],
+        },
+      },
     };
 
-    const regionFilter = selectedFilters?.region?.length ? selectedFilters.region : null;
-    const departmentFilter = selectedFilters?.department?.length ? selectedFilters.department : null;
-    const academyFilter = selectedFilters?.academy?.length ? selectedFilters.academy : null;
-    const statusFilter = selectedFilters?.status?.length ? selectedFilters.status : null;
-    const statusPhase1Filter = selectedFilters?.statusPhase1?.length ? selectedFilters.statusPhase1 : null;
-    const cohortFilter = selectedFilters?.cohort?.length ? selectedFilters.cohort : null;
-
     const body = {
-      query: { bool: { must: { match_all: {} } } },
+      query: { bool: { must: { match_all: {} }, filter: [] } },
       aggs: {
-        statusPhase1: {
-          filter: {
-            bool: {
-              must: [],
-              filter: [
-                getTerms("region.keyword", regionFilter),
-                getTerms("department.keyword", departmentFilter),
-                getTerms("academy.keyword", academyFilter),
-                getTerms("status.keyword", statusFilter),
-                getTerms("cohort.keyword", cohortFilter),
-              ].filter((e) => e),
-            },
-          },
-          aggs: {
-            names: { terms: { field: "statusPhase1.keyword", size: ES_NO_LIMIT } },
-          },
-        },
+        statusPhase1: { terms: { field: "statusPhase1.keyword" } },
         pdr: {
-          filter: {
-            bool: {
-              must: [],
-              filter: [
-                getTerms("region.keyword", regionFilter),
-                getTerms("department.keyword", departmentFilter),
-                getTerms("academy.keyword", academyFilter),
-                getTerms("status.keyword", statusFilter),
-                getTerms("cohort.keyword", cohortFilter),
-                getTerms("statusPhase1.keyword", statusPhase1Filter ? statusPhase1Filter?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) : null),
-              ].filter((e) => e),
-            },
-          },
+          ...aggsFilter,
           aggs: {
             names: { terms: { field: "hasMeetingInformation.keyword", missing: "NR", size: ES_NO_LIMIT } },
           },
         },
         participation: {
-          filter: {
-            bool: {
-              must: [],
-              filter: [
-                getTerms("region.keyword", regionFilter),
-                getTerms("department.keyword", departmentFilter),
-                getTerms("academy.keyword", academyFilter),
-                getTerms("status.keyword", statusFilter),
-                getTerms("cohort.keyword", cohortFilter),
-                getTerms("statusPhase1.keyword", statusPhase1Filter ? statusPhase1Filter?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) : null),
-              ].filter((e) => e),
-            },
-          },
+          ...aggsFilter,
           aggs: {
             names: { terms: { field: "youngPhase1Agreement.keyword", size: ES_NO_LIMIT } },
           },
         },
         precense: {
-          filter: {
-            bool: {
-              must: [],
-              filter: [
-                getTerms("region.keyword", regionFilter),
-                getTerms("department.keyword", departmentFilter),
-                getTerms("academy.keyword", academyFilter),
-                getTerms("status.keyword", statusFilter),
-                getTerms("cohort.keyword", cohortFilter),
-                getTerms("statusPhase1.keyword", statusPhase1Filter ? statusPhase1Filter?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) : null),
-              ].filter((e) => e),
-            },
-          },
+          ...aggsFilter,
           aggs: {
             names: { terms: { field: "cohesionStayPresence.keyword", missing: "NR", size: ES_NO_LIMIT } },
           },
         },
         JDM: {
-          filter: {
-            bool: {
-              must: [],
-              filter: [
-                getTerms("region.keyword", regionFilter),
-                getTerms("department.keyword", departmentFilter),
-                getTerms("academy.keyword", academyFilter),
-                getTerms("status.keyword", statusFilter),
-                getTerms("cohort.keyword", cohortFilter),
-                getTerms("statusPhase1.keyword", statusPhase1Filter ? statusPhase1Filter?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) : null),
-              ].filter((e) => e),
-            },
-          },
+          ...aggsFilter,
           aggs: {
             names: { terms: { field: "presenceJDM.keyword", missing: "NR", size: ES_NO_LIMIT } },
           },
         },
         depart: {
-          filter: {
-            bool: {
-              must: [],
-              filter: [
-                getTerms("region.keyword", regionFilter),
-                getTerms("department.keyword", departmentFilter),
-                getTerms("academy.keyword", academyFilter),
-                getTerms("status.keyword", statusFilter),
-                getTerms("cohort.keyword", cohortFilter),
-                getTerms("statusPhase1.keyword", statusPhase1Filter ? statusPhase1Filter?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) : null),
-              ].filter((e) => e),
-            },
-          },
+          ...aggsFilter,
           aggs: {
             names: { terms: { field: "departInform.keyword", size: ES_NO_LIMIT } },
           },
         },
         departMotif: {
-          filter: {
-            bool: {
-              must: [],
-              filter: [
-                getTerms("region.keyword", regionFilter),
-                getTerms("department.keyword", departmentFilter),
-                getTerms("academy.keyword", academyFilter),
-                getTerms("status.keyword", statusFilter),
-                getTerms("cohort.keyword", cohortFilter),
-                getTerms("statusPhase1.keyword", statusPhase1Filter ? statusPhase1Filter?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) : null),
-              ].filter((e) => e),
-            },
-          },
+          ...aggsFilter,
           aggs: {
             names: { terms: { field: "departSejourMotif.keyword", size: ES_NO_LIMIT } },
           },
@@ -218,13 +135,18 @@ export default function Index() {
       track_total_hits: true,
     };
 
+    if (selectedFilters.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": selectedFilters.region } });
+    if (selectedFilters.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": selectedFilters.department } });
+    if (selectedFilters.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohort } });
+    if (selectedFilters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": selectedFilters.academy } });
+    if (selectedFilters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.status } });
+
     const { responses } = await api.esQuery("young", body);
 
-    if (responses.length) {
+    if (responses?.length) {
       let result = {};
-      result.statusPhase1 = responses[0].aggregations.statusPhase1.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-      result.statusPhase1Total = responses[0].aggregations.statusPhase1.doc_count;
-      result.pdr = responses[0].aggregations.pdr.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
+      result.statusPhase1 = responses[0].aggregations.statusPhase1.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
+      result.statusPhase1Total = responses[0].hits.total.value;
       result.pdrTotal = responses[0].aggregations.pdr.doc_count;
       result.participation = responses[0].aggregations.participation.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
       result.participationTotal = responses[0].aggregations.participation.doc_count;
