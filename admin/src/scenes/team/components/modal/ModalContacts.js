@@ -5,6 +5,8 @@ import { HiCheckCircle, HiPhone, HiPlus, HiPencil, HiOutlineTrash } from "react-
 import { copyToClipboard, translate, formatPhoneNumberFR } from "../../../../utils";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
+import { MdInfoOutline } from "react-icons/md";
+import ReactTooltip from "react-tooltip";
 
 export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contacts, cohorts, getService }) {
   const [currentTab, setCurrentTab] = useState();
@@ -102,8 +104,15 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
   if (!contacts || !cohorts || !currentTab) return null;
 
   return (
-    <ModalForm classNameModal="max-w-3xl" isOpen={isOpen} headerText="Mes contacts convocation" onCancel={onCancel}>
+    <ModalForm classNameModal="max-w-3xl" isOpen={isOpen} onCancel={onCancel}>
       <div className="flex flex-col w-full pt-2">
+        <div className="flex flex-row gap-2 items-center justify-center mb-4">
+          <span className="text-xl text-black font-medium">Mes contacts convocation</span>
+          <MdInfoOutline data-tip data-for="inscriptions" className="text-gray-400 h-5 w-5 cursor-pointer" />
+          <ReactTooltip id="inscriptions" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+            Renseigner le contact local de votre département disponible le jour du départ
+          </ReactTooltip>
+        </div>
         <div className="flex flex-1 flex-col lg:flex-row mb-4 border-b">
           <nav className="px-3 flex flex-1 ">
             {cohorts.map((cohort) => (

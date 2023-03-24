@@ -107,6 +107,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  busListAvailability: {
+    type: Boolean,
+    documentation: {
+      description:
+        " Ouverture ou fermeture de l’accès à la liste des volontaires d’un même centre par ligne de transport et par point de rassemblement envoyé par email (activation/désactivation du token)",
+    },
+  },
+
   //information n'impactant le fonctionnement de l'application
   uselessInformation: {
     type: mongoose.Schema.Types.Mixed,

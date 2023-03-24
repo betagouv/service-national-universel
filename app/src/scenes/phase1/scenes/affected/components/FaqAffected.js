@@ -4,7 +4,7 @@ import QuestionBlock from "../../../components/QuestionBlock";
 
 const FaqAffected = ({ className }) => {
   return (
-    <section className={`mx-[1rem] md:mx-[4rem] my-[2rem] ${className}`}>
+    <section className={`m-[1rem] md:mx-[4rem] ${className}`}>
       <h2 className="font-bold text-xl my-4">F.A.Q</h2>
       <div className="flex flex-col gap-4">
         <QuestionBlock

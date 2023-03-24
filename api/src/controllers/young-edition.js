@@ -398,6 +398,9 @@ router.get("/:id/remider/:idParent", passport.authenticate("referent", { session
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
+    if (!young.inscriptionDoneDate) {
+      return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+    }
 
     // parent 1
     if (parentId === 1) {

@@ -37,7 +37,7 @@ import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle
 import { supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
-import { getAddress } from "../api";
+import { apiAdress } from "../../../services/api-adresse";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -302,7 +302,7 @@ export default function StepCoordonnees() {
   const debouncedSuggestionsRequest = useCallback(
     debounce(async (value) => {
       try {
-        const response = await getAddress(value);
+        const response = await apiAdress(value);
         const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
         setBirthCityZipSuggestions(suggestions);
       } catch (error) {

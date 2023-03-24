@@ -1,10 +1,10 @@
 import { Dialog, Transition } from "@headlessui/react";
 import React, { Fragment } from "react";
 
-const Modal = ({ isOpen = false, onClose = () => {}, children = null, className = "" }) => {
+const Modal = ({ isOpen = false, onClose: handleClose = () => {}, children = null, className = "" }) => {
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-20" onClose={onClose}>
+      <Dialog as="div" className="relative z-20" onClose={handleClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -25,7 +25,7 @@ const Modal = ({ isOpen = false, onClose = () => {}, children = null, className 
               leave="ease-in duration-200"
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-              <Dialog.Panel className={`relative transform transition-all ${className}`}>{children}</Dialog.Panel>
+              <Dialog.Panel className={`relative transform transition-all rounded-md ${className}`}>{children}</Dialog.Panel>
             </Transition.Child>
           </div>
         </div>

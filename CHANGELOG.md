@@ -1,3 +1,84 @@
+# [1.239.0](https://github.com/betagouv/service-national-universel/compare/v1.238.0...v1.239.0) (2023-03-23)
+
+
+### Bug Fixes
+
+* **admin:** double filetype in export (.xlsx.xlsx) ([e3b65b2](https://github.com/betagouv/service-national-universel/commit/e3b65b2b87b350021df409e569fdb6f541192dde))
+* **admin:** retour design 2 filters ([af2ede6](https://github.com/betagouv/service-national-universel/commit/af2ede69e55fd4692263154740780de15235ed13))
+* **api:** coordinates next step in case of qpv erreur ([#2416](https://github.com/betagouv/service-national-universel/issues/2416)) ([3572160](https://github.com/betagouv/service-national-universel/commit/3572160b4653944be45ba83832a8caf2a3da7e72))
+* **app:** address mobile fix ([835488d](https://github.com/betagouv/service-national-universel/commit/835488d9d44de205850fb4f93da807c2dda429ec))
+* **app:** apiAdress filters array ([a174a46](https://github.com/betagouv/service-national-universel/commit/a174a465ebcf757fd582c0882c8d3aadebdaf9e8))
+* **app:** steps logic ([fcb700b](https://github.com/betagouv/service-national-universel/commit/fcb700bfc1194b178c1ec8e8fb281bb0b3c87f7c))
+* **knowledge:** design link contactform ([#2409](https://github.com/betagouv/service-national-universel/issues/2409)) ([dc9d275](https://github.com/betagouv/service-national-universel/commit/dc9d275620ea61ffa613074c0d9bd94d3eee110f))
+
+
+### Features
+
+* **admin:** add department's numbers on filters ([f38994f](https://github.com/betagouv/service-national-universel/commit/f38994fa60414f69c0cce08215b668268f791273))
+* **admin:** remove selected filters ([9a38b43](https://github.com/betagouv/service-national-universel/commit/9a38b4335fb1a0338a84b3f6900327b3f9d1a71a))
+* **admin/api:** Objectif des inscriptions new dashboard ([6dc6753](https://github.com/betagouv/service-national-universel/commit/6dc675304e07aaf506d68132554cd3b33ca619aa))
+
+# [1.238.0](https://github.com/betagouv/service-national-universel/compare/v1.237.0...v1.238.0) (2023-03-22)
+
+
+### Bug Fixes
+
+* **admin:** add ids to filter dashboard ([b639f63](https://github.com/betagouv/service-national-universel/commit/b639f636975f2f8bf1d9318ae7c2473507655418))
+* **admin:** retour design filtres ([a58467d](https://github.com/betagouv/service-national-universel/commit/a58467d4b38ec2295ff3fdc310ff2f013d550f24))
+* **api:** MongoDB allowed connections for staging ([4492e1f](https://github.com/betagouv/service-national-universel/commit/4492e1f63bf93e2d64266d1ac556e07a2eeec38e))
+* **api/sib:** Less mongoDB connections allowed on staging ([e9cc950](https://github.com/betagouv/service-national-universel/commit/e9cc950d6e716b2ce3793821f9878104ea662b3b))
+* **app:** Filtrer les recherches d'adresse par code postal ([#2398](https://github.com/betagouv/service-national-universel/issues/2398)) ([aa3e4dd](https://github.com/betagouv/service-national-universel/commit/aa3e4dd600c853fe54276a0acea4299d17833f1b))
+* **app:** fix coordinates fetching for location filter in misison search ([c73de28](https://github.com/betagouv/service-national-universel/commit/c73de28eb9f82ee16011c3c1fcf9fddc589cfd56))
+
+
+### Features
+
+* **admin:** Dashboard filtre base ([b8aa8dd](https://github.com/betagouv/service-national-universel/commit/b8aa8dd8fa45814d99a4a68058382ad82de7bba2))
+* **admin:** front dashboard sejour ([#2402](https://github.com/betagouv/service-national-universel/issues/2402)) ([650ca56](https://github.com/betagouv/service-national-universel/commit/650ca56b8f41ed096962b29d7539ea36f21b5834))
+* **app:** ajout de l'anonymisation et de la suppression des données du compte  ([#2397](https://github.com/betagouv/service-national-universel/issues/2397)) ([830b52f](https://github.com/betagouv/service-national-universel/commit/830b52fedf4f37f00345d7d0ae7819a71f2d871a))
+* **app:** new medical file modal ([#2399](https://github.com/betagouv/service-national-universel/issues/2399)) ([bbce4d1](https://github.com/betagouv/service-national-universel/commit/bbce4d19e9035aefb93bb9df7bbcf9b1f85df62f))
+
+# [1.237.0](https://github.com/betagouv/service-national-universel/compare/v1.236.0...v1.237.0) (2023-03-21)
+
+
+### Bug Fixes
+
+* **admin:** update schoolId on change ([7a27136](https://github.com/betagouv/service-national-universel/commit/7a27136826a41a9a3e7709725db8801f1929cc19))
+* **api:** auto-validation update ([a4dab7c](https://github.com/betagouv/service-national-universel/commit/a4dab7c1c0efea6f3113854ca7c51721b2adfda2))
+* **api:** correction des espacements dans les convocation pdf ([#2400](https://github.com/betagouv/service-national-universel/issues/2400)) ([704e939](https://github.com/betagouv/service-national-universel/commit/704e939c823b2115f88ae61f3c04e566471da363))
+* **api:** Reload api in dev mode ([6c43e41](https://github.com/betagouv/service-national-universel/commit/6c43e41eb36239f4d8186df5570acd96c50f5930))
+* **app:** long name pdr on affected page ([dafad95](https://github.com/betagouv/service-national-universel/commit/dafad95c2d9dec52ff250e1f303de83072e10619))
+
+
+### Features
+
+* **api:** Update MongoDB connections ([#2396](https://github.com/betagouv/service-national-universel/issues/2396)) ([2724192](https://github.com/betagouv/service-national-universel/commit/27241927144e5a2e14852d498e56eade11f091bb))
+* **api/admin:** Bloc "Affectation et pointage" champ “Disponibilité des listes de transport par centre ([#2392](https://github.com/betagouv/service-national-universel/issues/2392)) ([6c47898](https://github.com/betagouv/service-national-universel/commit/6c4789874a0c8feaaa875086758b6807dd6c9e09))
+
+# [1.236.0](https://github.com/betagouv/service-national-universel/compare/v1.235.0...v1.236.0) (2023-03-20)
+
+
+### Bug Fixes
+
+* **admin:** Fix filters (css / variables / typo) ([0ad3480](https://github.com/betagouv/service-national-universel/commit/0ad3480d8c7077d12f54919517a8b078ac22cc91))
+* **admin:** franceConnect wording ([c4faac9](https://github.com/betagouv/service-national-universel/commit/c4faac9a407fe745676dad9db6109c7f01c08625))
+* **admin:** normalize filter search bar ([b5c0e5a](https://github.com/betagouv/service-national-universel/commit/b5c0e5a7a3ffdba6ccc6bbd636485302375ecdd6))
+* **admin:** tooltip modal contact convocation ([4f3dba0](https://github.com/betagouv/service-national-universel/commit/4f3dba0ad6880b7d8b1c7e28f17c34084d0849a7))
+* **admin:** typo plan de transport ([8555029](https://github.com/betagouv/service-national-universel/commit/85550291787f922176733bd8b13e2a6435bd85ee))
+* **admin:** use informationAccuracy field ([cd86cdb](https://github.com/betagouv/service-national-universel/commit/cd86cdb24794272a5b45e2ac0359796208aec859))
+* **api:** fix du style de la convocation pdf ([#2384](https://github.com/betagouv/service-national-universel/issues/2384)) ([41b3f01](https://github.com/betagouv/service-national-universel/commit/41b3f01604bae5eca4592428bc4a26b6f9df4529))
+* **app:** fix enabled condition for step 2 affected ([4fa8a95](https://github.com/betagouv/service-national-universel/commit/4fa8a951815b561671f6d3ecd46da5b2f368aa7d))
+
+
+### Features
+
+* **admin:** Ajout nouveaux filtres sur PDR ([08e52ef](https://github.com/betagouv/service-national-universel/commit/08e52ef8e8bbf0d6970859a708a0306b5d6970aa))
+
+
+### Reverts
+
+* Revert "feat(admin): architecture dashboard (#2375)" ([1b736ec](https://github.com/betagouv/service-national-universel/commit/1b736ecb3b39c1fedee8c10ee7fb34c8ae148cd5)), closes [#2375](https://github.com/betagouv/service-national-universel/issues/2375)
+
 # [1.235.0](https://github.com/betagouv/service-national-universel/compare/v1.234.0...v1.235.0) (2023-03-17)
 
 
