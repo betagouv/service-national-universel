@@ -16,12 +16,12 @@ export default function Index() {
         <FullDoughnut title="Left" legendSide="left" labels={["Oui", "Non", "Non renseigné"]} values={[45, 23, 38]} />
         <FullDoughnut title="Right" legendSide="right" labels={["Oui", "Non", "Non renseigné"]} values={[45, 23, 38]} />
         <FullDoughnut title="Left max 2" legendSide="left" labels={["Oui", "Non", "Non renseigné", "Autre"]} values={[45, 23, 38, 42]} maxLegends={2} />
-        <FullDoughnut title="Right max 2" legendSide="right" labels={["Oui", "Non", "Non renseigné", "Autre"]} values={[45, 23, 38, 10]} maxLegends={2} />
+        <FullDoughnut title="Right max 2 un peu long" legendSide="right" labels={["Oui", "Non", "Non renseigné", "Autre"]} values={[45, 23, 38, 10]} maxLegends={2} />
 
         <FullDoughnut title="Top" legendSide="top" labels={["Oui", "Non", "Non renseigné"]} values={[45, 23, 38]} />
         <FullDoughnut title="Top max 2" legendSide="top" labels={["Oui", "Non", "Non renseigné"]} values={[45, 23, 38]} maxLegends={2} />
         <FullDoughnut title="Bottom" legendSide="bottom" labels={["Oui", "Non", "Non renseigné", "Autre"]} values={[45, 23, 38, 42]} />
-        <FullDoughnut title="Bottom max 2" legendSide="bottom" labels={["Oui", "Non", "Non renseigné", "Autre"]} values={[45, 23, 38, 10]} maxLegends={2} />
+        <FullDoughnut title="Bottom max 2 un peu long" legendSide="bottom" labels={["Oui", "Non", "Non renseigné", "Autre"]} values={[45, 23, 38, 10]} maxLegends={2} />
       </div>
 
       <h4>Demi Doughnut</h4>

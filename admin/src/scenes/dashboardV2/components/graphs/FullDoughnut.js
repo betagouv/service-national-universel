@@ -21,6 +21,9 @@ export default function FullDoughnut({ title, values, labels, maxLegends = Numbe
             display: false,
           },
         },
+        layout: {
+          padding: { left: 1, right: 1, top: 1, bottom: 1, [legendSide]: 40 },
+        },
         onHover: function (evt, elems) {
           console.log("Evt: ", evt);
           console.log("elems: ", elems);
@@ -34,10 +37,10 @@ export default function FullDoughnut({ title, values, labels, maxLegends = Numbe
             data: values,
             backgroundColor: dataColors,
             hoverBackgroundColor: dataColors,
-            hoverBorderWidth: 1,
+            hoverBorderWidth: 2,
             hoverBorderColor: "rgb(30 58 138)",
             borderWidth: 0,
-            with: 0,
+            width: 0,
             height: 0,
             padding: 0,
           },
@@ -106,6 +109,7 @@ export default function FullDoughnut({ title, values, labels, maxLegends = Numbe
   let legendClass = "";
   let legendValueClass = "flex items-center";
   let legendDotClass = "mr-2";
+  let titleClass = "";
 
   switch (legendSide) {
     case "left":
@@ -114,45 +118,49 @@ export default function FullDoughnut({ title, values, labels, maxLegends = Numbe
       legendValueClass += " flex-row-reverse";
       legendDotClass = "ml-2";
       if (maxLegends > legends.length) {
-        legendsClass = "mr-10";
+        legendsClass = "";
       } else {
-        legendsClass = `mr-10 grid grid-cols-${maxLegends}`;
+        legendsClass = `grid grid-cols-${maxLegends}`;
       }
+      titleClass = "ml-10 py-[44px]";
       break;
     case "right":
       mainClass += " flex-row";
       legendClass += " mb-[16px] last:mb-0";
       if (maxLegends > legends.length) {
-        legendsClass = "ml-10";
+        legendsClass = "";
       } else {
-        legendsClass = `ml-10 grid grid-cols-${maxLegends}`;
+        legendsClass = `grid grid-cols-${maxLegends}`;
       }
+      titleClass = "mr-10 py-[44px]";
       break;
     case "top":
       mainClass += " flex-col-reverse";
       if (maxLegends > legends.length) {
-        legendsClass = "flex justify-center mb-10";
+        legendsClass = "flex justify-center";
       } else {
-        legendsClass = `grid grid-cols-${maxLegends} mb-10`;
+        legendsClass = `grid grid-cols-${maxLegends}`;
       }
       legendClass += " mr-7 last:mr-0";
+      titleClass = "mt-10 px-[44px]";
       break;
     case "bottom":
     default:
       mainClass += " flex-col";
       if (maxLegends > legends.length) {
-        legendsClass = "flex justify-center mt-10";
+        legendsClass = "flex justify-center";
       } else {
-        legendsClass = `grid grid-cols-${maxLegends} mt-10`;
+        legendsClass = `grid grid-cols-${maxLegends}`;
       }
       legendClass += " mr-7 last:mr-0";
+      titleClass = "mb-10 px-[44px]";
   }
 
   return (
     <div className={`${mainClass} ${className}`}>
       <div className={graphClass}>
         {graphData && <Doughnut data={graphData} options={graphOptions} />}
-        <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 text-center text-gray-900 text-sm leading-[1.1em] font-bold">{title}</div>
+        <div className={`absolute top-[0px] bottom-[0px] left-[0px] right-[0px] flex justify-center items-center text-center text-gray-900 text-sm leading-[1.1em] font-bold p-[24px] pointer-events-none ${titleClass}`}>{title}</div>
       </div>
       <div className={legendsClass}>
         {legends.map((legend) => {
