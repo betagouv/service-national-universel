@@ -186,7 +186,12 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
                         ?.map((option) => (
                           <div className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer" key={option?.key} onClick={() => handleSelect(option?.key)}>
                             <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
-                              <input type="checkbox" checked={selectedFilters[filter.id]?.length && selectedFilters[filter?.id]?.includes(option?.key)} />
+                              <input
+                                className="cursor-pointer"
+                                type="checkbox"
+                                readOnly={true}
+                                checked={selectedFilters[filter.id]?.length && selectedFilters[filter?.id]?.includes(option?.key)}
+                              />
                               {option.label}
                             </div>
                           </div>
