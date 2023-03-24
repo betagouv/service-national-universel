@@ -27,6 +27,7 @@ export default function Index() {
       id: "statusPhase1",
       name: "Statut de phase 1",
       fullValue: "Tous",
+      fixed: [YOUNG_STATUS_PHASE1.AFFECTED],
       options: Object.keys(YOUNG_STATUS_PHASE1)
         .filter((s) => ![YOUNG_STATUS_PHASE1.WAITING_LIST, YOUNG_STATUS_PHASE1.WITHDRAWN].includes(s))
         .map((status) => ({ key: status, label: translatePhase1(status) })),
