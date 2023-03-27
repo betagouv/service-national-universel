@@ -95,268 +95,7 @@ const ListSession = ({ firstSession }) => {
   const user = useSelector((state) => state.Auth.user);
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
   const [cohesionCenter, setCohesionCenter] = useState([]);
-  const getDefaultQuery = () => {
-    if (user.role === ROLES.ADMIN) {
-      return { size: ES_NO_LIMIT, query: { match_all: {} }, track_total_hits: true };
-    } else if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      return {
-        size: ES_NO_LIMIT,
-        query: { bool: { filter: [{ terms: { "department.keyword": user.department } }] } },
-        track_total_hits: true,
-      };
-    } else if (user.role === ROLES.REFERENT_REGION) {
-      return {
-        size: ES_NO_LIMIT,
-        query: { bool: { filter: [{ term: { "region.keyword": user.region } }] } },
-        track_total_hits: true,
-      };
-    }
-  };
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
-  useEffect(() => {
-    (async () => {
-      if (cohesionCenterIds?.length) {
-        const { responses } = await api.esQuery("cohesioncenter", {
-          size: ES_NO_LIMIT,
-          query: { bool: { must: { match_all: {} }, filter: [{ terms: { _id: cohesionCenterIds } }] } },
-        });
-        if (responses?.length) {
-          setCohesionCenter(responses[0]?.hits?.hits || []);
-        }
-      }
-    })();
-  }, [cohesionCenterIds]);
-  const history = useHistory();
 
-  if (!firstSession) return <div></div>;
-  return (
-    <ReactiveBase url={`${apiURL}/es`} app="sessionphase1" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-      <div className="flex-1 flex-column bg-white flex-wrap">
-        <div className="flex flex-row pt-4 justify-between items-center mx-8">
-          <div className="flex flex-row">
-            <DataSearch
-              defaultQuery={getDefaultQuery}
-              showIcon={false}
-              placeholder="Rechercher par mots clés, ville, code postal..."
-              componentId="SEARCH"
-              dataField={["nameCentre", "cityCentre", "zipCentre", "codeCentre"]}
-              react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-              style={{ marginRight: "1rem", flex: 1 }}
-              innerClass={{ input: "searchbox" }}
-              className="datasearch-searchfield"
-              URLParams={true}
-              autosuggest={false}
-            />
-            <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
-          </div>
-          <ExportComponent
-            handleClick={() => plausibleEvent("Centres/CTA - Exporter centres")}
-            title="Exporter"
-            defaultQuery={getExportQuery}
-            exportTitle="Session"
-            icon={<BsDownload className="text-gray-400" />}
-            index="sessionphase1"
-            react={{ and: FILTERS }}
-            css={{
-              override: true,
-              button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-              loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-            }}
-            transform={async (all) => {
-              const { responses } = await api.esQuery("cohesioncenter", {
-                size: ES_NO_LIMIT,
-                query: { bool: { must: { match_all: {} }, filter: [{ terms: { _id: [...new Set(all.map((s) => s.cohesionCenterId))].filter((e) => e) } }] } },
-                track_total_hits: true,
-              });
-
-              const centerList = responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } }));
-
-              console.log([...new Set(all.map((s) => s.headCenterId))]);
-
-              const { responses: responses2 } = await api.esQuery("referent", {
-                size: ES_NO_LIMIT,
-                query: { bool: { must: { match_all: {} }, filter: [{ terms: { _id: [...new Set(all.map((s) => s.headCenterId))].filter((e) => e) } }] } },
-                track_total_hits: true,
-              });
-
-              const headCenters = responses2[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } }));
-
-              return all
-                .sort(function (a, b) {
-                  let res = a?.nameCentre?.localeCompare(b?.nameCentre);
-
-                  if (res === 0) {
-                    res = COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort];
-                  }
-                  return res;
-                })
-                .map((data) => {
-                  const center = centerList.find((e) => e?.id?.toString() === data?.cohesionCenterId?.toString());
-                  const headCenter = headCenters.find((e) => e?.id?.toString() === data?.headCenterId?.toString());
-                  return {
-                    "Id centre": center?.id?.toString(),
-                    "Code du centre": center?.code2022,
-                    "Nom du centre": center?.name,
-                    "Désignation du centre": center?.centerDesignation,
-                    "Id de la session": data?._id?.toString(),
-                    "Cohort de la session": data.cohort,
-                    "Statut de la session": translate(data.status),
-                    "Accessibilité aux personnes à mobilité réduite": translate(center?.pmr),
-                    "Capacité maximale d'accueil": center?.placesTotal,
-                    "Place total de la session": data.placesTotal,
-                    "Place restante de la session": data.placesLeft,
-                    "Emploi du temps": data.hasTimeSchedule === "true" ? "Déposé" : "Non déposé",
-                    Typologie: translateTypologieCenter(center?.typology),
-                    Domaine: translateDomainCenter(center?.domain),
-                    "Gestionnaire ou propriétaire": center?.complement,
-                    Adresse: center?.address,
-                    Ville: center?.city,
-                    "Code postal": center?.zip,
-                    Département: center?.department,
-                    Académie: center?.academy,
-                    Région: center?.region,
-                    "Prénom du chef de centre": headCenter?.firstName || "",
-                    "Nom du chef de centre": headCenter?.lastName || "",
-                    "Email du chef de centre": headCenter?.email || "",
-                    "Téléphone du chef de centre": headCenter?.mobile || headCenter?.phone || "",
-                    "Créé le": formatLongDateFR(data.createdAt),
-                    "Mis à jour le": formatLongDateFR(data.updatedAt),
-                  };
-                });
-            }}
-          />
-        </div>
-
-        <div className={`mt-3 gap-2 flex flex-wrap mx-8 items-center ${!filterVisible ? "hidden" : ""}`}>
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            componentId="COHORT"
-            placeholder="Cohortes"
-            dataField="cohort.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-            renderItem={(e, count) => {
-              return `${translate(e)} (${count})`;
-            }}
-            title=""
-            URLParams={true}
-            showSearch={false}
-            defaultValue={[firstSession]}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Cohorte", "Cohorte")}</div>}
-          />
-
-          <RegionFilter
-            renderLabel={(items) => <div>{getFilterLabel(items, "Région", "Région")}</div>}
-            defaultQuery={getDefaultQuery}
-            filters={FILTERS}
-            defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
-          />
-          <DepartmentFilter
-            defaultQuery={getDefaultQuery}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Département", "Département")}</div>}
-            filters={FILTERS}
-            defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []}
-          />
-          {user.role === ROLES.ADMIN && (
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Code"
-              componentId="CODE2022"
-              dataField="codeCentre.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
-              title=""
-              URLParams={true}
-              sortBy="asc"
-              showSearch={true}
-              searchPlaceholder="Rechercher..."
-              showMissing
-              missingLabel="Non renseigné"
-              renderLabel={(items) => <div>{getFilterLabel(items, "Code", "Code")}</div>}
-            />
-          )}
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            placeholder="Places restantes"
-            componentId="PLACES"
-            dataField="placesLeft"
-            react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
-            title=""
-            URLParams={true}
-            sortBy="asc"
-            showSearch={false}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Places restantes", "Places restantes")}</div>}
-          />
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            componentId="STATUS"
-            dataField="sessionStatus.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-            renderItem={(e, count) => {
-              return `${translate(e)} (${count})`;
-            }}
-            title=""
-            URLParams={true}
-            showSearch={false}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Statut", "Statut")}</div>}
-          />
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            componentId="TIMESCHEDULE"
-            dataField="hasTimeSchedule.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "TIMESCHEDULE") }}
-            renderItem={(e, count) => {
-              return `${translate(e)} (${count})`;
-            }}
-            title=""
-            URLParams={true}
-            showSearch={false}
-            renderLabel={(items) => getFilterLabel(items, "Emploi du temps", "Emploi du temps")}
-            showMissing
-            missingLabel="Non renseigné"
-          />
-          <DeleteFilters />
-        </div>
-
-        <div className="reactive-result">
-          <ReactiveListComponent
-            defaultQuery={getDefaultQuery}
-            paginationAt="bottom"
-            showTopResultStats={false}
-            react={{ and: FILTERS }}
-            onData={({ rawData }) => {
-              if (rawData?.hits?.hits) setCohesionCenterIds(rawData.hits.hits.filter((e) => e?._source?.cohesionCenterId).map((e) => e._source.cohesionCenterId));
-            }}
-            render={({ data }) => (
-              <div className="flex w-full flex-col gap-1 mt-6 mb-2">
-                <hr />
-                <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
-                  <div className="w-[40%]">Centre</div>
-                  <div className="w-[20%]">Cohortes</div>
-                  <div className="w-[20%]">Places</div>
-                  <div className="w-[20%]">Disponibilités</div>
-                </div>
-                {data.map((hit) => (
-                  <HitSession
-                    onClick={() => history.push(`/centre/${hit?.cohesionCenterId}?cohorte=${hit.cohort}`)}
-                    key={hit._id}
-                    center={cohesionCenter.filter((e) => e._id === hit.cohesionCenterId)[0]}
-                    hit={hit}
-                  />
-                ))}
-                <hr />
-              </div>
-            )}
-          />
-        </div>
-      </div>
-    </ReactiveBase>
-  );
-};
-const ListCenter = ({ firstSession }) => {
   const [data, setData] = React.useState([]);
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({
@@ -374,12 +113,219 @@ const ListCenter = ({ firstSession }) => {
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
   ];
+  //placesLeft
+  //code2022
+  ///sessionStatus
+  //hasTimeSchedule
   const searchBarObject = {
     placeholder: "Rechercher un point de rassemblement",
     datafield: ["name", "address", "region", "department", "code", "city", "zip"],
   };
 
-  const [filterVisible, setFilterVisible] = useState(false);
+  const getDefaultQuery = () => {
+    if (user.role === ROLES.ADMIN) {
+      return { size: ES_NO_LIMIT, query: { match_all: {} }, track_total_hits: true };
+    } else if (user.role === ROLES.REFERENT_DEPARTMENT) {
+      return {
+        size: ES_NO_LIMIT,
+        query: { bool: { filter: [{ terms: { "department.keyword": user.department } }] } },
+        track_total_hits: true,
+      };
+    } else if (user.role === ROLES.REFERENT_REGION) {
+      return {
+        size: ES_NO_LIMIT,
+        query: { bool: { filter: [{ term: { "region.keyword": user.region } }] } },
+        track_total_hits: true,
+      };
+    }
+  };
+  useEffect(() => {
+    (async () => {
+      if (cohesionCenterIds?.length) {
+        const { responses } = await api.esQuery("cohesioncenter", {
+          size: ES_NO_LIMIT,
+          query: { bool: { must: { match_all: {} }, filter: [{ terms: { _id: cohesionCenterIds } }] } },
+        });
+        if (responses?.length) {
+          setCohesionCenter(responses[0]?.hits?.hits || []);
+        }
+      }
+    })();
+  }, [cohesionCenterIds]);
+  const history = useHistory();
+  React.useEffect(() => {
+    if (data) setCohesionCenterIds(data.map((pdr) => pdr._id));
+  }, [data]);
+
+  if (!firstSession) return <div></div>;
+  return (
+    <ReactiveBase url={`${apiURL}/es`} app="sessionphase1" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+      <div className="flex-1 flex-column bg-white flex-wrap">
+        <div className="mx-4">
+          <div className="flex flex-row justify-between w-full">
+            <Filters
+              pageId="pdrList"
+              esId="pointderassemblement"
+              defaultQuery={getDefaultQuery()}
+              setData={(value) => setData(value)}
+              filters={filterArray}
+              searchBarObject={searchBarObject}
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+              paramData={paramData}
+              setParamData={setParamData}
+            />
+            <ExportComponentV2
+              title="Exporter"
+              defaultQuery={getDefaultQuery()}
+              filters={filterArray}
+              exportTitle="point_de_rassemblement"
+              index="pointderassemblement"
+              transform={async (all) => {
+                const { responses } = await api.esQuery("cohesioncenter", {
+                  size: ES_NO_LIMIT,
+                  query: { bool: { must: { match_all: {} }, filter: [{ terms: { _id: [...new Set(all.map((s) => s.cohesionCenterId))].filter((e) => e) } }] } },
+                  track_total_hits: true,
+                });
+
+                const centerList = responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } }));
+
+                console.log([...new Set(all.map((s) => s.headCenterId))]);
+
+                const { responses: responses2 } = await api.esQuery("referent", {
+                  size: ES_NO_LIMIT,
+                  query: { bool: { must: { match_all: {} }, filter: [{ terms: { _id: [...new Set(all.map((s) => s.headCenterId))].filter((e) => e) } }] } },
+                  track_total_hits: true,
+                });
+
+                const headCenters = responses2[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } }));
+
+                return all
+                  .sort(function (a, b) {
+                    let res = a?.nameCentre?.localeCompare(b?.nameCentre);
+
+                    if (res === 0) {
+                      res = COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort];
+                    }
+                    return res;
+                  })
+                  .map((data) => {
+                    const center = centerList.find((e) => e?.id?.toString() === data?.cohesionCenterId?.toString());
+                    const headCenter = headCenters.find((e) => e?.id?.toString() === data?.headCenterId?.toString());
+                    return {
+                      "Id centre": center?.id?.toString(),
+                      "Code du centre": center?.code2022,
+                      "Nom du centre": center?.name,
+                      "Désignation du centre": center?.centerDesignation,
+                      "Id de la session": data?._id?.toString(),
+                      "Cohort de la session": data.cohort,
+                      "Statut de la session": translate(data.status),
+                      "Accessibilité aux personnes à mobilité réduite": translate(center?.pmr),
+                      "Capacité maximale d'accueil": center?.placesTotal,
+                      "Place total de la session": data.placesTotal,
+                      "Place restante de la session": data.placesLeft,
+                      "Emploi du temps": data.hasTimeSchedule === "true" ? "Déposé" : "Non déposé",
+                      Typologie: translateTypologieCenter(center?.typology),
+                      Domaine: translateDomainCenter(center?.domain),
+                      "Gestionnaire ou propriétaire": center?.complement,
+                      Adresse: center?.address,
+                      Ville: center?.city,
+                      "Code postal": center?.zip,
+                      Département: center?.department,
+                      Académie: center?.academy,
+                      Région: center?.region,
+                      "Prénom du chef de centre": headCenter?.firstName || "",
+                      "Nom du chef de centre": headCenter?.lastName || "",
+                      "Email du chef de centre": headCenter?.email || "",
+                      "Téléphone du chef de centre": headCenter?.mobile || headCenter?.phone || "",
+                      "Créé le": formatLongDateFR(data.createdAt),
+                      "Mis à jour le": formatLongDateFR(data.updatedAt),
+                    };
+                  });
+              }}
+              selectedFilters={selectedFilters}
+              searchBarObject={searchBarObject}
+              icon={<BsDownload className="text-gray-400" />}
+              css={{
+                override: true,
+                button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+                loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+              }}
+            />
+          </div>
+          <div className="mt-2 flex flex-row flex-wrap items-center">
+            <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="pdrList" />
+            <SelectedFilters
+              filterArray={filterArray}
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+              paramData={paramData}
+              setParamData={setParamData}
+            />
+          </div>
+        </div>
+        <ResultTable
+          paramData={paramData}
+          setParamData={setParamData}
+          currentEntryOnPage={data?.length}
+          render={
+            <div className="flex w-full flex-col gap-1 mt-6 mb-2">
+              <hr />
+              <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
+                <div className="w-[40%]">Centre</div>
+                <div className="w-[20%]">Cohortes</div>
+                <div className="w-[20%]">Places</div>
+                <div className="w-[20%]">Disponibilités</div>
+              </div>
+              {data.map((hit) => (
+                <HitSession
+                  onClick={() => history.push(`/centre/${hit?.cohesionCenterId}?cohorte=${hit.cohort}`)}
+                  key={hit._id}
+                  center={cohesionCenter.filter((e) => e._id === hit.cohesionCenterId)[0]}
+                  hit={hit}
+                />
+              ))}
+              <hr />
+            </div>
+          }
+        />
+      </div>
+    </ReactiveBase>
+  );
+};
+const ListCenter = ({ firstSession }) => {
+  const user = useSelector((state) => state.Auth.user);
+
+  const [data, setData] = React.useState([]);
+  const [selectedFilters, setSelectedFilters] = React.useState({});
+  const [paramData, setParamData] = React.useState({
+    size: 20,
+    page: 0,
+  });
+  const filterArray = [
+    { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée" },
+    {
+      title: "Région",
+      name: "region",
+      datafield: "region.keyword",
+      missingLabel: "Non renseignée",
+      defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
+    },
+    {
+      title: "Département",
+      name: "department",
+      datafield: "department.keyword",
+      missingLabel: "Non renseignée",
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
+    },
+    { title: "Code", name: "code2022", datafield: "code2022.keyword", missingLabel: "Non renseigné" },
+  ];
+  const searchBarObject = {
+    placeholder: "Rechercher un point de rassemblement",
+    datafield: ["name", "address", "region", "department", "code", "city", "zip"],
+  };
+
   // List of sessionPhase1 IDS currently displayed in results
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
   // List of cohesionCenter associated to the sessionPhase1
@@ -387,8 +333,6 @@ const ListCenter = ({ firstSession }) => {
 
   // list of cohorts selected, used for filtering the sessionPhase1 displayed inline
   const [filterCohorts, setFilterConhorts] = useState([]);
-
-  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
