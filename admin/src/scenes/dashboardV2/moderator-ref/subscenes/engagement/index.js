@@ -5,7 +5,7 @@ import DashboardContainer from "../../../components/DashboardContainer";
 export default function Index() {
   return (
     <DashboardContainer
-      availableTab={["general", "engagement", "sejour", "inscription"]}
+      availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}
       active="engagement"
       navChildren={
         <div className="flex items-center gap-2">
