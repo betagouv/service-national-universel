@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 import { BsDownload } from "react-icons/bs";
-import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
-import { apiURL } from "../../config";
 import {
   COHESION_STAY_START,
   COHORTS,
@@ -15,33 +12,33 @@ import {
   canCreateOrUpdateCohesionCenter,
   translateTypologieCenter,
   translateDomainCenter,
-  getFilterLabel,
   getDepartmentNumber,
 } from "snu-lib";
-import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Title } from "../pointDeRassemblement/components/common";
-import { FilterButton, TabItem, Badge } from "./components/commons";
-import ReactiveListComponent from "../../components/ReactiveListComponent";
-import plausibleEvent from "../../services/plausible";
+import { TabItem, Badge } from "./components/commons";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import Menu from "../../assets/icons/Menu";
 import Calendar from "../../assets/icons/Calendar";
 
-import DeleteFilters from "../../components/buttons/DeleteFilters";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 
 import ModalRattacherCentre from "./components/ModalRattacherCentre";
 
 import { Filters, ResultTable, getDefaultQuery, Save, SelectedFilters, ExportComponentV2 } from "../../components/filters-system";
 
-const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022", "TIMESCHEDULE"];
-
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
 
+  const history = useHistory();
+  const { currentTab } = useParams();
+
   const [modalVisible, setModalVisible] = useState(false);
 
-  const [currentTab, setCurrentTab] = useState("liste-centre");
+  React.useEffect(() => {
+    const listTab = ["liste-centre", "session"];
+    console.log("currentTab", currentTab);
+    if (!currentTab || !listTab.includes(currentTab)) return history.replace(`/centre/liste/liste-centre`);
+  }, [currentTab]);
 
   const [firstSession, setFirstSession] = useState(null);
   const getFirstCohortAvailable = () => {
@@ -74,8 +71,8 @@ export default function List() {
           </div>
           <div>
             <div className="flex flex-1">
-              <TabItem icon={<Menu />} title="Liste des centres" onClick={() => setCurrentTab("liste-centre")} active={currentTab === "liste-centre"} />
-              <TabItem icon={<Calendar />} title="Sessions" onClick={() => setCurrentTab("session")} active={currentTab === "session"} />
+              <TabItem icon={<Menu />} title="Liste des centres" onClick={() => history.replace(`/centre/liste/liste-centre`)} active={currentTab === "liste-centre"} />
+              <TabItem icon={<Calendar />} title="Sessions" onClick={() => history.replace(`/centre/liste/session`)} active={currentTab === "session"} />
             </div>
             <div className={`bg-white rounded-b-lg rounded-tr-lg mb-8 relative items-start`}>
               <div className="flex flex-col w-full pt-4">
@@ -162,7 +159,6 @@ const ListSession = ({ firstSession }) => {
       }
     })();
   }, [cohesionCenterIds]);
-  const history = useHistory();
   React.useEffect(() => {
     if (data) setCohesionCenterIds(data.map((pdr) => pdr._id));
   }, [data]);
