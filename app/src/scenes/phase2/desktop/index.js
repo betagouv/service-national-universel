@@ -135,6 +135,16 @@ export default function IndexDesktop() {
               <ArrowUpRight className="text-gray-400 text-2xl group-hover:scale-105" />
             </a>
           </div>
+          <div className="flex w-1/3 border-[1px] border-gray-200 hover:border-gray-300 rounded-lg cursor-pointer">
+            <a
+              href="https://support.snu.gouv.fr/base-de-connaissance/jai-trouve-ma-mission-par-moi-meme-et-elle-nest-pas-encore-sur-la-plateforme"
+              target="_blank"
+              rel="noreferrer"
+              className="flex flex-1 gap-1 items-start justify-between p-3">
+              <div className="font-bold flex-1 text-gray-800 ml-3">J’ai trouvé une mission qui n’est pas sur la plateforme</div>
+              <ArrowUpRight className="text-gray-400 text-2xl group-hover:scale-105" />
+            </a>
+          </div>
           <div className="group w-1/3 border-[1px] border-gray-200 hover:border-gray-300 rounded-lg">
             <a
               href={`https://support.snu.gouv.fr/base-de-connaissance/demander-la-reconnaissance-dun-engagement-deja-realise`}
