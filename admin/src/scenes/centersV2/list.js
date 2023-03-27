@@ -132,7 +132,7 @@ const ListSession = ({ firstSession }) => {
       return {
         size: ES_NO_LIMIT,
         query: {
-          bool: { must: [{ match_all: {} }, { filter: [{ terms: { "department.keyword": user.department } }] }] },
+          bool: { must: [{ match_all: {} }, { terms: { "department.keyword": user.department } }] },
         },
         track_total_hits: true,
       };
@@ -140,7 +140,7 @@ const ListSession = ({ firstSession }) => {
       return {
         size: ES_NO_LIMIT,
         query: {
-          bool: { must: [{ match_all: {} }, { filter: [{ terms: { "region.keyword": user.region } }] }] },
+          bool: { must: [{ match_all: {} }, { term: { "region.keyword": user.region } }] },
         },
         track_total_hits: true,
       };
