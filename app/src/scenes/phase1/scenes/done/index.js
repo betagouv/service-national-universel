@@ -245,7 +245,7 @@ export default function Done() {
             </div>
           </div>
         </div>
-        <JDMDone />
+        {young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />}
         <div className="flex flex-col text-center gap-4 items-center rounded-lg justify-between bg-gray-100 mb-4 px-2 py-5">
           <div className="w-full lg:w-2/3 text-xl leading-7 font-bold">
             Et maintenant, votre parcours d’engagement se poursuit désormais avec la phase 2, la mission d’intérêt général
