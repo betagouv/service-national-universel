@@ -1,18 +1,12 @@
 require("../../mongo");
 
-const { ObjectId } = require("mongodb");
 const fetch = require("node-fetch");
-const { isInRuralArea, getAge } = require("snu-lib");
-
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
-const YoungModel = require("../../models/young");
-const YoungPatchModel = require("./models/youngPatch");
 const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
-const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
+const { getAccessToken } = require("./utils");
 
 let token;
-const result = { event: {} };
 
 exports.handler = async () => {
   try {
