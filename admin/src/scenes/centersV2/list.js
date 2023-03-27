@@ -109,11 +109,10 @@ const ListSession = ({ firstSession }) => {
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
     { title: "Places restantes", name: "placesLeft", datafield: "placesLeft", missingLabel: "Non renseignée" },
+    { title: "Emploi du temps", name: "hasTimeSchedule", datafield: "hasTimeSchedule.keyword", missingLabel: "Non renseignée", translate: translate },
   ];
-  //placesLeft
-  //code2022
-  ///sessionStatus
-  //hasTimeSchedule
+  if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code", datafield: "codeCentre.keyword", missingLabel: "Non renseignée" });
+
   const searchBarObject = {
     placeholder: "Rechercher un point de rassemblement",
     datafield: ["name", "address", "region", "department", "code", "city", "zip"],
@@ -259,7 +258,7 @@ const ListSession = ({ firstSession }) => {
           />
         </div>
         <div className="mt-2 flex flex-row flex-wrap items-center">
-          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="pdrList" />
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="centerSession" />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
       </div>
@@ -317,8 +316,8 @@ const ListCenter = ({ firstSession }) => {
       translate: (e) => getDepartmentNumber(e) + " - " + e,
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
     },
-    { title: "Code", name: "code2022", datafield: "code2022.keyword", missingLabel: "Non renseigné" },
   ];
+  if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code2022", datafield: "code2022.keyword", missingLabel: "Non renseignée" });
   const searchBarObject = {
     placeholder: "Rechercher un point de rassemblement",
     datafield: ["name", "address", "region", "department", "code", "city", "zip"],
@@ -328,9 +327,6 @@ const ListCenter = ({ firstSession }) => {
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
   // List of cohesionCenter associated to the sessionPhase1
   const [sessionsPhase1, setSessionsPhase1] = useState([]);
-
-  // list of cohorts selected, used for filtering the sessionPhase1 displayed inline
-  const [filterCohorts, setFilterConhorts] = useState([]);
 
   useEffect(() => {
     (async () => {
@@ -432,9 +428,7 @@ const ListCenter = ({ firstSession }) => {
                 hit={hit}
                 history={history}
                 onClick={() => history.push(`/centre/${hit._id}`)}
-                sessionsPhase1={sessionsPhase1
-                  .filter((e) => e?._source?.cohesionCenterId === hit._id && (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)))
-                  .map((e) => e)}
+                sessionsPhase1={sessionsPhase1.filter((e) => e?._source?.cohesionCenterId === hit._id).map((e) => e)}
               />
             ))}
             <hr />
