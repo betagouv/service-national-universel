@@ -46,7 +46,7 @@ function postParams(token) {
 
 // Compter les jeunes qui ont changé de statut dans une période 
 // Pour 1..n départements ou 1..n régions ou au global
-router.post("/young-status/count", async (req, res) => {
+router.post("/young-status/count", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       region: Joi.array().items(Joi.string()),
@@ -82,7 +82,7 @@ router.post("/young-status/count", async (req, res) => {
 
 // Compter les jeunes qui ont changé de cohorte dans une période 
 // Pour 1..n départements ou 1..n régions ou au global
-router.post("/young-cohort/count", async (req, res) => {
+router.post("/young-cohort/count", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       region: Joi.array().items(Joi.string()),
