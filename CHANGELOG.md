@@ -1,3 +1,16 @@
+# [1.240.0](https://github.com/betagouv/service-national-universel/compare/v1.239.0...v1.240.0) (2023-03-24)
+
+
+### Bug Fixes
+
+* **admin:** lien du contrat d'engagement application jeune ([54f2ae5](https://github.com/betagouv/service-national-universel/commit/54f2ae51913e0186e5fd529c81299fc4bacb96d3))
+* **app:** bug schooladdress ([e86f278](https://github.com/betagouv/service-national-universel/commit/e86f278aaabbbab91bb76b0914cd9820db6f750c))
+
+
+### Features
+
+* **admin:** logique es volontaire sejour ([#2414](https://github.com/betagouv/service-national-universel/issues/2414)) ([056d5cb](https://github.com/betagouv/service-national-universel/commit/056d5cb675054cfe01cdfb3310a6c2bf088d9e25))
+
 # [1.239.0](https://github.com/betagouv/service-national-universel/compare/v1.238.0...v1.239.0) (2023-03-23)
 
 

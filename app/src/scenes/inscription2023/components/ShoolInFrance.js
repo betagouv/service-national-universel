@@ -200,7 +200,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
           .sort()
           .map((c) => ({ value: c, label: c }))}
         onChange={(value) => {
-          onSelectSchool(schools.find((e) => `${e.fullName} - ${e.adresse}` === value));
+          onSelectSchool(schools.find((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}` === value));
         }}
         placeholder="Sélectionnez un établissement"
         onCreateOption={(value) => {
