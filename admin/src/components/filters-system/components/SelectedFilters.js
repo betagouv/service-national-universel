@@ -9,7 +9,7 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
   const hasOnlyDefaultFiltersSelected = useMemo(
     () =>
       filterArray.every((filter) => {
-        if (selectedFilters[filter.name]?.filter?.length > 0 && selectedFilters[filter.name]?.filter[0]?.trim() !== "") {
+        if (selectedFilters[filter.name]?.filter?.length > 0 && selectedFilters[filter.name]?.filter[0]?.toString().trim() !== "") {
           return filter?.defaultValue ? filter.defaultValue.join(",") === selectedFilters[filter.name].filter.join(",") : false;
         }
         return true;

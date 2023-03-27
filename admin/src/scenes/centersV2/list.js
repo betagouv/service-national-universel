@@ -111,6 +111,7 @@ const ListSession = ({ firstSession }) => {
       missingLabel: "Non renseignée",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
+    { title: "Places restantes", name: "placesLeft", datafield: "placesLeft", missingLabel: "Non renseignée" },
   ];
   //placesLeft
   //code2022
