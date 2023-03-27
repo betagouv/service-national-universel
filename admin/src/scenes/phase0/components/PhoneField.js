@@ -7,17 +7,6 @@ import SectionContext from "../context/SectionContext";
 import CorrectedRequest from "./CorrectedRequest";
 import CorrectionRequest from "./CorrectionRequest";
 
-// name="phone"
-// label="Téléphone"
-// value={young.phone}
-// mode={globalMode}
-// onStartRequest={onStartRequest}
-// currentRequest={currentRequest}
-// correctionRequest={getCorrectionRequest(requests, "phone")}
-// onCorrectionRequestChange={onCorrectionRequestChange}
-// onChange={(value) => onChange("phone", value)}
-// young={young}
-
 /**
  * mode  could be "correction|edition|readonly" (default readonly)
  */
@@ -43,7 +32,6 @@ const PhoneField = ({
   const [opened, setOpened] = useState(false);
   const [hasValidRequest, setHasValidRequest] = useState(false);
   const [requestButtonClass, setRequestButtonClass] = useState("");
-  const [editable, setEditable] = useState(false);
 
   const { errors } = useContext(SectionContext);
 

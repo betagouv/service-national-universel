@@ -220,6 +220,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
   try {
     const { error, value } = validateYoung(req.body);
     if (error) {
+      console.error(error);
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
