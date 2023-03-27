@@ -19,6 +19,7 @@
  *                                                              => Récupération du détail d'un département (les centres du départemetn avec les groupes y arrivant)
  */
 
+// eslint-disable-next-line import/no-unused-modules
 const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
@@ -509,7 +510,11 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
     // --- assigned
     const repartitionResult = await schemaRepartitionModel
       .aggregate([
-        { $match: { cohort } },
+        {
+          $match: {
+            $and: [{ cohort, centerId: { $ne: null } }, { $or: [{ intradepartmental: "true" }, { gatheringPlaces: { $exists: true, $ne: [] } }] }],
+          },
+        },
         {
           $group: {
             _id: "$fromRegion",
@@ -688,7 +693,11 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
 
     // --- assigned
     const schemaPipeline = [
-      { $match: { cohort, fromRegion: region } },
+      {
+        $match: {
+          $and: [{ cohort, fromRegion: region, centerId: { $ne: null } }, { $or: [{ intradepartmental: "true" }, { gatheringPlaces: { $exists: true, $ne: [] } }] }],
+        },
+      },
       {
         $group: {
           _id: "$fromDepartment",
@@ -852,12 +861,17 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
     let intradepartmentalAssigned = 0;
     for (const schema of schemas) {
       if (schema.intradepartmental === "true") {
-        intradepartmentalAssigned += schema.youngsVolume;
+        if (schema.centerId) {
+          intradepartmentalAssigned += schema.youngsVolume;
+          assigned += schema.youngsVolume;
+        }
         groups.intra.push(schema);
       } else {
+        if (schema.centerId && schema.gatheringPlaces && schema.gatheringPlaces.length > 0) {
+          assigned += schema.youngsVolume;
+        }
         groups.extra.push(schema);
       }
-      assigned += schema.youngsVolume;
     }
     // limit to existing.
     assigned = Math.min(assigned, youngValues.total);
