@@ -22,10 +22,12 @@ export default function TravelInfoBus({ meetingPoint, cohortDetails }) {
             <span className="capitalize">{dayjs(cohortDetails.dateStart).locale("fr").format("dddd")}</span>{" "}
             <span>{dayjs(cohortDetails.dateStart).locale("fr").format("D MMMM")}</span> à {meetingPoint?.ligneToPoint?.meetingHour}
           </p>
-          <p className="text-sm py-2 px-3 my-2 bg-gray-100 rounded-xl text-ellipsis overflow-hidden whitespace-nowrap">
+          <p className="text-sm py-2 px-3 my-2 bg-gray-100 rounded-xl">
             {meetingPoint.name},
             <br />
             {meetingPoint.address}
+            <br />
+            {meetingPoint.zip} {meetingPoint.city}
           </p>
         </div>
 
@@ -40,10 +42,12 @@ export default function TravelInfoBus({ meetingPoint, cohortDetails }) {
             <span className="capitalize">{dayjs(cohortDetails.dateEnd).locale("fr").format("dddd")}</span> <span>{dayjs(cohortDetails.dateEnd).locale("fr").format("D MMMM")}</span>{" "}
             à {meetingPoint?.ligneToPoint?.returnHour}
           </p>
-          <p className="text-sm py-2 px-3 my-2 bg-gray-100 rounded-xl text-ellipsis overflow-hidden whitespace-nowrap">
+          <p className="text-sm py-2 px-3 my-2 bg-gray-100 rounded-xl">
             {meetingPoint.name},
             <br />
             {meetingPoint.address}
+            <br />
+            {meetingPoint.zip} {meetingPoint.city}
           </p>
         </div>
       </div>
