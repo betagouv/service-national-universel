@@ -98,7 +98,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setLoading(false);
       toastr.success("Ce volontaire a été supprimé.");
-      return history.push("/inscription");
+      return history.push(`/volontaire/${young._id}`);
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la supression du volontaire :", translate(e.code));

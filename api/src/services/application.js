@@ -6,7 +6,6 @@ const anonymizeApplicationsFromYoungId = async ({ youngId = "", anonymizedYoung 
 
   for (const application of applications) {
     application.set({
-      ...application._doc,
       youngFirstName: anonymizedYoung.firstName,
       youngLastName: anonymizedYoung.lastName,
       youngEmail: anonymizedYoung.email,
@@ -14,7 +13,7 @@ const anonymizeApplicationsFromYoungId = async ({ youngId = "", anonymizedYoung 
       youngCity: anonymizedYoung.city,
       youngDepartment: anonymizedYoung.department,
     });
-    application.save();
+    await application.save();
     const deletePatchesResult = await deletePatches({ id: application._id.toString(), model: ApplicationModel });
     if (!deletePatchesResult.ok) {
       console.error(`ERROR deleting patches of application with id ${application._id} >>>`, deletePatchesResult.code);

@@ -6,7 +6,6 @@ const anonymizeContractsFromYoungId = async ({ youngId = "", anonymizedYoung = {
 
   for (const contract of contracts) {
     contract.set({
-      ...contract._doc,
       youngFirstName: anonymizedYoung.firstName,
       youngLastName: anonymizedYoung.lastName,
       youngEmail: anonymizedYoung.email,
