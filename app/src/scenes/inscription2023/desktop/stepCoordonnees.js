@@ -517,6 +517,8 @@ export default function StepCoordonnees() {
     setErrors({ addressVerified: undefined });
   };
 
+  console.log(phoneZone);
+
   return (
     <DesktopPageContainer
       title="Mon profil volontaire"

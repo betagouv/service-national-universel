@@ -38,9 +38,11 @@ const PhoneField = ({
   const error = errorProps || errors[name];
 
   const getReadOnlyValue = () => {
-    const { shortcut, code } = PHONE_ZONES[zoneValue || "AUTRE"];
-    const codeStr = code ? ` (${code}) ` : " ";
-    return `${shortcut}${codeStr}${value}`;
+    const zoneKey = zoneValue || "AUTRE";
+    const { shortcut, code } = PHONE_ZONES[zoneKey];
+    const codeStr = code ? ` (${code}) ` : "";
+    const shortcutStr = zoneKey === "AUTRE" ? "" : shortcut;
+    return `${shortcutStr}${codeStr}${value}`;
   };
 
   useEffect(() => {

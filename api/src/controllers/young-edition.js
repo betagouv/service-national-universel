@@ -32,7 +32,7 @@ const config = require("../config");
 const YoungObject = require("../models/young");
 const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../models/sessionPhase1");
-const { PHONE_ZONES_NAMES } = require("../utils/phone-number.utils");
+const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR } = require("../utils/phone-number.utils");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [
@@ -60,8 +60,8 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       phone: Joi.string().trim(),
       phoneZone: Joi.string()
         .trim()
-        .valid(...PHONE_ZONES_NAMES)
-        .default("AUTRE"),
+        .valid(...PHONE_ZONES_NAMES_ARR)
+        .default(PHONE_ZONES_NAMES.FRANCE),
       latestCNIFileExpirationDate: Joi.date(),
       latestCNIFileCategory: Joi.string().trim(),
       birthdateAt: Joi.date(),
@@ -166,8 +166,8 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       parent1Phone: Joi.string().trim().allow(""),
       parent1PhoneZone: Joi.string()
         .trim()
-        .valid(...PHONE_ZONES_NAMES)
-        .default("AUTRE"),
+        .valid(...PHONE_ZONES_NAMES_ARR)
+        .default(PHONE_ZONES_NAMES.FRANCE),
       parent1OwnAddress: Joi.string().trim().valid("true", "false").allow(""),
       parent1Address: Joi.string().trim().allow(""),
       parent1Zip: Joi.string().trim().allow(""),
@@ -181,8 +181,8 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       parent2Phone: Joi.string().trim().allow(""),
       parent2PhoneZone: Joi.string()
         .trim()
-        .valid(...PHONE_ZONES_NAMES)
-        .default("AUTRE"),
+        .valid(...PHONE_ZONES_NAMES_ARR)
+        .default(PHONE_ZONES_NAMES.FRANCE),
       parent2OwnAddress: Joi.string().trim().valid("true", "false").allow(""),
       parent2Address: Joi.string().trim().allow(""),
       parent2Zip: Joi.string().trim().allow(""),

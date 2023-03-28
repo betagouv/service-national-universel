@@ -2,7 +2,7 @@ const Joi = require("joi");
 const { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib/roles");
 const { isYoung } = require("../utils");
 const { COHORTS } = require("snu-lib/constants");
-const { PHONE_ZONES_NAMES } = require("./phone-number.utils");
+const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR } = require("./phone-number.utils");
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
 const idRegex = /^[0-9a-fA-F]{24}$/;
@@ -321,8 +321,8 @@ function validateYoung(young, user) {
     phone: Joi.string().allow(null, ""),
     phoneZone: Joi.string()
       .trim()
-      .valid(...PHONE_ZONES_NAMES)
-      .default("AUTRE"),
+      .valid(...PHONE_ZONES_NAMES_ARR)
+      .default(PHONE_ZONES_NAMES.FRANCE),
     gender: Joi.string().allow(null, ""),
     birthdateAt: Joi.string().allow(null, ""),
     cohort: Joi.string().allow(null, ""),
@@ -446,8 +446,8 @@ function validateYoung(young, user) {
     parent1Phone: Joi.string().allow(null, ""),
     parent1PhoneZone: Joi.string()
       .trim()
-      .valid(...PHONE_ZONES_NAMES)
-      .default("AUTRE"),
+      .valid(...PHONE_ZONES_NAMES_ARR)
+      .default(PHONE_ZONES_NAMES.FRANCE),
     parent1OwnAddress: Joi.string().allow(null, ""),
     parent1Address: Joi.string().allow(null, ""),
     parent1ComplementAddress: Joi.string().allow(null, ""),
@@ -472,8 +472,8 @@ function validateYoung(young, user) {
     parent2Phone: Joi.string().allow(null, ""),
     parent2PhoneZone: Joi.string()
       .trim()
-      .valid(...PHONE_ZONES_NAMES)
-      .default("AUTRE"),
+      .valid(...PHONE_ZONES_NAMES_ARR)
+      .default(PHONE_ZONES_NAMES.FRANCE),
     parent2OwnAddress: Joi.string().allow(null, ""),
     parent2Address: Joi.string().allow(null, ""),
     parent2ComplementAddress: Joi.string().allow(null, ""),

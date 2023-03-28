@@ -1134,8 +1134,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
         if (data.parent1Phone) data.parent1Phone = trimmedPhones[1];
         if (data.parent2Phone) data.parent2Phone = trimmedPhones[2];
 
-        console.log(data.parent1Phone, data.parent1PhoneZone);
-
         const result = await api.put(`/young-edition/${young._id}/situationparents`, data);
         if (result.ok) {
           toastr.success("Les données ont bien été enregistrées.");

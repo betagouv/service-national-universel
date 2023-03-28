@@ -67,7 +67,7 @@ const Step = ({ young: { inscriptionStep2023 } }) => {
   const updatedEligibleStepIndex = eligibleStepDetails.allowNext ? eligibleStepIndex + 1 : eligibleStepIndex;
 
   if (currentStepIndex > updatedEligibleStepIndex) {
-    return <Redirect to={`/inscription2023/${STEP_LIST[eligibleStepIndex]}`} />;
+    return <Redirect to={`/inscription2023/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
   return (
