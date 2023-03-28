@@ -114,8 +114,8 @@ const ListSession = ({ firstSession }) => {
   if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code", datafield: "codeCentre.keyword", missingLabel: "Non renseignée" });
 
   const searchBarObject = {
-    placeholder: "Rechercher un point de rassemblement",
-    datafield: ["name", "address", "region", "department", "code", "city", "zip"],
+    placeholder: "Rechercher par mots clés, ville, code postal...",
+    datafield: ["nameCentre", "cityCentre", "zipCentre", "codeCentre"],
   };
 
   const getDefaultQuery = () => {
@@ -320,8 +320,8 @@ const ListCenter = ({ firstSession }) => {
   ];
   if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code2022", datafield: "code2022.keyword", missingLabel: "Non renseignée" });
   const searchBarObject = {
-    placeholder: "Rechercher un point de rassemblement",
-    datafield: ["name", "address", "region", "department", "code", "city", "zip"],
+    placeholder: "Rechercher par mots clés, ville, code postal...",
+    datafield: ["name", "city", "zip", "code2022"],
   };
 
   // List of sessionPhase1 IDS currently displayed in results
