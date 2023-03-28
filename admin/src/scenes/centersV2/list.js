@@ -92,6 +92,7 @@ const ListSession = ({ firstSession }) => {
   const [cohesionCenter, setCohesionCenter] = useState([]);
 
   const [data, setData] = React.useState([]);
+  const pageId = "centerSession";
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({
     size: 20,
@@ -167,7 +168,7 @@ const ListSession = ({ firstSession }) => {
       <div className="mx-4">
         <div className="flex flex-row justify-between w-full">
           <Filters
-            pageId="centerSession"
+            pageId={pageId}
             esId="sessionphase1"
             defaultQuery={getDefaultQuery()}
             setData={(value) => setData(value)}
@@ -257,7 +258,7 @@ const ListSession = ({ firstSession }) => {
           />
         </div>
         <div className="mt-2 flex flex-row flex-wrap items-center">
-          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="centerSession" />
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
       </div>
@@ -293,6 +294,7 @@ const ListCenter = ({ firstSession }) => {
   const user = useSelector((state) => state.Auth.user);
 
   const [data, setData] = React.useState([]);
+  const pageId = "centreList";
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({
     size: 20,
@@ -353,7 +355,7 @@ const ListCenter = ({ firstSession }) => {
       <div className="mx-4">
         <div className="flex flex-row justify-between w-full">
           <Filters
-            pageId="centreList"
+            pageId={pageId}
             esId="cohesioncenter"
             defaultQuery={getDefaultQuery()}
             setData={(value) => setData(value)}
@@ -405,7 +407,7 @@ const ListCenter = ({ firstSession }) => {
           />
         </div>
         <div className="mt-2 flex flex-row flex-wrap items-center">
-          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="centreList" />
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
       </div>
