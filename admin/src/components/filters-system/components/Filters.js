@@ -34,9 +34,11 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
   const ref = React.useRef(null);
   const refFilter = React.useRef(null);
 
-  const hasSomeFilterSelected = selectedFilters && Object.values(selectedFilters).find((item) => item?.filter?.length > 0 && item?.filter[0]?.trim() !== "");
+  const hasSomeFilterSelected = selectedFilters && Object.values(selectedFilters).find((item) => item?.filter?.length > 0 && item?.filter[0]?.toString().trim() !== "");
 
   const [firstLoad, setFirstLoad] = React.useState(true);
+
+  const mounted = React.useRef(false);
 
   React.useEffect(() => {
     init();
@@ -93,9 +95,12 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
 
   React.useEffect(
     function updateOnParamChange() {
-      if (!selectedFilters) return;
-      getData();
-      setURL();
+      if (Object.keys(selectedFilters).length === 0) mounted.current = true;
+      else {
+        if (!selectedFilters || !mounted.current) return;
+        getData();
+        setURL();
+      }
     },
     [selectedFilters, paramData.page, paramData.sort],
   );
@@ -109,15 +114,13 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
 
   const getDefaultFilters = () => {
     const newFilters = {};
-    filters
-      .filter((f) => f?.defaultValue)
-      .map((f) => {
-        if (f?.customComponent?.getQuery) {
-          newFilters[f.name] = { filter: f.defaultValue, customComponentQuery: f.getQuery(f.defaultValue) };
-        } else {
-          newFilters[f.name] = { filter: f.defaultValue };
-        }
-      });
+    filters.map((f) => {
+      if (f?.customComponent?.getQuery) {
+        newFilters[f.name] = { filter: f.defaultValue, customComponentQuery: f.getQuery(f.defaultValue) };
+      } else {
+        newFilters[f.name] = { filter: f?.defaultValue ? f.defaultValue : [] };
+      }
+    });
     return newFilters;
   };
 
