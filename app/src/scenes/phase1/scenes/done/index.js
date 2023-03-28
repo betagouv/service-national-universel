@@ -134,11 +134,11 @@ export default function Done() {
               <img className="object-scale-down h-80" src={require("../../../../assets/validatedPhase2.png")} alt="" />
             </div>
           </div>
-          <div className="flex px-8 pt-8 pb-12 justify-between flex-col items-stretch lg:!flex-row gap-8">
-            <div className="flex flex-col w-full lg:w-1/2 items-center px-8  gap-3 lg:border-r-[1px] border-gray-200">
+          <div className="grid grid-rows-2 lg:grid-rows-1 grid-cols-1 lg:grid-cols-2 px-8 pt-8 mb-12 lg:divide-x-[1px] gap-8 lg:gap-0">
+            <div className="flex flex-col items-center px-8 gap-3">
               <Unlock />
               <div className="leading-7 text-xl text-center font-bold">Le code de la route, c’est facile !</div>
-              <div className="text-xs leading-4 font-medium text-gray-500 text-center">
+              <div className="text-xs leading-relaxed font-medium text-gray-500 text-center">
                 Vous bénéficiez désormais d’un accès <strong>gratuit</strong> à la <br />
                 plateforme en ligne d’apprentissage du code de la route.
               </div>
@@ -150,7 +150,7 @@ export default function Done() {
                 Plus d’informations
               </a>
             </div>
-            {young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />}
+            <div className="flex flex-col items-center">{young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />}</div>
           </div>
         </div>
         <div className="flex flex-col lg:flex-row text-center gap-4 lg:!text-left items-center rounded-xl shadow-ninaBlock justify-between bg-white mx-4 mb-4 px-10 py-5">
@@ -230,18 +230,15 @@ export default function Done() {
           <div className="flex flex-col items-center gap-3 mt-4">
             <Unlock />
             <div className="leading-7 text-xl text-center font-bold">Le code de la route, c’est facile !</div>
-            <div className="text-xs leading-4 font-medium text-gray-500 text-center">
-              Vous bénéficiez désormais d’un accès <strong>gratuit</strong> à la <br />
-              plateforme en ligne d’apprentissage du code de la route.{" "}
-              <span>
-                <a
-                  target="_blank"
-                  rel="noreferrer"
-                  href="https://support.snu.gouv.fr/base-de-connaissance/permis-et-code-de-la-route"
-                  className="font-bold text-gray-800 hover:text-gray-800">
-                  Plus d’informations
-                </a>
-              </span>
+            <div className="text-xs leading-relaxed font-medium text-gray-500 text-center">
+              Vous bénéficiez désormais d’un accès <strong>gratuit</strong> à la plateforme en ligne d’apprentissage du code de la route.{" "}
+              <a
+                target="_blank"
+                rel="noreferrer"
+                href="https://support.snu.gouv.fr/base-de-connaissance/permis-et-code-de-la-route"
+                className="font-bold text-gray-800 hover:text-gray-800">
+                Plus d’informations
+              </a>
             </div>
           </div>
         </div>
