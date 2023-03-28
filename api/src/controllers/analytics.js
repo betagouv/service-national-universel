@@ -1,15 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const fetch = require("node-fetch");
-
+const Joi = require("joi");
 const { capture } = require("../sentry");
-const WaitingListModel = require("../models/waitingList");
 const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../config.js");
 const { ERRORS } = require("../utils");
-const { validateWaitingList } = require("../utils/validator");
-const { sendTemplate } = require("../sendinblue");
-const Joi = require("joi");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 async function getAccessToken(endpoint, apiKey) {
   const response = await fetch(`${endpoint}/auth/token`, {
