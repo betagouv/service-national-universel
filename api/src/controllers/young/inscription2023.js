@@ -15,7 +15,7 @@ const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { isInRuralArea } = require("snu-lib");
-const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR } = require("../../utils/phone-number.utils");
+const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR, formatPhoneNumberFromPhoneZone } = require("../../utils/phone-number.utils");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -230,6 +230,8 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
+
     if (type === "next") value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;
 
     if (type === "correction") {
@@ -351,6 +353,9 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+
+    value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
+    value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

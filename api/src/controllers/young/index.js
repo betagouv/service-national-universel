@@ -59,6 +59,7 @@ const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES, YOUNG_STATUS_PHASE2 } = require("snu-lib/constants");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
 const { getFilteredSessions } = require("../../utils/cohort");
+const { formatPhoneNumberFromPhoneZone } = require("../../utils/phone-number.utils");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
@@ -425,6 +426,10 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+
+    value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
+    value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
+    value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

@@ -32,7 +32,7 @@ const config = require("../config");
 const YoungObject = require("../models/young");
 const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../models/sessionPhase1");
-const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR } = require("../utils/phone-number.utils");
+const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR, formatPhoneNumberFromPhoneZone } = require("../utils/phone-number.utils");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [
@@ -88,6 +88,8 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
+
+    value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
 
     // --- update young
     const young = await YoungModel.findById(id);
@@ -209,6 +211,9 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
+
+    value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
+    value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
 
     // --- update young
     const young = await YoungModel.findById(id);

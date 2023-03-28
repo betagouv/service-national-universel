@@ -116,6 +116,6 @@ export const isPhoneNumberWellFormated = (phoneNumberValue, zoneKey) => {
   if (expectedPhoneNumberLength === 10) {
     const shouldPhoneNumberStartWithZero = phoneNumberValue.length === expectedPhoneNumberLength;
     const hasPhoneNumberAZero = phoneNumberValue.charAt(0) === "0";
-    return (shouldPhoneNumberStartWithZero && hasPhoneNumberAZero) || (!shouldPhoneNumberStartWithZero && phoneNumberValue.length === 9);
+    return (shouldPhoneNumberStartWithZero && hasPhoneNumberAZero) || (!shouldPhoneNumberStartWithZero && phoneNumberValue.length === 9 && !hasPhoneNumberAZero);
   }
 };
