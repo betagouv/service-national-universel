@@ -36,7 +36,6 @@ export default function List() {
 
   React.useEffect(() => {
     const listTab = ["liste-centre", "session"];
-    console.log("currentTab", currentTab);
     if (!currentTab || !listTab.includes(currentTab)) return history.replace(`/centre/liste/liste-centre`);
   }, [currentTab]);
 
