@@ -2,7 +2,18 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { canViewEmailHistory, canViewNotes, ROLES, SENDINBLUE_TEMPLATES, translate, translateInscriptionStatus, WITHRAWN_REASONS, YOUNG_PHASE, YOUNG_STATUS } from "snu-lib";
+import {
+  canViewEmailHistory,
+  canViewNotes,
+  ROLES,
+  SENDINBLUE_TEMPLATES,
+  translate,
+  translateInscriptionStatus,
+  WITHRAWN_REASONS,
+  YOUNG_PHASE,
+  YOUNG_STATUS,
+  YOUNG_STATUS_PHASE1,
+} from "snu-lib";
 import Bin from "../../../assets/Bin";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import History from "../../../assets/icons/History";
@@ -87,7 +98,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setLoading(false);
       toastr.success("Ce volontaire a été supprimé.");
-      return history.push("/inscription");
+      return history.push(`/volontaire/${young._id}`);
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la supression du volontaire :", translate(e.code));
@@ -198,6 +209,16 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     return young.notes.filter((note) => note.phase === phase);
   };
 
+  const canYoungChangeCohort = () => {
+    if (young.status === YOUNG_STATUS.DELETED || user.role === ROLES.HEAD_CENTER) {
+      return false;
+    }
+    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
+      return false;
+    }
+    return true;
+  };
+
   return (
     <div className="px-[30px] pt-[15px] flex justify-end items-end border-b-[#E5E7EB] border-b-[1px]">
       <NoteDisplayModal notes={viewedNotes} isOpen={viewedNotes.length > 0} onClose={() => setVieweNotes([])} user={user} />
@@ -211,7 +232,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               </div>
             </div>
             <Badge {...(young.status === YOUNG_STATUS.DELETED ? greyBadge : blueBadge)} text={young.cohort} />
-            {young.status !== YOUNG_STATUS.DELETED && user.role !== ROLES.HEAD_CENTER && (
+            {canYoungChangeCohort() && (
               <>
                 <ChangeCohortPen young={young} onChange={onChange} />
                 {young.originalCohort && <Badge {...greyBadge} text={young.originalCohort} tooltipText={`Anciennement ${young.originalCohort}`} style={{ cursor: "default" }} />}

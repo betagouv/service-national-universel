@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 
-import Done from "./done.js";
+import Done from "./scenes/done";
 import Affected from "./scenes/affected/index.js";
 import Cancel from "./cancel.js";
 import NotDone from "./notDone.js";

@@ -21,7 +21,7 @@ export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArr
   );
 };
 
-const FilterComponent = ({ filter, selectedFilters, setSelectedFilters }) => {
+export const FilterComponent = ({ filter, selectedFilters, setSelectedFilters }) => {
   const selectedFilterValues = selectedFilters[filter.id]?.length ? selectedFilters[filter.id] : [];
   const [visible, setVisible] = React.useState(false);
 
@@ -128,6 +128,7 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
   const handleSelect = (value) => {
     // check si c'est un isSingle (un seul filtre possible)
     if (filter?.isSingle) return setSelectedFilters({ ...selectedFilters, [filter?.id]: [value] });
+    if (filter?.fixed?.includes(value)) return;
     let newFilters = [];
     // store localement les filtres
     if (selectedFilters[filter?.id]) {
@@ -139,9 +140,13 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
     } else {
       newFilters = [value];
     }
+    // concat array without doublon --> Set is Array without doublon
+    if (filter?.fixed && newFilters.length > 0) newFilters = [...new Set([...newFilters, ...filter.fixed])];
+
     setSelectedFilters({ ...selectedFilters, [filter?.id]: newFilters });
   };
   const handleDelete = () => {
+    if (filter?.fixed) return setSelectedFilters((selectedFilters) => ({ ...selectedFilters, [filter?.id]: filter.fixed }));
     setSelectedFilters((selectedFilters) => ({ ...selectedFilters, [filter?.id]: [] }));
   };
   return (
@@ -186,7 +191,11 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
                         ?.map((option) => (
                           <div className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer" key={option?.key} onClick={() => handleSelect(option?.key)}>
                             <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
-                              <input type="checkbox" checked={selectedFilters[filter.id]?.length && selectedFilters[filter?.id]?.includes(option?.key)} />
+                              <input
+                                type="checkbox"
+                                disabled={filter?.fixed?.includes(option.key)}
+                                checked={filter?.fixed?.includes(option.key) || (selectedFilters[filter.id]?.length && selectedFilters[filter?.id]?.includes(option?.key))}
+                              />
                               {option.label}
                             </div>
                           </div>
