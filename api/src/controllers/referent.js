@@ -73,6 +73,7 @@ const {
   MILITARY_FILE_KEYS,
 } = require("snu-lib");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
+const { formatPhoneNumberFromPhoneZone } = require("../utils/phone-number.utils");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -392,6 +393,10 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+
+    value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
+    value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
+    value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
 
     const { id } = req.params;
     const young = await YoungModel.findById(id);
