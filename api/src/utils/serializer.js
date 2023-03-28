@@ -19,6 +19,7 @@ function serializeMission(mission) {
       delete ret.sqlId;
       delete ret.sqlStructureId;
       delete ret.sqlTutorId;
+      delete ret.jvaRawData;
       return ret;
     },
   });
@@ -93,6 +94,7 @@ function serializeStructure(structure, user) {
       delete ret.sqlId;
       delete ret.sqlUserId;
       delete ret.sqlNetworkId;
+      delete ret.jvaRawData;
       return ret;
     },
   });
