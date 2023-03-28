@@ -73,6 +73,7 @@ export default function Index() {
   });
   const [data, setData] = useState({});
   const [dataCenter, setDataCenter] = useState({});
+  const [sessionList, setSessionList] = useState(null);
 
   const queryYoung = async () => {
     const statusPhaseTerms = selectedFilters?.statusPhase1?.length
@@ -190,12 +191,13 @@ export default function Index() {
         status: { terms: { field: "status.keyword" } },
         timeSchedule: { terms: { field: "hasTimeSchedule.keyword" } },
       },
-      size: 0,
+      size: ES_NO_LIMIT,
     };
 
     if (selectedFilters.cohort?.length) bodySession.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohort } });
     const { responses: responsesSession } = await api.esQuery("sessionphase1", bodySession);
     if (responsesSession.length) {
+      setSessionList(responsesSession[0].hits.hits.map((e) => ({ ...e._source, _id: e._id })));
       resultCenter.placesTotalSession = responsesSession[0].aggregations.placesTotal.value;
       resultCenter.placesLeftSession = responsesSession[0].aggregations.placesLeft.value;
       resultCenter.status = responsesSession[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
@@ -242,9 +244,9 @@ export default function Index() {
           <OccupationCardHorizontal total={dataCenter?.placesTotalSession || 0} taken={dataCenter?.placesTotalSession - dataCenter?.placesLeftSession || 0} />
           <BoxWithPercentage total={dataCenter?.totalSession || 0} number={dataCenter?.timeSchedule?.false || 0} title="Emplois du temps" subLabel="restants à renseigner" />
         </div>
-        <div className="flex items-stretch gap-4 ">
+        <div className="flex gap-4 ">
           <MoreInfo typology={dataCenter?.typology} domains={dataCenter?.domains} />
-          <TabSession />
+          <TabSession sessionList={sessionList} filters={selectedFilters} />
         </div>
       </div>
     </DashboardContainer>
