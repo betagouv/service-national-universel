@@ -4,6 +4,12 @@ const ContractModel = require("../models/contract");
 const anonymizeContractsFromYoungId = async ({ youngId = "", anonymizedYoung = {} }) => {
   const contracts = await ContractModel.find({ youngId });
 
+  console.log("ANONYMIZE YOUNGS CONTRACTS >>>", `${contracts.length} contracts found for young with id ${youngId}.`);
+
+  if (!contracts.length) {
+    return;
+  }
+
   for (const contract of contracts) {
     contract.set({
       youngFirstName: anonymizedYoung.firstName,
@@ -35,6 +41,8 @@ const anonymizeContractsFromYoungId = async ({ youngId = "", anonymizedYoung = {
       console.error(`ERROR deleting patches of contract with id ${contract._id} >>>`, deletePatchesResult.code);
     }
   }
+
+  console.log("ANONYMIZE YOUNGS CONTRACTS >>>", `${contracts.length} contracts anonymized for young with id ${youngId}.`);
 };
 
 module.exports = {

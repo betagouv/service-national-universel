@@ -1,3 +1,19 @@
+export const PHONE_ZONES_NAMES = {
+  FRANCE: "FRANCE",
+  GUADELOUPE: "GUADELOUPE",
+  GUYANE: "GUYANE",
+  LA_REUNION: "LA_REUNION",
+  MARTINIQUE: "MARTINIQUE",
+  MAYOTTE: "MAYOTTE",
+  NOUVELLE_CALEDONIE: "NOUVELLE_CALEDONIE",
+  POLYNESIE_FRANCAISE: "POLYNESIE_FRANCAISE",
+  SAINT_BARTHELEMY: "SAINT_BARTHELEMY",
+  SAINT_MARTIN: "SAINT_MARTIN",
+  SAINT_PIERRE_ET_MIQUELON: "SAINT_PIERRE_ET_MIQUELON",
+  WALLIS_ET_FUTUNA: "WALLIS_ET_FUTUNA",
+  AUTRE: "AUTRE",
+};
+
 export const PHONE_ZONES = {
   FRANCE: {
     shortcut: "FR",
@@ -90,6 +106,14 @@ export const PHONE_ZONES = {
     errorMessage: null,
     example: null,
   },
+};
+
+export const isPhoneZoneKnown = ({ zoneKey, throwError = true }) => {
+  const isPhoneZoneIncluded = Object.keys(PHONE_ZONES).includes(zoneKey);
+  if (!isPhoneZoneIncluded && throwError) {
+    throw new Error(`Phone zone '${zoneKey}' unkown. Please check if this phone zone exists in PHONE_ZONES in 'src/utils/phone-number.utils.js'.`);
+  }
+  return isPhoneZoneIncluded;
 };
 
 export const isPhoneNumberWellFormated = (phoneNumberValue, zoneKey) => {
