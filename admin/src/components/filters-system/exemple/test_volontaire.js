@@ -42,6 +42,7 @@ export default function test_volontaire() {
     size: 20,
     page: 0,
   });
+  const pageId = "volontaire";
   // filtre non obligatoire
 
   const [modalExportVisible, setModalExportVisible] = useState(false);
@@ -296,7 +297,7 @@ export default function test_volontaire() {
         {/* display filtter button + currentfilters + searchbar */}
         <div className="p-[15px]">
           <Filters
-            pageId="young"
+            pageId={pageId}
             esId="young"
             defaultQuery={getDefaultQuery()}
             setData={(value) => setData(value)}
@@ -310,7 +311,7 @@ export default function test_volontaire() {
         </div>
 
         <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
-          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="young" />
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
         <SortOption sortOptions={sortOptions} paramData={paramData} setParamData={setParamData} />
