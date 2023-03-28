@@ -1,3 +1,33 @@
+# [1.241.0](https://github.com/betagouv/service-national-universel/compare/v1.240.0...v1.241.0) (2023-03-27)
+
+
+### Bug Fixes
+
+* **admin:** allow admin to edit school info before parent info are filled ([3522f46](https://github.com/betagouv/service-national-universel/commit/3522f468e09d7d912840bfdb18e405ed079e5ecf))
+* **admin:** correction des droits de changement de séjour pour un jeune ayant validé la phase 1 ([#2418](https://github.com/betagouv/service-national-universel/issues/2418)) ([9a758e5](https://github.com/betagouv/service-national-universel/commit/9a758e5ef365624a4d2968703b86abd4d6ab4519))
+* **admin:** Correction rapide pour empecher l'edition des schema de repartition par les référents régionaux ([#2420](https://github.com/betagouv/service-national-universel/issues/2420)) ([2c5de83](https://github.com/betagouv/service-national-universel/commit/2c5de83e684044883eaf91dc3b181d66c82afd4c))
+* **admin:** fix pagination condition ([c1c45df](https://github.com/betagouv/service-national-universel/commit/c1c45df966a98403921ce2235aede318e4abcec0))
+* **api:** Correction du % d'affectés dans les affichages du schéma de répartition ([#2390](https://github.com/betagouv/service-national-universel/issues/2390)) ([970ce56](https://github.com/betagouv/service-national-universel/commit/970ce562c93818c7b6a88db5cbc2e2e3ffba9742))
+
+
+### Features
+
+* **app:** [Phase 1/Validée] Affichage conditionnel du bloc JDC en fonction de la participation à la JDM ([#2417](https://github.com/betagouv/service-national-universel/issues/2417)) ([057b744](https://github.com/betagouv/service-national-universel/commit/057b7445e76b64f0ba7e4103aed1a6ab65aa9545))
+* **app:** design updates on phase 1 page ([#2406](https://github.com/betagouv/service-national-universel/issues/2406)) ([80d0cce](https://github.com/betagouv/service-national-universel/commit/80d0cce94e5f6f1e056733323501b5a8b732b0eb))
+
+# [1.240.0](https://github.com/betagouv/service-national-universel/compare/v1.239.0...v1.240.0) (2023-03-24)
+
+
+### Bug Fixes
+
+* **admin:** lien du contrat d'engagement application jeune ([54f2ae5](https://github.com/betagouv/service-national-universel/commit/54f2ae51913e0186e5fd529c81299fc4bacb96d3))
+* **app:** bug schooladdress ([e86f278](https://github.com/betagouv/service-national-universel/commit/e86f278aaabbbab91bb76b0914cd9820db6f750c))
+
+
+### Features
+
+* **admin:** logique es volontaire sejour ([#2414](https://github.com/betagouv/service-national-universel/issues/2414)) ([056d5cb](https://github.com/betagouv/service-national-universel/commit/056d5cb675054cfe01cdfb3310a6c2bf088d9e25))
+
 # [1.239.0](https://github.com/betagouv/service-national-universel/compare/v1.238.0...v1.239.0) (2023-03-23)
 
 

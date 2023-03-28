@@ -1149,6 +1149,8 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     let result = true;
     let errors = {};
 
+    if (!data.parent1Status) return true;
+
     for (let parent = 1; parent <= (young.parent2Status ? 2 : 1); ++parent) {
       if ((data[`parent${parent}ContactPreference`] === "email" || data[`parent${parent}Email`] !== "") && !validator.isEmail(data[`parent${parent}Email`])) {
         errors[`parent${parent}Email`] = "L'email ne semble pas valide";

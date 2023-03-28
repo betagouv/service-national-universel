@@ -9,7 +9,7 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
   const hasOnlyDefaultFiltersSelected = useMemo(
     () =>
       filterArray.every((filter) => {
-        if (selectedFilters[filter.name]?.filter?.length > 0 && selectedFilters[filter.name]?.filter[0]?.trim() !== "") {
+        if (selectedFilters[filter.name]?.filter?.length > 0 && selectedFilters[filter.name]?.filter[0]?.toString().trim() !== "") {
           return filter?.defaultValue ? filter.defaultValue.join(",") === selectedFilters[filter.name].filter.join(",") : false;
         }
         return true;
@@ -33,7 +33,7 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
             <div className={`p-0.5 border-[2px] ${paramData?.isShowing === filter.name ? "  border-blue-600 rounded-xl" : "border-transparent"}`}>
               <div
                 onClick={() => setParamData((oldValue) => ({ ...oldValue, isShowing: filter.name }))}
-                className=" cursor-pointer flex flex-row border-[1px] border-gray-200 rounded-md w-fit pr-1.5 py-1.5 pl-[12px] items-center gap-1">
+                className=" cursor-pointer flex flex-row border-[1px] border-gray-200 hover:border-gray-300 rounded-md w-fit pr-1.5 py-1.5 pl-[12px] items-center gap-1">
                 <div className="text-gray-700 font-medium text-xs">{filter.title} :</div>
                 {selectedFilters[filter.name].filter.map((item, index) => {
                   // on affiche que les 2 premiers filtres, apres on affiche "+x"
