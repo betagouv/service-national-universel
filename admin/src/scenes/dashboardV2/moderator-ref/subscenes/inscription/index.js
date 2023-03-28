@@ -6,7 +6,21 @@ import { FullDoughnut, HorizontalBar, BarChart, Legends, Legend, graphColors } f
 import { FilterDashBoard, FilterComponent } from "../../../components/FilterDashBoard";
 import api from "../../../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { YOUNG_STATUS, YOUNG_SITUATIONS, REFERENT_ROLES, departmentList, regionList, COHORTS, ES_NO_LIMIT, translate } from "snu-lib";
+import {
+  YOUNG_STATUS,
+  YOUNG_SITUATIONS,
+  REFERENT_ROLES,
+  departmentList,
+  regionList,
+  COHORTS,
+  ES_NO_LIMIT,
+  translate,
+  academyList,
+  region2department,
+  department2region,
+  academyToDepartments,
+  departmentToAcademy,
+} from "snu-lib";
 import { useSelector } from "react-redux";
 import StatutPhase from "../../../components/inscription/StatutPhase.js";
 
@@ -26,18 +40,28 @@ export default function Index() {
   const [rural, setRural] = useState({});
   const [specificSituation, setSpecificSituation] = useState({});
 
+  const [departmentOptions, setDepartmentOptions] = useState(departmentList.map((department) => ({ key: department, label: department })));
+  const [regionOptions, setRegionOptions] = useState(regionList.map((region) => ({ key: region, label: region })));
+  const [academyOptions, setAcademyOptions] = useState(academyList.map((department) => ({ key: department, label: department })));
+
   const filterArray = [
     {
       id: "region",
       name: "Région",
       fullValue: "Toutes",
-      options: regionList.map((region) => ({ key: region, label: region })),
+      options: regionOptions,
     },
     {
       id: "department",
       name: "Département",
       fullValue: "Tous",
-      options: departmentList.map((department) => ({ key: department, label: department })),
+      options: departmentOptions,
+    },
+    {
+      id: "academy",
+      name: "Académie",
+      fullValue: "Tous",
+      options: academyOptions,
     },
     {
       id: "cohort",
@@ -49,6 +73,98 @@ export default function Index() {
   const [selectedFilters, setSelectedFilters] = React.useState({
     cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
   });
+
+  const updateLocalisationOptions = () => {
+    // check region
+    if (selectedFilters?.region?.length > 0) {
+      // if region is selected, we filter the department list
+      // get the list of departments from the selected regions
+      const departments = selectedFilters.region.map((region) => region2department[region]).flat();
+      // check if there is a duplicate
+      const uniqueDepartments = [...new Set(departments)];
+      // set the department list
+      // remove the department from the filter if it is not in the list
+      const newDepartment = selectedFilters?.department?.filter((department) => uniqueDepartments.includes(department));
+
+      const academy = uniqueDepartments.map((department) => departmentToAcademy[department]).flat();
+      const uniqueAcademy = [...new Set(academy)];
+
+      // remove the academy from the filter if it is not in the list
+      const newAcademy = selectedFilters?.academy?.filter((academy) => uniqueAcademy.includes(academy));
+
+      // verifier si les array newDepartment et selectedFilters.department sont differents
+      if (newDepartment && (newDepartment.length !== selectedFilters?.department?.length || !selectedFilters.department.every((val, i) => val === newDepartment[i]))) {
+        if (newAcademy && (newAcademy.length !== selectedFilters?.academy?.length || !selectedFilters.academy.every((val, i) => val === newAcademy[i])))
+          return setSelectedFilters({ ...selectedFilters, department: newDepartment, academy: newAcademy });
+        return setSelectedFilters({ ...selectedFilters, department: newDepartment });
+      } else if (newAcademy && (newAcademy.length !== selectedFilters?.academy?.length || !selectedFilters.academy.every((val, i) => val === newAcademy[i]))) {
+        return setSelectedFilters({ ...selectedFilters, academy: newAcademy });
+      } else {
+        setDepartmentOptions(uniqueDepartments.map((department) => ({ key: department, label: department })));
+        setAcademyOptions(uniqueAcademy.map((academy) => ({ key: academy, label: academy })));
+      }
+    } else {
+      if (selectedFilters?.department?.length === 0) setDepartmentOptions(departmentList.map((department) => ({ key: department, label: department })));
+      if (selectedFilters?.academy?.length === 0) setAcademyOptions(academyList.map((academy) => ({ key: academy, label: academy })));
+      return;
+    }
+    // check department
+    if (selectedFilters?.department?.length > 0) {
+      // if department is selected, we filter the region list
+      // get the list of regions from the selected departments
+      const regions = selectedFilters.department.map((department) => department2region[department]);
+      // check if there is a duplicate
+      const uniqueRegions = [...new Set(regions)];
+
+      // filtrer les academies
+      const academy = selectedFilters.department.map((department) => departmentToAcademy[department]).flat();
+      const uniqueAcademy = [...new Set(academy)];
+
+      // remove the region from the filter if it is not in the list
+      const newRegion = selectedFilters?.region?.filter((region) => uniqueRegions.includes(region));
+
+      // remove the academy from the filter if it is not in the list
+      const newAcademy = selectedFilters?.academy?.filter((academy) => uniqueAcademy.includes(academy));
+
+      console.log("newRegion", newRegion);
+      console.log("selectedFilters.region", selectedFilters.region);
+      console.log("newAcademy", newAcademy);
+      console.log("selectedFilters.academy", selectedFilters.academy);
+      // verifier si les array newRegion et selectedFilters.region sont differents
+      if (newAcademy && (newAcademy.length !== selectedFilters?.academy?.length || !selectedFilters.academy.every((val, i) => val === newAcademy[i]))) {
+        if (newRegion && (newRegion.length !== selectedFilters?.region?.length || !selectedFilters.region.every((val, i) => val === newRegion[i])))
+          return setSelectedFilters({ ...selectedFilters, region: newRegion, academy: newAcademy });
+        return setSelectedFilters({ ...selectedFilters, academy: newAcademy });
+      } else if (newRegion && (newRegion.length !== selectedFilters?.region?.length || !selectedFilters.region.every((val, i) => val === newRegion[i]))) {
+        return setSelectedFilters({ ...selectedFilters, region: newRegion });
+      } else setRegionOptions(uniqueRegions.map((region) => ({ key: region, label: region })));
+      setAcademyOptions(uniqueAcademy.map((academy) => ({ key: academy, label: academy })));
+    } else {
+      if (selectedFilters?.region?.length === 0) setRegionOptions(regionList.map((region) => ({ key: region, label: region })));
+    }
+
+    // check academy
+    if (selectedFilters?.academy?.length > 0) {
+      // if academy is selected, we filter the department list
+      // get the list of departments from the selected regions
+      const departments = selectedFilters.academy.map((academy) => academyToDepartments[academy]).flat();
+      // check if there is a duplicate
+      const uniqueDepartments = [...new Set(departments)];
+      // set the department list
+
+      // filter on region
+      const regions = uniqueDepartments.map((department) => department2region[department]);
+      const uniqueRegions = [...new Set(regions)];
+
+      // remove the department from the filter if it is not in the list
+      const newDepartment = selectedFilters?.department?.filter((department) => uniqueDepartments.includes(department));
+      // verifier si les array newDepartment et selectedFilters.department sont differents
+      if (newDepartment && (newDepartment.length !== selectedFilters?.department?.length || !selectedFilters.department.every((val, i) => val === newDepartment[i])))
+        return setSelectedFilters({ ...selectedFilters, department: newDepartment });
+      else setDepartmentOptions(uniqueDepartments.map((department) => ({ key: department, label: department })));
+      setRegionOptions(uniqueRegions.map((region) => ({ key: region, label: region })));
+    }
+  };
 
   const [selectedFiltersBottom, setSelectedFiltersBottom] = React.useState({});
   const filterArrayBottom = [
@@ -104,6 +220,7 @@ export default function Index() {
   useEffect(() => {
     fetchCurrentInscriptions();
     fetchDetailInscriptions();
+    updateLocalisationOptions();
   }, [selectedFilters]);
 
   useEffect(() => {
