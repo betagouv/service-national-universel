@@ -10,7 +10,7 @@ import api from "../../../services/api";
 import { HeroContainer } from "../../../components/Content";
 import FileUpload, { useFileUpload } from "../../../components/FileUpload";
 import ErrorMessage, { requiredMessage } from "../../inscription2023/components/ErrorMessageOld";
-import { SelectTag, step1, step2Technical, step2Question } from "./worflow";
+import { SelectTag, step0, step1, step2Technical, step2Question } from "./worflow";
 import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import Unlock from "../../../assets/icons/Unlock";
@@ -63,7 +63,7 @@ export default function TicketCreate(props) {
 
       <Form>
         <Formik
-          initialValues={{ step1: null, step2: null, message: "" }}
+          initialValues={{ step0: null, step1: null, step2: null, message: "" }}
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values) => {
@@ -79,12 +79,13 @@ export default function TicketCreate(props) {
                 }
                 uploadedFiles = filesResponse.data;
               }
-              const { message, step1, step2 } = values;
+              const { message, step0, step1, step2 } = values;
               const title = `${step1?.label} - ${step2?.label}`;
               const response = await api.post("/zammood/ticket", {
                 message,
                 subject: title,
                 fromPage,
+                subjectStep0: step0?.id,
                 subjectStep1: step1?.id,
                 subjectStep2: step2?.id,
                 files: uploadedFiles,
@@ -104,6 +105,17 @@ export default function TicketCreate(props) {
           }}>
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
             <>
+              <SelectTag
+                name="step0"
+                options={Object.values(step0)}
+                title={"Je suis"}
+                selectPlaceholder={"Choisir mon rôle"}
+                handleChange={handleChange}
+                value={values?.step0?.id}
+                values={values}
+                errors={errors}
+                touched={touched}
+              />
               <SelectTag
                 name="step1"
                 options={Object.values(step1)}

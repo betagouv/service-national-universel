@@ -32,6 +32,19 @@ export const SelectTag = ({ options, name, value, title, selectPlaceholder, hand
   );
 };
 
+export const step0 = {
+  VOLONTAIRE: {
+    id: "volontaire",
+    label: "Un(e) volontaire",
+    tags: ["TAG_volontaire"],
+  },
+  REPRESENTANT: {
+    id: "représentant légal",
+    label: "Un(e) représentant(e) légal(e)",
+    tags: ["TAG_représentant_legal"],
+  },
+};
+
 export const step1 = {
   TECHNICAL: {
     id: "TECHNICAL",
