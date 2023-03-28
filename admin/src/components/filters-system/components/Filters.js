@@ -187,7 +187,7 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
                 placeholder={searchBarObject.placeholder}
                 value={selectedFilters?.searchbar?.filter[0] || ""}
                 onChange={(e) => {
-                  setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value?.trim()] } });
+                  setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value] } });
                 }}
                 className={`w-full h-full text-xs text-gray-600`}
               />
