@@ -13,6 +13,7 @@ import { getTransportIcon } from "../../../scenes/plan-transport/util";
 
 export default function test_volontaire() {
   const [data, setData] = useState([]);
+  const pageId = "plandetransport";
   const [paramData, setParamData] = useState({
     size: 20,
     page: 0,
@@ -120,7 +121,7 @@ export default function test_volontaire() {
         <div>{paramData?.count} résultats aa</div>
         {/* display filtter button + currentfilters + searchbar */}
         <Filters
-          pageId="plandetransport"
+          pageId={pageId}
           esId="plandetransport"
           defaultQuery={getDefaultQuery()}
           setData={(value) => setData(value)}
@@ -132,7 +133,7 @@ export default function test_volontaire() {
           setParamData={setParamData}
         />
         <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
-          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="young" />
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
         <ResultTable

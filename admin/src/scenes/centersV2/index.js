@@ -17,8 +17,9 @@ export default function Index() {
       <SentryRoute path="/centre/nouveau" component={Create} />
       <SentryRoute path="/centre/:id/:sessionId/equipe" component={Team} />
       <SentryRoute path="/centre/:id/:sessionId/:currentTab" component={Youngs} />
+      <SentryRoute path="/centre/liste/:currentTab" component={List} />
+      <SentryRoute exact path="/centre" component={List} />
       <SentryRoute path="/centre/:id" component={View} />
-      <SentryRoute path="/centre" component={List} />
     </Switch>
   );
 }

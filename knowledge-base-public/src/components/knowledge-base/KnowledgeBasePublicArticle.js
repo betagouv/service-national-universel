@@ -76,7 +76,10 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
               <h1 className="text-2xl font-light not-italic leading-8 text-gray-600">Aidez-nous à nous améliorer</h1>
               <p className="mt-8 justify-center leading-5 text-gray-600 ">
                 ⚠️ <span className="text-lg font-semibold text-gray-600">Rappel :</span> vous n'obtiendrez pas de réponse à votre question, merci de ne pas inscrire d'informations
-                personnelles. Pour obtenir une aide personnalisée, <span className="cursor-pointer text-lg font-semibold text-[#4F46E5] ">cliquez ici.</span>
+                personnelles. Pour obtenir une aide personnalisée,{" "}
+                <a href="https://www.snu.gouv.fr/nous-contacter/" className="text-snu-purple-200 " target="_blank" rel="noopener noreferrer">
+                  <span className="font-semibold text-[#4F46E5] ">cliquez ici.</span>
+                </a>
               </p>
               <div className="mt-8 mb-2 flex w-full flex-row">
                 <p className="inline-block w-full self-end text-base font-medium leading-5 text-gray-700">Quel était votre question ?</p>
@@ -86,7 +89,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
                 className={`h-24 w-full rounded-md border-2 ${
                   !feedback.comment || feedback.comment?.length <= 125 ? "border-gray-200" : "border-[#EF4444]"
                 } p-4 text-sm font-normal text-[#4B5563] focus:outline-none`}
-                placeholder="Describe yourself here..."
+                placeholder="Ecrivez votre question ici..."
                 onChange={(e) => setFeedback({ ...feedback, comment: e.target.value })}
               ></textarea>
               <p

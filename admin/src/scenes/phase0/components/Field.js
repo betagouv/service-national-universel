@@ -78,7 +78,6 @@ export default function Field({
     } else {
       edit = false;
     }
-    // console.log(name + " editable: ", edit, mode, type, options);
     setEditable(edit);
   }, [options, mode, type]);
 

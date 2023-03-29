@@ -128,6 +128,7 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
   const handleSelect = (value) => {
     // check si c'est un isSingle (un seul filtre possible)
     if (filter?.isSingle) return setSelectedFilters({ ...selectedFilters, [filter?.id]: [value] });
+    if (filter?.fixed?.includes(value)) return;
     let newFilters = [];
     // store localement les filtres
     if (selectedFilters[filter?.id]) {
@@ -139,9 +140,13 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
     } else {
       newFilters = [value];
     }
+    // concat array without doublon --> Set is Array without doublon
+    if (filter?.fixed && newFilters.length > 0) newFilters = [...new Set([...newFilters, ...filter.fixed])];
+
     setSelectedFilters({ ...selectedFilters, [filter?.id]: newFilters });
   };
   const handleDelete = () => {
+    if (filter?.fixed) return setSelectedFilters((selectedFilters) => ({ ...selectedFilters, [filter?.id]: filter.fixed }));
     setSelectedFilters((selectedFilters) => ({ ...selectedFilters, [filter?.id]: [] }));
   };
   return (

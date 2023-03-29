@@ -70,6 +70,7 @@ export default function Index() {
       options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
     },
   ];
+
   const [selectedFilters, setSelectedFilters] = React.useState({
     cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
   });
@@ -173,6 +174,12 @@ export default function Index() {
       name: "Statuts",
       fullValue: "Tous",
       options: Object.keys(YOUNG_STATUS).map((status) => ({ key: status, label: translate(status) })),
+    },
+    {
+      id: "cohort",
+      name: "Cohorte",
+      fullValue: "Toutes",
+      options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
     },
   ];
 
@@ -568,6 +575,5 @@ async function getCurrentInscriptions(filters) {
 
   const { responses } = await api.esQuery("young", body);
   if (!responses.length) return {};
-  console.log("responses", responses[0]);
   return api.getAggregations(responses[0]);
 }

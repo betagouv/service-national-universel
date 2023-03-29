@@ -15,7 +15,7 @@ const KnowledgeBasePublicNoAnswer = ({ className = "" }) => {
             <br /> La base de connaissance du SNU se construit au fil des évolutions de la plateforme et également des besoins des utilisateurs. <br />
             Si vous n'avez pas trouvé de réponse à votre question, vous pouvez nous suggérer un sujet d'article{" "}
             <a href="https://forms.gle/tUPfh6iZwYqV3Hws9" className="text-snu-purple-200 underline" target="_blank" rel="noreferrer">
-              {"en\u00A0cliquant\u00A0ici"}
+              {"en\u00A0cliquant\u00A0ici."}
             </a>
             <br />
             <br />
@@ -23,7 +23,7 @@ const KnowledgeBasePublicNoAnswer = ({ className = "" }) => {
           </p>
           <div>
             Vous pouvez nous contacter{" "}
-            <a href="https://moncompte.snu.gouv.fr/public-besoin-d-aide" target="_blank" rel="noopener noreferrer">
+            <a href="https://moncompte.snu.gouv.fr/public-besoin-d-aide" className="text-snu-purple-200 underline" target="_blank" rel="noopener noreferrer">
               en cliquant ici.
             </a>
           </div>

@@ -2,7 +2,7 @@ import React from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
-import { canCreateMeetingPoint, ES_NO_LIMIT, ROLES, START_DATE_SESSION_PHASE1, COHORTS, COHESION_STAY_START } from "snu-lib";
+import { canCreateMeetingPoint, ES_NO_LIMIT, ROLES, START_DATE_SESSION_PHASE1, COHORTS, COHESION_STAY_START, getDepartmentNumber } from "snu-lib";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { adminURL } from "../../config";
 import api from "../../services/api";
@@ -90,6 +90,7 @@ export default function List() {
 const ListPoints = ({ user }) => {
   const [data, setData] = React.useState([]);
   const [selectedFilters, setSelectedFilters] = React.useState({});
+  const pageId = "pdrList";
   const [paramData, setParamData] = React.useState({
     size: 20,
     page: 0,
@@ -97,7 +98,13 @@ const ListPoints = ({ user }) => {
   const filterArray = [
     { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée" },
     { title: "Région", name: "region", datafield: "region.keyword", missingLabel: "Non renseignée" },
-    { title: "Département", name: "department", datafield: "department.keyword", missingLabel: "Non renseignée" },
+    {
+      title: "Département",
+      name: "department",
+      datafield: "department.keyword",
+      missingLabel: "Non renseignée",
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+    },
   ];
   const searchBarObject = {
     placeholder: "Rechercher un point de rassemblement",
@@ -109,7 +116,7 @@ const ListPoints = ({ user }) => {
       <div className="mx-4">
         <div className="flex flex-row justify-between w-full">
           <Filters
-            pageId="pdrList"
+            pageId={pageId}
             esId="pointderassemblement"
             defaultQuery={getDefaultQuery()}
             setData={(value) => setData(value)}
@@ -157,7 +164,7 @@ const ListPoints = ({ user }) => {
           />
         </div>
         <div className="mt-2 flex flex-row flex-wrap items-center">
-          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="pdrList" />
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
       </div>
@@ -224,6 +231,7 @@ const Hit = ({ hit }) => {
 const ListSessions = ({ user, firstSession }) => {
   const [data, setData] = React.useState([]);
   const [selectedFilters, setSelectedFilters] = React.useState({});
+  const pageId = "pdrListSession";
   const [paramData, setParamData] = React.useState({
     size: 20,
     page: 0,
@@ -242,6 +250,7 @@ const ListSessions = ({ user, firstSession }) => {
       name: "department",
       datafield: "department.keyword",
       missingLabel: "Non renseignée",
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : [],
     },
   ];
@@ -316,7 +325,7 @@ const ListSessions = ({ user, firstSession }) => {
       <div className="mx-4">
         <div className="flex flex-row justify-between w-full">
           <Filters
-            pageId="pdrListSession"
+            pageId={pageId}
             esId="pointderassemblement"
             defaultQuery={getDefaultQuery()}
             setData={(value) => setData(value)}
@@ -367,7 +376,7 @@ const ListSessions = ({ user, firstSession }) => {
           />
         </div>
         <div className="mt-2 flex flex-row flex-wrap items-center">
-          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="pdrListSession" />
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
       </div>

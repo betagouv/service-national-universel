@@ -133,7 +133,7 @@ function Loading({ onFinish, loading, exportTitle, transform, currentQuery, inde
         setStatus(STATUS_EXPORT);
       });
     } else if (status === STATUS_EXPORT) {
-      const fileName = `${exportTitle}_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}.xlsx`;
+      const fileName = `${exportTitle}_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`;
 
       exportData(fileName, data);
       onFinish();

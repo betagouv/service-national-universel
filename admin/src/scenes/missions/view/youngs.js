@@ -553,7 +553,9 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab
 
       <td className={`${bgColor} ${mainTextColor}`}>
         <MultiLine>
-          <span className={`font-bold ${mainTextColor} text-black`}>{`${hit.youngFirstName} ${hit.youngLastName}`}</span>
+          <span className={`font-bold ${mainTextColor} text-black`}>
+            {hit.youngEmail === `${hit.youngId}@delete.com` ? "Compte supprimé" : `${hit.youngFirstName} ${hit.youngLastName}`}
+          </span>
           <p className={`${mainTextColor}`}>
             {hit.youngBirthdateAt ? `${getAge(hit.youngBirthdateAt)} ans` : null} {`• ${hit.youngCity || ""} (${hit.youngDepartment || ""})`}
           </p>

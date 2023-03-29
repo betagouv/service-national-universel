@@ -13,11 +13,16 @@ import GroupAffectationSummary from "./group/GroupAffectationSummary";
 import { useSelector } from "react-redux";
 import { ROLES } from "snu-lib";
 import GroupModificationEnhanced from "./group/GroupModificationEnhanced";
+import { isSchemaModificationAuthorized } from "../../../utils/temporary-functions";
 
 export default function GroupEditor({ group, className = "", onChange }) {
   const { user } = useSelector((state) => state.Auth);
   const [step, setStep] = useState(
-    group._id ? ([ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role) ? GROUPSTEPS.AFFECTATION_SUMMARY : GROUPSTEPS.MODIFICATION) : GROUPSTEPS.CREATION,
+    group._id
+      ? [ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role) || !isSchemaModificationAuthorized(user, group.cohort)
+        ? GROUPSTEPS.AFFECTATION_SUMMARY
+        : GROUPSTEPS.MODIFICATION
+      : GROUPSTEPS.CREATION,
   );
   const [previousStep, setPreviousStep] = useState(null);
   const [reloadNextStep, setReloadNextStep] = useState(null);
@@ -31,7 +36,7 @@ export default function GroupEditor({ group, className = "", onChange }) {
         if (reloadNextStep === GROUPSTEPS.CANCEL) {
           onChange(null);
         } else {
-          if (![ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)) {
+          if (![ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role) && isSchemaModificationAuthorized(user, group.cohort)) {
             setPreviousStep(step);
             setStep(reloadNextStep);
           }
@@ -41,7 +46,7 @@ export default function GroupEditor({ group, className = "", onChange }) {
         setPreviousStep(null);
         setStep(
           group && group._id
-            ? [ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)
+            ? [ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role) || !isSchemaModificationAuthorized(user, group.cohort)
               ? GROUPSTEPS.AFFECTATION_SUMMARY
               : GROUPSTEPS.MODIFICATION
             : GROUPSTEPS.CREATION,
@@ -52,7 +57,7 @@ export default function GroupEditor({ group, className = "", onChange }) {
   }, [group]);
 
   function onChangeStep(newStep) {
-    if (![ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)) {
+    if (![ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role) && isSchemaModificationAuthorized(user, group.cohort)) {
       setPreviousStep(step);
       setStep(newStep);
     }

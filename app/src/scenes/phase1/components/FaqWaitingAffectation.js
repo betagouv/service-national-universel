@@ -5,7 +5,7 @@ import QuestionBlock from "./QuestionBlock";
 const FaqWaitingAffectation = () => {
   return (
     <section className="mb-14">
-      <h2 className="font-bold text-xl m-0 mb-4">F.A.Q</h2>
+      <h2 className="font-bold text-xl m-0 mb-4">Questions fréquentes</h2>
       <div className="flex flex-col gap-4">
         <QuestionBlock
           questionText="Quand vais-je connaître mon lieu d'affectation ?"

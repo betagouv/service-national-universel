@@ -45,12 +45,14 @@ function renderStep(step, device) {
   return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;
 }
 
-const Step = ({ young: { inscriptionStep2023: eligibleStep } }) => {
+const Step = ({ young: { inscriptionStep2023 } }) => {
   const device = useDevice();
   const [isOpen, setIsOpen] = React.useState(false);
   const { step } = useParams();
 
   const requestedStep = getStepFromUrlParam(step, STEP_LIST);
+
+  const eligibleStep = inscriptionStep2023 || STEPS.COORDONNEES;
 
   if (!requestedStep && eligibleStep) {
     return <Redirect to={`/inscription2023/${getStepUrl(eligibleStep, STEP_LIST)}`} />;
