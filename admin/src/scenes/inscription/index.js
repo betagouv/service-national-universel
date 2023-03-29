@@ -40,7 +40,7 @@ import DeleteFilters from "../../components/buttons/DeleteFilters";
 import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";
 import DeletedInscriptionPanel from "./deletedPanel";
-import { concatPhoneNumberWithZone } from "../../utils/phone-number.utils";
+import { concatPhoneNumberWithZone } from "snu-lib/phone-number";
 
 const FILTERS = [
   "SEARCH",
