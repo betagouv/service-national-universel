@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { academyList, COHORTS, departmentList, ES_NO_LIMIT, regionList, ROLES, translateInscriptionStatus, translatePhase1, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import api from "../../../../../services/api";
+import plausibleEvent from "../../../../../services/plausible";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import BoxWithPercentage from "./components/BoxWithPercentage";
@@ -219,11 +220,13 @@ export default function Index() {
       availableTab={["general", "engagement", "sejour", "inscription"]}
       navChildren={
         <div className="flex items-center gap-2">
-          <ButtonPrimary className="text-sm">
-            Exporter le rapport <span className="font-bold">“Séjour”</span>
-          </ButtonPrimary>
-          <ButtonPrimary className="text-sm">
-            Exporter le rapport <span className="font-bold">“Séjour”</span>
+          <ButtonPrimary
+            className="text-sm"
+            onClick={() => {
+              plausibleEvent("Dashboard/CTA - Exporter statistiques séjour");
+              print();
+            }}>
+            Exporter les statistiques <span className="font-bold">“Séjour”</span>
           </ButtonPrimary>
         </div>
       }>
