@@ -92,6 +92,15 @@ export const PHONE_ZONES = {
   },
 };
 
+export const concatPhoneNumberWithZone = (phoneNumber, zoneKey) => {
+  const verifiedZoneKey = zoneKey || "AUTRE";
+  if (verifiedZoneKey === "AUTRE") {
+    return phoneNumber;
+  }
+  const phoneZone = PHONE_ZONES[verifiedZoneKey];
+  return `(${phoneZone.code}) ${phoneNumber}`;
+};
+
 export const isPhoneZoneKnown = ({ zoneKey, throwError = true }) => {
   const isPhoneZoneIncluded = Object.keys(PHONE_ZONES).includes(zoneKey);
   if (!isPhoneZoneIncluded && throwError) {
