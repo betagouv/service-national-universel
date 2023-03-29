@@ -125,7 +125,15 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
   };
 
   const getData = async () => {
-    const res = await buildQuery(esId, selectedFilters, paramData?.page, paramData?.size, defaultQuery, filters, searchBarObject, paramData?.sort);
+    // remove disabeld filters
+    const newFilters = {};
+    Object.keys(selectedFilters).forEach((key) => {
+      const filter = filters.find((f) => f.name === key);
+      if (filter?.disabledBaseQuery) return;
+      newFilters[key] = selectedFilters[key];
+    });
+
+    const res = await buildQuery(esId, newFilters, paramData?.page, paramData?.size, defaultQuery, filters, searchBarObject, paramData?.sort);
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
     const newParamData = {
@@ -250,7 +258,7 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
                                     filter={item}
                                     selectedFilters={selectedFilters}
                                     setSelectedFilters={setSelectedFilters}
-                                    data={dataFilter[item?.name] || []}
+                                    data={item?.disabledBaseQuery ? item.options : dataFilter[item?.name] || []}
                                     isShowing={isShowing === item.name}
                                     setIsShowing={handleFilterShowing}
                                     setParamData={setParamData}

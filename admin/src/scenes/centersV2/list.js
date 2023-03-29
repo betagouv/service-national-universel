@@ -13,6 +13,7 @@ import {
   translateTypologieCenter,
   translateDomainCenter,
   getDepartmentNumber,
+  academyList,
 } from "snu-lib";
 import { Title } from "../pointDeRassemblement/components/common";
 import { TabItem, Badge } from "./components/commons";
@@ -316,6 +317,16 @@ const ListCenter = ({ firstSession }) => {
       missingLabel: "Non renseignée",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
+    },
+    {
+      title: "Académie",
+      name: "academy",
+      datafield: "academy.keyword",
+      missingLabel: "Non renseignée",
+      defaultValue: ["Créteil"],
+      options: academyList.map((academy) => ({ key: academy, label: academy })),
+      disabledBaseQuery: true,
+      allowEmpty: false,
     },
   ];
   if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code2022", datafield: "code2022.keyword", missingLabel: "Non renseignée" });
