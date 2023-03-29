@@ -34,7 +34,7 @@ export const FilterComponent = ({ filter, selectedFilters, setSelectedFilters })
             <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">{filter?.fullValue}</div>
           ) : selectedFilterValues.length > 0 ? (
             selectedFilterValues.map((item, index) => {
-              const label = filter.options.find((option) => option.key === item).label;
+              const label = filter.options.find((option) => option.key === item)?.label;
               if (index > 2) {
                 if (index === selectedFilterValues.length - 1) {
                   return (
