@@ -36,7 +36,7 @@ import { getCorrectionByStep } from "../../../utils/navigation";
 import { apiAdress } from "../../../services/api-adresse";
 import PhoneField from "../components/PhoneField";
 import useClickOutside from "../../../hooks/useClickOutside";
-import { isPhoneNumberWellFormated, PHONE_ZONES } from "../../../utils/phone-number.utils";
+import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};

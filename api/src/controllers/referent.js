@@ -73,7 +73,7 @@ const {
   MILITARY_FILE_KEYS,
 } = require("snu-lib");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
-const { formatPhoneNumberFromPhoneZone } = require("../utils/phone-number.utils");
+const { formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;

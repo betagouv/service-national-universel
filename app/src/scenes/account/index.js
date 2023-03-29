@@ -21,7 +21,7 @@ import DeleteAccountButton from "../../components/buttons/DeleteAccountButton";
 import ChangeStayButton from "../../components/buttons/ChangeStayButton";
 import WithdrawalModal from "./components/WithdrawalModal";
 import PhoneField from "./components/PhoneField";
-import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "../../utils/phone-number.utils";
+import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
 
 export default function Account() {
   const search = useLocation().search;
@@ -326,7 +326,7 @@ export default function Account() {
 
 const Item = ({ title, name, values, handleChange, errors, touched, validate, type, children, ...props }) => {
   return (
-    <Col md={4} style={{ marginTop: 20 }}>
+    <Col lg={4} style={{ marginTop: 20 }}>
       {title && <label className="text-gray-700 font-semibold text-sm mb-[5px]">{title}</label>}
       {children || <Field type={type} className="form-control" name={name} value={values[name]} onChange={handleChange} validate={validate} {...props} />}
       {errors && <ErrorMessage errors={errors} touched={touched} name={name} />}
@@ -336,7 +336,7 @@ const Item = ({ title, name, values, handleChange, errors, touched, validate, ty
 
 const Select = ({ title, name, values, handleChange, errors, touched, validate, options }) => {
   return (
-    <Col md={4} style={{ marginTop: 20 }}>
+    <Col lg={4} style={{ marginTop: 20 }}>
       <label className="text-gray-700 font-semibold text-sm mb-[5px]">{title}</label>
       <select className="form-control" name={name} value={values[name]} onChange={handleChange} validate={validate}>
         {options.map((o, i) => (

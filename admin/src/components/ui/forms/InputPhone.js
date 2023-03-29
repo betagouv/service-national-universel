@@ -1,5 +1,5 @@
 import React from "react";
-import { isPhoneZoneKnown, PHONE_ZONES } from "../../../utils/phone-number.utils";
+import { isPhoneZoneKnown, PHONE_ZONES } from "snu-lib/phone-number";
 
 const InputPhone = ({ value = "", onChange = () => {}, zoneValue = "FRANCE", onChangeZone = () => {}, placeholder = "", className = "" }) => {
   isPhoneZoneKnown({ zoneKey: zoneValue });
@@ -13,10 +13,10 @@ const InputPhone = ({ value = "", onChange = () => {}, zoneValue = "FRANCE", onC
   };
   return (
     <div className={`flex items-center w-full ${className}`}>
-      <select className="py-2 pl-4 mr-3 bg-transparent" onChange={handleChangePhoneZone} value={zoneValue}>
+      <select className="py-2 pl-4 mr-3 bg-transparent max-w-[120px]" onChange={handleChangePhoneZone} value={zoneValue}>
         {Object.entries(PHONE_ZONES).map(([key, phoneZone]) => (
           <option key={key} value={key} className="flex gap-1">
-            {phoneZone.shortcut} {phoneZone.code}
+            {phoneZone.code} {phoneZone.name}
           </option>
         ))}
       </select>

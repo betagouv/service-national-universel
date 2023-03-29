@@ -26,7 +26,7 @@ import VerifyAddress from "../phase0/components/VerifyAddress";
 import FieldSituationsParticulieres from "../phase0/components/FieldSituationsParticulieres";
 import Check from "../../assets/icons/Check";
 import PhoneField from "../phase0/components/PhoneField";
-import { isPhoneNumberWellFormated, PHONE_ZONES } from "../../utils/phone-number.utils";
+import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 
 export default function Create() {
   const history = useHistory();
