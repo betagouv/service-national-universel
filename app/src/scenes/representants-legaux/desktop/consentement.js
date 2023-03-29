@@ -167,6 +167,8 @@ export default function Consentement({ step, parentId }) {
   async function onSubmit() {
     setSaving(true);
     setErrors({});
+
+    data.email = data.email.trim();
     const errors = validateData();
     if (errors) {
       setErrors(errors);
@@ -338,8 +340,8 @@ export default function Consentement({ step, parentId }) {
               <Input className="flex-[1_0_0] mr-2" value={data.firstName} label="Prénom" onChange={(e) => setData({ ...data, firstName: e })} error={errors.firstName} />
               <Input className="flex-[1_0_0] ml-2" value={data.lastName} label="Nom" onChange={(e) => setData({ ...data, lastName: e })} error={errors.lastName} />
             </div>
-            <Input className="" value={data.email} label="Adresse email" onChange={(e) => setData({ ...data, email: e })} error={errors.email} />
-            <Input className="" value={data.phone} label="Votre téléphone" onChange={(e) => setData({ ...data, phone: e })} error={errors.phone} />
+            <Input className="" value={data.email} label="Adresse email" onChange={(e) => setData({ ...data, email: e })} error={errors.email} type="email" />
+            <Input className="" value={data.phone} label="Votre téléphone" onChange={(e) => setData({ ...data, phone: e })} error={errors.phone} type="tel" />
           </div>
 
           <div className="py-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">

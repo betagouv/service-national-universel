@@ -33,67 +33,45 @@ export default function StepRepresentants() {
   const parent1Keys = ["parent1Status", "parent1FirstName", "parent1LastName"];
   const parent2Keys = ["parent2Status", "parent2FirstName", "parent2LastName"];
   const [loading, setLoading] = React.useState(false);
-  const [corrections, setCorrections] = React.useState({});
   const [errors, setErrors] = React.useState({});
-  const [isParent2Visible, setIsParent2Visible] = React.useState(true);
+  const [isParent2Visible, setIsParent2Visible] = React.useState(!young?.parent2Email && !young?.parent2Phone);
   const dispatch = useDispatch();
   const { step } = useParams();
 
+  const corrections = young.status === YOUNG_STATUS.WAITING_CORRECTION ? getCorrectionByStep(young, step) : [];
+  if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) return history.push("/");
+
   const [data, setData] = React.useState({
-    parent1Status: "",
-    parent1FirstName: "",
-    parent1LastName: "",
-    parent1Email: "",
-    parent1Phone: "",
-    parent1PhoneZone: "FRANCE",
-    parent2Status: "",
-    parent2FirstName: "",
-    parent2LastName: "",
-    parent2Email: "",
-    parent2Phone: "",
-    parent2PhoneZone: "FRANCE",
+    parent1FirstName: young.parent1FirstName || "",
+    parent1LastName: young.parent1LastName || "",
+    parent1Email: young.parent1Email || "",
+    parent1Phone: young.parent1Phone || "",
+    parent1PhoneZone: young.parent1PhoneZone || "FRANCE",
+    parent2Status: young.parent2Status || "",
+    parent2FirstName: young.parent2FirstName || "",
+    parent2LastName: young.parent2LastName || "",
+    parent2Email: young.parent2Email || "",
+    parent2Phone: young.parent2Phone || "",
+    parent2PhoneZone: young.parent2PhoneZone || "FRANCE",
   });
 
-  React.useEffect(() => {
-    if (young) {
-      setData((prevData) => ({
-        parent1Status: young.parent1Status,
-        parent1FirstName: young.parent1FirstName,
-        parent1LastName: young.parent1LastName,
-        parent1Email: young.parent1Email,
-        parent1Phone: young.parent1Phone,
-        parent1PhoneZone: young.parent1PhoneZone || prevData.parent1PhoneZone,
-        parent2Status: young.parent2Status,
-        parent2FirstName: young.parent2FirstName,
-        parent2LastName: young.parent2LastName,
-        parent2Email: young.parent2Email,
-        parent2Phone: young.parent2Phone,
-        parent2PhoneZone: young.parent2PhoneZone || prevData.parent2PhoneZone,
-      }));
-    }
-    if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
-      const corrections = getCorrectionByStep(young, step);
-      if (!Object.keys(corrections).length) return history.push("/");
-      else setCorrections(corrections);
-      if (!young?.parent2Email && !young?.parent2Phone) setIsParent2Visible(false);
-    }
-  }, [young]);
-
-  const trimmedParent1Phone = data.parent1Phone && data.parent1Phone.replace(/\s/g, "");
-  const trimmedParent2Phone = data.parent2Phone && data.parent2Phone.replace(/\s/g, "");
+  const trimmedParent1Phone = data.parent1Phone && data?.parent1Phone.replace(/\s/g, "");
+  const trimmedParent2Phone = data.parent2Phone && data?.parent2Phone.replace(/\s/g, "");
+  const trimmedParent1Email = data.parent1Email && data?.parent1Email.trim();
+  const trimmedParent2Email = data.parent2Email && data?.parent2Email.trim();
 
   const getErrors = () => {
     let errors = {};
     if (data.parent1Phone && !isPhoneNumberWellFormated(trimmedParent1Phone, data.parent1PhoneZone)) {
       errors.parent1Phone = PHONE_ZONES[data.parent1PhoneZone].errorMessage;
     } else errors.parent1Phone = undefined;
-    if (data.parent1Email && !validator.isEmail(data.parent1Email)) {
+    if (data.parent1Email && !validator.isEmail(trimmedParent1Email)) {
       errors.parent1Email = "L'adresse email n'est pas valide";
     } else errors.parent1Email = undefined;
     if (data.parent2Phone && !isPhoneNumberWellFormated(trimmedParent2Phone, data.parent2PhoneZone)) {
       errors.parent2Phone = PHONE_ZONES[data.parent2PhoneZone].errorMessage;
     } else errors.parent2Phone = undefined;
-    if (data.parent2Email && !validator.isEmail(data.parent2Email)) {
+    if (data.parent2Email && !validator.isEmail(trimmedParent2Email)) {
       errors.parent2Email = "L'adresse email n'est pas valide";
     } else errors.parent2Email = undefined;
     return errors;
@@ -128,6 +106,8 @@ export default function StepRepresentants() {
 
     if (data.parent1Phone) data.parent1Phone = trimmedParent1Phone;
     if (data.parent2Phone) data.parent2Phone = trimmedParent2Phone;
+    if (data.parent1Email) data.parent1Email = trimmedParent1Email;
+    if (data.parent2Email) data.parent2Email = trimmedParent2Email;
 
     for (const key in error) {
       if (error[key] === undefined) {

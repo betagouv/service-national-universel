@@ -24,7 +24,7 @@ export default function StepProfil() {
   const validate = () => {
     let errors = {};
     //Email
-    if (data?.email && !validator.isEmail(data.email)) {
+    if (data?.email && !validator.isEmail(data.email.trim())) {
       errors.email = "L'e-mail renseigné est invalide";
     }
     //Email confirm
@@ -47,6 +47,9 @@ export default function StepProfil() {
   }, [data.email, data.emailConfirm, data.password, data.confirmPassword, data.acceptCGU, data.rulesYoung]);
 
   const onSubmit = async () => {
+    // data.email = data.email?.trim();
+    // data.emailConfirm = data.emailConfirm?.trim();
+
     let errors = {};
     for (const key of keyList) {
       if (data[key] === undefined || data[key] === "") {
@@ -65,6 +68,7 @@ export default function StepProfil() {
     }
     setError(errors);
     if (!Object.keys(errors).length) {
+      data.email = data.email.trim();
       setData({ ...data, step: PREINSCRIPTION_STEPS.CONFIRM });
       plausibleEvent("Phase0/CTA preinscription - infos persos");
       history.push("/preinscription/confirm");
@@ -88,12 +92,12 @@ export default function StepProfil() {
         <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
             <label className="text-[#161616] text-base">E-mail</label>
-            <Input value={data.email} onChange={(e) => setData({ ...data, email: e })} />
+            <Input value={data.email} onChange={(e) => setData({ ...data, email: e })} type="email" />
             {error.email ? <span className="text-red-500 text-sm">{error.email}</span> : null}
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[#161616] text-base">Confirmez votre e-mail</label>
-            <Input value={data.emailConfirm} onChange={(e) => setData({ ...data, emailConfirm: e })} />
+            <Input value={data.emailConfirm} onChange={(e) => setData({ ...data, emailConfirm: e })} type="email" />
             {error.emailConfirm ? <span className="text-red-500 text-sm">{error.emailConfirm}</span> : null}
           </div>
         </div>
