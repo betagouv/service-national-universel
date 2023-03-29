@@ -21,7 +21,7 @@ const PhoneField = ({
     <div className={className}>
       <label className="text-gray-700 font-semibold text-sm mb-[5px]">{label}</label>
       <div className="flex items-center w-full form-control px-0">
-        <Field as="select" name={selectZoneName} className="py-2 pl-4 mr-3 bg-transparent max-w-[120px]" onChange={onChangeZone} value={zoneValue}>
+        <Field as="select" name={selectZoneName} className="py-2 pl-4 mr-3 bg-transparent max-w-[120px] text-ellipsis" onChange={onChangeZone} value={zoneValue}>
           {Object.entries(PHONE_ZONES).map(([key, phoneZone]) => (
             <option key={key} value={key} className="flex gap-1">
               {phoneZone.code} {phoneZone.name}
