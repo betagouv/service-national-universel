@@ -212,3 +212,23 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
     </Transition>
   );
 };
+
+export const currentFilterAsUrl = (filters) => {
+  let selectedFilters = {};
+  Object.keys(filters)?.forEach((key) => {
+    if (filters[key]?.length > 0) selectedFilters[key] = filters[key];
+  });
+  const length = Object.keys(selectedFilters).length;
+  let index = 0;
+  let url = Object.keys(selectedFilters)?.reduce((acc, curr) => {
+    if (selectedFilters[curr]?.length > 0) {
+      acc += `${curr}=${selectedFilters[curr]?.join(",")}${index < length - 1 ? "&" : ""}`;
+    } else return acc;
+
+    index++;
+    return acc;
+  }, "");
+  url += `${url !== "" ? "&" : ""}page=1`;
+
+  return url;
+};
