@@ -589,7 +589,7 @@ export default function StepCoordonnees() {
         onChangeZone={updateData("phoneZone")}
         value={phone}
         zoneValue={phoneZone}
-        placeholder={PHONE_ZONES[phoneZone].example}
+        placeholder={PHONE_ZONES[phoneZone]?.example}
         error={errors.phone}
         correction={corrections.phone}
       />
