@@ -26,7 +26,7 @@ import VerifyAddress from "../phase0/components/VerifyAddress";
 import FieldSituationsParticulieres from "../phase0/components/FieldSituationsParticulieres";
 import Check from "../../assets/icons/Check";
 import PhoneField from "../phase0/components/PhoneField";
-import { isPhoneNumberWellFormated, PHONE_ZONES } from "../../utils/phone-number.utils";
+import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 
 export default function Create() {
   const history = useHistory();
@@ -598,6 +598,7 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
         mode="edition"
         error={errors[`parent${parent}Phone`]}
         value={values[`parent${parent}Phone`]}
+        placeholder={PHONE_ZONES[values[`parent${parent}PhoneZone`]]?.example}
         zoneValue={values[`parent${parent}PhoneZone`]}
         onChange={handlePhoneChange(`parent${parent}Phone`)}
         onChangeZone={handlePhoneChange(`parent${parent}PhoneZone`)}
@@ -1013,6 +1014,7 @@ function Identite({ values, handleChange, errors, setFieldValue, cohort }) {
         mode="edition"
         error={errors.phone}
         value={values.phone}
+        placeholder={PHONE_ZONES[values.phoneZone]?.example}
         zoneValue={values.phoneZone}
         onChange={handlePhoneChange("phone")}
         onChangeZone={handlePhoneChange("phoneZone")}

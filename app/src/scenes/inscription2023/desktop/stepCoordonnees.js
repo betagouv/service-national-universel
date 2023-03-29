@@ -35,7 +35,7 @@ import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { apiAdress } from "../../../services/api-adresse";
 import PhoneField from "../components/PhoneField";
-import { isPhoneNumberWellFormated, PHONE_ZONES } from "../../../utils/phone-number.utils";
+import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -589,7 +589,7 @@ export default function StepCoordonnees() {
         onChangeZone={updateData("phoneZone")}
         value={phone}
         zoneValue={phoneZone}
-        placeholder={PHONE_ZONES[phoneZone].example}
+        placeholder={PHONE_ZONES[phoneZone]?.example}
         error={errors.phone}
         correction={corrections.phone}
       />
