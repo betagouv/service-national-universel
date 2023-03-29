@@ -294,7 +294,7 @@ export default function Index() {
           <OccupationCardHorizontal total={dataCenter?.placesTotalSession || 0} taken={dataCenter?.placesTotalSession - dataCenter?.placesLeftSession || 0} />
           <BoxWithPercentage total={dataCenter?.totalSession || 0} number={dataCenter?.timeSchedule?.false || 0} title="Emplois du temps" subLabel="restants à renseigner" />
         </div>
-        <div className="flex gap-4 ">
+        <div className="flex gap-4">
           <MoreInfo typology={dataCenter?.typology} domains={dataCenter?.domains} />
           <TabSession sessionList={sessionList} filters={selectedFilters} />
         </div>

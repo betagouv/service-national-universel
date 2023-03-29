@@ -105,7 +105,7 @@ export default function TabSession({ sessionList, filters }) {
           <HiOutlineExternalLink className="h-5 w-5 text-gray-400 cursor-pointer" />
         </Link>
       </div>
-      <table className="table-fixed w-full h-full">
+      <table className="table-fixed w-full">
         <thead>
           <tr className="flex items-center border-y-[1px] border-gray-100 py-4">
             <th className="w-[40%] uppercase text-xs text-gray-500 font-medium leading-4">centres</th>
@@ -119,7 +119,7 @@ export default function TabSession({ sessionList, filters }) {
             </th>
           </tr>
         </thead>
-        <tbody className="h-full">
+        <tbody className="">
           {isLoading ? (
             Array.from(Array(PAGE_SIZE).keys()).map((i) => (
               <tr key={`LoadingCenter${i}`} className="flex items-center border-b-[1px] border-gray-100 h-1/6">
@@ -158,7 +158,7 @@ export default function TabSession({ sessionList, filters }) {
           )}
         </tbody>
       </table>
-      <div className="flex items-center justify-between  pt-4">
+      <div className="flex items-center justify-between pt-4">
         <p className="text-sm leading-5 font-normal text-gray-700">
           {noResult ? 0 : page * PAGE_SIZE + 1}-<strong> {page * PAGE_SIZE + PAGE_SIZE >= total ? total : page * PAGE_SIZE + PAGE_SIZE}</strong> sur <strong>{total}</strong>{" "}
           résultats
