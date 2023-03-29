@@ -75,6 +75,7 @@ export default function Index() {
     cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
   });
 
+  /*
   const updateLocalisationOptions = () => {
     // check region
     if (selectedFilters?.region?.length > 0) {
@@ -138,7 +139,6 @@ export default function Index() {
     } else {
       setRegionOptions(regionList.map((region) => ({ key: region, label: region })));
     }
-
     // check academy
     if (selectedFilters?.academy?.length > 0) {
       // if academy is selected, we filter the department list
@@ -146,6 +146,7 @@ export default function Index() {
       const departments = selectedFilters.academy.map((academy) => academyToDepartments[academy]).flat();
       // check if there is a duplicate
       const uniqueDepartments = [...new Set(departments)];
+      console.log(uniqueDepartments);
       // set the department list
 
       // filter on region
@@ -168,7 +169,7 @@ export default function Index() {
       setRegionOptions(uniqueRegions.map((region) => ({ key: region, label: region })));
     }
   };
-
+*/
   const [selectedFiltersBottom, setSelectedFiltersBottom] = React.useState({});
   const filterArrayBottom = [
     {
@@ -229,6 +230,7 @@ export default function Index() {
   useEffect(() => {
     fetchCurrentInscriptions();
     fetchDetailInscriptions();
+    //updateLocalisationOptions();
   }, [selectedFilters]);
 
   useEffect(() => {
