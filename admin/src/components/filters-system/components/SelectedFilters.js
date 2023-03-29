@@ -64,7 +64,7 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
                 filter={filter}
                 selectedFilters={selectedFilters}
                 setSelectedFilters={setSelectedFilters}
-                data={paramData?.filters ? paramData.filters[filter.name] : []}
+                data={filter?.disabledBaseQuery ? filter.options : paramData?.filters ? paramData.filters[filter.name] : []}
                 isShowing={paramData?.isShowing === filter.name}
                 setParamData={setParamData}
                 inListFilter={false}

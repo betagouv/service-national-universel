@@ -250,7 +250,7 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
                                     filter={item}
                                     selectedFilters={selectedFilters}
                                     setSelectedFilters={setSelectedFilters}
-                                    data={dataFilter[item?.name] || []}
+                                    data={item?.disabledBaseQuery ? item.options : dataFilter[item?.name] || []}
                                     isShowing={isShowing === item.name}
                                     setIsShowing={handleFilterShowing}
                                     setParamData={setParamData}
