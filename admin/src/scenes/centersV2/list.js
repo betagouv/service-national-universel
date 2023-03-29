@@ -13,7 +13,6 @@ import {
   translateTypologieCenter,
   translateDomainCenter,
   getDepartmentNumber,
-  academyList,
 } from "snu-lib";
 import { Title } from "../pointDeRassemblement/components/common";
 import { TabItem, Badge } from "./components/commons";
