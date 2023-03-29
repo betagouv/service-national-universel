@@ -34,7 +34,7 @@ export const FilterComponent = ({ filter, selectedFilters, setSelectedFilters })
             <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">{filter?.fullValue}</div>
           ) : selectedFilterValues.length > 0 ? (
             selectedFilterValues.map((item, index) => {
-              const label = filter.options.find((option) => option.key === item).label;
+              const label = filter.options.find((option) => option.key === item)?.label;
               if (index > 2) {
                 if (index === selectedFilterValues.length - 1) {
                   return (
@@ -188,18 +188,20 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
                         ?.sort((a, b) => {
                           a.key.toString().localeCompare(b.key.toString());
                         })
-                        ?.map((option) => (
-                          <div className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer" key={option?.key} onClick={() => handleSelect(option?.key)}>
-                            <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
-                              <input
-                                type="checkbox"
-                                disabled={filter?.fixed?.includes(option.key)}
-                                checked={filter?.fixed?.includes(option.key) || (selectedFilters[filter.id]?.length && selectedFilters[filter?.id]?.includes(option?.key))}
-                              />
-                              {option.label}
+                        ?.map((option) => {
+                          const optionSelected = filter?.fixed?.includes(option.key) || (selectedFilters[filter.id]?.length && selectedFilters[filter?.id]?.includes(option?.key));
+                          return (
+                            <div
+                              className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer"
+                              key={option?.key}
+                              onClick={() => handleSelect(option?.key)}>
+                              <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
+                                <input type="checkbox" disabled={filter?.fixed?.includes(option.key)} checked={optionSelected} onChange={() => {}} />
+                                {option.label}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                     </>
                   )}
                 </div>

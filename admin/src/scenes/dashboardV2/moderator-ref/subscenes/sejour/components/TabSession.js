@@ -105,7 +105,7 @@ export default function TabSession({ sessionList, filters }) {
           <HiOutlineExternalLink className="h-5 w-5 text-gray-400 cursor-pointer" />
         </Link>
       </div>
-      <table className="table-fixed w-full h-full">
+      <table className="table-fixed w-full">
         <thead>
           <tr className="flex items-center border-y-[1px] border-gray-100 py-4">
             <th className="w-[40%] uppercase text-xs text-gray-500 font-medium leading-4">centres</th>
@@ -119,7 +119,7 @@ export default function TabSession({ sessionList, filters }) {
             </th>
           </tr>
         </thead>
-        <tbody className="h-full">
+        <tbody className="">
           {isLoading ? (
             Array.from(Array(PAGE_SIZE).keys()).map((i) => (
               <tr key={`LoadingCenter${i}`} className="flex items-center border-b-[1px] border-gray-100 h-1/6">
@@ -136,7 +136,7 @@ export default function TabSession({ sessionList, filters }) {
             ))
           ) : !noResult ? (
             sessionByCenter?.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)?.map((center) => (
-              <tr key={center?.name} className="flex items-center border-b-[1px] border-gray-100 py-3 h-1/6">
+              <tr key={center?.centerId} className="flex items-center border-b-[1px] border-gray-100 py-3 h-1/6">
                 <td className="flex flex-col w-[40%] gap-1">
                   <p className="text-sm text-gray-900 font-bold leading-6 truncate">{center.centerName}</p>
                   <p className="text-xs text-gray-500 leading-4">
@@ -152,34 +152,34 @@ export default function TabSession({ sessionList, filters }) {
               </tr>
             ))
           ) : (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-sm leading-5 font-normal text-gray-700">Aucun résultat</p>
-            </div>
+            <tr className="flex items-center justify-center h-full">
+              <td className="text-sm leading-5 font-normal text-gray-700">Aucun résultat</td>
+            </tr>
           )}
         </tbody>
-        <div className="flex items-center border-t-[1px] justify-between border-gray-100 pt-4">
-          <p className="text-sm leading-5 font-normal text-gray-700">
-            {noResult ? 0 : page * PAGE_SIZE + 1}-<strong> {page * PAGE_SIZE + PAGE_SIZE >= total ? total : page * PAGE_SIZE + PAGE_SIZE}</strong> sur <strong>{total}</strong>{" "}
-            résultats
-          </p>
-          <div className="flex items-center">
-            <button
-              className="flex items-center justify-center h-10 w-10 rounded-l-md border-[1px] border-gray-300"
-              onClick={() => {
-                if (page > 0) setPage(page - 1);
-              }}>
-              <HiOutlineChevronLeft className="h-5 w-5 text-gray-500" />
-            </button>
-            <button
-              className="flex items-center justify-center h-10 w-10 rounded-r-md border-r-[1px] border-y-[1px] border-gray-300"
-              onClick={() => {
-                if (page < pageMax) setPage(page + 1);
-              }}>
-              <HiOutlineChevronRight className="h-5 w-5 text-gray-500" />
-            </button>
-          </div>
-        </div>
       </table>
+      <div className="flex items-center justify-between pt-4">
+        <p className="text-sm leading-5 font-normal text-gray-700">
+          {noResult ? 0 : page * PAGE_SIZE + 1}-<strong> {page * PAGE_SIZE + PAGE_SIZE >= total ? total : page * PAGE_SIZE + PAGE_SIZE}</strong> sur <strong>{total}</strong>{" "}
+          résultats
+        </p>
+        <div className="flex items-center">
+          <button
+            className="flex items-center justify-center h-10 w-10 rounded-l-md border-[1px] border-gray-300"
+            onClick={() => {
+              if (page > 0) setPage(page - 1);
+            }}>
+            <HiOutlineChevronLeft className="h-5 w-5 text-gray-500" />
+          </button>
+          <button
+            className="flex items-center justify-center h-10 w-10 rounded-r-md border-r-[1px] border-y-[1px] border-gray-300"
+            onClick={() => {
+              if (page < pageMax) setPage(page + 1);
+            }}>
+            <HiOutlineChevronRight className="h-5 w-5 text-gray-500" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
