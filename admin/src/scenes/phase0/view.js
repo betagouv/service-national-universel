@@ -1067,6 +1067,7 @@ function SectionIdentiteContact({ young, globalMode, currentRequest, onStartRequ
         zoneValue={young.phoneZone}
         onChangeZone={(value) => onChange("phoneZone", value)}
         mode={globalMode}
+        placeholder={PHONE_ZONES[young.phoneZone]?.example}
         onStartRequest={onStartRequest}
         currentRequest={currentRequest}
         correctionRequest={getCorrectionRequest(requests, "phone")}
@@ -1395,6 +1396,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 zoneValue={data[`parent${currentParent}PhoneZone`]}
                 onChangeZone={(value) => onLocalChange(`parent${currentParent}PhoneZone`, value)}
                 mode={sectionMode}
+                placeholder={PHONE_ZONES[data[`parent${currentParent}PhoneZone`]]?.example}
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
                 correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Phone`)}
