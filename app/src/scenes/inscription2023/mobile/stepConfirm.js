@@ -13,6 +13,7 @@ import Footer from "../../../components/footerV2";
 import plausibleEvent from "../../../services/plausible";
 import { supportURL } from "../../../config";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
+import { concatPhoneNumberWithZone } from "snu-lib/phone-number";
 
 export default function StepConfirm() {
   const young = useSelector((state) => state.Auth.young);
@@ -93,7 +94,7 @@ export default function StepConfirm() {
           <Details title="Département de naissance" value={young.birthCityZip} />
           <Details title="Ville de naissance" value={young.birthCity} />
           <Details title="Sexe" value={translate(young.gender)} />
-          <Details title="Téléphone" value={young.phone} />
+          <Details title="Téléphone" value={concatPhoneNumberWithZone(young.phone, young.phoneZone)} />
           <Details title="Adresse de résidence" value={young.address} />
           <Details title="Code postal" value={young.zip} />
           <Details title="Ville" value={young.city} />
@@ -133,7 +134,7 @@ export default function StepConfirm() {
           <Details title="Son prénom" value={young.parent1FirstName} />
           <Details title="Son nom" value={young.parent1LastName} />
           <Details title="Son e-mail" value={young.parent1Email} />
-          <Details title="Son téléphone" value={young.parent1Phone} />
+          <Details title="Son téléphone" value={concatPhoneNumberWithZone(young.parent1Phone, young.parent1PhoneZone)} />
           {young.parent2Status ? (
             <>
               <hr className="my-2 mx-10 h-px bg-gray-200 border-0" />
@@ -141,7 +142,7 @@ export default function StepConfirm() {
               <Details title="Son prénom" value={young.parent2FirstName} />
               <Details title="Son nom" value={young.parent2LastName} />
               <Details title="Son e-mail" value={young.parent2Email} />
-              <Details title="Son téléphone" value={young.parent2Phone} />
+              <Details title="Son téléphone" value={concatPhoneNumberWithZone(young.parent2Phone, young.parent2PhoneZone)} />
             </>
           ) : null}
         </div>
