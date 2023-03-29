@@ -55,7 +55,7 @@ export default function Index() {
       options: departmentList.map((department) => ({ key: department, label: department })),
     },
     {
-      id: "cohort",
+      id: "cohorts",
       name: "Cohorte",
       fullValue: "Toutes",
       options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
@@ -66,7 +66,7 @@ export default function Index() {
   const [selectedFilters, setSelectedFilters] = useState({
     status: [YOUNG_STATUS.VALIDATED],
     statusPhase1: [YOUNG_STATUS_PHASE1.AFFECTED],
-    cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
+    cohorts: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
     region: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
     department: user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : [],
     academy: [],
@@ -136,7 +136,7 @@ export default function Index() {
 
     if (selectedFilters.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": selectedFilters.region } });
     if (selectedFilters.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": selectedFilters.department } });
-    if (selectedFilters.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohort } });
+    if (selectedFilters.cohorts?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohorts } });
     if (selectedFilters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": selectedFilters.academy } });
     if (selectedFilters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.status } });
 
@@ -171,7 +171,8 @@ export default function Index() {
 
     if (selectedFilters.region?.length) bodyCohesion.query.bool.filter.push({ terms: { "region.keyword": selectedFilters.region } });
     if (selectedFilters.department?.length) bodyCohesion.query.bool.filter.push({ terms: { "department.keyword": selectedFilters.department } });
-    if (selectedFilters.cohort?.length) bodyCohesion.query.bool.filter.push({ terms: { "cohorts.keyword": selectedFilters.cohort } });
+    if (selectedFilters.academy?.length) bodyCohesion.query.bool.filter.push({ terms: { "academy.keyword": selectedFilters.academy } });
+    if (selectedFilters.cohorts?.length) bodyCohesion.query.bool.filter.push({ terms: { "cohorts.keyword": selectedFilters.cohorts } });
 
     const { responses: responsesCohesion } = await api.esQuery("cohesioncenter", bodyCohesion);
 
@@ -194,7 +195,7 @@ export default function Index() {
       size: ES_NO_LIMIT,
     };
 
-    if (selectedFilters.cohort?.length) bodySession.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohort } });
+    if (selectedFilters.cohorts?.length) bodySession.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohorts } });
     const { responses: responsesSession } = await api.esQuery("sessionphase1", bodySession);
     if (responsesSession.length) {
       setSessionList(responsesSession[0].hits.hits.map((e) => ({ ...e._source, _id: e._id })));

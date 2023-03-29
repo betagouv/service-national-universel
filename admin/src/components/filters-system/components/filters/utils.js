@@ -96,6 +96,7 @@ export const buildBody = (selectedFilters, page, size, defaultQuery, filterArray
     Object.keys(selectedFilters).forEach((key) => {
       if (key === "searchbar") return;
       const currentFilter = filterArray.find((f) => f.name === key);
+      if (!currentFilter) return;
       if (currentFilter.disabledBaseQuery) return;
       if (currentFilter.customQuery) {
         // on a une custom query
@@ -104,7 +105,7 @@ export const buildBody = (selectedFilters, page, size, defaultQuery, filterArray
           // fonction qui va ajouter la query à la query principale
           bodyQuery.query = setPropertyToObject(currentQuery, bodyQuery.query);
         }
-      } else if (currentFilter.customComponent) {
+      } else if (currentFilter?.customComponent) {
         const currentQuery = selectedFilters[key].customComponentQuery?.query?.query;
         if (currentQuery) {
           bodyQuery.query = setPropertyToObject(currentQuery, bodyQuery.query);
@@ -147,6 +148,7 @@ const buildAggs = (filterArray, selectedFilters, searchBarObject, defaultQuery) 
   //ajouter les aggregations pour count
   filterArray.map((f) => {
     const currentFilter = filterArray.find((e) => f.name === e.name);
+    if (!currentFilter) return;
     if (currentFilter.disabledBaseQuery) return;
     if (currentFilter.customComponent) return;
     if (currentFilter.datafield.includes(".keyword")) {
@@ -220,7 +222,11 @@ export const getURLParam = (urlParams, setParamData, filters) => {
   });
   return localFilters;
 };
-export const currentFilterAsUrl = (selectedFilters, page) => {
+export const currentFilterAsUrl = (filters, page) => {
+  let selectedFilters = {};
+  Object.keys(filters)?.forEach((key) => {
+    if (filters[key]?.filter?.length > 0) selectedFilters[key] = filters[key];
+  });
   const length = Object.keys(selectedFilters).length;
   let index = 0;
   let url = Object.keys(selectedFilters)?.reduce((acc, curr) => {
@@ -236,7 +242,7 @@ export const currentFilterAsUrl = (selectedFilters, page) => {
     return acc;
   }, "");
   // add pagination to url
-  url += `&page=${page + 1}`;
+  url += `${url !== "" ? "&" : ""}page=${page + 1}`;
   return url;
 };
 
@@ -264,6 +270,7 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, filter
     if (key === name) return;
 
     const currentFilter = filterArray.find((f) => f.name === key);
+    if (!currentFilter) return;
     if (currentFilter.disabledBaseQuery) return;
 
     // check pour une customQuery

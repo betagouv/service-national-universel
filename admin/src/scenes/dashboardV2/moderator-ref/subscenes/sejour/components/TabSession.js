@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExternalLink } from "react-icons/hi";
+import { Link } from "react-router-dom";
 import { ES_NO_LIMIT } from "snu-lib";
 import api from "../../../../../../services/api";
 
@@ -12,8 +13,6 @@ export default function TabSession({ sessionList, filters }) {
   const [pageMax, setPageMax] = React.useState(0);
   const [noResult, setNoResult] = React.useState(false);
   const [total, setTotal] = React.useState(0);
-
-  console.log("sessionList", sessionList);
 
   const getYoungsBySession = async () => {
     if (sessionList.length === 0) {
@@ -38,7 +37,6 @@ export default function TabSession({ sessionList, filters }) {
       size: 0,
     };
 
-    if (filters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filters.academy } });
     if (filters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filters.status } });
     if (filters.statusPhase1?.length) body.query.bool.filter.push({ terms: { "statusPhase1.keyword": filters.statusPhase1 } });
 
@@ -97,12 +95,15 @@ export default function TabSession({ sessionList, filters }) {
       getYoungsBySession(sessionList);
     }
   }, [sessionList]);
-
+  console.log(currentFilterAsUrl(filters));
   return (
     <div className="flex flex-col gap-5 bg-white rounded-lg shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] px-8 py-8 w-[60%]">
       <div className="flex items-center gap-3">
         <p className="text-base text-left leading-5 font-bold text-gray-900">Liste des centres</p>
-        <HiOutlineExternalLink className="h-5 w-5 text-gray-400 cursor-pointer" />
+        {/*to={`/centre/liste-presence?${currentFilterAsUrl(filters)}`}*/}
+        <Link to={`/centre/liste-presence?${currentFilterAsUrl(filters)}`} target={"_blank"}>
+          <HiOutlineExternalLink className="h-5 w-5 text-gray-400 cursor-pointer" />
+        </Link>
       </div>
       <table className="table-fixed w-full h-full">
         <thead>
@@ -143,10 +144,10 @@ export default function TabSession({ sessionList, filters }) {
                   </p>
                 </td>
                 <td className="w-[30%] text-sm text-gray-500 leading-3">
-                  <span className="text-gray-900 font-bold">{center.presence}</span> ({Math.round(center.presence / center.total) || 0}%)
+                  <span className="text-gray-900 font-bold">{center.presence}</span> ({Math.round((center.presence / center.total) * 100) || 0}%)
                 </td>
                 <td className="w-[30%] text-sm text-gray-500 leading-3">
-                  <span className="text-gray-900 font-bold">{center.presenceJDM}</span> ({Math.round(center.presenceJDM / center.total) || 0}%)
+                  <span className="text-gray-900 font-bold">{center.presenceJDM}</span> ({Math.round((center.presenceJDM / center.total) * 100) || 0}%)
                 </td>
               </tr>
             ))
@@ -195,3 +196,23 @@ function Loading({ width }) {
     </div>
   );
 }
+
+const currentFilterAsUrl = (filters) => {
+  let selectedFilters = {};
+  Object.keys(filters)?.forEach((key) => {
+    if (filters[key]?.length > 0) selectedFilters[key] = filters[key];
+  });
+  const length = Object.keys(selectedFilters).length;
+  let index = 0;
+  let url = Object.keys(selectedFilters)?.reduce((acc, curr) => {
+    if (selectedFilters[curr]?.length > 0) {
+      acc += `${curr}=${selectedFilters[curr]?.join(",")}${index < length - 1 ? "&" : ""}`;
+    } else return acc;
+
+    index++;
+    return acc;
+  }, "");
+  url += `${url !== "" ? "&" : ""}page=1`;
+
+  return url;
+};
