@@ -25,6 +25,9 @@ export default function List() {
   // States for filters
   const [data, setData] = useState([]);
 
+  // MUST BE UNIQUE
+  const pageId = "mission";
+
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({
     size: 20,
@@ -98,7 +101,7 @@ export default function List() {
         <div className="flex flex-1 flex-col w-full px-8">
           <div className="text-2xl font-bold text-[#242526] leading-7">Missions</div>
           <Filters
-            pageId="mission"
+            pageId={pageId}
             esId="mission"
             defaultQuery={getDefaultQuery()}
             setData={(value) => setData(value)}
@@ -110,7 +113,7 @@ export default function List() {
             setParamData={setParamData}
           />
           <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
-            <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId="young" />
+            <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
             <SelectedFilters
               filterArray={filterArray}
               selectedFilters={selectedFilters}

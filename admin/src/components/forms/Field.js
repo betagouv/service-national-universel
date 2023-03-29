@@ -4,7 +4,20 @@ import { copyToClipboard } from "../../utils";
 import { HiCheckCircle } from "react-icons/hi";
 import { BiCopy } from "react-icons/bi";
 
-export default function Field({ name, label, value, className = "", type = "text", handleChange, readOnly = false, errors = {}, row = 5, isJvaMission = false, copy = false }) {
+export default function Field({
+  name,
+  label,
+  value,
+  className = "",
+  type = "text",
+  handleChange,
+  readOnly = false,
+  errors = {},
+  row = 5,
+  isJvaMission = false,
+  copy = false,
+  autoFocus = false,
+}) {
   const [copied, setCopied] = React.useState(false);
   const border = (readOnly, error) => {
     if (readOnly) return "border-gray-200";
@@ -37,6 +50,7 @@ export default function Field({ name, label, value, className = "", type = "text
             readOnly={(readOnly || isJvaMission) && "readonly"}
             type={type}
             name={name}
+            autoFocus={autoFocus}
             value={value}
             onChange={handleChange}
             className={`w-full h-5 ${!readOnly && isJvaMission && "bg-gray-200"}`}

@@ -40,7 +40,7 @@ import validator from "validator";
 import SectionContext from "./context/SectionContext";
 import VerifyAddress from "./components/VerifyAddress";
 import { FileField } from "./components/FileField";
-import { copyToClipboard, regexPhoneFrenchCountries } from "../../utils";
+import { copyToClipboard } from "../../utils";
 import Warning from "../../assets/icons/Warning";
 import { useSelector } from "react-redux";
 import { appURL } from "../../config";
@@ -48,6 +48,8 @@ import { capture } from "../../sentry";
 import Modal from "../../components/ui/modals/Modal";
 import ButtonLight from "../../components/ui/buttons/ButtonLight";
 import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
+import PhoneField from "./components/PhoneField";
+import { isPhoneNumberWellFormated, PHONE_ZONES } from "../../utils/phone-number.utils";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -620,10 +622,12 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
       errors.email = "L'email ne semble pas valide";
       result = false;
     }
-    if (!data.phone || !validator.matches(data.phone, regexPhoneFrenchCountries)) {
-      errors.phone = "Le téléphone doit être un numéro de téléphone mobile valide. (exemple : (+33)(0)642424242)";
+
+    if (!data.phone || !isPhoneNumberWellFormated(data.phone, data.phoneZone || "AUTRE")) {
+      errors.phone = PHONE_ZONES[data.phoneZone || "AUTRE"].errorMessage;
       result = false;
     }
+
     result = validateEmpty(data, "lastName", errors) && result;
     result = validateEmpty(data, "firstName", errors) && result;
     result = validateEmpty(data, "birthCity", errors) && result;
@@ -950,7 +954,7 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
 
       <FieldsGroup
         name="latestCNIFileExpirationDate"
-        title="Date d’expiration de la pièce d’identité"
+        title="Date d'expiration de la pièce d'identité"
         mode={globalMode}
         onStartRequest={onStartRequest}
         currentRequest={currentRequest}
@@ -1055,17 +1059,18 @@ function SectionIdentiteContact({ young, globalMode, currentRequest, onStartRequ
         young={young}
         copy={true}
       />
-      <Field
+      <PhoneField
         name="phone"
-        label="Téléphone"
+        young={young}
         value={young.phone}
+        onChange={(value) => onChange("phone", value)}
+        zoneValue={young.phoneZone}
+        onChangeZone={(value) => onChange("phoneZone", value)}
         mode={globalMode}
         onStartRequest={onStartRequest}
         currentRequest={currentRequest}
         correctionRequest={getCorrectionRequest(requests, "phone")}
         onCorrectionRequestChange={onCorrectionRequestChange}
-        onChange={(value) => onChange("phone", value)}
-        young={young}
       />
     </div>
   );
@@ -1149,13 +1154,19 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     let result = true;
     let errors = {};
 
+    if (!data.parent1Status) return true;
+
     for (let parent = 1; parent <= (young.parent2Status ? 2 : 1); ++parent) {
       if ((data[`parent${parent}ContactPreference`] === "email" || data[`parent${parent}Email`] !== "") && !validator.isEmail(data[`parent${parent}Email`])) {
         errors[`parent${parent}Email`] = "L'email ne semble pas valide";
         result = false;
       }
-      if ((data[`parent${parent}ContactPreference`] === "phone" || trimmedPhones[parent] !== "") && !validator.matches(data[`parent${parent}Phone`], regexPhoneFrenchCountries)) {
-        errors[`parent${parent}Phone`] = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
+
+      if (
+        (data[`parent${parent}ContactPreference`] === "phone" || trimmedPhones[parent] !== "") &&
+        !isPhoneNumberWellFormated(data[`parent${parent}Phone`], data[`parent${parent}PhoneZone`] || "AUTRE")
+      ) {
+        errors[`parent${parent}Phone`] = PHONE_ZONES[data[`parent${parent}PhoneZone`] || "AUTRE"].errorMessage;
         result = false;
       }
       result = validateEmpty(data, `parent${parent}LastName`, errors) && result;
@@ -1375,18 +1386,19 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 young={young}
                 copy={true}
               />
-              <Field
+              <PhoneField
                 name={`parent${currentParent}Phone`}
-                label="Téléphone"
-                value={data[`parent${currentParent}Phone`]}
-                mode={sectionMode}
                 className="mb-[16px]"
+                young={young}
+                value={data[`parent${currentParent}Phone`]}
+                onChange={(value) => onLocalChange(`parent${currentParent}Phone`, value)}
+                zoneValue={data[`parent${currentParent}PhoneZone`]}
+                onChangeZone={(value) => onLocalChange(`parent${currentParent}PhoneZone`, value)}
+                mode={sectionMode}
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
                 correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Phone`)}
                 onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={(value) => onLocalChange(`parent${currentParent}Phone`, value)}
-                young={young}
               />
               <Field
                 name={`parent${currentParent}OwnAddress`}
@@ -1763,7 +1775,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
             <MiniSwitch value={young.parent1AllowSNU === "true"} />
           </div>
         ) : (
-          !readonly && (
+          !readonly &&
+          young.inscriptionDoneDate && (
             <div className="mt-2 flex items-center justify-between">
               <div
                 className="cursor-pointer italic text-[#1D4ED8]"

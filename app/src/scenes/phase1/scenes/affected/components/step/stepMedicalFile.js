@@ -1,33 +1,27 @@
-import React, { useEffect, useState } from "react";
-import { BsCheck2 } from "react-icons/bs";
-import { HiOutlineDownload, HiOutlineMail } from "react-icons/hi";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import WithTooltip from "../../../../../../components/WithTooltip";
 import { setYoung } from "../../../../../../redux/auth/actions";
 import api from "../../../../../../services/api";
 import { SENDINBLUE_TEMPLATES } from "../../../../../../utils";
+import { isStepConvocationDone, isStepMedicalFieldDone } from "../../utils/steps.utils";
 import { toastr } from "react-redux-toastr";
 import plausibleEvent from "../../../../../../services/plausible";
 import { CDN_BASE_URL } from "../../../../../representants-legaux/commons";
-import MedicalFileModal from "../../../../components/MedicalFileModal";
-import ConfirmationModal from "../../../../../../components/ui/modals/ConfirmationModal";
 import useDevice from "../../../../../../hooks/useDevice";
+
+import { BsCheck2 } from "react-icons/bs";
 import ButtonLink from "../../../../../../components/ui/buttons/ButtonLink";
+import ConfirmationModal from "../../../../../../components/ui/modals/ConfirmationModal";
+import { HiOutlineDownload, HiOutlineMail } from "react-icons/hi";
+import MedicalFileModal from "../../../../components/MedicalFileModal";
+import WithTooltip from "../../../../../../components/WithTooltip";
 
 export default function StepMedicalField({ young }) {
   const device = useDevice();
-
-  const [valid, setValid] = useState(false);
-  const [enabled, setEnabled] = useState(false);
+  const valid = isStepMedicalFieldDone(young);
+  const enabled = isStepConvocationDone(young);
   const [isSendEmailConfirmationModalOpen, setSendEmailConfirmationModalOpen] = useState(false);
   const [isMedicalFileModalOpen, setMedicalFileModalOpen] = useState(false);
-
-  useEffect(() => {
-    if (young) {
-      setEnabled(young.convocationFileDownload === "true" || young.cohesionStayMedicalFileDownload === "true");
-      setValid(young.cohesionStayMedicalFileDownload === "true");
-    }
-  }, [young]);
 
   const dispatch = useDispatch();
 

@@ -34,9 +34,11 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
   const ref = React.useRef(null);
   const refFilter = React.useRef(null);
 
-  const hasSomeFilterSelected = selectedFilters && Object.values(selectedFilters).find((item) => item?.filter?.length > 0 && item?.filter[0]?.trim() !== "");
+  const hasSomeFilterSelected = selectedFilters && Object.values(selectedFilters).find((item) => item?.filter?.length > 0 && item?.filter[0]?.toString().trim() !== "");
 
   const [firstLoad, setFirstLoad] = React.useState(true);
+
+  const mounted = React.useRef(false);
 
   React.useEffect(() => {
     init();
@@ -93,9 +95,12 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
 
   React.useEffect(
     function updateOnParamChange() {
-      if (!selectedFilters) return;
-      getData();
-      setURL();
+      if (Object.keys(selectedFilters).length === 0) mounted.current = true;
+      else {
+        if (!selectedFilters || !mounted.current) return;
+        getData();
+        setURL();
+      }
     },
     [selectedFilters, paramData.page, paramData.sort],
   );
@@ -109,15 +114,13 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
 
   const getDefaultFilters = () => {
     const newFilters = {};
-    filters
-      .filter((f) => f?.defaultValue)
-      .map((f) => {
-        if (f?.customComponent?.getQuery) {
-          newFilters[f.name] = { filter: f.defaultValue, customComponentQuery: f.getQuery(f.defaultValue) };
-        } else {
-          newFilters[f.name] = { filter: f.defaultValue };
-        }
-      });
+    filters.map((f) => {
+      if (f?.customComponent?.getQuery) {
+        newFilters[f.name] = { filter: f.defaultValue, customComponentQuery: f.getQuery(f.defaultValue) };
+      } else {
+        newFilters[f.name] = { filter: f?.defaultValue ? f.defaultValue : [] };
+      }
+    });
     return newFilters;
   };
 
@@ -184,7 +187,7 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
                 placeholder={searchBarObject.placeholder}
                 value={selectedFilters?.searchbar?.filter[0] || ""}
                 onChange={(e) => {
-                  setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value?.trim()] } });
+                  setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value] } });
                 }}
                 className={`w-full h-full text-xs text-gray-600`}
               />
@@ -198,9 +201,9 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
                   ref={ref}
                   onClick={() => handleFilterShowing(!isShowing)}
                   className={classNames(
-                    open ? "ring-2 ring-blue-500 ring-offset-2" : "",
-                    "flex gap-2 items-center px-3 h-[38px] rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer outline-none",
-                    hasSomeFilterSelected ? "bg-[#2563EB] text-white" : "",
+                    open ? "ring-2 ring-blue-500 ring-offset-2 bg-gray-200" : "",
+                    "flex gap-2 items-center px-3 h-[38px] rounded-lg bg-gray-100  hover:bg-gray-200 text-[14px] font-medium text-gray-700 cursor-pointer outline-none",
+                    hasSomeFilterSelected ? "bg-[#2563EB] hover:bg-blue-700 text-white" : "",
                   )}>
                   <FilterSvg className={`${hasSomeFilterSelected ? "text-white" : "text-gray-400"} h-4 w-4`} />
                   <span>Filtres</span>
@@ -231,7 +234,7 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
                           type="text"
                           value={search}
                           onChange={(e) => setSearch(e.target.value)}
-                          className="px-3 py-2 bg-gray-100 mx-2 rounded-lg mb-2 placeholder:text-gray-600 text-sm text-gray-900"
+                          className="px-3 py-2 bg-gray-100 mx-2 rounded-lg mb-2 placeholder:text-gray-600 text-xs text-gray-900"
                           placeholder="Rechercher par..."
                         />
                         <div className="flex flex-col max-h-[590px] overflow-y-auto">

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { BsCheck2 } from "react-icons/bs";
 import { HiOutlineDownload, HiOutlineMail } from "react-icons/hi";
@@ -13,20 +13,14 @@ import api from "../../../../../../services/api";
 import Convocation from "../Convocation";
 import { capture } from "../../../../../../sentry";
 import { translate } from "snu-lib";
+import { isStepAgreementDone, isStepConvocationDone } from "../../utils/steps.utils";
 
 export default function StepConvocation({ young }) {
   const [showConvocation, setShowConvocation] = useState(false);
   const [stateMobil, setStateMobil] = useState(false);
-  const [valid, setValid] = useState(false);
-  const [enabled, setEnabled] = useState(false);
+  const valid = isStepConvocationDone(young);
+  const enabled = isStepAgreementDone(young);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-
-  useEffect(() => {
-    if (young) {
-      setEnabled(young.youngPhase1Agreement === "true");
-      setValid(young.convocationFileDownload === "true");
-    }
-  }, [young]);
 
   const handleMail = async () => {
     try {

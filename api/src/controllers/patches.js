@@ -1,7 +1,8 @@
 const Joi = require("joi");
 const { capture } = require("../sentry");
 const { ERRORS } = require("../utils");
-const { canViewPatchesHistory } = require("snu-lib/roles");
+const { canViewPatchesHistory, canDeletePatchesHistory } = require("snu-lib/roles");
+const { validateId } = require("../utils/validator");
 
 const get = async (req, res, model) => {
   try {
@@ -25,16 +26,15 @@ const get = async (req, res, model) => {
   }
 };
 
-const deletePatches = async ({ req, model }) => {
+const deletePatches = async ({ id, model }) => {
   try {
-    const { error, value } = Joi.object({ id: Joi.string().required() })
-      .unknown()
-      .validate({ ...req.params }, { stripUnknown: true });
-    console.log(error);
+    const { error, value: validatedId } = validateId(id);
+    if (error) {
+      console.error(error);
+    }
     if (error) return { ok: false, code: ERRORS.INVALID_PARAMS, codeError: 400 };
-    if (!canViewPatchesHistory(req.user)) return { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, codeError: 403 };
 
-    const elem = await model.findById(value.id);
+    const elem = await model.findById(validatedId);
     if (!elem) return { ok: false, code: ERRORS.NOT_FOUND, codeError: 404 };
 
     const fieldToKeep = [
@@ -71,7 +71,7 @@ const deletePatches = async ({ req, model }) => {
       });
 
       if (updatedOps.length === 0) {
-        patch.remove();
+        await patch.remove();
       } else {
         patch.set({ ops: updatedOps });
         if (patch.user !== undefined && patch.user["role"] === undefined) {

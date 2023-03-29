@@ -3,6 +3,7 @@ import { Spinner } from "reactstrap";
 import { department2region, departmentLookUp } from "snu-lib/region-and-departments";
 import InfoIcon from "../../../components/InfoIcon";
 import { apiAdress } from "../../../services/api-adresse";
+import Button from "./Button";
 import GhostButton from "./GhostButton";
 
 export default function VerifyAddress({ address, zip, city, onSuccess, onFail, disabled = false, isVerified = false, buttonClassName = "", buttonContainerClassName = "" }) {
@@ -12,8 +13,7 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
   const getSuggestions = async (text) => {
     setLoading(true);
     try {
-      const res = await apiAdress(`${encodeURIComponent(text)}`);
-
+      const res = await apiAdress(text, [`postcode=${zip}`]);
       const arr = res?.features;
 
       setLoading(false);
@@ -56,31 +56,34 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
       );
     }
     return (
-      <div className="w-full">
-        <b className="mb-8">Est-ce que c&apos;est la bonne adresse ?</b>
-        <p>{suggestion.properties.name}</p>
-        <p>{`${suggestion.properties.postcode}, ${suggestion.properties.city}`}</p>
-        <div className="grid grid-cols-2 gap-4">
-          <GhostButton
-            onClick={() => {
-              onFail(formatResult(suggestion));
-              setSuggestion(null);
-            }}
-            name="Non"
-          />
-          <GhostButton
-            onClick={() => {
-              onSuccess(formatResult(suggestion));
-              setSuggestion(null);
-            }}
-            name="Oui"
-          />
-        </div>
+      <div className="my-2">
+        <p className="mb-6 leading-relaxed">
+          Est-ce que c&apos;est la bonne adresse ?
+          <br />
+          <strong>
+            {suggestion.properties.name}, {`${suggestion.properties.postcode} ${suggestion.properties.city}`}
+          </strong>
+        </p>
+        <Button
+          onClick={() => {
+            onSuccess(formatResult(suggestion));
+            setSuggestion(null);
+          }}
+          className="w-full my-1">
+          Oui
+        </Button>
+        <GhostButton
+          onClick={() => {
+            onFail(formatResult(suggestion));
+            setSuggestion(null);
+          }}
+          name={`Non, garder "${address}, ${zip} ${city}"`}
+        />
       </div>
     );
   }
 
-  if (isVerified) return <Message>L&apos;adresse a été vérifiée</Message>;
+  if (isVerified) return <Message>L&apos;adresse a été enregistrée</Message>;
 
   return (
     <>
@@ -96,7 +99,7 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
           }
           onClick={() => {
             if (disabled || !address || !zip || !city || loading) return;
-            getSuggestions(`${address}, ${city} ${zip}`);
+            getSuggestions(`${address}, ${city}`);
           }}
         />
       </div>

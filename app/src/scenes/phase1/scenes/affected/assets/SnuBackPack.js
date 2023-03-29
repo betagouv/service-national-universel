@@ -65,7 +65,7 @@ export default function SnuBackPack({ className }) {
         <pattern id="pattern0" patternContentUnits="objectBoundingBox" width="1" height="1">
           <use xlinkHref="#image0_9739_109593" transform="scale(0.00404858)" />
         </pattern>
-        <filter id="filter0_d_9739_109593" x="19.5869" y="40.2939" width="23.6855" height="14.2042" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+        <filter id="filter0_d_9739_109593" x="19.5869" y="40.2939" width="23.6855" height="14.2042" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
           <feOffset dx="3" dy="-2" />

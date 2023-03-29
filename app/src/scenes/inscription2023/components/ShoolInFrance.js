@@ -39,7 +39,6 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
         },
       };
       const { responses } = await api.esQuery("schoolramses", body);
-      console.log("cities: ", responses[0].aggregations?.cities.buckets);
       setCities(responses[0].aggregations?.cities.buckets.map((e) => e.key).sort());
     }
     getCities();
@@ -197,11 +196,11 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
         label="Nom de l'établissement"
         value={school && `${school.fullName} - ${school.adresse}`}
         options={schools
-          .map((e) => `${e.fullName} - ${e.adresse}`)
+          .map((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`)
           .sort()
           .map((c) => ({ value: c, label: c }))}
         onChange={(value) => {
-          onSelectSchool(schools.find((e) => `${e.fullName} - ${e.adresse}` === value));
+          onSelectSchool(schools.find((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}` === value));
         }}
         placeholder="Sélectionnez un établissement"
         onCreateOption={(value) => {
