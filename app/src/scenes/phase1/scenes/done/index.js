@@ -9,13 +9,13 @@ import api from "../../../../services/api";
 import { translate } from "../../../../utils";
 import downloadPDF from "../../../../utils/download-pdf";
 import InfoConvocation from "../../components/modals/InfoConvocation";
-import plausibleEvent from "../../../../services/plausible";
 import { capture } from "../../../../sentry";
 import { isCohortDone } from "../../../../utils/cohorts";
-import ButtonLinkPrimary from "../../../../components/ui/buttons/ButtonLinkPrimary";
+
+import HeroPhase1Mobile from "./assets/herophase1mobile.png";
 import JDMDone from "./components/JDMDone";
 import JDMNotDone from "./components/JDMNotDone";
-import HeroPhase1Mobile from "./assets/herophase1mobile.png";
+import NextStep from "./components/NextStep";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -234,33 +234,7 @@ export default function Done() {
         {young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />}
       </div>
 
-      {/* <div className="flex flex-col lg:flex-row text-center gap-4 lg:!text-left items-center rounded-xl shadow-ninaBlock justify-between bg-white mx-4 mb-4 px-10 py-5">
-        <p className="w-full lg:w-2/3 text-xl leading-7 font-bold">
-          Et maintenant, votre parcours d’engagement se poursuit désormais avec la phase 2, la mission d’intérêt général
-        </p>
-        <ButtonLinkPrimary
-          to="/phase2"
-          className="shadow-ninaBlue"
-          onClick={() => {
-            plausibleEvent("Phase 2/CTA - Realiser ma mission");
-          }}>
-          Je trouve une mission d’intérêt général
-        </ButtonLinkPrimary>
-      </div> */}
-
-      <div className="flex flex-col md:flex-row justify-between gap-4 items-center rounded-xl bg-gray-100 md:bg-white mx-4 mb-4 md:p-[2rem] md:shadow-ninaBlock">
-        <p className="w-full md:w-2/3 text-center md:text-[left] text-xl leading-7 font-bold">
-          Et maintenant, votre parcours d’engagement se poursuit désormais avec la phase 2, la mission d’intérêt général
-        </p>
-        <ButtonLinkPrimary
-          to="/phase2"
-          className="shadow-ninaBlue"
-          onClick={() => {
-            plausibleEvent("Phase 2/CTA - Realiser ma mission");
-          }}>
-          Je trouve une mission d’intérêt général
-        </ButtonLinkPrimary>
-      </div>
+      <NextStep />
 
       <InfoConvocation isOpen={modalOpen?.isOpen} onCancel={() => setModalOpen({ isOpen: false })} />
     </>
