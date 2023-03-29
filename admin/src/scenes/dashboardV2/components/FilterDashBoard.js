@@ -188,18 +188,20 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
                         ?.sort((a, b) => {
                           a.key.toString().localeCompare(b.key.toString());
                         })
-                        ?.map((option) => (
-                          <div className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer" key={option?.key} onClick={() => handleSelect(option?.key)}>
-                            <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
-                              <input
-                                type="checkbox"
-                                disabled={filter?.fixed?.includes(option.key)}
-                                checked={filter?.fixed?.includes(option.key) || (selectedFilters[filter.id]?.length && selectedFilters[filter?.id]?.includes(option?.key))}
-                              />
-                              {option.label}
+                        ?.map((option) => {
+                          const optionSelected = filter?.fixed?.includes(option.key) || (selectedFilters[filter.id]?.length && selectedFilters[filter?.id]?.includes(option?.key));
+                          return (
+                            <div
+                              className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer"
+                              key={option?.key}
+                              onClick={() => handleSelect(option?.key)}>
+                              <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
+                                <input type="checkbox" disabled={filter?.fixed?.includes(option.key)} checked={optionSelected} onChange={() => {}} />
+                                {option.label}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                     </>
                   )}
                 </div>
