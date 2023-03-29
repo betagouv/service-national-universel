@@ -99,11 +99,18 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: newFilters } });
   };
   const handleDelete = () => {
-    setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: [] } });
+    setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: filter?.defaultValue ? filter.defaultValue : [] } });
   };
 
   const handleCustomComponent = (query) => {
     setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: query.value, customComponentQuery: query } });
+  };
+
+  const hasOnlyDefaultFiltersSelected = () => {
+    if (selectedFilters[filter.name]?.filter?.length > 0 && selectedFilters[filter.name]?.filter[0]?.toString().trim() !== "") {
+      return filter?.defaultValue ? filter.defaultValue.join(",") === selectedFilters[filter.name].filter.join(",") : false;
+    }
+    return true;
   };
   return (
     <Transition
@@ -120,7 +127,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
           <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100">
             <div className="flex items-center justify-between py-2 mb-1 px-3">
               <p className="text-gray-500 text-xs leading-5 font-light">{filter?.title}</p>
-              {filter.allowEmpty === false ? <></> : <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={handleDelete} />}
+              {filter.allowEmpty === false || hasOnlyDefaultFiltersSelected() ? <></> : <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={handleDelete} />}
             </div>
             {filter?.customComponent ? (
               filter.customComponent(handleCustomComponent, selectedFilters[filter?.name]?.filter)
