@@ -125,15 +125,7 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
   };
 
   const getData = async () => {
-    // remove disabeld filters
-    const newFilters = {};
-    Object.keys(selectedFilters).forEach((key) => {
-      const filter = filters.find((f) => f.name === key);
-      if (filter?.disabledBaseQuery) return;
-      newFilters[key] = selectedFilters[key];
-    });
-
-    const res = await buildQuery(esId, newFilters, paramData?.page, paramData?.size, defaultQuery, filters, searchBarObject, paramData?.sort);
+    const res = await buildQuery(esId, selectedFilters, paramData?.page, paramData?.size, defaultQuery, filters, searchBarObject, paramData?.sort);
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
     const newParamData = {
