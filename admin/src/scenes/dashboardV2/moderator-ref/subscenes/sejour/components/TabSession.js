@@ -3,6 +3,7 @@ import { HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExternalLink } fr
 import { Link } from "react-router-dom";
 import { ES_NO_LIMIT } from "snu-lib";
 import api from "../../../../../../services/api";
+import { currentFilterAsUrl } from "../../../../components/FilterDashBoard";
 
 const PAGE_SIZE = 6;
 
@@ -95,12 +96,11 @@ export default function TabSession({ sessionList, filters }) {
       getYoungsBySession(sessionList);
     }
   }, [sessionList]);
-  console.log(currentFilterAsUrl(filters));
+
   return (
     <div className="flex flex-col gap-5 bg-white rounded-lg shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] px-8 py-8 w-[60%]">
       <div className="flex items-center gap-3">
         <p className="text-base text-left leading-5 font-bold text-gray-900">Liste des centres</p>
-        {/*to={`/centre/liste-presence?${currentFilterAsUrl(filters)}`}*/}
         <Link to={`/centre/liste-presence?${currentFilterAsUrl(filters)}`} target={"_blank"}>
           <HiOutlineExternalLink className="h-5 w-5 text-gray-400 cursor-pointer" />
         </Link>
@@ -196,23 +196,3 @@ function Loading({ width }) {
     </div>
   );
 }
-
-const currentFilterAsUrl = (filters) => {
-  let selectedFilters = {};
-  Object.keys(filters)?.forEach((key) => {
-    if (filters[key]?.length > 0) selectedFilters[key] = filters[key];
-  });
-  const length = Object.keys(selectedFilters).length;
-  let index = 0;
-  let url = Object.keys(selectedFilters)?.reduce((acc, curr) => {
-    if (selectedFilters[curr]?.length > 0) {
-      acc += `${curr}=${selectedFilters[curr]?.join(",")}${index < length - 1 ? "&" : ""}`;
-    } else return acc;
-
-    index++;
-    return acc;
-  }, "");
-  url += `${url !== "" ? "&" : ""}page=1`;
-
-  return url;
-};
