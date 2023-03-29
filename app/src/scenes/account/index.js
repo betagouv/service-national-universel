@@ -12,7 +12,7 @@ import validator from "validator";
 import AddressInputV2 from "../../components/addressInputV2";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import PasswordEye from "../../components/PasswordEye";
-import { appURL, environment } from "../../config";
+import { appURL } from "../../config";
 import { putLocation } from "../../services/api-adresse";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import FormRow from "../../components/forms/FormRow";
@@ -20,6 +20,8 @@ import ContinueButton from "../../components/buttons/ContinueButton";
 import DeleteAccountButton from "../../components/buttons/DeleteAccountButton";
 import ChangeStayButton from "../../components/buttons/ChangeStayButton";
 import WithdrawalModal from "./components/WithdrawalModal";
+import PhoneField from "./components/PhoneField";
+import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "../../utils/phone-number.utils";
 
 export default function Account() {
   const search = useLocation().search;
@@ -147,14 +149,19 @@ export default function Account() {
       </Formik>
 
       <Formik
-        initialValues={young}
+        initialValues={{
+          ...young,
+          phoneZone: young.phoneZone || PHONE_ZONES_NAMES.FRANCE,
+          parent1PhoneZone: young.parent1PhoneZone || PHONE_ZONES_NAMES.FRANCE,
+          parent2PhoneZone: young.parent2PhoneZone || PHONE_ZONES_NAMES.FRANCE,
+        }}
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
           if (young.address !== values.address || young.city !== values.city || young.department !== values.department || young.region !== values.region) {
             return setConfirmationModal({
               isOpen: true,
-              title: "J’ai déménagé",
+              title: "J'ai déménagé",
               message: (
                 <p>
                   <b>Attention, vous êtes sur le point de déclarer un déménagement.</b>
@@ -191,14 +198,18 @@ export default function Account() {
                   { value: "female", label: "Feminin" },
                 ]}
               />
-              <Item
-                name="phone"
-                values={values}
-                handleChange={handleChange}
-                title="Téléphone"
-                validate={(v) => v && !validator.isMobilePhone(v, "fr-FR") && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX"}
-                errors={errors}
-              />
+              <Item>
+                <PhoneField
+                  name="phone"
+                  selectZoneName="phoneZone"
+                  value={values.phone}
+                  zoneValue={values.phoneZone}
+                  onChange={handleChange}
+                  onChangeZone={handleChange}
+                  error={errors.phone}
+                  validate={(value) => value && !isPhoneNumberWellFormated(value, values.phoneZone) && PHONE_ZONES[values.phoneZone].errorMessage}
+                />
+              </Item>
             </FormRow>
             <div style={{ marginBottom: "1.5rem" }}>
               <AddressInputV2
@@ -234,16 +245,18 @@ export default function Account() {
                 validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champ est au mauvais format")}
                 errors={errors}
               />
-              <Item
-                name="parent1Phone"
-                values={values}
-                handleChange={handleChange}
-                title="Téléphone"
-                validate={(v) =>
-                  (!v && requiredMessage) || (!validator.isMobilePhone(v, "fr-FR") && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
-                }
-                errors={errors}
-              />
+              <Item>
+                <PhoneField
+                  name="parent1Phone"
+                  selectZoneName="parent1PhoneZone"
+                  value={values.parent1Phone}
+                  zoneValue={values.parent1PhoneZone}
+                  onChange={handleChange}
+                  onChangeZone={handleChange}
+                  error={errors.parent1Phone}
+                  validate={(value) => value && !isPhoneNumberWellFormated(value, values.parent1PhoneZone) && PHONE_ZONES[values.parent1PhoneZone].errorMessage}
+                />
+              </Item>
             </FormRow>
             <FormRow margin="0">
               <Select
@@ -268,14 +281,18 @@ export default function Account() {
                 validate={(v) => v && !validator.isEmail(v) && "Ce champ est au mauvais format"}
                 errors={errors}
               />
-              <Item
-                name="parent2Phone"
-                values={values}
-                handleChange={handleChange}
-                title="Téléphone"
-                validate={(v) => v && !validator.isMobilePhone(v, "fr-FR") && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX"}
-                errors={errors}
-              />
+              <Item>
+                <PhoneField
+                  name="parent2Phone"
+                  selectZoneName="parent2PhoneZone"
+                  value={values.parent2Phone}
+                  zoneValue={values.parent2PhoneZone}
+                  onChange={handleChange}
+                  onChangeZone={handleChange}
+                  error={errors.parent2Phone}
+                  validate={(value) => value && !isPhoneNumberWellFormated(value, values.parent2PhoneZone) && PHONE_ZONES[values.parent2PhoneZone].errorMessage}
+                />
+              </Item>
             </FormRow>
             <ContinueButton onClick={handleSubmit} disabled={isSubmitting}>
               Enregistrer
@@ -310,7 +327,7 @@ export default function Account() {
 const Item = ({ title, name, values, handleChange, errors, touched, validate, type, children, ...props }) => {
   return (
     <Col md={4} style={{ marginTop: 20 }}>
-      <label className="text-gray-700 font-semibold text-sm mb-[5px]">{title}</label>
+      {title && <label className="text-gray-700 font-semibold text-sm mb-[5px]">{title}</label>}
       {children || <Field type={type} className="form-control" name={name} value={values[name]} onChange={handleChange} validate={validate} {...props} />}
       {errors && <ErrorMessage errors={errors} touched={touched} name={name} />}
     </Col>

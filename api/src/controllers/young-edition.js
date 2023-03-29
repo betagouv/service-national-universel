@@ -32,6 +32,7 @@ const config = require("../config");
 const YoungObject = require("../models/young");
 const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../models/sessionPhase1");
+const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR, formatPhoneNumberFromPhoneZone } = require("../utils/phone-number.utils");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [
@@ -57,6 +58,10 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       gender: Joi.string().valid("male", "female"),
       email: Joi.string().lowercase().trim(),
       phone: Joi.string().trim(),
+      phoneZone: Joi.string()
+        .trim()
+        .valid(...PHONE_ZONES_NAMES_ARR)
+        .default(PHONE_ZONES_NAMES.FRANCE),
       latestCNIFileExpirationDate: Joi.date(),
       latestCNIFileCategory: Joi.string().trim(),
       birthdateAt: Joi.date(),
@@ -83,6 +88,8 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
+
+    value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
 
     // --- update young
     const young = await YoungModel.findById(id);
@@ -159,6 +166,10 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       parent1FirstName: Joi.string().trim().allow(""),
       parent1Email: Joi.string().trim().allow(""),
       parent1Phone: Joi.string().trim().allow(""),
+      parent1PhoneZone: Joi.string()
+        .trim()
+        .valid(...PHONE_ZONES_NAMES_ARR)
+        .default(PHONE_ZONES_NAMES.FRANCE),
       parent1OwnAddress: Joi.string().trim().valid("true", "false").allow(""),
       parent1Address: Joi.string().trim().allow(""),
       parent1Zip: Joi.string().trim().allow(""),
@@ -170,6 +181,10 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       parent2FirstName: Joi.string().trim().allow(""),
       parent2Email: Joi.string().trim().allow(""),
       parent2Phone: Joi.string().trim().allow(""),
+      parent2PhoneZone: Joi.string()
+        .trim()
+        .valid(...PHONE_ZONES_NAMES_ARR)
+        .default(PHONE_ZONES_NAMES.FRANCE),
       parent2OwnAddress: Joi.string().trim().valid("true", "false").allow(""),
       parent2Address: Joi.string().trim().allow(""),
       parent2Zip: Joi.string().trim().allow(""),
@@ -196,6 +211,9 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
+
+    value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
+    value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
 
     // --- update young
     const young = await YoungModel.findById(id);

@@ -26,7 +26,7 @@ import SearchableSelect from "../../../components/SearchableSelect";
 import Toggle from "../../../components/inscription/toggle";
 import CheckBox from "../../../components/inscription/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
-import { translate, regexPhoneFrenchCountries } from "../../../utils";
+import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import DesktopPageContainer from "../components/DesktopPageContainer";
 import plausibleEvent from "../../../services/plausible";
@@ -34,6 +34,8 @@ import { supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { apiAdress } from "../../../services/api-adresse";
+import PhoneField from "../components/PhoneField";
+import { isPhoneNumberWellFormated, PHONE_ZONES } from "../../../utils/phone-number.utils";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -56,7 +58,19 @@ const addressFields = ["address", "zip", "city", "cityCode", "region", "departme
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
-const commonFields = [...birthPlaceFields, ...addressFields, "gender", "phone", "situation", "livesInFrance", "handicap", "allergies", "ppsBeneficiary", "paiBeneficiary"];
+const commonFields = [
+  ...birthPlaceFields,
+  ...addressFields,
+  "gender",
+  "phone",
+  "phoneZone",
+  "situation",
+  "livesInFrance",
+  "handicap",
+  "allergies",
+  "ppsBeneficiary",
+  "paiBeneficiary",
+];
 
 const commonRequiredFields = [
   ...birthPlaceFields,
@@ -84,6 +98,7 @@ const defaultState = {
   birthCityZip: "",
   birthCity: "",
   gender: genderOptions[0].value,
+  phoneZone: "FRANCE",
   phone: "",
   livesInFrance: inFranceOrAbroadOptions[0].value,
   addressVerified: "false",
@@ -135,6 +150,7 @@ export default function StepCoordonnees() {
     birthCity,
     gender,
     phone,
+    phoneZone,
     livesInFrance,
     addressVerified,
     address,
@@ -185,6 +201,7 @@ export default function StepCoordonnees() {
         birthCityZip: young.birthCityZip || data.birthCityZip,
         gender: young.gender || data.gender,
         phone: young.phone || data.phone,
+        phoneZone: young.phoneZone || data.phoneZone,
         livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
         addressVerified: young.addressVerified || data.addressVerified,
         address: young.address || data.address,
@@ -220,7 +237,7 @@ export default function StepCoordonnees() {
 
   useEffect(() => {
     setErrors(getErrors());
-  }, [phone, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
+  }, [phone, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary, phoneZone]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -239,8 +256,8 @@ export default function StepCoordonnees() {
   const getErrors = () => {
     let errors = {};
 
-    if (phone && !validator.matches(trimmedPhone, regexPhoneFrenchCountries)) {
-      errors.phone = errorMessages.phone;
+    if (phone && !isPhoneNumberWellFormated(trimmedPhone, phoneZone)) {
+      errors.phone = PHONE_ZONES[phoneZone].errorMessage;
     }
 
     if (wasBornInFranceBool && birthCityZip && !validator.isPostalCode(birthCityZip, "FR")) {
@@ -566,7 +583,16 @@ export default function StepCoordonnees() {
         />
       </div>
       <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} correction={corrections.gender} error={errors?.gender} />
-      <Input type="tel" value={phone} label="Votre téléphone" onChange={updateData("phone")} error={errors.phone} correction={corrections.phone} />
+      <PhoneField
+        label="Votre téléphone"
+        onChange={updateData("phone")}
+        onChangeZone={updateData("phoneZone")}
+        value={phone}
+        zoneValue={phoneZone}
+        placeholder={PHONE_ZONES[phoneZone].example}
+        error={errors.phone}
+        correction={corrections.phone}
+      />
       <RadioButton
         label="Je réside..."
         options={inFranceOrAbroadOptions}
@@ -623,7 +649,7 @@ export default function StepCoordonnees() {
             </div>
           </div>
           <p className="text-[14px] text-[#666666] leading-tight text-justify">
-            À noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
+            À noter : l&apos;hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
           </p>
           <div className="flex">
             <Input
@@ -646,7 +672,7 @@ export default function StepCoordonnees() {
           <Select
             options={hostRelationshipOptions}
             value={hostRelationship}
-            label="Précisez votre lien avec l’hébergeur"
+            label="Précisez votre lien avec l'hébergeur"
             onChange={updateData("hostRelationship")}
             error={errors.hostRelationship}
             correction={corrections.hostRelationship}
@@ -683,7 +709,7 @@ export default function StepCoordonnees() {
       <div className="flex justify-between items-center mb-4">
         <div>
           <h2 className="mt-0 text-[16px] font-bold">
-            Souhaitez-vous nous faire part d’une situation particulière ? (allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)
+            Souhaitez-vous nous faire part d&apos;une situation particulière ? (allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)
           </h2>
           <div className=" text-[#666666] text-[14px] leading-tight mt-1">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
         </div>

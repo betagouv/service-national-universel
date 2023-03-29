@@ -1,3 +1,22 @@
+# [1.242.0](https://github.com/betagouv/service-national-universel/compare/v1.241.0...v1.242.0) (2023-03-28)
+
+
+### Bug Fixes
+
+* **admin:** Add pageId variable to filters  ([#2427](https://github.com/betagouv/service-national-universel/issues/2427)) ([cbd40f5](https://github.com/betagouv/service-national-universel/commit/cbd40f509b7644e1a2473ee5c227045d347aa420))
+* **admin:** Barre de recherche centre ([34b30b8](https://github.com/betagouv/service-national-universel/commit/34b30b8873c405d61b645a9304ed95377d20d3c3))
+* **admin:** remove trim in filters search bar ([8688d1f](https://github.com/betagouv/service-national-universel/commit/8688d1fe022e16b1609db752372cd0ba08e80a38))
+* **api:** Add jva raw data to serializer ([b648b01](https://github.com/betagouv/service-national-universel/commit/b648b017b01bbbe15ad650b155d2d9d72573bef6))
+* **api:** data paramètrage dynamique ([643c727](https://github.com/betagouv/service-national-universel/commit/643c727068a72b9a3158938c13c262cae63e4237))
+* **api/admin:** amélioration de l'anonymisation des infos jeune sur les contrats et candidatures après suppression ([#2423](https://github.com/betagouv/service-national-universel/issues/2423)) ([17ed386](https://github.com/betagouv/service-national-universel/commit/17ed3864760395e17e2c36631d1b0039afa2bd06))
+
+
+### Features
+
+* **admin:** add Filters to /centre ([11d0758](https://github.com/betagouv/service-national-universel/commit/11d075883cc4e43299da90eca76382de35bb16fb))
+* **admin/api/app:** ajout des préfix régionaux sur les champs téléphone ([#2419](https://github.com/betagouv/service-national-universel/issues/2419)) ([7abab14](https://github.com/betagouv/service-national-universel/commit/7abab14bac49b63e92cde720001a5f48264f89fe))
+* **app:** ajout du champ de sélection de préfix régional aux champs numéro de téléphone sur la page de profil ([#2429](https://github.com/betagouv/service-national-universel/issues/2429)) ([83a07df](https://github.com/betagouv/service-national-universel/commit/83a07df992d77fad3d4b833bb2a1ec63ab78a692))
+
 # [1.241.0](https://github.com/betagouv/service-national-universel/compare/v1.240.0...v1.241.0) (2023-03-27)
 
 
