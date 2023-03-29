@@ -101,7 +101,7 @@ export default function TabSession({ sessionList, filters }) {
     <div className="flex flex-col gap-5 bg-white rounded-lg shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] px-8 py-8 w-[60%]">
       <div className="flex items-center gap-3">
         <p className="text-base text-left leading-5 font-bold text-gray-900">Liste des centres</p>
-        <Link to={`/centre/liste-presence?${currentFilterAsUrl(filters)}`} target={"_blank"}>
+        <Link to={`/centre/liste/presence?${currentFilterAsUrl(filters)}`} target={"_blank"}>
           <HiOutlineExternalLink className="h-5 w-5 text-gray-400 cursor-pointer" />
         </Link>
       </div>
