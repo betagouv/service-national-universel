@@ -55,7 +55,7 @@ export default function Index() {
       options: departmentList.map((department) => ({ key: department, label: department })),
     },
     {
-      id: "cohort",
+      id: "cohorts",
       name: "Cohorte",
       fullValue: "Toutes",
       options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
@@ -66,13 +66,14 @@ export default function Index() {
   const [selectedFilters, setSelectedFilters] = useState({
     status: [YOUNG_STATUS.VALIDATED],
     statusPhase1: [YOUNG_STATUS_PHASE1.AFFECTED],
-    cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
+    cohorts: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
     region: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
     department: user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : [],
     academy: [],
   });
   const [data, setData] = useState({});
   const [dataCenter, setDataCenter] = useState({});
+  const [sessionList, setSessionList] = useState(null);
 
   const queryYoung = async () => {
     const statusPhaseTerms = selectedFilters?.statusPhase1?.length
@@ -135,7 +136,7 @@ export default function Index() {
 
     if (selectedFilters.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": selectedFilters.region } });
     if (selectedFilters.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": selectedFilters.department } });
-    if (selectedFilters.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohort } });
+    if (selectedFilters.cohorts?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohorts } });
     if (selectedFilters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": selectedFilters.academy } });
     if (selectedFilters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.status } });
 
@@ -170,7 +171,8 @@ export default function Index() {
 
     if (selectedFilters.region?.length) bodyCohesion.query.bool.filter.push({ terms: { "region.keyword": selectedFilters.region } });
     if (selectedFilters.department?.length) bodyCohesion.query.bool.filter.push({ terms: { "department.keyword": selectedFilters.department } });
-    if (selectedFilters.cohort?.length) bodyCohesion.query.bool.filter.push({ terms: { "cohorts.keyword": selectedFilters.cohort } });
+    if (selectedFilters.academy?.length) bodyCohesion.query.bool.filter.push({ terms: { "academy.keyword": selectedFilters.academy } });
+    if (selectedFilters.cohorts?.length) bodyCohesion.query.bool.filter.push({ terms: { "cohorts.keyword": selectedFilters.cohorts } });
 
     const { responses: responsesCohesion } = await api.esQuery("cohesioncenter", bodyCohesion);
 
@@ -190,12 +192,13 @@ export default function Index() {
         status: { terms: { field: "status.keyword" } },
         timeSchedule: { terms: { field: "hasTimeSchedule.keyword" } },
       },
-      size: 0,
+      size: ES_NO_LIMIT,
     };
 
-    if (selectedFilters.cohort?.length) bodySession.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohort } });
+    if (selectedFilters.cohorts?.length) bodySession.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohorts } });
     const { responses: responsesSession } = await api.esQuery("sessionphase1", bodySession);
     if (responsesSession.length) {
+      setSessionList(responsesSession[0].hits.hits.map((e) => ({ ...e._source, _id: e._id })));
       resultCenter.placesTotalSession = responsesSession[0].aggregations.placesTotal.value;
       resultCenter.placesLeftSession = responsesSession[0].aggregations.placesLeft.value;
       resultCenter.status = responsesSession[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
@@ -242,9 +245,9 @@ export default function Index() {
           <OccupationCardHorizontal total={dataCenter?.placesTotalSession || 0} taken={dataCenter?.placesTotalSession - dataCenter?.placesLeftSession || 0} />
           <BoxWithPercentage total={dataCenter?.totalSession || 0} number={dataCenter?.timeSchedule?.false || 0} title="Emplois du temps" subLabel="restants à renseigner" />
         </div>
-        <div className="flex items-stretch gap-4 ">
+        <div className="flex gap-4 ">
           <MoreInfo typology={dataCenter?.typology} domains={dataCenter?.domains} />
-          <TabSession />
+          <TabSession sessionList={sessionList} filters={selectedFilters} />
         </div>
       </div>
     </DashboardContainer>
