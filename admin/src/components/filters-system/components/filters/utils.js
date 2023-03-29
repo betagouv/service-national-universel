@@ -256,7 +256,14 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, filter
   };
   if (selectedFilters?.searchbar?.filter[0] && selectedFilters?.searchbar?.filter[0]?.trim() !== "") {
     aggregfiltersObject.bool.must.push({
-      multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
+      bool: {
+        should: [
+          { multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "cross_fields", operator: "and" } },
+          { multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "phrase", operator: "and" } },
+          { multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "phrase_prefix", operator: "and" } },
+        ],
+        minimum_should_match: 1,
+      },
     });
   }
 
