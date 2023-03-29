@@ -206,6 +206,7 @@ export default function Account() {
                   zoneValue={values.phoneZone}
                   onChange={handleChange}
                   onChangeZone={handleChange}
+                  placeholder={PHONE_ZONES[values.phoneZone].example}
                   error={errors.phone}
                   validate={(value) => value && !isPhoneNumberWellFormated(value, values.phoneZone) && PHONE_ZONES[values.phoneZone].errorMessage}
                 />
@@ -253,6 +254,7 @@ export default function Account() {
                   zoneValue={values.parent1PhoneZone}
                   onChange={handleChange}
                   onChangeZone={handleChange}
+                  placeholder={PHONE_ZONES[values.parent1PhoneZone].example}
                   error={errors.parent1Phone}
                   validate={(value) => value && !isPhoneNumberWellFormated(value, values.parent1PhoneZone) && PHONE_ZONES[values.parent1PhoneZone].errorMessage}
                 />
@@ -289,6 +291,7 @@ export default function Account() {
                   zoneValue={values.parent2PhoneZone}
                   onChange={handleChange}
                   onChangeZone={handleChange}
+                  placeholder={PHONE_ZONES[values.parent2PhoneZone].example}
                   error={errors.parent2Phone}
                   validate={(value) => value && !isPhoneNumberWellFormated(value, values.parent2PhoneZone) && PHONE_ZONES[values.parent2PhoneZone].errorMessage}
                 />
