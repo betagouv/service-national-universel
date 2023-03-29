@@ -144,7 +144,6 @@ export default function Contract({ young }) {
         structureId: structure._id,
         applicationId: application._id,
         missionId: mission._id,
-        tutorId: tutor?._id,
         isYoungAdult: isYoungAdult ? "true" : "false",
       });
       setLoadings({
@@ -220,8 +219,6 @@ export default function Contract({ young }) {
       structureManagerEmail: structure.structureManager?.email || tutor?.email || "",
       tutorFirstName: tutor?.firstName || "",
       tutorLastName: tutor?.lastName || "",
-      tutorRole: "Tuteur de mission",
-      tutorEmail: tutor?.email || "",
       structureSiret: structure?.siret || "",
       structureName: structure?.name || "",
       sendMessage: false,

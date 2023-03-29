@@ -9,6 +9,7 @@ const Schema = new mongoose.Schema({
   structureId: { type: String },
   applicationId: { type: String },
   missionId: { type: String },
+  //deprecated (only firstname and lastname are used)
   tutorId: { type: String },
   isYoungAdult: { type: String, default: "false" },
 
@@ -94,7 +95,9 @@ const Schema = new mongoose.Schema({
   structureManagerEmail: { type: String },
   tutorFirstName: { type: String },
   tutorLastName: { type: String },
+  //deprecated (only firstname and lastname are used)
   tutorRole: { type: String },
+  //deprecated (only firstname and lastname are used)
   tutorEmail: { type: String },
   structureSiret: { type: String },
   structureName: { type: String },
