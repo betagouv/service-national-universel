@@ -96,6 +96,7 @@ export const buildBody = (selectedFilters, page, size, defaultQuery, filterArray
     Object.keys(selectedFilters).forEach((key) => {
       if (key === "searchbar") return;
       const currentFilter = filterArray.find((f) => f.name === key);
+      if (currentFilter.disabledBaseQuery) return;
       if (currentFilter.customQuery) {
         // on a une custom query
         const currentQuery = currentFilter.customQuery(selectedFilters[key].filter).query;
@@ -128,7 +129,14 @@ export const buildBody = (selectedFilters, page, size, defaultQuery, filterArray
   // query sur la searchBar
   if (selectedFilters?.searchbar?.filter[0] && selectedFilters?.searchbar?.filter[0]?.trim() !== "") {
     bodyQuery.query.bool.must.push({
-      multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
+      bool: {
+        should: [
+          { multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "cross_fields", operator: "and" } },
+          { multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "phrase", operator: "and" } },
+          { multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "phrase_prefix", operator: "and" } },
+        ],
+        minimum_should_match: 1,
+      },
     });
   }
 
@@ -146,6 +154,7 @@ const buildAggs = (filterArray, selectedFilters, searchBarObject, defaultQuery) 
   //ajouter les aggregations pour count
   filterArray.map((f) => {
     const currentFilter = filterArray.find((e) => f.name === e.name);
+    if (currentFilter.disabledBaseQuery) return;
     if (currentFilter.customComponent) return;
     if (currentFilter.datafield.includes(".keyword")) {
       bodyAggs.aggs[f.name] = {
@@ -186,6 +195,7 @@ export const buildQuery = async (esId, selectedFilters, page = 0, size, defaultQ
   // map a travers les aggregations pour recuperer les filtres
   filterArray.map((f) => {
     if (f.customComponent) return;
+    if (f.disabledBaseQuery) return;
     newFilters[f.name] = aggs[f.name].names.buckets.filter((b) => b.doc_count > 0).map((b) => ({ key: b.key, doc_count: b.doc_count }));
 
     // check for any transformData function
@@ -246,7 +256,14 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, filter
   };
   if (selectedFilters?.searchbar?.filter[0] && selectedFilters?.searchbar?.filter[0]?.trim() !== "") {
     aggregfiltersObject.bool.must.push({
-      multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "best_fields", operator: "or", fuzziness: 2 },
+      bool: {
+        should: [
+          { multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "cross_fields", operator: "and" } },
+          { multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "phrase", operator: "and" } },
+          { multi_match: { query: selectedFilters?.searchbar?.filter[0], fields: searchBarObject.datafield, type: "phrase_prefix", operator: "and" } },
+        ],
+        minimum_should_match: 1,
+      },
     });
   }
 
@@ -261,6 +278,7 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, filter
     if (key === name) return;
 
     const currentFilter = filterArray.find((f) => f.name === key);
+    if (currentFilter.disabledBaseQuery) return;
 
     // check pour une customQuery
     if (currentFilter.customQuery) {

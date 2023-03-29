@@ -35,7 +35,6 @@ import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { apiAdress } from "../../../services/api-adresse";
 import PhoneField from "../components/PhoneField";
-import useClickOutside from "../../../hooks/useClickOutside";
 import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 
 const getObjectWithEmptyData = (fields) => {
@@ -141,7 +140,7 @@ export default function StepCoordonnees() {
   const dispatch = useDispatch();
   const history = useHistory();
   const { step } = useParams();
-  const birthCitySuggestionsRef = useRef(null);
+  const ref = useRef(null);
 
   const [hasSpecialSituation, setSpecialSituation] = useState(false);
 
@@ -240,7 +239,17 @@ export default function StepCoordonnees() {
     setErrors(getErrors());
   }, [phone, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary, phoneZone]);
 
-  useClickOutside(birthCitySuggestionsRef, () => setBirthCityZipSuggestions([]));
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setBirthCityZipSuggestions([]);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
 
   const trimmedPhone = phone.replace(/\s/g, "");
 
@@ -551,7 +560,7 @@ export default function StepCoordonnees() {
             correction={corrections.birthCity}
           />
           {wasBornInFranceBool && (
-            <div ref={birthCitySuggestionsRef} className="w-full absolute z-50 bg-white border-3 border-red-600 shadow overflow-hidden mt-[-24px]">
+            <div ref={ref} className="w-full absolute z-50 bg-white border-3 border-red-600 shadow overflow-hidden mt-[-24px]">
               {birthCityZipSuggestions.map(({ city, postcode }, index) => (
                 <div
                   onClick={() => {
