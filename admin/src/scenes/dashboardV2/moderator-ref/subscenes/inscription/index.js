@@ -107,7 +107,6 @@ export default function Index() {
     } else {
       if (selectedFilters?.department?.length === 0) setDepartmentOptions(departmentList.map((department) => ({ key: department, label: department })));
       if (selectedFilters?.academy?.length === 0) setAcademyOptions(academyList.map((academy) => ({ key: academy, label: academy })));
-      return;
     }
     // check department
     if (selectedFilters?.department?.length > 0) {
@@ -127,10 +126,6 @@ export default function Index() {
       // remove the academy from the filter if it is not in the list
       const newAcademy = selectedFilters?.academy?.filter((academy) => uniqueAcademy.includes(academy));
 
-      console.log("newRegion", newRegion);
-      console.log("selectedFilters.region", selectedFilters.region);
-      console.log("newAcademy", newAcademy);
-      console.log("selectedFilters.academy", selectedFilters.academy);
       // verifier si les array newRegion et selectedFilters.region sont differents
       if (newAcademy && (newAcademy.length !== selectedFilters?.academy?.length || !selectedFilters.academy.every((val, i) => val === newAcademy[i]))) {
         if (newRegion && (newRegion.length !== selectedFilters?.region?.length || !selectedFilters.region.every((val, i) => val === newRegion[i])))
@@ -141,7 +136,7 @@ export default function Index() {
       } else setRegionOptions(uniqueRegions.map((region) => ({ key: region, label: region })));
       setAcademyOptions(uniqueAcademy.map((academy) => ({ key: academy, label: academy })));
     } else {
-      if (selectedFilters?.region?.length === 0) setRegionOptions(regionList.map((region) => ({ key: region, label: region })));
+      setRegionOptions(regionList.map((region) => ({ key: region, label: region })));
     }
 
     // check academy
@@ -157,12 +152,19 @@ export default function Index() {
       const regions = uniqueDepartments.map((department) => department2region[department]);
       const uniqueRegions = [...new Set(regions)];
 
+      // remove the region from the filter if it is not in the list
+      const newRegion = selectedFilters?.region?.filter((region) => uniqueRegions.includes(region));
+
       // remove the department from the filter if it is not in the list
       const newDepartment = selectedFilters?.department?.filter((department) => uniqueDepartments.includes(department));
       // verifier si les array newDepartment et selectedFilters.department sont differents
-      if (newDepartment && (newDepartment.length !== selectedFilters?.department?.length || !selectedFilters.department.every((val, i) => val === newDepartment[i])))
+      if (newDepartment && (newDepartment.length !== selectedFilters?.department?.length || !selectedFilters.department.every((val, i) => val === newDepartment[i]))) {
+        if (newRegion && (newRegion.length !== selectedFilters?.region?.length || !selectedFilters.region.every((val, i) => val === newRegion[i])))
+          return setSelectedFilters({ ...selectedFilters, region: newRegion, department: newDepartment });
         return setSelectedFilters({ ...selectedFilters, department: newDepartment });
-      else setDepartmentOptions(uniqueDepartments.map((department) => ({ key: department, label: department })));
+      } else if (newRegion && (newRegion.length !== selectedFilters?.region?.length || !selectedFilters.region.every((val, i) => val === newRegion[i]))) {
+        return setSelectedFilters({ ...selectedFilters, region: newRegion });
+      } else setDepartmentOptions(uniqueDepartments.map((department) => ({ key: department, label: department })));
       setRegionOptions(uniqueRegions.map((region) => ({ key: region, label: region })));
     }
   };
