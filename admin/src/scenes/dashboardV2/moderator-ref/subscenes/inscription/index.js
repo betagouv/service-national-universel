@@ -229,7 +229,6 @@ export default function Index() {
   useEffect(() => {
     fetchCurrentInscriptions();
     fetchDetailInscriptions();
-    updateLocalisationOptions();
   }, [selectedFilters]);
 
   useEffect(() => {
