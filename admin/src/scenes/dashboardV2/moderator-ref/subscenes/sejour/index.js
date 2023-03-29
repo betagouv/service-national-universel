@@ -50,7 +50,7 @@ export default function Index() {
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
   const academyOptions =
     user.role === ROLES.REFERENT_REGION
-      ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]).flat())].map((a) => ({ key: a, label: a }))
+      ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
       : academyList.map((a) => ({ key: a, label: a }));
 
   const getFilteredDepartment = () => {
