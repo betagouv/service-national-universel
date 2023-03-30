@@ -18,11 +18,10 @@ var { fr } = require("date-fns/locale");
 
 const isFromDOMTOM = (young) => {
   return (
-    (["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
+    ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
       young.department,
-    ) ||
-      young.region === "Corse") &&
-    young.grade !== "Terminale"
+    ) /* ||
+      young.region === "Corse" */ && young.grade !== "Terminale"
   );
 };
 
