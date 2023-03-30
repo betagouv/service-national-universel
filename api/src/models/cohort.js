@@ -115,10 +115,10 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  repartitionSchemaCreateGroupAvailability: {
+  repartitionSchemaCreateAndEditGroupAvailability: {
     type: Boolean,
     documentation: {
-      description: "Ouverture ou fermeture pour les utilisateurs de la possibilité de créer des groupes sur le schéma de répartition.",
+      description: "Ouverture ou fermeture pour les utilisateurs de la possibilité de créer et modifier des groupes sur le schéma de répartition.",
     },
   },
   repartitionSchemaDownloadAvailability: {

@@ -36,7 +36,7 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
       setIsUserAuthorizedToCreateGroup(false);
       return;
     }
-    if ((!cohort || !cohort.repartitionSchemaCreateGroupAvailability) && user.role === ROLES.REFERENT_REGION) {
+    if ((!cohort || !cohort.repartitionSchemaCreateAndEditGroupAvailability) && user.role === ROLES.REFERENT_REGION) {
       setIsUserAuthorizedToCreateGroup(false);
       return;
     }

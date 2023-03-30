@@ -363,11 +363,11 @@ export default function Settings() {
                 <div className="flex flex-col w-[45%] gap-4">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Création de groupe sur le schéma de répartition</p>
+                      <p className="text-gray-900  text-xs font-medium">Création de groupe et modification du schéma de répartition</p>
                       <MdInfoOutline data-tip data-for="création_groupe" className="text-gray-400 h-5 w-5 cursor-pointer" />
                       <ReactTooltip id="création_groupe" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
                         <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
-                          Ouverture ou fermeture pour les utilisateurs de la possibilité de créer des groupes sur le schéma de répartition.
+                          Ouverture ou fermeture pour les utilisateurs de la possibilité de créer et modifier des groupes sur le schéma de répartition.
                         </p>
                       </ReactTooltip>
                     </div>
@@ -375,19 +375,19 @@ export default function Settings() {
                       label="Référents régionaux"
                       disabled={isLoading}
                       readOnly={readOnly}
-                      value={data.repartitionSchemaCreateGroupAvailability}
-                      onChange={() => setData({ ...data, repartitionSchemaCreateGroupAvailability: !data.repartitionSchemaCreateGroupAvailability })}
+                      value={data.repartitionSchemaCreateAndEditGroupAvailability}
+                      onChange={() => setData({ ...data, repartitionSchemaCreateAndEditGroupAvailability: !data.repartitionSchemaCreateAndEditGroupAvailability })}
                       range={{
-                        from: data?.uselessInformation?.repartitionSchemaCreateGroupAvailabilityFrom || undefined,
-                        to: data?.uselessInformation?.repartitionSchemaCreateGroupAvailabilityTo || undefined,
+                        from: data?.uselessInformation?.repartitionSchemaCreateAndEditGroupAvailabilityFrom || undefined,
+                        to: data?.uselessInformation?.repartitionSchemaCreateAndEditGroupAvailabilityTo || undefined,
                       }}
                       onChangeRange={(range) => {
                         setData({
                           ...data,
                           uselessInformation: {
                             ...data.uselessInformation,
-                            repartitionSchemaCreateGroupAvailabilityFrom: range?.from,
-                            repartitionSchemaCreateGroupAvailabilityTo: range?.to,
+                            repartitionSchemaCreateAndEditGroupAvailabilityFrom: range?.from,
+                            repartitionSchemaCreateAndEditGroupAvailabilityTo: range?.to,
                           },
                         });
                       }}
