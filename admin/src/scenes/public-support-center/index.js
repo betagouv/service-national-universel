@@ -224,7 +224,7 @@ export default function PublicSupportCenter(props) {
               Contactez nos équipes. Nous travaillons généralement du <strong>lundi au vendredi de 9h00 à 18h00</strong> et traiterons votre demande dès que possible. Vous recevrez
               une réponse par mail.
             </div>
-            <div className="zammad-container">
+            <div className="bda-container">
               <LinkButton
                 onClick={() => {
                   plausibleEvent("Besoin d'aide - Contacter quelqu'un");
@@ -256,7 +256,7 @@ const Container = styled.div`
       margin: 0.8rem 0;
       flex: 1;
     }
-    .zammad-container {
+    .bda-container {
       margin-top: 0.7rem;
       flex: 1;
     }
