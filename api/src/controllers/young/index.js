@@ -59,6 +59,9 @@ const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES, YOUNG_STATUS_PHASE2 } = require("snu-lib/constants");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
 const { getFilteredSessions } = require("../../utils/cohort");
+const { formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
+const { anonymizeApplicationsFromYoungId } = require("../../services/application");
+const { anonymizeContractsFromYoungId } = require("../../services/contract");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
@@ -425,6 +428,10 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+
+    value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
+    value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
+    value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -864,6 +871,9 @@ router.put("/:id/soft-delete", passport.authenticate(["referent", "young"], { se
     await young.save({ fromUser: req.user });
     if (!canDeletePatchesHistory(req.user, young)) return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await patches.deletePatches({ id, model: YoungObject });
+
+    await anonymizeApplicationsFromYoungId({ youngId: young._id, anonymizedYoung: young });
+    await anonymizeContractsFromYoungId({ youngId: young._id, anonymizedYoung: young });
 
     console.log(`Young ${id} has been soft deleted`);
     res.status(200).send({ ok: true, data: young });

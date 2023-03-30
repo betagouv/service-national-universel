@@ -6,6 +6,7 @@ const { ROLES_LIST } = require("snu-lib");
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
+const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR } = require("snu-lib/phone-number");
 const MODELNAME = "young";
 
 const File = new mongoose.Schema({
@@ -173,6 +174,14 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Numéro de télephone du volontaire",
+    },
+  },
+  phoneZone: {
+    type: String,
+    enum: PHONE_ZONES_NAMES_ARR,
+    default: PHONE_ZONES_NAMES.FRANCE,
+    documentation: {
+      description: "Zone géographique de provenance du numéro du volontaire",
     },
   },
   gender: {
@@ -979,6 +988,14 @@ const Schema = new mongoose.Schema({
       description: "Numéro de téléphone du parent 1",
     },
   },
+  parent1PhoneZone: {
+    type: String,
+    enum: PHONE_ZONES_NAMES_ARR,
+    default: PHONE_ZONES_NAMES.FRANCE,
+    documentation: {
+      description: "Zone géographique de provenance du numéro du parent 1",
+    },
+  },
   parent1OwnAddress: {
     type: String,
     enum: ["true", "false"],
@@ -1117,6 +1134,14 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Numéro de téléphone du parent 2",
+    },
+  },
+  parent2PhoneZone: {
+    type: String,
+    enum: PHONE_ZONES_NAMES_ARR,
+    default: PHONE_ZONES_NAMES.FRANCE,
+    documentation: {
+      description: "Zone géographique de provenance du numéro du parent 1",
     },
   },
   parent2OwnAddress: {

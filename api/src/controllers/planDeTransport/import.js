@@ -337,7 +337,7 @@ router.post(
         const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
           if (line[`ID PDR ${pdrNumber}`] && mongoose.Types.ObjectId.isValid(line[`ID PDR ${pdrNumber}`])) {
-            const pdr = await PdrModel.findById(line[`ID PDR ${pdrNumber}`]);
+            const pdr = await PdrModel.find({ _id: line[`ID PDR ${pdrNumber}`], deletedAt: { $exists: false } });
             if (!pdr) {
               errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
             }

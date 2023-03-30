@@ -25,6 +25,8 @@ import SchoolEditor from "../phase0/components/SchoolEditor";
 import VerifyAddress from "../phase0/components/VerifyAddress";
 import FieldSituationsParticulieres from "../phase0/components/FieldSituationsParticulieres";
 import Check from "../../assets/icons/Check";
+import PhoneField from "../phase0/components/PhoneField";
+import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 
 export default function Create() {
   const history = useHistory();
@@ -51,6 +53,7 @@ export default function Create() {
     email: "",
     expirationDate: null,
     phone: "",
+    phoneZone: "FRANCE",
     cohort: "",
     parentStatementOfHonorInvalidId: "false",
     addressVerified: false,
@@ -98,6 +101,7 @@ export default function Create() {
     parent1LastName: "",
     parent1Email: "",
     parent1Phone: "",
+    parent1PhoneZone: "FRANCE",
     parent1OwnAddress: "false",
     parent1Address: "",
     parent1Zip: "",
@@ -109,6 +113,7 @@ export default function Create() {
     parent2LastName: "",
     parent2Email: "",
     parent2Phone: "",
+    parent2PhoneZone: "FRANCE",
     parent2OwnAddress: "false",
     parent2Address: "",
     parent2Zip: "",
@@ -170,12 +175,16 @@ export default function Create() {
     if (!validator.isMobilePhone(values.phone)) {
       errors.phone = errorPhone;
     }
+    if (!values.phone || !isPhoneNumberWellFormated(values.phone, values.phoneZone || "AUTRE")) {
+      errors.phone = PHONE_ZONES[values.phoneZone || "AUTRE"].errorMessage;
+    }
     // Check parent 1
     if (!validator.isEmail(values.parent1Email)) {
       errors.parent1Email = errorEmail;
     }
-    if (!validator.isMobilePhone(values.parent1Phone)) {
-      errors.parent1Phone = errorPhone;
+
+    if (!values.parent1Phone || !isPhoneNumberWellFormated(values.parent1Phone, values.parent1PhoneZone || "AUTRE")) {
+      errors.parent1Phone = PHONE_ZONES[values.parent1PhoneZone || "AUTRE"].errorMessage;
     }
     //check parent2 if exist
     const parent2FirstNameEmpty = validator.isEmpty(values.parent2FirstName);
@@ -189,8 +198,8 @@ export default function Create() {
         errors.parent2Email = errorEmail;
         foundError = true;
       }
-      if (!validator.isMobilePhone(values.parent2Phone)) {
-        errors.parent2Phone = errorPhone;
+      if (!values.parent2Phone || !isPhoneNumberWellFormated(values.parent2Phone, values.parent2PhoneZone || "AUTRE")) {
+        errors.parent2Phone = PHONE_ZONES[values.parent1PhoneZone || "AUTRE"].errorMessage;
         foundError = true;
       }
       if (parent2FirstNameEmpty) {
@@ -529,6 +538,15 @@ export default function Create() {
   );
 }
 function Representant({ values, handleChange, errors, setFieldValue, parent }) {
+  const handlePhoneChange = (name) => (value) => {
+    handleChange({
+      target: {
+        name,
+        value,
+      },
+    });
+  };
+
   return (
     <>
       <Field
@@ -575,14 +593,15 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
         className="mb-4"
         handleChange={handleChange}
       />
-      <Field
-        name={parent === "1" ? "parent1Phone" : "parent2Phone"}
-        label="Téléphone"
-        errors={errors}
-        value={parent === "1" ? values.parent1Phone : values.parent2Phone}
-        transformer={translate}
-        className="mb-4"
-        handleChange={handleChange}
+      <PhoneField
+        name={`parent${parent}Phone`}
+        mode="edition"
+        error={errors[`parent${parent}Phone`]}
+        value={values[`parent${parent}Phone`]}
+        placeholder={PHONE_ZONES[values[`parent${parent}PhoneZone`]]?.example}
+        zoneValue={values[`parent${parent}PhoneZone`]}
+        onChange={handlePhoneChange(`parent${parent}Phone`)}
+        onChangeZone={handlePhoneChange(`parent${parent}PhoneZone`)}
       />
       <Field
         name={parent === "1" ? "parent1OwnAddress" : "parent2OwnAddress"}
@@ -961,6 +980,16 @@ function Identite({ values, handleChange, errors, setFieldValue, cohort }) {
     setFieldValue("filesToUpload", young.filesToUpload);
     setFieldValue("latestCNIFileCategory", young.latestCNIFileCategory);
   };
+
+  const handlePhoneChange = (name) => (value) => {
+    handleChange({
+      target: {
+        name,
+        value,
+      },
+    });
+  };
+
   return (
     <>
       <div className="font-medium text-xs text-[#242526] leading-snug mb-2">Identité et contact</div>
@@ -980,7 +1009,16 @@ function Identite({ values, handleChange, errors, setFieldValue, cohort }) {
         handleChange={setFieldValue}
       />
       <Field name="email" label="Email" errors={errors} value={values.email} className="mb-4" transformer={translate} handleChange={handleChange} />
-      <Field name="phone" label="Téléphone" errors={errors} value={values.phone} transformer={translate} handleChange={handleChange} />
+      <PhoneField
+        name="phone"
+        mode="edition"
+        error={errors.phone}
+        value={values.phone}
+        placeholder={PHONE_ZONES[values.phoneZone]?.example}
+        zoneValue={values.phoneZone}
+        onChange={handlePhoneChange("phone")}
+        onChangeZone={handlePhoneChange("phoneZone")}
+      />
       <div className="mt-8 ">
         <CniField
           name="cniFile"

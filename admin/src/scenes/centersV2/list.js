@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 import { BsDownload } from "react-icons/bs";
-import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
-import { apiURL } from "../../config";
 import {
   COHESION_STAY_START,
   COHORTS,
@@ -15,30 +12,32 @@ import {
   canCreateOrUpdateCohesionCenter,
   translateTypologieCenter,
   translateDomainCenter,
-  getFilterLabel,
+  getDepartmentNumber,
 } from "snu-lib";
-import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Title } from "../pointDeRassemblement/components/common";
-import { FilterButton, TabItem, Badge } from "./components/commons";
-import ReactiveListComponent from "../../components/ReactiveListComponent";
-import plausibleEvent from "../../services/plausible";
+import { TabItem, Badge } from "./components/commons";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import Menu from "../../assets/icons/Menu";
 import Calendar from "../../assets/icons/Calendar";
 
-import DeleteFilters from "../../components/buttons/DeleteFilters";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 
 import ModalRattacherCentre from "./components/ModalRattacherCentre";
 
-const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022", "TIMESCHEDULE"];
+import { Filters, ResultTable, getDefaultQuery, Save, SelectedFilters, ExportComponentV2 } from "../../components/filters-system";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
 
+  const history = useHistory();
+  const { currentTab } = useParams();
+
   const [modalVisible, setModalVisible] = useState(false);
 
-  const [currentTab, setCurrentTab] = useState("liste-centre");
+  React.useEffect(() => {
+    const listTab = ["liste-centre", "session"];
+    if (!currentTab || !listTab.includes(currentTab)) return history.replace(`/centre/liste/liste-centre`);
+  }, [currentTab]);
 
   const [firstSession, setFirstSession] = useState(null);
   const getFirstCohortAvailable = () => {
@@ -71,11 +70,11 @@ export default function List() {
           </div>
           <div>
             <div className="flex flex-1">
-              <TabItem icon={<Menu />} title="Liste des centres" onClick={() => setCurrentTab("liste-centre")} active={currentTab === "liste-centre"} />
-              <TabItem icon={<Calendar />} title="Sessions" onClick={() => setCurrentTab("session")} active={currentTab === "session"} />
+              <TabItem icon={<Menu />} title="Liste des centres" onClick={() => history.replace(`/centre/liste/liste-centre`)} active={currentTab === "liste-centre"} />
+              <TabItem icon={<Calendar />} title="Sessions" onClick={() => history.replace(`/centre/liste/session`)} active={currentTab === "session"} />
             </div>
-            <div className={`bg-white rounded-b-lg rounded-tr-lg relative items-start`}>
-              <div className="flex flex-col w-full">
+            <div className={`bg-white rounded-b-lg rounded-tr-lg mb-8 relative items-start`}>
+              <div className="flex flex-col w-full pt-4">
                 {currentTab === "liste-centre" && <ListCenter firstSession={firstSession} />}
                 {currentTab === "session" && <ListSession firstSession={firstSession} />}
               </div>
@@ -88,34 +87,70 @@ export default function List() {
 }
 
 const ListSession = ({ firstSession }) => {
-  const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
   const [cohesionCenter, setCohesionCenter] = useState([]);
+
+  const [data, setData] = React.useState([]);
+  const pageId = "centerSession";
+  const [selectedFilters, setSelectedFilters] = React.useState({});
+  const [paramData, setParamData] = React.useState({
+    size: 20,
+    page: 0,
+  });
+  const filterArray = [
+    { title: "Cohorte", name: "cohort", datafield: "cohort.keyword", missingLabel: "Non renseignée", defaultValue: [firstSession] },
+    { title: "Région", name: "region", datafield: "region.keyword", missingLabel: "Non renseignée" },
+    {
+      title: "Département",
+      name: "department",
+      datafield: "department.keyword",
+      missingLabel: "Non renseignée",
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+    },
+    { title: "Places restantes", name: "placesLeft", datafield: "placesLeft", missingLabel: "Non renseignée" },
+    { title: "Emploi du temps", name: "hasTimeSchedule", datafield: "hasTimeSchedule.keyword", missingLabel: "Non renseignée", translate: translate },
+  ];
+  if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code", datafield: "codeCentre.keyword", missingLabel: "Non renseignée" });
+
+  const searchBarObject = {
+    placeholder: "Rechercher par mots clés, ville, code postal...",
+    datafield: ["nameCentre", "cityCentre", "zipCentre", "codeCentre"],
+  };
+
   const getDefaultQuery = () => {
     if (user.role === ROLES.ADMIN) {
-      return { size: ES_NO_LIMIT, query: { match_all: {} }, track_total_hits: true };
+      return {
+        size: ES_NO_LIMIT,
+        query: {
+          bool: { must: [{ match_all: {} }] },
+        },
+        track_total_hits: true,
+      };
     } else if (user.role === ROLES.REFERENT_DEPARTMENT) {
       return {
         size: ES_NO_LIMIT,
-        query: { bool: { filter: [{ terms: { "department.keyword": user.department } }] } },
+        query: {
+          bool: { must: [{ match_all: {} }, { terms: { "department.keyword": user.department } }] },
+        },
         track_total_hits: true,
       };
     } else if (user.role === ROLES.REFERENT_REGION) {
       return {
         size: ES_NO_LIMIT,
-        query: { bool: { filter: [{ term: { "region.keyword": user.region } }] } },
+        query: {
+          bool: { must: [{ match_all: {} }, { term: { "region.keyword": user.region } }] },
+        },
         track_total_hits: true,
       };
     }
   };
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   useEffect(() => {
     (async () => {
       if (cohesionCenterIds?.length) {
         const { responses } = await api.esQuery("cohesioncenter", {
           size: ES_NO_LIMIT,
-          query: { bool: { must: { match_all: {} }, filter: [{ terms: { _id: cohesionCenterIds } }] } },
+          query: { bool: { must: { match_all: {} }, filter: { terms: { _id: cohesionCenterIds } } } },
         });
         if (responses?.length) {
           setCohesionCenter(responses[0]?.hits?.hits || []);
@@ -123,42 +158,33 @@ const ListSession = ({ firstSession }) => {
       }
     })();
   }, [cohesionCenterIds]);
-  const history = useHistory();
+  React.useEffect(() => {
+    if (data) setCohesionCenterIds(data.map((pdr) => pdr._id));
+  }, [data]);
 
   if (!firstSession) return <div></div>;
   return (
-    <ReactiveBase url={`${apiURL}/es`} app="sessionphase1" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-      <div className="flex-1 flex-column bg-white flex-wrap">
-        <div className="flex flex-row pt-4 justify-between items-center mx-8">
-          <div className="flex flex-row">
-            <DataSearch
-              defaultQuery={getDefaultQuery}
-              showIcon={false}
-              placeholder="Rechercher par mots clés, ville, code postal..."
-              componentId="SEARCH"
-              dataField={["nameCentre", "cityCentre", "zipCentre", "codeCentre"]}
-              react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-              style={{ marginRight: "1rem", flex: 1 }}
-              innerClass={{ input: "searchbox" }}
-              className="datasearch-searchfield"
-              URLParams={true}
-              autosuggest={false}
-            />
-            <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
-          </div>
-          <ExportComponent
-            handleClick={() => plausibleEvent("Centres/CTA - Exporter centres")}
+    <div className="flex-1 flex-column bg-white flex-wrap">
+      <div className="mx-4">
+        <div className="flex flex-row justify-between w-full">
+          <Filters
+            pageId={pageId}
+            esId="sessionphase1"
+            defaultQuery={getDefaultQuery()}
+            setData={(value) => setData(value)}
+            filters={filterArray}
+            searchBarObject={searchBarObject}
+            selectedFilters={selectedFilters}
+            setSelectedFilters={setSelectedFilters}
+            paramData={paramData}
+            setParamData={setParamData}
+          />
+          <ExportComponentV2
             title="Exporter"
-            defaultQuery={getExportQuery}
+            defaultQuery={getDefaultQuery()}
+            filters={filterArray}
             exportTitle="Session"
-            icon={<BsDownload className="text-gray-400" />}
             index="sessionphase1"
-            react={{ and: FILTERS }}
-            css={{
-              override: true,
-              button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-              loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-            }}
             transform={async (all) => {
               const { responses } = await api.esQuery("cohesioncenter", {
                 size: ES_NO_LIMIT,
@@ -221,154 +247,87 @@ const ListSession = ({ firstSession }) => {
                   };
                 });
             }}
+            selectedFilters={selectedFilters}
+            searchBarObject={searchBarObject}
+            icon={<BsDownload className="text-gray-400" />}
+            css={{
+              override: true,
+              button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+              loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+            }}
           />
         </div>
-
-        <div className={`mt-3 gap-2 flex flex-wrap mx-8 items-center ${!filterVisible ? "hidden" : ""}`}>
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            componentId="COHORT"
-            placeholder="Cohortes"
-            dataField="cohort.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-            renderItem={(e, count) => {
-              return `${translate(e)} (${count})`;
-            }}
-            title=""
-            URLParams={true}
-            showSearch={false}
-            defaultValue={[firstSession]}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Cohorte", "Cohorte")}</div>}
-          />
-
-          <RegionFilter
-            renderLabel={(items) => <div>{getFilterLabel(items, "Région", "Région")}</div>}
-            defaultQuery={getDefaultQuery}
-            filters={FILTERS}
-            defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
-          />
-          <DepartmentFilter
-            defaultQuery={getDefaultQuery}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Département", "Département")}</div>}
-            filters={FILTERS}
-            defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []}
-          />
-          {user.role === ROLES.ADMIN && (
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Code"
-              componentId="CODE2022"
-              dataField="codeCentre.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
-              title=""
-              URLParams={true}
-              sortBy="asc"
-              showSearch={true}
-              searchPlaceholder="Rechercher..."
-              showMissing
-              missingLabel="Non renseigné"
-              renderLabel={(items) => <div>{getFilterLabel(items, "Code", "Code")}</div>}
-            />
-          )}
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            placeholder="Places restantes"
-            componentId="PLACES"
-            dataField="placesLeft"
-            react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
-            title=""
-            URLParams={true}
-            sortBy="asc"
-            showSearch={false}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Places restantes", "Places restantes")}</div>}
-          />
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            componentId="STATUS"
-            dataField="sessionStatus.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-            renderItem={(e, count) => {
-              return `${translate(e)} (${count})`;
-            }}
-            title=""
-            URLParams={true}
-            showSearch={false}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Statut", "Statut")}</div>}
-          />
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            componentId="TIMESCHEDULE"
-            dataField="hasTimeSchedule.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "TIMESCHEDULE") }}
-            renderItem={(e, count) => {
-              return `${translate(e)} (${count})`;
-            }}
-            title=""
-            URLParams={true}
-            showSearch={false}
-            renderLabel={(items) => getFilterLabel(items, "Emploi du temps", "Emploi du temps")}
-            showMissing
-            missingLabel="Non renseigné"
-          />
-          <DeleteFilters />
-        </div>
-
-        <div className="reactive-result">
-          <ReactiveListComponent
-            defaultQuery={getDefaultQuery}
-            paginationAt="bottom"
-            showTopResultStats={false}
-            react={{ and: FILTERS }}
-            onData={({ rawData }) => {
-              if (rawData?.hits?.hits) setCohesionCenterIds(rawData.hits.hits.filter((e) => e?._source?.cohesionCenterId).map((e) => e._source.cohesionCenterId));
-            }}
-            render={({ data }) => (
-              <div className="flex w-full flex-col gap-1 mt-6 mb-2">
-                <hr />
-                <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
-                  <div className="w-[40%]">Centre</div>
-                  <div className="w-[20%]">Cohortes</div>
-                  <div className="w-[20%]">Places</div>
-                  <div className="w-[20%]">Disponibilités</div>
-                </div>
-                {data.map((hit) => (
-                  <HitSession
-                    onClick={() => history.push(`/centre/${hit?.cohesionCenterId}?cohorte=${hit.cohort}`)}
-                    key={hit._id}
-                    center={cohesionCenter.filter((e) => e._id === hit.cohesionCenterId)[0]}
-                    hit={hit}
-                  />
-                ))}
-                <hr />
-              </div>
-            )}
-          />
+        <div className="mt-2 flex flex-row flex-wrap items-center">
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
       </div>
-    </ReactiveBase>
+      <ResultTable
+        paramData={paramData}
+        setParamData={setParamData}
+        currentEntryOnPage={data?.length}
+        render={
+          <div className="flex w-full flex-col gap-1 mt-6 mb-2">
+            <hr />
+            <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
+              <div className="w-[40%]">Centre</div>
+              <div className="w-[20%]">Cohortes</div>
+              <div className="w-[20%]">Places</div>
+              <div className="w-[20%]">Disponibilités</div>
+            </div>
+            {data.map((hit) => (
+              <HitSession
+                onClick={() => history.push(`/centre/${hit?.cohesionCenterId}?cohorte=${hit.cohort}`)}
+                key={hit._id}
+                center={cohesionCenter.filter((e) => e._id === hit.cohesionCenterId)[0]}
+                hit={hit}
+              />
+            ))}
+            <hr />
+          </div>
+        }
+      />
+    </div>
   );
 };
 const ListCenter = ({ firstSession }) => {
-  const [filterVisible, setFilterVisible] = useState(false);
+  const user = useSelector((state) => state.Auth.user);
+
+  const [data, setData] = React.useState([]);
+  const pageId = "centreList";
+  const [selectedFilters, setSelectedFilters] = React.useState({});
+  const [paramData, setParamData] = React.useState({
+    size: 20,
+    page: 0,
+  });
+  const filterArray = [
+    { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée" },
+    {
+      title: "Région",
+      name: "region",
+      datafield: "region.keyword",
+      missingLabel: "Non renseignée",
+      defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
+    },
+    {
+      title: "Département",
+      name: "department",
+      datafield: "department.keyword",
+      missingLabel: "Non renseignée",
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
+    },
+  ];
+  if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code2022", datafield: "code2022.keyword", missingLabel: "Non renseignée" });
+  const searchBarObject = {
+    placeholder: "Rechercher par mots clés, ville, code postal...",
+    datafield: ["name", "city", "zip", "code2022"],
+  };
+
   // List of sessionPhase1 IDS currently displayed in results
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
   // List of cohesionCenter associated to the sessionPhase1
   const [sessionsPhase1, setSessionsPhase1] = useState([]);
-
-  // list of cohorts selected, used for filtering the sessionPhase1 displayed inline
-  const [filterCohorts, setFilterConhorts] = useState([]);
-
-  const user = useSelector((state) => state.Auth.user);
-
-  const getDefaultQuery = () => {
-    return { query: { match_all: {} }, track_total_hits: true };
-  };
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   useEffect(() => {
     (async () => {
@@ -386,40 +345,33 @@ const ListCenter = ({ firstSession }) => {
 
   const history = useHistory();
 
+  React.useEffect(() => {
+    if (data) setCohesionCenterIds(data.map((center) => center._id));
+  }, [data]);
+
   if (!firstSession) return <div></div>;
   return (
-    <ReactiveBase url={`${apiURL}/es`} app="cohesioncenter" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-      <div className="flex-1 flex-column bg-white mx-8 flex-wrap">
-        <div className="flex flex-row pt-4 justify-between items-center">
-          <div className="flex flex-row">
-            <DataSearch
-              defaultQuery={getDefaultQuery}
-              showIcon={false}
-              placeholder="Rechercher par mots clés, ville, code postal..."
-              componentId="SEARCH"
-              dataField={["name", "city", "zip", "code2022"]}
-              react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-              style={{ marginRight: "1rem", flex: 1 }}
-              innerClass={{ input: "searchbox" }}
-              className="datasearch-searchfield"
-              URLParams={true}
-              autosuggest={false}
-            />
-            <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
-          </div>
-          <ExportComponent
-            handleClick={() => plausibleEvent("Centres/CTA - Exporter centres")}
+    <div className="flex-1 flex-column bg-white flex-wrap">
+      <div className="mx-4">
+        <div className="flex flex-row justify-between w-full">
+          <Filters
+            pageId={pageId}
+            esId="cohesioncenter"
+            defaultQuery={getDefaultQuery()}
+            setData={(value) => setData(value)}
+            filters={filterArray}
+            searchBarObject={searchBarObject}
+            selectedFilters={selectedFilters}
+            setSelectedFilters={setSelectedFilters}
+            paramData={paramData}
+            setParamData={setParamData}
+          />
+          <ExportComponentV2
             title="Exporter"
-            defaultQuery={getExportQuery}
+            defaultQuery={getDefaultQuery()}
+            filters={filterArray}
             exportTitle="Centres_de_cohesion"
             index="cohesioncenter"
-            react={{ and: FILTERS }}
-            css={{
-              override: true,
-              button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-              loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-            }}
-            icon={<BsDownload className="text-gray-400" />}
             transform={(all) => {
               return all?.map((data) => {
                 return {
@@ -444,92 +396,47 @@ const ListCenter = ({ firstSession }) => {
                 };
               });
             }}
-          />
-        </div>
-        <div className={`mt-3 gap-2 flex flex-wrap items-center ${!filterVisible ? "hidden" : ""}`}>
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            componentId="COHORT"
-            placeholder="Cohortes"
-            dataField="cohorts.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-            renderItem={(e, count) => {
-              return `${translate(e)} (${count})`;
+            selectedFilters={selectedFilters}
+            searchBarObject={searchBarObject}
+            icon={<BsDownload className="text-gray-400" />}
+            css={{
+              override: true,
+              button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+              loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
             }}
-            title=""
-            URLParams={true}
-            showSearch={false}
-            onValueChange={setFilterConhorts}
-            // defaultValue={[firstSession]}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Cohorte", "Cohorte")}</div>}
           />
-          <RegionFilter
-            defaultQuery={getDefaultQuery}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Région", "Région")}</div>}
-            filters={FILTERS}
-            defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
-          />
-          <DepartmentFilter
-            defaultQuery={getDefaultQuery}
-            renderLabel={(items) => <div>{getFilterLabel(items, "Département", "Département")}</div>}
-            filters={FILTERS}
-            defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []}
-          />
-          {user.role === ROLES.ADMIN ? (
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Code"
-              componentId="CODE2022"
-              dataField="code2022.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
-              title=""
-              URLParams={true}
-              sortBy="asc"
-              showSearch={true}
-              searchPlaceholder="Rechercher..."
-              showMissing
-              missingLabel="Non renseigné"
-              renderLabel={(items) => <div>{getFilterLabel(items, "Code", "Code")}</div>}
-            />
-          ) : null}
-          <DeleteFilters />
+        </div>
+        <div className="mt-2 flex flex-row flex-wrap items-center">
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
       </div>
-      <div className="reactive-result">
-        <ReactiveListComponent
-          defaultQuery={getDefaultQuery}
-          paginationAt="bottom"
-          showTopResultStats={false}
-          react={{ and: FILTERS }}
-          onData={({ rawData }) => {
-            if (rawData?.hits?.hits) setCohesionCenterIds(rawData.hits.hits.map((e) => e._id));
-          }}
-          render={({ data }) => (
-            <div className="flex w-full flex-col gap-1 mt-6 mb-2">
-              <hr />
-              <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
-                <div className="w-[40%]">Centre</div>
-                <div className="w-[60%]">Cohortes à venir</div>
-              </div>
-              {data.map((hit) => (
-                <Hit
-                  key={hit._id}
-                  hit={hit}
-                  history={history}
-                  onClick={() => history.push(`/centre/${hit._id}`)}
-                  sessionsPhase1={sessionsPhase1
-                    .filter((e) => e?._source?.cohesionCenterId === hit._id && (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)))
-                    .map((e) => e)}
-                />
-              ))}
-              <hr />
+
+      <ResultTable
+        paramData={paramData}
+        setParamData={setParamData}
+        currentEntryOnPage={data?.length}
+        render={
+          <div className="flex w-full flex-col gap-1 mt-6 mb-2">
+            <hr />
+            <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
+              <div className="w-[40%]">Centre</div>
+              <div className="w-[60%]">Cohortes à venir</div>
             </div>
-          )}
-        />
-      </div>
-    </ReactiveBase>
+            {data.map((hit) => (
+              <Hit
+                key={hit._id}
+                hit={hit}
+                history={history}
+                onClick={() => history.push(`/centre/${hit._id}`)}
+                sessionsPhase1={sessionsPhase1.filter((e) => e?._source?.cohesionCenterId === hit._id).map((e) => e)}
+              />
+            ))}
+            <hr />
+          </div>
+        }
+      />
+    </div>
   );
 };
 const Hit = ({ hit, sessionsPhase1, onClick, history }) => {

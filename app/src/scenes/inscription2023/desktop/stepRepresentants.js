@@ -12,11 +12,13 @@ import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
-import { regexPhoneFrenchCountries, translate } from "../../../utils";
+import { translate } from "../../../utils";
 import { getCorrectionByStep } from "../../../utils/navigation";
+import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 import Help from "../components/Help";
 import Input from "../components/Input";
 import Navbar from "../components/Navbar";
+import PhoneField from "../components/PhoneField";
 import RadioButton from "../components/RadioButton";
 
 const parentsStatus = [
@@ -43,27 +45,31 @@ export default function StepRepresentants() {
     parent1LastName: "",
     parent1Email: "",
     parent1Phone: "",
+    parent1PhoneZone: "FRANCE",
     parent2Status: "",
     parent2FirstName: "",
     parent2LastName: "",
     parent2Email: "",
     parent2Phone: "",
+    parent2PhoneZone: "FRANCE",
   });
 
   React.useEffect(() => {
     if (young) {
-      setData({
+      setData((prevData) => ({
         parent1Status: young.parent1Status,
         parent1FirstName: young.parent1FirstName,
         parent1LastName: young.parent1LastName,
         parent1Email: young.parent1Email,
         parent1Phone: young.parent1Phone,
+        parent1PhoneZone: young.parent1PhoneZone || prevData.parent1PhoneZone,
         parent2Status: young.parent2Status,
         parent2FirstName: young.parent2FirstName,
         parent2LastName: young.parent2LastName,
         parent2Email: young.parent2Email,
         parent2Phone: young.parent2Phone,
-      });
+        parent2PhoneZone: young.parent2PhoneZone || prevData.parent2PhoneZone,
+      }));
     }
     if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
       const corrections = getCorrectionByStep(young, step);
@@ -78,14 +84,14 @@ export default function StepRepresentants() {
 
   const getErrors = () => {
     let errors = {};
-    if (data.parent1Phone && !validator.matches(trimmedParent1Phone, regexPhoneFrenchCountries)) {
-      errors.parent1Phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
+    if (data.parent1Phone && !isPhoneNumberWellFormated(trimmedParent1Phone, data.parent1PhoneZone)) {
+      errors.parent1Phone = PHONE_ZONES[data.parent1PhoneZone].errorMessage;
     } else errors.parent1Phone = undefined;
     if (data.parent1Email && !validator.isEmail(data.parent1Email)) {
       errors.parent1Email = "L'adresse email n'est pas valide";
     } else errors.parent1Email = undefined;
-    if (data.parent2Phone && !validator.matches(trimmedParent2Phone, regexPhoneFrenchCountries)) {
-      errors.parent2Phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
+    if (data.parent2Phone && !isPhoneNumberWellFormated(trimmedParent2Phone, data.parent2PhoneZone)) {
+      errors.parent2Phone = PHONE_ZONES[data.parent2PhoneZone].errorMessage;
     } else errors.parent2Phone = undefined;
     if (data.parent2Email && !validator.isEmail(data.parent2Email)) {
       errors.parent2Email = "L'adresse email n'est pas valide";
@@ -95,7 +101,7 @@ export default function StepRepresentants() {
 
   React.useEffect(() => {
     setErrors({ ...errors, ...getErrors() });
-  }, [data.parent1Email, data.parent1Phone, data.parent2Email, data.parent2Phone]);
+  }, [data.parent1Email, data.parent1Phone, data.parent2Email, data.parent2Phone, data.parent1PhoneZone, data.parent2PhoneZone]);
 
   const onSubmit = async () => {
     setLoading(true);
@@ -138,6 +144,7 @@ export default function StepRepresentants() {
         delete value.parent2LastName;
         delete value.parent2Email;
         delete value.parent2Phone;
+        delete value.parent2PhoneZone;
       } else {
         value.parent2 = true;
       }
@@ -200,6 +207,7 @@ export default function StepRepresentants() {
           delete value.parent2LastName;
           delete value.parent2Email;
           delete value.parent2Phone;
+          delete value.parent2PhoneZone;
         } else {
           value.parent2 = true;
         }
@@ -235,6 +243,7 @@ export default function StepRepresentants() {
         delete value.parent2LastName;
         delete value.parent2Email;
         delete value.parent2Phone;
+        delete value.parent2PhoneZone;
       } else {
         value.parent2 = true;
       }
@@ -349,10 +358,13 @@ const FormRepresentant = ({ i, data, setData, errors, corrections }) => {
         error={errors[`parent${i}Email`]}
         correction={corrections[`parent${i}Email`]}
       />
-      <Input
-        value={data[`parent${i}Phone`]}
+      <PhoneField
         label="Son numéro de téléphone"
-        onChange={(e) => setData({ ...data, [`parent${i}Phone`]: e })}
+        onChange={(value) => setData({ ...data, [`parent${i}Phone`]: value })}
+        onChangeZone={(value) => setData({ ...data, [`parent${i}PhoneZone`]: value })}
+        value={data[`parent${i}Phone`]}
+        zoneValue={data[`parent${i}PhoneZone`]}
+        placeholder={PHONE_ZONES[data[`parent${i}PhoneZone`]].example}
         error={errors[`parent${i}Phone`]}
         correction={corrections[`parent${i}Phone`]}
       />

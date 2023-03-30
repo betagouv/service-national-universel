@@ -1,3 +1,94 @@
+# [1.243.0](https://github.com/betagouv/service-national-universel/compare/v1.242.0...v1.243.0) (2023-03-29)
+
+
+### Bug Fixes
+
+* **admin:** improve searchbar filter (add to aggreg) ([1d46e1a](https://github.com/betagouv/service-national-universel/commit/1d46e1a300d50fa0e8dfa6084f27c0d21f2fe344))
+* **admin:** improve searchbar filters ([12973f1](https://github.com/betagouv/service-national-universel/commit/12973f1698b88624c77b73a1e0a0771be7647df7))
+* **admin:** intégration des préfixes téléphoniques dans les exports xlsx des volontaires et des inscriptions ([#2430](https://github.com/betagouv/service-national-universel/issues/2430)) ([241a354](https://github.com/betagouv/service-national-universel/commit/241a354aee3a25200245db625374a29c16434dc4))
+* **admin/app:** take tutor name update into account on contrats ([#2435](https://github.com/betagouv/service-national-universel/issues/2435)) ([9313859](https://github.com/betagouv/service-national-universel/commit/9313859abd6c7486c8f76cfa7baa494204cfb3d6))
+* **api:** import plan de transport deleted PDR ([fb0f1c0](https://github.com/betagouv/service-national-universel/commit/fb0f1c025046d98b77a2f47f79fff1af8c70e7bd))
+* **app:** ajout des préfixes téléphoniques sur le récapitulatif d'inscription ([#2437](https://github.com/betagouv/service-national-universel/issues/2437)) ([954caee](https://github.com/betagouv/service-national-universel/commit/954caeedb313fcfeb5f89dd59d35d903be4921ff))
+* **app:** enable checkbox again on coordinates page ([18eaa83](https://github.com/betagouv/service-national-universel/commit/18eaa836cb247f7e6293377f1c4b8146f9f188a6))
+* **app/admin:** correction des noms des zones géographiques liées aux préfixes téléphoniques ([#2442](https://github.com/betagouv/service-national-universel/issues/2442)) ([be50839](https://github.com/betagouv/service-national-universel/commit/be508393ee1780c29213b892c8a15aec223494b3))
+* **app/admin:** corrections sur le sélecteur de préfixes sur les champs téléphones ([#2436](https://github.com/betagouv/service-national-universel/issues/2436)) ([e70d8f0](https://github.com/betagouv/service-national-universel/commit/e70d8f04b44538ab7bed23d540ca4c0b3109f3cb))
+
+
+### Features
+
+* **admin:** add external filters to filter system ([6205bb8](https://github.com/betagouv/service-national-universel/commit/6205bb817846d046cd95d182609103ee8177e5ce))
+* **admin:** dashboard logique filtre region / dep / academy ([#2440](https://github.com/betagouv/service-national-universel/issues/2440)) ([24ae724](https://github.com/betagouv/service-national-universel/commit/24ae72434b89488daf79496a39adc7e6f442c0dc))
+* **admin:** Dashboard séjour liste presence ([#2428](https://github.com/betagouv/service-national-universel/issues/2428)) ([2af7983](https://github.com/betagouv/service-national-universel/commit/2af798326b4d060dd335f71996df6a9ab2f7e13b))
+
+# [1.242.0](https://github.com/betagouv/service-national-universel/compare/v1.241.0...v1.242.0) (2023-03-28)
+
+
+### Bug Fixes
+
+* **admin:** Add pageId variable to filters  ([#2427](https://github.com/betagouv/service-national-universel/issues/2427)) ([cbd40f5](https://github.com/betagouv/service-national-universel/commit/cbd40f509b7644e1a2473ee5c227045d347aa420))
+* **admin:** Barre de recherche centre ([34b30b8](https://github.com/betagouv/service-national-universel/commit/34b30b8873c405d61b645a9304ed95377d20d3c3))
+* **admin:** remove trim in filters search bar ([8688d1f](https://github.com/betagouv/service-national-universel/commit/8688d1fe022e16b1609db752372cd0ba08e80a38))
+* **api:** Add jva raw data to serializer ([b648b01](https://github.com/betagouv/service-national-universel/commit/b648b017b01bbbe15ad650b155d2d9d72573bef6))
+* **api:** data paramètrage dynamique ([643c727](https://github.com/betagouv/service-national-universel/commit/643c727068a72b9a3158938c13c262cae63e4237))
+* **api/admin:** amélioration de l'anonymisation des infos jeune sur les contrats et candidatures après suppression ([#2423](https://github.com/betagouv/service-national-universel/issues/2423)) ([17ed386](https://github.com/betagouv/service-national-universel/commit/17ed3864760395e17e2c36631d1b0039afa2bd06))
+
+
+### Features
+
+* **admin:** add Filters to /centre ([11d0758](https://github.com/betagouv/service-national-universel/commit/11d075883cc4e43299da90eca76382de35bb16fb))
+* **admin/api/app:** ajout des préfix régionaux sur les champs téléphone ([#2419](https://github.com/betagouv/service-national-universel/issues/2419)) ([7abab14](https://github.com/betagouv/service-national-universel/commit/7abab14bac49b63e92cde720001a5f48264f89fe))
+* **app:** ajout du champ de sélection de préfix régional aux champs numéro de téléphone sur la page de profil ([#2429](https://github.com/betagouv/service-national-universel/issues/2429)) ([83a07df](https://github.com/betagouv/service-national-universel/commit/83a07df992d77fad3d4b833bb2a1ec63ab78a692))
+
+# [1.241.0](https://github.com/betagouv/service-national-universel/compare/v1.240.0...v1.241.0) (2023-03-27)
+
+
+### Bug Fixes
+
+* **admin:** allow admin to edit school info before parent info are filled ([3522f46](https://github.com/betagouv/service-national-universel/commit/3522f468e09d7d912840bfdb18e405ed079e5ecf))
+* **admin:** correction des droits de changement de séjour pour un jeune ayant validé la phase 1 ([#2418](https://github.com/betagouv/service-national-universel/issues/2418)) ([9a758e5](https://github.com/betagouv/service-national-universel/commit/9a758e5ef365624a4d2968703b86abd4d6ab4519))
+* **admin:** Correction rapide pour empecher l'edition des schema de repartition par les référents régionaux ([#2420](https://github.com/betagouv/service-national-universel/issues/2420)) ([2c5de83](https://github.com/betagouv/service-national-universel/commit/2c5de83e684044883eaf91dc3b181d66c82afd4c))
+* **admin:** fix pagination condition ([c1c45df](https://github.com/betagouv/service-national-universel/commit/c1c45df966a98403921ce2235aede318e4abcec0))
+* **api:** Correction du % d'affectés dans les affichages du schéma de répartition ([#2390](https://github.com/betagouv/service-national-universel/issues/2390)) ([970ce56](https://github.com/betagouv/service-national-universel/commit/970ce562c93818c7b6a88db5cbc2e2e3ffba9742))
+
+
+### Features
+
+* **app:** [Phase 1/Validée] Affichage conditionnel du bloc JDC en fonction de la participation à la JDM ([#2417](https://github.com/betagouv/service-national-universel/issues/2417)) ([057b744](https://github.com/betagouv/service-national-universel/commit/057b7445e76b64f0ba7e4103aed1a6ab65aa9545))
+* **app:** design updates on phase 1 page ([#2406](https://github.com/betagouv/service-national-universel/issues/2406)) ([80d0cce](https://github.com/betagouv/service-national-universel/commit/80d0cce94e5f6f1e056733323501b5a8b732b0eb))
+
+# [1.240.0](https://github.com/betagouv/service-national-universel/compare/v1.239.0...v1.240.0) (2023-03-24)
+
+
+### Bug Fixes
+
+* **admin:** lien du contrat d'engagement application jeune ([54f2ae5](https://github.com/betagouv/service-national-universel/commit/54f2ae51913e0186e5fd529c81299fc4bacb96d3))
+* **app:** bug schooladdress ([e86f278](https://github.com/betagouv/service-national-universel/commit/e86f278aaabbbab91bb76b0914cd9820db6f750c))
+
+
+### Features
+
+* **admin:** logique es volontaire sejour ([#2414](https://github.com/betagouv/service-national-universel/issues/2414)) ([056d5cb](https://github.com/betagouv/service-national-universel/commit/056d5cb675054cfe01cdfb3310a6c2bf088d9e25))
+
+# [1.239.0](https://github.com/betagouv/service-national-universel/compare/v1.238.0...v1.239.0) (2023-03-23)
+
+
+### Bug Fixes
+
+* **admin:** double filetype in export (.xlsx.xlsx) ([e3b65b2](https://github.com/betagouv/service-national-universel/commit/e3b65b2b87b350021df409e569fdb6f541192dde))
+* **admin:** retour design 2 filters ([af2ede6](https://github.com/betagouv/service-national-universel/commit/af2ede69e55fd4692263154740780de15235ed13))
+* **api:** coordinates next step in case of qpv erreur ([#2416](https://github.com/betagouv/service-national-universel/issues/2416)) ([3572160](https://github.com/betagouv/service-national-universel/commit/3572160b4653944be45ba83832a8caf2a3da7e72))
+* **app:** address mobile fix ([835488d](https://github.com/betagouv/service-national-universel/commit/835488d9d44de205850fb4f93da807c2dda429ec))
+* **app:** apiAdress filters array ([a174a46](https://github.com/betagouv/service-national-universel/commit/a174a465ebcf757fd582c0882c8d3aadebdaf9e8))
+* **app:** steps logic ([fcb700b](https://github.com/betagouv/service-national-universel/commit/fcb700bfc1194b178c1ec8e8fb281bb0b3c87f7c))
+* **knowledge:** design link contactform ([#2409](https://github.com/betagouv/service-national-universel/issues/2409)) ([dc9d275](https://github.com/betagouv/service-national-universel/commit/dc9d275620ea61ffa613074c0d9bd94d3eee110f))
+
+
+### Features
+
+* **admin:** add department's numbers on filters ([f38994f](https://github.com/betagouv/service-national-universel/commit/f38994fa60414f69c0cce08215b668268f791273))
+* **admin:** remove selected filters ([9a38b43](https://github.com/betagouv/service-national-universel/commit/9a38b4335fb1a0338a84b3f6900327b3f9d1a71a))
+* **admin/api:** Objectif des inscriptions new dashboard ([6dc6753](https://github.com/betagouv/service-national-universel/commit/6dc675304e07aaf506d68132554cd3b33ca619aa))
+
 # [1.238.0](https://github.com/betagouv/service-national-universel/compare/v1.237.0...v1.238.0) (2023-03-22)
 
 

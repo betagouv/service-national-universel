@@ -242,7 +242,11 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
     //set to 23h59 certains dates
     const valueToSet = ["pdrChoiceLimitDate", "validationDate", "validationDateForTerminaleGrade"];
     valueToSet.forEach((key) => {
-      if (body[key]) body[key].setHours(23, 59, 59, 999);
+      if (body[key]) {
+        let date = new Date(body[key]);
+        date.setHours(23, 59, 59, 999);
+        body[key] = date;
+      }
     });
 
     cohort.set({

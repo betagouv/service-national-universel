@@ -15,6 +15,7 @@ const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { isInRuralArea } = require("snu-lib");
+const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR, formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -143,6 +144,10 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       birthCity: needRequired(Joi.string().trim(), isRequired),
       birthCityZip: Joi.string().trim().allow(null, ""),
       phone: needRequired(Joi.string().trim(), isRequired),
+      phoneZone: Joi.string()
+        .trim()
+        .valid(...PHONE_ZONES_NAMES_ARR)
+        .default(PHONE_ZONES_NAMES.FRANCE),
       situation: Joi.alternatives().conditional("schooled", {
         is: "true",
         then: needRequired(
@@ -225,6 +230,8 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
+
     if (type === "next") value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;
 
     if (type === "correction") {
@@ -245,10 +252,14 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
 
     // Check quartier prioritaires.
     if (value.zip && value.city && value.address) {
-      const qpv = await getQPV(value.zip, value.city, value.address);
-      if (qpv === true) young.set({ qpv: "true" });
-      else if (qpv === false) young.set({ qpv: "false" });
-      else young.set({ qpv: "" });
+      try {
+        const qpv = await getQPV(value.zip, value.city, value.address);
+        if (qpv === true) young.set({ qpv: "true" });
+        else if (qpv === false) young.set({ qpv: "false" });
+        else young.set({ qpv: "" });
+      } catch (error) {
+        young.set({ qpv: "" });
+      }
     }
 
     // Check zone rurale.
@@ -309,6 +320,10 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       parent1LastName: needRequired(Joi.string().trim(), isRequired),
       parent1Email: needRequired(Joi.string().trim().email(), isRequired),
       parent1Phone: needRequired(Joi.string().trim(), isRequired),
+      parent1PhoneZone: Joi.string()
+        .trim()
+        .valid(...PHONE_ZONES_NAMES_ARR)
+        .default(PHONE_ZONES_NAMES.FRANCE),
       parent2: needRequired(Joi.string().trim().valid(true, false), isRequired),
       parent2Status: Joi.alternatives().conditional("parent2", {
         is: true,
@@ -331,6 +346,10 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
         then: needRequired(Joi.string().trim(), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
+      parent2PhoneZone: Joi.string()
+        .trim()
+        .valid(...PHONE_ZONES_NAMES_ARR)
+        .default(PHONE_ZONES_NAMES.FRANCE),
     };
 
     let { error, value } = Joi.object(representantSchema).validate(req.body, { stripUnknown: true });
@@ -338,6 +357,9 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+
+    value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
+    value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

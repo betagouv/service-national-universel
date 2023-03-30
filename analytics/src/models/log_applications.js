@@ -22,5 +22,4 @@ const OBJ = db.define(
   }
 );
 
-OBJ.sync({ alter: true });
 module.exports = OBJ;

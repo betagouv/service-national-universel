@@ -129,6 +129,16 @@ export default function IndexPhase2Mobile() {
             <ArrowUpRight className="text-gray-400 text-2xl" />
           </a>
         </div>
+        <div className="flex border-[1px] border-gray-200 rounded-lg cursor-pointer">
+          <a
+            href="https://support.snu.gouv.fr/base-de-connaissance/jai-trouve-ma-mission-par-moi-meme-et-elle-nest-pas-encore-sur-la-plateforme"
+            target="_blank"
+            rel="noreferrer"
+            className="flex flex-1 gap-1 items-start justify-between p-3">
+            <div className="font-bold flex-1 text-gray-800">J’ai trouvé une mission qui n’est pas sur la plateforme</div>
+            <ArrowUpRight className="text-gray-400 text-2xl" />
+          </a>
+        </div>
         <div className="border-[1px] border-gray-200 rounded-lg">
           <a
             href={`https://support.snu.gouv.fr/base-de-connaissance/demander-la-reconnaissance-dun-engagement-deja-realise`}

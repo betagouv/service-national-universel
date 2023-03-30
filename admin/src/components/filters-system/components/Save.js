@@ -76,7 +76,7 @@ export default function Save({ filterArray, selectedFilters, page = 1, pageId })
           data-tip=""
           data-for="tooltip-saveFilter"
           onClick={() => setModalSaveVisible(true)}
-          className="p-2 h-[42px] w-[42px] bg-gray-100 rounded flex items-center justify-center cursor-pointer">
+          className="p-2 h-[38px] w-[38px] bg-gray-100 hover:bg-gray-200 rounded flex items-center justify-center cursor-pointer">
           <FloppyDisk />
         </div>
 
@@ -86,7 +86,7 @@ export default function Save({ filterArray, selectedFilters, page = 1, pageId })
             <div className="font-medium text-xs mt-3 mb-2">Nommez la vue</div>
             <Field autoFocus name="nameView" label="Nom de la vue" value={nameView} errors={{ nameView: error }} handleChange={(e) => setNameView(e.target.value)} />
             <div className="flex justify-end items-center">
-              <div onClick={handleSave} className={` ${loading && "opacity-50"} bg-blue-600 text-white px-3 py-2 rounded-md w-fit my-4 self-end cursor-pointer`}>
+              <div onClick={handleSave} className={` ${loading && "opacity-50"} bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md w-fit my-4 self-end cursor-pointer`}>
                 Enregistrer
               </div>
             </div>
