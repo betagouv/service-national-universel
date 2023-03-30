@@ -34,7 +34,7 @@ export default function StepRepresentants() {
   const parent2Keys = ["parent2Status", "parent2FirstName", "parent2LastName"];
   const [loading, setLoading] = React.useState(false);
   const [errors, setErrors] = React.useState({});
-  const [isParent2Visible, setIsParent2Visible] = React.useState(young?.parent2Email || young?.parent2Phone);
+  const [isParent2Visible, setIsParent2Visible] = React.useState(true);
   const dispatch = useDispatch();
   const { step } = useParams();
 

@@ -36,7 +36,7 @@ export default function StepRepresentants() {
   const parent2Keys = ["parent2Status", "parent2FirstName", "parent2LastName"];
   const [loading, setLoading] = React.useState(false);
   const [errors, setErrors] = React.useState({});
-  const [isParent2Visible, setIsParent2Visible] = React.useState(young?.parent2Email || young?.parent2Phone);
+  const [isParent2Visible, setIsParent2Visible] = React.useState(true);
   const dispatch = useDispatch();
   const { step } = useParams();
 
@@ -66,13 +66,13 @@ export default function StepRepresentants() {
   const getErrors = () => {
     let errors = {};
     if (data.parent1Phone && !isPhoneNumberWellFormated(trimmedParent1Phone, data.parent1PhoneZone)) {
-      errors.parent1Phone = PHONE_ZONES[trimmedParent1Phone].errorMessage;
+      errors.parent1Phone = PHONE_ZONES[data.parent1PhoneZone].errorMessage;
     } else errors.parent1Phone = undefined;
     if (data.parent1Email && !validator.isEmail(trimmedParent1Email)) {
       errors.parent1Email = "L'adresse email n'est pas valide";
     } else errors.parent1Email = undefined;
     if (data.parent2Phone && !isPhoneNumberWellFormated(trimmedParent2Phone, data.parent2PhoneZone)) {
-      errors.parent2Phone = PHONE_ZONES[trimmedParent2Phone].errorMessage;
+      errors.parent2Phone = PHONE_ZONES[data.parent2PhoneZone].errorMessage;
     } else errors.parent2Phone = undefined;
     if (data.parent2Email && !validator.isEmail(trimmedParent2Email)) {
       errors.parent2Email = "L'adresse email n'est pas valide";
