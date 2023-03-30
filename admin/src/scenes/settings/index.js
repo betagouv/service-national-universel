@@ -305,13 +305,13 @@ export default function Settings() {
 
           {/* TODO implementer parametres sur la plateforme */}
           {/* Préparation des affectations et des transports (phase 1) */}
-          {/* <div className="flex flex-col rounded-xl pt-8 pb-12 px-8 bg-white gap-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+          <div className="flex flex-col rounded-xl pt-8 pb-12 px-8 bg-white gap-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
             <div className="flex flex-col w-full gap-8">
               <p className="text-gray-900 leading-5 text-lg font-medium">Préparation des affectations et des transports (phase 1)</p>
               <div className="flex">
                 <div className="flex flex-col w-[45%] gap-4">
                   <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
+                    {/* <div className="flex items-center gap-2">
                       <p className="text-gray-900  text-xs font-medium">Remplissage des centres </p>
                       <MdInfoOutline data-tip data-for="remplissage_centres" className="text-gray-400 h-5 w-5 cursor-pointer" />
                       <ReactTooltip id="remplissage_centres" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
@@ -331,10 +331,10 @@ export default function Settings() {
                       disabled={isLoading || readOnly}
                       value={data.manualAffectionOpenForAdmin}
                       onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
-                    />
+                    /> */}
                   </div>
                   <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
+                    {/* <div className="flex items-center gap-2">
                       <p className="text-gray-900  text-xs font-medium">Remplissage des points de rassemblement</p>
                       <MdInfoOutline data-tip data-for="remplissage_PDR" className="text-gray-400 h-5 w-5 cursor-pointer" />
                       <ReactTooltip id="remplissage_PDR" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
@@ -354,7 +354,7 @@ export default function Settings() {
                       disabled={isLoading || readOnly}
                       value={data.manualAffectionOpenForAdmin}
                       onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
-                    />
+                    /> */}
                   </div>
                 </div>
                 <div className="flex w-[10%] justify-center items-center">
@@ -363,11 +363,11 @@ export default function Settings() {
                 <div className="flex flex-col w-[45%] gap-4">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Création de groupe sur le schéma de répartition</p>
+                      <p className="text-gray-900  text-xs font-medium">Création de groupe et modification du schéma de répartition</p>
                       <MdInfoOutline data-tip data-for="création_groupe" className="text-gray-400 h-5 w-5 cursor-pointer" />
                       <ReactTooltip id="création_groupe" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
                         <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
-                          Ouverture ou fermeture pour les utilisateurs de la possibilité de créer des groupes sur le schéma de répartition.
+                          Ouverture ou fermeture pour les utilisateurs de la possibilité de créer et modifier des groupes sur le schéma de répartition.
                         </p>
                       </ReactTooltip>
                     </div>
@@ -375,8 +375,22 @@ export default function Settings() {
                       label="Référents régionaux"
                       disabled={isLoading}
                       readOnly={readOnly}
-                      value={data.manualAffectionOpenForAdmin}
-                      onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
+                      value={data.repartitionSchemaCreateAndEditGroupAvailability}
+                      onChange={() => setData({ ...data, repartitionSchemaCreateAndEditGroupAvailability: !data.repartitionSchemaCreateAndEditGroupAvailability })}
+                      range={{
+                        from: data?.uselessInformation?.repartitionSchemaCreateAndEditGroupAvailabilityFrom || undefined,
+                        to: data?.uselessInformation?.repartitionSchemaCreateAndEditGroupAvailabilityTo || undefined,
+                      }}
+                      onChangeRange={(range) => {
+                        setData({
+                          ...data,
+                          uselessInformation: {
+                            ...data.uselessInformation,
+                            repartitionSchemaCreateAndEditGroupAvailabilityFrom: range?.from,
+                            repartitionSchemaCreateAndEditGroupAvailabilityTo: range?.to,
+                          },
+                        });
+                      }}
                     />
                   </div>
                   <div className="flex flex-col gap-3">
@@ -393,17 +407,26 @@ export default function Settings() {
                       label="Transporteur"
                       disabled={isLoading}
                       readOnly={readOnly}
-                      value={data.manualAffectionOpenForAdmin}
-                      onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
-                      range={{ from: data?.fromRange || undefined, to: data?.toRange || undefined }}
+                      value={data.repartitionSchemaDownloadAvailability}
+                      onChange={() => setData({ ...data, repartitionSchemaDownloadAvailability: !data.repartitionSchemaDownloadAvailability })}
+                      range={{
+                        from: data?.uselessInformation?.repartitionSchemaDownloadAvailabilityFrom || undefined,
+                        to: data?.uselessInformation?.repartitionSchemaDownloadAvailabilityTo || undefined,
+                      }}
                       onChangeRange={(range) => {
-                        console.log(range);
-                        setData({ ...data, fromRange: range?.from, toRange: range?.to });
+                        setData({
+                          ...data,
+                          uselessInformation: {
+                            ...data.uselessInformation,
+                            repartitionSchemaDownloadAvailabilityFrom: range?.from,
+                            repartitionSchemaDownloadAvailabilityTo: range?.to,
+                          },
+                        });
                       }}
                     />
                   </div>
                   <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
+                    {/* <div className="flex items-center gap-2">
                       <p className="text-gray-900  text-xs font-medium">Demande de correction sur le plan de transport</p>
                       <MdInfoOutline data-tip data-for="demande_correction" className="text-gray-400 h-5 w-5 cursor-pointer" />
                       <ReactTooltip id="demande_correction" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
@@ -418,12 +441,12 @@ export default function Settings() {
                       readOnly={readOnly}
                       value={data.manualAffectionOpenForAdmin}
                       onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
-                    />
+                    /> */}
                   </div>
                 </div>
               </div>
             </div>
-          </div> */}
+          </div>
 
           {/* Affectation et pointage (phase 1) */}
           <div className="flex flex-col rounded-xl pt-8 pb-12 px-8 bg-white gap-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
