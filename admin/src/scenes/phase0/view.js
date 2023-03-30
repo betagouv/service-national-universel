@@ -49,7 +49,7 @@ import Modal from "../../components/ui/modals/Modal";
 import ButtonLight from "../../components/ui/buttons/ButtonLight";
 import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
 import PhoneField from "./components/PhoneField";
-import { isPhoneNumberWellFormated, PHONE_ZONES } from "../../utils/phone-number.utils";
+import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -1067,6 +1067,7 @@ function SectionIdentiteContact({ young, globalMode, currentRequest, onStartRequ
         zoneValue={young.phoneZone}
         onChangeZone={(value) => onChange("phoneZone", value)}
         mode={globalMode}
+        placeholder={PHONE_ZONES[young.phoneZone]?.example}
         onStartRequest={onStartRequest}
         currentRequest={currentRequest}
         correctionRequest={getCorrectionRequest(requests, "phone")}
@@ -1395,6 +1396,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 zoneValue={data[`parent${currentParent}PhoneZone`]}
                 onChangeZone={(value) => onLocalChange(`parent${currentParent}PhoneZone`, value)}
                 mode={sectionMode}
+                placeholder={PHONE_ZONES[data[`parent${currentParent}PhoneZone`]]?.example}
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
                 correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Phone`)}

@@ -15,7 +15,7 @@ const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { isInRuralArea } = require("snu-lib");
-const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR, formatPhoneNumberFromPhoneZone } = require("../../utils/phone-number.utils");
+const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR, formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,

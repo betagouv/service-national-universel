@@ -94,6 +94,7 @@ app.use("/young-edition", require("./controllers/young-edition"));
 app.use("/tags", require("./controllers/tags"));
 app.use("/cohort", require("./controllers/cohort"));
 app.use("/filters", require("./controllers/filters"));
+app.use("/analytics", require("./controllers/analytics"));
 app.use("/plan-de-transport/import", require("./controllers/planDeTransport/import"));
 
 //services

@@ -38,7 +38,7 @@ import { supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { apiAdress } from "../../../services/api-adresse";
-import { isPhoneNumberWellFormated, PHONE_ZONES } from "../../../utils/phone-number.utils";
+import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 import PhoneField from "../components/PhoneField";
 
 const getObjectWithEmptyData = (fields) => {

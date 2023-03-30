@@ -49,7 +49,7 @@ import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { translateApplicationFileType, youngExportFields } from "snu-lib";
 import ModalExport from "../../components/modals/ModalExport";
-import { concatPhoneNumberWithZone } from "../../utils/phone-number.utils";
+import { concatPhoneNumberWithZone } from "snu-lib/phone-number";
 
 const FILTERS = [
   "SEARCH",

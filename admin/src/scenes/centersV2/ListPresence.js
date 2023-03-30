@@ -301,8 +301,7 @@ export default function ListPresence() {
           setParamData={setParamData}
           currentEntryOnPage={data?.length}
           render={
-            <div className="flex w-full flex-col gap-1 mt-6 mb-2">
-              <hr />
+            <div className="flex w-full flex-col mt-6 mb-2 border-y-[1px] border-gray-100">
               <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
                 <div className="w-[30%] uppercase">Centre</div>
                 <div className="w-[20%] uppercase">présence JDM</div>
@@ -319,7 +318,6 @@ export default function ListPresence() {
                   sessionsPhase1={youngByCenter.find((e) => e.centerId === hit._id)}
                 />
               ))}
-              <hr />
             </div>
           }
         />
@@ -336,60 +334,57 @@ const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
   }, [sessionsPhase1]);
 
   return (
-    <>
-      <hr />
-      <div onClick={onClick} className="flex py-3 items-center px-4 hover:bg-gray-50 cursor-pointer">
-        <div className="flex flex-col gap-1 w-[30%]">
-          <div className="font-bold leading-6 text-gray-900 truncate">{hit?.name}</div>
-          <div className="font-normal text-xs leading-4 text-gray-500">{`${hit?.city || ""} • ${hit?.department || ""}`}</div>
-        </div>
-        <div className="flex flex-col gap-2 w-[20%]">
-          {isLoading ? (
-            <Loading width="w-[50%]" />
-          ) : (
-            <>
-              <span className="text-sm leading-none font-normal text-gray-900">
-                <strong>{sessionsPhase1?.presenceJDMOui || 0}</strong> Présents <strong>{sessionsPhase1?.presenceJDMNon || 0}</strong> Absents
-              </span>
-              <span className="text-xs leading-none font-normal text-gray-500 uppercase">
-                <strong>{sessionsPhase1?.presenceJDMNR || 0}</strong> non renseignés ({Math.round((sessionsPhase1?.presenceJDMNR / sessionsPhase1?.total) * 100) || 0}%)
-              </span>
-            </>
-          )}
-        </div>
-        <div className="flex flex-col gap-2 w-[20%]">
-          {isLoading ? (
-            <Loading width="w-[50%]" />
-          ) : (
-            <>
-              <span className="text-sm leading-none font-normal text-gray-900">
-                <strong>{sessionsPhase1?.presenceOui || 0}</strong> Présents <strong>{sessionsPhase1?.presenceNon || 0}</strong> Absents
-              </span>
-              <span className="text-xs leading-none font-normal text-gray-500 uppercase">
-                <strong>{sessionsPhase1?.presenceNR || 0}</strong> non renseignés ({Math.round((sessionsPhase1?.presenceNR / sessionsPhase1?.total) * 100) || 0}%)
-              </span>
-            </>
-          )}
-        </div>
-        <div className="flex items-center w-[10%] text-sm leading-none font-normal text-gray-900">
-          {isLoading ? <Loading width="w-[50%]" /> : <strong>{sessionsPhase1?.departOui || 0}</strong>}
-        </div>
-        <div className="flex flex-col gap-2 w-[20%]">
-          {isLoading ? (
-            <Loading width="w-[50%]" />
-          ) : (
-            <>
-              <span className="text-sm leading-none font-normal text-gray-900">
-                <strong>{sessionsPhase1?.sanitaryFieldOui || 0}</strong> Renseignées ({Math.round((sessionsPhase1?.sanitaryFieldOui / sessionsPhase1?.total) * 100) || 0}%)
-              </span>
-              <span className="text-sm leading-none font-normal text-gray-900">
-                <strong>{sessionsPhase1?.sanitaryFieldNR + sessionsPhase1?.sanitaryFieldNon || 0}</strong> Non renseignées (
-                {Math.round(((sessionsPhase1?.sanitaryFieldNR + sessionsPhase1?.sanitaryFieldNon) / sessionsPhase1?.total) * 100) || 0}%)
-              </span>
-            </>
-          )}
-        </div>
+    <div onClick={onClick} className="flex py-3 items-center px-4 cursor-pointer hover:bg-gray-50 border-t-[1px] border-gray-100">
+      <div className="flex flex-col gap-1 w-[30%]">
+        <div className="font-bold leading-6 text-gray-900 truncate">{hit?.name}</div>
+        <div className="font-normal text-xs leading-4 text-gray-500">{`${hit?.city || ""} • ${hit?.department || ""}`}</div>
       </div>
-    </>
+      <div className="flex flex-col gap-2 w-[20%]">
+        {isLoading ? (
+          <Loading width="w-[50%]" />
+        ) : (
+          <>
+            <span className="text-sm leading-none font-normal text-gray-900">
+              <strong>{sessionsPhase1?.presenceJDMOui || 0}</strong> Présents <strong>{sessionsPhase1?.presenceJDMNon || 0}</strong> Absents
+            </span>
+            <span className="text-xs leading-none font-normal text-gray-500 uppercase">
+              <strong>{sessionsPhase1?.presenceJDMNR || 0}</strong> non renseignés ({Math.round((sessionsPhase1?.presenceJDMNR / sessionsPhase1?.total) * 100) || 0}%)
+            </span>
+          </>
+        )}
+      </div>
+      <div className="flex flex-col gap-2 w-[20%]">
+        {isLoading ? (
+          <Loading width="w-[50%]" />
+        ) : (
+          <>
+            <span className="text-sm leading-none font-normal text-gray-900">
+              <strong>{sessionsPhase1?.presenceOui || 0}</strong> Présents <strong>{sessionsPhase1?.presenceNon || 0}</strong> Absents
+            </span>
+            <span className="text-xs leading-none font-normal text-gray-500 uppercase">
+              <strong>{sessionsPhase1?.presenceNR || 0}</strong> non renseignés ({Math.round((sessionsPhase1?.presenceNR / sessionsPhase1?.total) * 100) || 0}%)
+            </span>
+          </>
+        )}
+      </div>
+      <div className="flex items-center w-[10%] text-sm leading-none font-normal text-gray-900">
+        {isLoading ? <Loading width="w-[50%]" /> : <strong>{sessionsPhase1?.departOui || 0}</strong>}
+      </div>
+      <div className="flex flex-col gap-2 w-[20%]">
+        {isLoading ? (
+          <Loading width="w-[50%]" />
+        ) : (
+          <>
+            <span className="text-sm leading-none font-normal text-gray-900">
+              <strong>{sessionsPhase1?.sanitaryFieldOui || 0}</strong> Renseignées ({Math.round((sessionsPhase1?.sanitaryFieldOui / sessionsPhase1?.total) * 100) || 0}%)
+            </span>
+            <span className="text-sm leading-none font-normal text-gray-900">
+              <strong>{sessionsPhase1?.sanitaryFieldNR + sessionsPhase1?.sanitaryFieldNon || 0}</strong> Non renseignées (
+              {Math.round(((sessionsPhase1?.sanitaryFieldNR + sessionsPhase1?.sanitaryFieldNon) / sessionsPhase1?.total) * 100) || 0}%)
+            </span>
+          </>
+        )}
+      </div>
+    </div>
   );
 };

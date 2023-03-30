@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
 
 import {
   YOUNG_SITUATIONS,
@@ -15,7 +14,6 @@ import {
   getLabelWithdrawnReason,
   ROLES,
   colors,
-  translate,
   formatPhoneNumberFR,
 } from "snu-lib";
 import { appURL } from "../../config";
@@ -25,8 +23,8 @@ import Panel, { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
 import plausibleEvent from "../../services/plausible";
-import ModalConfirm from "../../components/modals/ModalConfirm";
 import { ImQuotesLeft } from "react-icons/im";
+import ModalConfirmDeleteYoung from "../../components/modals/young/ModalConfirmDeleteYoung";
 
 export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
@@ -34,28 +32,20 @@ export default function VolontairePanel({ onChange, value }) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
 
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const onClickDelete = () => {
-    setModal({
-      isOpen: true,
-      onConfirm: onConfirmDelete,
-      title: "Êtes-vous sûr(e) de vouloir supprimer ce volontaire ?",
-      message: "Cette action est irréversible.",
-    });
+  const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] = useState(false);
+
+  const handleDeleteYoung = () => {
+    setIsConfirmDeleteModalOpen(true);
   };
 
-  const onConfirmDelete = async () => {
-    try {
-      const { ok, code } = await api.put(`/young/${young._id}/soft-delete`);
-      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      toastr.success("Ce volontaire a été supprimé.");
-      onChange();
-      history.go(0);
-    } catch (e) {
-      console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la supression du volontaire :", translate(e.code));
-    }
+  const handleCancelDeleteYoung = () => {
+    setIsConfirmDeleteModalOpen(false);
+  };
+
+  const handleDeleteYoungSuccess = () => {
+    setIsConfirmDeleteModalOpen(false);
+    onChange();
+    history.go(0);
   };
 
   useEffect(() => {
@@ -106,7 +96,7 @@ export default function VolontairePanel({ onChange, value }) {
                 <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
                   <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
                 </a>
-                <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
+                <PanelActionButton onClick={handleDeleteYoung} icon="bin" title="Supprimer" />
               </>
             )}
           </div>
@@ -239,16 +229,7 @@ export default function VolontairePanel({ onChange, value }) {
           </div>
         )}
       </Panel>
-      <ModalConfirm
-        isOpen={modal?.isOpen}
-        title={modal?.title}
-        message={modal?.message}
-        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-        onConfirm={async () => {
-          await modal?.onConfirm();
-          setModal({ isOpen: false, onConfirm: null });
-        }}
-      />
+      <ModalConfirmDeleteYoung isOpen={isConfirmDeleteModalOpen} young={young} onCancel={handleCancelDeleteYoung} onConfirm={handleDeleteYoungSuccess} />
     </>
   );
 }
