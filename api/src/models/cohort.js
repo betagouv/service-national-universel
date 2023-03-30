@@ -115,6 +115,19 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  repartitionSchemaCreationAvailability: {
+    type: Boolean,
+    documentation: {
+      description: "Ouverture ou fermeture pour les utilisateurs de la possibilité de créer des groupes sur le schéma de répartition.",
+    },
+  },
+  repartitionSchemaDownloadAvailability: {
+    type: Boolean,
+    documentation: {
+      description: "Ouverture ou fermeture pour les utilisateurs de la possibilité de télécharger le schéma de répartition.",
+    },
+  },
+
   //information n'impactant le fonctionnement de l'application
   uselessInformation: {
     type: mongoose.Schema.Types.Mixed,
