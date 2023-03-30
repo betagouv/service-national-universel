@@ -744,7 +744,7 @@ router.post("/france-connect/authorization-url", async (req, res) => {
       redirect_uri: `${config.APP_URL}/${value.callback}`,
       response_type: "code",
       client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
-      state: "home",
+      state: crypto.randomBytes(20).toString("hex"),
       nonce: crypto.randomBytes(20).toString("hex"),
       acr_values: "eidas1",
     };
