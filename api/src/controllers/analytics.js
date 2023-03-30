@@ -115,7 +115,6 @@ router.post("/young-cohort/count", passport.authenticate(["referent"], { session
       }),
     });
     const result = await response.json();
-    console.log(result);
     return res.status(200).send({ ok: true, data: result.data });
   } catch (error) {
     capture(error);
