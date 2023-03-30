@@ -34,12 +34,14 @@ import PhaseStatusSelector from "./PhaseStatusSelector";
 import NoteIcon from "../../volontaires/view/notes/components/NoteIcon";
 import { PHASE_1, PHASE_2, PHASE_3, PHASE_INSCRIPTION } from "../../volontaires/view/notes/utils";
 import NoteDisplayModal from "../../volontaires/view/notes/components/NoteDisplayModal";
+import ModalConfirmDeleteYoung from "../../../components/modals/young/ModalConfirmDeleteYoung";
 
 const blueBadge = { color: "#66A7F4", backgroundColor: "#F9FCFF" };
 const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
 
 export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.INSCRIPTION, isStructure = false, applicationId = null }) {
   const user = useSelector((state) => state.Auth.user);
+  const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] = useState(false);
   const [confirmModal, setConfirmModal] = useState(null);
   const [viewedNotes, setVieweNotes] = useState([]);
   const history = useHistory();
@@ -51,7 +53,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     if (young) {
       let options = [];
       if (user.role === ROLES.ADMIN) {
-        options = Object.keys(YOUNG_STATUS).filter((status) => status !== young.status);
+        options = Object.keys(YOUNG_STATUS).filter((status) => status !== young.status && status !== YOUNG_STATUS.DELETED);
       } else {
         switch (young.status) {
           case YOUNG_STATUS.WAITING_LIST:
@@ -81,28 +83,17 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     setVieweNotes(getNotesByPhase(phase));
   };
 
-  function onClickDelete() {
-    setConfirmModal({
-      isOpen: true,
-      loadingText: "La suppresion peut prendre une minute...",
-      title: "Êtes-vous sûr(e) de vouloir supprimer ce volontaire ?",
-      message: "Cette action est irréversible.",
-    });
-  }
+  const handleDeleteYoung = () => {
+    setIsConfirmDeleteModalOpen(true);
+  };
 
-  const onConfirmDelete = async () => {
-    try {
-      setLoading(true);
-      const { ok, code } = await api.put(`/young/${young._id}/soft-delete`);
-      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      setLoading(false);
-      toastr.success("Ce volontaire a été supprimé.");
-      return history.push(`/volontaire/${young._id}`);
-    } catch (e) {
-      console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la supression du volontaire :", translate(e.code));
-    }
+  const handleCancelDeleteYoung = () => {
+    setIsConfirmDeleteModalOpen(false);
+  };
+
+  const handleDeleteYoungSuccess = () => {
+    setIsConfirmDeleteModalOpen(false);
+    history.push(`/volontaire/${young._id}`);
   };
 
   const onSelectStatus = (status) => {
@@ -331,7 +322,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
             />
             {young.status !== YOUNG_STATUS.DELETED && (
               <div className="flex items-center justify-between my-[15px]">
-                <Button icon={<Bin fill="red" />} onClick={onClickDelete}>
+                <Button icon={<Bin fill="red" />} onClick={handleDeleteYoung}>
                   Supprimer
                 </Button>
                 <Button
@@ -346,6 +337,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
           </div>
         )}
       </div>
+      <ModalConfirmDeleteYoung isOpen={isConfirmDeleteModalOpen} young={young} onCancel={handleCancelDeleteYoung} onConfirm={handleDeleteYoungSuccess} />
       {confirmModal && (
         <ConfirmationModal
           isOpen={true}
@@ -357,7 +349,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
           loadingText={confirmModal.loadingText}
           confirmMode={confirmModal.confirmColor || "blue"}
           onCancel={() => setConfirmModal(null)}
-          onConfirm={confirmModal.type ? onConfirmStatus : onConfirmDelete}>
+          onConfirm={confirmModal.type ? onConfirmStatus : () => {}}>
           {confirmModal.type === YOUNG_STATUS.WITHDRAWN && (
             <div className="mt-[24px]">
               <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
