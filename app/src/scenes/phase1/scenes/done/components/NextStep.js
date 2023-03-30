@@ -5,7 +5,10 @@ import plausibleEvent from "../../../../../services/plausible";
 export default function NextStep() {
   return (
     <div className="flex flex-col md:flex-row justify-between gap-4 items-center rounded-xl bg-gray-100 md:bg-white mx-4 mb-4 p-[1rem] md:p-[2rem] md:shadow-ninaBlock">
-      <p className="w-full md:w-2/3 text-left text-xl leading-7 font-bold">
+      <p className="md:hidden text-center text-xl leading-7 font-bold">
+        Et maintenant, votre parcours d’engagement se poursuit désormais avec la phase 2, la mission d’intérêt général
+      </p>
+      <p className="hidden md:block md:w-2/3 text-left text-xl leading-7 font-bold">
         Et maintenant, votre parcours d’engagement se poursuit désormais avec la phase 2, la mission d’intérêt général
       </p>
       <ButtonLinkPrimary
