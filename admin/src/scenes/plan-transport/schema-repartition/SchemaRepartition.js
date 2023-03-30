@@ -22,6 +22,7 @@ import * as FileSaver from "file-saver";
 import { useSelector } from "react-redux";
 import ButtonPrimary from "../../../components/ui/buttons/ButtonPrimary";
 import { getCohortByName } from "../../../services/cohort.service";
+import ReactTooltip from "react-tooltip";
 
 const ExcelFileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
 
@@ -502,9 +503,23 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
   return (
     <Box className={className}>
       <BoxHeader title="">
-        <ButtonPrimary onClick={onExportDetail} disabled={!isUserAuthorizedToExportData}>
-          Exporter
-        </ButtonPrimary>
+        <span data-tip data-tip-disable={false} data-for="export-data">
+          <ButtonPrimary onClick={onExportDetail} disabled={!isUserAuthorizedToExportData}>
+            Exporter
+          </ButtonPrimary>
+          <ReactTooltip
+            disable={isUserAuthorizedToExportData}
+            id="export-data"
+            type="light"
+            place="top"
+            effect="solid"
+            className="custom-tooltip-radius !opacity-100 !shadow-md"
+            tooltipRadius="6">
+            <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+              Précision de la ou des zones géographiques ou scolaires concernées par le séjour.
+            </p>
+          </ReactTooltip>
+        </span>
       </BoxHeader>
       <div className="">
         <table className="w-[100%]">

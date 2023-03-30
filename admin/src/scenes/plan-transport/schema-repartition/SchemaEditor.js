@@ -6,6 +6,7 @@ import GroupEditor from "./GroupEditor";
 import ButtonPrimary from "../../../components/ui/buttons/ButtonPrimary";
 import { getCohortByName } from "../../../services/cohort.service";
 import { ROLES } from "snu-lib";
+import ReactTooltip from "react-tooltip";
 
 export default function SchemaEditor({ className = "", onExportDetail, department, region, cohort: cohortName, groups, summary, onChange, user }) {
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -56,9 +57,23 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
   return (
     <Box className={className}>
       <BoxHeader title={"Gérer les volontaires de " + department}>
-        <ButtonPrimary onClick={onExportDetail} disabled={!isUserAuthorizedToExportData}>
-          Exporter
-        </ButtonPrimary>
+        <span data-tip data-tip-disable={false} data-for="export-data">
+          <ButtonPrimary onClick={onExportDetail} disabled={!isUserAuthorizedToExportData}>
+            Exporter
+          </ButtonPrimary>
+          <ReactTooltip
+            disable={isUserAuthorizedToExportData}
+            id="export-data"
+            type="light"
+            place="top"
+            effect="solid"
+            className="custom-tooltip-radius !opacity-100 !shadow-md"
+            tooltipRadius="6">
+            <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+              Précision de la ou des zones géographiques ou scolaires concernées par le séjour.
+            </p>
+          </ReactTooltip>
+        </span>
       </BoxHeader>
       <div className="flex mt-[48px]">
         <div className="flex-[1_1_50%] overflow-auto">
