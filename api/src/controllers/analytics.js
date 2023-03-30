@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const passport = require("passport");
 const fetch = require("node-fetch");
 const Joi = require("joi");
 const { capture } = require("../sentry");
@@ -39,7 +40,7 @@ function postParams(token) {
   };
 }
 
-// Compter les jeunes qui ont changé de statut dans une période 
+// Compter les jeunes qui ont changé de statut dans une période
 // Pour 1..n départements ou 1..n régions ou au global
 router.post("/young-status/count", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -47,9 +48,15 @@ router.post("/young-status/count", passport.authenticate(["referent"], { session
       region: Joi.array().items(Joi.string()),
       department: Joi.array().items(Joi.string()),
       status: Joi.string().valid("VALIDATED", "WAITING_VALIDATION", "WITHDRAWN").required(),
-      startDate: Joi.string().regex(/^\d{4}-\d{2}-\d{2}$/).required(),
-      endDate: Joi.string().regex(/^\d{4}-\d{2}-\d{2}$/).required(),
-    }).oxor('region', 'department').validate(req.body);
+      startDate: Joi.string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .required(),
+      endDate: Joi.string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .required(),
+    })
+      .oxor("region", "department")
+      .validate(req.body);
 
     if (error) {
       capture(error);
@@ -75,16 +82,22 @@ router.post("/young-status/count", passport.authenticate(["referent"], { session
   }
 });
 
-// Compter les jeunes qui ont changé de cohorte dans une période 
+// Compter les jeunes qui ont changé de cohorte dans une période
 // Pour 1..n départements ou 1..n régions ou au global
 router.post("/young-cohort/count", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       region: Joi.array().items(Joi.string()),
       department: Joi.array().items(Joi.string()),
-      startDate: Joi.string().regex(/^\d{4}-\d{2}-\d{2}$/).required(),
-      endDate: Joi.string().regex(/^\d{4}-\d{2}-\d{2}$/).required(),
-    }).oxor('region', 'department').validate(req.body);
+      startDate: Joi.string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .required(),
+      endDate: Joi.string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .required(),
+    })
+      .oxor("region", "department")
+      .validate(req.body);
 
     if (error) {
       capture(error);
