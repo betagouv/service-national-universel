@@ -375,19 +375,19 @@ export default function Settings() {
                       label="Référents régionaux"
                       disabled={isLoading}
                       readOnly={readOnly}
-                      value={data.repartitionSchemaCreationAvailability}
-                      onChange={() => setData({ ...data, repartitionSchemaCreationAvailability: !data.repartitionSchemaCreationAvailability })}
+                      value={data.repartitionSchemaCreateGroupAvailability}
+                      onChange={() => setData({ ...data, repartitionSchemaCreateGroupAvailability: !data.repartitionSchemaCreateGroupAvailability })}
                       range={{
-                        from: data?.uselessInformation?.repartitionSchemaCreationAvailabilityFrom || undefined,
-                        to: data?.uselessInformation?.repartitionSchemaCreationAvailabilityTo || undefined,
+                        from: data?.uselessInformation?.repartitionSchemaCreateGroupAvailabilityFrom || undefined,
+                        to: data?.uselessInformation?.repartitionSchemaCreateGroupAvailabilityTo || undefined,
                       }}
                       onChangeRange={(range) => {
                         setData({
                           ...data,
                           uselessInformation: {
                             ...data.uselessInformation,
-                            repartitionSchemaCreationAvailabilityFrom: range?.from,
-                            repartitionSchemaCreationAvailabilityTo: range?.to,
+                            repartitionSchemaCreateGroupAvailabilityFrom: range?.from,
+                            repartitionSchemaCreateGroupAvailabilityTo: range?.to,
                           },
                         });
                       }}

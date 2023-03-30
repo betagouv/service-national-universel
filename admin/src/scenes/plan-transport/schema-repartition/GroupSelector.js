@@ -1,17 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import People from "../../../assets/icons/People";
 import Plus from "../../../assets/icons/Plus";
 import { GroupSummary } from "../components/commons";
 import { useSelector } from "react-redux";
 import { ROLES } from "snu-lib";
-import { isSchemaModificationAuthorized } from "../../../utils/temporary-functions";
+import { getCohortByName } from "../../../services/cohort.service";
 
-export default function GroupSelector({ title, groups, youngsCount, intradepartmental, className = "", onSelect, cohort, department, region, selectedGroup }) {
+export default function GroupSelector({ title, groups, youngsCount, intradepartmental, className = "", onSelect, cohort: cohortName, department, region, selectedGroup }) {
   const { user } = useSelector((state) => state.Auth);
+  const [isUserAuthorizedToCreateGroup, setIsUserAuthorizedToCreateGroup] = useState(false);
+
+  const checkIfUserIsAuthorizedToCreateGroup = async () => {
+    const cohort = await getCohortByName(cohortName);
+    if ([ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
+      setIsUserAuthorizedToCreateGroup(false);
+      return;
+    }
+    if ((!cohort || !cohort.repartitionSchemaCreateGroupAvailability) && user.role === ROLES.REFERENT_REGION) {
+      setIsUserAuthorizedToCreateGroup(false);
+      return;
+    }
+    setIsUserAuthorizedToCreateGroup(true);
+  };
+
+  useEffect(() => {
+    checkIfUserIsAuthorizedToCreateGroup();
+  }, []);
 
   function createGroup() {
     onSelect({
-      cohort,
+      cohort: cohortName,
       intradepartmental: intradepartmental ? "true" : "false",
       fromDepartment: department,
       fromRegion: region,
@@ -47,7 +65,7 @@ export default function GroupSelector({ title, groups, youngsCount, intradepartm
         {groups.map((group) => (
           <GroupBox key={group._id} group={group} onSelect={onSelectGroup} selected={selectedGroup && selectedGroup._id === group._id} />
         ))}
-        {![ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role) && isSchemaModificationAuthorized(user, cohort) && (
+        {isUserAuthorizedToCreateGroup && (
           <div className="p-[8px]">
             <div className="border-[1px] border-dashed border-[#D1D5DB] rounded-[8px] flex flex-column items-center justify-center py-[45px]">
               <div

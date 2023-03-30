@@ -226,7 +226,7 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       youngCheckinForRegionReferent: Joi.boolean().required(),
       youngCheckinForDepartmentReferent: Joi.boolean().required(),
       busListAvailability: Joi.boolean().required(),
-      repartitionSchemaCreationAvailability: Joi.boolean().required(),
+      repartitionSchemaCreateGroupAvailability: Joi.boolean().required(),
       repartitionSchemaDownloadAvailability: Joi.boolean().required(),
       uselessInformation: Joi.object().allow(null),
     }).validate(req.body, { stripUnknown: true });
@@ -234,20 +234,6 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       capture(bodyError);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
-
-    console.log(
-      "CREATION",
-      body.repartitionSchemaCreationAvailability,
-      body.uselessInformation.repartitionSchemaCreationAvailabilityFrom,
-      body.uselessInformation.repartitionSchemaCreationAvailabilityTo,
-    );
-
-    console.log(
-      "DOWNLOAD",
-      body.repartitionSchemaDownloadAvailability,
-      body.uselessInformation.repartitionSchemaDownloadAvailabilityFrom,
-      body.uselessInformation.repartitionSchemaDownloadAvailabilityTo,
-    );
 
     if (!isSuperAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
@@ -280,7 +266,7 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       youngCheckinForRegionReferent: body.youngCheckinForRegionReferent,
       youngCheckinForDepartmentReferent: body.youngCheckinForDepartmentReferent,
       busListAvailability: body.busListAvailability,
-      repartitionSchemaCreationAvailability: body.repartitionSchemaCreationAvailability,
+      repartitionSchemaCreateGroupAvailability: body.repartitionSchemaCreateGroupAvailability,
       repartitionSchemaDownloadAvailability: body.repartitionSchemaDownloadAvailability,
       uselessInformation: body.uselessInformation,
     });
