@@ -127,7 +127,6 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       formSubjectStep2: req.body.subjectStep2,
       files: req.body.files,
     };
-    console.log("3", obj);
     const { error, value } = Joi.object({
       subject: Joi.string().required(),
       message: Joi.string().required(),
