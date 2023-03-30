@@ -22,9 +22,12 @@ export default function StepProfil() {
   const history = useHistory();
 
   const validate = () => {
+    data.email = data.email.trim();
+    data.emailConfirm = data.emailConfirm.trim();
+
     let errors = {};
     //Email
-    if (data?.email && !validator.isEmail(data.email.trim())) {
+    if (data?.email && !validator.isEmail(data.email)) {
       errors.email = "L'e-mail renseigné est invalide";
     }
     //Email confirm
@@ -47,9 +50,6 @@ export default function StepProfil() {
   }, [data.email, data.emailConfirm, data.password, data.confirmPassword, data.acceptCGU, data.rulesYoung]);
 
   const onSubmit = async () => {
-    // data.email = data.email?.trim();
-    // data.emailConfirm = data.emailConfirm?.trim();
-
     let errors = {};
     for (const key of keyList) {
       if (data[key] === undefined || data[key] === "") {
@@ -68,7 +68,6 @@ export default function StepProfil() {
     }
     setError(errors);
     if (!Object.keys(errors).length) {
-      data.email = data.email.trim();
       setData({ ...data, step: PREINSCRIPTION_STEPS.CONFIRM });
       plausibleEvent("Phase0/CTA preinscription - infos persos");
       history.push("/preinscription/confirm");

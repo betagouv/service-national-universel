@@ -34,14 +34,15 @@ export default function StepRepresentants() {
   const parent2Keys = ["parent2Status", "parent2FirstName", "parent2LastName"];
   const [loading, setLoading] = React.useState(false);
   const [errors, setErrors] = React.useState({});
-  const [isParent2Visible, setIsParent2Visible] = React.useState(!young?.parent2Email && !young?.parent2Phone);
+  const [isParent2Visible, setIsParent2Visible] = React.useState(young?.parent2Email || young?.parent2Phone);
   const dispatch = useDispatch();
   const { step } = useParams();
 
   const corrections = young.status === YOUNG_STATUS.WAITING_CORRECTION ? getCorrectionByStep(young, step) : [];
-  if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) return history.push("/");
+  if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) history.push("/");
 
   const [data, setData] = React.useState({
+    parent1Status: young.parent1Status || "",
     parent1FirstName: young.parent1FirstName || "",
     parent1LastName: young.parent1LastName || "",
     parent1Email: young.parent1Email || "",
