@@ -30,19 +30,19 @@ export default function StepProfil() {
     lastName: young.lastName,
   });
 
+  const trimmedEmail = data?.email.trim();
+  const trimmedEmailConfirm = data?.emailConfirm.trim();
+
   const keyList = ["firstName", "lastName", "email", "emailConfirm"];
 
   const validate = () => {
-    data.email = data.email.trim();
-    data.emailConfirm = data.emailConfirm.trim();
-
     let errors = {};
     //Email
-    if (data?.email && !validator.isEmail(data.email)) {
+    if (trimmedEmail && !validator.isEmail(trimmedEmail)) {
       errors.email = "L'e-mail renseigné est invalide";
     }
     //Email confirm
-    if (data?.email && data?.emailConfirm && data.email !== data.emailConfirm) {
+    if (trimmedEmail && trimmedEmailConfirm && trimmedEmail !== trimmedEmailConfirm) {
       errors.emailConfirm = "Les emails ne correspondent pas";
     }
     return errors;
@@ -63,10 +63,10 @@ export default function StepProfil() {
 
     setError(errors);
     if (!Object.keys(errors).length) {
-      data.email = data.email.trim();
+      const formattedData = { ...data, email: trimmedEmail };
       setLoading(true);
       try {
-        const { ok, code, data: responseData } = await API.put(`/young/inscription2023/profil`, data);
+        const { ok, code, data: responseData } = await API.put(`/young/inscription2023/profil`, formattedData);
         if (!ok) {
           setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
           setLoading(false);

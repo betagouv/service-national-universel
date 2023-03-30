@@ -169,8 +169,6 @@ export default function Consentement({ step, parentId }) {
   async function onSubmit() {
     setSaving(true);
     setErrors({});
-
-    data.email = data.email.trim();
     const errors = validateData();
     if (errors) {
       setErrors(errors);
@@ -272,7 +270,7 @@ export default function Consentement({ step, parentId }) {
     let body = {
       [`parent${parentId}FirstName`]: data.firstName.trim(),
       [`parent${parentId}LastName`]: data.lastName.trim(),
-      [`parent${parentId}Email`]: validator.normalizeEmail(data.email),
+      [`parent${parentId}Email`]: validator.normalizeEmail(data.email.trim()),
       [`parent${parentId}Phone`]: data.phone.trim(),
       ...address,
     };
