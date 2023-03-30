@@ -1,32 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import People from "../../../assets/icons/People";
 import Plus from "../../../assets/icons/Plus";
 import { GroupSummary } from "../components/commons";
-import { useSelector } from "react-redux";
-import { ROLES } from "snu-lib";
-import { getCohortByName } from "../../../services/cohort.service";
 
-export default function GroupSelector({ title, groups, youngsCount, intradepartmental, className = "", onSelect, cohort: cohortName, department, region, selectedGroup }) {
-  const { user } = useSelector((state) => state.Auth);
-  const [isUserAuthorizedToCreateGroup, setIsUserAuthorizedToCreateGroup] = useState(false);
-
-  const checkIfUserIsAuthorizedToCreateGroup = async () => {
-    const cohort = await getCohortByName(cohortName);
-    if ([ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
-      setIsUserAuthorizedToCreateGroup(false);
-      return;
-    }
-    if ((!cohort || !cohort.repartitionSchemaCreateGroupAvailability) && user.role === ROLES.REFERENT_REGION) {
-      setIsUserAuthorizedToCreateGroup(false);
-      return;
-    }
-    setIsUserAuthorizedToCreateGroup(true);
-  };
-
-  useEffect(() => {
-    checkIfUserIsAuthorizedToCreateGroup();
-  }, []);
-
+export default function GroupSelector({
+  title,
+  groups,
+  youngsCount,
+  intradepartmental,
+  className = "",
+  onSelect,
+  cohort: cohortName,
+  department,
+  region,
+  selectedGroup,
+  isUserAuthorizedToCreateGroup,
+}) {
   function createGroup() {
     onSelect({
       cohort: cohortName,

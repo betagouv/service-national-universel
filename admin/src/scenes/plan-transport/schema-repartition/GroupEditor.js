@@ -13,17 +13,10 @@ import GroupAffectationSummary from "./group/GroupAffectationSummary";
 import { useSelector } from "react-redux";
 import { ROLES } from "snu-lib";
 import GroupModificationEnhanced from "./group/GroupModificationEnhanced";
-import { isSchemaModificationAuthorized } from "../../../utils/temporary-functions";
 
-export default function GroupEditor({ group, className = "", onChange }) {
+export default function GroupEditor({ group, className = "", onChange, isUserAuthorizedToCreateGroup }) {
   const { user } = useSelector((state) => state.Auth);
-  const [step, setStep] = useState(
-    group._id
-      ? [ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role) || !isSchemaModificationAuthorized(user, group.cohort)
-        ? GROUPSTEPS.AFFECTATION_SUMMARY
-        : GROUPSTEPS.MODIFICATION
-      : GROUPSTEPS.CREATION,
-  );
+  const [step, setStep] = useState(group._id ? (!isUserAuthorizedToCreateGroup ? GROUPSTEPS.AFFECTATION_SUMMARY : GROUPSTEPS.MODIFICATION) : GROUPSTEPS.CREATION);
   const [previousStep, setPreviousStep] = useState(null);
   const [reloadNextStep, setReloadNextStep] = useState(null);
   const [tempGroup, setTempGroup] = useState(group);
@@ -36,7 +29,7 @@ export default function GroupEditor({ group, className = "", onChange }) {
         if (reloadNextStep === GROUPSTEPS.CANCEL) {
           onChange(null);
         } else {
-          if (![ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role) && isSchemaModificationAuthorized(user, group.cohort)) {
+          if (isUserAuthorizedToCreateGroup) {
             setPreviousStep(step);
             setStep(reloadNextStep);
           }
@@ -44,20 +37,14 @@ export default function GroupEditor({ group, className = "", onChange }) {
         }
       } else {
         setPreviousStep(null);
-        setStep(
-          group && group._id
-            ? [ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role) || !isSchemaModificationAuthorized(user, group.cohort)
-              ? GROUPSTEPS.AFFECTATION_SUMMARY
-              : GROUPSTEPS.MODIFICATION
-            : GROUPSTEPS.CREATION,
-        );
+        setStep(group && group._id ? (!isUserAuthorizedToCreateGroup ? GROUPSTEPS.AFFECTATION_SUMMARY : GROUPSTEPS.MODIFICATION) : GROUPSTEPS.CREATION);
       }
     }
     setTempGroup(group);
   }, [group]);
 
   function onChangeStep(newStep) {
-    if (![ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role) && isSchemaModificationAuthorized(user, group.cohort)) {
+    if (isUserAuthorizedToCreateGroup) {
       setPreviousStep(step);
       setStep(newStep);
     }
@@ -153,7 +140,15 @@ export default function GroupEditor({ group, className = "", onChange }) {
     case GROUPSTEPS.GATHERING_PLACES:
       return <GroupGatheringPlaces className={className} group={tempGroup} onChangeStep={onChangeStep} onChange={onUpdateTemp} previousStep={previousStep} />;
     case GROUPSTEPS.AFFECTATION_SUMMARY:
-      return <GroupAffectationSummary className={className} group={tempGroup} onChangeStep={onChangeStep} onChange={onUpdate} />;
+      return (
+        <GroupAffectationSummary
+          className={className}
+          group={tempGroup}
+          onChangeStep={onChangeStep}
+          onChange={onUpdate}
+          isUserAuthorizedToCreateGroup={isUserAuthorizedToCreateGroup}
+        />
+      );
     case GROUPSTEPS.CONFIRM_DELETE_CENTER:
       return <GroupConfirmDeleteCenter className={className} group={group} onChangeStep={onChangeStep} onChange={onUpdate} />;
     default:

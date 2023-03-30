@@ -10,6 +10,7 @@ import { ROLES } from "snu-lib";
 export default function SchemaEditor({ className = "", onExportDetail, department, region, cohort: cohortName, groups, summary, onChange, user }) {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [isUserAuthorizedToExportData, setIsUserAuthorizedToExportData] = useState(false);
+  const [isUserAuthorizedToCreateGroup, setIsUserAuthorizedToCreateGroup] = useState(false);
 
   function groupSelected(group) {
     setSelectedGroup(group);
@@ -22,8 +23,7 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
     }
   }
 
-  const checkIfUserIsAuthorizedToExportData = async () => {
-    const cohort = await getCohortByName(cohortName);
+  const checkIfUserIsAuthorizedToExportData = async (cohort) => {
     if ((!cohort || !cohort.repartitionSchemaDownloadAvailability) && user.role === ROLES.TRANSPORTER) {
       setIsUserAuthorizedToExportData(false);
       return;
@@ -31,8 +31,26 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
     setIsUserAuthorizedToExportData(true);
   };
 
+  const checkIfUserIsAuthorizedToCreateGroup = async (cohort) => {
+    if ([ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
+      setIsUserAuthorizedToCreateGroup(false);
+      return;
+    }
+    if ((!cohort || !cohort.repartitionSchemaCreateGroupAvailability) && user.role === ROLES.REFERENT_REGION) {
+      setIsUserAuthorizedToCreateGroup(false);
+      return;
+    }
+    setIsUserAuthorizedToCreateGroup(true);
+  };
+
+  const checkUserAuthorizations = async () => {
+    const cohort = await getCohortByName(cohortName);
+    checkIfUserIsAuthorizedToExportData(cohort);
+    checkIfUserIsAuthorizedToCreateGroup(cohort);
+  };
+
   useEffect(() => {
-    checkIfUserIsAuthorizedToExportData();
+    checkUserAuthorizations();
   }, []);
 
   return (
@@ -53,6 +71,7 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
             cohort={cohortName}
             onSelect={groupSelected}
             selectedGroup={selectedGroup}
+            isUserAuthorizedToCreateGroup={isUserAuthorizedToCreateGroup}
           />
           <GroupSelector
             className="mt-[32px]"
@@ -65,12 +84,13 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
             cohort={cohortName}
             onSelect={groupSelected}
             selectedGroup={selectedGroup}
+            isUserAuthorizedToCreateGroup={isUserAuthorizedToCreateGroup}
           />
         </div>
         <div className="flex-[0_0_1px] bg-[#E5E7EB] w-[1px] mx-[40px]" />
         <div className="flex-[1_1_50%]">
           {selectedGroup ? (
-            <GroupEditor group={selectedGroup} onChange={onChangeGroup} />
+            <GroupEditor group={selectedGroup} onChange={onChangeGroup} isUserAuthorizedToCreateGroup={isUserAuthorizedToCreateGroup} />
           ) : (
             <div className="flex items-center justify-center min-h-[412px]">
               <Iceberg />
