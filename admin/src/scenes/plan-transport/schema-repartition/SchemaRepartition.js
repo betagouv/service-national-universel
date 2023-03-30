@@ -4,7 +4,6 @@ import PlanTransportBreadcrumb from "../components/PlanTransportBreadcrumb";
 import { Box, BoxHeader, MiniTitle, Badge, AlertPoint, BigDigits, Loading, regionList } from "../components/commons";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import ChevronRight from "../../../assets/icons/ChevronRight";
-import { PlainButton } from "../components/Buttons";
 import { cohortList, formatRate, parseQuery } from "../util";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import People from "../../../assets/icons/People";
@@ -21,6 +20,8 @@ import SchemaDepartmentDetail from "./SchemaDepartmentDetail";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { useSelector } from "react-redux";
+import ButtonPrimary from "../../../components/ui/buttons/ButtonPrimary";
+import { getCohortByName } from "../../../services/cohort.service";
 
 const ExcelFileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
 
@@ -345,6 +346,7 @@ export default function SchemaRepartition({ region, department }) {
               groups={data && data.groups ? data.groups : { intra: [], extra: [] }}
               summary={summary}
               onChange={loadData}
+              user={user}
             />
             <SchemaDepartmentDetail department={department} cohort={cohort} departmentData={data} />
           </>
@@ -477,15 +479,32 @@ function BoxCentres({ summary, className = "", loading, isNational, isDepartment
   );
 }
 
-function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onExportDetail, cohort, user }) {
+function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onExportDetail, cohort: cohortName, user }) {
+  const [isUserAuthorizedToExportData, setIsUserAuthorizedToExportData] = useState(false);
+
   function goToRow(row) {
     onGoToRow && onGoToRow(row);
   }
 
+  const checkIfUserIsAuthorizedToExportData = async () => {
+    const cohort = await getCohortByName(cohortName);
+    if ((!cohort || !cohort.repartitionSchemaDownloadAvailability) && user.role === ROLES.TRANSPORTER) {
+      setIsUserAuthorizedToExportData(false);
+      return;
+    }
+    setIsUserAuthorizedToExportData(true);
+  };
+
+  useEffect(() => {
+    checkIfUserIsAuthorizedToExportData();
+  }, []);
+
   return (
     <Box className={className}>
       <BoxHeader title="">
-        <PlainButton onClick={onExportDetail}>Exporter</PlainButton>
+        <ButtonPrimary onClick={onExportDetail} disabled={!isUserAuthorizedToExportData}>
+          Exporter
+        </ButtonPrimary>
       </BoxHeader>
       <div className="">
         <table className="w-[100%]">
@@ -538,7 +557,7 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
                       )}
                       {user.role !== ROLES.TRANSPORTER && (
                         <Link
-                          to={getIntradepartmentalYoungsLink(isNational ? row.name : null, isNational ? null : row.name, cohort)}
+                          to={getIntradepartmentalYoungsLink(isNational ? row.name : null, isNational ? null : row.name, cohortName)}
                           className="ml-2"
                           onClick={(e) => {
                             e.stopPropagation();

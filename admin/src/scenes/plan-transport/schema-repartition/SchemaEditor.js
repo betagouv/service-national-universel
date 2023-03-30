@@ -1,12 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, BoxHeader } from "../components/commons";
-import { PlainButton } from "../components/Buttons";
 import Iceberg from "../../../assets/icons/Iceberg";
 import GroupSelector from "./GroupSelector";
 import GroupEditor from "./GroupEditor";
+import ButtonPrimary from "../../../components/ui/buttons/ButtonPrimary";
+import { getCohortByName } from "../../../services/cohort.service";
+import { ROLES } from "snu-lib";
 
-export default function SchemaEditor({ className = "", onExportDetail, department, region, cohort, groups, summary, onChange }) {
+export default function SchemaEditor({ className = "", onExportDetail, department, region, cohort: cohortName, groups, summary, onChange, user }) {
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [isUserAuthorizedToExportData, setIsUserAuthorizedToExportData] = useState(false);
 
   function groupSelected(group) {
     setSelectedGroup(group);
@@ -19,10 +22,25 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
     }
   }
 
+  const checkIfUserIsAuthorizedToExportData = async () => {
+    const cohort = await getCohortByName(cohortName);
+    if ((!cohort || !cohort.repartitionSchemaDownloadAvailability) && user.role === ROLES.TRANSPORTER) {
+      setIsUserAuthorizedToExportData(false);
+      return;
+    }
+    setIsUserAuthorizedToExportData(true);
+  };
+
+  useEffect(() => {
+    checkIfUserIsAuthorizedToExportData();
+  }, []);
+
   return (
     <Box className={className}>
       <BoxHeader title={"Gérer les volontaires de " + department}>
-        <PlainButton onClick={onExportDetail}>Exporter</PlainButton>
+        <ButtonPrimary onClick={onExportDetail} disabled={!isUserAuthorizedToExportData}>
+          Exporter
+        </ButtonPrimary>
       </BoxHeader>
       <div className="flex mt-[48px]">
         <div className="flex-[1_1_50%] overflow-auto">
@@ -32,7 +50,7 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
             groups={groups.extra}
             department={department}
             region={region}
-            cohort={cohort}
+            cohort={cohortName}
             onSelect={groupSelected}
             selectedGroup={selectedGroup}
           />
@@ -44,7 +62,7 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
             groups={groups.intra}
             department={department}
             region={region}
-            cohort={cohort}
+            cohort={cohortName}
             onSelect={groupSelected}
             selectedGroup={selectedGroup}
           />
