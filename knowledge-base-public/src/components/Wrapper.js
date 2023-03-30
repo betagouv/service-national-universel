@@ -40,7 +40,7 @@ const Wrapper = ({ children }) => {
         <div className="mr-auto ml-auto flex max-w-screen-95 flex-wrap items-center gap-4 py-4 px-8 lg:gap-8">
           <div className="w-auto flex-none lg:w-1/6">
             <Link href="/">
-              <img className="h-10 w-10 cursor-pointer" src="/assets/logo-snu.svg" alt="" />
+              <img className="h-9 w-9 cursor-pointer" src="/assets/logo-snu.png" alt="" />
             </Link>
           </div>
           <div className="order-3 w-full md:order-2 md:w-1/2 md:flex-1">
