@@ -179,7 +179,7 @@ export default function Settings() {
                 <div className="flex flex-col w-[45%] gap-4">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Toolkit d’aide</p>
+                      <p className="text-gray-900  text-xs font-medium">Toolkit d&apos;aide</p>
                       <MdInfoOutline data-tip data-for="toolkit" className="text-gray-400 h-5 w-5 cursor-pointer" />
                       <ReactTooltip id="toolkit" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
                         <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">Liens vers un articles d&apos;aide pour suivre la cohorte.</p>
@@ -217,7 +217,7 @@ export default function Settings() {
                       <MdInfoOutline data-tip data-for="eligibilité" className="text-gray-400 h-5 w-5 cursor-pointer" />
                       <ReactTooltip id="eligibilité" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
                         <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
-                          Précision des critères d’éligibilité des volontaires pour le séjour (niveau scolaire).
+                          Précision des critères d&apos;éligibilité des volontaires pour le séjour (niveau scolaire).
                         </p>
                       </ReactTooltip>
                     </div>
