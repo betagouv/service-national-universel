@@ -3,7 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const MODELNAME = "missionequivalence";
-const { UNSS_TYPE } = require("snu-lib");
+const { UNSS_TYPE, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
 
 const Schema = new mongoose.Schema({
   youngId: {
@@ -21,16 +21,16 @@ const Schema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["Service Civique", "BAFA", "Jeune Sapeur Pompier", "Certification Union Nationale du Sport scolaire (UNSS)"],
+    enum: [...ENGAGEMENT_TYPES],
     documentation: {
       description: "Type de mission",
     },
   },
   sousType: {
     type: String,
-    enum: [...UNSS_TYPE],
+    enum: [...UNSS_TYPE, ...ENGAGEMENT_LYCEEN_TYPES],
     documentation: {
-      description: "Sous-type de mission UNSS",
+      description: "Sous-type de mission",
     },
   },
   structureName: {
