@@ -8,7 +8,6 @@ const getCustomerIdByEmail = async (email) => {
 };
 
 const api = async (path, options = {}) => {
-  console.log("ZAMOOD API", options);
   if (!SUPPORT_URL) return { ok: true, code: "ignore zammood, no support url" };
   const res = await fetch(`${SUPPORT_URL}${path}`, {
     ...options,
