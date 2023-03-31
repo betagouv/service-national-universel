@@ -117,6 +117,7 @@ router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session
 
 // Create a new ticket while authenticated
 router.post("/ticket", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  console.log("REQBODY", req.body);
   try {
     const obj = {
       subject: req.body.subject,
@@ -127,6 +128,8 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       formSubjectStep2: req.body.subjectStep2,
       files: req.body.files,
     };
+    console.log("OBJ", obj);
+
     const { error, value } = Joi.object({
       subject: Joi.string().required(),
       message: Joi.string().required(),
@@ -168,6 +171,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
         files,
       }),
     });
+    console.log("RESPONSE", response);
     if (!response.ok) slack.error({ title: "Create ticket via message Zammod", text: JSON.stringify(response.code) });
     else if (isYoung(req.user && subject.includes("J'ai une question"))) {
       const isNotified = await notifyReferent(response.data, req.body.message);
