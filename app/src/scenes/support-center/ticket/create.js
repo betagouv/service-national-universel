@@ -90,7 +90,6 @@ export default function TicketCreate(props) {
                 subjectStep2: step2?.id,
                 files: uploadedFiles,
               });
-              console.log("RESPONSE CREATE", response);
               if (!response.ok) {
                 setLoading(false);
                 return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
