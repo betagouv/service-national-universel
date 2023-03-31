@@ -516,7 +516,7 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
             className="custom-tooltip-radius !opacity-100 !shadow-md"
             tooltipRadius="6">
             <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
-              Précision de la ou des zones géographiques ou scolaires concernées par le séjour.
+              L'export n'est pas disponible au téléchargement. Contactez-nous pour plus d'information
             </p>
           </ReactTooltip>
         </span>
