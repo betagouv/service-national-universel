@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, BoxHeader } from "../components/commons";
-import { PlainButton } from "../components/Buttons";
 import Iceberg from "../../../assets/icons/Iceberg";
 import GroupSelector from "./GroupSelector";
 import GroupEditor from "./GroupEditor";
+import ButtonPrimary from "../../../components/ui/buttons/ButtonPrimary";
+import { getCohortByName } from "../../../services/cohort.service";
+import { ROLES } from "snu-lib";
+import ReactTooltip from "react-tooltip";
 
-export default function SchemaEditor({ className = "", onExportDetail, department, region, cohort, groups, summary, onChange }) {
+export default function SchemaEditor({ className = "", onExportDetail, department, region, cohort: cohortName, groups, summary, onChange, user }) {
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [isUserAuthorizedToExportData, setIsUserAuthorizedToExportData] = useState(false);
+  const [isUserAuthorizedToCreateGroup, setIsUserAuthorizedToCreateGroup] = useState(false);
 
   function groupSelected(group) {
     setSelectedGroup(group);
@@ -19,10 +24,56 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
     }
   }
 
+  const checkIfUserIsAuthorizedToExportData = async (cohort) => {
+    if ((!cohort || !cohort.repartitionSchemaDownloadAvailability) && user.role === ROLES.TRANSPORTER) {
+      setIsUserAuthorizedToExportData(false);
+      return;
+    }
+    setIsUserAuthorizedToExportData(true);
+  };
+
+  const checkIfUserIsAuthorizedToCreateGroup = async (cohort) => {
+    if ([ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
+      setIsUserAuthorizedToCreateGroup(false);
+      return;
+    }
+    if ((!cohort || !cohort.repartitionSchemaCreateAndEditGroupAvailability) && user.role === ROLES.REFERENT_REGION) {
+      setIsUserAuthorizedToCreateGroup(false);
+      return;
+    }
+    setIsUserAuthorizedToCreateGroup(true);
+  };
+
+  const checkUserAuthorizations = async () => {
+    const cohort = await getCohortByName(cohortName);
+    checkIfUserIsAuthorizedToExportData(cohort);
+    checkIfUserIsAuthorizedToCreateGroup(cohort);
+  };
+
+  useEffect(() => {
+    checkUserAuthorizations();
+  }, []);
+
   return (
     <Box className={className}>
       <BoxHeader title={"Gérer les volontaires de " + department}>
-        <PlainButton onClick={onExportDetail}>Exporter</PlainButton>
+        <span data-tip data-tip-disable={false} data-for="export-data">
+          <ButtonPrimary onClick={onExportDetail} disabled={!isUserAuthorizedToExportData}>
+            Exporter
+          </ButtonPrimary>
+          <ReactTooltip
+            disable={isUserAuthorizedToExportData}
+            id="export-data"
+            type="light"
+            place="top"
+            effect="solid"
+            className="custom-tooltip-radius !opacity-100 !shadow-md"
+            tooltipRadius="6">
+            <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+              Précision de la ou des zones géographiques ou scolaires concernées par le séjour.
+            </p>
+          </ReactTooltip>
+        </span>
       </BoxHeader>
       <div className="flex mt-[48px]">
         <div className="flex-[1_1_50%] overflow-auto">
@@ -32,9 +83,10 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
             groups={groups.extra}
             department={department}
             region={region}
-            cohort={cohort}
+            cohort={cohortName}
             onSelect={groupSelected}
             selectedGroup={selectedGroup}
+            isUserAuthorizedToCreateGroup={isUserAuthorizedToCreateGroup}
           />
           <GroupSelector
             className="mt-[32px]"
@@ -44,15 +96,16 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
             groups={groups.intra}
             department={department}
             region={region}
-            cohort={cohort}
+            cohort={cohortName}
             onSelect={groupSelected}
             selectedGroup={selectedGroup}
+            isUserAuthorizedToCreateGroup={isUserAuthorizedToCreateGroup}
           />
         </div>
         <div className="flex-[0_0_1px] bg-[#E5E7EB] w-[1px] mx-[40px]" />
         <div className="flex-[1_1_50%]">
           {selectedGroup ? (
-            <GroupEditor group={selectedGroup} onChange={onChangeGroup} />
+            <GroupEditor group={selectedGroup} onChange={onChangeGroup} isUserAuthorizedToCreateGroup={isUserAuthorizedToCreateGroup} />
           ) : (
             <div className="flex items-center justify-center min-h-[412px]">
               <Iceberg />

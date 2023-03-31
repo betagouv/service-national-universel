@@ -1,3 +1,27 @@
+# [1.244.0](https://github.com/betagouv/service-national-universel/compare/v1.243.0...v1.244.0) (2023-03-30)
+
+
+### Bug Fixes
+
+* **admin/api:** ajout du nouveau logo SNU ([#2450](https://github.com/betagouv/service-national-universel/issues/2450)) ([582fd1e](https://github.com/betagouv/service-national-universel/commit/582fd1eafa0fdc17ebf8265ed3e3994ec398ab3e))
+* **analytics:** remove object sync ([#2432](https://github.com/betagouv/service-national-universel/issues/2432)) ([9b568ac](https://github.com/betagouv/service-national-universel/commit/9b568ac92db6f08619eb7d700d4b472b3a0500aa))
+* **api:** add access young with cohort in region/department ([#2445](https://github.com/betagouv/service-national-universel/issues/2445)) ([dec1886](https://github.com/betagouv/service-national-universel/commit/dec18868641b6c031ad086bf599270e7017f89ef))
+* **api:** convocation corse ([b6da252](https://github.com/betagouv/service-national-universel/commit/b6da252d3cd2901c57ceef988f8277181ecc1176))
+* **api:** correction de la suppression inattendue des numéros de téléphone à la validation d'un jeune inscrit ([#2451](https://github.com/betagouv/service-national-universel/issues/2451)) ([a0f20c9](https://github.com/betagouv/service-national-universel/commit/a0f20c95bceaee5037882c09a14aa274c0494786))
+* **app:** visualisation convocation en corse ([a5b2c9a](https://github.com/betagouv/service-national-universel/commit/a5b2c9a612cebc89c11ad23141c048b7716665c8))
+* **app/admin:** changement du nom de la zone téléphonique "France" à "France métropolitaine" ([#2447](https://github.com/betagouv/service-national-universel/issues/2447)) ([1b39fc6](https://github.com/betagouv/service-national-universel/commit/1b39fc629b1b1ff9968fd6856609fdd9c9dec95d))
+* **app/admin:** Nouvelle favicon du SNU ([#2452](https://github.com/betagouv/service-national-universel/issues/2452)) ([13e4f4b](https://github.com/betagouv/service-national-universel/commit/13e4f4b37a4bf4982733242980a62f6aa63d2d7b))
+* **knowledge:** changement logo snu ([#2411](https://github.com/betagouv/service-national-universel/issues/2411)) ([bb66f7c](https://github.com/betagouv/service-national-universel/commit/bb66f7c35b1e43ee24f84eb84979106424cfab83))
+* clean code mort zammad ([#2444](https://github.com/betagouv/service-national-universel/issues/2444)) ([eca8ba3](https://github.com/betagouv/service-national-universel/commit/eca8ba340ede67c661486a7f4a41acc39078f445))
+
+
+### Features
+
+* **admin:** ajout d'un champ de confirmation sur la modale de suppression des volontaires et inscrits ([#2441](https://github.com/betagouv/service-national-universel/issues/2441)) ([7a20ee3](https://github.com/betagouv/service-national-universel/commit/7a20ee3a6e84f577282479f00193d4cf1afbfb12))
+* **admin/api:** Ajout des paramètres dynamiques " Création de groupe" et "Téléchargement" sur le schéma de répartition ([#2448](https://github.com/betagouv/service-national-universel/issues/2448)) ([905ea27](https://github.com/betagouv/service-national-universel/commit/905ea279d169ca53b4bde705971f53413103d641))
+* **analytics:** proof of concept for stats ([#2408](https://github.com/betagouv/service-national-universel/issues/2408)) ([b5a24c6](https://github.com/betagouv/service-national-universel/commit/b5a24c6bea8831f166f66ac76f50315bf4a4e09a))
+* **app/api:** add new ticket field ([#2431](https://github.com/betagouv/service-national-universel/issues/2431)) ([d112d9a](https://github.com/betagouv/service-national-universel/commit/d112d9a2ff8fa1b1b0e096cb313879210d2be374))
+
 # [1.243.0](https://github.com/betagouv/service-national-universel/compare/v1.242.0...v1.243.0) (2023-03-29)
 
 

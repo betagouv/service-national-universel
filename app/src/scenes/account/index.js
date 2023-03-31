@@ -33,11 +33,12 @@ export default function Account() {
   const [isWithdrawalModalOpen, setWithdrawalModalOpen] = useState(isWithdrawalModalOpenDefault);
 
   const updateYoung = async (values) => {
+    values.email = values.email?.trim();
     try {
       if (!values.location || !values.location.lat || !values.location.lon) {
         values.location = await putLocation(values.city, values.zip);
       }
-      if (!values.location) return toastr.error("Il y a un soucis avec le nom de la ville ou/et le zip code");
+      if (!values.location) return toastr.error("Il y a un problème avec le nom de la ville et/ou le code postal.");
       const { ok, code, data: young } = await api.put("/young", values);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setYoung(young));
@@ -83,7 +84,7 @@ export default function Account() {
                 values={values}
                 handleChange={handleChange}
                 title="E-mail"
-                validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champ est au mauvais format")}
+                validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v.trim()) && "Ce champ est au mauvais format")}
                 errors={errors}
                 touched={touched}
               />

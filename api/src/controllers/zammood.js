@@ -122,6 +122,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       subject: req.body.subject,
       message: req.body.message,
       fromPage: req.body.fromPage,
+      author: req.body.subjectStep0,
       formSubjectStep1: req.body.subjectStep1,
       formSubjectStep2: req.body.subjectStep2,
       files: req.body.files,
@@ -130,6 +131,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       subject: Joi.string().required(),
       message: Joi.string().required(),
       fromPage: Joi.string().allow(null),
+      author: Joi.string(),
       formSubjectStep1: Joi.string(),
       formSubjectStep2: Joi.string(),
       files: Joi.array().items(
@@ -147,7 +149,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const { subject, message, formSubjectStep1, formSubjectStep2, files } = value;
+    const { subject, message, author, formSubjectStep1, formSubjectStep2, files } = value;
     const userAttributes = await getUserAttributes(req.user);
     const response = await zammood.api("/v0/message", {
       method: "POST",
@@ -159,6 +161,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
         firstName: req.user.firstName,
         lastName: req.user.lastName,
         source: "PLATFORM",
+        author,
         formSubjectStep1,
         formSubjectStep2,
         attributes: [...userAttributes, { name: "page précédente", value: value.fromPage }],

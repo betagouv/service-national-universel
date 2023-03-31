@@ -8,9 +8,8 @@ import IcebergColor from "../../../../assets/icons/IcebergColor";
 import MapColor from "../../../../assets/icons/MapColor";
 import { useSelector } from "react-redux";
 import { ROLES } from "snu-lib";
-import { isSchemaModificationAuthorized } from "../../../../utils/temporary-functions";
 
-export default function GroupAffectationSummary({ group, className = "", onChange, onChangeStep }) {
+export default function GroupAffectationSummary({ group, className = "", onChange, onChangeStep, isUserAuthorizedToCreateGroup }) {
   const { user } = useSelector((state) => state.Auth);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState(null);
@@ -88,7 +87,7 @@ export default function GroupAffectationSummary({ group, className = "", onChang
           </>
         )}
       </div>
-      {![ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role) && isSchemaModificationAuthorized(user, group.cohort) && (
+      {isUserAuthorizedToCreateGroup && (
         <div className="flex items-end justify-center pt-[67px]">
           <BorderButton onClick={() => onChangeStep(GROUPSTEPS.MODIFICATION)} className="mr-[8px]">
             Annuler
