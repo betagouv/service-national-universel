@@ -131,14 +131,16 @@ export default function ListPresence() {
 
   const filterArray = [
     { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée", parentGroup: "Centre" },
-    {
-      title: "Région",
-      name: "region",
-      datafield: "region.keyword",
-      missingLabel: "Non renseignée",
-      defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
-      parentGroup: "Centre",
-    },
+    ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+      ? {
+          title: "Région",
+          name: "region",
+          datafield: "region.keyword",
+          missingLabel: "Non renseignée",
+          defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
+          parentGroup: "Centre",
+        }
+      : null,
     {
       title: "Département",
       name: "department",
@@ -148,13 +150,15 @@ export default function ListPresence() {
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       parentGroup: "Centre",
     },
-    {
-      title: "Académie",
-      name: "demy",
-      datafield: "demy.keyword",
-      missingLabel: "Non renseignée",
-      parentGroup: "Centre",
-    },
+    ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+      ? {
+          title: "Académie",
+          name: "demy",
+          datafield: "demy.keyword",
+          missingLabel: "Non renseignée",
+          parentGroup: "Centre",
+        }
+      : null,
     {
       name: "status",
       title: "Statut d’inscription",
@@ -175,8 +179,8 @@ export default function ListPresence() {
       disabledBaseQuery: true,
       parentGroup: "Volontaire",
     },
-  ];
-  if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code2022", datafield: "code2022.keyword", missingLabel: "Non renseignée", parentGroup: "Centre" });
+    user.role === ROLES.ADMIN ? { title: "Code", name: "code2022", datafield: "code2022.keyword", missingLabel: "Non renseignée", parentGroup: "Centre" } : null,
+  ].filter((e) => e);
 
   const searchBarObject = {
     placeholder: "Rechercher par mots clés, ville, code postal...",
