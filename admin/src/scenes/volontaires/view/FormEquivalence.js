@@ -12,9 +12,9 @@ import InformationCircle from "../../../assets/icons/InformationCircle";
 import { slugifyFileName, UNSS_TYPE } from "../../../utils";
 import { capture } from "../../../sentry";
 import YoungHeader from "../../phase0/components/YoungHeader";
+import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES } from "snu-lib";
 
 export default function FormEquivalence({ young, onChange }) {
-  const optionsType = ["Service Civique", "BAFA", "Jeune Sapeur Pompier", "Certification Union Nationale du Sport scolaire (UNSS)"];
   const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
   const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
   const keyList = ["type", "sousType", "structureName", "address", "zip", "city", "startDate", "endDate", "frequency", "contactFullName", "contactEmail", "files"];
@@ -92,7 +92,7 @@ export default function FormEquivalence({ young, onChange }) {
           error = true;
         }
       } else if (key === "sousType") {
-        if (data.type === "Certification Union Nationale du Sport scolaire (UNSS)" && (data?.sousType === undefined || data.sousType === "")) {
+        if (["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(data.type) && (data?.sousType === undefined || data.sousType === "")) {
           error = true;
         }
       } else if (data[key] === undefined || data[key] === "") {
@@ -112,7 +112,8 @@ export default function FormEquivalence({ young, onChange }) {
 
     try {
       if (!error) {
-        if (data.type !== "Certification Union Nationale du Sport scolaire (UNSS)" && (data?.sousType === "" || data?.sousType)) delete data.sousType;
+        if (!["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(data.type) && (data?.sousType === "" || data?.sousType))
+          delete data.sousType;
 
         const { ok } = await api.post(`/young/${young._id.toString()}/phase2/equivalence`, data);
         if (!ok) {
@@ -202,7 +203,7 @@ export default function FormEquivalence({ young, onChange }) {
                   </button>
                   {/* display options */}
                   <div className={`${openType ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
-                    {optionsType.map((option) => (
+                    {ENGAGEMENT_TYPES.map((option) => (
                       <div
                         key={option}
                         onClick={() => {
@@ -255,6 +256,43 @@ export default function FormEquivalence({ young, onChange }) {
                   {error?.sousType ? <div className="text-xs leading-4 font-normal text-red-500">{error.sousType}</div> : null}
                 </div>
               ) : null}
+
+              {data?.type === "Engagements lycéens" ? (
+                <div className="border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
+                  {data?.sousType ? <div className="text-xs leading-4 font-normal text-gray-500">Catégorie</div> : null}
+                  <div className="relative" ref={refSousType}>
+                    <button className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full" onClick={() => setOpenSousType((e) => !e)}>
+                      <div className="flex items-center gap-2">
+                        {data?.sousType ? (
+                          <span className="text-sm leading-5 font-normal">{data?.sousType}</span>
+                        ) : (
+                          <span className="text-gray-400 text-sm leading-5 font-normal">Catégorie</span>
+                        )}
+                      </div>
+                      <ChevronDown className="text-gray-400" />
+                    </button>
+                    {/* display options */}
+                    <div className={`${openSousType ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
+                      {ENGAGEMENT_LYCEEN_TYPES.map((option) => (
+                        <div
+                          key={option}
+                          onClick={() => {
+                            setData({ ...data, sousType: option });
+                            setOpenSousType(false);
+                          }}
+                          className={`${option === data?.sousType && "font-bold bg-gray"}`}>
+                          <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                            <div>{option}</div>
+                            {option === data?.sousType ? <BsCheck2 /> : null}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  {error?.sousType ? <div className="text-xs leading-4 font-normal text-red-500">{error.sousType}</div> : null}
+                </div>
+              ) : null}
+
               <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
                 {data?.structureName ? <div className="text-xs leading-4 font-normal text-gray-500">Nom de la structure</div> : null}
                 <input

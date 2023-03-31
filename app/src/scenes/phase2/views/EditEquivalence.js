@@ -152,7 +152,6 @@ export default function EditEquivalence() {
           delete data.sousType;
 
         data.status = "WAITING_VERIFICATION";
-        console.log("🚀 ~ file: EditEquivalence.js:167 ~ handleSubmit ~ data:", data);
         let ok = false;
         if (mode === "create") ok = (await api.post(`/young/${young._id.toString()}/phase2/equivalence`, data)).ok;
         if (mode === "edit") ok = (await api.put(`/young/${young._id.toString()}/phase2/equivalence/${equivalenceId}`, data)).ok;
@@ -173,8 +172,8 @@ export default function EditEquivalence() {
       return;
     }
   };
-  if (!data) return null;
-  if (data && !["WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(data.status)) history.push("/phase2");
+
+  if (data?._id && !["WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(data?.status)) history.push("/phase2");
 
   return (
     <div className="flex justify-center align-center my-4 ">
@@ -188,7 +187,7 @@ export default function EditEquivalence() {
             <div className="flex-1 ml-4 text-blue-800 text-sm leading-5 font-medium">Pour être reconnu et validé, votre engagement doit être terminé.</div>
           </div>
         </div>
-        {data.status === "WAITING_CORRECTION" ? (
+        {data?.status === "WAITING_CORRECTION" ? (
           <div className="border-[1px] border-gray-200 rounded-lg bg-white mt-4">
             <div className="flex flex-col px-3 py-2 gap-2">
               <div className="text-neutral-900 text-base leading-5 font-medium">Corrections demandées</div>
