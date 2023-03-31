@@ -21,14 +21,17 @@ export default function StepProfil() {
   const keyList = ["firstName", "lastName", "email", "emailConfirm", "password", "confirmPassword"];
   const history = useHistory();
 
+  const trimmedEmail = data?.email.trim();
+  const trimmedEmailConfirm = data?.emailConfirm.trim();
+
   const validate = () => {
     let errors = {};
     //Email
-    if (data?.email && !validator.isEmail(data.email)) {
+    if (trimmedEmail && !validator.isEmail(trimmedEmail)) {
       errors.email = "L'e-mail renseigné est invalide";
     }
     //Email confirm
-    if (data?.email && data?.emailConfirm && data.email !== data.emailConfirm) {
+    if (trimmedEmail && trimmedEmailConfirm && trimmedEmail !== trimmedEmailConfirm) {
       errors.emailConfirm = "Les emails ne correspondent pas";
     }
     //Password
@@ -65,7 +68,7 @@ export default function StepProfil() {
     }
     setError(errors);
     if (!Object.keys(errors).length) {
-      setData({ ...data, step: PREINSCRIPTION_STEPS.CONFIRM });
+      setData({ ...data, email: trimmedEmail, step: PREINSCRIPTION_STEPS.CONFIRM });
       plausibleEvent("Phase0/CTA preinscription - infos persos");
       history.push("/preinscription/confirm");
     }
@@ -88,12 +91,12 @@ export default function StepProfil() {
         <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
             <label className="text-[#161616] text-base">E-mail</label>
-            <Input value={data.email} onChange={(e) => setData({ ...data, email: e })} />
+            <Input value={data.email} onChange={(e) => setData({ ...data, email: e })} type="email" />
             {error.email ? <span className="text-red-500 text-sm">{error.email}</span> : null}
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[#161616] text-base">Confirmez votre e-mail</label>
-            <Input value={data.emailConfirm} onChange={(e) => setData({ ...data, emailConfirm: e })} />
+            <Input value={data.emailConfirm} onChange={(e) => setData({ ...data, emailConfirm: e })} type="email" />
             {error.emailConfirm ? <span className="text-red-500 text-sm">{error.emailConfirm}</span> : null}
           </div>
         </div>
