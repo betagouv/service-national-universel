@@ -177,7 +177,7 @@ const ReactiveList = ({ cohort, history }) => {
 
   const searchBarObject = {
     placeholder: "Rechercher une ligne (numéro, ville, region)",
-    datafield: ["busId", "pointDeRassemblements.region", "pointDeRassemblements.cit", "centerCode", "centerCity", "centerRegion"],
+    datafield: ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"],
   };
 
   return (
