@@ -1,3 +1,17 @@
+# [1.245.0](https://github.com/betagouv/service-national-universel/compare/v1.244.0...v1.245.0) (2023-03-31)
+
+
+### Bug Fixes
+
+* **admin:** fill rate at user create ([#2439](https://github.com/betagouv/service-national-universel/issues/2439)) ([f011dbe](https://github.com/betagouv/service-national-universel/commit/f011dbe2dfd55781197370d12a422662925e4ce1))
+* tentative de fix author ([#2456](https://github.com/betagouv/service-national-universel/issues/2456)) ([28b5491](https://github.com/betagouv/service-national-universel/commit/28b5491bf717ba4af23e54a5917a80a81d3cb09e))
+* **admin:** export disabled label ([9ec71d9](https://github.com/betagouv/service-national-universel/commit/9ec71d9186332b211d3d9a6f4afe42ef85d51ae0))
+
+
+### Features
+
+* **admin:** new filters on PDT ([#2457](https://github.com/betagouv/service-national-universel/issues/2457)) ([f0e686b](https://github.com/betagouv/service-national-universel/commit/f0e686bf70ade4f95e8d3eeba280f2ee299edde2))
+
 # [1.244.0](https://github.com/betagouv/service-national-universel/compare/v1.243.0...v1.244.0) (2023-03-30)
 
 
