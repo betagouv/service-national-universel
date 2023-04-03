@@ -11,7 +11,7 @@ export default function HorizontalBar({ title, values, labels, goal, className =
     if (values && values.length > 0) {
       const total = values.reduce((value, originalValue) => value + originalValue, 0);
       setTotal(total);
-      setTotalPercent(Math.round((total / goal) * 100));
+      setTotalPercent(Math.round((total / goal) * 100) || 0);
 
       const colors = graphColors[values.length];
       setBars(
@@ -20,7 +20,7 @@ export default function HorizontalBar({ title, values, labels, goal, className =
             color: colors[idx],
             label: labels[idx],
             value,
-            percent: Math.round((value / goal) * 100),
+            percent: Math.round((value / goal) * 100) || 0,
             width: Math.min(Math.round((value / Math.max(total, goal)) * 100), 100),
           };
         }),
