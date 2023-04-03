@@ -15,7 +15,19 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Filters({ esId, pageId, filters, defaultQuery, searchBarObject = null, setData, selectedFilters, setSelectedFilters, paramData, setParamData }) {
+export default function Filters({
+  esId,
+  pageId,
+  filters,
+  defaultQuery,
+  searchBarObject = null,
+  setData,
+  selectedFilters,
+  setSelectedFilters,
+  paramData,
+  setParamData,
+  defaultUrlParam = false,
+}) {
   // search for filters
   const [search, setSearch] = React.useState("");
   // searchBar
@@ -33,7 +45,11 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
   const ref = React.useRef(null);
   const refFilter = React.useRef(null);
 
-  const hasSomeFilterSelected = selectedFilters && Object.values(selectedFilters).find((item) => item?.filter?.length > 0 && item?.filter[0]?.toString().trim() !== "");
+  const hasSomeFilterSelected =
+    selectedFilters &&
+    Object.keys(selectedFilters).find(
+      (key) => selectedFilters[key]?.filter?.length > 0 && selectedFilters[key]?.filter[0]?.toString().trim() !== "" && filters.find((f) => f.name === key),
+    );
 
   const [firstLoad, setFirstLoad] = React.useState(true);
 
@@ -138,7 +154,7 @@ export default function Filters({ esId, pageId, filters, defaultQuery, searchBar
   };
 
   const setURL = () => {
-    history.replace({ search: `?${currentFilterAsUrl(selectedFilters, paramData?.page)}` });
+    history.replace({ search: `?${currentFilterAsUrl(selectedFilters, paramData?.page, filters, defaultUrlParam)}` });
   };
 
   // text for tooltip save

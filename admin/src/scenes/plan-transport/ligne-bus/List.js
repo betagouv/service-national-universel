@@ -194,6 +194,7 @@ const ReactiveList = ({ cohort, history }) => {
         <div className="flex items-center justify-between bg-white pt-2 px-4">
           <div className="flex items-center gap-2">
             <Filters
+              defaultUrlParam={`cohort=${cohort}`}
               pageId={pageId}
               esId="plandetransport"
               defaultQuery={getDefaultQuery()}
