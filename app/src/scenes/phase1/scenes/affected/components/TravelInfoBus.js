@@ -1,17 +1,20 @@
 import React from "react";
 import dayjs from "dayjs";
 import LongArrow from "../../../../../assets/icons/LongArrow.js";
+import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR } from "../utils/steps.utils.js";
 
-export default function TravelInfoBus({ meetingPoint, cohortDetails }) {
-  if (!meetingPoint || !cohortDetails) {
+export default function TravelInfoBus({ location, cohortDetails }) {
+  if (!location || !cohortDetails) {
     return <></>;
   }
 
   return (
-    <div className="border-l-4 border-gray-500 flex-none ml-[1rem] pl-[1rem] md:ml-[4rem] md:pl-[3rem] md:max-w-md">
+    <div className="border w-full md:flex-1 p-4">
       <h1 className="text-xl font-bold mb-6">Résumé du voyage</h1>
-      <div className="space-y-4 my-2">
-        <div className="max-w-md">
+      {!location?.ligneToPoint && <p className="text-sm mb-4">Je me rends au centre et en reviens par mes propres moyens.</p>}
+
+      <div className="pl-4 border-l-2 border-gray-500 space-y-8">
+        <div>
           <p className="flex gap-2 items-center">
             <strong>Aller</strong>
             <span>
@@ -20,18 +23,18 @@ export default function TravelInfoBus({ meetingPoint, cohortDetails }) {
           </p>
           <p className="text-sm">
             <span className="capitalize">{dayjs(cohortDetails.dateStart).locale("fr").format("dddd")}</span>{" "}
-            <span>{dayjs(cohortDetails.dateStart).locale("fr").format("D MMMM")}</span> à {meetingPoint?.ligneToPoint?.meetingHour}
+            <span>{dayjs(cohortDetails.dateStart).locale("fr").format("D MMMM")}</span> à {location?.ligneToPoint?.meetingHour || ALONE_ARRIVAL_HOUR}
           </p>
           <p className="text-sm py-2 px-3 my-2 bg-gray-100 rounded-xl">
-            {meetingPoint.name},
+            {location.name},
             <br />
-            {meetingPoint.address}
+            {location.address}
             <br />
-            {meetingPoint.zip} {meetingPoint.city}
+            {location.zip} {location.city}
           </p>
         </div>
 
-        <div className="max-w-md">
+        <div>
           <p className="flex gap-2 items-center">
             <strong>Retour</strong>
             <span>
@@ -40,14 +43,14 @@ export default function TravelInfoBus({ meetingPoint, cohortDetails }) {
           </p>
           <p className="leading-relaxed text-sm max-w-md">
             <span className="capitalize">{dayjs(cohortDetails.dateEnd).locale("fr").format("dddd")}</span> <span>{dayjs(cohortDetails.dateEnd).locale("fr").format("D MMMM")}</span>{" "}
-            à {meetingPoint?.ligneToPoint?.returnHour}
+            à {location?.ligneToPoint?.returnHour || ALONE_DEPARTURE_HOUR}
           </p>
           <p className="text-sm py-2 px-3 my-2 bg-gray-100 rounded-xl">
-            {meetingPoint.name},
+            {location.name},
             <br />
-            {meetingPoint.address}
+            {location.address}
             <br />
-            {meetingPoint.zip} {meetingPoint.city}
+            {location.zip} {location.city}
           </p>
         </div>
       </div>

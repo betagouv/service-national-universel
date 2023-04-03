@@ -14,7 +14,6 @@ import JDMA from "../../../../components/JDMA.js";
 import Loader from "../../../../components/Loader";
 import Problem from "./components/Problem";
 import StepsAffected from "./components/StepsAffected";
-import TravelInfoAlone from "./components/TravelInfoAlone.js";
 import TravelInfoBus from "./components/TravelInfoBus";
 import TodoBackpack from "./components/TodoBackpack";
 
@@ -70,6 +69,7 @@ export default function Affected() {
             onClose={() => setShowInfoMessage(false)}
           />
         )}
+
         <header className="flex flex-col items-between px-4 md:!px-8 lg:!px-16 py-4 lg:justify-between lg:flex-row order-1">
           <div>
             <h1 className="text-2xl md:text-5xl md:space-y-4">
@@ -84,14 +84,8 @@ export default function Affected() {
         </header>
 
         {isStepMedicalFieldDone(young) && (
-          <div className="md:border-t-[1px] flex flex-col md:flex-row flex-none gap-6 md:gap-16 pt-[1rem] md:pt-[4rem] order-2 overflow-hidden">
-            {young.meetingPointId ? (
-              <TravelInfoBus meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
-            ) : young.deplacementPhase1Autonomous === "true" ? (
-              <TravelInfoAlone center={center} cohortDetails={cohortDetails} />
-            ) : (
-              <></>
-            )}
+          <div className="border flex flex-col md:flex-row flex-none gap-4 order-2 px-[1rem]">
+            <TravelInfoBus location={young?.meetingPointId ? meetingPoint : center} cohortDetails={cohortDetails} />
             <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
           </div>
         )}
