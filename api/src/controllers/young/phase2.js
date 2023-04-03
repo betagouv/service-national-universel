@@ -10,7 +10,7 @@ const ReferentModel = require("../../models/referent");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const ApplicationModel = require("../../models/application");
 const { ERRORS, getCcOfYoung, cancelPendingApplications } = require("../../utils");
-const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, APPLICATION_STATUS } = require("snu-lib");
+const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, APPLICATION_STATUS, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");
 
@@ -18,10 +18,13 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
-      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier", "Certification Union Nationale du Sport scolaire (UNSS)").required(),
+      type: Joi.string()
+        .trim()
+        .valid(...ENGAGEMENT_TYPES)
+        .required(),
       sousType: Joi.string()
         .trim()
-        .valid(...UNSS_TYPE),
+        .valid(...UNSS_TYPE, ...ENGAGEMENT_LYCEEN_TYPES),
       structureName: Joi.string().trim().required(),
       address: Joi.string().trim().required(),
       zip: Joi.string().trim().required(),
@@ -126,10 +129,12 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       id: Joi.string().required(),
       idEquivalence: Joi.string().required(),
       status: Joi.string().valid("WAITING_VERIFICATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED"),
-      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier", "Certification Union Nationale du Sport scolaire (UNSS)"),
+      type: Joi.string()
+        .trim()
+        .valid(...ENGAGEMENT_TYPES),
       sousType: Joi.string()
         .trim()
-        .valid(...UNSS_TYPE),
+        .valid(...UNSS_TYPE, ...ENGAGEMENT_LYCEEN_TYPES),
       structureName: Joi.string().trim(),
       address: Joi.string().trim(),
       zip: Joi.string().trim(),
@@ -147,7 +152,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       message: Joi.string().trim(),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
-    if (value.type !== "Certification Union Nationale du Sport scolaire (UNSS)") {
+    if (!["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(value.type)) {
       value.sousType = undefined;
     }
 
