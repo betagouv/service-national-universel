@@ -156,3 +156,15 @@ export const canYoungResumePhase1 = (y) => {
     ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.NOT_DONE].includes(y.statusPhase1)
   );
 };
+
+export const debounce = (fn, delay) => {
+  let timeOutId;
+  return function (...args) {
+    if (timeOutId) {
+      clearTimeout(timeOutId);
+    }
+    timeOutId = setTimeout(() => {
+      fn(...args);
+    }, delay);
+  };
+};

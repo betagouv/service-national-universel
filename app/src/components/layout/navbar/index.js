@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
-import useDevice from "../../../hooks/useDevice";
+import useDevice from "../../../hooks/useDeviceWithResize";
 
 import Close from "./assets/Close";
 import Hamburger from "./assets/Hamburger";
@@ -23,9 +23,15 @@ function MobileNavbar() {
   const user = useSelector((state) => state.Auth.young);
   const [drawer, setDrawer] = React.useState({ open: false, content: null });
 
+  useEffect(() => {
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+
   function openDrawer(Content) {
     setDrawer({ open: true, content: <Content onClose={onClose} /> });
-    document.addEventListener("click", handleClickOutside, true);
   }
 
   function onClose() {
@@ -34,7 +40,6 @@ function MobileNavbar() {
 
   function handleClickOutside(event) {
     if (ref.current && !ref.current.contains(event.target)) onClose();
-    document.removeEventListener("click", handleClickOutside, true);
   }
 
   return (
