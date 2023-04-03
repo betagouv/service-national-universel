@@ -1,8 +1,6 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
-import ChevronDown from "../../../assets/icons/ChevronDown";
 import { AiOutlinePlus } from "react-icons/ai";
-import { BsCheck2 } from "react-icons/bs";
 import PaperClip from "../../../assets/icons/PaperClip";
 import AddImage from "../../../assets/icons/AddImage";
 import { toastr } from "react-redux-toastr";
@@ -13,16 +11,14 @@ import { slugifyFileName, UNSS_TYPE } from "../../../utils";
 import { capture } from "../../../sentry";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES } from "snu-lib";
+import Select from "../../../components/forms/Select";
+import InputText from "../../../components/ui/forms/InputText";
 
 export default function FormEquivalence({ young, onChange }) {
   const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
   const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
   const keyList = ["type", "sousType", "structureName", "address", "zip", "city", "startDate", "endDate", "frequency", "contactFullName", "contactEmail", "files"];
   const [data, setData] = React.useState({});
-  const [openType, setOpenType] = React.useState(false);
-  const [openSousType, setOpenSousType] = React.useState(false);
-  const [openDuree, setOpenDuree] = React.useState(false);
-  const [openFrequence, setOpenFrequence] = React.useState(false);
   const [clickStartDate, setClickStartDate] = React.useState(false);
   const [clickEndDate, setClickEndDate] = React.useState(false);
   const [frequence, setFrequence] = React.useState(false);
@@ -32,12 +28,8 @@ export default function FormEquivalence({ young, onChange }) {
   const [uploading, setUploading] = React.useState(false);
   const [errorMail, setErrorMail] = React.useState(false);
 
-  const refType = React.useRef(null);
-  const refSousType = React.useRef(null);
   const refStartDate = React.useRef(null);
   const refEndDate = React.useRef(null);
-  const refDuree = React.useRef(null);
-  const refFrequence = React.useRef(null);
   const history = useHistory();
 
   const hiddenFileInput = React.useRef(null);
@@ -133,27 +125,6 @@ export default function FormEquivalence({ young, onChange }) {
     }
   };
 
-  React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (refType.current && !refType.current.contains(event.target)) {
-        setOpenType(false);
-      }
-      if (refSousType.current && !refSousType.current.contains(event.target)) {
-        setOpenSousType(false);
-      }
-      if (refDuree.current && !refDuree.current.contains(event.target)) {
-        setOpenDuree(false);
-      }
-      if (refFrequence.current && !refFrequence.current.contains(event.target)) {
-        setOpenFrequence(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside, true);
-    return () => {
-      document.removeEventListener("click", handleClickOutside, true);
-    };
-  }, []);
-
   return (
     <>
       <YoungHeader young={young} tab="phase2" onChange={onChange} />
@@ -188,154 +159,37 @@ export default function FormEquivalence({ young, onChange }) {
               <div className="text-lg leading-7 font-bold">Informations générales</div>
               <div className="text-sm leading-5 font-normal text-gray-500 mt-2">Veuillez compléter le formulaire ci-dessous.</div>
               <div className="mt-6 text-xs leading-4 font-medium">Quoi ?</div>
-              <div className="border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
-                {data?.type ? <div className="text-xs leading-4 font-normal text-gray-500">Type d&apos;engagement</div> : null}
-                <div className="relative" ref={refType}>
-                  <button className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full" onClick={() => setOpenType((e) => !e)}>
-                    <div className="flex items-center gap-2">
-                      {data?.type ? (
-                        <span className="text-sm leading-5 font-normal">{data?.type}</span>
-                      ) : (
-                        <span className="text-gray-400 text-sm leading-5 font-normal">Type d’engagement</span>
-                      )}
-                    </div>
-                    <ChevronDown className="text-gray-400" />
-                  </button>
-                  {/* display options */}
-                  <div className={`${openType ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
-                    {ENGAGEMENT_TYPES.map((option) => (
-                      <div
-                        key={option}
-                        onClick={() => {
-                          setData({ ...data, type: option, sousType: "" });
-                          setOpenType(false);
-                        }}
-                        className={`${option === data?.type && "font-bold bg-gray"}`}>
-                        <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                          <div>{option}</div>
-                          {option === data?.type ? <BsCheck2 /> : null}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                {error?.type ? <div className="text-xs leading-4 font-normal text-red-500">{error.type}</div> : null}
-              </div>
-              {data?.type === "Certification Union Nationale du Sport scolaire (UNSS)" ? (
-                <div className="border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
-                  {data?.sousType ? <div className="text-xs leading-4 font-normal text-gray-500">Catégorie</div> : null}
-                  <div className="relative" ref={refSousType}>
-                    <button className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full" onClick={() => setOpenSousType((e) => !e)}>
-                      <div className="flex items-center gap-2">
-                        {data?.sousType ? (
-                          <span className="text-sm leading-5 font-normal">{data?.sousType}</span>
-                        ) : (
-                          <span className="text-gray-400 text-sm leading-5 font-normal">Catégorie</span>
-                        )}
-                      </div>
-                      <ChevronDown className="text-gray-400" />
-                    </button>
-                    {/* display options */}
-                    <div className={`${openSousType ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
-                      {UNSS_TYPE.map((option) => (
-                        <div
-                          key={option}
-                          onClick={() => {
-                            setData({ ...data, sousType: option });
-                            setOpenSousType(false);
-                          }}
-                          className={`${option === data?.sousType && "font-bold bg-gray"}`}>
-                          <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                            <div>{option}</div>
-                            {option === data?.sousType ? <BsCheck2 /> : null}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  {error?.sousType ? <div className="text-xs leading-4 font-normal text-red-500">{error.sousType}</div> : null}
-                </div>
-              ) : null}
 
-              {data?.type === "Engagements lycéens" ? (
-                <div className="border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
-                  {data?.sousType ? <div className="text-xs leading-4 font-normal text-gray-500">Catégorie</div> : null}
-                  <div className="relative" ref={refSousType}>
-                    <button className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full" onClick={() => setOpenSousType((e) => !e)}>
-                      <div className="flex items-center gap-2">
-                        {data?.sousType ? (
-                          <span className="text-sm leading-5 font-normal">{data?.sousType}</span>
-                        ) : (
-                          <span className="text-gray-400 text-sm leading-5 font-normal">Catégorie</span>
-                        )}
-                      </div>
-                      <ChevronDown className="text-gray-400" />
-                    </button>
-                    {/* display options */}
-                    <div className={`${openSousType ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
-                      {ENGAGEMENT_LYCEEN_TYPES.map((option) => (
-                        <div
-                          key={option}
-                          onClick={() => {
-                            setData({ ...data, sousType: option });
-                            setOpenSousType(false);
-                          }}
-                          className={`${option === data?.sousType && "font-bold bg-gray"}`}>
-                          <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                            <div>{option}</div>
-                            {option === data?.sousType ? <BsCheck2 /> : null}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  {error?.sousType ? <div className="text-xs leading-4 font-normal text-red-500">{error.sousType}</div> : null}
-                </div>
-              ) : null}
+              <div className="space-y-4 mt-3">
+                <Select label="Type d'engagement" options={ENGAGEMENT_TYPES} selected={data?.type} setSelected={(e) => setData({ ...data, type: e })} />
 
-              <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-                {data?.structureName ? <div className="text-xs leading-4 font-normal text-gray-500">Nom de la structure</div> : null}
-                <input
-                  className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
-                  placeholder="Nom de la structure d’accueil"
-                  type="text"
-                  onChange={(e) => setData({ ...data, structureName: e.target.value })}
-                />
+                {data.type === "Certification Union Nationale du Sport scolaire (UNSS)" && (
+                  <Select label="Catégorie" options={UNSS_TYPE} selected={data?.sousType} setSelected={(e) => setData({ ...data, sousType: e })} />
+                )}
+
+                {data.type === "Engagements lycéens" && (
+                  <Select label="Catégorie" options={ENGAGEMENT_LYCEEN_TYPES} selected={data?.sousType} setSelected={(e) => setData({ ...data, sousType: e })} />
+                )}
+
+                <InputText label="Nom de la structure d'accueil" value={data?.structureName} onChange={(e) => setData({ ...data, structureName: e.target.value })} />
               </div>
+
               <div className="mt-4 text-xs leading-4 font-medium">Où ?</div>
-              <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-                {data?.address ? <div className="text-xs leading-4 font-normal text-gray-500">Adresse du lieu</div> : null}
-                <input
-                  className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
-                  placeholder="Adresse du lieu"
-                  type="text"
-                  onChange={(e) => setData({ ...data, address: e.target.value })}
-                />
-              </div>
-              <div className="flex items-stretch gap-2">
-                <div className="flex flex-col justify-center border-[1px] border-gray-300 w-2/3 px-3 py-2 rounded-lg mt-3">
-                  {data?.zip ? <div className="text-xs leading-4 font-normal text-gray-500">Code postal</div> : null}
-                  <input
-                    className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
-                    placeholder="Code postal"
-                    type="text"
-                    onChange={(e) => setData({ ...data, zip: e.target.value })}
-                  />
-                </div>
-                <div className="flex flex-col justify-center border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-                  {data?.city ? <div className="text-xs leading-4 font-normal text-gray-500">Ville</div> : null}
-                  <input
-                    className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
-                    placeholder="Ville"
-                    type="text"
-                    onChange={(e) => setData({ ...data, city: e.target.value })}
-                  />
+
+              <div className="space-y-4 mt-3">
+                <InputText label="Adresse du lieu" value={data?.address} onChange={(e) => setData({ ...data, address: e.target.value })} />
+
+                <div className="flex items-stretch gap-2">
+                  <InputText label="Code postal" value={data?.zip} onChange={(e) => setData({ ...data, zip: e.target.value })} />
+                  <InputText label="Ville" value={data?.city} onChange={(e) => setData({ ...data, city: e.target.value })} />
                 </div>
               </div>
+
               <div className="mt-4 text-xs leading-4 font-medium">Quand ?</div>
               <div className="flex gap-2 items-stretch align-middle">
                 <div className="flex justify-center flex-col border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
                   {data?.startDate || clickStartDate ? <div className="text-xs leading-4 font-normal text-gray-500">Date de début</div> : null}
+
                   <input
                     className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
                     placeholder="Date de début"
@@ -374,105 +228,41 @@ export default function FormEquivalence({ young, onChange }) {
                   />
                 </div>
               </div>
+
               {frequence ? (
                 <>
                   <div className="flex items-stretch gap-2 mt-2 flex-wrap md:!flex-nowrap">
-                    <div className="flex flex-1 gap-2 md:flex-none">
-                      <div className="flex flex-col justify-center border-[1px] border-gray-300 px-3 py-2 rounded-lg mt-3 w-1/2">
-                        {data?.frequency?.nombre ? <div className="text-xs leading-4 font-normal text-gray-500">Nombre</div> : null}
-                        <input
-                          className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
-                          placeholder="Nombre"
-                          type="text"
-                          onChange={(e) => setData({ ...data, frequency: { ...data.frequency, nombre: e.target.value } })}
-                        />
-                      </div>
-                      <div className="flex flex-col justify-center border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
-                        {data?.frequency?.duree ? <div className="text-xs leading-4 font-normal text-gray-500">Durée</div> : null}
-                        <div className="relative" ref={refDuree}>
-                          <button
-                            className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full"
-                            onClick={() => setOpenDuree((e) => !e)}>
-                            <div className="flex items-center gap-2">
-                              {data?.frequency?.duree ? (
-                                <span className="text-sm leading-5 font-normal">{data?.frequency?.duree}</span>
-                              ) : (
-                                <span className="text-gray-400 text-sm leading-5 font-normal">Durée</span>
-                              )}
-                            </div>
-                            <ChevronDown className="text-gray-400" />
-                          </button>
-                          {/* display options */}
-                          <div className={`${openDuree ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
-                            {optionsDuree.map((option) => (
-                              <div
-                                key={option}
-                                onClick={() => {
-                                  setData({ ...data, frequency: { ...data.frequency, duree: option } });
-                                  setOpenDuree(false);
-                                }}
-                                className={`${option === data.frequency?.duree && "font-bold bg-gray"}`}>
-                                <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                                  <div>{option}</div>
-                                  {option === data?.frequency?.duree ? <BsCheck2 /> : null}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex flex-col justify-center border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
-                      {data?.frequency?.frequence ? <div className="text-xs leading-4 font-normal text-gray-500">Fréquence</div> : null}
-                      <div className="relative" ref={refFrequence}>
-                        <button
-                          className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full"
-                          onClick={() => setOpenFrequence((e) => !e)}>
-                          <div className="flex items-center gap-2">
-                            {data?.frequency?.frequence ? (
-                              <span className="text-sm leading-5 font-normal">{data?.frequency?.frequence}</span>
-                            ) : (
-                              <span className="text-gray-400 text-sm leading-5 font-normal">Fréquence</span>
-                            )}
-                          </div>
-                          <ChevronDown className="text-gray-400" />
-                        </button>
-                        {/* display options */}
-                        <div className={`${openFrequence ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
-                          {optionsFrequence.map((option) => (
-                            <div
-                              key={option}
-                              onClick={() => {
-                                setData({ ...data, frequency: { ...data.frequency, frequence: option } });
-                                setOpenFrequence(false);
-                              }}
-                              className={`${option === data?.frequency?.frequence && "font-bold bg-gray"}`}>
-                              <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                                <div>{option}</div>
-                                {option === data?.frequency?.frequence ? <BsCheck2 /> : null}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                    <InputText label="Nombre" onChange={(e) => setData({ ...data, frequency: { ...data.frequency, nombre: e.target.value } })} value={data?.frequency?.nombre} />
+
+                    <Select
+                      label="Durée"
+                      options={optionsDuree}
+                      selected={data?.frequency?.duree}
+                      setSelected={(e) => setData({ ...data, frequency: { ...data.frequency, duree: e } })}
+                    />
+
+                    <Select
+                      label="Fréquence"
+                      options={optionsFrequence}
+                      selected={data?.frequency?.frequence}
+                      setSelected={(e) => setData({ ...data, frequency: { ...data.frequency, frequence: e } })}
+                    />
                   </div>
-                  <div
+
+                  <button
                     className="text-sm leading-5 font-normal text-indigo-600 mt-3 hover:underline text-center"
                     onClick={() => {
                       setFrequence(false);
                       setData({ ...data, frequency: undefined });
                     }}>
                     Supprimer la fréquence
-                  </div>
+                  </button>
                 </>
               ) : (
-                <>
-                  <div className="group flex items-center justify-center rounded-lg mt-4 bg-blue-50 py-3 cursor-pointer" onClick={() => setFrequence(true)}>
-                    <AiOutlinePlus className="text-indigo-400 mr-2 h-5 w-5 group-hover:scale-110" />
-                    <div className="text-sm leading-5 font-medium text-blue-700 group-hover:underline">Ajouter la fréquence (facultatif)</div>
-                  </div>
-                </>
+                <div className="group flex items-center justify-center rounded-lg mt-4 bg-blue-50 py-3 cursor-pointer" onClick={() => setFrequence(true)}>
+                  <AiOutlinePlus className="text-indigo-400 mr-2 h-5 w-5 group-hover:scale-110" />
+                  <div className="text-sm leading-5 font-medium text-blue-700 group-hover:underline">Ajouter la fréquence (facultatif)</div>
+                </div>
               )}
             </div>
             <div className="flex flex-col justify-between basis-1/2 pb-2">
@@ -481,25 +271,12 @@ export default function FormEquivalence({ young, onChange }) {
                 <div className="text-sm leading-5 font-normal text-gray-500 mt-2">
                   Cette personne doit vous connaître et pourra être contactée par l’administration sur votre dossier.
                 </div>
-                <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-                  {data?.contactFullName ? <div className="text-xs leading-4 font-normal text-gray-500">Prénom et Nom</div> : null}
-                  <input
-                    className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
-                    placeholder="Prénom et Nom"
-                    type="text"
-                    onChange={(e) => setData({ ...data, contactFullName: e.target.value })}
-                  />
+
+                <div className="space-y-4 mt-4">
+                  <InputText label="Prénom et Nom" value={data?.contactFullName} onChange={(e) => setData({ ...data, contactFullName: e.target.value })} />
+                  <InputText label="Adresse email" value={data?.contactEmail} onChange={(e) => setData({ ...data, contactEmail: e.target.value })} error={errorMail} />
+                  {errorMail ? <div className="text-sm leading-5 font-normal text-red-500 mt-2 text-center">L&apos;adresse email n&apos;est pas valide.</div> : null}
                 </div>
-                <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-                  {data?.contactEmail ? <div className="text-xs leading-4 font-normal text-gray-500">Adresse email</div> : null}
-                  <input
-                    className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
-                    placeholder="Adresse email"
-                    type="text"
-                    onChange={(e) => setData({ ...data, contactEmail: e.target.value })}
-                  />
-                </div>
-                {errorMail ? <div className="text-sm leading-5 font-normal text-red-500 mt-2 text-center">L&apos;adresse email n&apos;est pas valide.</div> : null}
               </div>
               <div className="rounded-xl bg-white p-6">
                 <div className="text-lg leading-7 font-bold">Document justificatif d’engagement</div>
