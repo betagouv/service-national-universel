@@ -8,6 +8,9 @@ export const graphColors = {
   5: ["#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1E40AF"],
   6: ["#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#1E40AF"],
   7: ["#BFDBFE", "#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#1E40AF"],
+  8: ["#BFDBFE", "#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#1E40AF", "#BFDBFE"],
+  9: ["#BFDBFE", "#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#1E40AF", "#BFDBFE", "#93C5FD"],
+  10: ["#BFDBFE", "#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#1E40AF", "#BFDBFE", "#93C5FD", "#60A5FA"],
 };
 
 export function Legend({ color, name, value = null, className = "" }) {
