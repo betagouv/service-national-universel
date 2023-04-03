@@ -26,6 +26,7 @@ export default function ListeDemandeModif() {
   const urlParams = new URLSearchParams(window.location.search);
   const [cohort, setCohort] = React.useState(urlParams.get("cohort") || "Février 2023 - C");
   const [tagsOptions, setTagsOptions] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
@@ -41,6 +42,7 @@ export default function ListeDemandeModif() {
     try {
       setTagsOptions([]);
       setSelectedFilters({});
+      setLoading(true);
       const { ok, code, data: reponseTags } = await api.get(`/tags?type=modification_bus`);
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des tags", translate(code));
@@ -49,6 +51,7 @@ export default function ListeDemandeModif() {
         return { value: tag._id, label: tag.name };
       });
       setTagsOptions(options);
+      setLoading(false);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération des tags");
@@ -68,7 +71,7 @@ export default function ListeDemandeModif() {
     };
   };
 
-  if (!tagsOptions.length) return <Loader />;
+  if (loading) return <Loader />;
 
   const filterArray = [
     {
