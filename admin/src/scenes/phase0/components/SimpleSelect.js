@@ -97,11 +97,11 @@ export default function SimpleSelect({ value, transformer, options, onChange, fi
               {opt.label}
             </div>
           ))}
-          {allowCustomValue && filter?.length && !filteredOptions?.length && (
+          {allowCustomValue && filter?.length && !filteredOptions?.length ? (
             <button onClick={() => selectOption(filter)} className="w-full p-2 text-left">
               Ajoutez manuellement: &quot;{filter}&quot;
             </button>
-          )}
+          ) : null}
         </div>
       )}
     </div>
