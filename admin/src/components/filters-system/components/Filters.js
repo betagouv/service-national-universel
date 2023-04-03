@@ -18,7 +18,6 @@ function classNames(...classes) {
 export default function Filters({ esId, pageId, filters, defaultQuery, searchBarObject = null, setData, selectedFilters, setSelectedFilters, paramData, setParamData }) {
   // search for filters
   const [search, setSearch] = React.useState("");
-
   // searchBar
   // data correspond to filters
   const [dataFilter, setDataFilter] = React.useState([]);

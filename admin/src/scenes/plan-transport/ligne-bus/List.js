@@ -3,7 +3,7 @@ import { BsArrowLeft, BsArrowRight, BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { ES_NO_LIMIT, getDepartmentNumber, ROLES, translate } from "snu-lib";
+import { getDepartmentNumber, ROLES, translate } from "snu-lib";
 import ArrowUp from "../../../assets/ArrowUp";
 import Comment from "../../../assets/comment";
 import History from "../../../assets/icons/History";
@@ -110,10 +110,7 @@ const ReactiveList = ({ cohort, history }) => {
   const getDefaultQuery = () => {
     return {
       query: {
-        bool: {
-          should: [],
-          filter: [{ term: { "cohort.keyword": cohort } }],
-        },
+        bool: { must: [{ match_all: {} }, { term: { "cohort.keyword": cohort } }] },
       },
       track_total_hits: true,
     };
@@ -134,7 +131,14 @@ const ReactiveList = ({ cohort, history }) => {
     },
     { title: "Nom", name: "NAME_PDR", datafield: "pointDeRassemblements.name.keyword", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
     { title: "Région", name: "REGION_PDR", datafield: "pointDeRassemblements.region.keyword", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
-    { title: "Département", name: "DEPARTMENT_PDR", datafield: "pointDeRassemblements.department.keyword", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
+    {
+      title: "Département",
+      name: "DEPARTMENT_PDR",
+      datafield: "pointDeRassemblements.department.keyword",
+      parentGroup: "Points de rassemblement",
+      missingLabel: "Non renseigné",
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+    },
     { title: "Ville", name: "CITY_PDR", datafield: "pointDeRassemblements.city.keyword", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
     { title: "Code", name: "CODE_PDR", datafield: "pointDeRassemblements.code.keyword", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
     { title: "Nom", name: "NAME_CENTER", datafield: "centerName.keyword", parentGroup: "Centre", missingLabel: "Non renseigné" },
@@ -220,6 +224,9 @@ const ReactiveList = ({ cohort, history }) => {
               exportTitle="Plan_de_transport"
               icon={<BsDownload className="text-gray-400" />}
               index="plandetransport"
+              filters={filterArray}
+              selectedFilters={selectedFilters}
+              searchBarObject={searchBarObject}
               css={{
                 override: true,
                 button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,

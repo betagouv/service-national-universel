@@ -76,6 +76,7 @@ import api from "../../../../services/api";
 
 export const buildBody = (selectedFilters, page, size, defaultQuery, filterArray, searchBarObject = null, sortSelected = null) => {
   let query = structuredClone(defaultQuery.query);
+  console.log("query", query);
   let bodyQuery = {
     query: query,
     aggs: {},
@@ -145,9 +146,9 @@ export const buildBody = (selectedFilters, page, size, defaultQuery, filterArray
 };
 
 const buildAggs = (filterArray, selectedFilters, searchBarObject, defaultQuery) => {
-  let aggsQuery = structuredClone(defaultQuery.query);
+  let aggsQuery = structuredClone(defaultQuery);
   let bodyAggs = {
-    query: aggsQuery,
+    query: aggsQuery.query,
     aggs: {},
     size: 0,
     track_total_hits: true,
@@ -190,6 +191,7 @@ export const buildQuery = async (esId, selectedFilters, page = 0, size, defaultQ
   if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
 
   const aggs = resAggs.responses[0].aggregations;
+  console.log("resQuery", resQuery);
   const data = resQuery.responses[0].hits.hits.map((h) => ({ ...h._source, _id: h._id }));
   const count = resQuery.responses[0].hits.total.value;
   const newFilters = {};
@@ -273,9 +275,9 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, filter
     });
   }
 
-  if (!bodyAggs.query?.bool) bodyAggs.query.bool = { must: [], filter: [] };
-  if (!bodyAggs.query.bool?.fitler) bodyAggs.query.bool.filter = [];
-  if (!bodyAggs.query.bool?.must) bodyAggs.query.bool.must = [];
+  // if (!bodyAggs.query?.bool) bodyAggs.query.bool = { must: [], filter: [] };
+  // if (!bodyAggs.query.bool?.fitler) bodyAggs.query.bool.filter = [];
+  // if (!bodyAggs.query.bool?.must) bodyAggs.query.bool.must = [];
 
   Object.keys(selectedFilters).map((key) => {
     if (selectedFilters.customComponentQuery) return;

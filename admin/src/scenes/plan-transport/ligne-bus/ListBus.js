@@ -1,22 +1,14 @@
-import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import React from "react";
+import { BsDownload } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import { ES_NO_LIMIT, formatDateFR, getFilterLabel, translate, translatePhase1, youngPlanDeTranportExportFields } from "snu-lib";
+import { formatDateFR, getDepartmentNumber, translate, translatePhase1, youngPlanDeTranportExportFields } from "snu-lib";
 import ExternalLink from "../../../assets/icons/ExternalLink";
+import { Filters, ModalExportV2, ResultTable, Save, SelectedFilters } from "../../../components/filters-system";
 import Loader from "../../../components/Loader";
-import { apiURL } from "../../../config";
+import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { Title } from "../components/commons";
-import FilterSvg from "../../../assets/icons/Filter";
-import DeleteFilters from "../../../components/buttons/DeleteFilters";
-import ReactiveListComponent from "../../../components/ReactiveListComponent";
-import { DepartmentFilter, RegionFilter } from "../../../components/filters";
-import ModalExport from "../../../components/modals/ModalExport";
-import { BsDownload } from "react-icons/bs";
-import { capture } from "../../../sentry";
-
-const FILTERS = ["SEARCH", "PDRID", "PDRNAME", "PDRCITY", "REGION", "DEPARTMENT"];
 
 const contactTypes = {
   email: "Adresse e-mail",
@@ -28,9 +20,16 @@ export default function ListPDR(props) {
   if (!id) return <div />;
   const [bus, setBus] = React.useState();
   const [loading, setLoading] = React.useState(true);
-  const [filterVisible, setFilterVisible] = React.useState(false);
   const [isExportOpen, setIsExportOpen] = React.useState(false);
   const history = useHistory();
+
+  const [data, setData] = React.useState([]);
+  const pageId = "listBus";
+  const [selectedFilters, setSelectedFilters] = React.useState({});
+  const [paramData, setParamData] = React.useState({
+    size: 20,
+    page: 0,
+  });
 
   const fetchData = async () => {
     try {
@@ -54,12 +53,12 @@ export default function ListPDR(props) {
   }, []);
 
   const getDefaultQuery = () => ({
-    query: { bool: { filter: [{ terms: { "ligneId.keyword": [bus?._id?.toString()] } }, { terms: { "status.keyword": ["VALIDATED"] } }] } },
+    query: {
+      bool: { must: [{ match_all: {} }, { terms: { "ligneId.keyword": [bus?._id?.toString()] } }, { terms: { "status.keyword": ["VALIDATED"] } }] },
+    },
     sort: [{ "lastName.keyword": "asc" }],
     track_total_hits: true,
   });
-
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   function transformVolontaires(data, values) {
     let all = data;
@@ -110,12 +109,12 @@ export default function ListPDR(props) {
         },
         phase1Transport: {
           "ID du transport": b?.busId || "",
-          "ID du point de rassemblement": PDR.code || "",
-          "Nom du point de rassemblement": PDR.name || "",
-          "Adresse du point de rassemblement": PDR.address || "",
-          "Ville du point de rassemblement": PDR.city || "",
-          "Département du point de rassemblement": PDR.department || "",
-          "Région du point de rassemblement": PDR.region || "",
+          "ID du point de rassemblement": PDR?.code || "",
+          "Nom du point de rassemblement": PDR?.name || "",
+          "Adresse du point de rassemblement": PDR?.address || "",
+          "Ville du point de rassemblement": PDR?.city || "",
+          "Département du point de rassemblement": PDR?.department || "",
+          "Région du point de rassemblement": PDR?.region || "",
           "Date et heure de départ (aller)": formatDateFR(b?.departuredDate) + " - " + PDR?.departureHour || "",
           "Date et heure d’arrivée (retour)": formatDateFR(b?.returnDate) + " - " + PDR?.returnHour || "",
         },
@@ -135,6 +134,46 @@ export default function ListPDR(props) {
     });
   }
 
+  const filterArray = [
+    {
+      title: "ID du PDR",
+      name: "PDRID",
+      datafield: "meetingPointId.keyword",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A") return item;
+        return bus.meetingsPointsDetail.find((option) => option.meetingPointId.toString() === item)?.code;
+      },
+    },
+    {
+      title: "Nom du PDR",
+      name: "PDRNAME",
+      datafield: "meetingPointId.keyword",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A") return item;
+        return bus.meetingsPointsDetail.find((option) => option.meetingPointId === item)?.name;
+      },
+    },
+    {
+      title: " Commune du point du PDR",
+      name: "PDRCITY",
+      datafield: "meetingPointId.keyword",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A") return item;
+        return bus.meetingsPointsDetail.find((option) => option.meetingPointId === item)?.city;
+      },
+    },
+    { title: "Région", name: "REGION", datafield: "region.keyword", missingLabel: "Non renseigné" },
+    { title: "Département", name: "DEPARTMENT", datafield: "department.keyword", missingLabel: "Non renseigné", translate: (e) => getDepartmentNumber(e) + " - " + e },
+  ];
+
+  const searchBarObject = {
+    placeholder: "Rechercher par prénom, nom, email, ville, code postal...",
+    datafield: ["email", "firstName", "lastName", "city", "zip"],
+  };
+
   if (loading) return <Loader />;
 
   return (
@@ -149,167 +188,61 @@ export default function ListPDR(props) {
         </div>
       </div>
 
-      <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div className="flex flex-col bg-white py-4 mb-8 rounded-xl">
-          <div className="flex items-stretch justify-between  bg-white py-2 px-4">
-            <div className="flex items-center gap-2">
-              <DataSearch
-                defaultQuery={getDefaultQuery}
-                showIcon={false}
-                componentId="SEARCH"
-                dataField={["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"]}
-                placeholder="Rechercher par prénom, nom, email, ville, code postal..."
-                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                URLParams={true}
-                autosuggest={false}
-                className="datasearch-searchfield"
-                innerClass={{ input: "searchbox" }}
-              />
-              <div
-                className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
-                onClick={() => setFilterVisible((e) => !e)}>
-                <FilterSvg className="text-gray-400" />
-                Filtres
-              </div>
-            </div>
-            <button
-              className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
-              onClick={() => setIsExportOpen(true)}>
-              <BsDownload className="text-gray-400" />
-              Exporter
-            </button>
-            <ModalExport
-              isOpen={isExportOpen}
-              setIsOpen={setIsExportOpen}
-              index="young"
-              transform={transformVolontaires}
-              exportFields={youngPlanDeTranportExportFields}
-              filters={FILTERS}
-              getExportQuery={getExportQuery}
-            />
-          </div>
-          <div className={`flex flex-wrap items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="ID du point de rassemblement"
-              componentId="PDRID"
-              dataField="meetingPointId.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "PDRID") }}
-              renderItem={(e, count) => {
-                if (e === "Non renseigné") return `Non renseigné (${count})`;
-                return `${bus.meetingsPointsDetail.find((option) => option.meetingPointId === e)?.code} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={true}
-              showMissing
-              searchPlaceholder="Rechercher..."
-              missingLabel="Non renseigné"
-              renderLabel={(items) => {
-                if (Object.keys(items).length === 0) return "ID du point de rassemblement";
-                const translated = Object.keys(items).map((item) => {
-                  if (item === "Non renseigné") return item;
-                  return bus.meetingsPointsDetail.find((option) => option.meetingPointId.toString() === item)?.code;
-                });
-                let value = translated.join(", ");
-                value = "ID du point de rassemblement : " + value;
-                return <div>{value}</div>;
-              }}
-            />
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Nom du point de rassemblement"
-              componentId="PDRNAME"
-              dataField="meetingPointId.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "PDRNAME") }}
-              renderItem={(e, count) => {
-                if (e === "Non renseigné") return `Non renseigné (${count})`;
-                return `${bus.meetingsPointsDetail.find((option) => option.meetingPointId === e)?.name} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={true}
-              showMissing
-              searchPlaceholder="Rechercher..."
-              missingLabel="Non renseigné"
-              renderLabel={(items) => {
-                if (Object.keys(items).length === 0) return "Nom du point de rassemblement";
-                const translated = Object.keys(items).map((item) => {
-                  if (item === "Non renseigné") return item;
-                  return bus.meetingsPointsDetail.find((option) => option.meetingPointId.toString() === item)?.name;
-                });
-                let value = translated.join(", ");
-                value = "Nom du point de rassemblement : " + value;
-                return <div>{value}</div>;
-              }}
-            />
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Commune du point de rassemblement"
-              componentId="PDRCITY"
-              dataField="meetingPointId.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "PDRCITY") }}
-              renderItem={(e, count) => {
-                if (e === "Non renseigné") return `Non renseigné (${count})`;
-                return `${bus.meetingsPointsDetail.find((option) => option.meetingPointId === e)?.city} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={true}
-              showMissing
-              searchPlaceholder="Rechercher..."
-              missingLabel="Non renseigné"
-              renderLabel={(items) => {
-                if (Object.keys(items).length === 0) return "Commune du point de rassemblement";
-                const translated = Object.keys(items).map((item) => {
-                  if (item === "Non renseigné") return item;
-                  return bus.meetingsPointsDetail.find((option) => option.meetingPointId.toString() === item)?.city;
-                });
-                let value = translated.join(", ");
-                value = "Commune du point de rassemblement : " + value;
-                return <div>{value}</div>;
-              }}
-            />
-            <RegionFilter
-              defaultQuery={getDefaultQuery}
-              filters={FILTERS}
-              renderLabel={(items) => <div>{getFilterLabel(items, "Région du volontaire", "Région du volontaire")}</div>}
-            />
-            <DepartmentFilter
-              defaultQuery={getDefaultQuery}
-              filters={FILTERS}
-              renderLabel={(items) => <div>{getFilterLabel(items, "Département du volontaire", "Département du volontaire")}</div>}
-            />
-            <DeleteFilters />
-          </div>
-          <div className="reactive-result">
-            <ReactiveListComponent
-              pageSize={20}
-              defaultQuery={getDefaultQuery}
-              react={{ and: FILTERS }}
-              paginationAt="bottom"
-              showTopResultStats={false}
-              render={({ data }) => (
-                <div className="flex w-full flex-col mt-6 mb-2">
-                  <hr />
-                  <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 w-full gap-6">
-                    <div className="w-[33%]">Volontaire</div>
-                    <div className="w-[33%]">Point de rassemblement</div>
-                    <div className="w-[33%]">Centre de destination</div>
-                  </div>
-                  {data?.map((hit) => {
-                    return <Line key={hit._id} young={hit} bus={bus} />;
-                  })}
-                  <hr />
-                </div>
-              )}
-            />
-          </div>
+      <div className="flex flex-col bg-white py-4 mb-8 rounded-xl">
+        <div className="flex items-stretch justify-between  bg-white pt-2 px-4">
+          <Filters
+            pageId={pageId}
+            esId="young"
+            defaultQuery={getDefaultQuery()}
+            setData={(value) => setData(value)}
+            filters={filterArray}
+            searchBarObject={searchBarObject}
+            selectedFilters={selectedFilters}
+            setSelectedFilters={setSelectedFilters}
+            paramData={paramData}
+            setParamData={setParamData}
+          />
+          <button className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm" onClick={() => setIsExportOpen(true)}>
+            <BsDownload className="text-gray-400" />
+            Exporter
+          </button>
+          <ModalExportV2
+            isOpen={isExportOpen}
+            setIsOpen={setIsExportOpen}
+            index="young"
+            defaultQuery={getDefaultQuery()}
+            exportTitle={`volontaires - ${bus.busId}`}
+            transform={transformVolontaires}
+            exportFields={youngPlanDeTranportExportFields}
+            searchBarObject={searchBarObject}
+            selectedFilters={selectedFilters}
+            filters={filterArray}
+          />
         </div>
-      </ReactiveBase>
+        <div className="mt-2 px-4 flex flex-row flex-wrap items-center">
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
+        </div>
+        <ResultTable
+          paramData={paramData}
+          setParamData={setParamData}
+          currentEntryOnPage={data?.length}
+          render={
+            <div className="flex w-full flex-col mt-6 mb-2">
+              <hr />
+              <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 w-full gap-6">
+                <div className="w-[33%]">Volontaire</div>
+                <div className="w-[33%]">Point de rassemblement</div>
+                <div className="w-[33%]">Centre de destination</div>
+              </div>
+              {data?.map((hit) => {
+                return <Line key={hit?._id} young={hit} bus={bus} />;
+              })}
+              <hr />
+            </div>
+          }
+        />
+      </div>
     </div>
   );
 }
