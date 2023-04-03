@@ -1,22 +1,14 @@
-import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import React from "react";
+import { BsDownload } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import { ES_NO_LIMIT, formatDateFR, getFilterLabel, translate, translatePhase1, youngPlanDeTranportExportFields } from "snu-lib";
+import { formatDateFR, getDepartmentNumber, translate, translatePhase1, youngPlanDeTranportExportFields } from "snu-lib";
 import ExternalLink from "../../../assets/icons/ExternalLink";
+import { Filters, ModalExportV2, ResultTable, Save, SelectedFilters } from "../../../components/filters-system";
 import Loader from "../../../components/Loader";
-import { apiURL } from "../../../config";
+import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { Title } from "../components/commons";
-import FilterSvg from "../../../assets/icons/Filter";
-import DeleteFilters from "../../../components/buttons/DeleteFilters";
-import ReactiveListComponent from "../../../components/ReactiveListComponent";
-import { DepartmentFilter, RegionFilter } from "../../../components/filters";
-import ModalExport from "../../../components/modals/ModalExport";
-import { BsDownload } from "react-icons/bs";
-import { capture } from "../../../sentry";
-
-const FILTERS = ["SEARCH", "LIGNE", "CENTERID", "CENTERNAME", "CENTERCITY", "REGION", "DEPARTMENT"];
 
 const contactTypes = {
   email: "Adresse e-mail",
@@ -32,9 +24,16 @@ export default function ListPDR(props) {
   const [PDRDetails, setPDRDetails] = React.useState([]);
   const [centers, setCenters] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
-  const [filterVisible, setFilterVisible] = React.useState(false);
   const [isExportOpen, setIsExportOpen] = React.useState(false);
   const history = useHistory();
+
+  const [data, setData] = React.useState([]);
+  const pageId = "listyoungPDR";
+  const [selectedFilters, setSelectedFilters] = React.useState({});
+  const [paramData, setParamData] = React.useState({
+    size: 20,
+    page: 0,
+  });
 
   const fetchData = async () => {
     try {
@@ -73,12 +72,12 @@ export default function ListPDR(props) {
   }, []);
 
   const getDefaultQuery = () => ({
-    query: { bool: { filter: [{ terms: { "meetingPointId.keyword": [PDR?._id?.toString()] } }, { terms: { "status.keyword": ["VALIDATED"] } }] } },
+    query: {
+      bool: { must: [{ match_all: {} }, { terms: { "meetingPointId.keyword": [PDR?._id?.toString()] } }, { terms: { "status.keyword": ["VALIDATED"] } }] },
+    },
     sort: [{ "lastName.keyword": "asc" }],
     track_total_hits: true,
   });
-
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   function transformVolontaires(data, values) {
     let all = data;
@@ -155,6 +154,65 @@ export default function ListPDR(props) {
 
   if (loading) return <Loader />;
 
+  const filterArray = [
+    {
+      title: "Ligne",
+      name: "LIGNE",
+      datafield: "ligneId.keyword",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A") return item;
+        return bus.find((option) => option._id.toString() === item)?.busId;
+      },
+    },
+    {
+      title: "ID du centre de destination",
+      name: "CENTERID",
+      datafield: "sessionPhase1Id.keyword",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A") return item;
+        return bus.find((option) => option?.sessionId?.toString() === item).centerId;
+      },
+    },
+    {
+      title: "Nom du centre de destination",
+      name: "CENTERNAME",
+      datafield: "sessionPhase1Id.keyword",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A") return item;
+        let b = bus.find((option) => option?.sessionId?.toString() === item);
+        return centers.find((option) => option._id.toString() === b.centerId)?.name;
+      },
+    },
+    {
+      title: "Ville du centre de destination",
+      name: "CENTERCITY",
+      datafield: "sessionPhase1Id.keyword",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A") return item;
+        let b = bus.find((option) => option?.sessionId?.toString() === item);
+        return centers.find((option) => option._id.toString() === b.centerId)?.city;
+      },
+    },
+
+    { title: "Région du volontaire", name: "REGION", datafield: "region.keyword", missingLabel: "Non renseigné" },
+    {
+      title: "Département du volontaire",
+      name: "DEPARTMENT",
+      datafield: "department.keyword",
+      missingLabel: "Non renseigné",
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+    },
+  ];
+
+  const searchBarObject = {
+    placeholder: "Rechercher par prénom, nom, email, ville, code postal...",
+    datafield: ["email", "firstName", "lastName", "city", "zip"],
+  };
+
   return (
     <div className="flex flex-col w-full px-8 pb-8 pt-4">
       <div className="py-8 flex items-center gap-4">
@@ -169,201 +227,64 @@ export default function ListPDR(props) {
         </div>
       </div>
 
-      <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div className="flex flex-col bg-white py-4 mb-8 rounded-xl">
-          <div className="flex items-stretch justify-between  bg-white py-2 px-4">
-            <div className="flex items-center gap-2">
-              <DataSearch
-                defaultQuery={getDefaultQuery}
-                showIcon={false}
-                componentId="SEARCH"
-                dataField={["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"]}
-                placeholder="Rechercher par prénom, nom, email, ville, code postal..."
-                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                URLParams={true}
-                autosuggest={false}
-                className="datasearch-searchfield"
-                innerClass={{ input: "searchbox" }}
-              />
-              <div
-                className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
-                onClick={() => setFilterVisible((e) => !e)}>
-                <FilterSvg className="text-gray-400" />
-                Filtres
-              </div>
-            </div>
-            <button
-              className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
-              onClick={() => setIsExportOpen(true)}>
-              <BsDownload className="text-gray-400" />
-              Exporter
-            </button>
-            <ModalExport
-              isOpen={isExportOpen}
-              setIsOpen={setIsExportOpen}
-              index="young"
-              transform={transformVolontaires}
-              exportFields={youngPlanDeTranportExportFields}
-              filters={FILTERS}
-              getExportQuery={getExportQuery}
+      <div className="flex flex-col bg-white py-4 mb-8 rounded-xl">
+        <div className="flex items-stretch justify-between  bg-white pt-2 px-4">
+          <div className="flex items-center gap-2">
+            <Filters
+              defaultUrlParam={`cohort=${cohort}`}
+              pageId={pageId}
+              esId="young"
+              defaultQuery={getDefaultQuery()}
+              setData={(value) => setData(value)}
+              filters={filterArray}
+              searchBarObject={searchBarObject}
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+              paramData={paramData}
+              setParamData={setParamData}
             />
           </div>
-          <div className={`flex flex-wrap items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Type"
-              componentId="LIGNE"
-              dataField="ligneId.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "LIGNE") }}
-              renderItem={(e, count) => {
-                if (e === "Non renseigné") return `Non renseigné (${count})`;
-                return `${bus.find((option) => option._id.toString() === e)?.busId} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={true}
-              showMissing
-              searchPlaceholder="Rechercher..."
-              missingLabel="Non renseigné"
-              renderLabel={(items) => {
-                if (Object.keys(items).length === 0) return "Ligne";
-                const translated = Object.keys(items).map((item) => {
-                  if (item === "Non renseigné") return item;
-                  return bus.find((option) => option._id.toString() === item)?.busId;
-                });
-                let value = translated.join(", ");
-                value = "Ligne : " + value;
-                return <div>{value}</div>;
-              }}
-            />
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="ID du centre de destination"
-              componentId="CENTERID"
-              dataField="sessionPhase1Id.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "CENTERID") }}
-              renderItem={(e, count) => {
-                if (e === "Non renseigné") return `Nom renseigné (${count})`;
-                let b = bus.find((option) => option?.sessionId?.toString() === e);
-                return `${b?.centerId} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={true}
-              showMissing
-              searchPlaceholder="Rechercher..."
-              missingLabel="Non renseigné"
-              renderLabel={(items) => {
-                if (Object.keys(items).length === 0) return "ID du centre de destination";
-                const translated = Object.keys(items).map((item) => {
-                  if (item === "Non renseigné") return item;
-                  let b = bus.find((option) => option?.sessionId?.toString() === item);
-                  return b?.centerId;
-                });
-                let value = translated.join(", ");
-                value = "ID du centre : " + value;
-                return <div>{value}</div>;
-              }}
-            />
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Nom du centre de destination"
-              componentId="CENTERNAME"
-              dataField="sessionPhase1Id.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "CENTERNAME") }}
-              renderItem={(e, count) => {
-                if (e === "Non renseigné") return `Nom renseigné (${count})`;
-                let b = bus.find((option) => option?.sessionId?.toString() === e);
-                return `${centers.find((option) => option._id.toString() === b.centerId)?.name} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={true}
-              showMissing
-              searchPlaceholder="Rechercher..."
-              missingLabel="Non renseigné"
-              renderLabel={(items) => {
-                if (Object.keys(items).length === 0) return "Nom du centre de destination";
-                const translated = Object.keys(items).map((item) => {
-                  if (item === "Non renseigné") return item;
-                  let b = bus.find((option) => option?.sessionId?.toString() === item);
-                  return centers.find((option) => option._id.toString() === b?.centerId)?.name;
-                });
-                let value = translated.join(", ");
-                value = "Nom du centre : " + value;
-                return <div>{value}</div>;
-              }}
-            />
-            <MultiDropdownList
-              defaultQuery={getDefaultQuery}
-              className="dropdown-filter"
-              placeholder="Commune du centre de destination"
-              componentId="CENTERCITY"
-              dataField="sessionPhase1Id.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "CENTERCITY") }}
-              renderItem={(e, count) => {
-                if (e === "Non renseigné") return `Nom renseigné (${count})`;
-                let b = bus.find((option) => option?.sessionId?.toString() === e);
-                return `${centers.find((option) => option._id.toString() === b.centerId)?.city} (${count})`;
-              }}
-              title=""
-              URLParams={true}
-              showSearch={true}
-              showMissing
-              searchPlaceholder="Rechercher..."
-              missingLabel="Non renseigné"
-              renderLabel={(items) => {
-                if (Object.keys(items).length === 0) return "Commune du centre de destination";
-                const translated = Object.keys(items).map((item) => {
-                  if (item === "Non renseigné") return item;
-                  let b = bus.find((option) => option?.sessionId?.toString() === item);
-                  return centers.find((option) => option._id.toString() === b?.centerId)?.city;
-                });
-                let value = translated.join(", ");
-                value = "Commune du centre : " + value;
-                return <div>{value}</div>;
-              }}
-            />
-            <RegionFilter
-              defaultQuery={getDefaultQuery}
-              filters={FILTERS}
-              renderLabel={(items) => <div>{getFilterLabel(items, "Région du volontaire", "Région du volontaire")}</div>}
-            />
-            <DepartmentFilter
-              defaultQuery={getDefaultQuery}
-              filters={FILTERS}
-              renderLabel={(items) => <div>{getFilterLabel(items, "Département du volontaire", "Département du volontaire")}</div>}
-            />
-            <DeleteFilters />
-          </div>
-          <div className="reactive-result">
-            <ReactiveListComponent
-              pageSize={20}
-              defaultQuery={getDefaultQuery}
-              react={{ and: FILTERS }}
-              paginationAt="bottom"
-              showTopResultStats={false}
-              render={({ data }) => (
-                <div className="flex w-full flex-col mt-6 mb-2">
-                  <hr />
-                  <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 w-full gap-6">
-                    <div className="w-[40%]">Volontaire</div>
-                    <div className="w-[20%]">Ligne</div>
-                    <div className="w-[40%]">Centre de destination</div>
-                  </div>
-                  {data?.map((hit) => {
-                    return <Line key={hit._id} young={hit} bus={bus} centers={centers} cohort={cohort} />;
-                  })}
-                  <hr />
-                </div>
-              )}
-            />
-          </div>
+          <button className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm" onClick={() => setIsExportOpen(true)}>
+            <BsDownload className="text-gray-400" />
+            Exporter
+          </button>
+          <ModalExportV2
+            isOpen={isExportOpen}
+            setIsOpen={setIsExportOpen}
+            index="young"
+            transform={transformVolontaires}
+            exportFields={youngPlanDeTranportExportFields}
+            defaultQuery={getDefaultQuery()}
+            searchBarObject={searchBarObject}
+            selectedFilters={selectedFilters}
+            filters={filterArray}
+            exportTitle="volontaires"
+          />
         </div>
-      </ReactiveBase>
+        <div className="mt-2 px-4 flex flex-row flex-wrap items-center">
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
+        </div>
+        <ResultTable
+          paramData={paramData}
+          setParamData={setParamData}
+          currentEntryOnPage={data?.length}
+          render={
+            <div className="flex w-full flex-col mt-6 mb-2">
+              <hr />
+              <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 w-full gap-6">
+                <div className="w-[40%]">Volontaire</div>
+                <div className="w-[20%]">Ligne</div>
+                <div className="w-[40%]">Centre de destination</div>
+              </div>
+              {data?.map((hit) => {
+                return <Line key={hit._id} young={hit} bus={bus} centers={centers} cohort={cohort} />;
+              })}
+              <hr />
+            </div>
+          }
+        />
+      </div>
     </div>
   );
 }
