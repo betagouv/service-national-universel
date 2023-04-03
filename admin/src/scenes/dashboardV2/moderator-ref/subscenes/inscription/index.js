@@ -23,6 +23,7 @@ import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import StatutPhase from "../../../components/inscription/StatutPhase.js";
 
 import Details from "../../../components/inscription/Details";
+import plausibleEvent from "../../../../../services/plausible";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -132,7 +133,12 @@ export default function Index() {
           <ButtonPrimary className="text-sm">
             Exporter le rapport <span className="font-bold">“Inscription”</span>
           </ButtonPrimary>
-          <ButtonPrimary className="text-sm">
+          <ButtonPrimary
+            className="text-sm"
+            onClick={() => {
+              plausibleEvent("Dashboard/CTA - Exporter statistiques inscriptions");
+              print();
+            }}>
             Exporter les statistiques <span className="font-bold">“Inscription”</span>
           </ButtonPrimary>
         </div>
