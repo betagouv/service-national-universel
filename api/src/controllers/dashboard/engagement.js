@@ -3,7 +3,7 @@ const passport = require("passport");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const Joi = require("joi");
-const { ROLES, YOUNG_STATUS } = require("snu-lib");
+const { YOUNG_STATUS } = require("snu-lib");
 const router = express.Router();
 const YoungModel = require("../../models/young");
 
@@ -50,7 +50,7 @@ router.post("/volontaires-statuts-phase", passport.authenticate("referent", { se
       {
         $group: {
           _id: `$statusPhase${phase}`,
-          count: { $sum: 1 }
+          count: { $sum: 1 },
         },
       },
     ];

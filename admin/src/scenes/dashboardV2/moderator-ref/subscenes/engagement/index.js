@@ -2,10 +2,9 @@ import React, { useEffect, useState } from "react";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
-import { COHORTS, departmentList, regionList, ROLES } from "snu-lib";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib/constants";
+import { COHORTS, departmentList, regionList, ROLES, translateInscriptionStatus } from "snu-lib";
+import { YOUNG_STATUS } from "snu-lib/constants";
 import { useSelector } from "react-redux";
-import { translateInscriptionStatus, translatePhase1 } from "snu-lib/translation";
 import { academyList, academyToDepartments, departmentToAcademy } from "snu-lib/academy";
 import { department2region, region2department } from "snu-lib/region-and-departments";
 import Section from "../../../components/ui/Section";
@@ -125,4 +124,3 @@ export default function Index() {
     </DashboardContainer>
   );
 }
-

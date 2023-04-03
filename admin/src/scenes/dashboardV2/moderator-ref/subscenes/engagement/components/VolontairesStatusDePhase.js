@@ -12,7 +12,8 @@ export default function VolontairesStatutsDePhase({ filters, className = "" }) {
 
   useEffect(() => {
     loadData();
-  }, [filters, phase])
+  }, [filters, phase]);
+
   function selectPhase(e) {
     setPhase(parseInt(e.target.value));
   }
