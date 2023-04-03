@@ -28,7 +28,7 @@ export default function ListPDR(props) {
   const history = useHistory();
 
   const [data, setData] = React.useState([]);
-  const pageId = "listyoungPDR";
+  const pageId = "listYoungPDR";
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({
     size: 20,
