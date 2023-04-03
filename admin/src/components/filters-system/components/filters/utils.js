@@ -76,7 +76,6 @@ import api from "../../../../services/api";
 
 export const buildBody = (selectedFilters, page, size, defaultQuery, filterArray, searchBarObject = null, sortSelected = null) => {
   let query = structuredClone(defaultQuery.query);
-  console.log("query", query);
   let bodyQuery = {
     query: query,
     aggs: {},
@@ -191,7 +190,6 @@ export const buildQuery = async (esId, selectedFilters, page = 0, size, defaultQ
   if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
 
   const aggs = resAggs.responses[0].aggregations;
-  console.log("resQuery", resQuery);
   const data = resQuery.responses[0].hits.hits.map((h) => ({ ...h._source, _id: h._id }));
   const count = resQuery.responses[0].hits.total.value;
   const newFilters = {};
@@ -231,9 +229,10 @@ export const getURLParam = (urlParams, setParamData, filters) => {
   });
   return localFilters;
 };
-export const currentFilterAsUrl = (filters, page) => {
+export const currentFilterAsUrl = (filters, page, filterArray, defaultUrlParam) => {
   let selectedFilters = {};
   Object.keys(filters)?.forEach((key) => {
+    if (!filterArray.find((f) => f.name === key)) return;
     if (filters[key]?.filter?.length > 0) selectedFilters[key] = filters[key];
   });
   const length = Object.keys(selectedFilters).length;
@@ -250,6 +249,10 @@ export const currentFilterAsUrl = (filters, page) => {
     index++;
     return acc;
   }, "");
+
+  // add default url
+  if (defaultUrlParam) url = defaultUrlParam + (url !== "" ? "&" : "") + url;
+
   // add pagination to url
   url += `${url !== "" ? "&" : ""}page=${page + 1}`;
   return url;
@@ -334,6 +337,7 @@ export const saveTitle = (selectedFilters, filters) => {
         return;
       }
       if (selectedFilters[key]?.filter?.length > 0) {
+        if (!filters.find((f) => f.name === key)) return undefined;
         return filters.find((f) => f.name === key)?.title + " (" + selectedFilters[key].filter.length + ")";
       }
     })
