@@ -84,7 +84,7 @@ export default function Affected() {
         </header>
 
         {isStepMedicalFieldDone(young) && (
-          <div className="md:border-t-[1px] flex flex-col md:flex-row flex-none gap-6 md:gap-8 pt-[1rem] md:pt-[4rem] order-2 overflow-hidden">
+          <div className="md:border-t-[1px] flex flex-col md:flex-row flex-none gap-6 md:gap-16 pt-[1rem] md:pt-[4rem] order-2 overflow-hidden">
             {young.meetingPointId ? (
               <TravelInfoBus meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
             ) : young.deplacementPhase1Autonomous === "true" ? (
