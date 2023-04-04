@@ -2,10 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import {
   academyList,
-  academyToDepartments,
   COHORTS,
-  department2region,
-  departmentList,
   departmentToAcademy,
   ES_NO_LIMIT,
   region2department,

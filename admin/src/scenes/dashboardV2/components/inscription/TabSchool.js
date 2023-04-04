@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { HiOutlineChevronLeft, HiOutlineChevronRight } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { region2department, ES_NO_LIMIT, ROLES } from "snu-lib";
+import { ES_NO_LIMIT, ROLES } from "snu-lib";
 import api from "../../../../services/api";
 import { replaceSpaces } from "../../../../utils";
 

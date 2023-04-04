@@ -5,27 +5,15 @@ import { HorizontalBar } from "../../../components/graphs";
 
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import {
-  academyList,
-  academyToDepartments,
-  COHORTS,
-  department2region,
-  departmentList,
-  departmentToAcademy,
-  ES_NO_LIMIT,
-  REFERENT_ROLES,
-  region2department,
-  regionList,
-  ROLES,
-} from "snu-lib";
+import { academyList, COHORTS, departmentToAcademy, ES_NO_LIMIT, REFERENT_ROLES, region2department, regionList, ROLES } from "snu-lib";
 import api from "../../../../../services/api";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import StatutPhase from "../../../components/inscription/StatutPhase.js";
 
-import Details from "../../../components/inscription/Details";
 import plausibleEvent from "../../../../../services/plausible";
-import TabSchool from "../../../components/inscription/TabSchool";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
+import Details from "../../../components/inscription/Details";
+import TabSchool from "../../../components/inscription/TabSchool";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);

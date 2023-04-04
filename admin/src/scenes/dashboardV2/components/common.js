@@ -1,4 +1,3 @@
-import React from "react";
 import { academyToDepartments, department2region, departmentList, departmentToAcademy, region2department, ROLES } from "snu-lib";
 
 export const getFilteredDepartment = (setSelectedFilters, selectedFilters, setDepartmentOptions, user) => {
