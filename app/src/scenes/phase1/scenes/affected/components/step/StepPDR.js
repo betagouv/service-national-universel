@@ -176,7 +176,7 @@ export default function StepPDR({ young, center }) {
               {young.meetingPointId ? (
                 <>{addressOf(choosenMeetingPoint)}</>
               ) : young.deplacementPhase1Autonomous === "true" ? (
-                <>Je me rends au centre et en revient par mes propres moyens</>
+                <>Je me rends au centre et en reviens par mes propres moyens</>
               ) : young.transportInfoGivenByLocal === "true" ? (
                 <>Les informations sur les modalités d&apos;acheminement vers le centre et de retour vous seront transmises par e-mail par les services académiques.</>
               ) : pdrChoiceExpired ? (
@@ -264,7 +264,7 @@ export default function StepPDR({ young, center }) {
                 </>
               ) : young.deplacementPhase1Autonomous === "true" ? (
                 <>
-                  <div>Je me rends au centre et en revient par mes propres moyens</div>
+                  <div>Je me rends au centre et en reviens par mes propres moyens</div>
                   {cohort && <MobileDateDetail startHour={ALONE_ARRIVAL_HOUR} returnHour={ALONE_DEPARTURE_HOUR} cohort={cohort} />}
                 </>
               ) : young.transportInfoGivenByLocal === "true" ? (
@@ -411,7 +411,7 @@ function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired,
   return (
     <div className="flex flex-col items-center bg-gray-50 rounded-lg p-4">
       <LinearMap gray="true" />
-      <div className="flex-1 text-[#242526] text-base font-bold mt-3 text-center">Je me rends au centre et en revient par mes propres moyens</div>
+      <div className="flex-1 text-[#242526] text-base font-bold mt-3 text-center">Je me rends au centre et en reviens par mes propres moyens</div>
       <button onClick={toggleMore} className="text-blue-600 font-medium text-xs mt-6 mb-8 md:hover:underline relative" id="toggle-button">
         {opened ? "Masquer les informations" : "En savoir plus"}
         {opened && (
@@ -459,7 +459,7 @@ function MeetingPointGoAloneMobile({ center, young, onChoose, choosed, expired }
   return (
     <div className="flex flex-col items-center bg-gray-50 rounded-lg p-4">
       <LinearMap gray="true" />
-      <div className="flex-1 text-[#242526] text-base font-bold mt-3 text-center">Je me rends au centre et en revient par mes propres moyens</div>
+      <div className="flex-1 text-[#242526] text-base font-bold mt-3 text-center">Je me rends au centre et en reviens par mes propres moyens</div>
       <button onClick={toggleMore} className="text-blue-600 font-medium text-xs mt-6 mb-8 md:hover:underline relative">
         {opened ? "Masquer les informations" : "En savoir plus"}
         {opened && (

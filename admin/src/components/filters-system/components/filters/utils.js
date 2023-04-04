@@ -145,9 +145,9 @@ export const buildBody = (selectedFilters, page, size, defaultQuery, filterArray
 };
 
 const buildAggs = (filterArray, selectedFilters, searchBarObject, defaultQuery) => {
-  let aggsQuery = structuredClone(defaultQuery.query);
+  let aggsQuery = structuredClone(defaultQuery);
   let bodyAggs = {
-    query: aggsQuery,
+    query: aggsQuery.query,
     aggs: {},
     size: 0,
     track_total_hits: true,
@@ -229,9 +229,10 @@ export const getURLParam = (urlParams, setParamData, filters) => {
   });
   return localFilters;
 };
-export const currentFilterAsUrl = (filters, page) => {
+export const currentFilterAsUrl = (filters, page, filterArray, defaultUrlParam) => {
   let selectedFilters = {};
   Object.keys(filters)?.forEach((key) => {
+    if (!filterArray.find((f) => f.name === key)) return;
     if (filters[key]?.filter?.length > 0) selectedFilters[key] = filters[key];
   });
   const length = Object.keys(selectedFilters).length;
@@ -248,6 +249,10 @@ export const currentFilterAsUrl = (filters, page) => {
     index++;
     return acc;
   }, "");
+
+  // add default url
+  if (defaultUrlParam) url = defaultUrlParam + (url !== "" ? "&" : "") + url;
+
   // add pagination to url
   url += `${url !== "" ? "&" : ""}page=${page + 1}`;
   return url;
@@ -273,9 +278,9 @@ const getAggsFilters = (name, selectedFilters, searchBarObject, bodyAggs, filter
     });
   }
 
-  if (!bodyAggs.query?.bool) bodyAggs.query.bool = { must: [], filter: [] };
-  if (!bodyAggs.query.bool?.fitler) bodyAggs.query.bool.filter = [];
-  if (!bodyAggs.query.bool?.must) bodyAggs.query.bool.must = [];
+  // if (!bodyAggs.query?.bool) bodyAggs.query.bool = { must: [], filter: [] };
+  // if (!bodyAggs.query.bool?.fitler) bodyAggs.query.bool.filter = [];
+  // if (!bodyAggs.query.bool?.must) bodyAggs.query.bool.must = [];
 
   Object.keys(selectedFilters).map((key) => {
     if (selectedFilters.customComponentQuery) return;
@@ -332,6 +337,7 @@ export const saveTitle = (selectedFilters, filters) => {
         return;
       }
       if (selectedFilters[key]?.filter?.length > 0) {
+        if (!filters.find((f) => f.name === key)) return undefined;
         return filters.find((f) => f.name === key)?.title + " (" + selectedFilters[key].filter.length + ")";
       }
     })

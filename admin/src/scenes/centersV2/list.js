@@ -91,6 +91,8 @@ const ListSession = ({ firstSession }) => {
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
   const [cohesionCenter, setCohesionCenter] = useState([]);
 
+  const history = useHistory();
+
   const [data, setData] = React.useState([]);
   const pageId = "centerSession";
   const [selectedFilters, setSelectedFilters] = React.useState({});

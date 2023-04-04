@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import validator from "validator";
 import "dayjs/locale/fr";
 
@@ -13,10 +13,7 @@ import { youngEmployedSituationOptions, youngSchooledSituationOptions } from "..
 import dayjs from "dayjs";
 import MiniSwitch from "../phase0/components/MiniSwitch";
 import RadioButton from "../phase0/components/RadioButton";
-import { DropdownItem, DropdownMenu, DropdownToggle, Modal, Spinner, UncontrolledDropdown } from "reactstrap";
-import { IoWarningOutline } from "react-icons/io5";
-import { BorderButton, PlainButton } from "../phase0/components/Buttons";
-import Chevron from "../../components/Chevron";
+import { Spinner } from "reactstrap";
 
 //Identite
 import Field from "./components/Field";
@@ -27,17 +24,20 @@ import FieldSituationsParticulieres from "../phase0/components/FieldSituationsPa
 import Check from "../../assets/icons/Check";
 import PhoneField from "../phase0/components/PhoneField";
 import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
+import ConfirmationModal from "../../components/ui/modals/ConfirmationModal";
 
 export default function Create() {
   const history = useHistory();
-  const [selectedRepresentant, setSelectedRepresentant] = React.useState(1);
-  const [uploadError, setUploadError] = React.useState("");
-  const [youngId, setYoungId] = React.useState(null);
-  const [loading, setLoading] = React.useState(false);
+  const [selectedRepresentant, setSelectedRepresentant] = useState(1);
+  const [uploadError, setUploadError] = useState("");
+  const [youngId, setYoungId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [cohorts, setCohorts] = useState([]);
+  const [egibilityError, setEgibilityError] = useState("");
+  const [isComplememtaryListModalOpen, setComplememtaryListModalOpen] = useState(false);
 
-  const [errors, setErrors] = React.useState({});
-  const [values, setValues] = React.useState({
-    status: "VALIDATED",
+  const [errors, setErrors] = useState({});
+  const [values, setValues] = useState({
     firstName: "",
     lastName: "",
     birthdateAt: null,
@@ -120,16 +120,8 @@ export default function Create() {
     parent2City: "",
     parent2Country: "",
   });
-  const [cohorts, setCohorts] = React.useState([]);
-  const cohort = cohorts.find(({ name }) => name === values?.cohort);
-  const [egibilityError, setEgibilityError] = React.useState("");
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [status, setStatus] = React.useState({});
 
-  const statusOptions = [
-    { value: YOUNG_STATUS.WAITING_LIST, label: "Placer sur liste complémentaire" },
-    { value: YOUNG_STATUS.VALIDATED, label: "Valider l'inscription" },
-  ];
+  const cohort = cohorts.find(({ name }) => name === values?.cohort);
 
   const validate = () => {
     const errors = {};
@@ -333,21 +325,27 @@ export default function Create() {
     setValues((prevValues) => ({ ...prevValues, [key]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const receivedErrors = validate();
     setErrors(receivedErrors);
     if (Object.keys(receivedErrors).length !== 0) return;
-    if (cohort.isFull) setIsOpen(true);
-    else sendData();
+    const res = await api.get(`/inscription-goal/${cohort?.name}/department/${values.department}`);
+    if (!res.ok) throw new Error(res);
+    const fillingRate = res.data;
+    if (fillingRate >= 1.05) {
+      setComplememtaryListModalOpen(true);
+    } else {
+      sendData();
+    }
   };
 
-  const sendData = async () => {
+  const sendData = async (status = YOUNG_STATUS.VALIDATED) => {
     try {
       setLoading(true);
       values.addressVerified = values.addressVerified.toString();
       // necessaire ?
       delete values.certifyData;
-      const { ok, code, young } = await api.post("/young/invite", { ...values, status: status.value });
+      const { ok, code, young } = await api.post("/young/invite", { ...values, status });
       if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
       const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate);
       setYoungId(young._id);
@@ -363,6 +361,7 @@ export default function Create() {
     if (!values.temporaryDate) return;
     setFieldValue("birthdateAt", dayjs(values.temporaryDate).locale("fr").format("YYYY-MM-DD"));
   }, [values.temporaryDate]);
+
   React.useEffect(() => {
     if ((values.grade !== "" || values.schooled === "false") && (values.department !== "" || values.schoolDepartment !== "") && values.birthdateAt !== null) {
       (async () => {
@@ -385,10 +384,24 @@ export default function Create() {
       setEgibilityError("");
       setCohorts([]);
     }
-  }, [values.schoolDepartment, values.department, values.schoolRegion, values.region, values.grade, values.birthdateAt, values.status]);
+  }, [values.schoolDepartment, values.department, values.schoolRegion, values.region, values.grade, values.birthdateAt]);
 
   return (
     <div className="py-4 px-8">
+      <ConfirmationModal
+        isOpen={isComplememtaryListModalOpen}
+        title={
+          <span>
+            L&apos;objectif d&apos;inscription de votre département a été atteint à 105%. Le dossier d&apos;inscription de {values.firstName} {values.lastName} va être{" "}
+            <strong className="text-bold">validé sur liste complémentaire</strong>.
+          </span>
+        }
+        message="Souhaitez-vous confirmer l'action ?"
+        onClose={() => {
+          setComplememtaryListModalOpen(false);
+        }}
+        onConfirm={() => sendData(YOUNG_STATUS.WAITING_LIST)}
+      />
       <div className="relative bg-white shadow rounded mb-4 pt-4">
         <div className="text-2xl font-bold flex items-center justify-center">Créer une inscription manuellement</div>
         <div className="border-b mb-5 mt-6 mx-9" />
@@ -488,52 +501,6 @@ export default function Create() {
           )}
         </div>
       )}
-      <Modal size="lg" centered isOpen={isOpen}>
-        <div className="bg-white rounded-[8px]">
-          <div className="px-[24px] pt-[24px]">
-            <h1 className="text-[20px] leading-[28px] text-red-500 mt-[24px] text-center">ALERTE</h1>
-            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 px-4 py-3 my-4 mx-4 rounded-lg">
-              <div className="flex gap-2 items-center">
-                <IoWarningOutline className="h-6 w-6" />
-                <p className="font-bold">Objectif d&apos;inscription régional atteint</p>
-              </div>
-              <p className="text-sm">
-                Objectif d&apos;inscription régional atteint L&apos;objectif d&apos;inscription de votre région a été atteint. Merci de placer le jeune sur liste complémentaire ou
-                de vous rapprocher de votre coordinateur régional avant de valider son inscription.
-              </p>
-              <UncontrolledDropdown isActiveFromChild className="mt-2">
-                <DropdownToggle tag="button">
-                  <div className="border-[#D1D5DB] border-[1px] rounded-[100px] bg-white flex items-center justify-between w-[375px] py-[4px] px-[15px]">
-                    {status?.label || "Que souhaitez-vous faire ?"}
-                    <Chevron color="#9a9a9a" style={{ padding: 0, margin: 0, marginLeft: "15px" }} />
-                  </div>
-                </DropdownToggle>
-                <DropdownMenu>
-                  {statusOptions.map((e) => (
-                    <DropdownItem key={e.label} className="dropdown-item" onClick={() => setStatus(e)}>
-                      {e.label}
-                    </DropdownItem>
-                  ))}
-                </DropdownMenu>
-              </UncontrolledDropdown>
-            </div>
-          </div>
-          <div className="flex p-[24px] items-center justify-between">
-            <BorderButton onClick={() => setIsOpen(false)} className="mr-[6px] grow">
-              Annuler
-            </BorderButton>
-            <PlainButton
-              onClick={() => {
-                if (status === {}) return toastr.error("Veuillez choisir une action.");
-                setIsOpen(false);
-                sendData();
-              }}
-              className="ml-[6px] grow">
-              Confirmer
-            </PlainButton>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 }

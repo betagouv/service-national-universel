@@ -17,7 +17,6 @@ import {
   inFranceOrAbroadOptions,
   genderOptions,
   booleanOptions,
-  debounce,
 } from "../utils";
 
 import api from "../../../services/api";
@@ -26,7 +25,7 @@ import SearchableSelect from "../../../components/SearchableSelect";
 import Toggle from "../../../components/inscription/toggle";
 import CheckBox from "../../../components/inscription/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
-import { translate } from "../../../utils";
+import { debounce, translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import DesktopPageContainer from "../components/DesktopPageContainer";
 import plausibleEvent from "../../../services/plausible";

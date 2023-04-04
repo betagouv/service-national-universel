@@ -1,3 +1,37 @@
+# [1.246.0](https://github.com/betagouv/service-national-universel/compare/v1.245.0...v1.246.0) (2023-04-03)
+
+
+### Bug Fixes
+
+* **admin:**  school select display when null ([75322c9](https://github.com/betagouv/service-national-universel/commit/75322c9fbe1aa51130928e5371bdaeb1c55aac2f))
+* **admin:** liste demande de modifications ([2429eb9](https://github.com/betagouv/service-national-universel/commit/2429eb91a7c3a05226e7848b2531f372bb411abd))
+* **admin:** session redirect ([0a93220](https://github.com/betagouv/service-national-universel/commit/0a93220b8d7199557ba7deaba25d1bebf118939f))
+* **app:** correction d'une faute de conjugaison lors du choix de moyen de transport ([#2462](https://github.com/betagouv/service-national-universel/issues/2462)) ([826933f](https://github.com/betagouv/service-national-universel/commit/826933f8f966f3b36a4c20caaa78b37704433fe0))
+* **app:** navbar ([9b4e700](https://github.com/betagouv/service-national-universel/commit/9b4e7009c62d8286b836f7b4b854571305aeca62))
+* **app:** phase recap  visual fix ([4ab2bb5](https://github.com/betagouv/service-national-universel/commit/4ab2bb550b5c35f18c38f39d41d584abc7d0e899))
+
+
+### Features
+
+* **admin:** demande liste modification bus / PDR by young + logique filter with defaultUrlParm ([#2461](https://github.com/betagouv/service-national-universel/issues/2461)) ([a9a4c70](https://github.com/betagouv/service-national-universel/commit/a9a4c7013005f5e64af904d75ded3756e614a4d6))
+* **admin:** fix export plan de transport + new filters on list young by bus ([333bc41](https://github.com/betagouv/service-national-universel/commit/333bc41012a39fa488d78e45ed60cf220eb46f1b))
+* **admin:** Permettre aux référents d'ajouter manuellement une école ([2e36fa2](https://github.com/betagouv/service-national-universel/commit/2e36fa2c43a3e36c9a3bbb635bdc71dae15ea0db))
+* **app, admin:** Ajouter de nouveaux types d'engagements MIG ([#2455](https://github.com/betagouv/service-national-universel/issues/2455)) ([0b2fcab](https://github.com/betagouv/service-national-universel/commit/0b2fcab725ed570ff9a7d6589161c11d7dbe2f52))
+
+# [1.245.0](https://github.com/betagouv/service-national-universel/compare/v1.244.0...v1.245.0) (2023-03-31)
+
+
+### Bug Fixes
+
+* **admin:** fill rate at user create ([#2439](https://github.com/betagouv/service-national-universel/issues/2439)) ([f011dbe](https://github.com/betagouv/service-national-universel/commit/f011dbe2dfd55781197370d12a422662925e4ce1))
+* tentative de fix author ([#2456](https://github.com/betagouv/service-national-universel/issues/2456)) ([28b5491](https://github.com/betagouv/service-national-universel/commit/28b5491bf717ba4af23e54a5917a80a81d3cb09e))
+* **admin:** export disabled label ([9ec71d9](https://github.com/betagouv/service-national-universel/commit/9ec71d9186332b211d3d9a6f4afe42ef85d51ae0))
+
+
+### Features
+
+* **admin:** new filters on PDT ([#2457](https://github.com/betagouv/service-national-universel/issues/2457)) ([f0e686b](https://github.com/betagouv/service-national-universel/commit/f0e686bf70ade4f95e8d3eeba280f2ee299edde2))
+
 # [1.244.0](https://github.com/betagouv/service-national-universel/compare/v1.243.0...v1.244.0) (2023-03-30)
 
 

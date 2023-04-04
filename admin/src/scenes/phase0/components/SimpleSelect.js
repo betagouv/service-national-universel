@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 
-export default function SimpleSelect({ value, transformer, options, onChange, filterOnType, showBackgroundColor = true }) {
+export default function SimpleSelect({ value, transformer, options, onChange, filterOnType, showBackgroundColor = true, allowCustomValue = false }) {
   const [selectOptionsOpened, setSelectOptionsOpened] = useState(false);
   const [filter, setFilter] = useState("");
   const [filteredOptions, setFilteredOptions] = useState([]);
@@ -97,6 +97,11 @@ export default function SimpleSelect({ value, transformer, options, onChange, fi
               {opt.label}
             </div>
           ))}
+          {allowCustomValue && filter?.length && !filteredOptions?.length ? (
+            <button onClick={() => selectOption(filter)} className="w-full p-2 text-left">
+              Ajoutez manuellement: &quot;{filter}&quot;
+            </button>
+          ) : null}
         </div>
       )}
     </div>

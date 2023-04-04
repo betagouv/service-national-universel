@@ -33,6 +33,7 @@ export default function Field({
   maxLength,
   copy = false,
   error: errorProps,
+  allowCustomValue = false,
 }) {
   const [mouseIn, setMouseIn] = useState(false);
   const [opened, setOpened] = useState(false);
@@ -111,7 +112,15 @@ export default function Field({
         {mode === "edition" && editable ? (
           <>
             {type === "select" && (
-              <SimpleSelect value={value} transformer={transformer} showBackgroundColor={showBackgroundColor} options={options} onChange={onChange} filterOnType={filterOnType} />
+              <SimpleSelect
+                value={value}
+                transformer={transformer}
+                showBackgroundColor={showBackgroundColor}
+                options={options}
+                onChange={onChange}
+                filterOnType={filterOnType}
+                allowCustomValue={allowCustomValue}
+              />
             )}
             {type === "text" && (
               <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={`block p-[5px] ${showBackgroundColor && "bg-gray-50"}  w-[100%]`} />
