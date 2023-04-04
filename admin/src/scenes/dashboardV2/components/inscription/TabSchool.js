@@ -19,11 +19,16 @@ export default function TabSchool({ filters }) {
   const user = useSelector((state) => state.Auth.user);
 
   const fetchYoungByschool = async () => {
+    setYoungBySchool(null);
+    setNoResult(false);
+    setTotal(0);
+    setPageMax(0);
+    setIsLoading(true);
     if (!filters.region?.length && !filters.department?.length && !filters.academy?.length && user.role === ROLES.ADMIN) {
       setNoFilterDepartement(true);
-      setYoungBySchool(null);
       setNoResult(true);
       setIsLoading(false);
+
       return;
     } else {
       setNoFilterDepartement(false);
