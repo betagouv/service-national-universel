@@ -1,3 +1,12 @@
+## [1.246.1](https://github.com/betagouv/service-national-universel/compare/v1.246.0...v1.246.1) (2023-04-04)
+
+
+### Bug Fixes
+
+* **api:** Reduce pool size mongo on prod ([647b94b](https://github.com/betagouv/service-national-universel/commit/647b94bfbae9eb358cd67d32f944944c62679fe2))
+* **app:** remove missing referentManagerPhase2 alert ([9d77600](https://github.com/betagouv/service-national-universel/commit/9d77600cb43c2dfcf2fecd4f814fc8f530ffb601))
+* **sib:** Lower send in blue mongoDB connection ([6dcfe65](https://github.com/betagouv/service-national-universel/commit/6dcfe65054552fc62c8c0d05bc5f55a9395f7c35))
+
 # [1.246.0](https://github.com/betagouv/service-national-universel/compare/v1.245.0...v1.246.0) (2023-04-03)
 
 
