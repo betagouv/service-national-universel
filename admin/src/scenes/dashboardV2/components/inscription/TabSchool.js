@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { HiOutlineChevronLeft, HiOutlineChevronRight } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { ES_NO_LIMIT, ROLES } from "snu-lib";
+import { region2department, ES_NO_LIMIT, ROLES } from "snu-lib";
 import api from "../../../../services/api";
 import { replaceSpaces } from "../../../../utils";
 
@@ -40,12 +40,15 @@ export default function TabSchool({ filters }) {
       size: 0,
       track_total_hits: true,
     };
-    if (filters.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filters.region } });
+    if (filters.region?.length) body.query.bool.filter.push({ terms: { "schoolRegion.keyword": filters.region } });
     if (filters.department?.length) body.query.bool.filter.push({ terms: { "schoolDepartment.keyword": filters.department } });
-    if (filters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filters.academy } });
     if (filters.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filters.cohort } });
 
-    const { responses } = await api.esQuery("young", body);
+    let route = "young";
+    if (user.role === ROLES.REFERENT_DEPARTMENT) route = "young-having-school-in-department/inscriptions";
+    if (user.role === ROLES.REFERENT_REGION) route = "young-having-school-in-region/inscriptions";
+
+    const { responses } = await api.esQuery("young", body, route);
     if (!responses?.length) return setNoResult(true);
     if (setNoResult(responses[0].aggregations.school.buckets.length === 0)) {
       setNoResult(true);
