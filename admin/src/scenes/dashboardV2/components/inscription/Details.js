@@ -29,25 +29,25 @@ export default function Details({ selectedFilters }) {
     const res = await getDetailInscriptions({ ...selectedFilters, ...selectedFiltersBottom });
     // get all the years from the res object
     const objectYears = {};
-    Object.keys(res.age).forEach((e) => {
+    Object.keys(res?.age || {}).forEach((e) => {
       const year = new Date(parseInt(e)).getFullYear();
       if (!objectYears[year]) objectYears[year] = 1;
       else objectYears[year] += 1;
     });
     setAge(objectYears);
-    setSexe(res.gender);
-    setGrade(res.grade);
-    setSituation(res.situation);
-    setQpv(res.qpv);
-    setRural(res.rural);
+    setSexe(res?.gender || {});
+    setGrade(res?.grade || {});
+    setSituation(res?.situation || {});
+    setQpv(res?.qpv || {});
+    setRural(res?.rural || {});
     setSpecificSituation({
-      handicap: res.handicap,
-      allergies: res.allergies,
-      handicapInSameDepartment: res.handicapInSameDepartment,
-      reducedMobilityAccess: res.reducedMobilityAccess,
-      ppsBeneficiary: res.ppsBeneficiary,
-      paiBeneficiary: res.paiBeneficiary,
-      specificAmenagment: res.specificAmenagment,
+      handicap: res?.handicap || {},
+      allergies: res?.allergies || {},
+      handicapInSameDepartment: res?.handicapInSameDepartment || {},
+      reducedMobilityAccess: res?.reducedMobilityAccess || {},
+      ppsBeneficiary: res?.ppsBeneficiary || {},
+      paiBeneficiary: res?.paiBeneficiary || {},
+      specificAmenagment: res?.specificAmenagment || {},
     });
   }
 
