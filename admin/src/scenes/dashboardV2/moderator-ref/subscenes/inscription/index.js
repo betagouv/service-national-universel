@@ -24,6 +24,7 @@ import StatutPhase from "../../../components/inscription/StatutPhase.js";
 
 import Details from "../../../components/inscription/Details";
 import plausibleEvent from "../../../../../services/plausible";
+import TabSchool from "../../../components/inscription/TabSchool";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -160,7 +161,10 @@ export default function Index() {
           />
         </div>
         <StatutPhase values={inscriptionDetailObject} />
-        <Details selectedFilters={selectedFilters} />
+        <div className="flex gap-4">
+          <Details selectedFilters={selectedFilters} />
+          <TabSchool filters={selectedFilters} />
+        </div>
       </div>
     </DashboardContainer>
   );

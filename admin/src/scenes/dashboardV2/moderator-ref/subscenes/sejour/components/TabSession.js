@@ -105,7 +105,7 @@ export default function TabSession({ sessionList, filters }) {
           <HiOutlineExternalLink className="h-5 w-5 text-gray-400 cursor-pointer" />
         </Link>
       </div>
-      <table className="table-fixed w-full">
+      <table className={`table-fixed w-full ${isLoading || noResult ? "h-full" : ""}`}>
         <thead>
           <tr className="flex items-center border-y-[1px] border-gray-100 py-4">
             <th className="w-[40%] uppercase text-xs text-gray-500 font-medium leading-4">centres</th>
