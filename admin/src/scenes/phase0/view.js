@@ -19,6 +19,8 @@ import {
   getAge,
   ROLES,
   SENDINBLUE_TEMPLATES,
+  FILLING_RATE_THRESHOLD,
+  shouldCheckFillRateOnCohortChange,
 } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
@@ -29,7 +31,7 @@ import FieldSituationsParticulieres from "./components/FieldSituationsParticulie
 import ShieldCheck from "../../assets/icons/ShieldCheck";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
-import ConfirmationModal from "./components/ConfirmationModal";
+import ConfirmationModal from "../../components/ui/modals/ConfirmationModal";
 import { countryOptions, SPECIFIC_SITUATIONS_KEY, youngEmployedSituationOptions, youngSchooledSituationOptions } from "./commons";
 import Check from "../../assets/icons/Check";
 import RadioButton from "./components/RadioButton";
@@ -559,6 +561,9 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
   const [saving, setSaving] = useState(false);
   const [birthDate, setBirthDate] = useState({ day: "", month: "", year: "" });
   const [errors, setErrors] = useState({});
+  const [addressVerified, setAddressVerified] = useState(true);
+  const [isStatusChangeValidationModalOpen, setStatusChangeValidationModalOpen] = useState(false);
+  const [newStatus, setNewStatus] = useState(undefined);
 
   useEffect(() => {
     if (young) {
@@ -583,6 +588,11 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     setSectionMode(mode === "default" ? globalMode : mode);
   }
 
+  function onLocalAddressChange(field, value) {
+    onLocalChange(field, value);
+    setAddressVerified(false);
+  }
+
   function onLocalChange(field, value) {
     setData({ ...data, [field]: value });
   }
@@ -592,10 +602,26 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     setErrors({});
   }
 
-  async function onSave() {
+  function validateStatusChange() {
+    setStatusChangeValidationModalOpen(false);
+    onSave(false);
+  }
+
+  async function onSave(shouldRequestStatusChangeValidation = true) {
     setSaving(true);
     if (validate()) {
       try {
+        if (young.department !== data.department && shouldRequestStatusChangeValidation && shouldCheckFillRateOnCohortChange(young)) {
+          const res = await api.get(`/inscription-goal/${young.cohort}/department/${data.department}`);
+          if (!res.ok) throw new Error(res);
+          const fillingRate = res.data;
+          const newStatus = fillingRate >= FILLING_RATE_THRESHOLD ? YOUNG_STATUS.WAITING_LIST : YOUNG_STATUS.VALIDATED;
+          if (young.status !== newStatus) {
+            setNewStatus(newStatus);
+            setStatusChangeValidationModalOpen(true);
+            return setSaving(false);
+          }
+        }
         const result = await api.put(`/young-edition/${young._id}/identite`, data);
         if (result.ok) {
           toastr.success("Les données ont bien été enregistrées.");
@@ -618,6 +644,11 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     let result = true;
     let errors = {};
 
+    if (data.country && data.country.toUpperCase() === "FRANCE" && !addressVerified) {
+      errors.addressVerified = "Veuillez vérifier l'adresse";
+      result = false;
+    }
+
     if (!data.email || !validator.isEmail(data.email)) {
       errors.email = "L'email ne semble pas valide";
       result = false;
@@ -638,6 +669,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     result = validateEmpty(data, "zip", errors) && result;
     result = validateEmpty(data, "city", errors) && result;
     result = validateEmpty(data, "country", errors) && result;
+    result = validateEmpty(data, "country", errors) && result;
 
     setErrors(errors);
     return result;
@@ -656,10 +688,30 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
       zip: isConfirmed ? suggestion.zip : data.zip,
       city: isConfirmed ? suggestion.city : data.city,
     });
+    setAddressVerified(true);
+    setErrors({ ...errors, addressVerified: undefined });
   };
+
+  const statusChangeModalTitle =
+    newStatus === YOUNG_STATUS.WAITING_LIST
+      ? `Le dossier de ${young.firstName} ${young.lastName} va être validé sur liste complémentaire`
+      : `Le dossier de ${young.firstName} ${young.lastName} va être validé sur liste principale`;
+  const statusChangeModalMessage =
+    newStatus === YOUNG_STATUS.WAITING_LIST
+      ? "L'objectif d'inscription du nouveau département a été atteint à 105%"
+      : "L'objectif d'inscription du nouveau département n'a pas été atteint à 105%";
 
   return (
     <SectionContext.Provider value={{ errors }}>
+      <ConfirmationModal
+        onClose={() => {
+          setStatusChangeValidationModalOpen(false);
+        }}
+        isOpen={isStatusChangeValidationModalOpen}
+        message={statusChangeModalMessage}
+        title={statusChangeModalTitle}
+        onConfirm={validateStatusChange}
+      />
       <Section
         step={globalMode === "correction" ? "Première étape" : null}
         title={globalMode === "correction" ? "Vérifier l'identité" : "Informations générales"}
@@ -793,7 +845,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               currentRequest={currentRequest}
               correctionRequest={getCorrectionRequest(requests, "address")}
               onCorrectionRequestChange={onCorrectionRequestChange}
-              onChange={(value) => onLocalChange("address", value)}
+              onChange={(value) => onLocalAddressChange("address", value)}
               young={young}
             />
             <div className="mb-[16px] flex items-start justify-between">
@@ -807,7 +859,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 currentRequest={currentRequest}
                 correctionRequest={getCorrectionRequest(requests, "zip")}
                 onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={(value) => onLocalChange("zip", value)}
+                onChange={(value) => onLocalAddressChange("zip", value)}
                 young={young}
               />
               <Field
@@ -820,7 +872,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 currentRequest={currentRequest}
                 correctionRequest={getCorrectionRequest(requests, "city")}
                 onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={(value) => onLocalChange("city", value)}
+                onChange={(value) => onLocalAddressChange("city", value)}
                 young={young}
               />
             </div>
@@ -837,13 +889,14 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               type="select"
               options={countryOptions}
               filterOnType
-              onChange={(value) => onLocalChange("country", value)}
+              onChange={(value) => onLocalAddressChange("country", value)}
               young={young}
             />
             <div className="mb-[16px] flex items-start justify-between">
               <Field name="department" label="Département" value={data.department} mode="readonly" className="mr-[8px] flex-[1_1_50%]" />
               <Field name="region" label="Région" value={data.region} mode="readonly" className="ml-[8px] flex-[1_1_50%]" />
             </div>
+            {sectionMode === "edition" && errors.addressVerified && <div className="text-[#EF4444] mt-[-16] mb-3">{errors.addressVerified}</div>}
             {sectionMode === "edition" && data.country && data.country.toUpperCase() === "FRANCE" && (
               <VerifyAddress
                 address={data.address}
@@ -851,7 +904,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 city={data.city}
                 onSuccess={onVerifyAddress(true)}
                 onFail={onVerifyAddress()}
-                isVerified={data.addressVerified === true}
+                isVerified={addressVerified === true}
                 buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
               />
             )}
