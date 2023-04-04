@@ -180,18 +180,38 @@ const buildAggs = (filterArray, selectedFilters, searchBarObject, defaultQuery) 
 };
 
 export const buildQuery = async (esId, selectedFilters, page = 0, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
-  const bodyQuery = buildBody(selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected);
-  const bodyAggs = buildAggs(filterArray, selectedFilters, searchBarObject, defaultQuery);
+  /*
+  console.log("ploum", selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected);
+  console.log(Object.entries(selectedFilters));
+  console.log({
+    filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
+      return { ...e, [key]: value.filter };
+    }, {}),
+  });
+  */
 
-  const resAggs = await api.esQuery(esId, bodyAggs);
-  if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
+  // const bodyQuery = buildBody(selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected);
+  // const bodyAggs = buildAggs(filterArray, selectedFilters, searchBarObject, defaultQuery);
 
-  const resQuery = await api.esQuery(esId, bodyQuery);
-  if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
+  // console.log("bodyQuery", bodyQuery);
+  // console.log("bodyAggs", bodyAggs);
 
-  const aggs = resAggs.responses[0].aggregations;
-  const data = resQuery.responses[0].hits.hits.map((h) => ({ ...h._source, _id: h._id }));
-  const count = resQuery.responses[0].hits.total.value;
+  // const resAggs = await api.esQuery(esId, bodyAggs);
+  // if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
+
+  const resAlternative = await api.post("/elasticsearch/" + esId + "/search", {
+    page,
+    filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
+      return { ...e, [key]: value.filter };
+    }, {}),
+  });
+
+  // const resQuery = await api.esQuery(esId, bodyQuery);
+  // if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
+
+  const aggs = resAlternative.responses[1].aggregations;
+  const data = resAlternative.responses[0].hits.hits.map((h) => ({ ...h._source, _id: h._id }));
+  const count = resAlternative.responses[0].hits.total.value;
   const newFilters = {};
 
   // map a travers les aggregations pour recuperer les filtres
