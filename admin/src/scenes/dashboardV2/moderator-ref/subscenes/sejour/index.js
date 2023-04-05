@@ -2,10 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import {
   academyList,
-  academyToDepartments,
   COHORTS,
-  department2region,
-  departmentList,
   departmentToAcademy,
   ES_NO_LIMIT,
   region2department,
@@ -19,6 +16,7 @@ import {
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import api from "../../../../../services/api";
 import plausibleEvent from "../../../../../services/plausible";
+import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import BoxWithPercentage from "./components/BoxWithPercentage";
@@ -52,24 +50,6 @@ export default function Index() {
     user.role === ROLES.REFERENT_REGION
       ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
       : academyList.map((a) => ({ key: a, label: a }));
-
-  const getFilteredDepartment = () => {
-    if (selectedFilters.academy?.length) {
-      setSelectedFilters({ ...selectedFilters, department: selectedFilters?.department?.filter((d) => selectedFilters.academy?.includes(departmentToAcademy[d])) });
-      return setDepartmentOptions(
-        selectedFilters.academy?.reduce((previous, current) => {
-          return [...previous, ...(academyToDepartments[current] || []).map((d) => ({ key: d, label: d }))];
-        }, []) || [],
-      );
-    }
-    if (!selectedFilters.region?.length) return setDepartmentOptions(departmentList?.map((d) => ({ key: d, label: d })));
-    setSelectedFilters({ ...selectedFilters, department: selectedFilters?.department?.filter((d) => selectedFilters.region?.includes(department2region[d])) });
-    setDepartmentOptions(selectedFilters.region?.reduce((previous, current) => previous?.concat(region2department[current]?.map((d) => ({ key: d, label: d }))), []));
-  };
-
-  const getDepartmentOptions = () => {
-    return setDepartmentOptions(user?.department?.map((d) => ({ key: d, label: d })));
-  };
 
   useEffect(() => {
     let filters = [
@@ -256,14 +236,14 @@ export default function Index() {
   useEffect(() => {
     queryYoung();
     queryCenter();
-    if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions();
-    else getFilteredDepartment();
+    if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
+    else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
   }, [JSON.stringify(selectedFilters)]);
 
   return (
     <DashboardContainer
       active="sejour"
-      availableTab={["general", "engagement", "sejour", "inscription"]}
+      availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}
       navChildren={
         <div className="flex items-center gap-2">
           <ButtonPrimary
