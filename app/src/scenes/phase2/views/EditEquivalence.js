@@ -514,18 +514,18 @@ export default function EditEquivalence() {
 
           {data?.sousType === "Elu au sein du conseil des délégués pour la vie lycéenne (CVL)" && (
             <p className="text-sm leading-5 font-normal text-gray-500 mt-2">
-              Téléverser une attestation individuelle de la réalisation d&apos;un mandat d&apos;un an signée par le chef d&apos;établissement ou le référent vie lycéenne
+              Téléverser une attestation individuelle de la réalisation d&apos;un mandat d&apos;un an signée par le chef d&apos;établissement ou le référent vie lycéenne.
             </p>
           )}
           {data?.sousType === "Elu au sein du conseil académique de la vie lycéenne (CAVL)" && (
             <p className="text-sm leading-5 font-normal text-gray-500 mt-2">
               Téléverser une attestation individuelle de la réalisation d&apos;un mandat d&apos;un an signée par le recteur ou le délégué académique à la vie lycéenne et
-              collégienne
+              collégienne.
             </p>
           )}
           {data?.sousType === "Elu au sein des conseils régionaux des jeunes" && (
             <p className="text-sm leading-5 font-normal text-gray-500 mt-2">
-              Téléverser une attestation individuelle de la réalisation d&apos;un mandat d&apos;un an signée par le président du conseil régional ou son représentant
+              Téléverser une attestation individuelle de la réalisation d&apos;un mandat d&apos;un an signée par le président du conseil régional ou son représentant.
             </p>
           )}
           {data?.type === "Préparation militaire hors offre MIG des armées" && (
