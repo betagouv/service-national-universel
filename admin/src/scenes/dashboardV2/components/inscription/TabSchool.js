@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { HiOutlineChevronLeft, HiOutlineChevronRight } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { ES_NO_LIMIT, ROLES } from "snu-lib";
+import { ROLES } from "snu-lib";
 import api from "../../../../services/api";
 import { replaceSpaces } from "../../../../utils";
 
@@ -15,7 +15,6 @@ export default function TabSchool({ filters }) {
   const [pageMax, setPageMax] = React.useState(0);
   const [noResult, setNoResult] = React.useState(true);
   const [total, setTotal] = React.useState(0);
-  const [noFilterDepartement, setNoFilterDepartement] = React.useState(false);
   const user = useSelector((state) => state.Auth.user);
 
   const fetchYoungByschool = async () => {
@@ -24,21 +23,12 @@ export default function TabSchool({ filters }) {
     setTotal(0);
     setPageMax(0);
     setIsLoading(true);
-    if (!filters.region?.length && !filters.department?.length && !filters.academy?.length && user.role === ROLES.ADMIN) {
-      setNoFilterDepartement(true);
-      setNoResult(true);
-      setIsLoading(false);
-
-      return;
-    } else {
-      setNoFilterDepartement(false);
-    }
 
     const body = {
       query: { bool: { must: { match_all: {} }, filter: [] } },
       aggs: {
         school: {
-          terms: { field: "schoolId.keyword", size: ES_NO_LIMIT },
+          terms: { field: "schoolId.keyword", size: 500 },
           aggs: { departments: { terms: { field: "department.keyword" } }, firstUser: { top_hits: { size: 1 } } },
         },
       },
@@ -113,7 +103,7 @@ export default function TabSchool({ filters }) {
           </Link>
         </div>
       </div>
-      <table className={`table-fixed w-full ${isLoading || noFilterDepartement || noResult ? "h-full" : ""}`}>
+      <table className={`table-fixed w-full ${isLoading || noResult ? "h-full" : ""}`}>
         <thead>
           <tr className="flex items-center border-y-[1px] border-gray-100 py-4">
             <th className="w-[70%] uppercase text-xs text-gray-500 font-medium leading-4">établissements</th>
@@ -158,13 +148,9 @@ export default function TabSchool({ filters }) {
                 </td>
               </tr>
             ))
-          ) : !noFilterDepartement ? (
-            <tr className="flex items-center justify-center h-full">
-              <td className="text-sm leading-5 font-normal text-gray-700">Aucun résultat</td>
-            </tr>
           ) : (
             <tr className="flex items-center justify-center h-full">
-              <td className="text-sm leading-5 font-normal text-gray-700">Vous devez filtrer au minimum sur une région / un département pour accéder à cette liste</td>
+              <td className="text-sm leading-5 font-normal text-gray-700">Aucun résultat</td>
             </tr>
           )}
         </tbody>
