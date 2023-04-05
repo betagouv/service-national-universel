@@ -14,7 +14,7 @@ import FrenchMap from "../../../assets/icons/FrenchMap";
 import { capture } from "../../../sentry";
 import { toastr } from "react-redux-toastr";
 import API from "../../../services/api";
-import { department2region, region2department, ROLES } from "snu-lib";
+import { department2region, getDepartmentNumber, region2department, ROLES } from "snu-lib";
 import SchemaEditor from "./SchemaEditor";
 import SchemaDepartmentDetail from "./SchemaDepartmentDetail";
 import * as XLSX from "xlsx";
@@ -466,7 +466,11 @@ function BoxCentres({ summary, className = "", loading, isNational, isDepartment
           {summary.toRegions.map((region) => (
             <React.Fragment key={region.name}>
               <li className="text-[#171725] text-[15px] leading-[18px] font-bold mt-[12px]">{region.name}</li>
-              {isDepartmental && <li className="text-[#1F2937] text-[12px], leading-[14px] mt-[2px]">{region.departments.join(", ")}</li>}
+              {isDepartmental && (
+                <li className="text-[#1F2937] text-[12px], leading-[14px] mt-[2px]">
+                  {region.departments.map((department) => `${department} (${getDepartmentNumber(department)})`).join(", ")}
+                </li>
+              )}
             </React.Fragment>
           ))}
         </ul>
@@ -516,7 +520,7 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
             className="custom-tooltip-radius !opacity-100 !shadow-md"
             tooltipRadius="6">
             <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
-              L'export n'est pas disponible au téléchargement. Contactez-nous pour plus d'information
+              L&apos;export n&apos;est pas disponible au téléchargement. Contactez-nous pour plus d&apos;information
             </p>
           </ReactTooltip>
         </span>
@@ -536,8 +540,7 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
             {rows.map((row) => (
               <tr key={row.name} className="border-b-[1px] border-b-[#F4F5FA] hover:bg-[#F2F5FC]" onClick={() => goToRow(row)}>
                 <td className="py-[17px] px-[9px] font-bold text-[15px] text-[#242526] whitespace-nowrap">
-                  {row.name}
-                  {row.code ? " (" + row.code + ")" : ""}
+                  {row.name} {!isNational ? `(${getDepartmentNumber(row.name)})` : null}
                 </td>
                 <td className="py-[17px] px-[8px]">
                   {loading ? (

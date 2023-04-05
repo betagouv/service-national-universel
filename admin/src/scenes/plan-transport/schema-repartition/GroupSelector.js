@@ -2,6 +2,7 @@ import React from "react";
 import People from "../../../assets/icons/People";
 import Plus from "../../../assets/icons/Plus";
 import { GroupSummary } from "../components/commons";
+import { getDepartmentNumber } from "snu-lib";
 
 export default function GroupSelector({
   title,
@@ -84,7 +85,7 @@ function GroupBox({ group, className = "", onSelect, selected }) {
         <div className={`mt-[24px] ${group.centerId ? "" : "opacity-30"}`}>
           <div className="text-[15px] leading-[18px] text-[#374151] font-bold">{group.centerName ? group.centerName : "Centre d'affectation"}</div>
           <div className="text-[15px] leading-[18px] text-[#6B7280] mt-[8px]">
-            {group.centerCity ? group.centerCity : "Ville"} • {group.toDepartment ? group.toDepartment : "Département"}
+            {group.centerCity ? group.centerCity : "Ville"} • {group.toDepartment ? `${group.toDepartment} (${getDepartmentNumber(group.toDepartment)})` : "Département"}
           </div>
         </div>
       </div>
