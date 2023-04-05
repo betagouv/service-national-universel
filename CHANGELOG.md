@@ -1,3 +1,11 @@
+# [1.247.0](https://github.com/betagouv/service-national-universel/compare/v1.246.1...v1.247.0) (2023-04-05)
+
+
+### Features
+
+* **admin:** affichage des codes départementaux ([#2464](https://github.com/betagouv/service-national-universel/issues/2464)) ([1aa8287](https://github.com/betagouv/service-national-universel/commit/1aa828738cd768bd74d9fbed74a757ef08a1d081))
+* **admin:** dashboard inscription ([#2438](https://github.com/betagouv/service-national-universel/issues/2438)) ([f2248c5](https://github.com/betagouv/service-national-universel/commit/f2248c530cd37b2f920443016fa0c96f76203a97))
+
 ## [1.246.1](https://github.com/betagouv/service-national-universel/compare/v1.246.0...v1.246.1) (2023-04-04)
 
 
