@@ -1,5 +1,6 @@
 import React from "react";
 import FlagFr from "../../../assets/flags/FlagFr";
+import { getDepartmentNumber } from "snu-lib";
 
 export default function PlanTransportBreadcrumb({ className = "", region = null, department = null, onGoToRegion = () => {}, onGoToNational = () => {} }) {
   return (
@@ -14,7 +15,7 @@ export default function PlanTransportBreadcrumb({ className = "", region = null,
       )}
       {department && (
         <Crumb color="#9CA3AF" className="ml-[-12px] z-0 hover:cursor-pointer" key="department">
-          {department.label}
+          {department.label} ({getDepartmentNumber(department.label)})
         </Crumb>
       )}
     </div>

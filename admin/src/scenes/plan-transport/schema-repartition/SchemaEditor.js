@@ -56,7 +56,7 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
 
   return (
     <Box className={className}>
-      <BoxHeader title={"Gérer les volontaires de " + department}>
+      <BoxHeader title={`Gérer les volontaires de ${department}`}>
         <span data-tip data-tip-disable={false} data-for="export-data">
           <ButtonPrimary onClick={onExportDetail} disabled={!isUserAuthorizedToExportData}>
             Exporter
