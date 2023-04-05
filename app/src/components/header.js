@@ -1,6 +1,6 @@
 import React from "react";
 import LogoFr from "../assets/fr.png";
-import SNU from "../assets/logo-snu.svg";
+import SNU from "../assets/logo-snu.png";
 import Menu from "../assets/icons/Burger";
 import Help from "../assets/icons/QuestionMarkBlue";
 import File from "../assets/file.svg";
