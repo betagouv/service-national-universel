@@ -18,6 +18,7 @@ import Select from "../components/Select";
 import { getTransportIcon } from "../util";
 import Excel from "./components/Icons/Excel.png";
 import ListPanel from "./modificationPanel/List";
+import { transformVolontaires } from "../../../utils/excelExportTransforms";
 
 const cohortList = [
   { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
@@ -111,6 +112,31 @@ const ReactiveList = ({ cohort, history }) => {
     return {
       query: {
         bool: { must: [{ match_all: {} }, { term: { "cohort.keyword": cohort } }] },
+      },
+      track_total_hits: true,
+    };
+  };
+
+  const getDefaultQueryYoungs = () => {
+    return {
+      query: {
+        bool: {
+          must: [
+            { match_all: {} },
+            { term: { "cohort.keyword": cohort } },
+            { term: { "status.keyword": "VALIDATED" } },
+            { term: { "cohesionStayPresence.keyword": "true" } },
+            { term: { "departInform.keyword": "false" } },
+          ],
+        },
+      },
+      aggs: {
+        group_by_bus: {
+          terms: {
+            field: "busId.keyword",
+            size: 100,
+          },
+        },
       },
       track_total_hits: true,
     };
@@ -276,6 +302,20 @@ const ReactiveList = ({ cohort, history }) => {
                   };
                 });
               }}
+            />
+
+            <ExportComponentV2
+              title="Exporter la liste des volontaires par ligne"
+              defaultQuery={getDefaultQueryYoungs()}
+              exportTitle="Liste_des_volontaires_par_ligne"
+              icon={<BsDownload className="text-gray-400" />}
+              index="young-having-meeting-point-in-geography"
+              css={{
+                override: true,
+                button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+                loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+              }}
+              transform={transformVolontaires}
             />
           </div>
         </div>
