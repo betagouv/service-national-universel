@@ -11,7 +11,7 @@ import Profil from "../../../../assets/icons/Profil";
 import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
 
-export function OutTable({ cohort, region, user, youngsByDepartment, setYoungsByDepartment }) {
+export function OutTable({ cohort, region, user }) {
   const history = useHistory();
   const [loadingQuery, setLoadingQuery] = React.useState(false);
 
@@ -23,6 +23,7 @@ export function OutTable({ cohort, region, user, youngsByDepartment, setYoungsBy
 
   //process
   const [data, setData] = React.useState([]);
+  const [youngsByDepartment, setYoungsByDepartment] = React.useState([]);
   const [placesCenterByDepartment, setPlacesCenterByDepartment] = React.useState({});
   const [searchDepartment, setSearchDepartment] = React.useState("");
   const [departments, setDepartments] = React.useState(region2department[region]);

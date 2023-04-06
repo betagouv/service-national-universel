@@ -6,8 +6,13 @@ import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
 import { Loading } from "../../components/commons";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
+import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
+import * as XLSX from "xlsx";
+import * as FileSaver from "file-saver";
 
-export function InTable({ region, cohort, youngsByDepartment }) {
+const ExcelFileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+
+export function InTable({ region, cohort }) {
   const [loadingQuery, setLoadingQuery] = React.useState(false);
   const [data, setData] = React.useState([]);
   const [centerTotal, setCenterTotal] = React.useState(0);
@@ -15,6 +20,7 @@ export function InTable({ region, cohort, youngsByDepartment }) {
   const [searchDepartment, setSearchDepartment] = React.useState("");
   const [departments, setDepartments] = React.useState(region2department[region]);
   const [objectifByDepartment, setObjectifByDepartment] = React.useState([]);
+  const [youngsByDepartment, setYoungsByDepartment] = React.useState([]);
 
   React.useEffect(() => {
     (async () => {
@@ -29,6 +35,23 @@ export function InTable({ region, cohort, youngsByDepartment }) {
           return i === data.findIndex((a) => a.fromRegion === e.fromRegion && a.toRegion === e.toRegion);
         });
         const inRegion = filteredData.map((e) => e.fromRegion);
+
+        const bodyYoung = {
+          query: {
+            bool: {
+              must: { match_all: {} },
+              filter: [{ term: { "cohort.keyword": cohort } }, { terms: { "status.keyword": ["VALIDATED"] } }, { terms: { "region.keyword": inRegion } }],
+            },
+          },
+          aggs: {
+            department: { terms: { field: "department.keyword" } },
+          },
+          track_total_hits: true,
+          size: 0,
+        };
+
+        const { responses } = await API.esQuery("young", bodyYoung);
+        setYoungsByDepartment(responses[0].aggregations.department.buckets);
 
         const bodyCohesionCenter = {
           query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohorts.keyword": [cohort] } }, { term: { "region.keyword": region } }] } },
@@ -76,6 +99,77 @@ export function InTable({ region, cohort, youngsByDepartment }) {
     setDepartments(departments);
   }, [searchDepartment]);
 
+  async function loadExportData() {
+    let url = `/table-de-repartition/toRegion/${cohort}/${region}`;
+    const result = await API.get(url);
+    if (!result.ok) {
+      return toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+    }
+    //Get all region wich came tp the region
+    const filteredData = data.filter((e, i) => {
+      return i === data.findIndex((a) => a.fromRegion === e.fromRegion && a.toRegion === e.toRegion);
+    });
+    const inRegion = filteredData.map((e) => e.fromRegion);
+
+    const { data: dataObjectif, ok: okObjectif } = await API.get(`/inscription-goal/${cohort}`);
+    if (!okObjectif) return toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+    const goals = dataObjectif.filter((e) => inRegion.includes(e.region));
+
+    return result.data
+      .map((element) => ({
+        ...element,
+        goal: goals.find((e) => element.fromDepartment === e.department)?.max || 0,
+        youngs: youngsByDepartment.find((r) => r.key === element.fromDepartment)?.doc_count || 0,
+      }))
+      .filter((e) => region2department[region].includes(e.toDepartment));
+  }
+
+  async function exportExcelSheet(departments) {
+    let sheetData = departments.map((dept) => ({
+      toDepartmentNumber: getDepartmentNumber(dept.toDepartment),
+      toDepartment: dept.toDepartment,
+      fromRegion: dept.fromRegion,
+      formDepartmentNumber: getDepartmentNumber(dept.fromDepartment),
+      fromDepartment: dept.fromDepartment,
+      youngs: dept.youngs,
+      rate: `${dept.goal !== 0 ? Math.round((dept.youngs / dept.goal) * 100) : 100} %`,
+      goal: dept.goal,
+    }));
+
+    let sheet = XLSX.utils.json_to_sheet(sheetData);
+
+    // --- fix header names
+    let headers = [
+      "N° de département d'accueil",
+      "Département d'accueil",
+      "Région de départ",
+      "N° de département de départ",
+      "Département de départ",
+      "Nombre d'inscrits sur liste principale dans la région de départ",
+      "Taux d'inscriptions",
+      "Objectif d'inscriptions dans la région de départ",
+    ];
+    XLSX.utils.sheet_add_aoa(sheet, [headers], { origin: "A1" });
+
+    // --- create workbook
+    let workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, sheet, "Schéma de répartition");
+    const fileName = "schema-repartition.xlsx";
+    return { workbook, fileName };
+  }
+
+  const handleExportData = async () => {
+    try {
+      const data = await loadExportData();
+      const result = await exportExcelSheet(data);
+      const buffer = XLSX.write(result.workbook, { bookType: "xlsx", type: "array" });
+      FileSaver.saveAs(new Blob([buffer], { type: ExcelFileType }), result.fileName);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des données. Nous ne pouvons exporter les données.");
+    }
+  };
+
   return (
     <>
       {/* INFO */}
@@ -98,7 +192,7 @@ export function InTable({ region, cohort, youngsByDepartment }) {
             placeholder="Rechercher un département"
             onChange={(e) => setSearchDepartment(e.target.value)}
           />
-          {/* <button className="bg-blue-600 border-[1px] border-blue-600 text-white px-4 py-2 rounded-lg hover:bg-white hover:!text-blue-600 transition ease-in-out">Exporter</button> */}
+          <ButtonPrimary onClick={handleExportData}>Exporter</ButtonPrimary>
         </div>
         <hr />
         <div className="flex px-4 py-2 items-center">
@@ -106,16 +200,18 @@ export function InTable({ region, cohort, youngsByDepartment }) {
           <div className="w-[70%] uppercase text-[#7E858C] text-xs leading-3">Régions accueillies</div>
         </div>
         {departments?.length ? (
-          departments.map((department) => (
-            <Department
-              key={"reverse" + department}
-              department={department}
-              data={data}
-              loadingQuery={loadingQuery}
-              objectifByDepartment={objectifByDepartment}
-              youngsInDepartment={youngsByDepartment.find((r) => r.key === department)?.doc_count || 0}
-            />
-          ))
+          departments.map((department) => {
+            return (
+              <Department
+                key={"reverse" + department}
+                department={department}
+                data={data}
+                loadingQuery={loadingQuery}
+                objectifByDepartment={objectifByDepartment}
+                youngsByDepartment={youngsByDepartment}
+              />
+            );
+          })
         ) : (
           <>
             <hr />
@@ -129,7 +225,7 @@ export function InTable({ region, cohort, youngsByDepartment }) {
   );
 }
 
-const Department = ({ department, loadingQuery, data, objectifByDepartment, youngsInDepartment }) => {
+const Department = ({ department, loadingQuery, data, objectifByDepartment, youngsByDepartment }) => {
   const [open, setOpen] = React.useState({ open: false, region: null });
   const [listRegion, setListRegion] = React.useState([]);
   const [departmentByRegion, setDepartmentByRegion] = React.useState([]);
@@ -172,7 +268,7 @@ const Department = ({ department, loadingQuery, data, objectifByDepartment, youn
                       setOpen={setOpen}
                       assignDepartment={departmentByRegion[assign.fromRegion]}
                       objectifByDepartment={objectifByDepartment}
-                      youngsInDepartment={youngsInDepartment}
+                      youngsByDepartment={youngsByDepartment}
                     />
                   )}
                 </div>
@@ -185,7 +281,7 @@ const Department = ({ department, loadingQuery, data, objectifByDepartment, youn
   );
 };
 
-const InfoDepartment = ({ setOpen, assignDepartment, region, objectifByDepartment, youngsInDepartment }) => {
+const InfoDepartment = ({ setOpen, assignDepartment, region, objectifByDepartment, youngsByDepartment }) => {
   const ref = React.useRef(null);
 
   React.useEffect(() => {
@@ -210,6 +306,7 @@ const InfoDepartment = ({ setOpen, assignDepartment, region, objectifByDepartmen
         </div>
         {assignDepartment.map((assign, i) => {
           const goal = objectifByDepartment.find((e) => e.department === assign) ? objectifByDepartment.find((e) => e.department === assign).max || 0 : 0;
+          const youngsInDepartment = youngsByDepartment.find((r) => r.key === assign)?.doc_count || 0;
           return (
             <div key={i + "assignDepartment"} className="flex gap-4 justify-between relative hover:bg-gray-100 cursor-default p-2">
               <div className="text-sm leading-5 text-gray-700 basis-3/6">

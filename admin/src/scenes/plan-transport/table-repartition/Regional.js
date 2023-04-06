@@ -22,7 +22,6 @@ export default function Regional() {
   ];
 
   const [openReverseView, setOpenReverseView] = React.useState(false);
-  const [youngsByDepartment, setYoungsByDepartment] = React.useState([]);
 
   return (
     <>
@@ -41,7 +40,7 @@ export default function Regional() {
         </div>
 
         {/* TABLE */}
-        <OutTable cohort={cohort} region={region} user={user} youngsByDepartment={youngsByDepartment} setYoungsByDepartment={setYoungsByDepartment} />
+        <OutTable cohort={cohort} region={region} user={user} />
 
         {/* Reverse View */}
         <div className="py-8 flex flex-col gap-2 items-center">
@@ -56,7 +55,7 @@ export default function Regional() {
             />
           </div>
         </div>
-        {openReverseView && <InTable cohort={cohort} region={region} youngsByDepartment={youngsByDepartment} />}
+        {openReverseView && <InTable cohort={cohort} region={region} />}
       </div>
     </>
   );
