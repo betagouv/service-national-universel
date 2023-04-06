@@ -1,11 +1,10 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import DashboardBox from "../../../../components/ui/DashboardBox";
-import {FullDoughnut} from "../../../../components/graphs";
+import { FullDoughnut } from "../../../../components/graphs";
 import Section from "../../../../components/ui/Section";
 import api from "../../../../../../services/api";
-import {translate} from "snu-lib/translation";
+import { translate } from "snu-lib/translation";
 import Loader from "../../../../../../components/Loader";
-
 
 export default function SectionStructures({ filters }) {
   const [loading, setLoading] = useState(true);

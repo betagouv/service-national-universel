@@ -452,7 +452,7 @@ router.post("/missions-young-preferences", passport.authenticate("referent", { s
       console.log(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
-    const { filters, missionFilters, group } = value;
+    const { filters, group } = value;
 
     // get data
     let pipeline = [{ $match: computeYoungFilter(filters) }];

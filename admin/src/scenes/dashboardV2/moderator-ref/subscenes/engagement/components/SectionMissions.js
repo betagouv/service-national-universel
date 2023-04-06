@@ -1,7 +1,5 @@
 import Section from "../../../../components/ui/Section";
 import React, { useState, useEffect } from "react";
-import DashboardBox from "../../../../components/ui/DashboardBox";
-import { FullDoughnut } from "../../../../components/graphs";
 import { FilterComponent } from "../../../../components/FilterDashBoard";
 import api from "../../../../../../services/api";
 import MissionsProposedPlaces from "./MissionsProposedPlaces";

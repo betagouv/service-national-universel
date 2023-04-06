@@ -38,7 +38,7 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
       if (result.ok) {
         console.log("Mission Details: ", result.data);
         let maxValue = 0;
-        result.data.forEach((d, idx) => {
+        result.data.forEach((d) => {
           if (maxValue < d.validatedMission) {
             maxValue = d.validatedMission;
           }

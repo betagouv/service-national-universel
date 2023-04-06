@@ -4,9 +4,7 @@ import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
 import { translate } from "snu-lib";
 import Tabs from "../../../../../phase0/components/Tabs";
-import BarChart from "../../../../components/graphs/BarChart";
-import { Legends } from "../../../../components/graphs/graph-commons";
-import {FullDoughnut} from "../../../../components/graphs";
+import { FullDoughnut } from "../../../../components/graphs";
 
 export default function MissionsYoungPreferences({ filters, missionFilters, className = "" }) {
   const [loading, setLoading] = useState(true);

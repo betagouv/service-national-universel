@@ -3,7 +3,6 @@ import { DemiDoughnut } from "../../../../components/graphs";
 import Loader from "../../../../../../components/Loader";
 import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
-import { translate } from "snu-lib";
 
 export default function MissionsProposedPlaces({ filters, missionFilters, className = "" }) {
   const [graph, setGraph] = useState(null);
