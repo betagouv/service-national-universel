@@ -9,7 +9,12 @@ import { academyList, academyToDepartments, departmentToAcademy } from "snu-lib/
 import { department2region, region2department } from "snu-lib/region-and-departments";
 import Section from "../../../components/ui/Section";
 import DashboardBox from "../../../components/ui/DashboardBox";
-import VolontairesStatutsDePhase from "./components/VolontairesStatusDePhase";
+import VolontairesStatutsDePhase from "./components/VolontairesStatutsDePhase";
+import VolontairesStatutsDivers from "./components/VolontairesStatutsDivers";
+import {FullDoughnut} from "../../../components/graphs";
+import SectionStructures from "./components/SectionStructures";
+import SectionMissions from "./components/SectionMissions";
+import plausibleEvent from "../../../../../services/plausible";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -108,7 +113,12 @@ export default function Index() {
           <ButtonPrimary className="text-sm">
             Exporter le rapport <span className="font-bold">“Engagement”</span>
           </ButtonPrimary>
-          <ButtonPrimary className="text-sm">
+          <ButtonPrimary
+            className="text-sm"
+            onClick={() => {
+              plausibleEvent("Dashboard/CTA - Exporter statistiques engagement");
+              print();
+            }}>
             Exporter les statistiques <span className="font-bold">“Engagement”</span>
           </ButtonPrimary>
         </div>
@@ -117,10 +127,11 @@ export default function Index() {
       <Section title="Volontaires">
         <div className="flex">
           <VolontairesStatutsDePhase filters={selectedFilters} className="mr-4 flex-[0_0_332px]" />
-          <DashboardBox title="Statuts divers" className="grow">
-          </DashboardBox>
+          <VolontairesStatutsDivers filters={selectedFilters} className="grow" />
         </div>
       </Section>
+      <SectionStructures filters={selectedFilters} />
+      <SectionMissions filters={selectedFilters} />
     </DashboardContainer>
   );
 }

@@ -34,7 +34,7 @@ export default function VolontairesStatutsDePhase({ filters, className = "" }) {
         setGraph({ values, labels });
       } else {
         console.log("error : ", result);
-        setError("Erreur: impossible de charger les données 2.");
+        setError("Erreur: impossible de charger les données.");
       }
     } catch (err) {
       console.log("unable to load volontaires statuts de phase data: ", err);

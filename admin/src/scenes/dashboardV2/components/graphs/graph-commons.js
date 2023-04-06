@@ -11,6 +11,8 @@ export const graphColors = {
   8: ["#BFDBFE", "#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#1E40AF", "#BFDBFE"],
   9: ["#BFDBFE", "#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#1E40AF", "#BFDBFE", "#93C5FD"],
   10: ["#BFDBFE", "#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#1E40AF", "#BFDBFE", "#93C5FD", "#60A5FA"],
+  11: ["#BFDBFE", "#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#1E40AF", "#BFDBFE", "#93C5FD", "#60A5FA", "#3B82F6"],
+  12: ["#BFDBFE", "#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#1E40AF", "#BFDBFE", "#93C5FD", "#60A5FA", "#3B82F6", "#2563EB"],
 };
 
 export function Legend({ color, name, value = null, className = "" }) {
@@ -30,7 +32,7 @@ export function Legends({ labels, values = null, className = "" }) {
   return (
     <div className={`flex ${className}`}>
       {labels.map((label, idx) => (
-        <Legend color={colors[idx]} name={label} value={values ? values[idx] : null} key={labels} className="mr-4 last:mr-0" />
+        <Legend color={colors[idx]} name={label} value={values ? values[idx] : null} key={label} className="mr-4 last:mr-0" />
       ))}
     </div>
   );
