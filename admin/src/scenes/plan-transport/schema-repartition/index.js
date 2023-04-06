@@ -31,10 +31,7 @@ export default function SchemaRepartitionIndex(props) {
           if (![ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
             return <Redirect to={getRedirectionRoute()} />;
           }
-          if (
-            (ROLES.REFERENT_REGION === user.role && region !== user.region) ||
-            (ROLES.REFERENT_DEPARTMENT === user.role && !userDepartment && department2region[userDepartment] !== region)
-          ) {
+          if (ROLES.REFERENT_DEPARTMENT === user.role && !userDepartment && department2region[userDepartment] !== region) {
             return <Redirect to={getRedirectionRoute()} />;
           }
           return <SchemaRepartition region={region} department={department} />;
@@ -43,7 +40,7 @@ export default function SchemaRepartitionIndex(props) {
       <SentryRoute
         path="/schema-repartition/:region"
         component={() => {
-          if (![ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION].includes(user.role) || (ROLES.REFERENT_REGION === user.role && region !== user.region)) {
+          if (![ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION].includes(user.role)) {
             return <Redirect to={getRedirectionRoute()} />;
           }
           return <SchemaRepartition region={region} />;
@@ -52,7 +49,7 @@ export default function SchemaRepartitionIndex(props) {
       <SentryRoute
         path="/schema-repartition"
         component={() => {
-          if (![ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
+          if (![ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION].includes(user.role)) {
             return <Redirect to={getRedirectionRoute()} />;
           }
           return <SchemaRepartition />;

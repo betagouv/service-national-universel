@@ -149,12 +149,12 @@ export default function SchemaRepartition({ region, department }) {
   }
 
   function goToNational() {
-    if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
+    if ([ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION].includes(user.role)) {
       history.push("/schema-repartition?cohort=" + cohort);
     }
-    if (region && user.role === ROLES.REFERENT_REGION) {
-      history.push(`/schema-repartition/${region}?cohort=${cohort}`);
-    }
+    // if (region && user.role === ROLES.REFERENT_REGION) {
+    //   history.push(`/schema-repartition/${region}?cohort=${cohort}`);
+    // }
   }
 
   function goToRegion() {
