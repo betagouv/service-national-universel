@@ -28,7 +28,9 @@ export const FilterComponent = ({ filter, selectedFilters, setSelectedFilters, m
   return (
     <div className="relative w-fit">
       <div className={`p-0.5 border-[2px] ${visible ? "border-blue-600 rounded-xl" : "border-transparent"}`}>
-        <div onClick={() => setVisible(true)} className="cursor-pointer flex flex-row border-[1px] border-gray-200 hover:border-gray-300 rounded-md p-2 items-center gap-1">
+        <div
+          onClick={() => setVisible(true)}
+          className="cursor-pointer flex flex-row border-[1px] border-gray-200 bg-[#FFFFFF] hover:border-gray-300 rounded-md p-2 items-center gap-1">
           <div className="text-gray-700 font-medium text-xs">{filter.name}</div>
           {selectedFilterValues?.length === filter.options?.length ? (
             <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">{filter?.fullValue}</div>
