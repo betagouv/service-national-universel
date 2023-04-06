@@ -1,3 +1,12 @@
+## [1.247.1](https://github.com/betagouv/service-national-universel/compare/v1.247.0...v1.247.1) (2023-04-06)
+
+
+### Bug Fixes
+
+* **admin:** accès en lecture seule aux données des autres régions du territoire par le référents régionaux ([#2465](https://github.com/betagouv/service-national-universel/issues/2465)) ([87200f9](https://github.com/betagouv/service-national-universel/commit/87200f9f598c7fc3a64e5cc9928a92af93f11081))
+* **admin/lib:** mission young list export ([7430b02](https://github.com/betagouv/service-national-universel/commit/7430b0297edd6ed5d96d9595ed856077bd19c078))
+* **lib:** Sémantique accès bloqué ([7c2643c](https://github.com/betagouv/service-national-universel/commit/7c2643c295b2d35180b2973a570afc695c438506))
+
 # [1.247.0](https://github.com/betagouv/service-national-universel/compare/v1.246.1...v1.247.0) (2023-04-05)
 
 
