@@ -38,6 +38,11 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT", "CONTRACT_STATUS", "FILES_TYPE"];
 
+const genderTranslation = {
+  male: "Masculin",
+  female: "Féminin",
+};
+
 export default function Youngs({ mission, applications, updateMission }) {
   const user = useSelector((state) => state.Auth.user);
   const [young, setYoung] = useState();
@@ -100,7 +105,7 @@ export default function Youngs({ mission, applications, updateMission }) {
 
   async function transform(data, values) {
     let all = data;
-    if (values && ["contact", "address", "location", "application", "status", "choices", "representative1", "representative2"].some((e) => values.includes(e))) {
+    if (values && ["identity", "contact", "address", "location", "application", "status", "choices", "representative1", "representative2"].some((e) => values.includes(e))) {
       const youngIds = [...new Set(data.map((item) => item.youngId))];
       if (youngIds?.length) {
         const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
@@ -119,7 +124,7 @@ export default function Youngs({ mission, applications, updateMission }) {
           Cohorte: data.youngCohort,
           Prénom: data.youngFirstName,
           Nom: data.youngLastName,
-          Sexe: data.gender,
+          Sexe: genderTranslation[data.young.gender] || data.young.gender,
           "Date de naissance": formatLongDateUTCWithoutTime(data.youngBirthdateAt),
         },
         contact: {

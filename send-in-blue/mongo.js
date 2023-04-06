@@ -9,9 +9,9 @@ if (MONGO_URL) {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false, // * https://stackoverflow.com/a/52572958
-    poolSize: 50_000,
-    maxPoolSize: 50_000,
-    minPoolSize: 500,
+    poolSize: 500,
+    maxPoolSize: 500,
+    minPoolSize: 50,
     waitQueueTimeoutMS: 30_000,
   });
 } else {

@@ -34,6 +34,7 @@ const {
   canCreateSchemaDeRepartition,
   canDeleteSchemaDeRepartition,
   canEditSchemaDeRepartition,
+  getDepartmentNumber,
 } = require("snu-lib");
 const { filteredRegionList } = require("./commons");
 const Joi = require("joi");

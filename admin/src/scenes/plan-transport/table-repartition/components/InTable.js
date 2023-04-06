@@ -101,7 +101,7 @@ export function InTable({ region, cohort }) {
         </div>
         <hr />
         <div className="flex px-4 py-2 items-center">
-          <div className="w-[30%] uppercase text-[#7E858C] text-xs leading-3">Départements d’accueil</div>
+          <div className="w-[30%] uppercase text-[#7E858C] text-xs leading-3">Départements d&apos;accueil</div>
           <div className="w-[70%] uppercase text-[#7E858C] text-xs leading-3">Régions accueillies</div>
         </div>
         {departments?.length ? (
