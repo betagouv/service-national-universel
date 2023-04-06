@@ -1,12 +1,13 @@
 import React from "react";
 import { toastr } from "react-redux-toastr";
-import { ES_NO_LIMIT, region2department } from "snu-lib";
+import { ES_NO_LIMIT, getDepartmentNumber, region2department } from "snu-lib";
 import Profil from "../../../../assets/icons/Profil";
 import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
 import { Loading } from "../../components/commons";
+import { BsChevronDown, BsChevronUp } from "react-icons/bs";
 
-export function InTable({ region, cohort }) {
+export function InTable({ region, cohort, youngsByDepartment }) {
   const [loadingQuery, setLoadingQuery] = React.useState(false);
   const [data, setData] = React.useState([]);
   const [centerTotal, setCenterTotal] = React.useState(0);
@@ -106,7 +107,14 @@ export function InTable({ region, cohort }) {
         </div>
         {departments?.length ? (
           departments.map((department) => (
-            <Department key={"reverse" + department} department={department} data={data} loadingQuery={loadingQuery} objectifByDepartment={objectifByDepartment} />
+            <Department
+              key={"reverse" + department}
+              department={department}
+              data={data}
+              loadingQuery={loadingQuery}
+              objectifByDepartment={objectifByDepartment}
+              youngsInDepartment={youngsByDepartment.find((r) => r.key === department)?.doc_count || 0}
+            />
           ))
         ) : (
           <>
@@ -121,7 +129,7 @@ export function InTable({ region, cohort }) {
   );
 }
 
-const Department = ({ department, loadingQuery, data, objectifByDepartment }) => {
+const Department = ({ department, loadingQuery, data, objectifByDepartment, youngsInDepartment }) => {
   const [open, setOpen] = React.useState({ open: false, region: null });
   const [listRegion, setListRegion] = React.useState([]);
   const [departmentByRegion, setDepartmentByRegion] = React.useState([]);
@@ -154,9 +162,9 @@ const Department = ({ department, loadingQuery, data, objectifByDepartment }) =>
               {listRegion.map((assign, i) => (
                 <div key={i + "assignRegion"}>
                   <div
-                    className="relative text-xs text-gray-700 bg-gray-100 rounded-full p-2 cursor-pointer hover:scale-105"
+                    className="relative text-xs text-gray-700 bg-gray-100 rounded-full p-2 cursor-pointer hover:scale-105 flex gap-2 items-center"
                     onClick={() => setOpen({ open: true, region: assign.fromRegion })}>
-                    {assign.fromRegion}
+                    {assign.fromRegion} {open.open ? <BsChevronUp /> : <BsChevronDown />}
                   </div>
                   {open.open && open.region === assign.fromRegion && (
                     <InfoDepartment
@@ -164,6 +172,7 @@ const Department = ({ department, loadingQuery, data, objectifByDepartment }) =>
                       setOpen={setOpen}
                       assignDepartment={departmentByRegion[assign.fromRegion]}
                       objectifByDepartment={objectifByDepartment}
+                      youngsInDepartment={youngsInDepartment}
                     />
                   )}
                 </div>
@@ -176,7 +185,7 @@ const Department = ({ department, loadingQuery, data, objectifByDepartment }) =>
   );
 };
 
-const InfoDepartment = ({ setOpen, assignDepartment, region, objectifByDepartment }) => {
+const InfoDepartment = ({ setOpen, assignDepartment, region, objectifByDepartment, youngsInDepartment }) => {
   const ref = React.useRef(null);
 
   React.useEffect(() => {
@@ -192,20 +201,34 @@ const InfoDepartment = ({ setOpen, assignDepartment, region, objectifByDepartmen
   }, []);
 
   return (
-    <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg w-[40%] py-2 max-h-60 overflow-y-auto">
-      <div className="flex flex-col gap-2 px-2">
-        <div className="text-gray-500 text-xs font-medium leading-4">{region}</div>
-        {assignDepartment.map((assign, i) => (
-          <div key={i + "assignDepartment"} className="flex flex-row justify-between relative">
-            <div className="text-sm leading-5 text-gray-700 ">{assign}</div>
-            <div className="flex items-center gap-2 pr-2">
-              <Profil className="text-gray-400" />
-              <div className="text-sm leading-5 text-gray-500 font-normal">
-                {objectifByDepartment.find((e) => e.department === assign) ? objectifByDepartment.find((e) => e.department === assign).max || 0 : 0}
+    <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg min-w-[400px] py-2 max-h-60 overflow-y-auto">
+      <div className="flex flex-col">
+        <div className="flex gap-4 p-2">
+          <div className="text-gray-500 text-xs font-medium leading-4 basis-3/6">{region}</div>
+          <div className="text-gray-500 text-xs font-medium leading-4 basis-1/6">Objectif</div>
+          <div className="text-gray-500 text-xs font-medium leading-4 basis-2/6">Inscrits</div>
+        </div>
+        {assignDepartment.map((assign, i) => {
+          const goal = objectifByDepartment.find((e) => e.department === assign) ? objectifByDepartment.find((e) => e.department === assign).max || 0 : 0;
+          return (
+            <div key={i + "assignDepartment"} className="flex gap-4 justify-between relative hover:bg-gray-100 cursor-default p-2">
+              <div className="text-sm leading-5 text-gray-700 basis-3/6">
+                {getDepartmentNumber(assign)} - {assign}
+              </div>
+              <div className="flex items-center gap-2 basis-1/6">
+                <Profil className="text-gray-400" />
+                <div className="text-sm leading-5 text-gray-500 font-normal">{goal}</div>
+              </div>
+              <div className="flex items-center gap-2 basis-2/6">
+                <Profil className="text-gray-400" />
+                <div className="text-sm leading-5 text-gray-500 font-normal flex gap-2 flex-grow">
+                  <span>{youngsInDepartment}</span>
+                  <span className="text-gray-400">({goal !== 0 ? Math.round((youngsInDepartment / goal) * 100) : 100} %)</span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
