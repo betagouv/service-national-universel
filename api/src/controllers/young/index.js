@@ -63,6 +63,21 @@ const { formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
 const { anonymizeContractsFromYoungId } = require("../../services/contract");
 
+const redis = require("redis");
+
+const client = redis.createClient({
+  url: config.REDIS_URL,
+});
+client.connect().catch(console.error);
+
+client.on("connect", function () {
+  console.log("Connected to Redis server");
+});
+
+client.on("error", function (error) {
+  console.error("Error connecting to Redis server", error);
+});
+
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
@@ -748,6 +763,23 @@ router.post("/france-connect/authorization-url", async (req, res) => {
       nonce: crypto.randomBytes(20).toString("hex"),
       acr_values: "eidas1",
     };
+
+    client.setEx(`franceConnectNonce:${query.nonce}`, 1800, query.nonce, (error) => {
+      if (error) {
+        console.error(error);
+      } else {
+        console.log("Value set with expiration time");
+      }
+    });
+
+    client.setEx(`franceConnectState:${query.state}`, 1800, query.state, (error) => {
+      if (error) {
+        console.error(error);
+      } else {
+        console.log("Value set with expiration time");
+      }
+    });
+
     const url = `${process.env.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
     return res.status(200).send({ ok: true, data: { url } });
   } catch (error) {
@@ -759,7 +791,9 @@ router.post("/france-connect/authorization-url", async (req, res) => {
 // Get user information for authorized user on France Connect.
 router.post("/france-connect/user-info", async (req, res) => {
   try {
-    const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
+    const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required(), state: Joi.string().required() })
+      .unknown()
+      .validate(req.body, { stripUnknown: true });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -772,15 +806,48 @@ router.post("/france-connect/user-info", async (req, res) => {
       client_secret: process.env.FRANCE_CONNECT_CLIENT_SECRET,
       code: value.code,
     };
+
     const tokenResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/token`, {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
       body: queryString.stringify(body),
     });
+
     const token = await tokenResponse.json();
+    const franceConnectToken = token["id_token"];
+
+    const decodedToken = jwt.decode(franceConnectToken);
+
+    const storedState = await client.get(`franceConnectState:${value.state}`, (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+
+    const storedNonce = await client.get(`franceConnectNonce:${decodedToken.nonce}`, (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
 
     if (!token["access_token"] || !token["id_token"]) {
       return res.sendStatus(403, token);
+    }
+
+    if (storedNonce !== decodedToken.nonce) {
+      return res.sendStatus(403, "Invalide Nonce");
+    } else {
+      console.log("Valide Nonce");
+    }
+
+    if (storedState !== value.state) {
+      return res.sendStatus(403, "Invalide State");
+    } else {
+      console.log("Valide State");
     }
 
     // … then get user info.
