@@ -115,7 +115,6 @@ const ReactiveList = ({ cohort, history }) => {
       parentGroup: "Bus",
       missingLabel: "Non renseigné",
       transformData: (value) => transformDataTaux(value),
-      // customQuery: (value) => customQuery(value, getDefaultQuery),
     },
     { title: "Nom", name: "pointDeRassemblements.name", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
     { title: "Région", name: "pointDeRassemblements.region", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
@@ -441,35 +440,4 @@ const transformDataTaux = (data) => {
     }
   });
   return newData;
-};
-
-const customQuery = (value, getDefaultQuery) => {
-  let rangeArray = [];
-  let empty = false;
-  let full = false;
-  if (Array.isArray(value)) {
-    value?.map((e) => {
-      if (e === "Vide") empty = true;
-      else if (e === "Rempli") full = true;
-      else {
-        const splitValue = e.split("-");
-        const transformedArray = [parseInt(splitValue[0]), parseInt(splitValue[1].replace("%", ""))];
-        rangeArray = rangeArray.concat([transformedArray]);
-      }
-    });
-  }
-  const body = getDefaultQuery();
-  const filter = [];
-  if (empty) filter.push({ term: { lineFillingRate: 0 } });
-  if (full) filter.push({ term: { lineFillingRate: 100 } });
-  if (rangeArray.length > 0) {
-    rangeArray.map((e) => {
-      filter.push({ range: { lineFillingRate: { gte: e[0] === 0 ? 1 : e[0], lte: e[1] } } });
-    });
-  }
-  if (empty || full || rangeArray.length > 0) {
-    body.query.bool.minimum_should_match = 1;
-    body.query.bool.should = filter;
-  }
-  return body;
 };

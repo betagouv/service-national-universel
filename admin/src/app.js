@@ -57,7 +57,6 @@ import ModalCGU from "./components/modals/ModalCGU";
 import Team from "./scenes/team";
 import * as Sentry from "@sentry/react";
 import FiltersDemoVolontaire from "./scenes/filters-demo/example/test_volontaire";
-import FiltersDemoCustomComponent from "./scenes/filters-demo/example/test_customComponent";
 
 initSentry();
 initApi();
@@ -225,7 +224,6 @@ const Home = () => {
             {/* Only for developper eyes... */}
             {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
             {environment === "development" && <RestrictedRoute path="/filters-demo/volontaires" component={FiltersDemoVolontaire} />}
-            {environment === "development" && <RestrictedRoute path="/filters-demo/custom" component={FiltersDemoCustomComponent} />}
 
             {/* DASHBOARD */}
             {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
