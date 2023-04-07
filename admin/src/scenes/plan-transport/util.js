@@ -3,7 +3,7 @@ import Avion from "../../assets/icons/Avion";
 import Bus from "../../assets/icons/Bus";
 import Fusee from "../../assets/icons/Fusee";
 import Train from "./ligne-bus/components/Icons/Train";
-import { ES_NO_LIMIT, ROLES, formatDateFR, formatDateFRTimezoneUTC, translate } from "snu-lib";
+import { ES_NO_LIMIT, ROLES, translate } from "snu-lib";
 import FileSaver from "file-saver";
 import { toastr } from "react-redux-toastr";
 import dayjs from "dayjs";
@@ -106,7 +106,7 @@ function filterBusLinesByRole(lines, user) {
   }
 }
 
-export const exportLigneBus = async (user, cohort) => {
+export async function exportLigneBus(user, cohort) {
   try {
     const body = {
       query: {
@@ -118,6 +118,7 @@ export const exportLigneBus = async (user, cohort) => {
 
     const data = await getAllResults("plandetransport", body);
     if (!data || !data.length) return toastr.error("Aucune ligne de bus n'a été trouvée");
+
     const ligneBus = filterBusLinesByRole(data, user);
     const ligneIds = ligneBus.map((e) => e._id);
 
@@ -128,76 +129,31 @@ export const exportLigneBus = async (user, cohort) => {
       }
     }
 
-    const esYoungByLine = async () => {
-      let body = {
-        query: {
-          bool: {
-            must: [{ match_all: {} }, { term: { "cohort.keyword": cohort } }, { term: { "status.keyword": "VALIDATED" } }, { terms: { "ligneId.keyword": ligneIds } }],
-            must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
+    const bodyYoung = {
+      query: {
+        bool: {
+          must: [{ match_all: {} }, { term: { "cohort.keyword": cohort } }, { term: { "status.keyword": "VALIDATED" } }, { terms: { "ligneId.keyword": ligneIds } }],
+          must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
+        },
+      },
+      aggs: {
+        group_by_bus: {
+          terms: {
+            field: "ligneId.keyword",
+            size: ES_NO_LIMIT,
           },
         },
-        aggs: {
-          group_by_bus: {
-            terms: {
-              field: "ligneId.keyword",
-              size: ES_NO_LIMIT,
-            },
-          },
-        },
-        track_total_hits: true,
-      };
-
-      return await getAllResults("young-having-meeting-point-in-geography", body);
+      },
+      track_total_hits: true,
     };
 
-    const youngs = await esYoungByLine();
+    const youngs = await getAllResults("young-having-meeting-point-in-geography", bodyYoung);
+    if (!youngs || !youngs.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
 
     let result = {};
 
-    const bodyCenter = {
-      query: {
-        bool: {
-          must: [{ match_all: {} }],
-        },
-      },
-    };
-
-    const cohesionCenters = await getAllResults("cohesioncenter", bodyCenter);
-    console.log("🚀 ~ file: util.js:157 ~ exportLigneBus ~ cohesionCenters:", cohesionCenters);
-
     for (const young of youngs) {
-      const tempYoung = {
-        _id: young._id,
-        cohort: young.cohort,
-        firstName: young.firstName,
-        lastName: young.lastName,
-        email: young.email,
-        phone: young.phone,
-        address: young.address,
-        department: young.department,
-        region: young.region,
-        zip: young.zip,
-        city: young.city,
-        birthdateAt: young.birthdateAt,
-        gender: young.gender,
-        parent1FirstName: young.parent1FirstName,
-        parent1LastName: young.parent1LastName,
-        parent1Email: young.parent1Email,
-        parent1Phone: young.parent1Phone,
-        parent1Status: young.parent1Status,
-        parent2FirstName: young.parent2FirstName,
-        parent2LastName: young.parent2LastName,
-        parent2Email: young.parent2Email,
-        parent2Phone: young.parent2Phone,
-        parent2Status: young.parent2Status,
-        statusPhase1: young.statusPhase1,
-        meetingPointId: young.meetingPointId,
-        ligneId: young.ligneId,
-        status: young.status,
-        imageRight: young.imageRight,
-        youngPhase1Agreement: young.youngPhase1Agreement,
-      };
-
+      const tempYoung = young;
       const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint.meetingPointId === young.meetingPointId);
       const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
 
@@ -207,7 +163,6 @@ export const exportLigneBus = async (user, cohort) => {
           result[youngLigneBus.busId]["youngs"] = [];
           result[youngLigneBus.busId]["ligneBus"] = [];
           result[youngLigneBus.busId]["meetingPoint"] = [];
-          result[youngLigneBus.busId]["centers"] = [];
         }
         if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint.meetingPointId === youngMeetingPoint.meetingPointId)) {
           result[youngLigneBus.busId]["meetingPoint"].push(youngMeetingPoint);
@@ -218,7 +173,6 @@ export const exportLigneBus = async (user, cohort) => {
         result[youngLigneBus.busId]["youngs"].push(tempYoung);
       }
     }
-    console.log("result", result);
     // Transform data into array of objects before excel converts
     const formatedRep = Object.keys(result).map((key) => {
       return {
@@ -232,17 +186,11 @@ export const exportLigneBus = async (user, cohort) => {
             Cohorte: young.cohort,
             Prénom: young.firstName,
             Nom: young.lastName,
-            // "Date de naissance": formatDateFRTimezoneUTC(young.birthdateAt),
-            // Sexe: translate(young.gender),
             Email: young.email,
             Téléphone: young.phone,
-            // "Adresse postale": young.address,
-            // "Code postal": young.zip,
-            // Ville: young.city,
             Département: young.department,
             Académie: translate(young.academie),
             Région: young.region,
-            // Statut: translate(young.statusPhase1),
 
             "Statut représentant légal 1": translate(young.parent1Status),
             "Prénom représentant légal 1": young.parent1FirstName,
@@ -264,12 +212,12 @@ export const exportLigneBus = async (user, cohort) => {
             "Département du centre": ligneBus.centerDepartment,
             "Région du centre": ligneBus.centerRegion,
 
-            "Id du point de rassemblement": meetingPoint?.meetingPointId,
-            "Nom point de rassemblement": meetingPoint?.name,
-            "Adresse point de rassemblement": meetingPoint?.address,
-            "Ville point de rassemblement": meetingPoint?.city,
-            "Département point de rassemblement": meetingPoint?.department,
-            "Région point de rassemblement": meetingPoint?.region,
+            "Id du point de rassemblement": meetingPoint.meetingPointId,
+            "Nom point de rassemblement": meetingPoint.name,
+            "Adresse point de rassemblement": meetingPoint.address,
+            "Ville point de rassemblement": meetingPoint.city,
+            "Département point de rassemblement": meetingPoint.department,
+            "Région point de rassemblement": meetingPoint.region,
 
             "Date aller": ligneBus.departureString,
             "Date retour": ligneBus.returnString,
@@ -283,20 +231,24 @@ export const exportLigneBus = async (user, cohort) => {
       };
     });
 
-    const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-    const wb = XLSX.utils.book_new();
-    formatedRep.forEach((sheet) => {
-      let ws = XLSX.utils.json_to_sheet(sheet.data);
-      XLSX.utils.book_append_sheet(wb, ws, sheet.name.substring(0, 30));
-    });
-    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    const resultData = new Blob([excelBuffer], { type: fileType });
-    FileSaver.saveAs(resultData, `Listes_volontaires_par_ligne_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`);
+    generateExcelWorkbook(formatedRep, "Listes_volontaires_par_ligne");
   } catch (e) {
     console.log(e);
     toastr.error("Erreur !", translate(e.code));
   }
-};
+}
+
+function generateExcelWorkbook(data, filename) {
+  const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+  const wb = XLSX.utils.book_new();
+  data.forEach((sheet) => {
+    let ws = XLSX.utils.json_to_sheet(sheet.data);
+    XLSX.utils.book_append_sheet(wb, ws, sheet.name.substring(0, 30));
+  });
+  const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const resultData = new Blob([excelBuffer], { type: fileType });
+  FileSaver.saveAs(resultData, `${filename}_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`);
+}
 
 async function getAllResults(index, query) {
   const result = await API.post(`/es/${index}/export`, query);
