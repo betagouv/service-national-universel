@@ -810,9 +810,12 @@ router.post("/france-connect/user-info", async (req, res) => {
 
     const decodedToken = jwt.decode(franceConnectToken);
 
+    let storedState;
+    let storedNonce;
+
     try {
-      const storedState = await redisClient.get(`franceConnectState:${value.state}`);
-      const storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`);
+      storedState = await redisClient.get(`franceConnectState:${value.state}`);
+      storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`);
     } catch (e) {
       capture(e);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
