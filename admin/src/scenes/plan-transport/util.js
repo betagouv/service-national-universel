@@ -131,15 +131,8 @@ export const exportLigneBus = async (user, cohort) => {
       let body = {
         query: {
           bool: {
-            must: [],
-            filter: [
-              { match_all: {} },
-              { term: { "cohort.keyword": cohort } },
-              { term: { "status.keyword": "VALIDATED" } },
-              { terms: { "ligneId.keyword": ligneIds } },
-              { term: { "cohesionStayPresence.keyword": "true" } },
-              { term: { "departInform.keyword": "false" } },
-            ],
+            must: [{ match_all: {} }, { term: { "cohort.keyword": cohort } }, { term: { "status.keyword": "VALIDATED" } }, { terms: { "ligneId.keyword": ligneIds } }],
+            must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
           },
         },
         aggs: {
@@ -157,18 +150,8 @@ export const exportLigneBus = async (user, cohort) => {
     };
 
     const youngs = await esYoungByLine();
-    console.log("🚀 ~ file: List.js:238 ~ exportDataTransport ~ youngs:", youngs);
 
-    let result = {
-      noMeetingPoint: {
-        youngs: [],
-        meetingPoint: [],
-      },
-      transportInfoGivenByLocal: {
-        youngs: [],
-        meetingPoint: [],
-      },
-    };
+    let result = {};
 
     for (const young of youngs) {
       const tempYoung = {
@@ -199,43 +182,34 @@ export const exportLigneBus = async (user, cohort) => {
         meetingPointId: young.meetingPointId,
         ligneId: young.ligneId,
       };
-      if (young.deplacementPhase1Autonomous === "true") {
-        result.noMeetingPoint.youngs.push(tempYoung);
-      } else if (young.transportInfoGivenByLocal === "true") {
-        result.transportInfoGivenByLocal.youngs.push(tempYoung);
-      } else {
-        const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint.meetingPointId === young.meetingPointId);
-        const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
-        if (youngMeetingPoint) {
-          if (!result[youngLigneBus.busId]) {
-            result[youngLigneBus.busId] = {};
-            result[youngLigneBus.busId]["youngs"] = [];
-            result[youngLigneBus.busId]["ligneBus"] = [];
-            result[youngLigneBus.busId]["meetingPoint"] = [];
-          }
-          if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint.meetingPointId === youngMeetingPoint.meetingPointId)) {
-            result[youngLigneBus.busId]["meetingPoint"].push(youngMeetingPoint);
-          }
-          if (!result[youngLigneBus.busId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
-            result[youngLigneBus.busId]["ligneBus"].push(youngLigneBus);
-          }
-          result[youngLigneBus.busId]["youngs"].push(tempYoung);
+
+      const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint.meetingPointId === young.meetingPointId);
+      const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
+
+      if (youngMeetingPoint) {
+        if (!result[youngLigneBus.busId]) {
+          result[youngLigneBus.busId] = {};
+          result[youngLigneBus.busId]["youngs"] = [];
+          result[youngLigneBus.busId]["ligneBus"] = [];
+          result[youngLigneBus.busId]["meetingPoint"] = [];
         }
+        if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint.meetingPointId === youngMeetingPoint.meetingPointId)) {
+          result[youngLigneBus.busId]["meetingPoint"].push(youngMeetingPoint);
+        }
+        if (!result[youngLigneBus.busId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
+          result[youngLigneBus.busId]["ligneBus"].push(youngLigneBus);
+        }
+        result[youngLigneBus.busId]["youngs"].push(tempYoung);
       }
     }
     // Transform data into array of objects before excel converts
     const formatedRep = Object.keys(result).map((key) => {
-      let name;
-      if (key === "noMeetingPoint") name = "Autonome";
-      else if (key === "transportInfoGivenByLocal") name = "Services locaux";
-      else name = key;
-      // console.log(name, result[key]);
       return {
-        name: name,
+        name: key,
         data: result[key].youngs.map((young) => {
           const meetingPoint = young.meetingPointId && result[key].meetingPoint.find((mp) => mp._id === young.meetingPointId);
           const ligneBus = young.ligneId && result[key].ligneBus.find((lb) => lb._id === young.ligneId);
-          // console.log(young.ligneId);
+
           return {
             _id: young._id,
             Cohorte: young.cohort,
