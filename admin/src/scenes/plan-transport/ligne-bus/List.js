@@ -3,7 +3,7 @@ import { BsArrowLeft, BsArrowRight, BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { ES_NO_LIMIT, formatDateFR, formatDateFRTimezoneUTC, getDepartmentNumber, ROLES, translate } from "snu-lib";
+import { formatDateFR, formatDateFRTimezoneUTC, getDepartmentNumber, ROLES, translate } from "snu-lib";
 import ArrowUp from "../../../assets/ArrowUp";
 import Comment from "../../../assets/comment";
 import History from "../../../assets/icons/History";
@@ -18,7 +18,6 @@ import Select from "../components/Select";
 import { getTransportIcon } from "../util";
 import Excel from "./components/Icons/Excel.png";
 import ListPanel from "./modificationPanel/List";
-import { transformVolontaires } from "../../../utils/excelExportTransforms";
 import FileSaver from "file-saver";
 import dayjs from "dayjs";
 import * as XLSX from "xlsx";
@@ -120,98 +119,6 @@ const ReactiveList = ({ cohort, history }) => {
     };
   };
 
-  const lineAgg = (region = "", departments = []) => {
-    [
-      { $match: { cohort: cohort } },
-      {
-        $addFields: {
-          cohesionCenterObjId: {
-            $convert: {
-              input: "$centerId",
-              to: "objectId",
-              onError: "",
-              onNull: "",
-            },
-          },
-          meetingPointsObjIds: {
-            $map: {
-              input: "$meetingPointsIds",
-              in: {
-                $convert: {
-                  input: "$$this",
-                  to: "objectId",
-                  onError: "",
-                  onNull: "",
-                },
-              },
-            },
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "cohesioncenters",
-          localField: "cohesionCenterObjId",
-          foreignField: "_id",
-          as: "cohesionCenter",
-        },
-      },
-      { $unwind: { path: "$cohesionCenter" } },
-      { $unwind: { path: "$meetingPointsObjIds" } },
-      {
-        $lookup: {
-          from: "pointderassemblements",
-          localField: "meetingPointsObjIds",
-          foreignField: "_id",
-          as: "meetingPoints",
-        },
-      },
-      { $unwind: { path: "$meetingPoints" } },
-      {
-        $group: {
-          _id: "$_id",
-          meetingPoints: {
-            $push: "$meetingPoints",
-          },
-          cohesionCenter: {
-            $first: "$cohesionCenter",
-          },
-        },
-      },
-      {
-        $addFields: {
-          regions: {
-            $concatArrays: [
-              {
-                $map: {
-                  input: "$meetingPoints",
-                  in: "$$this.region",
-                },
-              },
-              ["$cohesionCenter.region"],
-            ],
-          },
-          departments: {
-            $concatArrays: [
-              {
-                $map: {
-                  input: "$meetingPoints",
-                  in: "$$this.department",
-                },
-              },
-              ["$cohesionCenter.department"],
-            ],
-          },
-        },
-      },
-      {
-        $match: {
-          $or: [{ regions: region }, { departments: { $in: departments } }],
-        },
-      },
-    ];
-  };
-
   const filterArray = [
     { title: "Numéro de la ligne", name: "LINE_NUMBER", datafield: "busId.keyword", parentGroup: "Bus", missingLabel: "Non renseigné" },
     { title: "Date aller", name: "DATE_ALLER", datafield: "departureString.keyword", parentGroup: "Bus", missingLabel: "Non renseigné" },
@@ -280,30 +187,6 @@ const ReactiveList = ({ cohort, history }) => {
     datafield: ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"],
   };
 
-  const esYoungByLine = async () => {
-    let body = {
-      query: {
-        bool: {
-          must: [],
-          filter: [
-            { terms: { "status.keyword": ["VALIDATED"] } },
-            { term: { "cohort.keyword": cohort } },
-            // { term: { "sessionPhase1Id.keyword": sessionId } }
-          ],
-        },
-      },
-      sort: [
-        {
-          "lastName.keyword": "asc",
-        },
-      ],
-      track_total_hits: true,
-      size: ES_NO_LIMIT,
-    };
-
-    return await getAllResults(`young`, body);
-  };
-
   const exportDataTransport = async () => {
     try {
       let result = {
@@ -317,11 +200,16 @@ const ReactiveList = ({ cohort, history }) => {
         },
       };
 
-      const lines = await api.get(`/ligne-de-bus/get-lines-with-geography/${cohort}`);
-      const busIds = lines.map((e) => e.busId);
+      const ligneBus = await api.get(`/ligne-de-bus/get-lines-with-geography/${cohort}`);
+      console.log("🚀 ~ file: List.js:322 ~ exportDataTransport ~ ligneBus:", ligneBus);
 
-      const getDefaultQueryYoungs = () => {
-        return {
+      const busIds = ligneBus.map((e) => e.busId);
+      console.log("🚀 ~ file: List.js:208 ~ exportDataTransport ~ busIds:", busIds);
+      const meetingPoints = [].concat(ligneBus.map((e) => e.meetingPoints));
+      console.log("🚀 ~ file: List.js:210 ~ exportDataTransport ~ meetingPoints:", meetingPoints);
+
+      const esYoungByLine = async () => {
+        let body = {
           query: {
             bool: {
               must: [],
@@ -345,9 +233,12 @@ const ReactiveList = ({ cohort, history }) => {
           },
           track_total_hits: true,
         };
+
+        return await getAllResults(`young`, body);
       };
 
       const youngs = await esYoungByLine();
+      console.log("🚀 ~ file: List.js:238 ~ exportDataTransport ~ youngs:", youngs);
 
       // let response = await api.get(`/point-de-rassemblement/center/${id}/cohort/${youngs[0].cohort}`);
       // const meetingPoints = response ? response.data.meetingPoints : [];

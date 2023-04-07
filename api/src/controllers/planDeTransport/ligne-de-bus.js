@@ -805,105 +805,101 @@ router.get("/get-lines-with-geography/:cohort", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
     }
 
-    const lineAgg = (cohort, region = "", departments = []) => {
-      [
-        { $match: { cohort: cohort } },
-        {
-          $addFields: {
-            cohesionCenterObjId: {
-              $convert: {
-                input: "$centerId",
-                to: "objectId",
-                onError: "",
-                onNull: "",
-              },
+    const pipeline = (cohort, region = "", departments = []) => [
+      { $match: { cohort: cohort } },
+      {
+        $addFields: {
+          cohesionCenterObjId: {
+            $convert: {
+              input: "$centerId",
+              to: "objectId",
+              onError: "",
+              onNull: "",
             },
-            meetingPointsObjIds: {
-              $map: {
-                input: "$meetingPointsIds",
-                in: {
-                  $convert: {
-                    input: "$$this",
-                    to: "objectId",
-                    onError: "",
-                    onNull: "",
-                  },
+          },
+          meetingPointsObjIds: {
+            $map: {
+              input: "$meetingPointsIds",
+              in: {
+                $convert: {
+                  input: "$$this",
+                  to: "objectId",
+                  onError: "",
+                  onNull: "",
                 },
               },
             },
           },
         },
-        {
-          $lookup: {
-            from: "cohesioncenters",
-            localField: "cohesionCenterObjId",
-            foreignField: "_id",
-            as: "cohesionCenter",
-          },
+      },
+      {
+        $lookup: {
+          from: "cohesioncenters",
+          localField: "cohesionCenterObjId",
+          foreignField: "_id",
+          as: "cohesionCenter",
         },
-        { $unwind: { path: "$cohesionCenter" } },
-        { $unwind: { path: "$meetingPointsObjIds" } },
-        {
-          $lookup: {
-            from: "pointderassemblements",
-            localField: "meetingPointsObjIds",
-            foreignField: "_id",
-            as: "meetingPoints",
-          },
+      },
+      { $unwind: { path: "$cohesionCenter" } },
+      { $unwind: { path: "$meetingPointsObjIds" } },
+      {
+        $lookup: {
+          from: "pointderassemblements",
+          localField: "meetingPointsObjIds",
+          foreignField: "_id",
+          as: "meetingPoints",
         },
-        { $unwind: { path: "$meetingPoints" } },
-        {
-          $group: {
-            _id: "$_id",
-            meetingPoints: {
-              $push: "$meetingPoints",
-            },
-            cohesionCenter: {
-              $first: "$cohesionCenter",
-            },
-          },
+      },
+      { $unwind: { path: "$meetingPoints" } },
+      {
+        $group: {
+          _id: "$_id",
+          busId: { $first: "$busId" },
+          meetingPoints: { $push: "$meetingPoints" },
+          cohesionCenter: { $first: "$cohesionCenter" },
         },
-        {
-          $addFields: {
-            regions: {
-              $concatArrays: [
-                {
-                  $map: {
-                    input: "$meetingPoints",
-                    in: "$$this.region",
-                  },
+      },
+      {
+        $addFields: {
+          regions: {
+            $concatArrays: [
+              {
+                $map: {
+                  input: "$meetingPoints",
+                  in: "$$this.region",
                 },
-                ["$cohesionCenter.region"],
-              ],
-            },
-            departments: {
-              $concatArrays: [
-                {
-                  $map: {
-                    input: "$meetingPoints",
-                    in: "$$this.department",
-                  },
+              },
+              ["$cohesionCenter.region"],
+            ],
+          },
+          departments: {
+            $concatArrays: [
+              {
+                $map: {
+                  input: "$meetingPoints",
+                  in: "$$this.department",
                 },
-                ["$cohesionCenter.department"],
-              ],
-            },
+              },
+              ["$cohesionCenter.department"],
+            ],
           },
         },
-        {
-          $match: {
-            $or: [{ regions: region }, { departments: { $in: departments } }],
-          },
+      },
+      {
+        $match: {
+          $or: [{ regions: region }, { departments: { $in: departments } }],
         },
-      ];
-    };
+      },
+    ];
 
-    const lines = await LigneBusModel.aggregate(lineAgg(req.params.cohort, req.user.region, req.user.departments));
+    const lines = await LigneBusModel.aggregate(pipeline(req.params.cohort, req.user?.region || "", req.user?.departments || []));
     if (!lines || lines.length === 0) {
       return res.status(200).send({ ok: true, data: [] });
     }
 
     res.status(200).send({ ok: true, data: lines });
   } catch (error) {
+    console.log("🚀 ~ file: ligne-de-bus.js:904 ~ router.get ~ error:", error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
