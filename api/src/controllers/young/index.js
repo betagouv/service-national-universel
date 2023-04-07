@@ -62,6 +62,7 @@ const { getFilteredSessions } = require("../../utils/cohort");
 const { formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
 const { anonymizeContractsFromYoungId } = require("../../services/contract");
+const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
@@ -533,6 +534,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
         departSejourMotifComment: undefined,
         youngPhase1Agreement: "false",
         hasMeetingInformation: undefined,
+        statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
       });
     }
 
@@ -545,15 +547,17 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const session = sessions.find(({ name }) => name === cohort);
     if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-    young.set({
-      cohort,
-      cohortChangeReason,
-      cohortDetailedChangeReason,
-      status: session.isFull ? YOUNG_STATUS.WAITING_LIST : YOUNG_STATUS.VALIDATED,
-      statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
-      cohesionStayPresence: undefined,
-      cohesionStayMedicalFileReceived: undefined,
-    });
+    young.set({ cohort, cohortChangeReason, cohortDetailedChangeReason, cohesionStayPresence: undefined, cohesionStayMedicalFileReceived: undefined });
+
+    const fillingRate = await getFillingRate(young.department, cohort);
+
+    if (fillingRate >= FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.VALIDATED) {
+      young.set({ status: YOUNG_STATUS.WAITING_LIST });
+    }
+
+    if (fillingRate < FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.WAITING_LIST) {
+      young.set({ status: YOUNG_STATUS.VALIDATED });
+    }
 
     await young.save({ fromUser: req.user });
 
