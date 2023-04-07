@@ -3,13 +3,13 @@ import dayjs from "dayjs";
 import LongArrow from "../../../../../assets/icons/LongArrow.js";
 import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR } from "../utils/steps.utils.js";
 
-export default function TravelInfoBus({ location, cohortDetails }) {
+export default function TravelInfo({ location, cohortDetails }) {
   if (!location || !cohortDetails) {
     return <></>;
   }
 
   return (
-    <div className="border w-full md:flex-1 p-4">
+    <div className="p-4 md:ml-10">
       <h1 className="text-xl font-bold mb-6">Résumé du voyage</h1>
       {!location?.ligneToPoint && <p className="text-sm mb-4">Je me rends au centre et en reviens par mes propres moyens.</p>}
 

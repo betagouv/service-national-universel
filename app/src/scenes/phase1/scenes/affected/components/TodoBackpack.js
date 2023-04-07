@@ -32,10 +32,10 @@ export default function TodoBackpack({ lunchBreak }) {
   }
 
   return (
-    <div className="border bg-white rounded-xl shadow-nina md:shadow-none overflow-hidden max-w-md p-4">
+    <div className="mx-[0.5rem] md:mx-[0rem] bg-white rounded-xl shadow-nina md:shadow-none overflow-hidden lg:w-2/3 flex">
       <MedicalFileModal isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} />
 
-      <div>
+      <div className="relative p-4">
         <h1 className="text-xl font-bold mb-6">Dans mon sac...</h1>
 
         <div className="flex gap-4 items-baseline">
@@ -81,13 +81,11 @@ export default function TodoBackpack({ lunchBreak }) {
             </label>
           </div>
         )}
+        <Arrow className="absolute hidden lg:block left-80 top-10" />
+        <DontForget className="absolute hidden lg:block left-80 top-20" />
       </div>
 
-      <div className="absolute">
-        {/* <Arrow className="absolute hidden md:block left-80 top-0" />
-        <DontForget className="absolute hidden md:block left-80 top-10" />
-        <SnuBackPack className="block md:hidden xl:block absolute -right-4 md:-right-16 top-4 md:w-64 md:h-64" /> */}
-      </div>
+      <SnuBackPack className="block md:hidden xl:block mt-4 md:w-64 md:h-64 flex-none" />
 
       <ModalConvocation open={modalConvocationOpen} setOpen={setModalConvocationOpen} />
     </div>

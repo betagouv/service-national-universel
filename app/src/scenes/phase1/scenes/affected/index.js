@@ -14,7 +14,7 @@ import JDMA from "../../../../components/JDMA.js";
 import Loader from "../../../../components/Loader";
 import Problem from "./components/Problem";
 import StepsAffected from "./components/StepsAffected";
-import TravelInfoBus from "./components/TravelInfoBus";
+import TravelInfo from "./components/TravelInfo.js";
 import TodoBackpack from "./components/TodoBackpack";
 
 export default function Affected() {
@@ -60,8 +60,8 @@ export default function Affected() {
   }
 
   return (
-    <div className="md:m-10">
-      <div className="max-w-[80rem] rounded-xl shadow-nina md:mx-auto py-8 relative overflow-hidden flex flex-col justify-between bg-gray-50 md:bg-white mb-4">
+    <div className="md:m-8">
+      <div className="max-w-[80rem] md:rounded-xl md:shadow-nina md:mx-auto py-8 relative overflow-hidden flex flex-col justify-between bg-gray-50 md:bg-white mb-4">
         {showInfoMessage && (
           <AlertBoxInformation
             title="Information"
@@ -84,8 +84,8 @@ export default function Affected() {
         </header>
 
         {isStepMedicalFieldDone(young) && (
-          <div className="border flex flex-col md:flex-row flex-none gap-4 order-2 px-[1rem]">
-            <TravelInfoBus location={young?.meetingPointId ? meetingPoint : center} cohortDetails={cohortDetails} />
+          <div className="flex flex-col md:flex-row flex-none gap-4 order-2">
+            <TravelInfo location={young?.meetingPointId ? meetingPoint : center} cohortDetails={cohortDetails} />
             <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
           </div>
         )}
