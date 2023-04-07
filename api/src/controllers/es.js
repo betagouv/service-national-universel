@@ -63,8 +63,6 @@ router.post("/mission/:action(_msearch|export)", passport.authenticate(["young",
       const response = await allRecords("mission", applyFilterOnQuery(req.body.query, filter), esClient, body.fieldsToExport);
       return res.status(200).send({ ok: true, data: serializeMissions(response) });
     } else {
-      const bodyWithFilter = withFilterForMSearch(body, filter);
-      console.log("🚀 ~ file: es.js:67 ~ router.post ~ body:", bodyWithFilter);
       const response = await esClient.msearch({ index: "mission", body: withFilterForMSearch(body, filter) });
       return res.status(200).send(serializeMissions(response.body));
     }
@@ -283,18 +281,6 @@ router.post("/young-having-meeting-point-in-geography/export", passport.authenti
 
     if (!canSearchInElasticSearch(user, "young-having-meeting-point-in-geography")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    // const filter = [];
-
-    // if (user.role === ROLES.REFERENT_DEPARTMENT) {
-    //   filter.push({ terms: { "department.keyword": [user.department] } });
-    // }
-
-    // if (user.role === ROLES.REFERENT_REGION) {
-    //   filter.push({ terms: { "region.keyword": [user.region] } });
-    // }
-
-    // { terms: { "meetingPointGeography.keyword": [user.region, user.department] } }];
-    // const query = applyFilterOnQuery(body.query, filter);
     const response = await allRecords("young", body.query);
     return res.status(200).send({ ok: true, data: serializeYoungs(response) });
   } catch (error) {
