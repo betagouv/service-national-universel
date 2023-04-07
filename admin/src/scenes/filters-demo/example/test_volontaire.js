@@ -291,12 +291,12 @@ export default function FiltersDemoVolontaire() {
   return (
     <div className="bg-white h-full">
       <div className="flex flex-col  m-4">
-        <div>{paramData?.count} résultats aa</div>
+        <div>{paramData?.count} résultats</div>
         {/* display filtter button + currentfilters + searchbar */}
         <div className="p-[15px]">
           <Filters
             pageId={pageId}
-            esId="young"
+            route="/elasticsearch/young/search"
             setData={(value) => setData(value)}
             filters={filterArray}
             searchPlaceholder="Rechercher par prénom, nom, email, ville..."
@@ -317,7 +317,7 @@ export default function FiltersDemoVolontaire() {
         <ModalExportV2
           isOpen={modalExportVisible}
           setIsOpen={setModalExportVisible}
-          index="young"
+          route="/elasticsearch/young/export"
           defaultQuery={getDefaultQuery()}
           exportTitle="candidatures"
           showTotalHits={false}

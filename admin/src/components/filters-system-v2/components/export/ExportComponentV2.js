@@ -7,23 +7,17 @@ import LoadingButtonV2 from "../../../buttons/LoadingButtonV2";
 import ModalConfirm from "../../../modals/ModalConfirm";
 import api from "../../../../services/api";
 
-import { buildBody } from "../filters/utils";
-import { getDefaultQuery } from "../../index";
-import { ES_NO_LIMIT } from "snu-lib/constants";
-
 export default function ExportComponent({
   handleClick,
   title,
   exportTitle,
-  index,
+  route,
   transform,
   searchType = "export",
-  defaultQuery = getDefaultQuery(),
   fieldsToExport = "*",
   setIsOpen,
   css = { override: false },
   icon,
-  filters,
   selectedFilters,
 }) {
   const [exporting, setExporting] = useState(false);
@@ -44,14 +38,13 @@ export default function ExportComponent({
   if (exporting) {
     return (
       <Loading
-        // // buildBody(selectedFilters, 0, ES_NO_LIMIT, defaultQuery, filters, searchBarObject).query
         selectedFilters={selectedFilters}
         loading={loading}
         onFinish={() => {
           setExporting(false);
           if (setIsOpen) setIsOpen(false);
         }}
-        index={index}
+        route={route}
         exportTitle={exportTitle}
         transform={transform}
         searchType={searchType}
@@ -87,7 +80,7 @@ export default function ExportComponent({
   );
 }
 
-function Loading({ onFinish, loading, exportTitle, transform, selectedFilters, index, searchType, fieldsToExport, css }) {
+function Loading({ onFinish, loading, exportTitle, transform, selectedFilters, route, searchType, fieldsToExport, css }) {
   const STATUS_LOADING = "Récupération des données";
   const STATUS_TRANSFORM = "Mise en forme";
   const STATUS_EXPORT = "Création du fichier";
@@ -106,7 +99,7 @@ function Loading({ onFinish, loading, exportTitle, transform, selectedFilters, i
     if (!status) {
       setStatus(STATUS_LOADING);
     } else if (status === STATUS_LOADING) {
-      getAllResults(index, selectedFilters, searchType, fieldsToExport).then((results) => {
+      getAllResults(route, selectedFilters, searchType, fieldsToExport).then((results) => {
         setData(results);
         setStatus(STATUS_TRANSFORM);
       });
@@ -140,18 +133,13 @@ async function toArrayOfArray(results, transform) {
   return [columns, ...data.map((item) => Object.values(item))];
 }
 
-async function getAllResults(index, selectedFilters, searchType, fieldsToExport) {
+async function getAllResults(route, selectedFilters, searchType, fieldsToExport) {
   let result;
   if (searchType === "_msearch") {
     throw new Error("Not implemented");
     // TODO ......
-    /*
-    result = await api.esQuery(index, query);
-    if (!result.responses.length) return [];
-    return result.responses[0];
-    */
   } else {
-    result = await api.post(`/elasticsearch/${index}/export`, {
+    result = await api.post(route, {
       filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
         return { ...e, [key]: value.filter };
       }, {}),

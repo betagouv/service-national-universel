@@ -97,56 +97,22 @@ const ListSession = ({ firstSession }) => {
   const pageId = "centerSession";
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({
-    size: 20,
     page: 0,
   });
   const filterArray = [
-    { title: "Cohorte", name: "cohort", datafield: "cohort.keyword", missingLabel: "Non renseignée", defaultValue: [firstSession] },
-    { title: "Région", name: "region", datafield: "region.keyword", missingLabel: "Non renseignée" },
+    { title: "Cohorte", name: "cohort", missingLabel: "Non renseignée", defaultValue: [firstSession] },
+    { title: "Région", name: "region", missingLabel: "Non renseignée" },
     {
       title: "Département",
       name: "department",
-      datafield: "department.keyword",
       missingLabel: "Non renseignée",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
-    { title: "Places restantes", name: "placesLeft", datafield: "placesLeft", missingLabel: "Non renseignée" },
-    { title: "Emploi du temps", name: "hasTimeSchedule", datafield: "hasTimeSchedule.keyword", missingLabel: "Non renseignée", translate: translate },
+    { title: "Places restantes", name: "placesLeft", missingLabel: "Non renseignée" },
+    { title: "Emploi du temps", name: "hasTimeSchedule", missingLabel: "Non renseignée", translate: translate },
   ];
-  if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code", datafield: "codeCentre.keyword", missingLabel: "Non renseignée" });
+  if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code", missingLabel: "Non renseignée" });
 
-  const searchBarObject = {
-    placeholder: "Rechercher par mots clés, ville, code postal...",
-    datafield: ["nameCentre", "cityCentre", "zipCentre", "codeCentre"],
-  };
-
-  const getDefaultQuery = () => {
-    if (user.role === ROLES.ADMIN) {
-      return {
-        size: ES_NO_LIMIT,
-        query: {
-          bool: { must: [{ match_all: {} }] },
-        },
-        track_total_hits: true,
-      };
-    } else if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      return {
-        size: ES_NO_LIMIT,
-        query: {
-          bool: { must: [{ match_all: {} }, { terms: { "department.keyword": user.department } }] },
-        },
-        track_total_hits: true,
-      };
-    } else if (user.role === ROLES.REFERENT_REGION) {
-      return {
-        size: ES_NO_LIMIT,
-        query: {
-          bool: { must: [{ match_all: {} }, { term: { "region.keyword": user.region } }] },
-        },
-        track_total_hits: true,
-      };
-    }
-  };
   useEffect(() => {
     (async () => {
       if (cohesionCenterIds?.length) {
@@ -171,11 +137,10 @@ const ListSession = ({ firstSession }) => {
         <div className="flex flex-row justify-between w-full">
           <Filters
             pageId={pageId}
-            esId="sessionphase1"
-            defaultQuery={getDefaultQuery()}
+            route="/elasticsearch/sessionphase1/search"
             setData={(value) => setData(value)}
             filters={filterArray}
-            searchBarObject={searchBarObject}
+            searchPlaceholder="Rechercher par mots clés, ville, code postal..."
             selectedFilters={selectedFilters}
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
@@ -183,10 +148,8 @@ const ListSession = ({ firstSession }) => {
           />
           <ExportComponentV2
             title="Exporter"
-            defaultQuery={getDefaultQuery()}
-            filters={filterArray}
             exportTitle="Session"
-            index="sessionphase1"
+            route="/elasticsearch/sessionphase1/export"
             transform={async (all) => {
               const { responses } = await api.esQuery("cohesioncenter", {
                 size: ES_NO_LIMIT,
@@ -250,7 +213,6 @@ const ListSession = ({ firstSession }) => {
                 });
             }}
             selectedFilters={selectedFilters}
-            searchBarObject={searchBarObject}
             icon={<BsDownload className="text-gray-400" />}
             css={{
               override: true,
@@ -300,7 +262,6 @@ const ListCenter = ({ firstSession }) => {
   const pageId = "centreList";
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({
-    size: 20,
     page: 0,
   });
   const filterArray = [
@@ -353,7 +314,7 @@ const ListCenter = ({ firstSession }) => {
         <div className="flex flex-row justify-between w-full">
           <Filters
             pageId={pageId}
-            esId="cohesioncenter"
+            route="/elasticsearch/cohesioncenter/search"
             defaultQuery={getDefaultQuery()}
             setData={(value) => setData(value)}
             filters={filterArray}
@@ -368,7 +329,7 @@ const ListCenter = ({ firstSession }) => {
             defaultQuery={getDefaultQuery()}
             filters={filterArray}
             exportTitle="Centres_de_cohesion"
-            index="cohesioncenter"
+            route="/elasticsearch/cohesioncenter/export"
             transform={(all) => {
               return all?.map((data) => {
                 return {

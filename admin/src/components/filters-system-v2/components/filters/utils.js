@@ -73,8 +73,8 @@ import api from "../../../../services/api";
 
 */
 
-export const buildQuery = async (esId, selectedFilters, page = 0, filterArray, sort) => {
-  const resAlternative = await api.post("/elasticsearch/" + esId + "/search", {
+export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort) => {
+  const resAlternative = await api.post(route, {
     page,
     filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
       return { ...e, [key]: value.filter };

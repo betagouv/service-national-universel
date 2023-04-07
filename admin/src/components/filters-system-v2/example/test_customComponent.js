@@ -13,9 +13,6 @@ import SelectStatusMissionV2 from "../../missions/components/SelectStatusMission
 
 import { Filters, ResultTable, SelectedFilters, Save } from "../../../components/filters-system-v2";
 
-import FromDate, { getQuery } from "../../../components/filters-system-v2/components/customComponent/FromDate";
-import ToDate, { getQuery as getQueryToDate } from "../../../components/filters-system-v2/components/customComponent/ToDate";
-
 export default function List() {
   const [mission, setMission] = useState(null);
   const [structure, setStructure] = useState();
@@ -39,12 +36,8 @@ export default function List() {
     {
       title: "Date de début",
       name: "fromDate",
-      datafield: "fromDate.keyword",
       parentGroup: "Date",
       missingLabel: "Non renseignée",
-      customComponent: (setQuery, filter) => <FromDate setQuery={setQuery} value={filter} />,
-      //getQuery is needed only if you want to use customComponent
-      getQuery: (value) => getQuery(value),
       translate: formatDateFR,
     },
     {
@@ -53,7 +46,7 @@ export default function List() {
       datafield: "toDate.keyword",
       parentGroup: "Date",
       missingLabel: "Non renseignée",
-      customComponent: (setQuery, filter) => <ToDate setQuery={setQuery} value={filter} />,
+      //       customComponent: (setQuery, filter) => <ToDate setQuery={setQuery} value={filter} />,
       getQuery: (value) => getQueryToDate(value),
       translate: formatDateFR,
     },
@@ -98,7 +91,7 @@ export default function List() {
           <div className="text-2xl font-bold text-[#242526] leading-7">Missions</div>
           <Filters
             pageId={pageId}
-            esId="mission"
+            route="/elasticsearch/mission/search"
             defaultQuery={getDefaultQuery()}
             setData={(value) => setData(value)}
             filters={filterArray}

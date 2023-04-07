@@ -22,16 +22,18 @@ function hitsSubQuery(query, key, value) {
   return query;
 }
 
-function aggsSubQuery(keys, aggsSearchQuery, filters) {
+function aggsSubQuery(keys, aggsSearchQuery, queryFilters, contextFilters) {
   let aggs = {};
+  console.log(keys, queryFilters);
   for (const key of keys) {
-    let filter = { bool: { must: [], filter: [] } };
+    let filter = { bool: { must: [], filter: contextFilters } };
     if (aggsSearchQuery) filter.bool.must.push(aggsSearchQuery);
 
     for (const subKey of keys) {
       if (subKey === key) continue;
-      if (!filters[subKey.replace(".keyword", "")]?.length) continue;
-      filter = hitsSubQuery(filter, subKey, filters[subKey.replace(".keyword", "")]);
+      if (!queryFilters[subKey.replace(".keyword", "")]?.length) continue;
+      console.log("youpi");
+      filter = hitsSubQuery(filter, subKey, queryFilters[subKey.replace(".keyword", "")]);
     }
 
     if (key.includes(".keyword")) {
@@ -40,6 +42,7 @@ function aggsSubQuery(keys, aggsSearchQuery, filters) {
       aggs[key] = { filter, aggs: { names: { histogram: { field: key, interval: 1, min_doc_count: 1 } } } };
     }
   }
+  console.log(JSON.stringify(aggs));
   return aggs;
 }
 
@@ -66,7 +69,7 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
     hitsRequestBody.query = hitsSubQuery(hitsRequestBody.query, key, queryFilters[keyWithoutKeyword]);
   }
   // Aggs request body
-  const aggsRequestBody = { query: getMainQuery(), aggs: aggsSubQuery(filterFields, search, contextFilters), size: 0, track_total_hits: true };
+  const aggsRequestBody = { query: getMainQuery(), aggs: aggsSubQuery(filterFields, search, queryFilters, contextFilters), size: 0, track_total_hits: true };
   return { hitsRequestBody, aggsRequestBody };
 }
 

@@ -15,7 +15,18 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Filters({ esId, pageId, filters, searchPlaceholder = "", setData, selectedFilters, setSelectedFilters, paramData, setParamData, defaultUrlParam = false }) {
+export default function Filters({
+  route,
+  pageId,
+  filters,
+  searchPlaceholder = "",
+  setData,
+  selectedFilters,
+  setSelectedFilters,
+  paramData,
+  setParamData,
+  defaultUrlParam = false,
+}) {
   // search for filters
   const [search, setSearch] = React.useState("");
   // searchBar
@@ -128,7 +139,7 @@ export default function Filters({ esId, pageId, filters, searchPlaceholder = "",
   };
 
   const getData = async () => {
-    const res = await buildQuery(esId, selectedFilters, paramData?.page, filters, paramData?.sort);
+    const res = await buildQuery(route, selectedFilters, paramData?.page, filters, paramData?.sort);
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
     const newParamData = {
