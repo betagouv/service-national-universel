@@ -764,9 +764,13 @@ router.post("/france-connect/authorization-url", async (req, res) => {
       acr_values: "eidas1",
     };
 
-    redisClient.setEx(`franceConnectNonce:${query.nonce}`, 1800, query.nonce, (error) => capture(error));
-
-    redisClient.setEx(`franceConnectState:${query.state}`, 1800, query.state, (error) => capture(error));
+    try {
+      await redisClient.setEx(`franceConnectNonce:${query.nonce}`, 1800, query.nonce);
+      await redisClient.setEx(`franceConnectState:${query.state}`, 1800, query.state);
+    } catch (e) {
+      capture(e);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
 
     const url = `${process.env.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
     return res.status(200).send({ ok: true, data: { url } });
@@ -806,21 +810,13 @@ router.post("/france-connect/user-info", async (req, res) => {
 
     const decodedToken = jwt.decode(franceConnectToken);
 
-    const storedState = await redisClient.get(`franceConnectState:${value.state}`, (err, result) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    });
-
-    const storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`, (err, result) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    });
+    try {
+      const storedState = await redisClient.get(`franceConnectState:${value.state}`);
+      const storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`);
+    } catch (e) {
+      capture(e);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
 
     if (!token["access_token"] || !token["id_token"] || !storedNonce || !storedState) {
       capture(`France Connect User Information failed: ${JSON.stringify({ storedNonce, storedState, token })}`);
