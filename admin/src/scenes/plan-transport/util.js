@@ -199,7 +199,6 @@ export const exportLigneBus = async (user, cohort) => {
       };
 
       const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint.meetingPointId === young.meetingPointId);
-      // const youngCenter = cohesionCenters.find((center) => center._id.toString() === young.cohesionCenterId);
       const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
 
       if (youngMeetingPoint) {
@@ -216,9 +215,6 @@ export const exportLigneBus = async (user, cohort) => {
         if (!result[youngLigneBus.busId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
           result[youngLigneBus.busId]["ligneBus"].push(youngLigneBus);
         }
-        // if (!result[youngLigneBus.busId]["centers"].find((center) => center._id.toString() === young.cohesionCenterId)) {
-        //   result[youngLigneBus.busId]["centers"].push(youngCenter);
-        // }
         result[youngLigneBus.busId]["youngs"].push(tempYoung);
       }
     }
@@ -228,10 +224,8 @@ export const exportLigneBus = async (user, cohort) => {
       return {
         name: key,
         data: result[key].youngs.map((young) => {
-          const meetingPoint = young.meetingPointId && result[key].meetingPoint.find((mp) => mp._id === young.meetingPointId);
-          console.log("🚀 ~ file: util.js:228 ~ data:result[key].youngs.map ~ meetingPoint:", meetingPoint);
+          const meetingPoint = young.meetingPointId && result[key].meetingPoint.find((mp) => mp.meetingPointId === young.meetingPointId);
           const ligneBus = young.ligneId && result[key].ligneBus.find((lb) => lb._id === young.ligneId);
-          // const center = young.meetingPointId && result[key].center.find((c) => c._id === young.cohesionCenterId);
 
           return {
             _id: young._id,
