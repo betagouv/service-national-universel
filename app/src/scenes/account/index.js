@@ -14,7 +14,7 @@ import ModalConfirm from "../../components/modals/ModalConfirm";
 import PasswordEye from "../../components/PasswordEye";
 import { appURL } from "../../config";
 import { putLocation } from "../../services/api-adresse";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { youngCanChangeSession, YOUNG_STATUS } from "snu-lib";
 import FormRow from "../../components/forms/FormRow";
 import ContinueButton from "../../components/buttons/ContinueButton";
 import DeleteAccountButton from "../../components/buttons/DeleteAccountButton";
@@ -316,10 +316,7 @@ export default function Account() {
         )}
       </Formik>
       <div className="flex flex-col md:flex-row justify-center md:gap-8 mt-12 text-center">
-        {[YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ||
-        [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.AFFECTED].includes(young.statusPhase1) ? (
-          <ChangeStayButton />
-        ) : null}
+        {youngCanChangeSession(young) ? <ChangeStayButton /> : null}
         {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ? (
           <DeleteAccountButton young={young} onClick={() => setWithdrawalModalOpen(true)} />
         ) : null}

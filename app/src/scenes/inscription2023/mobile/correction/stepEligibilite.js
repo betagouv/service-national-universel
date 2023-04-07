@@ -151,7 +151,7 @@ export default function StepEligibilite() {
       const res = await api.post("/cohort-session/eligibility/2023", updatedYoung);
       if (!res.ok) throw new Error(translate(res.code));
 
-      const cohorts = res.data.length > 0 ? res.data.filter((e) => e?.goalReached === false) : null;
+      const cohorts = res.data.length > 0 ? res.data : null;
 
       if (res.data.msg || !cohorts) {
         let res = await api.put("/young/inscription2023/noneligible");
