@@ -24,7 +24,7 @@ import { useHistory, useParams } from "react-router-dom";
 
 import ModalRattacherCentre from "./components/ModalRattacherCentre";
 
-import { Filters, ResultTable, getDefaultQuery, Save, SelectedFilters, ExportComponentV2 } from "../../components/filters-system";
+import { Filters, ResultTable, getDefaultQuery, Save, SelectedFilters, ExportComponentV2 } from "../../components/filters-system-v2";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -292,6 +292,7 @@ const ListSession = ({ firstSession }) => {
     </div>
   );
 };
+
 const ListCenter = ({ firstSession }) => {
   const user = useSelector((state) => state.Auth.user);
 
@@ -303,28 +304,22 @@ const ListCenter = ({ firstSession }) => {
     page: 0,
   });
   const filterArray = [
-    { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée" },
+    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée" },
     {
       title: "Région",
       name: "region",
-      datafield: "region.keyword",
       missingLabel: "Non renseignée",
       defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
     },
     {
       title: "Département",
       name: "department",
-      datafield: "department.keyword",
       missingLabel: "Non renseignée",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
     },
   ];
-  if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code2022", datafield: "code2022.keyword", missingLabel: "Non renseignée" });
-  const searchBarObject = {
-    placeholder: "Rechercher par mots clés, ville, code postal...",
-    datafield: ["name", "city", "zip", "code2022"],
-  };
+  if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code2022", missingLabel: "Non renseignée" });
 
   // List of sessionPhase1 IDS currently displayed in results
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
@@ -362,7 +357,7 @@ const ListCenter = ({ firstSession }) => {
             defaultQuery={getDefaultQuery()}
             setData={(value) => setData(value)}
             filters={filterArray}
-            searchBarObject={searchBarObject}
+            searchPlaceholder="Rechercher par mots clés, ville, code postal..."
             selectedFilters={selectedFilters}
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
@@ -399,7 +394,7 @@ const ListCenter = ({ firstSession }) => {
               });
             }}
             selectedFilters={selectedFilters}
-            searchBarObject={searchBarObject}
+            searchPlaceholder="Rechercher par mots clés, ville, code postal..."
             icon={<BsDownload className="text-gray-400" />}
             css={{
               override: true,
