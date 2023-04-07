@@ -3,7 +3,7 @@ import { BsArrowLeft, BsArrowRight, BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { ES_NO_LIMIT, formatDateFR, formatDateFRTimezoneUTC, getDepartmentNumber, ROLES, translate } from "snu-lib";
+import { getDepartmentNumber, ROLES, translate } from "snu-lib";
 import ArrowUp from "../../../assets/ArrowUp";
 import Comment from "../../../assets/comment";
 import History from "../../../assets/icons/History";
@@ -15,12 +15,9 @@ import api from "../../../services/api";
 import { PlainButton } from "../components/Buttons";
 import { TabItem, Title, translateStatus } from "../components/commons";
 import Select from "../components/Select";
-import { getDepartmentsFromBusLine, getRegionsFromBusLine, getTransportIcon } from "../util";
+import { exportLigneBus, getTransportIcon } from "../util";
 import Excel from "./components/Icons/Excel.png";
 import ListPanel from "./modificationPanel/List";
-import FileSaver from "file-saver";
-import dayjs from "dayjs";
-import * as XLSX from "xlsx";
 
 const cohortList = [
   { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
@@ -187,208 +184,6 @@ const ReactiveList = ({ cohort, history }) => {
     datafield: ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"],
   };
 
-  const exportDataTransport = async () => {
-    try {
-      const body = {
-        query: {
-          bool: {
-            must: [{ match_all: {} }, { term: { "cohort.keyword": cohort } }],
-          },
-        },
-      };
-
-      const res = await getAllResults("plandetransport", body);
-      console.log("🚀 ~ file: List.js:207 ~ exportDataTransport ~ res:", res);
-
-      // const { data } = await api.post(`/es/plandetransport/export`, { body, size: ES_NO_LIMIT });
-      // console.log("🚀 ~ file: List.js:208 ~ exportDataTransport ~ data:", data);
-
-      // On filtre les lignes pour ne garder que celles qui ont des points de rassemblement ou un point d'arrivée dans la région ou le département de l'utilisateur
-      let ligneBus = data.map((e) => {
-        return { ...e, regions: getRegionsFromBusLine(e), departments: getDepartmentsFromBusLine(e) };
-      });
-
-      if (user.region && user.region !== "") {
-        ligneBus = ligneBus.filter((e) => e.regions.includes(user.region));
-      }
-
-      if (user.department && user.department !== [] && user.department[0] !== "") {
-        ligneBus = ligneBus.filter((e) => user.department.some((dep) => e.departments.includes(dep)));
-      }
-      console.log("🚀 ~ file: List.js:466 ~ ligneBus ~ ligneBus:", ligneBus);
-
-      const ligneIds = await ligneBus.map((e) => e._id);
-
-      let meetingPoints = [];
-      for (const line of ligneBus) {
-        for (const mp of line.pointDeRassemblements) {
-          meetingPoints.push(mp);
-        }
-      }
-      console.log("🚀 ~ file: List.js:210 ~ exportDataTransport ~ meetingPoints:", meetingPoints);
-
-      const esYoungByLine = async () => {
-        let body = {
-          query: {
-            bool: {
-              must: [],
-              filter: [
-                { match_all: {} },
-                { term: { "cohort.keyword": cohort } },
-                { term: { "status.keyword": "VALIDATED" } },
-                { terms: { "ligneId.keyword": ligneIds } },
-                // { term: { "cohesionStayPresence.keyword": "true" } },
-                // { term: { "departInform.keyword": "false" } },
-              ],
-            },
-          },
-          aggs: {
-            group_by_bus: {
-              terms: {
-                field: "ligneId.keyword",
-                size: ES_NO_LIMIT,
-              },
-            },
-          },
-          track_total_hits: true,
-        };
-
-        return await getAllResults("young-having-meeting-point-in-geography", body);
-      };
-
-      const youngs = await esYoungByLine();
-      console.log("🚀 ~ file: List.js:238 ~ exportDataTransport ~ youngs:", youngs);
-
-      let result = {
-        noMeetingPoint: {
-          youngs: [],
-          meetingPoint: [],
-        },
-        transportInfoGivenByLocal: {
-          youngs: [],
-          meetingPoint: [],
-        },
-      };
-
-      // let response = await api.get(`/point-de-rassemblement/center/${id}/cohort/${youngs[0].cohort}`);
-      // const meetingPoints = response ? response.data.meetingPoints : [];
-      // const ligneBus = response ? response.data.ligneBus : [];
-
-      for (const young of youngs) {
-        const tempYoung = {
-          _id: young._id,
-          cohort: young.cohort,
-          firstName: young.firstName,
-          lastName: young.lastName,
-          email: young.email,
-          phone: young.phone,
-          address: young.address,
-          zip: young.zip,
-          city: young.city,
-          department: young.department,
-          region: young.region,
-          birthdateAt: young.birthdateAt,
-          gender: young.gender,
-          parent1FirstName: young.parent1FirstName,
-          parent1LastName: young.parent1LastName,
-          parent1Email: young.parent1Email,
-          parent1Phone: young.parent1Phone,
-          parent1Status: young.parent1Status,
-          parent2FirstName: young.parent2FirstName,
-          parent2LastName: young.parent2LastName,
-          parent2Email: young.parent2Email,
-          parent2Phone: young.parent2Phone,
-          parent2Status: young.parent2Status,
-          statusPhase1: young.statusPhase1,
-          meetingPointId: young.meetingPointId,
-          ligneId: young.ligneId,
-        };
-        if (young.deplacementPhase1Autonomous === "true") {
-          result.noMeetingPoint.youngs.push(tempYoung);
-        } else if (young.transportInfoGivenByLocal === "true") {
-          result.transportInfoGivenByLocal.youngs.push(tempYoung);
-        } else {
-          const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint.meetingPointId === young.meetingPointId);
-          const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
-          if (youngMeetingPoint) {
-            if (!result[youngLigneBus.busId]) {
-              result[youngLigneBus.busId] = {};
-              result[youngLigneBus.busId]["youngs"] = [];
-              result[youngLigneBus.busId]["ligneBus"] = [];
-              result[youngLigneBus.busId]["meetingPoint"] = [];
-            }
-            if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint.meetingPointId === youngMeetingPoint.meetingPointId)) {
-              result[youngLigneBus.busId]["meetingPoint"].push(youngMeetingPoint);
-            }
-            if (!result[youngLigneBus.busId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
-              result[youngLigneBus.busId]["ligneBus"].push(youngLigneBus);
-            }
-            result[youngLigneBus.busId]["youngs"].push(tempYoung);
-          }
-        }
-      }
-      // Transform data into array of objects before excel converts
-      const formatedRep = Object.keys(result).map((key) => {
-        let name;
-        if (key === "noMeetingPoint") name = "Autonome";
-        else if (key === "transportInfoGivenByLocal") name = "Services locaux";
-        else name = key;
-        // console.log(name, result[key]);
-        return {
-          name: name,
-          data: result[key].youngs.map((young) => {
-            const meetingPoint = young.meetingPointId && result[key].meetingPoint.find((mp) => mp._id === young.meetingPointId);
-            const ligneBus = young.ligneId && result[key].ligneBus.find((lb) => lb._id === young.ligneId);
-            // console.log(young.ligneId);
-            return {
-              _id: young._id,
-              Cohorte: young.cohort,
-              Prénom: young.firstName,
-              Nom: young.lastName,
-              "Date de naissance": formatDateFRTimezoneUTC(young.birthdateAt),
-              Sexe: translate(young.gender),
-              Email: young.email,
-              Téléphone: young.phone,
-              "Adresse postale": young.address,
-              "Code postal": young.zip,
-              Ville: young.city,
-              Département: young.department,
-              Région: young.region,
-              Statut: translate(young.statusPhase1),
-              "Prénom représentant légal 1": young.parent1FirstName,
-              "Nom représentant légal 1": young.parent1LastName,
-              "Email représentant légal 1": young.parent1Email,
-              "Téléphone représentant légal 1": young.parent1Phone,
-              "Statut représentant légal 1": translate(young.parent1Status),
-              "Prénom représentant légal 2": young.parent2FirstName,
-              "Nom représentant légal 2": young.parent2LastName,
-              "Email représentant légal 2": young.parent2Email,
-              "Téléphone représentant légal 2": young.parent2Phone,
-              "Statut représentant légal 2": translate(young.parent2Status),
-              "Id du point de rassemblement": young.meetingPointId,
-              "Adresse point de rassemblement": meetingPoint?.address,
-              "Date aller": formatDateFR(ligneBus?.departuredDate),
-              "Date retour": formatDateFR(ligneBus?.returnDate),
-            };
-          }),
-        };
-      });
-
-      const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-      const wb = XLSX.utils.book_new();
-      formatedRep.forEach((sheet) => {
-        let ws = XLSX.utils.json_to_sheet(sheet.data);
-        XLSX.utils.book_append_sheet(wb, ws, sheet.name.substring(0, 30));
-      });
-      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      const resultData = new Blob([excelBuffer], { type: fileType });
-      FileSaver.saveAs(resultData, `transport_information_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`);
-    } catch (e) {
-      console.log(e);
-      toastr.error("Erreur !", translate(e.code));
-    }
-  };
-
   return (
     <>
       <div className="flex flex-1">
@@ -483,7 +278,13 @@ const ReactiveList = ({ cohort, history }) => {
               }}
             />
 
-            <button onClick={exportDataTransport}>Exporter les volontaires par ligne</button>
+            {[ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
+              <button
+                className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
+                onClick={() => exportLigneBus(user, cohort)}>
+                Exporter les volontaires par ligne
+              </button>
+            )}
           </div>
         </div>
         <div className="mt-2 px-4 flex flex-row flex-wrap items-center">
@@ -701,9 +502,3 @@ const customQuery = (value, getDefaultQuery) => {
   }
   return body;
 };
-
-async function getAllResults(index, query) {
-  const result = await api.post(`/es/${index}/export`, query);
-  if (!result.data.length) return [];
-  return result.data;
-}
