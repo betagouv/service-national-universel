@@ -1,3 +1,17 @@
+# [1.248.0](https://github.com/betagouv/service-national-universel/compare/v1.247.1...v1.248.0) (2023-04-07)
+
+
+### Bug Fixes
+
+* **api:** france connect state ([#2449](https://github.com/betagouv/service-national-universel/issues/2449)) ([bac1eac](https://github.com/betagouv/service-national-universel/commit/bac1eac5ba2732fc046529a4ab18e004abf8e6ac))
+* **app/api:** cohort filling rate check ([#2469](https://github.com/betagouv/service-national-universel/issues/2469)) ([da18bd2](https://github.com/betagouv/service-national-universel/commit/da18bd23765ec43e08223746540d2042d5776f18))
+
+
+### Features
+
+* **admin:** amélioration de la vue détaillée par région accueillies sur la table de répartition et ajout de l'export de données ([#2467](https://github.com/betagouv/service-national-universel/issues/2467)) ([439538d](https://github.com/betagouv/service-national-universel/commit/439538d7816bf63cde0dd639190a94c0b709177b))
+* **admin:** Plan de transport - Export des volontaires par ligne de bus ([#2466](https://github.com/betagouv/service-national-universel/issues/2466)) ([4fa51df](https://github.com/betagouv/service-national-universel/commit/4fa51df0212807edb2d0e80ff52e7d32d0ca038f))
+
 ## [1.247.1](https://github.com/betagouv/service-national-universel/compare/v1.247.0...v1.247.1) (2023-04-06)
 
 
