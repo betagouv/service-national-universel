@@ -117,6 +117,7 @@ export const exportLigneBus = async (user, cohort) => {
     };
 
     const data = await getAllResults("plandetransport", body);
+    if (!data || !data.length) return toastr.error("Aucune ligne de bus n'a été trouvée");
     const ligneBus = filterBusLinesByRole(data, user);
     const ligneIds = ligneBus.map((e) => e._id);
 
@@ -153,6 +154,17 @@ export const exportLigneBus = async (user, cohort) => {
 
     let result = {};
 
+    const bodyCenter = {
+      query: {
+        bool: {
+          must: [{ match_all: {} }],
+        },
+      },
+    };
+
+    const cohesionCenters = await getAllResults("cohesioncenter", bodyCenter);
+    console.log("🚀 ~ file: util.js:157 ~ exportLigneBus ~ cohesionCenters:", cohesionCenters);
+
     for (const young of youngs) {
       const tempYoung = {
         _id: young._id,
@@ -162,10 +174,10 @@ export const exportLigneBus = async (user, cohort) => {
         email: young.email,
         phone: young.phone,
         address: young.address,
-        zip: young.zip,
-        city: young.city,
         department: young.department,
         region: young.region,
+        zip: young.zip,
+        city: young.city,
         birthdateAt: young.birthdateAt,
         gender: young.gender,
         parent1FirstName: young.parent1FirstName,
@@ -181,9 +193,13 @@ export const exportLigneBus = async (user, cohort) => {
         statusPhase1: young.statusPhase1,
         meetingPointId: young.meetingPointId,
         ligneId: young.ligneId,
+        status: young.status,
+        imageRight: young.imageRight,
+        youngPhase1Agreement: young.youngPhase1Agreement,
       };
 
       const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint.meetingPointId === young.meetingPointId);
+      // const youngCenter = cohesionCenters.find((center) => center._id.toString() === young.cohesionCenterId);
       const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
 
       if (youngMeetingPoint) {
@@ -192,6 +208,7 @@ export const exportLigneBus = async (user, cohort) => {
           result[youngLigneBus.busId]["youngs"] = [];
           result[youngLigneBus.busId]["ligneBus"] = [];
           result[youngLigneBus.busId]["meetingPoint"] = [];
+          result[youngLigneBus.busId]["centers"] = [];
         }
         if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint.meetingPointId === youngMeetingPoint.meetingPointId)) {
           result[youngLigneBus.busId]["meetingPoint"].push(youngMeetingPoint);
@@ -199,46 +216,74 @@ export const exportLigneBus = async (user, cohort) => {
         if (!result[youngLigneBus.busId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
           result[youngLigneBus.busId]["ligneBus"].push(youngLigneBus);
         }
+        // if (!result[youngLigneBus.busId]["centers"].find((center) => center._id.toString() === young.cohesionCenterId)) {
+        //   result[youngLigneBus.busId]["centers"].push(youngCenter);
+        // }
         result[youngLigneBus.busId]["youngs"].push(tempYoung);
       }
     }
+    console.log("result", result);
     // Transform data into array of objects before excel converts
     const formatedRep = Object.keys(result).map((key) => {
       return {
         name: key,
         data: result[key].youngs.map((young) => {
           const meetingPoint = young.meetingPointId && result[key].meetingPoint.find((mp) => mp._id === young.meetingPointId);
+          console.log("🚀 ~ file: util.js:228 ~ data:result[key].youngs.map ~ meetingPoint:", meetingPoint);
           const ligneBus = young.ligneId && result[key].ligneBus.find((lb) => lb._id === young.ligneId);
+          // const center = young.meetingPointId && result[key].center.find((c) => c._id === young.cohesionCenterId);
 
           return {
             _id: young._id,
             Cohorte: young.cohort,
             Prénom: young.firstName,
             Nom: young.lastName,
-            "Date de naissance": formatDateFRTimezoneUTC(young.birthdateAt),
-            Sexe: translate(young.gender),
+            // "Date de naissance": formatDateFRTimezoneUTC(young.birthdateAt),
+            // Sexe: translate(young.gender),
             Email: young.email,
             Téléphone: young.phone,
-            "Adresse postale": young.address,
-            "Code postal": young.zip,
-            Ville: young.city,
+            // "Adresse postale": young.address,
+            // "Code postal": young.zip,
+            // Ville: young.city,
             Département: young.department,
+            Académie: translate(young.academie),
             Région: young.region,
-            Statut: translate(young.statusPhase1),
+            // Statut: translate(young.statusPhase1),
+
+            "Statut représentant légal 1": translate(young.parent1Status),
             "Prénom représentant légal 1": young.parent1FirstName,
             "Nom représentant légal 1": young.parent1LastName,
             "Email représentant légal 1": young.parent1Email,
             "Téléphone représentant légal 1": young.parent1Phone,
-            "Statut représentant légal 1": translate(young.parent1Status),
+
+            "Statut représentant légal 2": translate(young.parent2Status),
             "Prénom représentant légal 2": young.parent2FirstName,
             "Nom représentant légal 2": young.parent2LastName,
             "Email représentant légal 2": young.parent2Email,
             "Téléphone représentant légal 2": young.parent2Phone,
-            "Statut représentant légal 2": translate(young.parent2Status),
-            "Id du point de rassemblement": young.meetingPointId,
+
+            "ID centre": ligneBus.centerId,
+            "Code centre": ligneBus.centerCode,
+            "Nom du centre": ligneBus.centerName,
+            "Adresse du centre": ligneBus.centerAddress,
+            "Ville du centre": ligneBus.centerCity,
+            "Département du centre": ligneBus.centerDepartment,
+            "Région du centre": ligneBus.centerRegion,
+
+            "Id du point de rassemblement": meetingPoint?.meetingPointId,
+            "Nom point de rassemblement": meetingPoint?.name,
             "Adresse point de rassemblement": meetingPoint?.address,
-            "Date aller": formatDateFR(ligneBus?.departuredDate),
-            "Date retour": formatDateFR(ligneBus?.returnDate),
+            "Ville point de rassemblement": meetingPoint?.city,
+            "Département point de rassemblement": meetingPoint?.department,
+            "Région point de rassemblement": meetingPoint?.region,
+
+            "Date aller": ligneBus.departureString,
+            "Date retour": ligneBus.returnString,
+
+            "Statut général": translate(young.status),
+            "Statut phase 1": translate(young.statusPhase1),
+            "Droit à l'image": translate(young.imageRight),
+            "Confirmation de participation au séjour de cohésion": translate(young.youngPhase1Agreement),
           };
         }),
       };
