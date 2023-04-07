@@ -805,7 +805,11 @@ router.get("/get-lines-with-geography/:cohort", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
     }
 
-    const pipeline = (cohort, region = "", departments = []) => [
+    const cohort = req.params.cohort;
+    const region = req.user?.region || "";
+    const departments = req.user?.departments || [];
+
+    const pipeline = [
       { $match: { cohort: cohort } },
       {
         $addFields: {
@@ -886,13 +890,19 @@ router.get("/get-lines-with-geography/:cohort", async (req, res) => {
         },
       },
       {
-        $match: {
-          $or: [{ regions: region }, { departments: { $in: departments } }],
-        },
+        $match: {},
       },
     ];
 
-    const lines = await LigneBusModel.aggregate(pipeline(req.params.cohort, req.user?.region || "", req.user?.departments || []));
+    if (region && region !== "") {
+      pipeline[11].$match = { regions: region };
+    }
+
+    if (departments && departments.length > 0) {
+      pipeline[11].$match = { departments: { $in: departments } };
+    }
+
+    const lines = await LigneBusModel.aggregate(pipeline);
     if (!lines || lines.length === 0) {
       return res.status(200).send({ ok: true, data: [] });
     }

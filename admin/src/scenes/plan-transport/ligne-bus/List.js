@@ -3,7 +3,7 @@ import { BsArrowLeft, BsArrowRight, BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { formatDateFR, formatDateFRTimezoneUTC, getDepartmentNumber, ROLES, translate } from "snu-lib";
+import { ES_NO_LIMIT, formatDateFR, formatDateFRTimezoneUTC, getDepartmentNumber, ROLES, translate } from "snu-lib";
 import ArrowUp from "../../../assets/ArrowUp";
 import Comment from "../../../assets/comment";
 import History from "../../../assets/icons/History";
@@ -200,10 +200,11 @@ const ReactiveList = ({ cohort, history }) => {
         },
       };
 
-      const ligneBus = await api.get(`/ligne-de-bus/get-lines-with-geography/${cohort}`);
+      const responseligneBus = await api.get(`/ligne-de-bus/get-lines-with-geography/${cohort}`);
+      const ligneBus = responseligneBus.data;
       console.log("🚀 ~ file: List.js:322 ~ exportDataTransport ~ ligneBus:", ligneBus);
 
-      const busIds = ligneBus.map((e) => e.busId);
+      const busIds = await ligneBus.map((e) => e.busId);
       console.log("🚀 ~ file: List.js:208 ~ exportDataTransport ~ busIds:", busIds);
       const meetingPoints = [].concat(ligneBus.map((e) => e.meetingPoints));
       console.log("🚀 ~ file: List.js:210 ~ exportDataTransport ~ meetingPoints:", meetingPoints);
@@ -217,7 +218,7 @@ const ReactiveList = ({ cohort, history }) => {
                 { match_all: {} },
                 { term: { "cohort.keyword": cohort } },
                 { term: { "status.keyword": "VALIDATED" } },
-                { terms: { "busId.keyword": busIds } },
+                { terms: { "ligneId.keyword": busIds } },
                 // { term: { "cohesionStayPresence.keyword": "true" } },
                 // { term: { "departInform.keyword": "false" } },
               ],
@@ -452,7 +453,203 @@ const ReactiveList = ({ cohort, history }) => {
               }}
             />
 
-            <button onClick={exportDataTransport}>Exporter les volontaires par ligne</button>
+            <ExportComponentV2
+              title="Exporter les volontaires par ligne"
+              defaultQuery={getDefaultQuery()}
+              exportTitle="Volontaires_par_ligne"
+              icon={<BsDownload className="text-gray-400" />}
+              index="plandetransport"
+              transform={async (data) => {
+                function getRegionList(line) {
+                  let regions = [];
+                  regions.push(line.centerRegion);
+                  for (const pdr of line.pointDeRassemblements) {
+                    regions.push(pdr.region);
+                  }
+                  return regions;
+                }
+
+                function getDepartmentList(line) {
+                  let departments = [];
+                  departments.push(line.centerDepartment);
+                  for (const pdr of line.pointDeRassemblements) {
+                    departments.push(pdr.department);
+                  }
+                  return departments;
+                }
+
+                let ligneBus = data.map((e) => {
+                  return { ...e, regions: getRegionList(e), departments: getDepartmentList(e) };
+                });
+
+                if (user.region && user.region !== "") {
+                  console.log("🚀 ~ file: List.js:486 ~ user.region:", user.region);
+                  ligneBus = ligneBus.filter((e) => e.regions.includes(user.region));
+                }
+
+                if (user.department && user.department !== [] && user.department[0] !== "") {
+                  ligneBus = ligneBus.filter((e) => user.department.some((dep) => e.departments.includes(dep)));
+                }
+
+                console.log("🚀 ~ file: List.js:493 ~ ligneBus:", ligneBus);
+
+                const ligneIds = await ligneBus.map((e) => e._id);
+                console.log("🚀 ~ file: List.js:208 ~ exportDataTransport ~ ligneIds:", ligneIds);
+                // const meetingPoints = [].concat(ligneBus.map((e) => e.meetingPoints));
+                // console.log("🚀 ~ file: List.js:210 ~ exportDataTransport ~ meetingPoints:", meetingPoints);
+
+                const esYoungByLine = async () => {
+                  let body = {
+                    query: {
+                      bool: {
+                        must: [],
+                        filter: [
+                          { match_all: {} },
+                          { term: { "cohort.keyword": cohort } },
+                          { term: { "status.keyword": "VALIDATED" } },
+                          { terms: { "ligneId.keyword": ligneIds } },
+                          // { term: { "cohesionStayPresence.keyword": "true" } },
+                          // { term: { "departInform.keyword": "false" } },
+                        ],
+                      },
+                    },
+                    aggs: {
+                      group_by_bus: {
+                        terms: {
+                          field: "ligneId.keyword",
+                          size: ES_NO_LIMIT,
+                        },
+                      },
+                    },
+                    track_total_hits: true,
+                  };
+
+                  return await getAllResults(`young`, body);
+                };
+
+                const youngs = await esYoungByLine();
+                console.log("🚀 ~ file: List.js:238 ~ exportDataTransport ~ youngs:", youngs);
+
+                let result = {
+                  noMeetingPoint: {
+                    youngs: [],
+                    meetingPoint: [],
+                  },
+                  transportInfoGivenByLocal: {
+                    youngs: [],
+                    meetingPoint: [],
+                  },
+                };
+
+                let response = await api.get(`/point-de-rassemblement/center/${id}/cohort/${youngs[0].cohort}`);
+                const meetingPoints = response ? response.data.meetingPoints : [];
+                // const ligneBus = response ? response.data.ligneBus : [];
+
+                for (const young of youngs) {
+                  const tempYoung = {
+                    _id: young._id,
+                    cohort: young.cohort,
+                    firstName: young.firstName,
+                    lastName: young.lastName,
+                    email: young.email,
+                    phone: young.phone,
+                    address: young.address,
+                    zip: young.zip,
+                    city: young.city,
+                    department: young.department,
+                    region: young.region,
+                    birthdateAt: young.birthdateAt,
+                    gender: young.gender,
+                    parent1FirstName: young.parent1FirstName,
+                    parent1LastName: young.parent1LastName,
+                    parent1Email: young.parent1Email,
+                    parent1Phone: young.parent1Phone,
+                    parent1Status: young.parent1Status,
+                    parent2FirstName: young.parent2FirstName,
+                    parent2LastName: young.parent2LastName,
+                    parent2Email: young.parent2Email,
+                    parent2Phone: young.parent2Phone,
+                    parent2Status: young.parent2Status,
+                    statusPhase1: young.statusPhase1,
+                    meetingPointId: young.meetingPointId,
+                    ligneId: young.ligneId,
+                  };
+                  if (young.deplacementPhase1Autonomous === "true") {
+                    result.noMeetingPoint.youngs.push(tempYoung);
+                  } else if (young.transportInfoGivenByLocal === "true") {
+                    result.transportInfoGivenByLocal.youngs.push(tempYoung);
+                  } else {
+                    const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
+                    const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
+                    if (youngMeetingPoint) {
+                      if (!result[youngLigneBus.busId]) {
+                        result[youngLigneBus.busId] = {};
+                        result[youngLigneBus.busId]["youngs"] = [];
+                        result[youngLigneBus.busId]["ligneBus"] = [];
+                        result[youngLigneBus.busId]["meetingPoint"] = [];
+                      }
+                      if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
+                        result[youngLigneBus.busId]["meetingPoint"].push(youngMeetingPoint);
+                      }
+                      if (!result[youngLigneBus.busId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
+                        result[youngLigneBus.busId]["ligneBus"].push(youngLigneBus);
+                      }
+                      result[youngLigneBus.busId]["youngs"].push(tempYoung);
+                    }
+                  }
+                }
+                // Transform data into array of objects before excel converts
+                const formatedRep = Object.keys(result).map((key) => {
+                  let name;
+                  if (key === "noMeetingPoint") name = "Autonome";
+                  else if (key === "transportInfoGivenByLocal") name = "Services locaux";
+                  else name = key;
+                  console.log(name, result[key]);
+                  return {
+                    name: name,
+                    data: result[key].youngs.map((young) => {
+                      const meetingPoint = young.meetingPointId && result[key].meetingPoint.find((mp) => mp._id === young.meetingPointId);
+                      const ligneBus = young.ligneId && result[key].ligneBus.find((lb) => lb._id === young.ligneId);
+                      console.log(young.ligneId);
+                      return {
+                        _id: young._id,
+                        Cohorte: young.cohort,
+                        Prénom: young.firstName,
+                        Nom: young.lastName,
+                        "Date de naissance": formatDateFRTimezoneUTC(young.birthdateAt),
+                        Sexe: translate(young.gender),
+                        Email: young.email,
+                        Téléphone: young.phone,
+                        "Adresse postale": young.address,
+                        "Code postal": young.zip,
+                        Ville: young.city,
+                        Département: young.department,
+                        Région: young.region,
+                        Statut: translate(young.statusPhase1),
+                        "Prénom représentant légal 1": young.parent1FirstName,
+                        "Nom représentant légal 1": young.parent1LastName,
+                        "Email représentant légal 1": young.parent1Email,
+                        "Téléphone représentant légal 1": young.parent1Phone,
+                        "Statut représentant légal 1": translate(young.parent1Status),
+                        "Prénom représentant légal 2": young.parent2FirstName,
+                        "Nom représentant légal 2": young.parent2LastName,
+                        "Email représentant légal 2": young.parent2Email,
+                        "Téléphone représentant légal 2": young.parent2Phone,
+                        "Statut représentant légal 2": translate(young.parent2Status),
+                        "Id du point de rassemblement": young.meetingPointId,
+                        "Adresse point de rassemblement": meetingPoint?.address,
+                        "Date aller": formatDateFR(ligneBus?.departuredDate),
+                        "Date retour": formatDateFR(ligneBus?.returnDate),
+                      };
+                    }),
+                  };
+                });
+
+                return formatedRep;
+              }}
+            />
+
+            {/* <button onClick={exportDataTransport}>Exporter les volontaires par ligne</button> */}
           </div>
         </div>
         <div className="mt-2 px-4 flex flex-row flex-wrap items-center">
