@@ -4,9 +4,9 @@ import ExportFieldCard from "../../../ExportFieldCard";
 import ModalTailwind from "../../../modals/ModalTailwind";
 import plausibleEvent from "../../../../services/plausible";
 import { capitalizeFirstLetter } from "../../../../utils";
-import ExportComponent from "./ExportComponentV2";
+import ExportComponent from "./ExportComponent";
 
-export default function ModalExportV2({ isOpen, setIsOpen, route, transform, exportFields, exportTitle = "", totalHits = false, selectedFilters }) {
+export default function ModalExport({ isOpen, setIsOpen, route, transform, exportFields, exportTitle = "", totalHits = false, selectedFilters }) {
   const [selectedFields, setSelectedFields] = useState(exportFields?.map((e) => e.id));
   const fieldsToExport = [].concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
   const [hasFilter, setHasFilter] = useState(false);

@@ -24,7 +24,7 @@ import { useHistory, useParams } from "react-router-dom";
 
 import ModalRattacherCentre from "./components/ModalRattacherCentre";
 
-import { Filters, ResultTable, getDefaultQuery, Save, SelectedFilters, ExportComponentV2 } from "../../components/filters-system-v2";
+import { Filters, ResultTable, getDefaultQuery, Save, SelectedFilters, ExportComponent } from "../../components/filters-system-v2";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -146,7 +146,7 @@ const ListSession = ({ firstSession }) => {
             paramData={paramData}
             setParamData={setParamData}
           />
-          <ExportComponentV2
+          <ExportComponent
             title="Exporter"
             exportTitle="Session"
             route="/elasticsearch/sessionphase1/export"
@@ -324,7 +324,7 @@ const ListCenter = ({ firstSession }) => {
             paramData={paramData}
             setParamData={setParamData}
           />
-          <ExportComponentV2
+          <ExportComponent
             title="Exporter"
             defaultQuery={getDefaultQuery()}
             filters={filterArray}

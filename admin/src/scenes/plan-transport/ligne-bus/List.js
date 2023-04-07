@@ -8,7 +8,7 @@ import ArrowUp from "../../../assets/ArrowUp";
 import Comment from "../../../assets/comment";
 import History from "../../../assets/icons/History";
 import Breadcrumbs from "../../../components/Breadcrumbs";
-import { ExportComponentV2, Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
 import Loader from "../../../components/Loader";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -199,7 +199,7 @@ const ReactiveList = ({ cohort, history }) => {
               onClick={() => history.push(`/ligne-de-bus/demande-de-modification?cohort=${cohort}`)}>
               Demande de modification
             </button>
-            <ExportComponentV2
+            <ExportComponent
               title="Exporter"
               exportTitle="Plan_de_transport"
               icon={<BsDownload className="text-gray-400" />}
