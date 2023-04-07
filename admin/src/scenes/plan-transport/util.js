@@ -63,3 +63,21 @@ export const GROUPSTEPS = {
   AFFECTATION_SUMMARY: "AFFECTATION_SUMMARY",
   CONFIRM_DELETE_GROUP: "CONFIRM_DELETE_GROUP",
 };
+
+export function getRegionsFromBusLine(line) {
+  let regions = [];
+  regions.push(line.centerRegion);
+  for (const pdr of line.pointDeRassemblements) {
+    regions.push(pdr.region);
+  }
+  return regions;
+}
+
+export function getDepartmentsFromBusLine(line) {
+  let departments = [];
+  departments.push(line.centerDepartment);
+  for (const pdr of line.pointDeRassemblements) {
+    departments.push(pdr.department);
+  }
+  return departments;
+}

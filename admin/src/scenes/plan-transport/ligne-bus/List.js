@@ -15,7 +15,7 @@ import api from "../../../services/api";
 import { PlainButton } from "../components/Buttons";
 import { TabItem, Title, translateStatus } from "../components/commons";
 import Select from "../components/Select";
-import { getTransportIcon } from "../util";
+import { getDepartmentsFromBusLine, getRegionsFromBusLine, getTransportIcon } from "../util";
 import Excel from "./components/Icons/Excel.png";
 import ListPanel from "./modificationPanel/List";
 import FileSaver from "file-saver";
@@ -395,7 +395,7 @@ const ReactiveList = ({ cohort, history }) => {
               Demande de modification
             </button>
             <ExportComponentV2
-              title="Exporter"
+              title="Exporter le plan de transport"
               defaultQuery={getDefaultQuery()}
               exportTitle="Plan_de_transport"
               icon={<BsDownload className="text-gray-400" />}
@@ -459,44 +459,34 @@ const ReactiveList = ({ cohort, history }) => {
               exportTitle="Volontaires_par_ligne"
               icon={<BsDownload className="text-gray-400" />}
               index="plandetransport"
+              css={{
+                override: true,
+                button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+                loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+              }}
               transform={async (data) => {
-                function getRegionList(line) {
-                  let regions = [];
-                  regions.push(line.centerRegion);
-                  for (const pdr of line.pointDeRassemblements) {
-                    regions.push(pdr.region);
-                  }
-                  return regions;
-                }
-
-                function getDepartmentList(line) {
-                  let departments = [];
-                  departments.push(line.centerDepartment);
-                  for (const pdr of line.pointDeRassemblements) {
-                    departments.push(pdr.department);
-                  }
-                  return departments;
-                }
-
                 let ligneBus = data.map((e) => {
-                  return { ...e, regions: getRegionList(e), departments: getDepartmentList(e) };
+                  return { ...e, regions: getRegionsFromBusLine(e), departments: getDepartmentsFromBusLine(e) };
                 });
 
                 if (user.region && user.region !== "") {
-                  console.log("🚀 ~ file: List.js:486 ~ user.region:", user.region);
                   ligneBus = ligneBus.filter((e) => e.regions.includes(user.region));
                 }
 
                 if (user.department && user.department !== [] && user.department[0] !== "") {
                   ligneBus = ligneBus.filter((e) => user.department.some((dep) => e.departments.includes(dep)));
                 }
-
-                console.log("🚀 ~ file: List.js:493 ~ ligneBus:", ligneBus);
+                console.log("🚀 ~ file: List.js:466 ~ ligneBus ~ ligneBus:", ligneBus);
 
                 const ligneIds = await ligneBus.map((e) => e._id);
-                console.log("🚀 ~ file: List.js:208 ~ exportDataTransport ~ ligneIds:", ligneIds);
-                // const meetingPoints = [].concat(ligneBus.map((e) => e.meetingPoints));
-                // console.log("🚀 ~ file: List.js:210 ~ exportDataTransport ~ meetingPoints:", meetingPoints);
+
+                let meetingPoints = [];
+                for (const line of ligneBus) {
+                  for (const mp of line.pointDeRassemblements) {
+                    meetingPoints.push(mp);
+                  }
+                }
+                console.log("🚀 ~ file: List.js:210 ~ exportDataTransport ~ meetingPoints:", meetingPoints);
 
                 const esYoungByLine = async () => {
                   let body = {
@@ -541,8 +531,8 @@ const ReactiveList = ({ cohort, history }) => {
                   },
                 };
 
-                let response = await api.get(`/point-de-rassemblement/center/${id}/cohort/${youngs[0].cohort}`);
-                const meetingPoints = response ? response.data.meetingPoints : [];
+                // let response = await api.get(`/point-de-rassemblement/center/${id}/cohort/${youngs[0].cohort}`);
+                // const meetingPoints = response ? response.data.meetingPoints : [];
                 // const ligneBus = response ? response.data.ligneBus : [];
 
                 for (const young of youngs) {
@@ -579,7 +569,7 @@ const ReactiveList = ({ cohort, history }) => {
                   } else if (young.transportInfoGivenByLocal === "true") {
                     result.transportInfoGivenByLocal.youngs.push(tempYoung);
                   } else {
-                    const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
+                    const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint.meetingPointId === young.meetingPointId);
                     const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
                     if (youngMeetingPoint) {
                       if (!result[youngLigneBus.busId]) {
@@ -588,7 +578,7 @@ const ReactiveList = ({ cohort, history }) => {
                         result[youngLigneBus.busId]["ligneBus"] = [];
                         result[youngLigneBus.busId]["meetingPoint"] = [];
                       }
-                      if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
+                      if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint.meetingPointId === youngMeetingPoint.meetingPointId)) {
                         result[youngLigneBus.busId]["meetingPoint"].push(youngMeetingPoint);
                       }
                       if (!result[youngLigneBus.busId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
