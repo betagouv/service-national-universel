@@ -149,6 +149,7 @@ async function getAllResults(index, query, searchType, fieldsToExport) {
   } else {
     result = await api.post(`/es/${index}/export`, { query, fieldsToExport });
     if (!result.data.length) return [];
+    console.log("🚀 ~ file: ExportComponentV2.js:152 ~ getAllResults ~ result:", result.data);
     return result.data;
   }
 }

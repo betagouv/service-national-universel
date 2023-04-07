@@ -3,7 +3,7 @@ import { BsArrowLeft, BsArrowRight, BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { getDepartmentNumber, ROLES, translate } from "snu-lib";
+import { ES_NO_LIMIT, formatDateFR, formatDateFRTimezoneUTC, getDepartmentNumber, ROLES, translate } from "snu-lib";
 import ArrowUp from "../../../assets/ArrowUp";
 import Comment from "../../../assets/comment";
 import History from "../../../assets/icons/History";
@@ -19,6 +19,9 @@ import { getTransportIcon } from "../util";
 import Excel from "./components/Icons/Excel.png";
 import ListPanel from "./modificationPanel/List";
 import { transformVolontaires } from "../../../utils/excelExportTransforms";
+import FileSaver from "file-saver";
+import dayjs from "dayjs";
+import * as XLSX from "xlsx";
 
 const cohortList = [
   { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
@@ -117,29 +120,96 @@ const ReactiveList = ({ cohort, history }) => {
     };
   };
 
-  const getDefaultQueryYoungs = () => {
-    return {
-      query: {
-        bool: {
-          must: [
-            { match_all: {} },
-            { term: { "cohort.keyword": cohort } },
-            { term: { "status.keyword": "VALIDATED" } },
-            { term: { "cohesionStayPresence.keyword": "true" } },
-            { term: { "departInform.keyword": "false" } },
-          ],
-        },
-      },
-      aggs: {
-        group_by_bus: {
-          terms: {
-            field: "busId.keyword",
-            size: 100,
+  const lineAgg = (region = "", departments = []) => {
+    [
+      { $match: { cohort: cohort } },
+      {
+        $addFields: {
+          cohesionCenterObjId: {
+            $convert: {
+              input: "$centerId",
+              to: "objectId",
+              onError: "",
+              onNull: "",
+            },
+          },
+          meetingPointsObjIds: {
+            $map: {
+              input: "$meetingPointsIds",
+              in: {
+                $convert: {
+                  input: "$$this",
+                  to: "objectId",
+                  onError: "",
+                  onNull: "",
+                },
+              },
+            },
           },
         },
       },
-      track_total_hits: true,
-    };
+      {
+        $lookup: {
+          from: "cohesioncenters",
+          localField: "cohesionCenterObjId",
+          foreignField: "_id",
+          as: "cohesionCenter",
+        },
+      },
+      { $unwind: { path: "$cohesionCenter" } },
+      { $unwind: { path: "$meetingPointsObjIds" } },
+      {
+        $lookup: {
+          from: "pointderassemblements",
+          localField: "meetingPointsObjIds",
+          foreignField: "_id",
+          as: "meetingPoints",
+        },
+      },
+      { $unwind: { path: "$meetingPoints" } },
+      {
+        $group: {
+          _id: "$_id",
+          meetingPoints: {
+            $push: "$meetingPoints",
+          },
+          cohesionCenter: {
+            $first: "$cohesionCenter",
+          },
+        },
+      },
+      {
+        $addFields: {
+          regions: {
+            $concatArrays: [
+              {
+                $map: {
+                  input: "$meetingPoints",
+                  in: "$$this.region",
+                },
+              },
+              ["$cohesionCenter.region"],
+            ],
+          },
+          departments: {
+            $concatArrays: [
+              {
+                $map: {
+                  input: "$meetingPoints",
+                  in: "$$this.department",
+                },
+              },
+              ["$cohesionCenter.department"],
+            ],
+          },
+        },
+      },
+      {
+        $match: {
+          $or: [{ regions: region }, { departments: { $in: departments } }],
+        },
+      },
+    ];
   };
 
   const filterArray = [
@@ -208,6 +278,193 @@ const ReactiveList = ({ cohort, history }) => {
   const searchBarObject = {
     placeholder: "Rechercher une ligne (numéro, ville, region)",
     datafield: ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"],
+  };
+
+  const esYoungByLine = async () => {
+    let body = {
+      query: {
+        bool: {
+          must: [],
+          filter: [
+            { terms: { "status.keyword": ["VALIDATED"] } },
+            { term: { "cohort.keyword": cohort } },
+            // { term: { "sessionPhase1Id.keyword": sessionId } }
+          ],
+        },
+      },
+      sort: [
+        {
+          "lastName.keyword": "asc",
+        },
+      ],
+      track_total_hits: true,
+      size: ES_NO_LIMIT,
+    };
+
+    return await getAllResults(`young`, body);
+  };
+
+  const exportDataTransport = async () => {
+    try {
+      let result = {
+        noMeetingPoint: {
+          youngs: [],
+          meetingPoint: [],
+        },
+        transportInfoGivenByLocal: {
+          youngs: [],
+          meetingPoint: [],
+        },
+      };
+
+      const lines = await api.get(`/ligne-de-bus/get-lines-with-geography/${cohort}`);
+      const busIds = lines.map((e) => e.busId);
+
+      const getDefaultQueryYoungs = () => {
+        return {
+          query: {
+            bool: {
+              must: [],
+              filter: [
+                { match_all: {} },
+                { term: { "cohort.keyword": cohort } },
+                { term: { "status.keyword": "VALIDATED" } },
+                { terms: { "busId.keyword": busIds } },
+                // { term: { "cohesionStayPresence.keyword": "true" } },
+                // { term: { "departInform.keyword": "false" } },
+              ],
+            },
+          },
+          aggs: {
+            group_by_bus: {
+              terms: {
+                field: "ligneId.keyword",
+                size: 100,
+              },
+            },
+          },
+          track_total_hits: true,
+        };
+      };
+
+      const youngs = await esYoungByLine();
+
+      // let response = await api.get(`/point-de-rassemblement/center/${id}/cohort/${youngs[0].cohort}`);
+      // const meetingPoints = response ? response.data.meetingPoints : [];
+      // const ligneBus = response ? response.data.ligneBus : [];
+
+      for (const young of youngs) {
+        const tempYoung = {
+          _id: young._id,
+          cohort: young.cohort,
+          firstName: young.firstName,
+          lastName: young.lastName,
+          email: young.email,
+          phone: young.phone,
+          address: young.address,
+          zip: young.zip,
+          city: young.city,
+          department: young.department,
+          region: young.region,
+          birthdateAt: young.birthdateAt,
+          gender: young.gender,
+          parent1FirstName: young.parent1FirstName,
+          parent1LastName: young.parent1LastName,
+          parent1Email: young.parent1Email,
+          parent1Phone: young.parent1Phone,
+          parent1Status: young.parent1Status,
+          parent2FirstName: young.parent2FirstName,
+          parent2LastName: young.parent2LastName,
+          parent2Email: young.parent2Email,
+          parent2Phone: young.parent2Phone,
+          parent2Status: young.parent2Status,
+          statusPhase1: young.statusPhase1,
+          meetingPointId: young.meetingPointId,
+          ligneId: young.ligneId,
+        };
+        if (young.deplacementPhase1Autonomous === "true") {
+          result.noMeetingPoint.youngs.push(tempYoung);
+        } else if (young.transportInfoGivenByLocal === "true") {
+          result.transportInfoGivenByLocal.youngs.push(tempYoung);
+        } else {
+          const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
+          const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
+          if (youngMeetingPoint) {
+            if (!result[youngLigneBus.busId]) {
+              result[youngLigneBus.busId] = {};
+              result[youngLigneBus.busId]["youngs"] = [];
+              result[youngLigneBus.busId]["ligneBus"] = [];
+              result[youngLigneBus.busId]["meetingPoint"] = [];
+            }
+            if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
+              result[youngLigneBus.busId]["meetingPoint"].push(youngMeetingPoint);
+            }
+            if (!result[youngLigneBus.busId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
+              result[youngLigneBus.busId]["ligneBus"].push(youngLigneBus);
+            }
+            result[youngLigneBus.busId]["youngs"].push(tempYoung);
+          }
+        }
+      }
+      // Transform data into array of objects before excel converts
+      const formatedRep = Object.keys(result).map((key) => {
+        let name;
+        if (key === "noMeetingPoint") name = "Autonome";
+        else if (key === "transportInfoGivenByLocal") name = "Services locaux";
+        else name = key;
+        console.log(name, result[key]);
+        return {
+          name: name,
+          data: result[key].youngs.map((young) => {
+            const meetingPoint = young.meetingPointId && result[key].meetingPoint.find((mp) => mp._id === young.meetingPointId);
+            const ligneBus = young.ligneId && result[key].ligneBus.find((lb) => lb._id === young.ligneId);
+            console.log(young.ligneId);
+            return {
+              _id: young._id,
+              Cohorte: young.cohort,
+              Prénom: young.firstName,
+              Nom: young.lastName,
+              "Date de naissance": formatDateFRTimezoneUTC(young.birthdateAt),
+              Sexe: translate(young.gender),
+              Email: young.email,
+              Téléphone: young.phone,
+              "Adresse postale": young.address,
+              "Code postal": young.zip,
+              Ville: young.city,
+              Département: young.department,
+              Région: young.region,
+              Statut: translate(young.statusPhase1),
+              "Prénom représentant légal 1": young.parent1FirstName,
+              "Nom représentant légal 1": young.parent1LastName,
+              "Email représentant légal 1": young.parent1Email,
+              "Téléphone représentant légal 1": young.parent1Phone,
+              "Statut représentant légal 1": translate(young.parent1Status),
+              "Prénom représentant légal 2": young.parent2FirstName,
+              "Nom représentant légal 2": young.parent2LastName,
+              "Email représentant légal 2": young.parent2Email,
+              "Téléphone représentant légal 2": young.parent2Phone,
+              "Statut représentant légal 2": translate(young.parent2Status),
+              "Id du point de rassemblement": young.meetingPointId,
+              "Adresse point de rassemblement": meetingPoint?.address,
+              "Date aller": formatDateFR(ligneBus?.departuredDate),
+              "Date retour": formatDateFR(ligneBus?.returnDate),
+            };
+          }),
+        };
+      });
+      const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+      const wb = XLSX.utils.book_new();
+      formatedRep.forEach((sheet) => {
+        let ws = XLSX.utils.json_to_sheet(sheet.data);
+        XLSX.utils.book_append_sheet(wb, ws, sheet.name.substring(0, 30));
+      });
+      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      const resultData = new Blob([excelBuffer], { type: fileType });
+      FileSaver.saveAs(resultData, `transport_information_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`);
+    } catch (e) {
+      console.log(e);
+      toastr.error("Erreur !", translate(e.code));
+    }
   };
 
   return (
@@ -304,19 +561,7 @@ const ReactiveList = ({ cohort, history }) => {
               }}
             />
 
-            <ExportComponentV2
-              title="Exporter la liste des volontaires par ligne"
-              defaultQuery={getDefaultQueryYoungs()}
-              exportTitle="Liste_des_volontaires_par_ligne"
-              icon={<BsDownload className="text-gray-400" />}
-              index="young-having-meeting-point-in-geography"
-              css={{
-                override: true,
-                button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-                loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-              }}
-              transform={transformVolontaires}
-            />
+            <button onClick={exportDataTransport}>Exporter les volontaires par ligne</button>
           </div>
         </div>
         <div className="mt-2 px-4 flex flex-row flex-wrap items-center">
@@ -534,3 +779,9 @@ const customQuery = (value, getDefaultQuery) => {
   }
   return body;
 };
+
+async function getAllResults(index, query) {
+  const result = await api.post(`/es/${index}/export`, query);
+  if (!result.data.length) return [];
+  return result.data;
+}
