@@ -11,5 +11,6 @@ const { buildNdJson, buildRequestBody } = require("./utils");
 router.use("/cohesioncenter", require("./cohesioncenter"));
 router.use("/young", require("./young"));
 router.use("/sessionphase1", require("./sessionphase1"));
+router.use("/plandetransport", require("./plandetransport"));
 
 module.exports = router;
