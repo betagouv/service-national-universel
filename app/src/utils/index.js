@@ -60,7 +60,7 @@ export function permissionPhase1(y) {
 }
 
 export function permissionPhase2(y) {
-  if (!permissionPhase1(y)) return false;
+  // if (!permissionPhase1(y)) return false;
   return (
     (y.status !== YOUNG_STATUS.WITHDRAWN &&
       (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) ||
