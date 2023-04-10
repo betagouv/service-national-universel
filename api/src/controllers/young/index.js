@@ -82,7 +82,7 @@ redisClient.on("error", function (error) {
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
-router.post("/logout", (req, res) => YoungAuth.logout(req, res));
+router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.logout(req, res));
 router.get("/signin_token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.signinToken(req, res));
 router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
 router.post("/forgot_password_reset", async (req, res) => YoungAuth.forgotPasswordReset(req, res));

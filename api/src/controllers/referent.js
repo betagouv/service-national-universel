@@ -125,7 +125,7 @@ function cleanReferentData(referent) {
 }
 
 router.post("/signin", (req, res) => ReferentAuth.signin(req, res));
-router.post("/logout", (req, res) => ReferentAuth.logout(req, res));
+router.post("/logout", passport.authenticate("referent", { session: false, failWithError: true }), (req, res) => ReferentAuth.logout(req, res));
 router.post("/signup", async (req, res) => {
   try {
     const { error, value } = Joi.object({

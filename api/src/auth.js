@@ -231,7 +231,7 @@ class Auth {
     }
   }
 
-  async logout(_req, res) {
+  async logout(req, res) {
     try {
       // Find user by token
       const { user } = req;

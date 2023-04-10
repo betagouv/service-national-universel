@@ -27,8 +27,8 @@ module.exports = function () {
         const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
         if (error) return done(null, false);
 
-        const young = await Young.findById(value._id);
-        if (young) return done(null, young);
+        const young = await Young.findById(value._id).select("password");
+        if (young && jwtPayload.lastLogoutAt === young.lastLogoutAt && jwtPayload.password === young.password) return done(null, young);
       } catch (error) {
         capture(error);
       }
@@ -43,8 +43,9 @@ module.exports = function () {
         const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
         if (error) return done(null, false);
 
-        const referent = await Referent.findById(value._id);
-        if (referent) return done(null, referent);
+        const referent = await Referent.findById(value._id).select("password");
+        console.log("🚀 ~ file: passport.js:47 ~ referent:", referent.password);
+        if (referent && jwtPayload.lastLogoutAt === referent.lastLogoutAt && jwtPayload.password === referent.password) return done(null, referent);
       } catch (error) {
         capture(error);
       }
@@ -59,8 +60,9 @@ module.exports = function () {
         const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
         if (error) return done(null, false);
 
-        const referent = await Referent.findById(value._id);
-        if (referent && referent.role === ROLES.ADMIN) return done(null, referent);
+        const referent = await Referent.findById(value._id).select("password");
+        if (referent && referent.role === ROLES.ADMIN && jwtPayload.lastLogoutAt === referent.lastLogoutAt && jwtPayload.password === referent.password)
+          return done(null, referent);
       } catch (error) {
         capture(error);
       }
@@ -75,8 +77,8 @@ module.exports = function () {
         const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
         if (error) return done(null, false);
 
-        const referent = await Referent.findById(value._id);
-        if (referent && referent.role === ROLES.DSNJ) return done(null, referent);
+        const referent = await Referent.findById(value._id).select("password");
+        if (referent && referent.role === ROLES.DSNJ && jwtPayload.lastLogoutAt === referent.lastLogoutAt && jwtPayload.password === referent.password) return done(null, referent);
       } catch (error) {
         capture(error);
       }
