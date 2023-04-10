@@ -43,16 +43,14 @@ router.get("/token", async (req, res) => {
     const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
     if (error) return res.status(200).send({ ok: true, user: { restriction: "public" } });
 
-    // Add check of lastLoginAt and password if you find the young or referent
-
     const young = await Young.findById(value._id);
-    if (young) {
+    if (young && jwtPayload.lastLogoutAt === young.lastLogoutAt && jwtPayload.password === young.password) {
       young.set({ lastLoginAt: Date.now() });
       await young.save();
       return res.status(200).send({ ok: true, user: { ...serializeYoung(young, young), allowedRole: "young" } });
     }
     const referent = await Referent.findById(value._id);
-    if (referent) {
+    if (referent && jwtPayload.lastLogoutAt === referent.lastLogoutAt && jwtPayload.password === referent.password) {
       referent.set({ lastLoginAt: Date.now() });
       await referent.save();
       return res.status(200).send({ ok: true, user: { ...serializeReferent(referent, referent), allowedRole: allowedRole(referent) } });

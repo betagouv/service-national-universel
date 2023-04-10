@@ -32,9 +32,7 @@ router.get("/signin", async (req, res) => {
 
     // si l'utilisateur n'existe pas, on bloque
     if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
-    // Check if lastLogoutAt is equal to user lastLogoutAt
     if (lastLogoutAt && lastLogoutAt !== user.lastLogoutAt) return res.status(401).send({ ok: false, code: ERRORS.TOKEN_INVALID });
-    // Check if password is equal to user password
     if (password && password !== user.password) return res.status(401).send({ ok: false, code: ERRORS.TOKEN_INVALID });
 
     const structure = await StructureModel.findById(user.structureId);
