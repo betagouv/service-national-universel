@@ -59,7 +59,7 @@ class Auth {
         acceptCGU,
         rulesYoung,
       });
-      const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
+      const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, password: user.password }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
 
       return res.status(200).send({
@@ -159,7 +159,7 @@ class Auth {
         grade,
         inscriptionStep2023: STEPS2023.COORDONNEES,
       });
-      const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
+      const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, password: user.password }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
 
       await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
@@ -215,7 +215,7 @@ class Auth {
       user.set({ lastLoginAt: Date.now() });
       await user.save();
 
-      const token = jwt.sign({ _id: user.id }, config.secret, { expiresIn: JWT_MAX_AGE });
+      const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, password: user.password }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
@@ -233,6 +233,10 @@ class Auth {
 
   async logout(_req, res) {
     try {
+      // Find user by token
+      const { user } = req;
+      user.set({ lastLogoutAt: Date.now() });
+      await user.save();
       res.clearCookie("jwt", logoutCookieOptions());
       return res.status(200).send({ ok: true });
     } catch (error) {

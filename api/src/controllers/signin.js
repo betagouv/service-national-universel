@@ -43,6 +43,8 @@ router.get("/token", async (req, res) => {
     const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
     if (error) return res.status(200).send({ ok: true, user: { restriction: "public" } });
 
+    // Add check of lastLoginAt and password if you find the young or referent
+
     const young = await Young.findById(value._id);
     if (young) {
       young.set({ lastLoginAt: Date.now() });

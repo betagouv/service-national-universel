@@ -65,6 +65,12 @@ const Schema = new mongoose.Schema({
       description: "Date de dernière connexion",
     },
   },
+  lastLogoutAt: {
+    type: Date,
+    documentation: {
+      description: "Date de dernière déconnexion",
+    },
+  },
   registredAt: {
     type: Date,
     documentation: {
@@ -243,6 +249,7 @@ Schema.plugin(patchHistory, {
   excludes: [
     "/password",
     "/lastLoginAt",
+    "/lastLogoutAt",
     "/nextLoginAttemptIn",
     "/forgotPasswordResetToken",
     "/forgotPasswordResetExpires",
@@ -255,7 +262,7 @@ Schema.plugin(patchHistory, {
 
 Schema.plugin(
   mongooseElastic(esClient, {
-    ignore: ["password", "nextLoginAttemptIn", "forgotPasswordResetToken", "forgotPasswordResetExpires", "invitationToken", "invitationExpires", "loginAttempts"],
+    ignore: ["password", "lastLogoutAt", "nextLoginAttemptIn", "forgotPasswordResetToken", "forgotPasswordResetExpires", "invitationToken", "invitationExpires", "loginAttempts"],
   }),
   MODELNAME,
 );

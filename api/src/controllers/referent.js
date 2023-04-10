@@ -150,7 +150,7 @@ router.post("/signup", async (req, res) => {
     const role = ROLES.RESPONSIBLE; // responsible by default
 
     const user = await ReferentModel.create({ password, email, firstName, lastName, role, acceptCGU, phone, mobile: phone });
-    const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
+    const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, password: user.password }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());
 
     return res.status(200).send({ user, token, ok: true });
@@ -181,7 +181,7 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
 
     if (!canSigninAs(req.user, user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const token = jwt.sign({ _id: user.id }, config.secret, { expiresIn: JWT_MAX_AGE });
+    const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, password: user.password }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());
 
     return res.status(200).send({ ok: true, token, data: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
@@ -314,7 +314,7 @@ router.post("/signup_verify", async (req, res) => {
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
 
-    const token = jwt.sign({ _id: referent._id }, config.secret, { expiresIn: "30d" });
+    const token = jwt.sign({ _id: referent.id, lastLogoutAt: referent.lastLogoutAt, password: referent.password }, config.secret, { expiresIn: "30d" });
     return res.status(200).send({ ok: true, token, data: serializeReferent(referent, referent) });
   } catch (error) {
     capture(error);
@@ -356,7 +356,7 @@ router.post("/signup_invite", async (req, res) => {
       acceptCGU,
     });
 
-    const token = jwt.sign({ _id: referent.id }, config.secret, { expiresIn: "30d" });
+    const token = jwt.sign({ _id: referent.id, lastLogoutAt: referent.lastLogoutAt, password: referent.password }, config.secret, { expiresIn: "30d" });
     res.cookie("jwt", token, cookieOptions());
 
     await referent.save({ fromUser: req.user });
