@@ -1,3 +1,11 @@
+## [1.248.1](https://github.com/betagouv/service-national-universel/compare/v1.248.0...v1.248.1) (2023-04-10)
+
+
+### Bug Fixes
+
+* **admin:** Typo ([158942e](https://github.com/betagouv/service-national-universel/commit/158942e959b2fb74d2e87abee29196b3373e41d1))
+* **api:** young app change cohort ([05dfc67](https://github.com/betagouv/service-national-universel/commit/05dfc67591bf8ef5f69f9a658367bf823ff49dca))
+
 # [1.248.0](https://github.com/betagouv/service-national-universel/compare/v1.247.1...v1.248.0) (2023-04-07)
 
 
