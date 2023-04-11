@@ -59,7 +59,7 @@ class Auth {
         acceptCGU,
         rulesYoung,
       });
-      const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, password: user.password }, config.secret, { expiresIn: JWT_MAX_AGE });
+      const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, password: password }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
 
       return res.status(200).send({
@@ -159,7 +159,7 @@ class Auth {
         grade,
         inscriptionStep2023: STEPS2023.COORDONNEES,
       });
-      const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, password: user.password }, config.secret, { expiresIn: JWT_MAX_AGE });
+      const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, password: password }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
 
       await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
@@ -191,7 +191,7 @@ class Auth {
     const { password, email } = value;
     try {
       const now = new Date();
-      const user = await this.model.findOne({ email });
+      const user = await this.model.findOne({ email }).select("password");
       if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       if (user.loginAttempts > 12) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
       if (user.nextLoginAttemptIn > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });

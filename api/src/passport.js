@@ -24,11 +24,15 @@ module.exports = function () {
     "young",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({
+          _id: jwtPayload._id,
+          password: jwtPayload.password,
+          lastLogoutAt: jwtPayload.lastLogoutAt,
+        });
         if (error) return done(null, false);
 
         const young = await Young.findById(value._id).select("password");
-        if (young && jwtPayload.lastLogoutAt === young.lastLogoutAt && jwtPayload.password === young.password) return done(null, young);
+        if (young && value.lastLogoutAt === young.lastLogoutAt && value.password === young.password) return done(null, young);
       } catch (error) {
         capture(error);
       }
@@ -40,12 +44,19 @@ module.exports = function () {
     "referent",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({
+          _id: jwtPayload._id,
+          password: jwtPayload.password,
+          lastLogoutAt: jwtPayload.lastLogoutAt,
+        });
         if (error) return done(null, false);
 
         const referent = await Referent.findById(value._id).select("password");
-        console.log("🚀 ~ file: passport.js:47 ~ referent:", referent.password);
-        if (referent && jwtPayload.lastLogoutAt === referent.lastLogoutAt && jwtPayload.password === referent.password) return done(null, referent);
+        console.log("🚀 ~ file: passport.js:47 ~ referent:", jwtPayload.lastLogoutAt);
+        console.log("🚀 ~ file: passport.js:48 ~ referent.lastLogoutAt:", referent.lastLogoutAt);
+        console.log("🚀 ~ file: passport.js:47 ~ referent:", jwtPayload.password);
+        console.log("🚀 ~ file: passport.js:50 ~ referent.password:", referent.password);
+        if (referent && value.lastLogoutAt === referent.lastLogoutAt && value.password === referent.password) return done(null, referent);
       } catch (error) {
         capture(error);
       }
@@ -57,12 +68,15 @@ module.exports = function () {
     "admin",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({
+          _id: jwtPayload._id,
+          password: jwtPayload.password,
+          lastLogoutAt: jwtPayload.lastLogoutAt,
+        });
         if (error) return done(null, false);
 
         const referent = await Referent.findById(value._id).select("password");
-        if (referent && referent.role === ROLES.ADMIN && jwtPayload.lastLogoutAt === referent.lastLogoutAt && jwtPayload.password === referent.password)
-          return done(null, referent);
+        if (referent && referent.role === ROLES.ADMIN && value.lastLogoutAt === referent.lastLogoutAt && value.password === referent.password) return done(null, referent);
       } catch (error) {
         capture(error);
       }
@@ -74,11 +88,15 @@ module.exports = function () {
     "dsnj",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({
+          _id: jwtPayload._id,
+          password: jwtPayload.password,
+          lastLogoutAt: jwtPayload.lastLogoutAt,
+        });
         if (error) return done(null, false);
 
         const referent = await Referent.findById(value._id).select("password");
-        if (referent && referent.role === ROLES.DSNJ && jwtPayload.lastLogoutAt === referent.lastLogoutAt && jwtPayload.password === referent.password) return done(null, referent);
+        if (referent && referent.role === ROLES.DSNJ && value.lastLogoutAt === referent.lastLogoutAt && value.password === referent.password) return done(null, referent);
       } catch (error) {
         capture(error);
       }
