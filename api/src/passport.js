@@ -31,8 +31,8 @@ module.exports = function () {
         });
         if (error) return done(null, false);
 
-        const young = await Young.findById(value._id).select("password");
-        if (young && value.lastLogoutAt === young.lastLogoutAt && value.password === young.password) return done(null, young);
+        const young = await Young.findOne(value);
+        if (young) return done(null, young);
       } catch (error) {
         capture(error);
       }
@@ -43,21 +43,18 @@ module.exports = function () {
   passport.use(
     "referent",
     new JwtStrategy(opts, async function (jwtPayload, done) {
+      console.log("🚀 ~ file: passport.js:46 ~ jwtPayload:", jwtPayload);
       try {
         const { error, value } = Joi.object({ _id: Joi.string().required(), password: Joi.string().required(), lastLogoutAt: Joi.date().allow(null) }).validate({
           _id: jwtPayload._id,
           password: jwtPayload.password,
           lastLogoutAt: jwtPayload.lastLogoutAt,
         });
-        console.log("🚀 ~ file: passport.js:52 ~ const{error,value}=Joi.object ~ error:", error);
         if (error) return done(null, false);
 
-        console.log("🚀 ~ file: passport.js:56 ~ value:", value);
+        console.log("🚀 ~ file: passport.js:55 ~ value:", value);
         const referent = await Referent.findOne(value);
-        console.log("🚀 ~ file: passport.js:47 ~ referent:", value.lastLogoutAt);
-        console.log("🚀 ~ file: passport.js:48 ~ referent.lastLogoutAt:", referent.lastLogoutAt);
-        console.log("🚀 ~ file: passport.js:47 ~ referent:", value.password);
-        console.log("🚀 ~ file: passport.js:50 ~ referent.password:", referent.password);
+        console.log("🚀 ~ file: passport.js:56 ~ referent:", referent);
         if (referent) return done(null, referent);
       } catch (error) {
         capture(error);
@@ -77,8 +74,8 @@ module.exports = function () {
         });
         if (error) return done(null, false);
 
-        const referent = await Referent.findById(value._id).select("password");
-        if (referent && referent.role === ROLES.ADMIN && value.lastLogoutAt === referent.lastLogoutAt && value.password === referent.password) return done(null, referent);
+        const referent = await Referent.findOne(value);
+        if (referent && referent.role === ROLES.ADMIN) return done(null, referent);
       } catch (error) {
         capture(error);
       }
@@ -97,8 +94,8 @@ module.exports = function () {
         });
         if (error) return done(null, false);
 
-        const referent = await Referent.findById(value._id).select("password");
-        if (referent && referent.role === ROLES.DSNJ && value.lastLogoutAt === referent.lastLogoutAt && value.password === referent.password) return done(null, referent);
+        const referent = await Referent.findOne(value);
+        if (referent && referent.role === ROLES.DSNJ) return done(null, referent);
       } catch (error) {
         capture(error);
       }

@@ -40,17 +40,21 @@ router.get("/token", async (req, res) => {
       });
     });
     if (!jwtPayload) return res.status(401).send({ ok: false, user: { restriction: "public" } });
-    const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+    const { error, value } = Joi.object({ _id: Joi.string().required(), password: Joi.string().required(), lastLogoutAt: Joi.date().required() }).validate({
+      _id: jwtPayload._id,
+      password: jwtPayload.password,
+      lastLogoutAt: jwtPayload.lastLogoutAt,
+    });
     if (error) return res.status(200).send({ ok: true, user: { restriction: "public" } });
 
-    const young = await Young.findById(value._id);
-    if (young && jwtPayload.lastLogoutAt === young.lastLogoutAt && jwtPayload.password === young.password) {
+    const young = await Young.findOne(value);
+    if (young) {
       young.set({ lastLoginAt: Date.now() });
       await young.save();
       return res.status(200).send({ ok: true, user: { ...serializeYoung(young, young), allowedRole: "young" } });
     }
-    const referent = await Referent.findById(value._id);
-    if (referent && jwtPayload.lastLogoutAt === referent.lastLogoutAt && jwtPayload.password === referent.password) {
+    const referent = await Referent.findOne(value);
+    if (referent) {
       referent.set({ lastLoginAt: Date.now() });
       await referent.save();
       return res.status(200).send({ ok: true, user: { ...serializeReferent(referent, referent), allowedRole: allowedRole(referent) } });

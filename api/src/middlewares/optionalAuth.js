@@ -18,11 +18,11 @@ const optionalAuth = async (req, _, next) => {
       if (!jwtPayload._id) {
         return;
       }
-      user = await ReferentObject.findById(jwtPayload._id);
+      user = await ReferentObject.findOne(jwtPayload);
       if (!user) {
-        user = await YoungObject.findById(jwtPayload._id);
+        user = await YoungObject.findOne(jwtPayload);
       }
-      if (user && jwtPayload.lastLogoutAt === user.lastLogoutAt && jwtPayload.password === user.password) {
+      if (user) {
         req.user = user;
       }
     }
