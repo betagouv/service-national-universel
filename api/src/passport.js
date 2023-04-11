@@ -43,7 +43,6 @@ module.exports = function () {
   passport.use(
     "referent",
     new JwtStrategy(opts, async function (jwtPayload, done) {
-      console.log("🚀 ~ file: passport.js:46 ~ jwtPayload:", jwtPayload);
       try {
         const { error, value } = Joi.object({ _id: Joi.string().required(), password: Joi.string().required(), lastLogoutAt: Joi.date().allow(null) }).validate({
           _id: jwtPayload._id,
@@ -52,9 +51,7 @@ module.exports = function () {
         });
         if (error) return done(null, false);
 
-        console.log("🚀 ~ file: passport.js:55 ~ value:", value);
         const referent = await Referent.findOne(value);
-        console.log("🚀 ~ file: passport.js:56 ~ referent:", referent);
         if (referent) return done(null, referent);
       } catch (error) {
         capture(error);
