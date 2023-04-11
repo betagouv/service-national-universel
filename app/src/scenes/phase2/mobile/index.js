@@ -1,33 +1,28 @@
 import React from "react";
 import { HiOutlineAdjustments, HiOutlineSearch } from "react-icons/hi";
-import { MdOutlineContentCopy } from "react-icons/md";
-import { useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
 
 import ArrowUpRight from "../../../assets/icons/ArrowUpRight";
 import Medaille from "../../../assets/icons/Medaille";
 import Loader from "../../../components/Loader";
 import api from "../../../services/api";
-import { copyToClipboard } from "../../../utils";
 import CardMission from "./components/CardMission";
 import CardEquivalence from "./components/CardEquivalence";
 import CardPM from "./components/CardPM";
 import plausibleEvent from "../../../services/plausible";
+import AlertPrimary from "../../../components/ui/alerts/AlertPrimary";
+import InformationCircle from "../../../assets/icons/InformationCircle";
+import ButtonLinkPrimaryOutline from "../../../components/ui/buttons/ButtonLinkPrimaryOutline";
+import { YOUNG_STATUS_PHASE1 } from "snu-lib";
 
-export default function IndexPhase2Mobile() {
-  const young = useSelector((state) => state.Auth.young);
+export default function IndexPhase2Mobile({ young, cohort }) {
   const [applications, setApplications] = React.useState();
   const [equivalences, setEquivalences] = React.useState();
   const [hasPM, setHasPM] = React.useState(false);
 
-  const [referentManagerPhase2, setReferentManagerPhase2] = React.useState();
-  React.useEffect(() => {
-    (async () => {
-      const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
-      if (ok) return setReferentManagerPhase2(data);
-    })();
-  }, []);
+  const hasYoungFinishedPhase1 =
+    [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) && new Date(new Date(cohort.dateEnd).toLocaleDateString()) <= new Date();
+
   React.useEffect(() => {
     (async () => {
       const { ok, data } = await api.get(`/young/${young._id.toString()}/application`);
@@ -56,7 +51,7 @@ export default function IndexPhase2Mobile() {
         <div className="px-4 pt-4 pb-3">
           <div className="text-white font-bold text-3xl">Réalisez votre mission d&apos;intérêt général</div>
           <div className="text-gray-300 text-sm mt-2 mb-2 font-normal">
-            Mettez votre énergie au service d’une société plus solidaire et découvrez votre talent pour l’engagement en réalisant une mission d’intérêt général !
+            Mettez votre énergie au service d&apos;une société plus solidaire et découvrez votre talent pour l&apos;engagement en réalisant une mission d&apos;intérêt général !
           </div>
           <Link to="/preferences" onClick={() => plausibleEvent("Phase2/CTA - Renseigner mes préférences")}>
             <div className="flex items-center mb-4">
@@ -125,7 +120,7 @@ export default function IndexPhase2Mobile() {
             target="_blank"
             rel="noreferrer"
             className="flex flex-1 gap-1 items-start justify-between p-3">
-            <div className="font-bold flex-1 text-gray-800">J’ai des questions sur la mission d’intérêt général</div>
+            <div className="font-bold flex-1 text-gray-800">J&apos;ai des questions sur la mission d&apos;intérêt général</div>
             <ArrowUpRight className="text-gray-400 text-2xl" />
           </a>
         </div>
@@ -145,7 +140,7 @@ export default function IndexPhase2Mobile() {
             target="_blank"
             rel="noreferrer"
             className="flex gap-1 items-start justify-between p-3">
-            <div className="font-bold flex-1 text-gray-800">J’ai des questions sur la reconnaissance d’engagement</div>
+            <div className="font-bold flex-1 text-gray-800">J&apos;ai des questions sur la reconnaissance d&apos;engagement</div>
             <ArrowUpRight className="text-gray-400 text-2xl" />
           </a>
         </div>
@@ -167,11 +162,23 @@ export default function IndexPhase2Mobile() {
           <div className="border-0 rounded-lg shadow-lg items-center">
             <img src={require("../../../assets/phase2MobileReconnaissance.png")} className="rounded-lg w-full" />
             <div className="px-3 pb-4">
-              <div className="font-bold text-lg text-gray-900 ">Demandez la reconnaissance d’un engagement déjà réalisé</div>
-              <div className="text-gray-600 text-sm mt-2 mb-3">Faîtes reconnaitre comme mission d’intérêt général un engagement déjà réalisé au service de la société</div>
-              <Link to="phase2/equivalence" onClick={() => plausibleEvent("Phase 2/ CTA - EquivalenceMIGdemande")}>
-                <div className="rounded-lg text-blue-600 text-center text-sm py-1 border-[1px] border-blue-600">Faire ma demande</div>
-              </Link>
+              <div className="font-bold text-lg text-gray-900 ">Demandez la reconnaissance d&apos;un engagement déjà réalisé</div>
+              <div className="text-gray-600 text-sm mt-2 mb-3">Faîtes reconnaitre comme mission d&apos;intérêt général un engagement déjà réalisé au service de la société</div>
+              {!hasYoungFinishedPhase1 && (
+                <AlertPrimary className="mb-4">
+                  <div className="text-blue-400 my-1">
+                    <InformationCircle />
+                  </div>
+                  <span>Vous devez avoir terminé votre séjour de cohésion.</span>
+                </AlertPrimary>
+              )}
+              <ButtonLinkPrimaryOutline
+                to="phase2/equivalence"
+                disabled={!hasYoungFinishedPhase1}
+                className="flex justify-center w-full"
+                onClick={() => plausibleEvent("Phase 2/ CTA - EquivalenceMIGdemande")}>
+                Faire ma demande
+              </ButtonLinkPrimaryOutline>
             </div>
           </div>
         ) : null}
