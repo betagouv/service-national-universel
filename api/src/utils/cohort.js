@@ -18,7 +18,6 @@ function getRegionForEligibility(young) {
 }
 
 async function getFilteredSessions(young) {
-  console.log({ sessions2023, birthdateAt: young.birthdateAt });
   const region = getRegionForEligibility(young);
   const sessions = sessions2023.filter(
     (session) =>
