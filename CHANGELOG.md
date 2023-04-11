@@ -1,3 +1,34 @@
+## [1.248.1](https://github.com/betagouv/service-national-universel/compare/v1.248.0...v1.248.1) (2023-04-10)
+
+
+### Bug Fixes
+
+* **admin:** Typo ([158942e](https://github.com/betagouv/service-national-universel/commit/158942e959b2fb74d2e87abee29196b3373e41d1))
+* **api:** young app change cohort ([05dfc67](https://github.com/betagouv/service-national-universel/commit/05dfc67591bf8ef5f69f9a658367bf823ff49dca))
+
+# [1.248.0](https://github.com/betagouv/service-national-universel/compare/v1.247.1...v1.248.0) (2023-04-07)
+
+
+### Bug Fixes
+
+* **api:** france connect state ([#2449](https://github.com/betagouv/service-national-universel/issues/2449)) ([bac1eac](https://github.com/betagouv/service-national-universel/commit/bac1eac5ba2732fc046529a4ab18e004abf8e6ac))
+* **app/api:** cohort filling rate check ([#2469](https://github.com/betagouv/service-national-universel/issues/2469)) ([da18bd2](https://github.com/betagouv/service-national-universel/commit/da18bd23765ec43e08223746540d2042d5776f18))
+
+
+### Features
+
+* **admin:** amélioration de la vue détaillée par région accueillies sur la table de répartition et ajout de l'export de données ([#2467](https://github.com/betagouv/service-national-universel/issues/2467)) ([439538d](https://github.com/betagouv/service-national-universel/commit/439538d7816bf63cde0dd639190a94c0b709177b))
+* **admin:** Plan de transport - Export des volontaires par ligne de bus ([#2466](https://github.com/betagouv/service-national-universel/issues/2466)) ([4fa51df](https://github.com/betagouv/service-national-universel/commit/4fa51df0212807edb2d0e80ff52e7d32d0ca038f))
+
+## [1.247.1](https://github.com/betagouv/service-national-universel/compare/v1.247.0...v1.247.1) (2023-04-06)
+
+
+### Bug Fixes
+
+* **admin:** accès en lecture seule aux données des autres régions du territoire par le référents régionaux ([#2465](https://github.com/betagouv/service-national-universel/issues/2465)) ([87200f9](https://github.com/betagouv/service-national-universel/commit/87200f9f598c7fc3a64e5cc9928a92af93f11081))
+* **admin/lib:** mission young list export ([7430b02](https://github.com/betagouv/service-national-universel/commit/7430b0297edd6ed5d96d9595ed856077bd19c078))
+* **lib:** Sémantique accès bloqué ([7c2643c](https://github.com/betagouv/service-national-universel/commit/7c2643c295b2d35180b2973a570afc695c438506))
+
 # [1.247.0](https://github.com/betagouv/service-national-universel/compare/v1.246.1...v1.247.0) (2023-04-05)
 
 

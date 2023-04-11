@@ -62,6 +62,22 @@ const { getFilteredSessions } = require("../../utils/cohort");
 const { formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
 const { anonymizeContractsFromYoungId } = require("../../services/contract");
+const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
+
+const redis = require("redis");
+
+const redisClient = redis.createClient({
+  url: config.REDIS_URL,
+});
+redisClient.connect().catch(console.error);
+
+redisClient.on("connect", function () {
+  console.log("Connected to Redis server");
+});
+
+redisClient.on("error", function (error) {
+  console.error("Error connecting to Redis server", error);
+});
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
@@ -533,6 +549,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
         departSejourMotifComment: undefined,
         youngPhase1Agreement: "false",
         hasMeetingInformation: undefined,
+        statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
       });
     }
 
@@ -545,15 +562,17 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const session = sessions.find(({ name }) => name === cohort);
     if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-    young.set({
-      cohort,
-      cohortChangeReason,
-      cohortDetailedChangeReason,
-      status: session.isFull ? YOUNG_STATUS.WAITING_LIST : YOUNG_STATUS.VALIDATED,
-      statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
-      cohesionStayPresence: undefined,
-      cohesionStayMedicalFileReceived: undefined,
-    });
+    young.set({ cohort, cohortChangeReason, cohortDetailedChangeReason, cohesionStayPresence: undefined, cohesionStayMedicalFileReceived: undefined });
+
+    const fillingRate = await getFillingRate(young.department, cohort);
+
+    if (fillingRate >= FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.VALIDATED) {
+      young.set({ status: YOUNG_STATUS.WAITING_LIST });
+    }
+
+    if (fillingRate < FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.WAITING_LIST) {
+      young.set({ status: YOUNG_STATUS.VALIDATED });
+    }
 
     await young.save({ fromUser: req.user });
 
@@ -744,10 +763,19 @@ router.post("/france-connect/authorization-url", async (req, res) => {
       redirect_uri: `${config.APP_URL}/${value.callback}`,
       response_type: "code",
       client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
-      state: "home",
+      state: crypto.randomBytes(20).toString("hex"),
       nonce: crypto.randomBytes(20).toString("hex"),
       acr_values: "eidas1",
     };
+
+    try {
+      await redisClient.setEx(`franceConnectNonce:${query.nonce}`, 1800, query.nonce);
+      await redisClient.setEx(`franceConnectState:${query.state}`, 1800, query.state);
+    } catch (e) {
+      capture(e);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+
     const url = `${process.env.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
     return res.status(200).send({ ok: true, data: { url } });
   } catch (error) {
@@ -759,7 +787,9 @@ router.post("/france-connect/authorization-url", async (req, res) => {
 // Get user information for authorized user on France Connect.
 router.post("/france-connect/user-info", async (req, res) => {
   try {
-    const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
+    const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required(), state: Joi.string().required() })
+      .unknown()
+      .validate(req.body, { stripUnknown: true });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -772,14 +802,31 @@ router.post("/france-connect/user-info", async (req, res) => {
       client_secret: process.env.FRANCE_CONNECT_CLIENT_SECRET,
       code: value.code,
     };
+
     const tokenResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/token`, {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
       body: queryString.stringify(body),
     });
-    const token = await tokenResponse.json();
 
-    if (!token["access_token"] || !token["id_token"]) {
+    const token = await tokenResponse.json();
+    const franceConnectToken = token["id_token"];
+
+    const decodedToken = jwt.decode(franceConnectToken);
+
+    let storedState;
+    let storedNonce;
+
+    try {
+      storedState = await redisClient.get(`franceConnectState:${value.state}`);
+      storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`);
+    } catch (e) {
+      capture(e);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+
+    if (!token["access_token"] || !token["id_token"] || !storedNonce || !storedState) {
+      capture(`France Connect User Information failed: ${JSON.stringify({ storedNonce, storedState, token })}`);
       return res.sendStatus(403, token);
     }
 
@@ -788,7 +835,9 @@ router.post("/france-connect/user-info", async (req, res) => {
       method: "GET",
       headers: { Authorization: `Bearer ${token["access_token"]}` },
     });
+
     const userInfo = await userInfoResponse.json();
+
     res.status(200).send({ ok: true, data: userInfo, tokenId: token["id_token"] });
   } catch (e) {
     capture(e);
