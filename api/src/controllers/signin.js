@@ -40,9 +40,9 @@ router.get("/token", async (req, res) => {
       });
     });
     if (!jwtPayload) return res.status(401).send({ ok: false, user: { restriction: "public" } });
-    const { error, value } = Joi.object({ _id: Joi.string().required(), password: Joi.string().required(), lastLogoutAt: Joi.date().required() }).validate({
+    const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.string().required(), lastLogoutAt: Joi.date().required() }).validate({
       _id: jwtPayload._id,
-      password: jwtPayload.password,
+      passwordChangedAt: jwtPayload.passwordChangedAt,
       lastLogoutAt: jwtPayload.lastLogoutAt,
     });
     if (error) return res.status(200).send({ ok: true, user: { restriction: "public" } });

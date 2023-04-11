@@ -150,7 +150,7 @@ router.post("/signup", async (req, res) => {
     const role = ROLES.RESPONSIBLE; // responsible by default
 
     const user = await ReferentModel.create({ password, email, firstName, lastName, role, acceptCGU, phone, mobile: phone });
-    const token = jwt.sign({ _id: user.id, lastLogoutAt: null, password }, config.secret, { expiresIn: JWT_MAX_AGE });
+    const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());
 
     return res.status(200).send({ user, token, ok: true });
@@ -175,13 +175,13 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     const { id, type } = params;
 
     let user = null;
-    if (type === "referent") user = await ReferentModel.findById(id).select("+password +lastLogoutAt");
-    else if (type === "young") user = await YoungModel.findById(id).select("+password +lastLogoutAt");
+    if (type === "referent") user = await ReferentModel.findById(id).select("+passwordChangedAt +lastLogoutAt");
+    else if (type === "young") user = await YoungModel.findById(id).select("+passwordChangedAt +lastLogoutAt");
     if (!user) return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
 
     if (!canSigninAs(req.user, user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, password: user.password }, config.secret, { expiresIn: JWT_MAX_AGE });
+    const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());
 
     return res.status(200).send({ ok: true, token, data: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
@@ -311,10 +311,10 @@ router.post("/signup_verify", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } }).select("password");
+    const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
 
-    const token = jwt.sign({ _id: referent.id, lastLogoutAt: null, password: referent.password }, config.secret, { expiresIn: "30d" });
+    const token = jwt.sign({ _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: "30d" });
     return res.status(200).send({ ok: true, token, data: serializeReferent(referent, referent) });
   } catch (error) {
     capture(error);
@@ -356,7 +356,7 @@ router.post("/signup_invite", async (req, res) => {
       acceptCGU,
     });
 
-    const token = jwt.sign({ _id: referent.id, lastLogoutAt: null, password }, config.secret, { expiresIn: "30d" });
+    const token = jwt.sign({ _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: "30d" });
     res.cookie("jwt", token, cookieOptions());
 
     await referent.save({ fromUser: req.user });

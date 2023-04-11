@@ -24,9 +24,9 @@ module.exports = function () {
     "young",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required(), password: Joi.string().required(), lastLogoutAt: Joi.date().required() }).validate({
+        const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.date().allow(null), lastLogoutAt: Joi.date().allow(null) }).validate({
           _id: jwtPayload._id,
-          password: jwtPayload.password,
+          passwordChangedAt: jwtPayload.passwordChangedAt,
           lastLogoutAt: jwtPayload.lastLogoutAt,
         });
         if (error) return done(null, false);
@@ -44,9 +44,9 @@ module.exports = function () {
     "referent",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required(), password: Joi.string().required(), lastLogoutAt: Joi.date().allow(null) }).validate({
+        const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.date().allow(null), lastLogoutAt: Joi.date().allow(null) }).validate({
           _id: jwtPayload._id,
-          password: jwtPayload.password,
+          passwordChangedAt: jwtPayload.passwordChangedAt,
           lastLogoutAt: jwtPayload.lastLogoutAt,
         });
         if (error) return done(null, false);
@@ -64,9 +64,9 @@ module.exports = function () {
     "admin",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required(), password: Joi.string().required(), lastLogoutAt: Joi.date().required() }).validate({
+        const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.date().allow(null), lastLogoutAt: Joi.date().allow(null) }).validate({
           _id: jwtPayload._id,
-          password: jwtPayload.password,
+          passwordChangedAt: jwtPayload.passwordChangedAt,
           lastLogoutAt: jwtPayload.lastLogoutAt,
         });
         if (error) return done(null, false);
@@ -84,9 +84,9 @@ module.exports = function () {
     "dsnj",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required(), password: Joi.string().required(), lastLogoutAt: Joi.date().required() }).validate({
+        const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.date().allow(null), lastLogoutAt: Joi.date().allow(null) }).validate({
           _id: jwtPayload._id,
-          password: jwtPayload.password,
+          passwordChangedAt: jwtPayload.passwordChangedAt,
           lastLogoutAt: jwtPayload.lastLogoutAt,
         });
         if (error) return done(null, false);

@@ -59,7 +59,7 @@ class Auth {
         acceptCGU,
         rulesYoung,
       });
-      const token = jwt.sign({ _id: user.id, lastLogoutAt: null, password }, config.secret, { expiresIn: JWT_MAX_AGE });
+      const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
 
       return res.status(200).send({
@@ -159,7 +159,7 @@ class Auth {
         grade,
         inscriptionStep2023: STEPS2023.COORDONNEES,
       });
-      const token = jwt.sign({ _id: user.id, lastLogoutAt: null, password }, config.secret, { expiresIn: JWT_MAX_AGE });
+      const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
 
       await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
@@ -191,7 +191,7 @@ class Auth {
     const { password, email } = value;
     try {
       const now = new Date();
-      const user = await this.model.findOne({ email }).select("+password +lastLogoutAt");
+      const user = await this.model.findOne({ email }).select("+passwordChangedAt +lastLogoutAt");
       if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       if (user.loginAttempts > 12) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
       if (user.nextLoginAttemptIn > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
@@ -214,9 +214,8 @@ class Auth {
       user.set({ loginAttempts: 0 });
       user.set({ lastLoginAt: Date.now() });
       await user.save();
-      console.log("🚀 ~ file: auth.js:217 ~ Auth ~ signin ~ user:", user);
 
-      const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, password: user.password }, config.secret, { expiresIn: JWT_MAX_AGE });
+      const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
@@ -286,7 +285,7 @@ class Auth {
       if (newPassword === password) return res.status(401).send({ ok: false, code: ERRORS.NEW_PASSWORD_IDENTICAL_PASSWORD });
 
       const user = await this.model.findById(req.user._id);
-      user.set({ password: newPassword });
+      user.set({ password: newPassword, passwordChangedAt: Date.now() });
       await user.save();
 
       return res.status(200).send({ ok: true, user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
@@ -347,6 +346,7 @@ class Auth {
       user.password = password;
       user.forgotPasswordResetToken = "";
       user.forgotPasswordResetExpires = "";
+      user.passwordChangedAt = Date.now();
       await user.save();
       return res.status(200).send({ ok: true });
     } catch (error) {

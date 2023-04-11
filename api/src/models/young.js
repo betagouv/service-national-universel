@@ -480,6 +480,12 @@ const Schema = new mongoose.Schema({
       description: "Date de dernière déconnexion",
     },
   },
+  passwordChangedAt: {
+    type: Date,
+    documentation: {
+      description: "Date de dernier changement de password",
+    },
+  },
   nextLoginAttemptIn: {
     type: Date,
     documentation: {
@@ -1955,6 +1961,7 @@ Schema.plugin(patchHistory, {
     "/password",
     "/lastLoginAt",
     "/lastLogoutAt",
+    "/passwordChangedAt",
     "/nextLoginAttemptIn",
     "/forgotPasswordResetToken",
     "/forgotPasswordResetExpires",
@@ -1977,6 +1984,7 @@ Schema.plugin(
       "missionsInMail",
       "password",
       "lastLogoutAt",
+      "passwordChangedAt",
       "nextLoginAttemptIn",
       "forgotPasswordResetToken",
       "forgotPasswordResetExpires",
