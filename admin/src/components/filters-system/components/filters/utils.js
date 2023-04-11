@@ -180,16 +180,6 @@ const buildAggs = (filterArray, selectedFilters, searchBarObject, defaultQuery) 
 };
 
 export const buildQuery = async (esId, selectedFilters, page = 0, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
-  /*
-  console.log("ploum", selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected);
-  console.log(Object.entries(selectedFilters));
-  console.log({
-    filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
-      return { ...e, [key]: value.filter };
-    }, {}),
-  });
-  */
-
   const bodyQuery = buildBody(selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected);
   const bodyAggs = buildAggs(filterArray, selectedFilters, searchBarObject, defaultQuery);
 
