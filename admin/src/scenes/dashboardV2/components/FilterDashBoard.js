@@ -28,7 +28,9 @@ export const FilterComponent = ({ filter, selectedFilters, setSelectedFilters, m
   return (
     <div className="relative w-fit">
       <div className={`p-0.5 border-[2px] ${visible ? "border-blue-600 rounded-xl" : "border-transparent"}`}>
-        <div onClick={() => setVisible(true)} className="cursor-pointer flex flex-row border-[1px] border-gray-200 hover:border-gray-300 rounded-md p-2 items-center gap-1">
+        <div
+          onClick={() => setVisible(true)}
+          className="cursor-pointer flex flex-row border-[1px] border-gray-200 bg-[#FFFFFF] hover:border-gray-300 rounded-md p-2 items-center gap-1">
           <div className="text-gray-700 font-medium text-xs">{filter.name}</div>
           {selectedFilterValues?.length === filter.options?.length ? (
             <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">{filter?.fullValue}</div>
@@ -129,7 +131,7 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
     // check si c'est un isSingle (un seul filtre possible)
     if (filter?.isSingle) return setSelectedFilters({ ...selectedFilters, [filter?.id]: [value] });
     if (filter?.fixed?.includes(value)) return;
-    let newFilters = [];
+    let newFilters;
     // store localement les filtres
     if (selectedFilters[filter?.id]) {
       if (selectedFilters[filter?.id]?.includes(value)) {

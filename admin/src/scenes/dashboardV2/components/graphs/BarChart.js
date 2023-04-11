@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { graphColors } from "./graph-commons";
 
-export default function BarChart({ values, title, noValue = false, unit = "", className = "" }) {
+export default function BarChart({ values, title, noValue = false, unit = "", className = "", max }) {
   const [bars, setBars] = useState([]);
 
   useEffect(() => {
     if (values && values.length > 0) {
       const colors = graphColors[values.length];
-      const maxValue = Math.max(...values);
+      const maxValue = max ? max : Math.max(...values);
       setBars(
         values.map((value, idx) => {
           return {
