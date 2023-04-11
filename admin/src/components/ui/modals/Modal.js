@@ -36,7 +36,7 @@ const Modal = ({ isOpen, onClose = () => {}, children, className = "" }) => {
   );
 };
 
-const ModalHeader = ({ className, children, ...rest }) => {
+const ModalHeader = ({ className = "", children, ...rest }) => {
   return (
     <div className={`px-6 pt-6 text-gray-900 flex gap-6 ${className}`} {...rest}>
       {children}
@@ -44,7 +44,7 @@ const ModalHeader = ({ className, children, ...rest }) => {
   );
 };
 
-const ModalContent = ({ className, children, ...rest }) => {
+const ModalContent = ({ className = "", children, ...rest }) => {
   return (
     <div className={`p-6 text-gray-900 ${className}`} {...rest}>
       {children}
@@ -52,7 +52,7 @@ const ModalContent = ({ className, children, ...rest }) => {
   );
 };
 
-const ModalFooter = ({ className, children, ...rest }) => {
+const ModalFooter = ({ className = "", children, ...rest }) => {
   return (
     <div className={`px-6 pb-6 text-gray-900 ${className}`} {...rest}>
       {children}

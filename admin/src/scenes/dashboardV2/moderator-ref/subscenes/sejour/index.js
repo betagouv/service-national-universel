@@ -1,8 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { academyList, COHORTS, departmentList, ES_NO_LIMIT, regionList, ROLES, translateInscriptionStatus, translatePhase1, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import {
+  academyList,
+  COHORTS,
+  departmentToAcademy,
+  ES_NO_LIMIT,
+  region2department,
+  regionList,
+  ROLES,
+  translateInscriptionStatus,
+  translatePhase1,
+  YOUNG_STATUS,
+  YOUNG_STATUS_PHASE1,
+} from "snu-lib";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import api from "../../../../../services/api";
+import plausibleEvent from "../../../../../services/plausible";
+import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import BoxWithPercentage from "./components/BoxWithPercentage";
@@ -16,63 +30,75 @@ import TabSession from "./components/TabSession";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
-  const filterArray = [
-    {
-      id: "status",
-      name: "Statut d’inscription",
-      fullValue: "Tous",
-      options: Object.keys(YOUNG_STATUS).map((status) => ({ key: status, label: translateInscriptionStatus(status) })),
-    },
-    {
-      id: "statusPhase1",
-      name: "Statut de phase 1",
-      fullValue: "Tous",
-      fixed: [YOUNG_STATUS_PHASE1.AFFECTED],
-      options: Object.keys(YOUNG_STATUS_PHASE1)
-        .filter((s) => ![YOUNG_STATUS_PHASE1.WAITING_LIST, YOUNG_STATUS_PHASE1.WITHDRAWN].includes(s))
-        .map((status) => ({ key: status, label: translatePhase1(status) })),
-    },
-    ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
-      ? {
-          id: "region",
-          name: "Région",
-          fullValue: "Toutes",
-          options: regionList.map((region) => ({ key: region, label: region })),
-        }
-      : null,
-    ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
-      ? {
-          id: "academy",
-          name: "Académie",
-          fullValue: "Toutes",
-          options: academyList.map((academy) => ({ key: academy, label: academy })),
-        }
-      : null,
-    {
-      id: "department",
-      name: "Département",
-      fullValue: "Tous",
-      options: departmentList.map((department) => ({ key: department, label: department })),
-    },
-    {
-      id: "cohort",
-      name: "Cohorte",
-      fullValue: "Toutes",
-      options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
-    },
-  ].filter((e) => e);
 
   //useStates
   const [selectedFilters, setSelectedFilters] = useState({
     status: [YOUNG_STATUS.VALIDATED],
     statusPhase1: [YOUNG_STATUS_PHASE1.AFFECTED],
-    cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
+    cohorts: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
     region: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
     department: user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : [],
     academy: [],
   });
+  const [filterArray, setFilterArray] = useState([]);
   const [data, setData] = useState({});
   const [dataCenter, setDataCenter] = useState({});
+  const [sessionList, setSessionList] = useState(null);
+  const [departmentOptions, setDepartmentOptions] = useState([]);
+  const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
+  const academyOptions =
+    user.role === ROLES.REFERENT_REGION
+      ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
+      : academyList.map((a) => ({ key: a, label: a }));
+
+  useEffect(() => {
+    let filters = [
+      {
+        id: "status",
+        name: "Statut d’inscription",
+        fullValue: "Tous",
+        options: Object.keys(YOUNG_STATUS).map((status) => ({ key: status, label: translateInscriptionStatus(status) })),
+      },
+      {
+        id: "statusPhase1",
+        name: "Statut de phase 1",
+        fullValue: "Tous",
+        fixed: [YOUNG_STATUS_PHASE1.AFFECTED],
+        options: Object.keys(YOUNG_STATUS_PHASE1)
+          .filter((s) => ![YOUNG_STATUS_PHASE1.WAITING_LIST, YOUNG_STATUS_PHASE1.WITHDRAWN].includes(s))
+          .map((status) => ({ key: status, label: translatePhase1(status) })),
+      },
+      ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+        ? {
+            id: "region",
+            name: "Région",
+            fullValue: "Toutes",
+            options: regionOptions,
+          }
+        : null,
+      ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+        ? {
+            id: "academy",
+            name: "Académie",
+            fullValue: "Toutes",
+            options: academyOptions,
+          }
+        : null,
+      {
+        id: "department",
+        name: "Département",
+        fullValue: "Tous",
+        options: departmentOptions,
+      },
+      {
+        id: "cohorts",
+        name: "Cohorte",
+        fullValue: "Toutes",
+        options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
+      },
+    ].filter((e) => e);
+    setFilterArray(filters);
+  }, [departmentOptions]);
 
   const queryYoung = async () => {
     const statusPhaseTerms = selectedFilters?.statusPhase1?.length
@@ -135,7 +161,7 @@ export default function Index() {
 
     if (selectedFilters.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": selectedFilters.region } });
     if (selectedFilters.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": selectedFilters.department } });
-    if (selectedFilters.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohort } });
+    if (selectedFilters.cohorts?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohorts } });
     if (selectedFilters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": selectedFilters.academy } });
     if (selectedFilters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.status } });
 
@@ -170,7 +196,8 @@ export default function Index() {
 
     if (selectedFilters.region?.length) bodyCohesion.query.bool.filter.push({ terms: { "region.keyword": selectedFilters.region } });
     if (selectedFilters.department?.length) bodyCohesion.query.bool.filter.push({ terms: { "department.keyword": selectedFilters.department } });
-    if (selectedFilters.cohort?.length) bodyCohesion.query.bool.filter.push({ terms: { "cohorts.keyword": selectedFilters.cohort } });
+    if (selectedFilters.academy?.length) bodyCohesion.query.bool.filter.push({ terms: { "academy.keyword": selectedFilters.academy } });
+    if (selectedFilters.cohorts?.length) bodyCohesion.query.bool.filter.push({ terms: { "cohorts.keyword": selectedFilters.cohorts } });
 
     const { responses: responsesCohesion } = await api.esQuery("cohesioncenter", bodyCohesion);
 
@@ -190,12 +217,13 @@ export default function Index() {
         status: { terms: { field: "status.keyword" } },
         timeSchedule: { terms: { field: "hasTimeSchedule.keyword" } },
       },
-      size: 0,
+      size: ES_NO_LIMIT,
     };
 
-    if (selectedFilters.cohort?.length) bodySession.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohort } });
+    if (selectedFilters.cohorts?.length) bodySession.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohorts } });
     const { responses: responsesSession } = await api.esQuery("sessionphase1", bodySession);
     if (responsesSession.length) {
+      setSessionList(responsesSession[0].hits.hits.map((e) => ({ ...e._source, _id: e._id })));
       resultCenter.placesTotalSession = responsesSession[0].aggregations.placesTotal.value;
       resultCenter.placesLeftSession = responsesSession[0].aggregations.placesLeft.value;
       resultCenter.status = responsesSession[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
@@ -208,19 +236,23 @@ export default function Index() {
   useEffect(() => {
     queryYoung();
     queryCenter();
+    if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
+    else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
   }, [JSON.stringify(selectedFilters)]);
 
   return (
     <DashboardContainer
       active="sejour"
-      availableTab={["general", "engagement", "sejour", "inscription"]}
+      availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}
       navChildren={
         <div className="flex items-center gap-2">
-          <ButtonPrimary className="text-sm">
-            Exporter le rapport <span className="font-bold">“Séjour”</span>
-          </ButtonPrimary>
-          <ButtonPrimary className="text-sm">
-            Exporter le rapport <span className="font-bold">“Séjour”</span>
+          <ButtonPrimary
+            className="text-sm"
+            onClick={() => {
+              plausibleEvent("Dashboard/CTA - Exporter statistiques séjour");
+              print();
+            }}>
+            Exporter les statistiques <span className="font-bold">“Séjour”</span>
           </ButtonPrimary>
         </div>
       }>
@@ -242,9 +274,9 @@ export default function Index() {
           <OccupationCardHorizontal total={dataCenter?.placesTotalSession || 0} taken={dataCenter?.placesTotalSession - dataCenter?.placesLeftSession || 0} />
           <BoxWithPercentage total={dataCenter?.totalSession || 0} number={dataCenter?.timeSchedule?.false || 0} title="Emplois du temps" subLabel="restants à renseigner" />
         </div>
-        <div className="flex items-stretch gap-4 ">
+        <div className="flex gap-4">
           <MoreInfo typology={dataCenter?.typology} domains={dataCenter?.domains} />
-          <TabSession />
+          <TabSession sessionList={sessionList} filters={selectedFilters} />
         </div>
       </div>
     </DashboardContainer>

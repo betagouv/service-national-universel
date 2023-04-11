@@ -13,10 +13,6 @@ const API_ANALYTICS_ENDPOINT = process.env.API_ANALYTICS_ENDPOINT || "http://loc
 
 const API_ANALYTICS_API_KEY = process.env.API_ANALYTICS_API_KEY || "api-key";
 
-let ZAMMAD_IP = process.env.ZAMMAD_IP || "";
-let ZAMMAD_PLATEFORME_USER = process.env.ZAMMAD_PLATEFORME_USER || "";
-let ZAMMAD_PLATEFORME_USER_ID = process.env.ZAMMAD_PLATEFORME_USER_ID || "";
-
 const ES_ENDPOINT = process.env.ES_ENDPOINT || "";
 
 const SENDINBLUEKEY = process.env.SENDINBLUEKEY || "";
@@ -38,8 +34,6 @@ const FILE_ENCRYPTION_SECRET_SUPPORT = process.env.FILE_ENCRYPTION_SECRET_SUPPOR
 const FILE_ENCRYPTION_SECRET = process.env.FILE_ENCRYPTION_SECRET || "";
 const QPV_USERNAME = process.env.QPV_USERNAME || "";
 const QPV_PASSWORD = process.env.QPV_PASSWORD || "";
-const ZAMMAD_TOKEN = process.env.ZAMMAD_TOKEN || "";
-const ZAMMAD_URL = process.env.ZAMMAD_URL || "";
 
 const API_ENGAGEMENT_KEY = process.env.API_ENGAGEMENT_KEY || "";
 
@@ -54,6 +48,8 @@ const SLACK_BOT_CHANNEL = process.env.SLACK_BOT_CHANNEL || "";
 const JVA_TOKEN = process.env.JVA_TOKEN || "";
 const JVA_API_KEY = process.env.JVA_API_KEY || "";
 
+const REDIS_URL = process.env.REDIS_URL || "";
+
 module.exports = {
   LOCAL,
   PORT,
@@ -63,7 +59,6 @@ module.exports = {
   ADMIN_URL,
   SUPPORT_URL,
   KNOWLEDGEBASE_URL,
-  ZAMMAD_IP,
   ENVIRONMENT,
   ES_ENDPOINT,
   CELLAR_KEYSECRET,
@@ -83,10 +78,6 @@ module.exports = {
   QPV_USERNAME,
   QPV_PASSWORD,
   API_ENGAGEMENT_KEY,
-  ZAMMAD_TOKEN,
-  ZAMMAD_URL,
-  ZAMMAD_PLATEFORME_USER,
-  ZAMMAD_PLATEFORME_USER_ID,
   API_ASSOCIATION_ES_ENDPOINT,
   API_ASSOCIATION_CELLAR_ENDPOINT,
   API_ASSOCIATION_CELLAR_KEYID,
@@ -98,6 +89,7 @@ module.exports = {
   API_PDF_ENDPOINT,
   API_ANALYTICS_ENDPOINT,
   API_ANALYTICS_API_KEY,
+  REDIS_URL,
 };
 
 function getEnvironment() {

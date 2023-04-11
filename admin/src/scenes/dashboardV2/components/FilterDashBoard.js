@@ -21,27 +21,29 @@ export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArr
   );
 };
 
-export const FilterComponent = ({ filter, selectedFilters, setSelectedFilters }) => {
+export const FilterComponent = ({ filter, selectedFilters, setSelectedFilters, maxItems = 3 }) => {
   const selectedFilterValues = selectedFilters[filter.id]?.length ? selectedFilters[filter.id] : [];
   const [visible, setVisible] = React.useState(false);
 
   return (
-    <div className="relative">
+    <div className="relative w-fit">
       <div className={`p-0.5 border-[2px] ${visible ? "border-blue-600 rounded-xl" : "border-transparent"}`}>
-        <div onClick={() => setVisible(true)} className="cursor-pointer flex flex-row border-[1px] border-gray-200 rounded-md w-fit p-2 items-center gap-1">
+        <div
+          onClick={() => setVisible(true)}
+          className="cursor-pointer flex flex-row border-[1px] border-gray-200 bg-[#FFFFFF] hover:border-gray-300 rounded-md p-2 items-center gap-1">
           <div className="text-gray-700 font-medium text-xs">{filter.name}</div>
           {selectedFilterValues?.length === filter.options?.length ? (
             <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">{filter?.fullValue}</div>
           ) : selectedFilterValues.length > 0 ? (
             selectedFilterValues.map((item, index) => {
-              const label = filter.options.find((option) => option.key === item).label;
-              if (index > 2) {
+              const label = filter.options.find((option) => option.key === item)?.label;
+              if (index > maxItems - 1) {
                 if (index === selectedFilterValues.length - 1) {
                   return (
                     <div key={item}>
                       <ToolTipView selectedFilterValues={selectedFilterValues} filter={filter} />
                       <div data-tip="" data-for={"tooltip-filtre" + filter.id} className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">
-                        +{index - 2}
+                        +{index - maxItems + 1}
                       </div>
                     </div>
                   );
@@ -129,7 +131,7 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
     // check si c'est un isSingle (un seul filtre possible)
     if (filter?.isSingle) return setSelectedFilters({ ...selectedFilters, [filter?.id]: [value] });
     if (filter?.fixed?.includes(value)) return;
-    let newFilters = [];
+    let newFilters;
     // store localement les filtres
     if (selectedFilters[filter?.id]) {
       if (selectedFilters[filter?.id]?.includes(value)) {
@@ -188,18 +190,20 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
                         ?.sort((a, b) => {
                           a.key.toString().localeCompare(b.key.toString());
                         })
-                        ?.map((option) => (
-                          <div className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer" key={option?.key} onClick={() => handleSelect(option?.key)}>
-                            <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
-                              <input
-                                type="checkbox"
-                                disabled={filter?.fixed?.includes(option.key)}
-                                checked={filter?.fixed?.includes(option.key) || (selectedFilters[filter.id]?.length && selectedFilters[filter?.id]?.includes(option?.key))}
-                              />
-                              {option.label}
+                        ?.map((option) => {
+                          const optionSelected = filter?.fixed?.includes(option.key) || (selectedFilters[filter.id]?.length && selectedFilters[filter?.id]?.includes(option?.key));
+                          return (
+                            <div
+                              className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer"
+                              key={option?.key}
+                              onClick={() => handleSelect(option?.key)}>
+                              <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
+                                <input type="checkbox" disabled={filter?.fixed?.includes(option.key)} checked={optionSelected} onChange={() => {}} />
+                                {option.label}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                     </>
                   )}
                 </div>
@@ -210,4 +214,24 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
       </Popover.Panel>
     </Transition>
   );
+};
+
+export const currentFilterAsUrl = (filters) => {
+  let selectedFilters = {};
+  Object.keys(filters)?.forEach((key) => {
+    if (filters[key]?.length > 0) selectedFilters[key] = filters[key];
+  });
+  const length = Object.keys(selectedFilters).length;
+  let index = 0;
+  let url = Object.keys(selectedFilters)?.reduce((acc, curr) => {
+    if (selectedFilters[curr]?.length > 0) {
+      acc += `${curr}=${selectedFilters[curr]?.join(",")}${index < length - 1 ? "&" : ""}`;
+    } else return acc;
+
+    index++;
+    return acc;
+  }, "");
+  url += `${url !== "" ? "&" : ""}page=1`;
+
+  return url;
 };

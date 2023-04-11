@@ -8,7 +8,6 @@ function getNewContractFixture() {
     structureId: ObjectId(),
     applicationId: ObjectId(),
     missionId: ObjectId(),
-    tutorId: ObjectId(),
     isYoungAdult: "false",
     youngFirstName: faker.name.firstName(),
     youngLastName: faker.name.lastName(),
@@ -53,6 +52,8 @@ function getNewContractFixture() {
     structureManagerEmail: faker.internet.email(),
     structureSiret: faker.company.companyName(),
     structureName: faker.company.companyName(),
+    tutorFirstName: faker.name.firstName(),
+    tutorLastName: faker.name.lastName(),
   };
 }
 

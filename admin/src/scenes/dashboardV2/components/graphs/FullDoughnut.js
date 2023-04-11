@@ -110,6 +110,8 @@ export default function FullDoughnut({ title, values, labels, maxLegends = Numbe
   let legendValueClass = "flex items-center";
   let legendDotClass = "mr-2";
   let titleClass = "";
+  let legendGroupClass = "flex";
+  let textLegendClass = "";
 
   switch (legendSide) {
     case "left":
@@ -123,6 +125,7 @@ export default function FullDoughnut({ title, values, labels, maxLegends = Numbe
         legendsClass = `grid grid-cols-${maxLegends}`;
       }
       titleClass = "ml-10 py-[44px]";
+      textLegendClass = "text-right";
       break;
     case "right":
       mainClass += " flex-row";
@@ -133,6 +136,7 @@ export default function FullDoughnut({ title, values, labels, maxLegends = Numbe
         legendsClass = `grid grid-cols-${maxLegends}`;
       }
       titleClass = "mr-10 py-[44px]";
+      textLegendClass = "text-left";
       break;
     case "top":
       mainClass += " flex-col-reverse";

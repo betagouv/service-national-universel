@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import { Switch, useHistory } from "react-router-dom";
 import { permissionPhase2, YOUNG_STATUS_PHASE2 } from "../../utils";
 import View from "./view";
-import CreateEquivalence from "./views/CreateEquivalence";
 import EditEquivalence from "./views/EditEquivalence";
 import ValidatedDesktop from "./desktop/Validated";
 import ValidatedMobile from "./mobile/Validated";
@@ -30,7 +29,7 @@ export default function Index() {
   return (
     <Switch>
       <SentryRoute path="/phase2/equivalence/:equivalenceId" component={EditEquivalence} />
-      <SentryRoute path="/phase2/equivalence" component={CreateEquivalence} />
+      <SentryRoute path="/phase2/equivalence" component={EditEquivalence} />
       <SentryRoute path="/phase2" component={View} />
     </Switch>
   );

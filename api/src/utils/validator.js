@@ -2,7 +2,7 @@ const Joi = require("joi");
 const { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib/roles");
 const { isYoung } = require("../utils");
 const { COHORTS } = require("snu-lib/constants");
-const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR } = require("./phone-number.utils");
+const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR } = require("snu-lib/phone-number");
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
 const idRegex = /^[0-9a-fA-F]{24}$/;
@@ -137,7 +137,8 @@ function validateContract(program) {
       structureId: Joi.string().allow(null, ""),
       applicationId: Joi.string().allow(null, ""),
       missionId: Joi.string().allow(null, ""),
-      tutorId: Joi.string().allow(null, ""),
+      tutorFirstName: Joi.string().allow(null, ""),
+      tutorLastName: Joi.string().allow(null, ""),
       isYoungAdult: Joi.string().allow(null, ""),
       parent1Token: Joi.string().allow(null, ""),
       projectManagerToken: Joi.string().allow(null, ""),

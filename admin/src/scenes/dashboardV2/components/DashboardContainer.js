@@ -11,6 +11,7 @@ export default function DashboardContainer({ active = "general", availableTab, n
           {availableTab.includes("inscription") && <TabItem id="inscription" active={active} label="Inscriptions" onClick={() => history.push("/dashboard/inscription")} />}
           {availableTab.includes("sejour") && <TabItem id="sejour" active={active} label="Séjour" onClick={() => history.push("/dashboard/sejour")} />}
           {availableTab.includes("engagement") && <TabItem id="engagement" active={active} label="Engagement" onClick={() => history.push("/dashboard/engagement")} />}
+          {availableTab.includes("analytics") && <TabItem id="analytics" active={active} label="Analytics" onClick={() => history.push("/dashboard/analytics")} />}
         </div>
         <div>{navChildren}</div>
       </div>

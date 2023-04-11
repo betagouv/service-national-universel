@@ -17,7 +17,6 @@ import {
   inFranceOrAbroadOptions,
   genderOptions,
   booleanOptions,
-  debounce,
 } from "../utils";
 
 import api from "../../../services/api";
@@ -26,7 +25,7 @@ import SearchableSelect from "../../../components/SearchableSelect";
 import Toggle from "../../../components/inscription/toggle";
 import CheckBox from "../../../components/inscription/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
-import { translate } from "../../../utils";
+import { debounce, translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import DesktopPageContainer from "../components/DesktopPageContainer";
 import plausibleEvent from "../../../services/plausible";
@@ -35,8 +34,7 @@ import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { apiAdress } from "../../../services/api-adresse";
 import PhoneField from "../components/PhoneField";
-import useClickOutside from "../../../hooks/useClickOutside";
-import { isPhoneNumberWellFormated, PHONE_ZONES } from "../../../utils/phone-number.utils";
+import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -141,7 +139,7 @@ export default function StepCoordonnees() {
   const dispatch = useDispatch();
   const history = useHistory();
   const { step } = useParams();
-  const birthCitySuggestionsRef = useRef(null);
+  const ref = useRef(null);
 
   const [hasSpecialSituation, setSpecialSituation] = useState(false);
 
@@ -240,7 +238,17 @@ export default function StepCoordonnees() {
     setErrors(getErrors());
   }, [phone, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary, phoneZone]);
 
-  useClickOutside(birthCitySuggestionsRef, () => setBirthCityZipSuggestions([]));
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setBirthCityZipSuggestions([]);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
 
   const trimmedPhone = phone.replace(/\s/g, "");
 
@@ -551,7 +559,7 @@ export default function StepCoordonnees() {
             correction={corrections.birthCity}
           />
           {wasBornInFranceBool && (
-            <div ref={birthCitySuggestionsRef} className="w-full absolute z-50 bg-white border-3 border-red-600 shadow overflow-hidden mt-[-24px]">
+            <div ref={ref} className="w-full absolute z-50 bg-white border-3 border-red-600 shadow overflow-hidden mt-[-24px]">
               {birthCityZipSuggestions.map(({ city, postcode }, index) => (
                 <div
                   onClick={() => {
@@ -580,7 +588,7 @@ export default function StepCoordonnees() {
         onChangeZone={updateData("phoneZone")}
         value={phone}
         zoneValue={phoneZone}
-        placeholder={PHONE_ZONES[phoneZone].example}
+        placeholder={PHONE_ZONES[phoneZone]?.example}
         error={errors.phone}
         correction={corrections.phone}
       />

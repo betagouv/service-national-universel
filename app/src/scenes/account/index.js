@@ -14,14 +14,14 @@ import ModalConfirm from "../../components/modals/ModalConfirm";
 import PasswordEye from "../../components/PasswordEye";
 import { appURL } from "../../config";
 import { putLocation } from "../../services/api-adresse";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { youngCanChangeSession, YOUNG_STATUS } from "snu-lib";
 import FormRow from "../../components/forms/FormRow";
 import ContinueButton from "../../components/buttons/ContinueButton";
 import DeleteAccountButton from "../../components/buttons/DeleteAccountButton";
 import ChangeStayButton from "../../components/buttons/ChangeStayButton";
 import WithdrawalModal from "./components/WithdrawalModal";
 import PhoneField from "./components/PhoneField";
-import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "../../utils/phone-number.utils";
+import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
 
 export default function Account() {
   const search = useLocation().search;
@@ -33,11 +33,12 @@ export default function Account() {
   const [isWithdrawalModalOpen, setWithdrawalModalOpen] = useState(isWithdrawalModalOpenDefault);
 
   const updateYoung = async (values) => {
+    values.email = values.email?.trim();
     try {
       if (!values.location || !values.location.lat || !values.location.lon) {
         values.location = await putLocation(values.city, values.zip);
       }
-      if (!values.location) return toastr.error("Il y a un soucis avec le nom de la ville ou/et le zip code");
+      if (!values.location) return toastr.error("Il y a un problème avec le nom de la ville et/ou le code postal.");
       const { ok, code, data: young } = await api.put("/young", values);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setYoung(young));
@@ -83,7 +84,7 @@ export default function Account() {
                 values={values}
                 handleChange={handleChange}
                 title="E-mail"
-                validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champ est au mauvais format")}
+                validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v.trim()) && "Ce champ est au mauvais format")}
                 errors={errors}
                 touched={touched}
               />
@@ -206,6 +207,7 @@ export default function Account() {
                   zoneValue={values.phoneZone}
                   onChange={handleChange}
                   onChangeZone={handleChange}
+                  placeholder={PHONE_ZONES[values.phoneZone]?.example}
                   error={errors.phone}
                   validate={(value) => value && !isPhoneNumberWellFormated(value, values.phoneZone) && PHONE_ZONES[values.phoneZone].errorMessage}
                 />
@@ -253,6 +255,7 @@ export default function Account() {
                   zoneValue={values.parent1PhoneZone}
                   onChange={handleChange}
                   onChangeZone={handleChange}
+                  placeholder={PHONE_ZONES[values.parent1PhoneZone]?.example}
                   error={errors.parent1Phone}
                   validate={(value) => value && !isPhoneNumberWellFormated(value, values.parent1PhoneZone) && PHONE_ZONES[values.parent1PhoneZone].errorMessage}
                 />
@@ -289,6 +292,7 @@ export default function Account() {
                   zoneValue={values.parent2PhoneZone}
                   onChange={handleChange}
                   onChangeZone={handleChange}
+                  placeholder={PHONE_ZONES[values.parent2PhoneZone]?.example}
                   error={errors.parent2Phone}
                   validate={(value) => value && !isPhoneNumberWellFormated(value, values.parent2PhoneZone) && PHONE_ZONES[values.parent2PhoneZone].errorMessage}
                 />
@@ -312,10 +316,7 @@ export default function Account() {
         )}
       </Formik>
       <div className="flex flex-col md:flex-row justify-center md:gap-8 mt-12 text-center">
-        {[YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ||
-        [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.AFFECTED].includes(young.statusPhase1) ? (
-          <ChangeStayButton />
-        ) : null}
+        {youngCanChangeSession(young) ? <ChangeStayButton /> : null}
         {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ? (
           <DeleteAccountButton young={young} onClick={() => setWithdrawalModalOpen(true)} />
         ) : null}
@@ -326,7 +327,7 @@ export default function Account() {
 
 const Item = ({ title, name, values, handleChange, errors, touched, validate, type, children, ...props }) => {
   return (
-    <Col md={4} style={{ marginTop: 20 }}>
+    <Col lg={4} style={{ marginTop: 20 }}>
       {title && <label className="text-gray-700 font-semibold text-sm mb-[5px]">{title}</label>}
       {children || <Field type={type} className="form-control" name={name} value={values[name]} onChange={handleChange} validate={validate} {...props} />}
       {errors && <ErrorMessage errors={errors} touched={touched} name={name} />}
@@ -336,7 +337,7 @@ const Item = ({ title, name, values, handleChange, errors, touched, validate, ty
 
 const Select = ({ title, name, values, handleChange, errors, touched, validate, options }) => {
   return (
-    <Col md={4} style={{ marginTop: 20 }}>
+    <Col lg={4} style={{ marginTop: 20 }}>
       <label className="text-gray-700 font-semibold text-sm mb-[5px]">{title}</label>
       <select className="form-control" name={name} value={values[name]} onChange={handleChange} validate={validate}>
         {options.map((o, i) => (

@@ -26,7 +26,7 @@ export default function Select({ options, selected, setSelected, label, readOnly
                 <div className="w-full flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">{label}</p>
-                    <p className="block truncate h-5">{selected?.label}</p>
+                    <p className="block truncate h-5">{selected?.label || selected}</p>
                   </div>
                   <div className="pointer-events-none flex items-center pr-2">
                     {!readOnly && open && <BsChevronUp className="h-4 w-4 text-gray-900" aria-hidden="true" />}
@@ -41,12 +41,12 @@ export default function Select({ options, selected, setSelected, label, readOnly
               <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                 {options.map((option) => (
                   <Listbox.Option
-                    key={option.value}
+                    key={option.value || option}
                     className={({ active }) => classNames(active ? "text-white bg-blue-600" : "text-gray-900", "relative cursor-default select-none py-2 pl-3 pr-9 list-none")}
                     value={option}>
                     {({ selected, active }) => (
                       <>
-                        <span className={classNames(selected ? "font-semibold" : "font-normal", "block truncate")}>{option.label}</span>
+                        <span className={classNames(selected ? "font-semibold" : "font-normal", "block truncate")}>{option.label || option}</span>
                         {selected && (
                           <span className={classNames(active ? "text-white" : "text-blue-600", "absolute inset-y-0 right-0 flex items-center pr-4")}>
                             <AiOutlineCheck className="h-5 w-5" aria-hidden="true" />

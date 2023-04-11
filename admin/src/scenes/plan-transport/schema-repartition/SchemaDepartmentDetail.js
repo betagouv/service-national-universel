@@ -5,6 +5,7 @@ import People from "../../../assets/icons/People";
 import IcebergColor from "../../../assets/icons/IcebergColor";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
+import { getDepartmentNumber } from "snu-lib";
 
 export default function SchemaDepartmentDetail({ departmentData, cohort, department, className }) {
   const [shown, setShown] = useState(false);
@@ -74,7 +75,9 @@ export default function SchemaDepartmentDetail({ departmentData, cohort, departm
               </div>
             </Box>
             <Box className="grow">
-              <div className="mb-2">Centres en {department}</div>
+              <div className="mb-2">
+                Centres en {department} ({getDepartmentNumber(department)})
+              </div>
               {loading ? (
                 <Loading width="w-100" />
               ) : error ? (
@@ -118,7 +121,7 @@ function CenterDetail({ center }) {
           <div className="grow">
             <div className="text-base text-gray-900 font-bold">{center.name}</div>
             <div className="text-sm text-gray-500">
-              {center.city} • {center.department}
+              {center.city} • {center.department} ({getDepartmentNumber(center.department)})
             </div>
           </div>
         </div>
@@ -132,7 +135,9 @@ function CenterDetail({ center }) {
                   <div className="text-base text-gray-900 font-bold">{group.youngsVolume}</div>
                 </div>
                 <div className="grow">
-                  <div className="text-base text-gray-900 font-bold">De : {group.department}</div>
+                  <div className="text-base text-gray-900 font-bold">
+                    De : {group.department} ({getDepartmentNumber(group.department)})
+                  </div>
                   <div className="text-sm text-gray-500">{group.region}</div>
                 </div>
               </div>

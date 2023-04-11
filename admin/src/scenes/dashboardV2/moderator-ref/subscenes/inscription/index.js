@@ -1,14 +1,19 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import DashboardContainer from "../../../components/DashboardContainer";
-import { FullDoughnut, HorizontalBar } from "../../../components/graphs";
+import { HorizontalBar } from "../../../components/graphs";
 
-import { FilterDashBoard, FilterComponent } from "../../../components/FilterDashBoard";
-import api from "../../../../../services/api";
-import { toastr } from "react-redux-toastr";
-import { YOUNG_STATUS, REFERENT_ROLES, departmentList, regionList, COHORTS, ES_NO_LIMIT, translate } from "snu-lib";
 import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
+import { academyList, COHORTS, departmentToAcademy, ES_NO_LIMIT, REFERENT_ROLES, region2department, regionList, ROLES } from "snu-lib";
+import api from "../../../../../services/api";
+import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import StatutPhase from "../../../components/inscription/StatutPhase.js";
+
+import plausibleEvent from "../../../../../services/plausible";
+import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
+import Details from "../../../components/inscription/Details";
+import TabSchool from "../../../components/inscription/TabSchool";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -16,39 +21,51 @@ export default function Index() {
 
   const [inscriptionDetailObject, setInscriptionDetailObject] = useState({});
 
-  const filterArray = [
-    {
-      id: "region",
-      name: "Région",
-      fullValue: "Toutes",
-      options: regionList.map((region) => ({ key: region, label: region })),
-    },
-    {
-      id: "department",
-      name: "Département",
-      fullValue: "Tous",
-      options: departmentList.map((department) => ({ key: department, label: department })),
-    },
-    {
-      id: "cohort",
-      name: "Cohorte",
-      fullValue: "Toutes",
-      options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
-    },
-  ];
+  const [filterArray, setFilterArray] = useState([]);
+  const [departmentOptions, setDepartmentOptions] = useState([]);
+  const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
+  const academyOptions =
+    user.role === ROLES.REFERENT_REGION
+      ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
+      : academyList.map((a) => ({ key: a, label: a }));
+
+  useEffect(() => {
+    let filters = [
+      ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+        ? {
+            id: "region",
+            name: "Région",
+            fullValue: "Toutes",
+            options: regionOptions,
+          }
+        : null,
+      ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+        ? {
+            id: "academy",
+            name: "Académie",
+            fullValue: "Toutes",
+            options: academyOptions,
+          }
+        : null,
+      {
+        id: "department",
+        name: "Département",
+        fullValue: "Tous",
+        options: departmentOptions,
+      },
+      {
+        id: "cohort",
+        name: "Cohorte",
+        fullValue: "Toutes",
+        options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
+      },
+    ].filter((e) => e);
+    setFilterArray(filters);
+  }, [departmentOptions]);
+
   const [selectedFilters, setSelectedFilters] = React.useState({
     cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
   });
-
-  const [selectedFiltersBottom, setSelectedFiltersBottom] = React.useState({});
-  const filterArrayBottom = [
-    {
-      id: "status",
-      name: "Statuts",
-      fullValue: "Tous",
-      options: Object.keys(YOUNG_STATUS).map((status) => ({ key: status, label: translate(status) })),
-    },
-  ];
 
   async function fetchInscriptionGoals() {
     const res = await getInscriptionGoals();
@@ -61,12 +78,13 @@ export default function Index() {
 
   useEffect(() => {
     fetchInscriptionGoals();
-    fetchCurrentInscriptions();
   }, []);
 
   useEffect(() => {
+    if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
+    else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
     fetchCurrentInscriptions();
-  }, [selectedFilters]);
+  }, [JSON.stringify(selectedFilters)]);
 
   const goal = useMemo(
     () =>
@@ -81,46 +99,43 @@ export default function Index() {
   return (
     <DashboardContainer
       active="inscription"
-      availableTab={["general", "engagement", "sejour", "inscription"]}
+      availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}
       navChildren={
         <div className="flex items-center gap-2">
           <ButtonPrimary className="text-sm">
             Exporter le rapport <span className="font-bold">“Inscription”</span>
           </ButtonPrimary>
-          <ButtonPrimary className="text-sm">
+          <ButtonPrimary
+            className="text-sm"
+            onClick={() => {
+              plausibleEvent("Dashboard/CTA - Exporter statistiques inscriptions");
+              print();
+            }}>
             Exporter les statistiques <span className="font-bold">“Inscription”</span>
           </ButtonPrimary>
         </div>
       }>
-      <div>Inscription</div>
-      <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
-      <div className="bg-white my-4 p-8 rounded-lg">
-        <HorizontalBar
-          title="Objectif des inscriptions"
-          labels={["Sur la liste principale", "Sur liste complémentaire", "En attente de validation", "En attente de correction", "En cours"]}
-          values={[
-            inscriptionDetailObject.VALIDATED,
-            inscriptionDetailObject.WAITING_LIST,
-            inscriptionDetailObject.WAITING_VALIDATION,
-            inscriptionDetailObject.WAITING_CORRECTION,
-            inscriptionDetailObject.IN_PROGRESS,
-          ]}
-          goal={goal}
-        />
-      </div>
-
-      <StatutPhase values={inscriptionDetailObject} />
-
-      <div className="min-w-[450px] w-[40%] bg-white rounded-lg my-4 py-6 px-8">
-        <div className="flex flex-row justify-between items-center">
-          <div className="text-base font-bold text-gray-900">En détail</div>
-          <div className="w-fit">
-            {filterArrayBottom.map((filter) => (
-              <FilterComponent key={filter.id} filter={filter} selectedFilters={selectedFiltersBottom} setSelectedFilters={setSelectedFiltersBottom} />
-            ))}
-          </div>
+      <div className="flex flex-col gap-8">
+        <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
+        <div className="bg-white p-8 rounded-lg">
+          <HorizontalBar
+            title="Objectif des inscriptions"
+            labels={["Sur la liste principale", "Sur liste complémentaire", "En attente de validation", "En attente de correction", "En cours"]}
+            values={[
+              inscriptionDetailObject.VALIDATED || 0,
+              inscriptionDetailObject.WAITING_LIST || 0,
+              inscriptionDetailObject.WAITING_VALIDATION || 0,
+              inscriptionDetailObject.WAITING_CORRECTION || 0,
+              inscriptionDetailObject.IN_PROGRESS || 0,
+            ]}
+            goal={goal}
+          />
         </div>
-        <FullDoughnut title="Présence à l'arrivée" legendSide="right" labels={["Oui", "Non", "Non renseigné", "Autre"]} values={[45, 23, 38, 25]} maxLegends={2} />
+        <StatutPhase values={inscriptionDetailObject} />
+        <div className="flex gap-4">
+          <Details selectedFilters={selectedFilters} />
+          <TabSchool filters={selectedFilters} />
+        </div>
       </div>
     </DashboardContainer>
   );

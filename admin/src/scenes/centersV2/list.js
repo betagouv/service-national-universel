@@ -91,6 +91,8 @@ const ListSession = ({ firstSession }) => {
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
   const [cohesionCenter, setCohesionCenter] = useState([]);
 
+  const history = useHistory();
+
   const [data, setData] = React.useState([]);
   const pageId = "centerSession";
   const [selectedFilters, setSelectedFilters] = React.useState({});
@@ -346,7 +348,7 @@ const ListCenter = ({ firstSession }) => {
   const history = useHistory();
 
   React.useEffect(() => {
-    if (data) setCohesionCenterIds(data.map((pdr) => pdr._id));
+    if (data) setCohesionCenterIds(data.map((center) => center._id));
   }, [data]);
 
   if (!firstSession) return <div></div>;

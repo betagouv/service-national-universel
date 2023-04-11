@@ -90,6 +90,16 @@ export default function SchoolEditor({ young, onChange, className, showBackgroun
           changes.schoolId = school.id;
         }
       }
+    } else if (field === "schoolName") {
+      if (onChange) {
+        changes.schoolName = value;
+        changes.schoolType = "";
+        changes.schoolAddress = "";
+        changes.schoolZip = "";
+        changes.schoolDepartment = "";
+        changes.schoolRegion = "";
+        changes.schoolId = "";
+      }
     }
 
     onChange && onChange(changes);
@@ -225,8 +235,9 @@ export default function SchoolEditor({ young, onChange, className, showBackgroun
           type="select"
           filterOnType
           options={schools ? schools.map((s) => ({ value: s.id, label: s.fullName })) : []}
-          onChange={(value) => onLocalChange("schoolId", value)}
+          onChange={(value) => onLocalChange(schools?.map((s) => s.id).includes(value) ? "schoolId" : "schoolName", value)}
           young={young}
+          allowCustomValue={true}
         />
       )}
     </div>

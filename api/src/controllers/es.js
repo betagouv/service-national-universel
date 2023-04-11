@@ -158,8 +158,34 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
       filter.push({ terms: { _id: applications.map((e) => e.youngId) } });
     }
 
-    if (user.role === ROLES.REFERENT_REGION) filter.push({ term: { "region.keyword": user.region } });
-    if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ terms: { "department.keyword": user.department } });
+    if (user.role === ROLES.REFERENT_REGION) {
+      const sessionPhase1 = await SessionPhase1Object.find({ region: user.region });
+      if (sessionPhase1.length === 0) {
+        filter.push({ term: { "region.keyword": user.region } });
+      } else {
+        filter.push({
+          bool: {
+            should: [{ terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } }, { term: { "region.keyword": user.region } }],
+          },
+        });
+      }
+    }
+
+    if (user.role === ROLES.REFERENT_DEPARTMENT) {
+      const sessionPhase1 = await SessionPhase1Object.find({ department: { $in: user.department } });
+      if (sessionPhase1.length === 0) {
+        filter.push({ terms: { "department.keyword": user.department } });
+      } else {
+        filter.push({
+          bool: {
+            should: [
+              { terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } },
+              { terms: { "department.keyword": user.department } },
+            ],
+          },
+        });
+      }
+    }
 
     // Visitors can only get aggregations and is limited to its region.
     if (user.role === ROLES.VISITOR) {
@@ -205,6 +231,7 @@ router.post("/young-having-school-in-department/:view/:action(_msearch|export)",
       const response = await allRecords("young", applyFilterOnQuery(body.query, filter));
       return res.status(200).send({ ok: true, data: serializeYoungs(response) });
     } else {
+      console.log(withFilterForMSearch(body, filter));
       const response = await esClient.msearch({ index: "young", body: withFilterForMSearch(body, filter) });
       return res.status(200).send(serializeYoungs(response.body));
     }
@@ -215,7 +242,7 @@ router.post("/young-having-school-in-department/:view/:action(_msearch|export)",
 });
 // young-having-school-in-region is a special index (that uses a young index)
 // used by REFERENT_REGION to get youngs having a school in their region.
-router.post("/young-having-school-in-region/:view/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/young-having-school-in-region/:view/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const keys = ["volontaires", "inscriptions"];
     const { error: viewError, value: view } = Joi.string()
@@ -228,13 +255,33 @@ router.post("/young-having-school-in-region/:view/export", passport.authenticate
 
     if (!canSearchInElasticSearch(user, "young-having-school-in-region")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const filter = [{ terms: { "schoolDepartment.keyword": [...region2department[user.region]] } }];
+    const filter = [{ terms: { "schoolRegion.keyword": [user.region] } }];
 
     if (view === "volontaires") {
       filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } });
     }
 
-    const response = await allRecords("young", applyFilterOnQuery(body.query, filter));
+    if (req.params.action === "export") {
+      const response = await allRecords("young", applyFilterOnQuery(body.query, filter));
+      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+    } else {
+      console.log(withFilterForMSearch(body, filter));
+      const response = await esClient.msearch({ index: "young", body: withFilterForMSearch(body, filter) });
+      return res.status(200).send(serializeYoungs(response.body));
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/young-having-meeting-point-in-geography/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+
+    if (!canSearchInElasticSearch(user, "young-having-meeting-point-in-geography")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const response = await allRecords("young", body.query);
     return res.status(200).send({ ok: true, data: serializeYoungs(response) });
   } catch (error) {
     capture(error);

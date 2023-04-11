@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 
 import { formatDateFR } from "snu-lib";
@@ -8,7 +6,7 @@ import Badge from "../../components/Badge";
 import DownloadButton from "../../components/buttons/DownloadButton";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Historic from "../../components/historic";
-import ModalConfirm from "../../components/modals/ModalConfirm";
+import ModalConfirmDeleteYoung from "../../components/modals/young/ModalConfirmDeleteYoung";
 import Panel, { Details, Info } from "../../components/Panel";
 import PatchHistoric from "../../components/views/PatchHistoric";
 import { appURL } from "../../config";
@@ -18,8 +16,7 @@ import { formatPhoneNumberFR, getAge, isInRuralArea, translate as t, YOUNG_STATU
 
 export default function InscriptionPanel({ onChange, value }) {
   const [young, setYoung] = useState(null);
-  const user = useSelector((state) => state.Auth.user);
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] = useState(false);
   const history = useHistory();
 
   useEffect(() => {
@@ -31,27 +28,18 @@ export default function InscriptionPanel({ onChange, value }) {
     })();
   }, [value]);
 
-  const onClickDelete = () => {
-    setModal({
-      isOpen: true,
-      onConfirm: onConfirmDelete,
-      title: "Êtes-vous sûr(e) de vouloir supprimer ce volontaire ?",
-      message: "Cette action est irréversible. La suppression prend jusqu'à 1 minute.",
-    });
+  const handleDeleteYoung = () => {
+    setIsConfirmDeleteModalOpen(true);
   };
 
-  const onConfirmDelete = async () => {
-    try {
-      const { ok, code } = await api.put(`/young/${young._id}/soft-delete`);
-      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok) return toastr.error("Une erreur s'est produite :", t(code));
-      toastr.success("Ce volontaire a été supprimé.");
-      onChange();
-      history.go(0);
-    } catch (e) {
-      console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la supression du volontaire :", t(e.code));
-    }
+  const handleCancelDeleteYoung = () => {
+    setIsConfirmDeleteModalOpen(false);
+  };
+
+  const handleDeleteYoungSuccess = () => {
+    setIsConfirmDeleteModalOpen(false);
+    onChange();
+    history.go(0);
   };
 
   if (!value) return <div />;
@@ -60,10 +48,6 @@ export default function InscriptionPanel({ onChange, value }) {
     const date = new Date(d);
     return date.toLocaleDateString();
   };
-
-  function isFromFranceConnect() {
-    return young && young.parent1FromFranceConnect === "true" && (!young.parent2Status || young.parent2FromFranceConnect === "true");
-  }
 
   return (
     <Panel>
@@ -94,7 +78,7 @@ export default function InscriptionPanel({ onChange, value }) {
           <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
             <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
           </a>
-          <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
+          <PanelActionButton onClick={handleDeleteYoung} icon="bin" title="Supprimer" />
         </div>
         {value.status === YOUNG_STATUS.WITHDRAWN && <div className="mt-3">⚠️ Désistement : &quot;{value.withdrawnMessage}&quot;</div>}
       </div>
@@ -188,21 +172,7 @@ export default function InscriptionPanel({ onChange, value }) {
           <div className="quote">{`« ${value.motivations} »`}</div>
         </div>
       )}
-      {/* <div>
-        {Object.keys(value).map((e) => {
-          return <div>{`${e}:${value[e]}`}</div>;
-        })}
-      </div> */}
-      <ModalConfirm
-        isOpen={modal?.isOpen}
-        title={modal?.title}
-        message={modal?.message}
-        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-        onConfirm={async () => {
-          await modal?.onConfirm();
-          setModal({ isOpen: false, onConfirm: null });
-        }}
-      />
+      <ModalConfirmDeleteYoung isOpen={isConfirmDeleteModalOpen} young={young} onCancel={handleCancelDeleteYoung} onConfirm={handleDeleteYoungSuccess} />
     </Panel>
   );
 }

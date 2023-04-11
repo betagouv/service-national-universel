@@ -10,7 +10,7 @@ import HorizontalBar from "../../../components/graphs/HorizontalBar";
 
 export default function Index() {
   return (
-    <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription"]}>
+    <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}>
       <h4>Full Doughnut</h4>
       <div className="bg-white m-8 p-8 grid grid-cols-2 gap-2">
         <FullDoughnut title="Left" legendSide="left" labels={["Oui", "Non", "Non renseigné"]} values={[45, 23, 38]} />

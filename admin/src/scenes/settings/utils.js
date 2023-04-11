@@ -20,6 +20,10 @@ export const uselessSettings = {
   youngCheckinForDepartmentReferentTo: "",
   busListAvailabilityFrom: "",
   busListAvailabilityTo: "",
+  repartitionSchemaCreateAndEditGroupAvailabilityFrom: "",
+  repartitionSchemaCreateAndEditGroupAvailabilityTo: "",
+  repartitionSchemaDownloadAvailabilityFrom: "",
+  repartitionSchemaDownloadAvailabilityTo: "",
 };
 
 export const settings = {
@@ -39,4 +43,6 @@ export const settings = {
   youngCheckinForRegionReferent: false,
   youngCheckinForDepartmentReferent: false,
   busListAvailability: false,
+  repartitionSchemaCreateAndEditGroupAvailability: false,
+  repartitionSchemaDownloadAvailability: false,
 };
