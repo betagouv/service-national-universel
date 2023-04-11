@@ -1,3 +1,22 @@
+# [1.249.0](https://github.com/betagouv/service-national-universel/compare/v1.248.1...v1.249.0) (2023-04-11)
+
+
+### Bug Fixes
+
+* **admin:** Ouvrir les droits d’inscription a certaines situations ([#2473](https://github.com/betagouv/service-national-universel/issues/2473)) ([b8118be](https://github.com/betagouv/service-national-universel/commit/b8118bebb80f9470c90f3997c5eb77a62b7b53ff))
+* **api:** cohort eligibility debug ([7303955](https://github.com/betagouv/service-national-universel/commit/7303955cf828f44ca1fff19d8c417449b9e7649f))
+* **api:** remove console.log ([f6b43f2](https://github.com/betagouv/service-national-universel/commit/f6b43f20a2e471b21258b8070b4820b2985b098c))
+
+
+### Features
+
+* **admin,api:** Dashboard engagement ([#2468](https://github.com/betagouv/service-national-universel/issues/2468)) ([6a2ccf1](https://github.com/betagouv/service-national-universel/commit/6a2ccf1f1c028135f9506c9f63843d2ee87846fe))
+
+
+### Reverts
+
+* Revert "fix(api): france connect state (#2449)" ([e1a66c9](https://github.com/betagouv/service-national-universel/commit/e1a66c9d8818c107831a7859fd13a7a5e561e020)), closes [#2449](https://github.com/betagouv/service-national-universel/issues/2449)
+
 ## [1.248.1](https://github.com/betagouv/service-national-universel/compare/v1.248.0...v1.248.1) (2023-04-10)
 
 
