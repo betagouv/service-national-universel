@@ -212,7 +212,7 @@ const ReactiveList = ({ cohort, history }) => {
                     {
                       action: async () => {},
                       render: (
-                        <ExportComponentV2
+                        <ExportComponent
                           title="Plan de transport"
                           exportTitle="Plan_de_transport"
                           route="/elasticsearch/plandetransport/export"
