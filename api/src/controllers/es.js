@@ -547,7 +547,6 @@ router.post("/cohesioncenter/:action(_msearch|export)", passport.authenticate(["
       const response = await allRecords("cohesioncenter", applyFilterOnQuery(req.body.query, filter));
       return res.status(200).send({ ok: true, data: response });
     } else {
-      console.log(withFilterForMSearch(body, filter));
       const response = await esClient.msearch({ index: "cohesioncenter", body: withFilterForMSearch(body, filter) });
       return res.status(200).send(response.body);
     }
