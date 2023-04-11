@@ -54,7 +54,10 @@ export default function Signin() {
         setError({ text: "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole" });
       } else if (e.code === "TOO_MANY_REQUESTS") {
         let date = formatToActualTime(e?.data?.nextLoginAttemptIn);
-        setError({ text: "Vous avez atteint le maximum de tentatives de connexion autorisées.", subText: `Réessayez ${date !== "-" ? `à ${date}.` : "demain."}` });
+        setError({
+          text: "Vous avez atteint le maximum de tentatives de connexion autorisées.",
+          subText: `Votre accès est bloqué jusqu'à ${date !== "-" ? `à ${date}.` : "demain."}. Revenez d'ici quelques minutes.`,
+        });
       } else if (e.code === "YOUNG_ALREADY_REGISTERED") {
         setError({ text: "Vous êtes déjà inscrit" });
       } else if (!e.ok) {

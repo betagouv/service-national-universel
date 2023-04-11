@@ -7,6 +7,7 @@ const { capture } = require("../sentry");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const { ERRORS } = require("../utils");
+const { getFillingRate, FILLING_RATE_LIMIT } = require("../services/inscription-goal");
 
 // Update all inscription goals for a cohort
 router.post("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -96,10 +97,27 @@ router.get("/:cohort/department/:department", passport.authenticate("referent", 
     if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { department, cohort } = value;
-    const youngCount = await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort }).countDocuments();
-    const inscriptionGoal = await InscriptionGoalModel.findOne({ department, cohort });
-    const fillingRate = (youngCount || 0) / (inscriptionGoal.max || 1);
+    const fillingRate = await getFillingRate(department, cohort);
+
     return res.status(200).send({ ok: true, data: fillingRate });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:cohort/department/:department/reached", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    const { department, cohort } = value;
+    const fillingRate = await getFillingRate(department, cohort);
+
+    return res.status(200).send({ ok: true, data: fillingRate >= FILLING_RATE_LIMIT });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

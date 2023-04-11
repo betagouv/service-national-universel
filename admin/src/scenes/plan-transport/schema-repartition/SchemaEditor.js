@@ -37,7 +37,11 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
       setIsUserAuthorizedToCreateGroup(false);
       return;
     }
-    if ((!cohort || !cohort.repartitionSchemaCreateAndEditGroupAvailability) && user.role === ROLES.REFERENT_REGION) {
+    if (user.role === ROLES.REFERENT_REGION && user.region !== region) {
+      setIsUserAuthorizedToCreateGroup(false);
+      return;
+    }
+    if (user.role === ROLES.REFERENT_REGION && (!cohort || !cohort.repartitionSchemaCreateAndEditGroupAvailability)) {
       setIsUserAuthorizedToCreateGroup(false);
       return;
     }
@@ -56,7 +60,7 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
 
   return (
     <Box className={className}>
-      <BoxHeader title={"Gérer les volontaires de " + department}>
+      <BoxHeader title={`Gérer les volontaires de ${department}`}>
         <span data-tip data-tip-disable={false} data-for="export-data">
           <ButtonPrimary onClick={onExportDetail} disabled={!isUserAuthorizedToExportData}>
             Exporter

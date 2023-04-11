@@ -65,6 +65,7 @@ export default function FullDoughnut({ title, values, labels, maxLegends = Numbe
   let legendValueClass = "flex items-center";
   let legendDotClass = "mr-2";
   let legendGroupClass = "flex";
+  let textLegendClass = "";
 
   switch (legendSide) {
     case "left":
@@ -73,11 +74,13 @@ export default function FullDoughnut({ title, values, labels, maxLegends = Numbe
       legendClass += "flex flex-col items-end mb-[16px] last:mb-0";
       legendValueClass += " flex-row-reverse";
       legendDotClass = "ml-2";
+      textLegendClass = "text-right";
       break;
     case "right":
       mainClass += " flex-row";
       legendGroupClass += " flex-col ml-10";
       legendClass += " mb-[16px] last:mb-0";
+      textLegendClass = "text-left";
       break;
     case "top":
       mainClass += " flex-col-reverse";
@@ -104,7 +107,7 @@ export default function FullDoughnut({ title, values, labels, maxLegends = Numbe
           <div className={legendGroupClass} key={"group-" + idx}>
             {legends.map((legend) => (
               <div className={legendClass} key={legend.name}>
-                <div className="text-xs text-gray-600 mb-[4px]">{legend.name}</div>
+                <div className={"text-xs text-gray-600 mb-[4px] max-w-[168px] " + textLegendClass}>{legend.name}</div>
                 <div className={legendValueClass}>
                   <div className={`rounded-full w-[10px] h-[10px] ${legendDotClass}`} style={{ backgroundColor: legend.color }}></div>
                   <div className="font-medium text-lg text-gray-900">{legend.value}</div>

@@ -8,8 +8,8 @@ function getFranceConnectCallback(parent, token) {
 
 export default function FranceConnectCallback() {
   // Update from France Connect.
-  async function fetchData(code, id, token) {
-    const { data, tokenId } = await api.post("/young/france-connect/user-info", { code, callback: getFranceConnectCallback(id, token) });
+  async function fetchData(code, id, token, state) {
+    const { data, tokenId } = await api.post("/young/france-connect/user-info", { code, callback: getFranceConnectCallback(id, token), state });
     if (data && data["email"]) {
       await api.put(`/representants-legaux/representant-fromFranceConnect/${id}?parent=${id}&token=${token}`, {
         [`parent${id}FirstName`]: data["given_name"],
@@ -30,8 +30,9 @@ export default function FranceConnectCallback() {
     const id = urlParams.get("parent");
     const token = urlParams.get("token");
     const code = urlParams.get("code");
+    const state = urlParams.get("state");
     if (id && code) {
-      fetchData(code, id, token);
+      fetchData(code, id, token, state);
     }
   }, []);
 

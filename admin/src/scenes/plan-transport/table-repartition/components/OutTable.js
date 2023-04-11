@@ -1,5 +1,5 @@
 import React from "react";
-import { region2department, ROLES, department2region, ES_NO_LIMIT } from "snu-lib";
+import { region2department, ROLES, department2region, ES_NO_LIMIT, getDepartmentNumber } from "snu-lib";
 import Pencil from "../../../../assets/icons/Pencil";
 import { Loading } from "../../components/commons";
 
@@ -196,7 +196,7 @@ export function OutTable({ cohort, region, user }) {
         </div>
         <div className="flex flex-col gap-4 w-4/12 rounded-lg shadow-sm bg-white p-4 relative">
           <div className="flex items-center gap-3">
-            <div className="text-sm text-gray-800 font-bold leading-5">Région(s) d’accueil</div>
+            <div className="text-sm text-gray-800 font-bold leading-5">Région(s) d&apos;accueil</div>
             <div className="text-xs text-[#0063CB] leading-5 font-bold px-1 bg-[#E8EDFF] rounded-lg uppercase">{centerTotal} Centre(s)</div>
           </div>
           {regionAccueil.map((r) => (
@@ -229,7 +229,7 @@ export function OutTable({ cohort, region, user }) {
         <hr />
         <div className="flex px-4 py-2 items-center">
           <div className="w-[30%] uppercase text-[#7E858C] text-xs leading-3">Départements de départ</div>
-          <div className="w-[70%] uppercase text-[#7E858C] text-xs leading-3">Départements d’accueil</div>
+          <div className="w-[70%] uppercase text-[#7E858C] text-xs leading-3">Départements d&apos;accueil</div>
         </div>
         {departments?.length ? (
           departments.map((department) => (
@@ -275,7 +275,9 @@ const Department = ({ department, loadingQuery, data, youngInDepartment, placesC
       <hr />
       <div className="flex px-4 py-2 items-center">
         <div className="w-[30%] flex flex-col gap-1">
-          <div className="text-base text-[#242526] font-bold leading-6">{department}</div>
+          <div className="text-base text-[#242526] font-bold leading-6">
+            {department} ({getDepartmentNumber(department)})
+          </div>
           <div className="flex text-xs text-gray-800 leading-4 items-center">{loadingQuery ? <Loading width="w-1/3" /> : `${youngInDepartment} volontaires`}</div>
         </div>
         <div className="w-[70%]">
@@ -285,7 +287,7 @@ const Department = ({ department, loadingQuery, data, youngInDepartment, placesC
             <div className="relative flex flex-row gap-2 items-center flex-wrap">
               {assignDepartment.map((assign, i) => (
                 <div key={i + "assign"} className="text-xs text-gray-700 bg-gray-100 rounded-full p-2">
-                  {assign.toDepartment}
+                  {assign.toDepartment} ({getDepartmentNumber(assign.toDepartment)})
                 </div>
               ))}
               {!editDisabled && (
@@ -357,7 +359,7 @@ const SelectHostDepartment = ({ department, setOpen, onCreate, assignDepartment,
             <div key={d} className="flex flex-row items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100" onClick={() => onChange(department, d)}>
               <div className="flex items-center gap-2 text-gray-700 text-sm">
                 <input type={"checkbox"} checked={assignDepartment.find((e) => e.toDepartment === d) || false} readOnly />
-                {d}
+                {d} ({getDepartmentNumber(d)})
               </div>
               <div className="text-sm text-gray-500 uppercase">{placesCenterByDepartment[d] ? placesCenterByDepartment[d] : 0} places</div>
             </div>

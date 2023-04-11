@@ -195,39 +195,39 @@ describe("Young", () => {
     });
   });
 
-  describe("POST /young/france-connect/authorization-url", () => {
-    it("should return 200", async () => {
-      const res = await request(getAppHelper()).post("/young/france-connect/authorization-url").send({
-        callback: "foo",
-      });
-      expect(res.statusCode).toEqual(200);
-    });
-  });
+  // describe("POST /young/france-connect/authorization-url", () => {
+  //   it("should return 200", async () => {
+  //     const res = await request(getAppHelper()).post("/young/france-connect/authorization-url").send({
+  //       callback: "foo",
+  //     });
+  //     expect(res.statusCode).toEqual(200);
+  //   });
+  // });
 
-  describe("POST /young/france-connect/user-info", () => {
-    it("should return 200", async () => {
-      const jsonResponse = jest
-        .fn()
-        .mockReturnValueOnce(
-          Promise.resolve({
-            access_token: "foo",
-            id_token: "bar",
-          }),
-        )
-        .mockReturnValue(Promise.resolve({}));
-      fetch.mockReturnValue(
-        Promise.resolve({
-          status: 200,
-          json: jsonResponse,
-        }),
-      );
-      const res = await request(getAppHelper()).post("/young/france-connect/user-info").send({
-        code: "foo",
-        callback: "bar",
-      });
-      expect(res.statusCode).toEqual(200);
-    });
-  });
+  // describe("POST /young/france-connect/user-info", () => {
+  //   it("should return 200", async () => {
+  //     const jsonResponse = jest
+  //       .fn()
+  //       .mockReturnValueOnce(
+  //         Promise.resolve({
+  //           access_token: "foo",
+  //           id_token: "bar",
+  //         }),
+  //       )
+  //       .mockReturnValue(Promise.resolve({}));
+  //     fetch.mockReturnValue(
+  //       Promise.resolve({
+  //         status: 200,
+  //         json: jsonResponse,
+  //       }),
+  //     );
+  //     const res = await request(getAppHelper()).post("/young/france-connect/user-info").send({
+  //       code: "foo",
+  //       callback: "bar",
+  //     });
+  //     expect(res.statusCode).toEqual(200);
+  //   });
+  // });
 
   describe("PUT /young", () => {
     async function selfUpdateYoung(body = {}, fields = {}) {

@@ -50,7 +50,10 @@ export default function Signin() {
       setError({ text: "  E-mail et/ou mot de passe incorrect(s)" });
       if (e.code === "TOO_MANY_REQUESTS") {
         let date = formatToActualTime(e?.data?.nextLoginAttemptIn);
-        setError({ text: " Vous avez atteint le maximum de tentatives de connexion autorisées.", subText: `Réessayez ${date !== "-" ? `à ${date}.` : "demain."}` });
+        setError({
+          text: " Vous avez atteint le maximum de tentatives de connexion autorisées.",
+          subText: `Votre accès est bloqué jusqu'à ${date !== "-" ? `à ${date}.` : "demain."}. Revenez d'ici quelques minutes.`,
+        });
       }
     }
     setLoading(false);
