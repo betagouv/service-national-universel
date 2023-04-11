@@ -1006,6 +1006,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
 
     const referent = await ReferentModel.findById(req.params.id);
+    console.log("🚀 ~ file: referent.js:1009 ~ router.put ~ referent:", referent);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const structure = await StructureModel.findById(value.structureId);

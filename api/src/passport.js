@@ -24,7 +24,7 @@ module.exports = function () {
     "young",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({
+        const { error, value } = Joi.object({ _id: Joi.string().required(), password: Joi.string().required(), lastLogoutAt: Joi.date().required() }).validate({
           _id: jwtPayload._id,
           password: jwtPayload.password,
           lastLogoutAt: jwtPayload.lastLogoutAt,
@@ -44,19 +44,21 @@ module.exports = function () {
     "referent",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({
+        const { error, value } = Joi.object({ _id: Joi.string().required(), password: Joi.string().required(), lastLogoutAt: Joi.date().allow(null) }).validate({
           _id: jwtPayload._id,
           password: jwtPayload.password,
           lastLogoutAt: jwtPayload.lastLogoutAt,
         });
+        console.log("🚀 ~ file: passport.js:52 ~ const{error,value}=Joi.object ~ error:", error);
         if (error) return done(null, false);
 
-        const referent = await Referent.findById(value._id).select("password");
-        console.log("🚀 ~ file: passport.js:47 ~ referent:", jwtPayload.lastLogoutAt);
+        console.log("🚀 ~ file: passport.js:56 ~ value:", value);
+        const referent = await Referent.findOne(value);
+        console.log("🚀 ~ file: passport.js:47 ~ referent:", value.lastLogoutAt);
         console.log("🚀 ~ file: passport.js:48 ~ referent.lastLogoutAt:", referent.lastLogoutAt);
-        console.log("🚀 ~ file: passport.js:47 ~ referent:", jwtPayload.password);
+        console.log("🚀 ~ file: passport.js:47 ~ referent:", value.password);
         console.log("🚀 ~ file: passport.js:50 ~ referent.password:", referent.password);
-        if (referent && value.lastLogoutAt === referent.lastLogoutAt && value.password === referent.password) return done(null, referent);
+        if (referent) return done(null, referent);
       } catch (error) {
         capture(error);
       }
@@ -68,7 +70,7 @@ module.exports = function () {
     "admin",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({
+        const { error, value } = Joi.object({ _id: Joi.string().required(), password: Joi.string().required(), lastLogoutAt: Joi.date().required() }).validate({
           _id: jwtPayload._id,
           password: jwtPayload.password,
           lastLogoutAt: jwtPayload.lastLogoutAt,
@@ -88,7 +90,7 @@ module.exports = function () {
     "dsnj",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({
+        const { error, value } = Joi.object({ _id: Joi.string().required(), password: Joi.string().required(), lastLogoutAt: Joi.date().required() }).validate({
           _id: jwtPayload._id,
           password: jwtPayload.password,
           lastLogoutAt: jwtPayload.lastLogoutAt,
