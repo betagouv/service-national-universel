@@ -19,6 +19,18 @@ function getRegionForEligibility(young) {
 
 async function getFilteredSessions(young) {
   const region = getRegionForEligibility(young);
+
+  console.log("🚀 ~ file: cohort.js:22 ~ getFilteredSessions ~ young:", young);
+  console.log("🚀 ~ file: cohort.js:22 ~ getFilteredSessions ~ region:", region);
+
+  for (const session of sessions2023) {
+    console.log(session.eligibility.zones.includes(region2zone[region]));
+    console.log(session.eligibility.schoolLevels.includes(young.grade));
+    console.log(session.eligibility.bornAfter < young.birthdateAt);
+    console.log(session.eligibility.bornBefore > young.birthdateAt);
+    console.log(session.eligibility.inscriptionEndDate > Date.now());
+  }
+
   const sessions = sessions2023.filter(
     (session) =>
       session.eligibility.zones.includes(region2zone[region]) &&
