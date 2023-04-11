@@ -21,8 +21,12 @@ export default function IndexDesktop({ young, cohort }) {
   const [equivalences, setEquivalences] = useState();
   const [hasPM, setHasPM] = useState(false);
 
-  const hasYoungFinishedPhase1 =
-    [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) && new Date(new Date(cohort.dateEnd).toLocaleDateString()) <= new Date();
+  const hasYoungFinishedPhase1 = () => {
+    const hasYoungPhase1DoneOrExempted = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1);
+    const cohortDateEnd = new Date(new Date(cohort.dateEnd).toLocaleDateString());
+    cohortDateEnd.setDate(cohortDateEnd.getDate() + 1);
+    return hasYoungPhase1DoneOrExempted && cohortDateEnd <= new Date();
+  };
 
   useEffect(() => {
     (async () => {
@@ -175,7 +179,7 @@ export default function IndexDesktop({ young, cohort }) {
                 {/* <IoIosInformationCircleOutline className="text-2xl" /> */}
               </div>
               <div className="text-gray-600 text-sm mb-2">Faîtes reconnaitre comme mission d&apos;intérêt général un engagement déjà réalisé au service de la société</div>
-              {!hasYoungFinishedPhase1 && (
+              {!hasYoungFinishedPhase1() && (
                 <AlertPrimary className="mb-4">
                   <div className="text-blue-400 my-1">
                     <InformationCircle />
@@ -185,7 +189,7 @@ export default function IndexDesktop({ young, cohort }) {
               )}
               <ButtonLinkPrimaryOutline
                 to="phase2/equivalence"
-                disabled={!hasYoungFinishedPhase1}
+                disabled={!hasYoungFinishedPhase1()}
                 className="flex justify-center w-full"
                 onClick={() => plausibleEvent("Phase 2/ CTA - EquivalenceMIGdemande")}>
                 Faire ma demande

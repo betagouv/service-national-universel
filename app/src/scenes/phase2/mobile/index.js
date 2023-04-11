@@ -20,8 +20,12 @@ export default function IndexPhase2Mobile({ young, cohort }) {
   const [equivalences, setEquivalences] = React.useState();
   const [hasPM, setHasPM] = React.useState(false);
 
-  const hasYoungFinishedPhase1 =
-    [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) && new Date(new Date(cohort.dateEnd).toLocaleDateString()) <= new Date();
+  const hasYoungFinishedPhase1 = () => {
+    const hasYoungPhase1DoneOrExempted = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1);
+    const cohortDateEnd = new Date(new Date(cohort.dateEnd).toLocaleDateString());
+    cohortDateEnd.setDate(cohortDateEnd.getDate() + 1);
+    return hasYoungPhase1DoneOrExempted && cohortDateEnd <= new Date();
+  };
 
   React.useEffect(() => {
     (async () => {
@@ -164,7 +168,7 @@ export default function IndexPhase2Mobile({ young, cohort }) {
             <div className="px-3 pb-4">
               <div className="font-bold text-lg text-gray-900 ">Demandez la reconnaissance d&apos;un engagement déjà réalisé</div>
               <div className="text-gray-600 text-sm mt-2 mb-3">Faîtes reconnaitre comme mission d&apos;intérêt général un engagement déjà réalisé au service de la société</div>
-              {!hasYoungFinishedPhase1 && (
+              {!hasYoungFinishedPhase1() && (
                 <AlertPrimary className="mb-4">
                   <div className="text-blue-400 my-1">
                     <InformationCircle />
@@ -174,7 +178,7 @@ export default function IndexPhase2Mobile({ young, cohort }) {
               )}
               <ButtonLinkPrimaryOutline
                 to="phase2/equivalence"
-                disabled={!hasYoungFinishedPhase1}
+                disabled={!hasYoungFinishedPhase1()}
                 className="flex justify-center w-full"
                 onClick={() => plausibleEvent("Phase 2/ CTA - EquivalenceMIGdemande")}>
                 Faire ma demande
