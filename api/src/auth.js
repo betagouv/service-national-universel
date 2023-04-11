@@ -284,9 +284,13 @@ class Auth {
       if (newPassword !== verifyPassword) return res.status(422).send({ ok: false, code: ERRORS.PASSWORDS_NOT_MATCH });
       if (newPassword === password) return res.status(401).send({ ok: false, code: ERRORS.NEW_PASSWORD_IDENTICAL_PASSWORD });
 
-      const user = await this.model.findById(req.user._id);
-      user.set({ password: newPassword, passwordChangedAt: Date.now() });
+      const user = await this.model.findById(req.user._id).select("+lastLogoutAt");
+      const passwordChangedAt = Date.now();
+      user.set({ password: newPassword, passwordChangedAt });
       await user.save();
+
+      const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
+      res.cookie("jwt", token, cookieOptions());
 
       return res.status(200).send({ ok: true, user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
     } catch (error) {
