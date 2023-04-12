@@ -1,3 +1,19 @@
+# [1.250.0](https://github.com/betagouv/service-national-universel/compare/v1.249.0...v1.250.0) (2023-04-12)
+
+
+### Bug Fixes
+
+* **api:** Warning pdf ([094f07f](https://github.com/betagouv/service-national-universel/commit/094f07feb8551cde2e7cda8be291d460b6138a95))
+* **app:** isCohortDone for old cohort ([6ec1c2e](https://github.com/betagouv/service-national-universel/commit/6ec1c2e6bcb1f675b5c5d3f87093f208f4856efe))
+
+
+### Features
+
+* **admin:** dashboard inscription liste établissement ([#2477](https://github.com/betagouv/service-national-universel/issues/2477)) ([c4431d6](https://github.com/betagouv/service-national-universel/commit/c4431d65da6eaf4ec9a130e5a7538c1b4159a063))
+* **admin:** export report dashboard inscription ([054eca9](https://github.com/betagouv/service-national-universel/commit/054eca9b2be85dee1572f99645705950dc7252cf))
+* **admin:** Paramétrage dynamique - Gestion des droits d'édition de session phase 1 ([#2478](https://github.com/betagouv/service-national-universel/issues/2478)) ([6e0815e](https://github.com/betagouv/service-national-universel/commit/6e0815e49bfc05434e5caef316768c7c9c140bd2))
+* **app:** Désactivation du bouton de reconnaissance d'engagement pour les volontaires en cours de phase 1 ([#2475](https://github.com/betagouv/service-national-universel/issues/2475)) ([0819201](https://github.com/betagouv/service-national-universel/commit/0819201b24e387a65f587d7d4fff4781df789fa0))
+
 # [1.249.0](https://github.com/betagouv/service-national-universel/compare/v1.248.1...v1.249.0) (2023-04-11)
 
 
