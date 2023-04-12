@@ -216,10 +216,7 @@ export default function SchemaRepartition({ region, department }) {
         department: g.fromDepartment,
         youngsVolume: g.youngsVolume,
         centerId: g.centerId,
-        centerName: g.centerName,
-        centerAddress: g.centerAddress,
-        centerZip: g.centerZip,
-        centerCity: g.centerCity,
+        centerName: `${g.centerName} ${g.centerAddress} ${g.centerZip} ${g.centerCity}`,
         centerDepartment: g.toDepartment,
         centerRegion: g.toRegion,
       };
@@ -229,10 +226,7 @@ export default function SchemaRepartition({ region, department }) {
       for (let i = 0, n = g.gatheringPlaces.length; i < n; ++i) {
         const pdr = g.gatheringPlaces[i];
         data["gpId" + i] = pdr._id;
-        data["gpName" + i] = pdr.name;
-        data["gpAddress" + i] = pdr.address;
-        data["gpZip" + i] = pdr.zip;
-        data["gpCity" + i] = pdr.city;
+        data["gpName" + i] = `${pdr.name} ${pdr.address} ${pdr.zip} ${pdr.city}`;
       }
       return data;
     });
@@ -267,23 +261,12 @@ export default function SchemaRepartition({ region, department }) {
       "Département des volontaires",
       "Nombre de volontaires",
       "ID centre",
-      "Nom du centre",
-      "Adresse du centre",
-      "Code Postal du centre",
-      "Commune du centre",
+      "Désignation du centre",
       "Département du centre",
       "Région du centre",
     ];
     for (let i = 1; i <= maxGatheringPlaces; ++i) {
-      headers.push(
-        ...[
-          "ID du point de rassemblement " + i,
-          "Nom du point de rassemblement " + i,
-          "Adresse du point de rassemblement " + i,
-          "Code postal du point de rassemblement " + i,
-          "Ville du point de rassemblement " + i,
-        ],
-      );
+      headers.push(...["ID du point de rassemblement " + i, "Désignation du point de rassemblement " + i]);
     }
     XLSX.utils.sheet_add_aoa(sheet, [headers], { origin: "A1" });
 
