@@ -117,6 +117,7 @@ const Schema = new mongoose.Schema({
 
   sessionEditionOpenForReferentRegion: {
     type: Boolean,
+    default: false,
     documentation: {
       description: "Ouverture ou fermeture de l'édition des sessions pour les référents régionaux",
     },
@@ -124,6 +125,7 @@ const Schema = new mongoose.Schema({
 
   sessionEditionOpenForReferentDepartment: {
     type: Boolean,
+    default: false,
     documentation: {
       description: "Ouverture ou fermeture de l'édition des sessions pour les référents départementaux",
     },
