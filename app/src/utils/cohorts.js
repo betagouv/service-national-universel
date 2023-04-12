@@ -61,6 +61,7 @@ export function getCohortDetail(cohortName) {
 }
 
 export function isCohortDone(cohortName) {
+  if (["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022"].includes(cohortName)) return true;
   if (isCohortsInitialized()) {
     const cohort = getCohort(cohortName);
     if (cohort && cohort.dateEnd) {
