@@ -7,8 +7,6 @@ import { BsDownload } from "react-icons/bs";
 import { Title } from "../centersV2/components/commons";
 import API from "../../services/api";
 
-// Lycée général et technologique Albert Calmette
-
 const getAggregSchool = async (schoolIds, filters, user) => {
   const body = {
     query: { bool: { must: { match_all: {} }, filter: [{ terms: { "schoolId.keyword": schoolIds } }] } },
