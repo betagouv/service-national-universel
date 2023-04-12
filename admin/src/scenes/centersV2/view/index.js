@@ -42,21 +42,19 @@ export default function Index({ ...props }) {
   const [modalDelete, setModalDelete] = useState({ isOpen: false });
   const [focusedCohortData, setFocusedCohortData] = useState(null);
 
-  async function getCohort(cohort) {
-    try {
-      const { ok, data } = await api.get("/cohort/" + cohort);
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte", translate(data.code));
-      }
-      setFocusedCohortData(data);
-    } catch (e) {
-      capture(e);
-    }
-  }
-
   useEffect(() => {
     if (!focusedSession) return;
-    getCohort(focusedSession.cohort);
+    (async () => {
+      try {
+        const { ok, data } = await api.get("/cohort/" + focusedSession.cohort);
+        if (!ok) {
+          return toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte", translate(data.code));
+        }
+        setFocusedCohortData(data);
+      } catch (e) {
+        capture(e);
+      }
+    })();
   }, [focusedSession]);
 
   useEffect(() => {

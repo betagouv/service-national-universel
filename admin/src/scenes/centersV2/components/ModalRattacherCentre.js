@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { BsChevronDown, BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { ES_NO_LIMIT, START_DATE_SESSION_PHASE1, ROLES, translate } from "snu-lib";
+import { ES_NO_LIMIT, ROLES, translate, canEditSessionPhase1 } from "snu-lib";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -10,8 +10,20 @@ import Field from "./Field";
 
 export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user, defaultCentre = null, editable = true }) {
   const history = useHistory();
-  const availableCohorts = Object.keys(START_DATE_SESSION_PHASE1).reduce((acc, cohort) => {
-    return START_DATE_SESSION_PHASE1[cohort] > new Date() ? [...acc, cohort] : acc;
+  const [availableCohorts, setAvailableCohorts] = React.useState([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("/cohort");
+        const filteredCohorts = data.filter((cohort) => canEditSessionPhase1(user, cohort) === true);
+        const availableCohorts = filteredCohorts.map((cohort) => cohort.name);
+        setAvailableCohorts(availableCohorts);
+      } catch (err) {
+        capture(err);
+        toastr.error("Erreur", translate("Une erreur est survenue"));
+      }
+    })();
   }, []);
 
   const refSelect = React.useRef(null);
