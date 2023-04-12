@@ -13,7 +13,7 @@ import Trash from "../../../assets/icons/Trash.js";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import Pencil from "../../../assets/icons/Pencil";
 
-import { COHESION_STAY_START, canEditSessionPhase1 } from "snu-lib";
+import { COHESION_STAY_START, isSessionEditionOpen } from "snu-lib";
 
 import Field from "../components/Field";
 import Select from "../components/Select";
@@ -221,7 +221,7 @@ export default function Index({ ...props }) {
               ))}
             </div>
             <div>
-              {canEditSessionPhase1(user, focusedCohortData) ? (
+              {isSessionEditionOpen(user, focusedCohortData) ? (
                 <>
                   {!editingBottom ? (
                     <button
