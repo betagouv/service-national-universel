@@ -107,6 +107,27 @@ router.post("/schoolramses/_msearch", async (req, res) => {
   }
 });
 
+router.post("/schoolramses-limited-roles/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    const filter = [];
+
+    if (user.role === ROLES.REFERENT_REGION) filter.push({ term: { "region.keyword": user.region } });
+    if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ terms: { "departmentName.keyword": user.department } });
+    console.log(user);
+    if (req.params.action === "export") {
+      const response = await allRecords("schoolramses", applyFilterOnQuery(req.body.query, filter));
+      return res.status(200).send({ ok: true, data: response });
+    } else {
+      const response = await esClient.msearch({ index: "schoolramses", body: withFilterForMSearch(body, filter) });
+      return res.status(200).send(serializeYoungs(response.body));
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 // Routes accessible by referents only
 router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
