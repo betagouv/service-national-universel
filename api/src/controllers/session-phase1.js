@@ -175,9 +175,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    // if (!isReferentOrAdmin(req.user) && req.user.role !== ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const cohort = await CohortModel.findById(sessionPhase1.cohortId);
+    const cohort = await CohortModel.findOne({ name: sessionPhase1.cohort });
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (!isSessionEditionOpen(req.user, cohort)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
