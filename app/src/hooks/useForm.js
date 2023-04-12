@@ -1,6 +1,11 @@
 import { useState } from "react";
 
-const isFuncAsync = (func) => func.constructor.name === "AsyncFunction" || func.constructor.name === "Promise";
+const isFuncAsync = (func) => {
+  if (func && func.contstructor) {
+    return func.constructor.name === "AsyncFunction" || func.constructor.name === "Promise";
+  }
+  return false;
+};
 
 /**
  * Hook for managing form validation
@@ -26,6 +31,9 @@ const useForm = ({ initialValues = {}, validateOnChange = false }) => {
   const [isValidationPending, setIsValidationPending] = useState(false);
 
   const validateInput = async (inputName, inputValue, validationRule) => {
+    if (!validationRule || !inputName || !inputValue) {
+      return;
+    }
     const validationResult = isFuncAsync(validationRule) ? await validationRule(inputValue || "") : validationRule(inputValue || "");
 
     if (typeof validationResult === "string") {
@@ -46,11 +54,14 @@ const useForm = ({ initialValues = {}, validateOnChange = false }) => {
 
   const validateForm = async ({ showErrors = false }) => {
     setShowErrors(showErrors);
-    setIsValidationPending(true);
-    for (const [inputName, validationRule] of Object.entries(validationRules)) {
-      await validateInput(inputName, formValues[inputName], validationRule);
+    const validationRulesArr = Object.entries(validationRules);
+    if (validationRulesArr.length > 0) {
+      setIsValidationPending(true);
+      for (const [inputName, validationRule] of Object.entries(validationRules)) {
+        await validateInput(inputName, formValues[inputName], validationRule);
+      }
+      setIsValidationPending(false);
     }
-    setIsValidationPending(false);
   };
 
   const validate = (validationRule) => (name) => {
@@ -72,6 +83,7 @@ const useForm = ({ initialValues = {}, validateOnChange = false }) => {
   };
 
   const setValues = (inputName) => (value) => {
+    console.log("SET VALUES", inputName, value);
     setFormValues((prevValues) => ({
       ...prevValues,
       [inputName]: value,

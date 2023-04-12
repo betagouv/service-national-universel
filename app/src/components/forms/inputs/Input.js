@@ -1,6 +1,10 @@
 import React, { useEffect } from "react";
 
-const InputText = ({ label = "", className = "", validate = () => null, name = "", value = "", onChange = () => null, error = null, ...rest }) => {
+const Input = ({ label = "", className = "", validate = (value) => null, name = "", value = "", onChange = (value) => null, error = null, type = "text", ...rest }) => {
+  if (!["text", "email"].includes(type)) {
+    throw new Error(`Input component wrong type '${type}'. Please set 'text' or 'email'.`);
+  }
+
   useEffect(() => {
     if (validate) {
       validate(name);
@@ -21,7 +25,7 @@ const InputText = ({ label = "", className = "", validate = () => null, name = "
         <input
           className="w-full text-sm bg-white text-gray-900 disabled:text-gray-400 placeholder:text-gray-500 focus:outline-none"
           name={name}
-          type="text"
+          type={type}
           value={value}
           onChange={handleChange}
           {...rest}
@@ -32,4 +36,4 @@ const InputText = ({ label = "", className = "", validate = () => null, name = "
   );
 };
 
-export default InputText;
+export default Input;
