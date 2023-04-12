@@ -16,6 +16,9 @@ export const graphColors = {
   13: ["#1E40AF", "#1D4ED8", "#2563EB", "#3B82F6", "#60A5FA", "#93C5FD", "#BFDBFE", "#1E40AF", "#1D4ED8", "#2563EB", "#3B82F6", "#60A5FA", "#93C5FD"],
   14: ["#1E40AF", "#1D4ED8", "#2563EB", "#3B82F6", "#60A5FA", "#93C5FD", "#BFDBFE", "#1E40AF", "#1D4ED8", "#2563EB", "#3B82F6", "#60A5FA", "#93C5FD", "#BFDBFE"],
 };
+export function getGraphColors(count) {
+  return graphColors[Math.max(1, Math.min(14, count))];
+}
 
 export function Legend({ color, name, value = null, className = "" }) {
   return (

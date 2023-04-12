@@ -54,6 +54,18 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
               return {
                 title: idx + 1 + ". " + translate(d.key),
                 values: [Math.round(d.validatedMission * 100), Math.round(d.youngPreferences * 100)],
+                tooltips: [
+                  <div key="t-0">
+                    <div>{d.missionsCount}</div>
+                    <div className="font-normal">missions</div>
+                    <div className="mt-2">{Math.round(d.placesLeft * 100)}%</div>
+                    <div className="font-normal whitespace-nowrap">de places disponibles</div>
+                  </div>,
+                  <div key="t-1">
+                    <div>{d.preferencesCount}</div>
+                    <div className="font-normal">missions</div>
+                  </div>,
+                ],
               };
             }),
         );
@@ -97,7 +109,7 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
         <>
           <div className="flex justify-around items-center mb-8">
             {bars.map((bar) => (
-              <BarChart key={bar.title} title={bar.title} values={bar.values} max={maxValue} unit="%" className="h-[140px]" />
+              <BarChart key={bar.title} title={bar.title} values={bar.values} tooltips={bar.tooltips} max={maxValue} unit="%" className="h-[140px]" />
             ))}
           </div>
           <div className="flex justify-center">

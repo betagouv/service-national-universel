@@ -59,7 +59,7 @@ export default function VolontairesStatutsDePhase({ filters, className = "" }) {
           <Loader />
         </div>
       ) : (
-        <FullDoughnut labels={graph.labels} values={graph.values} legendSide="bottom" maxLegends={2} className="mt-8" />
+        <FullDoughnut labels={graph.labels} values={graph.values} legendSide="bottom" maxLegends={2} className="mt-8" tooltipsPercent />
       )}
     </DashboardBox>
   );

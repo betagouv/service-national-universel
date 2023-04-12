@@ -17,7 +17,7 @@ export default function StatusTable({ statuses, className = "" }) {
     <div className={`flex ${className}`}>
       <div className="flex flex-col w-[45%] gap-2">
         {columns.left.map((column) => (
-          <StatusText status={column.status} nb={column.nb} percentage={column.percentage} key={column.status} />
+          <StatusText status={column.status} nb={column.nb} percentage={column.percentage} key={column.status} infoPanel={column.info} />
         ))}
       </div>
       <div className="flex w-[10%] justify-center items-center">
@@ -25,7 +25,7 @@ export default function StatusTable({ statuses, className = "" }) {
       </div>
       <div className="flex flex-col w-[45%] gap-1">
         {columns.right.map((column) => (
-          <StatusText status={column.status} nb={column.nb} percentage={column.percentage} key={column.status} />
+          <StatusText status={column.status} nb={column.nb} percentage={column.percentage} key={column.status} infoPanel={column.info} />
         ))}
       </div>
     </div>

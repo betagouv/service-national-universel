@@ -68,7 +68,7 @@ export default function SectionStructures({ filters }) {
             </DashboardBox>
           </div>
           <DashboardBox title="Catégories" subtitle="Sélectionnez une catégorie pour voir ses sous-catégories." className="grow">
-            <FullDoughnut legendSide="left" maxLegends={2} labels={structures.map((structure) => structure._id)} values={structures.map((structure) => structure.total)} />
+            <FullDoughnut legendSide="left" maxLegends={2} labels={structures.map((structure) => structure._id)} values={structures.map((structure) => structure.total)} tooltipsPercent />
           </DashboardBox>
         </div>
       )}

@@ -9,6 +9,7 @@ const YoungModel = require("../../models/young");
 const MissionModel = require("../../models/mission");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const StructureModel = require("../../models/structure");
+const { MISSION_STATUS } = require("snu-lib/constants");
 
 const filtersJoi = Joi.object({
   status: Joi.array().items(Joi.string().valid(...Object.values(YOUNG_STATUS))),
@@ -349,13 +350,15 @@ router.post("/missions-detail", passport.authenticate("referent", { session: fal
 
     // get data
     // --- missions
-    let missionPipeline = [{ $match: computeMissionFilter(filters, missionFilters) }];
+    let missionPipeline = [{ $match: { ...computeMissionFilter(filters, missionFilters), status: MISSION_STATUS.VALIDATED } }];
     switch (group) {
       case "domain":
         missionPipeline.push({
           $group: {
             _id: "$mainDomain",
             count: { $sum: 1 },
+            placesTotal: { $sum: "$placesTotal" },
+            placesLeft: { $sum: "$placesLeft" },
           },
         });
         break;
@@ -365,6 +368,8 @@ router.post("/missions-detail", passport.authenticate("referent", { session: fal
           $group: {
             _id: "$period",
             count: { $sum: 1 },
+            placesTotal: { $sum: "$placesTotal" },
+            placesLeft: { $sum: "$placesLeft" },
           },
         });
         break;
@@ -373,6 +378,8 @@ router.post("/missions-detail", passport.authenticate("referent", { session: fal
           $group: {
             _id: "$format",
             count: { $sum: 1 },
+            placesTotal: { $sum: "$placesTotal" },
+            placesLeft: { $sum: "$placesLeft" },
           },
         });
         break;
@@ -422,7 +429,10 @@ router.post("/missions-detail", passport.authenticate("referent", { session: fal
         data.push({
           key,
           youngPreferences: young && youngTotal ? young.count / youngTotal : 0,
+          preferencesCount: young ? young.count : 0,
           validatedMission: mission && missionTotal ? mission.count / missionTotal : 0,
+          missionsCount: mission ? mission.count : 0,
+          placesLeft: mission && mission.placesTotal ? mission.placesLeft / mission.placesTotal : 0,
         });
       }
     }
@@ -455,7 +465,8 @@ router.post("/missions-young-preferences", passport.authenticate("referent", { s
     const { filters, group } = value;
 
     // get data
-    let pipeline = [{ $match: computeYoungFilter(filters) }];
+    const youngFilter = computeYoungFilter(filters);
+    let pipeline = [{ $match: youngFilter }];
     switch (group) {
       case "project":
         pipeline.push({
@@ -549,15 +560,41 @@ router.post("/missions-young-preferences", passport.authenticate("referent", { s
         });
         break;
     }
+    pipeline.push({ $sort: { count: -1 } });
     const result = await YoungModel.aggregate(pipeline);
-    console.log("RESULT: ", result);
+    // console.log("Young Pref RESULT: ", result);
+
+    let uniformResult;
+    if (group === "project") {
+      const uniformPipeline = [
+        { $match: { ...youngFilter, professionnalProject: "UNIFORM" } },
+        {
+          $group: {
+            _id: "$professionnalProjectPrecision",
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { count: -1 } },
+      ];
+      uniformResult = await YoungModel.aggregate(uniformPipeline);
+    }
 
     // --- format data
     let data = [];
 
     switch (group) {
       case "project":
-        data = [result.filter((d) => d._id !== null)];
+        data = [
+          result
+            .filter((d) => d._id !== null)
+            .map((d) => {
+              if (d._id === "UNIFORM") {
+                return { ...d, extra: uniformResult };
+              } else {
+                return d;
+              }
+            }),
+        ];
         break;
       case "geography":
         data = [

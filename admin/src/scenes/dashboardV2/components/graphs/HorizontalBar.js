@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { graphColors } from "./graph-commons";
+import GraphTooltip from "./GraphTooltip";
 
-export default function HorizontalBar({ title, values, labels, goal, className = "" }) {
+export default function HorizontalBar({ title, values, labels, tooltips, goal, className = "" }) {
   const [bars, setBars] = useState([]);
   const [total, setTotal] = useState(0);
   const [totalPercent, setTotalPercent] = useState(0);
@@ -22,6 +23,7 @@ export default function HorizontalBar({ title, values, labels, goal, className =
             value,
             percent: Math.round((value / goal) * 100) || 0,
             width: Math.min(Math.round((value / Math.max(total, goal)) * 100), 100),
+            tooltip: tooltips && tooltips.length > idx ? tooltips[idx] : undefined,
           };
         }),
       );
@@ -52,9 +54,11 @@ export default function HorizontalBar({ title, values, labels, goal, className =
         </div>
       </div>
       <div className="relative">
-        <div className="h-[31px] rounded-full bg-gray-100 overflow-hidden">
+        <div className="h-[31px] rounded-full bg-gray-100">
           {bars.map((bar, idx) => (
-            <div className="inline-block h-[100%]" style={{ width: bar.width + "%", backgroundColor: bar.color }} key={"bar-" + idx}></div>
+            <div className="group relative inline-block h-[100%] first:rounded-l-full" style={{ width: bar.width + "%", backgroundColor: bar.color }} key={"bar-" + idx}>
+              {bar.tooltip && <GraphTooltip className="">{bar.tooltip}</GraphTooltip>}
+            </div>
           ))}
         </div>
         {x100 && (
