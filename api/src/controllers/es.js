@@ -114,7 +114,7 @@ router.post("/schoolramses-limited-roles/:action(_msearch|export)", passport.aut
 
     if (user.role === ROLES.REFERENT_REGION) filter.push({ term: { "region.keyword": user.region } });
     if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ terms: { "departmentName.keyword": user.department } });
-    console.log(user);
+
     if (req.params.action === "export") {
       const response = await allRecords("schoolramses", applyFilterOnQuery(req.body.query, filter));
       return res.status(200).send({ ok: true, data: response });

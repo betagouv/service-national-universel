@@ -172,7 +172,7 @@ export default function List() {
                       UAI: data.uai,
                       Nom: data.fullName,
                       Ville: data.city,
-                      "Code postal": data.zip,
+                      "Code postal": data.postcode,
                       Département: data.departmentName,
                       Région: data.region,
                       "Nombre de volontaires": infoYoungs?.total || 0,
@@ -229,7 +229,7 @@ const Hit = ({ hit, infoYoungs, isLoading }) => {
     <div className="flex py-3 items-center px-4 cursor-pointer hover:bg-gray-50 border-t-[1px] border-gray-100">
       <div className="flex flex-col gap-1 w-[70%]">
         <div className="font-bold text-base leading-6 text-gray-900 truncate">{hit?.fullName}</div>
-        <div className="font-normal text-xs leading-4 text-gray-500">{`${hit?.city || ""} • ${hit?.department || ""}`}</div>
+        <div className="font-normal text-xs leading-4 text-gray-500">{`${hit?.city || ""} • ${hit?.departmentName || ""}`}</div>
       </div>
       <div className="flex flex-col gap-2 w-[30%]">
         {isLoading ? (
