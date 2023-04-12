@@ -1,7 +1,7 @@
 import { ExtraErrorData, Offline, ReportingObserver } from "@sentry/integrations";
-import { init, reactRouterV5Instrumentation, withSentryRouting, captureException as sentryCaptureException, captureMessage as sentryCaptureMessage } from "@sentry/react";
+import { init, reactRouterV5Instrumentation, withSentryRouting, captureException as sentryCaptureException, captureMessage as sentryCaptureMessage, Replay } from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
-import { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, apiURL } from "./config";
+import { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE, SENTRY_ON_ERROR_SAMPLE_RATE, apiURL } from "./config";
 import { Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
 
@@ -15,6 +15,8 @@ function initSentry() {
     dsn: SENTRY_URL,
     environment: "admin",
     normalizeDepth: 16,
+    replaysSessionSampleRate: SENTRY_SESSION_SAMPLE_RATE,
+    replaysOnErrorSampleRate: SENTRY_ON_ERROR_SAMPLE_RATE,
     integrations: [
       new ExtraErrorData({ depth: 16 }),
       new BrowserTracing({
@@ -26,6 +28,7 @@ function initSentry() {
       new ReportingObserver({
         types: ["crash", "deprecation", "intervention"],
       }),
+      new Replay(),
     ],
     tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE),
     ignoreErrors: [
