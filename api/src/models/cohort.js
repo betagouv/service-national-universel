@@ -115,6 +115,22 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  sessionEditionOpenForReferentRegion: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Ouverture ou fermeture de l'édition des sessions pour les référents régionaux",
+    },
+  },
+
+  sessionEditionOpenForReferentDepartment: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Ouverture ou fermeture de l'édition des sessions pour les référents départementaux",
+    },
+  },
+
   repartitionSchemaCreateAndEditGroupAvailability: {
     type: Boolean,
     documentation: {

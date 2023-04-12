@@ -14,7 +14,7 @@ import DatePickerInput from "./components/DatePickerInput";
 import InputText from "../../components/ui/forms/InputText";
 import InputTextarea from "../../components/ui/forms/InputTextarea";
 import Select from "../../components/forms/Select";
-// import SimpleToggle from "./components/SimpleToggle";
+import SimpleToggle from "./components/SimpleToggle";
 import ToggleDate from "./components/ToggleDate";
 import { BiLoaderAlt } from "react-icons/bi";
 import { settings, uselessSettings } from "./utils";
@@ -311,27 +311,27 @@ export default function Settings() {
               <div className="flex">
                 <div className="flex flex-col w-[45%] gap-4">
                   <div className="flex flex-col gap-3">
-                    {/* <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <p className="text-gray-900  text-xs font-medium">Remplissage des centres </p>
                       <MdInfoOutline data-tip data-for="remplissage_centres" className="text-gray-400 h-5 w-5 cursor-pointer" />
                       <ReactTooltip id="remplissage_centres" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
                         <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
-                          Ouverture ou fermerture pour les utilisateurs de la possibilité de déclarer un centre sur le séjour.
+                          Ouverture ou fermeture pour les utilisateurs de la possibilité de déclarer un centre sur le séjour.
                         </p>
                       </ReactTooltip>
                     </div>
                     <SimpleToggle
                       label="Référents régionaux"
                       disabled={isLoading || readOnly}
-                      value={data.manualAffectionOpenForAdmin}
-                      onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
+                      value={data.sessionEditionOpenForReferentRegion}
+                      onChange={() => setData({ ...data, sessionEditionOpenForReferentRegion: !data.sessionEditionOpenForReferentRegion })}
                     />
                     <SimpleToggle
                       label="Référents départementaux"
                       disabled={isLoading || readOnly}
-                      value={data.manualAffectionOpenForAdmin}
-                      onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
-                    /> */}
+                      value={data.sessionEditionOpenForReferentDepartment}
+                      onChange={() => setData({ ...data, sessionEditionOpenForReferentDepartment: !data.sessionEditionOpenForReferentDepartment })}
+                    />
                   </div>
                   <div className="flex flex-col gap-3">
                     {/* <div className="flex items-center gap-2">
