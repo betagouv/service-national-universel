@@ -10,6 +10,7 @@ export default function FranceConnectCallback() {
   // Update from France Connect.
   async function fetchData(code, id, token, state) {
     const { data, tokenId } = await api.post("/young/france-connect/user-info", { code, callback: getFranceConnectCallback(id, token), state });
+
     if (data && data["email"]) {
       await api.put(`/representants-legaux/representant-fromFranceConnect/${id}?parent=${id}&token=${token}`, {
         [`parent${id}FirstName`]: data["given_name"],
