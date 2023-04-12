@@ -8,8 +8,23 @@ const app = express();
 const port = 8080;
 
 app.use(
-  helmet({
-    contentSecurityPolicy: false,
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        "'strict-dynamic'",
+        "https://www.snu.gouv.fr/mentions-legales/",
+        "https://plausible.io/",
+        "https://plausible.io/js/script.manual.outbound-links.file-downloads.js",
+      ],
+      scriptSrcElem: ["'self'", "'unsafe-inline'", "https://plausible.io"],
+      connectSrc: ["'self'", "https://sentry.selego.co", "https://plausible.io"],
+      objectSrc: ["'none'"],
+      frameSrc: ["'none'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      reportUri: "/csp-report",
+    },
   }),
 );
 
