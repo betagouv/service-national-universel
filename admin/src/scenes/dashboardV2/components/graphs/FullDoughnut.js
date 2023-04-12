@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
-import {getGraphColors, graphColors} from "./graph-commons";
+import { getGraphColors } from "./graph-commons";
 import GraphTooltip from "./GraphTooltip";
-import InformationCircle from "../../../../assets/icons/InformationCircle";
 import MoreInfoPanel from "../MoreInformationPanel";
 
 export default function FullDoughnut({
@@ -240,7 +239,10 @@ export default function FullDoughnut({
               <div className={`text-xs text-gray-600 mb-[4px] ${textLegendClass}`}>{legend.name}</div>
               <div className={legendValueClass}>
                 <div className={`rounded-full w-[10px] h-[10px] ${legendDotClass}`} style={{ backgroundColor: legend.color }}></div>
-                <div className="font-medium text-lg text-gray-900">{legend.value}{valueSuffix}</div>
+                <div className="font-medium text-lg text-gray-900">
+                  {legend.value}
+                  {valueSuffix}
+                </div>
                 {legend.info && <MoreInfoPanel>{legend.info}</MoreInfoPanel>}
               </div>
             </div>
