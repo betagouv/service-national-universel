@@ -34,6 +34,7 @@ import SchemaDeRepartition from "./scenes/plan-transport/schema-repartition";
 import LigneBus from "./scenes/plan-transport/ligne-bus";
 import DSNJExport from "./scenes/dsnj-export";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
+import Etablissement from "./scenes/school";
 
 //DashboardV2
 import DashboardV2 from "./scenes/dashboardV2/moderator-ref";
@@ -199,6 +200,7 @@ const Home = () => {
             <RestrictedRoute path="/settings" component={Settings} />
             <RestrictedRoute path="/profil" component={Profil} />
             <RestrictedRoute path="/volontaire" component={renderVolontaire} />
+            <RestrictedRoute path="/etablissement" component={Etablissement} />
             <RestrictedRoute path="/mission" component={Missions} />
             <RestrictedRoute path="/inscription" component={Inscription} />
             <RestrictedRoute path="/user" component={Utilisateur} />

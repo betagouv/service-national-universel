@@ -63,13 +63,13 @@ export default function Phase2MilitaryPreparation({ young }) {
                 }
               />
               <FileCard
-                name="Certifical médical de non contre-indication..."
+                name="Certificat médical de non contre-indication..."
                 icon="autotest"
                 filled={young.files.militaryPreparationFilesCertificate.length}
                 onClick={() =>
                   setModalFiles({
                     isOpen: true,
-                    title: "Certifical médical de non contre-indication...",
+                    title: "Certificat médical de non contre-indication...",
                     nameFiles: "militaryPreparationFilesCertificate",
                     initialValues: young.files.militaryPreparationFilesCertificate,
                   })

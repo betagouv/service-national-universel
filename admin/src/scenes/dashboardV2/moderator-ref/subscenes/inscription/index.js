@@ -14,6 +14,7 @@ import plausibleEvent from "../../../../../services/plausible";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import Details from "../../../components/inscription/Details";
 import TabSchool from "../../../components/inscription/TabSchool";
+import ExportReport from "./ExportReport";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -102,9 +103,7 @@ export default function Index() {
       availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}
       navChildren={
         <div className="flex items-center gap-2">
-          <ButtonPrimary className="text-sm">
-            Exporter le rapport <span className="font-bold">“Inscription”</span>
-          </ButtonPrimary>
+          <ExportReport filter={selectedFilters} />
           <ButtonPrimary
             className="text-sm"
             onClick={() => {
