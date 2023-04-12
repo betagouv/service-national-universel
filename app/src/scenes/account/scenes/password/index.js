@@ -7,10 +7,8 @@ import { changeYoungPassword } from "../../../../services/young.service";
 import { setYoung } from "../../../../redux/auth/actions";
 import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { validatePassword } from "../../../../utils/password.utils";
+import { requiredErrorMessage, validatePassword } from "../../../../utils/form-validation.utils";
 import InputPassword from "../../../../components/forms/inputs/InputPassword";
-
-const requiredMessage = "Ce champ est obligatoire";
 
 const AccountPasswordPage = () => {
   const dispatch = useDispatch();
@@ -48,7 +46,7 @@ const AccountPasswordPage = () => {
             error={errors.password}
             placeholder="********"
             value={values.password}
-            validate={validate(({ value }) => !value && requiredMessage)}
+            validate={validate(({ value }) => !value && requiredErrorMessage)}
           />
           <InputPassword
             name="newPassword"
@@ -64,7 +62,7 @@ const AccountPasswordPage = () => {
             error={errors.verifyPassword}
             validate={validate(({ value, formValues }) => {
               console.log("VALUES", formValues);
-              return (!value && requiredMessage) || (value !== formValues.newPassword && "Les mots de passe renseignés doivent être identiques.");
+              return (!value && requiredErrorMessage) || (value !== formValues.newPassword && "Les mots de passe renseignés doivent être identiques.");
             })}
             placeholder="Confirmer nouveau mot de passe"
             value={values.verifyPassword}

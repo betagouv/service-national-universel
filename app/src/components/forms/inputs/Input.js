@@ -7,7 +7,12 @@ const Input = ({ label = "", className = "", validate = (value) => null, name = 
 
   useEffect(() => {
     if (validate) {
-      validate(name);
+      const removeValidation = validate(name);
+      return () => {
+        if (removeValidation) {
+          removeValidation();
+        }
+      };
     }
   }, [value]);
 

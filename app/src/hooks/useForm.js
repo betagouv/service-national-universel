@@ -1,13 +1,5 @@
 import { useEffect, useState } from "react";
 
-const isFuncAsync = (func) => {
-  console.log(func, func.constructor.name);
-  if (func && func.contstructor) {
-    return func.constructor.name === "AsyncFunction" || func.constructor.name === "Promise";
-  }
-  return false;
-};
-
 /**
  * Hook for managing form validation
  * @param {{
@@ -68,14 +60,22 @@ const useForm = ({ initialValues = {}, validateOnChange = false, validateOnInit 
     }
   };
 
-  const validate = (validationRule) => (name) => {
-    console.log("validate", name);
-    if (!(name in validationRules)) {
+  const validate = (validationRule) => (inputName) => {
+    if (!(inputName in validationRules)) {
       setValidationRules((prevValidationRules) => ({
         ...prevValidationRules,
-        [name]: validationRule,
+        [inputName]: validationRule,
       }));
     }
+    return () => {
+      // Remove validation when parent component is destroyed
+      if (inputName in validationRules) {
+        setValidationRules((prevValidationRules) => {
+          const filteredRules = Object.entries(prevValidationRules).filter(([key]) => key !== inputName);
+          return Object.fromEntries(filteredRules);
+        });
+      }
+    };
   };
 
   const handleSubmit = (submitHandler) => async (event) => {
@@ -101,6 +101,7 @@ const useForm = ({ initialValues = {}, validateOnChange = false, validateOnInit 
 
   useEffect(() => {
     if (validateOnInit) {
+      console.log("REVALIDATE >>>", validationRules);
       validateForm({ showErrors: true });
     }
   }, [validationRules]);

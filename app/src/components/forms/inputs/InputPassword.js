@@ -11,7 +11,12 @@ const InputPassword = ({ label = "", className = "", validate = (value) => null,
 
   useEffect(() => {
     if (validate) {
-      validate(name);
+      const removeValidation = validate(name);
+      return () => {
+        if (removeValidation) {
+          removeValidation();
+        }
+      };
     }
   }, [value]);
 

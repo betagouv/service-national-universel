@@ -3,9 +3,8 @@ import Input from "../../../../components/forms/inputs/Input";
 import Select from "../../../../components/forms/inputs/Select";
 import { useDispatch, useSelector } from "react-redux";
 import useForm from "../../../../hooks/useForm";
-import validator from "validator";
 import InputPhone from "../../../../components/forms/inputs/InputPhone";
-import { PHONE_ZONES, PHONE_ZONES_NAMES, isPhoneNumberWellFormated } from "snu-lib/phone-number";
+import { PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
 import IdCardReader from "../components/IdCardReader";
 import ButtonLinkLight from "../../../../components/ui/buttons/ButtonLinkLight";
 import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
@@ -15,8 +14,7 @@ import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../../redux/auth/actions";
 import { BiLoaderAlt } from "react-icons/bi";
 import { youngCanChangeSession } from "snu-lib";
-
-const requiredMessage = "Ce champ est obligatoire";
+import { validateEmail, validatePhoneNumber } from "../../../../utils/form-validation.utils";
 
 const AccountGeneralPage = () => {
   const young = useSelector((state) => state.Auth.young);
@@ -24,8 +22,8 @@ const AccountGeneralPage = () => {
 
   const { values, setValues, validate, errors, handleSubmit, isSubmitionPending, isValid } = useForm({
     initialValues: {
-      firstName: young.firstName || "",
       lastName: young.lastName || "",
+      firstName: young.firstName || "",
       gender: young.gender || "male",
       birthdateAt: (young.birthdateAt && new Date(young.birthdateAt).toLocaleDateString("fr-fr")) || "",
       email: young.email || "",
@@ -79,7 +77,7 @@ const AccountGeneralPage = () => {
               placeholder="example@example.com"
               value={values.email}
               onChange={setValues("email")}
-              validate={validate(({ value }) => (!value && requiredMessage) || (!validator.isEmail(value.trim()) && "Veuillez saisir une adresse email valide."))}
+              validate={validate(validateEmail)}
             />
             <InputPhone
               label="Téléphone"
@@ -88,11 +86,7 @@ const AccountGeneralPage = () => {
               error={errors.phone}
               onChange={setValues("phone")}
               placeholder={PHONE_ZONES[values.phone.phoneZone].example}
-              validate={validate(
-                ({ value }) =>
-                  (!value.phoneNumber && requiredMessage) ||
-                  (value.phoneNumber && !isPhoneNumberWellFormated(value.phoneNumber, value.phoneZone) && PHONE_ZONES[value.phoneZone].errorMessage),
-              )}
+              validate={validate(validatePhoneNumber)}
             />
           </section>
           <section className="mb-4">
