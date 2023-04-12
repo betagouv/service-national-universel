@@ -12,6 +12,7 @@ const mime = require("mime-types");
 const fs = require("fs");
 const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
+const redis = require("redis");
 const { decrypt, encrypt } = require("../../cryptoUtils");
 const config = require("../../config");
 const { capture } = require("../../sentry");
@@ -63,21 +64,6 @@ const { formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
 const { anonymizeContractsFromYoungId } = require("../../services/contract");
 const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
-
-const redis = require("redis");
-
-const redisClient = redis.createClient({
-  url: config.REDIS_URL,
-});
-redisClient.connect().catch(console.error);
-
-redisClient.on("connect", function () {
-  console.log("Connected to Redis server");
-});
-
-redisClient.on("error", function (error) {
-  console.error("Error connecting to Redis server", error);
-});
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
@@ -769,8 +755,15 @@ router.post("/france-connect/authorization-url", async (req, res) => {
     };
 
     try {
+      const redisClient = redis.createClient({
+        url: config.REDIS_URL,
+      });
+      await redisClient.connect();
+
       await redisClient.setEx(`franceConnectNonce:${query.nonce}`, 1800, query.nonce);
       await redisClient.setEx(`franceConnectState:${query.state}`, 1800, query.state);
+
+      await redisClient.disconnect();
     } catch (e) {
       capture(e);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -818,8 +811,15 @@ router.post("/france-connect/user-info", async (req, res) => {
     let storedNonce;
 
     try {
+      const redisClient = redis.createClient({
+        url: config.REDIS_URL,
+      });
+      await redisClient.connect();
+
       storedState = await redisClient.get(`franceConnectState:${value.state}`);
       storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`);
+
+      await redisClient.disconnect();
     } catch (e) {
       capture(e);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
