@@ -753,21 +753,15 @@ router.post("/france-connect/authorization-url", async (req, res) => {
       nonce: crypto.randomBytes(20).toString("hex"),
       acr_values: "eidas1",
     };
+    const redisClient = redis.createClient({
+      url: config.REDIS_URL,
+    });
+    await redisClient.connect();
 
-    try {
-      const redisClient = redis.createClient({
-        url: config.REDIS_URL,
-      });
-      await redisClient.connect();
+    await redisClient.setEx(`franceConnectNonce:${query.nonce}`, 1800, query.nonce);
+    await redisClient.setEx(`franceConnectState:${query.state}`, 1800, query.state);
 
-      await redisClient.setEx(`franceConnectNonce:${query.nonce}`, 1800, query.nonce);
-      await redisClient.setEx(`franceConnectState:${query.state}`, 1800, query.state);
-
-      await redisClient.disconnect();
-    } catch (e) {
-      capture(e);
-      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    }
+    await redisClient.disconnect();
 
     const url = `${process.env.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
     return res.status(200).send({ ok: true, data: { url } });
@@ -810,20 +804,15 @@ router.post("/france-connect/user-info", async (req, res) => {
     let storedState;
     let storedNonce;
 
-    try {
-      const redisClient = redis.createClient({
-        url: config.REDIS_URL,
-      });
-      await redisClient.connect();
+    const redisClient = redis.createClient({
+      url: config.REDIS_URL,
+    });
+    await redisClient.connect();
 
-      storedState = await redisClient.get(`franceConnectState:${value.state}`);
-      storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`);
+    storedState = await redisClient.get(`franceConnectState:${value.state}`);
+    storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`);
 
-      await redisClient.disconnect();
-    } catch (e) {
-      capture(e);
-      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    }
+    await redisClient.disconnect();
 
     if (!token["access_token"] || !token["id_token"] || !storedNonce || !storedState) {
       capture(`France Connect User Information failed: ${JSON.stringify({ storedNonce, storedState, token })}`);
