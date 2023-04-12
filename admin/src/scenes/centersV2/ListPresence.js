@@ -153,8 +153,8 @@ export default function ListPresence() {
     ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
       ? {
           title: "Académie",
-          name: "demy",
-          datafield: "demy.keyword",
+          name: "academy",
+          datafield: "academy.keyword",
           missingLabel: "Non renseignée",
           parentGroup: "Centre",
         }

@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
-import { HiOutlineChevronLeft, HiOutlineChevronRight } from "react-icons/hi";
+import { HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExternalLink } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { ROLES } from "snu-lib";
 import api from "../../../../services/api";
 import { replaceSpaces } from "../../../../utils";
+import { currentFilterAsUrl } from "../FilterDashBoard";
 
 const PAGE_SIZE = 6;
 
@@ -38,6 +39,7 @@ export default function TabSchool({ filters }) {
     if (filters.region?.length) body.query.bool.filter.push({ terms: { "schoolRegion.keyword": filters.region } });
     if (filters.department?.length) body.query.bool.filter.push({ terms: { "schoolDepartment.keyword": filters.department } });
     if (filters.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filters.cohort } });
+    if (filters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filters.academy } });
 
     let route = "young";
     if (user.role === ROLES.REFERENT_DEPARTMENT) route = "young-having-school-in-department/inscriptions";
@@ -89,7 +91,12 @@ export default function TabSchool({ filters }) {
   return (
     <div className="flex flex-col gap-5 w-[60%] bg-white rounded-lg px-8 py-8">
       <div className="flex flex-row justify-between w-full">
-        <div className="text-base font-bold text-gray-900">Liste des établissements</div>
+        <div className="flex items-center gap-3">
+          <div className="text-base font-bold text-gray-900">Liste des établissements</div>
+          <Link to={`/etablissement/liste-jeunes?${currentFilterAsUrl(filters)}`} target={"_blank"}>
+            <HiOutlineExternalLink className="h-5 w-5 text-gray-400 cursor-pointer" />
+          </Link>
+        </div>
         <div className="text-xs text-gray-600">
           Export depuis le menu{" "}
           <Link

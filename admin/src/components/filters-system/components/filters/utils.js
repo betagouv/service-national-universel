@@ -179,14 +179,14 @@ const buildAggs = (filterArray, selectedFilters, searchBarObject, defaultQuery) 
   return bodyAggs;
 };
 
-export const buildQuery = async (esId, selectedFilters, page = 0, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
+export const buildQuery = async (esId, esRoute, selectedFilters, page = 0, size, defaultQuery = null, filterArray, searchBarObject, sortSelected) => {
   const bodyQuery = buildBody(selectedFilters, page, size, defaultQuery, filterArray, searchBarObject, sortSelected);
   const bodyAggs = buildAggs(filterArray, selectedFilters, searchBarObject, defaultQuery);
 
-  const resAggs = await api.esQuery(esId, bodyAggs);
+  const resAggs = await api.esQuery(esId, bodyAggs, esRoute);
   if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
 
-  const resQuery = await api.esQuery(esId, bodyQuery);
+  const resQuery = await api.esQuery(esId, bodyQuery, esRoute);
   if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
 
   const aggs = resAggs.responses[0].aggregations;
