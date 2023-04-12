@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const isFuncAsync = (func) => {
+  console.log(func, func.constructor.name);
   if (func && func.contstructor) {
     return func.constructor.name === "AsyncFunction" || func.constructor.name === "Promise";
   }
@@ -11,11 +12,13 @@ const isFuncAsync = (func) => {
  * Hook for managing form validation
  * @param {{
  *  initialValues: { [inputName: String]: any },
- *  validateOnChange: Boolean
+ *  validateOnChange: Boolean,
+ *  validateOnInit: Boolean
  * }} config
  * @returns {{
  *  isValid: Boolean,
  * 	isValidationPending: Boolean,
+ * 	isSubmitionPending: Boolean,
  *  errors: { [inputName: String]: String },
  *  validate: (validationRule: (value) => string | void) => (inputName: string) => void,
  *  setValues: (inputName: string) => (value) => void,
@@ -23,18 +26,19 @@ const isFuncAsync = (func) => {
  *  handleSubmit: ((values: { [inputName: String]: any }) => void) => (event) => void,
  * }} methods and parameters
  */
-const useForm = ({ initialValues = {}, validateOnChange = false }) => {
+const useForm = ({ initialValues = {}, validateOnChange = false, validateOnInit = true }) => {
   const [formValues, setFormValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
   const [showErrors, setShowErrors] = useState(validateOnChange);
   const [validationRules, setValidationRules] = useState({});
   const [isValidationPending, setIsValidationPending] = useState(false);
+  const [isSubmitionPending, setIsSubmitionPending] = useState(false);
 
   const validateInput = async (inputName, inputValue, validationRule) => {
-    if (!validationRule || !inputName || !inputValue) {
+    if (!validationRule || !inputName) {
       return;
     }
-    const validationResult = isFuncAsync(validationRule) ? await validationRule(inputValue || "") : validationRule(inputValue || "");
+    const validationResult = await validationRule({ value: inputValue || "", formValues });
 
     if (typeof validationResult === "string") {
       setErrors((prevErrors) => ({
@@ -65,6 +69,7 @@ const useForm = ({ initialValues = {}, validateOnChange = false }) => {
   };
 
   const validate = (validationRule) => (name) => {
+    console.log("validate", name);
     if (!(name in validationRules)) {
       setValidationRules((prevValidationRules) => ({
         ...prevValidationRules,
@@ -73,17 +78,17 @@ const useForm = ({ initialValues = {}, validateOnChange = false }) => {
     }
   };
 
-  const handleSubmit = (submitHandler) => (event) => {
+  const handleSubmit = (submitHandler) => async (event) => {
     event.preventDefault();
-    validateForm({ showErrors: true }).finally(() => {
-      if (Object.keys(errors).length === 0) {
-        submitHandler(formValues);
-      }
-    });
+    await validateForm({ showErrors: true });
+    if (Object.keys(errors).length === 0) {
+      setIsSubmitionPending(true);
+      await submitHandler(formValues);
+      setIsSubmitionPending(false);
+    }
   };
 
   const setValues = (inputName) => (value) => {
-    console.log("SET VALUES", inputName, value);
     setFormValues((prevValues) => ({
       ...prevValues,
       [inputName]: value,
@@ -94,9 +99,16 @@ const useForm = ({ initialValues = {}, validateOnChange = false }) => {
     });
   };
 
+  useEffect(() => {
+    if (validateOnInit) {
+      validateForm({ showErrors: true });
+    }
+  }, [validationRules]);
+
   return {
     isValid: Object.keys(errors).length === 0,
     isValidationPending,
+    isSubmitionPending,
     errors: showErrors ? errors : {},
     validate,
     setValues,
