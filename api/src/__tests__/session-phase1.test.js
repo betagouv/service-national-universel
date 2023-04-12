@@ -11,7 +11,7 @@ const { dbConnect, dbClose } = require("./helpers/db");
 const { ROLES } = require("snu-lib/roles");
 const getNewReferentFixture = require("./fixtures/referent");
 const { createReferentHelper } = require("./helpers/referent");
-const { getNewCohortFixture } = require("./fixtures/cohort");
+const getNewCohortFixture = require("./fixtures/cohort");
 const { createCohortHelper } = require("./helpers/cohort");
 
 jest.mock("../sendinblue", () => ({
