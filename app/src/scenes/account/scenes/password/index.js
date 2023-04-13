@@ -34,7 +34,7 @@ const AccountPasswordPage = () => {
   };
 
   return (
-    <div className="bg-white shadow-sm">
+    <div className="bg-white shadow-sm mb-6">
       <form onSubmit={handleSubmit(handleChangePasswordSubmit)}>
         <div className="px-4 pt-6 pb-2">
           <p className="text-sm text-gray-500 mb-6">Vous pouvez modifier votre mot de passe si vous le souhaitez</p>

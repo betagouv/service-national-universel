@@ -18,7 +18,7 @@ const IdCardReader = ({ cniFile }) => {
         <p className="text-sm text-gray-900 font-medium mb-1">{getFileTitle()}</p>
         <p className="text-sm text-gray-500 mb-1">Nom : {cniFile.name}</p>
         <p className="text-sm text-gray-500 mb-4">Expire le {new Date(cniFile.expirationDate).toLocaleDateString("fr-fr")}</p>
-        <ButtonLight>Visualiser</ButtonLight>
+        <ButtonLight>Télécharger</ButtonLight>
       </div>
     </>
   );
