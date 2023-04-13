@@ -52,9 +52,9 @@
   "dependencies": {
     "@appbaseio/reactivesearch": "3.42.1",
     "@headlessui/react": "^1.7.4",
-    "@sentry/integrations": "^7.17.4",
+    "@sentry/integrations": "^7.47.0",
     "@sentry/react": "^7.47.0",
-    "@sentry/tracing": "^7.17.4",
+    "@sentry/tracing": "^7.47.0",
     "@tailwindcss/line-clamp": "^0.4.2",
     "babel-loader": "8.3.0",
     "bootstrap": "4.6.1",

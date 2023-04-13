@@ -29,7 +29,7 @@ if (environment === "production") {
   SENTRY_URL = "https://d09670865360498e9567369808de4064@sentry.selego.co/13";
   SENTRY_TRACING_SAMPLE_RATE = 0.01;
   SENTRY_SESSION_SAMPLE_RATE = 0.01;
-  SENTRY_ON_ERROR_SAMPLE_RATE = 0.01;
+  SENTRY_ON_ERROR_SAMPLE_RATE = 1.0;
 }
 const S3PREFIX = "";
 
