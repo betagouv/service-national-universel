@@ -28,7 +28,7 @@ router.get("/signin", async (req, res) => {
     const { _id, lastLogoutAt, passwordChangedAt } = jwt.verify(token_jva, config.secret);
     if (!_id) return res.status(401).send({ ok: false, code: ERRORS.TOKEN_INVALID });
 
-    const user = await ReferentModel.find({ _id, lastLogoutAt, passwordChangedAt }).select("+passwordChangedAt +lastLogoutAt");
+    const user = await ReferentModel.find({ _id, lastLogoutAt, passwordChangedAt });
 
     // si l'utilisateur n'existe pas, on bloque
     if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
@@ -70,7 +70,7 @@ router.get("/getToken", async (req, res) => {
       return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_API_KEY_INVALID });
     }
 
-    const user = await ReferentModel.findOne({ email, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } }).select("+passwordChangedAt +lastLogoutAt");
+    const user = await ReferentModel.findOne({ email, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
 
     // si l'utilisateur n'existe pas, on bloque
     if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_API_KEY_INVALID });

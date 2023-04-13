@@ -67,12 +67,14 @@ const Schema = new mongoose.Schema({
   },
   lastLogoutAt: {
     type: Date,
+    select: true,
     documentation: {
       description: "Date de dernière déconnexion",
     },
   },
   passwordChangedAt: {
     type: Date,
+    select: true,
     documentation: {
       description: "Date de dernier changement de password",
     },

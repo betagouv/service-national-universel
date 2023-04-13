@@ -175,8 +175,8 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     const { id, type } = params;
 
     let user = null;
-    if (type === "referent") user = await ReferentModel.findById(id).select("+passwordChangedAt +lastLogoutAt");
-    else if (type === "young") user = await YoungModel.findById(id).select("+passwordChangedAt +lastLogoutAt");
+    if (type === "referent") user = await ReferentModel.findById(id);
+    else if (type === "young") user = await YoungModel.findById(id);
     if (!user) return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
 
     if (!canSigninAs(req.user, user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

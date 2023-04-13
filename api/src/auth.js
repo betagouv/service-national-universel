@@ -191,7 +191,7 @@ class Auth {
     const { password, email } = value;
     try {
       const now = new Date();
-      const user = await this.model.findOne({ email }).select("+passwordChangedAt +lastLogoutAt");
+      const user = await this.model.findOne({ email });
       if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       if (user.loginAttempts > 12) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
       if (user.nextLoginAttemptIn > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
@@ -284,7 +284,7 @@ class Auth {
       if (newPassword !== verifyPassword) return res.status(422).send({ ok: false, code: ERRORS.PASSWORDS_NOT_MATCH });
       if (newPassword === password) return res.status(401).send({ ok: false, code: ERRORS.NEW_PASSWORD_IDENTICAL_PASSWORD });
 
-      const user = await this.model.findById(req.user._id).select("+lastLogoutAt");
+      const user = await this.model.findById(req.user._id);
       const passwordChangedAt = Date.now();
       user.set({ password: newPassword, passwordChangedAt });
       await user.save();
