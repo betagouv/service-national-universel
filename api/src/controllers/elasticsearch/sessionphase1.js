@@ -26,7 +26,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
 
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterField, queryFilters, page, sort, contextFilters });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
 
     if (req.params.action === "export") {
       const response = await allRecords("sessionphase1", hitsRequestBody.query);
