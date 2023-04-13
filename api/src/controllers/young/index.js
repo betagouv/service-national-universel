@@ -12,6 +12,7 @@ const mime = require("mime-types");
 const fs = require("fs");
 const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
+const redis = require("redis");
 const { decrypt, encrypt } = require("../../cryptoUtils");
 const config = require("../../config");
 const { capture } = require("../../sentry");
@@ -748,10 +749,20 @@ router.post("/france-connect/authorization-url", async (req, res) => {
       redirect_uri: `${config.APP_URL}/${value.callback}`,
       response_type: "code",
       client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
-      state: "home",
+      state: crypto.randomBytes(20).toString("hex"),
       nonce: crypto.randomBytes(20).toString("hex"),
       acr_values: "eidas1",
     };
+    const redisClient = redis.createClient({
+      url: config.REDIS_URL,
+    });
+    await redisClient.connect();
+
+    await redisClient.setEx(`franceConnectNonce:${query.nonce}`, 1800, query.nonce);
+    await redisClient.setEx(`franceConnectState:${query.state}`, 1800, query.state);
+
+    await redisClient.disconnect();
+
     const url = `${process.env.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
     return res.status(200).send({ ok: true, data: { url } });
   } catch (error) {
@@ -763,7 +774,9 @@ router.post("/france-connect/authorization-url", async (req, res) => {
 // Get user information for authorized user on France Connect.
 router.post("/france-connect/user-info", async (req, res) => {
   try {
-    const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
+    const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required(), state: Joi.string().required() })
+      .unknown()
+      .validate(req.body, { stripUnknown: true });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -776,14 +789,33 @@ router.post("/france-connect/user-info", async (req, res) => {
       client_secret: process.env.FRANCE_CONNECT_CLIENT_SECRET,
       code: value.code,
     };
+
     const tokenResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/token`, {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
       body: queryString.stringify(body),
     });
-    const token = await tokenResponse.json();
 
-    if (!token["access_token"] || !token["id_token"]) {
+    const token = await tokenResponse.json();
+    const franceConnectToken = token["id_token"];
+
+    const decodedToken = jwt.decode(franceConnectToken);
+
+    let storedState;
+    let storedNonce;
+
+    const redisClient = redis.createClient({
+      url: config.REDIS_URL,
+    });
+    await redisClient.connect();
+
+    storedState = await redisClient.get(`franceConnectState:${value.state}`);
+    storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`);
+
+    await redisClient.disconnect();
+
+    if (!token["access_token"] || !token["id_token"] || !storedNonce || !storedState) {
+      capture(`France Connect User Information failed: ${JSON.stringify({ storedNonce, storedState, token })}`);
       return res.sendStatus(403, token);
     }
 
@@ -792,7 +824,9 @@ router.post("/france-connect/user-info", async (req, res) => {
       method: "GET",
       headers: { Authorization: `Bearer ${token["access_token"]}` },
     });
+
     const userInfo = await userInfoResponse.json();
+
     res.status(200).send({ ok: true, data: userInfo, tokenId: token["id_token"] });
   } catch (e) {
     capture(e);
