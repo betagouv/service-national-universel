@@ -89,7 +89,7 @@ export default function TabSchool({ filters }) {
   }, [filters]);
 
   return (
-    <div className="flex flex-col gap-5 w-[60%] bg-white rounded-lg px-8 py-8">
+    <div className="flex flex-col gap-5 w-[60%] bg-white rounded-lg px-8 py-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
       <div className="flex flex-row justify-between w-full">
         <div className="flex items-center gap-3">
           <div className="text-base font-bold text-gray-900">Liste des établissements</div>
@@ -113,33 +113,33 @@ export default function TabSchool({ filters }) {
       <table className={`table-fixed w-full ${isLoading || noResult ? "h-full" : ""}`}>
         <thead>
           <tr className="flex items-center border-y-[1px] border-gray-100 py-4">
-            <th className="w-[70%] uppercase text-xs text-gray-500 font-medium leading-4">établissements</th>
-            <th className="w-[30%] uppercase text-xs text-gray-500 font-medium leading-4">volontaires</th>
+            <th className="w-[80%] uppercase text-xs text-gray-400 font-medium leading-4">établissements</th>
+            <th className="w-[20%] uppercase text-xs text-gray-400 font-medium leading-4">volontaires</th>
           </tr>
         </thead>
         <tbody className="">
           {isLoading ? (
             Array.from(Array(PAGE_SIZE).keys()).map((i) => (
               <tr key={`LoadingSchool${i}`} className="flex items-center border-b-[1px] border-gray-100 h-1/6">
-                <td className="w-[70%]">
+                <td className="w-[80%]">
                   <Loading width="w-[50%]" />
                 </td>
-                <td className="w-[30%]">
+                <td className="w-[20%]">
                   <Loading width="w-[50%]" />
                 </td>
               </tr>
             ))
           ) : !noResult ? (
             youngBySchool?.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)?.map((school) => (
-              <tr key={school?.key} className="flex items-center border-b-[1px] border-gray-100 py-3 h-1/6">
-                <td className="flex flex-col w-[70%] gap-1">
+              <tr key={school?.key} className="flex items-center border-b-[1px] border-gray-100 py-3 h-1/6 hover:bg-gray-50 cursor-default">
+                <td className="flex flex-col w-[80%] gap-1">
                   <Link
                     to={`/inscription?SCHOOL=%5B"${replaceSpaces(school.schoolName)}"%5D`}
                     target="_blank"
                     onClick={(e) => {
                       e.stopPropagation();
                     }}
-                    className="text-blue-600 cursor-pointer">
+                    className="cursor-pointer">
                     <p className="text-sm text-gray-900 font-bold leading-6 truncate w-[90%]">{school.schoolName}</p>
                     <p className="text-xs text-gray-500 leading-4">
                       {school?.schoolCity} • {school.schoolZip}
@@ -147,7 +147,7 @@ export default function TabSchool({ filters }) {
                   </Link>
                 </td>
 
-                <td className="w-[30%] flex flex-col gap-1 ">
+                <td className="w-[20%] flex flex-col gap-1 ">
                   <span className="text-sm text-gray-500 leading-3">
                     <span className="text-gray-900 font-bold">{school.total}</span> (dont {school.inDepartment} au sein
                   </span>
@@ -163,7 +163,7 @@ export default function TabSchool({ filters }) {
         </tbody>
       </table>
       <div className="flex items-center justify-between pt-4 w-full">
-        <p className="text-sm leading-5 font-normal text-gray-700">
+        <p className="text-xs leading-5 font-normal text-gray-700">
           {noResult ? 0 : page * PAGE_SIZE + 1}-<strong> {page * PAGE_SIZE + PAGE_SIZE >= total ? total : page * PAGE_SIZE + PAGE_SIZE}</strong> sur <strong>{total}</strong>{" "}
           résultats
         </p>

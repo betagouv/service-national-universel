@@ -114,9 +114,9 @@ export default function Index() {
           </ButtonPrimary>
         </div>
       }>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 ">
         <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
-        <div className="bg-white p-8 rounded-lg">
+        <div className="bg-white p-8 rounded-lg shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
           <HorizontalBar
             title="Objectif des inscriptions"
             labels={["Sur la liste principale", "Sur liste complémentaire", "En attente de validation", "En attente de correction", "En cours"]}

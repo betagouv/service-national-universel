@@ -163,7 +163,7 @@ export default function IndexDesktop({ young }) {
         {/* TODO activer si plusieurs cartes 👇 */}
         {/* <div className="mt-12 mb-4 text-lg">Vous avez déjà fait preuve de solidarité ?</div> */}
         {equivalences.length < 3 && equivalences.filter((equivalence) => equivalence.status !== "REFUSED").length === 0 ? (
-          <div className="border-0 flex rounded-lg shadow-lg w-1/2 mt-4 max-h-[300px] overflow-hidden">
+          <div className="border-0 flex rounded-lg shadow-lg w-full xl:w-1/2 mt-4 max-h-[300px] overflow-hidden">
             <img src={require("../../../assets/phase2Reconnaissance.png")} className="rounded-lg overflow-hidden w-[300px] object-right-bottom object-cover" />
             <div className="pr-8 pt-[20px] pb-6">
               <div className="flex items-end">
