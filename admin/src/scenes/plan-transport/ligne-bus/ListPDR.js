@@ -242,6 +242,7 @@ export default function ListPDR(props) {
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
+              esRouteQueryParams="?showAffectedToRegionOrDep=1"
             />
           </div>
           <button className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm" onClick={() => setIsExportOpen(true)}>
@@ -259,6 +260,7 @@ export default function ListPDR(props) {
             selectedFilters={selectedFilters}
             filters={filterArray}
             exportTitle="volontaires"
+            esRouteQueryParams="?showAffectedToRegionOrDep=1"
           />
         </div>
         <div className="mt-2 px-4 flex flex-row flex-wrap items-center">

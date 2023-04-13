@@ -26,9 +26,9 @@ class api {
     return this.token;
   }
 
-  esQuery(index, body, route = null) {
+  esQuery(index, body, route = null, queryParam = "") {
     const header = { index, type: "_doc" };
-    return fetch(`${apiURL}/es/${route || index}/_msearch`, {
+    return fetch(`${apiURL}/es/${route || index}/_msearch${queryParam}`, {
       retries: 3,
       retryDelay: 1000,
       retryOn: [502, 503, 504],
