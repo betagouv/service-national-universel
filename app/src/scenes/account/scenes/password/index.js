@@ -38,43 +38,48 @@ const AccountPasswordPage = () => {
   return (
     <div className="bg-white shadow-sm mb-6 lg:rounded-lg">
       <form onSubmit={handleSubmit(handleChangePasswordSubmit)}>
-        <div className="px-4 pt-6 pb-2">
-          <FormDescription>Vous pouvez modifier votre mot de passe si vous le souhaitez</FormDescription>
-          <SectionTitle>Mon mot de passe</SectionTitle>
-          <InputPassword
-            label="Actuel"
-            name="password"
-            onChange={setValues("password")}
-            error={errors.password}
-            placeholder="********"
-            value={values.password}
-            validate={validate(({ value }) => !value && requiredErrorMessage)}
-          />
-          <InputPassword
-            name="newPassword"
-            error={errors.newPassword}
-            onChange={setValues("newPassword")}
-            validate={validate(validatePassword)}
-            placeholder="Nouveau mot de passe"
-            value={values.newPassword}
-          />
-          <InputPassword
-            name="verifyPassword"
-            onChange={setValues("verifyPassword")}
-            error={errors.verifyPassword}
-            validate={validate(({ value, formValues }) => {
-              console.log("VALUES", formValues);
-              return (!value && requiredErrorMessage) || (value !== formValues.newPassword && "Les mots de passe renseignés doivent être identiques.");
-            })}
-            placeholder="Confirmer nouveau mot de passe"
-            value={values.verifyPassword}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-3">
+          <div className="hidden lg:block lg:col-start-1 py-6 pl-6">
+            <h2 className="text-gray-900 text-lg leading-6 font-medium m-0 mb-1">Mot de passe</h2>
+            <FormDescription>Vous pouvez modifier votre mot de passe si vous le souhaitez</FormDescription>
+          </div>
+          <div className="px-4 pt-6 pb-2 lg:col-start-2 lg:col-span-2">
+            <FormDescription className="lg:hidden">Vous pouvez modifier votre mot de passe si vous le souhaitez</FormDescription>
+            <SectionTitle>Mon mot de passe</SectionTitle>
+            <InputPassword
+              label="Actuel"
+              name="password"
+              onChange={setValues("password")}
+              error={errors.password}
+              placeholder="********"
+              value={values.password}
+              validate={validate(({ value }) => !value && requiredErrorMessage)}
+            />
+            <InputPassword
+              name="newPassword"
+              error={errors.newPassword}
+              onChange={setValues("newPassword")}
+              validate={validate(validatePassword)}
+              placeholder="Nouveau mot de passe"
+              value={values.newPassword}
+            />
+            <InputPassword
+              name="verifyPassword"
+              onChange={setValues("verifyPassword")}
+              error={errors.verifyPassword}
+              validate={validate(({ value, formValues }) => {
+                return (!value && requiredErrorMessage) || (value !== formValues.newPassword && "Les mots de passe renseignés doivent être identiques.");
+              })}
+              placeholder="Confirmer nouveau mot de passe"
+              value={values.verifyPassword}
+            />
+          </div>
         </div>
-        <div className="bg-gray-50 py-3 px-4 flex flex-col gap-3">
-          <ButtonLinkLight className="w-full" to="/account">
+        <div className="bg-gray-50 py-3 px-4 flex flex-col lg:flex-row lg:justify-end gap-3">
+          <ButtonLinkLight className="w-full lg:w-fit" to="/account">
             Annuler
           </ButtonLinkLight>
-          <ButtonPrimary type="submit" className="w-full" disabled={isSubmitionPending || !isValid}>
+          <ButtonPrimary type="submit" className="w-full lg:w-fit" disabled={isSubmitionPending || !isValid}>
             {isSubmitionPending && <BiLoaderAlt className="animate-spin" />}
             Enregistrer
           </ButtonPrimary>

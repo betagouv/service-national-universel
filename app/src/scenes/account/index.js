@@ -74,7 +74,7 @@ const Account = () => {
         )}
         {device === "desktop" && (
           <div>
-            <Tabs onChange={handleChangeTab} tabs={Object.values(ACCOUNT_PAGES)} />
+            <Tabs onChange={handleChangeTab} tabs={Object.values(ACCOUNT_PAGES)} selectedTabKey={`/account/${pagePath}`} />
           </div>
         )}
       </div>

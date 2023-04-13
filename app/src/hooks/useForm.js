@@ -74,7 +74,6 @@ const useForm = ({ initialValues = {}, validateOnChange = false, validateOnInit 
     return () => {
       // Remove field validation when parent component is destroyed
       setValidationRules((prevValidationRules) => {
-        console.dir(prevValidationRules);
         if (inputName in prevValidationRules) {
           const filteredRules = Object.entries(prevValidationRules).filter(([key]) => key !== inputName);
           return Object.fromEntries(filteredRules);

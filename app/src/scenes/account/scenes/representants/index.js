@@ -65,106 +65,111 @@ const AccountRepresentantsPage = () => {
   return (
     <div className="bg-white shadow-sm mb-6 lg:rounded-lg">
       <form onSubmit={handleSubmit(handleSubmitRepresentantsForm)}>
-        <div className="px-4 py-6">
-          <section className="mb-4">
-            <SectionTitle>Représentant légal 1</SectionTitle>
-            <Select label="Statut" name="parent1Status" value={values.parent1Status} onChange={setValues("parent1Status")}>
-              <option value="mother">Mère</option>
-              <option value="father">Père</option>
-              <option value="representant">Représentant légal</option>
-            </Select>
-            <Input
-              label="Nom"
-              name="parent1LastName"
-              placeholder="Dupond"
-              validate={validate(validateRequired)}
-              onChange={setValues("parent1LastName")}
-              value={values.parent1LastName}
-              error={errors.parent1LastName}
-            />
-            <Input
-              label="Prénom"
-              name="parent1FirstName"
-              placeholder="Gaspard"
-              validate={validate(validateRequired)}
-              onChange={setValues("parent1FirstName")}
-              value={values.parent1FirstName}
-              error={errors.parent1FirstName}
-            />
-            <Input
-              type="email"
-              label="Adresse email"
-              name="parent1Email"
-              error={errors.parent1Email}
-              placeholder="example@example.com"
-              value={values.parent1Email}
-              onChange={setValues("parent1Email")}
-              validate={validate(validateEmail)}
-            />
-            <InputPhone
-              label="Téléphone"
-              name="parent1Phone"
-              value={values.parent1Phone}
-              error={errors.parent1Phone}
-              onChange={setValues("parent1Phone")}
-              placeholder={PHONE_ZONES[values.parent1Phone.phoneZone].example}
-              validate={validate(validatePhoneNumber)}
-            />
-          </section>
-          <Checkbox label="Je ne possède pas de second(e) réprésensant(e) légal(e)" onChange={setHasParent2} value={hasParent2} useCheckedAsValue />
-          {hasParent2 && (
+        <div className="grid grid-cols-1 lg:grid-cols-3">
+          <div className="hidden lg:block lg:col-start-1 py-6 pl-6">
+            <h2 className="text-gray-900 text-lg leading-6 font-medium m-0 mb-1">Représentants légaux</h2>
+          </div>
+          <div className="px-4 pt-6 pb-2 lg:col-start-2 lg:col-span-2">
             <section className="mb-4">
-              <SectionTitle>Représentant légal 2</SectionTitle>
-              <Select label="Statut" name="parent2Status" value={values.parent2Status} onChange={setValues("parent2Status")}>
+              <SectionTitle>Représentant légal 1</SectionTitle>
+              <Select label="Statut" name="parent1Status" value={values.parent1Status} onChange={setValues("parent1Status")}>
                 <option value="mother">Mère</option>
                 <option value="father">Père</option>
                 <option value="representant">Représentant légal</option>
               </Select>
               <Input
                 label="Nom"
-                name="parent2LastName"
+                name="parent1LastName"
                 placeholder="Dupond"
                 validate={validate(validateRequired)}
-                onChange={setValues("parent2LastName")}
-                value={values.parent2LastName}
-                error={errors.parent2LastName}
+                onChange={setValues("parent1LastName")}
+                value={values.parent1LastName}
+                error={errors.parent1LastName}
               />
               <Input
                 label="Prénom"
-                name="parent2FirstName"
+                name="parent1FirstName"
                 placeholder="Gaspard"
                 validate={validate(validateRequired)}
-                onChange={setValues("parent2FirstName")}
-                value={values.parent2FirstName}
-                error={errors.parent2FirstName}
+                onChange={setValues("parent1FirstName")}
+                value={values.parent1FirstName}
+                error={errors.parent1FirstName}
               />
               <Input
                 type="email"
                 label="Adresse email"
-                name="parent2Email"
-                error={errors.parent2Email}
+                name="parent1Email"
+                error={errors.parent1Email}
                 placeholder="example@example.com"
-                value={values.parent2Email}
-                onChange={setValues("parent2Email")}
+                value={values.parent1Email}
+                onChange={setValues("parent1Email")}
                 validate={validate(validateEmail)}
               />
               <InputPhone
                 label="Téléphone"
-                name="parent2Phone"
-                value={values.parent2Phone}
-                error={errors.parent2Phone}
-                onChange={setValues("parent2Phone")}
-                placeholder={PHONE_ZONES[values.parent2Phone.phoneZone].example}
+                name="parent1Phone"
+                value={values.parent1Phone}
+                error={errors.parent1Phone}
+                onChange={setValues("parent1Phone")}
+                placeholder={PHONE_ZONES[values.parent1Phone.phoneZone].example}
                 validate={validate(validatePhoneNumber)}
               />
             </section>
-          )}
+            <Checkbox label="Je ne possède pas de second(e) réprésensant(e) légal(e)" onChange={setHasParent2} value={hasParent2} useCheckedAsValue />
+            {hasParent2 && (
+              <section className="mb-4">
+                <SectionTitle>Représentant légal 2</SectionTitle>
+                <Select label="Statut" name="parent2Status" value={values.parent2Status} onChange={setValues("parent2Status")}>
+                  <option value="mother">Mère</option>
+                  <option value="father">Père</option>
+                  <option value="representant">Représentant légal</option>
+                </Select>
+                <Input
+                  label="Nom"
+                  name="parent2LastName"
+                  placeholder="Dupond"
+                  validate={validate(validateRequired)}
+                  onChange={setValues("parent2LastName")}
+                  value={values.parent2LastName}
+                  error={errors.parent2LastName}
+                />
+                <Input
+                  label="Prénom"
+                  name="parent2FirstName"
+                  placeholder="Gaspard"
+                  validate={validate(validateRequired)}
+                  onChange={setValues("parent2FirstName")}
+                  value={values.parent2FirstName}
+                  error={errors.parent2FirstName}
+                />
+                <Input
+                  type="email"
+                  label="Adresse email"
+                  name="parent2Email"
+                  error={errors.parent2Email}
+                  placeholder="example@example.com"
+                  value={values.parent2Email}
+                  onChange={setValues("parent2Email")}
+                  validate={validate(validateEmail)}
+                />
+                <InputPhone
+                  label="Téléphone"
+                  name="parent2Phone"
+                  value={values.parent2Phone}
+                  error={errors.parent2Phone}
+                  onChange={setValues("parent2Phone")}
+                  placeholder={PHONE_ZONES[values.parent2Phone.phoneZone].example}
+                  validate={validate(validatePhoneNumber)}
+                />
+              </section>
+            )}
+          </div>
         </div>
-        <div className="bg-gray-50 py-3 px-4 flex flex-col gap-3">
-          <ButtonLinkLight className="w-full" to="/account">
+        <div className="bg-gray-50 py-3 px-4 flex flex-col lg:flex-row lg:justify-end gap-3">
+          <ButtonLinkLight className="w-full lg:w-fit" to="/account">
             Annuler
           </ButtonLinkLight>
-          <ButtonPrimary type="submit" className="w-full" disabled={isSubmitionPending || !isValid}>
+          <ButtonPrimary type="submit" className="w-full lg:w-fit" disabled={isSubmitionPending || !isValid}>
             {isSubmitionPending && <BiLoaderAlt className="animate-spin" />}
             Enregistrer
           </ButtonPrimary>

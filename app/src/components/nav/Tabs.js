@@ -13,18 +13,27 @@ const Tabs = ({ tabs = [], selectedTabKey = "", className = "", onChange = () =>
   const [tabUnderlineWidth, setTabUnderlineWidth] = useState(0);
   const [tabUnderlineLeft, setTabUnderlineLeft] = useState(0);
 
-  const tabsRef = useRef([]);
+  const tabsRef = useRef({});
 
   useEffect(() => {
     function setTabPosition() {
       const currentTab = tabsRef.current[activeTabKey];
+      console.dir(currentTab);
+      console.log("OFFSET", currentTab?.offsetLeft);
+      console.log("WIDTH", currentTab?.clientWidth, currentTab?.offsetWidth, currentTab?.scrollWidth);
       setTabUnderlineLeft(currentTab?.offsetLeft ?? 0);
       setTabUnderlineWidth(currentTab?.clientWidth ?? 0);
     }
-
     setTabPosition();
-    window.addEventListener("resize", setTabPosition);
 
+    window.addEventListener("resize", () => {
+      console.log("RESIZE ------------");
+      const currentTab = tabsRef.current[activeTabKey];
+      console.dir(currentTab);
+      console.log("OFFSET", currentTab?.offsetLeft);
+      console.log("WIDTH", currentTab?.clientWidth, currentTab?.offsetWidth, currentTab?.scrollWidth);
+      setTabPosition();
+    });
     return () => window.removeEventListener("resize", setTabPosition);
   }, [activeTabKey]);
 
