@@ -15,6 +15,7 @@ export default function FullDoughnut({
   legendSide = "bottom",
   legendInfoPanels = [],
   className = "",
+  onLegendClicked = () => {},
 }) {
   const [graphOptions, setGraphOptions] = useState(null);
   const [graphData, setGraphData] = useState(null);
@@ -233,9 +234,9 @@ export default function FullDoughnut({
         {tooltip && <GraphTooltip style={tooltip.style}>{tooltip.value}</GraphTooltip>}
       </div>
       <div className={legendsClass}>
-        {legends.map((legend) => {
+        {legends.map((legend, idx) => {
           return legend ? (
-            <div className={legendClass} key={legend.name}>
+            <div className={legendClass} key={legend.name} onClick={() => onLegendClicked({ index: idx, label: legend.name, value: legend.value, color: legend.color })}>
               <div className={`text-xs text-gray-600 mb-[4px] ${textLegendClass}`}>{legend.name}</div>
               <div className={legendValueClass}>
                 <div className={`rounded-full w-[10px] h-[10px] ${legendDotClass}`} style={{ backgroundColor: legend.color }}></div>

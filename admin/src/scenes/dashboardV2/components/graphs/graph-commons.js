@@ -20,9 +20,9 @@ export function getGraphColors(count) {
   return graphColors[Math.max(1, Math.min(14, count))];
 }
 
-export function Legend({ color, name, value = null, className = "" }) {
+export function Legend({ color, name, value = null, className = "", onClick = () => {} }) {
   return (
-    <div className={`flex flex-row-reverse items-center ${className}`}>
+    <div className={`flex flex-row-reverse items-center ${className}`} onClick={onClick}>
       <div className="text-xs text-gray-600 ml-2">{name}</div>
       <div className={`flex items-center`}>
         <div className={`rounded-full w-[10px] h-[10px]`} style={{ backgroundColor: color }}></div>
@@ -32,12 +32,19 @@ export function Legend({ color, name, value = null, className = "" }) {
   );
 }
 
-export function Legends({ labels, values = null, className = "" }) {
+export function Legends({ labels, values = null, className = "", onLegendClicked = () => {} }) {
   const colors = graphColors[labels.length];
   return (
     <div className={`flex ${className}`}>
       {labels.map((label, idx) => (
-        <Legend color={colors[idx]} name={label} value={values ? values[idx] : 0} key={label} className="mr-4 last:mr-0" />
+        <Legend
+          color={colors[idx]}
+          name={label}
+          value={values ? values[idx] : 0}
+          key={label}
+          className="mr-4 last:mr-0"
+          onClick={() => onLegendClicked({ index: idx, label, value: values ? values[idx] : 0, color: colors[idx] })}
+        />
       ))}
     </div>
   );

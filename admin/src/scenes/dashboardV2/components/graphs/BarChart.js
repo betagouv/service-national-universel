@@ -31,7 +31,7 @@ export default function BarChart({ values, tooltips, title, noValue = false, uni
           {bars.map((bar, idx) => (
             <div className="group relative flex flex-col items-center mr-[6px] last:mr-0" key={"bar-" + idx}>
               <div className="flex-grow-1 relative w-[16px]">
-                <div className="absolute left-[0px] right-[0px] bottom-[0px] rounded-full" style={{ height: bar.height, backgroundColor: bar.color }}></div>
+                <div className="absolute left-[0px] right-[0px] bottom-[0px] rounded-full hover:scale-[1.05]" style={{ height: bar.height, backgroundColor: bar.color }}></div>
               </div>
               {!noValue && bar.value !== null && bar.value !== undefined && <div className="">{bar.value}</div>}
               {bar.tooltip && <GraphTooltip className="">{bar.tooltip}</GraphTooltip>}

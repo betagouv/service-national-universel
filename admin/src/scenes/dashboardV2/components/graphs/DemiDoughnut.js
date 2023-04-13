@@ -21,7 +21,7 @@ const centerPlugin = {
 };
 ChartJS.register(centerPlugin);
 
-export default function DemiDoughnut({ title, values, labels, tooltips, tooltipsPercent = false, className = "" }) {
+export default function DemiDoughnut({ title, values, labels, tooltips, tooltipsPercent = false, className = "", onLegendClicked = () => {} }) {
   const [graphOptions, setGraphOptions] = useState(null);
   const [graphData, setGraphData] = useState(null);
   const [total, setTotal] = useState(0);
@@ -113,7 +113,7 @@ export default function DemiDoughnut({ title, values, labels, tooltips, tooltips
   return (
     <div className={className}>
       <div className="text-left text-gray-900 text-sm font-bold w-full">{title}</div>
-      <Legends labels={labels} values={values} className="w-full my-8" />
+      <Legends labels={labels} values={values} className="w-full my-8" onLegendClicked={onLegendClicked} />
       <div className="relative">
         {graphData && <Doughnut data={graphData} options={graphOptions} />}
         <div className="flex flex-col absolute left-[0px] right-[0px] bottom-[14px] pointer-events-none">

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { graphColors } from "./graph-commons";
 import GraphTooltip from "./GraphTooltip";
 
-export default function HorizontalBar({ title, values, labels, tooltips, goal, className = "" }) {
+export default function HorizontalBar({ title, values, labels, tooltips, goal, className = "", onLegendClicked = () => {} }) {
   const [bars, setBars] = useState([]);
   const [total, setTotal] = useState(0);
   const [totalPercent, setTotalPercent] = useState(0);
@@ -56,7 +56,10 @@ export default function HorizontalBar({ title, values, labels, tooltips, goal, c
       <div className="relative">
         <div className="h-[31px] rounded-full bg-gray-100">
           {bars.map((bar, idx) => (
-            <div className="group relative inline-block h-[100%] first:rounded-l-full" style={{ width: bar.width + "%", backgroundColor: bar.color }} key={"bar-" + idx}>
+            <div
+              className="group relative inline-block h-[100%] first:rounded-l-full  hover:scale-[1.05] hover:z-10"
+              style={{ width: bar.width + "%", backgroundColor: bar.color }}
+              key={"bar-" + idx}>
               {bar.tooltip && <GraphTooltip className="">{bar.tooltip}</GraphTooltip>}
             </div>
           ))}
@@ -71,9 +74,9 @@ export default function HorizontalBar({ title, values, labels, tooltips, goal, c
       </div>
       <div className="mt-4 flex justify-between mr-8 last:mr-0">
         {bars.map((bar, idx) => (
-          <div key={"legend-" + idx}>
+          <div key={"legend-" + idx} onClick={() => onLegendClicked({ index: idx, label: bar.label, value: bar.percent, color: bar.color })}>
             <div className="flex">
-              <div className="rounded-full w-[12px] h-[12px] mr-2" style={{ backgroundColor: bar.color }}></div>
+              <div className="rounded-full w-[12px] h-[12px] mr-2 mt-2" style={{ backgroundColor: bar.color }}></div>
               <div>
                 <div className="text-base font-bold text-gray-900">{bar.percent}%</div>
                 <div className="text-sm text-gray-600 font-medium">{bar.label}</div>
