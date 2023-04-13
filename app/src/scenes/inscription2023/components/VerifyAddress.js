@@ -13,7 +13,7 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
   const getSuggestions = async (text) => {
     setLoading(true);
     try {
-      const res = await apiAdress(text, [`postcode=${zip}`]);
+      const res = await apiAdress(`${text} ${zip}`, [`postcode=${zip}`]);
       const arr = res?.features;
 
       setLoading(false);
@@ -26,9 +26,13 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
 
   const formatResult = (suggestion) => {
     let depart = suggestion.properties.postcode.substr(0, 2);
+
+    // Cas particuliers : codes postaux en Polynésie
     if (["97", "98"].includes(depart)) {
       depart = suggestion.properties.postcode.substr(0, 3);
     }
+
+    // Cas particuliers : code postaux en Corse
     if (depart === "20") {
       depart = suggestion.properties.context.substr(0, 2);
       if (!["2A", "2B"].includes(depart)) depart = "2B";
