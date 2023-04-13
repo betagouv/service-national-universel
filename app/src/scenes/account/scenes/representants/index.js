@@ -13,6 +13,7 @@ import Input from "../../../../components/forms/inputs/Input";
 import Checkbox from "../../../../components/forms/inputs/Checkbox";
 import { validateEmail, validatePhoneNumber, validateRequired } from "../../../../utils/form-validation.utils";
 import { updateYoung } from "../../../../services/young.service";
+import SectionTitle from "../components/SectionTitle";
 
 const AccountRepresentantsPage = () => {
   const young = useSelector((state) => state.Auth.young);
@@ -66,7 +67,7 @@ const AccountRepresentantsPage = () => {
       <form onSubmit={handleSubmit(handleSubmitRepresentantsForm)}>
         <div className="px-4 py-6">
           <section className="mb-4">
-            <h2 className="text-xs font-medium text-gray-900 m-0 mb-2">Représentant légal 1</h2>
+            <SectionTitle>Représentant légal 1</SectionTitle>
             <Select label="Statut" name="parent1Status" value={values.parent1Status} onChange={setValues("parent1Status")}>
               <option value="mother">Mère</option>
               <option value="father">Père</option>
@@ -113,7 +114,7 @@ const AccountRepresentantsPage = () => {
           <Checkbox label="Je ne possède pas de second(e) réprésensant(e) légal(e)" onChange={setHasParent2} value={hasParent2} useCheckedAsValue />
           {hasParent2 && (
             <section className="mb-4">
-              <h2 className="text-xs font-medium text-gray-900 m-0 mb-2">Représentant légal 2</h2>
+              <SectionTitle>Représentant légal 2</SectionTitle>
               <Select label="Statut" name="parent2Status" value={values.parent2Status} onChange={setValues("parent2Status")}>
                 <option value="mother">Mère</option>
                 <option value="father">Père</option>

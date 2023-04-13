@@ -9,6 +9,8 @@ import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { requiredErrorMessage, validatePassword } from "../../../../utils/form-validation.utils";
 import InputPassword from "../../../../components/forms/inputs/InputPassword";
+import FormDescription from "../components/FormDescription";
+import SectionTitle from "../components/SectionTitle";
 
 const AccountPasswordPage = () => {
   const dispatch = useDispatch();
@@ -37,8 +39,8 @@ const AccountPasswordPage = () => {
     <div className="bg-white shadow-sm mb-6">
       <form onSubmit={handleSubmit(handleChangePasswordSubmit)}>
         <div className="px-4 pt-6 pb-2">
-          <p className="text-sm text-gray-500 mb-6">Vous pouvez modifier votre mot de passe si vous le souhaitez</p>
-          <h2 className="text-xs font-medium text-gray-900 m-0 mb-2">Mon mot de passe</h2>
+          <FormDescription>Vous pouvez modifier votre mot de passe si vous le souhaitez</FormDescription>
+          <SectionTitle>Mon mot de passe</SectionTitle>
           <InputPassword
             label="Actuel"
             name="password"

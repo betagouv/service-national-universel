@@ -1,20 +1,22 @@
 import React from "react";
+import { BiLoaderAlt } from "react-icons/bi";
+import { Link } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
+import { youngCanChangeSession } from "snu-lib";
+import { PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
+import { useDispatch, useSelector } from "react-redux";
+import { setYoung } from "../../../../redux/auth/actions";
+import { validateEmail, validatePhoneNumber } from "../../../../utils/form-validation.utils";
+import { updateYoung } from "../../../../services/young.service";
 import Input from "../../../../components/forms/inputs/Input";
 import Select from "../../../../components/forms/inputs/Select";
-import { useDispatch, useSelector } from "react-redux";
-import useForm from "../../../../hooks/useForm";
 import InputPhone from "../../../../components/forms/inputs/InputPhone";
-import { PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
-import IdCardReader from "../components/IdCardReader";
 import ButtonLinkLight from "../../../../components/ui/buttons/ButtonLinkLight";
 import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
-import { Link } from "react-router-dom";
-import { updateYoung } from "../../../../services/young.service";
-import { toastr } from "react-redux-toastr";
-import { setYoung } from "../../../../redux/auth/actions";
-import { BiLoaderAlt } from "react-icons/bi";
-import { youngCanChangeSession } from "snu-lib";
-import { validateEmail, validatePhoneNumber } from "../../../../utils/form-validation.utils";
+import useForm from "../../../../hooks/useForm";
+import IdCardReader from "./components/IdCardReader";
+import SectionTitle from "../components/SectionTitle";
+import Withdrawal from "./components/Withdrawal";
 
 const AccountGeneralPage = () => {
   const young = useSelector((state) => state.Auth.young);
@@ -61,7 +63,7 @@ const AccountGeneralPage = () => {
       <form onSubmit={handleSubmit(handleSubmitGeneralForm)}>
         <div className="px-4 py-6">
           <section className="mb-4">
-            <h2 className="text-xs font-medium text-gray-900 m-0 mb-2">Identité et contact</h2>
+            <SectionTitle>Identité et contact</SectionTitle>
             <Input label="Nom" name="lastName" placeholder="Dupond" value={values.firstName} disabled />
             <Input label="Prénom" name="firstName" placeholder="Gaspard" value={values.lastName} disabled />
             <Select label="Sexe" name="gender" value={values.gender} onChange={setValues("gender")}>
@@ -90,14 +92,16 @@ const AccountGeneralPage = () => {
             />
           </section>
           <section className="mb-4">
-            <h2 className="text-xs font-medium text-gray-900 m-0 mb-2">Adresse</h2>
+            <SectionTitle>Adresse</SectionTitle>
             <Input label="Adresse" name="address" value={values.address} onChange={setValues("address")} disabled />
             <Input label="Code Postal" name="zip" value={values.zip} onChange={setValues("zip")} disabled />
             <Input label="Ville" name="city" value={values.city} onChange={setValues("city")} disabled />
           </section>
           <section>
-            <h2 className="text-xs font-medium text-gray-900 m-0 mb-2">Pièce d&apos;identité</h2>
-            <div className="flex flex-col gap-2">{young.files.cniFiles && young.files.cniFiles.map((cniFile) => <IdCardReader key={cniFile._id} cniFile={cniFile} />)}</div>
+            <SectionTitle>Pièce d&apos;identité</SectionTitle>
+            <div className="flex flex-col gap-2">
+              {young.files.cniFiles && young.files.cniFiles.map((cniFile) => <IdCardReader key={cniFile._id} cniFile={cniFile} young={young} />)}
+            </div>
           </section>
         </div>
         <div className="bg-gray-50 py-3 px-4 flex flex-col gap-3">
@@ -112,16 +116,11 @@ const AccountGeneralPage = () => {
       </form>
       <div className="flex flex-col items-center gap-6 py-8">
         {youngCanChangeSession(young) ? (
-          <Link to="/changer-de-sejour" className="d-flex gap-2 items-center text-blue-600 text-sm">
+          <Link to="/changer-de-sejour" className="flex gap-2 items-center text-blue-600 text-sm">
             Changer de séjour
           </Link>
         ) : null}
-        {/*
-			// TODO withdrawal modal
-		*/}
-        <Link to="changer-de-sejour" className="d-flex gap-2 items-center text-red-600 text-sm">
-          Se désister du SNU
-        </Link>
+        <Withdrawal young={young} />
       </div>
     </div>
   );

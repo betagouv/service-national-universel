@@ -1,6 +1,6 @@
 import { ERRORS } from "snu-lib/errors";
 import api from "./api";
-import { translate } from "snu-lib";
+import { download, translate } from "snu-lib";
 
 export const logoutYoung = () => api.post("/young/logout");
 
@@ -56,6 +56,23 @@ export const changeYoungPassword = async ({ password, newPassword, verifyPasswor
     throw {
       title: "Oups, une erreur est survenue pendant la mise à jour de votre profil:",
       message: translate(error.code),
+    };
+  }
+};
+
+export const downloadYoungDocument = async ({ youngId, fileId, fileType }) => {
+  try {
+    const result = await api.get(`/young/${youngId}/documents/${fileType}/${fileId}`);
+    const blob = new Blob([new Uint8Array(result.data.data)], { type: result.mimeType });
+    download(blob, result.fileName);
+    return {
+      title: "Succès",
+    };
+  } catch (error) {
+    console.error(error);
+    throw {
+      title: "Error",
+      message: "Impossible de télécharger la pièce. Veuillez réessayer dans quelques instants.",
     };
   }
 };

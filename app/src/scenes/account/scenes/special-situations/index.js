@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import useForm from "../../../../hooks/useForm";
 import Checkbox from "../../../../components/forms/inputs/Checkbox";
 import Textarea from "../../../../components/forms/inputs/Textarea";
+import FormDescription from "../components/FormDescription";
 
 const AccountSpecialSituationsPage = () => {
   const young = useSelector((state) => state.Auth.young);
@@ -24,7 +25,7 @@ const AccountSpecialSituationsPage = () => {
     <div className="bg-white shadow-sm mb-6">
       <form>
         <div className="px-4 pt-6 pb-2">
-          <p className="text-sm text-gray-500 mb-6">En fonction des situations signalées, un responsable prendra contact avec vous.</p>
+          <FormDescription>En fonction des situations signalées, un responsable prendra contact avec vous.</FormDescription>
           <Checkbox label="Je suis en situation de handicap" name="handicap" value={values.handicap} disabled useCheckedAsValue />
           <Checkbox label="Je suis bénéficiaire d'un Projet personnalisé de scolarisation (PPS)" name="ppsBeneficiary" value={values.ppsBeneficiary} disabled useCheckedAsValue />
           <Checkbox label="Je suis bénéficiaire d'un Projet d'accueil individualisé (PAI)" name="paiBeneficiary" value={values.paiBeneficiary} disabled useCheckedAsValue />
