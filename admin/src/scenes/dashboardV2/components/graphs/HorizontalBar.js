@@ -1,28 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { graphColors } from "./graph-commons";
+import { getGraphColors } from "./graph-commons";
 import GraphTooltip from "./GraphTooltip";
 
 export default function HorizontalBar({ title, values, labels, tooltips, goal, className = "", onLegendClicked = () => {} }) {
   const [bars, setBars] = useState([]);
   const [total, setTotal] = useState(0);
-  const [totalPercent, setTotalPercent] = useState(0);
+  const [totalPercent, setTotalPercent] = useState("-");
   const [x100, setX100] = useState(null);
 
   useEffect(() => {
     if (values && values.length > 0) {
       const total = values.reduce((value, originalValue) => value + originalValue, 0);
-      setTotal(total);
-      setTotalPercent(Math.round((total / goal) * 100) || 0);
 
-      const colors = graphColors[values.length];
+      setTotal(total);
+      setTotalPercent(goal === 0 ? "-" : Math.round((total / goal) * 100) || 0) + "%";
+
+      const localGoal = goal === 0 ? total : goal;
+
+      const colors = getGraphColors(values.length);
       setBars(
         values.map((value, idx) => {
           return {
             color: colors[idx],
             label: labels[idx],
             value,
-            percent: Math.round((value / goal) * 100) || 0,
-            width: Math.min(Math.round((value / Math.max(total, goal)) * 100), 100),
+            percent: localGoal === 0 ? "-" : Math.round((value / localGoal) * 100) + "%",
+            width: Math.min(Math.round((value / Math.max(total, localGoal)) * 100), 100),
             tooltip: tooltips && tooltips.length > idx ? tooltips[idx] : undefined,
           };
         }),
@@ -50,22 +53,24 @@ export default function HorizontalBar({ title, values, labels, tooltips, goal, c
           </div>
         )}
         <div className="font-medium text-base text-gray-900 text-right">
-          <span>Total :</span> <span className="font-bold">{totalPercent}%</span> <span className="text-[#9CA3AF] font-normal">({total})</span>
+          <span>Total :</span> <span className="font-bold">{totalPercent}</span> <span className="text-[#9CA3AF] font-normal">({total})</span>
         </div>
       </div>
       <div className="relative">
         <div className="h-[31px] rounded-full bg-gray-100">
-          {bars.map((bar, idx) => (
-            <div
-              className="group relative inline-block h-[100%] first:rounded-l-full  hover:scale-[1.05] hover:z-10"
-              style={{ width: bar.width + "%", backgroundColor: bar.color }}
-              key={"bar-" + idx}>
-              {bar.tooltip && <GraphTooltip className="">{bar.tooltip}</GraphTooltip>}
-            </div>
-          ))}
+          {bars.map((bar, idx) => {
+            return bar.width > 0 ? (
+              <div
+                className="group relative inline-block h-[100%] first:rounded-l-full last:rounded-r-full  hover:scale-y-[1.05] hover:z-10"
+                style={{ width: bar.width + "%", backgroundColor: bar.color }}
+                key={"bar-" + idx}>
+                {bar.tooltip && <GraphTooltip className="">{bar.tooltip}</GraphTooltip>}
+              </div>
+            ) : null;
+          })}
         </div>
         {x100 && (
-          <div className="border-[1px] border-white bg-red-600 w-[5px] rounded-full absolute top-[-4px] bottom-[-4px]" style={{ left: x100 + "%" }}>
+          <div className="border-[1px] border-white bg-red-600 w-[5px] rounded-full absolute top-[-4px] bottom-[-4px] z-20" style={{ left: x100 + "%" }}>
             <div className="absolute bg-red-600 text-white text-[8px] font-bold py-[2px] px-1 border-[1px] border-white rounded-[4px] top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2">
               100%
             </div>
@@ -78,7 +83,7 @@ export default function HorizontalBar({ title, values, labels, tooltips, goal, c
             <div className="flex">
               <div className="rounded-full w-[12px] h-[12px] mr-2 mt-2" style={{ backgroundColor: bar.color }}></div>
               <div>
-                <div className="text-base font-bold text-gray-900">{bar.percent}%</div>
+                <div className="text-base font-bold text-gray-900">{bar.percent}</div>
                 <div className="text-sm text-gray-600 font-medium">{bar.label}</div>
                 <div className="text-sm text-[#9CA3AF]">({bar.value})</div>
               </div>

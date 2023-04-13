@@ -2,7 +2,6 @@ import StatusText from "../../moderator-ref/subscenes/sejour/components/StatusTe
 import React from "react";
 
 export default function StatusTable({ statuses, className = "", onStatusClicked = () => {} }) {
-  console.log("statuses: ", statuses);
   const columns = statuses
     ? {
         left: statuses.slice(0, Math.ceil(statuses.length / 2)),

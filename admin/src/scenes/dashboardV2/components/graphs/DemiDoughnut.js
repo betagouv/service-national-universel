@@ -53,7 +53,6 @@ export default function DemiDoughnut({ title, values, labels, tooltips, tooltips
           },
         },
         onHover: function (evt, elems) {
-          console.log("on hover");
           if ((tooltips || tooltipsPercent) && elems.length > 0) {
             if (tooltipsPercent || tooltips.length > elems[0].index) {
               const angle = elems[0].element.startAngle + (elems[0].element.endAngle - elems[0].element.startAngle) / 2;
