@@ -19,7 +19,7 @@ const AccountSchoolSituationPage = () => {
   });
 
   return (
-    <div className="bg-white shadow-sm mb-6">
+    <div className="bg-white shadow-sm mb-6 lg:rounded-lg">
       <form>
         <div className="px-4 pt-6 pb-2">
           <SectionTitle>Scolarité</SectionTitle>

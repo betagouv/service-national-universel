@@ -22,7 +22,7 @@ const AccountSpecialSituationsPage = () => {
   });
 
   return (
-    <div className="bg-white shadow-sm mb-6">
+    <div className="bg-white shadow-sm mb-6 lg:rounded-lg">
       <form>
         <div className="px-4 pt-6 pb-2">
           <FormDescription>En fonction des situations signalées, un responsable prendra contact avec vous.</FormDescription>

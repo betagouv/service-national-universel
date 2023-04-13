@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import ChevronRight from "../../../assets/icons/ChevronRight";
+import ChevronRight from "../../assets/icons/ChevronRight";
 
 const MobileMenu = ({ children = null, className = "" }) => {
   return <div className={`flex flex-col gap-3 ${className}`}>{children}</div>;

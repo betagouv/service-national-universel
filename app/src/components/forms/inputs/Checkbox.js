@@ -22,8 +22,8 @@ const Checkbox = ({ label = "", className = "", validate = () => null, name = ""
   const customValue = useCheckedAsValue ? { checked: value } : { value };
 
   return (
-    <div className="mb-4">
-      <label className={`flex gap-3 w-full rounded-lg m-0 ${error && "border-red-500"} ${className}`}>
+    <div className={`mb-[1rem] ${className}`}>
+      <label className={`flex gap-3 w-full rounded-lg m-0 ${error && "border-red-500"}`}>
         <input
           className="text-sm bg-white text-gray-900 disabled:text-gray-400 placeholder:text-gray-500 focus:outline-none accent-blue-600 disabled:accent-gray-200 rounded"
           name={name}

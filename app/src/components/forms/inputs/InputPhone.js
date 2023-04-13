@@ -7,10 +7,10 @@ const InputPhone = ({
     phoneZone: PHONE_ZONES_NAMES.FRANCE,
   },
   label = "",
-  onChange = (value) => null,
+  onChange = () => null,
   placeholder = "",
   error = null,
-  validate = (value) => null,
+  validate = () => null,
   className = "",
   name = "",
 }) => {
@@ -35,11 +35,11 @@ const InputPhone = ({
   };
 
   return (
-    <div className="mb-4">
+    <div className={`mb-[1rem] ${className}`}>
       <label
         className={`flex flex-col justify-center border-[1px] min-h-[54px] w-full py-2 px-3 rounded-lg bg-white border-gray-300 disabled:border-gray-200 focus-within:border-blue-600 m-0 ${
           error && "border-red-500"
-        } ${className}`}>
+        }`}>
         {label ? <p className="text-xs leading-4 text-gray-500 disabled:text-gray-400">{label}</p> : null}
         <div className={`flex items-center w-full ${className}`}>
           <select className="mr-3 bg-transparent max-w-[120px] text-ellipsis text-sm" onChange={handleChange("phoneZone")} value={value.phoneZone}>

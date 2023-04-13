@@ -63,7 +63,7 @@ const AccountRepresentantsPage = () => {
   };
 
   return (
-    <div className="bg-white shadow-sm mb-6">
+    <div className="bg-white shadow-sm mb-6 lg:rounded-lg">
       <form onSubmit={handleSubmit(handleSubmitRepresentantsForm)}>
         <div className="px-4 py-6">
           <section className="mb-4">
