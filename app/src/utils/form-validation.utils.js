@@ -3,6 +3,8 @@ import validator from "validator";
 
 export const requiredErrorMessage = "Ce champ est obligatoire.";
 
+export const validateRequired = ({ value }) => !value && requiredErrorMessage;
+
 export const validatePassword = ({ value }) => {
   if (!value) return requiredErrorMessage;
   const isPasswordValid = validator.isStrongPassword(value, { minLength: 12, minUppercase: 1, minLowercase: 1, minNumbers: 1, minSymbols: 1 });
@@ -18,5 +20,5 @@ export const validateEmail = ({ value }) => {
 
 export const validatePhoneNumber = ({ value }) => {
   if (!value.phoneNumber) return requiredErrorMessage;
-  !isPhoneNumberWellFormated(value.phoneNumber, value.phoneZone) && PHONE_ZONES[value.phoneZone].errorMessage;
+  return !isPhoneNumberWellFormated(value.phoneNumber, value.phoneZone) && PHONE_ZONES[value.phoneZone].errorMessage;
 };

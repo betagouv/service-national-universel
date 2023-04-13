@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
  *  setValues: (inputName: string) => (value) => void,
  *  values: formValues: { [inputName: String]: any },
  *  handleSubmit: ((values: { [inputName: String]: any }) => void) => (event) => void,
+ * 	revalidateForm: ({ showErrors: Boolean }) => void;
  * }} methods and parameters
  */
 const useForm = ({ initialValues = {}, validateOnChange = false, validateOnInit = true }) => {
@@ -61,20 +62,33 @@ const useForm = ({ initialValues = {}, validateOnChange = false, validateOnInit 
   };
 
   const validate = (validationRule) => (inputName) => {
-    if (!(inputName in validationRules)) {
-      setValidationRules((prevValidationRules) => ({
-        ...prevValidationRules,
-        [inputName]: validationRule,
-      }));
-    }
+    // Register field validation rule
+    setValidationRules((prevValidationRules) => {
+      if (!(inputName in prevValidationRules)) {
+        return {
+          ...prevValidationRules,
+          [inputName]: validationRule,
+        };
+      }
+    });
     return () => {
-      // Remove validation when parent component is destroyed
-      if (inputName in validationRules) {
-        setValidationRules((prevValidationRules) => {
+      // Remove field validation when parent component is destroyed
+      setValidationRules((prevValidationRules) => {
+        console.dir(prevValidationRules);
+        if (inputName in prevValidationRules) {
           const filteredRules = Object.entries(prevValidationRules).filter(([key]) => key !== inputName);
           return Object.fromEntries(filteredRules);
-        });
-      }
+        }
+        return prevValidationRules;
+      });
+      // Remove field errors when parent component is destroyed
+      setErrors((prevErrors) => {
+        if (inputName in prevErrors) {
+          const filteredErrors = Object.entries(prevErrors).filter(([errorName]) => errorName !== inputName);
+          return Object.fromEntries(filteredErrors);
+        }
+        return prevErrors;
+      });
     };
   };
 
@@ -99,11 +113,12 @@ const useForm = ({ initialValues = {}, validateOnChange = false, validateOnInit 
     });
   };
 
+  const revalidateForm = ({ showErrors = false }) => {
+    validateForm({ showErrors });
+  };
+
   useEffect(() => {
-    if (validateOnInit) {
-      console.log("REVALIDATE >>>", validationRules);
-      validateForm({ showErrors: true });
-    }
+    validateForm({ showErrors: validateOnInit });
   }, [validationRules]);
 
   return {
@@ -115,6 +130,7 @@ const useForm = ({ initialValues = {}, validateOnChange = false, validateOnInit 
     setValues,
     values: formValues,
     handleSubmit,
+    revalidateForm,
   };
 };
 

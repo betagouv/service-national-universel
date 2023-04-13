@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-const Input = ({ label = "", className = "", validate = (value) => null, name = "", value = "", onChange = (value) => null, error = null, type = "text", ...rest }) => {
+const Input = ({ label = "", className = "", validate = () => null, name = "", value = "", onChange = () => null, error = null, type = "text", ...rest }) => {
   if (!["text", "email"].includes(type)) {
     throw new Error(`Input component wrong type '${type}'. Please set 'text' or 'email'.`);
   }
