@@ -6,26 +6,27 @@ const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
-const { buildNdJson, buildRequestBody } = require("./utils");
+const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { user, body } = req;
+    // Configuration
+    const searchFields = ["nameCentre", "cityCentre", "zipCentre", "codeCentre"];
+    const filterFields = ["department.keyword", "region.keyword", "cohort.keyword", "code.keyword", "placesLeft", "hasTimeSchedule.keyword"];
+    const sortFields = [];
 
-    if (!canSearchInElasticSearch(user, "sessionphase1")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Authorization
+    if (!canSearchInElasticSearch(req.user, "sessionphase1")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // Body params validation
+    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     let contextFilters = [];
-    if (user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": user.region } });
-    if (user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": user.department } });
+    if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
 
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
-      searchFields: ["nameCentre", "cityCentre", "zipCentre", "codeCentre"],
-      filterFields: ["department.keyword", "region.keyword", "cohort.keyword", "code.keyword", "placesLeft", "hasTimeSchedule.keyword"],
-      queryFilters: body.filters,
-      page: body.page,
-      sort: body.sort,
-      contextFilters,
-    });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterField, queryFilters, page, sort, contextFilters });
 
     if (req.params.action === "export") {
       const response = await allRecords("sessionphase1", hitsRequestBody.query);

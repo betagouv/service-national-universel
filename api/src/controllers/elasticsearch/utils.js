@@ -1,3 +1,6 @@
+const Joi = require("joi");
+const { capture } = require("../../sentry");
+
 const ES_NO_LIMIT = 10000;
 
 function searchSubQuery([value], fields) {
@@ -54,7 +57,8 @@ function unsafeStrucuredClone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
-function buildNdJson(header, hitsQuery, aggsQuery) {
+function buildNdJson(header, hitsQuery, aggsQuery = null) {
+  if (!aggsQuery) return [JSON.stringify(header), JSON.stringify(hitsQuery)].join("\n") + "\n";
   return [JSON.stringify(header), JSON.stringify(hitsQuery), JSON.stringify(header), JSON.stringify(aggsQuery)].join("\n") + "\n";
 }
 
@@ -76,7 +80,23 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
   return { hitsRequestBody, aggsRequestBody };
 }
 
+function joiElasticSearch({ filterFields, sortFields = [], body }) {
+  const schema = Joi.object({
+    filters: Joi.object(["searchbar", ...filterFields].reduce((acc, field) => ({ ...acc, [field.replace(".keyword", "")]: Joi.array().items(Joi.string()) }), {})),
+    page: Joi.number().integer().min(0).default(0),
+    sort: Joi.array()
+      .items(Joi.string().valid(...sortFields))
+      .allow(null)
+      .default(null),
+  });
+
+  const { error, value } = schema.validate(body);
+  if (error) capture(error);
+  return { queryFilters: value.filters, page: value.page, sort: value.sort, error };
+}
+
 module.exports = {
   buildNdJson,
   buildRequestBody,
+  joiElasticSearch,
 };

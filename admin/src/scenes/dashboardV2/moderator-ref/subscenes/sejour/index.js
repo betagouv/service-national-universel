@@ -101,72 +101,9 @@ export default function Index() {
   }, [departmentOptions]);
 
   const queryYoung = async () => {
-    const statusPhaseTerms = selectedFilters?.statusPhase1?.length
-      ? { terms: { "statusPhase1.keyword": selectedFilters?.statusPhase1?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) } }
-      : null;
-
-    const aggsFilter = {
-      filter: {
-        bool: {
-          must: [],
-          filter: statusPhaseTerms ? [statusPhaseTerms] : [],
-        },
-      },
-    };
-
-    const body = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
-      aggs: {
-        statusPhase1: { terms: { field: "statusPhase1.keyword" } },
-        pdr: {
-          ...aggsFilter,
-          aggs: {
-            names: { terms: { field: "hasMeetingInformation.keyword", missing: "NR", size: ES_NO_LIMIT } },
-          },
-        },
-        participation: {
-          ...aggsFilter,
-          aggs: {
-            names: { terms: { field: "youngPhase1Agreement.keyword", size: ES_NO_LIMIT } },
-          },
-        },
-        precense: {
-          ...aggsFilter,
-          aggs: {
-            names: { terms: { field: "cohesionStayPresence.keyword", missing: "NR", size: ES_NO_LIMIT } },
-          },
-        },
-        JDM: {
-          ...aggsFilter,
-          aggs: {
-            names: { terms: { field: "presenceJDM.keyword", missing: "NR", size: ES_NO_LIMIT } },
-          },
-        },
-        depart: {
-          ...aggsFilter,
-          aggs: {
-            names: { terms: { field: "departInform.keyword", size: ES_NO_LIMIT } },
-          },
-        },
-        departMotif: {
-          ...aggsFilter,
-          aggs: {
-            names: { terms: { field: "departSejourMotif.keyword", size: ES_NO_LIMIT } },
-          },
-        },
-      },
-      size: 0,
-      track_total_hits: true,
-    };
-
-    if (selectedFilters.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": selectedFilters.region } });
-    if (selectedFilters.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": selectedFilters.department } });
-    if (selectedFilters.cohorts?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohorts } });
-    if (selectedFilters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": selectedFilters.academy } });
-    if (selectedFilters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.status } });
-
-    const { responses } = await api.esQuery("young", body);
-
+    const { responses } = await api.post("/elasticsearch/young/moderator/sejour/", {
+      filters: Object.fromEntries(Object.entries(selectedFilters).filter(([key]) => key !== "cohorts")),
+    });
     if (responses?.length) {
       let result = {};
       result.statusPhase1 = responses[0].aggregations.statusPhase1.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});

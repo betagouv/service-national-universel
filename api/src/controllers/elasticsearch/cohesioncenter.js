@@ -6,26 +6,29 @@ const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
-const { buildNdJson, buildRequestBody } = require("./utils");
+const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { user, body } = req;
+    // Configuration
+    const searchFields = ["name", "city", "zip", "code2022"];
+    const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword"];
+    const sortFields = [];
 
-    if (!canSearchInElasticSearch(user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Authorization
+    if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+    // Body params validation
+    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // Context filters
     let contextFilters = [];
-    if (user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": user.region } });
-    if (user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": user.department } });
+    if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
 
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
-      searchFields: ["name", "city", "zip", "code2022"],
-      filterFields: ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword"],
-      queryFilters: body.filters,
-      page: body.page,
-      sort: body.sort,
-      contextFilters,
-    });
+    // Build request body
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
 
     if (req.params.action === "export") {
       const response = await allRecords("cohesioncenter", hitsRequestBody.query);

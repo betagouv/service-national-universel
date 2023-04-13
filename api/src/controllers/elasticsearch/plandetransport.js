@@ -6,40 +6,50 @@ const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
-const { buildNdJson, buildRequestBody } = require("./utils");
+const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { user, body } = req;
+    // Configuration
+    const searchFields = ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"];
+    const filterFields = [
+      "busId.keyword",
+      "cohort.keyword",
+      "departureString.keyword",
+      "returnString.keyword",
+      "pointDeRassemblements.name.keyword",
+      "pointDeRassemblements.region.keyword",
+      "pointDeRassemblements.department.keyword",
+      "pointDeRassemblements.city.keyword",
+      "pointDeRassemblements.code.keyword",
+      "centerName.keyword",
+      "centerRegion.keyword",
+      "centerDepartment.keyword",
+      "centerCode.keyword",
+      "modificationBuses.requestMessage.keyword",
+      "modificationBuses.status.keyword",
+      "modificationBuses.opinion.keyword",
+      "lineFillingRate",
+    ];
+    const sortFields = [];
 
-    if (!canSearchLigneBus(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Authorization
+    if (!canSearchLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+    // Body params validation
+    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // Context filters
     let contextFilters = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }];
 
+    // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
-      searchFields: ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"],
-      filterFields: [
-        "busId.keyword",
-        "departureString.keyword",
-        "returnString.keyword",
-        "pointDeRassemblements.name.keyword",
-        "pointDeRassemblements.region.keyword",
-        "pointDeRassemblements.department.keyword",
-        "pointDeRassemblements.city.keyword",
-        "pointDeRassemblements.code.keyword",
-        "centerName.keyword",
-        "centerRegion.keyword",
-        "centerDepartment.keyword",
-        "centerCode.keyword",
-        "modificationBuses.requestMessage.keyword",
-        "modificationBuses.status.keyword",
-        "modificationBuses.opinion.keyword",
-        "lineFillingRate",
-      ],
+      searchFields,
+      filterFields,
       customQueries: {
-        ["lineFillingRate"]: (query, value) => {
+        lineFillingRate: (query, value) => {
           const conditions = [];
-          console.log(value);
           for (const v of value) {
             if (v === "Vide") conditions.push({ term: { lineFillingRate: 0 } });
             if (v === "Rempli") conditions.push({ range: { lineFillingRate: 100 } });
@@ -52,9 +62,9 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
           return query;
         },
       },
-      queryFilters: body.filters,
-      page: body.page,
-      sort: body.sort,
+      queryFilters,
+      page,
+      sort,
       contextFilters,
     });
 
