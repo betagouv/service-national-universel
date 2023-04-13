@@ -1,3 +1,21 @@
+# [1.251.0](https://github.com/betagouv/service-national-universel/compare/v1.250.0...v1.251.0) (2023-04-13)
+
+
+### Bug Fixes
+
+* **admin:** Interdire aux référents d'un autre département/région de modifier un PDR ([#2460](https://github.com/betagouv/service-national-universel/issues/2460)) ([f9d869b](https://github.com/betagouv/service-national-universel/commit/f9d869bab323ac35572d6da7a11c6d0fc79441c9))
+* **api/admin:** access to young list ([#2485](https://github.com/betagouv/service-national-universel/issues/2485)) ([eeb57b4](https://github.com/betagouv/service-national-universel/commit/eeb57b43b322253d73a3291546d65fe100472c60))
+* **app:** Amélioration de la reconnaissance des adresses des communes associées en Polynésie (staging only) ([#2483](https://github.com/betagouv/service-national-universel/issues/2483)) ([b045108](https://github.com/betagouv/service-national-universel/commit/b0451080d405632a369f87760da09491f872a642))
+* **app:** contract update by supervisors ([d839dca](https://github.com/betagouv/service-national-universel/commit/d839dcadca17735601a696283cf026fae747678e))
+* **app:** correction adaptabilité bloc demande reconnaissance engagement et correction erreurs de syntaxe ([#2484](https://github.com/betagouv/service-national-universel/issues/2484)) ([f9a8bf5](https://github.com/betagouv/service-national-universel/commit/f9a8bf5b6d22171a364a2dbbca8a3f69cb127c8b))
+* **app:** further improve address search ([843dead](https://github.com/betagouv/service-national-universel/commit/843dead81c22c7b66537de78f4619a6b94e39ce0))
+* **test:** FranceConnect security ([#2474](https://github.com/betagouv/service-national-universel/issues/2474)) ([357b30b](https://github.com/betagouv/service-national-universel/commit/357b30b0624c259a16d617a262520e78cf18da77))
+
+
+### Features
+
+* **admin,api:** Tooltips et panels sur le dashboard ([#2482](https://github.com/betagouv/service-national-universel/issues/2482)) ([0379ebd](https://github.com/betagouv/service-national-universel/commit/0379ebd14957c6cdf2ca6b2f7261cfcad1f78038))
+
 # [1.250.0](https://github.com/betagouv/service-national-universel/compare/v1.249.0...v1.250.0) (2023-04-12)
 
 
