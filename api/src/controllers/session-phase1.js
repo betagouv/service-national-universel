@@ -26,6 +26,7 @@ const {
   canCreateOrUpdateCohesionCenter,
   isReferentOrAdmin,
   ROLES,
+  isSessionEditionOpen,
 } = require("snu-lib/roles");
 const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
@@ -174,7 +175,13 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!isReferentOrAdmin(req.user) && req.user.role !== ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const cohort = await CohortModel.findOne({ name: sessionPhase1.cohort });
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!isSessionEditionOpen(req.user, cohort)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const { error, value } = validateSessionPhase1(req.body);
     if (error) {
       capture(error);

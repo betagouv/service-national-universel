@@ -56,7 +56,7 @@ export default function Details({ selectedFilters }) {
   }, [selectedFiltersBottom, selectedFilters]);
 
   return (
-    <div className="w-[40%] bg-white rounded-lg py-6 px-8 flex items-center flex-col">
+    <div className="w-[40%] bg-white rounded-lg py-6 px-8 flex items-center flex-col shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
       <div className="flex flex-row justify-between w-full">
         <div className="text-base font-bold text-gray-900">En détail</div>
         <div className="flex flex-col items-end">

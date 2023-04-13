@@ -27,6 +27,7 @@ export default function Filters({
   paramData,
   setParamData,
   defaultUrlParam = false,
+  esRoute = null,
 }) {
   // search for filters
   const [search, setSearch] = React.useState("");
@@ -140,7 +141,7 @@ export default function Filters({
   };
 
   const getData = async () => {
-    const res = await buildQuery(esId, selectedFilters, paramData?.page, paramData?.size, defaultQuery, filters, searchBarObject, paramData?.sort);
+    const res = await buildQuery(esId, esRoute, selectedFilters, paramData?.page, paramData?.size, defaultQuery, filters, searchBarObject, paramData?.sort);
     if (!res) return;
     setDataFilter({ ...dataFilter, ...res.newFilters });
     const newParamData = {

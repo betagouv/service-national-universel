@@ -152,7 +152,7 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
               }
             />
             <FileCard
-              name="Certifical médical de non contre-indication..."
+              name="Certificat médical de non contre-indication..."
               icon="autotest"
               filled={young.files.militaryPreparationFilesCertificate.length}
               color={young.files.militaryPreparationFilesCertificate.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}

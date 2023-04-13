@@ -14,6 +14,7 @@ import plausibleEvent from "../../../../../services/plausible";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import Details from "../../../components/inscription/Details";
 import TabSchool from "../../../components/inscription/TabSchool";
+import ExportReport from "./ExportReport";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -102,9 +103,7 @@ export default function Index() {
       availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}
       navChildren={
         <div className="flex items-center gap-2">
-          <ButtonPrimary className="text-sm">
-            Exporter le rapport <span className="font-bold">“Inscription”</span>
-          </ButtonPrimary>
+          <ExportReport filter={selectedFilters} />
           <ButtonPrimary
             className="text-sm"
             onClick={() => {
@@ -115,9 +114,9 @@ export default function Index() {
           </ButtonPrimary>
         </div>
       }>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 ">
         <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
-        <div className="bg-white p-8 rounded-lg">
+        <div className="bg-white p-8 rounded-lg shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
           <HorizontalBar
             title="Objectif des inscriptions"
             labels={["Sur la liste principale", "Sur liste complémentaire", "En attente de validation", "En attente de correction", "En cours"]}

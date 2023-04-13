@@ -1,3 +1,38 @@
+# [1.250.0](https://github.com/betagouv/service-national-universel/compare/v1.249.0...v1.250.0) (2023-04-12)
+
+
+### Bug Fixes
+
+* **api:** Warning pdf ([094f07f](https://github.com/betagouv/service-national-universel/commit/094f07feb8551cde2e7cda8be291d460b6138a95))
+* **app:** isCohortDone for old cohort ([6ec1c2e](https://github.com/betagouv/service-national-universel/commit/6ec1c2e6bcb1f675b5c5d3f87093f208f4856efe))
+
+
+### Features
+
+* **admin:** dashboard inscription liste établissement ([#2477](https://github.com/betagouv/service-national-universel/issues/2477)) ([c4431d6](https://github.com/betagouv/service-national-universel/commit/c4431d65da6eaf4ec9a130e5a7538c1b4159a063))
+* **admin:** export report dashboard inscription ([054eca9](https://github.com/betagouv/service-national-universel/commit/054eca9b2be85dee1572f99645705950dc7252cf))
+* **admin:** Paramétrage dynamique - Gestion des droits d'édition de session phase 1 ([#2478](https://github.com/betagouv/service-national-universel/issues/2478)) ([6e0815e](https://github.com/betagouv/service-national-universel/commit/6e0815e49bfc05434e5caef316768c7c9c140bd2))
+* **app:** Désactivation du bouton de reconnaissance d'engagement pour les volontaires en cours de phase 1 ([#2475](https://github.com/betagouv/service-national-universel/issues/2475)) ([0819201](https://github.com/betagouv/service-national-universel/commit/0819201b24e387a65f587d7d4fff4781df789fa0))
+
+# [1.249.0](https://github.com/betagouv/service-national-universel/compare/v1.248.1...v1.249.0) (2023-04-11)
+
+
+### Bug Fixes
+
+* **admin:** Ouvrir les droits d’inscription a certaines situations ([#2473](https://github.com/betagouv/service-national-universel/issues/2473)) ([b8118be](https://github.com/betagouv/service-national-universel/commit/b8118bebb80f9470c90f3997c5eb77a62b7b53ff))
+* **api:** cohort eligibility debug ([7303955](https://github.com/betagouv/service-national-universel/commit/7303955cf828f44ca1fff19d8c417449b9e7649f))
+* **api:** remove console.log ([f6b43f2](https://github.com/betagouv/service-national-universel/commit/f6b43f20a2e471b21258b8070b4820b2985b098c))
+
+
+### Features
+
+* **admin,api:** Dashboard engagement ([#2468](https://github.com/betagouv/service-national-universel/issues/2468)) ([6a2ccf1](https://github.com/betagouv/service-national-universel/commit/6a2ccf1f1c028135f9506c9f63843d2ee87846fe))
+
+
+### Reverts
+
+* Revert "fix(api): france connect state (#2449)" ([e1a66c9](https://github.com/betagouv/service-national-universel/commit/e1a66c9d8818c107831a7859fd13a7a5e561e020)), closes [#2449](https://github.com/betagouv/service-national-universel/issues/2449)
+
 ## [1.248.1](https://github.com/betagouv/service-national-universel/compare/v1.248.0...v1.248.1) (2023-04-10)
 
 
