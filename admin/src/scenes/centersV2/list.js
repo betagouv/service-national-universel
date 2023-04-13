@@ -315,7 +315,6 @@ const ListCenter = ({ firstSession }) => {
           <Filters
             pageId={pageId}
             route="/elasticsearch/cohesioncenter/search"
-            defaultQuery={getDefaultQuery()}
             setData={(value) => setData(value)}
             filters={filterArray}
             searchPlaceholder="Rechercher par mots clés, ville, code postal..."
@@ -326,7 +325,6 @@ const ListCenter = ({ firstSession }) => {
           />
           <ExportComponent
             title="Exporter"
-            defaultQuery={getDefaultQuery()}
             filters={filterArray}
             exportTitle="Centres_de_cohesion"
             route="/elasticsearch/cohesioncenter/export"

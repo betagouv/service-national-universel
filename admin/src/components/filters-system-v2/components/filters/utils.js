@@ -4,6 +4,7 @@ export const buildQuery = async (route, selectedFilters, page = 0, filterArray, 
   const resAlternative = await api.post(route, {
     page,
     filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
+      if (value.filter.length === 1 && value.filter[0] === "") return e;
       return { ...e, [key]: value.filter };
     }, {}),
     sort: sort ? { field: sort.field, order: sort.order } : null,

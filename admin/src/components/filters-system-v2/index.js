@@ -8,9 +8,3 @@ export { default as SortOption } from "./components/SortOption";
 // export
 export { default as ExportComponent } from "./components/export/ExportComponent.js";
 export { default as ModalExport } from "./components/export/ModalExport.js";
-
-export const getDefaultQuery = () => {
-  return {
-    query: { bool: { must: [{ match_all: {} }] } },
-  };
-};
