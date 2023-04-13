@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Spinner } from "reactstrap";
 import { department2region, departmentLookUp } from "snu-lib/region-and-departments";
 import InfoIcon from "../../../components/InfoIcon";
 import { apiAdress } from "../../../services/api-adresse";
 import Button from "./Button";
 import GhostButton from "./GhostButton";
-import { environment } from "../../../config";
 
 export default function VerifyAddress({ address, zip, city, onSuccess, onFail, disabled = false, isVerified = false, buttonClassName = "", buttonContainerClassName = "" }) {
   const [loading, setLoading] = useState(false);
@@ -16,17 +15,18 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
     return getSuggestions(address, city, zip);
   };
 
+  useEffect(() => {
+    setSuggestion(null);
+  }, [address, zip, city]);
+
   const getSuggestions = async (address, city, zip) => {
     setLoading(true);
     try {
-      let query = `${address}, ${city}`;
-      if (environment !== "production") {
-        query = `${address}, ${city}, ${zip}`;
-      }
+      let query = `${address}, ${city}, ${zip}`;
       let res = await apiAdress(query, [`postcode=${zip}`]);
 
       // Si pas de résultat, on tente avec la ville et le code postal uniquement
-      if (res?.features?.length === 0 && environment !== "production") {
+      if (res?.features?.length === 0) {
         query = `${city}, ${zip}`;
         res = await apiAdress(query, [`postcode=${zip}`]);
       }

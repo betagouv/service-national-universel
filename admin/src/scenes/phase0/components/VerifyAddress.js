@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Spinner } from "reactstrap";
 import { department2region, departmentLookUp } from "snu-lib/region-and-departments";
 import InfoIcon from "../../../components/InfoIcon";
@@ -21,10 +21,21 @@ export default function VerifyAddress({
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState(null);
 
-  const getSuggestions = async (text) => {
+  useEffect(() => {
+    setSuggestion(null);
+  }, [address, zip, city]);
+
+  const getSuggestions = async (address, city, zip) => {
     setLoading(true);
     try {
-      const res = await apiAdress(`${encodeURIComponent(text)}`);
+      let query = `${address}, ${city}, ${zip}`;
+      let res = await apiAdress(query, [`postcode=${zip}`]);
+
+      // Si pas de résultat, on tente avec la ville et le code postal uniquement
+      if (res?.features?.length === 0) {
+        query = `${city}, ${zip}`;
+        res = await apiAdress(query, [`postcode=${zip}`]);
+      }
 
       const arr = res?.features;
 
@@ -72,20 +83,20 @@ export default function VerifyAddress({
         <b className="mb-8">Est-ce que c&apos;est la bonne adresse ?</b>
         <p>{suggestion.properties.name}</p>
         <p>{`${suggestion.properties.postcode}, ${suggestion.properties.city}`}</p>
-        <div className="grid grid-cols-2 gap-4">
-          <BorderButton
-            onClick={() => {
-              onFail(formatResult(suggestion));
-              setSuggestion(null);
-            }}>
-            Non
-          </BorderButton>
+        <div className="grid grid-cols-2 gap-4 mt-2">
           <BorderButton
             onClick={() => {
               onSuccess(formatResult(suggestion));
               setSuggestion(null);
             }}>
             Oui
+          </BorderButton>
+          <BorderButton
+            onClick={() => {
+              onFail(formatResult(suggestion));
+              setSuggestion(null);
+            }}>
+            Non, garder &quot;{address}, {zip}, {city}&quot;
           </BorderButton>
         </div>
       </div>
@@ -102,7 +113,7 @@ export default function VerifyAddress({
           disabled={disabled}
           onClick={() => {
             if (disabled || !address || !zip || !city || loading) return;
-            getSuggestions(`${address}, ${city} ${zip}`);
+            getSuggestions(address, city, zip);
           }}>
           <div>
             {loading && <Spinner size="sm" key={"verifaddress"} style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
