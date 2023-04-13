@@ -21,12 +21,13 @@ export default function FullDoughnut({
   const [graphData, setGraphData] = useState(null);
   const [legends, setLegends] = useState([]);
   const [tooltip, setTooltip] = useState(null);
+  const [dataIsZero, setDataIsZero] = useState(true);
 
   useEffect(() => {
-    console.log("info panels = ", legendInfoPanels);
     if (values) {
       const dataColors = getGraphColors(values.length);
       const totalValues = values.reduce((acc, val) => acc + val, 0);
+      setDataIsZero(totalValues === 0);
 
       setGraphOptions({
         cutout: "62%",
@@ -223,10 +224,45 @@ export default function FullDoughnut({
       titleClass = "mb-10 px-[44px]";
   }
 
+  const graphZeroData = {
+    labels: [""],
+    datasets: [
+      {
+        data: [1],
+        backgroundColor: "rgb(243 244 246)",
+        hoverBackgroundColor: "rgb(243 244 246)",
+        hoverBorderWidth: 0,
+        hoverBorderColor: "rgb(243 244 246)",
+        borderWidth: 0,
+        width: 0,
+        height: 0,
+        padding: 0,
+      },
+    ],
+  };
+
+  const graphZeroOption = {
+    cutout: "62%",
+    plugins: {
+      title: {
+        display: false,
+      },
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        enabled: false,
+      },
+    },
+    layout: {
+      padding: { left: 1, right: 1, top: 1, bottom: 1, [legendSide]: 40 },
+    },
+  };
+
   return (
     <div className={`${mainClass} ${className}`}>
       <div className={`relative ${graphClass}`}>
-        {graphData && <Doughnut data={graphData} options={graphOptions} />}
+        {dataIsZero ? <Doughnut data={graphZeroData} options={graphZeroOption} /> : graphData && <Doughnut data={graphData} options={graphOptions} />}
         <div
           className={`absolute top-[0px] bottom-[0px] left-[0px] right-[0px] flex justify-center items-center text-center text-gray-900 text-sm leading-[1.1em] font-bold p-[24px] pointer-events-none ${titleClass}`}>
           {title}

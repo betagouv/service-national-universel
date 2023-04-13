@@ -24,7 +24,7 @@ export default function VolontairesStatutsDePhase({ filters, className = "" }) {
     try {
       const result = await api.post(`/dashboard/engagement/volontaires-statuts-phase`, { filters, phase });
       if (result.ok) {
-        console.log("RESULT: ", result.data);
+        // console.log("RESULT Statuts de Phase: ", result.data);
         const labels = [];
         const values = [];
         for (const data of result.data) {

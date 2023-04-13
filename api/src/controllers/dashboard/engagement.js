@@ -278,12 +278,22 @@ router.post("/mission-proposed-places", passport.authenticate("referent", { sess
     let result = await MissionModel.aggregate(pipeline);
 
     console.log("result: ", result);
-    // --- format data
-    const data = {
-      left: result[0].left,
-      occupied: result[0].total - result[0].left,
-      total: result[0].total,
-    };
+
+    let data;
+    if (result.length > 0) {
+      // --- format data
+      data = {
+        left: result[0].left,
+        occupied: result[0].total - result[0].left,
+        total: result[0].total,
+      };
+    } else {
+      data = {
+        left: 0,
+        occupied: 0,
+        total: 0,
+      };
+    }
 
     // --- result
     return res.status(200).send({ ok: true, data });
