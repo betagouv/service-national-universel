@@ -5,10 +5,20 @@ import InfoIcon from "../../../components/InfoIcon";
 import { apiAdress } from "../../../services/api-adresse";
 import Button from "./Button";
 import GhostButton from "./GhostButton";
+import { environment } from "../../../config";
 
 export default function VerifyAddress({ address, zip, city, onSuccess, onFail, disabled = false, isVerified = false, buttonClassName = "", buttonContainerClassName = "" }) {
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState(null);
+
+  const handleClick = (address, city, zip) => {
+    if (disabled || !address || !zip || !city || loading) return;
+    let query = `${address}, ${city}`;
+    if (environment !== "production") {
+      query = `${address}, ${city}, ${zip}`;
+    }
+    return getSuggestions(query);
+  };
 
   const getSuggestions = async (text) => {
     setLoading(true);
@@ -26,9 +36,13 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
 
   const formatResult = (suggestion) => {
     let depart = suggestion.properties.postcode.substr(0, 2);
+
+    // Cas particuliers : codes postaux en Polynésie
     if (["97", "98"].includes(depart)) {
       depart = suggestion.properties.postcode.substr(0, 3);
     }
+
+    // Cas particuliers : code postaux en Corse
     if (depart === "20") {
       depart = suggestion.properties.context.substr(0, 2);
       if (!["2A", "2B"].includes(depart)) depart = "2B";
@@ -97,10 +111,7 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
               Vériﬁer mon adresse
             </div>
           }
-          onClick={() => {
-            if (disabled || !address || !zip || !city || loading) return;
-            getSuggestions(`${address}, ${city}`);
-          }}
+          onClick={() => handleClick(address, city, zip)}
         />
       </div>
       {(!address || !zip || !city) && <Message>Pour vérifier votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.</Message>}
