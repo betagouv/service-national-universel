@@ -1,3 +1,120 @@
+# [1.250.0](https://github.com/betagouv/service-national-universel/compare/v1.249.0...v1.250.0) (2023-04-12)
+
+
+### Bug Fixes
+
+* **api:** Warning pdf ([094f07f](https://github.com/betagouv/service-national-universel/commit/094f07feb8551cde2e7cda8be291d460b6138a95))
+* **app:** isCohortDone for old cohort ([6ec1c2e](https://github.com/betagouv/service-national-universel/commit/6ec1c2e6bcb1f675b5c5d3f87093f208f4856efe))
+
+
+### Features
+
+* **admin:** dashboard inscription liste établissement ([#2477](https://github.com/betagouv/service-national-universel/issues/2477)) ([c4431d6](https://github.com/betagouv/service-national-universel/commit/c4431d65da6eaf4ec9a130e5a7538c1b4159a063))
+* **admin:** export report dashboard inscription ([054eca9](https://github.com/betagouv/service-national-universel/commit/054eca9b2be85dee1572f99645705950dc7252cf))
+* **admin:** Paramétrage dynamique - Gestion des droits d'édition de session phase 1 ([#2478](https://github.com/betagouv/service-national-universel/issues/2478)) ([6e0815e](https://github.com/betagouv/service-national-universel/commit/6e0815e49bfc05434e5caef316768c7c9c140bd2))
+* **app:** Désactivation du bouton de reconnaissance d'engagement pour les volontaires en cours de phase 1 ([#2475](https://github.com/betagouv/service-national-universel/issues/2475)) ([0819201](https://github.com/betagouv/service-national-universel/commit/0819201b24e387a65f587d7d4fff4781df789fa0))
+
+# [1.249.0](https://github.com/betagouv/service-national-universel/compare/v1.248.1...v1.249.0) (2023-04-11)
+
+
+### Bug Fixes
+
+* **admin:** Ouvrir les droits d’inscription a certaines situations ([#2473](https://github.com/betagouv/service-national-universel/issues/2473)) ([b8118be](https://github.com/betagouv/service-national-universel/commit/b8118bebb80f9470c90f3997c5eb77a62b7b53ff))
+* **api:** cohort eligibility debug ([7303955](https://github.com/betagouv/service-national-universel/commit/7303955cf828f44ca1fff19d8c417449b9e7649f))
+* **api:** remove console.log ([f6b43f2](https://github.com/betagouv/service-national-universel/commit/f6b43f20a2e471b21258b8070b4820b2985b098c))
+
+
+### Features
+
+* **admin,api:** Dashboard engagement ([#2468](https://github.com/betagouv/service-national-universel/issues/2468)) ([6a2ccf1](https://github.com/betagouv/service-national-universel/commit/6a2ccf1f1c028135f9506c9f63843d2ee87846fe))
+
+
+### Reverts
+
+* Revert "fix(api): france connect state (#2449)" ([e1a66c9](https://github.com/betagouv/service-national-universel/commit/e1a66c9d8818c107831a7859fd13a7a5e561e020)), closes [#2449](https://github.com/betagouv/service-national-universel/issues/2449)
+
+## [1.248.1](https://github.com/betagouv/service-national-universel/compare/v1.248.0...v1.248.1) (2023-04-10)
+
+
+### Bug Fixes
+
+* **admin:** Typo ([158942e](https://github.com/betagouv/service-national-universel/commit/158942e959b2fb74d2e87abee29196b3373e41d1))
+* **api:** young app change cohort ([05dfc67](https://github.com/betagouv/service-national-universel/commit/05dfc67591bf8ef5f69f9a658367bf823ff49dca))
+
+# [1.248.0](https://github.com/betagouv/service-national-universel/compare/v1.247.1...v1.248.0) (2023-04-07)
+
+
+### Bug Fixes
+
+* **api:** france connect state ([#2449](https://github.com/betagouv/service-national-universel/issues/2449)) ([bac1eac](https://github.com/betagouv/service-national-universel/commit/bac1eac5ba2732fc046529a4ab18e004abf8e6ac))
+* **app/api:** cohort filling rate check ([#2469](https://github.com/betagouv/service-national-universel/issues/2469)) ([da18bd2](https://github.com/betagouv/service-national-universel/commit/da18bd23765ec43e08223746540d2042d5776f18))
+
+
+### Features
+
+* **admin:** amélioration de la vue détaillée par région accueillies sur la table de répartition et ajout de l'export de données ([#2467](https://github.com/betagouv/service-national-universel/issues/2467)) ([439538d](https://github.com/betagouv/service-national-universel/commit/439538d7816bf63cde0dd639190a94c0b709177b))
+* **admin:** Plan de transport - Export des volontaires par ligne de bus ([#2466](https://github.com/betagouv/service-national-universel/issues/2466)) ([4fa51df](https://github.com/betagouv/service-national-universel/commit/4fa51df0212807edb2d0e80ff52e7d32d0ca038f))
+
+## [1.247.1](https://github.com/betagouv/service-national-universel/compare/v1.247.0...v1.247.1) (2023-04-06)
+
+
+### Bug Fixes
+
+* **admin:** accès en lecture seule aux données des autres régions du territoire par le référents régionaux ([#2465](https://github.com/betagouv/service-national-universel/issues/2465)) ([87200f9](https://github.com/betagouv/service-national-universel/commit/87200f9f598c7fc3a64e5cc9928a92af93f11081))
+* **admin/lib:** mission young list export ([7430b02](https://github.com/betagouv/service-national-universel/commit/7430b0297edd6ed5d96d9595ed856077bd19c078))
+* **lib:** Sémantique accès bloqué ([7c2643c](https://github.com/betagouv/service-national-universel/commit/7c2643c295b2d35180b2973a570afc695c438506))
+
+# [1.247.0](https://github.com/betagouv/service-national-universel/compare/v1.246.1...v1.247.0) (2023-04-05)
+
+
+### Features
+
+* **admin:** affichage des codes départementaux ([#2464](https://github.com/betagouv/service-national-universel/issues/2464)) ([1aa8287](https://github.com/betagouv/service-national-universel/commit/1aa828738cd768bd74d9fbed74a757ef08a1d081))
+* **admin:** dashboard inscription ([#2438](https://github.com/betagouv/service-national-universel/issues/2438)) ([f2248c5](https://github.com/betagouv/service-national-universel/commit/f2248c530cd37b2f920443016fa0c96f76203a97))
+
+## [1.246.1](https://github.com/betagouv/service-national-universel/compare/v1.246.0...v1.246.1) (2023-04-04)
+
+
+### Bug Fixes
+
+* **api:** Reduce pool size mongo on prod ([647b94b](https://github.com/betagouv/service-national-universel/commit/647b94bfbae9eb358cd67d32f944944c62679fe2))
+* **app:** remove missing referentManagerPhase2 alert ([9d77600](https://github.com/betagouv/service-national-universel/commit/9d77600cb43c2dfcf2fecd4f814fc8f530ffb601))
+* **sib:** Lower send in blue mongoDB connection ([6dcfe65](https://github.com/betagouv/service-national-universel/commit/6dcfe65054552fc62c8c0d05bc5f55a9395f7c35))
+
+# [1.246.0](https://github.com/betagouv/service-national-universel/compare/v1.245.0...v1.246.0) (2023-04-03)
+
+
+### Bug Fixes
+
+* **admin:**  school select display when null ([75322c9](https://github.com/betagouv/service-national-universel/commit/75322c9fbe1aa51130928e5371bdaeb1c55aac2f))
+* **admin:** liste demande de modifications ([2429eb9](https://github.com/betagouv/service-national-universel/commit/2429eb91a7c3a05226e7848b2531f372bb411abd))
+* **admin:** session redirect ([0a93220](https://github.com/betagouv/service-national-universel/commit/0a93220b8d7199557ba7deaba25d1bebf118939f))
+* **app:** correction d'une faute de conjugaison lors du choix de moyen de transport ([#2462](https://github.com/betagouv/service-national-universel/issues/2462)) ([826933f](https://github.com/betagouv/service-national-universel/commit/826933f8f966f3b36a4c20caaa78b37704433fe0))
+* **app:** navbar ([9b4e700](https://github.com/betagouv/service-national-universel/commit/9b4e7009c62d8286b836f7b4b854571305aeca62))
+* **app:** phase recap  visual fix ([4ab2bb5](https://github.com/betagouv/service-national-universel/commit/4ab2bb550b5c35f18c38f39d41d584abc7d0e899))
+
+
+### Features
+
+* **admin:** demande liste modification bus / PDR by young + logique filter with defaultUrlParm ([#2461](https://github.com/betagouv/service-national-universel/issues/2461)) ([a9a4c70](https://github.com/betagouv/service-national-universel/commit/a9a4c7013005f5e64af904d75ded3756e614a4d6))
+* **admin:** fix export plan de transport + new filters on list young by bus ([333bc41](https://github.com/betagouv/service-national-universel/commit/333bc41012a39fa488d78e45ed60cf220eb46f1b))
+* **admin:** Permettre aux référents d'ajouter manuellement une école ([2e36fa2](https://github.com/betagouv/service-national-universel/commit/2e36fa2c43a3e36c9a3bbb635bdc71dae15ea0db))
+* **app, admin:** Ajouter de nouveaux types d'engagements MIG ([#2455](https://github.com/betagouv/service-national-universel/issues/2455)) ([0b2fcab](https://github.com/betagouv/service-national-universel/commit/0b2fcab725ed570ff9a7d6589161c11d7dbe2f52))
+
+# [1.245.0](https://github.com/betagouv/service-national-universel/compare/v1.244.0...v1.245.0) (2023-03-31)
+
+
+### Bug Fixes
+
+* **admin:** fill rate at user create ([#2439](https://github.com/betagouv/service-national-universel/issues/2439)) ([f011dbe](https://github.com/betagouv/service-national-universel/commit/f011dbe2dfd55781197370d12a422662925e4ce1))
+* tentative de fix author ([#2456](https://github.com/betagouv/service-national-universel/issues/2456)) ([28b5491](https://github.com/betagouv/service-national-universel/commit/28b5491bf717ba4af23e54a5917a80a81d3cb09e))
+* **admin:** export disabled label ([9ec71d9](https://github.com/betagouv/service-national-universel/commit/9ec71d9186332b211d3d9a6f4afe42ef85d51ae0))
+
+
+### Features
+
+* **admin:** new filters on PDT ([#2457](https://github.com/betagouv/service-national-universel/issues/2457)) ([f0e686b](https://github.com/betagouv/service-national-universel/commit/f0e686bf70ade4f95e8d3eeba280f2ee299edde2))
+
 # [1.244.0](https://github.com/betagouv/service-national-universel/compare/v1.243.0...v1.244.0) (2023-03-30)
 
 

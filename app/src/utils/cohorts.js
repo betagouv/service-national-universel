@@ -1,6 +1,6 @@
 import api from "../services/api";
 import { capture } from "../sentry";
-import { oldSessions, sessions2023 } from "snu-lib";
+import { sessions2023 } from "snu-lib";
 import dayjs from "dayjs";
 let cohorts = null;
 let cohortsCachedAt = null;
@@ -19,8 +19,8 @@ export async function cohortsInit() {
   }
 }
 
-export function isCohortsInitialized() {
-  return cohortsCachedAt !== null;
+function isCohortsInitialized() {
+  return cohortsCachedAt !== null && cohorts !== null && Array.isArray(cohorts);
 }
 
 export function getCohort(name) {
@@ -61,7 +61,13 @@ export function getCohortDetail(cohortName) {
 }
 
 export function isCohortDone(cohortName) {
-  const cohort = [...oldSessions, ...sessions2023].find((c) => c.name === cohortName);
-  if (!cohort.dateEnd) return true;
-  return cohort && cohort.dateEnd && new Date(cohort.dateEnd).valueOf() < Date.now();
+  if (["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022"].includes(cohortName)) return true;
+  if (isCohortsInitialized()) {
+    const cohort = getCohort(cohortName);
+    if (cohort && cohort.dateEnd) {
+      return cohort.dateEnd && new Date(cohort.dateEnd).valueOf() < Date.now();
+    }
+    return false;
+  }
+  return false;
 }

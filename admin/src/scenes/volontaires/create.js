@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import validator from "validator";
 import "dayjs/locale/fr";
 
@@ -8,8 +8,8 @@ import { toastr } from "react-redux-toastr";
 import { capture } from "../../sentry";
 import { useHistory } from "react-router-dom";
 
-import { translateGrade, YOUNG_SITUATIONS, GRADES, getAge, COHESION_STAY_LIMIT_DATE, ES_NO_LIMIT, YOUNG_STATUS } from "snu-lib";
-import { youngEmployedSituationOptions, youngSchooledSituationOptions } from "../phase0/commons";
+import { translateGrade, GRADES, getAge, COHESION_STAY_LIMIT_DATE, ES_NO_LIMIT, YOUNG_STATUS } from "snu-lib";
+import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
 import dayjs from "dayjs";
 import MiniSwitch from "../phase0/components/MiniSwitch";
 import RadioButton from "../phase0/components/RadioButton";
@@ -366,7 +366,24 @@ export default function Create() {
     if ((values.grade !== "" || values.schooled === "false") && (values.department !== "" || values.schoolDepartment !== "") && values.birthdateAt !== null) {
       (async () => {
         try {
-          const res = await api.post("/cohort-session/eligibility/2023", values);
+          let body = {};
+          if (values.schooled === "true") {
+            body = {
+              schoolDepartment: values.schoolDepartment,
+              department: values.department,
+              schoolRegion: values.schoolRegion,
+              birthdateAt: values.birthdateAt,
+              grade: values.grade,
+              zip: values.zip,
+            };
+          } else {
+            body = {
+              grade: values.department,
+              birthdateAt: values.birthdateAt,
+              zip: values.zip,
+            };
+          }
+          const res = await api.post("/cohort-session/eligibility/2023", body);
           if (res.data.msg) return setEgibilityError(res.data.msg);
           if (res.data.length === 0) {
             setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
@@ -376,6 +393,7 @@ export default function Create() {
           setCohorts(res.data);
         } catch (e) {
           capture(e);
+
           setCohorts([]);
         }
         setLoading(false);
@@ -641,46 +659,64 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
   };
   const onChangeSituation = (key, value) => {
     setFieldValue("employed", youngEmployedSituationOptions.includes(value) ? "true" : "false");
-    const isSchooled = youngSchooledSituationOptions.includes(value);
-    if (!isSchooled) setFieldValue("grade", "");
-    setFieldValue("schooled", isSchooled ? "true" : "false");
     setFieldValue("situation", value);
   };
-  const situationOptions = Object.keys(YOUNG_SITUATIONS).map((s) => ({ value: s, label: translate(s) }));
-  const gradeOptions = Object.keys(GRADES)
-    .filter((g) => g !== GRADES.NOT_SCOLARISE)
-    .map((g) => ({ value: g, label: translateGrade(g) }));
+
+  const onChangeGrade = (key, value) => {
+    const isSchooled = value !== "NOT_SCOLARISE";
+    setFieldValue("schooled", isSchooled ? "true" : "false");
+    setFieldValue("grade", value);
+    setFieldValue("situation", "");
+    onChange({
+      schoolId: "",
+      schoolName: "",
+      schoolType: "",
+      schoolAddress: "",
+      schoolZip: "",
+      schoolDepartment: "",
+      schoolRegion: "",
+      schoolCity: "",
+      schoolCountry: "FRANCE",
+    });
+  };
+
+  const gradeOptions = Object.keys(GRADES).map((g) => ({ value: g, label: translateGrade(g) }));
   const onParticuliereChange = (key, value) => {
     setFieldValue(key, value);
   };
+
   return (
     <>
       <div className="font-medium text-xs text-[#242526] leading-snug mb-2">Situation</div>
+
       <Field
-        name="situation"
-        label="Statut"
+        name="grade"
+        label="Classe"
         type="select"
         errors={errors}
-        value={values.situation}
+        value={values.grade}
         transformer={translate}
         className="flex-[1_1_50%]"
-        options={situationOptions}
-        handleChange={onChangeSituation}
+        options={gradeOptions}
+        handleChange={onChangeGrade}
       />
+      {values.schooled !== "" && (
+        <Field
+          name="situation"
+          label="Statut"
+          type="select"
+          errors={errors}
+          value={values.situation}
+          transformer={translate}
+          className="flex-[1_1_50%] mt-4"
+          options={values.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions}
+          handleChange={onChangeSituation}
+        />
+      )}
+
       {values.situation !== "" && values.schooled === "true" && (
         <div className="mt-4">
           <SchoolEditor showBackgroundColor={false} young={values} onChange={onChange} />
-          <Field
-            name="grade"
-            label="Classe"
-            type="select"
-            errors={errors}
-            value={values.grade}
-            transformer={translate}
-            className="flex-[1_1_50%]"
-            options={gradeOptions}
-            handleChange={setFieldValue}
-          />
         </div>
       )}
       <div className="mt-8">

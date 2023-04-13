@@ -247,8 +247,7 @@ export default function List() {
       try {
         if (!young) return;
         const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
-        if (!ok) return toastr.error("Aucun référent n'a été trouvé");
-        setReferentManagerPhase2(data);
+        if (ok) setReferentManagerPhase2(data);
       } catch (e) {
         capture(e);
       }

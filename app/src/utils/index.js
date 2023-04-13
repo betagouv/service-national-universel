@@ -82,7 +82,8 @@ export function permissionReinscription(_y) {
 }
 
 export function isYoungCanApplyToPhase2Missions(young) {
-  return isCohortDone(young.cohort);
+  const hasYoungPhase1DoneOrExempted = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1);
+  return isCohortDone(young.cohort) && hasYoungPhase1DoneOrExempted;
 }
 
 export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];
@@ -155,4 +156,16 @@ export const canYoungResumePhase1 = (y) => {
     y.status === YOUNG_STATUS.WITHDRAWN &&
     ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.NOT_DONE].includes(y.statusPhase1)
   );
+};
+
+export const debounce = (fn, delay) => {
+  let timeOutId;
+  return function (...args) {
+    if (timeOutId) {
+      clearTimeout(timeOutId);
+    }
+    timeOutId = setTimeout(() => {
+      fn(...args);
+    }, delay);
+  };
 };

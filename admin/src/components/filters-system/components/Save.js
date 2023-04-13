@@ -35,7 +35,7 @@ export default function Save({ filterArray, selectedFilters, page = 1, pageId })
     try {
       const res = await api.post("/filters", {
         page: pageId,
-        url: currentFilterAsUrl(selectedFilters, page),
+        url: currentFilterAsUrl(selectedFilters, page, filterArray),
         name: name,
       });
       if (!res.ok) return toastr.error("Oops, une erreur est survenue");

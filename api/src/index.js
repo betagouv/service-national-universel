@@ -96,6 +96,7 @@ app.use("/cohort", require("./controllers/cohort"));
 app.use("/filters", require("./controllers/filters"));
 app.use("/analytics", require("./controllers/analytics"));
 app.use("/plan-de-transport/import", require("./controllers/planDeTransport/import"));
+app.use("/dashboard/engagement", require("./controllers/dashboard/engagement"));
 
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));

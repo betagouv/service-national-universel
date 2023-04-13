@@ -1,24 +1,18 @@
-import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
+import dayjs from "dayjs";
 import React from "react";
+import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+import { ROLES, translate } from "snu-lib";
+import ExternalLink from "../../../assets/icons/ExternalLink";
 import Breadcrumbs from "../../../components/Breadcrumbs";
-import ReactiveListComponent from "../../../components/ReactiveListComponent";
-import { apiURL } from "../../../config";
+import { Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system";
+import Loader from "../../../components/Loader";
+import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { getInitials, getStatusClass, Title, translateStatus } from "../components/commons";
 import Select from "../components/Select";
-import FilterSvg from "../../../assets/icons/Filter";
-import { toastr } from "react-redux-toastr";
-import { getFilterLabel, ROLES, translate } from "snu-lib";
-import { capture } from "../../../sentry";
-import Loader from "../../../components/Loader";
-import dayjs from "dayjs";
-import ExternalLink from "../../../assets/icons/ExternalLink";
 import Thumbs from "./components/Icons/Thumbs";
-import DeleteFilters from "../../../components/buttons/DeleteFilters";
-import { useSelector } from "react-redux";
-
-const FILTERS = ["SEARCH", "LIGNE", "TAGS", "STATUS", "OPINION", "ROLE"];
 
 const cohortList = [
   { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
@@ -31,13 +25,24 @@ const cohortList = [
 export default function ListeDemandeModif() {
   const urlParams = new URLSearchParams(window.location.search);
   const [cohort, setCohort] = React.useState(urlParams.get("cohort") || "Février 2023 - C");
-  const [filterVisible, setFilterVisible] = React.useState(false);
   const [tagsOptions, setTagsOptions] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
+  const [data, setData] = React.useState([]);
+  const pageId = "demande-modification-bus";
+  const [selectedFilters, setSelectedFilters] = React.useState({});
+  const [paramData, setParamData] = React.useState({
+    size: 20,
+    page: 0,
+  });
+
   const getTags = async () => {
     try {
+      setTagsOptions([]);
+      setSelectedFilters({});
+      setLoading(true);
       const { ok, code, data: reponseTags } = await api.get(`/tags?type=modification_bus`);
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des tags", translate(code));
@@ -46,6 +51,7 @@ export default function ListeDemandeModif() {
         return { value: tag._id, label: tag.name };
       });
       setTagsOptions(options);
+      setLoading(false);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération des tags");
@@ -54,16 +60,62 @@ export default function ListeDemandeModif() {
 
   React.useEffect(() => {
     getTags();
-  }, []);
+  }, [cohort]);
 
   const getDefaultQuery = () => {
     return {
-      query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": cohort } }] } },
+      query: {
+        bool: { must: [{ match_all: {} }, { term: { "cohort.keyword": cohort } }] },
+      },
       track_total_hits: true,
     };
   };
 
-  if (!tagsOptions) return <Loader />;
+  if (loading) return <Loader />;
+
+  const filterArray = [
+    {
+      title: "Numéro de ligne",
+      name: "LIGNE",
+      datafield: "lineName.keyword",
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Type",
+      name: "TAGS",
+      datafield: "tagIds.keyword",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A") return item;
+        return tagsOptions.find((option) => option.value === item)?.label || item;
+      },
+    },
+    {
+      title: "Statut",
+      name: "STATUS",
+      datafield: "status.keyword",
+      missingLabel: "Non renseigné",
+      translate: translateStatus,
+    },
+    [ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)
+      ? {
+          title: "Avis",
+          name: "OPINION",
+          datafield: "opinion.keyword",
+          missingLabel: "Non renseigné",
+          translate: (item) => {
+            if (item === "N/A") return item;
+            return item === "true" ? "Favorable" : "Défavorable";
+          },
+        }
+      : null,
+    { title: "Rôle", name: "ROLE", datafield: "requestUserRole.keyword", missingLabel: "Non renseigné", translate: translate },
+  ].filter((e) => e);
+
+  const searchBarObject = {
+    placeholder: "Rechercher...",
+    datafield: ["lineName", "requestUserName", "requestMessage"],
+  };
 
   return (
     <>
@@ -76,176 +128,59 @@ export default function ListeDemandeModif() {
             value={cohort}
             onChange={(e) => {
               setCohort(e);
-              history.replace({ search: `?cohort=${e}` });
+              history.push(`/ligne-de-bus/demande-de-modification?cohort=${e}`);
             }}
           />
         </div>
 
-        <ReactiveBase url={`${apiURL}/es`} app="modificationbus" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-          <div className="flex flex-col bg-white py-4 mb-8 rounded-xl">
-            <div className="flex items-stretch gap-2 bg-white py-2 px-4">
-              <DataSearch
-                defaultQuery={getDefaultQuery}
-                showIcon={false}
-                componentId="SEARCH"
-                dataField={["lineName", "requestUserName", "requestMessage"]}
-                placeholder="Rechercher..."
-                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                URLParams={true}
-                autosuggest={false}
-                className="datasearch-searchfield"
-                innerClass={{ input: "searchbox" }}
-              />
-              <div
-                className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
-                onClick={() => setFilterVisible((e) => !e)}>
-                <FilterSvg className="text-gray-400" />
-                Filtres
-              </div>
-            </div>
-            <div className={`flex items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>
-              <MultiDropdownList
-                defaultQuery={getDefaultQuery}
-                className="dropdown-filter"
-                placeholder="Numéro de ligne"
-                componentId="LIGNE"
-                dataField="lineName.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "LIGNE") }}
-                renderItem={(e, count) => {
-                  return `${translate(e)} (${count})`;
-                }}
-                title=""
-                URLParams={true}
-                showSearch={false}
-                renderLabel={(items) => <div>{getFilterLabel(items, "Numéro de ligne", "Numéro de ligne")}</div>}
-              />
-              <MultiDropdownList
-                defaultQuery={getDefaultQuery}
-                className="dropdown-filter"
-                placeholder="Type"
-                componentId="TAGS"
-                dataField="tagIds.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "TAGS") }}
-                renderItem={(e, count) => {
-                  if (e === "Non renseigné") return `Non renseigné (${count})`;
-                  return `${tagsOptions.find((option) => option.value === e)?.label} (${count})`;
-                }}
-                title=""
-                URLParams={true}
-                showSearch={false}
-                showMissing
-                missingLabel="Non renseigné"
-                renderLabel={(items) => {
-                  if (Object.keys(items).length === 0) return "Type";
-                  const translated = Object.keys(items).map((item) => {
-                    if (item === "Non renseigné") return item;
-                    return tagsOptions.find((option) => option.value === item)?.label;
-                  });
-                  let value = translated.join(", ");
-                  value = "Type : " + value;
-                  return <div>{value}</div>;
-                }}
-              />
-              <MultiDropdownList
-                defaultQuery={getDefaultQuery}
-                className="dropdown-filter"
-                placeholder="Statut"
-                componentId="STATUS"
-                dataField="status.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-                renderItem={(e, count) => {
-                  return `${translateStatus(e)} (${count})`;
-                }}
-                title=""
-                URLParams={true}
-                showSearch={false}
-                showMissing
-                missingLabel="Non renseigné"
-                renderLabel={(items) => {
-                  if (Object.keys(items).length === 0) return "Statut";
-                  const translated = Object.keys(items).map((item) => {
-                    if (item === "Non renseigné") return item;
-                    return translateStatus(item);
-                  });
-                  let value = translated.join(", ");
-                  value = "Statut : " + value;
-                  return <div>{value}</div>;
-                }}
-              />
-              {[ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role) && (
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Avis"
-                  componentId="OPINION"
-                  dataField="opinion.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "OPINION") }}
-                  renderItem={(e, count) => {
-                    if (e === "Non renseigné") return `Non renseigné (${count})`;
-                    if (e === "true") return `Favorable (${count})`;
-                    if (e === "false") return `Défavorable (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  showMissing
-                  missingLabel="Non renseigné"
-                  renderLabel={(items) => {
-                    if (Object.keys(items).length === 0) return "Avis";
-                    const translated = Object.keys(items).map((item) => {
-                      if (item === "Non renseigné") return item;
-                      if (item === "true") return "Favorable";
-                      if (item === "false") return "Défavorable";
-                    });
-                    let value = translated.join(", ");
-                    value = "Avis : " + value;
-                    return <div>{value}</div>;
-                  }}
-                />
-              )}
-              <MultiDropdownList
-                defaultQuery={getDefaultQuery}
-                className="dropdown-filter"
-                componentId="ROLE"
-                dataField="requestUserRole.keyword"
-                renderItem={(e, count) => {
-                  return `${translate(e)} (${count})`;
-                }}
-                react={{ and: FILTERS.filter((e) => e !== "ROLE") }}
-                title=""
-                URLParams={true}
-                showSearch={false}
-                renderLabel={(items) => <div>{getFilterLabel(items, "Rôle")}</div>}
-              />
-              <DeleteFilters />
-            </div>
-            <div className="reactive-result">
-              <ReactiveListComponent
-                pageSize={20}
-                defaultQuery={getDefaultQuery}
-                react={{ and: FILTERS }}
-                paginationAt="bottom"
-                showTopResultStats={false}
-                render={({ data }) => (
-                  <div className="flex w-full flex-col mt-6 mb-2">
-                    <hr />
-                    <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 w-full gap-6">
-                      <div className="w-[35%]">Contenu</div>
-                      <div className="w-[12%]">Ligne</div>
-                      <div className="w-[23%]">Type</div>
-                      <div className="w-[12%]">État </div>
-                      <div className="w-[18%]">Auteur</div>
-                    </div>
-                    {data?.map((hit) => {
-                      return <Line key={hit._id} modification={hit} tagsOptions={tagsOptions} user={user} />;
-                    })}
-                    <hr />
-                  </div>
-                )}
-              />
-            </div>
+        <div className="flex flex-col bg-white py-4 mb-8 rounded-xl">
+          <div className="flex items-stretch gap-2 bg-white pt-2 px-4">
+            <Filters
+              defaultUrlParam={`cohort=${cohort}`}
+              pageId={pageId}
+              esId="modificationbus"
+              defaultQuery={getDefaultQuery()}
+              setData={(value) => setData(value)}
+              filters={filterArray}
+              searchBarObject={searchBarObject}
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+              paramData={paramData}
+              setParamData={setParamData}
+            />
           </div>
-        </ReactiveBase>
+          <div className="mt-2 px-4 flex flex-row flex-wrap items-center">
+            <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+            <SelectedFilters
+              filterArray={filterArray}
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+              paramData={paramData}
+              setParamData={setParamData}
+            />
+          </div>
+          <ResultTable
+            paramData={paramData}
+            setParamData={setParamData}
+            currentEntryOnPage={data?.length}
+            render={
+              <div className="flex w-full flex-col mt-6 mb-2">
+                <hr />
+                <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 w-full gap-6">
+                  <div className="w-[35%]">Contenu</div>
+                  <div className="w-[12%]">Ligne</div>
+                  <div className="w-[23%]">Type</div>
+                  <div className="w-[12%]">État </div>
+                  <div className="w-[18%]">Auteur</div>
+                </div>
+                {data?.map((hit) => {
+                  return <Line key={hit._id} modification={hit} tagsOptions={tagsOptions} user={user} />;
+                })}
+                <hr />
+              </div>
+            }
+          />
+        </div>
       </div>
     </>
   );

@@ -1,21 +1,22 @@
 import React from "react";
-import { BsArrowLeft, BsArrowRight, BsDownload } from "react-icons/bs";
+import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { ES_NO_LIMIT, getDepartmentNumber, ROLES, translate } from "snu-lib";
+import { ROLES, getDepartmentNumber, translate } from "snu-lib";
 import ArrowUp from "../../../assets/ArrowUp";
 import Comment from "../../../assets/comment";
 import History from "../../../assets/icons/History";
 import Breadcrumbs from "../../../components/Breadcrumbs";
-import { ExportComponentV2, Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system";
 import Loader from "../../../components/Loader";
+import SelectAction from "../../../components/SelectAction";
+import { ExportComponentV2, Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { PlainButton } from "../components/Buttons";
-import { TabItem, Title, translateStatus } from "../components/commons";
 import Select from "../components/Select";
-import { getTransportIcon } from "../util";
+import { TabItem, Title, translateStatus } from "../components/commons";
+import { exportLigneBus, getTransportIcon } from "../util";
 import Excel from "./components/Icons/Excel.png";
 import ListPanel from "./modificationPanel/List";
 
@@ -110,10 +111,7 @@ const ReactiveList = ({ cohort, history }) => {
   const getDefaultQuery = () => {
     return {
       query: {
-        bool: {
-          should: [],
-          filter: [{ term: { "cohort.keyword": cohort } }],
-        },
+        bool: { must: [{ match_all: {} }, { term: { "cohort.keyword": cohort } }] },
       },
       track_total_hits: true,
     };
@@ -134,7 +132,14 @@ const ReactiveList = ({ cohort, history }) => {
     },
     { title: "Nom", name: "NAME_PDR", datafield: "pointDeRassemblements.name.keyword", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
     { title: "Région", name: "REGION_PDR", datafield: "pointDeRassemblements.region.keyword", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
-    { title: "Département", name: "DEPARTMENT_PDR", datafield: "pointDeRassemblements.department.keyword", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
+    {
+      title: "Département",
+      name: "DEPARTMENT_PDR",
+      datafield: "pointDeRassemblements.department.keyword",
+      parentGroup: "Points de rassemblement",
+      missingLabel: "Non renseigné",
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+    },
     { title: "Ville", name: "CITY_PDR", datafield: "pointDeRassemblements.city.keyword", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
     { title: "Code", name: "CODE_PDR", datafield: "pointDeRassemblements.code.keyword", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
     { title: "Nom", name: "NAME_CENTER", datafield: "centerName.keyword", parentGroup: "Centre", missingLabel: "Non renseigné" },
@@ -190,6 +195,7 @@ const ReactiveList = ({ cohort, history }) => {
         <div className="flex items-center justify-between bg-white pt-2 px-4">
           <div className="flex items-center gap-2">
             <Filters
+              defaultUrlParam={`cohort=${cohort}`}
               pageId={pageId}
               esId="plandetransport"
               defaultQuery={getDefaultQuery()}
@@ -210,64 +216,97 @@ const ReactiveList = ({ cohort, history }) => {
               Historique
             </button>
             <button
-              className="text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
+              className="text-gray-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
               onClick={() => history.push(`/ligne-de-bus/demande-de-modification?cohort=${cohort}`)}>
               Demande de modification
             </button>
-            <ExportComponentV2
+            <SelectAction
               title="Exporter"
-              defaultQuery={getDefaultQuery()}
-              exportTitle="Plan_de_transport"
-              icon={<BsDownload className="text-gray-400" />}
-              index="plandetransport"
-              css={{
-                override: true,
-                button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-                loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-              }}
-              transform={async (data) => {
-                let all = data;
+              alignItems="right"
+              buttonClassNames="bg-white border border-gray-300 h-10 rounded-md px-3"
+              textClassNames="text-grey-700 font-medium text-sm"
+              rightIconClassNames="text-gray-300"
+              optionsGroup={[
+                {
+                  items: [
+                    {
+                      action: async () => {},
+                      render: (
+                        <ExportComponentV2
+                          title="Plan de transport"
+                          defaultQuery={getDefaultQuery()}
+                          exportTitle="Plan_de_transport"
+                          index="plandetransport"
+                          filters={filterArray}
+                          selectedFilters={selectedFilters}
+                          searchBarObject={searchBarObject}
+                          setIsOpen={() => true}
+                          css={{
+                            override: true,
+                            button: `flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer w-full text-sm text-gray-700`,
+                            loadingButton: `text-sm text-gray-700`,
+                          }}
+                          transform={async (data) => {
+                            let all = data;
 
-                // Get the length of the longest array of PDRs
-                const maxPDRs = all.reduce((max, item) => (item.pointDeRassemblements.length > max ? item.pointDeRassemblements.length : max), 0);
+                            // Get the length of the longest array of PDRs
+                            const maxPDRs = all.reduce((max, item) => (item.pointDeRassemblements.length > max ? item.pointDeRassemblements.length : max), 0);
 
-                return all.map((data) => {
-                  let pdrs = {};
+                            return all.map((data) => {
+                              let pdrs = {};
 
-                  for (let i = 0; i < maxPDRs; i++) {
-                    const pdr = data.pointDeRassemblements?.[i];
-                    const num = i + 1;
-                    pdrs[`N° DU DEPARTEMENT DU PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
-                    pdrs[`ID PDR ${num}`] = pdr?.meetingPointId || "";
-                    pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
-                    pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
-                    pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr?.busArrivalHour || "";
-                    pdrs[`HEURE DE DEPART DU PDR ${num}`] = pdr?.departureHour || "";
-                    pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${num}`] = pdr?.returnHour || "";
-                  }
+                              for (let i = 0; i < maxPDRs; i++) {
+                                const pdr = data.pointDeRassemblements?.[i];
+                                const num = i + 1;
+                                pdrs[`N° DU DEPARTEMENT DU PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
+                                pdrs[`ID PDR ${num}`] = pdr?.meetingPointId || "";
+                                pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
+                                pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
+                                pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr?.busArrivalHour || "";
+                                pdrs[`HEURE DE DEPART DU PDR ${num}`] = pdr?.departureHour || "";
+                                pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${num}`] = pdr?.returnHour || "";
+                              }
 
-                  return {
-                    "NUMERO DE LIGNE": data.busId,
-                    "DATE DE TRANSPORT ALLER": data.departureString,
-                    "DATE DE TRANSPORT RETOUR": data.returnString,
-                    ...pdrs,
-                    "N° DU DEPARTEMENT DU CENTRE": getDepartmentNumber(data.centerDepartment),
-                    "ID CENTRE": data.centerId,
-                    "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
-                    "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,
-                    "HEURE DE DÉPART DU CENTRE": data.centerDepartureTime,
+                              return {
+                                "NUMERO DE LIGNE": data.busId,
+                                "DATE DE TRANSPORT ALLER": data.departureString,
+                                "DATE DE TRANSPORT RETOUR": data.returnString,
+                                ...pdrs,
+                                "N° DU DEPARTEMENT DU CENTRE": getDepartmentNumber(data.centerDepartment),
+                                "ID CENTRE": data.centerId,
+                                "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
+                                "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,
+                                "HEURE DE DÉPART DU CENTRE": data.centerDepartureTime,
 
-                    // * followerCapacity !== Total des followers mais c'est la sémantique ici
-                    "TOTAL ACCOMPAGNATEURS": data.followerCapacity,
+                                // * followerCapacity !== Total des followers mais c'est la sémantique ici
+                                "TOTAL ACCOMPAGNATEURS": data.followerCapacity,
 
-                    "CAPACITÉ VOLONTAIRE TOTALE": data.youngCapacity,
-                    "CAPACITÉ TOTALE LIGNE": data.totalCapacity,
-                    "PAUSE DÉJEUNER ALLER": data.lunchBreak ? "Oui" : "Non",
-                    "PAUSE DÉJEUNER RETOUR": data.lunchBreakReturn ? "Oui" : "Non",
-                    "TEMPS DE ROUTE": data.travelTime,
-                  };
-                });
-              }}
+                                "CAPACITÉ VOLONTAIRE TOTALE": data.youngCapacity,
+                                "CAPACITÉ TOTALE LIGNE": data.totalCapacity,
+                                "PAUSE DÉJEUNER ALLER": data.lunchBreak ? "Oui" : "Non",
+                                "PAUSE DÉJEUNER RETOUR": data.lunchBreakReturn ? "Oui" : "Non",
+                                "TEMPS DE ROUTE": data.travelTime,
+                              };
+                            });
+                          }}
+                        />
+                      ),
+                    },
+                    [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)
+                      ? {
+                          action: async () => {
+                            await exportLigneBus(user, cohort);
+                          },
+                          render: (
+                            <div className="flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                              <div className="text-sm text-gray-700">Volontaires par ligne</div>
+                            </div>
+                          ),
+                        }
+                      : null,
+                  ].filter((x) => x),
+                },
+              ]}
             />
           </div>
         </div>

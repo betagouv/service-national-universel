@@ -89,7 +89,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
           if (!responseApplication.ok)
             toastr.error(
               translate(responseApplication.code),
-              `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`,
+              `Une erreur s'est produite lors du changement automatique de statut de la candidature à la mission : ${app.missionName}`,
             );
           await api.post(`/referent/${app.tutorId}/email/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED}`, { app });
         }
@@ -306,13 +306,13 @@ export default function Phase2militaryPrepartionV2({ young }) {
                 }
               />
               <FileCard
-                name="Certifical médical de non contre-indication..."
+                name="Certificat médical de non contre-indication..."
                 icon="autotest"
                 filled={young.files.militaryPreparationFilesCertificate.length}
                 onClick={() =>
                   setModalFiles({
                     isOpen: true,
-                    title: "Certifical médical de non contre-indication...",
+                    title: "Certificat médical de non contre-indication...",
                     nameFiles: "militaryPreparationFilesCertificate",
                     initialValues: young.files.militaryPreparationFilesCertificate,
                   })

@@ -38,6 +38,8 @@ import ApplyModal from "./components/ApplyModal";
 import IconDomain from "./components/IconDomain";
 import ModalPJ from "./components/ModalPJ";
 import House from "./components/HouseIcon";
+import AlertPrimary from "../../components/ui/alerts/AlertPrimary";
+import InformationCircle from "../../assets/icons/InformationCircle";
 
 export default function viewMobile() {
   const [mission, setMission] = useState();
@@ -235,7 +237,7 @@ export default function viewMobile() {
               onClick={() => {
                 setOpenPeopleContract(!openPeopleContract);
               }}>
-              <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
+              <div className="text-lg font-bold">Contrat d&apos;engagement en mission d&apos;intérêt général</div>
               {contract?.invitationSent && <HiChevronDown />}
             </div>
             {openPeopleContract && (
@@ -535,8 +537,13 @@ const ApplyButton = ({
 
   if (applicationsCount >= 15)
     return (
-      <div className="flex flex-col items-center justify-center gap-2">
-        <div className="text-red-500 text-xs text-center">Vous ne pouvez candidater qu&quot;à 15 missions différentes.</div>
+      <div className="flex flex-col items-center justify-center gap-4">
+        <AlertPrimary>
+          <div className="text-blue-400 my-1">
+            <InformationCircle />
+          </div>
+          <span>Vous ne pouvez candidater qu&apos;à 15 missions différentes.</span>
+        </AlertPrimary>
         <div className="flex flex-col items-stretch gap-4">
           <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
             Candidater
@@ -548,8 +555,13 @@ const ApplyButton = ({
 
   if (!isYoungCanApplyToPhase2Missions(young)) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2">
-        <div className="text-red-500 text-xs text-center">Pour candidater, vous devez avoir terminé votre séjour de cohésion</div>
+      <div className="flex flex-col items-center justify-center gap-4">
+        <AlertPrimary>
+          <div className="text-blue-400 my-1">
+            <InformationCircle />
+          </div>
+          <span>Pour candidater, vous devez avoir terminé votre séjour de cohésion.</span>
+        </AlertPrimary>
         <div className="flex flex-col items-stretch gap-4">
           <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
             Candidater
@@ -561,8 +573,13 @@ const ApplyButton = ({
   }
   if (disabledAge)
     return (
-      <div className="flex flex-col items-center justify-center gap-2">
-        <div className="text-red-500 text-xs">Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)</div>
+      <div className="flex flex-col items-center justify-center gap-4">
+        <AlertPrimary>
+          <div className="text-blue-400 my-1">
+            <InformationCircle />
+          </div>
+          <span>Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie).</span>
+        </AlertPrimary>
         <div className="flex flex-col items-stretch gap-4">
           <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
             Candidater
@@ -574,18 +591,29 @@ const ApplyButton = ({
 
   if (disabledPmRefused)
     return (
-      <div className="flex flex-col items-center justify-center gap-2">
-        <div className="text-red-500 text-xs">Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater</div>
+      <div className="flex flex-col items-center justify-center gap-4">
+        <AlertPrimary>
+          <div className="text-blue-400 my-1">
+            <InformationCircle />
+          </div>
+          <span>Vous n&apos;êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater.</span>
+        </AlertPrimary>
         <div className="flex flex-col items-stretch gap-4">
           <button className="px-12 py-2 rounded-lg text-white bg-blue-600/60  text-sm cursor-pointer">Candidater</button>
           <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
         </div>
       </div>
     );
+
   if (disabledIncomplete)
     return (
-      <div className="flex flex-col items-center justify-center gap-2">
-        <div className="text-red-500 text-center text-xs">Pour candidater, veuillez téléverser le dossier d’égibilité présent en bas de page</div>
+      <div className="flex flex-col items-center justify-center gap-4">
+        <AlertPrimary>
+          <div className="text-blue-400 my-1">
+            <InformationCircle />
+          </div>
+          <span>Pour candidater, veuillez téléverser le dossier d&apos;égibilité présent en bas de page.</span>
+        </AlertPrimary>
         <div className="flex flex-col items-stretch gap-4">
           <button className="px-12 py-2 rounded-lg text-white bg-blue-600  text-sm cursor-pointer" onClick={() => scrollToBottom()}>
             Candidater

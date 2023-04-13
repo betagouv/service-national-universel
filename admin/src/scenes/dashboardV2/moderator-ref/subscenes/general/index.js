@@ -13,10 +13,15 @@ export default function Index() {
     <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}>
       <h4>Full Doughnut</h4>
       <div className="bg-white m-8 p-8 grid grid-cols-2 gap-2">
-        <FullDoughnut title="Présence à l'arrivée" legendSide="left" labels={["Oui", "Non", "Non renseigné"]} values={[45, 23, 38]} />
-        <FullDoughnut title="Présence à l'arrivée" legendSide="bottom" labels={["Oui", "Non", "Non renseigné", "Décalé"]} values={[45, 23, 38, 12]} maxLegends={2} />
-        <FullDoughnut title="Présence à l'arrivée" legendSide="top" labels={["Oui", "Non", "Non renseigné"]} values={[45, 23, 38]} />
-        <FullDoughnut title="Présence à l'arrivée" legendSide="right" labels={["Oui", "Non", "Non renseigné", "Autre"]} values={[45, 23, 38, 25]} maxLegends={2} />
+        <FullDoughnut title="Left" legendSide="left" labels={["Oui", "Non", "Non renseigné"]} values={[45, 23, 38]} />
+        <FullDoughnut title="Right" legendSide="right" labels={["Oui", "Non", "Non renseigné"]} values={[45, 23, 38]} />
+        <FullDoughnut title="Left max 2" legendSide="left" labels={["Oui", "Non", "Non renseigné", "Autre"]} values={[45, 23, 38, 42]} maxLegends={2} />
+        <FullDoughnut title="Right max 2 un peu long" legendSide="right" labels={["Oui", "Non", "Non renseigné", "Autre"]} values={[45, 23, 38, 10]} maxLegends={2} />
+
+        <FullDoughnut title="Top" legendSide="top" labels={["Oui", "Non", "Non renseigné"]} values={[45, 23, 38]} />
+        <FullDoughnut title="Top max 2" legendSide="top" labels={["Oui", "Non", "Non renseigné"]} values={[45, 23, 38]} maxLegends={2} />
+        <FullDoughnut title="Bottom" legendSide="bottom" labels={["Oui", "Non", "Non renseigné", "Autre"]} values={[45, 23, 38, 42]} />
+        <FullDoughnut title="Bottom max 2 un peu long" legendSide="bottom" labels={["Oui", "Non", "Non renseigné", "Autre"]} values={[45, 23, 38, 10]} maxLegends={2} />
       </div>
 
       <h4>Demi Doughnut</h4>
