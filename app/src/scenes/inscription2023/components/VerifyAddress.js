@@ -13,17 +13,24 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
 
   const handleClick = (address, city, zip) => {
     if (disabled || !address || !zip || !city || loading) return;
-    let query = `${address}, ${city}`;
-    if (environment !== "production") {
-      query = `${address}, ${city}, ${zip}`;
-    }
-    return getSuggestions(query);
+    return getSuggestions(address, city, zip);
   };
 
-  const getSuggestions = async (text) => {
+  const getSuggestions = async (address, city, zip) => {
     setLoading(true);
     try {
-      const res = await apiAdress(text, [`postcode=${zip}`]);
+      let query = `${address}, ${city}`;
+      if (environment !== "production") {
+        query = `${address}, ${city}, ${zip}`;
+      }
+      let res = await apiAdress(query, [`postcode=${zip}`]);
+
+      // Si pas de résultat, on tente avec la ville et le code postal uniquement
+      if (res?.features?.length === 0 && environment !== "production") {
+        query = `${city}, ${zip}`;
+        res = await apiAdress(query, [`postcode=${zip}`]);
+      }
+
       const arr = res?.features;
 
       setLoading(false);
