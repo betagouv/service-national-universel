@@ -15,7 +15,7 @@ const contactTypes = {
   phone: "Téléphone",
 };
 
-export default function ListPDR(props) {
+export default function ListBus(props) {
   const id = props.match && props.match.params && props.match.params.id;
   if (!id) return <div />;
   const [bus, setBus] = React.useState();
@@ -201,6 +201,7 @@ export default function ListPDR(props) {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            esRouteQueryParams="?showAffectedToRegionOrDep=1"
           />
           <button className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm" onClick={() => setIsExportOpen(true)}>
             <BsDownload className="text-gray-400" />
@@ -217,6 +218,7 @@ export default function ListPDR(props) {
             searchBarObject={searchBarObject}
             selectedFilters={selectedFilters}
             filters={filterArray}
+            esRouteQueryParams="?showAffectedToRegionOrDep=1"
           />
         </div>
         <div className="mt-2 px-4 flex flex-row flex-wrap items-center">
