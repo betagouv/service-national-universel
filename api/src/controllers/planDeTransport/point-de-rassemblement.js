@@ -223,13 +223,12 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canUpdateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const { id, name, address, city, zip, department, region, location } = value;
 
     // * Update slave PlanTransport
     const pointDeRassemblement = await PointDeRassemblementModel.findById(id);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canUpdateMeetingPoint(req.user, pointDeRassemblement)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     pointDeRassemblement.set({ name, address, city, zip, department, region, location });
     await pointDeRassemblement.save({ fromUser: req.user });
@@ -264,12 +263,11 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canUpdateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const { id, cohort, complementAddress } = value;
 
     const pointDeRassemblement = await PointDeRassemblementModel.findById(id);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canUpdateMeetingPoint(req.user, pointDeRassemblement)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     let cohortsToUpdate = pointDeRassemblement.cohorts;
     if (!cohortsToUpdate.includes(cohort)) cohortsToUpdate.push(cohort);

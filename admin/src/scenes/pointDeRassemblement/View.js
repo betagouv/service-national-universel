@@ -280,7 +280,7 @@ export default function View(props) {
         <div className="flex flex-col rounded-lg pt-8 pb-12 px-8 bg-white gap-8">
           <div className="flex items-center justify-between">
             <div className="text-lg leading-6 font-medium text-gray-900">Informations générales</div>
-            {canUpdateMeetingPoint(user) ? (
+            {canUpdateMeetingPoint(user, data) ? (
               <>
                 {!editInfo ? (
                   <div data-tip="" data-for="tooltip-edit-disabled">
@@ -403,7 +403,7 @@ export default function View(props) {
                     </a>
                   ))}
               </nav>
-              {canUpdateMeetingPoint(user) ? (
+              {canUpdateMeetingPoint(user, data) ? (
                 <>
                   {!editSession ? (
                     <button
