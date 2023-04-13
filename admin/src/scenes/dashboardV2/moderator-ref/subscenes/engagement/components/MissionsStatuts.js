@@ -20,7 +20,14 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
     try {
       const result = await api.post(`/dashboard/engagement/missions-statuts`, { filters, missionFilters });
       if (result.ok) {
-        setStatuses(result.data.map((status) => ({ status: translate(status.status), nb: status.value, percentage: Math.round(status.percentage * 100) })));
+        setStatuses(
+          result.data.map((status) => ({
+            status: translate(status.status),
+            nb: status.value,
+            percentage: Math.round(status.percentage * 100),
+            info: <div className="p-8">TODO: panel for {translate(status.status)}</div>,
+          })),
+        );
       } else {
         console.log("error : ", result);
         setError("Erreur: impossible de charger les données.");

@@ -33,11 +33,50 @@ export default function MissionsYoungPreferences({ filters, missionFilters, clas
           result.data.map((res) => {
             const labels = [];
             const values = [];
-            for (const data of res) {
+            const tooltips = [];
+            const infoPanels = [];
+            const total = res.reduce((acc, val) => acc + val.count, 0);
+            console.log("total: ", total);
+            for (let i = 0, n = res.length; i < n; ++i) {
+              const data = res[i];
               labels.push(translate(data._id));
-              values.push(data.count);
+              values.push(total ? Math.round((data.count / total) * 100) : 0);
+              tooltips.push(
+                <div>
+                  <span className="font-normal">D&apos;après </span>
+                  {data.count}
+                  <span className="font-normal"> volontaires</span>
+                </div>,
+              );
+              if (data.extra) {
+                console.log("data.extra = ", data.extra);
+                const extraTotal = data.extra.reduce((acc, val) => acc + val.count, 0);
+                const extraTooltips = data.extra.map((e, idx) => (
+                  <div key={"extratooltip-" + idx}>
+                    <span className="font-normal">D&apos;après </span>
+                    {e.count}
+                    <span className="font-normal"> volontaires</span>
+                  </div>
+                ));
+                infoPanels.push(
+                  <div key={`info-${i}`} className="p-8">
+                    <div className="font-bold test-base text-gray-800">{translate(data._id)}</div>
+                    <FullDoughnut
+                      labels={data.extra.map((e) => (e._id !== "" ? translate(e._id) : "Non précisé"))}
+                      values={data.extra.map((e) => (extraTotal ? Math.round((e.count / extraTotal) * 100) : 0))}
+                      tooltips={extraTooltips}
+                      legendSide="right"
+                      maxLegends={4}
+                      valueSuffix="%"
+                    />
+                  </div>,
+                );
+              } else {
+                infoPanels.push(null);
+              }
             }
-            return { values, labels };
+            console.log("values= ", values);
+            return { values, labels, tooltips, infoPanels };
           }),
         );
       } else {
@@ -72,7 +111,17 @@ export default function MissionsYoungPreferences({ filters, missionFilters, clas
       ) : (
         <div className="flex items-center justify-around mt-8">
           {graphs.map((graph, idx) => (
-            <FullDoughnut title={getGraphTitle(idx)} key={"graph-" + idx} labels={graph.labels} values={graph.values} legendSide="right" maxLegends={3} />
+            <FullDoughnut
+              title={getGraphTitle(idx)}
+              key={"graph-" + idx}
+              labels={graph.labels}
+              values={graph.values}
+              valueSuffix="%"
+              legendSide="right"
+              maxLegends={3}
+              tooltips={graph.tooltips}
+              legendInfoPanels={graph.infoPanels}
+            />
           ))}
         </div>
       )}
