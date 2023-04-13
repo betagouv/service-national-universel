@@ -166,8 +166,13 @@ describe("Young", () => {
   });
   describe("POST /young/logout", () => {
     it("should return 200", async () => {
+      const young = await createYoungHelper({ ...getNewYoungFixture(), password: VALID_PASSWORD });
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
       const res = await request(getAppHelper()).post("/young/logout");
       expect(res.status).toBe(200);
+      passport.user = previous;
     });
   });
 

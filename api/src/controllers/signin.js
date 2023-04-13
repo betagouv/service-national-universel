@@ -40,16 +40,20 @@ router.get("/token", async (req, res) => {
       });
     });
     if (!jwtPayload) return res.status(401).send({ ok: false, user: { restriction: "public" } });
-    const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+    const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.string().required(), lastLogoutAt: Joi.date().required() }).validate({
+      _id: jwtPayload._id,
+      passwordChangedAt: jwtPayload.passwordChangedAt,
+      lastLogoutAt: jwtPayload.lastLogoutAt,
+    });
     if (error) return res.status(200).send({ ok: true, user: { restriction: "public" } });
 
-    const young = await Young.findById(value._id);
+    const young = await Young.findOne(value);
     if (young) {
       young.set({ lastLoginAt: Date.now() });
       await young.save();
       return res.status(200).send({ ok: true, user: { ...serializeYoung(young, young), allowedRole: "young" } });
     }
-    const referent = await Referent.findById(value._id);
+    const referent = await Referent.findOne(value);
     if (referent) {
       referent.set({ lastLoginAt: Date.now() });
       await referent.save();

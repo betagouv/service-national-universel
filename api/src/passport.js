@@ -24,10 +24,14 @@ module.exports = function () {
     "young",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+        const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.date().allow(null), lastLogoutAt: Joi.date().allow(null) }).validate({
+          _id: jwtPayload._id,
+          passwordChangedAt: jwtPayload.passwordChangedAt,
+          lastLogoutAt: jwtPayload.lastLogoutAt,
+        });
         if (error) return done(null, false);
 
-        const young = await Young.findById(value._id);
+        const young = await Young.findOne(value);
         if (young) return done(null, young);
       } catch (error) {
         capture(error);
@@ -40,10 +44,14 @@ module.exports = function () {
     "referent",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+        const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.date().allow(null), lastLogoutAt: Joi.date().allow(null) }).validate({
+          _id: jwtPayload._id,
+          passwordChangedAt: jwtPayload.passwordChangedAt,
+          lastLogoutAt: jwtPayload.lastLogoutAt,
+        });
         if (error) return done(null, false);
 
-        const referent = await Referent.findById(value._id);
+        const referent = await Referent.findOne(value);
         if (referent) return done(null, referent);
       } catch (error) {
         capture(error);
@@ -56,10 +64,14 @@ module.exports = function () {
     "admin",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+        const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.date().allow(null), lastLogoutAt: Joi.date().allow(null) }).validate({
+          _id: jwtPayload._id,
+          passwordChangedAt: jwtPayload.passwordChangedAt,
+          lastLogoutAt: jwtPayload.lastLogoutAt,
+        });
         if (error) return done(null, false);
 
-        const referent = await Referent.findById(value._id);
+        const referent = await Referent.findOne(value);
         if (referent && referent.role === ROLES.ADMIN) return done(null, referent);
       } catch (error) {
         capture(error);
@@ -72,10 +84,14 @@ module.exports = function () {
     "dsnj",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+        const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.date().allow(null), lastLogoutAt: Joi.date().allow(null) }).validate({
+          _id: jwtPayload._id,
+          passwordChangedAt: jwtPayload.passwordChangedAt,
+          lastLogoutAt: jwtPayload.lastLogoutAt,
+        });
         if (error) return done(null, false);
 
-        const referent = await Referent.findById(value._id);
+        const referent = await Referent.findOne(value);
         if (referent && referent.role === ROLES.DSNJ) return done(null, referent);
       } catch (error) {
         capture(error);
