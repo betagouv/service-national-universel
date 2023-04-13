@@ -315,9 +315,10 @@ export default function Settings() {
                       <p className="text-gray-900  text-xs font-medium">Remplissage des centres </p>
                       <MdInfoOutline data-tip data-for="remplissage_centres" className="text-gray-400 h-5 w-5 cursor-pointer" />
                       <ReactTooltip id="remplissage_centres" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
-                          Ouverture ou fermeture pour les utilisateurs de la possibilité de déclarer un centre sur le séjour.
-                        </p>
+                        <ul className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+                          <li>Ouverture ou fermeture pour les utilisateurs de la possibilité de déclarer un centre sur le séjour.</li>
+                          <li>Ouverture et fermeture pour les utilisateurs de la possibilité de modifier le nombre de places ouvertes sur le séjour</li>
+                        </ul>
                       </ReactTooltip>
                     </div>
                     <SimpleToggle
