@@ -5,15 +5,25 @@ import InfoIcon from "../../../components/InfoIcon";
 import { apiAdress } from "../../../services/api-adresse";
 import Button from "./Button";
 import GhostButton from "./GhostButton";
+import { environment } from "../../../config";
 
 export default function VerifyAddress({ address, zip, city, onSuccess, onFail, disabled = false, isVerified = false, buttonClassName = "", buttonContainerClassName = "" }) {
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState(null);
 
+  const handleClick = (address, city, zip) => {
+    if (disabled || !address || !zip || !city || loading) return;
+    let query = `${address}, ${city}`;
+    if (environment !== "production") {
+      query = `${address}, ${city}, ${zip}`;
+    }
+    return getSuggestions(query);
+  };
+
   const getSuggestions = async (text) => {
     setLoading(true);
     try {
-      const res = await apiAdress(`${text} ${zip}`, [`postcode=${zip}`]);
+      const res = await apiAdress(text, [`postcode=${zip}`]);
       const arr = res?.features;
 
       setLoading(false);
@@ -101,10 +111,7 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
               Vériﬁer mon adresse
             </div>
           }
-          onClick={() => {
-            if (disabled || !address || !zip || !city || loading) return;
-            getSuggestions(`${address}, ${city}`);
-          }}
+          onClick={() => handleClick(address, city, zip)}
         />
       </div>
       {(!address || !zip || !city) && <Message>Pour vérifier votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.</Message>}
