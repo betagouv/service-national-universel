@@ -26,10 +26,7 @@ export default function ListBus(props) {
   const [data, setData] = React.useState([]);
   const pageId = "listYoungBus";
   const [selectedFilters, setSelectedFilters] = React.useState({});
-  const [paramData, setParamData] = React.useState({
-    size: 20,
-    page: 0,
-  });
+  const [paramData, setParamData] = React.useState({ page: 0 });
 
   const fetchData = async () => {
     try {
