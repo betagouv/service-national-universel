@@ -95,11 +95,25 @@ const render = async (young) => {
       .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
       .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
       .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
-      .replace(/{{MEETING_DATE}}/g, sanitizeAll(`<b>Le</b> ${datefns.format(new Date(cohort?.dateStart), "EEEE dd MMMM", { locale: fr })}`))
+      .replace(
+        /{{MEETING_DATE}}/g,
+        sanitizeAll(
+          `<b>Le</b> ${
+            ligneBus
+              ? datefns.format(new Date(ligneBus?.departuredDate), "EEEE dd MMMM", { locale: fr })
+              : datefns.format(new Date(cohort?.dateStart), "EEEE dd MMMM", { locale: fr })
+          }`,
+        ),
+      )
       .replace(/{{MEETING_HOURS}}/g, sanitizeAll(`<b>A</b> ${meetingPoint ? ligneToPoint.meetingHour : "16:00"}`))
       .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(`<b>Au</b> ${getMeetingAddress(meetingPoint, center)}`))
       .replace(/{{TRANSPORT}}/g, sanitizeAll(ligneBus ? `<b>Numéro de transport</b> : ${ligneBus.busId}` : ""))
-      .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(datefns.format(new Date(cohort?.dateEnd), "EEEE dd MMMM", { locale: fr })))
+      .replace(
+        /{{MEETING_DATE_RETURN}}/g,
+        sanitizeAll(
+          ligneBus ? datefns.format(new Date(ligneBus?.returnDate), "EEEE dd MMMM", { locale: fr }) : datefns.format(new Date(cohort?.dateEnd), "EEEE dd MMMM", { locale: fr }),
+        ),
+      )
       .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(meetingPoint ? ligneToPoint.returnHour : "11:00"))
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
       .replace(/{{TOP}}/g, sanitizeAll(getTop()))
