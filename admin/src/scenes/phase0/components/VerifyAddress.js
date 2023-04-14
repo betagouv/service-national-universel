@@ -28,13 +28,11 @@ export default function VerifyAddress({
   const getSuggestions = async (address, city, zip) => {
     setLoading(true);
     try {
-      let query = `${address}, ${city}, ${zip}`;
-      let res = await apiAdress(query, [`postcode=${zip}`]);
+      let res = await apiAdress(`${address}, ${city}, ${zip}`, { postcode: zip });
 
       // Si pas de résultat, on tente avec la ville et le code postal uniquement
       if (res?.features?.length === 0) {
-        query = `${city}, ${zip}`;
-        res = await apiAdress(query, [`postcode=${zip}`]);
+        res = await apiAdress(`${city}, ${zip}`, { postcode: zip });
       }
 
       const arr = res?.features;
@@ -83,8 +81,9 @@ export default function VerifyAddress({
         <b className="mb-8">Est-ce que c&apos;est la bonne adresse ?</b>
         <p>{suggestion.properties.name}</p>
         <p>{`${suggestion.properties.postcode}, ${suggestion.properties.city}`}</p>
-        <div className="grid grid-cols-2 gap-4 mt-2">
+        <div className="space-y-4 mt-2">
           <BorderButton
+            className="w-full"
             onClick={() => {
               onSuccess(formatResult(suggestion));
               setSuggestion(null);
@@ -92,6 +91,7 @@ export default function VerifyAddress({
             Oui
           </BorderButton>
           <BorderButton
+            className="w-full"
             onClick={() => {
               onFail(formatResult(suggestion));
               setSuggestion(null);
