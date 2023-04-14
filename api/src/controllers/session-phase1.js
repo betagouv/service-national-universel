@@ -187,9 +187,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    if (!(req.user.role === ROLES.ADMIN) && sessionPhase1.status === "VALIDATED") {
-      value.placesTotal = sessionPhase1.placesTotal;
-    }
+
     const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
     if (cohesionCenter.placesTotal < value.placesTotal) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
