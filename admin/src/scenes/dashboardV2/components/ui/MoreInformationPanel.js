@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import InformationCircle from "../../../assets/icons/InformationCircle";
+import InformationCircle from "../../../../assets/icons/InformationCircle";
 
 export default function MoreInfoPanel({ children, className = "" }) {
   const [open, setOpen] = useState(false);

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { getGraphColors } from "./graph-commons";
 import GraphTooltip from "./GraphTooltip";
-import MoreInfoPanel from "../MoreInformationPanel";
+import MoreInfoPanel from "../ui/MoreInformationPanel";
+import { useHistory } from "react-router-dom";
 
 export default function FullDoughnut({
   title,
@@ -11,17 +12,19 @@ export default function FullDoughnut({
   labels,
   tooltips,
   tooltipsPercent = false,
+  legendUrls,
+  onLegendClicked = () => {},
   maxLegends = Number.MAX_VALUE,
   legendSide = "bottom",
   legendInfoPanels = [],
   className = "",
-  onLegendClicked = () => {},
 }) {
   const [graphOptions, setGraphOptions] = useState(null);
   const [graphData, setGraphData] = useState(null);
   const [legends, setLegends] = useState([]);
   const [tooltip, setTooltip] = useState(null);
   const [dataIsZero, setDataIsZero] = useState(true);
+  const history = useHistory();
 
   useEffect(() => {
     if (values) {
@@ -259,6 +262,14 @@ export default function FullDoughnut({
     },
   };
 
+  function clickOnLegend({ index, label, value, color }) {
+    if (legendUrls && legendUrls[index]) {
+      history.push(legendUrls[index]);
+    } else {
+      onLegendClicked(index, label, value, color);
+    }
+  }
+
   return (
     <div className={`${mainClass} ${className}`}>
       <div className={`relative ${graphClass}`}>
@@ -272,7 +283,7 @@ export default function FullDoughnut({
       <div className={legendsClass}>
         {legends.map((legend, idx) => {
           return legend ? (
-            <div className={legendClass} key={legend.name} onClick={() => onLegendClicked({ index: idx, label: legend.name, value: legend.value, color: legend.color })}>
+            <div className={legendClass} key={legend.name} onClick={() => clickOnLegend({ index: idx, label: legend.name, value: legend.value, color: legend.color })}>
               <div className={`text-xs text-gray-600 mb-[4px] ${textLegendClass}`}>{legend.name}</div>
               <div className={legendValueClass}>
                 <div className={`rounded-full w-[10px] h-[10px] ${legendDotClass}`} style={{ backgroundColor: legend.color }}></div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { useHistory } from "react-router-dom";
 
 export const graphColors = {
   1: ["#1E40AF"],
@@ -32,18 +33,29 @@ export function Legend({ color, name, value = null, className = "", onClick = ()
   );
 }
 
-export function Legends({ labels, values = null, className = "", onLegendClicked = () => {} }) {
-  const colors = graphColors[labels.length];
+export function Legends({ labels, values = null, legendUrls, className = "", onLegendClicked = () => {} }) {
+  const history = useHistory();
+
+  const colors = getGraphColors(labels.length);
+
+  function clickOnLegend({ index, label, value, color }) {
+    if (legendUrls && legendUrls[index]) {
+      history.push(legendUrls[index]);
+    } else {
+      onLegendClicked(index, label, value, color);
+    }
+  }
+
   return (
     <div className={`flex ${className}`}>
       {labels.map((label, idx) => (
         <Legend
-          color={colors[idx]}
+          color={colors[idx % colors.length]}
           name={label}
           value={values ? values[idx] : 0}
           key={label}
           className="mr-4 last:mr-0"
-          onClick={() => onLegendClicked({ index: idx, label, value: values ? values[idx] : 0, color: colors[idx] })}
+          onClick={() => clickOnLegend({ index: idx, label, value: values ? values[idx] : 0, color: colors[idx] })}
         />
       ))}
     </div>

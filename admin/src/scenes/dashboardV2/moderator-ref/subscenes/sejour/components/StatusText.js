@@ -1,5 +1,5 @@
 import React from "react";
-import MoreInfoPanel from "../../../../components/MoreInformationPanel";
+import MoreInfoPanel from "../../../../components/ui/MoreInformationPanel";
 
 export default function StatusText({ status, nb, percentage, infoPanel, onClick = () => {} }) {
   return (
