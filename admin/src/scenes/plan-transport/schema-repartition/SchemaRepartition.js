@@ -309,7 +309,11 @@ export default function SchemaRepartition({ region, department }) {
           />
           <div className="flex gap-4">
             {user.role === ROLES.REFERENT_DEPARTMENT && user.department.length > 1 && <Select options={departementsList} value={department} onChange={handleChangeDepartment} />}
-            <Select options={cohortList} value={cohort} onChange={handleChangeCohort} />
+            <Select
+              options={cohortList.filter((c) => ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && c.value !== "Juin 2023") || user.role === ROLES.ADMIN)}
+              value={cohort}
+              onChange={handleChangeCohort}
+            />
           </div>
         </div>
         <div className="flex my-[40px]">
