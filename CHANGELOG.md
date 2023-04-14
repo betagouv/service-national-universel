@@ -1,3 +1,19 @@
+# [1.252.0](https://github.com/betagouv/service-national-universel/compare/v1.251.0...v1.252.0) (2023-04-14)
+
+
+### Bug Fixes
+
+* **api:** convo date transport ([#2492](https://github.com/betagouv/service-national-universel/issues/2492)) ([32fadbf](https://github.com/betagouv/service-national-universel/commit/32fadbf8f11ba3eb8baa5698d8affbdd9d50cb8f))
+* **app, admin:** Améliorer la saisie d'adresses en Polynésie (mise en prod) ([#2486](https://github.com/betagouv/service-national-universel/issues/2486)) ([f54371d](https://github.com/betagouv/service-national-universel/commit/f54371d79a0962c15210e2aa9b696f4a160e6f21))
+* string for all filters ([502599b](https://github.com/betagouv/service-national-universel/commit/502599bf1c4c9069b67264f440ce672a200769c1))
+* **api:** Allow refs to update session places ([f222401](https://github.com/betagouv/service-national-universel/commit/f222401d4148b16fe436b13f1231832d9e1773c1))
+* update node to 18 ([#2487](https://github.com/betagouv/service-national-universel/issues/2487)) ([766c348](https://github.com/betagouv/service-national-universel/commit/766c3484e8a124cef5b06162a411f3d9338cec71))
+
+
+### Features
+
+* **poc:** es queries backend ([#2463](https://github.com/betagouv/service-national-universel/issues/2463)) ([0aed0ee](https://github.com/betagouv/service-national-universel/commit/0aed0ee7bfe59e44ad452d8cc71fc65d4ad8a8cf))
+
 # [1.251.0](https://github.com/betagouv/service-national-universel/compare/v1.250.0...v1.251.0) (2023-04-13)
 
 
