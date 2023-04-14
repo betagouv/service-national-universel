@@ -52,14 +52,6 @@ export default function ListBus(props) {
     fetchData();
   }, []);
 
-  const getDefaultQuery = () => ({
-    query: {
-      bool: { must: [{ match_all: {} }, { terms: { "ligneId.keyword": [bus?._id?.toString()] } }, { terms: { "status.keyword": ["VALIDATED"] } }] },
-    },
-    sort: [{ "lastName.keyword": "asc" }],
-    track_total_hits: true,
-  });
-
   function transformVolontaires(data, values) {
     let all = data;
     return all.map((data) => {
