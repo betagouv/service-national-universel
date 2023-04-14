@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 import { formatDateFR, getDepartmentNumber, translate, translatePhase1, youngPlanDeTranportExportFields } from "snu-lib";
 import ExternalLink from "../../../assets/icons/ExternalLink";
-import { Filters, ModalExportV2, ResultTable, Save, SelectedFilters } from "../../../components/filters-system";
+import { Filters, ModalExport, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
 import Loader from "../../../components/Loader";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -137,8 +137,7 @@ export default function ListBus(props) {
   const filterArray = [
     {
       title: "ID du PDR",
-      name: "PDRID",
-      datafield: "meetingPointId.keyword",
+      name: "meetingPointId",
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A") return item;
@@ -147,8 +146,7 @@ export default function ListBus(props) {
     },
     {
       title: "Nom du PDR",
-      name: "PDRNAME",
-      datafield: "meetingPointId.keyword",
+      name: "meetingPointName",
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A") return item;
@@ -157,22 +155,16 @@ export default function ListBus(props) {
     },
     {
       title: " Commune du point du PDR",
-      name: "PDRCITY",
-      datafield: "meetingPointId.keyword",
+      name: "meetingPointCity",
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A") return item;
         return bus.meetingsPointsDetail.find((option) => option.meetingPointId === item)?.city;
       },
     },
-    { title: "Région", name: "REGION", datafield: "region.keyword", missingLabel: "Non renseigné" },
-    { title: "Département", name: "DEPARTMENT", datafield: "department.keyword", missingLabel: "Non renseigné", translate: (e) => getDepartmentNumber(e) + " - " + e },
+    { title: "Région", name: "region", missingLabel: "Non renseigné" },
+    { title: "Département", name: "department", missingLabel: "Non renseigné", translate: (e) => getDepartmentNumber(e) + " - " + e },
   ];
-
-  const searchBarObject = {
-    placeholder: "Rechercher par prénom, nom, email, ville, code postal...",
-    datafield: ["email", "firstName", "lastName", "city", "zip"],
-  };
 
   if (loading) return <Loader />;
 
@@ -192,33 +184,28 @@ export default function ListBus(props) {
         <div className="flex items-stretch justify-between  bg-white pt-2 px-4">
           <Filters
             pageId={pageId}
-            esId="young"
-            defaultQuery={getDefaultQuery()}
+            route={`/elasticsearch/young/in-bus/${String(bus?._id)}/search`}
             setData={(value) => setData(value)}
             filters={filterArray}
-            searchBarObject={searchBarObject}
+            searchPlaceholder="Rechercher par prénom, nom, email, ville, code postal..."
             selectedFilters={selectedFilters}
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
-            esRouteQueryParams="?showAffectedToRegionOrDep=1"
           />
           <button className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm" onClick={() => setIsExportOpen(true)}>
             <BsDownload className="text-gray-400" />
             Exporter
           </button>
-          <ModalExportV2
+          <ModalExport
             isOpen={isExportOpen}
             setIsOpen={setIsExportOpen}
-            index="young"
-            defaultQuery={getDefaultQuery()}
-            exportTitle={`volontaires - ${bus.busId}`}
+            route={`/elasticsearch/young/in-bus/${String(bus?._id)}/export`}
+            exportTitle={`Volontaires - ${bus.busId}`}
             transform={transformVolontaires}
             exportFields={youngPlanDeTranportExportFields}
-            searchBarObject={searchBarObject}
             selectedFilters={selectedFilters}
             filters={filterArray}
-            esRouteQueryParams="?showAffectedToRegionOrDep=1"
           />
         </div>
         <div className="mt-2 px-4 flex flex-row flex-wrap items-center">
