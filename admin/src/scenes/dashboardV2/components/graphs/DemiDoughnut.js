@@ -4,7 +4,6 @@ import { Chart as ChartJS } from "chart.js";
 
 import { getGraphColors, Legends } from "./graph-commons";
 import GraphTooltip from "./GraphTooltip";
-import { useHistory } from "react-router-dom";
 
 const centerPlugin = {
   id: "centerPlugin",
@@ -27,7 +26,6 @@ export default function DemiDoughnut({ title, values, labels, tooltips, tooltips
   const [graphData, setGraphData] = useState(null);
   const [total, setTotal] = useState(0);
   const [tooltip, setTooltip] = useState(null);
-  const history = useHistory();
 
   useEffect(() => {
     if (values) {
@@ -113,7 +111,7 @@ export default function DemiDoughnut({ title, values, labels, tooltips, tooltips
 
   function clickOnLegend({ index, label, value, color }) {
     if (legendUrls && legendUrls[index]) {
-      history.push(legendUrls[index]);
+      window.open(legendUrls[index], "_blank");
     } else {
       onLegendClicked(index, label, value, color);
     }

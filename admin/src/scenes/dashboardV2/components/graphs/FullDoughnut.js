@@ -3,7 +3,6 @@ import { Doughnut } from "react-chartjs-2";
 import { getGraphColors } from "./graph-commons";
 import GraphTooltip from "./GraphTooltip";
 import MoreInfoPanel from "../ui/MoreInformationPanel";
-import { useHistory } from "react-router-dom";
 
 export default function FullDoughnut({
   title,
@@ -24,7 +23,6 @@ export default function FullDoughnut({
   const [legends, setLegends] = useState([]);
   const [tooltip, setTooltip] = useState(null);
   const [dataIsZero, setDataIsZero] = useState(true);
-  const history = useHistory();
 
   useEffect(() => {
     if (values) {
@@ -264,7 +262,7 @@ export default function FullDoughnut({
 
   function clickOnLegend({ index, label, value, color }) {
     if (legendUrls && legendUrls[index]) {
-      history.push(legendUrls[index]);
+      window.open(legendUrls[index], "_blank");
     } else {
       onLegendClicked(index, label, value, color);
     }
