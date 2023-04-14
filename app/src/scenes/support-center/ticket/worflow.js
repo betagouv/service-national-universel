@@ -46,6 +46,11 @@ export const step0 = {
 };
 
 export const step1 = {
+  TRANSPORT: {
+    id: "TRANSPORT",
+    label: "J'ai un problème de transport",
+    tags: ["TAG_problème_transport", "AGENT_Startup_Support", "AGENT_Startup_Technique"],
+  },
   TECHNICAL: {
     id: "TECHNICAL",
     label: "J'ai un problème technique",
@@ -59,6 +64,11 @@ export const step1 = {
 };
 
 export const step1Public = {
+  TRANSPORT: {
+    id: "TRANSPORT",
+    label: "J'ai un problème de transport",
+    tags: ["TAG_problème_transport", "AGENT_Startup_Support", "AGENT_Startup_Technique"],
+  },
   TECHNICAL: {
     id: "TECHNICAL",
     label: "J'ai un problème technique",
@@ -68,6 +78,33 @@ export const step1Public = {
     id: "QUESTION",
     label: "J'ai une question",
     tags: ["TAG_question", "AGENT_Startup_Support"],
+  },
+};
+
+export const step2Transport = {
+  DOWNLOAD: {
+    parentId: "TRANSPORT",
+    id: "DOWNLOAD",
+    label: "Probleme de transport",
+    tags: ["TAG_téléchargment"],
+  },
+  UPLOAD: {
+    parentId: "TRANSPORT",
+    id: "UPLOAD",
+    label: "Pas de transport",
+    tags: ["TAG_téléversement"],
+  },
+  CONTRACT: {
+    parentId: "TRANSPORT",
+    id: "CONTRACT",
+    label: "Jaime le transport",
+    tags: ["TAG_contrat_engagement"],
+  },
+  OTHER: {
+    parentId: "TRANSPORT",
+    id: "OTHER",
+    label: "J'ai un autre problème",
+    tags: ["TAG_autre"],
   },
 };
 
@@ -126,6 +163,33 @@ export const step2Question = {
     parentId: "QUESTION",
     id: "OTHER",
     label: "Autre",
+    tags: ["TAG_autre"],
+  },
+};
+
+export const step2TransportPublic = {
+  DOWNLOAD: {
+    parentId: "TRANSPORT",
+    id: "DOWNLOAD",
+    label: "Probleme de transport",
+    tags: ["TAG_téléchargment"],
+  },
+  UPLOAD: {
+    parentId: "TRANSPORT",
+    id: "UPLOAD",
+    label: "Pas de transport",
+    tags: ["TAG_téléversement"],
+  },
+  CONTRACT: {
+    parentId: "TRANSPORT",
+    id: "CONTRACT",
+    label: "Jaime le transport",
+    tags: ["TAG_contrat_engagement"],
+  },
+  OTHER: {
+    parentId: "TRANSPORT",
+    id: "OTHER",
+    label: "J'ai un autre problème",
     tags: ["TAG_autre"],
   },
 };
