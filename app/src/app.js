@@ -52,6 +52,9 @@ import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 import { cohortsInit } from "./utils/cohorts";
 import { getAvailableSessions } from "./services/cohort.service";
+import Modal from "./components/ui/modals/Modal";
+import ButtonLight from "./components/ui/buttons/ButtonLight";
+import Warning from "./assets/icons/Warning";
 
 initSentry();
 initApi();
@@ -133,8 +136,11 @@ export default function App() {
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
+  const [warningBusModalOpen, setWarningBusModalOpen] = useState(true);
 
   const young = useSelector((state) => state.Auth.young);
+
+  const busLignes = ["toto"];
 
   const handleModalCGUConfirm = async () => {
     setIsModalCGUOpen(false);
@@ -150,6 +156,11 @@ const Espace = () => {
     if (young && young.acceptCGU !== "true") {
       setIsModalCGUOpen(true);
     }
+
+    if (young && busLignes.includes(young.ligneId)) {
+      setWarningBusModalOpen(true);
+    }
+
     if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       getAvailableSessions(young).then((sessions) => {
         if (sessions.length) setIsResumePhase1WithdrawnModalOpen(true);
@@ -202,6 +213,7 @@ const Espace = () => {
       <Footer />
       <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
       <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
+      <ModalBusWarning isOpen={warningBusModalOpen} onClose={() => setWarningBusModalOpen(false)} />
     </>
   );
 };
@@ -218,3 +230,22 @@ function ScrollToTop() {
 
   return null;
 }
+
+const ModalBusWarning = ({ isOpen, onClose }) => {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} className="w-[512px] bg-white rounded-xl p-6">
+      <Warning className="w-10 h-10 mx-auto text-gray-400" />
+      <p className="text-sm text-gray-500 leading-5 mt-4 mx-2">
+        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown
+        printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting,
+        remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop
+        publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+      </p>
+      <div className=" mt-12">
+        <ButtonLight className="w-full" onClick={onClose}>
+          Fermer
+        </ButtonLight>
+      </div>
+    </Modal>
+  );
+};
