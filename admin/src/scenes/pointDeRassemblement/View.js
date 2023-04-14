@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
-import { canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession, canUpdateMeetingPoint, ROLES, START_DATE_SESSION_PHASE1 } from "snu-lib";
+import { canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession, canUpdateMeetingPoint, isPdrEditionOpen, ROLES, START_DATE_SESSION_PHASE1 } from "snu-lib";
 import Pencil from "../../assets/icons/Pencil";
 import Trash from "../../assets/icons/Trash";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -63,7 +63,7 @@ export default function View(props) {
     try {
       const id = props.match && props.match.params && props.match.params.id;
       if (!id) return <div />;
-      const { ok, code, data: reponsePDR } = await api.get(`/point-de-rassemblement/${id}`);
+      const { ok, code, data: reponsePDR } = await api.get(`/point-de-rassemblement/${id}?withcohorts=true`);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la récupération du point de rassemblement", code);
         return history.push("/point-de-rassemblement");
@@ -389,21 +389,21 @@ export default function View(props) {
           <div className="flex flex-col rounded-lg pt-3 bg-white">
             <div className="flex items-center justify-between border-b border-gray-200 px-8">
               <nav className="-mb-px flex space-x-8 " aria-label="Tabs">
-                {data?.cohorts
-                  ?.sort((a, b) => START_DATE_SESSION_PHASE1[a] - START_DATE_SESSION_PHASE1[b])
+                {data?.cohortsdetails
+                  ?.sort((a, b) => a.dateStart - b.dateStart)
                   ?.map((tab) => (
                     <a
-                      key={tab}
+                      key={tab._id}
                       onClick={() => setCurrentCohort(tab)}
                       className={classNames(
-                        tab === currentCohort ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
+                        tab?._id === currentCohort?._id ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
                         "whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer",
                       )}>
-                      {tab}
+                      {tab.name}
                     </a>
                   ))}
               </nav>
-              {canUpdateMeetingPoint(user, data) ? (
+              {canUpdateMeetingPoint(user, data) && isPdrEditionOpen(user, currentCohort) ? (
                 <>
                   {!editSession ? (
                     <button

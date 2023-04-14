@@ -1,20 +1,32 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BsChevronDown, BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { ES_NO_LIMIT, START_DATE_SESSION_PHASE1 } from "snu-lib";
+import { ES_NO_LIMIT, isSessionEditionOpen } from "snu-lib";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Field from "./Field";
+import { useSelector } from "react-redux";
 
 export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, editable = true }) {
   const history = useHistory();
-  const availableCohorts = Object.keys(START_DATE_SESSION_PHASE1)
-    .reduce((acc, cohort) => {
-      return START_DATE_SESSION_PHASE1[cohort] > new Date() ? [...acc, cohort] : acc;
-    }, [])
-    .filter((cohort) => !defaultPDR || !defaultPDR.cohorts.includes(cohort));
+  const user = useSelector((state) => state.Auth.user);
+  const [availableCohorts, setAvailableCohorts] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("/cohort");
+        const filteredCohorts = data.filter((cohort) => isSessionEditionOpen(user, cohort) === true && !defaultPDR?.cohorts.includes(cohort.name));
+        const availableCohorts = filteredCohorts.map((cohort) => cohort.name);
+        setAvailableCohorts(availableCohorts);
+      } catch (err) {
+        capture(err);
+        toastr.error("Erreur", "Une erreur est survenue");
+      }
+    })();
+  }, []);
 
   const refSelect = React.useRef(null);
   const refInput = React.useRef(null);
