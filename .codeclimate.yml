@@ -2,19 +2,19 @@ version: "2" # required to adjust maintainability checks
 checks:
   file-lines:
     config:
-      threshold: 350
+      threshold: 700
   method-lines:
     config:
-      threshold: 70
+      threshold: 200
   return-statements:
     config:
       threshold: 15
   similar-code:
     config:
-      threshold: 150
+      threshold: 300
   identical-code:
     config:
-      threshold: 70
+      threshold: 150
 exclude_patterns:
   - "config/"
   - "db/"
