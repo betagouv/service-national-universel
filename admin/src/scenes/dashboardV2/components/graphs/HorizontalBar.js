@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { getGraphColors } from "./graph-commons";
 import GraphTooltip from "./GraphTooltip";
+import { useHistory } from "react-router-dom";
 
-export default function HorizontalBar({ title, values, labels, tooltips, goal, className = "", onLegendClicked = () => {} }) {
+export default function HorizontalBar({ title, values, labels, tooltips, legendUrls, goal, className = "", onLegendClicked = () => {} }) {
   const [bars, setBars] = useState([]);
   const [total, setTotal] = useState(0);
   const [totalPercent, setTotalPercent] = useState("-");
   const [x100, setX100] = useState(null);
+  const history = useHistory();
 
   useEffect(() => {
     if (values && values.length > 0) {
@@ -21,7 +23,7 @@ export default function HorizontalBar({ title, values, labels, tooltips, goal, c
       setBars(
         values.map((value, idx) => {
           return {
-            color: colors[idx],
+            color: colors[idx % colors.length],
             label: labels[idx],
             value,
             percent: localGoal === 0 ? "-" : Math.round((value / localGoal) * 100) + "%",
@@ -43,6 +45,14 @@ export default function HorizontalBar({ title, values, labels, tooltips, goal, c
       setX100(null);
     }
   }, [values]);
+
+  function clickOnLegend({ index, label, value, color }) {
+    if (legendUrls && legendUrls[index]) {
+      history.push(legendUrls[index]);
+    } else {
+      onLegendClicked(index, label, value, color);
+    }
+  }
 
   return (
     <div className={` ${className}`}>
@@ -79,7 +89,7 @@ export default function HorizontalBar({ title, values, labels, tooltips, goal, c
       </div>
       <div className="mt-4 flex justify-between mr-8 last:mr-0">
         {bars.map((bar, idx) => (
-          <div key={"legend-" + idx} onClick={() => onLegendClicked({ index: idx, label: bar.label, value: bar.percent, color: bar.color })}>
+          <div key={"legend-" + idx} onClick={() => clickOnLegend({ index: idx, label: bar.label, value: bar.percent, color: bar.color })}>
             <div className="flex">
               <div className="rounded-full w-[12px] h-[12px] mr-2 mt-2" style={{ backgroundColor: bar.color }}></div>
               <div>
