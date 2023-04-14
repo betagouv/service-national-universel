@@ -5,7 +5,7 @@ export const buildQuery = async (route, selectedFilters, page = 0, filterArray, 
     page,
     filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
       if (value.filter.length === 1 && value.filter[0] === "") return e;
-      return { ...e, [key]: value.filter };
+      return { ...e, [key]: value.filter.map((e) => String(e)) };
     }, {}),
     sort: sort ? { field: sort.field, order: sort.order } : null,
   });
