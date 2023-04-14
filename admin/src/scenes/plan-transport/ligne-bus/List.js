@@ -8,9 +8,9 @@ import ArrowUp from "../../../assets/ArrowUp";
 import Comment from "../../../assets/comment";
 import History from "../../../assets/icons/History";
 import Breadcrumbs from "../../../components/Breadcrumbs";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
 import Loader from "../../../components/Loader";
 import SelectAction from "../../../components/SelectAction";
-import { ExportComponentV2, Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { PlainButton } from "../components/Buttons";
@@ -104,66 +104,52 @@ const ReactiveList = ({ cohort, history }) => {
   const pageId = "plandetransport";
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({
-    size: 20,
     page: 0,
   });
-
-  const getDefaultQuery = () => {
-    return {
-      query: {
-        bool: { must: [{ match_all: {} }, { term: { "cohort.keyword": cohort } }] },
-      },
-      track_total_hits: true,
-    };
-  };
-
   const filterArray = [
-    { title: "Numéro de la ligne", name: "LINE_NUMBER", datafield: "busId.keyword", parentGroup: "Bus", missingLabel: "Non renseigné" },
-    { title: "Date aller", name: "DATE_ALLER", datafield: "departureString.keyword", parentGroup: "Bus", missingLabel: "Non renseigné" },
-    { title: "Date retour", name: "DATE_RETOUR", datafield: "returnString.keyword", parentGroup: "Bus", missingLabel: "Non renseigné" },
+    { title: "Numéro de la ligne", name: "busId", parentGroup: "Bus", missingLabel: "Non renseigné" },
+    { title: "Date aller", name: "departureString", parentGroup: "Bus", missingLabel: "Non renseigné" },
+    { title: "Date retour", name: "returnString", parentGroup: "Bus", missingLabel: "Non renseigné" },
     {
       title: "Taux de remplissage",
-      name: "TAUX_REMPLISSAGE",
-      datafield: "lineFillingRate",
+      name: "lineFillingRate",
       parentGroup: "Bus",
       missingLabel: "Non renseigné",
       transformData: (value) => transformDataTaux(value),
-      customQuery: (value) => customQuery(value, getDefaultQuery),
     },
-    { title: "Nom", name: "NAME_PDR", datafield: "pointDeRassemblements.name.keyword", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
-    { title: "Région", name: "REGION_PDR", datafield: "pointDeRassemblements.region.keyword", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
+    { title: "Nom", name: "pointDeRassemblements.name", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
+    { title: "Région", name: "pointDeRassemblements.region", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
     {
       title: "Département",
-      name: "DEPARTMENT_PDR",
-      datafield: "pointDeRassemblements.department.keyword",
+      name: "pointDeRassemblements.department",
       parentGroup: "Points de rassemblement",
       missingLabel: "Non renseigné",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
-    { title: "Ville", name: "CITY_PDR", datafield: "pointDeRassemblements.city.keyword", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
-    { title: "Code", name: "CODE_PDR", datafield: "pointDeRassemblements.code.keyword", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
-    { title: "Nom", name: "NAME_CENTER", datafield: "centerName.keyword", parentGroup: "Centre", missingLabel: "Non renseigné" },
-    { title: "Région", name: "REGION_CENTER", datafield: "centerRegion.keyword", parentGroup: "Centre", missingLabel: "Non renseigné" },
+    { title: "Ville", name: "pointDeRassemblements.city", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
+    { title: "Code", name: "pointDeRassemblements.code", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
+    { title: "Nom", name: "centerName", parentGroup: "Centre", missingLabel: "Non renseigné" },
+    { title: "Région", name: "centerRegion", parentGroup: "Centre", missingLabel: "Non renseigné" },
     {
       title: "Département",
-      name: "DEPARTMENT_CENTER",
-      datafield: "centerDepartment.keyword",
+
+      name: "centerDepartment",
       parentGroup: "Centre",
       missingLabel: "Non renseigné",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
-    { title: "Code", name: "CODE_CENTER", datafield: "centerCode.keyword", parentGroup: "Centre", missingLabel: "Non renseigné" },
+    { title: "Code", name: "centerCode", parentGroup: "Centre", missingLabel: "Non renseigné" },
     {
       title: "Modification demandée",
-      name: "MODIFICATION_ASKED",
-      datafield: "modificationBuses.requestMessage.keyword",
+
+      name: "modificationBuses.requestMessage",
       parentGroup: "Modification",
       missingLabel: "Non renseigné",
     },
     {
       title: "Statut de la modification",
-      name: "MODIFICATION_STATUS",
-      datafield: "modificationBuses.status.keyword",
+
+      name: "modificationBuses.status",
       parentGroup: "Modification",
       missingLabel: "Non renseigné",
       translate: translateStatus,
@@ -171,19 +157,14 @@ const ReactiveList = ({ cohort, history }) => {
     user.role === ROLES.ADMIN
       ? {
           title: "Opinion sur la modification",
-          name: "MODIFICATION_OPINION",
-          datafield: "modificationBuses.opinion.keyword",
+
+          name: "modificationBuses.opinion",
           parentGroup: "Modification",
           missingLabel: "Non renseigné",
           translate: translate,
         }
       : null,
   ].filter((e) => e);
-
-  const searchBarObject = {
-    placeholder: "Rechercher une ligne (numéro, ville, region)",
-    datafield: ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"],
-  };
 
   return (
     <>
@@ -197,11 +178,10 @@ const ReactiveList = ({ cohort, history }) => {
             <Filters
               defaultUrlParam={`cohort=${cohort}`}
               pageId={pageId}
-              esId="plandetransport"
-              defaultQuery={getDefaultQuery()}
+              route="/elasticsearch/plandetransport/search"
               setData={(value) => setData(value)}
               filters={filterArray}
-              searchBarObject={searchBarObject}
+              searchPlaceholder="Rechercher une ligne (numéro, ville, region)"
               selectedFilters={selectedFilters}
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
@@ -232,14 +212,12 @@ const ReactiveList = ({ cohort, history }) => {
                     {
                       action: async () => {},
                       render: (
-                        <ExportComponentV2
+                        <ExportComponent
                           title="Plan de transport"
-                          defaultQuery={getDefaultQuery()}
                           exportTitle="Plan_de_transport"
-                          index="plandetransport"
+                          route="/elasticsearch/plandetransport/export"
                           filters={filterArray}
                           selectedFilters={selectedFilters}
-                          searchBarObject={searchBarObject}
                           setIsOpen={() => true}
                           css={{
                             override: true,
@@ -248,7 +226,6 @@ const ReactiveList = ({ cohort, history }) => {
                           }}
                           transform={async (data) => {
                             let all = data;
-
                             // Get the length of the longest array of PDRs
                             const maxPDRs = all.reduce((max, item) => (item.pointDeRassemblements.length > max ? item.pointDeRassemblements.length : max), 0);
 
@@ -493,35 +470,4 @@ const transformDataTaux = (data) => {
     }
   });
   return newData;
-};
-
-const customQuery = (value, getDefaultQuery) => {
-  let rangeArray = [];
-  let empty = false;
-  let full = false;
-  if (Array.isArray(value)) {
-    value?.map((e) => {
-      if (e === "Vide") empty = true;
-      else if (e === "Rempli") full = true;
-      else {
-        const splitValue = e.split("-");
-        const transformedArray = [parseInt(splitValue[0]), parseInt(splitValue[1].replace("%", ""))];
-        rangeArray = rangeArray.concat([transformedArray]);
-      }
-    });
-  }
-  const body = getDefaultQuery();
-  const filter = [];
-  if (empty) filter.push({ term: { lineFillingRate: 0 } });
-  if (full) filter.push({ term: { lineFillingRate: 100 } });
-  if (rangeArray.length > 0) {
-    rangeArray.map((e) => {
-      filter.push({ range: { lineFillingRate: { gte: e[0] === 0 ? 1 : e[0], lte: e[1] } } });
-    });
-  }
-  if (empty || full || rangeArray.length > 0) {
-    body.query.bool.minimum_should_match = 1;
-    body.query.bool.should = filter;
-  }
-  return body;
 };
