@@ -574,7 +574,7 @@ export default function EditEquivalence() {
           className="rounded-lg w-full py-2 mt-4 text-sm leading-5 font-medium bg-blue-600 text-white border-[1px] border-blue-600 hover:bg-white hover:!text-blue-600 disabled:bg-blue-300 disabled:!text-white disabled:border-blue-300"
           disabled={loading || uploading}
           onClick={() => handleSubmit()}>
-          {loading ? "Chargement" : "Modifier ma demande"}
+          {loading ? "Chargement" : mode === "edit" ? "Modifier ma demande" : "Soumettre ma demande"}
         </button>
       </div>
     </div>
