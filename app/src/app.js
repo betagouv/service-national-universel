@@ -140,7 +140,7 @@ const Espace = () => {
   // ! To clean after depart April B
   const [warningBusModalOpen, setWarningBusModalOpen] = useState(false);
   const [warningBusDepartLundiModalOpen, setWarningBusDepartLundiModalOpen] = useState(false);
-  const [warningBusNoChangeModalOpen, setWarningBusNoChangeModalOpen] = useState(true);
+  const [warningBusNoChangeModalOpen, setWarningBusNoChangeModalOpen] = useState(false);
   // ! To clean after depart April B
 
   const young = useSelector((state) => state.Auth.young);
@@ -371,13 +371,13 @@ const ModalBusWarningNoChange = ({ isOpen, onClose }) => {
     <Modal isOpen={isOpen} onClose={onClose} className="w-[512px] bg-white rounded-xl p-6">
       <div className="flex flex-col gap-2">
         <Warning className="w-10 h-10 mx-auto text-gray-400" />
-        <h4 className="flex text-center">Changement de date de votre départ en séjour</h4>
+        <h4 className="flex text-center">Information importante concernant votre transport</h4>
       </div>
       <p className="text-sm text-gray-500 leading-5 mt-4 mx-2">
-        Contrairement aux informations que vous avez reçu par mail et SMS aucun changement d&apos;horaire et de point de rassemblement n&apos;est prévu sur votre ligne de
-        transport. Les informations inscrites sur votre convocation sont à jour , vous pouvez dès à présent la télécharger de nouveau. <br />
+        Contrairement aux informations que vous avez reçues par mail et SMS aucun changement d&apos;horaire et de point de rassemblement n&apos;est prévu sur votre ligne de
+        transport. Les informations inscrites sur votre convocation sont à jour, vous pouvez dès à présent la télécharger de nouveau. <br />
         <br />
-        En vous priant de bien vouloir nous excuser pour la gène occasionnée. <br />
+        En vous priant de bien vouloir nous excuser pour la gêne occasionnée. <br />
         <br />
         Votre départ en séjour approche et les équipes encadrantes ont hâte de vous accueillir au sein de votre centre d&apos;affectation !
       </p>
