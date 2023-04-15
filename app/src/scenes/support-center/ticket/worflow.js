@@ -48,8 +48,8 @@ export const step0 = {
 export const step1 = {
   TRANSPORT: {
     id: "TRANSPORT",
-    label: "J'ai un problème de transport",
-    tags: ["TAG_problème_transport", "AGENT_Startup_Support", "AGENT_Startup_Technique"],
+    label: "Avril - Mon Transport",
+    tags: ["TAG_problème_transport_avril", "AGENT_Startup_Support", "AGENT_Startup_Technique"],
   },
   TECHNICAL: {
     id: "TECHNICAL",
@@ -66,8 +66,8 @@ export const step1 = {
 export const step1Public = {
   TRANSPORT: {
     id: "TRANSPORT",
-    label: "J'ai un problème de transport",
-    tags: ["TAG_problème_transport", "AGENT_Startup_Support", "AGENT_Startup_Technique"],
+    label: "Avril - Mon Transport",
+    tags: ["TAG_problème_transport_avril", "AGENT_Startup_Support", "AGENT_Startup_Technique"],
   },
   TECHNICAL: {
     id: "TECHNICAL",
@@ -82,29 +82,17 @@ export const step1Public = {
 };
 
 export const step2Transport = {
-  DOWNLOAD: {
+  QUESTION: {
     parentId: "TRANSPORT",
     id: "DOWNLOAD",
-    label: "Probleme de transport",
-    tags: ["TAG_téléchargment"],
-  },
-  UPLOAD: {
-    parentId: "TRANSPORT",
-    id: "UPLOAD",
-    label: "Pas de transport",
-    tags: ["TAG_téléversement"],
-  },
-  CONTRACT: {
-    parentId: "TRANSPORT",
-    id: "CONTRACT",
-    label: "Jaime le transport",
-    tags: ["TAG_contrat_engagement"],
+    label: "J'ai une question sur le transport d'avril",
+    tags: ["TAG_transport_avril"],
   },
   OTHER: {
-    parentId: "TRANSPORT",
-    id: "OTHER",
-    label: "J'ai un autre problème",
-    tags: ["TAG_autre"],
+    parentId: "TECHNICAL",
+    id: "TRANSPORT",
+    label: "Autre",
+    tags: ["TAG_transport_autre"],
   },
 };
 
@@ -168,29 +156,17 @@ export const step2Question = {
 };
 
 export const step2TransportPublic = {
-  DOWNLOAD: {
+  QUESTION: {
     parentId: "TRANSPORT",
     id: "DOWNLOAD",
-    label: "Probleme de transport",
-    tags: ["TAG_téléchargment"],
-  },
-  UPLOAD: {
-    parentId: "TRANSPORT",
-    id: "UPLOAD",
-    label: "Pas de transport",
-    tags: ["TAG_téléversement"],
-  },
-  CONTRACT: {
-    parentId: "TRANSPORT",
-    id: "CONTRACT",
-    label: "Jaime le transport",
-    tags: ["TAG_contrat_engagement"],
+    label: "J'ai une question sur mon transport",
+    tags: ["TAG_transport_avril_question"],
   },
   OTHER: {
-    parentId: "TRANSPORT",
-    id: "OTHER",
-    label: "J'ai un autre problème",
-    tags: ["TAG_autre"],
+    parentId: "TECHNICAL",
+    id: "TRANSPORT",
+    label: "Autre",
+    tags: ["TAG_transport_autre"],
   },
 };
 
