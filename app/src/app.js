@@ -136,10 +136,15 @@ export default function App() {
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
+
+  // ! To clean after depart April B
   const [warningBusModalOpen, setWarningBusModalOpen] = useState(false);
+  const [warningBusDepartLundiModalOpen, setWarningBusDepartLundiModalOpen] = useState(false);
+  // ! To clean after depart April B
 
   const young = useSelector((state) => state.Auth.young);
 
+  // ! To clean after depart April B
   const busLignes = [
     "6422a6ba2e94300602510423",
     "6422a6bb2e94300602510507",
@@ -178,6 +183,9 @@ const Espace = () => {
     "6422a6df2e94300602512323",
   ];
 
+  const busLignesDepartLundi = ["6422a6d82e94300602511f0a", "6422a6d32e94300602511b7a", "6422a6c12e94300602510a27"];
+  // ! To clean after depart April B
+
   const handleModalCGUConfirm = async () => {
     setIsModalCGUOpen(false);
     const { ok, code } = await api.put(`/young`, { acceptCGU: "true" });
@@ -193,9 +201,14 @@ const Espace = () => {
       setIsModalCGUOpen(true);
     }
 
+    // ! To clean after depart April B
     if (young && busLignes.includes(young.ligneId)) {
       setWarningBusModalOpen(true);
     }
+    if (young && busLignesDepartLundi.includes(young.ligneId)) {
+      setWarningBusDepartLundiModalOpen(true);
+    }
+    // ! To clean after depart April B
 
     if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       getAvailableSessions(young).then((sessions) => {
@@ -250,6 +263,7 @@ const Espace = () => {
       <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
       <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
       <ModalBusWarning isOpen={warningBusModalOpen} onClose={() => setWarningBusModalOpen(false)} />
+      <ModalBusWarningDepartLundi isOpen={warningBusDepartLundiModalOpen} onClose={() => setWarningBusDepartLundiModalOpen(false)} />
     </>
   );
 };
@@ -267,6 +281,7 @@ function ScrollToTop() {
   return null;
 }
 
+// ! To clean after depart April B
 const ModalBusWarning = ({ isOpen, onClose }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="w-[512px] bg-white rounded-xl p-6">
@@ -291,3 +306,32 @@ const ModalBusWarning = ({ isOpen, onClose }) => {
     </Modal>
   );
 };
+
+const ModalBusWarningDepartLundi = ({ isOpen, onClose }) => {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} className="w-[512px] bg-white rounded-xl p-6">
+      <div className="flex flex-col gap-2">
+        <Warning className="w-10 h-10 mx-auto text-gray-400" />
+        <h4 className="flex text-center">Changement de date de votre départ en séjour</h4>
+      </div>
+      <p className="text-sm text-gray-500 leading-5 mt-4 mx-2">
+        Votre départ en séjour approche et les équipes encadrantes ont hâte de vous accueillir au sein de votre centre d&apos;affectation ! <br />
+        <br />
+        <strong>Cependant, en raison de difficultés de transport, il est possible que votre départ soit décalé à lundi.</strong> <br />
+        <br />
+        Nous revenons vers vous au plus vite pour vous préciser votre nouvel horaire de départ. <br />
+        <br />
+        Nous mettons tout en oeuvre pour veiller à ce que le transport vers votre centre se déroule dans les meilleures conditions.
+        <br />
+        <br />
+        Pour toute demande de renseignements, nous vous invitons à nous contact via le centre d&apos;aide.
+      </p>
+      <div className=" mt-12">
+        <ButtonLight className="w-full" onClick={onClose}>
+          Fermer
+        </ButtonLight>
+      </div>
+    </Modal>
+  );
+};
+// ! To clean after depart April B
