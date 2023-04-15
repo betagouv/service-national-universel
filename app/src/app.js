@@ -320,7 +320,7 @@ const ModalBusWarning = ({ isOpen, onClose }) => {
       <p className="text-sm text-gray-500 leading-5 mt-4 mx-2">
         Vos informations de transport ont bien été mises à jour, vous pouvez dès à présent télécharger votre convocation. <br />
         <br />
-        Veuillez nous excuser pour la gène occasionnée. <br /> <br />
+        Veuillez nous excuser pour la gêne occasionnée. <br /> <br />
         Les équipes du Service National Universel
       </p>
       <div className=" mt-12">
