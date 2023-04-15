@@ -318,16 +318,10 @@ const ModalBusWarning = ({ isOpen, onClose }) => {
     <Modal isOpen={isOpen} onClose={onClose} className="w-[512px] bg-white rounded-xl p-6">
       <Warning className="w-10 h-10 mx-auto text-gray-400" />
       <p className="text-sm text-gray-500 leading-5 mt-4 mx-2">
-        Votre départ en séjour approche et les équipes encadrantes ont hâte de vous accueillir au sein de votre centre d&apos;affectation ! <br />
+        Vos informations de transport ont bien été mises à jour, vous pouvez dès à présent télécharger votre convocation. <br />
         <br />
-        <strong>Cependant, en raison de difficultés de transport, il est possible que vos lieux et horaires de départ soient modifiés.</strong> <br />
-        <br />
-        Nous revenons vers vous dans la journée pour vous préciser votre nouvel horaire de départ. <br />
-        <br />
-        Nous mettons tout en oeuvre pour veiller à ce que le transport vers votre centre se déroule dans les meilleurs conditions.
-        <br />
-        <br />
-        Pour toute demande de renseignements, nous vous invitons à prendre contact avec le numéro de téléphone indiqué sur votre convocation ou via notre centre d&apos;aide.
+        Veuillez nous excuser pour la gène occasionnée. <br /> <br />
+        Les équipes du Service National Universel
       </p>
       <div className=" mt-12">
         <ButtonLight className="w-full" onClick={onClose}>
