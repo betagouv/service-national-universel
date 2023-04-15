@@ -85,7 +85,7 @@ export const step2Transport = {
   QUESTION: {
     parentId: "TRANSPORT",
     id: "DOWNLOAD",
-    label: "J'ai une question sur le transport d'avril",
+    label: "J'ai une question sur mon transport",
     tags: ["TAG_transport_avril"],
   },
   OTHER: {
