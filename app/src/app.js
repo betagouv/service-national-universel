@@ -140,6 +140,7 @@ const Espace = () => {
   // ! To clean after depart April B
   const [warningBusModalOpen, setWarningBusModalOpen] = useState(false);
   const [warningBusDepartLundiModalOpen, setWarningBusDepartLundiModalOpen] = useState(false);
+  const [warningBusNoChangeModalOpen, setWarningBusNoChangeModalOpen] = useState(true);
   // ! To clean after depart April B
 
   const young = useSelector((state) => state.Auth.young);
@@ -186,7 +187,6 @@ const Espace = () => {
     "6422a6d82e94300602511f0a",
     "6422a6d32e94300602511b7a",
     "6422a6c12e94300602510a27",
-    "6422a6bb2e943006025104df",
     "6422a6bc2e94300602510605",
     "6422a6bd2e94300602510652",
     "6422a6bd2e943006025106a8",
@@ -209,6 +209,8 @@ const Espace = () => {
     "6422a6df2e94300602512309",
     "6422a6df2e94300602512372",
   ];
+
+  const busWithNoChangeAtTheEnd = ["6422a6bb2e943006025104df"];
   // ! To clean after depart April B
 
   const handleModalCGUConfirm = async () => {
@@ -232,6 +234,9 @@ const Espace = () => {
     }
     if (young && busLignesDepartLundi.includes(young.ligneId)) {
       setWarningBusDepartLundiModalOpen(true);
+    }
+    if (young && busWithNoChangeAtTheEnd.includes(young.ligneId)) {
+      setWarningBusNoChangeModalOpen(true);
     }
     // ! To clean after depart April B
 
@@ -289,6 +294,7 @@ const Espace = () => {
       <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
       <ModalBusWarning isOpen={warningBusModalOpen} onClose={() => setWarningBusModalOpen(false)} />
       <ModalBusWarningDepartLundi isOpen={warningBusDepartLundiModalOpen} onClose={() => setWarningBusDepartLundiModalOpen(false)} />
+      <ModalBusWarningNoChange isOpen={warningBusNoChangeModalOpen} onClose={() => setWarningBusNoChangeModalOpen(false)} />
     </>
   );
 };
@@ -350,6 +356,30 @@ const ModalBusWarningDepartLundi = ({ isOpen, onClose }) => {
         <br />
         <br />
         Pour toute demande de renseignements, nous vous invitons à nous contact via le centre d&apos;aide.
+      </p>
+      <div className=" mt-12">
+        <ButtonLight className="w-full" onClick={onClose}>
+          Fermer
+        </ButtonLight>
+      </div>
+    </Modal>
+  );
+};
+
+const ModalBusWarningNoChange = ({ isOpen, onClose }) => {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} className="w-[512px] bg-white rounded-xl p-6">
+      <div className="flex flex-col gap-2">
+        <Warning className="w-10 h-10 mx-auto text-gray-400" />
+        <h4 className="flex text-center">Changement de date de votre départ en séjour</h4>
+      </div>
+      <p className="text-sm text-gray-500 leading-5 mt-4 mx-2">
+        Contrairement aux informations que vous avez reçu par mail et SMS aucun changement d&apos;horaire et de point de rassemblement n&apos;est prévu sur votre ligne de
+        transport. Les informations inscrites sur votre convocation sont à jour , vous pouvez dès à présent la télécharger de nouveau. <br />
+        <br />
+        En vous priant de bien vouloir nous excuser pour la gène occasionnée. <br />
+        <br />
+        Votre départ en séjour approche et les équipes encadrantes ont hâte de vous accueillir au sein de votre centre d&apos;affectation !
       </p>
       <div className=" mt-12">
         <ButtonLight className="w-full" onClick={onClose}>
