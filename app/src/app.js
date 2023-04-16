@@ -184,9 +184,11 @@ const Espace = () => {
     "6422a6df2e94300602512323",
   ];
 
-  const busLignesDepartLundi = ["6422a6d32e94300602511b7a", "6422a6d82e94300602511f0a"];
+  const busLignesDepartLundi = [];
 
   const busDepartLundiGood = [
+    "6422a6d32e94300602511b7a",
+    "6422a6d82e94300602511f0a",
     "6422a6c92e943006025111b2",
     "6422a6c12e94300602510a27",
     "6422a6c82e9430060251101b",
