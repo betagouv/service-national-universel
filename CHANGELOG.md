@@ -1,3 +1,10 @@
+## [1.253.1](https://github.com/betagouv/service-national-universel/compare/v1.253.0...v1.253.1) (2023-04-16)
+
+
+### Bug Fixes
+
+* **app:** view convo ([57aebca](https://github.com/betagouv/service-national-universel/commit/57aebca388f28e8df13d3843b69e8f91dd092066))
+
 # [1.253.0](https://github.com/betagouv/service-national-universel/compare/v1.252.0...v1.253.0) (2023-04-15)
 
 
