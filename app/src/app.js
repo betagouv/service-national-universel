@@ -339,9 +339,13 @@ const ModalBusWarningDepartLundi = ({ isOpen, onClose }) => {
         <h4 className="flex text-center">Changement de date de votre départ en séjour</h4>
       </div>
       <p className="text-sm text-gray-500 leading-5 mt-4 mx-2">
-        Bonjour, <br /> <br />
-        Votre départ est confirmé pour lundi 17 avril 2023 : les éléments complémentaires (lieu de rassemblement et horaire) vous seront communiqués dans la journée. <br /> <br />{" "}
-        Nous vous prions de bien vouloir nous excuser pour la gêne occasionnée, et vous remercions pour votre engagement. <br /> <br />
+        Bonjour, <br />
+        <br />
+        Votre départ est confirmé pour lundi 17 avril 2023 : les éléments complémentaires (lieu de rassemblement et horaire) vous seront communiqués dans la journée. <br />
+        <br />
+        Nous vous prions de bien vouloir nous excuser pour la gêne occasionnée, nos équipes se mobilisent pour vous apporter une réponse rapide.
+        <br />
+        <br />
         Cordialement, <br />
         Les équipes du Service National Universel
       </p>
