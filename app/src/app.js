@@ -184,13 +184,11 @@ const Espace = () => {
   ];
 
   const busLignesDepartLundi = [
-    "6422a6d82e94300602511f0a",
-    "6422a6d32e94300602511b7a",
-    "6422a6c12e94300602510a27",
     "6422a6bc2e94300602510605",
     "6422a6bd2e94300602510652",
     "6422a6bd2e943006025106a8",
     "6422a6bd2e94300602510708",
+    "6422a6c12e94300602510a27",
     "6422a6c12e94300602510a56",
     "6422a6c22e94300602510b03",
     "6422a6c32e94300602510c13",
@@ -204,7 +202,8 @@ const Espace = () => {
     "6422a6ca2e94300602511298",
     "6422a6ca2e94300602511312",
     "6422a6d02e943006025117d6",
-    "6422a6d22e94300602511a66",
+    "6422a6d32e94300602511b7a",
+    "6422a6d82e94300602511f0a",
     "6422a6de2e9430060251228e",
     "6422a6df2e94300602512309",
     "6422a6df2e94300602512372",
@@ -340,16 +339,11 @@ const ModalBusWarningDepartLundi = ({ isOpen, onClose }) => {
         <h4 className="flex text-center">Changement de date de votre départ en séjour</h4>
       </div>
       <p className="text-sm text-gray-500 leading-5 mt-4 mx-2">
-        Votre départ en séjour approche et les équipes encadrantes ont hâte de vous accueillir au sein de votre centre d&apos;affectation ! <br />
-        <br />
-        <strong>Cependant, en raison de difficultés de transport, il est possible que votre départ soit décalé à lundi.</strong> <br />
-        <br />
-        Nous revenons vers vous au plus vite pour vous préciser votre nouvel horaire de départ. <br />
-        <br />
-        Nous mettons tout en oeuvre pour veiller à ce que le transport vers votre centre se déroule dans les meilleures conditions.
-        <br />
-        <br />
-        Pour toute demande de renseignements, nous vous invitons à nous contact via le centre d&apos;aide.
+        Bonjour, <br /> <br />
+        Votre départ est confirmé pour lundi 17 avril 2023 : les éléments complémentaires (lieu de rassemblement et horaire) vous seront communiqués dans la journée. <br /> <br />{" "}
+        Nous vous prions de bien vouloir nous excuser pour la gêne occasionnée, et vous remercions pour votre engagement. <br /> <br />
+        Cordialement, <br />
+        Les équipes du Service National Universel
       </p>
       <div className=" mt-12">
         <ButtonLight className="w-full" onClick={onClose}>
@@ -383,4 +377,3 @@ const ModalBusWarningNoChange = ({ isOpen, onClose }) => {
     </Modal>
   );
 };
-// ! To clean after depart April B
