@@ -1,3 +1,21 @@
+# [1.254.0](https://github.com/betagouv/service-national-universel/compare/v1.253.1...v1.254.0) (2023-04-17)
+
+
+### Bug Fixes
+
+* **admin:** Volontaire/Phase 0 - Reset verify address button on change ([5853745](https://github.com/betagouv/service-national-universel/commit/5853745a2ef167ba11e9a0293e37d3cd23681a61))
+* **api:** mission date test ([896c6df](https://github.com/betagouv/service-national-universel/commit/896c6dfd6a86806db5a6234177525bfb82136c9b))
+* **api:** mission date test ([b7fd9a0](https://github.com/betagouv/service-national-universel/commit/b7fd9a02813273e7969c3d670afa3ae82f390934))
+* **api:** mission dates ([#2498](https://github.com/betagouv/service-national-universel/issues/2498)) ([5cfc6a4](https://github.com/betagouv/service-national-universel/commit/5cfc6a4de1986570239b4bfd48f446febdb149f4))
+* **api:** Temporarily remove geography filter for refs ([2578f74](https://github.com/betagouv/service-national-universel/commit/2578f746727e89753c0eda7c1c53f13cb0d8a9d8))
+* **app:** Suggestion ville de naissance ([7c3e688](https://github.com/betagouv/service-national-universel/commit/7c3e688689e93fbc242e5bff7678dd9be40f177d))
+
+
+### Features
+
+* **admin:** Dashboard : ouverture des legendUrls dans un nouvel onglet ([#2489](https://github.com/betagouv/service-national-universel/issues/2489)) ([dbecac7](https://github.com/betagouv/service-national-universel/commit/dbecac7fddc8f0e5ce68a76ec515530582d9a0e9))
+* **lib:** eligibility param for juin 2023 ([#2496](https://github.com/betagouv/service-national-universel/issues/2496)) ([2f330b6](https://github.com/betagouv/service-national-universel/commit/2f330b60e593a6ec2ca823f74bb6e245c86336e0))
+
 ## [1.253.1](https://github.com/betagouv/service-national-universel/compare/v1.253.0...v1.253.1) (2023-04-16)
 
 
