@@ -21,6 +21,17 @@ const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
 const { putLocation } = require("../services/api-adresse");
 
+//@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
+const fixDate = (dateString) => {
+  const date = new Date(dateString);
+  if (date.getUTCHours() >= 22) {
+    const hoursToAdd = 24 - date.getUTCHours();
+    const newDate = new Date(date).setUTCHours(date.getUTCHours() + hoursToAdd);
+    return new Date(newDate).toISOString();
+  }
+  return dateString;
+};
+
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedMission } = validateMission(req.body);
@@ -33,6 +44,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (req.user.role === ROLES.SUPERVISOR) structure = await StructureObject.findById(checkedMission.structureId);
 
     if (!canCreateOrModifyMission(req.user, checkedMission, structure)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
+
+    //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
+    if (checkedMission.startAt) checkedMission.startAt = fixDate(checkedMission.startAt);
+    if (checkedMission.endAt) checkedMission.endAt = fixDate(checkedMission.endAt);
 
     if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
       if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
@@ -92,6 +107,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
+    if (checkedMission.startAt) checkedMission.startAt = fixDate(checkedMission.startAt);
+    if (checkedMission.endAt) checkedMission.endAt = fixDate(checkedMission.endAt);
 
     if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
       if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
