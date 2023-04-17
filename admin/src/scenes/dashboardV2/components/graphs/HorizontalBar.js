@@ -13,7 +13,7 @@ export default function HorizontalBar({ title, values, labels, tooltips, legendU
       const total = values.reduce((value, originalValue) => value + originalValue, 0);
 
       setTotal(total);
-      setTotalPercent(goal === 0 ? "-" : Math.round((total / goal) * 100) || 0) + "%";
+      setTotalPercent(goal === 0 ? "-" : Math.round((total / goal) * 100) + "%");
 
       const localGoal = goal === 0 ? total : goal;
 
