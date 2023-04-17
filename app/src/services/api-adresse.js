@@ -6,6 +6,7 @@ const baseUrl = "https://api-adresse.data.gouv.fr/search/?";
 
 const apiAdress = async (query, filters = [], options = {}) => {
   const url = encodeURI(`${baseUrl}q=${query}${filters.length > 0 ? `&${filters.join("&")}` : ""}`);
+
   try {
     const res = await fetch(url, {
       ...options,

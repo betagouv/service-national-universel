@@ -46,6 +46,11 @@ export const step0 = {
 };
 
 export const step1 = {
+  TRANSPORT: {
+    id: "TRANSPORT",
+    label: "Avril - Mon Transport",
+    tags: ["TAG_problème_transport_avril", "AGENT_Startup_Support", "AGENT_Startup_Technique"],
+  },
   TECHNICAL: {
     id: "TECHNICAL",
     label: "J'ai un problème technique",
@@ -59,6 +64,11 @@ export const step1 = {
 };
 
 export const step1Public = {
+  TRANSPORT: {
+    id: "TRANSPORT",
+    label: "Avril - Mon Transport",
+    tags: ["TAG_problème_transport_avril", "AGENT_Startup_Support", "AGENT_Startup_Technique"],
+  },
   TECHNICAL: {
     id: "TECHNICAL",
     label: "J'ai un problème technique",
@@ -68,6 +78,21 @@ export const step1Public = {
     id: "QUESTION",
     label: "J'ai une question",
     tags: ["TAG_question", "AGENT_Startup_Support"],
+  },
+};
+
+export const step2Transport = {
+  QUESTION: {
+    parentId: "TRANSPORT",
+    id: "DOWNLOAD",
+    label: "J'ai une question sur mon transport",
+    tags: ["TAG_transport_avril"],
+  },
+  OTHER: {
+    parentId: "TECHNICAL",
+    id: "TRANSPORT",
+    label: "Autre",
+    tags: ["TAG_transport_autre"],
   },
 };
 
@@ -127,6 +152,21 @@ export const step2Question = {
     id: "OTHER",
     label: "Autre",
     tags: ["TAG_autre"],
+  },
+};
+
+export const step2TransportPublic = {
+  QUESTION: {
+    parentId: "TRANSPORT",
+    id: "DOWNLOAD",
+    label: "J'ai une question sur mon transport",
+    tags: ["TAG_transport_avril_question"],
+  },
+  OTHER: {
+    parentId: "TECHNICAL",
+    id: "TRANSPORT",
+    label: "Autre",
+    tags: ["TAG_transport_autre"],
   },
 };
 
