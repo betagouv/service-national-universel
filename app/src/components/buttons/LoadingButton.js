@@ -14,7 +14,8 @@ export default function LoadingButton({ loading, children, disabled, ...rest }) 
         opacity: loading ? 0.7 : 1,
         cursor: loading || disabled ? "not-allowed" : "pointer",
       }}
-      {...rest}>
+      {...rest}
+    >
       {loading && <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
       {!loading && children}
     </VioletButtonHeader>

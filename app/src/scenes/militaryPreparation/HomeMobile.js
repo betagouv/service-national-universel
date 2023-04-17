@@ -14,26 +14,26 @@ export default function HomeMobile() {
 
   if (!young || !permissionPhase2(young)) history.push("/");
   return (
-    <div className="flex-col rounded-lg bg-white shadow-nina w-full pb-4 mb-4">
+    <div className="mb-4 w-full flex-col rounded-lg bg-white pb-4 shadow-nina">
       <div className="pl-4">
-        <div className="flex pt-4 justify-between">
-          <div className="flex flex-col w-2/3">
-            <div className="text-3xl text-gray-800 font-bold">Partez en préparation militaire</div>
+        <div className="flex justify-between pt-4">
+          <div className="flex w-2/3 flex-col">
+            <div className="text-3xl font-bold text-gray-800">Partez en préparation militaire</div>
             {!readMore ? (
-              <div className="text-gray-700 text-sm mt-4 text-left">
+              <div className="mt-4 text-left text-sm text-gray-700">
                 Vous désirez découvrir les armées et leurs métiers ? Vous cherchez la camaraderie, de l’exigence...
-                <span className="font-semibold cursor-pointer underline ml-2" onClick={() => setReadMore(true)}>
+                <span className="ml-2 cursor-pointer font-semibold underline" onClick={() => setReadMore(true)}>
                   Lire plus
                 </span>
               </div>
             ) : (
-              <div className="text-gray-700 text-sm mt-4 text-left">
+              <div className="mt-4 text-left text-sm text-gray-700">
                 Vous désirez découvrir les armées et leurs métiers ? Vous cherchez la camaraderie, de l’exigence, des rencontres ? Continuer d’apprendre et rencontrer des jeunes de
                 tous horizons ? Embarquez pour l’aventure en rejoignant une des missions d’intérêt général proposées par l’armée de terre, la marine nationale, l’armée de l’air et
                 de l’espace, le service de santé des armées, le service du commissariat des armées et le service de l’énergie opérationnelle. Vous effectuerez une période militaire
                 d’initiation-défense nationale qui ne vous engagera à rien mais vous permettra, si vous le souhaitez, de postuler plus tard pour un engagement dans l’active ou dans
                 la réserve.
-                <span className="font-semibold cursor-pointer underline ml-2" onClick={() => setReadMore(false)}>
+                <span className="ml-2 cursor-pointer font-semibold underline" onClick={() => setReadMore(false)}>
                   Voir moins
                 </span>
               </div>
@@ -43,51 +43,53 @@ export default function HomeMobile() {
             <img className="object-scale-down" src={require("../../assets/militaryPrepMobile.png")} />
           </div>
         </div>
-        <div className="flex flex-col gap-4 mt-4">
+        <div className="mt-4 flex flex-col gap-4">
           <div className="flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-green-500" />
+            <CheckCircle className="h-5 w-5 text-green-500" />
             <div className="flex flex-col">
-              <div className="text-gray-700 text-sm leading-5">
+              <div className="text-sm leading-5 text-gray-700">
                 J’ai <strong>16 ans</strong> révolus
               </div>
-              <div className="text-gray-400 text-sm leading-5">Le 1er jour de la mission choisie</div>
+              <div className="text-sm leading-5 text-gray-400">Le 1er jour de la mission choisie</div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-green-500" />
+            <CheckCircle className="h-5 w-5 text-green-500" />
             <div className="flex flex-col">
-              <div className="text-gray-700 text-sm leading-5">
+              <div className="text-sm leading-5 text-gray-700">
                 Je suis apte aux <strong>activités sportives</strong>
               </div>
-              <div className="text-gray-400 text-sm leading-5">Pas de contre-indication médicale</div>
+              <div className="text-sm leading-5 text-gray-400">Pas de contre-indication médicale</div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-green-500" />
+            <CheckCircle className="h-5 w-5 text-green-500" />
             <div className="flex flex-col">
-              <div className="text-gray-700 text-sm leading-5">
+              <div className="text-sm leading-5 text-gray-700">
                 J&apos;ai effectué mon <strong>recensement</strong> citoyen
               </div>
               <a
                 href="https://www.service-public.fr/particuliers/vosdroits/F870"
                 target="_blank"
                 rel="noreferrer"
-                className="text-gray-400 text-sm leading-5 underline cursor-pointer hover:underline">
+                className="cursor-pointer text-sm leading-5 text-gray-400 underline hover:underline"
+              >
                 En savoir plus
               </a>
             </div>
           </div>
         </div>
       </div>
-      <div className="flex flex-col bg-gray-50 items-center py-4 px-4 mt-4">
-        <div className="text-lg leading-6 font-semibold">Vous remplissez les conditions ?</div>
-        <div className="text-lg leading-6 font-semibold"> N’attendez plus !</div>
+      <div className="mt-4 flex flex-col items-center bg-gray-50 py-4 px-4">
+        <div className="text-lg font-semibold leading-6">Vous remplissez les conditions ?</div>
+        <div className="text-lg font-semibold leading-6"> N’attendez plus !</div>
         <Link
           to='/mission?MILITARY_PREPARATION=%5B"true"%5D'
           onClick={() => plausibleEvent("Phase2/CTA - PM - TrouvezPM")}
-          className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center bg-blue-600 hover:bg-white hover:border-blue-600 mt-4">
-          <HiOutlineSearch className="text-[#ffffff] group-hover:text-blue-600 mr-2" />
-          <div className="text-[#ffffff] group-hover:text-blue-600 text-sm flex-1">Trouver une préparation militaire</div>
+          className="group mt-4 flex items-center gap-1 rounded-[10px] border-[1px] bg-blue-600 py-2.5 px-3 hover:border-blue-600 hover:bg-white"
+        >
+          <HiOutlineSearch className="mr-2 text-[#ffffff] group-hover:text-blue-600" />
+          <div className="flex-1 text-sm text-[#ffffff] group-hover:text-blue-600">Trouver une préparation militaire</div>
         </Link>
       </div>
       <div className="mt-4 px-4">

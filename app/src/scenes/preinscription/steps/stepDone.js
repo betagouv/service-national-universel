@@ -41,19 +41,19 @@ export default function StepDone() {
   return (
     <DSFRContainer>
       <h1 className="text-2xl font-semibold text-[#161616]">Bienvenue {data.firstName} ! Vous avez complété votre pré-inscription.</h1>
-      <p className="mt-4 text-[#3A3A3A] text-sm">
+      <p className="mt-4 text-sm text-[#3A3A3A]">
         Vous pouvez dès à présent <strong>compléter</strong> votre inscription ou <strong>la reprendre à tout moment</strong> depuis le mail envoyé à {data.email}, ou depuis
         &quot;Se connecter&quot;
       </p>
       <div className="mt-4 border-x-[1px] border-t-[1px] border-b-4 border-b-[#000091] px-3 pt-2 pb-7">
         <CompleteInscription />
-        <div className="text-base text-[#161616] font-semibold mt-4">Finalisez votre inscription en 8 minutes</div>
-        <div className="text-sm mt-2">Vous pouvez d&apos;ores et déjà préparer le document suivant :</div>
-        <div className="flex flex-row items-center mt-4 gap-4">
-          <div className="flex items-center p-2 rounded-full bg-[#EEEEEE]">
+        <div className="mt-4 text-base font-semibold text-[#161616]">Finalisez votre inscription en 8 minutes</div>
+        <div className="mt-2 text-sm">Vous pouvez d&apos;ores et déjà préparer le document suivant :</div>
+        <div className="mt-4 flex flex-row items-center gap-4">
+          <div className="flex items-center rounded-full bg-[#EEEEEE] p-2">
             <GrAttachment className="text-[#3A3A3A]" />
           </div>
-          <div className="text-[#3A3A3A] text-sm">Pièce d’identité (ou passeport)</div>
+          <div className="text-sm text-[#3A3A3A]">Pièce d’identité (ou passeport)</div>
         </div>
       </div>
       <SignupButtonContainer onClickNext={handleClick} labelNext="Compléter mon inscription" onClickPrevious={logout} labelPrevious="Plus tard" />

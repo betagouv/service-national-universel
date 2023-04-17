@@ -10,18 +10,19 @@ export default function Maintenance() {
   return (
     <div>
       <Header location={location} />
-      <div className="bg-hero-pattern w-full h-[405px] text-center bg-right	bg-no-repeat bg-cover md:h-[500px]">
-        <div className="flex pt-1 flex-col	items-center z-10">
+      <div className="h-[405px] w-full bg-hero-pattern bg-cover bg-right	bg-no-repeat text-center md:h-[500px]">
+        <div className="z-10 flex flex-col	items-center pt-1">
           {/* incription Head */}
-          <div className="uppercase text-sm	font-normal	text-white md:hidden">inscription 2022</div>
-          <div className="mb-8 pt-3 text-white font-semibold text-[2rem] md:text-[3rem]">Participez au SNU</div>
+          <div className="text-sm font-normal	uppercase	text-white md:hidden">inscription 2022</div>
+          <div className="mb-8 pt-3 text-[2rem] font-semibold text-white md:text-[3rem]">Participez au SNU</div>
           {/* PlayButton */}
           <a
-            className="flex items-center justify-center bg-white mb-4 w-12 h-12 rounded-full md:h-20 md:w-20"
+            className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white md:h-20 md:w-20"
             onClick={() => plausibleEvent("LP - Video")}
             href="https://www.youtube.com/watch?v=rE-8fe9xPDo"
             target="_blank"
-            rel="noreferrer">
+            rel="noreferrer"
+          >
             <svg width="20" height="26" viewBox="0 0 20 26" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M19.1346 11.0998L3.79966 0.640236C2.49183 -0.253291 0.722412 0.719077 0.722412 2.32217V23.2149C0.722412 24.8443 2.49183 25.7904 3.79966 24.8969L19.1346 14.4373C20.2886 13.6752 20.2886 11.8882 19.1346 11.0998Z"
@@ -31,10 +32,10 @@ export default function Maintenance() {
           </a>
         </div>
         {/* Cards container */}
-        <div className="flex-1 z-10">
-          <p className="text-white mb-4 font-medium text-2xl md:text-base">Une aventure en trois phases</p>
+        <div className="z-10 flex-1">
+          <p className="mb-4 text-2xl font-medium text-white md:text-base">Une aventure en trois phases</p>
           {/* Desktop View Cards*/}
-          <div className=" justify-around hidden md:flex">
+          <div className=" hidden justify-around md:flex">
             <div className="w-[20rem] lg:w-[25rem] ">
               <CardPhase
                 onClick={() => plausibleEvent("LP - Phase 1")}
@@ -65,7 +66,7 @@ export default function Maintenance() {
           </div>
 
           {/* Mobile View Carusel*/}
-          <Carousel className="flex md:hidden p-3" showThumbs={false} showStatus={false} showArrows={true}>
+          <Carousel className="flex p-3 md:hidden" showThumbs={false} showStatus={false} showArrows={true}>
             <CardPhase
               onClick={() => plausibleEvent("LP - Phase 1")}
               upText="phase 1"
@@ -91,7 +92,7 @@ export default function Maintenance() {
 
           {/* Start Button Desktop View */}
           <div className="z-50  hidden md:block">
-            <button disabled className="uppercase p-3 pr-4 mt-[3px] lg:mt-[2rem] text-white bg-[#acaaba] font-medium	text-base	cursor-not-allowed tracking-wider	rounded-full">
+            <button disabled className="mt-[3px] cursor-not-allowed rounded-full bg-[#acaaba] p-3 pr-4 text-base font-medium	uppercase	tracking-wider text-white	lg:mt-[2rem]">
               Site&nbsp;en&nbsp;maintenance
             </button>
           </div>
@@ -113,15 +114,16 @@ export default function Maintenance() {
 const CardPhase = ({ upText, title, downText, to }) => {
   return (
     <a
-      className="flex w-full flex-col justify-between items-start border-b-8 border-red-700 rounded-2xl  min-h-[10rem]	 bg-white pt-4	pr-4 pb-8	 pl-4	hover:text-black"
+      className="flex min-h-[10rem] w-full flex-col items-start justify-between rounded-2xl border-b-8  border-red-700	 bg-white pt-4	pr-4 pb-8	 pl-4	hover:text-black"
       href={urlWithScheme(to)}
       target="_blank"
-      rel="noreferrer">
+      rel="noreferrer"
+    >
       <div>
-        <p className="text-left text-[#ef4036]	uppercase text-[0.8rem]	">{upText}</p>
-        <p className="text-lg text-left font-bold md:text-2xl ">{title}</p>
+        <p className="text-left text-[0.8rem]	uppercase text-[#ef4036]	">{upText}</p>
+        <p className="text-left text-lg font-bold md:text-2xl ">{title}</p>
       </div>
-      <p className="text-left text-base	md:text-sm text-[#6e757c] ">{downText}</p>
+      <p className="text-left text-base	text-[#6e757c] md:text-sm ">{downText}</p>
     </a>
   );
 };

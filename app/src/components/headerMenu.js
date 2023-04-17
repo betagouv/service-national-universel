@@ -22,13 +22,14 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
   const { pathname } = useLocation();
   return (
     isOpen && (
-      <div className={`w-screen  text-[#000091] shadow-lg  fixed top-0 text-sm font-medium z-[100]`}>
-        <div className="bg-white w-full px-3 py-3">
+      <div className={`fixed  top-0 z-[100]  w-screen text-sm font-medium text-[#000091] shadow-lg`}>
+        <div className="w-full bg-white px-3 py-3">
           <div
-            className="flex w-full justify-end items-center space-x-2 mb-8"
+            className="mb-8 flex w-full items-center justify-end space-x-2"
             onClick={() => {
               setIsOpen(false);
-            }}>
+            }}
+          >
             <div>Fermer</div>
             <img src={Close} className="w-3" />
           </div>
@@ -40,16 +41,17 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
               } else {
                 logout();
               }
-            }}>
+            }}
+          >
             <Login />
             {!young ? <div> Se connecter </div> : <div> Se déconnecter </div>}
           </div>
 
-          <a className="flex space-x-2 items-center border-b border-b-[#E5E5E5] py-3" href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer">
+          <a className="flex items-center space-x-2 border-b border-b-[#E5E5E5] py-3" href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer">
             <img src={File} />
             <div>Le programme</div>
           </a>
-          <Link className="flex space-x-2 items-center pt-3" to={`/public-besoin-d-aide?from=${pathname}`}>
+          <Link className="flex items-center space-x-2 pt-3" to={`/public-besoin-d-aide?from=${pathname}`}>
             <Help />
             <div>Besoin d&apos;aide ?</div>
           </Link>

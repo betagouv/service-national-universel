@@ -114,7 +114,8 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
                   const value = e.target.value;
                   handleChange({ target: { name: keys.country, value } });
                   onChangeCountry();
-                }}>
+                }}
+              >
                 <option value="" label="Sélectionner un pays" disabled>
                   Sélectionner un pays
                 </option>
@@ -211,7 +212,8 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
                   setSuggestion({});
                   addressVerifiedHelpers.setError("");
                   addressVerifiedHelpers.setValue("true");
-                }}>
+                }}
+              >
                 Non
               </SecondaryButton>
               <PrimaryButton onClick={onSuggestionSelected}>Oui</PrimaryButton>

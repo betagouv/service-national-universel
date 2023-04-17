@@ -19,7 +19,8 @@ function Calendar(props) {
         fontFamily="Marianne"
         fontSize={10}
         fontWeight={500}
-        letterSpacing={0}>
+        letterSpacing={0}
+      >
         <tspan x={9.818} y={14.07}>
           {props.month}
         </tspan>
@@ -33,7 +34,8 @@ function Calendar(props) {
         fontFamily="Marianne"
         fontSize={19}
         fontWeight="bold"
-        letterSpacing={0}>
+        letterSpacing={0}
+      >
         <tspan x={10.5} y={35.283}>
           {props.date}
         </tspan>

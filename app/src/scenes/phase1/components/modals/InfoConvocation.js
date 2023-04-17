@@ -164,27 +164,29 @@ export default function InfoConvocation({ isOpen, onCancel, title }) {
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="">
       <div className="flex flex-col items-center justify-center p-4">
-        <div className="text-xl leading-7 font-medium text-gray-900 text-center">{title ? title : "Mes informations de retour de séjour"}</div>
+        <div className="text-center text-xl font-medium leading-7 text-gray-900">{title ? title : "Mes informations de retour de séjour"}</div>
         <div className="relative mt-4" ref={refSelect}>
           <button
             disabled={loadingConvocation}
-            className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-4 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
-            onClick={() => setSelectOpen((e) => !e)}>
+            className="flex w-full items-center justify-between gap-3 rounded-full border-[1px] border-blue-600 bg-blue-600 px-4 py-2 disabled:cursor-wait disabled:opacity-50"
+            onClick={() => setSelectOpen((e) => !e)}
+          >
             <div className="flex items-center gap-2">
-              <span className="text-white leading-4 text-xs font-medium mr-2">Ma convocation</span>
+              <span className="mr-2 text-xs font-medium leading-4 text-white">Ma convocation</span>
             </div>
-            <ChevronDown className="text-white font-medium" />
+            <ChevronDown className="font-medium text-white" />
           </button>
 
-          <div className={`${selectOpen ? "block" : "hidden"}  rounded-lg !min-w-full bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
+          <div className={`${selectOpen ? "block" : "hidden"}  absolute right-0 top-[40px] z-50 !min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
             <div
               key="download"
               onClick={() => {
                 viewConvocation({ uri: "cohesion" });
                 setSelectOpen(false);
-              }}>
-              <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                <Download className="text-gray-400 w-4 h-4" />
+              }}
+            >
+              <div className="group flex cursor-pointer items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
+                <Download className="h-4 w-4 text-gray-400" />
                 <div>Télécharger</div>
               </div>
             </div>
@@ -193,27 +195,28 @@ export default function InfoConvocation({ isOpen, onCancel, title }) {
               onClick={() => {
                 sendConvocation({ template: "cohesion", type: "convocation" });
                 setSelectOpen(false);
-              }}>
-              <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                <FiMail className="text-gray-400 w-4 h-4" />
+              }}
+            >
+              <div className="group flex cursor-pointer items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
+                <FiMail className="h-4 w-4 text-gray-400" />
                 <div>Envoyer par mail</div>
               </div>
             </div>
           </div>
         </div>
         {returnDate && (
-          <div className="flex flex-col md:flex-row items-center mt-4 gap-6">
+          <div className="mt-4 flex flex-col items-center gap-6 md:flex-row">
             <div className="flex items-center justify-center gap-2 pr-4 md:border-r-[1px]">
-              <Calendar date={returnDate.date} month={returnDate.month} className="shadow-ninaBlock mx-3 w-7 h-10 md:w-11 md:h-12" />
+              <Calendar date={returnDate.date} month={returnDate.month} className="mx-3 h-10 w-7 shadow-ninaBlock md:h-12 md:w-11" />
               <div className="flex flex-col">
-                <div className="font-bold text-xs whitespace-nowrap">Retour à {returnDate.hour}</div>
-                <div className="text-xs text-gray-600 whitespace-nowrap">{returnDate.complete}</div>
+                <div className="whitespace-nowrap text-xs font-bold">Retour à {returnDate.hour}</div>
+                <div className="whitespace-nowrap text-xs text-gray-600">{returnDate.complete}</div>
               </div>
             </div>
-            <div className="flex w-2/3 text-center md:!text-left md:w-full text-xs leading-5 font-normal text-gray-800">{getMeetingAddress()}</div>
+            <div className="flex w-2/3 text-center text-xs font-normal leading-5 text-gray-800 md:w-full md:!text-left">{getMeetingAddress()}</div>
           </div>
         )}
-        <button className="mt-10 w-full text-center text-gray-700 border-[1px] py-2 rounded-lg" onClick={onCancel}>
+        <button className="mt-10 w-full rounded-lg border-[1px] py-2 text-center text-gray-700" onClick={onCancel}>
           Fermer
         </button>
       </div>

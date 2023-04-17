@@ -64,7 +64,8 @@ export default function StepDocuments() {
       onClickPrevious={() => history.push("/inscription2023/representants")}
       onSubmit={onSubmit}
       disabled={!young?.files.cniFiles.length > 0 || corrections?.length > 0}
-      questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
+      questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}
+    >
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       {corrections?.map((e) => (
         <ErrorMessage key={e._id}>
@@ -75,12 +76,13 @@ export default function StepDocuments() {
       {docs.map((doc) => (
         <div
           key={doc.category}
-          className={`my-4 bg-[#FFFFFF] hover:bg-[#FAFAFA] cursor-pointer ${disabledUpload && "bg-[#FAFAFA] cursor-default"}`}
-          onClick={() => handleClick(doc)}>
-          <div className="border p-4 my-3 flex justify-between items-center">
+          className={`my-4 cursor-pointer bg-[#FFFFFF] hover:bg-[#FAFAFA] ${disabledUpload && "cursor-default bg-[#FAFAFA]"}`}
+          onClick={() => handleClick(doc)}
+        >
+          <div className="my-3 flex items-center justify-between border p-4">
             <div>
               <div>{doc.title}</div>
-              {doc.subtitle && <div className="text-gray-500 text-sm">{doc.subtitle}</div>}
+              {doc.subtitle && <div className="text-sm text-gray-500">{doc.subtitle}</div>}
             </div>
             <ArrowRightBlueSquare fill={disabledUpload ? "gray" : "#000091"} />
           </div>

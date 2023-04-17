@@ -68,7 +68,7 @@ export default function StepDocuments() {
       <Navbar />
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <div className="w-full flex justify-between items-center">
+        <div className="flex w-full items-center justify-between">
           <h1 className="text-2xl font-semibold">Ma pièce d’identité</h1>
           <a href={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
@@ -82,16 +82,17 @@ export default function StepDocuments() {
             </ErrorMessage>
           ))}
         </div>
-        <div className="text-gray-800 mt-2 text-sm">Choisissez le justificatif d’identité que vous souhaitez importer :</div>
+        <div className="mt-2 text-sm text-gray-800">Choisissez le justificatif d’identité que vous souhaitez importer :</div>
         {IDs.map((doc) => (
           <div
             key={doc.category}
-            className={`my-4 bg-[#FFFFFF] hover:bg-[#FAFAFA] cursor-pointer ${disabledUpload && "bg-[#FAFAFA] cursor-default"}`}
-            onClick={() => handleClick(doc)}>
-            <div className="border p-4 my-3 flex justify-between items-center">
+            className={`my-4 cursor-pointer bg-[#FFFFFF] hover:bg-[#FAFAFA] ${disabledUpload && "cursor-default bg-[#FAFAFA]"}`}
+            onClick={() => handleClick(doc)}
+          >
+            <div className="my-3 flex items-center justify-between border p-4">
               <div>
                 <div>{doc.title}</div>
-                {doc.subtitle && <div className="text-gray-500 text-sm">{doc.subtitle}</div>}
+                {doc.subtitle && <div className="text-sm text-gray-500">{doc.subtitle}</div>}
               </div>
               <ArrowRightBlueSquare fill={disabledUpload ? "gray" : "#000091"} />
             </div>

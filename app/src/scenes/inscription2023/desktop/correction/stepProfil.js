@@ -88,15 +88,15 @@ export default function StepProfil() {
 
   return (
     <>
-      <div className="bg-[#f9f6f2] flex justify-center py-10">
-        <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px]">
-          <div className="w-full flex justify-between items-center">
+      <div className="flex justify-center bg-[#f9f6f2] py-10">
+        <div className="mx-auto my-0 basis-[70%] bg-white px-[102px] py-[60px]">
+          <div className="flex w-full items-center justify-between">
             <h1 className="text-xl text-[#161616]">Mon profil</h1>
             <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
               <QuestionMarkBlueCircle />
             </a>
           </div>
-          <hr className="my-8 h-px bg-gray-200 border-0" />
+          <hr className="my-8 h-px border-0 bg-gray-200" />
           <div className="flex flex-col">
             <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} label="Prénom" error={error.firstName} correction={corrections.firstName} />
             <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} label="Nom" error={error.lastName} correction={corrections.lastName} />
@@ -104,9 +104,10 @@ export default function StepProfil() {
             <Input value={data.emailConfirm} onChange={(e) => setData({ ...data, emailConfirm: e })} label="Confirmez votre e-mail" error={error.emailConfirm} type="email" />
             <div className="flex justify-end gap-4">
               <Button
-                className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091]"
+                className="flex cursor-pointer items-center justify-center bg-[#000091] px-3 py-2 text-white hover:border hover:border-[#000091] hover:bg-white hover:!text-[#000091]"
                 onClick={() => onSubmit()}
-                disabled={loading}>
+                disabled={loading}
+              >
                 Corriger
               </Button>
             </div>

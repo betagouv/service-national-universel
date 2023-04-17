@@ -29,7 +29,8 @@ export default function ModalButton({ primary, secondary, loading, children, dis
         color: getColor(),
         fontWeight: primary ? "700" : "500",
       }}
-      disabled={loading || disabled}>
+      disabled={loading || disabled}
+    >
       {loading && <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
       {!loading && children}
     </VioletButtonHeader>

@@ -34,11 +34,11 @@ export default function Done({ parentId }) {
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-4">
             <ConsentDone />
-            <h1 className="text-[22px] font-bold flex-1">{title}</h1>
+            <h1 className="flex-1 text-[22px] font-bold">{title}</h1>
           </div>
-          <hr className="my-2 h-px bg-gray-200 border-0" />
-          <p className="text-[#161616] text-base ">{text}</p>
-          <p className="text-[#161616] text-base mt-2">Vous pouvez à présent fermer cette page.</p>
+          <hr className="my-2 h-px border-0 bg-gray-200" />
+          <p className="text-base text-[#161616] ">{text}</p>
+          <p className="mt-2 text-base text-[#161616]">Vous pouvez à présent fermer cette page.</p>
         </div>
       </div>
       <Footer />

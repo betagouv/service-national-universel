@@ -470,7 +470,8 @@ export default function Index() {
               return toastr.error("Impossible de mettre à jour le contrat d'engagement");
             }
             return history.push("/validate-contract/done");
-          }}>
+          }}
+        >
           Je valide le contrat d&apos;engagement
         </VioletButton>
       </div>

@@ -43,20 +43,20 @@ export default function TicketCreate(props) {
       {/* Links to Phase 1 page */}
 
       {["EXEMPTED", "DONE"].includes(young?.statusPhase1) && (
-        <div className="mx-auto mb-3 gap-4 flex flex-col w-full md:flex-row md:w-4/5 md:max-w-[1000px] md:min-w-[700px]">
-          <div className="flex items-center p-2 gap-2 rounded-lg bg-white shadow-md cursor-pointer hover:shadow-lg" onClick={() => history.push("/phase1")}>
+        <div className="mx-auto mb-3 flex w-full flex-col gap-4 md:w-4/5 md:min-w-[700px] md:max-w-[1000px] md:flex-row">
+          <div className="flex cursor-pointer items-center gap-2 rounded-lg bg-white p-2 shadow-md hover:shadow-lg" onClick={() => history.push("/phase1")}>
             <div className="w-12">
               <Unlock style={{ transform: "scale(0.7)" }} />
             </div>
-            <div className="text-sm font-bold grow">Débloquez votre accès gratuit au code de la route</div>
-            <ChevronRight className="scale-[200%] stroke-white fill-gray-300 w-4 mr-1" />
+            <div className="grow text-sm font-bold">Débloquez votre accès gratuit au code de la route</div>
+            <ChevronRight className="mr-1 w-4 scale-[200%] fill-gray-300 stroke-white" />
           </div>
-          <div className="flex items-center p-2 gap-2 rounded-lg bg-white shadow-md cursor-pointer hover:shadow-lg" onClick={() => history.push("/phase1")}>
+          <div className="flex cursor-pointer items-center gap-2 rounded-lg bg-white p-2 shadow-md hover:shadow-lg" onClick={() => history.push("/phase1")}>
             <div className="ml-1 w-11">
               <QuestionBubble />
             </div>
             <div className="text-sm font-bold">Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?</div>
-            <ChevronRight className="scale-[200%] stroke-white fill-gray-300 w-4 mr-1" />
+            <ChevronRight className="mr-1 w-4 scale-[200%] fill-gray-300 stroke-white" />
           </div>
         </div>
       )}
@@ -102,7 +102,8 @@ export default function TicketCreate(props) {
             } finally {
               setLoading(false);
             }
-          }}>
+          }}
+        >
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
             <>
               <SelectTag
@@ -185,11 +186,11 @@ export default function TicketCreate(props) {
                 deleteFile={deleteFile}
                 filesAccepted={["jpeg", "png", "pdf", "word", "excel"]}
               />
-              <div className="flex md:flex-row flex-col mt-[15px] ml-[15px]">
+              <div className="mt-[15px] ml-[15px] flex flex-col md:flex-row">
                 <LoadingButton loading={isLoading} type="submit" style={{ maxWidth: "150px" }} onClick={handleSubmit} disabled={isSubmitting}>
                   Envoyer
                 </LoadingButton>
-                {isLoading && files.length > 0 && <div className="text-gray-500 text-sm mt-2 md:ml-4 md:mt-0">{translate("UPLOAD_IN_PROGRESS")}</div>}
+                {isLoading && files.length > 0 && <div className="mt-2 text-sm text-gray-500 md:ml-4 md:mt-0">{translate("UPLOAD_IN_PROGRESS")}</div>}
               </div>
             </>
           )}

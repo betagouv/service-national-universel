@@ -17,29 +17,30 @@ export default function ValidatedV2() {
       {/* DESKTOP */}
       <div className="hidden lg:flex">
         <div className="my-12 mx-10 w-full">
-          <div className="flex justify-between items-center rounded-lg bg-white ">
-            <div className="w-1/2 pl-10 py-6">
+          <div className="flex items-center justify-between rounded-lg bg-white ">
+            <div className="w-1/2 py-6 pl-10">
               <div className="text-[48px] font-medium leading-tight tracking-tight text-gray-800">
                 <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
               </div>
-              <div className="left-7 text-[#242526] font-bold mt-3">Félicitations, vous allez pouvoir débuter prochainement votre parcours SNU.</div>
-              <div className="flex items-center mt-4 ">
+              <div className="left-7 mt-3 font-bold text-[#242526]">Félicitations, vous allez pouvoir débuter prochainement votre parcours SNU.</div>
+              <div className="mt-4 flex items-center ">
                 <div className="h-8 w-8">
                   <Clock />
                 </div>
-                <div className="left-7 text-[#738297] ml-2">
+                <div className="left-7 ml-2 text-[#738297]">
                   {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST
                     ? "Vous êtes sur liste complémentaire pour le séjour de cohésion"
                     : "Vous êtes actuellement en attente d’affectation à un lieu pour votre séjour de cohésion."}
                 </div>
               </div>
-              <div className="flex items-start mt-5">
+              <div className="mt-5 flex items-start">
                 <ButtonPrimary
                   className="mr-2 shrink-0"
                   onClick={() => {
                     plausibleEvent("Phase1/CTA - Fill documents");
                     history.push("/phase1");
-                  }}>
+                  }}
+                >
                   Préparer mon séjour
                 </ButtonPrimary>
                 <DiscoverStayWithArrow />
@@ -50,29 +51,30 @@ export default function ValidatedV2() {
         </div>
       </div>
       {/* MOBILE */}
-      <div className="flex lg:hidden w-full">
+      <div className="flex w-full lg:hidden">
         <div className="flex flex-col-reverse ">
           <div className="px-4 pb-4">
             <div className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
               <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
             </div>
-            <div className="left-7 text-[#242526] font-bold mt-3">Félicitations, vous allez pouvoir débuter prochainement votre parcours SNU.</div>
-            <div className="flex items-center mt-4 ">
+            <div className="left-7 mt-3 font-bold text-[#242526]">Félicitations, vous allez pouvoir débuter prochainement votre parcours SNU.</div>
+            <div className="mt-4 flex items-center ">
               <div className="h-8 w-8">
                 <Clock />
               </div>
-              <div className="left-7 text-[#738297] text-sm ml-2">
+              <div className="left-7 ml-2 text-sm text-[#738297]">
                 {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST
                   ? "Vous êtes sur liste complémentaire pour le séjour de cohésion"
                   : "Vous êtes actuellement en attente d’affectation à un lieu pour votre séjour de cohésion."}
               </div>
             </div>
             <ButtonPrimary
-              className="w-full mt-3"
+              className="mt-3 w-full"
               onClick={() => {
                 plausibleEvent("Phase1/CTA - Fill documents");
                 history.push("/phase1");
-              }}>
+              }}
+            >
               Préparer mon séjour
             </ButtonPrimary>
           </div>

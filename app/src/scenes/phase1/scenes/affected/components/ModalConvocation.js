@@ -54,15 +54,15 @@ export function ModalConvocation({ open, setOpen }) {
 
   return (
     <ModalTailwind isOpen={open} onClose={() => setOpen(false)}>
-      <div className="bg-white p-4 space-y-2 rounded-md w-full md:w-auto">
-        <div className="flex gap-4 justify-between">
-          <h1 className="text-gray-900 text-lg font-semibold m-0">Choisissez une option de téléchargement</h1>
+      <div className="w-full space-y-2 rounded-md bg-white p-4 md:w-auto">
+        <div className="flex justify-between gap-4">
+          <h1 className="m-0 text-lg font-semibold text-gray-900">Choisissez une option de téléchargement</h1>
           <CloseSvg className="close-icon hover:cursor-pointer" height={16} width={16} onClick={() => setOpen(false)} />
         </div>
 
         <br />
         <ButtonPrimary onClick={handleDownload} className="w-full">
-          <HiOutlineDownload className="h-5 w-5 text-blue-300 mr-2" />
+          <HiOutlineDownload className="mr-2 h-5 w-5 text-blue-300" />
           Télécharger
         </ButtonPrimary>
 
@@ -75,8 +75,9 @@ export function ModalConvocation({ open, setOpen }) {
               message: `Vous allez recevoir votre convocation par mail à l'adresse ${young.email}.`,
             })
           }
-          className="w-full">
-          <HiOutlineMail className="h-5 w-5 mr-2" />
+          className="w-full"
+        >
+          <HiOutlineMail className="mr-2 h-5 w-5" />
           Recevoir par mail
         </ButtonPrimaryOutline>
       </div>

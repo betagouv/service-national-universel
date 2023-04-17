@@ -44,7 +44,8 @@ export default function WaitingRealisation() {
         } catch (e) {
           return toastr.error("Une erreur s'est produite ", e?.message);
         }
-      }}>
+      }}
+    >
       {({ values, handleChange, handleSubmit, errors, touched }) => (
         <>
           <FormLegend>
@@ -78,7 +79,8 @@ export default function WaitingRealisation() {
                 component="select"
                 name="phase3MissionDomain"
                 value={values.phase3MissionDomain}
-                onChange={handleChange}>
+                onChange={handleChange}
+              >
                 <option value="" disabled>
                   Domaine de la mission
                 </option>
@@ -214,7 +216,8 @@ export default function WaitingRealisation() {
               onClick={() => {
                 plausibleEvent("Phase3/CTA - Valider la phase 3");
                 handleSubmit();
-              }}>
+              }}
+            >
               Faire valider ma phase 3
             </ContinueButton>
             {Object.keys(errors).length ? <h3>Vous ne pouvez passer à l&apos;étape suivante car tous les champs ne sont pas correctement renseignés.</h3> : null}

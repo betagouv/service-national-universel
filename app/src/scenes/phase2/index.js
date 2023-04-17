@@ -17,7 +17,7 @@ export default function Index() {
   if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED)
     return (
       <>
-        <div className="hidden md:flex flex-1">
+        <div className="hidden flex-1 md:flex">
           <ValidatedDesktop />
         </div>
         <div className="flex md:hidden ">

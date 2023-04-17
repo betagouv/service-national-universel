@@ -7,7 +7,8 @@ const ChangeStayButton = () => {
   return (
     <Link
       to="/changer-de-sejour"
-      className="my-2 md:my-0 h-fit border-[1px] border-gray-300 text-gray-700 outline-none rounded-md font-medium text-sm block w-auto py-[10px] px-10 hover:text-gray-700">
+      className="my-2 block h-fit w-auto rounded-md border-[1px] border-gray-300 py-[10px] px-10 text-sm font-medium text-gray-700 outline-none hover:text-gray-700 md:my-0"
+    >
       Changer de séjour
     </Link>
   );

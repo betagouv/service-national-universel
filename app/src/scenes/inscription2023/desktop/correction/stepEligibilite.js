@@ -200,17 +200,17 @@ export default function StepEligibilite() {
 
   return (
     <>
-      <div className="bg-[#f9f6f2] flex justify-center py-10">
-        <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] drop-shadow-md">
-          <div className="w-full flex justify-between items-center">
+      <div className="flex justify-center bg-[#f9f6f2] py-10">
+        <div className="mx-auto my-0 basis-[70%] bg-white px-[102px] py-[60px] drop-shadow-md">
+          <div className="flex w-full items-center justify-between">
             <h1 className="text-xl text-[#161616]">Vérifiez votre éligibilité au SNU</h1>
             <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
               <QuestionMarkBlueCircle />
             </a>
           </div>
-          <hr className="my-8 h-px bg-gray-200 border-0" />
+          <hr className="my-8 h-px border-0 bg-gray-200" />
           <div className="flex flex-col gap-5">
-            <div className="flex flex-col flex-start">
+            <div className="flex-start flex flex-col">
               <div className="flex items-center">
                 <CheckBox disabled={true} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
                 <div className="flex items-center backdrop-opacity-100">
@@ -218,7 +218,7 @@ export default function StepEligibilite() {
                   <IconFrance />
                 </div>
               </div>
-              {error.frenchNationality ? <span className="text-red-500 text-sm">{error.frenchNationality}</span> : null}
+              {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
             </div>
             <div className="flex w-full space-x-4">
               <div className="w-1/2">
@@ -245,12 +245,12 @@ export default function StepEligibilite() {
             </div>
             {data.scolarity && (
               <>
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                   <p>
                     <div>
                       <span className="font-bold">{data.scolarity === "NOT_SCOLARISE" ? "Je réside" : "Mon établissement scolaire est"}</span> en France
                     </div>
-                    <div className="h-5 flex items-center">
+                    <div className="flex h-5 items-center">
                       <span className="text-xs leading-5 text-[#666666]">Métropolitaine ou Outre-mer</span>
                     </div>
                   </p>
@@ -285,9 +285,10 @@ export default function StepEligibilite() {
             )}
             <div className="flex justify-end gap-4">
               <button
-                className="w-1/3 flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091]"
+                className="flex w-1/3 cursor-pointer items-center justify-center bg-[#000091] px-3 py-2 text-white hover:border hover:border-[#000091] hover:bg-white hover:!text-[#000091]"
                 onClick={() => onSubmit()}
-                disabled={loading}>
+                disabled={loading}
+              >
                 Corriger
               </button>
             </div>

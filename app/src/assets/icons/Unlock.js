@@ -37,7 +37,8 @@ const Unlock = (props) => (
       x={9}
       y={27}
       width={38}
-      height={31}>
+      height={31}
+    >
       <path d="M42 57.333H14a4.68 4.68 0 0 1-4.667-4.666v-21A4.68 4.68 0 0 1 14 27h28a4.68 4.68 0 0 1 4.667 4.667v21A4.68 4.68 0 0 1 42 57.333Z" fill="#FFE91A" />
     </mask>
     <mask
@@ -49,7 +50,8 @@ const Unlock = (props) => (
       x={9}
       y={27}
       width={38}
-      height={31}>
+      height={31}
+    >
       <path
         fillRule="evenodd"
         clipRule="evenodd"

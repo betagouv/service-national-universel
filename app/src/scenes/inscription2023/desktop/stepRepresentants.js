@@ -250,53 +250,56 @@ export default function StepRepresentants() {
   return (
     <>
       <Navbar onSave={onSave} />
-      <div className="bg-[#f9f6f2] flex justify-center py-10">
-        <div className="basis-[70%] mx-auto my-0">
+      <div className="flex justify-center bg-[#f9f6f2] py-10">
+        <div className="mx-auto my-0 basis-[70%]">
           <div className="bg-white px-[102px] py-[60px]">
-            <div className="w-full flex justify-between items-center mt-2">
+            <div className="mt-2 flex w-full items-center justify-between">
               <h1 className="text-xl font-bold">Mes représentants légaux</h1>
               <a href={`${supportURL}/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux`} target="_blank" rel="noreferrer">
                 <QuestionMarkBlueCircle />
               </a>
             </div>
-            <div className="text-[#666666] text-sm mt-2">Votre représentant(e) légal(e) recevra un lien pour consentir à votre participation au SNU.</div>
-            <hr className="my-4 h-px bg-gray-200 border-0" />
+            <div className="mt-2 text-sm text-[#666666]">Votre représentant(e) légal(e) recevra un lien pour consentir à votre participation au SNU.</div>
+            <hr className="my-4 h-px border-0 bg-gray-200" />
             {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
             <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} young={young} />
-            <hr className="my-4 h-px bg-gray-200 border-0" />
-            <div className="flex gap-4 items-center">
+            <hr className="my-4 h-px border-0 bg-gray-200" />
+            <div className="flex items-center gap-4">
               <CheckBox checked={!isParent2Visible} onChange={(e) => setIsParent2Visible(!e)} />
-              <div className="text-[#3A3A3A] text-sm flex-1">Je ne possède pas de second(e) représentant(e) légal(e)</div>
+              <div className="flex-1 text-sm text-[#3A3A3A]">Je ne possède pas de second(e) représentant(e) légal(e)</div>
             </div>
             {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} young={young} /> : null}
-            <hr className="my-8 h-px bg-gray-200 border-0" />
+            <hr className="my-8 h-px border-0 bg-gray-200" />
             {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
               <div className="flex justify-end gap-4">
-                <button className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091] " onClick={() => history.push("/")}>
+                <button className="flex items-center justify-center border-[1px] border-[#000091] px-3 py-2 text-[#000091] " onClick={() => history.push("/")}>
                   Précédent
                 </button>
                 <button
-                  className={`flex items-center justify-center px-3 py-2 cursor-pointer ${loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
-                  onClick={() => !loading && onCorrection()}>
+                  className={`flex cursor-pointer items-center justify-center px-3 py-2 ${loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+                  onClick={() => !loading && onCorrection()}
+                >
                   Corriger
                 </button>
               </div>
             ) : (
               <div className="flex justify-end gap-4">
                 <button
-                  className="flex items-center justify-center px-3 py-2 border-[1px] border-[#000091] text-[#000091] "
-                  onClick={() => history.push("/inscription2023/consentement")}>
+                  className="flex items-center justify-center border-[1px] border-[#000091] px-3 py-2 text-[#000091] "
+                  onClick={() => history.push("/inscription2023/consentement")}
+                >
                   Précédent
                 </button>
                 <button
-                  className={`flex items-center justify-center px-3 py-2 cursor-pointer ${loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
-                  onClick={() => !loading && onSubmit()}>
+                  className={`flex cursor-pointer items-center justify-center px-3 py-2 ${loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+                  onClick={() => !loading && onSubmit()}
+                >
                   Continuer
                 </button>
               </div>
             )}
           </div>
-          <div className="flex w-full mt-4">
+          <div className="mt-4 flex w-full">
             <Help />
           </div>
         </div>
@@ -307,8 +310,8 @@ export default function StepRepresentants() {
 
 const FormRepresentant = ({ i, data, setData, errors, corrections }) => {
   return (
-    <div className="flex flex-col my-4">
-      <div className="pb-2 text-[#161616] font-bold">Représentant légal {i} </div>
+    <div className="my-4 flex flex-col">
+      <div className="pb-2 font-bold text-[#161616]">Représentant légal {i} </div>
       <RadioButton
         label="Votre lien"
         options={parentsStatus}

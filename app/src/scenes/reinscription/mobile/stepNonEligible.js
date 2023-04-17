@@ -76,32 +76,33 @@ export default function NonEligible() {
       <div className="bg-white p-4">
         <h1 className="text-[22px] font-bold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
         {msg && <div className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">{msg}</div>}
-        <div className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</div>
-        <div className="overflow-x-auto flex space-x-6">
+        <div className="my-4 text-base font-bold">Découvrez d’autres formes d’engagement</div>
+        <div className="flex space-x-6 overflow-x-auto">
           {engagementPrograms.map((program, index) => {
             const [isOpen, setIsOpen] = useState(false);
 
             return (
               <div key={index} className="flex w-96">
-                <div className="w-64 h-min-[700px] ">
-                  <div className="w-full h-[155px] ">
+                <div className="h-min-[700px] w-64 ">
+                  <div className="h-[155px] w-full ">
                     <a href={program.link} target="_blank" rel="noreferrer">
-                      <img src={program.picture} className="object-cover w-full h-full" />
+                      <img src={program.picture} className="h-full w-full object-cover" />
                     </a>
                   </div>
-                  <div className={`min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen && "h-[250px]"}`}>
-                    <div className="font-semibold my-4 min-h-[40px]">{program.title}</div>
-                    <div className={`text-[13px] leading-6 mb-4 ${!isOpen && "h-[70px] text-ellipsis overflow-hidden"}`}>
+                  <div className={`min-h-min border border-[#E5E5E5] pl-4 pr-1 pb-2 ${!isOpen && "h-[250px]"}`}>
+                    <div className="my-4 min-h-[40px] font-semibold">{program.title}</div>
+                    <div className={`mb-4 text-[13px] leading-6 ${!isOpen && "h-[70px] overflow-hidden text-ellipsis"}`}>
                       {" "}
                       <a href={program.link} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
                         {program.description}
                       </a>
                     </div>
                     <div
-                      className="text-[13px] flex justify-between pr-2 cursor-pointer"
+                      className="flex cursor-pointer justify-between pr-2 text-[13px]"
                       onClick={() => {
                         setIsOpen(!isOpen);
-                      }}>
+                      }}
+                    >
                       {" "}
                       <div>{isOpen ? "Lire moins" : "Lire plus"}</div>
                       <img src={arrowRightBlue} className="w-3" />
@@ -112,12 +113,13 @@ export default function NonEligible() {
             );
           })}
         </div>
-        <div className="flex justify-center my-8">
+        <div className="my-8 flex justify-center">
           <div
-            className="text-[#000091] text-center border-[1px] border-[#000091] w-[50%]  p-2 cursor-pointer"
+            className="w-[50%] cursor-pointer border-[1px] border-[#000091] p-2  text-center text-[#000091]"
             onClick={() => {
               history.push("/public-engagements");
-            }}>
+            }}
+          >
             Voir plus de formes d’engagement
           </div>
         </div>

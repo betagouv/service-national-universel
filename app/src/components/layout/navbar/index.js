@@ -43,7 +43,7 @@ function MobileNavbar() {
   }
 
   return (
-    <header ref={ref} className="text-[#D2DAEF] text-sm w-full h-16 grid grid-cols-3 bg-[#212B44] items-center z-20">
+    <header ref={ref} className="z-20 grid h-16 w-full grid-cols-3 items-center bg-[#212B44] text-sm text-[#D2DAEF]">
       <button onClick={() => openDrawer(NavigationMenu)} className="h-16 w-16 p-3">
         <Hamburger className="text-[#828EAC]" />
       </button>
@@ -51,7 +51,7 @@ function MobileNavbar() {
       <Logo />
 
       <button onClick={() => openDrawer(UserMenu)} className="flex justify-end pr-4">
-        <p className="rounded-full bg-[#344264] text-[#768BAC] w-9 h-9 flex text-center items-center justify-center capitalize">{user?.firstName[0] + user?.lastName[0]}</p>
+        <p className="flex h-9 w-9 items-center justify-center rounded-full bg-[#344264] text-center capitalize text-[#768BAC]">{user?.firstName[0] + user?.lastName[0]}</p>
       </button>
 
       <MobileDrawer open={drawer.open} onClose={onClose} content={drawer.content} />
@@ -61,9 +61,9 @@ function MobileNavbar() {
 
 function MobileDrawer({ open, onClose, content }) {
   return (
-    <div className={`fixed top-0 w-full z-10 ease-in-out duration-200 ${open ? "translate-y-0" : "-translate-y-full"}`}>
-      <div className="bg-[#212B44] h-16 flex justify-end items-center">
-        <button onClick={onClose} className="pr-4 pl-6 h-full">
+    <div className={`fixed top-0 z-10 w-full duration-200 ease-in-out ${open ? "translate-y-0" : "-translate-y-full"}`}>
+      <div className="flex h-16 items-center justify-end bg-[#212B44]">
+        <button onClick={onClose} className="h-full pr-4 pl-6">
           <Close className="text-[#828EAC]" />
         </button>
       </div>
@@ -74,8 +74,8 @@ function MobileDrawer({ open, onClose, content }) {
 
 function DesktopNavbar() {
   return (
-    <header className="text-[#D2DAEF] text-sm w-64 h-screen z-50 bg-[#212B44] hidden md:flex flex-col justify-start">
-      <div className="border-b-[1px] border-[#2A3655] h-24 flex-none">
+    <header className="z-50 hidden h-screen w-64 flex-col justify-start bg-[#212B44] text-sm text-[#D2DAEF] md:flex">
+      <div className="h-24 flex-none border-b-[1px] border-[#2A3655]">
         <Logo />
       </div>
 

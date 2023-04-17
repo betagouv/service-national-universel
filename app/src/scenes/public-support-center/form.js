@@ -72,7 +72,8 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
           } finally {
             setLoading(false);
           }
-        }}>
+        }}
+      >
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
             <Item
@@ -211,11 +212,11 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
               deleteFile={deleteFile}
               filesAccepted={["jpeg", "png", "pdf", "word", "excel"]}
             />
-            <div className="flex md:flex-row flex-col mt-[15px] ml-[15px]">
+            <div className="mt-[15px] ml-[15px] flex flex-col md:flex-row">
               <LoadingButton loading={loading} type="submit" style={{ maxWidth: "150px" }} onClick={handleSubmit} disabled={isSubmitting}>
                 Envoyer
               </LoadingButton>
-              {loading && files.length > 0 && <div className="text-gray-500 text-sm mt-2 md:ml-4 md:mt-0">{translate("UPLOAD_IN_PROGRESS")}</div>}
+              {loading && files.length > 0 && <div className="mt-2 text-sm text-gray-500 md:ml-4 md:mt-0">{translate("UPLOAD_IN_PROGRESS")}</div>}
             </div>
           </>
         )}
@@ -228,7 +229,7 @@ const Item = ({ title, name, value, handleChange, errors, touched, validate, typ
   return (
     <Col style={{ marginTop: 20 }}>
       <Label>{title}</Label>
-      {infos ? <div className="bg-[#FEF9E7] p-2 text-sm text-[#7D6608] rounded overflow-hidden italic mb-2">{infos}</div> : null}
+      {infos ? <div className="mb-2 overflow-hidden rounded bg-[#FEF9E7] p-2 text-sm italic text-[#7D6608]">{infos}</div> : null}
       {type === "select" ? (
         <Field as={type} className="form-control" name={name} value={value} onChange={handleChange} validate={validate} {...props}>
           <option disabled value="" selected={!value} label={placeholder}>

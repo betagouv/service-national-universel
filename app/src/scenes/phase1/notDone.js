@@ -50,20 +50,22 @@ export default function NotDone() {
           <p>Nous vous invitons à vous rapprocher de votre référent départemental pour la suite de votre parcours.</p>
           {!isCohortDone(young.cohort) && (
             <button
-              className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium hover:border-gray-500 mt-8"
-              onClick={() => setModalOpen({ isOpen: true })}>
+              className="mt-8 rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs font-medium leading-4 hover:border-gray-500"
+              onClick={() => setModalOpen({ isOpen: true })}
+            >
               Voir mes informations de convocation
             </button>
           )}
           {youngCanChangeSession(young) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
-          <div className="flex flex-col items-stretch w-fit">
+          <div className="flex w-fit flex-col items-stretch">
             {permissionPhase2(young) && (
               <button
-                className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
+                className="mt-5 rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
                 onClick={() => {
                   plausibleEvent("Phase 2/CTA - Realiser ma mission");
                   history.push("/phase2");
-                }}>
+                }}
+              >
                 Réaliser ma mission d&apos;intérêt général
               </button>
             )}
@@ -73,8 +75,9 @@ export default function NotDone() {
                   <Loader />
                 ) : (
                   <button
-                    className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-[#FFFFFF] hover:bg-blue-600 border-blue-600 mt-5 text-blue-600 hover:text-white text-sm leading-5 font-medium transition ease-in-out duration-150"
-                    onClick={goToReinscription}>
+                    className="bg-blue-[#FFFFFF] mt-5 w-full rounded-[10px] border-[1px]  border-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-blue-600 transition duration-150 ease-in-out hover:bg-blue-600 hover:text-white"
+                    onClick={goToReinscription}
+                  >
                     Se réinscrire à un autre séjour
                   </button>
                 )}

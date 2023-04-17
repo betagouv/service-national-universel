@@ -162,7 +162,8 @@ export default function changeSejour() {
                         href="https:support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1"
                         style={{ color: "#5145cc" }}
                         target="_blank"
-                        rel="noreferrer">
+                        rel="noreferrer"
+                      >
                         Pourquoi je ne vois pas tous les séjours ?
                       </a>
                     </SectionHelp>
@@ -203,7 +204,8 @@ export default function changeSejour() {
                       alignItems: "center",
                       minWidth: "75%",
                       justifyItems: "between",
-                    }}>
+                    }}
+                  >
                     <p>
                       <ContinueButton style={{ marginLeft: "60px" }} onClick={() => onConfirmer()}>
                         Enregistrer
@@ -218,7 +220,7 @@ export default function changeSejour() {
                             Ancien séjour : <Badge color="#aaaaaa" backgroundColor="#F9FCFF" text={young.cohort} style={{ cursor: "default" }} />
                             <br />
                             Nouveau séjour : <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={translateCohort(newSejour)} style={{ cursor: "default" }} />
-                            <div className="text-xs mt-2">Cette action est irréversible, souhaitez-vous confirmer cette action ?</div>
+                            <div className="mt-2 text-xs">Cette action est irréversible, souhaitez-vous confirmer cette action ?</div>
                           </>
                         }
                         onCancel={() => setmodalConfirmControlOk(false)}
@@ -226,7 +228,8 @@ export default function changeSejour() {
                           await handleChangeSejour();
                         }}
                         disableConfirm={!motif}
-                        showHeaderIcon={true}></ModalConfirm>
+                        showHeaderIcon={true}
+                      ></ModalConfirm>
                       <ModalConfirm
                         size="lg"
                         isOpen={modalConfirmGoalReached}
@@ -243,7 +246,8 @@ export default function changeSejour() {
                           await handleWaitingList();
                         }}
                         disableConfirm={!motif}
-                        showHeaderIcon={true}></ModalConfirm>
+                        showHeaderIcon={true}
+                      ></ModalConfirm>
                     </p>
                     <p>
                       <ButtonLink to="/phase1">Annuler</ButtonLink>

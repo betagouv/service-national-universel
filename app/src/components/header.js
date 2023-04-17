@@ -26,41 +26,44 @@ const Header = () => {
   return (
     <>
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-      <header className="px-[1rem] md:px-[7rem] w-full shadow-[0px_16px_16px_-16px_rgba(0,0,0,0.32)] md:shadow-none bg-white h-[7rem] flex justify-between py-3 items-center">
-        <div className="flex space-x-6 items-center">
+      <header className="flex h-[7rem] w-full items-center justify-between bg-white px-[1rem] py-3 shadow-[0px_16px_16px_-16px_rgba(0,0,0,0.32)] md:px-[7rem] md:shadow-none">
+        <div className="flex items-center space-x-6">
           <img src={LogoFr} alt="Logo de la République française" className="w-18 h-16" />
           <img src={SNU} alt="Logo du SNU" className="w-16" />
           <div className="hidden lg:block">
-            <h1 className="font-bold text-xl">Service National Universel</h1>
+            <h1 className="text-xl font-bold">Service National Universel</h1>
             <div className="text-sm ">Inscription du volontaire</div>
           </div>
         </div>
         <div
-          className="flex md:hidden items-start cursor-pointer pb-10"
+          className="flex cursor-pointer items-start pb-10 md:hidden"
           onClick={() => {
             setIsOpen(true);
-          }}>
+          }}
+        >
           <Menu />
         </div>
-        <nav className="hidden md:flex text-sm text-[#000091] h-8">
+        <nav className="hidden h-8 text-sm text-[#000091] md:flex">
           <a
-            className="flex items-center space-x-1 border-r border-r-gray-300 pr-3 cursor-pointer hover:font-bold hover:text-[#000091]"
+            className="flex cursor-pointer items-center space-x-1 border-r border-r-gray-300 pr-3 hover:font-bold hover:text-[#000091]"
             href="https://www.snu.gouv.fr/"
             target="_blank"
-            rel="noreferrer">
+            rel="noreferrer"
+          >
             <img src={File} alt="" />
             <div>Programme</div>
           </a>
-          <Link className="flex items-center space-x-1 py-1 px-3 cursor-pointer hover:font-bold hover:text-[#000091]" to={`/public-besoin-d-aide?from=${pathname}`}>
+          <Link className="flex cursor-pointer items-center space-x-1 py-1 px-3 hover:font-bold hover:text-[#000091]" to={`/public-besoin-d-aide?from=${pathname}`}>
             <Help />
             <div>Besoin d&apos;aide</div>{" "}
           </Link>
           <div
-            className="border border-gray-500 py-1 px-2 cursor-pointer hover:text-white hover:bg-[#000091]"
+            className="cursor-pointer border border-gray-500 py-1 px-2 hover:bg-[#000091] hover:text-white"
             onClick={() => {
               if (!young) history.push("/auth");
               else logout();
-            }}>
+            }}
+          >
             {!young ? <div> Se connecter </div> : <div> Se déconnecter </div>}
           </div>
         </nav>

@@ -5,19 +5,21 @@ export function BorderButton({ children, className = "", onClick = () => {}, hre
   if (href) {
     return (
       <a
-        className={`inline-flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-white text-[#000091] border-[1px] border-[#000091] border-solid hover:!bg-[#000091] hover:text-white hover:border-[transparent] ${className}`}
+        className={`inline-flex cursor-pointer items-center justify-center whitespace-nowrap border-[1px] border-solid border-[#000091] bg-white px-3 py-2 text-[#000091] hover:border-[transparent] hover:!bg-[#000091] hover:text-white ${className}`}
         href={href}
         target={target}
         rel={rel}
-        onClick={onClick}>
+        onClick={onClick}
+      >
         {children}
       </a>
     );
   } else {
     return (
       <button
-        className={`flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-white text-[#000091] border-[1px] border-[#000091] border-solid hover:!bg-[#000091] hover:text-white hover:border-[transparent] ${className}`}
-        onClick={onClick}>
+        className={`flex cursor-pointer items-center justify-center whitespace-nowrap border-[1px] border-solid border-[#000091] bg-white px-3 py-2 text-[#000091] hover:border-[transparent] hover:!bg-[#000091] hover:text-white ${className}`}
+        onClick={onClick}
+      >
         {children}
       </button>
     );
@@ -27,8 +29,9 @@ export function BorderButton({ children, className = "", onClick = () => {}, hre
 export function PlainButton({ children, className = "", onClick = () => {}, spinner = false }) {
   return (
     <button
-      className={`flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-[#000091] text-white border-[transparent] border-[1px] border-solid hover:!text-[#000091] hover:bg-white hover:border-[#000091] ${className}`}
-      onClick={onClick}>
+      className={`flex cursor-pointer items-center justify-center whitespace-nowrap border-[1px] border-solid border-[transparent] bg-[#000091] px-3 py-2 text-white hover:border-[#000091] hover:bg-white hover:!text-[#000091] ${className}`}
+      onClick={onClick}
+    >
       {spinner && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
       {children}
     </button>

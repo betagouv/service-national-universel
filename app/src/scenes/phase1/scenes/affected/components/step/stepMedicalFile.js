@@ -61,16 +61,16 @@ export default function StepMedicalField({ young }) {
         subTitle={`Vous allez recevoir le lien de téléchargement de la fiche sanitaire par mail à l'adresse ${young.email}.`}
       />
       {/* Desktop */}
-      <div className="hidden md:flex flex-col lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-1 flex-row py-4 items-center">
+      <div className="hidden flex-col md:flex lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-1 flex-row items-center py-4">
           {valid ? (
-            <div className="flex items-center justify-center bg-green-500 h-9 w-9 rounded-full mr-4">
-              <BsCheck2 className="text-white h-5 w-5" />
+            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
+              <BsCheck2 className="h-5 w-5 text-white" />
             </div>
           ) : (
-            <div className="flex items-center justify-center h-9 w-9 rounded-full mr-4 border-[1px] border-gray-200 text-gray-700">4</div>
+            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full border-[1px] border-gray-200 text-gray-700">4</div>
           )}
-          <div className="flex flex-1 flex-col mx-3">
+          <div className="mx-3 flex flex-1 flex-col">
             <h1 className={`text-base leading-7 ${enabled ? "text-gray-900" : "text-gray-400"}`}>Téléchargez votre fiche sanitaire</h1>
             <p className={`text-sm leading-5 ${enabled ? "text-gray-500" : "text-gray-400"}`}>
               Si vous ne l’avez pas déjà fait, vous devez renseigner votre fiche sanitaire et la remettre à votre arrivée au centre de séjour.
@@ -85,8 +85,9 @@ export default function StepMedicalField({ young }) {
                 Voir le mode d’emploi
               </ButtonLink>
               <button
-                className="flex items-center justify-center bg-gray-100 h-8 w-8 rounded-full mr-4 cursor-pointer hover:scale-110"
-                onClick={() => setSendEmailConfirmationModalOpen(true)}>
+                className="mr-4 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-gray-100 hover:scale-110"
+                onClick={() => setSendEmailConfirmationModalOpen(true)}
+              >
                 <WithTooltip tooltipText="Recevoir par email">
                   <HiOutlineMail className="h-5 w-5 text-gray-600" />
                 </WithTooltip>
@@ -94,9 +95,10 @@ export default function StepMedicalField({ young }) {
               <a target="blank" href={CDN_BASE_URL + "/file/fiche-sanitaire-2023.pdf"} onClick={handleDownload}>
                 <button
                   type="button"
-                  className={`flex flex-row items-center justify-center px-4 py-2 rounded-lg ${
+                  className={`flex flex-row items-center justify-center rounded-lg px-4 py-2 ${
                     valid ? "border-[1px] border-blue-700 " : "bg-blue-600"
-                  } cursor-pointer hover:scale-105`}>
+                  } cursor-pointer hover:scale-105`}
+                >
                   <HiOutlineDownload className={`h-5 w-5 ${valid ? "text-blue-700" : "text-blue-300"} mr-2`} />
                   <span className={`${valid ? "text-blue-700" : "text-white"}`}>Télécharger</span>
                 </button>
@@ -107,22 +109,23 @@ export default function StepMedicalField({ young }) {
       </div>
       {/* Mobile */}
       <div
-        className={`md:hidden flex items-center border-[1px] mb-3 ml-4 rounded-xl h-36 cursor-pointer ${valid ? "border-green-500 bg-green-50" : "bg-white"} `}
-        onClick={() => setMedicalFileModalOpen(enabled ? !isMedicalFileModalOpen : false)}>
-        <div className="-translate-x-5 flex flex-row items-center w-full">
+        className={`mb-3 ml-4 flex h-36 cursor-pointer items-center rounded-xl border-[1px] md:hidden ${valid ? "border-green-500 bg-green-50" : "bg-white"} `}
+        onClick={() => setMedicalFileModalOpen(enabled ? !isMedicalFileModalOpen : false)}
+      >
+        <div className="flex w-full -translate-x-5 flex-row items-center">
           {valid ? (
-            <div className="flex items-center justify-center bg-green-500 h-9 w-9 rounded-full mr-4">
-              <BsCheck2 className="text-white h-5 w-5" />
+            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
+              <BsCheck2 className="h-5 w-5 text-white" />
             </div>
           ) : (
-            <div className="flex items-center justify-center h-9 w-9 rounded-full border-[1px] bg-white border-gray-200 text-gray-700">4</div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-full border-[1px] border-gray-200 bg-white text-gray-700">4</div>
           )}
-          <div className="flex flex-1 flex-col ml-3">
+          <div className="ml-3 flex flex-1 flex-col">
             <div className={`text-sm ${valid && "text-green-600"} ${enabled ? "text-gray-900" : "text-gray-400"}`}>Téléchargez votre fiche sanitaire</div>
             <div className={` text-sm leading-5 ${valid && "text-green-600 opacity-70"} ${enabled ? "text-gray-500" : "text-gray-400"}`}>
               Vous devez renseigner votre fiche sanitaire et la remettre à votre arrivée au centre de séjour.
             </div>
-            {enabled ? <div className={` text-sm text-right leading-5 ${valid ? "text-green-500" : "text-blue-600"}`}>Télécharger</div> : null}
+            {enabled ? <div className={` text-right text-sm leading-5 ${valid ? "text-green-500" : "text-blue-600"}`}>Télécharger</div> : null}
           </div>
         </div>
       </div>

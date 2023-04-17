@@ -34,7 +34,7 @@ export default function ProgramCard({ program, image, enableToggle = true }) {
   };
 
   // eslint-disable-next-line prettier/prettier
-  const handleClick = () => { };
+  const handleClick = () => {};
 
   return (
     <Card onClick={handleClick}>

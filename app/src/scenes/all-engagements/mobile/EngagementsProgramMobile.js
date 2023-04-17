@@ -40,27 +40,28 @@ const EngagementsProgramMobile = () => {
   ) : (
     <>
       <div className="bg-white p-4">
-        <h1 className="text-[22px] font-bold mb-4">Toutes les formes d&apos;engagement</h1>
+        <h1 className="mb-4 text-[22px] font-bold">Toutes les formes d&apos;engagement</h1>
         {program.map((item) => {
           const clickId = item._id;
           return (
             <div key={item._id} className="mb-4">
-              <div className="w-full h-[195px]">
-                <img src={require(`../../../assets/programmes-engagement/${item.imageString}`)} className="object-cover w-full h-full" />
+              <div className="h-[195px] w-full">
+                <img src={require(`../../../assets/programmes-engagement/${item.imageString}`)} className="h-full w-full object-cover" />
               </div>
 
-              <div className={`min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen[clickId] && "h-[250px]"}`}>
-                <div className="font-semibold my-4 min-h-[40px] pr-14 text-[#161616]">{item.name}</div>
-                <div className={`text-[13px] text-[#3A3A3A] pr-14 leading-6 mb-4 ${!isOpen[clickId] && "h-[70px] text-ellipsis overflow-hidden"}`}>
+              <div className={`min-h-min border border-[#E5E5E5] pl-4 pr-1 pb-2 ${!isOpen[clickId] && "h-[250px]"}`}>
+                <div className="my-4 min-h-[40px] pr-14 font-semibold text-[#161616]">{item.name}</div>
+                <div className={`mb-4 pr-14 text-[13px] leading-6 text-[#3A3A3A] ${!isOpen[clickId] && "h-[70px] overflow-hidden text-ellipsis"}`}>
                   <a href={item.url} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
                     {item.description}
                   </a>
                 </div>
                 <div
-                  className="text-[13px] flex justify-between pr-2"
+                  className="flex justify-between pr-2 text-[13px]"
                   onClick={() => {
                     setIsOpen({ ...isOpen, [clickId]: !isOpen[clickId] });
-                  }}>
+                  }}
+                >
                   {" "}
                   <div className="text-[#666666]">{isOpen[clickId] ? "Lire moins" : "Lire plus"}</div>
                   <img src={arrowRightBlue} className="w-3" />

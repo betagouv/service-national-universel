@@ -24,22 +24,23 @@ export default function CardPM({ young }) {
 
   return (
     <>
-      <div className="flex flex-col rounded-lg bg-white px-3 pt-2 mb-4 shadow-md -translate-y-4 space-y-4 ">
+      <div className="mb-4 flex -translate-y-4 flex-col space-y-4 rounded-lg bg-white px-3 pt-2 shadow-md ">
         <div className="mb-3 cursor-pointer" onClick={() => setOpen(young.statusMilitaryPreparationFiles !== "REFUSED" ? !open : false)}>
           <div className="flex items-center justify-between ">
             <div
               className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
                 theme.text[young.statusMilitaryPreparationFiles]
-              } px-2 py-[2px] rounded-sm `}>
+              } rounded-sm px-2 py-[2px] `}
+            >
               {translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}
             </div>
-            {young.statusMilitaryPreparationFiles !== "REFUSED" ? <BsArrowUpShort className="rotate-45 text-gray-400 h-8 w-8" /> : null}
+            {young.statusMilitaryPreparationFiles !== "REFUSED" ? <BsArrowUpShort className="h-8 w-8 rotate-45 text-gray-400" /> : null}
           </div>
           <div className="flex items-center justify-between">
-            <div className="text-base leading-5 font-bold">Dossier d&apos;éligibilité aux Préparations militaires</div>
+            <div className="text-base font-bold leading-5">Dossier d&apos;éligibilité aux Préparations militaires</div>
           </div>
-          <div className="flex justify-end items-center">
-            <Prepa className="w-6 h-6 mr-2 text-gray-500" />
+          <div className="flex items-center justify-end">
+            <Prepa className="mr-2 h-6 w-6 text-gray-500" />
           </div>
         </div>
       </div>

@@ -62,40 +62,41 @@ export default function application({ application, index, onChange, loading }) {
       {(provided) => (
         <div
           ref={provided.innerRef}
-          className="bg-white relative flex flex-col w-full justify-between shadow-nina rounded-xl p-3 border-[1px] border-[#ffffff] hover:border-gray-200 mb-3"
-          {...provided.draggableProps}>
+          className="relative mb-3 flex w-full flex-col justify-between rounded-xl border-[1px] border-[#ffffff] bg-white p-3 shadow-nina hover:border-gray-200"
+          {...provided.draggableProps}
+        >
           <div className={`absolute top-0 right-0 flex space-x-2 p-3 ${loading ? "cursor-wait" : "cursor-pointer"}`} {...provided.dragHandleProps}>
-            <div className="text-gray-500 text-xs font-normal tracking-wider">CHOIX Nº{application.priority}</div>
+            <div className="text-xs font-normal tracking-wider text-gray-500">CHOIX Nº{application.priority}</div>
             <SixDotsVertical className="text-gray-400" />
           </div>
 
           {/* STATUT */}
           <div className="flex items-center">
-            <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
+            <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} rounded-sm px-2 py-[2px]`}>
               {translateApplicationForYoungs(application.status)}
             </div>
           </div>
           {/* END STATUT */}
 
-          <div className="flex my-3">
+          <div className="my-3 flex">
             {/* icon */}
             <div className="flex items-start">
               <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
             </div>
 
             {/* infos mission */}
-            <div className="flex flex-col flex-1">
+            <div className="flex flex-1 flex-col">
               <div className="space-y-1">
-                <div className="flex space-x-4 ml-2">
-                  <div className="text-gray-500 text-xs uppercase font-medium">{mission?.structureName}</div>
+                <div className="ml-2 flex space-x-4">
+                  <div className="text-xs font-medium uppercase text-gray-500">{mission?.structureName}</div>
                 </div>
-                <div className="text-gray-900 font-bold text-base ml-2">{mission?.name}</div>
-                <div className="flex justify-between ml-2">
-                  <div className="text-gray-500 text-xs">{mission?.placesLeft} places disponibles</div>
+                <div className="ml-2 text-base font-bold text-gray-900">{mission?.name}</div>
+                <div className="ml-2 flex justify-between">
+                  <div className="text-xs text-gray-500">{mission?.placesLeft} places disponibles</div>
                   {/* TODO */}
                   <div className="flex items-center space-x-2">
                     <LocationMarker className="text-gray-400" />
-                    <div className="text-gray-800 text-sm font-bold">à 11 km</div>
+                    <div className="text-sm font-bold text-gray-800">à 11 km</div>
                   </div>
                 </div>
               </div>
@@ -104,12 +105,12 @@ export default function application({ application, index, onChange, loading }) {
 
           <div className="flex flex-1 justify-between divide-x divide-gray-200">
             {application.hidden === "true" ? (
-              <div className="flex flex-1 items-center justify-center space-x-2 text-gray-400 py-1" onClick={() => handleHide({ value: "false" })}>
+              <div className="flex flex-1 items-center justify-center space-x-2 py-1 text-gray-400" onClick={() => handleHide({ value: "false" })}>
                 <Eye />
                 <div className="text-xs font-normal">afficher</div>
               </div>
             ) : (
-              <div className="flex flex-1 items-center justify-center space-x-2 text-gray-400 py-1" onClick={() => handleHide({ value: "true" })}>
+              <div className="flex flex-1 items-center justify-center space-x-2 py-1 text-gray-400" onClick={() => handleHide({ value: "true" })}>
                 <EyeOff />
                 <div className="text-xs font-normal">masquer</div>
               </div>

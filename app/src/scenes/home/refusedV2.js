@@ -15,57 +15,60 @@ export default function RefusedV2() {
       {/* DESKTOP */}
       <div className="hidden lg:flex">
         <div className="my-12 mx-10 w-full">
-          <div className="flex justify-between items-stretch rounded-lg bg-white">
+          <div className="flex items-stretch justify-between rounded-lg bg-white">
             <div className="w-full p-10">
               <div className="text-[44px] font-medium leading-tight tracking-tight text-gray-800">
                 <strong>{young.firstName},</strong> nous sommes désolés.
               </div>
-              <div className="text-[#242526] font-bold text-xl mt-3">Votre inscription n&apos;a pas pu être retenue.</div>
-              <div className="text-[#738297] text-sm mt-2">
+              <div className="mt-3 text-xl font-bold text-[#242526]">Votre inscription n&apos;a pas pu être retenue.</div>
+              <div className="mt-2 text-sm text-[#738297]">
                 Suite au traitement de votre dossier d&apos;inscription, votre référent n&apos;a pas pu retenir votre inscription, en voici la raison principale&nbsp;:
                 <div className="mt-1">{young?.inscriptionRefusedMessage}</div>
               </div>
               <Engagement />
             </div>
           </div>
-          <div className="flex justify-end mt-10">
+          <div className="mt-10 flex justify-end">
             <a
               className="w-40"
               href="https://voxusagers.numerique.gouv.fr/Demarches/3154?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
-              onClick={() => plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) })}>
+              onClick={() => plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) })}
+            >
               <img src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg" alt="Je donne mon avis" />
             </a>
           </div>
         </div>
       </div>
       {/* MOBILE */}
-      <div className="flex flex-col lg:hidden w-full">
-        <div className="flex flex-col w-full">
+      <div className="flex w-full flex-col lg:hidden">
+        <div className="flex w-full flex-col">
           <img src={require("../../assets/homePhase2Mobile.png")} />
-          <div className="px-4 pb-4 flex-col w-full">
+          <div className="w-full flex-col px-4 pb-4">
             <div className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
               <strong>{young.firstName},</strong> nous sommes désolés.
             </div>
-            <div className="text-[#242526] font-bold text-base mt-3">Votre inscription n&apos;a pas pu être retenue.</div>
-            <div className="text-[#738297] text-sm mt-2">
+            <div className="mt-3 text-base font-bold text-[#242526]">Votre inscription n&apos;a pas pu être retenue.</div>
+            <div className="mt-2 text-sm text-[#738297]">
               Suite au traitement de votre dossier d&apos;inscription, votre référent n&apos;a pas pu retenir votre inscription, en voici la raison principale&nbsp;:
               <div className="mt-1">{young?.inscriptionRefusedMessage}</div>
             </div>
             <Engagement />
-            <div className="flex justify-center my-8">
+            <div className="my-8 flex justify-center">
               <div
-                className="text-[#000091] text-center border-[1px] border-[#000091] w-full  p-2 cursor-pointer"
+                className="w-full cursor-pointer border-[1px] border-[#000091] p-2  text-center text-[#000091]"
                 onClick={() => {
                   history.push("/public-engagements");
-                }}>
+                }}
+              >
                 Voir plus de formes d’engagement
               </div>
             </div>
-            <div className="flex justify-center mt-20">
+            <div className="mt-20 flex justify-center">
               <a
                 className="w-36"
                 href="https://voxusagers.numerique.gouv.fr/Demarches/3154?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
-                onClick={() => plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) })}>
+                onClick={() => plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) })}
+              >
                 <img src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg" alt="Je donne mon avis" />
               </a>
             </div>

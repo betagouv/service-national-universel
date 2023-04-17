@@ -80,31 +80,31 @@ export default function StepProfil() {
         <div className="flex flex-col gap-1">
           <label>Prénom</label>
           <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} />
-          {error.firstName && <span className="text-red-500 text-sm">{error.firstName}</span>}
+          {error.firstName && <span className="text-sm text-red-500">{error.firstName}</span>}
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[#161616] text-base">Nom</label>
+          <label className="text-base text-[#161616]">Nom</label>
           <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} />
-          {error.lastName && <span className="text-red-500 text-sm">{error.lastName}</span>}
+          {error.lastName && <span className="text-sm text-red-500">{error.lastName}</span>}
         </div>
 
-        <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-rows-2 gap-4 md:grid-cols-2 md:grid-rows-1">
           <div className="flex flex-col gap-1">
-            <label className="text-[#161616] text-base">E-mail</label>
+            <label className="text-base text-[#161616]">E-mail</label>
             <Input value={data.email} onChange={(e) => setData({ ...data, email: e })} type="email" />
-            {error.email ? <span className="text-red-500 text-sm">{error.email}</span> : null}
+            {error.email ? <span className="text-sm text-red-500">{error.email}</span> : null}
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[#161616] text-base">Confirmez votre e-mail</label>
+            <label className="text-base text-[#161616]">Confirmez votre e-mail</label>
             <Input value={data.emailConfirm} onChange={(e) => setData({ ...data, emailConfirm: e })} type="email" />
-            {error.emailConfirm ? <span className="text-red-500 text-sm">{error.emailConfirm}</span> : null}
+            {error.emailConfirm ? <span className="text-sm text-red-500">{error.emailConfirm}</span> : null}
           </div>
         </div>
 
-        <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-rows-2 gap-4 md:grid-cols-2 md:grid-rows-1">
           <div className="flex flex-col gap-1">
-            <label className="text-[#161616] text-base">Mot de passe</label>
-            <div className="flex items-center w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] border-[#3A3A3A] rounded-t-[4px]">
+            <label className="text-base text-[#161616]">Mot de passe</label>
+            <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2">
               <input
                 className="w-full bg-inherit"
                 type={showPassword ? "text" : "password"}
@@ -122,8 +122,8 @@ export default function StepProfil() {
             </p>
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[#161616] text-base">Confirmez votre mot de passe</label>
-            <div className="flex items-center w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] border-[#3A3A3A] rounded-t-[4px]">
+            <label className="text-base text-[#161616]">Confirmez votre mot de passe</label>
+            <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2">
               <input
                 className="w-full bg-inherit"
                 type={showConfirmPassword ? "text" : "password"}
@@ -136,14 +136,14 @@ export default function StepProfil() {
                 <Eye className="cursor-pointer" onClick={() => setShowConfirmPassword(true)} />
               )}
             </div>
-            {error.confirmPassword ? <span className="text-red-500 text-sm">{error.confirmPassword}</span> : null}
+            {error.confirmPassword ? <span className="text-sm text-red-500">{error.confirmPassword}</span> : null}
           </div>
         </div>
 
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-4">
             <CheckBox checked={data?.acceptCGU === "true"} onChange={(e) => setData({ ...data, acceptCGU: e ? "true" : "false" })} />
-            <span className="text-sm text-[#3A3A3A]  flex-1 inline leading-5">
+            <span className="inline flex-1  text-sm leading-5 text-[#3A3A3A]">
               J&apos;ai lu et j&apos;accepte les{" "}
               <a className="underline " href={`${appURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer">
                 Conditions Générales d&apos;Utilisation (CGU)
@@ -151,19 +151,19 @@ export default function StepProfil() {
               de la plateforme du Service National Universel.
             </span>
           </div>
-          {error.acceptCGU ? <span className="text-red-500 text-sm">{error.acceptCGU}</span> : null}
+          {error.acceptCGU ? <span className="text-sm text-red-500">{error.acceptCGU}</span> : null}
         </div>
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-4">
             <CheckBox checked={data?.rulesYoung === "true"} onChange={(e) => setData({ ...data, rulesYoung: e ? "true" : "false" })} />
-            <span className="text-sm text-[#3A3A3A] flex-1 inline leading-5">
+            <span className="inline flex-1 text-sm leading-5 text-[#3A3A3A]">
               J&apos;ai pris connaissance des{" "}
               <a className="underline" href="https://www.snu.gouv.fr/donnees-personnelles" target="_blank" rel="noreferrer">
                 modalités de traitement de mes données personnelles
               </a>
             </span>
           </div>
-          {error.rulesYoung ? <span className="text-red-500 text-sm">{error.rulesYoung}</span> : null}
+          {error.rulesYoung ? <span className="text-sm text-red-500">{error.rulesYoung}</span> : null}
         </div>
       </div>
       <SignupButtonContainer

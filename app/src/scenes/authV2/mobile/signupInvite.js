@@ -90,28 +90,28 @@ export default function Signin() {
       <div className="bg-white px-4 pt-4 pb-12">
         {error?.text && <Error {...error} onClose={() => setError({})} />}
 
-        <div className="text-[#161616] text-[22px] font-bold">Activer mon compte</div>
-        <div className="flex items-center py-4 gap-4">
+        <div className="text-[22px] font-bold text-[#161616]">Activer mon compte</div>
+        <div className="flex items-center gap-4 py-4">
           <RightArrow />
-          <div className="text-[#161616] text-[17px] font-bold">Mon espace volontaire</div>
+          <div className="text-[17px] font-bold text-[#161616]">Mon espace volontaire</div>
         </div>
         <div className="flex flex-col gap-1 pt-1 pb-4">
-          <label className="text-[#161616] text-base">E-mail</label>
+          <label className="text-base text-[#161616]">E-mail</label>
           <Input value={email} onChange={(e) => setEmail(e)} />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[#161616] text-base">Mot de passe</label>
-          <div className="flex items-center w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] border-[#3A3A3A] rounded-t-[4px]">
+          <label className="text-base text-[#161616]">Mot de passe</label>
+          <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2">
             <input className="w-full bg-inherit" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} />
             {showPassword ? <EyeOff className="cursor-pointer" onClick={() => setShowPassword(false)} /> : <Eye className="cursor-pointer" onClick={() => setShowPassword(true)} />}
           </div>
         </div>
-        <div className={`pb-4 ${error?.password ? "text-[#CE0500]" : "text-[#3A3A3A]"} text-xs mt-1`}>
+        <div className={`pb-4 ${error?.password ? "text-[#CE0500]" : "text-[#3A3A3A]"} mt-1 text-xs`}>
           Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[#161616] text-base">Confirmez votre mot de passe</label>
-          <div className="flex items-center w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] border-[#3A3A3A] rounded-t-[4px]">
+          <label className="text-base text-[#161616]">Confirmez votre mot de passe</label>
+          <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2">
             <input className="w-full bg-inherit" type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
             {showConfirmPassword ? (
               <EyeOff className="cursor-pointer" onClick={() => setShowConfirmPassword(false)} />
@@ -120,10 +120,11 @@ export default function Signin() {
             )}
           </div>
         </div>
-        <div className={`pb-7 ${error?.passwordConfirm ? "text-[#CE0500]" : "text-[#3A3A3A]"} text-xs mt-1`}>{error?.passwordConfirm ? error.passwordConfirm : null}</div>
+        <div className={`pb-7 ${error?.passwordConfirm ? "text-[#CE0500]" : "text-[#3A3A3A]"} mt-1 text-xs`}>{error?.passwordConfirm ? error.passwordConfirm : null}</div>
         <button
-          className={`flex items-center justify-center p-2 w-full cursor-pointer ${disabled || loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
-          onClick={onSubmit}>
+          className={`flex w-full cursor-pointer items-center justify-center p-2 ${disabled || loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+          onClick={onSubmit}
+        >
           Connexion
         </button>
       </div>

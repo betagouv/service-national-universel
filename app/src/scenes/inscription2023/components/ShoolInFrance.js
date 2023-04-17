@@ -167,8 +167,8 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
       </div>
       <GhostButton
         name={
-          <div className="flex text-center items-center justify-center gap-1">
-            <FiChevronLeft className="text-[#000091] font-bold" />
+          <div className="flex items-center justify-center gap-1 text-center">
+            <FiChevronLeft className="font-bold text-[#000091]" />
             Revenir à la liste des établissements
           </div>
         }

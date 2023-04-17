@@ -12,8 +12,9 @@ export default function MenuItem({ to, enabled = true, icon, text, status, onClo
           onClick={onClose}
           to={to}
           exact
-          className="my-[2px] px-2 py-3 gap-3 w-full rounded-md flex text-[#D1DAEF] hover:bg-[#1B243D] hover:text-[#D1DAEF] items-center transition-colors duration-200"
-          activeClassName="bg-[#344264] text-[#67A4FF] hover:bg-[#344264] hover:text-[#67A4FF]">
+          className="my-[2px] flex w-full items-center gap-3 rounded-md px-2 py-3 text-[#D1DAEF] transition-colors duration-200 hover:bg-[#1B243D] hover:text-[#D1DAEF]"
+          activeClassName="bg-[#344264] text-[#67A4FF] hover:bg-[#344264] hover:text-[#67A4FF]"
+        >
           {icon && <div className={`w-5 ${isActive ? "text-[#67A4FF]" : "text-[#7A90C3]"}`}>{icon}</div>}
           {text && <span>{text}</span>}
           {status && <StatusPill status={status} />}
@@ -24,7 +25,7 @@ export default function MenuItem({ to, enabled = true, icon, text, status, onClo
 
   return (
     <li className="flex items-center">
-      <div className="my-[1px] px-2 py-3 w-full rounded-md flex gap-4 text-[#526187] cursor-default items-center">
+      <div className="my-[1px] flex w-full cursor-default items-center gap-4 rounded-md px-2 py-3 text-[#526187]">
         {icon}
         <span>{text}</span>
       </div>

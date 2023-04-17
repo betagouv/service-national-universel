@@ -120,15 +120,16 @@ export default function StepPDR({ young, center }) {
       <ConfirmationModal
         isOpen={modalMeetingPoint?.isOpen}
         loading={loading}
-        icon={<Warning className="text-[#D1D5DB] w-[36px] h-[36px]" />}
+        icon={<Warning className="h-[36px] w-[36px] text-[#D1D5DB]" />}
         title={"Changement de PDR"}
         confirmText="Confirmer le changement"
         onCancel={() => setModalMeetingPoint({ isOpen: false, meetingPoint: null })}
         onConfirm={() => {
           if (modalMeetingPoint.meetingPoint) return chooseMeetingPoint(modalMeetingPoint.meetingPoint);
           return chooseGoAlone();
-        }}>
-        <div className="flex flex-col gap-2  text-[14px] leading-[20px] text-gray-900 mt-[8px] text-center my-2">
+        }}
+      >
+        <div className="my-2 mt-[8px] flex  flex-col gap-2 text-center text-[14px] leading-[20px] text-gray-900">
           {modalMeetingPoint.meetingPoint ? (
             <>
               <div>Vous vous apprêtez à changer votre point de rassemblement, souhaitez-vous confirmer cette action ? </div>
@@ -153,18 +154,19 @@ export default function StepPDR({ young, center }) {
 
       {/* Desktop */}
       <div
-        className={`hidden md:flex flex-row items-center justify-between ${enabled && "cursor-pointer"}`}
-        onClick={() => setOpenedDesktop(enabled && young.transportInfoGivenByLocal !== "true" ? !openedDesktop : false)}>
-        <div className="flex lex-row py-4 items-center">
+        className={`hidden flex-row items-center justify-between md:flex ${enabled && "cursor-pointer"}`}
+        onClick={() => setOpenedDesktop(enabled && young.transportInfoGivenByLocal !== "true" ? !openedDesktop : false)}
+      >
+        <div className="lex-row flex items-center py-4">
           {valid ? (
-            <div className="flex items-center justify-center bg-green-500 h-9 w-9 rounded-full mr-4">
-              <BsCheck2 className="text-white h-5 w-5" />
+            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
+              <BsCheck2 className="h-5 w-5 text-white" />
             </div>
           ) : (
-            <div className="flex items-center justify-center h-9 w-9 rounded-full mr-4 border-[1px] border-gray-200 text-gray-700">1</div>
+            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full border-[1px] border-gray-200 text-gray-700">1</div>
           )}
           {(young.meetingPointId || young.deplacementPhase1Autonomous === "true") && <LinearMap />}
-          <div className="flex flex-1 flex-col mx-3">
+          <div className="mx-3 flex flex-1 flex-col">
             <h1 className={`text-base leading-7 ${enabled ? "text-gray-900" : "text-gray-400"}`}>
               {young.meetingPointId || young.deplacementPhase1Autonomous === "true"
                 ? "Lieu de rassemblement"
@@ -191,14 +193,14 @@ export default function StepPDR({ young, center }) {
         </div>
         {openedDesktop && <CohortDateSummary cohortName={young.cohort} className="ml-4" />}
         {enabled && young.transportInfoGivenByLocal !== "true" ? (
-          <div className="flex items-center justify-center bg-gray-100 h-9 w-9 rounded-full hover:scale-110 ml-4">
+          <div className="ml-4 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 hover:scale-110">
             {openedDesktop ? <HiOutlineChevronUp className="h-5 w-5" /> : <HiOutlineChevronDown className="h-5 w-5" />}
           </div>
         ) : null}
       </div>
       {openedDesktop && (
         <div className="my-12">
-          {error && <div className="text-red text-sm text-center my-4">{error}</div>}
+          {error && <div className="text-red my-4 text-center text-sm">{error}</div>}
           {meetingPoints ? (
             <div className="grid grid-cols-4 gap-4">
               {meetingPoints.map((mp) => (
@@ -233,22 +235,23 @@ export default function StepPDR({ young, center }) {
 
       {/* Mobile */}
       <div
-        className={`md:hidden flex items-center border-[1px] mb-3 ml-4 rounded-xl min-h-[144px] cursor-pointer relative ${
+        className={`relative mb-3 ml-4 flex min-h-[144px] cursor-pointer items-center rounded-xl border-[1px] md:hidden ${
           valid ? "border-green-500 bg-green-50" : !young.meetingPointId || young.deplacementPhase1Autonomous !== "true" ? "border-blue-600" : "bg-white"
         } `}
-        onClick={() => setOpenedMobile(enabled && young.transportInfoGivenByLocal !== "true" ? !openedMobile : false)}>
+        onClick={() => setOpenedMobile(enabled && young.transportInfoGivenByLocal !== "true" ? !openedMobile : false)}
+      >
         {(young.meetingPointId || young.deplacementPhase1Autonomous === "true") && (
           <LinearMap gray={(!young.meetingPointId).toString()} className="absolute top-[10px] right-[10px]" />
         )}
-        <div className="-translate-x-5 flex flex-row items-center w-full">
+        <div className="flex w-full -translate-x-5 flex-row items-center">
           {valid ? (
-            <div className="flex items-center justify-center bg-green-500 h-9 w-9 rounded-full mr-4">
-              <BsCheck2 className="text-white h-5 w-5" />
+            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
+              <BsCheck2 className="h-5 w-5 text-white" />
             </div>
           ) : (
-            <div className="flex items-center justify-center h-9 w-9 rounded-full border-[1px] bg-white border-gray-200 text-gray-700">1</div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-full border-[1px] border-gray-200 bg-white text-gray-700">1</div>
           )}
-          <div className="flex flex-1 flex-col ml-3  mr-8 mt-4">
+          <div className="ml-3 mr-8 mt-4 flex  flex-1 flex-col">
             <div className={`text-sm ${valid && "text-green-600"} ${enabled ? "text-gray-900" : "text-gray-400"}`}>
               {young.meetingPointId || young.deplacementPhase1Autonomous === "true"
                 ? "Lieu de rassemblement"
@@ -277,7 +280,7 @@ export default function StepPDR({ young, center }) {
                 </>
               )}
             </div>
-            {!valid && enabled ? <div className="text-blue-600 text-sm text-right leading-5 mt-2">Commencer</div> : null}
+            {!valid && enabled ? <div className="mt-2 text-right text-sm leading-5 text-blue-600">Commencer</div> : null}
           </div>
         </div>
       </div>
@@ -286,11 +289,11 @@ export default function StepPDR({ young, center }) {
           <ModalContainer>
             <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={() => setOpenedMobile(false)} />
             <div className="w-full p-12 md:p-4">
-              <div className="text-gray-900 font-bold text-lg text-center mb-3">Confirmez votre point de rassemblement</div>
+              <div className="mb-3 text-center text-lg font-bold text-gray-900">Confirmez votre point de rassemblement</div>
               <CohortDateSummary cohortName={young.cohort} className="mb-4" />
-              {error && <div className="text-red text-sm text-center my-4">{error}</div>}
+              {error && <div className="text-red my-4 text-center text-sm">{error}</div>}
               {meetingPoints ? (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
                   {meetingPoints.map((mp) => (
                     <MeetingPointChooser
                       key={mp._id}
@@ -327,7 +330,7 @@ export default function StepPDR({ young, center }) {
 
 function MobileDateDetail({ startHour, returnHour, cohort }) {
   return (
-    <div className="grid grid-cols-2 gap-2 my-3">
+    <div className="my-3 grid grid-cols-2 gap-2">
       <div className="">
         <div className="font-bold">Aller à {startHour}</div>
         <div className="text-xs">
@@ -348,25 +351,25 @@ function MeetingPointChooser({ meetingPoint, onChoose, choosed, expired }) {
   const completeAddress = meetingPoint.address + " " + meetingPoint.zip + " " + meetingPoint.city;
 
   return (
-    <div className="flex flex-col items-center bg-gray-50 rounded-lg p-4">
+    <div className="flex flex-col items-center rounded-lg bg-gray-50 p-4">
       <LinearMap />
-      <div className="text-[#242526] text-base font-bold mt-3 text-center">{meetingPoint.name}</div>
-      <div className="flex-1 text-gray-800 text-sm mt-1 underline text-center">{completeAddress}</div>
-      <div className="flex-1 text-gray-500 text-sm mt-1 text-center">N° de transport : {meetingPoint.busLineName}</div>
-      <div className="w-[66px] h-[1px] bg-gray-200 my-4" />
-      <div className="flex items-center mb-8">
+      <div className="mt-3 text-center text-base font-bold text-[#242526]">{meetingPoint.name}</div>
+      <div className="mt-1 flex-1 text-center text-sm text-gray-800 underline">{completeAddress}</div>
+      <div className="mt-1 flex-1 text-center text-sm text-gray-500">N° de transport : {meetingPoint.busLineName}</div>
+      <div className="my-4 h-[1px] w-[66px] bg-gray-200" />
+      <div className="mb-8 flex items-center">
         <Schedule type="Aller" className="mr-4">
           {meetingPoint.meetingHour}
         </Schedule>
         <Schedule type="Retour">{meetingPoint.returnHour}</Schedule>
       </div>
       {choosed ? (
-        <div className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 border-blue-600 text-[#FFFFFF] text-sm font-medium flex items-center">
+        <div className="flex items-center rounded-[10px] border-[1px]  border-blue-600 bg-blue-600 py-2.5 px-3 text-sm font-medium text-[#FFFFFF]">
           <Check className="mr-2" />
           Choisi
         </div>
       ) : expired ? (
-        <div className="rounded-[10px] border-[1px] py-2.5 px-3  bg-[#FFFFFF] border-gray-300 text-gray-500 text-sm font-medium">Date limite dépassée</div>
+        <div className="rounded-[10px] border-[1px] border-gray-300 bg-[#FFFFFF]  py-2.5 px-3 text-sm font-medium text-gray-500">Date limite dépassée</div>
       ) : (
         <BorderButton onClick={onChoose}>Choisir ce point</BorderButton>
       )}
@@ -377,8 +380,8 @@ function MeetingPointChooser({ meetingPoint, onChoose, choosed, expired }) {
 function Schedule({ type, children, className }) {
   return (
     <div className={`flex items-center ${className}`}>
-      <div className="text-gray-500 text-sm mr-1">{type}</div>
-      <div className="text-[#242526] font-bold text-lg">{children}</div>
+      <div className="mr-1 text-sm text-gray-500">{type}</div>
+      <div className="text-lg font-bold text-[#242526]">{children}</div>
     </div>
   );
 }
@@ -409,20 +412,21 @@ function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired,
   }
 
   return (
-    <div className="flex flex-col items-center bg-gray-50 rounded-lg p-4">
+    <div className="flex flex-col items-center rounded-lg bg-gray-50 p-4">
       <LinearMap gray="true" />
-      <div className="flex-1 text-[#242526] text-base font-bold mt-3 text-center">Je me rends au centre et en reviens par mes propres moyens</div>
-      <button onClick={toggleMore} className="text-blue-600 font-medium text-xs mt-6 mb-8 md:hover:underline relative" id="toggle-button">
+      <div className="mt-3 flex-1 text-center text-base font-bold text-[#242526]">Je me rends au centre et en reviens par mes propres moyens</div>
+      <button onClick={toggleMore} className="relative mt-6 mb-8 text-xs font-medium text-blue-600 md:hover:underline" id="toggle-button">
         {opened ? "Masquer les informations" : "En savoir plus"}
         {opened && (
           <div
-            className={`mt-4 md:mt-0 md:absolute md:bg-[#FFFFFF] md:p-6 md:shadow md:rounded-lg md:top-[100%] text-left ${
+            className={`mt-4 text-left md:absolute md:top-[100%] md:mt-0 md:rounded-lg md:bg-[#FFFFFF] md:p-6 md:shadow ${
               meetingPointsCount === 0 ? "md:left-[-70px]" : "md:right-[-120px]"
-            }`}>
-            <div className="text-sm md:text-lg text-[#242526] font-bold md:whitespace-nowrap">Rendez vous directement à votre lieu d’affectation</div>
+            }`}
+          >
+            <div className="text-sm font-bold text-[#242526] md:whitespace-nowrap md:text-lg">Rendez vous directement à votre lieu d’affectation</div>
             <div className="text-sm text-gray-700 md:whitespace-nowrap">{center.address + " " + center.zip + " " + center.city}</div>
             {cohort && (
-              <div className="flex flex-col md:flex-row md:items-center mt-4">
+              <div className="mt-4 flex flex-col md:flex-row md:items-center">
                 <CenterSchedule type="Aller" hour={ALONE_ARRIVAL_HOUR} date={cohort.dateStart} className="mb-[16px] md:mb-0 md:mr-4" />
                 <CenterSchedule type="Retour" hour={ALONE_DEPARTURE_HOUR} date={cohort.dateEnd} />
               </div>
@@ -431,12 +435,12 @@ function MeetingPointGoAloneDesktop({ center, young, onChoose, choosed, expired,
         )}
       </button>
       {choosed ? (
-        <div className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 border-blue-600 text-[#FFFFFF] text-sm font-medium flex items-center">
+        <div className="flex items-center rounded-[10px] border-[1px]  border-blue-600 bg-blue-600 py-2.5 px-3 text-sm font-medium text-[#FFFFFF]">
           <Check className="mr-2" />
           Choisi
         </div>
       ) : expired ? (
-        <div className="rounded-[10px] border-[1px] py-2.5 px-3  bg-[#FFFFFF] border-gray-300 text-gray-500 text-sm font-medium">Date limite dépassée</div>
+        <div className="rounded-[10px] border-[1px] border-gray-300 bg-[#FFFFFF]  py-2.5 px-3 text-sm font-medium text-gray-500">Date limite dépassée</div>
       ) : (
         <BorderButton onClick={onChoose}>Choisir</BorderButton>
       )}
@@ -457,17 +461,17 @@ function MeetingPointGoAloneMobile({ center, young, onChoose, choosed, expired }
   }
 
   return (
-    <div className="flex flex-col items-center bg-gray-50 rounded-lg p-4">
+    <div className="flex flex-col items-center rounded-lg bg-gray-50 p-4">
       <LinearMap gray="true" />
-      <div className="flex-1 text-[#242526] text-base font-bold mt-3 text-center">Je me rends au centre et en reviens par mes propres moyens</div>
-      <button onClick={toggleMore} className="text-blue-600 font-medium text-xs mt-6 mb-8 md:hover:underline relative">
+      <div className="mt-3 flex-1 text-center text-base font-bold text-[#242526]">Je me rends au centre et en reviens par mes propres moyens</div>
+      <button onClick={toggleMore} className="relative mt-6 mb-8 text-xs font-medium text-blue-600 md:hover:underline">
         {opened ? "Masquer les informations" : "En savoir plus"}
         {opened && (
-          <div className="mt-4 md:mt-0 md:absolute md:bg-[#FFFFFF] md:p-6 md:shadow md:rounded-lg md:top-[100%] md:right-[-120px] text-left">
-            <div className="text-sm md:text-lg text-[#242526] font-bold md:whitespace-nowrap">Rendez vous directement à votre lieu d’affectation</div>
+          <div className="mt-4 text-left md:absolute md:top-[100%] md:right-[-120px] md:mt-0 md:rounded-lg md:bg-[#FFFFFF] md:p-6 md:shadow">
+            <div className="text-sm font-bold text-[#242526] md:whitespace-nowrap md:text-lg">Rendez vous directement à votre lieu d’affectation</div>
             <div className="text-sm text-gray-700 md:whitespace-nowrap">{center.address + " " + center.zip + " " + center.city}</div>
             {cohort && (
-              <div className="flex flex-col md:flex-row md:items-center mt-4">
+              <div className="mt-4 flex flex-col md:flex-row md:items-center">
                 <CenterSchedule type="Aller" hour={ALONE_ARRIVAL_HOUR} date={cohort.dateStart} className="mb-[16px] md:mb-0 md:mr-4" />
                 <CenterSchedule type="Retour" hour={ALONE_DEPARTURE_HOUR} date={cohort.dateEnd} />
               </div>
@@ -476,12 +480,12 @@ function MeetingPointGoAloneMobile({ center, young, onChoose, choosed, expired }
         )}
       </button>
       {choosed ? (
-        <div className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 border-blue-600 text-[#FFFFFF] text-sm font-medium flex items-center">
+        <div className="flex items-center rounded-[10px] border-[1px]  border-blue-600 bg-blue-600 py-2.5 px-3 text-sm font-medium text-[#FFFFFF]">
           <Check className="mr-2" />
           Choisi
         </div>
       ) : expired ? (
-        <div className="rounded-[10px] border-[1px] py-2.5 px-3  bg-[#FFFFFF] border-gray-300 text-gray-500 text-sm font-medium">Date limite dépassée</div>
+        <div className="rounded-[10px] border-[1px] border-gray-300 bg-[#FFFFFF]  py-2.5 px-3 text-sm font-medium text-gray-500">Date limite dépassée</div>
       ) : (
         <BorderButton onClick={onChoose}>Choisir</BorderButton>
       )}
@@ -491,11 +495,11 @@ function MeetingPointGoAloneMobile({ center, young, onChoose, choosed, expired }
 
 function CenterSchedule({ type, hour, date, className = 0 }) {
   return (
-    <div className={`border-l-[3px] border-l-blue-700 border-l-solid pl-3 ${className}`}>
-      <div className="text-sm text-gray-800 font-bold">
+    <div className={`border-l-solid border-l-[3px] border-l-blue-700 pl-3 ${className}`}>
+      <div className="text-sm font-bold text-gray-800">
         {type} à {hour}
       </div>
-      <div className="text-sm text-gray-500 mt-2:">
+      <div className="mt-2: text-sm text-gray-500">
         <span className="capitalize">{dayjs(date).locale("fr").format("dddd")}</span> <span>{dayjs(date).locale("fr").format("D MMMM")}</span>
       </div>
     </div>

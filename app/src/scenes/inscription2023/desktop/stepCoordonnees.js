@@ -535,7 +535,8 @@ export default function StepCoordonnees() {
       childrenContinueButton={young.status === YOUNG_STATUS.WAITING_CORRECTION ? "Corriger" : "Continuer"}
       onCorrection={onCorrection}
       disabled={loading}
-      questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`}>
+      questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`}
+    >
       <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />
       {!wasBornInFranceBool && (
         <SearchableSelect
@@ -549,7 +550,7 @@ export default function StepCoordonnees() {
         />
       )}
       <div className="flex">
-        <div className="flex-1 mr-3 relative">
+        <div className="relative mr-3 flex-1">
           <Input
             list="suggestions"
             value={birthCity}
@@ -559,21 +560,22 @@ export default function StepCoordonnees() {
             correction={corrections.birthCity}
           />
           {wasBornInFranceBool && (
-            <div ref={ref} className="w-full absolute z-50 bg-white border-3 border-red-600 shadow overflow-hidden mt-[-24px]">
+            <div ref={ref} className="border-3 absolute z-50 mt-[-24px] w-full overflow-hidden border-red-600 bg-white shadow">
               {birthCityZipSuggestions.map(({ city, postcode }, index) => (
                 <div
                   onClick={() => {
                     onClickBirthCitySuggestion(city, postcode);
                   }}
-                  className="group flex justify-between items-center gap-2 p-2 px-3  hover:bg-gray-50 cursor-pointer"
-                  key={`${index} - ${postcode}`}>{`${city} - ${postcode}`}</div>
+                  className="group flex cursor-pointer items-center justify-between gap-2 p-2  px-3 hover:bg-gray-50"
+                  key={`${index} - ${postcode}`}
+                >{`${city} - ${postcode}`}</div>
               ))}
             </div>
           )}
         </div>
 
         <Input
-          className="flex-1 ml-3"
+          className="ml-3 flex-1"
           value={birthCityZip}
           label="Code postal de naissance"
           onChange={updateData("birthCityZip")}
@@ -620,7 +622,7 @@ export default function StepCoordonnees() {
       />
       <div className="flex">
         <Input
-          className="flex-1 mr-3"
+          className="mr-3 flex-1"
           value={isFrenchResident ? zip : foreignZip}
           label="Code postal"
           onChange={isFrenchResident ? updateAddressToVerify("zip") : updateData("foreignZip")}
@@ -628,7 +630,7 @@ export default function StepCoordonnees() {
           correction={isFrenchResident ? corrections.zip : corrections.foreignZip}
         />
         <Input
-          className="flex-1 ml-3"
+          className="ml-3 flex-1"
           value={isFrenchResident ? city : foreignCity}
           label="Ville"
           onChange={isFrenchResident ? updateAddressToVerify("city") : updateData("foreignCity")}
@@ -639,20 +641,20 @@ export default function StepCoordonnees() {
       {!isFrenchResident && (
         <>
           <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
-          <div className="flex my-3">
-            <div className="w-[40px] min-w-[40px] flex justify-center items-center bg-[#0063CB]">
+          <div className="my-3 flex">
+            <div className="flex w-[40px] min-w-[40px] items-center justify-center bg-[#0063CB]">
               <img src={require("../../../assets/infoSquared.svg")} height={20} width={20} />
             </div>
-            <div className="text-[#3A3A3A] border-2 border-[#0063CB] p-3  text-justify shadow-sm">
+            <div className="border-2 border-[#0063CB] p-3 text-justify  text-[#3A3A3A] shadow-sm">
               Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).
             </div>
           </div>
-          <p className="text-[14px] text-[#666666] leading-tight text-justify">
+          <p className="text-justify text-[14px] leading-tight text-[#666666]">
             À noter : l&apos;hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
           </p>
           <div className="flex">
             <Input
-              className="flex-1 mr-3"
+              className="mr-3 flex-1"
               value={hostFirstName}
               label="Prénom de l’hébergeur"
               onChange={updateData("hostFirstName")}
@@ -660,7 +662,7 @@ export default function StepCoordonnees() {
               correction={corrections.hostFirstName}
             />
             <Input
-              className="flex-1 ml-3"
+              className="ml-3 flex-1"
               value={hostLastName}
               label="Nom de l’hébergeur"
               onChange={updateData("hostLastName")}
@@ -678,8 +680,8 @@ export default function StepCoordonnees() {
           />
           <Input value={address} label="Son adresse" onChange={updateAddressToVerify("address", false)} error={errors.address} correction={corrections.address} />
           <div className="flex">
-            <Input className="flex-1 mr-3" value={zip} label="Code postal" onChange={updateAddressToVerify("zip", false)} error={errors.zip} correction={corrections.zip} />
-            <Input className="flex-1 ml-3" value={city} label="Ville" onChange={updateAddressToVerify("city", false)} error={errors.city} correction={corrections.city} />
+            <Input className="mr-3 flex-1" value={zip} label="Code postal" onChange={updateAddressToVerify("zip", false)} error={errors.zip} correction={corrections.zip} />
+            <Input className="ml-3 flex-1" value={city} label="Ville" onChange={updateAddressToVerify("city", false)} error={errors.city} correction={corrections.city} />
           </div>
         </>
       )}
@@ -705,12 +707,12 @@ export default function StepCoordonnees() {
         error={errors.situation}
         correction={corrections.situation}
       />
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <div>
           <h2 className="mt-0 text-[16px] font-bold">
             Souhaitez-vous nous faire part d&apos;une situation particulière ? (allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)
           </h2>
-          <div className=" text-[#666666] text-[14px] leading-tight mt-1">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
+          <div className=" mt-1 text-[14px] leading-tight text-[#666666]">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
         </div>
         <div className="ml-3">
           <Toggle toggled={hasSpecialSituation} onClick={() => updateSpecialSituation(!hasSpecialSituation)} />
@@ -754,7 +756,7 @@ export default function StepCoordonnees() {
           <ErrorMessage>{errors.hasSpecialSituation}</ErrorMessage>
           {moreInformation && (
             <>
-              <hr className="my-4 h-px bg-gray-200 border-0" />
+              <hr className="my-4 h-px border-0 bg-gray-200" />
               <RadioButton
                 label="Avez-vous besoin d’aménagements spécifiques ?"
                 description="(accompagnant professionnel, participation de jour, activités adaptées... )"

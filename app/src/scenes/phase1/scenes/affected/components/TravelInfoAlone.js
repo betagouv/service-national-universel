@@ -9,12 +9,12 @@ export default function TravelInfoAlone({ center, cohortDetails }) {
   }
 
   return (
-    <div className="border-l-4 border-gray-500 flex-none ml-[1rem] px-[1rem] md:ml-[4rem] md:pl-[3rem] md:max-w-md">
+    <div className="ml-[1rem] flex-none border-l-4 border-gray-500 px-[1rem] md:ml-[4rem] md:max-w-md md:pl-[3rem]">
       <h1 className="text-xl font-bold">Résumé du voyage</h1>
-      <p className="text-sm mb-4">Je me rends au centre et en reviens par mes propres moyens.</p>
-      <div className="space-y-4 my-2">
+      <p className="mb-4 text-sm">Je me rends au centre et en reviens par mes propres moyens.</p>
+      <div className="my-2 space-y-4">
         <div className="max-w-md">
-          <p className="flex gap-2 items-center">
+          <p className="flex items-center gap-2">
             <strong>Aller</strong>
             <span>
               <LongArrow className="text-gray-500" />
@@ -24,7 +24,7 @@ export default function TravelInfoAlone({ center, cohortDetails }) {
             <span className="capitalize">{dayjs(cohortDetails.dateStart).locale("fr").format("dddd")}</span>{" "}
             <span>{dayjs(cohortDetails.dateStart).locale("fr").format("D MMMM")}</span> à {ALONE_ARRIVAL_HOUR}
           </p>
-          <p className="text-sm py-2 px-3 my-2 bg-gray-100 rounded-xl">
+          <p className="my-2 rounded-xl bg-gray-100 py-2 px-3 text-sm">
             {center.name},
             <br />
             {center.address}
@@ -34,17 +34,17 @@ export default function TravelInfoAlone({ center, cohortDetails }) {
         </div>
 
         <div className="max-w-md">
-          <p className="flex gap-2 items-center">
+          <p className="flex items-center gap-2">
             <strong>Retour</strong>
             <span>
-              <LongArrow className="text-gray-500 rotate-180" />
+              <LongArrow className="rotate-180 text-gray-500" />
             </span>
           </p>
           <p className="text-sm">
             <span className="capitalize">{dayjs(cohortDetails.dateEnd).locale("fr").format("dddd")}</span> <span>{dayjs(cohortDetails.dateEnd).locale("fr").format("D MMMM")}</span>{" "}
             à {ALONE_DEPARTURE_HOUR}
           </p>
-          <p className="text-sm py-2 px-3 my-2 bg-gray-100 rounded-xl">
+          <p className="my-2 rounded-xl bg-gray-100 py-2 px-3 text-sm">
             {center.name},
             <br />
             {center.address}

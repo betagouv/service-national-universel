@@ -85,31 +85,31 @@ export default function Signin() {
   }, [email, password, confirmPassword]);
 
   return (
-    <div className="bg-[#F9F6F2] py-6 flex">
-      <div className="bg-white basis-[50%] mx-auto my-0 px-[102px] py-[60px]">
+    <div className="flex bg-[#F9F6F2] py-6">
+      <div className="mx-auto my-0 basis-[50%] bg-white px-[102px] py-[60px]">
         {error?.text && <Error {...error} onClose={() => setError({})} />}
-        <div className="text-[#161616] text-[32px] font-bold mb-1">Activer mon compte</div>
-        <div className="flex items-center mb-2 gap-4">
+        <div className="mb-1 text-[32px] font-bold text-[#161616]">Activer mon compte</div>
+        <div className="mb-2 flex items-center gap-4">
           <RightArrow />
-          <div className="text-[#161616] text-[21px] font-bold">Mon espace volontaire</div>
+          <div className="text-[21px] font-bold text-[#161616]">Mon espace volontaire</div>
         </div>
-        <div className="flex flex-col gap-1 pt-1 mb-1 pb-4">
-          <label className="text-[#161616] text-base">E-mail</label>
+        <div className="mb-1 flex flex-col gap-1 pt-1 pb-4">
+          <label className="text-base text-[#161616]">E-mail</label>
           <Input value={email} onChange={(e) => setEmail(e)} />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[#161616] text-base">Mot de passe</label>
-          <div className="flex items-center w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] border-[#3A3A3A] rounded-t-[4px]">
+          <label className="text-base text-[#161616]">Mot de passe</label>
+          <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2">
             <input className="w-full bg-inherit" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} />
             {showPassword ? <EyeOff className="cursor-pointer" onClick={() => setShowPassword(false)} /> : <Eye className="cursor-pointer" onClick={() => setShowPassword(true)} />}
           </div>
         </div>
-        <div className={`pb-4 ${error?.password ? "text-[#CE0500]" : "text-[#3A3A3A]"} text-xs mt-1`}>
+        <div className={`pb-4 ${error?.password ? "text-[#CE0500]" : "text-[#3A3A3A]"} mt-1 text-xs`}>
           Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[#161616] text-base">Confirmez votre mot de passe</label>
-          <div className="flex items-center w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] border-[#3A3A3A] rounded-t-[4px]">
+          <label className="text-base text-[#161616]">Confirmez votre mot de passe</label>
+          <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2">
             <input className="w-full bg-inherit" type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
             {showConfirmPassword ? (
               <EyeOff className="cursor-pointer" onClick={() => setShowConfirmPassword(false)} />
@@ -118,12 +118,13 @@ export default function Signin() {
             )}
           </div>
         </div>
-        <div className={`pb-7 ${error?.passwordConfirm ? "text-[#CE0500]" : "text-[#3A3A3A]"} text-xs mt-1`}>{error?.passwordConfirm ? error.passwordConfirm : null}</div>
-        <div className="w-full flex justify-end">
+        <div className={`pb-7 ${error?.passwordConfirm ? "text-[#CE0500]" : "text-[#3A3A3A]"} mt-1 text-xs`}>{error?.passwordConfirm ? error.passwordConfirm : null}</div>
+        <div className="flex w-full justify-end">
           <button
             disabled={disabled || loading}
-            className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:!text-[#000091] hover:bg-white hover:border hover:border-[#000091]  disabled:bg-[#E5E5E5] disabled:!text-[#929292] disabled:border-0 disabled:cursor-default"
-            onClick={onSubmit}>
+            className="flex cursor-pointer items-center justify-center bg-[#000091] px-3 py-2 text-white hover:border hover:border-[#000091] hover:bg-white hover:!text-[#000091]  disabled:cursor-default disabled:border-0 disabled:bg-[#E5E5E5] disabled:!text-[#929292]"
+            onClick={onSubmit}
+          >
             Connexion
           </button>
         </div>

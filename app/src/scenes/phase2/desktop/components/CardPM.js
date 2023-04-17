@@ -44,21 +44,22 @@ export default function CardPM({ young }) {
   };
 
   return (
-    <div className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md">
+    <div className="mb-4 flex w-full flex-col rounded-lg bg-white px-4 pt-3 shadow-md">
       <div className="mb-3 cursor-pointer" onClick={() => setOpen(young.statusMilitaryPreparationFiles !== "REFUSED" ? !open : false)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <Prepa className="w-6 h-6 mr-2 text-gray-500" />
-            <div className="text-base leading-5 font-bold">Dossier d&apos;éligibilité aux Préparations militaires</div>
+            <Prepa className="mr-2 h-6 w-6 text-gray-500" />
+            <div className="text-base font-bold leading-5">Dossier d&apos;éligibilité aux Préparations militaires</div>
           </div>
           <div className="flex items-center gap-5">
             <div
               className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
                 theme.text[young.statusMilitaryPreparationFiles]
-              } px-2 py-[2px] rounded-sm `}>
+              } rounded-sm px-2 py-[2px] `}
+            >
               {translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}
             </div>
-            {young.statusMilitaryPreparationFiles !== "REFUSED" ? <BsChevronDown className={`text-gray-400 h-5 w-5 ${open ? "rotate-180" : ""}`} /> : null}
+            {young.statusMilitaryPreparationFiles !== "REFUSED" ? <BsChevronDown className={`h-5 w-5 text-gray-400 ${open ? "rotate-180" : ""}`} /> : null}
           </div>
         </div>
       </div>
@@ -67,12 +68,12 @@ export default function CardPM({ young }) {
           <hr className="text-gray-200" />
           {young.statusMilitaryPreparationFiles === "WAITING_CORRECTION" ? (
             <>
-              <div className="flex justify-between items-center px-2 py-3 rounded-lg bg-gray-50 mt-4 mb-4 gap-6">
-                <div className="flex flex-col flex-1">
+              <div className="mt-4 mb-4 flex items-center justify-between gap-6 rounded-lg bg-gray-50 px-2 py-3">
+                <div className="flex flex-1 flex-col">
                   <div className="text-base font-bold">Corrections demandées</div>
                   <div className="text-sm text-gray-500">{young.militaryPreparationCorrectionMessage}</div>
                 </div>
-                <button className="mr-4 border-[1px] border-blue-700 hover:bg-blue-700 text-blue-700 hover:text-white px-4 py-2 rounded-lg" onClick={onCorrection}>
+                <button className="mr-4 rounded-lg border-[1px] border-blue-700 px-4 py-2 text-blue-700 hover:bg-blue-700 hover:text-white" onClick={onCorrection}>
                   Envoyer ma correction
                 </button>
               </div>

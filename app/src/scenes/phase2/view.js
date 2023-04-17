@@ -8,7 +8,7 @@ export default function View() {
 
   return (
     <>
-      <div className="hidden md:flex flex-1">
+      <div className="hidden flex-1 md:flex">
         <DesktopView young={young} />
       </div>
       <div className="flex md:hidden ">

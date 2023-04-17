@@ -159,10 +159,10 @@ export default function viewMobile() {
   if (!mission) return <Loader />;
   return (
     <div className="flex">
-      <div className="bg-white rounded-xl w-full p-3 mb-4">
+      <div className="mb-4 w-full rounded-xl bg-white p-3">
         {/* BEGIN HEADER */}
         <div className="flex flex-col gap-4">
-          <div className="flex gap-4 items-center">
+          <div className="flex items-center gap-4">
             {/* icon */}
             <div className="flex items-center">
               <IconDomain domain={mission.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission.domains[0]} />
@@ -171,22 +171,22 @@ export default function viewMobile() {
             {/* infos mission */}
             <div className="flex flex-col">
               <div className="space-y-2">
-                <div className="text-gray-500 text-xs uppercase">{mission.structureName}</div>
-                <div className="text-gray-900 font-bold text-base">{mission.name}</div>
+                <div className="text-xs uppercase text-gray-500">{mission.structureName}</div>
+                <div className="text-base font-bold text-gray-900">{mission.name}</div>
               </div>
             </div>
           </div>
           <div className="flex  flex-wrap space-x-2">
             {getTags()?.map((e, i) => (
-              <div key={i} className="flex justify-center items-center text-gray-600 border-gray-200 border-[1px] rounded-full p-1 text-xs">
+              <div key={i} className="flex items-center justify-center rounded-full border-[1px] border-gray-200 p-1 text-xs text-gray-600">
                 {e}
               </div>
             ))}
             {mission?.isMilitaryPreparation === "true" ? (
-              <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">Préparation militaire</div>
+              <div className="flex items-center justify-center rounded-full border-[1px] border-gray-200 bg-blue-900 px-4 py-1 text-xs text-white">Préparation militaire</div>
             ) : null}
           </div>
-          <div className="flex items-center justify-center mt-2">
+          <div className="mt-2 flex items-center justify-center">
             {mission.application ? (
               <ApplicationStatus
                 application={mission.application}
@@ -222,12 +222,13 @@ export default function viewMobile() {
         </div>
         {/* END HEADER */}
         {contract && !contractHasAllValidation(contract, young) && (
-          <div className="bg-gray-50 rounded-lg  p-3">
+          <div className="rounded-lg bg-gray-50  p-3">
             <div className="flex">
               <div
-                className={`text-xs font-normal px-2 py-1 ${
+                className={`px-2 py-1 text-xs font-normal ${
                   contract?.invitationSent ? "bg-sky-100 text-sky-500" : "bg-gray-200 text-gray-600"
-                } rounded-sm items-center flex space-x-1`}>
+                } flex items-center space-x-1 rounded-sm`}
+              >
                 {contract?.invitationSent && <AiFillClockCircle className="text-sky-500" />}
                 <div>Contrat {contract?.invitationSent ? "envoyé" : "en brouillon"}</div>
               </div>
@@ -236,15 +237,16 @@ export default function viewMobile() {
               className="flex justify-between"
               onClick={() => {
                 setOpenPeopleContract(!openPeopleContract);
-              }}>
+              }}
+            >
               <div className="text-lg font-bold">Contrat d&apos;engagement en mission d&apos;intérêt général</div>
               {contract?.invitationSent && <HiChevronDown />}
             </div>
             {openPeopleContract && (
               <>
-                <div className="text-sm mt-1 ">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
+                <div className="mt-1 text-sm ">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
                 {contract?.invitationSent && (
-                  <div className="flex flex-col my-4 space-y-3">
+                  <div className="my-4 flex flex-col space-y-3">
                     <StatusContractPeople
                       value={contract?.projectManagerStatus}
                       description="Représentant de l’État"
@@ -289,7 +291,7 @@ export default function viewMobile() {
           </div>
         )}
 
-        <div className="flex flex-row mt-3 gap-2">
+        <div className="mt-3 flex flex-row gap-2">
           <TabItem name="mots" setCurrentTab={setCurrentTab} active={currentTab === "mots"}>
             En quelques mots...
           </TabItem>
@@ -299,8 +301,8 @@ export default function viewMobile() {
         </div>
         <hr className="-mx-10 -translate-y-0.5" />
         {currentTab === "mots" ? (
-          <div className="flex flex-col mx-3 my-4">
-            <div className="text-base font-bold mb-2">La mission en quelques mots</div>
+          <div className="mx-3 my-4 flex flex-col">
+            <div className="mb-2 text-base font-bold">La mission en quelques mots</div>
             <Detail title="Format" content={translate(mission.format)} />
             <Detail title="Objectifs" content={mission.description} />
             <Detail title="Actions" content={mission.actions} />
@@ -308,9 +310,9 @@ export default function viewMobile() {
             <InfoStructure title="à propos de la structure" structure={mission.structureId} />
           </div>
         ) : (
-          <div className="flex flex-col mx-3 my-4">
+          <div className="mx-3 my-4 flex flex-col">
             <div className="flex items-center justify-between">
-              <div className="text-base font-bold mb-2">Informations pratiques</div>
+              <div className="mb-2 text-base font-bold">Informations pratiques</div>
               <DoubleDayTile date1={mission.startAt} date2={mission.endAt} />
             </div>
             <Detail
@@ -325,12 +327,12 @@ export default function viewMobile() {
             <Detail title="Période pour réaliser la mission" content={mission.period} />
             <Detail title="Lieu" content={[mission.address, mission.zip, mission.city, mission.department]} />
             {mission?.hebergement === "true" && (
-              <div className="bg-white shadow-sm rounded-lg px-3 pt-3">
+              <div className="rounded-lg bg-white px-3 pt-3 shadow-sm">
                 {mission.hebergementPayant === "true" ? (
                   <div>
                     <div className="flex flex-row justify-between">
                       <div className="text-sm font-bold">Hébergement payant proposé</div>
-                      <div className="p-1.5 bg-yellow-100 rounded-full">
+                      <div className="rounded-full bg-yellow-100 p-1.5">
                         <House color="#D97706" />
                       </div>
                     </div>
@@ -342,7 +344,7 @@ export default function viewMobile() {
                   <div>
                     <div className="flex flex-row justify-between">
                       <div className="text-sm font-bold">Hébergement gratuit proposé</div>
-                      <div className="p-1.5 bg-green-50 rounded-full">
+                      <div className="rounded-full bg-green-50 p-1.5">
                         <House color="#059669" />
                       </div>
                     </div>
@@ -357,10 +359,10 @@ export default function viewMobile() {
         )}
         {mission.application ? (
           <>
-            <div className="flex items-center justify-center mx-6 my-4">
+            <div className="mx-6 my-4 flex items-center justify-center">
               {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(mission?.application.status) ? (
                 <button
-                  className="group flex items-center gap-1 border-[1px] px-10 py-2 rounded-lg"
+                  className="group flex items-center gap-1 rounded-lg border-[1px] px-10 py-2"
                   disabled={loading}
                   onClick={() =>
                     setCancelModal({
@@ -369,14 +371,15 @@ export default function viewMobile() {
                       title: "Êtes-vous sûr ?",
                       message: "Vous vous apprêtez à annuler votre candidature. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
                     })
-                  }>
-                  <IoMdInformationCircleOutline className="h-5 w-5 group-disabled:text-red-300 text-red-400" />
-                  <div className="text-sm leading-5 font-medium group-disabled:text-gray-400 text-gray-800">Annuler cette candidature</div>
+                  }
+                >
+                  <IoMdInformationCircleOutline className="h-5 w-5 text-red-400 group-disabled:text-red-300" />
+                  <div className="text-sm font-medium leading-5 text-gray-800 group-disabled:text-gray-400">Annuler cette candidature</div>
                 </button>
               ) : null}
               {["IN_PROGRESS", "VALIDATED"].includes(mission?.application.status) ? (
                 <button
-                  className="group flex items-center gap-1 border-[1px] px-10 py-2 rounded-lg"
+                  className="group flex items-center gap-1 rounded-lg border-[1px] px-10 py-2"
                   disabled={loading}
                   onClick={() =>
                     setCancelModal({
@@ -385,9 +388,10 @@ export default function viewMobile() {
                       title: "Êtes-vous sûr ?",
                       message: "Vous vous apprêtez à abandonner cette mission. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
                     })
-                  }>
-                  <IoMdInformationCircleOutline className="h-5 w-5 group-disabled:text-red-300 text-red-400" />
-                  <div className="text-sm leading-5 font-medium group-disabled:text-gray-400 text-gray-800">Abandonner la mission</div>
+                  }
+                >
+                  <IoMdInformationCircleOutline className="h-5 w-5 text-red-400 group-disabled:text-red-300" />
+                  <div className="text-sm font-medium leading-5 text-gray-800 group-disabled:text-gray-400">Abandonner la mission</div>
                 </button>
               ) : null}
             </div>
@@ -416,30 +420,32 @@ export default function viewMobile() {
             <hr className="text-gray-100" />
             <div className="mt-8 ml-3">
               <div className="flex justify-between">
-                <div className="text-[15px] leading-6 font-semibold">Pièces jointes</div>
-                <div className="flex space-x-4 items-center">
+                <div className="text-[15px] font-semibold leading-6">Pièces jointes</div>
+                <div className="flex items-center space-x-4">
                   {optionsType.reduce((nmb, option) => nmb + mission.application[option].length, 0) !== 0 && (
                     <div
-                      className="group flex items-center rounded-lg text-blue-600 text-center text-sm py-2 px-4 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out"
-                      onClick={() => setOpenAttachments(!openAttachments)}>
+                      className="group flex items-center rounded-lg border-[1px] border-blue-600 py-2 px-4 text-center text-sm text-blue-600 transition duration-100 ease-in-out hover:bg-blue-600 hover:text-white"
+                      onClick={() => setOpenAttachments(!openAttachments)}
+                    >
                       {openAttachments ? "Masquer" : "Voir"}
-                      <BsChevronDown className={`ml-3 text-blue-600 group-hover:text-white h-5 w-5 ${openAttachments ? "rotate-180" : ""}`} />
+                      <BsChevronDown className={`ml-3 h-5 w-5 text-blue-600 group-hover:text-white ${openAttachments ? "rotate-180" : ""}`} />
                     </div>
                   )}
                   <div
-                    className="text-white bg-blue-600  rounded-full p-2 "
+                    className="rounded-full bg-blue-600  p-2 text-white "
                     onClick={() => {
                       setModalDocument({
                         isOpen: true,
                         stepOne: true,
                       });
-                    }}>
+                    }}
+                  >
                     <HiPlus />
                   </div>
                 </div>
               </div>
               {openAttachments && (
-                <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full ">
+                <div className="my-4 flex w-full flex-row gap-4 overflow-x-auto ">
                   {optionsType.map(
                     (option, index) =>
                       mission.application[option].length > 0 && (
@@ -512,8 +518,9 @@ export default function viewMobile() {
 const TabItem = ({ name, active, setCurrentTab, children }) => (
   <div
     onClick={() => setCurrentTab(name)}
-    className={`px-3 py-4 cursor-pointer text-sm text-coolGray-500  hover:text-blue-600 hover:border-b-[3px] hover:border-blue-600
-        ${active && "text-blue-600 font-bold border-b-[3px] border-blue-600"}`}>
+    className={`cursor-pointer px-3 py-4 text-sm text-coolGray-500  hover:border-b-[3px] hover:border-blue-600 hover:text-blue-600
+        ${active && "border-b-[3px] border-blue-600 font-bold text-blue-600"}`}
+  >
     {children}
   </div>
 );
@@ -539,13 +546,13 @@ const ApplyButton = ({
     return (
       <div className="flex flex-col items-center justify-center gap-4">
         <AlertPrimary>
-          <div className="text-blue-400 my-1">
+          <div className="my-1 text-blue-400">
             <InformationCircle />
           </div>
           <span>Vous ne pouvez candidater qu&apos;à 15 missions différentes.</span>
         </AlertPrimary>
         <div className="flex flex-col items-stretch gap-4">
-          <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
+          <button disabled className="cursor-pointer rounded-lg bg-blue-600 px-12 py-2 text-sm text-white disabled:bg-blue-600/60">
             Candidater
           </button>
           <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
@@ -557,13 +564,13 @@ const ApplyButton = ({
     return (
       <div className="flex flex-col items-center justify-center gap-4">
         <AlertPrimary>
-          <div className="text-blue-400 my-1">
+          <div className="my-1 text-blue-400">
             <InformationCircle />
           </div>
           <span>Pour candidater, vous devez avoir terminé votre séjour de cohésion.</span>
         </AlertPrimary>
         <div className="flex flex-col items-stretch gap-4">
-          <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
+          <button disabled className="cursor-pointer rounded-lg bg-blue-600 px-12 py-2 text-sm text-white disabled:bg-blue-600/60">
             Candidater
           </button>
           <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
@@ -575,13 +582,13 @@ const ApplyButton = ({
     return (
       <div className="flex flex-col items-center justify-center gap-4">
         <AlertPrimary>
-          <div className="text-blue-400 my-1">
+          <div className="my-1 text-blue-400">
             <InformationCircle />
           </div>
           <span>Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie).</span>
         </AlertPrimary>
         <div className="flex flex-col items-stretch gap-4">
-          <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
+          <button disabled className="cursor-pointer rounded-lg bg-blue-600 px-12 py-2 text-sm text-white disabled:bg-blue-600/60">
             Candidater
           </button>
           <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
@@ -593,13 +600,13 @@ const ApplyButton = ({
     return (
       <div className="flex flex-col items-center justify-center gap-4">
         <AlertPrimary>
-          <div className="text-blue-400 my-1">
+          <div className="my-1 text-blue-400">
             <InformationCircle />
           </div>
           <span>Vous n&apos;êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater.</span>
         </AlertPrimary>
         <div className="flex flex-col items-stretch gap-4">
-          <button className="px-12 py-2 rounded-lg text-white bg-blue-600/60  text-sm cursor-pointer">Candidater</button>
+          <button className="cursor-pointer rounded-lg bg-blue-600/60 px-12 py-2  text-sm text-white">Candidater</button>
           <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
         </div>
       </div>
@@ -609,13 +616,13 @@ const ApplyButton = ({
     return (
       <div className="flex flex-col items-center justify-center gap-4">
         <AlertPrimary>
-          <div className="text-blue-400 my-1">
+          <div className="my-1 text-blue-400">
             <InformationCircle />
           </div>
           <span>Pour candidater, veuillez téléverser le dossier d&apos;égibilité présent en bas de page.</span>
         </AlertPrimary>
         <div className="flex flex-col items-stretch gap-4">
-          <button className="px-12 py-2 rounded-lg text-white bg-blue-600  text-sm cursor-pointer" onClick={() => scrollToBottom()}>
+          <button className="cursor-pointer rounded-lg bg-blue-600 px-12 py-2  text-sm text-white" onClick={() => scrollToBottom()}>
             Candidater
           </button>
           <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
@@ -626,7 +633,7 @@ const ApplyButton = ({
   return (
     <div className="flex flex-col items-stretch gap-4">
       <button
-        className="py-2 rounded-lg text-white bg-blue-600 text-sm cursor-pointer "
+        className="cursor-pointer rounded-lg bg-blue-600 py-2 text-sm text-white "
         onClick={() => {
           if (isMilitaryPreparation === "true") {
             plausibleEvent("Phase 2/CTA - PM - Candidater");
@@ -634,7 +641,8 @@ const ApplyButton = ({
             plausibleEvent("Phase2/CTA missions - Candidater");
           }
           setModal("APPLY");
-        }}>
+        }}
+      >
         Candidater
       </button>
       <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
@@ -714,9 +722,9 @@ const ApplicationStatus = ({
   };
   if (["WAITING_VALIDATION", "WAITING_VERIFICATION", "REFUSED", "CANCEL"].includes(application.status)) {
     return (
-      <div className="flex flex-col justify-center items-center gap-4">
+      <div className="flex flex-col items-center justify-center gap-4">
         <div className="flex items-center gap-6">
-          <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
+          <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} rounded-sm px-2 py-[2px]`}>
             {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? "Candidature en attente" : translateApplication(application.status)}
           </div>
         </div>
@@ -726,27 +734,29 @@ const ApplicationStatus = ({
   }
   if (["IN_PROGRESS", "VALIDATED", "DONE", "ABANDON"].includes(application.status)) {
     return (
-      <div className="flex flex-col justify-center items-center gap-4">
-        <div className="flex align-items justify-between gap-6">
-          <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
+      <div className="flex flex-col items-center justify-center gap-4">
+        <div className="align-items flex justify-between gap-6">
+          <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} rounded-sm px-2 py-[2px]`}>
             {translateApplication(application.status)}
           </div>
           {contract && contractHasAllValidation(contract, young) && (
             <div className="relative" ref={refContractButton}>
               <button
                 disabled={loading}
-                className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
-                onClick={() => setOpenContractButton((e) => !e)}>
+                className="flex w-full items-center justify-between gap-3 rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 disabled:cursor-wait disabled:opacity-50"
+                onClick={() => setOpenContractButton((e) => !e)}
+              >
                 <div className="flex items-center gap-2">
-                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d&apos;engagement</span>
+                  <span className="whitespace-nowrap text-xs font-medium leading-4 text-white">Contrat d&apos;engagement</span>
                 </div>
-                <ChevronDown className="text-white font-medium" />
+                <ChevronDown className="font-medium text-white" />
               </button>
               {/* display options */}
               <div
                 className={`${
                   openContractButton ? "block" : "hidden"
-                }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
+                }  absolute right-0 top-[40px] z-50 !min-w-full overflow-hidden rounded-lg bg-white shadow transition lg:!min-w-3/4`}
+              >
                 <div
                   key="download"
                   onClick={() => {
@@ -754,9 +764,10 @@ const ApplicationStatus = ({
                     viewContract(contract._id);
                     setOpenContractButton(false);
                     setLoading(false);
-                  }}>
-                  <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 cursor-pointer">
-                    <Download className="text-gray-400 w-4 h-4" />
+                  }}
+                >
+                  <div className="group flex cursor-pointer items-center gap-3 p-2 px-3 text-sm leading-5">
+                    <Download className="h-4 w-4 text-gray-400" />
                     <div>Télécharger</div>
                   </div>
                 </div>
@@ -766,7 +777,7 @@ const ApplicationStatus = ({
           )}
         </div>
         {tutor ? (
-          <div className="border border-gray-200 rounded-lg py-2 px-3 flex gap-6 mb-4">
+          <div className="mb-4 flex gap-6 rounded-lg border border-gray-200 py-2 px-3">
             <div className="flex flex-col gap-1">
               <div className="text-sm font-bold">Contacter mon tuteur</div>
               <div className="text-xs text-gray-600">
@@ -774,7 +785,7 @@ const ApplicationStatus = ({
               </div>
             </div>
             <MdOutlineContentCopy
-              className="text-gray-400 hover:text-blue-600 cursor-pointer h-4 w-4"
+              className="h-4 w-4 cursor-pointer text-gray-400 hover:text-blue-600"
               onClick={() => {
                 copyToClipboard(tutor.email);
                 toastr.info("L'email de votre tuteur a été copié dans le presse-papier");
@@ -788,21 +799,22 @@ const ApplicationStatus = ({
 
   if (["WAITING_ACCEPTATION"].includes(application.status)) {
     return (
-      <div className="flex flex-col justify-center items-center gap-4">
-        <div className="text-xs text-center leading-none font-normal text-gray-500">
+      <div className="flex flex-col items-center justify-center gap-4">
+        <div className="text-center text-xs font-normal leading-none text-gray-500">
           Cette mission vous a été proposée <br /> par votre référent
         </div>
         <div className="flex items-center gap-3">
           {disabledAge || disabledIncomplete || disabledPmRefused ? (
             <button
-              className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-400"
-              onClick={() => disabledIncomplete && !disabledPmRefused && !disabledAge && scrollToBottom()}>
-              <CheckCircle className="text-blue-400 mr-2 w-5 h-5 " />
-              <span className="text-sm leading-5 font-medium text-white">Accepter</span>
+              className="group flex items-center justify-center rounded-lg bg-blue-400 px-4 py-2"
+              onClick={() => disabledIncomplete && !disabledPmRefused && !disabledAge && scrollToBottom()}
+            >
+              <CheckCircle className="mr-2 h-5 w-5 text-blue-400 " />
+              <span className="text-sm font-medium leading-5 text-white">Accepter</span>
             </button>
           ) : (
             <button
-              className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-500 transition duration-300 ease-in-out disabled:bg-blue-400"
+              className="group flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 transition duration-300 ease-in-out hover:bg-blue-500 disabled:bg-blue-400"
               disabled={loading}
               onClick={async () => {
                 try {
@@ -825,20 +837,22 @@ const ApplicationStatus = ({
                   console.log(e);
                   toastr.error("Oups, une erreur est survenue lors de la candidature.");
                 }
-              }}>
-              <CheckCircle className="text-blue-600 mr-2 w-5 h-5 hover:text-blue-500 group-disabled:text-blue-400" />
-              <span className="text-sm leading-5 font-medium text-white">Accepter</span>
+              }}
+            >
+              <CheckCircle className="mr-2 h-5 w-5 text-blue-600 hover:text-blue-500 group-disabled:text-blue-400" />
+              <span className="text-sm font-medium leading-5 text-white">Accepter</span>
             </button>
           )}
           <button
-            className="group flex items-center justify-center rounded-lg shadow-ninaButton px-4 py-2 transition duration-300 ease-in-out border-[1px] border-[#fff] hover:border-gray-200 disabled:shadow-none disabled:border-gray-200"
+            className="group flex items-center justify-center rounded-lg border-[1px] border-[#fff] px-4 py-2 shadow-ninaButton transition duration-300 ease-in-out hover:border-gray-200 disabled:border-gray-200 disabled:shadow-none"
             disabled={loading}
-            onClick={() => updateApplication(APPLICATION_STATUS.CANCEL)}>
-            <XCircle className="text-red-500 mr-2 w-5 h-5" />
-            <span className="text-sm leading-5 font-medium text-black">Décliner</span>
+            onClick={() => updateApplication(APPLICATION_STATUS.CANCEL)}
+          >
+            <XCircle className="mr-2 h-5 w-5 text-red-500" />
+            <span className="text-sm font-medium leading-5 text-black">Décliner</span>
           </button>
         </div>
-        {disabledAge || disabledIncomplete || disabledPmRefused ? <div className="text-red-500 text-center text-xs">{message}</div> : null}
+        {disabledAge || disabledIncomplete || disabledPmRefused ? <div className="text-center text-xs text-red-500">{message}</div> : null}
 
         <HoursAndPlaces duration={mission?.duration} placesLeft={mission.placesLeft} hebergement={mission.hebergement} hebergementPayant={mission.hebergementPayant} />
       </div>
@@ -850,9 +864,9 @@ const Detail = ({ title, content }) => {
   const [value] = useState((Array.isArray(content) && content) || [content]);
   return content && content.length ? (
     <div className="my-3">
-      <div className="text-gray-500 text-xs uppercase">{title}</div>
+      <div className="text-xs uppercase text-gray-500">{title}</div>
       {value.map((e, i) => (
-        <div key={i} className="text-sm leading-5 font-normal" dangerouslySetInnerHTML={{ __html: htmlCleaner(translate(e)) }} />
+        <div key={i} className="text-sm font-normal leading-5" dangerouslySetInnerHTML={{ __html: htmlCleaner(translate(e)) }} />
       ))}
     </div>
   ) : (
@@ -884,8 +898,8 @@ const InfoStructure = ({ title, structure }) => {
 
   return value ? (
     <div className="my-3">
-      <div className="text-gray-500 text-xs uppercase">{title}</div>
-      <div className="text-sm leading-5 font-normal">
+      <div className="text-xs uppercase text-gray-500">{title}</div>
+      <div className="text-sm font-normal leading-5">
         {rest ? (
           <div className="my-2">
             <div dangerouslySetInnerHTML={{ __html: preview + (expandNote ? rest : " ...") + " " }} />
@@ -911,21 +925,21 @@ const HoursAndPlaces = ({ duration, placesLeft, hebergement, hebergementPayant }
           {hebergement === "true" && (
             <>
               {hebergementPayant === "true" ? (
-                <div className="p-1.5 bg-yellow-100 rounded-full">
+                <div className="rounded-full bg-yellow-100 p-1.5">
                   <House color="#D97706" />
                 </div>
               ) : (
-                <div className="p-1.5 bg-green-50 rounded-full">
+                <div className="rounded-full bg-green-50 p-1.5">
                   <House color="#059669" />
                 </div>
               )}
             </>
           )}
-          <AiOutlineClockCircle className="text-gray-400 ml-2" />
+          <AiOutlineClockCircle className="ml-2 text-gray-400" />
           <div className="text-xs">{duration} heure(s)</div>
         </div>
       ) : null}
-      <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places restantes</div>
+      <div className="text-xs font-normal leading-none text-gray-500">{placesLeft} places restantes</div>
     </div>
   );
 };
@@ -937,14 +951,14 @@ const StatusContractPeople = ({ value, description, firstName, lastName }) => (
         {value === "VALIDATED" ? <img src={rubberStampValided} alt="rubberStampValided" /> : <img src={rubberStampNotValided} alt="rubberStampNotValided" />}
       </div>
       <div>
-        <div className="flex font-semibold space-x-2">
+        <div className="flex space-x-2 font-semibold">
           <div>{firstName}</div>
           <div>{lastName?.toUpperCase()}</div>
         </div>
-        <div className="text-gray-500 text-xs">{description}</div>
+        <div className="text-xs text-gray-500">{description}</div>
       </div>
     </div>
-    {value === "VALIDATED" ? "" : <div className="text-center text-gray-500 text-xs border-l-2 border-gray-500 w-1/4 px-1">En attente de signature</div>}
+    {value === "VALIDATED" ? "" : <div className="w-1/4 border-l-2 border-gray-500 px-1 text-center text-xs text-gray-500">En attente de signature</div>}
   </div>
 );
 
@@ -967,7 +981,7 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
   return (
     <>
       <div
-        className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 cursor-pointer"
+        className="group flex cursor-pointer items-center gap-3 p-2 px-3 text-sm leading-5"
         onClick={() =>
           setModalMail({
             isOpen: true,
@@ -975,8 +989,9 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
             title: "Envoi du document par mail",
             message: `Vous allez recevoir le document par mail à l'adresse ${young.email}.`,
           })
-        }>
-        <HiOutlineMail className="text-gray-400 w-4 h-4" />
+        }
+      >
+        <HiOutlineMail className="h-4 w-4 text-gray-400" />
         <div className="text-sm text-gray-800">Envoyer par mail</div>
       </div>
       <ModalConfirm

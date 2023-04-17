@@ -103,7 +103,7 @@ export default function App() {
       <Router history={history}>
         <ScrollToTop />
         {/* <GoogleTags /> */}
-        <div className={`${environment === "production" ? "main" : "flex flex-col justify-between h-screen"}`}>
+        <div className={`${environment === "production" ? "main" : "flex h-screen flex-col justify-between"}`}>
           {maintenance && !localStorage?.getItem("override_maintenance") ? (
             <Switch>
               <SentryRoute path="/" component={Maintenance} />
@@ -221,7 +221,7 @@ const Espace = () => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 z-10 right-0 md:right-auto  w-screen md:w-64">
+      <div className="fixed top-0 left-0 right-0 z-10 w-screen  md:right-auto md:w-64">
         <Navbar />
       </div>
       <main className="mt-16 md:mt-0 md:ml-[16rem]">
@@ -266,12 +266,12 @@ function ScrollToTop() {
 
 const ModalBusDepartLundiGood = ({ isOpen, onClose }) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="w-[512px] bg-white rounded-xl p-6">
+    <Modal isOpen={isOpen} onClose={onClose} className="w-[512px] rounded-xl bg-white p-6">
       <div className="flex flex-col gap-2">
-        <Warning className="w-10 h-10 mx-auto text-gray-400" />
-        <h4 className="flex text-center mx-auto">Départ en séjour - Lundi 17 avril - Confirmé</h4>
+        <Warning className="mx-auto h-10 w-10 text-gray-400" />
+        <h4 className="mx-auto flex text-center">Départ en séjour - Lundi 17 avril - Confirmé</h4>
       </div>
-      <p className="text-sm text-gray-500 leading-5 mt-4 mx-2">
+      <p className="mx-2 mt-4 text-sm leading-5 text-gray-500">
         Bonjour, <br />
         <br />
         Votre départ est confirmé pour lundi 17 avril 2023 : les éléments complémentaires (lieu de rassemblement et horaire) sont à retrouver sur votre convocation : onglet Phase

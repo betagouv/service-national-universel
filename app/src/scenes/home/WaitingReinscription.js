@@ -44,17 +44,18 @@ export default function WaitingReinscription() {
       {/* DESKTOP */}
       <div className="hidden lg:flex">
         <div className="my-12 mx-10 w-full">
-          <div className="flex justify-between items-center rounded-lg bg-white ">
-            <div className="w-1/2 pl-10 py-12">
+          <div className="flex items-center justify-between rounded-lg bg-white ">
+            <div className="w-1/2 py-12 pl-10">
               <div className="text-[48px] font-medium leading-tight tracking-tight text-gray-800">
                 <strong>{young.firstName},</strong> vous souhaitez vous réinscrire sur un séjour en 2023 ?
               </div>
-              <div className="text-base left-7 text-gray-800 mt-5">{textPrecision}</div>
-              <div className="flex flex-col items-stretch w-fit">
+              <div className="left-7 mt-5 text-base text-gray-800">{textPrecision}</div>
+              <div className="flex w-fit flex-col items-stretch">
                 <button
-                  className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
+                  className="mt-5 rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
                   disabled={loading}
-                  onClick={onClickEligibilte}>
+                  onClick={onClickEligibilte}
+                >
                   Vérifier mon éligibilité
                 </button>
               </div>
@@ -64,18 +65,19 @@ export default function WaitingReinscription() {
         </div>
       </div>
       {/* MOBILE */}
-      <div className="flex lg:hidden w-full">
+      <div className="flex w-full lg:hidden">
         <div className="flex flex-col-reverse ">
           <div className="px-4 pb-4">
             <div className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
               <strong>{young.firstName},</strong> vous souhaitez vous réinscrire sur un séjour en 2023 ?
             </div>
-            <div className="left-7 text-[#738297] mt-3">{textPrecision}</div>
-            <div className="left-7 font-bold text-gray-800 mt-4">Vérifiez dès maintenant votre éligibilité</div>
+            <div className="left-7 mt-3 text-[#738297]">{textPrecision}</div>
+            <div className="left-7 mt-4 font-bold text-gray-800">Vérifiez dès maintenant votre éligibilité</div>
             <button
-              className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-3 text-white hover:!text-blue-600 text-sm leading-5 transition ease-in-out duration-150"
+              className="mt-3 w-full rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
               disabled={loading}
-              onClick={onClickEligibilte}>
+              onClick={onClickEligibilte}
+            >
               Vérifier mon éligibilité
             </button>
           </div>
