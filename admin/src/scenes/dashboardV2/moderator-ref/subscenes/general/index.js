@@ -125,15 +125,15 @@ export default function Index() {
           Icon={IoWarningOutline}
           message="Message urgent  (white + red/800), suite à un problème technique, nous vous invitons à revalider les missions que vous aviez validés entre le 3 janvier 15h et le 4 janvier 8h. Veuillez nous excuser pour le désagrément."
         />
-        <h1 className="text-[28px] leading-8 font-bold text-gray-900">En ce moment</h1>
+        <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
         <div className="flex gap-4">
-          <div className={`flex flex-col gap-4 bg-white px-4 py-6 rounded-lg shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] w-[70%] ${!fullNote ? "h-[584px]" : "h-fit"}`}>
+          <div className={`flex w-[70%] flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!fullNote ? "h-[584px]" : "h-fit"}`}>
             <div className="grid grid-cols-3 gap-4">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
                   <Inscription />
-                  <div className="text-sm leading-5 font-bold text-gray-900">Inscription</div>
-                  <div className=" text-blue-600 text-sm text-medium px-2.5 py-0.5 bg-blue-50 rounded-full leading-none">4</div>
+                  <div className="text-sm font-bold leading-5 text-gray-900">Inscription</div>
+                  <div className=" text-medium rounded-full bg-blue-50 px-2.5 py-0.5 text-sm leading-none text-blue-600">4</div>
                 </div>
                 {Array.from(Array(4).keys())
                   .slice(0, fullNote ? 4 : 3)
@@ -144,8 +144,8 @@ export default function Index() {
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
                   <Sejour />
-                  <div className="text-sm leading-5 font-bold text-gray-900">Séjour</div>
-                  <div className=" text-blue-600 text-sm text-medium px-2.5 py-0.5 bg-blue-50 rounded-full leading-none">7</div>
+                  <div className="text-sm font-bold leading-5 text-gray-900">Séjour</div>
+                  <div className=" text-medium rounded-full bg-blue-50 px-2.5 py-0.5 text-sm leading-none text-blue-600">7</div>
                 </div>
                 {Array.from(Array(7).keys())
                   .slice(0, fullNote ? 7 : 3)
@@ -156,8 +156,8 @@ export default function Index() {
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
                   <Engagement />
-                  <div className="text-sm leading-5 font-bold text-gray-900">Engagement</div>
-                  <div className=" text-blue-600 text-sm text-medium px-2.5 py-0.5 bg-blue-50 rounded-full leading-none">9</div>
+                  <div className="text-sm font-bold leading-5 text-gray-900">Engagement</div>
+                  <div className=" text-medium rounded-full bg-blue-50 px-2.5 py-0.5 text-sm leading-none text-blue-600">9</div>
                 </div>
                 {Array.from(Array(9).keys())
                   .slice(0, fullNote ? 9 : 3)
@@ -167,26 +167,26 @@ export default function Index() {
               </div>
             </div>
             <div className="flex justify-center">
-              <button className="flex items-center text-sm text-blue-600 gap-1" onClick={() => setFullNote(!fullNote)}>
+              <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setFullNote(!fullNote)}>
                 <span>{fullNote ? "Voir moins" : "Voir plus"}</span>
                 {fullNote ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
               </button>
             </div>
           </div>
-          <div className={`flex flex-col  bg-white px-4 py-6 rounded-lg shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] w-[30%] ${!fullKeyNumber ? "h-[584px]" : "h-fit"}`}>
+          <div className={`flex w-[30%]  flex-col rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!fullKeyNumber ? "h-[584px]" : "h-fit"}`}>
             <div className="flex items-center justify-between pb-4">
               <div className="flex items-center gap-3">
-                <div className="text-sm leading-5 font-bold text-gray-900">Chiffres clés</div>
-                <div className=" text-blue-600 text-sm text-medium px-2.5 py-0.5 bg-blue-50 rounded-full leading-none">22</div>
+                <div className="text-sm font-bold leading-5 text-gray-900">Chiffres clés</div>
+                <div className=" text-medium rounded-full bg-blue-50 px-2.5 py-0.5 text-sm leading-none text-blue-600">22</div>
               </div>
               <FilterPopOver />
             </div>
-            <div className="flex flex-col h-full justify-between">
+            <div className="flex h-full flex-col justify-between">
               {Array.from(Array(22).keys())
                 .slice(0, fullKeyNumber ? 22 : 7)
                 .map((i) => (
-                  <div key={`keyNumber` + i} className={`flex items-center border-t-[1px] border-gray-200 gap-4 ${fullKeyNumber ? "py-3" : "h-full"}`}>
-                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100">
+                  <div key={`keyNumber` + i} className={`flex items-center gap-4 border-t-[1px] border-gray-200 ${fullKeyNumber ? "py-3" : "h-full"}`}>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100">
                       <Inscription />
                     </div>
                     <div className="text-sm text-gray-900">
@@ -195,8 +195,8 @@ export default function Index() {
                   </div>
                 ))}
             </div>
-            <div className="flex justify-center mt-4">
-              <button className="flex items-center text-sm text-blue-600 gap-1" onClick={() => setFullKeyNumber(!fullKeyNumber)}>
+            <div className="mt-4 flex justify-center">
+              <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setFullKeyNumber(!fullKeyNumber)}>
                 <span>{fullKeyNumber ? "Voir moins" : "Voir plus"}</span>
                 {fullKeyNumber ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
               </button>
@@ -204,8 +204,8 @@ export default function Index() {
           </div>
         </div>
         <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
-        <h1 className="text-[28px] leading-8 font-bold text-gray-900">Inscriptions</h1>
-        <div className="bg-white p-8 rounded-lg shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+        <h1 className="text-[28px] font-bold leading-8 text-gray-900">Inscriptions</h1>
+        <div className="rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
           <HorizontalBar
             title="Objectif des inscriptions"
             labels={["Sur la liste principale", "Sur liste complémentaire", "En attente de validation", "En attente de correction", "En cours"]}
@@ -219,6 +219,36 @@ export default function Index() {
             goal={goal}
           />
         </div>
+        <h1 className="text-[28px] font-bold leading-8 text-gray-900">Volontaires</h1>
+        <div className="flex gap-4">
+          <div className="flex w-1/4 flex-col gap-4">
+            <div className="flex items-center justify-between rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+              <p className="text-base font-bold text-gray-900">Volontaires</p>
+              <p className="text-2xl font-bold text-gray-900">156</p>
+            </div>
+            <div className="flex items-center justify-between rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+              <p className="text-base font-bold text-gray-900">Désistements</p>
+              <p className="text-2xl font-bold text-gray-900">4</p>
+            </div>
+          </div>
+          <div className="flex w-1/4 flex-col gap-8 rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+            <p className="text-base font-bold text-gray-900">Changement de cohorte</p>
+            <div className="my-auto flex items-center ">
+              <div className="flex w-[45%] flex-col items-center justify-center gap-4 ">
+                <p className="text-xs text-gray-600">Sorties</p>
+                <p className="text-2xl font-bold text-gray-900">1</p>
+              </div>
+              <div className="flex h-full w-[10%] items-center justify-center">
+                <div className="h-full w-[1px] border-r-[1px] border-gray-300 "></div>
+              </div>
+              <div className="flex w-[45%] flex-col items-center justify-center gap-4">
+                <p className="text-xs text-gray-600">Entrées</p>
+                <p className="text-2xl font-bold text-gray-900">0</p>
+              </div>
+            </div>
+          </div>
+          <div className="w-1/2 rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]"></div>
+        </div>
       </div>
     </DashboardContainer>
   );
@@ -226,16 +256,16 @@ export default function Index() {
 
 const NoteContainer = ({ title, number, content, btnLabel }) => {
   return (
-    <div className="flex flex-col justify-between w-full h-36 rounded-lg bg-blue-50 py-4 px-3">
+    <div className="flex h-36 w-full flex-col justify-between rounded-lg bg-blue-50 py-4 px-3">
       <div className="flex flex-col gap-2">
-        <span className="text-sm leading-5 font-bold text-gray-900">{title}</span>
-        <p className="text-xs leading-4 font-normal text-gray-900">
+        <span className="text-sm font-bold leading-5 text-gray-900">{title}</span>
+        <p className="text-xs font-normal leading-4 text-gray-900">
           <span className="font-bold text-blue-600">{number} </span>
           {content}
         </p>
       </div>
       <div className="flex justify-end">
-        <button className="flex items-center gap-2 bg-blue-600 text-white text-xs font-medium rounded-full px-2 py-1">
+        <button className="flex items-center gap-2 rounded-full bg-blue-600 px-2 py-1 text-xs font-medium text-white">
           <span>{btnLabel}</span>
           <HiChevronRight className="h-4 w-4" />
         </button>
@@ -261,42 +291,42 @@ const FilterPopOver = () => {
         leaveFrom="opacity-100 translate-y-0"
         leaveTo="opacity-0 translate-y-1">
         <Popover.Panel className="absolute right-0 z-10 mt-2 flex w-screen max-w-min">
-          <div className="w-60 shrink rounded-lg bg-white pt-3 pb-1 text-sm leading-6 ring-1 ring-black ring-opacity-5 shadow-lg">
+          <div className="w-60 shrink rounded-lg bg-white pt-3 pb-1 text-sm leading-6 shadow-lg ring-1 ring-black ring-opacity-5">
             <div className="flex flex-col">
-              <span className="text-sm text-gray-500 px-4 mb-1">Phase</span>
-              <div className="flex items-center gap-3 px-4 hover:bg-gray-50 py-1.5 cursor-pointer">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="cursor-pointer h-4 w-4" />
-                <span className="text-sm leading-5 font-normal text-gray-700">Tous</span>
+              <span className="mb-1 px-4 text-sm text-gray-500">Phase</span>
+              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
+                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
+                <span className="text-sm font-normal leading-5 text-gray-700">Tous</span>
               </div>
-              <div className="flex items-center gap-3 px-4 hover:bg-gray-50 py-1.5 cursor-pointer">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="cursor-pointer h-4 w-4" />
-                <span className="text-sm leading-5 font-normal text-gray-700">Inscription</span>
+              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
+                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
+                <span className="text-sm font-normal leading-5 text-gray-700">Inscription</span>
               </div>
-              <div className="flex items-center gap-3 px-4 hover:bg-gray-50 py-1.5 cursor-pointer">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="cursor-pointer h-4 w-4" />
-                <span className="text-sm leading-5 font-normal text-gray-700">Séjour</span>
+              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
+                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
+                <span className="text-sm font-normal leading-5 text-gray-700">Séjour</span>
               </div>
-              <div className="flex items-center gap-3 px-4 hover:bg-gray-50 py-1.5 cursor-pointer">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="cursor-pointer h-4 w-4" />
-                <span className="text-sm leading-5 font-normal text-gray-700">Engagement</span>
+              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
+                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
+                <span className="text-sm font-normal leading-5 text-gray-700">Engagement</span>
               </div>
-              <hr className="text-gray-100 my-2" />
-              <span className="text-sm text-gray-500 px-4 mb-1">Période</span>
-              <div className="flex items-center gap-3 px-4 hover:bg-gray-50 py-1.5 cursor-pointer">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="cursor-pointer h-4 w-4" />
-                <span className="text-sm leading-5 font-normal text-gray-700">Les 15 derniers jours</span>
+              <hr className="my-2 text-gray-100" />
+              <span className="mb-1 px-4 text-sm text-gray-500">Période</span>
+              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
+                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
+                <span className="text-sm font-normal leading-5 text-gray-700">Les 15 derniers jours</span>
               </div>
-              <div className="flex items-center gap-3 px-4 hover:bg-gray-50 py-1.5 cursor-pointer">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="cursor-pointer h-4 w-4" />
-                <span className="text-sm leading-5 font-normal text-gray-700">Les 30 derniers jours</span>
+              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
+                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
+                <span className="text-sm font-normal leading-5 text-gray-700">Les 30 derniers jours</span>
               </div>
-              <div className="flex items-center gap-3 px-4 hover:bg-gray-50 py-1.5 cursor-pointer">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="cursor-pointer h-4 w-4" />
-                <span className="text-sm leading-5 font-normal text-gray-700">La semaine dernière</span>
+              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
+                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
+                <span className="text-sm font-normal leading-5 text-gray-700">La semaine dernière</span>
               </div>
-              <div className="flex items-center gap-3 px-4 hover:bg-gray-50 py-1.5 cursor-pointer">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="cursor-pointer h-4 w-4" />
-                <span className="text-sm leading-5 font-normal text-gray-700">Le mois dernier</span>
+              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
+                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
+                <span className="text-sm font-normal leading-5 text-gray-700">Le mois dernier</span>
               </div>
               <DatePickerPopOver />
             </div>
@@ -310,9 +340,9 @@ const FilterPopOver = () => {
 const DatePickerPopOver = () => {
   return (
     <Popover className="relative">
-      <Popover.Button className="flex items-center gap-3 px-4 hover:bg-gray-50 py-1.5 cursor-pointer outline-none w-full">
-        <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="cursor-pointer h-4 w-4" />
-        <span className="text-sm leading-5 font-normal text-gray-700">Une date spécifique</span>
+      <Popover.Button className="flex w-full cursor-pointer items-center gap-3 px-4 py-1.5 outline-none hover:bg-gray-50">
+        <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
+        <span className="text-sm font-normal leading-5 text-gray-700">Une date spécifique</span>
       </Popover.Button>
 
       <Transition
@@ -324,7 +354,7 @@ const DatePickerPopOver = () => {
         leaveFrom="opacity-100 translate-y-0"
         leaveTo="opacity-0 translate-y-1">
         <Popover.Panel className="absolute right-0 z-10 mt-2 flex w-screen max-w-min">
-          <div className="flex-auto rounded-2xl bg-white shadow-lg ring-1 ring-gray-900/5 flex ">
+          <div className="flex flex-auto rounded-2xl bg-white shadow-lg ring-1 ring-gray-900/5 ">
             <DatePicker mode="range" fromYear={2022} toYear={2030} />
           </div>
         </Popover.Panel>
