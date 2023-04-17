@@ -119,13 +119,13 @@ export default function DemiDoughnut({ title, values, labels, tooltips, tooltips
 
   return (
     <div className={className}>
-      <div className="text-left text-gray-900 text-sm font-bold w-full">{title}</div>
-      <Legends labels={labels} values={values} className="w-full my-8" onLegendClicked={clickOnLegend} />
+      <div className="w-full text-left text-sm font-bold text-gray-900">{title}</div>
+      <Legends labels={labels} values={values} className="my-8 w-full" onLegendClicked={clickOnLegend} />
       <div className="relative">
         {graphData && <Doughnut data={graphData} options={graphOptions} />}
-        <div className="flex flex-col absolute left-[0px] right-[0px] bottom-[14px] pointer-events-none">
-          <div className="text-xs text-gray-600 text-center">Total</div>
-          <div className="text-2xl text-gray-900 font-bold text-center">{total}</div>
+        <div className="pointer-events-none absolute left-[0px] right-[0px] bottom-[14px] flex flex-col">
+          <div className="text-center text-xs text-gray-600">Total</div>
+          <div className="text-center text-2xl font-bold text-gray-900">{total}</div>
         </div>
         {tooltip && <GraphTooltip style={tooltip.style}>{tooltip.value}</GraphTooltip>}
       </div>

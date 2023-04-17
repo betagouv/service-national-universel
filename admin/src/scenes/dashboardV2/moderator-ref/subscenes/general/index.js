@@ -1,27 +1,21 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 
-import DashboardContainer from "../../../components/DashboardContainer";
-import FullDoughnut from "../../../components/graphs/FullDoughnut";
-import DemiDoughnut from "../../../components/graphs/DemiDoughnut";
-import { Legends } from "../../../components/graphs/graph-commons";
-import BarChart from "../../../components/graphs/BarChart";
-import RoundRatio from "../../../components/graphs/RoundRatio";
-import HorizontalBar from "../../../components/graphs/HorizontalBar";
-import InfoMessage from "../../../components/ui/InfoMessage";
+import { Popover, Transition } from "@headlessui/react";
 import { HiChevronDown, HiChevronRight, HiChevronUp, HiOutlineExclamationCircle, HiOutlineInformationCircle } from "react-icons/hi";
 import { IoWarningOutline } from "react-icons/io5";
-import Inscription from "../../../components/ui/icons/Inscription";
-import Sejour from "../../../components/ui/icons/Sejour";
-import Engagement from "../../../components/ui/icons/Engagement";
-import { Fragment } from "react";
-import { Popover, Transition } from "@headlessui/react";
-import DatePicker from "../../../../../components/ui/forms/DatePicker";
 import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 import { COHORTS, ES_NO_LIMIT, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
+import DatePicker from "../../../../../components/ui/forms/DatePicker";
+import api from "../../../../../services/api";
+import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
-import api from "../../../../../services/api";
-import { toastr } from "react-redux-toastr";
+import HorizontalBar from "../../../components/graphs/HorizontalBar";
+import InfoMessage from "../../../components/ui/InfoMessage";
+import Engagement from "../../../components/ui/icons/Engagement";
+import Inscription from "../../../components/ui/icons/Inscription";
+import Sejour from "../../../components/ui/icons/Sejour";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -247,7 +241,45 @@ export default function Index() {
               </div>
             </div>
           </div>
-          <div className="w-1/2 rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]"></div>
+          <div className="flex w-1/2 flex-col gap-2 rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+            <p className="text-base font-bold text-gray-900">Validations par phases</p>
+            <div className="flex gap-4">
+              <div className="flex w-[55%] items-center">
+                <div className="flex w-[30%] flex-col items-center gap-2">
+                  <div className="h-[10px] w-[10px] rounded-full bg-blue-800"></div>
+                  <p className="text-2xl font-bold text-gray-900">146</p>
+                  <p className="text-center text-xs text-gray-600">Ayant validé la Phase 1</p>
+                </div>
+                <div className="flex h-full w-[5%] gap-2">
+                  <div className="m-auto h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
+                </div>
+                <div className="flex w-[30%] flex-col items-center gap-2">
+                  <div className="h-[10px] w-[10px] rounded-full bg-blue-800"></div>
+                  <p className="text-2xl font-bold text-gray-900">6</p>
+                  <p className="text-center text-xs text-gray-600">Ayant validé la Phase 2</p>
+                </div>
+                <div className="flex h-full w-[5%] gap-2">
+                  <div className="m-auto h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
+                </div>
+                <div className="flex w-[30%] flex-col items-center gap-2">
+                  <div className="h-[10px] w-[10px] rounded-full bg-blue-800"></div>
+                  <p className="text-2xl font-bold text-gray-900">0</p>
+                  <p className="text-center text-xs text-gray-600">Ayant validé la Phase 3</p>
+                </div>
+              </div>
+              <div className="flex w-[45%] flex-col gap-2">
+                <div className="w-full">
+                  <div className="h-8  rounded-full bg-blue-800" style={{ width: "100%" }}></div>
+                </div>
+                <div className="w-full">
+                  <div className="h-8  rounded-full bg-blue-500" style={{ width: "50%" }}></div>
+                </div>
+                <div className="w-full">
+                  <div className="h-8  rounded-full bg-blue-300" style={{ width: "30%" }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </DashboardContainer>

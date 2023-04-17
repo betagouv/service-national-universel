@@ -273,7 +273,7 @@ export default function FullDoughnut({
       <div className={`relative ${graphClass}`}>
         {dataIsZero ? <Doughnut data={graphZeroData} options={graphZeroOption} /> : graphData && <Doughnut data={graphData} options={graphOptions} />}
         <div
-          className={`absolute top-[0px] bottom-[0px] left-[0px] right-[0px] flex justify-center items-center text-center text-gray-900 text-sm leading-[1.1em] font-bold p-[24px] pointer-events-none ${titleClass}`}>
+          className={`pointer-events-none absolute top-[0px] bottom-[0px] left-[0px] right-[0px] flex items-center justify-center p-[24px] text-center text-sm font-bold leading-[1.1em] text-gray-900 ${titleClass}`}>
           {title}
         </div>
         {tooltip && <GraphTooltip style={tooltip.style}>{tooltip.value}</GraphTooltip>}
@@ -282,10 +282,10 @@ export default function FullDoughnut({
         {legends.map((legend, idx) => {
           return legend ? (
             <div className={legendClass} key={legend.name} onClick={() => clickOnLegend({ index: idx, label: legend.name, value: legend.value, color: legend.color })}>
-              <div className={`text-xs text-gray-600 mb-[4px] ${textLegendClass}`}>{legend.name}</div>
+              <div className={`mb-[4px] text-xs text-gray-600 ${textLegendClass}`}>{legend.name}</div>
               <div className={legendValueClass}>
-                <div className={`rounded-full w-[10px] h-[10px] ${legendDotClass}`} style={{ backgroundColor: legend.color }}></div>
-                <div className="font-medium text-lg text-gray-900">
+                <div className={`h-[10px] w-[10px] rounded-full ${legendDotClass}`} style={{ backgroundColor: legend.color }}></div>
+                <div className="text-lg font-medium text-gray-900">
                   {legend.value}
                   {valueSuffix}
                 </div>
