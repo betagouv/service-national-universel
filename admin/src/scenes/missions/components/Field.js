@@ -9,19 +9,21 @@ export default function Field({ name, label, value, className = "", type = "text
   return (
     <div className={className}>
       <div
-        className={`relative ${!readOnly && isJvaMission ? "bg-gray-200" : "bg-white"} px-3 border-[1px] w-full rounded-md py-2 ${
+        className={`relative ${!readOnly && isJvaMission ? "bg-gray-200" : "bg-white"} w-full rounded-md border-[1px] px-3 py-2 ${
           errors[name] ? "border-red-500" : "border-[#D1D5DB]"
         }`}
-        key={name}>
+        key={name}
+      >
         <div className="flex justify-between">
-          {label && <div className="font-normal text-xs leading-4 text-[#6B7280]">{label}</div>}
+          {label && <div className="text-xs font-normal leading-4 text-[#6B7280]">{label}</div>}
           {copy && value && (
             <div
-              className="flex items-center justify-center cursor-pointer hover:scale-105"
+              className="flex cursor-pointer items-center justify-center hover:scale-105"
               onClick={() => {
                 copyToClipboard(value);
                 setCopied(true);
-              }}>
+              }}
+            >
               {copied ? <HiCheckCircle className="h-4 w-4 text-green-500" /> : <BiCopy className="h-4 w-4 text-gray-400" />}
             </div>
           )}
@@ -43,7 +45,7 @@ export default function Field({ name, label, value, className = "", type = "text
         {type === "textarea" && (
           <textarea rows={row} readOnly={readOnly || isJvaMission} type="text" name={name} value={value} onChange={handleChange} className={"w-full text-start " + className} />
         )}
-        {errors[name] && <div className="text-red-500 mt-2">{errors[name]}</div>}
+        {errors[name] && <div className="mt-2 text-red-500">{errors[name]}</div>}
       </div>
     </div>
   );

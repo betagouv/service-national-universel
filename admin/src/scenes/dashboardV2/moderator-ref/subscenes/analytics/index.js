@@ -36,22 +36,17 @@ export default function Analytics() {
   }, []);
   console.log(stats);
   return (
-    <DashboardContainer
-      availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}
-      active="analytics"
-      navChildren={
-        <></>
-      }>
+    <DashboardContainer availableTab={["general", "engagement", "sejour", "inscription", "analytics"]} active="analytics" navChildren={<></>}>
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg shadow-lg p-4">
+        <div className="rounded-lg bg-white p-4 shadow-lg">
           Tous les jeunes VALIDATED 2021-2023
           <div className="text-2xl font-bold">{stats.allValidated?.count}</div>
         </div>
-        <div className="bg-white rounded-lg shadow-lg p-4">
+        <div className="rounded-lg bg-white p-4 shadow-lg">
           Occitanie WITHDRAWN 2022-05 à 2022-12
           <div className="text-2xl font-bold">{stats.occitanie?.count}</div>
         </div>
-        <div className="bg-white rounded-lg shadow-lg p-4">
+        <div className="rounded-lg bg-white p-4 shadow-lg">
           Paris chgt de Cohort 2022
           <div className="text-2xl font-bold">{stats.cohort?.count}</div>
         </div>

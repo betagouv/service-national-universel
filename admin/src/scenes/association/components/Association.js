@@ -53,7 +53,8 @@ export default function Association({ hit, missionsInfo }) {
               setShow(true);
               setTab("Contacts");
               sendEventToBackend("CONTACT_CLICK", association.id);
-            }}>
+            }}
+          >
             <svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M3.97059 4.20594C3.97059 6.39506 5.75206 8.17653 7.94118 8.17653C10.1303 8.17653 11.9118 6.39506 11.9118 4.20594C11.9118 2.01682 10.1303 0.235352 7.94118 0.235352C5.75206 0.235352 3.97059 2.01682 3.97059 4.20594ZM15 17.0001H15.8824V16.1177C15.8824 12.7127 13.1109 9.94123 9.70588 9.94123H6.17647C2.77059 9.94123 0 12.7127 0 16.1177V17.0001H15Z"
@@ -67,7 +68,8 @@ export default function Association({ hit, missionsInfo }) {
               setShow(true);
               setTab("Contacts");
               sendEventToBackend("CONTACT_CLICK", association.id);
-            }}>
+            }}
+          >
             <a href={urlWithScheme(association.url)} target="_blank" style={{ decoration: "none", color: "#22252A" }} rel="noreferrer">
               <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -94,7 +96,8 @@ export default function Association({ hit, missionsInfo }) {
               setTab("Contacts");
               sendEventToBackend("CONTACT_CLICK", association.id);
               if (association.coordonnees_courriel.length > 0) window.open(`mailto:${association.coordonnees_courriel[0]}`);
-            }}>
+            }}
+          >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M8.68947 3.94941C10.0637 3.94941 11.3585 4.5586 12.3075 5.51091V5.51372C12.3075 5.05641 12.6152 4.71047 13.0404 4.71047H13.1484C13.8195 4.71047 13.9539 5.34328 13.9539 5.54297L13.9567 12.6502C13.91 13.1159 14.4377 13.3567 14.7307 13.0574C15.8698 11.8857 17.235 7.02797 14.0214 4.21547C11.0244 1.59028 7.00197 2.02397 4.86334 3.49772C2.59028 5.06822 1.13734 8.53716 2.54865 11.7974C4.0899 15.3518 8.49597 16.4122 11.1183 15.3547C12.4458 14.8186 13.0578 16.6107 11.678 17.1974C9.59847 18.0845 3.80303 17.9939 1.09628 13.3066C-0.73241 10.1403 -0.63566 4.57041 4.21647 1.68478C7.92503 -0.524155 12.8182 0.0878455 15.768 3.16753C18.8505 6.3901 18.6722 12.4195 15.6628 14.7635C14.2998 15.8294 12.276 14.7927 12.2906 13.2397L12.2754 12.7334C11.3265 13.6733 10.0637 14.2246 8.68947 14.2246C5.9709 14.2246 3.57747 11.8306 3.57747 9.11485C3.57747 6.36985 5.9709 3.95053 8.68947 3.95053V3.94941ZM12.1089 8.91853C12.006 6.92897 10.5294 5.73084 8.74515 5.73084H8.67765C6.62115 5.73084 5.47872 7.35085 5.47872 9.18741C5.47872 11.2467 6.85853 12.5472 8.66922 12.5472C10.6903 12.5472 12.0172 11.0684 12.114 9.31903L12.1089 8.91853Z"
@@ -109,7 +112,8 @@ export default function Association({ hit, missionsInfo }) {
             setShow(true);
             setTab("Missions");
             sendEventToBackend("MISSIONS_CLICK", association.id);
-          }}>
+          }}
+        >
           {missionsInfo.countMissions ? (
             <>
               <div className="title">
@@ -138,7 +142,8 @@ export default function Association({ hit, missionsInfo }) {
                       sendEventToBackend("CONTACT_CLICK", association.id);
                     } else if (e === "Informations") plausibleEvent("Association/CTA - Informations");
                     else if (e === "Missions") plausibleEvent("Association/CTA - Missions");
-                  }}>
+                  }}
+                >
                   {e}
                 </TabTitle>
               ) : (

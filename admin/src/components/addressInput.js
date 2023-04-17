@@ -124,7 +124,8 @@ export default function AddressInput({ keys, values, handleChange, errors, touch
                   // filter and preselect the region
                   setRegionListFiltered(value ? [department2region[value]] : regionList);
                   handleChange({ target: { name: keys.region, value: department2region[value] || "" } });
-                }}>
+                }}
+              >
                 <option label=""></option>
                 {departmentListFiltered?.sort()?.map((d) => (
                   <option key={d} value={d}>
@@ -149,7 +150,8 @@ export default function AddressInput({ keys, values, handleChange, errors, touch
                   handleChange({ target: { name: keys.region, value } });
                   // filter departments
                   setDepartmentListFiltered(value ? region2department[value] : departmentList);
-                }}>
+                }}
+              >
                 <option label=""></option>
                 {regionListFiltered?.sort()?.map((r) => (
                   <option key={r} value={r}>

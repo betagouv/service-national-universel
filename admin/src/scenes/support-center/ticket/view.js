@@ -156,7 +156,8 @@ export default function View(props) {
           boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
           overflow: "hidden",
           borderRadius: "10px",
-        }}>
+        }}
+      >
         {ticket && messages ? (
           <>
             <Heading>
@@ -193,7 +194,7 @@ export default function View(props) {
             </LoadingButton>
           </ButtonContainer>
         </InputContainer>
-        {sending && files.length > 0 && <div className="text-gray-500 text-sm mt-1">{translate("UPLOAD_IN_PROGRESS")}</div>}
+        {sending && files.length > 0 && <div className="mt-1 text-sm text-gray-500">{translate("UPLOAD_IN_PROGRESS")}</div>}
         <FileUpload files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
       </div>
     </Container>
@@ -212,7 +213,8 @@ const Message = ({ from, date, content, fromMe, files = [] }) => {
             onClick={() => {
               download(file);
             }}
-            color="white">
+            color="white"
+          >
             {file.name}
           </File>
         ))}
@@ -229,7 +231,8 @@ const Message = ({ from, date, content, fromMe, files = [] }) => {
             onClick={() => {
               download(file);
             }}
-            color="white">
+            color="white"
+          >
             {file.name}
           </File>
         ))}

@@ -154,14 +154,14 @@ export default function Profil() {
   return (
     <div className="m-8">
       <div className="mb-10 flex items-center gap-4">
-        <h2 className="text-2xl font-bold text-brand-black m-0">{`${user.firstName} ${user.lastName}`}</h2>
+        <h2 className="m-0 text-2xl font-bold text-brand-black">{`${user.firstName} ${user.lastName}`}</h2>
         <span className="rounded-full border !border-gray-400 bg-gray-100 px-3 py-1 text-sm text-gray-400">{translate(user.role)}</span>
       </div>
-      <div className="bg-white p-8 rounded-lg flex xl:flex-row flex-col w-full">
-        <div className="flex flex-col gap-4 flex-1">
+      <div className="flex w-full flex-col rounded-lg bg-white p-8 xl:flex-row">
+        <div className="flex flex-1 flex-col gap-4">
           <div className="text-lg font-medium text-gray-900">Informations générales</div>
           <div className="text-xs font-medium">Identité et contact</div>
-          <div className="flex flex-row justify-between items-center gap-4">
+          <div className="flex flex-row items-center justify-between gap-4">
             <Field label="Nom" onChange={(e) => handleChange("lastName", e.target.value)} value={values.lastName} error={errors?.lastName} />
             <Field label="Prénom" onChange={(e) => handleChange("firstName", e.target.value)} value={values.firstName} error={errors?.firstName} />
           </div>
@@ -171,26 +171,27 @@ export default function Profil() {
           {user.role === ROLES.REFERENT_DEPARTMENT ? <Field disabled label="Département" value={values.department} readOnly /> : null}
           {user.role === ROLES.REFERENT_REGION ? <Field disabled label="Région" value={values.region} readOnly /> : null}
           <Field label="Email" copy onChange={(e) => handleChange("email", e.target.value)} value={values.email} error={errors?.email} />
-          <div className="flex flex-row justify-between items-center gap-4">
+          <div className="flex flex-row items-center justify-between gap-4">
             <Field label="Téléphone mobile (facultatif)" onChange={(e) => handleChange("mobile", e.target.value)} value={values.mobile} error={errors?.mobile} />
             <Field label="Téléphone fixe (facultatif)" onChange={(e) => handleChange("phone", e.target.value)} value={values.phone ? values.phone : ""} error={errors?.phone} />
           </div>
-          <div className="flex flex-row w-full items-center gap-4 text-sm font-medium text-center mt-4">
+          <div className="mt-4 flex w-full flex-row items-center gap-4 text-center text-sm font-medium">
             {loading ? (
-              <div className="h-[38px] flex items-center justify-center w-full">
+              <div className="flex h-[38px] w-full items-center justify-center">
                 <Loader />
               </div>
             ) : (
               <>
                 <div
-                  className="py-2 border-gray-300 rounded-md border-[1px] flex-1 cursor-pointer"
+                  className="flex-1 cursor-pointer rounded-md border-[1px] border-gray-300 py-2"
                   onClick={() => {
                     setValues({ ...user });
                     setErrors({});
-                  }}>
+                  }}
+                >
                   Annuler
                 </div>
-                <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer" onClick={onSubmit}>
+                <div className="flex-1 cursor-pointer rounded-md border-[1px] bg-blue-600 py-2 text-white" onClick={onSubmit}>
                   Enregistrer
                 </div>
               </>
@@ -198,11 +199,11 @@ export default function Profil() {
           </div>
         </div>
 
-        <div className="hidden xl:flex justify-center items-center px-[56px]">
-          <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
+        <div className="hidden items-center justify-center px-[56px] xl:flex">
+          <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
         </div>
 
-        <div className="flex flex-col gap-4 flex-1 xl:mt-0 mt-8">
+        <div className="mt-8 flex flex-1 flex-col gap-4 xl:mt-0">
           <div className="text-lg font-medium text-gray-900">Mot de passe</div>
           <div className="text-xs font-medium">Mon mot de passe</div>
           <Field label="Actuel" eye onChange={(e) => handlePasswordChange("password", e.target.value)} value={rightValues.password} error={errors?.password} />
@@ -220,22 +221,23 @@ export default function Profil() {
             value={rightValues.verifyPassword}
             error={errors?.verifyPassword}
           />
-          <div className="flex flex-row w-full items-center gap-4 text-sm font-medium text-center mt-4">
+          <div className="mt-4 flex w-full flex-row items-center gap-4 text-center text-sm font-medium">
             {loadingPassord ? (
-              <div className="h-[38px] flex items-center justify-center w-full">
+              <div className="flex h-[38px] w-full items-center justify-center">
                 <Loader />
               </div>
             ) : (
               <>
                 <div
-                  className="py-2 border-gray-300 rounded-md border-[1px] flex-1 cursor-pointer"
+                  className="flex-1 cursor-pointer rounded-md border-[1px] border-gray-300 py-2"
                   onClick={() => {
                     setRightValues({ password: "", newPassword: "", verifyPassword: "" });
                     setErrors({});
-                  }}>
+                  }}
+                >
                   Annuler
                 </div>
-                <div className="text-white bg-blue-600 py-2 rounded-md border-[1px] flex-1 cursor-pointer" onClick={onPasswordSubmit}>
+                <div className="flex-1 cursor-pointer rounded-md border-[1px] bg-blue-600 py-2 text-white" onClick={onPasswordSubmit}>
                   Valider mon nouveau mot de passe
                 </div>
               </>
@@ -243,8 +245,8 @@ export default function Profil() {
           </div>
         </div>
       </div>
-      <div className="flex justify-center items-center my-8">
-        <div className="text-red-500 p-2 border-[1px] border-red-500 rounded-md tex-center self-center w-fit cursor-pointer" onClick={onClickDelete}>
+      <div className="my-8 flex items-center justify-center">
+        <div className="tex-center w-fit cursor-pointer self-center rounded-md border-[1px] border-red-500 p-2 text-red-500" onClick={onClickDelete}>
           Supprimer mon compte
         </div>
       </div>
@@ -291,7 +293,8 @@ const Field = ({ onChange, value, label, disabled = false, error, readOnly = fal
   return (
     <div
       key={label}
-      className={`flex flex-col border-[1px] border-gray-300 w-full py-2 px-2.5 rounded-lg ${disabled ? "bg-gray-100" : ""} ${error ? "border-red-500" : ""} ${className}`}>
+      className={`flex w-full flex-col rounded-lg border-[1px] border-gray-300 py-2 px-2.5 ${disabled ? "bg-gray-100" : ""} ${error ? "border-red-500" : ""} ${className}`}
+    >
       <label className="text-xs leading-4 text-gray-500">{label}</label>
       <div className="flex items-center gap-2">
         {copy && value && (
@@ -300,7 +303,8 @@ const Field = ({ onChange, value, label, disabled = false, error, readOnly = fal
             onClick={() => {
               copyToClipboard(value);
               setCopied(true);
-            }}>
+            }}
+          >
             {copied ? <HiCheckCircle className="h-4 w-4 text-green-500" /> : <BiCopy className="h-4 w-4 text-gray-400" />}
           </div>
         )}

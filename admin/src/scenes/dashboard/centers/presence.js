@@ -56,14 +56,14 @@ export default function Presence() {
   return (
     <ReactiveBase url={`${apiURL}/es`} app="cohesioncenter" headers={{ Authorization: `JWT ${api.getToken()}` }}>
       <div className="mt-4">
-        <h1 className="leading-7 text-xl text-gray-900 mb-8">Présence par centre</h1>
-        <div className="flex items-start w-full bg-white p-3 rounded-lg">
-          <div className="flex flex-col flex-1">
-            <div className="flex items-start w-full h-full">
-              <div className="flex-1 relative">
-                <div className="flex items-center mb-2 gap-2">
+        <h1 className="mb-8 text-xl leading-7 text-gray-900">Présence par centre</h1>
+        <div className="flex w-full items-start rounded-lg bg-white p-3">
+          <div className="flex flex-1 flex-col">
+            <div className="flex h-full w-full items-start">
+              <div className="relative flex-1">
+                <div className="mb-2 flex items-center gap-2">
                   <Filter2 className="w-full">
-                    <div className="flex justify-between items-center mb-2">
+                    <div className="mb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <DataSearch
                           showIcon={false}
@@ -76,8 +76,9 @@ export default function Presence() {
                           queryFormat="and"
                         />
                         <div
-                          className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
-                          onClick={() => setFilterVisible((e) => !e)}>
+                          className="flex cursor-pointer items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-[14px] font-medium text-gray-700 hover:underline"
+                          onClick={() => setFilterVisible((e) => !e)}
+                        >
                           <FilterSvg className="text-gray-400" />
                           Filtres
                         </div>
@@ -85,14 +86,15 @@ export default function Presence() {
                       {user?.role === "admin" ? (
                         <button
                           disabled={loading}
-                          className="border-[1px] border-gray-300 rounded-md px-3 py-2 flex items-center space-x-2 cursor-pointer hover:border-gray-400 disabled:bg-gray-200 disabled:cursor-progress"
-                          onClick={exportData}>
+                          className="flex cursor-pointer items-center space-x-2 rounded-md border-[1px] border-gray-300 px-3 py-2 hover:border-gray-400 disabled:cursor-progress disabled:bg-gray-200"
+                          onClick={exportData}
+                        >
                           {loading ? (
-                            <div className="text-sm text-gray-400 font-medium">Export en cours...</div>
+                            <div className="text-sm font-medium text-gray-400">Export en cours...</div>
                           ) : (
                             <>
                               <Download className="text-gray-400" />
-                              <div className="text-sm text-gray-700 font-medium">Exporter</div>
+                              <div className="text-sm font-medium text-gray-700">Exporter</div>
                             </>
                           )}
                         </button>
@@ -153,7 +155,7 @@ export default function Presence() {
                     render={({ data }) => (
                       <table className="w-full">
                         <thead className="">
-                          <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100">
+                          <tr className="border-y-[1px] border-gray-100 text-xs uppercase text-gray-400">
                             <th className="py-3 pl-4">Centre</th>
                             <th className="">Présence à l&apos;arrivée</th>
                             <th className="">Absents à l&apos;arrivée</th>
@@ -226,12 +228,13 @@ const Session = ({ centre, cohort }) => {
   return (
     <tr
       className={`hover:!bg-gray-100 ${!data?.sessionPhase1 ? "cursor-not-allowed" : "cursor-pointer"}`}
-      onClick={() => data?.sessionPhase1 && history.push(`/centre/${centre._id}/${data?.sessionPhase1?._id}/general`)}>
-      <td className={`py-3 pl-4 ml-2 rounded-l-lg`}>
+      onClick={() => data?.sessionPhase1 && history.push(`/centre/${centre._id}/${data?.sessionPhase1?._id}/general`)}
+    >
+      <td className={`ml-2 rounded-l-lg py-3 pl-4`}>
         <div>
           <div className="text-xs">{cohort}</div>
-          <div className={`font-bold text-[#242526] text-[15px]`}>{centre.name || <span>Non renseigné</span>}</div>
-          <div className={`font-normal text-xs text-[#738297]`}>
+          <div className={`text-[15px] font-bold text-[#242526]`}>{centre.name || <span>Non renseigné</span>}</div>
+          <div className={`text-xs font-normal text-[#738297]`}>
             {centre.city} • {centre.department}
           </div>
         </div>
@@ -240,11 +243,11 @@ const Session = ({ centre, cohort }) => {
         <>
           {[...Array(4)].map((e, i) => (
             <td key={centre.name + "-" + cohort + "-" + i}>
-              <div className="animate-pulse flex space-x-4 mx-4">
+              <div className="mx-4 flex animate-pulse space-x-4">
                 <div className="flex-1 space-y-6 py-1">
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="h-2 bg-gray-300 rounded col-span-2"></div>
-                    <div className="h-2 bg-gray-300 rounded col-span-1"></div>
+                    <div className="col-span-2 h-2 rounded bg-gray-300"></div>
+                    <div className="col-span-1 h-2 rounded bg-gray-300"></div>
                   </div>
                 </div>
               </div>

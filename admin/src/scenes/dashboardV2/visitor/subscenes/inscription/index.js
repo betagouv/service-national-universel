@@ -16,8 +16,9 @@ export default function Index() {
             Exporter les statistiques <span className="font-bold">“Inscription”</span>
           </ButtonPrimary>
         </div>
-      }>
-      <div className="rounded-lg w-full bg-white p-8">Inscription</div>
+      }
+    >
+      <div className="w-full rounded-lg bg-white p-8">Inscription</div>
     </DashboardContainer>
   );
 }

@@ -51,7 +51,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
             <div>
               Aucun compte n'a été trouvé pour l'email&nbsp;:
               <br />
-              <span className="underline text-snu-purple-300">{teamate.email}</span>
+              <span className="text-snu-purple-300 underline">{teamate.email}</span>
               <br />
               Êtes-vous sûr de vouloir l&apos;inviter&nbsp;?
             </div>
@@ -119,14 +119,14 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
 
   return (
     <>
-      <div className="flex gap-3 text-gray-400 items-center ml-12 mt-8">
+      <div className="ml-12 mt-8 flex items-center gap-3 text-gray-400">
         <Template className="" />
         <ChevronRight className="" />
-        <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre`}>
+        <Link className="text-xs hover:text-snu-purple-300 hover:underline" to={`/centre`}>
           Centres
         </Link>
         <ChevronRight className="" />
-        <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre/${id}`}>
+        <Link className="text-xs hover:text-snu-purple-300 hover:underline" to={`/centre/${id}`}>
           Fiche du centre
         </Link>
         <ChevronRight className="" />
@@ -216,9 +216,9 @@ const Group = ({ team, role, deleteTeamate }) => {
         {role}&nbsp;({teamFiltered.length})
       </h6>
       {teamFiltered.map((user, index) => (
-        <div className="flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg" key={index}>
+        <div className="flex items-center justify-between rounded-lg p-2 hover:bg-gray-50" key={index}>
           <div className="flex items-center">
-            <div key={index} className="h-8 w-8 flex justify-center items-center rounded-full bg-gray-100 text-indigo-600 text-xs border-2 border-white mr-2">
+            <div key={index} className="mr-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs text-indigo-600">
               {user.firstName?.[0]?.toUpperCase()}
               {user.lastName?.[0]?.toUpperCase()}
             </div>
@@ -229,8 +229,9 @@ const Group = ({ team, role, deleteTeamate }) => {
             </div>
           </div>
           <div
-            className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105 cursor-pointer"
-            onClick={() => deleteTeamate(user)}>
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:scale-105 group-hover:bg-white"
+            onClick={() => deleteTeamate(user)}
+          >
             <Trash width={16} height={16} />
           </div>
         </div>
@@ -246,7 +247,7 @@ const AddBlock = ({ addTeamate }) => {
     <div className="p-12">
       <h4>Ajouter un nouveau membre à l’équipe</h4>
       <p className="text-gray-500">Renseignez les membres de l’équipe d’encadrement du centre de séjour de cohésion.</p>
-      <h6 className="text-gray-600 uppercase">
+      <h6 className="uppercase text-gray-600">
         informations <span className="text-red-500">*</span>
       </h6>
       <Formik
@@ -259,7 +260,8 @@ const AddBlock = ({ addTeamate }) => {
           email: "",
           phone: "",
         }}
-        onSubmit={(values) => addTeamate(values)}>
+        onSubmit={(values) => addTeamate(values)}
+      >
         {({ values, handleChange, handleSubmit, errors, isSubmitting }) => (
           <React.Fragment>
             <div className="flex gap-2">
@@ -278,7 +280,7 @@ const AddBlock = ({ addTeamate }) => {
               value={values.email}
               onChange={handleChange}
             />
-            <p className="text-red-500 text-center mt-2 text-xs">{errors.email}</p>
+            <p className="mt-2 text-center text-xs text-red-500">{errors.email}</p>
             <Field
               disabled={isSubmitting}
               as="select"
@@ -287,22 +289,24 @@ const AddBlock = ({ addTeamate }) => {
               name="role"
               value={values.role}
               onChange={handleChange}
-              style={{ width: "100%", height: "auto", padding: "1rem", marginTop: "1rem", border: "none", borderRadius: "7px", border: "solid 1px #ccc" }}>
+              style={{ width: "100%", height: "auto", padding: "1rem", marginTop: "1rem", border: "none", borderRadius: "7px", border: "solid 1px #ccc" }}
+            >
               <option disabled value="" label="Rôle" />
               {listRoles.map((e) => (
                 <option value={e} key={e} label={e} />
               ))}
             </Field>
-            <div className="flex justify-center items-center">
+            <div className="flex items-center justify-center">
               <button
-                className="mt-4 py-2 px-8 bg-white border-[1px] border-gray-400 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed "
+                className="mt-4 cursor-pointer rounded-lg border-[1px] border-gray-400 bg-white py-2 px-8 disabled:cursor-not-allowed disabled:opacity-50 "
                 type="submit"
                 onClick={handleSubmit}
-                disabled={isSubmitting}>
+                disabled={isSubmitting}
+              >
                 Ajouter le membre
               </button>
             </div>
-            {!!Object.keys(errors).length && <p className="text-red-500 text-center mt-2 text-xs">Merci de remplir tous les champs</p>}
+            {!!Object.keys(errors).length && <p className="mt-2 text-center text-xs text-red-500">Merci de remplir tous les champs</p>}
           </React.Fragment>
         )}
       </Formik>

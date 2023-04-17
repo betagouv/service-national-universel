@@ -263,7 +263,7 @@ const Hit = ({ hit, onClick, user, selected, structure }) => {
       <td>
         {hit.role && (
           <div className="flex flex-col items-start">
-            <Badge text={translate(hit.role)} className="!bg-[#DAE3FD] !text-[#302B94] !border-[#302B94]" />
+            <Badge text={translate(hit.role)} className="!border-[#302B94] !bg-[#DAE3FD] !text-[#302B94]" />
             {hit.subRole && hit.subRole !== "god" ? <Badge text={translate(hit.subRole)} /> : null}
           </div>
         )}

@@ -136,8 +136,8 @@ export default function Phase3({ young, onChange }) {
                     />
                   </Col>
                 </Row>
-                <Row className="pb-2 flex justify-center">
-                  <div className="h-10 ml-4">{edit ? <PanelActionButton icon="pencil" title="Valider" type="submit" /> : null}</div>
+                <Row className="flex justify-center pb-2">
+                  <div className="ml-4 h-10">{edit ? <PanelActionButton icon="pencil" title="Valider" type="submit" /> : null}</div>
                 </Row>
               </form>
             </Box>
@@ -156,12 +156,12 @@ export default function Phase3({ young, onChange }) {
 const Details = ({ title, value, valueEdit, edit, onChange, name }) => {
   if (typeof value === "function") value = value();
   return (
-    <div className="flex p-2 items-center h-12 ">
+    <div className="flex h-12 items-center p-2 ">
       <div className="w-1/4 text-brand-detail_title ">{title} : </div>
       {edit ? (
-        <input type="text" required value={valueEdit} name={name} className="w-3/4 rounded border mr-4 h-8 pl-1" onChange={onChange} />
+        <input type="text" required value={valueEdit} name={name} className="mr-4 h-8 w-3/4 rounded border pl-1" onChange={onChange} />
       ) : (
-        <div className="w-3/4 mr-2">{value}</div>
+        <div className="mr-2 w-3/4">{value}</div>
       )}
     </div>
   );
@@ -175,7 +175,8 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         borderLeft: borderLeft ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}>
+      }}
+    >
       <Wrapper>
         <div style={{ display: "flex" }}>
           <BoxTitle>{title}</BoxTitle>

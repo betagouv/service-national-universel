@@ -57,20 +57,22 @@ export default function Wrapper({ mission, tab, children, getMission }) {
   if (!mission) return null;
   return (
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative" }}>
-      <div className=" flex flex-wrap-reverse flex-row border-b border-gray-200 my-7 px-8 gap-4 justify-between">
+      <div className=" my-7 flex flex-row flex-wrap-reverse justify-between gap-4 border-b border-gray-200 px-8">
         <div className="flex flex-col justify-end">
-          <div className="text-2xl font-bold mb-7 ">
+          <div className="mb-7 text-2xl font-bold ">
             {mission.name} {mission.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" /> : null}
           </div>
           <div className="flex flex-row gap-8">
             <div
-              className={`cursor-pointer text-gray-400 text-sm ${tab === "details" && "text-blue-600 border-b-2 border-blue-600 pb-4"}`}
-              onClick={() => history.push(`/mission/${mission._id}`)}>
+              className={`cursor-pointer text-sm text-gray-400 ${tab === "details" && "border-b-2 border-blue-600 pb-4 text-blue-600"}`}
+              onClick={() => history.push(`/mission/${mission._id}`)}
+            >
               Détails
             </div>
             <div
-              className={`flex flex-row items-center gap-2 cursor-pointer text-gray-400 text-sm pb-4 ${tab === "youngs" && "text-blue-600 border-b-2 border-blue-600"}`}
-              onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
+              className={`flex cursor-pointer flex-row items-center gap-2 pb-4 text-sm text-gray-400 ${tab === "youngs" && "border-b-2 border-blue-600 text-blue-600"}`}
+              onClick={() => history.push(`/mission/${mission._id}/youngs`)}
+            >
               {mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5 ? (
                 <ExclamationCircle className="text-white" fill="red" />
               ) : mission.pendingApplications > 0 ? (
@@ -81,21 +83,23 @@ export default function Wrapper({ mission, tab, children, getMission }) {
 
             {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
               mission.visibility === "HIDDEN" || (mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5) || mission.placesLeft < 1 ? (
-                <div className={`cursor-not-allowed text-gray-400 text-sm ${tab === "propose-mission" && "text-blue-600 border-b-2 border-blue-600 pb-4"}`} disabled>
+                <div className={`cursor-not-allowed text-sm text-gray-400 ${tab === "propose-mission" && "border-b-2 border-blue-600 pb-4 text-blue-600"}`} disabled>
                   Proposer cette mission
                 </div>
               ) : (
                 <div
-                  className={`cursor-pointer text-gray-400 text-sm ${tab === "propose-mission" && "text-blue-600 border-b-2 border-blue-600 pb-4"}`}
-                  onClick={() => history.push(`/mission/${mission._id}/propose-mission`)}>
+                  className={`cursor-pointer text-sm text-gray-400 ${tab === "propose-mission" && "border-b-2 border-blue-600 pb-4 text-blue-600"}`}
+                  onClick={() => history.push(`/mission/${mission._id}/propose-mission`)}
+                >
                   Proposer cette mission
                 </div>
               )
             ) : null}
             {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
               <div
-                className={`cursor-pointer text-gray-400 text-sm ${tab === "historique" && "text-blue-600 border-b-2 border-blue-600 pb-4"}`}
-                onClick={() => history.push(`/mission/${mission._id}/historique`)}>
+                className={`cursor-pointer text-sm text-gray-400 ${tab === "historique" && "border-b-2 border-blue-600 pb-4 text-blue-600"}`}
+                onClick={() => history.push(`/mission/${mission._id}/historique`)}
+              >
                 <div className="flex flex-row items-center justify-center gap-2">
                   <Clock fill={tab === "historique" ? "#2563EB" : "#6B7280"} />
                   Historique
@@ -104,10 +108,10 @@ export default function Wrapper({ mission, tab, children, getMission }) {
             ) : null}
           </div>
         </div>
-        <div className="flex flex-row justify-center items-center gap-4">
+        <div className="flex flex-row items-center justify-center gap-4">
           <div className="flex flex-col text-right">
-            <div className="font-bold text-3xl">{mission.placesLeft}</div>
-            <div className="uppercase text-gray-500 text-xs">
+            <div className="text-3xl font-bold">{mission.placesLeft}</div>
+            <div className="text-xs uppercase text-gray-500">
               {mission.placesLeft > 1 ? (
                 <>
                   <div>places</div>
@@ -127,7 +131,7 @@ export default function Wrapper({ mission, tab, children, getMission }) {
           </div>
           <div className="flex flex-col">
             <SelectStatusMission hit={mission} callback={getMission} />
-            <div className="flex items-center justify-between my-[15px]">
+            <div className="my-[15px] flex items-center justify-between">
               <Button icon={<Bin fill="red" />} onClick={onClickDelete}>
                 Supprimer
               </Button>
@@ -156,11 +160,12 @@ function Button({ children, className = "", onClick = () => {}, spinner = false,
   if (href) {
     return (
       <a
-        className={`inline-flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-[#FFFFFF] text-[#1F2937] border-[transparent] border-[1px] border-solid rounded-[6px] hover:border-[#D1D5DB] ${className}`}
+        className={`inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[6px] border-[1px] border-solid border-[transparent] bg-[#FFFFFF] px-3 py-2 text-[#1F2937] hover:border-[#D1D5DB] ${className}`}
         href={href}
         target={target}
         rel={rel}
-        onClick={onClick}>
+        onClick={onClick}
+      >
         {icon && <icon.type {...icon.props} className={`mr-[8px] ${icon.props.className}`} />}
         {children}
       </a>
@@ -168,8 +173,9 @@ function Button({ children, className = "", onClick = () => {}, spinner = false,
   } else {
     return (
       <button
-        className={`flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-[#FFFFFF] text-[#1F2937] border-[transparent] border-[1px] border-solid rounded-[6px] hover:border-[#D1D5DB] ${className}`}
-        onClick={onClick}>
+        className={`flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[6px] border-[1px] border-solid border-[transparent] bg-[#FFFFFF] px-3 py-2 text-[#1F2937] hover:border-[#D1D5DB] ${className}`}
+        onClick={onClick}
+      >
         {spinner && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
         {icon && <icon.type {...icon.props} className={`mr-[8px] ${icon.props.className}`} />}
         {children}

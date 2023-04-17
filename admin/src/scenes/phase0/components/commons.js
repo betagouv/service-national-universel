@@ -4,25 +4,26 @@ import Plus from "../../../assets/icons/Plus";
 import Bin from "../../../assets/Bin";
 
 export function MiniTitle({ children, className = "" }) {
-  return <div className={`font-medium text-[12px] text-[#242526] leading-snug mb-[8px] ${className}`}>{children}</div>;
+  return <div className={`mb-[8px] text-[12px] font-medium leading-snug text-[#242526] ${className}`}>{children}</div>;
 }
 
 export function DownloadButton({ className = "", onClick = () => {}, href, target, rel }) {
   if (href) {
     return (
       <a
-        className={`flex items-center justify-center w-[32px] h-[32px] rounded-[100px] bg-[#2563EB] cursor-pointer group hover:bg-[#DBEAFE] ${className}`}
+        className={`group flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-[100px] bg-[#2563EB] hover:bg-[#DBEAFE] ${className}`}
         href={href}
         target={target}
         rel={rel}
-        onClick={onClick}>
-        <Download className="w-[14px] h-[14px] text-[#DBEAFE] group-hover:text-[#2563EB]" />
+        onClick={onClick}
+      >
+        <Download className="h-[14px] w-[14px] text-[#DBEAFE] group-hover:text-[#2563EB]" />
       </a>
     );
   } else {
     return (
-      <div className={`flex items-center justify-center w-[32px] h-[32px] rounded-[100px] bg-[#2563EB] cursor-pointer group hover:bg-[#DBEAFE] ${className}`} onClick={onClick}>
-        <Download className="w-[14px] h-[14px] text-[#DBEAFE] group-hover:text-[#2563EB]" />
+      <div className={`group flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-[100px] bg-[#2563EB] hover:bg-[#DBEAFE] ${className}`} onClick={onClick}>
+        <Download className="h-[14px] w-[14px] text-[#DBEAFE] group-hover:text-[#2563EB]" />
       </div>
     );
   }
@@ -31,11 +32,12 @@ export function DownloadButton({ className = "", onClick = () => {}, href, targe
 export function MoreButton({ className = "", onClick = () => {} }) {
   return (
     <div
-      className={`flex items-center justify-center w-[32px] h-[32px] rounded-[100px] bg-[#E5E7EB] cursor-pointer group hover:bg-[#4B5563] flex items-center justify-center ${className}`}
-      onClick={onClick}>
-      <div className="bg-[#4B5563] w-[2px] h-[2px] mr-[2px] group-hover:bg-white" />
-      <div className="bg-[#4B5563] w-[2px] h-[2px] mr-[2px] group-hover:bg-white" />
-      <div className="bg-[#4B5563] w-[2px] h-[2px] group-hover:bg-white" />
+      className={`group flex flex h-[32px] w-[32px] cursor-pointer items-center items-center justify-center justify-center rounded-[100px] bg-[#E5E7EB] hover:bg-[#4B5563] ${className}`}
+      onClick={onClick}
+    >
+      <div className="mr-[2px] h-[2px] w-[2px] bg-[#4B5563] group-hover:bg-white" />
+      <div className="mr-[2px] h-[2px] w-[2px] bg-[#4B5563] group-hover:bg-white" />
+      <div className="h-[2px] w-[2px] bg-[#4B5563] group-hover:bg-white" />
     </div>
   );
 }
@@ -52,9 +54,10 @@ export function DeleteButton({ className = "", onClick = () => {}, mode = "red" 
   }
   return (
     <div
-      className={`flex items-center justify-center w-[32px] h-[32px] rounded-[100px] cursor-pointer group border-[1px] border-[transparent] ${modeStyle} ${className}`}
-      onClick={onClick}>
-      <Bin className="w-[14px] h-[14px]" />
+      className={`group flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-[100px] border-[1px] border-[transparent] ${modeStyle} ${className}`}
+      onClick={onClick}
+    >
+      <Bin className="h-[14px] w-[14px]" />
     </div>
   );
 }
@@ -62,9 +65,10 @@ export function DeleteButton({ className = "", onClick = () => {}, mode = "red" 
 export function AddButton({ className = "", onClick = () => {} }) {
   return (
     <div
-      className={`flex items-center justify-center w-[32px] h-[32px] rounded-[100px] bg-[#E5E7EB] cursor-pointer group border-[1px] border-[transparent] hover:bg-[#4B5563] bg-[#E5E7EB] ${className}`}
-      onClick={onClick}>
-      <Plus className="w-[14px] h-[14px] text-[#FFFFFF] group-hover:text-[#FFFFFF]" />
+      className={`group flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-[100px] border-[1px] border-[transparent] bg-[#E5E7EB] bg-[#E5E7EB] hover:bg-[#4B5563] ${className}`}
+      onClick={onClick}
+    >
+      <Plus className="h-[14px] w-[14px] text-[#FFFFFF] group-hover:text-[#FFFFFF]" />
     </div>
   );
 }

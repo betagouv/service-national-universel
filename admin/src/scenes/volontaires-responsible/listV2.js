@@ -177,7 +177,7 @@ export default function List() {
   }, []);
   const RenderText = (text) => {
     return (
-      <div key={text} className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+      <div key={text} className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
         <div className="font-normal">
           Marquer en <span className="font-bold">{text}</span>
           {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
@@ -459,9 +459,9 @@ export default function List() {
 
   if (!missions) return <Loader />;
   return (
-    <div className="px-8 flex w-full">
-      <div className="flex flex-col w-full">
-        <div className="text-2xl font-bold mt-8 mb-4">Mes candidatures</div>
+    <div className="flex w-full px-8">
+      <div className="flex w-full flex-col">
+        <div className="mt-8 mb-4 text-2xl font-bold">Mes candidatures</div>
 
         <ModalConfirm
           isOpen={modalMultiAction?.isOpen}
@@ -510,9 +510,9 @@ export default function List() {
           />
         </div>
         <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-          <div className={`relative items-start mb-4`}>
-            <div className="flex-1 flex-column bg-white flex-wrap rounded-b-lg rounded-tr-lg">
-              <div className="flex flex-row pt-4 justify-between items-center px-8">
+          <div className={`relative mb-4 items-start`}>
+            <div className="flex-column flex-1 flex-wrap rounded-b-lg rounded-tr-lg bg-white">
+              <div className="flex flex-row items-center justify-between px-8 pt-4">
                 <div className="flex flex-row">
                   <DataSearch
                     defaultQuery={getDefaultQuery}
@@ -533,8 +533,9 @@ export default function List() {
                   <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={[{ items: optionsFilteredRole }]} />
                 ) : (
                   <button
-                    className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
-                    onClick={() => setIsExportOpen(true)}>
+                    className="rounded-md bg-snu-purple-300 py-2 px-4 text-sm font-semibold text-white hover:bg-snu-purple-600 hover:drop-shadow"
+                    onClick={() => setIsExportOpen(true)}
+                  >
                     Exporter les candidatures
                   </button>
                 )}
@@ -550,7 +551,7 @@ export default function List() {
                 />
               </div>
 
-              <div className={`mt-3 gap-2 flex flex-wrap mx-8 items-center ${!filterVisible ? "hidden" : ""}`}>
+              <div className={`mx-8 mt-3 flex flex-wrap items-center gap-2 ${!filterVisible ? "hidden" : ""}`}>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -669,7 +670,7 @@ export default function List() {
                   render={({ data }) => (
                     <Table>
                       <thead>
-                        <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100 mt-6 mb-2 text-start">
+                        <tr className="mt-6 mb-2 border-y-[1px] border-gray-100 text-start text-xs uppercase text-gray-400">
                           {tab !== "all" && (
                             <th className="w-1/12">
                               <input ref={checkboxRef} className="cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
@@ -736,7 +737,7 @@ const Hit = ({ hit, onClick, selected, onSelect, currentTab, opened, mission }) 
   return (
     <tr className={`${!opened && "hover:!bg-gray-100"}`} onClick={onClick}>
       {currentTab !== "all" && (
-        <td className={`${bgColor} pl-4 ml-2 rounded-l-lg`}>
+        <td className={`${bgColor} ml-2 rounded-l-lg pl-4`}>
           <div onClick={(e) => e.stopPropagation()}>
             <input className="cursor-pointer" type="checkbox" checked={selected} onChange={() => onSelect(hit)} />
           </div>
@@ -752,28 +753,28 @@ const Hit = ({ hit, onClick, selected, onSelect, currentTab, opened, mission }) 
         </MultiLine>
       </td>
       <td className={`${bgColor}`}>
-        <div className="flex flex-row gap-4 items-center">
+        <div className="flex flex-row items-center gap-4">
           <div>
             {mission.isJvaMission === "true" ? (
-              <img src={require("../../assets/JVA_round.png")} width="36" height="36" className="group-hover:scale-105 mx-auto min-w-[36px]" />
+              <img src={require("../../assets/JVA_round.png")} width="36" height="36" className="mx-auto min-w-[36px] group-hover:scale-105" />
             ) : (
-              <img src={require("../../assets/logo-snu.png")} width="36" height="36" className="group-hover:scale-105 mx-auto min-w-[36px]" />
+              <img src={require("../../assets/logo-snu.png")} width="36" height="36" className="mx-auto min-w-[36px] group-hover:scale-105" />
             )}
           </div>
           <div className="flex flex-col items-start">
-            <div className="font-bold text-sm">{mission.name}</div>
+            <div className="text-sm font-bold">{mission.name}</div>
             <div className={`text-xs ${selected ? "text-white" : "text-[#718096]"}`}>A candidaté le {formatDateFRTimezoneUTC(hit.createdAt)}</div>
           </div>
         </div>
       </td>
       {currentTab !== "pending" && (
         <td className={`${bgColor}`}>
-          <div className="flex flex-row gap-2 justify-start items-start">
+          <div className="flex flex-row items-start justify-start gap-2">
             <div>{BadgeContract(hit.contractStatus, hit.status)}</div>
             {numberOfFiles > 0 && (
-              <div className="flex flex-row justify-center items-center">
-                {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && <div className="w-[8px] h-[8px] rounded-full bg-orange-500 mr-1.5" />}
-                <div className="font-medium text-sm text-gray-700 mr-1">{numberOfFiles}</div>
+              <div className="flex flex-row items-center justify-center">
+                {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && <div className="mr-1.5 h-[8px] w-[8px] rounded-full bg-orange-500" />}
+                <div className="mr-1 text-sm font-medium text-gray-700">{numberOfFiles}</div>
                 <PaperClip />
               </div>
             )}
@@ -790,9 +791,9 @@ const Hit = ({ hit, onClick, selected, onSelect, currentTab, opened, mission }) 
 
 const BadgeContract = (status, applicationStatus) => {
   if (!status || ["WAITING_VALIDATION", "WAITING_ACCEPTATION"].includes(applicationStatus)) return;
-  if (status === "DRAFT") return <span className="text-xs font-medium border-[0.5px] text-white px-2 rounded-3xl py-1 bg-orange-500">Brouillon</span>;
-  if (status === "SENT") return <span className="text-xs border-[0.5px] border-[#CECECE] font-medium text-gray-600 px-2 rounded-3xl py-1 bg-white">Envoyé</span>;
-  if (status === "VALIDATED") return <span className="text-xs border-[0.5px] border-[#CECECE] font-medium text-gray-600 px-2 rounded-3xl py-1 bg-gray-100">Signé</span>;
+  if (status === "DRAFT") return <span className="rounded-3xl border-[0.5px] bg-orange-500 px-2 py-1 text-xs font-medium text-white">Brouillon</span>;
+  if (status === "SENT") return <span className="rounded-3xl border-[0.5px] border-[#CECECE] bg-white px-2 py-1 text-xs font-medium text-gray-600">Envoyé</span>;
+  if (status === "VALIDATED") return <span className="rounded-3xl border-[0.5px] border-[#CECECE] bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">Signé</span>;
 };
 const PaperClip = () => {
   return (
@@ -808,30 +809,31 @@ const PaperClip = () => {
 const TabItem = ({ active, title, count, onClick, icon }) => (
   <div
     onClick={onClick}
-    className={`text-[13px] px-3 py-2 mr-2 cursor-pointer text-gray-600 rounded-t-lg hover:text-blue-600 ${
-      active ? "!text-blue-600 bg-white border-none" : "bg-gray-100 border-t border-x border-gray-200"
-    }`}>
+    className={`mr-2 cursor-pointer rounded-t-lg px-3 py-2 text-[13px] text-gray-600 hover:text-blue-600 ${
+      active ? "border-none bg-white !text-blue-600" : "border-x border-t border-gray-200 bg-gray-100"
+    }`}
+  >
     <div className={"flex items-center gap-2"}>
       <div className="flex flex-row items-center gap-2">
         {icon && <div>{icon}</div>}
         <div>{title}</div>
       </div>
 
-      <div className={`px-2 border-[0.5px] font-medium text-xs rounded-3xl ${active ? "border-blue-300 text-blue-600" : "border-gray-400 text-gray-500"}`}>{count}</div>
+      <div className={`rounded-3xl border-[0.5px] px-2 text-xs font-medium ${active ? "border-blue-300 text-blue-600" : "border-gray-400 text-gray-500"}`}>{count}</div>
     </div>
   </div>
 );
 
 function FilterButton({ onClick }) {
   return (
-    <div onClick={onClick} className="cursor-pointer bg-[#F3F4F6] w-24 h-10 rounded-md flex flex-row justify-center items-center">
+    <div onClick={onClick} className="flex h-10 w-24 cursor-pointer flex-row items-center justify-center rounded-md bg-[#F3F4F6]">
       <svg width={12} height={11} viewBox="0 0 12 11" fill="#9CA3AF" xmlns="http://www.w3.org/2000/svg">
         <path
           d="M0 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1.252a1 1 0 0 1-.293.708l-4.08 4.08a1 1 0 0 0-.294.708v1.171a1 1 0 0 1-.293.707l-.666.667c-.63.63-1.707.184-1.707-.707V7.748a1 1 0 0 0-.293-.708L.293 2.96A1 1 0 0 1 0 2.252V1Z"
           fill="#9CA3AF"
         />
       </svg>
-      <div className="ml-2 text-grey-700">Filtres</div>
+      <div className="text-grey-700 ml-2">Filtres</div>
     </div>
   );
 }

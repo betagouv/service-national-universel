@@ -30,13 +30,14 @@ export default function HistoricServerDriven({ data, refName, path, pagination, 
   }
 
   return (
-    <div className="w-full bg-white rounded-xl shadow-md text-slate-700">
-      <div className="w-full flex p-4 gap-4 justify-between items-center">
+    <div className="w-full rounded-xl bg-white text-slate-700 shadow-md">
+      <div className="flex w-full items-center justify-between gap-4 p-4">
         <div className="flex items-center gap-4 py-4">
-          <input onChange={(e) => changeQuery(e.target.value)} value={query} className="border p-2 rounded-lg w-64 text-xs" placeholder="Rechercher..." />
+          <input onChange={(e) => changeQuery(e.target.value)} value={query} className="w-64 rounded-lg border p-2 text-xs" placeholder="Rechercher..." />
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className={`group py-2 px-3 rounded-lg flex items-center gap-2 ${isOpen ? "bg-gray-500 hover:bg-gray-100" : "bg-gray-100 hover:bg-gray-500"}`}>
+            className={`group flex items-center gap-2 rounded-lg py-2 px-3 ${isOpen ? "bg-gray-500 hover:bg-gray-100" : "bg-gray-100 hover:bg-gray-500"}`}
+          >
             <FilterIcon className={isOpen ? "fill-gray-100 group-hover:fill-gray-500" : "fill-gray-500 group-hover:fill-gray-100"} />
             <p className={isOpen ? "text-gray-100 group-hover:text-gray-500" : "text-gray-500 group-hover:text-gray-100"}>Filtres</p>
           </button>
@@ -59,18 +60,18 @@ export default function HistoricServerDriven({ data, refName, path, pagination, 
           <Loader />
         </div>
       ) : data.length === 0 ? (
-        <div className="italic p-4">Aucune donnée</div>
+        <div className="p-4 italic">Aucune donnée</div>
       ) : (
         <>
-          <table className="table-fixed w-full">
+          <table className="w-full table-fixed">
             <thead>
-              <tr className="uppercase border-t border-t-slate-100">
-                {refName && <th className="font-normal px-4 py-3 text-xs text-gray-500">{refName}</th>}
-                <th className="font-normal px-4 py-3 text-xs text-gray-500">Action</th>
-                <th className="font-normal px-4 py-3 text-xs text-gray-500">Détails</th>
-                <th className="font-normal px-4 py-3 text-xs text-gray-500 w-16"></th>
-                <th className="font-normal px-4 py-3 text-xs text-gray-500"></th>
-                <th className="font-normal px-4 py-3 text-xs text-gray-500">Auteur</th>
+              <tr className="border-t border-t-slate-100 uppercase">
+                {refName && <th className="px-4 py-3 text-xs font-normal text-gray-500">{refName}</th>}
+                <th className="px-4 py-3 text-xs font-normal text-gray-500">Action</th>
+                <th className="px-4 py-3 text-xs font-normal text-gray-500">Détails</th>
+                <th className="w-16 px-4 py-3 text-xs font-normal text-gray-500"></th>
+                <th className="px-4 py-3 text-xs font-normal text-gray-500"></th>
+                <th className="px-4 py-3 text-xs font-normal text-gray-500">Auteur</th>
               </tr>
             </thead>
             <tbody>
@@ -97,24 +98,24 @@ export default function HistoricServerDriven({ data, refName, path, pagination, 
 
 function Event({ e, index, refName, path }) {
   return (
-    <tr key={index} className="border-t border-t-slate-100 hover:bg-slate-50 cursor-default">
+    <tr key={index} className="cursor-default border-t border-t-slate-100 hover:bg-slate-50">
       {refName && (
-        <td className="px-4 py-3 cursor-pointer overflow-hidden">
+        <td className="cursor-pointer overflow-hidden px-4 py-3">
           <a href={`/${path}/${e.ref}`}>{e.refName}</a>
         </td>
       )}
-      <td className="px-4 py-3 overflow-hidden">
-        <p className="text-gray-400 truncate">
+      <td className="overflow-hidden px-4 py-3">
+        <p className="truncate text-gray-400">
           {translateAction(e.op)} • {formatLongDateFR(e.date)}
         </p>
         <p>{translateBusPatchesField(e.path)}</p>
       </td>
-      <td className="px-4 py-3 truncate text-gray-400">{translateHistory(e.path, e.originalValue)}</td>
+      <td className="truncate px-4 py-3 text-gray-400">{translateHistory(e.path, e.originalValue)}</td>
       <td className="px-4 py-3">
         <HiOutlineArrowRight />
       </td>
-      <td className="px-4 py-3 truncate">{translateHistory(e.path, e.value)}</td>
-      <td className="px-4 py-3 overflow-hidden">
+      <td className="truncate px-4 py-3">{translateHistory(e.path, e.value)}</td>
+      <td className="overflow-hidden px-4 py-3">
         <UserCard user={e.user} />
       </td>
     </tr>
@@ -127,7 +128,7 @@ function FilterDrawer({ filters, changeFilters, filterOptions }) {
   }
 
   return (
-    <div className="flex flex-wrap gap-4 p-4 bg-slate-50">
+    <div className="flex flex-wrap gap-4 bg-slate-50 p-4">
       <MultiSelect
         options={filterOptions ? filterOptions.path.map((e) => ({ label: translateBusPatchesField(e), value: e })) : []}
         value={filters.path}

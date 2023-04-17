@@ -14,15 +14,15 @@ export default function StatusTable({ statuses, className = "", onStatusClicked 
 
   return (
     <div className={`flex ${className}`}>
-      <div className="flex flex-col w-[45%] gap-2">
+      <div className="flex w-[45%] flex-col gap-2">
         {columns.left.map((column) => (
           <StatusText status={column.status} nb={column.nb} percentage={column.percentage} key={column.status} infoPanel={column.info} onClick={onStatusClicked} />
         ))}
       </div>
-      <div className="flex w-[10%] justify-center items-center">
-        <div className="w-[1px] h-3/5 border-r-[1px] border-gray-300"></div>
+      <div className="flex w-[10%] items-center justify-center">
+        <div className="h-3/5 w-[1px] border-r-[1px] border-gray-300"></div>
       </div>
-      <div className="flex flex-col w-[45%] gap-1">
+      <div className="flex w-[45%] flex-col gap-1">
         {columns.right.map((column) => (
           <StatusText status={column.status} nb={column.nb} percentage={column.percentage} key={column.status} infoPanel={column.info} onClick={onStatusClicked} />
         ))}

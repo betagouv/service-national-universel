@@ -74,8 +74,8 @@ export default function Import({ cohort, onFileVerified }) {
 
   return importErrors ? (
     <>
-      <div className="flex flex-col w-full rounded-xl bg-white mt-8 pt-12 pb-24 px-8 gap-6">
-        <div className="text-xl leading-7 font-medium text-gray-900 text-center pb-4">Import du fichier</div>
+      <div className="mt-8 flex w-full flex-col gap-6 rounded-xl bg-white px-8 pt-12 pb-24">
+        <div className="pb-4 text-center text-xl font-medium leading-7 text-gray-900">Import du fichier</div>
         <div className="flex flex-col items-center justify-center gap-8">
           <div className="flex items-center gap-4">
             <div className="flex items-center">
@@ -86,11 +86,12 @@ export default function Import({ cohort, onFileVerified }) {
               </div>
             </div>
             <button
-              className="flex items-center gap-3 text-blue-700 bg-white border !border-blue-600 py-2 rounded-md px-4 font-medium text-sm hover:shadow"
+              className="flex items-center gap-3 rounded-md border !border-blue-600 bg-white py-2 px-4 text-sm font-medium text-blue-700 hover:shadow"
               onClick={() => {
                 setIsLoading(false);
                 setImportErrors(false);
-              }}>
+              }}
+            >
               Importer un nouveau fichier
             </button>
           </div>
@@ -101,7 +102,7 @@ export default function Import({ cohort, onFileVerified }) {
             ))}
         </div>
       </div>
-      <div className="flex justify-end mt-4">
+      <div className="mt-4 flex justify-end">
         <PlainButton className="w-52" disabled>
           Suivant
         </PlainButton>
@@ -109,18 +110,18 @@ export default function Import({ cohort, onFileVerified }) {
     </>
   ) : (
     <>
-      <div className="flex flex-col w-full rounded-xl bg-white mt-8 pt-12 pb-24 px-8 gap-6 justify-center items-center">
-        <div className="text-xl leading-7 font-medium text-gray-900 text-center pb-4">Import du fichier</div>
-        <div className="flex flex-col items-center justify-center w-[641px] h-[218px] border-[1px] border-dashed border-gray-300 rounded-lg gap-2">
+      <div className="mt-8 flex w-full flex-col items-center justify-center gap-6 rounded-xl bg-white px-8 pt-12 pb-24">
+        <div className="pb-4 text-center text-xl font-medium leading-7 text-gray-900">Import du fichier</div>
+        <div className="flex h-[218px] w-[641px] flex-col items-center justify-center gap-2 rounded-lg border-[1px] border-dashed border-gray-300">
           <img src={ExcelColor} alt="Excel" className="w-[71px]" />
           {!isLoading && !isUploading ? (
             <>
-              <div onClick={importFile} className="text-sm leading-5 font-medium text-blue-600 text-center hover:underline cursor-pointer">
+              <div onClick={importFile} className="cursor-pointer text-center text-sm font-medium leading-5 text-blue-600 hover:underline">
                 Téléversez votre fichier
               </div>
-              <div className="text-xs leading-4 font-normal text-gray-500">XLSX jusqu’à 5Mo</div>
+              <div className="text-xs font-normal leading-4 text-gray-500">XLSX jusqu’à 5Mo</div>
               <input type="file" accept={MIME_TYPES.EXCEL} ref={fileInput} onChange={upload} className="hidden" />
-              {uploadError && <div className="text-red-900 mt-8 text-center text-sm font-bold">{uploadError}</div>}
+              {uploadError && <div className="mt-8 text-center text-sm font-bold text-red-900">{uploadError}</div>}
             </>
           ) : (
             <ReactLoading className="mt-2" type="spin" color="#2563EB" width={"40px"} height={"40px"} />
@@ -143,29 +144,29 @@ const ErrorBlock = ({ column, errors }) => {
   const colName = column;
 
   return (
-    <div className="flex flex-col w-[700px]">
-      <button className={`flex items-center bg-[#EA5946] rounded-t-lg ${open ? "" : "rounded-b-lg"} px-4 h-[56px]`} onClick={() => setOpen(!open)}>
-        <div className="flex gap-10 items-center justify-between grow">
-          <div className="text-sm leading-5 font-bold text-white">
+    <div className="flex w-[700px] flex-col">
+      <button className={`flex items-center rounded-t-lg bg-[#EA5946] ${open ? "" : "rounded-b-lg"} h-[56px] px-4`} onClick={() => setOpen(!open)}>
+        <div className="flex grow items-center justify-between gap-10">
+          <div className="text-sm font-bold leading-5 text-white">
             {errorList.length + (errorList.length > 1 ? " erreurs" : " erreur")} - {colName}
           </div>
-          <div className="text-xs leading-5 font-normal text-white">Colonne {column}</div>
+          <div className="text-xs font-normal leading-5 text-white">Colonne {column}</div>
         </div>
-        <HiOutlineChevronDown className={`text-white h-5 w-5 ml-2 ${open ? "transform rotate-180" : ""}`} />
+        <HiOutlineChevronDown className={`ml-2 h-5 w-5 text-white ${open ? "rotate-180 transform" : ""}`} />
       </button>
 
-      <div className={`${open ? "block" : "hidden "} border-b-[1px] border-r-[1px] border-l-[1px] rounded-b-lg border-gray-200 w-full`}>
+      <div className={`${open ? "block" : "hidden "} w-full rounded-b-lg border-b-[1px] border-r-[1px] border-l-[1px] border-gray-200`}>
         {errorList.map((item, index) => (
           <React.Fragment key={"item-" + item.line}>
             {index !== 0 && <hr className="border-gray-200" />}
-            <div className="flex items-center px-4 py-2 w-full">
-              <div className="text-sm leading-5 font-medium text-gray-800">Ligne {item.line}</div>
-              <div className="flex grow items-center gap-4 w-1/4 justify-end">
-                <div className="text-sm leading-5 font-normal text-gray-800">{item.error}</div>
+            <div className="flex w-full items-center px-4 py-2">
+              <div className="text-sm font-medium leading-5 text-gray-800">Ligne {item.line}</div>
+              <div className="flex w-1/4 grow items-center justify-end gap-4">
+                <div className="text-sm font-normal leading-5 text-gray-800">{item.error}</div>
                 <div className="group relative">
-                  <GrCircleInformation data-tip data-for="info" className="text-gray-500 h-3 w-3 cursor-pointer" />
-                  <div className="hidden group-hover:block absolute bottom-[calc(100%+5px)] left-[50%] bg-gray-200 rounded-lg translate-x-[-50%] px-2 py-1 text-black shadow-sm z-10 min-w-[300px] text-center">
-                    <div className="absolute left-[50%] translate-x-[-50%] bg-gray-200 w-[10px] h-[10px] rotate-45 bottom-[-5px] shadow-sm"></div>
+                  <GrCircleInformation data-tip data-for="info" className="h-3 w-3 cursor-pointer text-gray-500" />
+                  <div className="absolute bottom-[calc(100%+5px)] left-[50%] z-10 hidden min-w-[300px] translate-x-[-50%] rounded-lg bg-gray-200 px-2 py-1 text-center text-black shadow-sm group-hover:block">
+                    <div className="absolute left-[50%] bottom-[-5px] h-[10px] w-[10px] translate-x-[-50%] rotate-45 bg-gray-200 shadow-sm"></div>
                     {item.tooltip}
                   </div>
                 </div>

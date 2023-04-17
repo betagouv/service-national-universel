@@ -7,7 +7,7 @@ const initialState = {
 
 const reducer = (oldState = initialState, action) => {
   switch (action.type) {
-    case 'FETCH_TICKETS':
+    case "FETCH_TICKETS":
       return {
         ...oldState,
         tickets: action.payload.tickets,

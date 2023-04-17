@@ -13,7 +13,7 @@ export default function DeleteFilters() {
         };
         if (!Object.values(selectedValues).some((filter) => filter.value?.length)) return null;
         return (
-          <div className="hover:underline text-xs text-coolGray-600 cursor-pointer" onClick={clearFilter}>
+          <div className="cursor-pointer text-xs text-coolGray-600 hover:underline" onClick={clearFilter}>
             Supprimer la sélection
           </div>
         );

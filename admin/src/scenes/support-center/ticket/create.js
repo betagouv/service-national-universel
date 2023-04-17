@@ -100,7 +100,8 @@ export default function Create(props) {
               toastr.error("Oups, une erreur est survenue", translate(e.code));
             } finally {
             }
-          }}>
+          }}
+        >
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
             <>
               <SelectTag
@@ -165,11 +166,11 @@ export default function Create(props) {
                 deleteFile={deleteFile}
                 filesAccepted={["jpeg", "png", "pdf", "word", "excel"]}
               />
-              <div className="flex md:flex-row flex-col mt-[15px] ml-[15px] items-start">
+              <div className="mt-[15px] ml-[15px] flex flex-col items-start md:flex-row">
                 <LoadingButton loading={isLoading} type="submit" className="w-[105px] shrink-0" onClick={handleSubmit} disabled={isSubmitting}>
                   Envoyer
                 </LoadingButton>
-                {isLoading && files.length > 0 && <div className="text-gray-500 text-sm mt-2 md:ml-4 md:mt-0">{translate("UPLOAD_IN_PROGRESS")}</div>}
+                {isLoading && files.length > 0 && <div className="mt-2 text-sm text-gray-500 md:ml-4 md:mt-0">{translate("UPLOAD_IN_PROGRESS")}</div>}
               </div>
             </>
           )}

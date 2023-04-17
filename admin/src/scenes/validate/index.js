@@ -49,7 +49,8 @@ export default function Index() {
               console.log(e);
               return toastr.error("Erreur détectée", e);
             }
-          }}>
+          }}
+        >
           {({ values, isSubmitting, handleChange, handleSubmit }) => {
             return (
               <Form onSubmit={handleSubmit}>

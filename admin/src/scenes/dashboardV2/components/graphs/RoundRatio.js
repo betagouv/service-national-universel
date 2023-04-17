@@ -28,7 +28,7 @@ export default function RoundRatio({ value, className = "" }) {
           <path d={arc} stroke="#1D4ED8" strokeWidth="6" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
         )}
       </svg>
-      <div className="text-gray-900 text-center text-lg font-bold absolute left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2 text-center text-lg font-bold text-gray-900">
         {percentValue}
         <sup className="text-xs">%</sup>
       </div>

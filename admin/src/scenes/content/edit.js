@@ -62,7 +62,8 @@ export default function Edit(props) {
           setLoading(false);
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette possibilité d'engagement", e?.message);
         }
-      }}>
+      }}
+    >
       {({ values, handleChange, handleSubmit, errors, touched }) => (
         <div>
           <Header>
@@ -236,7 +237,8 @@ const ChooseDepartment = ({ value, onChange, validate }) => {
       disabled={user.role === REFERENT_ROLES.REFERENT_DEPARTMENT && user.department.length === 1}
       name="department"
       value={value}
-      onChange={onChange}>
+      onChange={onChange}
+    >
       {list.map((e) => {
         return (
           <option value={e} key={e}>

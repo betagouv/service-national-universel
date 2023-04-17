@@ -19,7 +19,7 @@ const warningTitle = "Êtes-vous sûr(e) de vouloir supprimer ce(tte) volontaire
 const warningMessage = (
   <>
     <span className="block">Cette action est irréversible.</span>
-    <span className="block mb-4">
+    <span className="mb-4 block">
       Merci d&apos;entrer <strong>le nom de famille</strong> du (de la) volontaire pour confirmer sa suppression:
     </span>
   </>
@@ -60,7 +60,8 @@ const ModalConfirmDeleteYoung = ({ isOpen, onClose: handleClose = () => {}, onCa
       title={isLoading ? loadingTitle : warningTitle}
       message={isLoading ? loadingMessage : warningMessage}
       isLoading={isLoading}
-      isConfirmButtonDisabled={isConfirmValueValid(young, confirmationValue)}>
+      isConfirmButtonDisabled={isConfirmValueValid(young, confirmationValue)}
+    >
       {!isLoading && <InputText value={confirmationValue} onChange={handleInputChange} placeholder="Ex: DUPONT" />}
     </ModalDanger>
   );

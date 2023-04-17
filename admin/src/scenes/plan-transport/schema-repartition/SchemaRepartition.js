@@ -316,12 +316,12 @@ export default function SchemaRepartition({ region, department }) {
             />
           </div>
         </div>
-        <div className="flex my-[40px]">
-          <div className="flex flex-col grow">
-            <BoxVolontaires className="grow mb-[8px]" summary={summary} loading={loading} />
-            <BoxAffectation className="grow mt-[8px]" summary={summary} loading={loading} />
+        <div className="my-[40px] flex">
+          <div className="flex grow flex-col">
+            <BoxVolontaires className="mb-[8px] grow" summary={summary} loading={loading} />
+            <BoxAffectation className="mt-[8px] grow" summary={summary} loading={loading} />
           </div>
-          <BoxDisponibilite className="grow mx-[16px]" summary={summary} loading={loading} isNational={isNational} />
+          <BoxDisponibilite className="mx-[16px] grow" summary={summary} loading={loading} isNational={isNational} />
           <BoxCentres className="grow" summary={summary} loading={loading} isDepartmental={isDepartmental} user={user} />
         </div>
         {isDepartmental ? (
@@ -349,13 +349,13 @@ export default function SchemaRepartition({ region, department }) {
 function BoxVolontaires({ summary, className = "", loading }) {
   return (
     <Box>
-      <div className={`flex items-center mb-[10px] ${className}`}>
+      <div className={`mb-[10px] flex items-center ${className}`}>
         <MiniTitle>Volontaires</MiniTitle>
         {!loading && summary.intradepartmental > 0 && (
           <>
             <Badge className="mx-[8px]">{formatRate(summary.assigned, summary.total)} affectés</Badge>
             <Link to="">
-              <ExternalLink className="text-[#9CA3AF] hover:text[#000000]" />
+              <ExternalLink className="hover:text[#000000] text-[#9CA3AF]" />
             </Link>
           </>
         )}
@@ -387,13 +387,13 @@ function BoxAffectation({ summary, className = "", loading }) {
         <>
           <ProgressBar total={summary.total} value={summary.assigned} className="my-[10px]" />
           <div className="flex items-center">
-            <div className="flex items-center mr-[16px] text-[12px] leading-[14px] text-[#1F2937]">
-              <div className="rounded-[100px] w-[7px] h-[7px] bg-[#303958]" />
+            <div className="mr-[16px] flex items-center text-[12px] leading-[14px] text-[#1F2937]">
+              <div className="h-[7px] w-[7px] rounded-[100px] bg-[#303958]" />
               <b className="mx-[5px]">{summary.assigned}</b>
               affectés
             </div>
-            <div className="flex items-center mr-[16px] text-[12px] leading-[14px] text-[#1F2937]">
-              <div className="rounded-[100px] w-[7px] h-[7px] bg-[#E5E7EB]" />
+            <div className="mr-[16px] flex items-center text-[12px] leading-[14px] text-[#1F2937]">
+              <div className="h-[7px] w-[7px] rounded-[100px] bg-[#E5E7EB]" />
               <b className="mx-[5px]">{Math.max(0, summary.total - summary.assigned)}</b>
               <span>restants</span>
             </div>
@@ -406,14 +406,14 @@ function BoxAffectation({ summary, className = "", loading }) {
 
 function BoxDisponibilite({ summary, className = "", loading, isNational }) {
   return (
-    <Box className={`flex flex-column justify-between pb-[0px] ${className}`}>
+    <Box className={`flex-column flex justify-between pb-[0px] ${className}`}>
       <div>
         <MiniTitle className="mb-[10px]">Disponibilité des places</MiniTitle>
         {loading ? (
           <Loading />
         ) : (
           <>
-            {!isNational && summary.toRegions && <div className="text-[13px] leading-[1.3em] text-[#6B7280] mb-[10px]">{summary.toRegions.map((r) => r.name).join(", ")}</div>}
+            {!isNational && summary.toRegions && <div className="mb-[10px] text-[13px] leading-[1.3em] text-[#6B7280]">{summary.toRegions.map((r) => r.name).join(", ")}</div>}
             <div className="flex">
               <Badge className="">{summary.capacity} places</Badge>
             </div>
@@ -449,12 +449,12 @@ function BoxCentres({ summary, className = "", loading, isNational, isDepartment
       {!isNational && loading ? (
         <Loading width="w-1/3" />
       ) : (
-        <ul className="list-none mb-6">
+        <ul className="mb-6 list-none">
           {summary.toRegions.map((region) => (
             <React.Fragment key={region.name}>
-              <li className="text-[#171725] text-[15px] leading-[18px] font-bold mt-[12px]">{region.name}</li>
+              <li className="mt-[12px] text-[15px] font-bold leading-[18px] text-[#171725]">{region.name}</li>
               {isDepartmental && (
-                <li className="text-[#1F2937] text-[12px], leading-[14px] mt-[2px]">
+                <li className="text-[12px], mt-[2px] leading-[14px] text-[#1F2937]">
                   {region.departments.map((department) => `${department} (${getDepartmentNumber(department)})`).join(", ")}
                 </li>
               )}
@@ -463,7 +463,7 @@ function BoxCentres({ summary, className = "", loading, isNational, isDepartment
         </ul>
       )}
       {user.role !== ROLES.TRANSPORTER && (
-        <Link to="/table-repartition" className="flex items-center absolute right-[20px] bottom-[14px] text-[#2563EB] text-[12px] hover:text-[#000000]">
+        <Link to="/table-repartition" className="absolute right-[20px] bottom-[14px] flex items-center text-[12px] text-[#2563EB] hover:text-[#000000]">
           Table de répartition <ChevronRight className="ml-[5px]" />
         </Link>
       )}
@@ -505,8 +505,9 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
             place="top"
             effect="solid"
             className="custom-tooltip-radius !opacity-100 !shadow-md"
-            tooltipRadius="6">
-            <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+            tooltipRadius="6"
+          >
+            <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
               L&apos;export n&apos;est pas disponible au téléchargement. Contactez-nous pour plus d&apos;information
             </p>
           </ReactTooltip>
@@ -514,19 +515,19 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
       </BoxHeader>
       <div className="">
         <table className="w-[100%]">
-          <thead className="text-[#7E858C] text-[11px] leading-[16px] uppercase">
+          <thead className="text-[11px] uppercase leading-[16px] text-[#7E858C]">
             <tr className="border-b-[1px] border-b-[#F4F5FA]">
-              <th className="font-medium py-[17px] pr-[16px]">{isNational ? "Régions" : "Départements"}</th>
-              <th className="font-medium py-[17px] pr-[16px]">Volontaires</th>
-              <th className="font-medium py-[17px] pr-[16px]">Places restantes</th>
-              <th className="font-medium py-[17px] pr-[16px]">Volontaires en intra-départemental</th>
-              <th className="font-medium py-[17px]">Places restantes dans le département</th>
+              <th className="py-[17px] pr-[16px] font-medium">{isNational ? "Régions" : "Départements"}</th>
+              <th className="py-[17px] pr-[16px] font-medium">Volontaires</th>
+              <th className="py-[17px] pr-[16px] font-medium">Places restantes</th>
+              <th className="py-[17px] pr-[16px] font-medium">Volontaires en intra-départemental</th>
+              <th className="py-[17px] font-medium">Places restantes dans le département</th>
             </tr>
           </thead>
-          <tbody className="font-medium text-[14px] leading-[16px] text-[#1F2937]">
+          <tbody className="text-[14px] font-medium leading-[16px] text-[#1F2937]">
             {rows.map((row) => (
               <tr key={row.name} className="border-b-[1px] border-b-[#F4F5FA] hover:bg-[#F2F5FC]" onClick={() => goToRow(row)}>
-                <td className="py-[17px] px-[9px] font-bold text-[15px] text-[#242526] whitespace-nowrap">
+                <td className="whitespace-nowrap py-[17px] px-[9px] text-[15px] font-bold text-[#242526]">
                   {row.name} {!isNational ? `(${getDepartmentNumber(row.name)})` : null}
                 </td>
                 <td className="py-[17px] px-[8px]">
@@ -566,7 +567,8 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
                           className="ml-2"
                           onClick={(e) => {
                             e.stopPropagation();
-                          }}>
+                          }}
+                        >
                           <ExternalLink className="text-[#9CA3AF]" />
                         </Link>
                       )}

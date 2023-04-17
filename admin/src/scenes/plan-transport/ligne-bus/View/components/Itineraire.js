@@ -84,48 +84,48 @@ export default function Itineraire({ meetingsPoints, center, aller, retour }) {
   }, [showRetour, meetingsPoints, center, aller, retour]);
 
   return (
-    <div className="p-8 w-1/2 bg-white rounded-xl">
+    <div className="w-1/2 rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <div className="text-xl leading-6 text-[#242526]">Itinéraire</div>
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
-            <div className="text-gray-500 text-xs leading-5 font-light">Aller</div>
-            <div className="text-gray-800 text-xs leading-4">{formatDateFR(aller)}</div>
+            <div className="text-xs font-light leading-5 text-gray-500">Aller</div>
+            <div className="text-xs leading-4 text-gray-800">{formatDateFR(aller)}</div>
           </div>
           <Toggle value={showRetour} onChange={() => setShowRetour(!showRetour)} />
           <div className="flex flex-col">
-            <div className="text-gray-500 text-xs leading-5 font-light">Retour</div>
-            <div className="text-gray-800 text-xs leading-4">{formatDateFR(retour)}</div>
+            <div className="text-xs font-light leading-5 text-gray-500">Retour</div>
+            <div className="text-xs leading-4 text-gray-800">{formatDateFR(retour)}</div>
           </div>
         </div>
       </div>
-      <div className="flow-root mt-8 mb-8 overflow-y-auto max-h-[300px]">
+      <div className="mt-8 mb-8 flow-root max-h-[300px] overflow-y-auto">
         <ul role="list" className="pr-4">
           {timeline.map((event, eventIdx) => (
             <li key={event.id} className="list-none">
               <div className="relative">
-                <span className="absolute left-[88px] -ml-[2px] h-full w-1 bg-gray-200 space-x-3" aria-hidden="true" />
+                <span className="absolute left-[88px] -ml-[2px] h-full w-1 space-x-3 bg-gray-200" aria-hidden="true" />
                 <div className={classNames(eventIdx !== timeline.length - 1 ? "pb-4" : "", "flex items-center gap-4")}>
-                  <div className="flex items-center justify-center py-2 rounded-lg bg-gray-100 w-14 text-xs font-medium leading-4">{event.time}</div>
+                  <div className="flex w-14 items-center justify-center rounded-lg bg-gray-100 py-2 text-xs font-medium leading-4">{event.time}</div>
                   <div>
-                    <span className="flex items-center justify-center w-8 h-8">
-                      <GoPrimitiveDot className={classNames(event.iconColor, "h-5 w-5 z-10")} aria-hidden="true" />
+                    <span className="flex h-8 w-8 items-center justify-center">
+                      <GoPrimitiveDot className={classNames(event.iconColor, "z-10 h-5 w-5")} aria-hidden="true" />
                     </span>
                   </div>
-                  <div className="flex min-w-0 flex-1 justify-between items-center space-x-4">
+                  <div className="flex min-w-0 flex-1 items-center justify-between space-x-4">
                     <div className="flex flex-col">
                       {event.isEtape ? (
                         <>
                           <p className="text-xs leading-4 text-[#738297]">Correspondance</p>
-                          <p className="text-xs leading-4 text-[#738297] font-light">{event.address}</p>
+                          <p className="text-xs font-light leading-4 text-[#738297]">{event.address}</p>
                         </>
                       ) : (
                         <>
-                          <p className="font-medium text-sm leading-6 text-[#242526]">
+                          <p className="text-sm font-medium leading-6 text-[#242526]">
                             {event.department} • {event.region}
                           </p>
-                          <p className="text-xs leading-4 text-[#738297] font-light">{event.name}</p>
-                          <p className="text-xs leading-4 text-[#738297] font-light">
+                          <p className="text-xs font-light leading-4 text-[#738297]">{event.name}</p>
+                          <p className="text-xs font-light leading-4 text-[#738297]">
                             {event.address}, {event.zip}, {event.city}
                           </p>
                         </>

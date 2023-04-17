@@ -190,8 +190,8 @@ export default function Goal({ filter }) {
               <div data-tip="" data-for="tooltip-goal">
                 Taux d&apos;ouverture de dossiers
               </div>
-              <ReactTooltip id="tooltip-goal" className="bg-white shadow-xl opacity-100" arrowColor="white" place="top">
-                <div className="text-xs text-gray-700 w-[375px]">
+              <ReactTooltip id="tooltip-goal" className="bg-white opacity-100 shadow-xl" arrowColor="white" place="top">
+                <div className="w-[375px] text-xs text-gray-700">
                   Nombre de dossiers ouverts (en cours, en attente de validation, en attente de correction, sur liste complémentaire, validés) de jeunes scolarisés dans la région
                   (ou si non scolarisés, résidents dans la région) divisé par l’objectif d’inscription régional.
                 </div>

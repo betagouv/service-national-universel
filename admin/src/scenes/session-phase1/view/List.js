@@ -65,7 +65,7 @@ export default function List({ data }) {
   return (
     <>
       <div className="m-12 w-full">
-        <div className="font-bold text-2xl mb-4">Volontaires</div>
+        <div className="mb-4 text-2xl font-bold">Volontaires</div>
         <div className=" flex flex-1 flex-col lg:flex-row ">
           <nav className="flex flex-1 gap-1">
             {viewData
@@ -76,9 +76,10 @@ export default function List({ data }) {
                       setCurrentTab(bus);
                       setFilter({ search: "", status: "", meetingPoint: "" });
                     }}
-                    className={`text-[13px] px-3 py-2 cursor-pointer text-gray-600 rounded-t-lg bg-gray-50 border-t-[1px] border-r-[1px] border-l-[1px] border-gray-200 hover:text-snu-purple-800 ${
-                      currentTab === bus && "!text-snu-purple-800 bg-white border-none"
-                    }`}>
+                    className={`cursor-pointer rounded-t-lg border-t-[1px] border-r-[1px] border-l-[1px] border-gray-200 bg-gray-50 px-3 py-2 text-[13px] text-gray-600 hover:text-snu-purple-800 ${
+                      currentTab === bus && "border-none bg-white !text-snu-purple-800"
+                    }`}
+                  >
                     <div className="flex items-center gap-2">
                       {bus === "noMeetingPoint" ? (
                         <>
@@ -96,15 +97,15 @@ export default function List({ data }) {
               : null}
           </nav>
         </div>
-        <div className="p-3 bg-white rounded-lg">
+        <div className="rounded-lg bg-white p-3">
           {/* filter */}
-          <div className="flex flex-row m-3 items-center gap-x-4">
-            <div className="flex rounded-lg border-[1px] border-gray-300 w-1/3 overflow-hidden">
+          <div className="m-3 flex flex-row items-center gap-x-4">
+            <div className="flex w-1/3 overflow-hidden rounded-lg border-[1px] border-gray-300">
               <input
                 type="text"
                 name="search"
                 value={filter?.search || ""}
-                className="border-none p-2 w-full"
+                className="w-full border-none p-2"
                 placeholder="Rechercher par prénom, nom, email, ville ..."
                 onChange={(e) => updateFilter({ [e.target.name]: e.target.value })}
               />
@@ -135,7 +136,7 @@ export default function List({ data }) {
           </div>
           <table className="w-full bg-white">
             <thead className="">
-              <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100 ">
+              <tr className="border-y-[1px] border-gray-100 text-xs uppercase text-gray-400 ">
                 <th className="py-3 pl-4 font-normal">Volontaire</th>
                 <th className="font-normal">
                   Email du <br /> volontaire
@@ -177,35 +178,37 @@ const Line = ({ hit }) => {
 
   return (
     <tr className="hover:!bg-gray-100">
-      <td className="py-3 pl-4 ml-2 rounded-l-lg">
+      <td className="ml-2 rounded-l-lg py-3 pl-4">
         <div>
-          <div className="font-bold text-[15px]">{`${hit.firstName} ${hit.lastName}`}</div>
-          <div className="font-normal text-xs text-[#738297]">{`${hit.city || ""} (${hit.department || ""})`}</div>
+          <div className="text-[15px] font-bold">{`${hit.firstName} ${hit.lastName}`}</div>
+          <div className="text-xs font-normal text-[#738297]">{`${hit.city || ""} (${hit.department || ""})`}</div>
         </div>
       </td>
       <td>
-        <div className="flex my-2 px-2 items-center">
-          <div className="pr-2 flex-row text-gray-700 text-xs">{hit.email.length > 17 ? `${hit.email.substring(0, 17)} ...` : hit.email}</div>
+        <div className="my-2 flex items-center px-2">
+          <div className="flex-row pr-2 text-xs text-gray-700">{hit.email.length > 17 ? `${hit.email.substring(0, 17)} ...` : hit.email}</div>
           <div
-            className="flex items-center justify-center cursor-pointer hover:scale-105"
+            className="flex cursor-pointer items-center justify-center hover:scale-105"
             onClick={() => {
               copyToClipboard(hit.email);
               setCopiedElements((prev) => ({ ...prev, email: true }));
-            }}>
+            }}
+          >
             {copiedElements?.email ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
           </div>
         </div>
       </td>
       <td>
         {hit.phone ? (
-          <div className="flex gap-1 items-center">
-            <div className="flex items-center font-normal text-xs">{formatPhoneNumberFR(hit.phone)}</div>
+          <div className="flex items-center gap-1">
+            <div className="flex items-center text-xs font-normal">{formatPhoneNumberFR(hit.phone)}</div>
             <div
-              className="flex items-center justify-center cursor-pointer hover:scale-105"
+              className="flex cursor-pointer items-center justify-center hover:scale-105"
               onClick={() => {
                 copyToClipboard(hit.phone);
                 setCopiedElements((prev) => ({ ...prev, phone: true }));
-              }}>
+              }}
+            >
               {copiedElements?.phone ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
             </div>
           </div>
@@ -213,32 +216,34 @@ const Line = ({ hit }) => {
       </td>
       <td>
         <div>
-          <div className="font-normal text-xs ">{`${hit.parent1FirstName} ${hit.parent1LastName} ${hit?.parent1Status ? "(" + translate(hit.parent1Status) + ")" : ""}`}</div>
-          {parent2 ? <div className="font-normal text-xs ">{`${hit.parent2FirstName} ${hit.parent2LastName} (${translate(hit.parent2Status)})`}</div> : null}
+          <div className="text-xs font-normal ">{`${hit.parent1FirstName} ${hit.parent1LastName} ${hit?.parent1Status ? "(" + translate(hit.parent1Status) + ")" : ""}`}</div>
+          {parent2 ? <div className="text-xs font-normal ">{`${hit.parent2FirstName} ${hit.parent2LastName} (${translate(hit.parent2Status)})`}</div> : null}
         </div>
       </td>
       <td>
         <div>
-          <div className="flex my-2 px-2 items-center">
-            <div className="pr-2 flex-row text-gray-700 text-xs ">{hit.parent1Email.length > 17 ? `${hit.parent1Email.substring(0, 17)} ...` : hit.parent1Email}</div>
+          <div className="my-2 flex items-center px-2">
+            <div className="flex-row pr-2 text-xs text-gray-700 ">{hit.parent1Email.length > 17 ? `${hit.parent1Email.substring(0, 17)} ...` : hit.parent1Email}</div>
             <div
-              className="flex items-center justify-center cursor-pointer hover:scale-105"
+              className="flex cursor-pointer items-center justify-center hover:scale-105"
               onClick={() => {
                 copyToClipboard(hit.parent1Email);
                 setCopiedElements((prev) => ({ ...prev, parent1Email: true }));
-              }}>
+              }}
+            >
               {copiedElements?.parent1Email ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
             </div>
           </div>
           {parent2 ? (
-            <div className="flex my-2 px-2 items-center">
-              <div className="pr-2 flex-row text-gray-700 text-xs">{hit.parent2Email.length > 17 ? `${hit.parent2Email.substring(0, 17)} ...` : hit.parent2Email}</div>
+            <div className="my-2 flex items-center px-2">
+              <div className="flex-row pr-2 text-xs text-gray-700">{hit.parent2Email.length > 17 ? `${hit.parent2Email.substring(0, 17)} ...` : hit.parent2Email}</div>
               <div
-                className="flex items-center justify-center cursor-pointer hover:scale-105"
+                className="flex cursor-pointer items-center justify-center hover:scale-105"
                 onClick={() => {
                   copyToClipboard(hit.parent2Email);
                   setCopiedElements((prev) => ({ ...prev, parent2Email: true }));
-                }}>
+                }}
+              >
                 {copiedElements?.parent2Email ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
               </div>
             </div>
@@ -247,26 +252,28 @@ const Line = ({ hit }) => {
       </td>
       <td>
         <div>
-          <div className="flex gap-1 items-center">
-            <div className="font-normal text-xs ">{formatPhoneNumberFR(hit.parent1Phone)}</div>
+          <div className="flex items-center gap-1">
+            <div className="text-xs font-normal ">{formatPhoneNumberFR(hit.parent1Phone)}</div>
             <div
-              className="flex items-center justify-center cursor-pointer hover:scale-105"
+              className="flex cursor-pointer items-center justify-center hover:scale-105"
               onClick={() => {
                 copyToClipboard(hit.parent1Phone);
                 setCopiedElements((prev) => ({ ...prev, parent1Phone: true }));
-              }}>
+              }}
+            >
               {copiedElements?.parent1Phone ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
             </div>
           </div>
           {parent2 ? (
-            <div className="flex gap-1 items-center">
-              <div className="font-normal text-xs ">{formatPhoneNumberFR(hit.parent2Phone)}</div>
+            <div className="flex items-center gap-1">
+              <div className="text-xs font-normal ">{formatPhoneNumberFR(hit.parent2Phone)}</div>
               <div
-                className="flex items-center justify-center cursor-pointer hover:scale-105"
+                className="flex cursor-pointer items-center justify-center hover:scale-105"
                 onClick={() => {
                   copyToClipboard(hit.parent2Phone);
                   setCopiedElements((prev) => ({ ...prev, parent2Phone: true }));
-                }}>
+                }}
+              >
                 {copiedElements?.parent2Phone ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
               </div>
             </div>

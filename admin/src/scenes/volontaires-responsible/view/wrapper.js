@@ -38,7 +38,8 @@ export default function Wrapper({ children, young, tab }) {
                   <Tab
                     disabled={young.statusMilitaryPreparationFiles !== "VALIDATED"}
                     isActive={tab === "militaryPreparation"}
-                    onClick={() => young.statusMilitaryPreparationFiles === "VALIDATED" && history.push(`/volontaire/${young._id}/preparation-militaire`)}>
+                    onClick={() => young.statusMilitaryPreparationFiles === "VALIDATED" && history.push(`/volontaire/${young._id}/preparation-militaire`)}
+                  >
                     Préparation militaire
                   </Tab>
                 ) : null}

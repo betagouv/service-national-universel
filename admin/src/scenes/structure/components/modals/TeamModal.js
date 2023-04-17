@@ -132,7 +132,8 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
         onCancel();
         setErrors({});
       }}
-      className="bg-white rounded-xl shadow-xl w-[800px] h-[500px] p-8">
+      className="h-[500px] w-[800px] rounded-xl bg-white p-8 shadow-xl"
+    >
       {responsible ? (
         <EditContact
           team={team}
@@ -149,7 +150,7 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
         <div className="space-y-8">
           <div className="grid grid-cols-6">
             <div />
-            <p className="text-lg font-medium text-center col-span-4">L&apos;équipe</p>
+            <p className="col-span-4 text-center text-lg font-medium">L&apos;équipe</p>
             <div className="flex items-center justify-end">
               <button onClick={onCancel}>
                 <AiOutlineClose className="text-gray-500" />
@@ -194,41 +195,43 @@ const DisplayContact = ({ responsible, setResponsible }) => {
   const [copied, setCopied] = useState(false);
 
   return (
-    <div className="group flex flex-col rounded-lg border-grey-200 border-[1px] h-28">
-      <div className="flex justify-between items-center">
+    <div className="border-grey-200 group flex h-28 flex-col rounded-lg border-[1px]">
+      <div className="flex items-center justify-between">
         <Link to={`/user/${responsible._id}`} className="flex items-center p-3">
-          <div className="h-9 w-9 flex justify-center items-center rounded-full bg-gray-100 text-blue-600 text-sm font-bold mr-3">
+          <div className="mr-3 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-sm font-bold text-blue-600">
             {getInitials(responsible.firstName + " " + responsible.lastName)}
           </div>
           <div>
-            <div className="text-sm text-bold text-gray-900 max-w-[200px] truncate">{responsible.firstName + " " + responsible.lastName}</div>
+            <div className="text-bold max-w-[200px] truncate text-sm text-gray-900">{responsible.firstName + " " + responsible.lastName}</div>
             <div className="text-xs text-gray-500">{translate(responsible.role)}</div>
           </div>
         </Link>
         <div
-          className="invisible group-hover:!visible h-7 w-7 flex items-center rounded-full bg-gray-100 justify-center mr-3 cursor-pointer hover:scale-105"
-          onClick={() => setResponsible(responsible)}>
-          <HiPencil className="text-blue-500 tex-lg" />
+          className="invisible mr-3 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-gray-100 hover:scale-105 group-hover:!visible"
+          onClick={() => setResponsible(responsible)}
+        >
+          <HiPencil className="tex-lg text-blue-500" />
         </div>
       </div>
 
-      <div className="flex border-t-[1px] border-gray-200 my-auto">
+      <div className="my-auto flex border-t-[1px] border-gray-200">
         {responsible.phone && (
-          <div className="flex flex-1 flex-row justify-center items-center my-2 px-3">
+          <div className="my-2 flex flex-1 flex-row items-center justify-center px-3">
             <HiPhone className="text-gray-400" />
-            <div className="pl-2 text-gray-700 whitespace-nowrap">{formatPhoneNumberFR(responsible.phone)}</div>
+            <div className="whitespace-nowrap pl-2 text-gray-700">{formatPhoneNumberFR(responsible.phone)}</div>
           </div>
         )}
         {responsible.email && (
-          <div className="flex flex-2 my-2 px-3 border-l-[1px] border-gray-200 truncate w-full items-center">
-            <div className="pr-2 flex-row text-gray-700 truncate ">{responsible.email}</div>
+          <div className="flex-2 my-2 flex w-full items-center truncate border-l-[1px] border-gray-200 px-3">
+            <div className="flex-row truncate pr-2 text-gray-700 ">{responsible.email}</div>
             <div
-              className="flex items-center justify-center cursor-pointer hover:scale-105"
+              className="flex cursor-pointer items-center justify-center hover:scale-105"
               onClick={() => {
                 copyToClipboard(responsible.email);
                 setCopied(true);
                 setTimeout(() => setCopied(false), 3000);
-              }}>
+              }}
+            >
               {copied ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
             </div>
           </div>
@@ -241,10 +244,11 @@ const DisplayContact = ({ responsible, setResponsible }) => {
 const AddContact = ({ setResponsible, isSupervisor = false }) => {
   return (
     <div
-      className="flex flex-row border-dashed border-blue-600 rounded-lg bg-[#ffffff] border-grey-200 border-[1px] px-2 items-center justify-center hover:cursor-pointer h-28 hover:bg-[#eff6ff]"
-      onClick={() => setResponsible({})}>
+      className="border-grey-200 flex h-28 flex-row items-center justify-center rounded-lg border-[1px] border-dashed border-blue-600 bg-[#ffffff] px-2 hover:cursor-pointer hover:bg-[#eff6ff]"
+      onClick={() => setResponsible({})}
+    >
       <HiPlus className="text-indigo-300" />
-      <div className="pl-2 text-blue-600 text-sm">Ajouter un {isSupervisor ? "membre" : "responsable"}</div>{" "}
+      <div className="pl-2 text-sm text-blue-600">Ajouter un {isSupervisor ? "membre" : "responsable"}</div>{" "}
     </div>
   );
 };
@@ -262,8 +266,8 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
   const rolesOptions = roles.map((role) => ({ label: translate(role), value: role }));
 
   return (
-    <div className="h-full flex flex-col space-y-6" onSubmit={handleSubmit}>
-      <p className="text-lg font-medium text-center">{responsible._id ? "L'équipe" : "Inviter un nouvel utilisateur"}</p>
+    <div className="flex h-full flex-col space-y-6" onSubmit={handleSubmit}>
+      <p className="text-center text-lg font-medium">{responsible._id ? "L'équipe" : "Inviter un nouvel utilisateur"}</p>
       {!responsible._id && (
         <p className="text-center text-gray-500">Vous pouvez partager les droits d&apos;administration de votre compte de structure d&apos;accueil SNU avec plusieurs personnes.</p>
       )}
@@ -285,7 +289,7 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
 
       <div className="mt-auto space-y-6">
         {responsible._id && team.length > 1 && (
-          <button disabled={isLoading} className="items-center gap-2 flex ml-auto text-red-500" onClick={() => handleDelete(responsible)}>
+          <button disabled={isLoading} className="ml-auto flex items-center gap-2 text-red-500" onClick={() => handleDelete(responsible)}>
             <HiOutlineTrash className="text-lg" />
             Supprimer le contact
           </button>

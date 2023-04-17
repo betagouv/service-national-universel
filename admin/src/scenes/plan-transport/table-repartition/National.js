@@ -142,8 +142,8 @@ export default function National() {
   return (
     <>
       <Breadcrumbs items={[{ label: "Table de répartition" }]} />
-      <div className="flex flex-col w-full px-8 pb-8 ">
-        <div className="py-8 flex items-center justify-between">
+      <div className="flex w-full flex-col px-8 pb-8 ">
+        <div className="flex items-center justify-between py-8">
           <div className="flex flex-col gap-3">
             <Title>Table de répartition</Title>
             {user.role == ROLES.ADMIN && <SubTitle>Assignez une ou des régions d’accueil à votre région</SubTitle>}
@@ -151,11 +151,11 @@ export default function National() {
           <Select options={cohortList} value={cohort} onChange={handleChangeCohort} />
         </div>
         <div className="flex flex-col gap-2 rounded-lg bg-white pb-3">
-          <div className="flex px-4 py-3 items-center justify-between w-full">
+          <div className="flex w-full items-center justify-between px-4 py-3">
             <input
               type="text"
               name="search"
-              className=" border border-gray-300 rounded-lg px-4 py-2 w-1/3"
+              className=" w-1/3 rounded-lg border border-gray-300 px-4 py-2"
               placeholder="Rechercher une region"
               onChange={(e) => setSearchRegion(e.target.value)}
             />
@@ -165,10 +165,10 @@ export default function National() {
           </div>
 
           <hr />
-          <div className="flex px-4 py-2 items-center">
-            <div className="w-[30%] uppercase text-[#7E858C] text-xs leading-3">Région</div>
-            <div className="w-[60%] uppercase text-[#7E858C] text-xs leading-3">Région d&apos;accueil</div>
-            <div className="w-[10%] uppercase text-[#7E858C] text-xs leading-3 text-center">Avancement</div>
+          <div className="flex items-center px-4 py-2">
+            <div className="w-[30%] text-xs uppercase leading-3 text-[#7E858C]">Région</div>
+            <div className="w-[60%] text-xs uppercase leading-3 text-[#7E858C]">Région d&apos;accueil</div>
+            <div className="w-[10%] text-center text-xs uppercase leading-3 text-[#7E858C]">Avancement</div>
           </div>
 
           {regions?.length ? (
@@ -189,8 +189,8 @@ export default function National() {
           ) : (
             <>
               <hr />
-              <div className="flex px-4 pb-4 pt-2 items-center justify-center w-full">
-                <div className="text-sm text-[#7E858C] leading-6">Aucune région ne correspond à votre recherche</div>
+              <div className="flex w-full items-center justify-center px-4 pb-4 pt-2">
+                <div className="text-sm leading-6 text-[#7E858C]">Aucune région ne correspond à votre recherche</div>
               </div>
             </>
           )}
@@ -216,32 +216,33 @@ const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, on
   return (
     <>
       <hr />
-      <div className="flex px-4 py-2 items-center">
+      <div className="flex items-center px-4 py-2">
         <div
-          className={`w-[30%] flex flex-col gap-1 ${assignRegion.length ? "cursor-pointer" : ""}`}
-          onClick={() => assignRegion.length && history.push(`/table-repartition/regional?cohort=${cohort}&region=${region}`)}>
-          <div className="text-base text-[#242526] font-bold leading-6">{region}</div>
-          <div className="flex text-xs text-gray-800 leading-4 items-center">{loadingQuery ? <Loading width="w-1/3" /> : `${youngsInRegion} volontaires`}</div>
+          className={`flex w-[30%] flex-col gap-1 ${assignRegion.length ? "cursor-pointer" : ""}`}
+          onClick={() => assignRegion.length && history.push(`/table-repartition/regional?cohort=${cohort}&region=${region}`)}
+        >
+          <div className="text-base font-bold leading-6 text-[#242526]">{region}</div>
+          <div className="flex items-center text-xs leading-4 text-gray-800">{loadingQuery ? <Loading width="w-1/3" /> : `${youngsInRegion} volontaires`}</div>
         </div>
         <div className="w-[60%]">
           {loadingQuery ? (
             <Loading width="w-1/3" />
           ) : (
-            <div className="relative flex flex-row gap-2 items-center flex-wrap">
+            <div className="relative flex flex-row flex-wrap items-center gap-2">
               {assignRegion.map((assign, i) => (
-                <div key={i + "assign"} className="text-xs text-gray-700 bg-gray-100 rounded-full p-2">
+                <div key={i + "assign"} className="rounded-full bg-gray-100 p-2 text-xs text-gray-700">
                   {assign.toRegion}
                 </div>
               ))}
               {!editDisabled && (
                 <>
                   {assignRegion.length === 0 ? (
-                    <button className="px-2 py-1 cursor-pointer text-white text-xs leading-5 rounded-full bg-blue-600 hover:scale-105" onClick={() => setOpen(!open)}>
+                    <button className="cursor-pointer rounded-full bg-blue-600 px-2 py-1 text-xs leading-5 text-white hover:scale-105" onClick={() => setOpen(!open)}>
                       À assigner
                     </button>
                   ) : (
-                    <div className="flex items-center p-2 rounded-full bg-blue-600 cursor-pointer hover:scale-105" onClick={() => setOpen(!open)}>
-                      <Pencil className="w-4 h-4 text-white" />
+                    <div className="flex cursor-pointer items-center rounded-full bg-blue-600 p-2 hover:scale-105" onClick={() => setOpen(!open)}>
+                      <Pencil className="h-4 w-4 text-white" />
                     </div>
                   )}
                   {open ? (
@@ -264,7 +265,7 @@ const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, on
             <Loading width="w-2/3" />
           ) : (
             <div className="flex justify-center">
-              <div className={`px-2 py-1 rounded-lg text-xs font-bold uppercase leading-5 ${avancement === 100 ? "text-green-600 bg-[#E4F3EC]" : "text-blue-600 bg-[#E8EDFF]"}`}>
+              <div className={`rounded-lg px-2 py-1 text-xs font-bold uppercase leading-5 ${avancement === 100 ? "bg-[#E4F3EC] text-green-600" : "bg-[#E8EDFF] text-blue-600"}`}>
                 {avancement} %
               </div>
             </div>
@@ -296,15 +297,15 @@ const SelectHostRegion = ({ region, placesCenterByRegion, setOpen, onCreate, ass
   };
 
   return (
-    <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg w-[90%] py-2 h-60 overflow-y-auto">
+    <div ref={ref} className="absolute top-[110%] left-[0px] z-50 flex h-60 w-[90%] flex-col overflow-y-auto rounded-lg bg-white py-2 shadow-ninaButton">
       {regionList.map((r, i) => {
         return (
-          <div key={r + i} className="flex flex-row items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100" onClick={() => onChange(region, r)}>
-            <div className="flex items-center gap-2 text-gray-700 text-sm">
+          <div key={r + i} className="flex cursor-pointer flex-row items-center justify-between px-3 py-2 hover:bg-gray-100" onClick={() => onChange(region, r)}>
+            <div className="flex items-center gap-2 text-sm text-gray-700">
               <input type={"checkbox"} checked={assignRegion.find((e) => e.toRegion === r) || false} readOnly />
               {r}
             </div>
-            <div className="text-sm text-gray-500 uppercase">{placesCenterByRegion[r] ? placesCenterByRegion[r] : 0} places</div>
+            <div className="text-sm uppercase text-gray-500">{placesCenterByRegion[r] ? placesCenterByRegion[r] : 0} places</div>
           </div>
         );
       })}

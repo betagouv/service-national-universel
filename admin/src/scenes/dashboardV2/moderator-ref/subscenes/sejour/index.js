@@ -188,23 +188,25 @@ export default function Index() {
             onClick={() => {
               plausibleEvent("Dashboard/CTA - Exporter statistiques séjour");
               print();
-            }}>
+            }}
+          >
             Exporter les statistiques <span className="font-bold">“Séjour”</span>
           </ButtonPrimary>
         </div>
-      }>
+      }
+    >
       <div className="flex flex-col gap-8">
         <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
-        <h1 className="text-[28px] leading-8 font-bold text-gray-900">Volontaires</h1>
+        <h1 className="text-[28px] font-bold leading-8 text-gray-900">Volontaires</h1>
         <div className="flex items-stretch gap-4 ">
-          <div className="flex flex-col gap-4 w-[30%]">
+          <div className="flex w-[30%] flex-col gap-4">
             <BoxWithPercentage total={data?.pdrTotal || 0} number={data?.pdr?.NR + data?.pdr?.false || 0} title="Point de rassemblement" subLabel="restants à confirmer" />
             <BoxWithPercentage total={data?.participationTotal || 0} number={data?.participation?.false || 0} title="Participation" subLabel="restants à confirmer" />
           </div>
           <StatusPhase1 statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} />
         </div>
         <Presences presence={data?.presence} JDM={data?.JDM} depart={data?.depart} departTotal={data?.departTotal} departMotif={data?.departMotif} />
-        <h1 className="text-[28px] leading-8 font-bold text-gray-900">Centres</h1>
+        <h1 className="text-[28px] font-bold leading-8 text-gray-900">Centres</h1>
         <div className="grid grid-cols-3 gap-4">
           <CardCenterCapacity nbCenter={dataCenter?.totalCenter || 0} capacity={dataCenter?.capacity || 0} />
           <Cardsession nbValidated={dataCenter?.status?.VALIDATED || 0} nbPending={dataCenter?.status?.WAITING_VALIDATION || 0} />

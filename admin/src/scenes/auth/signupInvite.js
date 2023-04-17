@@ -82,7 +82,8 @@ export default function SignupInvite() {
                 if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
                 return toastr.error("Problème", translate(e.code));
               }
-            }}>
+            }}
+          >
             {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
               return (
                 <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-y-4 gap-x-2">
@@ -178,13 +179,14 @@ export default function SignupInvite() {
                         checked={values.acceptCGU === "true"}
                         className="rounded border-brand-grey text-brand-purple focus:ring-offset-0"
                       />
-                      <label htmlFor="checkboxCGU" className="flex-1 text-brand-grey mb-0">
+                      <label htmlFor="checkboxCGU" className="mb-0 flex-1 text-brand-grey">
                         J&apos;ai lu et j&apos;accepte les{" "}
                         <a
                           href={`${adminURL}/conditions-generales-utilisation`}
                           target="_blank"
                           className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline"
-                          rel="noreferrer">
+                          rel="noreferrer"
+                        >
                           conditions générales d&apos;utilisation{" "}
                         </a>
                         de la plateforme du Service national universel
@@ -195,7 +197,8 @@ export default function SignupInvite() {
                   <LoadingButton
                     className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 text-base font-medium text-white transition-colors"
                     loading={isSubmitting}
-                    type="submit">
+                    type="submit"
+                  >
                     Activer mon compte
                   </LoadingButton>
                   <div className="col-span-2 border-t border-gray-200 pt-6 text-sm text-brand-grey">

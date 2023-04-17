@@ -27,7 +27,8 @@ export default function Phase2MilitaryPreparation({ young }) {
               text={translateStatusMilitaryPreparationFiles(young.files.statusMilitaryPreparationFiles)}
               color={APPLICATION_STATUS_COLORS[young.statusMilitaryPreparationFiles]}
             />
-          }>
+          }
+        >
           <Line>
             {(young.files.militaryPreparationFilesIdentity || []).map((e, i) => (
               <DownloadButton
@@ -78,11 +79,13 @@ const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderLe
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         borderLeft: borderLeft ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}>
+      }}
+    >
       <Wrapper
         style={{
           width: "100%",
-        }}>
+        }}
+      >
         <div style={{ display: "flex", width: "100%" }}>
           <BoxTitle>
             <div>{title}</div>

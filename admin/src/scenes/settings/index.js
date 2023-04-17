@@ -101,12 +101,12 @@ export default function Settings() {
 
   if (user.role !== ROLES.ADMIN)
     return (
-      <div className="flex flex-col h-100 items-center justify-center m-6">
+      <div className="h-100 m-6 flex flex-col items-center justify-center">
         <img src={logo} alt="logo" className="w-56 pb-8" />
-        <div className="text-3xl text-center pb-4">Vous n&apos;avez pas les droits d&apos;accès à cette page !</div>
-        <div className="text-center text-lg mt-4 text-gray-500">
+        <div className="pb-4 text-center text-3xl">Vous n&apos;avez pas les droits d&apos;accès à cette page !</div>
+        <div className="mt-4 text-center text-lg text-gray-500">
           Besoin d&apos;aide ?{" "}
-          <a rel="noreferrer" href="/public-besoin-d-aide" target="_blank" className="hover:underline scale-105 cursor-pointer">
+          <a rel="noreferrer" href="/public-besoin-d-aide" target="_blank" className="scale-105 cursor-pointer hover:underline">
             Cliquez ici
           </a>
         </div>
@@ -116,10 +116,10 @@ export default function Settings() {
   return (
     <>
       <Breadcrumbs items={[{ label: "Paramétrage dynamique" }]} />
-      <div className="flex flex-col w-full px-8 pb-8">
-        <div className="py-8 flex items-center justify-between">
-          <div className="text-2xl leading-7 font-bold text-gray-900">Paramétrage dynamique</div>
-          <div className="flex items-center w-[258px]">
+      <div className="flex w-full flex-col px-8 pb-8">
+        <div className="flex items-center justify-between py-8">
+          <div className="text-2xl font-bold leading-7 text-gray-900">Paramétrage dynamique</div>
+          <div className="flex w-[258px] items-center">
             <Select
               label="Cohorte"
               options={cohortList}
@@ -131,19 +131,19 @@ export default function Settings() {
             />
           </div>
         </div>
-        <div className="flex flex-col gap-8 w-full">
+        <div className="flex w-full flex-col gap-8">
           {/* Informations générales */}
-          <div className="flex flex-col rounded-xl pt-8 pb-12 px-8 bg-white gap-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
-            <div className="flex flex-col w-full gap-8">
-              <p className="text-gray-900 leading-5 text-lg font-medium">Informations générales</p>
+          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pt-8 pb-12 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+            <div className="flex w-full flex-col gap-8">
+              <p className="text-lg font-medium leading-5 text-gray-900">Informations générales</p>
               <div className="flex">
-                <div className="flex flex-col w-[45%] gap-4">
+                <div className="flex w-[45%] flex-col gap-4">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Identification</p>
-                      <MdInfoOutline data-tip data-for="identification" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                      <p className="text-xs  font-medium text-gray-900">Identification</p>
+                      <MdInfoOutline data-tip data-for="identification" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="identification" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md " tooltipRadius="6">
-                        <ul className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+                        <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                           <li>Nom donné à la cohorte.</li>
                           <li>Identifiant technique donné à la cohorte.</li>
                         </ul>
@@ -154,13 +154,13 @@ export default function Settings() {
                   </div>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Dates du séjour</p>
-                      <MdInfoOutline data-tip data-for="dates_du_séjour" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                      <p className="text-xs  font-medium text-gray-900">Dates du séjour</p>
+                      <MdInfoOutline data-tip data-for="dates_du_séjour" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="dates_du_séjour" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md " tooltipRadius="6">
-                        <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">Précision de la date de départ en séjour et de celle de retour.</p>
+                        <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Précision de la date de départ en séjour et de celle de retour.</p>
                       </ReactTooltip>
                     </div>
-                    <div className="flex gap-4 w-full">
+                    <div className="flex w-full gap-4">
                       <DatePickerInput
                         mode="single"
                         label="Début"
@@ -173,16 +173,16 @@ export default function Settings() {
                     </div>
                   </div>
                 </div>
-                <div className="flex w-[10%] justify-center items-center">
-                  <div className="w-[1px] h-[90%] border-r-[1px] border-gray-200"></div>
+                <div className="flex w-[10%] items-center justify-center">
+                  <div className="h-[90%] w-[1px] border-r-[1px] border-gray-200"></div>
                 </div>
-                <div className="flex flex-col w-[45%] gap-4">
+                <div className="flex w-[45%] flex-col gap-4">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Toolkit d’aide</p>
-                      <MdInfoOutline data-tip data-for="toolkit" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                      <p className="text-xs  font-medium text-gray-900">Toolkit d’aide</p>
+                      <MdInfoOutline data-tip data-for="toolkit" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="toolkit" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">Liens vers un articles d&apos;aide pour suivre la cohorte.</p>
+                        <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Liens vers un articles d&apos;aide pour suivre la cohorte.</p>
                       </ReactTooltip>
                     </div>
                     <InputText
@@ -195,10 +195,10 @@ export default function Settings() {
                   </div>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Zones concernées</p>
-                      <MdInfoOutline data-tip data-for="zones_concernées" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                      <p className="text-xs  font-medium text-gray-900">Zones concernées</p>
+                      <MdInfoOutline data-tip data-for="zones_concernées" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="zones_concernées" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+                        <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                           Précision de la ou des zones géographiques ou scolaires concernées par le séjour.
                         </p>
                       </ReactTooltip>
@@ -213,10 +213,10 @@ export default function Settings() {
                   </div>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Éligibilité</p>
-                      <MdInfoOutline data-tip data-for="eligibilité" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                      <p className="text-xs  font-medium text-gray-900">Éligibilité</p>
+                      <MdInfoOutline data-tip data-for="eligibilité" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="eligibilité" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+                        <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                           Précision des critères d’éligibilité des volontaires pour le séjour (niveau scolaire).
                         </p>
                       </ReactTooltip>
@@ -305,17 +305,17 @@ export default function Settings() {
 
           {/* TODO implementer parametres sur la plateforme */}
           {/* Préparation des affectations et des transports (phase 1) */}
-          <div className="flex flex-col rounded-xl pt-8 pb-12 px-8 bg-white gap-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
-            <div className="flex flex-col w-full gap-8">
-              <p className="text-gray-900 leading-5 text-lg font-medium">Préparation des affectations et des transports (phase 1)</p>
+          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pt-8 pb-12 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+            <div className="flex w-full flex-col gap-8">
+              <p className="text-lg font-medium leading-5 text-gray-900">Préparation des affectations et des transports (phase 1)</p>
               <div className="flex">
-                <div className="flex flex-col w-[45%] gap-4">
+                <div className="flex w-[45%] flex-col gap-4">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Remplissage des centres </p>
-                      <MdInfoOutline data-tip data-for="remplissage_centres" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                      <p className="text-xs  font-medium text-gray-900">Remplissage des centres </p>
+                      <MdInfoOutline data-tip data-for="remplissage_centres" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="remplissage_centres" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <ul className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+                        <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                           <li>Ouverture ou fermeture pour les utilisateurs de la possibilité de déclarer un centre sur le séjour.</li>
                           <li>Ouverture et fermeture pour les utilisateurs de la possibilité de modifier le nombre de places ouvertes sur le séjour</li>
                         </ul>
@@ -358,16 +358,16 @@ export default function Settings() {
                     /> */}
                   </div>
                 </div>
-                <div className="flex w-[10%] justify-center items-center">
-                  <div className="w-[1px] h-[90%] border-r-[1px] border-gray-200"></div>
+                <div className="flex w-[10%] items-center justify-center">
+                  <div className="h-[90%] w-[1px] border-r-[1px] border-gray-200"></div>
                 </div>
-                <div className="flex flex-col w-[45%] gap-4">
+                <div className="flex w-[45%] flex-col gap-4">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Création de groupe et modification du schéma de répartition</p>
-                      <MdInfoOutline data-tip data-for="création_groupe" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                      <p className="text-xs  font-medium text-gray-900">Création de groupe et modification du schéma de répartition</p>
+                      <MdInfoOutline data-tip data-for="création_groupe" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="création_groupe" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+                        <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                           Ouverture ou fermeture pour les utilisateurs de la possibilité de créer et modifier des groupes sur le schéma de répartition.
                         </p>
                       </ReactTooltip>
@@ -396,10 +396,10 @@ export default function Settings() {
                   </div>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Téléchargement du schéma de répartition</p>
-                      <MdInfoOutline data-tip data-for="téléchargement_schema" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                      <p className="text-xs  font-medium text-gray-900">Téléchargement du schéma de répartition</p>
+                      <MdInfoOutline data-tip data-for="téléchargement_schema" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="téléchargement_schema" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+                        <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                           Ouverture ou fermeture pour les utilisateurs de la possibilité de télécharger le schéma de répartition.
                         </p>
                       </ReactTooltip>
@@ -450,17 +450,17 @@ export default function Settings() {
           </div>
 
           {/* Affectation et pointage (phase 1) */}
-          <div className="flex flex-col rounded-xl pt-8 pb-12 px-8 bg-white gap-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
-            <div className="flex flex-col w-full gap-8">
-              <p className="text-gray-900 leading-5 text-lg font-medium">Affectation et pointage (phase 1)</p>
+          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pt-8 pb-12 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+            <div className="flex w-full flex-col gap-8">
+              <p className="text-lg font-medium leading-5 text-gray-900">Affectation et pointage (phase 1)</p>
               <div className="flex">
-                <div className="flex flex-col w-[45%] gap-4">
+                <div className="flex w-[45%] flex-col gap-4">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Annonce et visibilité des affectations par les volontaires</p>
-                      <MdInfoOutline data-tip data-for="annonce_affectation" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                      <p className="text-xs  font-medium text-gray-900">Annonce et visibilité des affectations par les volontaires</p>
+                      <MdInfoOutline data-tip data-for="annonce_affectation" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="annonce_affectation" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <ul className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+                        <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                           <li>Ouverture ou fermeture de la visibilité sur l’affectation par le volontaire sur son compte.</li>
                           <li>Blocage des emails envoyés automatiquement par la plateforme lors de l’affectation manuelle.</li>
                         </ul>
@@ -490,12 +490,12 @@ export default function Settings() {
                   </div>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="flex flex-1 text-gray-900  text-xs font-medium">
+                      <p className="flex flex-1 text-xs  font-medium text-gray-900">
                         Affectation manuelle des volontaires et modification de leur affectation et de leur point de rassemblement
                       </p>
-                      <MdInfoOutline data-tip data-for="affectation_manuelle" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                      <MdInfoOutline data-tip data-for="affectation_manuelle" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="affectation_manuelle" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <p className="text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+                        <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                           Ouverture ou fermeture pour les utilisateurs du droit à affecter manuellement des volontaires et/ou à modifier leur centre d’affectation ou point de
                           rassemblement.
                         </p>
@@ -565,12 +565,12 @@ export default function Settings() {
                       }}
                     />
                   </div>
-                  <div className="flex flex-col gap-3 mt-4">
+                  <div className="mt-4 flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Confirmation du point de rassemblement par les volontaires</p>
-                      <MdInfoOutline data-tip data-for="confirmation_PDR" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                      <p className="text-xs  font-medium text-gray-900">Confirmation du point de rassemblement par les volontaires</p>
+                      <MdInfoOutline data-tip data-for="confirmation_PDR" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="confirmation_PDR" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <ul className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+                        <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                           <li>Fin de la possibilité de confirmer le point de rassemblement pour le volontaire sur son compte.</li>
                           <li>
                             Fin de la possibilité pour un utilisateur de choisir l’option “Je laisse [Prénom du volontaire] choisir son point de rassemblement” dans la modale de
@@ -589,17 +589,17 @@ export default function Settings() {
                     />
                   </div>
                 </div>
-                <div className="flex w-[10%] justify-center items-center">
-                  <div className="w-[1px] h-[90%] border-r-[1px] border-gray-200"></div>
+                <div className="flex w-[10%] items-center justify-center">
+                  <div className="h-[90%] w-[1px] border-r-[1px] border-gray-200"></div>
                 </div>
-                <div className="flex flex-col w-[45%] gap-4">
+                <div className="flex w-[45%] flex-col gap-4">
                   {/* TODO implementer parametres sur la plateforme */}
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Disponibilité des listes de transport par centre (envoi par email)</p>
-                      <MdInfoOutline data-tip data-for="disponibilité_liste" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                      <p className="text-xs  font-medium text-gray-900">Disponibilité des listes de transport par centre (envoi par email)</p>
+                      <MdInfoOutline data-tip data-for="disponibilité_liste" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="disponibilité_liste" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <ul className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+                        <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                           <li>
                             Ouverture ou fermeture de l’accès à la liste des volontaires d’un même centre par ligne de transport et par point de rassemblement envoyé par email
                             (activation/désactivation du token).
@@ -632,10 +632,10 @@ export default function Settings() {
                   </div>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Pointage</p>
-                      <MdInfoOutline data-tip data-for="pointage" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                      <p className="text-xs  font-medium text-gray-900">Pointage</p>
+                      <MdInfoOutline data-tip data-for="pointage" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="pointage" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <p className="text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+                        <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                           Ouverture ou fermeture pour les utilisateurs de la possibilité de réaliser le pointage des volontaires.
                         </p>
                       </ReactTooltip>
@@ -727,10 +727,10 @@ export default function Settings() {
                   </div>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Début de validation de la phase 1</p>
-                      <MdInfoOutline data-tip data-for="validation_phase" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                      <p className="text-xs  font-medium text-gray-900">Début de validation de la phase 1</p>
+                      <MdInfoOutline data-tip data-for="validation_phase" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="validation_phase" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <p className="text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">Par défaut 9e jour après le début du séjour.</p>
+                        <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Par défaut 9e jour après le début du séjour.</p>
                       </ReactTooltip>
                     </div>
                     <DatePickerInput
@@ -756,8 +756,8 @@ export default function Settings() {
           </div>
           {!readOnly && (
             <div className="flex items-center justify-center gap-3 ">
-              <ButtonPrimary disabled={isLoading || noChange} className="w-[300px] h-[50px]" onClick={onSubmit}>
-                {isLoading && <BiLoaderAlt className="animate-spin h-4 w-4" />}
+              <ButtonPrimary disabled={isLoading || noChange} className="h-[50px] w-[300px]" onClick={onSubmit}>
+                {isLoading && <BiLoaderAlt className="h-4 w-4 animate-spin" />}
                 Enregistrer
               </ButtonPrimary>
             </div>

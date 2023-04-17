@@ -36,7 +36,7 @@ export default function GroupAffectationSummary({ group, className = "", onChang
   return (
     <GroupBox className={className}>
       <GroupHeader onBack={() => onChangeStep(GROUPSTEPS.MODIFICATION)} noBack={[ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)}>
-        <div className="grow flex items-center justify-between">
+        <div className="flex grow items-center justify-between">
           <div className="">Récapitulatif</div>
           <div className="flex items-center text-base text-gray-900">
             <People className="mx-[5px] text-[#9CA3AF]" />
@@ -52,8 +52,8 @@ export default function GroupAffectationSummary({ group, className = "", onChang
           <div className="text-[#DC5318]">{error}</div>
         ) : (
           <>
-            <div className="flex items-start mt-4">
-              <IcebergColor className="w-[50px] mr-4" />
+            <div className="mt-4 flex items-start">
+              <IcebergColor className="mr-4 w-[50px]" />
               <div className="grow">
                 <div className="text-lg font-bold text-[#242526]">Centre de cohésion</div>
                 <div className="text-sm text-gray-800">
@@ -67,12 +67,12 @@ export default function GroupAffectationSummary({ group, className = "", onChang
                 </div>
               </div>
             </div>
-            <div className="flex items-start mt-4">
-              <MapColor className="w-[50px] h-[50px] mr-4" />
+            <div className="mt-4 flex items-start">
+              <MapColor className="mr-4 h-[50px] w-[50px]" />
               <div className="grow">
                 <div className="text-lg font-bold text-[#242526]">Lieux de rassemblement</div>
                 {detail.gatheringPlaces && detail.gatheringPlaces.length > 0 ? (
-                  <ul className="list-outside ml-3">
+                  <ul className="ml-3 list-outside">
                     {detail.gatheringPlaces.map((pdr) => (
                       <li key={pdr._id} className="text-sm text-gray-800">
                         {pdr.name}, {pdr.address} {pdr.zip} {pdr.city}&nbsp;•&nbsp;{pdr.department}

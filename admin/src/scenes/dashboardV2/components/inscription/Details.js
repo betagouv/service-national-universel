@@ -56,8 +56,8 @@ export default function Details({ selectedFilters }) {
   }, [selectedFiltersBottom, selectedFilters]);
 
   return (
-    <div className="w-[40%] bg-white rounded-lg py-6 px-8 flex items-center flex-col shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
-      <div className="flex flex-row justify-between w-full">
+    <div className="flex w-[40%] flex-col items-center rounded-lg bg-white py-6 px-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+      <div className="flex w-full flex-row justify-between">
         <div className="text-base font-bold text-gray-900">En détail</div>
         <div className="flex flex-col items-end">
           {filterArrayBottom.map((filter) => (
@@ -72,7 +72,7 @@ export default function Details({ selectedFilters }) {
 
       {/* Displayed graphs */}
       {selectedDetail === "age" ? (
-        <div className="flex flex-col justify-center items-center w-full gap-10">
+        <div className="flex w-full flex-col items-center justify-center gap-10">
           <FullDoughnut
             title="Âge"
             legendSide="right"
@@ -84,7 +84,7 @@ export default function Details({ selectedFilters }) {
           <FullDoughnut title="Sexe" legendSide="left" labels={["Garçons", "Filles"]} values={[sexe.male || 0, sexe.female || 0]} maxLegends={2} tooltipsPercent={true} />
         </div>
       ) : selectedDetail === "class" ? (
-        <div className="flex flex-col justify-center items-center w-full gap-10">
+        <div className="flex w-full flex-col items-center justify-center gap-10">
           <FullDoughnut
             title="Classe"
             legendSide="right"
@@ -103,7 +103,7 @@ export default function Details({ selectedFilters }) {
           />
         </div>
       ) : selectedDetail === "situation" ? (
-        <div className="flex flex-col justify-center items-center w-full gap-10">
+        <div className="flex w-full flex-col items-center justify-center gap-10">
           <BarChart
             values={[
               specificSituation?.handicap?.true || 0,
@@ -112,7 +112,7 @@ export default function Details({ selectedFilters }) {
               specificSituation?.allergies?.true || 0,
             ]}
             noValue
-            className="h-[200px] mt-8"
+            className="mt-8 h-[200px]"
           />
           <Legends
             className="flew-wrap"
@@ -127,7 +127,7 @@ export default function Details({ selectedFilters }) {
 
           <div className="h-[1px] w-3/5 border-b-[1px] border-gray-300" />
 
-          <div className="flex flex-row justify-between w-full">
+          <div className="flex w-full flex-row justify-between">
             <Legend className="!flex-col text-center" name="Aménagement spécifique" value={specificSituation.specificAmenagment.true || 0} color={graphColors[1][0]} />
             <Legend
               className="!flex-col text-center"
@@ -144,7 +144,7 @@ export default function Details({ selectedFilters }) {
           </div>
         </div>
       ) : selectedDetail === "qpv" ? (
-        <div className="flex flex-col justify-center items-center w-full gap-10">
+        <div className="flex w-full flex-col items-center justify-center gap-10">
           <FullDoughnut
             title="Quartier prioritaires"
             legendSide="right"
@@ -297,14 +297,14 @@ const FilterDetail = ({ selectedDetail, setSelectedDetail }) => {
   }, []);
   return (
     <div className="relative">
-      <div className="min-w-[200px] flex flex-row gap-2 items-center p-2 cursor-pointer justify-center" onClick={() => setShowDetailFilter((open) => !open)}>
+      <div className="flex min-w-[200px] cursor-pointer flex-row items-center justify-center gap-2 p-2" onClick={() => setShowDetailFilter((open) => !open)}>
         <div>{optionsDetail.find((e) => e.key === selectedDetail).label}</div>
         {showDetailFilter && <BsChevronUp className="h-4 w-4 text-gray-900" aria-hidden="true" />}
         {!showDetailFilter && <BsChevronDown className="h-4 w-4 text-gray-900" aria-hidden="true" />}
       </div>
 
       {showDetailFilter && (
-        <div ref={ref} className="absolute bg-white z-50 w-[236px] rounded-md  ring-1 ring-black ring-opacity-5 shadow-lg  translate-x-1/2 right-1/2">
+        <div ref={ref} className="absolute right-1/2 z-50 w-[236px] translate-x-1/2  rounded-md bg-white shadow-lg ring-1  ring-black ring-opacity-5">
           {optionsDetail.map((option) => (
             <div
               key={option.key}
@@ -312,7 +312,8 @@ const FilterDetail = ({ selectedDetail, setSelectedDetail }) => {
                 setShowDetailFilter(false);
                 setSelectedDetail(option.key);
               }}
-              className="hover:bg-gray-100 py-1 cursor-pointer text-sm text-gray-700 leading-5 px-3">
+              className="cursor-pointer py-1 px-3 text-sm leading-5 text-gray-700 hover:bg-gray-100"
+            >
               {option.label}
             </div>
           ))}

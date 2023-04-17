@@ -309,10 +309,10 @@ export default function Inscription() {
                   URLParams={true}
                   autosuggest={false}
                 />
-                <HiAdjustments onClick={handleShowFilter} className="text-xl text-coolGray-700 cursor-pointer hover:scale-105" />
+                <HiAdjustments onClick={handleShowFilter} className="cursor-pointer text-xl text-coolGray-700 hover:scale-105" />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <div className="uppercase text-xs text-snu-purple-800">Général</div>
+                <div className="text-xs uppercase text-snu-purple-800">Général</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -395,7 +395,7 @@ export default function Inscription() {
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <div className="uppercase text-xs text-snu-purple-800">Dossier</div>
+                <div className="text-xs uppercase text-snu-purple-800">Dossier</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"

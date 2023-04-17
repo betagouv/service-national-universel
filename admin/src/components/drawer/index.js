@@ -16,7 +16,7 @@ import { department2region } from "snu-lib";
 const DrawerTab = ({ title, to, onClick, beta, exact }) => {
   if (environment === "production" && beta) return null;
   return (
-    <div onClick={onClick} className=" hover:bg-snu-purple-800 hover:shadow-lg block">
+    <div onClick={onClick} className=" block hover:bg-snu-purple-800 hover:shadow-lg">
       <NavLink to={to} exact={exact} className="block py-3 pl-3 text-base hover:!text-white" activeClassName="block bg-snu-purple-300 py-3 pl-3 font-bold">
         {title}
         {beta ? <Badge className="ml-2" text="bêta" color={colors.yellow} /> : null}
@@ -28,7 +28,7 @@ const DrawerTab = ({ title, to, onClick, beta, exact }) => {
 const DrawerTabWithoutLink = ({ title, onClick, beta }) => {
   if (environment === "production" && beta) return null;
   return (
-    <div onClick={onClick} className=" hover:bg-snu-purple-800 hover:shadow-lg block cursor-pointer">
+    <div onClick={onClick} className=" block cursor-pointer hover:bg-snu-purple-800 hover:shadow-lg">
       <div className="block py-3 pl-3 text-base hover:!text-white">
         {title}
         {beta ? <Badge className="ml-2" text="bêta" color={colors.yellow} /> : null}
@@ -47,16 +47,17 @@ const BlankSeparator = () => (
 
 const HelpButton = ({ onClick, to }) => (
   <div
-    className="justify-center flex mb-4 p-8"
+    className="mb-4 flex justify-center p-8"
     onClick={() => {
       plausibleEvent("Menu/CTA - Besoin Aide");
       onClick();
-    }}>
-    <NavLink className=" items-center border rounded flex p-2 hover:!text-white hover:bg-snu-purple-800 hover:shadow-lg" activeClassName="flex bg-snu-purple-300 p-2" to={to}>
-      <QuestionMark className="h-6 w-6 flex mr-2" />
+    }}
+  >
+    <NavLink className=" flex items-center rounded border p-2 hover:bg-snu-purple-800 hover:!text-white hover:shadow-lg" activeClassName="flex bg-snu-purple-300 p-2" to={to}>
+      <QuestionMark className="mr-2 flex h-6 w-6" />
       <div>
-        <div className=" font-normal text-sm text-center  ">Besoin d&apos;aide&nbsp;?</div>
-        <div className="font-light text-xs float-right text-center ">Tutoriels, contacts</div>
+        <div className=" text-center text-sm font-normal  ">Besoin d&apos;aide&nbsp;?</div>
+        <div className="float-right text-center text-xs font-light ">Tutoriels, contacts</div>
       </div>
     </NavLink>
   </div>
@@ -64,8 +65,8 @@ const HelpButton = ({ onClick, to }) => (
 
 const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
-    <div onClick={onClick} className="hover:bg-snu-purple-800 hover:shadow-lg block">
-      <NavLink to={to} className=" py-3 pl-3 text-base block hover:!text-white" activeClassName=" bg-snu-purple-300 py-3 pl-3 font-bold">
+    <div onClick={onClick} className="block hover:bg-snu-purple-800 hover:shadow-lg">
+      <NavLink to={to} className=" block py-3 pl-3 text-base hover:!text-white" activeClassName=" bg-snu-purple-300 py-3 pl-3 font-bold">
         <div>
           <div>{title}</div>
           <div className="flex content-center">{children}</div>
@@ -87,8 +88,8 @@ const DrawerConnectToZammood = ({ title, children, history }) => {
   }
 
   return (
-    <div onClick={connectToZammood} className="hover:bg-snu-purple-800 hover:shadow-lg block cursor-pointer">
-      <div className=" py-3 pl-3 text-base block hover:!text-white">
+    <div onClick={connectToZammood} className="block cursor-pointer hover:bg-snu-purple-800 hover:shadow-lg">
+      <div className=" block py-3 pl-3 text-base hover:!text-white">
         <div>
           <div>{title}</div>
           <div className="flex content-center">{children}</div>
@@ -146,15 +147,15 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
           <div />
         ) : (
           <>
-            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+            <div className="mr-2.5 flex w-14 content-center justify-evenly rounded-lg bg-rose-500  px-2">
               <MailCloseIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
               <div>{newTickets}</div>
             </div>
-            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+            <div className="mr-2.5 flex w-14 content-center justify-evenly rounded-lg bg-amber-400  px-2">
               <MailOpenIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
               <div>{openedTickets}</div>
             </div>
-            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+            <div className="mr-2.5 flex w-14 content-center justify-evenly rounded-lg bg-green-500  px-2">
               <SuccessIcon color="#ffffff" style={{ margin: 0, paddingTop: "3px" }} />
               <div>{closedTickets}</div>
             </div>
@@ -205,15 +206,15 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, 
           <div />
         ) : (
           <>
-            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+            <div className="mr-2.5 flex w-14 content-center justify-evenly rounded-lg bg-rose-500  px-2">
               <MailCloseIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
               <div>{newTickets}</div>
             </div>
-            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+            <div className="mr-2.5 flex w-14 content-center justify-evenly rounded-lg bg-amber-400  px-2">
               <MailOpenIcon color="#ffffff" style={{ margin: 0, paddingTop: "2px" }} />
               <div>{openedTickets}</div>
             </div>
-            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+            <div className="mr-2.5 flex w-14 content-center justify-evenly rounded-lg bg-green-500  px-2">
               <SuccessIcon color="#ffffff" style={{ margin: 0, paddingTop: "3px" }} />
               <div>{closedTickets}</div>
             </div>
@@ -329,11 +330,11 @@ const Drawer = (props) => {
   if (!user) return <div />;
 
   return (
-    <div className="min-h-screen max-w-[220px] bg-snu-purple-900 text-white fixed z-10 overflow-y-auto bottom-0 top-[56px] pb-4">
+    <div className="fixed bottom-0 top-[56px] z-10 min-h-screen max-w-[220px] overflow-y-auto bg-snu-purple-900 pb-4 text-white">
       {!isOpen ? (
-        <nav open={open} id="drawer" className="text-white text-base font-normal min-h-full">
-          <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative">
-            <ul className="divide-y divide-slate-700 min-w-[220px]">
+        <nav open={open} id="drawer" className="min-h-full text-base font-normal text-white">
+          <div className="absolute inset-y-0 left-0 -translate-x-full transform lg:relative lg:block lg:translate-x-0">
+            <ul className="min-w-[220px] divide-y divide-slate-700">
               {![ROLES.DSNJ, ROLES.TRANSPORTER].includes(user.role) && <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />}
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
@@ -348,7 +349,7 @@ const Drawer = (props) => {
           </div>
         </nav>
       ) : (
-        <nav open={open} id="drawer" className="bg-snu-purple-900 text-white text-base font-normal min-h-full">
+        <nav open={open} id="drawer" className="min-h-full bg-snu-purple-900 text-base font-normal text-white">
           <div>
             <ul className="divide-y divide-slate-700">
               {![ROLES.DSNJ, ROLES.TRANSPORTER].includes(user.role) && <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />}

@@ -41,9 +41,10 @@ export function ChangeCohortPen({ young, onChange }) {
   return (
     <>
       <div
-        className="flex items-center justify-center p-[9px] rounded-[4px] cursor-pointer border-[1px] border-[transparent] hover:border-[#E5E7EB] mr-[15px]"
-        onClick={() => setChangeCohortModal(true)}>
-        <Pencil stroke="#66A7F4" className="w-[11px] h-[11px]" />
+        className="mr-[15px] flex cursor-pointer items-center justify-center rounded-[4px] border-[1px] border-[transparent] p-[9px] hover:border-[#E5E7EB]"
+        onClick={() => setChangeCohortModal(true)}
+      >
+        <Pencil stroke="#66A7F4" className="h-[11px] w-[11px]" />
       </div>
       <ChangeCohortModal isOpen={changeCohortModal} young={young} options={options} close={() => setChangeCohortModal(false)} onChange={onChange} />
     </>
@@ -113,15 +114,16 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
         }}
         disableConfirm={!motif || !newCohort.name}
         showHeaderIcon={true}
-        showHeaderText={false}>
+        showHeaderText={false}
+      >
         <>
           <div style={{ display: "grid", marginBlock: "20px", gridTemplateColumns: "1fr 375px", gridGap: "20px", alignItems: "center", justifyItems: "left", minWidth: "75%" }}>
             <p style={{ margin: 0 }}>Précisez le motif de changement de séjour :</p>
 
-            <div className="text-[#9a9a9a] bg-[#ffffff] w-[375px]">
+            <div className="w-[375px] bg-[#ffffff] text-[#9a9a9a]">
               <UncontrolledDropdown setActiveFromChild>
                 <DropdownToggle tag="button">
-                  <div className="border-[#D1D5DB] border-[1px] rounded-[100px] bg-white flex items-center justify-between w-[375px] py-[4px] px-[15px]">
+                  <div className="flex w-[375px] items-center justify-between rounded-[100px] border-[1px] border-[#D1D5DB] bg-white py-[4px] px-[15px]">
                     {motif || <p></p>}
                     <Chevron color="#9a9a9a" style={{ padding: 0, margin: 0, marginLeft: "15px" }} />
                   </div>
@@ -151,12 +153,12 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
         </>
       </ModalConfirm>
       <Modal size="lg" centered isOpen={modalConfirmWithMessage}>
-        <div className="bg-white rounded-[8px]">
+        <div className="rounded-[8px] bg-white">
           <div className="px-[24px] pt-[24px]">
-            <h1 className="text-[20px] leading-[28px] text-red-500 mt-[24px] text-center">ALERTE</h1>
+            <h1 className="mt-[24px] text-center text-[20px] leading-[28px] text-red-500">ALERTE</h1>
             {fillingRateMet && young.status !== YOUNG_STATUS.VALIDATED && (
-              <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 px-4 py-3 my-4 mx-4 rounded-lg">
-                <div className="flex gap-2 items-center">
+              <div className="my-4 mx-4 rounded-lg border-l-4 border-yellow-500 bg-yellow-100 px-4 py-3 text-yellow-700">
+                <div className="flex items-center gap-2">
                   <IoWarningOutline className="h-6 w-6" />
                   <p className="font-bold">Objectif d&apos;inscription départementale atteint</p>
                 </div>
@@ -164,8 +166,8 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
               </div>
             )}
             {fillingRateMet && young.status === YOUNG_STATUS.VALIDATED && (
-              <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 px-4 py-3 my-4 mx-4 rounded-lg">
-                <div className="flex gap-2 items-center">
+              <div className="my-4 mx-4 rounded-lg border-l-4 border-yellow-500 bg-yellow-100 px-4 py-3 text-yellow-700">
+                <div className="flex items-center gap-2">
                   <IoWarningOutline className="h-6 w-6" />
                   <p className="font-bold">Objectif d&apos;inscription départementale atteint</p>
                 </div>
@@ -175,10 +177,10 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
                 </p>
               </div>
             )}
-            <p className="text-[14px] leading-[20px] text-[#6B7280] mt-[8px] text-center">
+            <p className="mt-[8px] text-center text-[14px] leading-[20px] text-[#6B7280]">
               Veuillez éditer le message ci-dessous pour préciser le motif de changement de cohorte avant de l’envoyer :
             </p>
-            <div className="flex flex-col mt-[24px] w-2/3 items-center justify-center text-center mx-auto">
+            <div className="mx-auto mt-[24px] flex w-2/3 flex-col items-center justify-center text-center">
               Bonjour {young.firstName} {young.lastName}, Votre changement de séjour pour le Service National Universel a été pris en compte.
               <div className="mt-2">
                 Ancien séjour : <Badge color="#aaaaaa" backgroundColor="#F9FCFF" text={young.cohort} style={{ cursor: "default" }} />
@@ -186,13 +188,13 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
               <div>
                 Nouveau séjour : <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={translateCohort(newCohort.name)} style={{ cursor: "default" }} />
               </div>
-              <textarea className="border-[1px] rounded-lg w-full mt-2 p-2" placeholder="Votre message..." rows="5" value={message} onChange={(e) => setMessage(e.target.value)} />
+              <textarea className="mt-2 w-full rounded-lg border-[1px] p-2" placeholder="Votre message..." rows="5" value={message} onChange={(e) => setMessage(e.target.value)} />
               <div className="mt-2">
                 Cordialement, <br /> Les équipes du Service National Universel
               </div>
             </div>
           </div>
-          <div className="flex p-[24px] items-center justify-between">
+          <div className="flex items-center justify-between p-[24px]">
             <BorderButton onClick={() => setModalConfirmWithMessage(false)} className="mr-[6px] grow">
               Annuler
             </BorderButton>
@@ -219,13 +221,13 @@ function CohortDropDown({ originalCohort, cohort, onClick, options }) {
     <div className={` w-[375px] `}>
       <UncontrolledDropdown setActiveFromChild>
         <DropdownToggle tag="button" disabled={disabled}>
-          <div className={`flex items-center justify-between gap-1 w-[375px] py-[4px] px-[15px] text-[#0C7CFF] border-[#0C7CFF] border-[1px] rounded-[100px] bg-[#F9FCFF]`}>
+          <div className={`flex w-[375px] items-center justify-between gap-1 rounded-[100px] border-[1px] border-[#0C7CFF] bg-[#F9FCFF] py-[4px] px-[15px] text-[#0C7CFF]`}>
             {originalCohort ? <IconChangementCohorte /> : <p></p>}
             {cohort?.name || <p></p>}
             {!disabled ? <Chevron color="#0C7CFF" style={{ padding: 0, margin: 0, marginLeft: "15px" }} /> : null}
           </div>
         </DropdownToggle>
-        <DropdownMenu className="overflow-scroll max-h-[25vh]">
+        <DropdownMenu className="max-h-[25vh] overflow-scroll">
           {ops.length > 0 ? (
             options
               .filter((e) => e.name !== cohort.name)

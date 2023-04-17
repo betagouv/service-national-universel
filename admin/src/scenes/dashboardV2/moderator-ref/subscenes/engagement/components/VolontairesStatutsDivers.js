@@ -51,9 +51,9 @@ export default function VolontairesStatutsDivers({ filters, className = "" }) {
   return (
     <DashboardBox title="Statuts divers" className={className}>
       {error ? (
-        <div className="flex justify-center items-center text-center text-sm text-red-600 font-medium p-8">{error}</div>
+        <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : loading ? (
-        <div className="flex justify-center items-center">
+        <div className="flex items-center justify-center">
           <Loader />
         </div>
       ) : (

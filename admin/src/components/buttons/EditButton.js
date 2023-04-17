@@ -16,7 +16,8 @@ export default function EditButton({ isEditing, setIsEditing, isLoading, onSubmi
             setData(defaultData);
             setErrors({});
           }}
-          disabled={isLoading}>
+          disabled={isLoading}
+        >
           Annuler
         </button>
         <button className={style("blue")} onClick={onSubmit} disabled={isLoading}>

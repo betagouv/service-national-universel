@@ -14,7 +14,8 @@ export default function LoadingButton({ loading, children, disabled, loadingText
         opacity: loading ? 0.7 : 1,
         cursor: loading || disabled ? "not-allowed" : "pointer",
       }}
-      {...rest}>
+      {...rest}
+    >
       {loading && loadingText && (
         <>
           <Spinner size="sm" key={loadingText} style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />

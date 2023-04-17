@@ -101,7 +101,8 @@ export default function Create() {
           toastr.error("Erreur!");
           setIsLoading(false);
         }
-      }}>
+      }}
+    >
       {({ values, handleChange, handleSubmit, errors, touched }) => (
         <Wrapper>
           <Header>
@@ -166,7 +167,8 @@ export default function Create() {
                         onChange={(e) => {
                           const value = e.target.value;
                           handleChange({ target: { value: [value], name: "types" } });
-                        }}>
+                        }}
+                      >
                         <option key="" value="" selected disabled>
                           Type de structure privée
                         </option>
@@ -196,7 +198,8 @@ export default function Create() {
                           onChange={(e) => {
                             const value = e.target.value;
                             handleChange({ target: { value: [value], name: "types" } });
-                          }}>
+                          }}
+                        >
                           <option key="" value="" selected disabled>
                             Type de structure publique
                           </option>
@@ -221,7 +224,8 @@ export default function Create() {
                             component="select"
                             name="sousType"
                             value={values.sousType}
-                            onChange={handleChange}>
+                            onChange={handleChange}
+                          >
                             <option key="" value="" selected disabled>
                               Type de service de l&apos;état
                             </option>

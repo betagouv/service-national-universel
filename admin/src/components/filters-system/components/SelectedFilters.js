@@ -30,11 +30,12 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
         .filter((item) => selectedFilters[item.name] && selectedFilters[item.name].filter.length > 0)
         .map((filter) => (
           <div key={filter.title} className="relative">
-            <div className={`p-0.5 border-[2px] ${paramData?.isShowing === filter.name ? "  border-blue-600 rounded-xl" : "border-transparent"}`}>
+            <div className={`border-[2px] p-0.5 ${paramData?.isShowing === filter.name ? "  rounded-xl border-blue-600" : "border-transparent"}`}>
               <div
                 onClick={() => setParamData((oldValue) => ({ ...oldValue, isShowing: filter.name }))}
-                className="cursor-pointer flex flex-row border-[1px] border-gray-200 hover:border-gray-300 rounded-md w-fit pr-1.5 py-1.5 pl-[12px] items-center gap-1">
-                <div className="text-gray-700 font-medium text-xs">{filter.title} :</div>
+                className="flex w-fit cursor-pointer flex-row items-center gap-1 rounded-md border-[1px] border-gray-200 py-1.5 pr-1.5 pl-[12px] hover:border-gray-300"
+              >
+                <div className="text-xs font-medium text-gray-700">{filter.title} :</div>
                 {selectedFilters[filter.name].filter.map((item, index) => {
                   // on affiche que les 2 premiers filtres, apres on affiche "+x"
                   if (index > 2) {
@@ -42,7 +43,7 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
                       return (
                         <div key={item}>
                           <ToolTipView selectedFilters={selectedFilters} filter={filter} />
-                          <div data-tip="" data-for={"tooltip-filtre" + filter.name} className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">
+                          <div data-tip="" data-for={"tooltip-filtre" + filter.name} className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500">
                             +{index - 2}
                           </div>
                         </div>
@@ -51,7 +52,7 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
                     return null;
                   }
                   return (
-                    <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500" key={item}>
+                    <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500" key={item}>
                       {item === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(item) : item}
                     </div>
                   );
@@ -73,8 +74,8 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
           </div>
         ))}
       {!hasOnlyDefaultFiltersSelected && (
-        <div onClick={() => deleteFilters()} className="p-2 h-[38px] w-[38px] bg-gray-100 hover:bg-gray-200 rounded flex items-center justify-center cursor-pointer ml-1">
-          <Trash className="text-red-500 h-[13.5px] w-3 font-light " />
+        <div onClick={() => deleteFilters()} className="ml-1 flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded bg-gray-100 p-2 hover:bg-gray-200">
+          <Trash className="h-[13.5px] w-3 font-light text-red-500 " />
         </div>
       )}
     </>
@@ -83,10 +84,10 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
 
 const ToolTipView = ({ selectedFilters, filter }) => {
   return (
-    <ReactTooltip id={"tooltip-filtre" + filter.name} className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
-      <div className="flex flex-row gap-2 flex-wrap max-w-[600px] rounded">
+    <ReactTooltip id={"tooltip-filtre" + filter.name} className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
+      <div className="flex max-w-[600px] flex-row flex-wrap gap-2 rounded">
         {selectedFilters[filter.name].filter.map((item) => (
-          <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500" key={item}>
+          <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500" key={item}>
             {item === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(item) : item}
           </div>
         ))}

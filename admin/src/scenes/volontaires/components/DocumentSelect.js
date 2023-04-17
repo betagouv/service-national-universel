@@ -22,29 +22,33 @@ const DocumentSelect = ({ title, onClickMail, onClickPdf }) => {
     <div className="relative" ref={ref}>
       <div
         onClick={() => setOpen((open) => !open)}
-        className="cursor-pointer flex justify-center items-center gap-2 text-blue-700 border-[1px] rounded-full border-blue-700 px-4 py-1">
+        className="flex cursor-pointer items-center justify-center gap-2 rounded-full border-[1px] border-blue-700 px-4 py-1 text-blue-700"
+      >
         <span className="text-sm font-medium">{title}</span>
         <BiChevronDown />
       </div>
       <div
         className={`absolute ${
           open ? "flex" : "hidden"
-        } flex-col items-center justify-center bg-white border-[1px] border-gray-300 rounded-md text-gray-700 z-10 mt-2 overflow-hidden`}>
+        } z-10 mt-2 flex-col items-center justify-center overflow-hidden rounded-md border-[1px] border-gray-300 bg-white text-gray-700`}
+      >
         <div
           onClick={() => {
             onClickPdf();
             setOpen(false);
           }}
-          className="flex flex-row justify-start items-center gap-2 w-64 py-2.5 px-2 border-b-[1px] hover:text-white hover:bg-blue-600 cursor-pointer">
+          className="flex w-64 cursor-pointer flex-row items-center justify-start gap-2 border-b-[1px] py-2.5 px-2 hover:bg-blue-600 hover:text-white"
+        >
           <BsDownload />
           <div>Télécharger</div>
         </div>
         <div
-          className="flex flex-row justify-start items-center gap-2 w-64 py-2.5 px-2 hover:text-white hover:bg-blue-600 cursor-pointer"
+          className="flex w-64 cursor-pointer flex-row items-center justify-start gap-2 py-2.5 px-2 hover:bg-blue-600 hover:text-white"
           onClick={() => {
             onClickMail();
             setOpen(false);
-          }}>
+          }}
+        >
           <CiMail />
           <div>Envoyer par mail</div>
         </div>

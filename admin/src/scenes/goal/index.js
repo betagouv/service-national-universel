@@ -44,7 +44,8 @@ export default function Goal() {
             setLoading(true);
             await api.post(`/inscription-goal/${cohort}`, inscriptionGoals);
             setLoading(false);
-          }}>
+          }}
+        >
           Enregistrer
         </LoadingButton>
       </Header>
@@ -84,7 +85,8 @@ export default function Goal() {
               key={region}
               onClick={() => {
                 setBlocsOpened(blocsOpened.includes(region) ? blocsOpened.filter((b) => b !== region) : [...blocsOpened, region]);
-              }}>
+              }}
+            >
               {departements
                 .filter((departement) => departement !== "Corse")
                 .map((department) => {
@@ -137,7 +139,8 @@ const ToggleBloc = ({ children, title, borderBottom, borderRight, borderLeft, di
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         borderLeft: borderLeft ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}>
+      }}
+    >
       <Wrapper>
         <div onClick={onClick} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
           <Legend>{title}</Legend>

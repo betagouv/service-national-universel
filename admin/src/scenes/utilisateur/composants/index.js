@@ -13,9 +13,9 @@ import { MODE_EDITION } from "../utils";
 export const Session = ({ session, className, onClickView, mode, onDelete, onCohortChange }) => {
   const isEditionMode = mode === MODE_EDITION;
   return (
-    <div className={`flex justify-between items-center py-4 border-b border-gray-200 ${className}`}>
+    <div className={`flex items-center justify-between border-b border-gray-200 py-4 ${className}`}>
       <div className="flex flex-col items-start">
-        <div className="font-bold mb-2">{session?.center?.name}</div>
+        <div className="mb-2 font-bold">{session?.center?.name}</div>
         {!isEditionMode && <CohortBadge>{session.cohort}</CohortBadge>}
         {isEditionMode && (
           <CohortSelect
@@ -30,13 +30,13 @@ export const Session = ({ session, className, onClickView, mode, onDelete, onCoh
       </div>
       <div className="flex gap-3">
         {onClickView && (
-          <button className="bg-gray-100 w-8 h-8 rounded-full flex justify-center items-center text-gray-600 hover:shadow-[0_1px_5px_rgba(0,0,0,0.16)]" onClick={onClickView}>
-            <Eye className="w-[15px] h-[15px]" />
+          <button className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:shadow-[0_1px_5px_rgba(0,0,0,0.16)]" onClick={onClickView}>
+            <Eye className="h-[15px] w-[15px]" />
           </button>
         )}
         {isEditionMode && (
-          <button className="bg-gray-100 w-8 h-8 rounded-full flex justify-center items-center text-gray-600 hover:shadow-[0_1px_5px_rgba(0,0,0,0.16)]" onClick={onDelete}>
-            <Bin className="w-[14px] h-[14px]" />
+          <button className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:shadow-[0_1px_5px_rgba(0,0,0,0.16)]" onClick={onDelete}>
+            <Bin className="h-[14px] w-[14px]" />
           </button>
         )}
       </div>
@@ -52,13 +52,13 @@ export const CohortSelect = ({ value, options, onChange, disabled, placeholder =
     <UncontrolledDropdown setActiveFromChild className={`flex flex-col ${className}`}>
       <DropdownToggle tag="div">
         <CohortBadge className="cursor-pointer">
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <span>{value || placeholder}</span>
             <Chevron color="#0C7CFF" className="p-0" />
           </div>
         </CohortBadge>
       </DropdownToggle>
-      <DropdownMenu className="p-0 min-w-full">
+      <DropdownMenu className="min-w-full p-0">
         {options.map((cohort) => {
           return (
             <DropdownItem
@@ -66,7 +66,8 @@ export const CohortSelect = ({ value, options, onChange, disabled, placeholder =
               className="dropdown-item px-3 py-2 text-sm"
               onClick={() => {
                 onChange(cohort);
-              }}>
+              }}
+            >
               {cohort}
             </DropdownItem>
           );
@@ -78,7 +79,7 @@ export const CohortSelect = ({ value, options, onChange, disabled, placeholder =
 
 export const CohortBadge = ({ children, className }) => {
   return (
-    <div className={`bg-[#F9FCFF] text-xs text-[#0C7CFF] border-[0.5px] border-[#66A7F4] flex justify-center items-center p-1.5 px-4 rounded-full ${className}`}>{children}</div>
+    <div className={`flex items-center justify-center rounded-full border-[0.5px] border-[#66A7F4] bg-[#F9FCFF] p-1.5 px-4 text-xs text-[#0C7CFF] ${className}`}>{children}</div>
   );
 };
 
@@ -86,7 +87,8 @@ export const AddButton = ({ children, className, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className={`flex justify-end items-center border border-gray-300 font-medium text-gray-700  py-2 px-7 rounded-md hover:shadow-[0_1px_5px_rgba(0,0,0,0.16)] ${className}`}>
+      className={`flex items-center justify-end rounded-md border border-gray-300 py-2  px-7 font-medium text-gray-700 hover:shadow-[0_1px_5px_rgba(0,0,0,0.16)] ${className}`}
+    >
       <Plus className="mr-2 text-blue-600" />
       {children}
     </button>

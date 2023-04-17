@@ -90,9 +90,9 @@ const SearchBox = ({ getDefaultQuery, setSearch }) => {
           <p>Nom, prénom ou bien e-mail</p>
         </SearchStyle>
       </div>
-      <div className="flex rounded-xl mt-4 bg-gray-50 p-4 items-center">
+      <div className="mt-4 flex items-center rounded-xl bg-gray-50 p-4">
         <FilterRow visible>
-          <div className="uppercase text-sm text-gray-500">Filtres :</div>
+          <div className="text-sm uppercase text-gray-500">Filtres :</div>
           <MultiDropdownList
             defaultQuery={getDefaultQuery}
             className="dropdown-filter"
@@ -266,7 +266,8 @@ const Hit = ({ hit, mission, applicationsToTheMission, onClick }) => {
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-      }}>
+      }}
+    >
       <div style={{ padding: "1.5rem 1.5rem 10px 1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div>
@@ -307,7 +308,8 @@ const Hit = ({ hit, mission, applicationsToTheMission, onClick }) => {
           display: "flex",
           justifyContent: "center",
           cursor: isAlreadyApplied || (!isAlreadyApplied && loading) ? "default" : "pointer",
-        }}>
+        }}
+      >
         {isAlreadyApplied && <p style={{ margin: "0px", color: "#43994C" }}>Mission proposée</p>}
         {!isAlreadyApplied && loading && <Spinner size="sm" style={{ borderWidth: "0.125em", margin: "0.25rem" }} />}
         {!isAlreadyApplied && !loading && <p style={{ margin: "0px", color: "#5245CC" }}>Proposer la mission</p>}

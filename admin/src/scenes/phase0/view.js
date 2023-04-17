@@ -241,8 +241,8 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
       <div className="p-[30px]">
         {(young.status === YOUNG_STATUS.WAITING_CORRECTION || young.status === YOUNG_STATUS.WAITING_VALIDATION) && (
           <div className="pb-[30px]">
-            <h1 className="font-bold text-[30px] text-center mb-[8px]">Veuillez vérifier le dossier</h1>
-            <p className="text-[14px] leading-[20px] text-center max-w-[826px] mx-auto">
+            <h1 className="mb-[8px] text-center text-[30px] font-bold">Veuillez vérifier le dossier</h1>
+            <p className="mx-auto max-w-[826px] text-center text-[14px] leading-[20px]">
               Vous pouvez faire une <b>demande de correction</b> si besoin en passant votre curseur sur un champ et en cliquant sur le bouton orange. Si vous le souhaitez, vous
               pouvez également <b>modifier</b> vous-même l’information en cliquant sur &quot;modifier&quot;.
             </p>
@@ -296,28 +296,28 @@ function FooterPending({ young, requests, sending, onDeletePending, onSendPendin
   }, [requests]);
 
   return (
-    <div className="fixed bottom-0 left-[220px] right-0 bg-white shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)] flex py-[20px] px-[42px]">
+    <div className="fixed bottom-0 left-[220px] right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)]">
       <div className="grow">
         <div className="flex items-center">
-          <span className="text-[#242526] text-[18px] font-medium leading-snug">Le dossier est-il conforme&nbsp;?</span>
+          <span className="text-[18px] font-medium leading-snug text-[#242526]">Le dossier est-il conforme&nbsp;?</span>
           {pendingRequestsCount > 0 && (
             <>
               {sentRequestsCount > 0 && (
-                <span className="py-[4px] px-[10px] bg-[#F7F7F7] text-[#6B7280] text-[12px] ml-[12px] rounded-[100px] border-[#CECECE] border-[1px]">
+                <span className="ml-[12px] rounded-[100px] border-[1px] border-[#CECECE] bg-[#F7F7F7] py-[4px] px-[10px] text-[12px] text-[#6B7280]">
                   {sentRequestsCount} {sentRequestsCount > 1 ? "corrections envoyées" : "correction envoyée"}
                 </span>
               )}
-              <span className="py-[4px] px-[10px] bg-[#F97316] text-[#FFFFFF] text-[12px] ml-[12px] rounded-[100px]">
+              <span className="ml-[12px] rounded-[100px] bg-[#F97316] py-[4px] px-[10px] text-[12px] text-[#FFFFFF]">
                 {pendingRequestsCount} {pendingRequestsCount > 1 ? "corrections demandées" : "correction demandée"}
               </span>
-              <button className="ml-[12px] text-[12px] text-[#F87171] flex items-center" onClick={onDeletePending}>
+              <button className="ml-[12px] flex items-center text-[12px] text-[#F87171]" onClick={onDeletePending}>
                 <Bin fill="#F87171" />
                 <span className="ml-[5px]">Supprimer {pendingRequestsCount > 1 ? "les demandes" : "la demande"}</span>
               </button>
             </>
           )}
         </div>
-        <p className="text-[14px] leading-[20px] text-[#6B7280] mt-[8px]">
+        <p className="mt-[8px] text-[14px] leading-[20px] text-[#6B7280]">
           Votre demande sera transmise par mail à {young.firstName} {young.lastName} ({young.email})
         </p>
       </div>
@@ -354,15 +354,15 @@ function FooterSent({ young, requests, reminding, onRemindRequests }) {
   const remindedAt = remindedDate ? dayjs(remindedDate).locale("fr").format("DD/MM/YYYY à HH:mm") : null;
 
   return (
-    <div className="fixed bottom-0 left-[220px] right-0 bg-white shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)] flex py-[20px] px-[42px]">
+    <div className="fixed bottom-0 left-[220px] right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)]">
       <div className="grow">
         <div className="flex items-center">
-          <span className="text-[#242526] text-[18px] font-medium leading-snug">Demande de correction envoyée</span>
-          <span className="py-[4px] px-[10px] bg-[#F7F7F7] text-[#6B7280] text-[12px] ml-[12px] rounded-[100px] border-[#CECECE] border-[1px]">
+          <span className="text-[18px] font-medium leading-snug text-[#242526]">Demande de correction envoyée</span>
+          <span className="ml-[12px] rounded-[100px] border-[1px] border-[#CECECE] bg-[#F7F7F7] py-[4px] px-[10px] text-[12px] text-[#6B7280]">
             {sentRequestsCount} {sentRequestsCount > 1 ? "corrections demandées" : "correction demandée"}
           </span>
         </div>
-        <p className="text-[14px] leading-[20px] text-[#6B7280] mt-[8px]">
+        <p className="mt-[8px] text-[14px] leading-[20px] text-[#6B7280]">
           {sentAt && "Envoyée le " + sentAt} {remindedAt && (sentAt ? "/ " : "") + "Relancé(e) le " + remindedAt}
         </p>
       </div>
@@ -388,7 +388,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
       const fillingRate = res.data;
       if (fillingRate >= 1.05) {
         return setConfirmModal({
-          icon: <ShieldCheck className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+          icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
           title: (
             <span>
               L&apos;objectif d&apos;inscription de votre département a été atteint à 105%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
@@ -404,7 +404,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
         });
       }
       return setConfirmModal({
-        icon: <ShieldCheck className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+        icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
         title: (
           <span>
             L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 105%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
@@ -444,7 +444,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
     setRejectionMessage("");
 
     setConfirmModal({
-      icon: <XCircle className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+      icon: <XCircle className="h-[36px] w-[36px] text-[#D1D5DB]" />,
       title: "Refuser le dossier",
       message: `Vous vous apprêtez à refuser le dossier d’inscription de ${young.firstName} ${young.lastName}. Dites-lui pourquoi ci-dessous. Un email sera automatiquement envoyé au volontaire.`,
       type: "REFUSED",
@@ -478,10 +478,10 @@ function FooterNoRequest({ processing, onProcess, young }) {
   }
 
   return (
-    <div className="fixed bottom-0 left-[220px] right-0 bg-white shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)] flex py-[20px] px-[42px]">
+    <div className="fixed bottom-0 left-[220px] right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)]">
       <div className="grow">
         <div className="flex items-center">
-          <span className="text-[#242526] text-[18px] font-medium leading-snug">Le dossier est-il conforme&nbsp;?</span>
+          <span className="text-[18px] font-medium leading-snug text-[#242526]">Le dossier est-il conforme&nbsp;?</span>
         </div>
         <p className="text-[14px] leading-[20px] text-[#6B7280]">Veuillez actualiser le statut du dossier d&apos;inscription.</p>
       </div>
@@ -499,15 +499,15 @@ function FooterNoRequest({ processing, onProcess, young }) {
         {confirmModal && (
           <>
             <Modal.Header className="flex-col">
-              {confirmModal.icon && <div className="flex justify-center mb-auto">{confirmModal.icon}</div>}
-              <h2 className="leading-7 text-xl text-center m-0">{confirmModal.title}</h2>
+              {confirmModal.icon && <div className="mb-auto flex justify-center">{confirmModal.icon}</div>}
+              <h2 className="m-0 text-center text-xl leading-7">{confirmModal.title}</h2>
             </Modal.Header>
             <Modal.Content>
-              {(confirmModal.type === "VALIDATED" || confirmModal.type === "SESSION_FULL") && <p className="leading-7 text-xl mb-0 text-center">{confirmModal.message}</p>}
+              {(confirmModal.type === "VALIDATED" || confirmModal.type === "SESSION_FULL") && <p className="mb-0 text-center text-xl leading-7">{confirmModal.message}</p>}
               {confirmModal.type === "REFUSED" && (
                 <div className="mt-[24px]">
-                  <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
-                    <select value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} className="block grow p-[15px] bg-[transparent] appearance-none">
+                  <div className="mb-[16px] flex w-[100%] items-center rounded-[6px] border-[1px] border-[#D1D5DB] bg-white pr-[15px]">
+                    <select value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} className="block grow appearance-none bg-[transparent] p-[15px]">
                       {rejectionReasonOptions}
                     </select>
                     <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
@@ -516,7 +516,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
                     <textarea
                       value={rejectionMessage}
                       onChange={(e) => setRejectionMessage(e.target.value)}
-                      className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] p-[15px]"
+                      className="w-[100%] rounded-[6px] border-[1px] border-[#D1D5DB] bg-white p-[15px]"
                       rows="5"
                       placeholder="Précisez la raison de votre refus ici"
                     />
@@ -526,7 +526,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
               )}
             </Modal.Content>
             <Modal.Footer>
-              <div className="flex gap-2 items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <ButtonLight className="grow" onClick={() => setConfirmModal(null)}>
                   Annuler
                 </ButtonLight>
@@ -540,7 +540,8 @@ function FooterNoRequest({ processing, onProcess, young }) {
                     href={confirmModal.infoLink.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-3 py-2 drop-shadow-sm disabled:opacity-60 bg-transparent text-blue-600 hover:text-blue-700 hover:underline hover:cursor-pointer disabled:hover:text-blue-600 disabled:hover:no-underline">
+                    className="bg-transparent px-3 py-2 text-blue-600 drop-shadow-sm hover:cursor-pointer hover:text-blue-700 hover:underline disabled:opacity-60 disabled:hover:text-blue-600 disabled:hover:no-underline"
+                  >
                     {confirmModal.infoLink.text}
                   </a>
                 </div>
@@ -668,7 +669,8 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
         onChangeMode={onSectionChangeMode}
         saving={saving}
         onSave={onSave}
-        onCancel={onCancel}>
+        onCancel={onCancel}
+      >
         <div className="flex-[1_0_50%] pr-[56px]">
           {globalMode === "correction" ? (
             <>
@@ -716,7 +718,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
             </>
           )}
         </div>
-        <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
+        <div className="my-[73px] w-[1px] flex-[0_0_1px] bg-[#E5E7EB]" />
         <div className="flex-[1_0_50%] pl-[56px]">
           <div>
             <FieldsGroup
@@ -732,7 +734,8 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               type="date"
               value={data.birthdateAt}
               onChange={(value) => onLocalChange("birthdateAt", value)}
-              young={young}>
+              young={young}
+            >
               <Field name="birth_day" label="Jour" value={birthDate.day} className="mr-[14px] flex-[1_1_23%]" />
               <Field name="birth_month" label="Mois" value={birthDate.month} className="mr-[14px] flex-[1_1_42%]" />
               <Field name="birth_year" label="Année" value={birthDate.year} className="flex-[1_1_35%]" />
@@ -963,7 +966,8 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
         type="date"
         value={young.latestCNIFileExpirationDate}
         onChange={(value) => onChange("latestCNIFileExpirationDate", value)}
-        young={young}>
+        young={young}
+      >
         <Field name="cni_day" label="Jour" value={cniDay} className="mr-[14px] flex-[1_1_23%]" />
         <Field name="cni_month" label="Mois" value={cniMonth} className="mr-[14px] flex-[1_1_42%]" />
         <Field name="cni_year" label="Année" value={cniYear} className="flex-[1_1_35%]" />
@@ -1222,7 +1226,8 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
         saving={saving}
         onSave={onSave}
         onCancel={onCancel}
-        containerNoFlex>
+        containerNoFlex
+      >
         <div className="flex">
           <div className="flex-[1_0_50%] pr-[56px]">
             <div>
@@ -1325,7 +1330,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
               </div>
             )}
           </div>
-          <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
+          <div className="my-[73px] w-[1px] flex-[0_0_1px] bg-[#E5E7EB]" />
           <div className="flex-[1_0_50%] pl-[56px]">
             <Tabs tabs={tabs} selected={currentParent} onChange={onParrentTabChange} />
             <div className="mt-[32px]">
@@ -1428,7 +1433,8 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                   currentRequest={currentRequest}
                   correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Address`)}
                   onCorrectionRequestChange={onCorrectionRequestChange}
-                  young={young}>
+                  young={young}
+                >
                   <Field
                     name={`parent${currentParent}Address`}
                     label="Adresse"
@@ -1443,7 +1449,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                     label="Code postal"
                     value={data[`parent${currentParent}Zip`] || ""}
                     mode={sectionMode}
-                    className="mr-[8px] mb-[16px] w-[calc(50%-8px)] inline-block"
+                    className="mr-[8px] mb-[16px] inline-block w-[calc(50%-8px)]"
                     onChange={(value) => onLocalChange(`parent${currentParent}Zip`, value)}
                     young={young}
                   />
@@ -1452,7 +1458,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                     label="Ville"
                     value={data[`parent${currentParent}City`] || ""}
                     mode={sectionMode}
-                    className="ml-[8px] mb-[16px] w-[calc(50%-8px)] inline-block"
+                    className="ml-[8px] mb-[16px] inline-block w-[calc(50%-8px)]"
                     onChange={(value) => onLocalChange(`parent${currentParent}City`, value)}
                     young={young}
                   />
@@ -1471,11 +1477,11 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 </FieldsGroup>
               )}
               {data[`parent${currentParent}FromFranceConnect`] === "true" && (
-                <div className="flex items-center bg-[#F9FAFB] p-[18px] rounded-[7px] mt-[16px]">
+                <div className="mt-[16px] flex items-center rounded-[7px] bg-[#F9FAFB] p-[18px]">
                   <FranceConnect className="mr-[28px] flex-[0_0_100px]" />
                   <div>
-                    <div className="text-[14px] leading-[20px] text-[#242526] text-bold mb-[6px]">Attestation des représentants légaux</div>
-                    <div className="text-[12px] leading-[20px] text-[#000000] grow">
+                    <div className="text-bold mb-[6px] text-[14px] leading-[20px] text-[#242526]">Attestation des représentants légaux</div>
+                    <div className="grow text-[12px] leading-[20px] text-[#000000]">
                       Consentement parental validé via FranceConnect. Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de
                       s’affranchir du formulaire de consentement numérique.
                     </div>
@@ -1486,7 +1492,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
           </div>
         </div>
         {oldCohort && (
-          <div className="flex mt-[32px]">
+          <div className="mt-[32px] flex">
             <div className="flex-[1_0_50%] pr-[56px]">
               {data.motivations && (
                 <div>
@@ -1495,7 +1501,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 </div>
               )}
             </div>
-            <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
+            <div className="my-[73px] w-[1px] flex-[0_0_1px] bg-[#E5E7EB]" />
             <div className="flex-[1_0_50%] pl-[56px]">
               <FileField
                 mode={sectionMode}
@@ -1640,7 +1646,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
   return (
     <Section title="Consentements" collapsable>
       <div className="flex-[1_0_50%] pr-[56px]">
-        <div className="text-[16px] leading-[24px] font-bold text-[#242526]">
+        <div className="text-[16px] font-bold leading-[24px] text-[#242526]">
           Le volontaire{" "}
           <span className="font-normal text-[#6B7280]">
             {young.firstName} {young.lastName}
@@ -1661,9 +1667,9 @@ function SectionConsentements({ young, onChange, readonly = false }) {
           </CheckRead>
         </div>
       </div>
-      <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
+      <div className="my-[73px] w-[1px] flex-[0_0_1px] bg-[#E5E7EB]" />
       <div className="flex-[1_0_50%] pl-[56px] pb-[32px]">
-        <div className="text-[16px] leading-[24px] font-bold text-[#242526] flex items-center justify-between mb-[16px]">
+        <div className="mb-[16px] flex items-center justify-between text-[16px] font-bold leading-[24px] text-[#242526]">
           <div className="grow">
             {PARENT_STATUS_NAME[young.parent1Status]}{" "}
             <span className="font-normal text-[#6B7280]">
@@ -1671,7 +1677,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
             </span>
           </div>
           {young.parent1ValidationDate && (
-            <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+            <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
           )}
         </div>
         <div className="flex items-center gap-8">
@@ -1682,7 +1688,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
             </button>
           )}
         </div>
-        <div className="text-[#161616] text-[14px] leading-[20px] my-[16px]">
+        <div className="my-[16px] text-[14px] leading-[20px] text-[#161616]">
           <b>
             {young.firstName} {young.lastName}
           </b>{" "}
@@ -1717,13 +1723,13 @@ function SectionConsentements({ young, onChange, readonly = false }) {
           </CheckRead>
           <CheckRead value={young.parent1AllowSNU === "true"}>Reconnait avoir pris connaissance du Règlement Intérieur du SNU.</CheckRead>
         </div>
-        <div className="mt-[16px] flex itemx-center justify-between">
-          <div className="grow text-[#374151] text-[14px] leading-[20px]">
+        <div className="itemx-center mt-[16px] flex justify-between">
+          <div className="grow text-[14px] leading-[20px] text-[#374151]">
             <div className="font-bold">Droit à l&apos;image</div>
             <div className="flex items-center">
               <div>Accord : {translate(young.parent1AllowImageRights) || PENDING_ACCORD}</div>
               {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && !readonly && young.parent1Email && (
-                <a href="#" className="block ml-4 text-blue-600 underline" onClick={(e) => confirmImageRightsChange(1, e)}>
+                <a href="#" className="ml-4 block text-blue-600 underline" onClick={(e) => confirmImageRightsChange(1, e)}>
                   Modifier
                 </a>
               )}
@@ -1743,7 +1749,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                   onClick={() => {
                     copyToClipboard(`${appURL}/representants-legaux/droits-image?token=${young.parent1Inscription2023Token}&parent=1`);
                     toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-                  }}>
+                  }}
+                >
                   Copier le lien du formulaire
                 </div>
                 {young.parent1Email && (
@@ -1760,7 +1767,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                       } catch (error) {
                         toastr.error(translate(error.code), "");
                       }
-                    }}>
+                    }}
+                  >
                     Relancer
                   </BorderButton>
                 )}
@@ -1769,8 +1777,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
         }
 
         {young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false" ? (
-          <div className="mt-[16px] flex itemx-center justify-between">
-            <div className="grow text-[#374151] text-[14px] leading-[20px]">
+          <div className="itemx-center mt-[16px] flex justify-between">
+            <div className="grow text-[14px] leading-[20px] text-[#374151]">
               <div className="font-bold">Consentement à la participation</div>
               <div>Accord : {translate(young.parent1AllowSNU) || PENDING_ACCORD}</div>
             </div>
@@ -1785,7 +1793,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                 onClick={() => {
                   copyToClipboard(`${appURL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1`);
                   toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-                }}>
+                }}
+              >
                 Copier le lien du formulaire
               </div>
               {young.parent1Email && (
@@ -1802,7 +1811,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                     } catch (error) {
                       toastr.error(translate(error.code), "");
                     }
-                  }}>
+                  }}
+                >
                   Relancer
                 </BorderButton>
               )}
@@ -1810,8 +1820,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
           )
         )}
         {young.parent2Status && (
-          <div className="mt-[24px] border-t-[#E5E7EB] border-t-[1px] pt-[24px]">
-            <div className="text-[16px] leading-[24px] font-bold text-[#242526] flex items-center justify-between mb-[16px]">
+          <div className="mt-[24px] border-t-[1px] border-t-[#E5E7EB] pt-[24px]">
+            <div className="mb-[16px] flex items-center justify-between text-[16px] font-bold leading-[24px] text-[#242526]">
               <div className="grow">
                 {PARENT_STATUS_NAME[young.parent2Status]}{" "}
                 <span className="font-normal text-[#6B7280]">
@@ -1819,18 +1829,18 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                 </span>
               </div>
               {young.parent2ValidationDate && (
-                <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+                <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
               )}
             </div>
             {young.parent1AllowImageRights === "true" && (
               <>
                 <div className="mt-[16px] flex items-center justify-between">
-                  <div className="grow text-[#374151] text-[14px] leading-[20px]">
+                  <div className="grow text-[14px] leading-[20px] text-[#374151]">
                     <div className="font-bold">Droit à l&apos;image</div>
                     <div className="flex items-center">
                       <div>Accord : {translate(young.parent2AllowImageRights) || PENDING_ACCORD}</div>
                       {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && !readonly && young.parent2Email && (
-                        <a href="#" className="block ml-4 text-blue-600 underline" onClick={(e) => confirmImageRightsChange(2, e)}>
+                        <a href="#" className="ml-4 block text-blue-600 underline" onClick={(e) => confirmImageRightsChange(2, e)}>
                           Modifier
                         </a>
                       )}
@@ -1848,7 +1858,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                         onClick={() => {
                           copyToClipboard(`${appURL}/representants-legaux/droits-image2?token=${young.parent2Inscription2023Token}&parent=2`);
                           toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-                        }}>
+                        }}
+                      >
                         Copier le lien du formulaire
                       </div>
                       {young.parent2Email && (
@@ -1865,7 +1876,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                             } catch (error) {
                               toastr.error(translate(error.code), "");
                             }
-                          }}>
+                          }}
+                        >
                           Relancer
                         </BorderButton>
                       )}
@@ -1889,7 +1901,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                       onClick={() => {
                         copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
                         toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-                      }}>
+                      }}
+                    >
                       Copier le lien du formulaire
                     </div>
                     {young.parent2Email && (
@@ -1906,7 +1919,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                           } catch (error) {
                             toastr.error(translate(error.code), "");
                           }
-                        }}>
+                        }}
+                      >
                         Relancer
                       </BorderButton>
                     )}
@@ -1917,13 +1931,13 @@ function SectionConsentements({ young, onChange, readonly = false }) {
               young.status,
             ) ? (
               <div className="mt-[16px] flex items-center justify-between">
-                <div className="grow text-[#374151] text-[14px] leading-[20px] flex flex-column justify-center">
+                <div className="flex-column flex grow justify-center text-[14px] leading-[20px] text-[#374151]">
                   <div className="font-bold">Consentement à la participation</div>
                   {young.parent2RejectSNUComment && <div>{young.parent2RejectSNUComment}</div>}
                 </div>
                 {young.parent2AllowSNU === "true" || young.parent2AllowSNU === "false" ? (
-                  <div className="flex items-center gap-2 text-red-500 text-sm ">
-                    <XCircle className="w-4 h-4 text-red-500" />
+                  <div className="flex items-center gap-2 text-sm text-red-500 ">
+                    <XCircle className="h-4 w-4 text-red-500" />
                     Refusé
                   </div>
                 ) : (
@@ -1958,11 +1972,11 @@ function SectionOldConsentements({ young }) {
   return (
     <Section title="Consentements" collapsable>
       <div className="flex-[1_0_50%] pr-[56px]">
-        <div className="text-[16px] leading-[24px] font-medium text-[#242526]">
+        <div className="text-[16px] font-medium leading-[24px] text-[#242526]">
           Consentements validés par {young.firstName} {young.lastName}
         </div>
         <div>
-          <ul className="list-outside ml-[24px]">
+          <ul className="ml-[24px] list-outside">
             <li className="mt-[16px]">A lu et accepte les Conditions générales d&apos;utilisation de la plateforme du Service national universel&nbsp;;</li>
             <li className="mt-[16px]">A pris connaissance des modalités de traitement de mes données personnelles&nbsp;;</li>
             <li className="mt-[16px]">
@@ -1977,11 +1991,11 @@ function SectionOldConsentements({ young }) {
           </ul>
         </div>
       </div>
-      <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
+      <div className="my-[73px] w-[1px] flex-[0_0_1px] bg-[#E5E7EB]" />
       <div className="flex-[1_0_50%] pl-[56px] pb-[32px]">
-        <div className="text-[16px] leading-[24px] font-medium text-[#242526]">Consentements validés par ses représentants légaux</div>
+        <div className="text-[16px] font-medium leading-[24px] text-[#242526]">Consentements validés par ses représentants légaux</div>
         <div>
-          <ul className="list-outside ml-[24px]">
+          <ul className="ml-[24px] list-outside">
             <li className="mt-[16px]">Confirmation d&apos;être titulaire de l&apos;autorité parentale/le représentant légal du volontaire&nbsp;;</li>
             <li className="mt-[16px]">
               Autorisation du volontaire à participer à la session {young.cohort} du Service National Universel qui comprend la participation au séjour de cohésion puis la
@@ -1999,7 +2013,7 @@ function SectionOldConsentements({ young }) {
             </li>
           </ul>
         </div>
-        {young.parent2Status && <div className="mt-[24px] border-t-[#E5E7EB] border-t-[1px] pt-[24px]"></div>}
+        {young.parent2Status && <div className="mt-[24px] border-t-[1px] border-t-[#E5E7EB] pt-[24px]"></div>}
       </div>
     </Section>
   );
@@ -2007,11 +2021,11 @@ function SectionOldConsentements({ young }) {
 
 function CheckRead({ value, children }) {
   return (
-    <div className="flex items-center mt-[16px]">
-      <div className="flex-[0_0_14px] mr-[24px] bg-[#E5E5E5] rounded-[4px] flex items-center justify-center text-[#666666] w-[14px] h-[14px]">
-        {value && <Check className="w-[11px] h-[8px]" />}
+    <div className="mt-[16px] flex items-center">
+      <div className="mr-[24px] flex h-[14px] w-[14px] flex-[0_0_14px] items-center justify-center rounded-[4px] bg-[#E5E5E5] text-[#666666]">
+        {value && <Check className="h-[8px] w-[11px]" />}
       </div>
-      <div className="grow text-[#3A3A3A] text-[14px] leading-[19px]">{children}</div>
+      <div className="grow text-[14px] leading-[19px] text-[#3A3A3A]">{children}</div>
     </div>
   );
 }
@@ -2030,8 +2044,8 @@ function Section({ step, title, editable, collapsable, children, mode, onChangeM
   }
 
   return (
-    <div className="relative bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] rounded-[8px] mb-[24px]">
-      <h2 className={`py-[28px] text-[18px] leading-snug font-medium border-[1px] border-[#E5E7EB] ${mode === "edition" ? "text-left pl-[28px]" : "text-center"}`}>
+    <div className="relative mb-[24px] rounded-[8px] bg-[#FFFFFF] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
+      <h2 className={`border-[1px] border-[#E5E7EB] py-[28px] text-[18px] font-medium leading-snug ${mode === "edition" ? "pl-[28px] text-left" : "text-center"}`}>
         {step && <span className="text-[#6B7280]">{step} </span>}
         <span className="text-[#242526]">{title}</span>
       </h2>
@@ -2043,13 +2057,13 @@ function Section({ step, title, editable, collapsable, children, mode, onChangeM
                 Annuler
               </RoundButton>
               <RoundButton className="ml-[8px]" onClick={onSave}>
-                <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                 Enregistrer les changements
               </RoundButton>
             </div>
           ) : (
             <RoundButton className="absolute top-[24px] right-[24px]" onClick={startEdit}>
-              <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+              <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
               Modifier
             </RoundButton>
           )}
@@ -2058,8 +2072,9 @@ function Section({ step, title, editable, collapsable, children, mode, onChangeM
       {saving && <div className="absolute top-[30px] right-[24px] text-[14px] text-[#6B7280]">Enregistrement en cours...</div>}
       {collapsable && (
         <div
-          className="flex items-center justify-center h-[40px] w-[40px] absolute top-[24px] right-[24px] text-[#9CA3AF] cursor-pointer hover:text-[#242526]"
-          onClick={() => setCollapsed(!collapsed)}>
+          className="absolute top-[24px] right-[24px] flex h-[40px] w-[40px] cursor-pointer items-center justify-center text-[#9CA3AF] hover:text-[#242526]"
+          onClick={() => setCollapsed(!collapsed)}
+        >
           <ChevronDown className={collapsed ? "" : "rotate-180"} />
         </div>
       )}
@@ -2094,10 +2109,10 @@ function HonorCertificate({ young }) {
 
   if (cniExpired) {
     return (
-      <div className="flex items-center justify-between mt-[8px]">
+      <div className="mt-[8px] flex items-center justify-between">
         <MiniTitle>Attestation sur l&apos;honneur</MiniTitle>
         <div className="flex items-center">
-          <div className="py-[3px] px-[10px] border-[#CECECE] border-[1px] bg-[#FFFFFF] rounded-[100px] text-[12px] font-normal">
+          <div className="rounded-[100px] border-[1px] border-[#CECECE] bg-[#FFFFFF] py-[3px] px-[10px] text-[12px] font-normal">
             {young.parentStatementOfHonorInvalidId === "true" ? "Validée" : "En attente"}
           </div>
           {young.parentStatementOfHonorInvalidId !== "true" && young.parent1Email && (

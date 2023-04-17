@@ -109,38 +109,41 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung }) {
 
   if (!dataForCheck)
     return (
-      <div className="p-8 w-full bg-white rounded-xl">
+      <div className="w-full rounded-xl bg-white p-8">
         <Loader />
       </div>
     );
 
   return (
-    <div className="p-8 w-full bg-white rounded-xl">
+    <div className="w-full rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <div className="text-xl leading-6 text-[#242526]">Informations générales</div>
         {canEditLigneBusGeneralInfo(user) ? (
           <>
             {!editInfo ? (
               <button
-                className="flex items-center gap-2 rounded-full text-xs leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => setEditInfo(true)}
-                disabled={isLoading}>
-                <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                disabled={isLoading}
+              >
+                <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
                 Modifier
               </button>
             ) : (
               <div className="flex items-center gap-2">
                 <button
-                  className="flex items-center gap-2 rounded-full text-xs leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => setEditInfo(false)}
-                  disabled={isLoading}>
+                  disabled={isLoading}
+                >
                   Annuler
                 </button>
                 <button
-                  className="flex items-center gap-2 rounded-full text-xs  leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex cursor-pointer items-center gap-2 rounded-full  border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={onSubmitInfo}
-                  disabled={isLoading}>
-                  <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                  disabled={isLoading}
+                >
+                  <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                   Enregistrer les changements
                 </button>
               </div>
@@ -148,8 +151,8 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung }) {
           </>
         ) : null}
       </div>
-      <div className="flex my-8">
-        <div className="flex flex-col w-[45%] gap-4 justify-between">
+      <div className="my-8 flex">
+        <div className="flex w-[45%] flex-col justify-between gap-4">
           <div className="flex flex-col gap-4">
             <Field label="Numéro de ligne" onChange={(e) => setData({ ...data, busId: e.target.value })} value={data.busId} error={errors?.busId} readOnly={!editInfo} />
             <div className="flex items-center gap-4">
@@ -172,15 +175,16 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung }) {
             </div>
           </div>
           <button
-            className="flex justify-center bg-gray-100 rounded-lg py-2.5 text-sm text-gray-800"
-            onClick={() => history.push(`/ligne-de-bus/volontaires/bus/${bus._id.toString()}`)}>
+            className="flex justify-center rounded-lg bg-gray-100 py-2.5 text-sm text-gray-800"
+            onClick={() => history.push(`/ligne-de-bus/volontaires/bus/${bus._id.toString()}`)}
+          >
             Voir les volontaires ({nbYoung})
           </button>
         </div>
-        <div className="flex w-[10%] justify-center items-center">
-          <div className="w-[1px] h-full my-2 border-r-[1px] border-gray-300"></div>
+        <div className="flex w-[10%] items-center justify-center">
+          <div className="my-2 h-full w-[1px] border-r-[1px] border-gray-300"></div>
         </div>
-        <div className="flex flex-col w-[45%] gap-4 ">
+        <div className="flex w-[45%] flex-col gap-4 ">
           <div className="flex items-center gap-4">
             <Field
               label="Capacité accompagnateur"

@@ -72,9 +72,9 @@ export default function General({ updateFilter }) {
         <div>
           <ReactiveBase url={`${apiURL}/es`} app={`sessionphase1young/${focusedSession._id}`} headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
-              <div className="flex-1 relative">
+              <div className="relative flex-1">
                 <div className="mx-8">
-                  <div className="flex items-center mb-2">
+                  <div className="mb-2 flex items-center">
                     <DataSearch
                       defaultQuery={getDefaultQuery}
                       showIcon={false}
@@ -90,14 +90,15 @@ export default function General({ updateFilter }) {
                       onValueChange={(e) => updateFilter({ SEARCH: e })}
                     />
                     <div
-                      className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
-                      onClick={() => setFilterVisible((e) => !e)}>
+                      className="flex cursor-pointer items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-[14px] font-medium text-gray-700 hover:underline"
+                      onClick={() => setFilterVisible((e) => !e)}
+                    >
                       <FilterSvg className="text-gray-400" />
                       Filtres
                     </div>
                   </div>
-                  <div className={`mt-3 gap-2 flex flex-wrap items-center ${!filterVisible ? "hidden" : ""}`}>
-                    <div className="uppercase text-xs text-snu-purple-800">Général</div>
+                  <div className={`mt-3 flex flex-wrap items-center gap-2 ${!filterVisible ? "hidden" : ""}`}>
+                    <div className="text-xs uppercase text-snu-purple-800">Général</div>
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
@@ -132,8 +133,8 @@ export default function General({ updateFilter }) {
                     <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} onValueChange={(e) => updateFilter({ REGION: e })} />
                     <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} onValueChange={(e) => updateFilter({ DEPARTMENT: e })} />
                   </div>
-                  <div className={`mt-3 gap-2 flex flex-wrap items-center ${!filterVisible ? "hidden" : ""}`}>
-                    <div className="uppercase text-xs text-snu-purple-800">Dossier</div>
+                  <div className={`mt-3 flex flex-wrap items-center gap-2 ${!filterVisible ? "hidden" : ""}`}>
+                    <div className="text-xs uppercase text-snu-purple-800">Dossier</div>
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
@@ -325,8 +326,8 @@ export default function General({ updateFilter }) {
                       onValueChange={(e) => updateFilter({ AUTOTEST: e })}
                     />
                   </div>
-                  <div className={`mt-3 gap-2 flex flex-wrap items-center ${!filterVisible ? "hidden" : ""}`}>
-                    <div className="uppercase text-xs text-snu-purple-800">Pointage</div>
+                  <div className={`mt-3 flex flex-wrap items-center gap-2 ${!filterVisible ? "hidden" : ""}`}>
+                    <div className="text-xs uppercase text-snu-purple-800">Pointage</div>
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
@@ -407,9 +408,9 @@ export default function General({ updateFilter }) {
                     showTopResultStats={false}
                     pageSize={50}
                     render={({ data }) => (
-                      <table className="w-full mt-6">
+                      <table className="mt-6 w-full">
                         <thead className="">
-                          <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100">
+                          <tr className="border-y-[1px] border-gray-100 text-xs uppercase text-gray-400">
                             <th className="py-3 pl-4">Volontaire</th>
                             <th className="">Présence à l&apos;arrivée</th>
                             <th className="">Présence JDM</th>
@@ -457,32 +458,32 @@ const Line = ({ hit, onClick, selected }) => {
 
   return (
     <tr className={`${!selected && "hover:!bg-gray-100"}`} onClick={onClick}>
-      <td className={`${bgColor} py-3 pl-4 ml-2 rounded-l-lg`}>
+      <td className={`${bgColor} ml-2 rounded-l-lg py-3 pl-4`}>
         <div>
           <div className={`font-bold ${mainTextColor} text-[15px]`}>{`${hit.firstName} ${hit.lastName}`}</div>
-          <div className={`font-normal text-xs ${secondTextColor}`}>
+          <div className={`text-xs font-normal ${secondTextColor}`}>
             {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
           </div>
         </div>
       </td>
       <td className={`${bgColor}`}>
-        <div className={`font-normal text-xs ${mainTextColor}`}>
-          {!value.cohesionStayPresence && <span className="text-gray-400 italic">Non renseignée</span>}
+        <div className={`text-xs font-normal ${mainTextColor}`}>
+          {!value.cohesionStayPresence && <span className="italic text-gray-400">Non renseignée</span>}
           {value.cohesionStayPresence === "true" && "Présent"}
           {value.cohesionStayPresence === "false" && "Absent"}
         </div>
       </td>
       <td className={`${bgColor}`}>
-        <div className={`font-normal text-xs ${mainTextColor}`}>
-          {!value.presenceJDM && <span className="text-gray-400 italic">Non renseignée</span>}
+        <div className={`text-xs font-normal ${mainTextColor}`}>
+          {!value.presenceJDM && <span className="italic text-gray-400">Non renseignée</span>}
           {value.presenceJDM === "true" && "Présent"}
           {value.presenceJDM === "false" && "Absent"}
         </div>
       </td>
       <td className={`${bgColor}`}>
-        <div className={`font-normal text-xs ${mainTextColor}`}>
+        <div className={`text-xs font-normal ${mainTextColor}`}>
           {value.departSejourAt ? (
-            <div className="flex gap-1 items-center cursor-pointer">
+            <div className="flex cursor-pointer items-center gap-1">
               <ArrowCircleRight className="text-gray-400" />
               <div>{!value.departSejourAt ? "Renseigner un départ" : formatDateFR(value.departSejourAt)}</div>
             </div>
@@ -492,8 +493,8 @@ const Line = ({ hit, onClick, selected }) => {
         </div>
       </td>
       <td className={`${bgColor}`}>
-        <div className={`font-normal text-xs ${mainTextColor}`}>
-          {!value.cohesionStayMedicalFileReceived && <span className="text-gray-400 italic">Non renseignée</span>}
+        <div className={`text-xs font-normal ${mainTextColor}`}>
+          {!value.cohesionStayMedicalFileReceived && <span className="italic text-gray-400">Non renseignée</span>}
           {value.cohesionStayMedicalFileReceived === "true" && "Réceptionnée"}
           {value.cohesionStayMedicalFileReceived === "false" && "Non réceptionnée"}
         </div>

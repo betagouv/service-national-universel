@@ -92,16 +92,17 @@ export default function View(props) {
   return (
     <>
       <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
-      <div className="flex flex-col m-8 gap-8">
+      <div className="m-8 flex flex-col gap-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Title>{data.busId}</Title>
-            <div className="rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF]">{data.cohort}</div>
+            <div className="cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]">{data.cohort}</div>
           </div>
           {![ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT].includes(user.role) && (!["Avril 2023 - A", "Février 2023 - C"].includes(data.cohort) || environment !== "production") && (
             <button
-              className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg"
-              onClick={() => setPanelOpen(true)}>
+              className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
+              onClick={() => setPanelOpen(true)}
+            >
               Demander une modification
             </button>
           )}
@@ -117,8 +118,8 @@ export default function View(props) {
             <Modification demandeDeModification={demandeDeModification} getModification={getDemandeDeModification} />
           </div>
           <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
-          <div className="flex gap-4 items-start">
-            <div className="flex flex-col gap-4 w-1/2">
+          <div className="flex items-start gap-4">
+            <div className="flex w-1/2 flex-col gap-4">
               {data.meetingsPointsDetail.map((pdr, index) => (
                 <PointDeRassemblement bus={data} pdr={pdr} setBus={setData} index={index} key={index} volume={dataForCheck?.meetingPoints} getVolume={getDataForCheck} />
               ))}

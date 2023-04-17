@@ -59,13 +59,13 @@ export default function EmailPanel({ open, setOpen, email }) {
       {loading ? (
         <p className="animate-pulse">Chargement...</p>
       ) : !emailData || emailData.error ? (
-        <div className="flex flex-col items-center justify-center h-full gap-2">
+        <div className="flex h-full flex-col items-center justify-center gap-2">
           <BiErrorCircle />
           <p>Les données de cet email ne sont pas encore disponibles.</p>
         </div>
       ) : (
         emailData && (
-          <div className="flex flex-col gap-8 h-full">
+          <div className="flex h-full flex-col gap-8">
             <div className="flex gap-2">
               <p className="text-base text-gray-500">Message ID : {ID}</p>
               <button
@@ -74,7 +74,8 @@ export default function EmailPanel({ open, setOpen, email }) {
                   copyToClipboard(ID);
                   setCopied(true);
                   setTimeout(() => setCopied(false), 3000);
-                }}>
+                }}
+              >
                 {copied ? <HiCheckCircle className="h-4 w-4 text-green-500" /> : <BiCopy className="h-4 w-4 text-gray-400" />}
               </button>
             </div>
@@ -82,9 +83,9 @@ export default function EmailPanel({ open, setOpen, email }) {
               {events.map((event, index) => (
                 <div key={index} className="space-y-2">
                   <p className="mx-auto text-center text-gray-800">
-                    <span className="bg-gray-100 rounded-full px-3 py-1">{translateEmails(event.name)}</span>
+                    <span className="rounded-full bg-gray-100 px-3 py-1">{translateEmails(event.name)}</span>
                     <span> </span>
-                    {event.count > 1 && <span className="border rounded-full px-3 py-1">x {event.count}</span>}
+                    {event.count > 1 && <span className="rounded-full border px-3 py-1">x {event.count}</span>}
                   </p>
                   <p className="text-center text-gray-500">{formatLongDateFR(event.time)}</p>
                 </div>

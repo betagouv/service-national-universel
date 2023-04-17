@@ -16,7 +16,8 @@ export default function Index() {
             Exporter les statistiques <span className="font-bold">“Engagement”</span>
           </ButtonPrimary>
         </div>
-      }>
+      }
+    >
       <div>Engagement</div>
     </DashboardContainer>
   );

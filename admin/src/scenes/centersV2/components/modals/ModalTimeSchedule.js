@@ -23,7 +23,7 @@ export default function ModalTimeSchedule({ session, onCancel, onChanged }) {
     <Modal centered isOpen={true} toggle={onCancel}>
       <ModalContainer className="p-8">
         <CloseSvg className="close-icon" height={10} onClick={onCancel} />
-        <div className="flex align-center text-xl text-black font-medium">Emploi du temps du séjour</div>
+        <div className="align-center flex text-xl font-medium text-black">Emploi du temps du séjour</div>
         <div className="w-full">
           {session.timeScheduleFiles && session.timeScheduleFiles.length > 0 ? (
             session.timeScheduleFiles.map((file) => <TimeScheduleFile session={session} file={file} key={file.name} onDelete={onChanged} />)
@@ -72,14 +72,14 @@ function TimeScheduleFile({ session, file, onDelete, className = "" }) {
   }
 
   return (
-    <div className={`flex items-center justify-between py-4 border-b-[1px] border-b-gray-200 ${className}`}>
+    <div className={`flex items-center justify-between border-b-[1px] border-b-gray-200 py-4 ${className}`}>
       <div className="grow-1">{file.name}</div>
       {communicating ? (
         <div>
           <Loader size="2rem" className="m-0" />
         </div>
       ) : (
-        <div className="flex items-center ml-2">
+        <div className="ml-2 flex items-center">
           <DownloadButton onClick={downloadFile} />
           <DeleteButton mode="gray" className="ml-2" onClick={deleteFile} />
         </div>
@@ -162,8 +162,9 @@ function DropZone({ session, className = "", sessionChanged }) {
 
   return (
     <div
-      className={`relative border-gray-300 border-[1px] ${dragActive ? "border-solid bg-gray-100" : "border-dashed"} p-4 flex flex-col items-center ${className}`}
-      onDragEnter={dragIn}>
+      className={`relative border-[1px] border-gray-300 ${dragActive ? "border-solid bg-gray-100" : "border-dashed"} flex flex-col items-center p-4 ${className}`}
+      onDragEnter={dragIn}
+    >
       <AddImage className="txt-gray-400 mb-3" />
       <div className="text-sm font-medium text-gray-600">
         <a href="#" onClick={startUpload} className="text-blue-600">
@@ -181,14 +182,14 @@ function DropZone({ session, className = "", sessionChanged }) {
       />
       {dragActive && <div className="absolute left-[0] right-[0] top-[0] bottom-[0]" onDragEnter={dragIn} onDragOver={dragIn} onDragLeave={dragOut} onDrop={dropped}></div>}
       {uploading && (
-        <div className="bg-gray-100 absolute left-[0] right-[0] top-[0] bottom-[0] flex flex-col items-center justify-center">
+        <div className="absolute left-[0] right-[0] top-[0] bottom-[0] flex flex-col items-center justify-center bg-gray-100">
           <div>
             <Loader />
           </div>
-          <div className="text-gray-800 text-sm">Téléversement en cours...</div>
+          <div className="text-sm text-gray-800">Téléversement en cours...</div>
         </div>
       )}
-      {error && <div className="text-red-500 text-sm py-4">{error}</div>}
+      {error && <div className="py-4 text-sm text-red-500">{error}</div>}
     </div>
   );
 }

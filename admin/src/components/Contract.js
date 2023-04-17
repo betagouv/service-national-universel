@@ -237,7 +237,8 @@ export default function Contract({ young }) {
       <BackLink
         onClick={() => {
           history.push(`/volontaire/${young._id}/phase2/application/${applicationId}`);
-        }}>
+        }}
+      >
         {"<"} Revenir à l&apos;espace candidature
       </BackLink>
       {environment === "production" && (
@@ -795,7 +796,8 @@ export default function Contract({ young }) {
                     color={"#fff"}
                     textColor={"#767697"}
                     loading={loadings.saveButton}
-                    disabled={loadings.submitButton}>
+                    disabled={loadings.submitButton}
+                  >
                     Enregistrer les modifications
                   </LoadingButton>
                   {contract?.invitationSent !== "true" && (
@@ -808,7 +810,8 @@ export default function Contract({ young }) {
                       }}
                       style={{ marginLeft: "1rem" }}
                       loading={loadings.submitButton}
-                      disabled={loadings.saveButton}>
+                      disabled={loadings.saveButton}
+                    >
                       Envoyer une demande de validation aux {values.parent2Email && !isYoungAdult ? "4" : "3"} parties prenantes
                     </LoadingButton>
                   )}
@@ -826,7 +829,7 @@ export default function Contract({ young }) {
       )}
       {contract ? (
         <div className="mt-4">
-          <h3 className="text-sm my-2 mx-4 uppercase italic text-snu-purple-600">Historique des modifications du contrat d&apos;engagement</h3>
+          <h3 className="my-2 mx-4 text-sm uppercase italic text-snu-purple-600">Historique des modifications du contrat d&apos;engagement</h3>
           <HistoricComponent model="contract" value={contract} />
         </div>
       ) : null}
@@ -878,7 +881,8 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         borderLeft: borderLeft ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}>
+      }}
+    >
       <Wrapper>
         <div style={{ display: "flex" }}>
           <Legend>{title}</Legend>
@@ -925,7 +929,8 @@ function SendContractLink({ contract, target }) {
               }
             },
           });
-        }}>
+        }}
+      >
         ✉️ Renvoyer le lien par email
       </CopyLink>
       <ModalConfirm
@@ -964,7 +969,8 @@ function ContractStatusbadgeItem({ contract, status, token, target }) {
         onClick={() => {
           copyToClipboard(`${appURL}/validate-contract?token=${token}`);
           toastr.success("Le lien a été copié dans le presse papier.");
-        }}>
+        }}
+      >
         Copier le lien de validation
       </CopyLink>
       <br />

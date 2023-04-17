@@ -182,24 +182,25 @@ export default function Phase2militaryPrepartionV2({ young }) {
           path={`/young/${young._id}/documents/${modalFiles?.nameFiles}`}
         />
       ) : null}
-      <div className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md">
+      <div className="mb-4 flex w-full flex-col rounded-lg bg-white px-4 pt-3 shadow-md">
         <div className="mb-3">
           <div className="flex items-center justify-between px-4">
             <div className="flex items-center">
-              <div className="duration-150 flex rounded-full bg-[#FD7A02] p-2 items-center justify-center mr-2">
+              <div className="mr-2 flex items-center justify-center rounded-full bg-[#FD7A02] p-2 duration-150">
                 <Bell className="h-4 w-4 text-white" />
               </div>
-              <div className="text-base leading-5 font-bold">Dossier d’éligibilité aux préparations militaires</div>
+              <div className="text-base font-bold leading-5">Dossier d’éligibilité aux préparations militaires</div>
             </div>
             {!cardOpen ? (
               <div className="flex items-center gap-5">
                 <div
                   className={`text-xs font-normal ${themeBadge.background[young.statusMilitaryPreparationFiles]} ${
                     themeBadge.text[young.statusMilitaryPreparationFiles]
-                  } px-2 py-[2px] rounded-sm `}>
+                  } rounded-sm px-2 py-[2px] `}
+                >
                   {translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}
                 </div>
-                <BsChevronDown className="text-gray-400 h-5 w-5 cursor-pointer" onClick={() => setCardOpen(true)} />
+                <BsChevronDown className="h-5 w-5 cursor-pointer text-gray-400" onClick={() => setCardOpen(true)} />
               </div>
             ) : (
               <>
@@ -207,45 +208,49 @@ export default function Phase2militaryPrepartionV2({ young }) {
                 {young.statusMilitaryPreparationFiles === "WAITING_VERIFICATION" ? (
                   <div className="flex items-center gap-5 ">
                     <button
-                      className="group flex items-center justify-center rounded-lg shadow-ninaButton px-4 py-2 hover:bg-indigo-400 transition duration-300 ease-in-out"
-                      onClick={() => handleCorrection()}>
-                      <ExclamationCircle className="text-indigo-400 mr-2 w-5 h-5 group-hover:text-white" />
-                      <span className="text-sm leading-5 font-medium text-gray-700 group-hover:text-white">Demander une correction</span>
+                      className="group flex items-center justify-center rounded-lg px-4 py-2 shadow-ninaButton transition duration-300 ease-in-out hover:bg-indigo-400"
+                      onClick={() => handleCorrection()}
+                    >
+                      <ExclamationCircle className="mr-2 h-5 w-5 text-indigo-400 group-hover:text-white" />
+                      <span className="text-sm font-medium leading-5 text-gray-700 group-hover:text-white">Demander une correction</span>
                     </button>
                     <button
-                      className="flex items-center justify-center rounded-lg px-4 py-2 bg-green-500 hover:bg-green-400 transition duration-300 ease-in-ou"
-                      onClick={() => handleValidate()}>
-                      <CheckCircle className="text-green-500 mr-2 w-5 h-5 hover:bg-green-400" />
-                      <span className="text-sm leading-5 font-medium text-white">Valider</span>
+                      className="ease-in-ou flex items-center justify-center rounded-lg bg-green-500 px-4 py-2 transition duration-300 hover:bg-green-400"
+                      onClick={() => handleValidate()}
+                    >
+                      <CheckCircle className="mr-2 h-5 w-5 text-green-500 hover:bg-green-400" />
+                      <span className="text-sm font-medium leading-5 text-white">Valider</span>
                     </button>
                     <button
-                      className="flex items-center justify-center rounded-lg px-4 py-2 bg-red-500 hover:bg-red-400 transition duration-300 ease-in-ou"
-                      onClick={() => handleRefused()}>
-                      <XCircle className="text-red-500 mr-2 w-5 h-5 hover:bg-red-400" />
-                      <span className="text-sm leading-5 font-medium text-white">Refuser</span>
+                      className="ease-in-ou flex items-center justify-center rounded-lg bg-red-500 px-4 py-2 transition duration-300 hover:bg-red-400"
+                      onClick={() => handleRefused()}
+                    >
+                      <XCircle className="mr-2 h-5 w-5 text-red-500 hover:bg-red-400" />
+                      <span className="text-sm font-medium leading-5 text-white">Refuser</span>
                     </button>
-                    <BsChevronDown className="text-gray-400 h-5 w-5 rotate-180 cursor-pointer" onClick={() => setCardOpen(false)} />
+                    <BsChevronDown className="h-5 w-5 rotate-180 cursor-pointer text-gray-400" onClick={() => setCardOpen(false)} />
                   </div>
                 ) : (
                   <div className="flex items-center gap-5 ">
-                    <div className="border-[1px] border-gray-300 rounded-lg px-3 py-2.5">
+                    <div className="rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
                       <div className="relative" ref={ref}>
                         <button
-                          className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait min-w-[200px]"
-                          onClick={() => setOpen((e) => !e)}>
+                          className="flex min-w-[200px] cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50"
+                          onClick={() => setOpen((e) => !e)}
+                        >
                           <div className="flex items-center gap-2">
                             <GoPrimitiveDot className={theme[young.statusMilitaryPreparationFiles]} />
-                            <span className="text-sm leading-5 font-normal">{translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}</span>
+                            <span className="text-sm font-normal leading-5">{translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}</span>
                           </div>
-                          <ChevronDown className="ml-2 text-gray-400 cursor-pointer" />
+                          <ChevronDown className="ml-2 cursor-pointer text-gray-400" />
                         </button>
                         {/* display options */}
 
-                        <div className={`${open ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[35px]`}>
+                        <div className={`${open ? "block" : "hidden"}  absolute left-0 top-[35px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
                           {optionsStatus.map((option) => (
                             <div
                               key={option}
-                              className={`${option === young.statusMilitaryPreparationFiles && "font-bold bg-gray"}`}
+                              className={`${option === young.statusMilitaryPreparationFiles && "bg-gray font-bold"}`}
                               onClick={() => {
                                 switch (option) {
                                   case "WAITING_CORRECTION":
@@ -259,8 +264,9 @@ export default function Phase2militaryPrepartionV2({ young }) {
                                     break;
                                 }
                                 setOpen(false);
-                              }}>
-                              <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                              }}
+                            >
+                              <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
                                 <div>{translate(option)}</div>
                                 {option === young.statusMilitaryPreparationFiles ? <BsCheck2 /> : null}
                               </div>
@@ -269,7 +275,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
                         </div>
                       </div>
                     </div>
-                    <BsChevronDown className="text-gray-400 h-5 w-5 rotate-180 cursor-pointer" onClick={() => setCardOpen(false)} />
+                    <BsChevronDown className="h-5 w-5 rotate-180 cursor-pointer text-gray-400" onClick={() => setCardOpen(false)} />
                   </div>
                 )}
               </>
@@ -279,7 +285,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
         {cardOpen ? (
           <>
             <hr className="text-gray-200" />
-            <div className="flex flex-row flex-wrap lg:!flex-nowrap gap-4 my-4 w-full justify-between">
+            <div className="my-4 flex w-full flex-row flex-wrap justify-between gap-4 lg:!flex-nowrap">
               <FileCard
                 name="Pièce d’identité"
                 icon="reglement"

@@ -116,11 +116,13 @@ export default function Index() {
             onClick={() => {
               plausibleEvent("Dashboard/CTA - Exporter statistiques engagement");
               print();
-            }}>
+            }}
+          >
             Exporter les statistiques <span className="font-bold">“Engagement”</span>
           </ButtonPrimary>
         </div>
-      }>
+      }
+    >
       <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
       <Section title="Volontaires">
         <div className="flex">

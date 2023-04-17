@@ -33,15 +33,15 @@ export default function ModalPointagePresenceJDM({ isOpen, onSubmit, onCancel, v
       <form className="w-full" onSubmit={handleSubmit}>
         {viewList ? (
           <>
-            <div className="flex mx-4 gap-4">
-              <div onClick={() => setViewList(false)} className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 cursor-pointer">
+            <div className="mx-4 flex gap-4">
+              <div onClick={() => setViewList(false)} className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gray-200">
                 <ArrowNarrowLeft className="text-gray-700" />
               </div>
-              <div className="flex flex-1 items-center justify-center text-gray-900 text-xl font-medium text-center">{getTitle()}</div>
+              <div className="flex flex-1 items-center justify-center text-center text-xl font-medium text-gray-900">{getTitle()}</div>
             </div>
             <div className="m-4">
               {values.map((volontaire) => (
-                <div key={volontaire._id} className="flex items-center justify-center text-gray-900 text-base font-normal">
+                <div key={volontaire._id} className="flex items-center justify-center text-base font-normal text-gray-900">
                   {volontaire.firstName} {volontaire.lastName}
                 </div>
               ))}
@@ -49,8 +49,8 @@ export default function ModalPointagePresenceJDM({ isOpen, onSubmit, onCancel, v
           </>
         ) : (
           <>
-            <div className="flex mx-4 justify-end">
-              <div onClick={() => setViewList(true)} className="flex gap-1 items-center cursor-pointer hover:underline text-snu-purple-300">
+            <div className="mx-4 flex justify-end">
+              <div onClick={() => setViewList(true)} className="flex cursor-pointer items-center gap-1 text-snu-purple-300 hover:underline">
                 <ViewList />
                 Voir la liste
               </div>
@@ -59,22 +59,24 @@ export default function ModalPointagePresenceJDM({ isOpen, onSubmit, onCancel, v
               <ShieldCheck width={36} height={36} />
             </div>
             <div className="m-4">
-              <div className="flex items-center justify-center text-gray-900 text-xl font-medium text-center">{getTitle()}</div>
-              <div className="flex items-center justify-center text-gray-500 text-base font-normal text-center">{getMessage()}</div>
+              <div className="flex items-center justify-center text-center text-xl font-medium text-gray-900">{getTitle()}</div>
+              <div className="flex items-center justify-center text-center text-base font-normal text-gray-500">{getMessage()}</div>
             </div>
           </>
         )}
-        <div className="flex p-4 gap-2">
+        <div className="flex gap-2 p-4">
           <button
-            className="flex items-center justify-center flex-1 border-[1px] border-gray-300 text-gray-700 rounded-lg py-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+            className="flex flex-1 cursor-pointer items-center justify-center rounded-lg border-[1px] border-gray-300 py-2 text-gray-700 disabled:cursor-wait disabled:opacity-50"
             disabled={isLoading}
-            onClick={onClickCancel}>
+            onClick={onClickCancel}
+          >
             Annuler
           </button>
           <button
-            className="flex items-center justify-center flex-1 bg-snu-purple-300 text-white rounded-lg py-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+            className="flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-snu-purple-300 py-2 text-white disabled:cursor-wait disabled:opacity-50"
             disabled={isLoading}
-            type="submit">
+            type="submit"
+          >
             Confirmer
           </button>
         </div>

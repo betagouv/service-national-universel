@@ -64,8 +64,8 @@ export default function Mission({ structure }) {
                 { label: "Nom de la mission (Z > A)", dataField: "name.keyword", sortBy: "desc" },
               ]}
               render={({ data }) => (
-                <div className="flex flex-col bg-white gap-1 rounded-xl">
-                  <div className=" pt-4 pb-1 px-4 ">
+                <div className="flex flex-col gap-1 rounded-xl bg-white">
+                  <div className=" px-4 pt-4 pb-1 ">
                     <div className="flex items-center gap-2 py-2">
                       <DataSearch
                         defaultQuery={getDefaultQuery}
@@ -82,8 +82,9 @@ export default function Mission({ structure }) {
                         innerClass={{ input: "searchbox" }}
                       />
                       <div
-                        className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
-                        onClick={handleShowFilter}>
+                        className="flex cursor-pointer items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-[14px] font-medium text-gray-700 hover:underline"
+                        onClick={handleShowFilter}
+                      >
                         <FilterSvg className="text-gray-400" />
                         Filtres
                       </div>
@@ -169,8 +170,8 @@ export default function Mission({ structure }) {
                         <DeleteFilters />
                       </div>
                     </div>
-                    <div className="flex w-full flex-col mt-6 mb-2 divide-y divide-gray-100 border-y-[1px] border-gray-100">
-                      <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 ">
+                    <div className="mt-6 mb-2 flex w-full flex-col divide-y divide-gray-100 border-y-[1px] border-gray-100">
+                      <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 ">
                         <div className="w-[40%]">Mission</div>
                         <div className="w-[5%]"></div>
                         <div className="w-[15%]">Places</div>
@@ -211,16 +212,16 @@ const Hit = ({ hit, callback }) => {
   };
   return (
     <>
-      <div className="flex py-3 items-center px-4 hover:bg-gray-50">
-        <div className="flex items-center gap-4 w-[40%] cursor-pointer " onClick={() => history.push(`/mission/${hit._id}`)}>
+      <div className="flex items-center py-3 px-4 hover:bg-gray-50">
+        <div className="flex w-[40%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mission/${hit._id}`)}>
           {hit.isJvaMission === "true" ? (
-            <img src={require("../../../assets/JVA_round.png")} className="h-7 w-7 group-hover:scale-105 mx-auto" />
+            <img src={require("../../../assets/JVA_round.png")} className="mx-auto h-7 w-7 group-hover:scale-105" />
           ) : (
-            <img src={require("../../../assets/logo-snu.png")} className="h-7 w-7 group-hover:scale-105 mx-auto" />
+            <img src={require("../../../assets/logo-snu.png")} className="mx-auto h-7 w-7 group-hover:scale-105" />
           )}
-          <div className="flex flex-col gap-1 w-full">
-            <p className="font-bold leading-6 text-gray-900 truncate w-10/12">{hit.name}</p>
-            <p className="font-normal text-sm leading-4 text-gray-500">
+          <div className="flex w-full flex-col gap-1">
+            <p className="w-10/12 truncate font-bold leading-6 text-gray-900">{hit.name}</p>
+            <p className="text-sm font-normal leading-4 text-gray-500">
               {hit.address} • {hit.city} ({hit.department})
             </p>
           </div>
@@ -229,21 +230,21 @@ const Hit = ({ hit, callback }) => {
           {hit?.visibility === "HIDDEN" && (
             <div className="group relative cursor-pointer">
               <HiOutlineLockClosed size={20} className="text-gray-400" />
-              <div className="hidden group-hover:block absolute bottom-[calc(100%+15px)] left-[50%] bg-white rounded-xl translate-x-[-58%] px-3 py-2.5 text-gray-600 text-xs leading-5 drop-shadow-xl z-10 min-w-[275px] text-center">
-                <div className="absolute left-[50%] translate-x-[-50%] bg-white w-[15px] h-[15px] rotate-45 bottom-[-5px]"></div>
+              <div className="absolute bottom-[calc(100%+15px)] left-[50%] z-10 hidden min-w-[275px] translate-x-[-58%] rounded-xl bg-white px-3 py-2.5 text-center text-xs leading-5 text-gray-600 drop-shadow-xl group-hover:block">
+                <div className="absolute left-[50%] bottom-[-5px] h-[15px] w-[15px] translate-x-[-50%] rotate-45 bg-white"></div>
                 La mission est <strong>fermée</strong> aux candidatures
               </div>
             </div>
           )}
         </div>
 
-        <div className="w-[15%] flex flex-col gap-2">
-          <p className="text-sm leading-none font-normal text-gray-900">{hit.placesLeft} places(s)</p>
-          <p className="text-sm leading-none font-normal text-gray-500">
+        <div className="flex w-[15%] flex-col gap-2">
+          <p className="text-sm font-normal leading-none text-gray-900">{hit.placesLeft} places(s)</p>
+          <p className="text-sm font-normal leading-none text-gray-500">
             sur <span className="text-gray-900">{hit.placesTotal}</span>
           </p>
         </div>
-        <div className="flex flex-col gap-2 w-[20%] text-sm leading-none font-normal text-gray-500">
+        <div className="flex w-[20%] flex-col gap-2 text-sm font-normal leading-none text-gray-500">
           <p>
             Du <span className="text-gray-900">{formatStringDateTimezoneUTC(hit.startAt)}</span>
           </p>

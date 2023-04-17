@@ -192,9 +192,9 @@ export default function Filters({
 
   return (
     <div>
-      <div className="flex flex-row justify-between items-center">
+      <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center justify-start gap-2">
-          <div className="h-[38px] w-[305px] border-[1px] rounded-md border-gray-300 overflow-hidden px-2.5">
+          <div className="h-[38px] w-[305px] overflow-hidden rounded-md border-[1px] border-gray-300 px-2.5">
             <input
               name={"searchbar"}
               placeholder={searchPlaceholder}
@@ -202,7 +202,7 @@ export default function Filters({
               onChange={(e) => {
                 setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value] } });
               }}
-              className={`w-full h-full text-xs text-gray-600`}
+              className={`h-full w-full text-xs text-gray-600`}
             />
           </div>
 
@@ -213,10 +213,11 @@ export default function Filters({
                   ref={ref}
                   onClick={() => handleFilterShowing(!isShowing)}
                   className={classNames(
-                    open ? "ring-2 ring-blue-500 ring-offset-2 bg-gray-200" : "",
-                    "flex gap-2 items-center px-3 h-[38px] rounded-lg bg-gray-100  hover:bg-gray-200 text-[14px] font-medium text-gray-700 cursor-pointer outline-none",
-                    hasSomeFilterSelected ? "bg-[#2563EB] hover:bg-blue-700 text-white" : "",
-                  )}>
+                    open ? "bg-gray-200 ring-2 ring-blue-500 ring-offset-2" : "",
+                    "flex h-[38px] cursor-pointer items-center gap-2 rounded-lg bg-gray-100  px-3 text-[14px] font-medium text-gray-700 outline-none hover:bg-gray-200",
+                    hasSomeFilterSelected ? "bg-[#2563EB] text-white hover:bg-blue-700" : "",
+                  )}
+                >
                   <FilterSvg className={`${hasSomeFilterSelected ? "text-white" : "text-gray-400"} h-4 w-4`} />
                   <span>Filtres</span>
                 </Popover.Button>
@@ -229,10 +230,11 @@ export default function Filters({
                   enterTo="opacity-100 translate-y-0"
                   leave="transition ease-in duration-150"
                   leaveFrom="opacity-100 translate-y-0"
-                  leaveTo="opacity-0 translate-y-1">
+                  leaveTo="opacity-0 translate-y-1"
+                >
                   <Popover.Panel ref={refFilter} className="absolute left-0 z-10 mt-2 w-[305px]">
                     <div className="rounded-lg shadow-lg">
-                      <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100">
+                      <div className="relative grid rounded-lg border-[1px] border-gray-100 bg-white py-2">
                         {savedView.length > 0 && (
                           <ViewPopOver
                             setIsShowing={handleFilterShowing}
@@ -246,14 +248,14 @@ export default function Filters({
                           type="text"
                           value={search}
                           onChange={(e) => setSearch(e.target.value)}
-                          className="px-3 py-2 bg-gray-100 mx-2 rounded-lg mb-2 placeholder:text-gray-600 text-xs text-gray-900"
+                          className="mx-2 mb-2 rounded-lg bg-gray-100 px-3 py-2 text-xs text-gray-900 placeholder:text-gray-600"
                           placeholder="Rechercher par..."
                         />
                         <div className="flex flex-col overflow-y-auto">
                           {categories.map((category, index) => (
                             <div key={category}>
                               {index !== 0 && <hr className="my-2 border-gray-100" />}
-                              <div className="px-4 text-gray-500 text-xs leading-5 font-light">{category}</div>
+                              <div className="px-4 text-xs font-light leading-5 text-gray-500">{category}</div>
                               {filtersVisible
                                 ?.filter((f) => f.parentGroup === category)
                                 ?.map((item) => (

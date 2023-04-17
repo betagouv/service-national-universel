@@ -20,11 +20,12 @@ export default function ViewPopOver({ setIsShowing, isShowing, savedView, handle
             onClick={() => setIsShowing("view")}
             className={classNames(
               open ? "bg-gray-100 font-bold" : "",
-              "flex items-center justify-between transition  duration-150 ease-in-out hover:bg-gray-50 cursor-pointer py-2 px-4 outline-none w-full mb-1",
-            )}>
+              "mb-1 flex w-full cursor-pointer  items-center justify-between py-2 px-4 outline-none transition duration-150 ease-in-out hover:bg-gray-50",
+            )}
+          >
             <div className="flex flex-row items-center gap-2">
               <FloppyDisk />
-              <p className="text-gray-700 text-sm leading-5">
+              <p className="text-sm leading-5 text-gray-700">
                 Vues enregistrées <span className="font-bold">({savedView?.length})</span>
               </p>
             </div>
@@ -42,17 +43,18 @@ export default function ViewPopOver({ setIsShowing, isShowing, savedView, handle
             enterTo="opacity-100 translate-y-0"
             leave="transition ease-in duration-150"
             leaveFrom="opacity-100 translate-y-0"
-            leaveTo="opacity-0 translate-y-1">
+            leaveTo="opacity-0 translate-y-1"
+          >
             <Popover.Panel className="absolute left-[101%] z-20 w-[305px] -translate-y-[36px]">
               <div className="rounded-lg shadow-lg ">
-                <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100 px-3">
+                <div className="relative grid rounded-lg border-[1px] border-gray-100 bg-white py-2 px-3">
                   <div className="text-xs text-gray-500">Activer une vue annulera tous les filtres en cours</div>
                   {savedView.map((view) => (
                     <div key={view._id} className="flex items-center justify-between">
-                      <div className=" hover:bg-gray-50 cursor-pointer w-full py-2" onClick={() => handleSelect(view?.url)}>
-                        <div className="text-gray-700 text-sm">{view.name}</div>
+                      <div className=" w-full cursor-pointer py-2 hover:bg-gray-50" onClick={() => handleSelect(view?.url)}>
+                        <div className="text-sm text-gray-700">{view.name}</div>
                       </div>
-                      <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={() => handleDelete(view._id)} />
+                      <Trash className="h-3 w-3 cursor-pointer font-light text-red-500" onClick={() => handleDelete(view._id)} />
                     </div>
                   ))}
                 </div>

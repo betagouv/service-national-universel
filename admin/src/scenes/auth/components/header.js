@@ -15,14 +15,16 @@ export default function HeaderComponent() {
       <div className="flex flex-col border-l border-gray-200">
         <Link
           to="/auth"
-          className="inline-block flex-1 border-b border-gray-200 p-3 text-center text-xs uppercase text-brand-grey transition-colors hover:bg-gray-100 hover:text-snu-purple-600">
+          className="inline-block flex-1 border-b border-gray-200 p-3 text-center text-xs uppercase text-brand-grey transition-colors hover:bg-gray-100 hover:text-snu-purple-600"
+        >
           espace&nbsp;administrateur
         </Link>
         <a
           href="https://moncompte.snu.gouv.fr/"
           className="inline-block flex-1 p-3 text-center text-xs uppercase text-brand-grey transition-colors hover:bg-gray-100 hover:text-snu-purple-600"
           target="_blank"
-          rel="noreferrer">
+          rel="noreferrer"
+        >
           espace&nbsp;volontaire
         </a>
       </div>

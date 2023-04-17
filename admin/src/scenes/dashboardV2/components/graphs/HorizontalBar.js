@@ -54,14 +54,14 @@ export default function HorizontalBar({ title, values, labels, tooltips, legendU
 
   return (
     <div className={` ${className}`}>
-      <div className="flex justify-between mb-4">
+      <div className="mb-4 flex justify-between">
         {title && (
           <div className="text-base font-bold text-gray-900">
             {title} : {goal}
           </div>
         )}
-        <div className="font-medium text-base text-gray-900 text-right">
-          <span>Total :</span> <span className="font-bold">{totalPercent}</span> <span className="text-[#9CA3AF] font-normal">({total})</span>
+        <div className="text-right text-base font-medium text-gray-900">
+          <span>Total :</span> <span className="font-bold">{totalPercent}</span> <span className="font-normal text-[#9CA3AF]">({total})</span>
         </div>
       </div>
       <div className="relative">
@@ -69,30 +69,31 @@ export default function HorizontalBar({ title, values, labels, tooltips, legendU
           {bars.map((bar, idx) => {
             return bar.width > 0 ? (
               <div
-                className="group relative inline-block h-[100%] first:rounded-l-full last:rounded-r-full  hover:scale-y-[1.05] hover:z-10"
+                className="group relative inline-block h-[100%] first:rounded-l-full last:rounded-r-full  hover:z-10 hover:scale-y-[1.05]"
                 style={{ width: bar.width + "%", backgroundColor: bar.color }}
-                key={"bar-" + idx}>
+                key={"bar-" + idx}
+              >
                 {bar.tooltip && <GraphTooltip className="">{bar.tooltip}</GraphTooltip>}
               </div>
             ) : null;
           })}
         </div>
         {x100 && (
-          <div className="border-[1px] border-white bg-red-600 w-[5px] rounded-full absolute top-[-4px] bottom-[-4px] z-20" style={{ left: x100 + "%" }}>
-            <div className="absolute bg-red-600 text-white text-[8px] font-bold py-[2px] px-1 border-[1px] border-white rounded-[4px] top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2">
+          <div className="absolute top-[-4px] bottom-[-4px] z-20 w-[5px] rounded-full border-[1px] border-white bg-red-600" style={{ left: x100 + "%" }}>
+            <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 rounded-[4px] border-[1px] border-white bg-red-600 py-[2px] px-1 text-[8px] font-bold text-white">
               100%
             </div>
           </div>
         )}
       </div>
-      <div className="mt-4 flex justify-between mr-8 last:mr-0">
+      <div className="mt-4 mr-8 flex justify-between last:mr-0">
         {bars.map((bar, idx) => (
           <div key={"legend-" + idx} onClick={() => clickOnLegend({ index: idx, label: bar.label, value: bar.percent, color: bar.color })}>
             <div className="flex">
-              <div className="rounded-full w-[12px] h-[12px] mr-2 mt-2" style={{ backgroundColor: bar.color }}></div>
+              <div className="mr-2 mt-2 h-[12px] w-[12px] rounded-full" style={{ backgroundColor: bar.color }}></div>
               <div>
                 <div className="text-base font-bold text-gray-900">{bar.percent}</div>
-                <div className="text-sm text-gray-600 font-medium">{bar.label}</div>
+                <div className="text-sm font-medium text-gray-600">{bar.label}</div>
                 <div className="text-sm text-[#9CA3AF]">({bar.value})</div>
               </div>
             </div>

@@ -55,23 +55,23 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
 
   return (
     <>
-      <ModalTailwind isOpen={isOpen} onClose={() => setIsOpen(false)} className="bg-white rounded-xl w-[800px] min-h-[500px] px-8 py-7 flex flex-col gap-4">
+      <ModalTailwind isOpen={isOpen} onClose={() => setIsOpen(false)} className="flex min-h-[500px] w-[800px] flex-col gap-4 rounded-xl bg-white px-8 py-7">
         <div className="grid grid-cols-6">
           <div />
-          <p className="text-lg font-medium text-center col-span-4">Représentant de la structure</p>
+          <p className="col-span-4 text-center text-lg font-medium">Représentant de la structure</p>
           <div className="flex items-center justify-end">
             <button onClick={handleCancel}>
               <AiOutlineClose className="text-gray-500" />
             </button>
           </div>
         </div>
-        <p className="text-gray-500 text-sm text-center">
+        <p className="text-center text-sm text-gray-500">
           Dans le cadre du contrat d’engagement préalable à l’engagement d’un volontaire, vous pouvez préciser le signataire de l’ensemble des contrats et sa fonction au sein de
           votre structure.
         </p>
-        <div className="flex items-center bg-blue-50 rounded-lg p-3 gap-2">
-          <Warning className="text-blue-400 h-5 w-5" />
-          <div className="text-blue-800 text-sm">Attention : les contrats envoyés et signés ne seront pas impactés par cette modification.</div>
+        <div className="flex items-center gap-2 rounded-lg bg-blue-50 p-3">
+          <Warning className="h-5 w-5 text-blue-400" />
+          <div className="text-sm text-blue-800">Attention : les contrats envoyés et signés ne seront pas impactés par cette modification.</div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Prénom" name="firstName" value={data.firstName} handleChange={handleChange} errors={errors} />
@@ -79,10 +79,10 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
           <Field label="Téléphone" name="mobile" value={data.mobile} handleChange={handleChange} errors={errors} />
           <Field label="Adresse email" name="email" value={data.email} handleChange={handleChange} errors={errors} />
           <Field label="Rôle" name="role" value={data.role} handleChange={handleChange} errors={errors} />
-          <div className="h-full flex flex-col items-end">
+          <div className="flex h-full flex-col items-end">
             {structure.structureManager && (
-              <button disabled={isLoading} className="bg-[#ffffff] hover:bg-[#fef2f2] text-red-500 px-4 py-2 rounded-lg transition mt-auto" onClick={handleDelete}>
-                <div className="w-full flex justify-center items-center gap-2">
+              <button disabled={isLoading} className="mt-auto rounded-lg bg-[#ffffff] px-4 py-2 text-red-500 transition hover:bg-[#fef2f2]" onClick={handleDelete}>
+                <div className="flex w-full items-center justify-center gap-2">
                   <HiOutlineTrash className="text-lg" />
                   Supprimer le contact
                 </div>
@@ -90,7 +90,7 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
             )}
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4 mt-auto">
+        <div className="mt-auto grid grid-cols-2 gap-4">
           <Button onClick={handleCancel} disabled={isLoading} category="tertiary">
             Annuler
           </Button>

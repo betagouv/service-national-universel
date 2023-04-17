@@ -180,35 +180,35 @@ export function OutTable({ cohort, region, user }) {
 
   return (
     <>
-      <div className="flex flex-row gap-4 items-stretch mb-4">
-        <div className="flex flex-col gap-4 w-3/12">
-          <div className="flex flex-col gap-2 bg-white rounded-lg shadow-sm p-4">
-            <div className="text-sm text-gray-800 font-bold leading-5">Avancement</div>
-            <div className="text-2xl text-gray-800 font-bold leading-7">{avancement} %</div>
+      <div className="mb-4 flex flex-row items-stretch gap-4">
+        <div className="flex w-3/12 flex-col gap-4">
+          <div className="flex flex-col gap-2 rounded-lg bg-white p-4 shadow-sm">
+            <div className="text-sm font-bold leading-5 text-gray-800">Avancement</div>
+            <div className="text-2xl font-bold leading-7 text-gray-800">{avancement} %</div>
           </div>
-          <div className="flex flex-col gap-2 bg-white rounded-lg shadow-sm p-4">
-            <div className="text-sm text-gray-800 font-bold leading-5">Volontaires de la région</div>
+          <div className="flex flex-col gap-2 rounded-lg bg-white p-4 shadow-sm">
+            <div className="text-sm font-bold leading-5 text-gray-800">Volontaires de la région</div>
             <div className="flex items-center gap-2 ">
               <Profil className="text-gray-400" />
-              <div className="text-2xl text-gray-800 font-bold leading-7">{youngsTotal}</div>
+              <div className="text-2xl font-bold leading-7 text-gray-800">{youngsTotal}</div>
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-4 w-4/12 rounded-lg shadow-sm bg-white p-4 relative">
+        <div className="relative flex w-4/12 flex-col gap-4 rounded-lg bg-white p-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="text-sm text-gray-800 font-bold leading-5">Région(s) d&apos;accueil</div>
-            <div className="text-xs text-[#0063CB] leading-5 font-bold px-1 bg-[#E8EDFF] rounded-lg uppercase">{centerTotal} Centre(s)</div>
+            <div className="text-sm font-bold leading-5 text-gray-800">Région(s) d&apos;accueil</div>
+            <div className="rounded-lg bg-[#E8EDFF] px-1 text-xs font-bold uppercase leading-5 text-[#0063CB]">{centerTotal} Centre(s)</div>
           </div>
           {regionAccueil.map((r) => (
-            <div key={r} className="text-gray-800 font-bold text-lg leading-5">
+            <div key={r} className="text-lg font-bold leading-5 text-gray-800">
               {r}
             </div>
           ))}
           <div className="absolute  bottom-4 right-0">
             <FrenchMap />
           </div>
-          <div className="flex items-center gap-1 absolute bottom-4 right-6 cursor-pointer hover:underline" onClick={() => history.push("/table-repartition?cohort=" + cohort)}>
-            <div className="text-xs text-blue-600 leading-5 ">Table de répartition</div>
+          <div className="absolute bottom-4 right-6 flex cursor-pointer items-center gap-1 hover:underline" onClick={() => history.push("/table-repartition?cohort=" + cohort)}>
+            <div className="text-xs leading-5 text-blue-600 ">Table de répartition</div>
             <BsChevronRight className="text-blue-600 " />
           </div>
         </div>
@@ -216,20 +216,20 @@ export function OutTable({ cohort, region, user }) {
 
       {/* TABLE */}
       <div className="flex flex-col gap-2 rounded-lg bg-white pb-3">
-        <div className="flex px-4 py-3 items-center justify-between w-full">
+        <div className="flex w-full items-center justify-between px-4 py-3">
           <input
             type="text"
             name="search"
-            className=" border border-gray-300 rounded-lg px-4 py-2 w-1/3"
+            className=" w-1/3 rounded-lg border border-gray-300 px-4 py-2"
             placeholder="Rechercher un département"
             onChange={(e) => setSearchDepartment(e.target.value)}
           />
           {/* <button className="bg-blue-600 border-[1px] border-blue-600 text-white px-4 py-2 rounded-lg hover:bg-white hover:!text-blue-600 transition ease-in-out">Exporter</button> */}
         </div>
         <hr />
-        <div className="flex px-4 py-2 items-center">
-          <div className="w-[30%] uppercase text-[#7E858C] text-xs leading-3">Départements de départ</div>
-          <div className="w-[70%] uppercase text-[#7E858C] text-xs leading-3">Départements d&apos;accueil</div>
+        <div className="flex items-center px-4 py-2">
+          <div className="w-[30%] text-xs uppercase leading-3 text-[#7E858C]">Départements de départ</div>
+          <div className="w-[70%] text-xs uppercase leading-3 text-[#7E858C]">Départements d&apos;accueil</div>
         </div>
         {departments?.length ? (
           departments.map((department) => (
@@ -250,8 +250,8 @@ export function OutTable({ cohort, region, user }) {
         ) : (
           <>
             <hr />
-            <div className="flex px-4 pb-4 pt-2 items-center justify-center w-full">
-              <div className="text-sm text-[#7E858C] leading-6">Aucun département ne correspond à votre recherche</div>
+            <div className="flex w-full items-center justify-center px-4 pb-4 pt-2">
+              <div className="text-sm leading-6 text-[#7E858C]">Aucun département ne correspond à votre recherche</div>
             </div>
           </>
         )}
@@ -273,32 +273,32 @@ const Department = ({ department, loadingQuery, data, youngInDepartment, placesC
   return (
     <>
       <hr />
-      <div className="flex px-4 py-2 items-center">
-        <div className="w-[30%] flex flex-col gap-1">
-          <div className="text-base text-[#242526] font-bold leading-6">
+      <div className="flex items-center px-4 py-2">
+        <div className="flex w-[30%] flex-col gap-1">
+          <div className="text-base font-bold leading-6 text-[#242526]">
             {department} ({getDepartmentNumber(department)})
           </div>
-          <div className="flex text-xs text-gray-800 leading-4 items-center">{loadingQuery ? <Loading width="w-1/3" /> : `${youngInDepartment} volontaires`}</div>
+          <div className="flex items-center text-xs leading-4 text-gray-800">{loadingQuery ? <Loading width="w-1/3" /> : `${youngInDepartment} volontaires`}</div>
         </div>
         <div className="w-[70%]">
           {loadingQuery ? (
             <Loading width="w-1/3" />
           ) : (
-            <div className="relative flex flex-row gap-2 items-center flex-wrap">
+            <div className="relative flex flex-row flex-wrap items-center gap-2">
               {assignDepartment.map((assign, i) => (
-                <div key={i + "assign"} className="text-xs text-gray-700 bg-gray-100 rounded-full p-2">
+                <div key={i + "assign"} className="rounded-full bg-gray-100 p-2 text-xs text-gray-700">
                   {assign.toDepartment} ({getDepartmentNumber(assign.toDepartment)})
                 </div>
               ))}
               {!editDisabled && (
                 <>
                   {assignDepartment.length === 0 ? (
-                    <button className="px-2 py-1 cursor-pointer text-white text-xs leading-5 rounded-full bg-blue-600 hover:scale-105" onClick={() => setOpen(!open)}>
+                    <button className="cursor-pointer rounded-full bg-blue-600 px-2 py-1 text-xs leading-5 text-white hover:scale-105" onClick={() => setOpen(!open)}>
                       À assigner
                     </button>
                   ) : (
-                    <div className="flex items-center p-2 rounded-full bg-blue-600 cursor-pointer hover:scale-105" onClick={() => setOpen(!open)}>
-                      <Pencil className="w-4 h-4 text-white" />
+                    <div className="flex cursor-pointer items-center rounded-full bg-blue-600 p-2 hover:scale-105" onClick={() => setOpen(!open)}>
+                      <Pencil className="h-4 w-4 text-white" />
                     </div>
                   )}
                   {open ? (
@@ -344,24 +344,24 @@ const SelectHostDepartment = ({ department, setOpen, onCreate, assignDepartment,
   };
 
   return (
-    <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg w-[70%] h-60 overflow-y-auto">
+    <div ref={ref} className="absolute top-[110%] left-[0px] z-50 flex h-60 w-[70%] flex-col overflow-y-auto rounded-lg bg-white shadow-ninaButton">
       {regionAccueil.map((region, index) => (
         <div key={region} className="flex flex-col ">
           <div className="flex flex-row items-center justify-between px-3 py-2">
-            <div className="text-gray-500 text-xs font-medium leading-4">{region}</div>
+            <div className="text-xs font-medium leading-4 text-gray-500">{region}</div>
             {index === 0 && (
-              <div className="cursor-pointer text-blue-600 underline text-xs leading-5" onClick={() => selectAll(department)}>
+              <div className="cursor-pointer text-xs leading-5 text-blue-600 underline" onClick={() => selectAll(department)}>
                 Tout sélectionner
               </div>
             )}
           </div>
           {region2department[region].map((d) => (
-            <div key={d} className="flex flex-row items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100" onClick={() => onChange(department, d)}>
-              <div className="flex items-center gap-2 text-gray-700 text-sm">
+            <div key={d} className="flex cursor-pointer flex-row items-center justify-between px-3 py-2 hover:bg-gray-100" onClick={() => onChange(department, d)}>
+              <div className="flex items-center gap-2 text-sm text-gray-700">
                 <input type={"checkbox"} checked={assignDepartment.find((e) => e.toDepartment === d) || false} readOnly />
                 {d} ({getDepartmentNumber(d)})
               </div>
-              <div className="text-sm text-gray-500 uppercase">{placesCenterByDepartment[d] ? placesCenterByDepartment[d] : 0} places</div>
+              <div className="text-sm uppercase text-gray-500">{placesCenterByDepartment[d] ? placesCenterByDepartment[d] : 0} places</div>
             </div>
           ))}
         </div>

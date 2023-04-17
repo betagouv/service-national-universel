@@ -46,7 +46,8 @@ export default function Status({ filter }) {
         <LinkCard
           link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] })}
           color={YOUNG_STATUS_COLORS.IN_PROGRESS}
-          disabled={user.role === ROLES.VISITOR}>
+          disabled={user.role === ROLES.VISITOR}
+        >
           <CardTitle>En cours</CardTitle>
           <CardSubtitle>Inscriptions en cours</CardSubtitle>
           <CardValueWrapper>
@@ -61,7 +62,8 @@ export default function Status({ filter }) {
         <LinkCard
           link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"REINSCRIPTION"%5D'] })}
           color={YOUNG_STATUS_COLORS.REINSCRIPTION}
-          disabled={user.role === ROLES.VISITOR}>
+          disabled={user.role === ROLES.VISITOR}
+        >
           <CardTitle>Réinscription</CardTitle>
           <CardValueWrapper>
             <CardValue>{status.REINSCRIPTION || 0}</CardValue>
@@ -75,7 +77,8 @@ export default function Status({ filter }) {
         <LinkCard
           link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"NOT_AUTORISED"%5D'] })}
           color={YOUNG_STATUS_COLORS.NOT_AUTORISED}
-          disabled={user.role === ROLES.VISITOR}>
+          disabled={user.role === ROLES.VISITOR}
+        >
           <CardTitle>Non autorisées</CardTitle>
           <CardValueWrapper>
             <CardValue>{status.NOT_AUTORISED || 0}</CardValue>
@@ -100,7 +103,8 @@ export default function Status({ filter }) {
         <LinkCard
           link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"ABANDONED"%5D'] })}
           color={YOUNG_STATUS_COLORS.ABANDONED}
-          disabled={user.role === ROLES.VISITOR}>
+          disabled={user.role === ROLES.VISITOR}
+        >
           <CardTitle>Abandonnées</CardTitle>
           <CardValueWrapper>
             <CardValue>{status.ABANDONED || 0}</CardValue>
@@ -115,7 +119,8 @@ export default function Status({ filter }) {
         <LinkCard
           disabled={user.role === ROLES.VISITOR}
           link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"WAITING_VALIDATION"%5D'] })}
-          color={YOUNG_STATUS_COLORS.WAITING_VALIDATION}>
+          color={YOUNG_STATUS_COLORS.WAITING_VALIDATION}
+        >
           <CardTitle>En attente de validation</CardTitle>
           <CardValueWrapper>
             <CardValue>{status.WAITING_VALIDATION || 0}</CardValue>
@@ -129,7 +134,8 @@ export default function Status({ filter }) {
         <LinkCard
           disabled={user.role === ROLES.VISITOR}
           link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"WAITING_CORRECTION"%5D'] })}
-          color={YOUNG_STATUS_COLORS.WAITING_CORRECTION}>
+          color={YOUNG_STATUS_COLORS.WAITING_CORRECTION}
+        >
           <CardTitle>En attente de correction</CardTitle>
           <CardValueWrapper>
             <CardValue>{status.WAITING_CORRECTION || 0}</CardValue>
@@ -143,7 +149,8 @@ export default function Status({ filter }) {
         <LinkCard
           disabled={user.role === ROLES.VISITOR}
           link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] })}
-          color={YOUNG_STATUS_COLORS.VALIDATED}>
+          color={YOUNG_STATUS_COLORS.VALIDATED}
+        >
           <CardTitle>Validées sur liste principale</CardTitle>
           <CardValueWrapper>
             <CardValue>{status.VALIDATED || 0}</CardValue>
@@ -157,7 +164,8 @@ export default function Status({ filter }) {
         <LinkCard
           disabled={user.role === ROLES.VISITOR}
           link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"REFUSED"%5D'] })}
-          color={YOUNG_STATUS_COLORS.REFUSED}>
+          color={YOUNG_STATUS_COLORS.REFUSED}
+        >
           <CardTitle>Refusées</CardTitle>
           <CardValueWrapper>
             <CardValue>{status.REFUSED || 0}</CardValue>
@@ -171,7 +179,8 @@ export default function Status({ filter }) {
         <LinkCard
           disabled={user.role === ROLES.VISITOR}
           link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"WAITING_LIST"%5D'] })}
-          color={YOUNG_STATUS_COLORS.WAITING_LIST}>
+          color={YOUNG_STATUS_COLORS.WAITING_LIST}
+        >
           <CardTitle>Validées sur liste complémentaire</CardTitle>
           <CardValueWrapper>
             <CardValue>{status.WAITING_LIST || 0}</CardValue>
@@ -185,7 +194,8 @@ export default function Status({ filter }) {
         <LinkCard
           link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"DELETED"%5D'] })}
           color={YOUNG_STATUS_COLORS.DELETED}
-          disabled={user.role === ROLES.VISITOR}>
+          disabled={user.role === ROLES.VISITOR}
+        >
           <CardTitle>Supprimées</CardTitle>
           <CardValueWrapper>
             <CardValue>{status.DELETED || 0}</CardValue>

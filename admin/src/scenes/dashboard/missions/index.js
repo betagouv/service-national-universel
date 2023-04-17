@@ -80,7 +80,7 @@ export default function Index() {
     <>
       <Row>
         <Col style={{ display: "flex" }}>
-          <h2 className="m-0 font-bold text-2xl">Missions</h2>
+          <h2 className="m-0 text-2xl font-bold">Missions</h2>
           {filter && (
             <>
               <FiltersList>

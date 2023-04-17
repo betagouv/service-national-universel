@@ -33,19 +33,19 @@ export default function TeamCard() {
   if (!team?.length) return <div />;
   return (
     <>
-      <Card className="w-64 h-36">
+      <Card className="h-36 w-64">
         <div className="relative h-full cursor-pointer" onClick={() => setIsOpen(true)}>
           <div className="absolute my-6 px-7">
             <p className="mb-1 text-sm">L&apos;équipe</p>
-            <p className="text-gray-500 text-xs">
+            <p className="text-xs text-gray-500">
               {team.length} {structure.isNetwork ? "membre" : "responsable"}
               {team.length > 1 && "s"}
             </p>
-            <div className="flex flex-row mt-4 -space-x-2">
+            <div className="mt-4 flex flex-row -space-x-2">
               {team.map((contact, index) => {
                 if (index < 6)
                   return (
-                    <div key={index} className={`h-8 w-8 flex justify-center items-center rounded-full bg-gray-100 text-blue-600 text-xs border-2 border-white`}>
+                    <div key={index} className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs text-blue-600`}>
                       {getInitials(contact.firstName + " " + contact.lastName)}
                     </div>
                   );

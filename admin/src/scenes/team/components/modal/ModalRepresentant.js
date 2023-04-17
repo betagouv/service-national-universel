@@ -35,27 +35,27 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, represe
   return (
     <ModalForm isOpen={isOpen} headerText={`Représentant de l’État ${department}`} onCancel={onCancel} classNameModal="max-w-3xl">
       <form className="w-full" onSubmit={handleSubmit}>
-        <div className="flex items-center justify-center text-gray-500 text-sm">Contrat d’engagement</div>
-        <div className="flex flex-row items-center bg-blue-50 rounded-lg mx-8 my-4 py-3 px-2">
-          <HiInformationCircle className="text-blue-400 pr-2 h-8 w-8" />
-          <div className="text-blue-800 text-sm">Attention les contrats envoyés et signés ne seront pas impactés par cette modification.</div>
+        <div className="flex items-center justify-center text-sm text-gray-500">Contrat d’engagement</div>
+        <div className="mx-8 my-4 flex flex-row items-center rounded-lg bg-blue-50 py-3 px-2">
+          <HiInformationCircle className="h-8 w-8 pr-2 text-blue-400" />
+          <div className="text-sm text-blue-800">Attention les contrats envoyés et signés ne seront pas impactés par cette modification.</div>
         </div>
-        <div className="grid grid-cols-2 gap-4 mx-8 mb-4">
-          <div className={`border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-            <label htmlFor="firstName" className="text-left text-gray-500 w-full">
+        <div className="mx-8 mb-4 grid grid-cols-2 gap-4">
+          <div className={`rounded-lg border-[1px]  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+            <label htmlFor="firstName" className="w-full text-left text-gray-500">
               Prénom
             </label>
             <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="firstName" id="firstName" onChange={handleChange} value={data.firstName} />
           </div>
-          <div className={`border-[1px] rounded-lg   py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-            <label htmlFor="lastName" className="text-left text-gray-500 w-full">
+          <div className={`rounded-lg border-[1px]   py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+            <label htmlFor="lastName" className="w-full text-left text-gray-500">
               Nom
             </label>
             <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="lastName" id="lastName" onChange={handleChange} value={data.lastName} />
           </div>
 
-          <div className={`border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-            <label htmlFor="mobile" className="text-left text-gray-500 w-full">
+          <div className={`rounded-lg border-[1px]  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+            <label htmlFor="mobile" className="w-full text-left text-gray-500">
               Téléphone
             </label>
             <input
@@ -70,15 +70,15 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, represe
               value={data.mobile}
             />
           </div>
-          <div className={`border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-            <label htmlFor="email" className="text-left text-gray-500 w-full">
+          <div className={`rounded-lg border-[1px]  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+            <label htmlFor="email" className="w-full text-left text-gray-500">
               Adresse email
             </label>
             <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="email" id="email" onChange={handleChange} value={data.email} />
           </div>
 
-          <div className={`border-[1px] rounded-lg py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-            <label htmlFor="role" className="text-left text-gray-500 w-full">
+          <div className={`rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+            <label htmlFor="role" className="w-full text-left text-gray-500">
               Rôle
             </label>
             <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="role" id="role" onChange={handleChange} value={data.role} />

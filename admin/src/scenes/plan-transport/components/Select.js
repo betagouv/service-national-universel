@@ -28,24 +28,26 @@ export default function Select({ options, value, Icon = null, alignItems = "left
       <div className="relative">
         {/* select item */}
         <button
-          className="flex justify-between items-center gap-3 bg-white border border-gray-300 px-3 py-3 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-wait min-w-[300px]"
+          className="flex min-w-[300px] cursor-pointer items-center justify-between gap-3 rounded-lg border border-gray-300 bg-white px-3 py-3 disabled:cursor-wait disabled:opacity-50"
           style={{ fontFamily: "Marianne" }}
-          onClick={() => !disabled && setOpen((e) => !e)}>
+          onClick={() => !disabled && setOpen((e) => !e)}
+        >
           <div className="flex items-center gap-2">
             {Icon ? Icon : null}
-            <span className="text-gray-700 font-medium text-sm whitespace-nowrap " dangerouslySetInnerHTML={{ __html: options.find((o) => o.value === value)?.label }} />
+            <span className="whitespace-nowrap text-sm font-medium text-gray-700 " dangerouslySetInnerHTML={{ __html: options.find((o) => o.value === value)?.label }} />
           </div>
           {!disabled && <ChevronDown className="text-gray-400" />}
         </button>
 
         {/* display options */}
         <div
-          className={`${open ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute ${
+          className={`${open ? "block" : "hidden"}  absolute min-w-full rounded-lg bg-white transition ${
             alignItems === "right" ? "right-0" : "left-0"
-          } border-3 border-red-600 shadow overflow-hidden z-50`}>
+          } border-3 z-50 overflow-hidden border-red-600 shadow`}
+        >
           {options.map((option, index) => (
-            <div key={option?.key || index} onClick={() => handleChangeValue(option)} className={`${option.value === value && "font-bold bg-gray"}`}>
-              <div className="group flex justify-between items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+            <div key={option?.key || index} onClick={() => handleChangeValue(option)} className={`${option.value === value && "bg-gray font-bold"}`}>
+              <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
                 <div dangerouslySetInnerHTML={{ __html: option.label }} />
                 {option.value === value ? <BsCheck2 /> : null}
               </div>

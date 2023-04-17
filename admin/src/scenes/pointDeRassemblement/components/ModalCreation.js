@@ -146,20 +146,21 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
   };
 
   return (
-    <ModalTailwind isOpen={isOpen} onClose={onClose} className="w-[600px] bg-white rounded-lg shadow-xl">
-      <div className="flex flex-col p-8 h-[600px] w-full justify-between">
-        <div className="flex flex-col w-full">
-          <div className="font-medium text-xl text-gray-800 leading-7 text-center">Rattacher un point à un séjour</div>
+    <ModalTailwind isOpen={isOpen} onClose={onClose} className="w-[600px] rounded-lg bg-white shadow-xl">
+      <div className="flex h-[600px] w-full flex-col justify-between p-8">
+        <div className="flex w-full flex-col">
+          <div className="text-center text-xl font-medium leading-7 text-gray-800">Rattacher un point à un séjour</div>
           <hr className="my-8" />
-          <div className="text-gray-800 text-sm font-medium leading-6">Choisissez un séjour</div>
-          <div className="flex flex-row gap-2 flex-wrap py-2">
+          <div className="text-sm font-medium leading-6 text-gray-800">Choisissez un séjour</div>
+          <div className="flex flex-row flex-wrap gap-2 py-2">
             {availableCohorts.map((cohort) => (
               <div
                 key={cohort}
                 onClick={() => setSelectedCohort(cohort)}
-                className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] ${
-                  selectedCohort === cohort ? "border-blue-600 text-white bg-blue-600" : "border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF] "
-                }`}>
+                className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
+                  selectedCohort === cohort ? "border-blue-600 bg-blue-600 text-white" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF] "
+                }`}
+              >
                 {cohort}
               </div>
             ))}
@@ -167,34 +168,36 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
           </div>
           {selectedCohort ? (
             <>
-              <div className="text-gray-500 text-sm font-medium leading-6 mt-4">Sélectionnez un point de rassemblement</div>
+              <div className="mt-4 text-sm font-medium leading-6 text-gray-500">Sélectionnez un point de rassemblement</div>
               <div className="relative">
                 <div
                   ref={refContainer}
-                  className={`mt-2 py-2 pl-2 pr-4 flex items-center justify-between shadow-sm rounded-lg bg-white ${
-                    open ? "border-blue-500 border-2" : "border-[1px] border-gray-300"
-                  }`}>
+                  className={`mt-2 flex items-center justify-between rounded-lg bg-white py-2 pl-2 pr-4 shadow-sm ${
+                    open ? "border-2 border-blue-500" : "border-[1px] border-gray-300"
+                  }`}
+                >
                   <div className="flex flex-col justify-center">
-                    <div className="text-xs leading-6 font-normal text-gray-500">Choisir un point de rassemblement</div>
-                    {!selectedPDR ? <div className="text-sm leading-6 text-gray-800 h-5" /> : <div className="text-sm leading-6 text-gray-800">{selectedPDR.name}</div>}
+                    <div className="text-xs font-normal leading-6 text-gray-500">Choisir un point de rassemblement</div>
+                    {!selectedPDR ? <div className="h-5 text-sm leading-6 text-gray-800" /> : <div className="text-sm leading-6 text-gray-800">{selectedPDR.name}</div>}
                   </div>
-                  {editable && <BsChevronDown className={`text-gray-500 ${open ? "transform rotate-180" : ""}`} />}
+                  {editable && <BsChevronDown className={`text-gray-500 ${open ? "rotate-180 transform" : ""}`} />}
                 </div>
 
                 <div
                   ref={refSelect}
                   className={`${!open ? "hidden" : ""} ${
                     listPDR.length > 3 ? "h-[300px] overflow-y-auto" : ""
-                  } absolute left-0 w-full bg-white shadow-lg rounded-lg border border-gray-300 px-3 z-50`}>
-                  <div className="sticky top-0 bg-white z-10 pt-3">
-                    <div className="flex flex-row gap-2 items-center">
+                  } absolute left-0 z-50 w-full rounded-lg border border-gray-300 bg-white px-3 shadow-lg`}
+                >
+                  <div className="sticky top-0 z-10 bg-white pt-3">
+                    <div className="flex flex-row items-center gap-2">
                       <BsSearch className="text-gray-400" />
                       <input
                         ref={refInput}
                         type="text"
                         placeholder="Rechercher un point de rassemblement"
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full text-gray-800 text-[13px] leading-3"
+                        className="w-full text-[13px] leading-3 text-gray-800"
                       />
                     </div>
                     <hr className="my-2" />
@@ -206,7 +209,8 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
                         setSelectedPDR(pdr);
                         setOpen(false);
                       }}
-                      className="flex flex-col py-1 px-2 cursor-pointer hover:bg-gray-50 rounded-lg">
+                      className="flex cursor-pointer flex-col rounded-lg py-1 px-2 hover:bg-gray-50"
+                    >
                       <div className="text-sm leading-5 text-gray-900">{pdr.name}</div>
                       <div className="text-sm leading-5 text-gray-500">
                         {pdr.department} • {pdr.region}
@@ -214,16 +218,17 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
                     </div>
                   ))}
                   {listPDR.length === 0 && (
-                    <div className="flex items-center gap-2 py-2 justify-center">
+                    <div className="flex items-center justify-center gap-2 py-2">
                       <div className="text-xs leading-4 text-gray-900">Aucun point de rassemblement trouvé</div>
                     </div>
                   )}
                   <hr className="my-2" />
-                  <div className="flex flex-col items-center gap-2 justify-center pb-3">
+                  <div className="flex flex-col items-center justify-center gap-2 pb-3">
                     <div className="text-sm leading-5 text-gray-900">Le point de rassemblement n’est pas dans la liste ?</div>
                     <div
-                      className="text-xs leading-4 text-blue-600 py-1 px-2 rounded-lg hover:bg-blue-50 cursor-pointer"
-                      onClick={() => history.push(`/point-de-rassemblement/nouveau?cohort=${selectedCohort}`)}>
+                      className="cursor-pointer rounded-lg py-1 px-2 text-xs leading-4 text-blue-600 hover:bg-blue-50"
+                      onClick={() => history.push(`/point-de-rassemblement/nouveau?cohort=${selectedCohort}`)}
+                    >
                       Créer un point de rassemblement
                     </div>
                   </div>
@@ -231,7 +236,7 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
               </div>
               {selectedPDR && (
                 <>
-                  <div className="text-gray-500 text-sm font-medium leading-6 mt-4 mb-2">Ajouter un complément d’adresse (optionnel)</div>
+                  <div className="mt-4 mb-2 text-sm font-medium leading-6 text-gray-500">Ajouter un complément d’adresse (optionnel)</div>
                   <Field label="Complément d’adresse" onChange={(e) => setComplementAddress(e.target.value)} value={complementAddress} />
                 </>
               )}
@@ -239,13 +244,14 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
           ) : null}
         </div>
         <div className="flex items-center gap-4">
-          <button onClick={onClose} className="w-1/2 border-[1px] border-gray-300 py-2 rounded-lg hover:shadow-ninaButton ">
+          <button onClick={onClose} className="w-1/2 rounded-lg border-[1px] border-gray-300 py-2 hover:shadow-ninaButton ">
             Annuler
           </button>
           <button
             onClick={onSubmit}
             disabled={disabled || isLoading}
-            className="border-[1px] border-blue-600 text-white bg-blue-600 py-2 w-1/2 rounded-lg hover:shadow-ninaButton disabled:opacity-50 disabled:cursor-not-allowed">
+            className="w-1/2 rounded-lg border-[1px] border-blue-600 bg-blue-600 py-2 text-white hover:shadow-ninaButton disabled:cursor-not-allowed disabled:opacity-50"
+          >
             Enregistrer
           </button>
         </div>

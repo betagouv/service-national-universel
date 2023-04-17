@@ -30,7 +30,8 @@ export default function InvitationExpired() {
                 toastr.error("Erreur !", translate(e.code));
               }
               actions.setSubmitting(false);
-            }}>
+            }}
+          >
             {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
               return (
                 <form onSubmit={handleSubmit} className="mb-6 flex flex-col gap-4">
@@ -55,7 +56,8 @@ export default function InvitationExpired() {
                     className="block w-max cursor-pointer rounded-md border-0 bg-brand-purple py-3 px-10 text-base font-medium text-white transition-colors hover:bg-brand-darkPurple"
                     loading={isSubmitting}
                     type="submit"
-                    color="primary">
+                    color="primary"
+                  >
                     Cliquez ici pour recevoir une nouvelle invitation valide
                   </LoadingButton>
 

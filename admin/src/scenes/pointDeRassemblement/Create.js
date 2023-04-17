@@ -82,12 +82,12 @@ export default function Create() {
   return (
     <>
       <Breadcrumbs items={[{ label: "Point de rassemblement", to: "/point-de-rassemblement" }, { label: "Créer un point de rassemblement" }]} />
-      <div className="flex flex-col m-8 rounded-lg p-8 bg-white">
+      <div className="m-8 flex flex-col rounded-lg bg-white p-8">
         <Title className="text-center">Créer un point de rassemblement</Title>
         <hr className="my-8" />
         <div className="flex">
-          <div className="flex flex-col w-[45%] gap-4 ">
-            <div className="text-lg leading-6 font-medium text-gray-900">Informations générales</div>
+          <div className="flex w-[45%] flex-col gap-4 ">
+            <div className="text-lg font-medium leading-6 text-gray-900">Informations générales</div>
             <div className="flex flex-col gap-2">
               <div className="text-xs font-medium leading-4 text-gray-900">Nom du point de rassemblement</div>
               <Field label={"Nom du point de rassemblement"} onChange={(e) => setData({ ...data, name: e.target.value })} value={data.name} error={errors?.name} />
@@ -120,14 +120,14 @@ export default function Create() {
               </div>
             </div>
           </div>
-          <div className="flex w-[10%] justify-center items-center">
-            <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
+          <div className="flex w-[10%] items-center justify-center">
+            <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
           </div>
-          <div className="flex flex-col w-[45%]  justify-between">
+          <div className="flex w-[45%] flex-col  justify-between">
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
-                <div className="text-lg leading-6 font-medium text-gray-900">Détails du séjour</div>
-                <div className="rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF]">{cohort}</div>
+                <div className="text-lg font-medium leading-6 text-gray-900">Détails du séjour</div>
+                <div className="cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]">{cohort}</div>
               </div>
               <div className="flex flex-col gap-2">
                 <div className="text-xs font-medium leading-4 text-gray-900">Complément d’adresse (optionnel)</div>
@@ -136,8 +136,9 @@ export default function Create() {
             </div>
             <button
               onClick={onSubmit}
-              className={`border-[1px] border-blue-600 text-white bg-blue-600 py-2 rounded-lg hover:shadow-ninaButton disabled:opacity-50 disabled:cursor-not-allowed`}
-              disabled={isLoading}>
+              className={`rounded-lg border-[1px] border-blue-600 bg-blue-600 py-2 text-white hover:shadow-ninaButton disabled:cursor-not-allowed disabled:opacity-50`}
+              disabled={isLoading}
+            >
               Enregistrer
             </button>
           </div>

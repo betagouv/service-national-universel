@@ -151,45 +151,48 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
 
   if (!volume)
     return (
-      <div className="p-8 w-full bg-white rounded-xl">
+      <div className="w-full rounded-xl bg-white p-8">
         <Loader />
       </div>
     );
 
   return (
-    <div className="p-8 w-full bg-white rounded-xl">
+    <div className="w-full rounded-xl bg-white p-8">
       <div className="relative flex items-start justify-between">
         <div className="flex items-center gap-4">
           <div className="text-xl leading-6 text-[#242526]">Point de rassemblement</div>
-          <div className="flex items-center justify-center rounded-full bg-gray-200 h-7 w-7 text-sm">{index}</div>
-          <div className="flex items-center gap-2 ml-3">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-sm">{index}</div>
+          <div className="ml-3 flex items-center gap-2">
             <DoubleProfil className="text-gray-400" />
-            <div className="text-gray-900 text-lg leading-5 font-medium pb-1">{volume.find((v) => v.meetingPointId === pdr._id)?.youngsCount || 0} </div>
+            <div className="pb-1 text-lg font-medium leading-5 text-gray-900">{volume.find((v) => v.meetingPointId === pdr._id)?.youngsCount || 0} </div>
           </div>
         </div>
         {canEditLigneBusPointDeRassemblement(user) ? (
           <>
             {!editPdr ? (
               <button
-                className="absolute top-0 right-0 flex items-center gap-2 rounded-full text-xs leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="absolute top-0 right-0 flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => setEditPdr(true)}
-                disabled={isLoading}>
-                <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                disabled={isLoading}
+              >
+                <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
                 Modifier
               </button>
             ) : (
-              <div className="absolute top-0 right-0 flex flex-col justify-end items-end gap-2">
+              <div className="absolute top-0 right-0 flex flex-col items-end justify-end gap-2">
                 <button
-                  className="flex items-center gap-2 rounded-full text-xs  leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex cursor-pointer items-center gap-2 rounded-full  border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={onSubmitInfo}
-                  disabled={isLoading}>
-                  <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                  disabled={isLoading}
+                >
+                  <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                   Enregistrer les changements
                 </button>
                 <button
-                  className="flex items-center gap-2 rounded-full text-xs leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => setEditPdr(false)}
-                  disabled={isLoading}>
+                  disabled={isLoading}
+                >
                   Annuler
                 </button>
               </div>
@@ -197,10 +200,10 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
           </>
         ) : null}
       </div>
-      <div className="flex flex-col mt-8">
+      <div className="mt-8 flex flex-col">
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <p className="font-medium text-[15px] leading-6 text-[#242526]">
+            <p className="text-[15px] font-medium leading-6 text-[#242526]">
               {pdr.department} • {pdr.region}
             </p>
             {user.role !== ROLES.TRANSPORTER && (
@@ -208,48 +211,51 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
                 to={`/point-de-rassemblement/${pdr._id}`}
                 onClick={(e) => {
                   e.stopPropagation();
-                }}>
+                }}
+              >
                 <ExternalLink className="text-[#9CA3AF]" />
               </Link>
             )}
           </div>
-          <p className="text-xs leading-4 text-[#738297] font-light">{pdr.name}</p>
-          <p className="text-xs leading-4 text-[#738297] font-light">
+          <p className="text-xs font-light leading-4 text-[#738297]">{pdr.name}</p>
+          <p className="text-xs font-light leading-4 text-[#738297]">
             {pdr.address}, {pdr.zip}, {pdr.city}
           </p>
         </div>
-        <div className="flex flex-col mt-8 gap-4">
+        <div className="mt-8 flex flex-col gap-4">
           {user.role === ROLES.ADMIN && editPdr && !volume.find((v) => v.meetingPointId === pdr._id)?.youngsCount && (
             <div className="relative">
               <div
                 ref={refContainer}
-                className={`mt-2 py-2 px-2.5 flex items-center justify-between w-full h-[63px] rounded-lg bg-white ${
-                  open ? "border-blue-500 border-2" : "border-[1px] border-gray-300"
-                }`}>
-                <div className="flex flex-col justify-center w-[90%]">
-                  <div className="text-xs leading-6 font-normal text-gray-500">Choisir un point de rassemblement</div>
-                  <div className="flex-1 text-sm leading-6 text-gray-800 truncate w-full">
+                className={`mt-2 flex h-[63px] w-full items-center justify-between rounded-lg bg-white py-2 px-2.5 ${
+                  open ? "border-2 border-blue-500" : "border-[1px] border-gray-300"
+                }`}
+              >
+                <div className="flex w-[90%] flex-col justify-center">
+                  <div className="text-xs font-normal leading-6 text-gray-500">Choisir un point de rassemblement</div>
+                  <div className="w-full flex-1 truncate text-sm leading-6 text-gray-800">
                     {selectedPDR.name}, {selectedPDR.address}, {selectedPDR.zip}, {selectedPDR.city} ({selectedPDR.department} • {selectedPDR.region})
                   </div>
                 </div>
                 <div className="pointer-events-none flex items-center pr-2">
-                  <BsChevronDown className={` h-4 w-4 text-gray-400  ${open ? "transform rotate-180" : ""}`} />
+                  <BsChevronDown className={` h-4 w-4 text-gray-400  ${open ? "rotate-180 transform" : ""}`} />
                 </div>
               </div>
               <div
                 ref={refSelect}
                 className={`${!open ? "hidden" : ""} ${
                   filteredPDR.length > 5 ? "h-[300px] overflow-y-auto" : ""
-                } absolute left-0 w-full bg-white shadow-lg rounded-lg border border-gray-300 px-3 z-50`}>
-                <div className="sticky top-0 bg-white z-10 pt-3">
-                  <div className="flex flex-row gap-2 items-center">
+                } absolute left-0 z-50 w-full rounded-lg border border-gray-300 bg-white px-3 shadow-lg`}
+              >
+                <div className="sticky top-0 z-10 bg-white pt-3">
+                  <div className="flex flex-row items-center gap-2">
                     <BsSearch className="text-gray-400" />
                     <input
                       ref={refInput}
                       type="text"
                       placeholder="Rechercher un point de rassemblement"
                       onChange={(e) => setSearch(e.target.value)}
-                      className="w-full text-gray-800 text-[13px] leading-3"
+                      className="w-full text-[13px] leading-3 text-gray-800"
                     />
                   </div>
                   <hr className="my-2" />
@@ -261,9 +267,10 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
                         setSelectedPDR(p);
                         setOpen(false);
                       }}
-                      className="flex items-center gap-4 py-1 px-2 cursor-pointer hover:bg-gray-50 rounded-lg ">
+                      className="flex cursor-pointer items-center gap-4 rounded-lg py-1 px-2 hover:bg-gray-50 "
+                    >
                       <div className="text-sm leading-5 text-gray-900">{p.name}</div>
-                      <div className="flex-1 text-sm leading-5 text-gray-500 truncate">
+                      <div className="flex-1 truncate text-sm leading-5 text-gray-500">
                         {p.department} • {p.region}
                       </div>
                     </div>
@@ -271,7 +278,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
                   </div>
                 ))}
                 {filteredPDR.length === 0 && (
-                  <div className="flex items-center gap-2 pt-2 pb-4 justify-center">
+                  <div className="flex items-center justify-center gap-2 pt-2 pb-4">
                     <div className="text-xs leading-4 text-gray-900">Aucun point de rassemblement trouvé</div>
                   </div>
                 )}
@@ -285,7 +292,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
             setSelected={(e) => setData({ ...data, transportType: e.value })}
             readOnly={!editPdr}
           />
-          <div className="text-xs leading-4 font-medium text-gray-900">Aller</div>
+          <div className="text-xs font-medium leading-4 text-gray-900">Aller</div>
           <div className="flex items-center gap-4">
             <Field
               label="Heure d’arrivée du transport"
@@ -306,8 +313,8 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
             />
           </div>
           <div className="flex items-center gap-4">
-            <div className="w-1/2 text-xs leading-4 font-medium text-gray-900">Aller</div>
-            <div className="w-1/2 text-xs leading-4 font-medium text-gray-900">Retour</div>
+            <div className="w-1/2 text-xs font-medium leading-4 text-gray-900">Aller</div>
+            <div className="w-1/2 text-xs font-medium leading-4 text-gray-900">Retour</div>
           </div>
           <div className="flex items-center gap-4">
             <Field
@@ -330,7 +337,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
             />
           </div>
         </div>
-        <div className="flex justify-end mt-8">
+        <div className="mt-8 flex justify-end">
           <PDR />
         </div>
       </div>

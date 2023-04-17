@@ -44,7 +44,7 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
   }
 
   const exportButton = (
-    <button className="bg-gray-100 rounded text-gray-900 text-xs font-medium py-[7px] px-[10px] hover:bg-gray-200" onClick={exportDetail}>
+    <button className="rounded bg-gray-100 py-[7px] px-[10px] text-xs font-medium text-gray-900 hover:bg-gray-200" onClick={exportDetail}>
       Exporter le détail des missions
     </button>
   );
@@ -52,9 +52,9 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
   return (
     <DashboardBox title="Statut des missions proposées" className={className} headerChildren={exportButton}>
       {error ? (
-        <div className="flex justify-center items-center text-center text-sm text-red-600 font-medium p-8">{error}</div>
+        <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : loading ? (
-        <div className="flex justify-center items-center">
+        <div className="flex items-center justify-center">
           <Loader />
         </div>
       ) : (

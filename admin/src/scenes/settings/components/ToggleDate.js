@@ -13,22 +13,23 @@ export default function ToggleDate({ value, onChange, range, onChangeRange, disa
   return (
     <div className="flex flex-col gap-2 rounded-lg bg-gray-100 px-3 py-2">
       <div className="flex items-center justify-between">
-        <p className="text-gray-800 text-sm  text-left">{label}</p>
+        <p className="text-left text-sm  text-gray-800">{label}</p>
         <Toggle disabled={disabled || readOnly} value={value} onChange={onChange} />
       </div>
       <div className="flex items-center justify-between">
-        <p className="text-gray-500 text-xs text-left">
+        <p className="text-left text-xs text-gray-500">
           Début : <strong>{range?.from ? dayjs(range?.from).locale("fr").format("DD/MM/YYYY") : ""}</strong>
         </p>
-        <p className="text-gray-500 text-xs text-left">
+        <p className="text-left text-xs text-gray-500">
           Fin : <strong>{range?.to ? dayjs(range?.to).locale("fr").format("DD/MM/YYYY") : ""}</strong>
         </p>
         <Popover className="relative">
           {({ open }) => (
             <>
               <Popover.Button
-                className={classNames(disabled && "cursor-not-allowed", readOnly && "cursor-default", "cursor-pointer outline-none flex items-center")}
-                disabled={disabled || readOnly}>
+                className={classNames(disabled && "cursor-not-allowed", readOnly && "cursor-default", "flex cursor-pointer items-center outline-none")}
+                disabled={disabled || readOnly}
+              >
                 <DateIcon className={classNames(open ? "text-blue-600" : "text-gray-500")} />
               </Popover.Button>
               <Transition
@@ -39,9 +40,10 @@ export default function ToggleDate({ value, onChange, range, onChangeRange, disa
                 enterTo="opacity-100 translate-y-0"
                 leave="transition ease-in duration-150"
                 leaveFrom="opacity-100 translate-y-0"
-                leaveTo="opacity-0 translate-y-1">
-                <Popover.Panel className="absolute z-10 pt-2 right-0 transform translate-x-[15px] mt-2">
-                  <div className="flex-auto rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5 flex ">
+                leaveTo="opacity-0 translate-y-1"
+              >
+                <Popover.Panel className="absolute right-0 z-10 mt-2 translate-x-[15px] transform pt-2">
+                  <div className="flex flex-auto rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5 ">
                     <DatePicker mode="range" fromYear={2022} toYear={2030} value={range} onChange={onChangeRange} />
                   </div>
                 </Popover.Panel>

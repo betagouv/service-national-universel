@@ -31,7 +31,9 @@ export default function Status({ filter }) {
       if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery("structure", body);
-      { console.log(responses) }
+      {
+        console.log(responses);
+      }
       if (responses.length) {
         setLegalStatus(responses[0].aggregations.legalStatus.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setTypes(responses[0].aggregations.types.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
@@ -87,13 +89,13 @@ export default function Status({ filter }) {
                   </Card>
                 </Link>
               </Col>
-              <div className="flex flex-wrap flex-row gap-2 items-start">
+              <div className="flex flex-row flex-wrap items-start gap-2">
                 {(typesStructure[l] || []).map((type, tk) => {
                   return (
                     <Link key={tk} to={getLink({ base: `/structure`, filter, filtersUrl: [`LEGAL_STATUS=%5B"${l}"%5D&`, `TYPE=%5B"${type}"%5D`] })}>
-                      <div className="flex flex-col bg-white p-3 rounded-md shadow-sm cursor-pointer hover:scale-105">
+                      <div className="flex cursor-pointer flex-col rounded-md bg-white p-3 shadow-sm hover:scale-105">
                         <div>{translate(type)}</div>
-                        <div className="text-xl flex justify-between">
+                        <div className="flex justify-between text-xl">
                           <div>{types[type] || 0}</div>
                           <div className="text-base text-coolGray-400">
                             {legalStatus[l] ? `${(((types[type] || 0) * 100) / legalStatus[l]).toFixed(0)}%` : `0%`}

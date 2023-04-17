@@ -15,11 +15,11 @@ export default function Select({ options, selected, setSelected, label, readOnly
           <>
             <div className="relative">
               <Listbox.Button className="relative w-full text-left">
-                <div className={`flex flex-row ${!readOnly ? "cursor-default" : "cursor-pointer"} rounded-lg border border-gray-300 bg-white py-2 px-2.5 items-center`}>
+                <div className={`flex flex-row ${!readOnly ? "cursor-default" : "cursor-pointer"} items-center rounded-lg border border-gray-300 bg-white py-2 px-2.5`}>
                   {icon ? icon : null}
-                  <div className={`flex flex-col w-full `}>
+                  <div className={`flex w-full flex-col `}>
                     <label className="text-xs leading-4 text-gray-500">{label}</label>
-                    <div className="flex items-center justify-between w-full">
+                    <div className="flex w-full items-center justify-between">
                       <span className="block truncate">{selected?.label}</span>
                       <span className="pointer-events-none flex items-center pr-2">
                         {!readOnly && (
@@ -34,12 +34,13 @@ export default function Select({ options, selected, setSelected, label, readOnly
               </Listbox.Button>
 
               <Transition show={!readOnly && open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                <Listbox.Options className="max-h-60 absolute z-10 mt-1 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                   {options.map((option) => (
                     <Listbox.Option
                       key={option.value}
-                      className={({ active }) => classNames(active ? "text-white bg-blue-600" : "text-gray-900", "relative cursor-default select-none py-2 pl-3 pr-9 list-none")}
-                      value={option}>
+                      className={({ active }) => classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-default select-none list-none py-2 pl-3 pr-9")}
+                      value={option}
+                    >
                       {({ selected, active }) => (
                         <>
                           <span className={classNames(selected ? "font-semibold" : "font-normal", "block truncate")}>{option.label}</span>

@@ -47,10 +47,10 @@ export default function GroupGatheringPlaces({ group, className = "", onChangeSt
   useEffect(() => {
     setPdrLines(
       selection.map((pdr) => (
-        <div key={pdr._id} className="group border-t border-t-gray-200 p-4 hover:bg-gray-200 flex items-center cursor-pointer" onClick={() => toggleSelection(pdr)}>
+        <div key={pdr._id} className="group flex cursor-pointer items-center border-t border-t-gray-200 p-4 hover:bg-gray-200" onClick={() => toggleSelection(pdr)}>
           <input type="checkbox" checked={true} readOnly />
-          <div className="grow ml-4">
-            <div className="text-base text-[#242526] font-bold pb-2.5">{pdr.name}</div>
+          <div className="ml-4 grow">
+            <div className="pb-2.5 text-base font-bold text-[#242526]">{pdr.name}</div>
             <div className="text-xs text-[#738297]">
               {pdr.city} • {pdr.department} • {pdr.code}
             </div>
@@ -72,8 +72,9 @@ export default function GroupGatheringPlaces({ group, className = "", onChangeSt
           {pages.map((p) => (
             <div
               key={"page-" + p}
-              className={`border-t-2 w-[39px] text-center py-4 cursor-pointer ${currentPage === p ? "border-t-blue-500" : "border-t-[transparent]"} hover:border-t-blue-500`}
-              onClick={() => setCurrentPage(p)}>
+              className={`w-[39px] cursor-pointer border-t-2 py-4 text-center ${currentPage === p ? "border-t-blue-500" : "border-t-[transparent]"} hover:border-t-blue-500`}
+              onClick={() => setCurrentPage(p)}
+            >
               {p + 1}
             </div>
           ))}
@@ -193,24 +194,24 @@ export default function GroupGatheringPlaces({ group, className = "", onChangeSt
             )}
           </div>
           <MiniTitle>Choisissez des points de rassemblement</MiniTitle>
-          <div className="flex items-center justify-between mb-2 mt-2">
+          <div className="mb-2 mt-2 flex items-center justify-between">
             <input
               type="text"
-              className="appearance-none bg-[#FFFFFF] text-sm text-gray-600 py-3 px-5 border border-gray-300 rounded-lg"
+              className="appearance-none rounded-lg border border-gray-300 bg-[#FFFFFF] py-3 px-5 text-sm text-gray-600"
               placeholder="Rechercher un lieu..."
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
             />
             <div className="relative" onClick={() => setTypeDropdownOpened(!typeDropdownOpened)}>
-              <div className="p-2.5 text-sm text-gray-700 flex items-center hover:text-blue-600 cursor-pointer">
-                {type === "all" ? "Voir tout" : "Mon département"} <ChevronDown className="w-[10px] h-[6px] ml-3" />
+              <div className="flex cursor-pointer items-center p-2.5 text-sm text-gray-700 hover:text-blue-600">
+                {type === "all" ? "Voir tout" : "Mon département"} <ChevronDown className="ml-3 h-[6px] w-[10px]" />
               </div>
               {typeDropdownOpened && (
-                <div className="absolute bg-[#FFFFFF] shadow rounded-md text-sm right-[0px] z-10 whitespace-nowrap">
-                  <div className={`px-4 py-2 ${type === "all" ? "text-gray-500" : "text-gray-700 cursor-pointer whitespace-nowrap"}`} onClick={() => setType("all")}>
+                <div className="absolute right-[0px] z-10 whitespace-nowrap rounded-md bg-[#FFFFFF] text-sm shadow">
+                  <div className={`px-4 py-2 ${type === "all" ? "text-gray-500" : "cursor-pointer whitespace-nowrap text-gray-700"}`} onClick={() => setType("all")}>
                     Voir tout
                   </div>
-                  <div className={`px-4 py-2 ${type === "available" ? "text-gray-500" : "text-gray-700 cursor-pointer whitespace-nowrap"}`} onClick={() => setType("available")}>
+                  <div className={`px-4 py-2 ${type === "available" ? "text-gray-500" : "cursor-pointer whitespace-nowrap text-gray-700"}`} onClick={() => setType("available")}>
                     Mon département uniquement
                   </div>
                 </div>
@@ -220,10 +221,10 @@ export default function GroupGatheringPlaces({ group, className = "", onChangeSt
           <div className="">
             {list.map((pdr) => {
               return isSelected(pdr) ? null : (
-                <div key={pdr._id} className="group border-t border-t-gray-200 p-4 hover:bg-gray-200 flex items-center cursor-pointer" onClick={() => toggleSelection(pdr)}>
+                <div key={pdr._id} className="group flex cursor-pointer items-center border-t border-t-gray-200 p-4 hover:bg-gray-200" onClick={() => toggleSelection(pdr)}>
                   <input type="checkbox" checked={false} readOnly />
-                  <div className="grow ml-4">
-                    <div className="text-base text-[#242526] font-bold pb-2.5">{pdr.name}</div>
+                  <div className="ml-4 grow">
+                    <div className="pb-2.5 text-base font-bold text-[#242526]">{pdr.name}</div>
                     <div className="text-xs text-[#738297]">
                       {pdr.city} • {pdr.department} • {pdr.code}
                     </div>

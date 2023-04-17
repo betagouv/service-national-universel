@@ -177,19 +177,19 @@ export default function ListBus(props) {
   if (loading) return <Loader />;
 
   return (
-    <div className="flex flex-col w-full px-8 pb-8 pt-4">
-      <div className="py-8 flex items-center gap-4">
+    <div className="flex w-full flex-col px-8 pb-8 pt-4">
+      <div className="flex items-center gap-4 py-8">
         <Title>Volontaires</Title>
         <div className="flex items-center gap-2 rounded-full bg-gray-200 py-1 px-2 leading-7">
-          <div className="text-gray-800 text-xs leading-5">{bus.busId}</div>
+          <div className="text-xs leading-5 text-gray-800">{bus.busId}</div>
           <Link to={`/ligne-de-bus/${bus._id}`} target="_blank">
-            <ExternalLink className="text-[#9CA3AF] font-bold leading-5" />
+            <ExternalLink className="font-bold leading-5 text-[#9CA3AF]" />
           </Link>
         </div>
       </div>
 
-      <div className="flex flex-col bg-white py-4 mb-8 rounded-xl">
-        <div className="flex items-stretch justify-between  bg-white pt-2 px-4">
+      <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
+        <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
           <Filters
             pageId={pageId}
             esId="young"
@@ -203,7 +203,7 @@ export default function ListBus(props) {
             setParamData={setParamData}
             esRouteQueryParams="?showAffectedToRegionOrDep=1"
           />
-          <button className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm" onClick={() => setIsExportOpen(true)}>
+          <button className="text-grey-700 flex h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium" onClick={() => setIsExportOpen(true)}>
             <BsDownload className="text-gray-400" />
             Exporter
           </button>
@@ -221,7 +221,7 @@ export default function ListBus(props) {
             esRouteQueryParams="?showAffectedToRegionOrDep=1"
           />
         </div>
-        <div className="mt-2 px-4 flex flex-row flex-wrap items-center">
+        <div className="mt-2 flex flex-row flex-wrap items-center px-4">
           <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
@@ -230,9 +230,9 @@ export default function ListBus(props) {
           setParamData={setParamData}
           currentEntryOnPage={data?.length}
           render={
-            <div className="flex w-full flex-col mt-6 mb-2">
+            <div className="mt-6 mb-2 flex w-full flex-col">
               <hr />
-              <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 w-full gap-6">
+              <div className="flex w-full items-center gap-6 py-3 px-4 text-xs uppercase text-gray-400">
                 <div className="w-[33%]">Volontaire</div>
                 <div className="w-[33%]">Point de rassemblement</div>
                 <div className="w-[33%]">Centre de destination</div>
@@ -264,8 +264,8 @@ const Line = ({ young, bus }) => {
   return (
     <>
       <hr />
-      <div className="flex py-4 items-center px-4 hover:bg-gray-50 gap-6">
-        <div className="w-[33%] flex flex-col gap-1">
+      <div className="flex items-center gap-6 py-4 px-4 hover:bg-gray-50">
+        <div className="flex w-[33%] flex-col gap-1">
           <Link to={`/volontaire/${young._id}`} target="_blank">
             <div className="text-base font-bold leading-6 text-gray-800">
               {young.firstName} {young.lastName}
@@ -275,27 +275,27 @@ const Line = ({ young, bus }) => {
             {young.department} • {young.region}
           </div>
         </div>
-        <div className="w-[33%] flex flex-col gap-1">
+        <div className="flex w-[33%] flex-col gap-1">
           <div className="flex items-center gap-2">
             <div className="text-base font-medium leading-6 text-gray-800">{p.code}</div>
             <Link to={`/point-de-rassemblement/${p._id}?cohort=${bus.cohort}`} target="_blank">
-              <ExternalLink className="text-[#9CA3AF] font-bold leading-5" />
+              <ExternalLink className="font-bold leading-5 text-[#9CA3AF]" />
             </Link>
           </div>
           <div className="text-sm leading-4 text-[#738297]">{p.name}</div>
-          <div className="text-sm leading-4 text-[#738297] font-light">
+          <div className="text-sm font-light leading-4 text-[#738297]">
             {p.zip} {p.city}
           </div>
         </div>
-        <div className="w-[33%] flex flex-col gap-1">
+        <div className="flex w-[33%] flex-col gap-1">
           <div className="flex items-center gap-2">
             <div className="text-base font-medium leading-6 text-gray-800">{c.code2022}</div>
             <Link to={`/centre/${c._id}?cohorte=${bus.cohort}`} target="_blank">
-              <ExternalLink className="text-[#9CA3AF] font-bold leading-5" />
+              <ExternalLink className="font-bold leading-5 text-[#9CA3AF]" />
             </Link>
           </div>
           <div className="text-sm leading-4 text-[#738297]">{c.name}</div>
-          <div className="text-sm leading-4 text-[#738297] font-light">
+          <div className="text-sm font-light leading-4 text-[#738297]">
             {c.zip} {c.city}
           </div>
         </div>

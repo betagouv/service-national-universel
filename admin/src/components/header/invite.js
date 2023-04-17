@@ -98,7 +98,8 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                 toastr.error("Erreur !", translate(e.code));
               }
               setSubmitting(false);
-            }}>
+            }}
+          >
             {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
               <React.Fragment>
                 <ModalBody>
@@ -283,7 +284,8 @@ const ChooseRegion = ({ value, onChange, validate }) => {
       placeholder="Région"
       name="region"
       value={value}
-      onChange={onChange}>
+      onChange={onChange}
+    >
       <option key={-1} value="" label=""></option>
       {regionList.map((e) => {
         return (

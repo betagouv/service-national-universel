@@ -43,11 +43,11 @@ export default function TimeSchedule({ session, className = "", onSessionChanged
   }
 
   return (
-    <div className={`flex justify-center items-center ${className}`}>
-      <div className="rounded-lg bg-gray-50 flex items-center p-9">
+    <div className={`flex items-center justify-center ${className}`}>
+      <div className="flex items-center rounded-lg bg-gray-50 p-9">
         <Cni />
         <div className="grow-1 mx-7">
-          <div className="text-[#242526] text-sm font-bold">Emploi du temps du séjour</div>
+          <div className="text-sm font-bold text-[#242526]">Emploi du temps du séjour</div>
           {!hasTimeSchedule && [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && (
             <PlainButton className="mt-3" onClick={sendReminder}>
               Relancer le chef de centre

@@ -44,13 +44,14 @@ export default function List() {
   return (
     <>
       <Breadcrumbs items={[{ label: "Points de rassemblement" }]} />
-      <div className="flex flex-col w-full px-8">
-        <div className="py-8 flex items-center justify-between">
+      <div className="flex w-full flex-col px-8">
+        <div className="flex items-center justify-between py-8">
           <Title>Points de rassemblement</Title>
           {canCreateMeetingPoint(user) ? (
             <button
-              className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg"
-              onClick={() => setModal({ isOpen: true })}>
+              className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
+              onClick={() => setModal({ isOpen: true })}
+            >
               Rattacher un point à un séjour
             </button>
           ) : null}
@@ -74,8 +75,8 @@ export default function List() {
               active={currentTab === "session"}
             />
           </div>
-          <div className={`bg-white rounded-b-lg rounded-tr-lg mb-8 relative items-start`}>
-            <div className="flex flex-col w-full pt-4">
+          <div className={`relative mb-8 items-start rounded-b-lg rounded-tr-lg bg-white`}>
+            <div className="flex w-full flex-col pt-4">
               {currentTab === "liste-points" && <ListPoints user={user} />}
               {currentTab === "session" && <ListSessions user={user} firstSession={firstSession} />}
             </div>
@@ -112,9 +113,9 @@ const ListPoints = ({ user }) => {
   };
 
   return (
-    <div className="flex flex-col bg-white rounded-lg">
+    <div className="flex flex-col rounded-lg bg-white">
       <div className="mx-4">
-        <div className="flex flex-row justify-between w-full">
+        <div className="flex w-full flex-row justify-between">
           <Filters
             pageId={pageId}
             esId="pointderassemblement"
@@ -174,9 +175,9 @@ const ListPoints = ({ user }) => {
         setParamData={setParamData}
         currentEntryOnPage={data?.length}
         render={
-          <div className="flex w-full flex-col mt-6 mb-2">
+          <div className="mt-6 mb-2 flex w-full flex-col">
             <hr />
-            <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
+            <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400">
               <div className="w-[40%]">Points de rassemblements</div>
               <div className="w-[60%]">Cohortes</div>
             </div>
@@ -196,17 +197,17 @@ const Hit = ({ hit }) => {
   return (
     <>
       <hr />
-      <div className="flex py-2 items-center px-4 hover:bg-gray-50">
-        <div className="flex flex-col gap-1 w-[40%] cursor-pointer" onClick={() => history.push(`/point-de-rassemblement/${hit._id}`)}>
+      <div className="flex items-center py-2 px-4 hover:bg-gray-50">
+        <div className="flex w-[40%] cursor-pointer flex-col gap-1" onClick={() => history.push(`/point-de-rassemblement/${hit._id}`)}>
           <div className="font-bold leading-6 text-gray-900">{hit.name}</div>
-          <div className="font-medium text-sm leading-4 text-gray-500">
+          <div className="text-sm font-medium leading-4 text-gray-500">
             {hit.address}, {hit.zip}, {hit.city}
           </div>
           <div className="text-xs leading-4 text-gray-500">
             {hit.department}, {hit.region}
           </div>
         </div>
-        <div className="flex items-center flex-wrap gap-2 w-[60%]">
+        <div className="flex w-[60%] flex-wrap items-center gap-2">
           {hit.cohorts
             ?.sort((a, b) => START_DATE_SESSION_PHASE1[a] - START_DATE_SESSION_PHASE1[b])
             ?.map((cohort, index) => {
@@ -215,9 +216,10 @@ const Hit = ({ hit }) => {
                 <div
                   key={cohort + hit.name + index}
                   onClick={() => history.push(`/point-de-rassemblement/${hit._id}?cohort=${cohort}`)}
-                  className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] ${
-                    disabled ? "text-gray-500 bg-gray-100 border-gray-100" : "border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF]"
-                  }`}>
+                  className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
+                    disabled ? "border-gray-100 bg-gray-100 text-gray-500" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF]"
+                  }`}
+                >
                   {cohort}
                 </div>
               );
@@ -321,9 +323,9 @@ const ListSessions = ({ user, firstSession }) => {
   }, [data]);
 
   return (
-    <div className="flex flex-col bg-white rounded-lg">
+    <div className="flex flex-col rounded-lg bg-white">
       <div className="mx-4">
-        <div className="flex flex-row justify-between w-full">
+        <div className="flex w-full flex-row justify-between">
           <Filters
             pageId={pageId}
             esId="pointderassemblement"
@@ -385,9 +387,9 @@ const ListSessions = ({ user, firstSession }) => {
         setParamData={setParamData}
         currentEntryOnPage={data?.length}
         render={
-          <div className="flex w-full flex-col mt-6 mb-2">
+          <div className="mt-6 mb-2 flex w-full flex-col">
             <hr />
-            <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
+            <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400">
               <div className="w-[35%]">Points de rassemblements</div>
               <div className="w-[25%]">Cohortes</div>
               <div className="w-[20%]">Volontaires attendus sur le point</div>
@@ -420,43 +422,44 @@ const HitSession = ({ hit, session, nbYoung, nbLines, loading }) => {
   return (
     <>
       <hr />
-      <div className="flex py-2 items-center px-4 hover:bg-gray-50">
-        <div className="flex flex-col gap-1 w-[35%] cursor-pointer" onClick={() => history.push(`/point-de-rassemblement/${hit._id}`)}>
+      <div className="flex items-center py-2 px-4 hover:bg-gray-50">
+        <div className="flex w-[35%] cursor-pointer flex-col gap-1" onClick={() => history.push(`/point-de-rassemblement/${hit._id}`)}>
           <div className="font-bold leading-6 text-gray-900">{hit.name}</div>
-          <div className="font-medium text-sm leading-4 text-gray-500">
+          <div className="text-sm font-medium leading-4 text-gray-500">
             {hit.address}, {hit.zip}, {hit.city}
           </div>
           <div className="text-xs leading-4 text-gray-500">
             {hit.department}, {hit.region}
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 w-[25%]">
+        <div className="flex w-[25%] flex-wrap gap-2">
           <div
             onClick={() => history.push(`/point-de-rassemblement/${hit._id}?cohort=${session}`)}
-            className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF]`}>
+            className={`cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]`}
+          >
             {session}
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 w-[20%]">
+        <div className="flex w-[20%] flex-wrap gap-2">
           {loading ? (
             <Loading width="w-1/2" />
           ) : (
             <div className="flex items-center gap-2">
               <DoubleProfil className="text-gray-400" />
-              <div className="text-gray-900 text-sm leading-5">{nbYoung || 0} </div>
+              <div className="text-sm leading-5 text-gray-900">{nbYoung || 0} </div>
               <a target="_blank" rel="noreferrer" href={`${adminURL}/ligne-de-bus/volontaires/point-de-rassemblement/${hit._id.toString()}?cohort=${session}`}>
                 <ExternalLink className="text-gray-400" />
               </a>
             </div>
           )}
         </div>
-        <div className="flex flex-wrap gap-2 w-[20%]">
+        <div className="flex w-[20%] flex-wrap gap-2">
           {loading ? (
             <Loading width="w-1/2" />
           ) : (
             <div className="flex items-center gap-2">
-              <BusSvg className="text-gray-400 -rotate-12" />
-              <div className="text-gray-900 text-sm leading-5">{nbLines || 0} </div>
+              <BusSvg className="-rotate-12 text-gray-400" />
+              <div className="text-sm leading-5 text-gray-900">{nbLines || 0} </div>
               <a href={`${adminURL}/ligne-de-bus?cohort=${session}&CODE_PDR=%5B"${hit.code}"%5D`} target="_blank" rel="noreferrer">
                 <ExternalLink className="text-gray-400" />
               </a>

@@ -2,9 +2,10 @@ import React from "react";
 export default function GraphTooltip({ children, className = "", style = {} }) {
   return (
     <div
-      className={`rounded-lg bg-gray-900 px-[20px] py-[10px] font-extrabold text-sm text-[#FFFFFF] text-center w-min hidden group-hover:block absolute bottom-[calc(100%+17px)] left-[50%] translate-x-[-50%] pointer-events-none ${className}`}
-      style={style}>
-      <div className="w-[20px] h-[20px] absolute bottom-[-10px] left-[50%] translate-x-[-50%] rotate-45 bg-gray-900" />
+      className={`pointer-events-none absolute bottom-[calc(100%+17px)] left-[50%] hidden w-min translate-x-[-50%] rounded-lg bg-gray-900 px-[20px] py-[10px] text-center text-sm font-extrabold text-[#FFFFFF] group-hover:block ${className}`}
+      style={style}
+    >
+      <div className="absolute bottom-[-10px] left-[50%] h-[20px] w-[20px] translate-x-[-50%] rotate-45 bg-gray-900" />
       {children}
     </div>
   );

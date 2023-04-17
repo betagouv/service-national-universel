@@ -61,24 +61,25 @@ export default function Modification({ demandeDeModification, getModification })
 
   if (!demandeDeModification || !tagsOptions)
     return (
-      <div className="p-8 w-1/2 bg-white rounded-xl">
+      <div className="w-1/2 rounded-xl bg-white p-8">
         <Loader />
       </div>
     );
 
   return (
-    <div className="p-8 w-1/2 bg-white rounded-xl">
+    <div className="w-1/2 rounded-xl bg-white p-8">
       <div className="text-xl leading-6 text-[#242526]">Demandes de modifications ({demandeDeModification.length})</div>
-      <div className="mt-4 flex flex-col overflow-y-auto gap-4 max-h-[300px]">
+      <div className="mt-4 flex max-h-[300px] flex-col gap-4 overflow-y-auto">
         {demandeDeModification.map((modification, index) => (
-          <div key={index} className=" flex flex-col gap-2 mr-1">
+          <div key={index} className=" mr-1 flex flex-col gap-2">
             <div
-              className={`group relative flex flex-col gap-2 rounded-xl bg-[#F6F7F9] w-full p-4 ${[ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role) ? "cursor-pointer" : ""}`}
-              onClick={() => [ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role) && setPanel({ open: true, modification })}>
+              className={`group relative flex w-full flex-col gap-2 rounded-xl bg-[#F6F7F9] p-4 ${[ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role) ? "cursor-pointer" : ""}`}
+              onClick={() => [ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role) && setPanel({ open: true, modification })}
+            >
               {[ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role) && (
-                <div className="absolute top-0 right-0 w-full h-full rounded-xl bg-black opacity-70 hidden group-hover:flex items-center justify-center transition duration-300 ease-in-out">
-                  <div className="text-white text-base font-bold leading-6 hover:underline">Voir la demande</div>
-                  <div className="absolute bottom-3 right-5 text-white text-sm leading-6 flex items-center gap-1">
+                <div className="absolute top-0 right-0 hidden h-full w-full items-center justify-center rounded-xl bg-black opacity-70 transition duration-300 ease-in-out group-hover:flex">
+                  <div className="text-base font-bold leading-6 text-white hover:underline">Voir la demande</div>
+                  <div className="absolute bottom-3 right-5 flex items-center gap-1 text-sm leading-6 text-white">
                     <Chat className="text-white" />
                     {modification?.messages.length} Commentaire(s)
                   </div>
@@ -87,25 +88,25 @@ export default function Modification({ demandeDeModification, getModification })
               <div className="flex justify-start">
                 <Quote className="text-gray-400" />
               </div>
-              <div className="text-sm text-gray-800 leading-5 whitespace-pre-wrap">{modification.requestMessage}</div>
+              <div className="whitespace-pre-wrap text-sm leading-5 text-gray-800">{modification.requestMessage}</div>
               <div className="flex justify-end">
-                <Quote className="text-gray-400 rotate-180" />
+                <Quote className="rotate-180 text-gray-400" />
               </div>
             </div>
 
             <div className="flex justify-between py-1">
-              <div className="flex gap-2 items-center">
-                <div className={`flex items-center justify-center text-white text-xs rounded-full h-[22px] px-3 ${getStatusClass(modification.status)}`}>
+              <div className="flex items-center gap-2">
+                <div className={`flex h-[22px] items-center justify-center rounded-full px-3 text-xs text-white ${getStatusClass(modification.status)}`}>
                   {translateStatus(modification.status)}
                 </div>
                 {modification?.opinion && [ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role) && (
-                  <div className="flex items-center justify-center text-white text-xs rounded-full h-[22px] w-[22px] bg-[#3D5B85]">
-                    <Thumbs className={`text-white h-3 w-3 ${modification.opinion === "false" && "rotate-180"}`} />
+                  <div className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-[#3D5B85] text-xs text-white">
+                    <Thumbs className={`h-3 w-3 text-white ${modification.opinion === "false" && "rotate-180"}`} />
                   </div>
                 )}
               </div>
-              <div className="flex gap-2 items-center">
-                <div className="flex items-center justify-center text-blue-600 text-[10px] rounded-full h-[22px] w-[22px] bg-gray-100 border-[1px] border-white shadow-md">
+              <div className="flex items-center gap-2">
+                <div className="flex h-[22px] w-[22px] items-center justify-center rounded-full border-[1px] border-white bg-gray-100 text-[10px] text-blue-600 shadow-md">
                   {getInitials(modification?.requestUserName)}
                 </div>
                 <div className="text-xs text-gray-800">

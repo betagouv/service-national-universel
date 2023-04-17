@@ -44,7 +44,8 @@ export default function Invite({ structure, onSent }) {
             toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(e));
           }
           actions.setSubmitting(false);
-        }}>
+        }}
+      >
         {({ values, handleChange, handleSubmit }) => {
           return (
             <form onSubmit={handleSubmit}>

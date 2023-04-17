@@ -60,8 +60,8 @@ export default function List() {
   return (
     <>
       <Breadcrumbs items={[{ label: "Plan de transport" }]} />
-      <div className="flex flex-col w-full px-8 pb-8 ">
-        <div className="py-8 flex items-center justify-between">
+      <div className="flex w-full flex-col px-8 pb-8 ">
+        <div className="flex items-center justify-between py-8">
           <Title>Plan de transport</Title>
           <Select
             options={cohortList}
@@ -75,12 +75,12 @@ export default function List() {
         {hasValue ? (
           <ReactiveList cohort={cohort} history={history} />
         ) : (
-          <div className="flex flex-col items-center justify-center pt-12 gap-4 w-[450px] m-auto">
+          <div className="m-auto flex w-[450px] flex-col items-center justify-center gap-4 pt-12">
             <img src={Excel} alt="Excel" className="w-32 bg-[#f4f5f7]" />
-            <div className="font-bold text-2xl leading-7 text-gray-800">Aucun document importé</div>
+            <div className="text-2xl font-bold leading-7 text-gray-800">Aucun document importé</div>
             {[ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role) && (
               <>
-                <div className="text-gray-800 text-sm leading-5 text-center">
+                <div className="text-center text-sm leading-5 text-gray-800">
                   Importez votre plan de transport au format .xls (fichier Excel) afin de voir apparaître ici le plan de transport.
                 </div>
                 <PlainButton className="mt-2" onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}`)}>
@@ -172,8 +172,8 @@ const ReactiveList = ({ cohort, history }) => {
         <TabItem icon={<BsArrowRight />} title="Aller" onClick={() => setCurrentTab("aller")} active={currentTab === "aller"} />
         <TabItem icon={<BsArrowLeft />} title="Retour" onClick={() => setCurrentTab("retour")} active={currentTab === "retour"} />
       </div>
-      <div className="flex flex-col bg-white py-4 mb-8 rounded-lg">
-        <div className="flex items-center justify-between bg-white pt-2 px-4">
+      <div className="mb-8 flex flex-col rounded-lg bg-white py-4">
+        <div className="flex items-center justify-between bg-white px-4 pt-2">
           <div className="flex items-center gap-2">
             <Filters
               defaultUrlParam={`cohort=${cohort}`}
@@ -188,16 +188,18 @@ const ReactiveList = ({ cohort, history }) => {
               setParamData={setParamData}
             />
           </div>
-          <div className="flex gap-2 items-center">
+          <div className="flex items-center gap-2">
             <button
-              className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
-              onClick={() => history.push(`/ligne-de-bus/historique?cohort=${cohort}`)}>
+              className="text-grey-700 flex h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium"
+              onClick={() => history.push(`/ligne-de-bus/historique?cohort=${cohort}`)}
+            >
               <History className="text-gray-400" />
               Historique
             </button>
             <button
-              className="text-gray-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm"
-              onClick={() => history.push(`/ligne-de-bus/demande-de-modification?cohort=${cohort}`)}>
+              className="h-10 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700"
+              onClick={() => history.push(`/ligne-de-bus/demande-de-modification?cohort=${cohort}`)}
+            >
               Demande de modification
             </button>
             <SelectAction
@@ -275,7 +277,7 @@ const ReactiveList = ({ cohort, history }) => {
                             await exportLigneBus(user, cohort);
                           },
                           render: (
-                            <div className="flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                            <div className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
                               <div className="text-sm text-gray-700">Volontaires par ligne</div>
                             </div>
                           ),
@@ -287,7 +289,7 @@ const ReactiveList = ({ cohort, history }) => {
             />
           </div>
         </div>
-        <div className="mt-2 px-4 flex flex-row flex-wrap items-center">
+        <div className="mt-2 flex flex-row flex-wrap items-center px-4">
           <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
@@ -296,14 +298,14 @@ const ReactiveList = ({ cohort, history }) => {
           setParamData={setParamData}
           currentEntryOnPage={data?.length}
           render={
-            <div className="flex w-full flex-col mt-6 mb-2">
+            <div className="mt-6 mb-2 flex w-full flex-col">
               <hr />
-              <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 w-full">
+              <div className="flex w-full items-center py-3 px-4 text-xs uppercase text-gray-400">
                 <div className="w-[30%]">Lignes</div>
                 <div className="w-[40%]">Points de rassemblements</div>
                 <div className="w-[15%]">Centres de destinations</div>
                 <div className="w-[10%]">Taux de remplissage</div>
-                <div className="w-[5%] h-1"></div>
+                <div className="h-1 w-[5%]"></div>
               </div>
               {data?.map((hit) => {
                 return <Line key={hit._id} hit={hit} currentTab={currentTab} setPanel={setPanel} />;
@@ -332,7 +334,7 @@ const Line = ({ hit, currentTab, setPanel }) => {
   return (
     <>
       <hr />
-      <div className="flex py-6 items-center px-4 hover:bg-gray-50">
+      <div className="flex items-center py-6 px-4 hover:bg-gray-50">
         <div className="w-[30%] cursor-pointer" onClick={() => history.push(`/ligne-de-bus/${hit._id.toString()}`)}>
           <div className="flex flex-col">
             <div className="text-sm font-medium">{hit.busId}</div>
@@ -350,7 +352,8 @@ const Line = ({ hit, currentTab, setPanel }) => {
                     href={`/point-de-rassemblement/${meetingPoint.meetingPointId}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="hover:scale-105 cursor-pointer gap-2 text-sm font-normal flex justify-center px-2 py-1 items-center bg-gray-100 rounded-3xl">
+                    className="flex cursor-pointer items-center justify-center gap-2 rounded-3xl bg-gray-100 px-2 py-1 text-sm font-normal hover:scale-105"
+                  >
                     {meetingPoint.city}
                     <ArrowUp />
                   </a>
@@ -366,17 +369,18 @@ const Line = ({ hit, currentTab, setPanel }) => {
                 href={`/centre/${hit.centerId}`}
                 target="_blank"
                 rel="noreferrer"
-                className="hover:scale-105 cursor-pointer gap-2 text-sm font-normal flex justify-center px-2 py-1 items-center">
+                className="flex cursor-pointer items-center justify-center gap-2 px-2 py-1 text-sm font-normal hover:scale-105"
+              >
                 {hit.centerCode}
                 <ArrowUp />
               </a>
             </TooltipCenter>
           </div>
         </div>
-        <div className="w-[10%] flex gap-4 items-center">
+        <div className="flex w-[10%] items-center gap-4">
           <div className="text-sm font-normal">{hit.lineFillingRate}%</div>
           <div className="flex flex-col items-center">
-            <svg className="-rotate-90 w-9 h-9" viewBox="0 0 120 120">
+            <svg className="h-9 w-9 -rotate-90" viewBox="0 0 120 120">
               <circle cx="60" cy="60" r="40" fill="none" stroke="#F0F0F0" strokeDashoffset={`calc(100 - 0)`} strokeWidth="15" />
               <circle
                 className="percent fifty"
@@ -394,11 +398,12 @@ const Line = ({ hit, currentTab, setPanel }) => {
             </svg>
           </div>
         </div>
-        <div className="w-[5%] flex justify-center">
+        <div className="flex w-[5%] justify-center">
           {hit.modificationBuses?.length > 0 ? (
             <div
-              className={`flex p-2 rounded-full cursor-pointer ${hasPendingModification ? "bg-orange-500" : "bg-gray-200"}`}
-              onClick={() => setPanel({ open: true, id: hit._id })}>
+              className={`flex cursor-pointer rounded-full p-2 ${hasPendingModification ? "bg-orange-500" : "bg-gray-200"}`}
+              onClick={() => setPanel({ open: true, id: hit._id })}
+            >
               <Comment stroke={hasPendingModification && "white"} />
             </div>
           ) : null}
@@ -412,19 +417,19 @@ const TooltipMeetingPoint = ({ children, meetingPoint, currentTab, ...props }) =
   if (!meetingPoint) return children;
 
   return (
-    <div className="relative flex flex-col items-center group " {...props}>
+    <div className="group relative flex flex-col items-center " {...props}>
       {children}
-      <div className="absolute hidden group-hover:flex !top-8 mb-3 items-center left-0">
-        <div className="relative p-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-lg z-[500] rounded-lg">
-          <div className="flex items-center justify-between w-[524px]">
+      <div className="absolute !top-8 left-0 mb-3 hidden items-center group-hover:flex">
+        <div className="leading-2 relative z-[500] whitespace-nowrap rounded-lg bg-white p-3 text-xs text-[#414458] shadow-lg">
+          <div className="flex w-[524px] items-center justify-between">
             <div className="flex items-center">
-              <div className="text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-lg">
+              <div className="flex items-center justify-center rounded-lg bg-gray-100 px-2 py-1 text-sm font-medium">
                 {currentTab === "aller" ? meetingPoint.departureHour : meetingPoint.returnHour}
               </div>
               <svg id="triangle" viewBox="0 0 100 100" width={10} height={10} className="z-[600]">
                 <polygon points="0 0, 100 0, 50 55" transform="rotate(-90 50 50)" fill="#F5F5F5" />
               </svg>
-              <div className="flex flex-col ml-1">
+              <div className="ml-1 flex flex-col">
                 <div className="text-sm font-medium">{meetingPoint.name}</div>
                 <div className="text-xs text-gray-400">{`${meetingPoint.region} • ${meetingPoint.department}`}</div>
               </div>
@@ -439,10 +444,10 @@ const TooltipMeetingPoint = ({ children, meetingPoint, currentTab, ...props }) =
 
 const TooltipCenter = ({ children, name, region, department, ...props }) => {
   return (
-    <div className="relative flex flex-col items-center group" {...props}>
+    <div className="group relative flex flex-col items-center" {...props}>
       {children}
-      <div className="absolute flex-col hidden group-hover:flex !top-8 mb-3 items-center left-0">
-        <div className="relative py-3 px-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-lg z-[500] rounded-lg">
+      <div className="absolute !top-8 left-0 mb-3 hidden flex-col items-center group-hover:flex">
+        <div className="leading-2 relative z-[500] whitespace-nowrap rounded-lg bg-white py-3 px-3 text-xs text-[#414458] shadow-lg">
           <div className="flex flex-col">
             <div className="text-sm font-medium">{`${name}`}</div>
             <div className="text-xs text-gray-400">{`${region} • ${department}`}</div>

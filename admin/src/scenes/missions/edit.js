@@ -209,7 +209,8 @@ export default function Edit(props) {
           capture(e);
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.message);
         }
-      }}>
+      }}
+    >
       {({ values, handleChange, handleSubmit, errors, touched, validateField, validateForm }) => (
         <div>
           <Header>
@@ -223,7 +224,8 @@ export default function Edit(props) {
                 onClick={() => {
                   handleChange({ target: { value: "DRAFT", name: "status" } });
                   handleSubmit();
-                }}>
+                }}
+              >
                 Enregistrer
               </LoadingButton>
             ) : (
@@ -232,7 +234,8 @@ export default function Edit(props) {
                 textColor={"#767697"}
                 loading={loadings.saveButton}
                 disabled={loadings.submitButton || loadings.changeStructureButton}
-                onClick={handleSubmit}>
+                onClick={handleSubmit}
+              >
                 Enregistrer les modifications
               </LoadingButton>
             )}
@@ -249,7 +252,8 @@ export default function Edit(props) {
                     return toastr.error("Il y a des erreurs dans le formulaire");
                   }
                   handleSubmit();
-                }}>
+                }}
+              >
                 Enregistrer et proposer la mission
               </LoadingButton>
             ) : null}
@@ -258,7 +262,7 @@ export default function Edit(props) {
           <Wrapper>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             {isJvaMission ? (
-              <div className="bg-violet-100 text-indigo-800 p-4 mb-2.5 rounded-lg text-center text-base">
+              <div className="mb-2.5 rounded-lg bg-violet-100 p-4 text-center text-base text-indigo-800">
                 Les informations grisées sont à modifier par le responsable de la structure depuis son espace{" "}
                 <a target="_blank" rel="noreferrer" href="https://www.jeveuxaider.gouv.fr/">
                   jeveuxaider.gouv.fr
@@ -278,8 +282,8 @@ export default function Edit(props) {
                         {values.placesLeft < 1 ? (
                           // Si les places sont toutes attribuées, on l'indique.
                           <div className="flex items-center">
-                            <div className={"flex items-center w-9 h-4 rounded-full bg-gray-300"}>
-                              <div className={`flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] shadow-nina`}>
+                            <div className={"flex h-4 w-9 items-center rounded-full bg-gray-300"}>
+                              <div className={`shadow-nina flex h-5 w-5 items-center justify-center rounded-full border-[1px] border-gray-200 bg-[#ffffff]`}>
                                 <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />
                               </div>
                             </div>
@@ -290,14 +294,14 @@ export default function Edit(props) {
                         ) : values.pendingApplications >= values.placesLeft * 5 ? (
                           // Si il y a trop de candidatures en attente, on l'indique.
                           <div className="flex items-center">
-                            <div className={"flex items-center w-9 h-4 rounded-full bg-gray-300"}>
-                              <div className={`flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] shadow-nina`}>
+                            <div className={"flex h-4 w-9 items-center rounded-full bg-gray-300"}>
+                              <div className={`shadow-nina flex h-5 w-5 items-center justify-center rounded-full border-[1px] border-gray-200 bg-[#ffffff]`}>
                                 {values.visibility === "VISIBLE" ? null : <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />}
                               </div>
                             </div>
                             <div className="ml-2">
                               La mission est <strong>fermée</strong> aux candidatures. Vous avez atteint le seuil des{" "}
-                              <Link to="youngs" className="underline text-blue-800">
+                              <Link to="youngs" className="text-blue-800 underline">
                                 candidatures à traiter
                               </Link>
                               .
@@ -311,10 +315,11 @@ export default function Edit(props) {
                                 handleChange({ target: { value: "HIDDEN", name: "visibility" } });
                               }}
                               name="visibility"
-                              className="flex items-center w-9 h-4 rounded-full bg-blue-600 cursor-pointer transition duration-100 ease-in">
-                              <div className="flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] translate-x-[16px] transition duration-100 ease-in shadow-nina"></div>
+                              className="flex h-4 w-9 cursor-pointer items-center rounded-full bg-blue-600 transition duration-100 ease-in"
+                            >
+                              <div className="shadow-nina flex h-5 w-5 translate-x-[16px] items-center justify-center rounded-full border-[1px] border-gray-200 bg-[#ffffff] transition duration-100 ease-in"></div>
                             </div>
-                            <div className="flex ml-2 items-center">
+                            <div className="ml-2 flex items-center">
                               <div>
                                 La mission est <strong>ouverte</strong> aux candidatures.
                               </div>
@@ -327,12 +332,13 @@ export default function Edit(props) {
                                 handleChange({ target: { value: "VISIBLE", name: "visibility" } });
                               }}
                               name="visibility"
-                              className="flex items-center w-9 h-4 rounded-full bg-red-500 cursor-pointer transition duration-100 ease-in">
-                              <div className="flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] translate-x-0 transition duration-100 ease-in shadow-nina">
+                              className="flex h-4 w-9 cursor-pointer items-center rounded-full bg-red-500 transition duration-100 ease-in"
+                            >
+                              <div className="shadow-nina flex h-5 w-5 translate-x-0 items-center justify-center rounded-full border-[1px] border-gray-200 bg-[#ffffff] transition duration-100 ease-in">
                                 <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />
                               </div>
                             </div>
-                            <div className="flex ml-2 items-center">
+                            <div className="ml-2 flex items-center">
                               <div>
                                 La mission est <strong>fermée</strong> aux candidatures.
                               </div>
@@ -370,7 +376,8 @@ export default function Edit(props) {
                         value={values.mainDomain}
                         onChange={handleChange}
                         name="mainDomain"
-                        validate={(v) => values.status === "WAITING_VALIDATION" && !v && requiredMessage}>
+                        validate={(v) => values.status === "WAITING_VALIDATION" && !v && requiredMessage}
+                      >
                         <option value="" label="Sélectionnez un domaine principal">
                           Sélectionnez un domaine principal
                         </option>
@@ -412,7 +419,8 @@ export default function Edit(props) {
                         component="select"
                         name="format"
                         value={values.format}
-                        onChange={handleChange}>
+                        onChange={handleChange}
+                      >
                         <option key="CONTINUOUS" value="CONTINUOUS">
                           {translate("CONTINUOUS")}
                         </option>
@@ -631,7 +639,7 @@ export default function Edit(props) {
                         </p>
                         <Input name="placesTotal" onChange={handleChange} value={values.placesTotal} type="number" min={1} max={999} disabled={isJvaMission} />
                       </FormGroup>
-                      <div className="flex flex-row justify-between items-center w-full text-[#6a6f85] text-[11px] uppercase">
+                      <div className="flex w-full flex-row items-center justify-between text-[11px] uppercase text-[#6a6f85]">
                         <div className="flex flex-row items-center gap-1">
                           <div>Hébergement proposé : </div>
                           <div className="font-bold">{values.hebergement === "true" ? "Oui" : "Non"}</div>
@@ -644,7 +652,7 @@ export default function Edit(props) {
                         />
                       </div>
                       {values.hebergement === "true" && (
-                        <div className="flex flex-row justify-between items-center w-full text-[#6a6f85] text-[11px] uppercase mt-4">
+                        <div className="mt-4 flex w-full flex-row items-center justify-between text-[11px] uppercase text-[#6a6f85]">
                           <div className="flex flex-row items-center gap-1">
                             <div>Hébergement payant : </div>
                             <div className="font-bold">{values.hebergementPayant === "true" ? "Oui" : "Non"}</div>
@@ -676,7 +684,8 @@ export default function Edit(props) {
                                 style={{ textDecoration: "underline", cursor: "pointer" }}
                                 onClick={() => {
                                   setShowTutor(true);
-                                }}>
+                                }}
+                              >
                                 ajouter un nouveau tuteur
                               </a>
                             </u>{" "}
@@ -690,7 +699,8 @@ export default function Edit(props) {
                         component="select"
                         name="tutorId"
                         value={values.tutorId}
-                        onChange={handleChange}>
+                        onChange={handleChange}
+                      >
                         <option value="">Sélectionner un tuteur</option>
                         {referents &&
                           referents.map((referent) => {
@@ -753,7 +763,8 @@ export default function Edit(props) {
                               disabled={loadings.saveButton || loadings.submitButton}
                               onClick={() => {
                                 modifyStructure();
-                              }}>
+                              }}
+                            >
                               Modifier la structure
                             </LoadingButton>
                           </div>
@@ -775,7 +786,8 @@ export default function Edit(props) {
                   href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3508?&view-mode=formulaire-avis&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
                   target="_blank"
                   rel="noreferrer"
-                  className="mr-auto">
+                  className="mr-auto"
+                >
                   <img className="w-32" src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu.svg" alt="Je donne mon avis" />
                 </a>
               )}
@@ -788,7 +800,8 @@ export default function Edit(props) {
                   onClick={() => {
                     handleChange({ target: { value: "DRAFT", name: "status" } });
                     handleSubmit();
-                  }}>
+                  }}
+                >
                   Enregistrer
                 </LoadingButton>
               ) : (
@@ -797,7 +810,8 @@ export default function Edit(props) {
                   textColor={"#767697"}
                   loading={loadings.saveButton}
                   disabled={loadings.submitButton || loadings.changeStructureButton}
-                  onClick={handleSubmit}>
+                  onClick={handleSubmit}
+                >
                   Enregistrer les modifications
                 </LoadingButton>
               )}
@@ -813,7 +827,8 @@ export default function Edit(props) {
                       return toastr.error("Il y a des erreurs dans le formulaire");
                     }
                     handleSubmit();
-                  }}>
+                  }}
+                >
                   Enregistrer et proposer la mission
                 </LoadingButton>
               ) : null}

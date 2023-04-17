@@ -85,28 +85,29 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title, readOnly =
       <Modal centered isOpen={isOpen} toggle={onCancel} size="lg">
         <ModalContainer>
           <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={onCancel} />
-          <div className="pt-2 pb-4 text-center flex flex-col items-center px-8 w-full">
+          <div className="flex w-full flex-col items-center px-8 pt-2 pb-4 text-center">
             <h3 className="mb-4">{title}</h3>
 
             {filesList?.length
               ? filesList.map((file) => (
-                  <div key={file._id} className="flex flex-1 flex-row justify-between items-center border-[1px] border-gray-300 w-full rounded-lg py-2 px-3 mb-2">
+                  <div key={file._id} className="mb-2 flex w-full flex-1 flex-row items-center justify-between rounded-lg border-[1px] border-gray-300 py-2 px-3">
                     <div className="flex flex-row items-center">
-                      <PaperClip className="text-gray-400 mr-2" />
-                      <div className="text-sm leading-5 font-normal text-gray-800">{file.name}</div>
+                      <PaperClip className="mr-2 text-gray-400" />
+                      <div className="text-sm font-normal leading-5 text-gray-800">{file.name}</div>
                     </div>
                     <div className="flex flex-row items-center gap-4">
-                      <div className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer" onClick={() => handleClick(file._id)}>
+                      <div className="cursor-pointer text-sm font-normal leading-5 text-gray-800 hover:underline" onClick={() => handleClick(file._id)}>
                         Télécharger
                       </div>
                       {!readOnly && (
                         <div
-                          className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer"
+                          className="cursor-pointer text-sm font-normal leading-5 text-gray-800 hover:underline"
                           onClick={async () => {
                             setLoading(true);
                             await handleDelete(file._id);
                             setLoading(false);
-                          }}>
+                          }}
+                        >
                           Supprimer
                         </div>
                       )}
@@ -115,13 +116,13 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title, readOnly =
                 ))
               : null}
             {!readOnly && (
-              <div className="flex flex-col items-center border-[1px] border-dashed border-gray-300 w-full rounded-lg py-4 mt-3">
+              <div className="mt-3 flex w-full flex-col items-center rounded-lg border-[1px] border-dashed border-gray-300 py-4">
                 <AddImage className="text-gray-400" />
-                <div className="text-sm leading-5 font-medium text-blue-600 hover:underline mt-2 cursor-pointer" onClick={handleClickUpload}>
+                <div className="mt-2 cursor-pointer text-sm font-medium leading-5 text-blue-600 hover:underline" onClick={handleClickUpload}>
                   Téléversez le formulaire
                 </div>
                 <input type="file" ref={hiddenFileInput} onChange={(e) => handleUpload(e.target.files)} className="hidden" accept=".jpg, .jpeg, .png, .pdf" multiple />
-                <div className="text-xs leading-4 font-normal text-gray-500 mt-1">PDF, PNG, JPG jusqu’à 5Mo</div>
+                <div className="mt-1 text-xs font-normal leading-4 text-gray-500">PDF, PNG, JPG jusqu’à 5Mo</div>
               </div>
             )}
           </div>

@@ -17,7 +17,8 @@ export const SelectTag = ({ options, name, value, title, selectPlaceholder, hand
           const value = options.find((o) => o.id === e.target.value);
           handleChange({ target: { name, value } });
         }}
-        validate={(v) => !v && requiredMessage}>
+        validate={(v) => !v && requiredMessage}
+      >
         <option value="" disabled>
           {selectPlaceholder}
         </option>

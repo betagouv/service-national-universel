@@ -420,33 +420,33 @@ export default function Create() {
         }}
         onConfirm={() => sendData(YOUNG_STATUS.WAITING_LIST)}
       />
-      <div className="relative bg-white shadow rounded mb-4 pt-4">
-        <div className="text-2xl font-bold flex items-center justify-center">Créer une inscription manuellement</div>
-        <div className="border-b mb-5 mt-6 mx-9" />
+      <div className="relative mb-4 rounded bg-white pt-4 shadow">
+        <div className="flex items-center justify-center text-2xl font-bold">Créer une inscription manuellement</div>
+        <div className="mx-9 mb-5 mt-6 border-b" />
         <div className="ml-8 mb-6 text-lg font-normal">Informations générales</div>
         <div className={"flex pb-14"}>
           <div className="flex-[1_0_50%] pr-14 pl-8">
             <Identite values={values} handleChange={handleChange} errors={errors} setFieldValue={setFieldValue} cohort={cohort} />
           </div>
-          <div className="my-16 bg-[#E5E7EB] flex-[0_0_1px]" />
+          <div className="my-16 flex-[0_0_1px] bg-[#E5E7EB]" />
           <div className="flex-[1_0_50%] pl-14 pr-8">
             <Coordonnees values={values} handleChange={handleChange} errors={errors} setFieldValue={setFieldValue} />
           </div>
         </div>
       </div>
-      <div className="relative bg-white shadow rounded mb-4 pt-4">
+      <div className="relative mb-4 rounded bg-white pt-4 shadow">
         <div className="ml-8 mb-6 text-lg font-normal">Détails</div>
         <div className={"flex pb-14"}>
           <div className="flex-[1_0_50%] pl-8 pr-14">
             <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} />
           </div>
-          <div className="my-16 bg-[#E5E7EB] flex-[0_0_1px]" />
+          <div className="my-16 flex-[0_0_1px] bg-[#E5E7EB]" />
           <div className="flex-[1_0_50%] pl-14 pr-8">
             <div className="ml-5 mb-4 flex items-start justify-start">
-              <div onClick={() => setSelectedRepresentant(1)} className={`cursor-pointer pb-4 ${selectedRepresentant === 1 && "border-b-4 text-[#3B82F6]"} border-[#3B82F6] mr-9`}>
+              <div onClick={() => setSelectedRepresentant(1)} className={`cursor-pointer pb-4 ${selectedRepresentant === 1 && "border-b-4 text-[#3B82F6]"} mr-9 border-[#3B82F6]`}>
                 Représentant légal 1
               </div>
-              <div onClick={() => setSelectedRepresentant(2)} className={`cursor-pointer pb-4 ${selectedRepresentant === 2 && "border-b-4 text-[#3B82F6]"} border-[#3B82F6] mr-9`}>
+              <div onClick={() => setSelectedRepresentant(2)} className={`cursor-pointer pb-4 ${selectedRepresentant === 2 && "border-b-4 text-[#3B82F6]"} mr-9 border-[#3B82F6]`}>
                 Représentant légal 2
               </div>
             </div>
@@ -460,18 +460,19 @@ export default function Create() {
       </div>
 
       {(cohorts.length > 0 || egibilityError !== "") && (
-        <div className="relative bg-white shadow rounded mb-4 pt-4">
+        <div className="relative mb-4 rounded bg-white pt-4 shadow">
           <div className="ml-8 text-lg font-normal">Choisissez un séjour pour le volontaire</div>
           {egibilityError !== "" && <div className="ml-8 pb-4">{egibilityError}</div>}
-          <div className="flex justify-start flex-row flex-wrap px-3">
+          <div className="flex flex-row flex-wrap justify-start px-3">
             {egibilityError === "" &&
               cohorts.map((session) => (
                 <div
                   key={session.name}
                   onClick={() => setFieldValue("cohort", session.name)}
-                  className="cursor-pointer flex flex-row justify-start items-center w-60 h-14 border border-[#3B82F6] rounded-md m-3">
+                  className="m-3 flex h-14 w-60 cursor-pointer flex-row items-center justify-start rounded-md border border-[#3B82F6]"
+                >
                   <input
-                    className="rounded-full mx-3"
+                    className="mx-3 rounded-full"
                     type="radio"
                     id="checkboxCohort"
                     name="cohort"
@@ -494,25 +495,26 @@ export default function Create() {
         values.temporaryDate !== null &&
         cohorts.length > 0 &&
         egibilityError === "" && (
-          <div className="relative bg-white shadow rounded mb-4 pt-4">
+          <div className="relative mb-4 rounded bg-white pt-4 shadow">
             <div className="ml-8 mb-6 text-lg font-normal">Consentements</div>
-            <div className={"flex pb-14 px-8"}>
+            <div className={"flex px-8 pb-14"}>
               <SectionConsentements young={values} setFieldValue={setFieldValue} errors={errors} />
             </div>
           </div>
         )}
       {egibilityError === "" && (
-        <div className="flex items-center w-100 justify-center">
+        <div className="w-100 flex items-center justify-center">
           {uploadError === "" ? (
-            <div onClick={handleSubmit} className="cursor-pointer w-80 bg-[#2563EB] text-white py-2 px-4 text-center rounded-md self-center">
+            <div onClick={handleSubmit} className="w-80 cursor-pointer self-center rounded-md bg-[#2563EB] py-2 px-4 text-center text-white">
               {!loading ? "Créer l'inscription" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
             </div>
           ) : (
-            <div className="flex flex-column">
+            <div className="flex-column flex">
               <div>{uploadError}</div>
               <div
                 onClick={() => uploadFiles(youngId, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate)}
-                className="cursor-pointer w-80 bg-[#2563EB] text-white py-2 px-4 text-center rounded-md self-center">
+                className="w-80 cursor-pointer self-center rounded-md bg-[#2563EB] py-2 px-4 text-center text-white"
+              >
                 {!loading ? "Réessayer de téleverser les fichiers" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
               </div>
             </div>
@@ -604,7 +606,7 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
       />
       {(parent === "1" ? values.parent1OwnAddress : values.parent2OwnAddress) === "true" && (
         <>
-          <div className="font-medium text-xs text-[#242526] leading-snug mb-2">Adresse</div>
+          <div className="mb-2 text-xs font-medium leading-snug text-[#242526]">Adresse</div>
           <Field
             name={parent === "1" ? "parent1Address" : "parent2Address"}
             label="Adresse"
@@ -687,7 +689,7 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
 
   return (
     <>
-      <div className="font-medium text-xs text-[#242526] leading-snug mb-2">Situation</div>
+      <div className="mb-2 text-xs font-medium leading-snug text-[#242526]">Situation</div>
 
       <Field
         name="grade"
@@ -708,7 +710,7 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
           errors={errors}
           value={values.situation}
           transformer={translate}
-          className="flex-[1_1_50%] mt-4"
+          className="mt-4 flex-[1_1_50%]"
           options={values.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions}
           handleChange={onChangeSituation}
         />
@@ -720,7 +722,7 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
         </div>
       )}
       <div className="mt-8">
-        <div className="font-medium text-xs mt-8 text-[#242526] leading-snug mb-2">Situations particulières</div>
+        <div className="mt-8 mb-2 text-xs font-medium leading-snug text-[#242526]">Situations particulières</div>
         <FieldSituationsParticulieres name="specificSituations" young={values} mode={"edition"} onChange={onParticuliereChange} />
         {values.specificAmenagment === "true" && (
           <Field
@@ -798,7 +800,7 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
   }
   return (
     <>
-      <div className="font-medium text-xs text-[#242526] leading-snug mb-2">Date et lieu de naissance</div>
+      <div className="mb-2 text-xs font-medium leading-snug text-[#242526]">Date et lieu de naissance</div>
       <Field
         name="temporaryDate"
         label="Date de naissance"
@@ -838,21 +840,23 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
         className="flex-[1_1_50%]"
         handleChange={handleChange}
       />
-      <div className="flex justify-between items-center mt-8 mb-2">
-        <div className="font-medium text-xs text-[#242526] leading-snug">Adresse</div>
+      <div className="mt-8 mb-2 flex items-center justify-between">
+        <div className="text-xs font-medium leading-snug text-[#242526]">Adresse</div>
         <div className="inline-flex">
           <div
-            className={`border-[#3B82F6] border-[1px] rounded-[100px_0_0_100px] text-[14px] px-[10px] py-[3px] ${
-              liveInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "bg-[#FFFFFF] text-[#3B82F6] cursor-pointer"
+            className={`rounded-[100px_0_0_100px] border-[1px] border-[#3B82F6] px-[10px] py-[3px] text-[14px] ${
+              liveInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "cursor-pointer bg-[#FFFFFF] text-[#3B82F6]"
             }`}
-            onClick={() => handleCountryChange(true)}>
+            onClick={() => handleCountryChange(true)}
+          >
             en France
           </div>
           <div
-            className={`border-[#3B82F6] border-[1px] rounded-[0_100px_100px_0] text-[14px] px-[10px] py-[3px] ml-[-1px] ${
-              !liveInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "bg-[#FFFFFF] text-[#3B82F6] cursor-pointer"
+            className={`ml-[-1px] rounded-[0_100px_100px_0] border-[1px] border-[#3B82F6] px-[10px] py-[3px] text-[14px] ${
+              !liveInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "cursor-pointer bg-[#FFFFFF] text-[#3B82F6]"
             }`}
-            onClick={() => handleCountryChange(false)}>
+            onClick={() => handleCountryChange(false)}
+          >
             à l&apos;étranger
           </div>
         </div>
@@ -916,8 +920,8 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
       ) : (
         <>
           <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
-          <div className="flex my-3">
-            <div className="w-[40px] min-w-[40px] flex justify-center items-center bg-[#0063CB]">
+          <div className="my-3 flex">
+            <div className="flex w-[40px] min-w-[40px] items-center justify-center bg-[#0063CB]">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M17.5 0.499512H2.5C1.39543 0.499512 0.5 1.39494 0.5 2.49951V17.4995C0.5 18.6041 1.39543 19.4995 2.5 19.4995H17.5C18.6046 19.4995 19.5 18.6041 19.5 17.4995V2.49951C19.5 1.39494 18.6046 0.499512 17.5 0.499512ZM11 4.99951H9V6.99951H11V4.99951ZM11 8.99951H9V14.9995H11V8.99951Z"
@@ -925,11 +929,11 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
                 />
               </svg>
             </div>
-            <div className="text-[#3A3A3A] border-2 border-[#0063CB] p-3  text-justify shadow-sm">
+            <div className="border-2 border-[#0063CB] p-3 text-justify  text-[#3A3A3A] shadow-sm">
               Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).
             </div>
           </div>
-          <p className="text-[14px] text-[#666666] leading-tight text-justify">
+          <p className="text-justify text-[14px] leading-tight text-[#666666]">
             À noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
           </p>
           <div className="my-4 flex items-start justify-between">
@@ -995,7 +999,7 @@ function Identite({ values, handleChange, errors, setFieldValue, cohort }) {
 
   return (
     <>
-      <div className="font-medium text-xs text-[#242526] leading-snug mb-2">Identité et contact</div>
+      <div className="mb-2 text-xs font-medium leading-snug text-[#242526]">Identité et contact</div>
       <div className="mb-4 flex items-start justify-between">
         <Field name="lastName" label="Nom" errors={errors} value={values.lastName} transformer={translate} className="mr-2 flex-[1_1_50%]" handleChange={handleChange} />
         <Field name="firstName" label="Prénom" errors={errors} value={values.firstName} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
@@ -1050,20 +1054,22 @@ function Identite({ values, handleChange, errors, setFieldValue, cohort }) {
             setFielValue={setFieldValue}
           />
           {values.latestCNIFileExpirationDate !== null && cohort?.dateStart && new Date(values.latestCNIFileExpirationDate).getTime() < new Date(cohort?.dateStart).getTime() && (
-            <div className="mt-4 w-100 flex flew-row justify-between items-center">
+            <div className="w-100 flew-row mt-4 flex items-center justify-between">
               <div>Attestation sur l&apos;honneur</div>
               {values.parentStatementOfHonorInvalidId === "true" ? (
                 <a
                   onClick={(e) => handleChangeBool(e, "false")}
                   name="parentStatementOfHonorInvalidId"
-                  className="p-2 py text-center leading-5 border cursor-pointer border-[#D1D5DB] text-white bg-[#3B82F6] rounded-3xl">
+                  className="py cursor-pointer rounded-3xl border border-[#D1D5DB] bg-[#3B82F6] p-2 text-center leading-5 text-white"
+                >
                   Validée
                 </a>
               ) : (
                 <a
                   onClick={(e) => handleChangeBool(e, "true")}
                   name="parentStatementOfHonorInvalidId"
-                  className="p-2 py text-center leading-5  border cursor-pointer border-[#D1D5DB] text-whit rounded-3xl">
+                  className="py text-whit cursor-pointer rounded-3xl  border border-[#D1D5DB] p-2 text-center leading-5"
+                >
                   Non validée
                 </a>
               )}
@@ -1167,7 +1173,7 @@ function SectionConsentements({ young, setFieldValue, errors }) {
   return (
     <div className="flex">
       <div className="flex-[1_0_50%] pr-[56px]">
-        <div className="text-[16px] leading-[24px] font-bold text-[#242526]">
+        <div className="text-[16px] font-bold leading-[24px] text-[#242526]">
           Le volontaire{" "}
           <span className="font-normal text-[#6B7280]">
             {young.firstName} {young.lastName}
@@ -1192,18 +1198,18 @@ function SectionConsentements({ young, setFieldValue, errors }) {
           </CheckRead>
         </div>
       </div>
-      <div className="w-[1px] my-[73px] bg-[#E5E7EB] flex-[0_0_1px]" />
+      <div className="my-[73px] w-[1px] flex-[0_0_1px] bg-[#E5E7EB]" />
       <div className="flex-[1_0_50%] pl-[56px] pb-[32px]">
-        <div className="text-[16px] leading-[24px] font-bold text-[#242526] flex items-center justify-between mb-[16px]">
+        <div className="mb-[16px] flex items-center justify-between text-[16px] font-bold leading-[24px] text-[#242526]">
           <div className="grow">
             {PARENT_STATUS_NAME[young.parent1Status]}{" "}
             <span className="font-normal text-[#6B7280]">
               {young.parent1FirstName} {young.parent1LastName}
             </span>
           </div>
-          <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+          <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
         </div>
-        <div className="flex flex-column">
+        <div className="flex-column flex">
           <RadioButton value={young.parentAllowSNU} options={authorizationOptions} onChange={() => handleConsentementChange("parentAllowSNU")} />
           {errors.parentAllowSNU && (
             <div className="text-red-500">
@@ -1215,7 +1221,7 @@ function SectionConsentements({ young, setFieldValue, errors }) {
             </div>
           )}
         </div>
-        <div className="text-[#161616] text-[14px] leading-[20px] my-[16px]">
+        <div className="my-[16px] text-[14px] leading-[20px] text-[#161616]">
           <b>
             {young.firstName} {young.lastName}
           </b>{" "}
@@ -1252,8 +1258,8 @@ function SectionConsentements({ young, setFieldValue, errors }) {
             Reconnait avoir pris connaissance du Règlement Intérieur du SNU.
           </CheckRead>
         </div>
-        <div className="mt-[16px] flex itemx-center justify-between">
-          <div className="grow text-[#374151] text-[14px] leading-[20px]">
+        <div className="itemx-center mt-[16px] flex justify-between">
+          <div className="grow text-[14px] leading-[20px] text-[#374151]">
             <div className="font-bold">Droit à l&apos;image</div>
             <div>Accord : {translate(young.parent1AllowImageRights)}</div>
           </div>
@@ -1264,8 +1270,8 @@ function SectionConsentements({ young, setFieldValue, errors }) {
           )}
         </div>
         {(young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false") && (
-          <div className="mt-[16px] flex itemx-center justify-between">
-            <div className="grow text-[#374151] text-[14px] leading-[20px]">
+          <div className="itemx-center mt-[16px] flex justify-between">
+            <div className="grow text-[14px] leading-[20px] text-[#374151]">
               <div className="font-bold">Consentement à la participation</div>
               <div>Accord : {translate(young.parent1AllowSNU)}</div>
             </div>
@@ -1275,18 +1281,18 @@ function SectionConsentements({ young, setFieldValue, errors }) {
           </div>
         )}
         {young.parent2Status && (
-          <div className="mt-[24px] border-t-[#E5E7EB] border-t-[1px] pt-[24px]">
-            <div className="text-[16px] leading-[24px] font-bold text-[#242526] flex items-center justify-between mb-[16px]">
+          <div className="mt-[24px] border-t-[1px] border-t-[#E5E7EB] pt-[24px]">
+            <div className="mb-[16px] flex items-center justify-between text-[16px] font-bold leading-[24px] text-[#242526]">
               <div className="grow">
                 {PARENT_STATUS_NAME[young.parent2Status]}{" "}
                 <span className="font-normal text-[#6B7280]">
                   {young.parent2FirstName} {young.parent2LastName}
                 </span>
               </div>
-              <div className="text-[13px] whitespace-nowrap text-[#1F2937] font-normal">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+              <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
             </div>
             <div className="mt-[16px] flex items-center justify-between">
-              <div className="grow text-[#374151] text-[14px] leading-[20px]">
+              <div className="grow text-[14px] leading-[20px] text-[#374151]">
                 <div className="font-bold">Droit à l&apos;image</div>
                 <div>Accord : {translate(young.parent2AllowImageRights)}</div>
               </div>
@@ -1305,14 +1311,15 @@ function SectionConsentements({ young, setFieldValue, errors }) {
 
 function CheckRead({ name, errors, value, children, onClick }) {
   return (
-    <div onClick={onClick} className="cursor-pointer flex items-center mt-[16px]">
+    <div onClick={onClick} className="mt-[16px] flex cursor-pointer items-center">
       <div
-        className={`flex-[0_0_14px]  mr-[24px] bg-[#E5E5E5] rounded-[4px] flex items-center justify-center text-[#666666] w-[14px] h-[14px] ${
+        className={`mr-[24px]  flex h-[14px] w-[14px] flex-[0_0_14px] items-center justify-center rounded-[4px] bg-[#E5E5E5] text-[#666666] ${
           errors[name] && !value ? "border-2 border-red-500" : ""
-        } `}>
-        {value && <Check className="w-[11px] h-[8px]" />}
+        } `}
+      >
+        {value && <Check className="h-[8px] w-[11px]" />}
       </div>
-      <div className="grow text-[#3A3A3A] text-[14px] leading-[19px]">{children}</div>
+      <div className="grow text-[14px] leading-[19px] text-[#3A3A3A]">{children}</div>
     </div>
   );
 }

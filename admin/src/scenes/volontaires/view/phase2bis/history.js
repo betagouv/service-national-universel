@@ -43,10 +43,11 @@ export default function history({ young, onChange }) {
       <YoungHeader young={young} tab="phase2" onChange={onChange} />
 
       <div className="p-[30px]">
-        <div className="flex items-center gap-1 text-gray-600 py-1">
+        <div className="flex items-center gap-1 py-1 text-gray-600">
           <button
             onClick={history.goBack}
-            className="h-8 w-8 flex items-center justify-center space-x-1 bg-gray-100 rounded-full border-[1px] border-gray-100 hover:border-gray-300">
+            className="flex h-8 w-8 items-center justify-center space-x-1 rounded-full border-[1px] border-gray-100 bg-gray-100 hover:border-gray-300"
+          >
             <LeftArrow stroke={"#374151"} width={15} />
           </button>
           <span>Historique de la candidature à : {application?.missionName}</span>
@@ -55,7 +56,7 @@ export default function history({ young, onChange }) {
       </div>
       {contract ? (
         <div className="p-[30px]">
-          <div className="text-gray-600 py-1">Historique du contrat</div>
+          <div className="py-1 text-gray-600">Historique du contrat</div>
           <HistoricComponent model="contract" value={contract} />
         </div>
       ) : null}

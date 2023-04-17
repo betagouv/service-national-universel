@@ -66,9 +66,9 @@ export default function MobileList({ data }) {
 
   return (
     <div className="w-full">
-      <div className="hidden border-[#FE7B52] border-[#FEB951] border-[#6CC763] border-[#F8A9AD] border-[#382F79] border-[#d7d7d7] border-[#FE7B52] border-[#382F79] border-[#FEB951] border-[#FEB951] border-[#FE7B52] border-[#FE7B52] border-[#FE7B52] border-[#6CC763] border-[#BE3B12] border-[#ffa987] border-[#d7d7d7] border-[#BE3B12]" />
-      <div className="flex flex-row !justify-between items-center mx-4 my-6">
-        <div className="font-bold text-2xl">Volontaires</div>
+      <div className="hidden border-[#FE7B52] border-[#FE7B52] border-[#FE7B52] border-[#FE7B52] border-[#FE7B52] border-[#FEB951] border-[#FEB951] border-[#FEB951] border-[#6CC763] border-[#6CC763] border-[#F8A9AD] border-[#382F79] border-[#382F79] border-[#d7d7d7] border-[#d7d7d7] border-[#BE3B12] border-[#BE3B12] border-[#ffa987]" />
+      <div className="mx-4 my-6 flex flex-row items-center !justify-between">
+        <div className="text-2xl font-bold">Volontaires</div>
         <Select
           alignItems="right"
           onChange={(bus) => {
@@ -87,15 +87,15 @@ export default function MobileList({ data }) {
           }
         />
       </div>
-      <div className=" bg-white rounded-lg p-3">
+      <div className=" rounded-lg bg-white p-3">
         {/* filter */}
         <div className="flex flex-col items-center gap-2">
-          <div className="flex rounded-lg border-[1px] border-gray-300 w-full overflow-hidden">
+          <div className="flex w-full overflow-hidden rounded-lg border-[1px] border-gray-300">
             <input
               type="text"
               name="search"
               value={filter?.search || ""}
-              className="border-none p-2 w-full"
+              className="w-full border-none p-2"
               placeholder="Rechercher par prénom, nom, email, ville ..."
               onChange={(e) => updateFilter({ [e.target.name]: e.target.value })}
             />
@@ -167,51 +167,53 @@ const Line = ({ hit, onClick, selected }) => {
       <div className="mx-4 py-4">
         <div className="flex  items-center justify-between" onClick={onClick}>
           <div className={getClassName()}>
-            <div className="font-bold text-[15px]">{`${hit.firstName} ${hit.lastName}`}</div>
-            <div className="font-normal text-xs text-[#738297]">{`${hit.city || ""} (${hit.department || ""})`}</div>
+            <div className="text-[15px] font-bold">{`${hit.firstName} ${hit.lastName}`}</div>
+            <div className="text-xs font-normal text-[#738297]">{`${hit.city || ""} (${hit.department || ""})`}</div>
           </div>
-          {selected ? <ChevronDown className="text-gray-400 rotate-180" /> : <ChevronDown className="text-gray-400" />}
+          {selected ? <ChevronDown className="rotate-180 text-gray-400" /> : <ChevronDown className="text-gray-400" />}
         </div>
         {selected ? (
           <div className="flex flex-col gap-2 pt-2">
             <div className="flex flex-row items-center justify-between">
               <div
-                className="flex my-2 px-2 items-center"
+                className="my-2 flex items-center px-2"
                 onClick={() => {
                   copyToClipboard(hit.email);
                   setCopied(true);
-                }}>
-                <div className="flex items-center justify-center cursor-pointer hover:scale-105">
+                }}
+              >
+                <div className="flex cursor-pointer items-center justify-center hover:scale-105">
                   {copied ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
                 </div>
-                <div className="pl-2 flex-row text-gray-700 text-xs">{hit.email.length > 17 ? `${hit.email.substring(0, 17)} ...` : hit.email}</div>
+                <div className="flex-row pl-2 text-xs text-gray-700">{hit.email.length > 17 ? `${hit.email.substring(0, 17)} ...` : hit.email}</div>
               </div>
               {hit.phone ? (
-                <div className="flex item-center gap-2">
+                <div className="item-center flex gap-2">
                   <Phone className="text-gray-400" />
-                  <div className="font-normal text-xs">
+                  <div className="text-xs font-normal">
                     <a href={`tel:${hit.phone}`}>{formatPhoneNumberFR(hit.phone)}</a>
                   </div>
                 </div>
               ) : null}
             </div>
-            <div className="font-bold text-sm">{`${hit.parent1FirstName} ${hit.parent1LastName} ${hit?.parent1Status ? "(" + translate(hit.parent1Status) + ")" : ""}`}</div>
+            <div className="text-sm font-bold">{`${hit.parent1FirstName} ${hit.parent1LastName} ${hit?.parent1Status ? "(" + translate(hit.parent1Status) + ")" : ""}`}</div>
             <div className="flex flex-row items-center justify-between">
               <div
-                className="flex my-2 px-2 items-center"
+                className="my-2 flex items-center px-2"
                 onClick={() => {
                   copyToClipboard(hit.parent1Email);
                   setCopied1(true);
-                }}>
-                <div className="flex items-center justify-center cursor-pointer hover:scale-105">
+                }}
+              >
+                <div className="flex cursor-pointer items-center justify-center hover:scale-105">
                   {copied1 ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
                 </div>
-                <div className="pl-2 flex-row text-gray-700 text-xs">{hit.parent1Email.length > 17 ? `${hit.parent1Email.substring(0, 17)} ...` : hit.parent1Email}</div>
+                <div className="flex-row pl-2 text-xs text-gray-700">{hit.parent1Email.length > 17 ? `${hit.parent1Email.substring(0, 17)} ...` : hit.parent1Email}</div>
               </div>
               {hit.parent1Phone ? (
-                <div className="flex item-center gap-2">
+                <div className="item-center flex gap-2">
                   <Phone className="text-gray-400" />
-                  <div className="font-normal text-xs">
+                  <div className="text-xs font-normal">
                     <a href={`tel:${hit.parent1Phone}`}>{formatPhoneNumberFR(hit.parent1Phone)}</a>
                   </div>
                 </div>
@@ -219,23 +221,24 @@ const Line = ({ hit, onClick, selected }) => {
             </div>
             {parent2 ? (
               <>
-                <div className="font-bold text-sm">{`${hit.parent2FirstName} ${hit.parent2LastName} ${hit?.parent2Status ? "(" + translate(hit.parent2Status) + ")" : ""}`}</div>
+                <div className="text-sm font-bold">{`${hit.parent2FirstName} ${hit.parent2LastName} ${hit?.parent2Status ? "(" + translate(hit.parent2Status) + ")" : ""}`}</div>
                 <div className="flex flex-row items-center justify-between">
                   <div
-                    className="flex my-2 px-2 items-center"
+                    className="my-2 flex items-center px-2"
                     onClick={() => {
                       copyToClipboard(hit.parent2Email);
                       setCopied2(true);
-                    }}>
-                    <div className="flex items-center justify-center cursor-pointer hover:scale-105">
+                    }}
+                  >
+                    <div className="flex cursor-pointer items-center justify-center hover:scale-105">
                       {copied2 ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
                     </div>
-                    <div className="pl-2 flex-row text-gray-700 text-xs">{hit.parent2Email.length > 17 ? `${hit.parent2Email.substring(0, 17)} ...` : hit.parent2Email}</div>
+                    <div className="flex-row pl-2 text-xs text-gray-700">{hit.parent2Email.length > 17 ? `${hit.parent2Email.substring(0, 17)} ...` : hit.parent2Email}</div>
                   </div>
                   {hit.parent2Phone ? (
-                    <div className="flex item-center gap-2">
+                    <div className="item-center flex gap-2">
                       <Phone className="text-gray-400" />
-                      <div className="font-normal text-xs">
+                      <div className="text-xs font-normal">
                         <a href={`tel:${hit.parent2Phone}`}>{formatPhoneNumberFR(hit.parent2Phone)}</a>
                       </div>
                     </div>

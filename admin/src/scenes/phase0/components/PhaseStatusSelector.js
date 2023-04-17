@@ -58,10 +58,11 @@ export default function PhaseStatusSelector({ young, onChange }) {
       tags.map((t) => (
         <div
           key={t}
-          className={`flex items-center px-[16px] py-[8px] whitespace-nowrap rounded-b-[6px] bg-[#FFFFFF] hover:bg-[#F3F4F6] text-[#374151] text-[14px] ${
+          className={`flex items-center whitespace-nowrap rounded-b-[6px] bg-[#FFFFFF] px-[16px] py-[8px] text-[14px] text-[#374151] hover:bg-[#F3F4F6] ${
             young[`statusPhase${statusOpened}`] === t ? "font-medium" : "cursor-pointer"
           }`}
-          onClick={() => confirmChangePhaseStatus(statusOpened, t)}>
+          onClick={() => confirmChangePhaseStatus(statusOpened, t)}
+        >
           {young[`statusPhase${statusOpened}`] === t && <Check />}
           <div className="ml-[6px]">{statusOpened === 1 ? translatePhase1(t) : translate(t)}</div>
         </div>
@@ -106,40 +107,43 @@ export default function PhaseStatusSelector({ young, onChange }) {
 
   return (
     <>
-      <div ref={containerRef} className={`relative bg-white border-[#D1D5DB] border-[1px] rounded-[6px] border-[#D1D5DB]`}>
-        <div className="p-[13px] flex items-center cursor-pointer" onClick={() => setPhaseChoiceOpened(!phaseChoiceOpened)}>
-          <div className="text-[#6B7280] text-[14px] whitespace-nowrap">Statuts de phases</div>
-          <ChevronDown className="text-[#1F2937] ml-[8px]" />
+      <div ref={containerRef} className={`relative rounded-[6px] border-[1px] border-[#D1D5DB] border-[#D1D5DB] bg-white`}>
+        <div className="flex cursor-pointer items-center p-[13px]" onClick={() => setPhaseChoiceOpened(!phaseChoiceOpened)}>
+          <div className="whitespace-nowrap text-[14px] text-[#6B7280]">Statuts de phases</div>
+          <ChevronDown className="ml-[8px] text-[#1F2937]" />
         </div>
         {phaseChoiceOpened && (
-          <div className="absolute z-10 mt-[8px] top-[100%] right-[0px] border-[#E5E7EB] border-[1px] rounded-[6px] bg-[#FFFFFF] text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
+          <div className="absolute top-[100%] right-[0px] z-10 mt-[8px] rounded-[6px] border-[1px] border-[#E5E7EB] bg-[#FFFFFF] text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
             <div
-              className={`flex items-center px-[16px] py-[8px] whitespace-nowrap rounded-t-[6px] ${
-                statusOpened === 1 ? "bg-[#F3F4F6]" : "bg-[#FFFFFF] hover:bg-[#F3F4F6] cursor-pointer"
+              className={`flex items-center whitespace-nowrap rounded-t-[6px] px-[16px] py-[8px] ${
+                statusOpened === 1 ? "bg-[#F3F4F6]" : "cursor-pointer bg-[#FFFFFF] hover:bg-[#F3F4F6]"
               }`}
-              onClick={() => setStatusOpened(1)}>
-              <div className="text-[14px] text-[#111827] mr-[9px]">Phase 1</div>
+              onClick={() => setStatusOpened(1)}
+            >
+              <div className="mr-[9px] text-[14px] text-[#111827]">Phase 1</div>
               <div className="grow text-[12px] text-[#6B7280]">{translatePhase1(young.statusPhase1)}</div>
-              <ChevronRight className="text-[#1F2937] ml-[9px]" />
+              <ChevronRight className="ml-[9px] text-[#1F2937]" />
             </div>
             <div
-              className={`flex items-center px-[16px] py-[8px] whitespace-nowrap ${statusOpened === 2 ? "bg-[#F3F4F6]" : "bg-[#FFFFFF] hover:bg-[#F3F4F6] cursor-pointer"}`}
-              onClick={() => setStatusOpened(2)}>
-              <div className="text-[14px] text-[#111827] mr-[9px]">Phase 2</div>
+              className={`flex items-center whitespace-nowrap px-[16px] py-[8px] ${statusOpened === 2 ? "bg-[#F3F4F6]" : "cursor-pointer bg-[#FFFFFF] hover:bg-[#F3F4F6]"}`}
+              onClick={() => setStatusOpened(2)}
+            >
+              <div className="mr-[9px] text-[14px] text-[#111827]">Phase 2</div>
               <div className="grow text-[12px] text-[#6B7280]">{translate(young.statusPhase2)}</div>
-              <ChevronRight className="text-[#1F2937] ml-[9px]" />
+              <ChevronRight className="ml-[9px] text-[#1F2937]" />
             </div>
             <div
-              className={`flex items-center px-[16px] py-[8px] whitespace-nowrap rounded-b-[6px] ${
-                statusOpened === 3 ? "bg-[#F3F4F6]" : "bg-[#FFFFFF] hover:bg-[#F3F4F6] cursor-pointer"
+              className={`flex items-center whitespace-nowrap rounded-b-[6px] px-[16px] py-[8px] ${
+                statusOpened === 3 ? "bg-[#F3F4F6]" : "cursor-pointer bg-[#FFFFFF] hover:bg-[#F3F4F6]"
               }`}
-              onClick={() => setStatusOpened(3)}>
-              <div className="text-[14px] text-[#111827] mr-[9px]">Phase 3</div>
+              onClick={() => setStatusOpened(3)}
+            >
+              <div className="mr-[9px] text-[14px] text-[#111827]">Phase 3</div>
               <div className="grow text-[12px] text-[#6B7280]">{translate(young.statusPhase3)}</div>
-              <ChevronRight className="text-[#1F2937] ml-[9px]" />
+              <ChevronRight className="ml-[9px] text-[#1F2937]" />
             </div>
             {statusOpened > 0 && (
-              <div className="absolute z-10 mr-[4px] top-[0px] right-[100%] border-[#E5E7EB] border-[1px] rounded-[6px] bg-[#FFFFFF] text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] overflow-hidden">
+              <div className="absolute top-[0px] right-[100%] z-10 mr-[4px] overflow-hidden rounded-[6px] border-[1px] border-[#E5E7EB] bg-[#FFFFFF] text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
                 {phaseStatuses}
               </div>
             )}
@@ -149,7 +153,7 @@ export default function PhaseStatusSelector({ young, onChange }) {
       {confirmChangeModal && (
         <ConfirmationModal
           isOpen={true}
-          icon={<Warning className="text-[#D1D5DB] w-[36px] h-[36px]" />}
+          icon={<Warning className="h-[36px] w-[36px] text-[#D1D5DB]" />}
           title={"Changement de statut"}
           message={confirmChangeModal.message}
           confirmText="Confirmer le changement"

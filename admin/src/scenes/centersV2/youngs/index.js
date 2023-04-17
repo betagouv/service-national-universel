@@ -425,12 +425,13 @@ export default function CenterYoungIndex() {
       ) : null}
       <div className="m-8">
         <div className="flex items-center justify-between">
-          <div className="font-bold text-2xl mb-4">Volontaires</div>
+          <div className="mb-4 text-2xl font-bold">Volontaires</div>
           <div className="flex items-center gap-2">
             <button
               disabled={loading}
               onClick={() => viewAttestation()}
-              className="flex justify-between items-center gap-3 px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-wait bg-blue-600 text-white font-medium text-sm">
+              className="flex cursor-pointer items-center justify-between gap-3 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white disabled:cursor-wait disabled:opacity-50"
+            >
               Exporter les attestations
             </button>
             <SelectAction
@@ -448,7 +449,7 @@ export default function CenterYoungIndex() {
                         await exportData();
                       },
                       render: (
-                        <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
                           <ClipboardList className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
                           <div className="text-sm text-gray-700">Informations complètes</div>
                         </div>
@@ -459,7 +460,7 @@ export default function CenterYoungIndex() {
                         await exportDataTransport();
                       },
                       render: (
-                        <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
                           <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
                           <div className="text-sm text-gray-700">Informations transports</div>
                         </div>
@@ -483,7 +484,7 @@ export default function CenterYoungIndex() {
                         });
                       },
                       render: (
-                        <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
                           <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
                           <div className="text-sm text-gray-700">Informations transports</div>
                         </div>
@@ -495,14 +496,14 @@ export default function CenterYoungIndex() {
             />
           </div>
         </div>
-        <div className=" flex flex-1 flex-col lg:flex-row pt-4">
+        <div className=" flex flex-1 flex-col pt-4 lg:flex-row">
           <nav className="flex flex-1 gap-1">
             <TabItem icon={<Menu />} title="Général" to={`/centre/${id}/${sessionId}/general${urlParams && "?" + urlParams}`} />
             <TabItem
               icon={<PencilAlt />}
               title="Tableau de pointage"
               to={`/centre/${id}/${sessionId}/tableau-de-pointage${urlParams && "?" + urlParams}`}
-              extraIcon={!isYoungCheckinOpen ? <Warning className="text-red-900 cursor-pointer" /> : null}
+              extraIcon={!isYoungCheckinOpen ? <Warning className="cursor-pointer text-red-900" /> : null}
               extraTooltip="Le pointage n'est pas ouvert"
             />
             <TabItem icon={<ShieldCheck />} title="Fiche sanitaire" to={`/centre/${id}/${sessionId}/fiche-sanitaire${urlParams && "?" + urlParams}`} />
@@ -523,15 +524,16 @@ const TabItem = ({ to, title, icon, extraIcon, extraTooltip }) => (
   <NavLink
     to={to}
     activeClassName="!text-snu-purple-800 bg-white border-none"
-    className="text-[13px] px-3 py-2 cursor-pointer text-gray-600 rounded-t-lg bg-gray-50 border-t-[1px] border-r-[1px] border-l-[1px] border-gray-200 hover:text-snu-purple-800">
+    className="cursor-pointer rounded-t-lg border-t-[1px] border-r-[1px] border-l-[1px] border-gray-200 bg-gray-50 px-3 py-2 text-[13px] text-gray-600 hover:text-snu-purple-800"
+  >
     <div className="flex items-center gap-2">
       {icon} {title}
       {extraIcon && (
         <div className="group relative">
           {extraIcon}
           {extraTooltip && (
-            <div className="hidden group-hover:block absolute bottom-[calc(100%+5px)] left-[50%] bg-gray-200 rounded-lg translate-x-[-50%] px-2 py-1 text-black shadow-sm z-10 min-w-[200px] text-center">
-              <div className="absolute left-[50%] translate-x-[-50%] bg-gray-200 w-[10px] h-[10px] rotate-45 bottom-[-5px] shadow-sm"></div>
+            <div className="absolute bottom-[calc(100%+5px)] left-[50%] z-10 hidden min-w-[200px] translate-x-[-50%] rounded-lg bg-gray-200 px-2 py-1 text-center text-black shadow-sm group-hover:block">
+              <div className="absolute left-[50%] bottom-[-5px] h-[10px] w-[10px] translate-x-[-50%] rotate-45 bg-gray-200 shadow-sm"></div>
               {extraTooltip}
             </div>
           )}

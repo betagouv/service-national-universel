@@ -141,7 +141,7 @@ export default function Details({ center, setCenter, sessions }) {
   };
   if (!data) return <></>;
   return (
-    <div className="flex flex-col m-8 gap-6">
+    <div className="m-8 flex flex-col gap-6">
       {/*TODO : SET Centre par défaut + cohorte disponible ?*/}
       <ModalRattacherCentre
         editable={false}
@@ -167,13 +167,13 @@ export default function Details({ center, setCenter, sessions }) {
           {user.role === ROLES.ADMIN ? (
             <div data-tip="" data-for="tooltip-delete">
               {sessions.length !== 0 && (
-                <ReactTooltip id="tooltip-delete" className="bg-white shadow-xl text-black" arrowColor="white" disable={false}>
+                <ReactTooltip id="tooltip-delete" className="bg-white text-black shadow-xl" arrowColor="white" disable={false}>
                   <div className="text-[black]">Des sessions sont encore associées au centre</div>
                 </ReactTooltip>
               )}
 
               <button
-                className="border-[1px] border-red-600 bg-red-600 shadow-sm px-4 py-2 text-white hover:!text-red-600 hover:bg-white transition duration-300 ease-in-out rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-lg border-[1px] border-red-600 bg-red-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() =>
                   setModalDelete({
                     isOpen: true,
@@ -182,50 +182,55 @@ export default function Details({ center, setCenter, sessions }) {
                     onDelete: onDelete,
                   })
                 }
-                disabled={isLoading || sessions.length !== 0}>
+                disabled={isLoading || sessions.length !== 0}
+              >
                 Supprimer
               </button>
             </div>
           ) : null}
           {canCreateOrUpdateCohesionCenter(user) ? (
             <button
-              className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg"
-              onClick={() => setModalVisible(true)}>
+              className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
+              onClick={() => setModalVisible(true)}
+            >
               Rattacher un centre à un séjour
             </button>
           ) : null}
         </div>
       </div>
-      <div className="flex flex-col rounded-lg pt-8 pb-12 px-8 bg-white gap-8">
+      <div className="flex flex-col gap-8 rounded-lg bg-white px-8 pt-8 pb-12">
         <div className="flex items-center justify-between">
-          <div className="text-lg leading-6 font-medium text-gray-900">Informations générales</div>
+          <div className="text-lg font-medium leading-6 text-gray-900">Informations générales</div>
           {canUpdateMeetingPoint(user) ? (
             <>
               {!editInfo ? (
                 <button
-                  className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => setEditInfo(true)}
-                  disabled={isLoading}>
-                  <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                  disabled={isLoading}
+                >
+                  <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
                   Modifier
                 </button>
               ) : (
                 <div className="flex items-center gap-2">
                   <button
-                    className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                     onClick={() => {
                       setEditInfo(false);
                       setData(center);
                       setErrors({});
                     }}
-                    disabled={isLoading}>
+                    disabled={isLoading}
+                  >
                     Annuler
                   </button>
                   <button
-                    className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                     onClick={onSubmit}
-                    disabled={isLoading}>
-                    <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                    disabled={isLoading}
+                  >
+                    <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                     Enregistrer les changements
                   </button>
                 </div>
@@ -234,18 +239,18 @@ export default function Details({ center, setCenter, sessions }) {
           ) : null}
         </div>
         <div className="flex">
-          <div className="flex flex-col w-[45%] gap-4 ">
+          <div className="flex w-[45%] flex-col gap-4 ">
             <div className="flex flex-col gap-2">
               <div className="text-xs font-medium leading-4 text-gray-900">Nom du centre</div>
               <Field readOnly={!editInfo} label="Nom du centre" onChange={(e) => setData({ ...data, name: e.target.value })} value={data.name} error={errors?.name} />
             </div>
-            <div className="flex justify-between items-center">
-              <div className="flex gap-2 items-center">
-                <div className="flex bg-gray-100 rounded-full items-center justify-center p-2 ">
-                  <BiHandicap className="text-gray-500 h-5 w-5" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center rounded-full bg-gray-100 p-2 ">
+                  <BiHandicap className="h-5 w-5 text-gray-500" />
                 </div>
-                <div className="flex flex-col flex-1">
-                  <div className="text-sm leading-5 font-bold text-gray-700">Accessibilité PMR</div>
+                <div className="flex flex-1 flex-col">
+                  <div className="text-sm font-bold leading-5 text-gray-700">Accessibilité PMR</div>
                   <div className="text-sm leading-5 text-gray-700">{data.pmr === "true" ? "Oui" : "Non"}</div>
                 </div>
               </div>
@@ -310,10 +315,10 @@ export default function Details({ center, setCenter, sessions }) {
               )}
             </div>
           </div>
-          <div className="flex w-[10%] justify-center items-center">
-            <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
+          <div className="flex w-[10%] items-center justify-center">
+            <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
           </div>
-          <div className="flex flex-col w-[45%]  justify-between">
+          <div className="flex w-[45%] flex-col  justify-between">
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-2">
                 <div className="text-xs font-medium text-gray-900">Détails</div>

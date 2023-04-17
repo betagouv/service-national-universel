@@ -151,7 +151,8 @@ export default function AddressInputV2({
                   const value = e.target.value;
                   handleChange({ target: { name: keys.country, value } });
                   onChangeCountry();
-                }}>
+                }}
+              >
                 <option value="" label="Sélectionner un pays" disabled>
                   Sélectionner un pays
                 </option>
@@ -228,7 +229,8 @@ export default function AddressInputV2({
                   className="form-control"
                   placeholder="Département"
                   name={keys.department}
-                  value={values[keys.department]}>
+                  value={values[keys.department]}
+                >
                   <option label=""></option>
                   {departmentList.map((d) => (
                     <option key={d} value={d}>
@@ -282,7 +284,8 @@ export default function AddressInputV2({
                 onClick={() => {
                   setSuggestion({});
                   addressVerifiedHelpers.setValue("false");
-                }}>
+                }}
+              >
                 Non
               </SecondaryButton>
               <PrimaryButton onClick={onSuggestionSelected}>Oui</PrimaryButton>

@@ -65,10 +65,10 @@ export default function Save({ filterArray, selectedFilters, page = 1, pageId })
 
   return (
     <>
-      <ReactTooltip id="tooltip-saveFilter" className="bg-white !rounded-lg shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
+      <ReactTooltip id="tooltip-saveFilter" className="!rounded-lg bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
         <div>
           <div className="text-xs text-gray-600">Enregistrer cette vue...</div>
-          <div className="text-gray-600 font-bold">{saveTitle(selectedFilters, filterArray).join(", ")}</div>
+          <div className="font-bold text-gray-600">{saveTitle(selectedFilters, filterArray).join(", ")}</div>
         </div>
       </ReactTooltip>
       <div className="relative mr-1">
@@ -76,17 +76,18 @@ export default function Save({ filterArray, selectedFilters, page = 1, pageId })
           data-tip=""
           data-for="tooltip-saveFilter"
           onClick={() => setModalSaveVisible(true)}
-          className="p-2 h-[38px] w-[38px] bg-gray-100 hover:bg-gray-200 rounded flex items-center justify-center cursor-pointer">
+          className="flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded bg-gray-100 p-2 hover:bg-gray-200"
+        >
           <FloppyDisk />
         </div>
 
         {modalSaveVisible && (
-          <div className="absolute left-0 z-10 mt-2 bg-white w-[492px]  rounded-lg shadow-lg px-8" ref={ref}>
-            <div className="font-bold text-sm text-gray-800 mt-6">Enregistrer une nouvelle (groupe de filtres)</div>
-            <div className="font-medium text-xs mt-3 mb-2">Nommez la vue</div>
+          <div className="absolute left-0 z-10 mt-2 w-[492px] rounded-lg  bg-white px-8 shadow-lg" ref={ref}>
+            <div className="mt-6 text-sm font-bold text-gray-800">Enregistrer une nouvelle (groupe de filtres)</div>
+            <div className="mt-3 mb-2 text-xs font-medium">Nommez la vue</div>
             <Field autoFocus name="nameView" label="Nom de la vue" value={nameView} errors={{ nameView: error }} handleChange={(e) => setNameView(e.target.value)} />
-            <div className="flex justify-end items-center">
-              <div onClick={handleSave} className={` ${loading && "opacity-50"} bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md w-fit my-4 self-end cursor-pointer`}>
+            <div className="flex items-center justify-end">
+              <div onClick={handleSave} className={` ${loading && "opacity-50"} my-4 w-fit cursor-pointer self-end rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-700`}>
                 Enregistrer
               </div>
             </div>

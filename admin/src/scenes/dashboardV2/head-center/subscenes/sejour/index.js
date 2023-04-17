@@ -16,7 +16,8 @@ export default function Index() {
             Exporter le rapport <span className="font-bold">“Séjour”</span>
           </ButtonPrimary>
         </div>
-      }>
+      }
+    >
       <div>Séjour</div>
     </DashboardContainer>
   );

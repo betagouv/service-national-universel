@@ -42,7 +42,8 @@ export default function ModalConfirm({
               onConfirm();
               setSending((e) => ({ ...e, sending1: false }));
             }}
-            primary>
+            primary
+          >
             {confirmText}
           </ModalButton>
           {onConfirm2 ? (
@@ -53,7 +54,8 @@ export default function ModalConfirm({
                 setSending((e) => ({ ...e, sending2: true }));
                 onConfirm2();
                 setSending((e) => ({ ...e, sending2: false }));
-              }}>
+              }}
+            >
               {confirmText2}
             </ModalButton>
           ) : null}

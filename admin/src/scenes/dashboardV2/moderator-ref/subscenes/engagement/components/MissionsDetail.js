@@ -59,7 +59,7 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
                     <div>{d.missionsCount}</div>
                     <div className="font-normal">missions</div>
                     <div className="mt-2">{Math.round(d.placesLeft * 100)}%</div>
-                    <div className="font-normal whitespace-nowrap">de places disponibles</div>
+                    <div className="whitespace-nowrap font-normal">de places disponibles</div>
                   </div>,
                   <div key="t-1">
                     <div>{d.preferencesCount}</div>
@@ -88,7 +88,7 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
   return (
     <DashboardBox title="Détail des missions : préférences vs réalité" className={className}>
       <Tabs selected={selectedTab} tabs={tabs} onChange={setSelectedTab} className="my-6" />
-      <div className="flex justify-end my-4">
+      <div className="my-4 flex justify-end">
         <select className="" value={sort} onChange={selectSort}>
           {sortOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -98,16 +98,16 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
         </select>
       </div>
       {error ? (
-        <div className="flex justify-center items-center text-center text-sm text-red-600 font-medium p-8">{error}</div>
+        <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : loading ? (
-        <div className="flex justify-center items-center">
+        <div className="flex items-center justify-center">
           <Loader />
         </div>
       ) : bars.length === 0 ? (
-        <div className="text-gray-500 text-center">Aucune données</div>
+        <div className="text-center text-gray-500">Aucune données</div>
       ) : (
         <>
-          <div className="flex justify-around items-center mb-8">
+          <div className="mb-8 flex items-center justify-around">
             {bars.map((bar) => (
               <BarChart key={bar.title} title={bar.title} values={bar.values} tooltips={bar.tooltips} max={maxValue} unit="%" className="h-[140px]" />
             ))}

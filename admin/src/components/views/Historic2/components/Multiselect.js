@@ -16,8 +16,8 @@ export default function MultiSelect({ options, selected, onChange, label }) {
       <Listbox value={selected} onChange={onChange} multiple>
         {({ open }) => (
           <div className="relative">
-            <Listbox.Button className="flex rounded-lg p-2 border bg-white items-center gap-3">
-              <p className="min-w-1/4 text-left text-sm text-gray-500 max-w-xs whitespace-nowrap overflow-hidden">
+            <Listbox.Button className="flex items-center gap-3 rounded-lg border bg-white p-2">
+              <p className="min-w-1/4 max-w-xs overflow-hidden whitespace-nowrap text-left text-sm text-gray-500">
                 {label} :{" "}
                 {options
                   .filter((option) => selected.includes(option.value))
@@ -30,13 +30,14 @@ export default function MultiSelect({ options, selected, onChange, label }) {
             </Listbox.Button>
 
             <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-              <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                <input onChange={(e) => setQuery(e.target.value)} placeholder="Rechercher..." className="w-full py-2 px-3 border-b text-xs" />
+              <Listbox.Options className="max-h-60 absolute z-10 mt-1 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                <input onChange={(e) => setQuery(e.target.value)} placeholder="Rechercher..." className="w-full border-b py-2 px-3 text-xs" />
                 {filteredOptions.map((option) => (
                   <Listbox.Option
                     key={option.value}
-                    className={({ active }) => classNames(active ? "text-white bg-blue-600" : "text-gray-900", "relative cursor-default select-none py-2 pl-3 pr-9 list-none")}
-                    value={option.value}>
+                    className={({ active }) => classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-default select-none list-none py-2 pl-3 pr-9")}
+                    value={option.value}
+                  >
                     {({ selected, active }) => (
                       <>
                         <span className={classNames(selected ? "font-semibold" : "font-normal", "block truncate")}>{option.label}</span>

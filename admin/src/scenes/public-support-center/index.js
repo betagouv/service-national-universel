@@ -151,7 +151,8 @@ const KnowledgeBaseArticleCard = ({ _id, position, title, slug, path, className 
         rel="noreferrer"
         data-position={position}
         data-id={_id}
-        className={`my-1 w-full shrink-0 grow-0 lg:my-4 ${className}`}>
+        className={`my-1 w-full shrink-0 grow-0 lg:my-4 ${className}`}
+      >
         <article className={`flex items-center overflow-hidden rounded-lg bg-white py-6 shadow-lg `}>
           <div className="flex flex-grow flex-col">
             <header className="flex items-center justify-between px-8 leading-tight">
@@ -184,16 +185,17 @@ export default function PublicSupportCenter(props) {
               style={{ color: "#32257F", fontWeight: "bold", fontSize: "16px" }}
               href={`${adminURL}/auth/login?redirect=besoin-d-aide`}
               target="_blank"
-              rel="noopener noreferrer">
+              rel="noopener noreferrer"
+            >
               Connectez-vous
             </a>
           </p>
         )}
-        <h3 className="text-center text-[32px] !mt-3">Besoin d&apos;aide&nbsp;?</h3>
-        <div className=" mt-2 flex w-full content-center items-center mr-auto ml-auto justify-center md:w-2/3 md:flex-1">
+        <h3 className="!mt-3 text-center text-[32px]">Besoin d&apos;aide&nbsp;?</h3>
+        <div className=" mt-2 mr-auto ml-auto flex w-full content-center items-center justify-center md:w-2/3 md:flex-1">
           <KnowledgeBaseSearch path="/base-de-connaissance" className="rounded-md border border-gray-300 transition-colors focus:border-gray-400" restriction="public" />
         </div>
-        <div className="w-2/3 m-auto text-center !mt-3 !text-[16px] " style={{ color: "#6B7280" }}>
+        <div className="m-auto !mt-3 w-2/3 text-center !text-[16px] " style={{ color: "#6B7280" }}>
           <strong>Une question ? </strong> Utilisez notre moteur de recherche ci-dessus pour trouver l'article ou le tutoriel pour vous aider. Pour faciliter vos recherches
           utilisez <strong>des mots clés</strong> (ex : inscriptions, contrat d'engagement …)
         </div>
@@ -229,7 +231,8 @@ export default function PublicSupportCenter(props) {
                 onClick={() => {
                   plausibleEvent("Besoin d'aide - Contacter quelqu'un");
                   setOpen(true);
-                }}>
+                }}
+              >
                 Contacter quelqu&apos;un
               </LinkButton>
             </div>

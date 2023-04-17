@@ -174,21 +174,23 @@ export default function SchoolEditor({ young, onChange, className, showBackgroun
 
   return (
     <div className={`mb-[16px] ${className}`}>
-      <div className="flex justify-between items-center mb-[16px]">
+      <div className="mb-[16px] flex items-center justify-between">
         <span>Mon établissement est</span>
         <div className="inline-flex">
           <div
-            className={`border-[#3B82F6] border-[1px] rounded-[100px_0_0_100px] text-[14px] px-[10px] py-[3px] ${
-              schoolInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "bg-[#FFFFFF] text-[#3B82F6] cursor-pointer"
+            className={`rounded-[100px_0_0_100px] border-[1px] border-[#3B82F6] px-[10px] py-[3px] text-[14px] ${
+              schoolInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "cursor-pointer bg-[#FFFFFF] text-[#3B82F6]"
             }`}
-            onClick={() => changeSchoolInFrance(true)}>
+            onClick={() => changeSchoolInFrance(true)}
+          >
             en France
           </div>
           <div
-            className={`border-[#3B82F6] border-[1px] rounded-[0_100px_100px_0] text-[14px] px-[10px] py-[3px] ml-[-1px] ${
-              !schoolInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "bg-[#FFFFFF] text-[#3B82F6] cursor-pointer"
+            className={`ml-[-1px] rounded-[0_100px_100px_0] border-[1px] border-[#3B82F6] px-[10px] py-[3px] text-[14px] ${
+              !schoolInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "cursor-pointer bg-[#FFFFFF] text-[#3B82F6]"
             }`}
-            onClick={() => changeSchoolInFrance(false)}>
+            onClick={() => changeSchoolInFrance(false)}
+          >
             à l&apos;étranger
           </div>
         </div>
@@ -223,7 +225,7 @@ export default function SchoolEditor({ young, onChange, className, showBackgroun
         />
       )}
       {loadingSchools ? (
-        <div className="text-[#738297] my-[8px]">Chargement...</div>
+        <div className="my-[8px] text-[#738297]">Chargement...</div>
       ) : (
         <Field
           name="schoolName"

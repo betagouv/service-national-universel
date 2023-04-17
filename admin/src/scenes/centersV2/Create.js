@@ -128,27 +128,27 @@ export default function Create() {
   return (
     <>
       <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Création de centre" }]} />
-      <div className="flex flex-col m-8 rounded-lg p-8 bg-white">
-        <div className="flex items-center justify-center text-center text-2xl leading-8 font-bold tracking-tight gap-2">
+      <div className="m-8 flex flex-col rounded-lg bg-white p-8">
+        <div className="flex items-center justify-center gap-2 text-center text-2xl font-bold leading-8 tracking-tight">
           <div className="text-gray-400">Créer une session</div>
           <div className="text-gray-400">-</div>
           <div className="text-gray-900">Créer un centre</div>
         </div>
         <hr className="my-8" />
         <div className="flex">
-          <div className="flex flex-col w-[45%] gap-4 ">
-            <div className="text-lg leading-6 font-medium text-gray-900">Informations générales</div>
+          <div className="flex w-[45%] flex-col gap-4 ">
+            <div className="text-lg font-medium leading-6 text-gray-900">Informations générales</div>
             <div className="flex flex-col gap-2">
               <div className="text-xs font-medium leading-4 text-gray-900">Nom du centre</div>
               <Field label="Nom du centre" onChange={(e) => setData({ ...data, name: e.target.value })} value={data.name} error={errors?.name} />
             </div>
-            <div className="flex justify-between items-center">
-              <div className="flex gap-2 items-center">
-                <div className="flex bg-gray-100 rounded-full items-center justify-center p-2 ">
-                  <BiHandicap className="text-gray-500 h-5 w-5" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center rounded-full bg-gray-100 p-2 ">
+                  <BiHandicap className="h-5 w-5 text-gray-500" />
                 </div>
-                <div className="flex flex-col flex-1">
-                  <div className="text-sm leading-5 font-bold text-gray-700">Accessibilité PMR</div>
+                <div className="flex flex-1 flex-col">
+                  <div className="text-sm font-bold leading-5 text-gray-700">Accessibilité PMR</div>
                   <div className="text-sm leading-5 text-gray-700">{data.pmr ? "Oui" : "Non"}</div>
                 </div>
               </div>
@@ -185,10 +185,10 @@ export default function Create() {
               </div>
               {user.role === ROLES.ADMIN && (
                 <>
-                  <div className="flex flex-col gap-2 mt-4">
+                  <div className="mt-4 flex flex-col gap-2">
                     <div className="flex items-center gap-3">
                       <div className="text-xs font-medium leading-4 text-gray-900">Places ouvertes sur le séjour</div>
-                      <div className="rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF]">{cohort}</div>
+                      <div className="cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]">{cohort}</div>
                     </div>
                     <Field
                       label="Places ouvertes sur le séjour"
@@ -200,7 +200,7 @@ export default function Create() {
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
                       <div className="text-xs font-medium leading-4 text-gray-900">Statut de la session</div>
-                      <div className="rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF]">{cohort}</div>
+                      <div className="cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]">{cohort}</div>
                     </div>
                     <Select
                       label="Statut de la session"
@@ -213,10 +213,10 @@ export default function Create() {
               )}
             </div>
           </div>
-          <div className="flex w-[10%] justify-center items-center">
-            <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
+          <div className="flex w-[10%] items-center justify-center">
+            <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
           </div>
-          <div className="flex flex-col w-[45%]  justify-between">
+          <div className="flex w-[45%] flex-col  justify-between">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
                 <div className="text-xs font-medium leading-4 text-gray-900">Typologie</div>
@@ -258,7 +258,7 @@ export default function Create() {
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-3">
                     <div className="text-xs font-medium leading-4 text-gray-900">Places ouvertes sur le séjour</div>
-                    <div className="rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF]">{cohort}</div>
+                    <div className="cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]">{cohort}</div>
                   </div>
                   <Field
                     label="Places ouvertes sur le séjour"
@@ -286,8 +286,9 @@ export default function Create() {
             </div>
             <button
               onClick={onSubmit}
-              className={`border-[1px] border-blue-600 text-white bg-blue-600 py-2 rounded-lg hover:shadow-ninaButton disabled:opacity-50 disabled:cursor-not-allowed mt-4`}
-              disabled={isLoading}>
+              className={`mt-4 rounded-lg border-[1px] border-blue-600 bg-blue-600 py-2 text-white hover:shadow-ninaButton disabled:cursor-not-allowed disabled:opacity-50`}
+              disabled={isLoading}
+            >
               Enregistrer
             </button>
           </div>

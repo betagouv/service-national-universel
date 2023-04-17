@@ -104,11 +104,12 @@ export default function Field({
   return (
     <div className={className}>
       <div
-        className={`relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px] ${error ? "border-[#EF4444]" : "border-[#D1D5DB]"}`}
+        className={`relative rounded-[6px] border-[1px] border-[#D1D5DB] bg-white py-[9px] px-[13px] ${error ? "border-[#EF4444]" : "border-[#D1D5DB]"}`}
         key={name}
         onMouseEnter={() => mouseOver(true)}
-        onMouseLeave={() => mouseOver(false)}>
-        {label && <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">{label}</label>}
+        onMouseLeave={() => mouseOver(false)}
+      >
+        {label && <label className="text-[12px] font-normal leading-[16px] text-[#6B7280]">{label}</label>}
         {mode === "edition" && editable ? (
           <>
             {type === "select" && (
@@ -126,26 +127,27 @@ export default function Field({
               <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={`block p-[5px] ${showBackgroundColor && "bg-gray-50"}  w-[100%]`} />
             )}
             {type === "textarea" && (
-              <textarea maxLength={maxLength} rows={rows || 4} value={value} onChange={(e) => onChange(e.target.value)} className="block p-[5px] bg-gray-50 w-[100%]" />
+              <textarea maxLength={maxLength} rows={rows || 4} value={value} onChange={(e) => onChange(e.target.value)} className="block w-[100%] bg-gray-50 p-[5px]" />
             )}
-            {error && <div className="text-[#EF4444] mt-[8px]">{error}</div>}
+            {error && <div className="mt-[8px] text-[#EF4444]">{error}</div>}
           </>
         ) : (
           <div className="flex items-center gap-2">
             {copy && value && (
               <div
-                className="flex items-center justify-center cursor-pointer hover:scale-105"
+                className="flex cursor-pointer items-center justify-center hover:scale-105"
                 onClick={() => {
                   copyToClipboard(value);
                   setCopied(true);
-                }}>
+                }}
+              >
                 {copied ? <HiCheckCircle className="h-4 w-4 text-green-500" /> : <BiCopy className="h-4 w-4 text-gray-400" />}
               </div>
             )}
-            <div className="font-normal text-[14px] leading-[20px] text-[#1F2937]">{transformer ? transformer(value) : value}</div>
+            <div className="text-[14px] font-normal leading-[20px] text-[#1F2937]">{transformer ? transformer(value) : value}</div>
             {mode === "correction" && (
               <div className={requestButtonClass} onClick={startRequest}>
-                <PencilAlt className={`w-[14px] h-[14px]  ${hasValidRequest ? "text-white" : "text-[#F97316]"} group-hover:text-white`} />
+                <PencilAlt className={`h-[14px] w-[14px]  ${hasValidRequest ? "text-white" : "text-[#F97316]"} group-hover:text-white`} />
               </div>
             )}
           </div>

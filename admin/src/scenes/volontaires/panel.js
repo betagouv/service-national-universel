@@ -105,7 +105,7 @@ export default function VolontairePanel({ onChange, value }) {
             <TextButton>Voir équipe de référents ({young.department}) ›</TextButton>
           </Link>
           {young.departSejourMotifComment ? (
-            <div className="flex flex-col bg-orange-50 rounded-lg p-2 text-orange-700">
+            <div className="flex flex-col rounded-lg bg-orange-50 p-2 text-orange-700">
               <div className="flex-1 text-xs">{young.departSejourMotif}</div>
               <div className="flex gap-2 p-2">
                 <ImQuotesLeft />
@@ -255,7 +255,8 @@ const ApplicationDetails = ({ application, i }) => {
           style={{ margin: 0 }}
           onClick={() => {
             history.push(`/volontaire/${application.youngId}/phase2/application/${application._id}/contrat`);
-          }}>
+          }}
+        >
           Contrat d&apos;engagement &gt;
         </ContractLink>
       ) : null}

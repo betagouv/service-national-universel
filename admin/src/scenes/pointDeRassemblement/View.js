@@ -248,13 +248,13 @@ export default function View(props) {
   return (
     <>
       <Breadcrumbs items={[{ label: "Point de rassemblement", to: "/point-de-rassemblement" }, { label: "Fiche point de rassemblement" }]} />
-      <div className="flex flex-col m-8 gap-6">
+      <div className="m-8 flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <Title>{data.name}</Title>
           <div className="flex items-center gap-2">
             {canDeleteMeetingPoint(user) ? (
               <button
-                className="border-[1px] border-red-600 bg-red-600 shadow-sm px-4 py-2 text-white hover:!text-red-600 hover:bg-white transition duration-300 ease-in-out rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-lg border-[1px] border-red-600 bg-red-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() =>
                   setModalDelete({
                     isOpen: true,
@@ -263,56 +263,61 @@ export default function View(props) {
                     onDelete: onDelete,
                   })
                 }
-                disabled={isLoading}>
+                disabled={isLoading}
+              >
                 Supprimer
               </button>
             ) : null}
             {canCreateMeetingPoint(user) ? (
               <button
-                className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => setModalCreation({ isOpen: true })}
-                disabled={isLoading}>
+                disabled={isLoading}
+              >
                 Rattacher le point à un séjour
               </button>
             ) : null}
           </div>
         </div>
-        <div className="flex flex-col rounded-lg pt-8 pb-12 px-8 bg-white gap-8">
+        <div className="flex flex-col gap-8 rounded-lg bg-white px-8 pt-8 pb-12">
           <div className="flex items-center justify-between">
-            <div className="text-lg leading-6 font-medium text-gray-900">Informations générales</div>
+            <div className="text-lg font-medium leading-6 text-gray-900">Informations générales</div>
             {canUpdateMeetingPoint(user, data) ? (
               <>
                 {!editInfo ? (
                   <div data-tip="" data-for="tooltip-edit-disabled">
                     {pdrInSchema && user.role !== ROLES.ADMIN && (
-                      <ReactTooltip id="tooltip-edit-disabled" className="bg-white shadow-xl drop-shadow-sm rounded-xl" arrowColor="white" disable={false}>
-                        <div className="text-gray-700 text-center">
+                      <ReactTooltip id="tooltip-edit-disabled" className="rounded-xl bg-white shadow-xl drop-shadow-sm" arrowColor="white" disable={false}>
+                        <div className="text-center text-gray-700">
                           Action impossible : point de rassemblement utilisé dans un schéma de répartition. <br />
                           Rapprochez-vous de la Sous-Direction
                         </div>
                       </ReactTooltip>
                     )}
                     <button
-                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                       onClick={() => setEditInfo(true)}
-                      disabled={isLoading || (pdrInSchema && user.role !== ROLES.ADMIN)}>
-                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                      disabled={isLoading || (pdrInSchema && user.role !== ROLES.ADMIN)}
+                    >
+                      <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
                       Modifier
                     </button>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <button
-                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                       onClick={() => setEditInfo(false)}
-                      disabled={isLoading}>
+                      disabled={isLoading}
+                    >
                       Annuler
                     </button>
                     <button
-                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                       onClick={onSubmitInfo}
-                      disabled={isLoading}>
-                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                      disabled={isLoading}
+                    >
+                      <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                       Enregistrer les changements
                     </button>
                   </div>
@@ -321,7 +326,7 @@ export default function View(props) {
             ) : null}
           </div>
           <div className="flex">
-            <div className="flex flex-col w-[45%] gap-4 ">
+            <div className="flex w-[45%] flex-col gap-4 ">
               <div className="flex flex-col gap-2">
                 <div className="text-xs font-medium leading-4 text-gray-900">Nom du point de rassemblement</div>
                 <Field
@@ -333,10 +338,10 @@ export default function View(props) {
                 />
               </div>
             </div>
-            <div className="flex w-[10%] justify-center items-center">
-              <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
+            <div className="flex w-[10%] items-center justify-center">
+              <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
             </div>
-            <div className="flex flex-col w-[45%] justify-between">
+            <div className="flex w-[45%] flex-col justify-between">
               <div className="flex flex-col gap-3">
                 <div className="text-xs font-medium leading-4 text-gray-900">Adresse</div>
                 <Field
@@ -386,7 +391,7 @@ export default function View(props) {
           </div>
         </div>
         {data?.cohorts?.length > 0 ? (
-          <div className="flex flex-col rounded-lg pt-3 bg-white">
+          <div className="flex flex-col rounded-lg bg-white pt-3">
             <div className="flex items-center justify-between border-b border-gray-200 px-8">
               <nav className="-mb-px flex space-x-8 " aria-label="Tabs">
                 {data?.cohorts
@@ -396,9 +401,10 @@ export default function View(props) {
                       key={tab}
                       onClick={() => setCurrentCohort(tab)}
                       className={classNames(
-                        tab === currentCohort ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
-                        "whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer",
-                      )}>
+                        tab === currentCohort ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
+                        "cursor-pointer whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium",
+                      )}
+                    >
                       {tab}
                     </a>
                   ))}
@@ -407,25 +413,28 @@ export default function View(props) {
                 <>
                   {!editSession ? (
                     <button
-                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                       onClick={() => setEditSession(true)}
-                      disabled={isLoading}>
-                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                      disabled={isLoading}
+                    >
+                      <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
                       Modifier
                     </button>
                   ) : (
                     <div className="flex items-center gap-2">
                       <button
-                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                         onClick={() => setEditSession(false)}
-                        disabled={isLoading}>
+                        disabled={isLoading}
+                      >
                         Annuler
                       </button>
                       <button
-                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                         onClick={onSubmitSession}
-                        disabled={isLoading}>
-                        <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                        disabled={isLoading}
+                      >
+                        <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                         Enregistrer les changements
                       </button>
                     </div>
@@ -433,34 +442,37 @@ export default function View(props) {
                 </>
               ) : null}
             </div>
-            <div className="flex px-8 w-full h-64">
-              <div className="relative flex items-center justify-center w-1/3  border-r-[1px] border-gray-200 p-4">
+            <div className="flex h-64 w-full px-8">
+              <div className="relative flex w-1/3 items-center justify-center  border-r-[1px] border-gray-200 p-4">
                 <Field label="ID" value={data.code} copy={true} />
                 {canDeleteMeetingPointSession(user) ? (
                   <button
-                    className="absolute bottom-5 right-5 flex gap-2 items-center cursor-pointer px-2 py-1 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="absolute bottom-5 right-5 flex cursor-pointer items-center gap-2 px-2 py-1 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
                     onClick={() =>
                       setModalDelete({ isOpen: true, onDelete: onDeleteSession, title: "Supprimer la session", message: "Êtes-vous sûr de vouloir supprimer cette session ?" })
                     }
-                    disabled={isLoading}>
-                    <Trash className="text-red-400 h-4 w-4" />
+                    disabled={isLoading}
+                  >
+                    <Trash className="h-4 w-4 text-red-400" />
                     <div className="text-xs font-medium leading-4 text-gray-800">Supprimer le séjour</div>
                   </button>
                 ) : null}
               </div>
-              <div className="flex flex-col items-center justify-center w-1/3  border-r-[1px] border-gray-200">
+              <div className="flex w-1/3 flex-col items-center justify-center  border-r-[1px] border-gray-200">
                 <div
-                  className="flex items-center h-1/2 justify-center text-sm font-medium leading-4 text-gray-900 border-b-[1px] border-gray-200 w-full hover:underline cursor-pointer"
-                  onClick={() => history.push(`/ligne-de-bus/volontaires/point-de-rassemblement/${data._id.toString()}?cohort=${currentCohort}`)}>
+                  className="flex h-1/2 w-full cursor-pointer items-center justify-center border-b-[1px] border-gray-200 text-sm font-medium leading-4 text-gray-900 hover:underline"
+                  onClick={() => history.push(`/ligne-de-bus/volontaires/point-de-rassemblement/${data._id.toString()}?cohort=${currentCohort}`)}
+                >
                   Voir les volontaires ({nbYoung.find((n) => n.cohort === currentCohort)?.count || 0})
                 </div>
                 <div
-                  className="flex items-center h-1/2 justify-center text-sm font-medium leading-4 text-gray-900 border-b-[1px] border-gray-200 w-full hover:underline cursor-pointer"
-                  onClick={() => history.push(`/ligne-de-bus?cohort=${currentCohort}&CODE_PDR=%5B"${data.code}"%5D`)}>
+                  className="flex h-1/2 w-full cursor-pointer items-center justify-center border-b-[1px] border-gray-200 text-sm font-medium leading-4 text-gray-900 hover:underline"
+                  onClick={() => history.push(`/ligne-de-bus?cohort=${currentCohort}&CODE_PDR=%5B"${data.code}"%5D`)}
+                >
                   Liste des lignes de transports ({lines.find((l) => l.cohort === currentCohort)?.count || 0})
                 </div>
               </div>
-              <div className="flex items-center justify-center w-1/3 p-4">
+              <div className="flex w-1/3 items-center justify-center p-4">
                 <Field
                   label="Complément d’adresse"
                   onChange={(e) => changeComplement(e.target.value)}

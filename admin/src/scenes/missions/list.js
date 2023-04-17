@@ -441,13 +441,13 @@ export default function List() {
     <>
       <Breadcrumbs items={[{ label: "Missions" }]} />
       <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div className="flex flex-row mb-8 w-full" style={{ fontFamily: "Marianne" }}>
-          <div className="flex flex-1 flex-col w-full px-8">
-            <div className="py-8 flex items-center justify-between">
-              <div className="text-2xl font-bold text-[#242526] leading-7">Missions</div>
+        <div className="mb-8 flex w-full flex-row" style={{ fontFamily: "Marianne" }}>
+          <div className="flex w-full flex-1 flex-col px-8">
+            <div className="flex items-center justify-between py-8">
+              <div className="text-2xl font-bold leading-7 text-[#242526]">Missions</div>
               <div className="flex flex-row items-center gap-3 text-sm">
                 {user.role === ROLES.RESPONSIBLE && user.structureId && structure && structure.status !== "DRAFT" ? (
-                  <button className="bg-blue-600 px-3 py-2 rounded-lg cursor-pointer text-white" onClick={() => history.push(`/mission/create/${user.structureId}`)}>
+                  <button className="cursor-pointer rounded-lg bg-blue-600 px-3 py-2 text-white" onClick={() => history.push(`/mission/create/${user.structureId}`)}>
                     Nouvelle mission
                   </button>
                 ) : null}
@@ -464,13 +464,13 @@ export default function List() {
                           action: () => {
                             setIsExportOpen(true);
                           },
-                          render: <div className="p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer text-sm">Informations de missions</div>,
+                          render: <div className="cursor-pointer p-2 px-3 text-sm text-gray-700 hover:bg-gray-50">Informations de missions</div>,
                         },
                         {
                           action: () => {
                             setIsExportCandidatureOpen(true);
                           },
-                          render: <div className="p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer text-sm">Informations de candidatures</div>,
+                          render: <div className="cursor-pointer p-2 px-3 text-sm text-gray-700 hover:bg-gray-50">Informations de candidatures</div>,
                         },
                       ],
                     },
@@ -514,8 +514,8 @@ export default function List() {
                   { label: "Nom de la mission (Z > A)", dataField: "name.keyword", sortBy: "desc" },
                 ]}
                 render={({ data }) => (
-                  <div className="flex flex-col bg-white gap-1 rounded-xl w-full">
-                    <div className=" pt-4 pb-1 px-4 ">
+                  <div className="flex w-full flex-col gap-1 rounded-xl bg-white">
+                    <div className=" px-4 pt-4 pb-1 ">
                       <div className="flex items-center gap-2 py-2">
                         <DataSearch
                           defaultQuery={getDefaultQuery}
@@ -532,8 +532,9 @@ export default function List() {
                           innerClass={{ input: "searchbox" }}
                         />
                         <div
-                          className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
-                          onClick={handleShowFilter}>
+                          className="flex cursor-pointer items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-[14px] font-medium text-gray-700 hover:underline"
+                          onClick={handleShowFilter}
+                        >
                           <FilterSvg className="text-gray-400" />
                           Filtres
                         </div>
@@ -541,7 +542,7 @@ export default function List() {
                       <div className={`flex items-center gap-2 py-2 ${!filterVisible ? "hidden" : ""}`}>
                         <div className="flex flex-col gap-2">
                           <div className="flex items-center gap-x-2">
-                            <div className="uppercase text-xs text-snu-purple-800 mr-2">Général</div>
+                            <div className="mr-2 text-xs uppercase text-snu-purple-800">Général</div>
                             <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
                             <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
                             <MultiDropdownList
@@ -595,8 +596,8 @@ export default function List() {
                               renderLabel={(items) => <div>{getFilterLabel(items, "Visibilité", "Visibilité")} </div>}
                             />
                           </div>
-                          <div className="flex items-center flex-wrap gap-2">
-                            <div className="uppercase text-xs text-snu-purple-800 mr-2">Modalités</div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <div className="mr-2 text-xs uppercase text-snu-purple-800">Modalités</div>
                             <MultiDropdownList
                               defaultQuery={getDefaultQuery}
                               className="dropdown-filter"
@@ -720,7 +721,7 @@ export default function List() {
                             />
                           </div>
                           <div className="flex items-center gap-x-2">
-                            <div className="uppercase text-xs text-snu-purple-800 mr-2">Dates</div>
+                            <div className="mr-2 text-xs uppercase text-snu-purple-800">Dates</div>
                             <ReactiveComponent
                               componentId="DATE"
                               URLParams={true}
@@ -733,7 +734,7 @@ export default function List() {
                           <div className="flex items-center gap-x-2">
                             {user.role === ROLES.SUPERVISOR ? (
                               <>
-                                <div className="uppercase text-xs text-snu-purple-800 mr-2">Structure</div>
+                                <div className="mr-2 text-xs uppercase text-snu-purple-800">Structure</div>
                                 <MultiDropdownList
                                   defaultQuery={getDefaultQuery}
                                   className="dropdown-filter"
@@ -750,33 +751,35 @@ export default function List() {
                             ) : null}
                             <DeleteFilters />
                             <div
-                              className="flex items-center gap-1 ml-auto hover:underline cursor-pointer text-sm"
+                              className="ml-auto flex cursor-pointer items-center gap-1 text-sm hover:underline"
                               onClick={toggleInfos}
                               onMouseEnter={() => setInfosHover(true)}
-                              onMouseLeave={() => setInfosHover(false)}>
-                              {infosClick ? <img className="opacity-70 h-3" src={LockedSvg} /> : <img className="opacity-70 h-3" src={UnlockedSvg} />}
+                              onMouseLeave={() => setInfosHover(false)}
+                            >
+                              {infosClick ? <img className="h-3 opacity-70" src={LockedSvg} /> : <img className="h-3 opacity-70" src={UnlockedSvg} />}
                               Aide
                             </div>
                           </div>
                           {infosHover || infosClick ? (
-                            <div className="text-xs grid space-y-1 text-gray-500">
+                            <div className="grid space-y-1 text-xs text-gray-500">
                               <div>
-                                <span className="underline text-gray-900 mr-1">Général :</span>concerne toutes les informations générales de la mission .{" "}
+                                <span className="mr-1 text-gray-900 underline">Général :</span>concerne toutes les informations générales de la mission .{" "}
                                 <strong>La source </strong>
                                 correspond à la plateforme sur laquelle a été déposée la mission{" "}
                                 <a
                                   href={`${supportURL}/base-de-connaissance/missions-de-la-plateforme-jeveuxaidergouvfr`}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="hover:underline">
+                                  className="hover:underline"
+                                >
                                   JVA & SNU
                                 </a>
                               </div>
                               <div>
-                                <span className="underline text-gray-900 mr-1">Modalités :</span>concerne toutes les condtions de réalisation de la mission.
+                                <span className="mr-1 text-gray-900 underline">Modalités :</span>concerne toutes les condtions de réalisation de la mission.
                               </div>
                               <div>
-                                <span className="underline text-gray-900 mr-1">Dates :</span>permettent de filtrer les missions dont les dates de début et de fin sont inclues dans
+                                <span className="mr-1 text-gray-900 underline">Dates :</span>permettent de filtrer les missions dont les dates de début et de fin sont inclues dans
                                 la borne temporelle. Attention les missions dont seulement 1 jour est inclus seront également affichées.
                               </div>
                             </div>
@@ -784,8 +787,8 @@ export default function List() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex w-full flex-col mt-6 mb-2 divide-y divide-gray-100 border-y-[1px] border-gray-100">
-                      <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 ">
+                    <div className="mt-6 mb-2 flex w-full flex-col divide-y divide-gray-100 border-y-[1px] border-gray-100">
+                      <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 ">
                         <div className="w-[40%]">Mission</div>
                         <div className="w-[5%]"></div>
                         <div className="w-[15%]">Places</div>
@@ -820,19 +823,19 @@ const Hit = ({ hit, callback }) => {
   };
   return (
     <>
-      <div className="flex py-3 items-center px-4 hover:bg-gray-50">
-        <div className="flex items-center gap-4 w-[40%] cursor-pointer " onClick={() => history.push(`/mission/${hit._id}`)}>
+      <div className="flex items-center py-3 px-4 hover:bg-gray-50">
+        <div className="flex w-[40%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mission/${hit._id}`)}>
           {hit.isJvaMission === "true" ? (
-            <img src={require("../../assets/JVA_round.png")} className="h-7 w-7 group-hover:scale-105 mx-auto" />
+            <img src={require("../../assets/JVA_round.png")} className="mx-auto h-7 w-7 group-hover:scale-105" />
           ) : (
-            <img src={require("../../assets/logo-snu.png")} className="h-7 w-7 group-hover:scale-105 mx-auto" />
+            <img src={require("../../assets/logo-snu.png")} className="mx-auto h-7 w-7 group-hover:scale-105" />
           )}
-          <div className="flex flex-col w-full gap-1  justify-center">
-            <div className="table table-fixed w-full border-collapse m-0">
-              <div className="font-bold text-gray-900 truncate table-cell">{hit.name}</div>
+          <div className="flex w-full flex-col justify-center  gap-1">
+            <div className="m-0 table w-full table-fixed border-collapse">
+              <div className="table-cell truncate font-bold text-gray-900">{hit.name}</div>
             </div>
-            <div className="table table-fixed w-full border-collapse m-0">
-              <div className="font-normal text-sm leading-4 text-gray-500 truncate table-cel ">
+            <div className="m-0 table w-full table-fixed border-collapse">
+              <div className="table-cel truncate text-sm font-normal leading-4 text-gray-500 ">
                 {hit.address} • {hit.city} ({hit.department})
               </div>
             </div>
@@ -842,21 +845,21 @@ const Hit = ({ hit, callback }) => {
           {hit?.visibility === "HIDDEN" && (
             <div className="group relative cursor-pointer">
               <HiOutlineLockClosed size={20} className="text-gray-400" />
-              <div className="hidden group-hover:block absolute bottom-[calc(100%+15px)] left-[50%] bg-white rounded-xl translate-x-[-58%] px-3 py-2.5 text-gray-600 text-xs leading-5 drop-shadow-xl z-10 min-w-[275px] text-center">
-                <div className="absolute left-[50%] translate-x-[-50%] bg-white w-[15px] h-[15px] rotate-45 bottom-[-5px]"></div>
+              <div className="absolute bottom-[calc(100%+15px)] left-[50%] z-10 hidden min-w-[275px] translate-x-[-58%] rounded-xl bg-white px-3 py-2.5 text-center text-xs leading-5 text-gray-600 drop-shadow-xl group-hover:block">
+                <div className="absolute left-[50%] bottom-[-5px] h-[15px] w-[15px] translate-x-[-50%] rotate-45 bg-white"></div>
                 La mission est <strong>fermée</strong> aux candidatures
               </div>
             </div>
           )}
         </div>
 
-        <div className="w-[15%] flex flex-col gap-2">
-          <p className="text-sm leading-none font-normal text-gray-900">{hit.placesLeft} places(s)</p>
-          <p className="text-sm leading-none font-normal text-gray-500">
+        <div className="flex w-[15%] flex-col gap-2">
+          <p className="text-sm font-normal leading-none text-gray-900">{hit.placesLeft} places(s)</p>
+          <p className="text-sm font-normal leading-none text-gray-500">
             sur <span className="text-gray-900">{hit.placesTotal}</span>
           </p>
         </div>
-        <div className="flex flex-col gap-2 w-[20%] text-sm leading-none font-normal text-gray-500">
+        <div className="flex w-[20%] flex-col gap-2 text-sm font-normal leading-none text-gray-500">
           <p>
             Du <span className="text-gray-900">{formatStringDateTimezoneUTC(hit.startAt)}</span>
           </p>

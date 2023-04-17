@@ -72,7 +72,7 @@ export default function List() {
       <ReactiveBase url={`${apiURL}/es`} app="team" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
           <div style={{ flex: 1, position: "relative" }}>
-            <div className="flex justify-between items-start px-6 mt-6 flex-wrap">
+            <div className="mt-6 flex flex-wrap items-start justify-between px-6">
               <div className="text-2xl font-bold text-black">Mon équipe - {user.role === ROLES.REFERENT_REGION ? `Région ${user.region}` : `Département ${user.department}`}</div>
               <div className="flex items-center ">
                 <div className="mr-2">
@@ -125,16 +125,17 @@ export default function List() {
                   />
                 </div>
                 <button
-                  className=" box-border border-[1px] rounded-lg border-brand-purple text-brand-purple  hover:shadow-button px-7 py-1 ml-2"
-                  onClick={() => setNewUserOpen(true)}>
+                  className=" ml-2 box-border rounded-lg border-[1px] border-brand-purple  px-7 py-1 text-brand-purple hover:shadow-button"
+                  onClick={() => setNewUserOpen(true)}
+                >
                   Inviter&nbsp;un&nbsp;nouvel&nbsp;utilisateur
                 </button>
               </div>
             </div>
-            <div className="flex items-center px-6 mb-3 mr-4">
+            <div className="mb-3 mr-4 flex items-center px-6">
               <Nav filter={filter} updateFilter={updateFilter} />
             </div>
-            <div className="flex items-center px-6 mb-3 mr-4">{/* Card */}</div>
+            <div className="mb-3 mr-4 flex items-center px-6">{/* Card */}</div>
             <Filter>
               <FilterRow visible>
                 <DataSearch
@@ -247,7 +248,7 @@ const Hit = ({ hit, onClick, user, selected, structure, setResponsable }) => {
       <td>
         {hit.role && (
           <div className="flex flex-col items-start">
-            <Badge text={translate(hit.role)} className="!bg-[#DAE3FD] !text-[#302B94] !border-[#302B94]" />
+            <Badge text={translate(hit.role)} className="!border-[#302B94] !bg-[#DAE3FD] !text-[#302B94]" />
             {hit.subRole ? <Badge text={translate(hit.subRole)} /> : null}
           </div>
         )}
@@ -306,19 +307,19 @@ const Action = ({ hit, structure, displayActionButton, setResponsable }) => {
   };
   return (
     <>
-      <div className="flex flex-row items-center justify-between flex-wrap">
-        <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105" onClick={() => setResponsable(hit)}>
+      <div className="flex flex-row flex-wrap items-center justify-between">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:scale-105 group-hover:bg-white" onClick={() => setResponsable(hit)}>
           <Eye width={18} height={18} />
         </div>
         {displayActionButton ? (
           <>
             <Link to={`/user/${hit._id}`}>
-              <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:scale-105 group-hover:bg-white">
                 <Pencil width={16} height={16} />
               </div>
             </Link>
             {canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? (
-              <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105" onClick={onClickDelete}>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:scale-105 group-hover:bg-white" onClick={onClickDelete}>
                 <Trash width={16} height={16} />
               </div>
             ) : null}
