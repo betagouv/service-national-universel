@@ -15,7 +15,7 @@ import ButtonLinkLight from "../../../../components/ui/buttons/ButtonLinkLight";
 import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
 import useForm from "../../../../hooks/useForm";
 import IdCardReader from "./components/IdCardReader";
-import SectionTitle from "../components/SectionTitle";
+import SectionTitle from "../../components/SectionTitle";
 import Withdrawal from "./components/Withdrawal";
 import FormRow from "../../../../components/forms/layout/FormRow";
 

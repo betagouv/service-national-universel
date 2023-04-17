@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import Input from "../../../../components/forms/inputs/Input";
 import Select from "../../../../components/forms/inputs/Select";
 import { getSchoolGradesOptions, getYoungSchooledSituationOptions } from "../../../../utils/school-situation.utils";
-import SectionTitle from "../components/SectionTitle";
+import SectionTitle from "../../components/SectionTitle";
 
 const AccountSchoolSituationPage = () => {
   const young = useSelector((state) => state.Auth.young);

@@ -9,8 +9,8 @@ import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { requiredErrorMessage, validatePassword } from "../../../../utils/form-validation.utils";
 import InputPassword from "../../../../components/forms/inputs/InputPassword";
-import FormDescription from "../components/FormDescription";
-import SectionTitle from "../components/SectionTitle";
+import FormDescription from "../../components/FormDescription";
+import SectionTitle from "../../components/SectionTitle";
 
 const AccountPasswordPage = () => {
   const dispatch = useDispatch();

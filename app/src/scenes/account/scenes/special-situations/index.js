@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import useForm from "../../../../hooks/useForm";
 import Checkbox from "../../../../components/forms/inputs/Checkbox";
 import Textarea from "../../../../components/forms/inputs/Textarea";
-import FormDescription from "../components/FormDescription";
+import FormDescription from "../../components/FormDescription";
 
 const AccountSpecialSituationsPage = () => {
   const young = useSelector((state) => state.Auth.young);

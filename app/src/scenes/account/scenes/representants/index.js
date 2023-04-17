@@ -13,7 +13,7 @@ import Input from "../../../../components/forms/inputs/Input";
 import Checkbox from "../../../../components/forms/inputs/Checkbox";
 import { validateEmail, validatePhoneNumber, validateRequired } from "../../../../utils/form-validation.utils";
 import { updateYoung } from "../../../../services/young.service";
-import SectionTitle from "../components/SectionTitle";
+import SectionTitle from "../../components/SectionTitle";
 
 const AccountRepresentantsPage = () => {
   const young = useSelector((state) => state.Auth.young);
