@@ -1,5 +1,4 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
 
 export const graphColors = {
   1: ["#1E40AF"],
@@ -34,13 +33,11 @@ export function Legend({ color, name, value = null, className = "", onClick = ()
 }
 
 export function Legends({ labels, values = null, legendUrls, className = "", onLegendClicked = () => {} }) {
-  const history = useHistory();
-
   const colors = getGraphColors(labels.length);
 
   function clickOnLegend({ index, label, value, color }) {
     if (legendUrls && legendUrls[index]) {
-      history.push(legendUrls[index]);
+      window.open(legendUrls[index], "_blank");
     } else {
       onLegendClicked(index, label, value, color);
     }

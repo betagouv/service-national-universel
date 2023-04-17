@@ -1,21 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { getGraphColors } from "./graph-commons";
 import GraphTooltip from "./GraphTooltip";
-import { useHistory } from "react-router-dom";
 
 export default function HorizontalBar({ title, values, labels, tooltips, legendUrls, goal, className = "", onLegendClicked = () => {} }) {
   const [bars, setBars] = useState([]);
   const [total, setTotal] = useState(0);
   const [totalPercent, setTotalPercent] = useState("-");
   const [x100, setX100] = useState(null);
-  const history = useHistory();
 
   useEffect(() => {
     if (values && values.length > 0) {
       const total = values.reduce((value, originalValue) => value + originalValue, 0);
 
       setTotal(total);
-      setTotalPercent(goal === 0 ? "-" : Math.round((total / goal) * 100) || 0) + "%";
+      setTotalPercent(goal === 0 ? "-" : Math.round((total / goal) * 100) + "%");
 
       const localGoal = goal === 0 ? total : goal;
 
@@ -48,7 +46,7 @@ export default function HorizontalBar({ title, values, labels, tooltips, legendU
 
   function clickOnLegend({ index, label, value, color }) {
     if (legendUrls && legendUrls[index]) {
-      history.push(legendUrls[index]);
+      window.open(legendUrls[index], "_blank");
     } else {
       onLegendClicked(index, label, value, color);
     }
