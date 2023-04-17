@@ -7,7 +7,8 @@ const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const YoungModel = require("../../models/young");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
-const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession } = require("snu-lib/roles");
+const CohortModel = require("../../models/cohort");
+const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession, isPdrEditionOpen } = require("snu-lib/roles");
 const { ERRORS, isYoung } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
@@ -15,7 +16,6 @@ const { validateId } = require("../../utils/validator");
 const nanoid = require("nanoid");
 const { COHORTS } = require("snu-lib");
 const { getCohesionCenterFromSession } = require("./commons");
-const mongoose = require("mongoose");
 
 /**
  * Récupère les points de rassemblements (avec horaire de passage) pour un jeune affecté.
@@ -270,6 +270,10 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (!canUpdateMeetingPoint(req.user, pointDeRassemblement)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+    const cohortData = await CohortModel.findOne({ name: cohort });
+    if (!cohortData) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!isPdrEditionOpen(req.user, cohortData)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     let cohortsToUpdate = pointDeRassemblement.cohorts;
     if (!cohortsToUpdate.includes(cohort)) cohortsToUpdate.push(cohort);
 
@@ -328,33 +332,8 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const { error: queryError, value } = Joi.object({
-      withcohorts: Joi.string().valid("true").optional(),
-    })
-      .unknown()
-      .validate({ ...req.query }, { stripUnknown: true });
-    if (queryError) {
-      capture(queryError);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-    const withcohorts = value.withcohorts === "true";
+    const data = await PointDeRassemblementModel.findOne({ _id: checkedId, deletedAt: { $exists: false } });
 
-    let data = {};
-
-    if (withcohorts) {
-      const pipeline = [
-        { $match: { _id: mongoose.Types.ObjectId(checkedId), deletedAt: { $exists: false } } },
-        { $unwind: { path: "$cohorts" } },
-        { $lookup: { from: "cohorts", localField: "cohorts", foreignField: "name", as: "cohortsdetails" } },
-        { $unwind: { path: "$cohortsdetails" } },
-        { $group: { _id: "$_id", pdr: { $first: "$$ROOT" }, cohorts: { $push: "$cohorts" }, cohortsdetails: { $push: "$cohortsdetails" } } },
-        { $replaceRoot: { newRoot: { $mergeObjects: ["$pdr", { cohorts: "$cohorts" }, { cohortsdetails: "$cohortsdetails" }] } } },
-      ];
-      const res = await PointDeRassemblementModel.aggregate(pipeline);
-      data = res[0];
-    } else {
-      data = await PointDeRassemblementModel.findOne({ _id: checkedId, deletedAt: { $exists: false } });
-    }
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data });
