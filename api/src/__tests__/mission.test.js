@@ -38,7 +38,7 @@ describe("Mission", () => {
       const missionFixture = getNewMissionFixture();
       let mission = await createMissionHelper(missionFixture);
       const modifiedMission = { ...missionFixture };
-      modifiedMission.startAt = new Date();
+      modifiedMission.startAt = new Date("2022-12-17T00:00:00");
       const res = await request(getAppHelper()).put(`/mission/${mission._id}`).send(modifiedMission);
       expect(res.statusCode).toEqual(200);
       mission = await getMissionByIdHelper(mission._id);
