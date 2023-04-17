@@ -317,7 +317,7 @@ export default function StepCoordonnees() {
   const debouncedSuggestionsRequest = useCallback(
     debounce(async (value) => {
       try {
-        const response = await apiAdress(value);
+        const response = await apiAdress(value, ["type=municipality"]);
         const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
         setBirthCityZipSuggestions(suggestions);
       } catch (error) {

@@ -2,12 +2,10 @@ import { capture } from "../sentry";
 // https://adresse.data.gouv.fr/api-doc/adresse
 // Filtres possibles : postcode, citycode (INSEE), type, limit, autocomplete
 
-const apiAdress = async (query, filters = {}, options = {}) => {
-  let url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}`;
+const baseUrl = "https://api-adresse.data.gouv.fr/search/?";
 
-  for (const [key, value] of Object.entries(filters)) {
-    url += `&${key}=${encodeURIComponent(value)}`;
-  }
+const apiAdress = async (query, filters = [], options = {}) => {
+  const url = encodeURI(`${baseUrl}q=${query}${filters.length > 0 ? `&${filters.join("&")}` : ""}`);
 
   try {
     const res = await fetch(url, {

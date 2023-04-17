@@ -10,8 +10,8 @@ import Field from "./Field";
 import { useSelector } from "react-redux";
 
 export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, editable = true }) {
-  const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
+  const history = useHistory();
   const [availableCohorts, setAvailableCohorts] = useState([]);
 
   useEffect(() => {

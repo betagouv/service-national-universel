@@ -22,11 +22,11 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
   const getSuggestions = async (address, city, zip) => {
     setLoading(true);
     try {
-      let res = await apiAdress(`${address}, ${city}, ${zip}`, { postcode: zip });
+      let res = await apiAdress(`${address}, ${city}, ${zip}`, [`postcode=${zip}`]);
 
       // Si pas de résultat, on tente avec la ville et le code postal uniquement
       if (res?.features?.length === 0) {
-        res = await apiAdress(`${city}, ${zip}`, { postcode: zip });
+        res = await apiAdress(`${city}, ${zip}`, [`postcode=${zip}`]);
       }
 
       const arr = res?.features;
