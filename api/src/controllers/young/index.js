@@ -430,9 +430,15 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
-    value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
-    value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
+    if (value.phone) {
+      value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
+    }
+    if (value.parent1Phone) {
+      value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
+    }
+    if (value.parent2Phone) {
+      value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
+    }
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

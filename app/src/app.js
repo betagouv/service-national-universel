@@ -185,7 +185,7 @@ const Espace = () => {
       </div>
       <main className="mt-16 md:mt-0 md:ml-[16rem]">
         <Switch>
-          <SentryRoute path="/account" component={Account} />
+          <SentryRoute path="/account" component={environment === "production" ? AccountOld : Account} />
           <SentryRoute path="/account-old" component={AccountOld} />
           <SentryRoute path="/phase1" component={Phase1} />
           <SentryRoute path="/phase2" component={Phase2} />
