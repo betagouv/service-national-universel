@@ -334,8 +334,9 @@ export default function Settings() {
                       onChange={() => setData({ ...data, sessionEditionOpenForReferentDepartment: !data.sessionEditionOpenForReferentDepartment })}
                     />
                   </div>
+
                   <div className="flex flex-col gap-3">
-                    {/* <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <p className="text-gray-900  text-xs font-medium">Remplissage des points de rassemblement</p>
                       <MdInfoOutline data-tip data-for="remplissage_PDR" className="text-gray-400 h-5 w-5 cursor-pointer" />
                       <ReactTooltip id="remplissage_PDR" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
@@ -347,15 +348,15 @@ export default function Settings() {
                     <SimpleToggle
                       label="Référents régionaux"
                       disabled={isLoading || readOnly}
-                      value={data.manualAffectionOpenForAdmin}
-                      onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
+                      value={data.pdrEditionOpenForReferentRegion}
+                      onChange={() => setData({ ...data, pdrEditionOpenForReferentRegion: !data.pdrEditionOpenForReferentRegion })}
                     />
                     <SimpleToggle
                       label="Référents départementaux"
                       disabled={isLoading || readOnly}
-                      value={data.manualAffectionOpenForAdmin}
-                      onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
-                    /> */}
+                      value={data.pdrEditionOpenForReferentDepartment}
+                      onChange={() => setData({ ...data, pdrEditionOpenForReferentDepartment: !data.pdrEditionOpenForReferentDepartment })}
+                    />
                   </div>
                 </div>
                 <div className="flex w-[10%] justify-center items-center">
