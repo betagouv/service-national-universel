@@ -101,23 +101,20 @@ export default function AddressInputV2({
     return;
   };
 
-  const getSuggestions = async (item) => {
+  const getSuggestions = async () => {
     const errors = await Promise.all([validateField(keys.address), validateField(keys.city), validateField(keys.zip)]).then((arr) => arr.filter((error) => error !== false));
     if (errors.length) return;
-    const text = item;
 
     setLoading(true);
-    let url = `${text}`;
     // For Nouvelle-Calédonie, we don't add the postcode to the query
-    if (parseInt(values.zip.substr(0, 3)) !== 988) url = url.concat(`&postcode=${values.zip}`);
-    const res = await apiAdress(url);
+    const res = await apiAdress(`${values.address}, ${values.city}, ${values.zip}`, { postcode: parseInt(values.zip.substr(0, 3)) === 988 ? "" : values.zip });
     const arr = res?.features;
 
     setLoading(false);
     if (arr?.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
     else {
       // If no match with complete query, try with postcode only
-      const res = await apiAdress(`${values.zip}&limit=1&postcode=${values.zip}`);
+      const res = await apiAdress(values.zip, { postcode: values.zip });
       const arr = res?.features.filter((e) => e.properties.type !== "municipality");
 
       setLoading(false);

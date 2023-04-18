@@ -7,7 +7,7 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
 import validator from "validator";
-import AddressInput from "../../components/addressInput";
+import AddressInput from "../../components/addressInputV2";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
@@ -102,7 +102,7 @@ export default function Create() {
           setIsLoading(false);
         }
       }}>
-      {({ values, handleChange, handleSubmit, errors, touched }) => (
+      {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
         <Wrapper>
           <Header>
             <Title>Inviter une nouvelle structure</Title>
@@ -398,6 +398,7 @@ export default function Create() {
                     handleChange={handleChange}
                     errors={errors}
                     touched={touched}
+                    validateField={validateField}
                   />
                   <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l&apos;adresse n&apos;est pas reconnue, veuillez saisir le nom de la ville.</p>
                 </Wrapper>

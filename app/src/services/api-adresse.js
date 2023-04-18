@@ -45,8 +45,7 @@ const putLocation = async (city, zip) => {
       };
     }
     // try with postcode = zip
-    let url = `${city || zip}`;
-    const resPostcode = await apiAdress(url, { postcode: zip });
+    const resPostcode = await apiAdress(city || zip, { postcode: zip });
     if (resPostcode?.features?.length > 0) {
       return {
         lon: resPostcode.features[0].geometry.coordinates[0],
