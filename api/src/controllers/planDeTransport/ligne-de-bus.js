@@ -657,8 +657,12 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
         hasFilter = true;
       }
       if (filterUserId && filterUserId.trim().length > 0) {
-        filter["user._id"] = ObjectId(filterUserId);
-        hasFilter = true;
+        try {
+          filter["user._id"] = ObjectId(filterUserId);
+          hasFilter = true;
+        } catch (err) {
+          // bad filterUserId... let us ignore this filter.
+        }
       }
       const pipelineFilter = hasFilter ? [{ $match: filter }] : [];
 
@@ -846,9 +850,19 @@ function filterPatchWithQuery(p, query) {
 function mergeArrayItems(array, subProperty) {
   let set = {};
   for (const item of array) {
-    let p = subProperty ? item[subProperty].toString() : item;
-    p = pathToKey(p);
-    set[p] = subProperty ? item : p;
+    if (subProperty) {
+      if (item[subProperty]) {
+        const p = pathToKey(item[subProperty].toString());
+        if (p) {
+          set[p] = item;
+        }
+      }
+    } else {
+      const p = pathToKey(item);
+      if (p) {
+        set[p] = p;
+      }
+    }
   }
   return Object.values(set);
 }
