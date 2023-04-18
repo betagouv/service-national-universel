@@ -2,37 +2,23 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Row, Col, Spinner } from "reactstrap";
 import { Field, useField } from "formik";
-import ErrorMessage, { requiredMessage } from "./errorMessage";
-import { department2region, departmentLookUp, departmentToAcademy, departmentList, regionList } from "../utils";
+import ErrorMessage, { requiredMessage } from "../scenes/inscription2023/components/ErrorMessageOld";
+import { department2region, departmentLookUp, departmentToAcademy } from "../utils";
 import InfoIcon from "./InfoIcon";
 import countries from "i18n-iso-countries";
-import { toastr } from "react-redux-toastr";
+import validator from "validator";
 import { apiAdress } from "../services/api-adresse";
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
-// eslint-disable-next-line prettier/prettier
-export default function AddressInputV2({
-  keys,
-  values,
-  handleChange,
-  errors,
-  touched,
-  validateField,
-  countryVisible = false,
-  onChangeCountry = () => {},
-  countryByDefault = "",
-  required = false,
-  departAndRegionVisible = false,
-  disabled = false,
-}) {
+export default function AddressInput({ keys, values, handleChange, errors, touched, validateField, countryVisible = false, onChangeCountry = () => {}, countryByDefault = "" }) {
   const [suggestion, setSuggestion] = useState({});
   const [addressInFrance, setAddressInFrance] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [addressVerified, _, addressVerifiedHelpers] = useField({
+  const [addressVerified, , addressVerifiedHelpers] = useField({
     value: values[keys.addressVerified],
-    name: "addressVerified",
-    validate: (v) => v !== "true" && (values[keys.address] || values[keys.zip] || values[keys.city]) && addressInFrance && "Il est obligatoire de vérifier l'adresse",
+    name: keys.addressVerified || "addressVerified",
+    validate: (v) => v !== "true" && addressInFrance && "Il est obligatoire de vérifier l'adresse",
   });
 
   useEffect(() => {
@@ -44,18 +30,13 @@ export default function AddressInputV2({
   }, []);
 
   useEffect(() => {
-    setAddressInFrance(!values[keys.country] || values[keys.country] === "France");
-    if (keys.country && values[keys.country] === undefined) addressVerifiedHelpers.setValue("false");
+    setAddressInFrance(values[keys.country] === undefined || values[keys.country] === "France");
+    if (values[keys.country] === undefined) addressVerifiedHelpers.setValue("false");
   }, [values[keys.country]]);
 
   useEffect(() => {
     const zip = values[keys.zip];
-    if (!zip || zip.length < 2) {
-      handleChange({ target: { name: keys.department, value: "" } });
-      handleChange({ target: { name: keys.region, value: "" } });
-      return;
-    }
-    if (values?.cohort === "2020") return;
+    if (!zip || zip.length < 2) return;
     let departmentCode = zip.substr(0, 2);
     if (["97", "98"].includes(departmentCode)) {
       departmentCode = zip.substr(0, 3);
@@ -65,16 +46,15 @@ export default function AddressInputV2({
       if (zip === "20000" || zip.substr(0, 3) === "201") departmentCode = "2A";
       else departmentCode = "2B";
     }
-
     handleChange({ target: { name: keys.department, value: departmentLookUp[departmentCode] } });
     handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[departmentCode]] } });
-    if (keys.academy) handleChange({ target: { name: keys.academy, value: departmentToAcademy[departmentLookUp[departmentCode]] } });
+    handleChange({ target: { name: keys.academy, value: departmentToAcademy[departmentLookUp[departmentCode]] } });
   }, [values[keys.zip]]);
 
   const onSuggestionSelected = () => {
-    let depart = suggestion.properties.postcode?.substr(0, 2) || suggestion.properties.citycode.substr(0, 2);
+    let depart = suggestion.properties.postcode.substr(0, 2);
     if (["97", "98"].includes(depart)) {
-      depart = suggestion.properties.postcode?.substr(0, 3) || suggestion.properties.citycode.substr(0, 3);
+      depart = suggestion.properties.postcode.substr(0, 3);
     }
     if (depart === "20") {
       depart = suggestion.properties.context.substr(0, 2);
@@ -84,10 +64,9 @@ export default function AddressInputV2({
     handleChange({ target: { name: keys.zip, value: suggestion.properties.postcode } });
     handleChange({ target: { name: keys.address, value: suggestion.properties.name } });
     handleChange({ target: { name: keys.location, value: { lon: suggestion.geometry.coordinates[0], lat: suggestion.geometry.coordinates[1] } } });
-    if (values?.cohort !== "2020") {
-      handleChange({ target: { name: keys.department, value: departmentLookUp[depart] } });
-      handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });
-    }
+    handleChange({ target: { name: keys.department, value: departmentLookUp[depart] } });
+    handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });
+
     if (keys.cityCode) {
       handleChange({ target: { name: keys.cityCode, value: suggestion.properties.citycode } });
     }
@@ -101,32 +80,17 @@ export default function AddressInputV2({
     return;
   };
 
-  const getSuggestions = async (item) => {
+  const getSuggestions = async (query) => {
     const errors = await Promise.all([validateField(keys.address), validateField(keys.city), validateField(keys.zip)]).then((arr) => arr.filter((error) => error !== false));
     if (errors.length) return;
-    const text = item;
 
     setLoading(true);
-    let url = `${text}`;
-    // For Nouvelle-Calédonie, we don't add the postcode to the query
-    if (parseInt(values.zip.substr(0, 3)) !== 988) url = url.concat(`&postcode=${values.zip}`);
-    const res = await apiAdress(url);
+    const res = await apiAdress(query, { postcode: values[keys.zip] });
     const arr = res?.features;
 
     setLoading(false);
     if (arr?.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
-    else {
-      // If no match with complete query, try with postcode only
-      const res = await apiAdress(`${values.zip}&limit=1&postcode=${values.zip}`);
-      const arr = res?.features.filter((e) => e.properties.type !== "municipality");
-
-      setLoading(false);
-      if (arr?.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
-      else {
-        toastr.error("Aucune adresse n'a été trouvée.");
-        addressVerifiedHelpers.setValue("false");
-      }
-    }
+    else addressVerifiedHelpers.setValue("true");
   };
 
   // keys is not defined at first load ??
@@ -140,9 +104,8 @@ export default function AddressInputV2({
             <Col md={12}>
               <Label>Pays</Label>
               <Field
-                disabled={disabled}
                 as="select"
-                validate={(v) => required && !v && requiredMessage}
+                validate={(v) => !v && requiredMessage}
                 className="form-control"
                 placeholder="Pays"
                 name={keys.country}
@@ -166,11 +129,10 @@ export default function AddressInputV2({
               <ErrorMessage errors={errors} touched={touched} name={keys.country} />
             </Col>
           )}
-          <Col md={12} style={{ marginTop: countryVisible ? 15 : 0 }}>
+          <Col md={12} style={{ marginTop: 15 }}>
             <Label>Adresse</Label>
             <Field
-              disabled={disabled}
-              validate={(v) => required && !v && requiredMessage}
+              validate={(v) => !v && requiredMessage}
               className="form-control"
               placeholder="Adresse"
               name={keys.address}
@@ -186,8 +148,10 @@ export default function AddressInputV2({
           <Col md={6} style={{ marginTop: 15 }}>
             <Label>Code postal</Label>
             <Field
-              disabled={disabled}
-              validate={(v) => required && !v && requiredMessage}
+              validate={(v) =>
+                (!v && requiredMessage) ||
+                (values[keys.country] === "France" && !validator.isPostalCode(v, "FR") && "Ce champ est au mauvais format. Exemples de format attendu : 44000, 08300")
+              }
               className="form-control"
               placeholder="Code postal"
               name={keys.zip}
@@ -203,8 +167,7 @@ export default function AddressInputV2({
           <Col md={6} style={{ marginTop: 15 }}>
             <Label>Ville</Label>
             <Field
-              disabled={disabled}
-              validate={(v) => required && !v && requiredMessage}
+              validate={(v) => !v && requiredMessage}
               className="form-control"
               placeholder="Ville"
               name={keys.city}
@@ -217,46 +180,11 @@ export default function AddressInputV2({
             />
             <ErrorMessage errors={errors} touched={touched} name={keys.city} />
           </Col>
-          {departAndRegionVisible ? (
-            <>
-              <Col md={6} style={{ marginTop: 15 }}>
-                <Label>Département</Label>
-                <Field
-                  as="select"
-                  validate={(v) => !v && requiredMessage}
-                  disabled
-                  className="form-control"
-                  placeholder="Département"
-                  name={keys.department}
-                  value={values[keys.department]}>
-                  <option label=""></option>
-                  {departmentList.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </Field>
-                <ErrorMessage errors={errors} touched={touched} name={keys.department} />
-              </Col>
-              <Col md={6} style={{ marginTop: 15 }}>
-                <Label>Région</Label>
-                <Field as="select" validate={(v) => !v && requiredMessage} disabled className="form-control" placeholder="Région" name={keys.region} value={values[keys.region]}>
-                  <option label=""></option>
-                  {regionList.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </Field>
-                <ErrorMessage errors={errors} touched={touched} name={keys.region} />
-              </Col>
-            </>
-          ) : null}
           {addressInFrance ? (
             <>
               <Col md={12} style={{ display: "flex", alignItems: "flex-end" }}>
                 {addressVerified.value !== "true" ? (
-                  <PrimaryButton style={{ marginLeft: "auto" }} onClick={() => getSuggestions(`${values[keys.address]}, ${values[keys.city]} ${values[keys.zip]}`)}>
+                  <PrimaryButton style={{ marginLeft: "auto" }} onClick={() => getSuggestions(`${values[keys.address]}, ${values[keys.city]}`)}>
                     {!loading ? "Vérifier" : <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
                   </PrimaryButton>
                 ) : (
@@ -266,7 +194,7 @@ export default function AddressInputV2({
                   </div>
                 )}
               </Col>
-              <ErrorMessage errors={errors} touched={touched} name="addressVerified" />
+              <ErrorMessage errors={errors} touched={touched} name={keys.addressVerified || "addressVerified"} />
             </>
           ) : null}
         </Row>
@@ -281,13 +209,14 @@ export default function AddressInputV2({
               <SecondaryButton
                 onClick={() => {
                   setSuggestion({});
-                  addressVerifiedHelpers.setValue("false");
+                  addressVerifiedHelpers.setError("");
+                  addressVerifiedHelpers.setValue("true");
                 }}>
                 Non
               </SecondaryButton>
               <PrimaryButton onClick={onSuggestionSelected}>Oui</PrimaryButton>
             </div>
-            <ErrorMessage errors={errors} touched={touched} name="addressVerified" />
+            <ErrorMessage errors={errors} touched={touched} name={keys.addressVerified || "addressVerified"} />
           </Col>
         </Row>
       )}

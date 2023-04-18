@@ -29,7 +29,7 @@ const putLocation = async (city, zip) => {
   try {
     if (!city && !zip) return;
     // try with municipality = city + zip
-    const resMunicipality = await apiAdress(`${encodeURIComponent(city + " " + zip)}&type=municipality`);
+    const resMunicipality = await apiAdress(city + " " + zip, { type: "municipality" });
     if (resMunicipality?.features?.length > 0) {
       return {
         lon: resMunicipality.features[0].geometry.coordinates[0],
@@ -37,7 +37,7 @@ const putLocation = async (city, zip) => {
       };
     }
     // try with locality = city + zip
-    const resLocality = await apiAdress(`${encodeURIComponent(zip + " " + city)}&type=locality`);
+    const resLocality = await apiAdress(zip + " " + city, { type: "locality" });
     if (resLocality?.features?.length > 0) {
       return {
         lon: resLocality.features[0].geometry.coordinates[0],

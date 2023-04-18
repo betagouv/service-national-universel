@@ -9,7 +9,7 @@ import { setYoung } from "../../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../inscription2023/components/ErrorMessageOld";
 import { getPasswordErrorMessage, translate } from "../../utils";
 import validator from "validator";
-import AddressInputV2 from "../../components/addressInputV2";
+import AddressInputV2 from "../../components/addressInput";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import PasswordEye from "../../components/PasswordEye";
 import { appURL } from "../../config";
@@ -51,10 +51,10 @@ export default function Account() {
   };
 
   return (
-    <div className="py-5 px-10 rounded-sm drop-shadow-lg bg-white">
+    <div className="rounded-sm bg-white py-5 px-10 drop-shadow-lg">
       <div className="mb-[30px]">
-        <span className="text-snu-primary text-base font-bold mb-[5px]">{`${young.firstName} ${young.lastName}`}</span>
-        <h1 className="text-[#161e2e] mb-0 text-3xl md:text-5xl font-extrabold">Mes paramètres</h1>
+        <span className="mb-[5px] text-base font-bold text-snu-primary">{`${young.firstName} ${young.lastName}`}</span>
+        <h1 className="mb-0 text-3xl font-extrabold text-[#161e2e] md:text-5xl">Mes paramètres</h1>
       </div>
       <Formik
         initialValues={young}
@@ -77,7 +77,7 @@ export default function Account() {
         }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
-            <h2 className="md:text-3xl  text-2xl font-bold mb-6">Email</h2>
+            <h2 className="mb-6  text-2xl font-bold md:text-3xl">Email</h2>
             <FormRow>
               <Item
                 name="email"
@@ -113,7 +113,7 @@ export default function Account() {
         }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
-            <h2 className="md:text-3xl  text-2xl font-bold mb-6">Mot de passe</h2>
+            <h2 className="mb-6  text-2xl font-bold md:text-3xl">Mot de passe</h2>
             <hr />
             <Item required name="password" title="Actuel" errors={errors} touched={touched}>
               <PasswordEye
@@ -185,7 +185,7 @@ export default function Account() {
         }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched, validateField }) => (
           <>
-            <h2 className="md:text-3xl  text-2xl font-bold mb-6">Mon profil</h2>
+            <h2 className="mb-6  text-2xl font-bold md:text-3xl">Mon profil</h2>
             <FormRow>
               <Item name="firstName" values={values} handleChange={handleChange} title="Prénom" disabled />
               <Item name="lastName" values={values} handleChange={handleChange} title="Nom" disabled />
@@ -224,7 +224,7 @@ export default function Account() {
                 validateField={validateField}
               />
             </div>
-            <h2 className="md:text-3xl text-2xl font-bold mb-6">Représentant Légal</h2>
+            <h2 className="mb-6 text-2xl font-bold md:text-3xl">Représentant Légal</h2>
             <FormRow>
               <Select
                 name="parent1Status"
@@ -315,7 +315,7 @@ export default function Account() {
           </>
         )}
       </Formik>
-      <div className="flex flex-col md:flex-row justify-center md:gap-8 mt-12 text-center">
+      <div className="mt-12 flex flex-col justify-center text-center md:flex-row md:gap-8">
         {youngCanChangeSession(young) ? <ChangeStayButton /> : null}
         {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ? (
           <DeleteAccountButton young={young} onClick={() => setWithdrawalModalOpen(true)} />
@@ -328,7 +328,7 @@ export default function Account() {
 const Item = ({ title, name, values, handleChange, errors, touched, validate, type, children, ...props }) => {
   return (
     <Col lg={4} style={{ marginTop: 20 }}>
-      {title && <label className="text-gray-700 font-semibold text-sm mb-[5px]">{title}</label>}
+      {title && <label className="mb-[5px] text-sm font-semibold text-gray-700">{title}</label>}
       {children || <Field type={type} className="form-control" name={name} value={values[name]} onChange={handleChange} validate={validate} {...props} />}
       {errors && <ErrorMessage errors={errors} touched={touched} name={name} />}
     </Col>
@@ -338,7 +338,7 @@ const Item = ({ title, name, values, handleChange, errors, touched, validate, ty
 const Select = ({ title, name, values, handleChange, errors, touched, validate, options }) => {
   return (
     <Col lg={4} style={{ marginTop: 20 }}>
-      <label className="text-gray-700 font-semibold text-sm mb-[5px]">{title}</label>
+      <label className="mb-[5px] text-sm font-semibold text-gray-700">{title}</label>
       <select className="form-control" name={name} value={values[name]} onChange={handleChange} validate={validate}>
         {options.map((o, i) => (
           <option key={i} value={o.value}>
