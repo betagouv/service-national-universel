@@ -236,6 +236,7 @@ const ReactiveList = ({ cohort, history }) => {
                                 const pdr = data.pointDeRassemblements?.[i];
                                 const num = i + 1;
                                 pdrs[`N° DU DEPARTEMENT DU PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
+                                pdrs[`REGION DU PDR ${num}`] = pdr?.region || "";
                                 pdrs[`ID PDR ${num}`] = pdr?.meetingPointId || "";
                                 pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
                                 pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
@@ -250,6 +251,7 @@ const ReactiveList = ({ cohort, history }) => {
                                 "DATE DE TRANSPORT RETOUR": data.returnString,
                                 ...pdrs,
                                 "N° DU DEPARTEMENT DU CENTRE": getDepartmentNumber(data.centerDepartment),
+                                "REGION DU CENTRE": data.centerRegion,
                                 "ID CENTRE": data.centerId,
                                 "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
                                 "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,
