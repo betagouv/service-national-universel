@@ -13,7 +13,7 @@ import ErrorMessage from "./ErrorMessage";
 const addressValidationInfo = "Pour valider votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.";
 const addressValidationSuccess = "L'adresse a été vérifiée";
 
-export const messageStyles = {
+const messageStyles = {
   info: "info",
   error: "error",
 };

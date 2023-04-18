@@ -1,16 +1,10 @@
-import React, { useEffect } from "react";
-import ErrorMessage from '../ErrorMessage';
+import React from "react";
+import ErrorMessage from "../ErrorMessage";
 
-const Checkbox = ({ label = "", className = "", validate = () => null, name = "", value = "", useCheckedAsValue = false, onChange = () => null, error = null, ...rest }) => {
+const Checkbox = ({ label = "", className = "", value = "", useCheckedAsValue = false, onChange = () => null, error = null, ...rest }) => {
   if ("type" in rest) {
     throw new Error(`Checkbox component cannot handle a custom type.`);
   }
-
-  useEffect(() => {
-    if (validate) {
-      validate(name);
-    }
-  }, [value]);
 
   const handleChange = (event) => {
     if (useCheckedAsValue) {

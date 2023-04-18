@@ -3,6 +3,7 @@ import Select from "react-select";
 import ErrorMessage from "../scenes/inscription2023/components/ErrorMessage";
 
 const SearchableSelect = ({ label, options, value, onChange, placeholder = "Sélectionner une option", error = "", correction = "" }) => {
+  // TODO add debounce + display search results only
   return (
     <div className="text-[#161616]" style={{ fontFamily: "Marianne" }}>
       <label className={`my-2 ${correction || error ? "text-[#CE0500]" : "text-[#161616]}"}`}>{label}</label>
@@ -13,7 +14,7 @@ const SearchableSelect = ({ label, options, value, onChange, placeholder = "Sél
         options={options}
         isSearchable
         placeholder={placeholder}
-        noOptionsMessage={() => "Pas d’options"}
+        noOptionsMessage={() => "Pas d'options"}
         error={correction || error}
       />
       <ErrorMessage>{error}</ErrorMessage>

@@ -1,31 +1,14 @@
-import React, { useEffect } from "react";
-import Label from '../layout/Label';
-import ErrorMessage from '../ErrorMessage';
+import React, { forwardRef } from "react";
+import Label from "../layout/Label";
+import ErrorMessage from "../ErrorMessage";
 
-const Textarea = ({ label = "", className = "", validate = () => null, name = "", value = "", onChange = () => null, error = null, resize = false, ...rest }) => {
-  useEffect(() => {
-    if (validate) {
-      const removeValidation = validate(name);
-      return () => {
-        if (removeValidation) {
-          removeValidation();
-        }
-      };
-    }
-  }, [value]);
-
-  const handleChange = (event) => {
-    onChange(event.target.value);
-  };
-
+const Textarea = ({ label = "", className = "", error = null, resize = false, ...rest }, forwardedRef) => {
   return (
     <div className={`mb-[1rem] ${className}`}>
       <Label title={label} hasError={error}>
         <textarea
           className={`w-full text-sm bg-white text-gray-900 disabled:text-gray-400 placeholder:text-gray-500 focus:outline-none ${resize ? "" : "resize-none"}`}
-          name={name}
-          value={value}
-          onChange={handleChange}
+          ref={forwardedRef}
           {...rest}
         />
       </Label>
@@ -34,4 +17,4 @@ const Textarea = ({ label = "", className = "", validate = () => null, name = ""
   );
 };
 
-export default Textarea;
+export default forwardRef(Textarea);

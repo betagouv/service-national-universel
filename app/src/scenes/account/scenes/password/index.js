@@ -1,5 +1,4 @@
 import React from "react";
-import useForm from "../../../../hooks/useForm";
 import ButtonLinkLight from "../../../../components/ui/buttons/ButtonLinkLight";
 import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
 import { BiLoaderAlt } from "react-icons/bi";
@@ -7,21 +6,26 @@ import { changeYoungPassword } from "../../../../services/young.service";
 import { setYoung } from "../../../../redux/auth/actions";
 import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { requiredErrorMessage, validatePassword } from "../../../../utils/form-validation.utils";
+import { validatePassword, validateRequired, validateVerifyPassword } from "../../../../utils/form-validation.utils";
 import InputPassword from "../../../../components/forms/inputs/InputPassword";
 import FormDescription from "../../components/FormDescription";
 import SectionTitle from "../../components/SectionTitle";
+import { useForm } from "react-hook-form";
 
 const AccountPasswordPage = () => {
   const dispatch = useDispatch();
 
-  const { values, setValues, isSubmitionPending, isValid, handleSubmit, errors, validate } = useForm({
-    initialValues: {
+  const {
+    handleSubmit,
+    formState: { errors, isValid, isSubmitting },
+    register,
+  } = useForm({
+    defaultValues: {
       password: "",
       newPassword: "",
       verifyPassword: "",
     },
-    validateOnChange: true,
+    mode: "onChange",
   });
 
   const handleChangePasswordSubmit = async (values) => {
@@ -48,29 +52,24 @@ const AccountPasswordPage = () => {
             <SectionTitle>Mon mot de passe</SectionTitle>
             <InputPassword
               label="Actuel"
-              name="password"
-              onChange={setValues("password")}
-              error={errors.password}
-              value={values.password}
-              validate={validate(({ value }) => !value && requiredErrorMessage)}
+              error={errors?.password?.message}
+              {...register("password", {
+                validate: validateRequired,
+              })}
             />
             <InputPassword
               label="Nouveau mot de passe"
-              name="newPassword"
-              error={errors.newPassword}
-              onChange={setValues("newPassword")}
-              validate={validate(validatePassword)}
-              value={values.newPassword}
+              error={errors?.newPassword?.message}
+              {...register("newPassword", {
+                validate: validatePassword,
+              })}
             />
             <InputPassword
               label="Confirmer nouveau mot de passe"
-              name="verifyPassword"
-              onChange={setValues("verifyPassword")}
-              error={errors.verifyPassword}
-              validate={validate(({ value, formValues }) => {
-                return (!value && requiredErrorMessage) || (value !== formValues.newPassword && "Les mots de passe renseignés doivent être identiques.");
+              error={errors?.verifyPassword?.message}
+              {...register("verifyPassword", {
+                validate: validateVerifyPassword,
               })}
-              value={values.verifyPassword}
             />
           </div>
         </div>
@@ -78,8 +77,8 @@ const AccountPasswordPage = () => {
           <ButtonLinkLight className="w-full lg:w-fit" to="/account">
             Annuler
           </ButtonLinkLight>
-          <ButtonPrimary type="submit" className="w-full lg:w-fit" disabled={isSubmitionPending || !isValid}>
-            {isSubmitionPending && <BiLoaderAlt className="animate-spin" />}
+          <ButtonPrimary type="submit" className="w-full lg:w-fit" disabled={isSubmitting || !isValid}>
+            {isSubmitting && <BiLoaderAlt className="animate-spin" />}
             Enregistrer
           </ButtonPrimary>
         </div>

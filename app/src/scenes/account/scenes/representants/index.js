@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import useForm from "../../../../hooks/useForm";
 import { PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
 import { setYoung } from "../../../../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
@@ -14,14 +13,22 @@ import Checkbox from "../../../../components/forms/inputs/Checkbox";
 import { validateEmail, validatePhoneNumber, validateRequired } from "../../../../utils/form-validation.utils";
 import { updateYoung } from "../../../../services/young.service";
 import SectionTitle from "../../components/SectionTitle";
+import { useForm } from "react-hook-form";
 
 const AccountRepresentantsPage = () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const [hasParent2, setHasParent2] = useState(young?.parent2Email || false);
 
-  const { values, setValues, validate, errors, handleSubmit, isSubmitionPending, isValid } = useForm({
-    initialValues: {
+  const {
+    handleSubmit,
+    formState: { errors, isValid, isSubmitting },
+    getValues,
+    register,
+    control,
+    trigger,
+  } = useForm({
+    defaultValues: {
       parent1Status: young?.parent1Status || "representant",
       parent1LastName: young?.parent1LastName || "",
       parent1FirstName: young?.parent1FirstName || "",
@@ -39,7 +46,7 @@ const AccountRepresentantsPage = () => {
         phoneZone: young?.parent2PhoneZone || PHONE_ZONES_NAMES.FRANCE,
       },
     },
-    validateOnChange: true,
+    mode: "onChange",
   });
 
   const handleSubmitRepresentantsForm = async (values) => {
@@ -62,6 +69,10 @@ const AccountRepresentantsPage = () => {
     }
   };
 
+  useEffect(() => {
+    trigger();
+  }, [hasParent2]);
+
   return (
     <div className="bg-white shadow-sm mb-6 lg:rounded-lg">
       <form onSubmit={handleSubmit(handleSubmitRepresentantsForm)}>
@@ -72,94 +83,86 @@ const AccountRepresentantsPage = () => {
           <div className="px-4 pt-6 pb-2 lg:col-start-2 lg:col-span-2">
             <section className="mb-4">
               <SectionTitle>Représentant légal 1</SectionTitle>
-              <Select label="Statut" name="parent1Status" value={values.parent1Status} onChange={setValues("parent1Status")}>
+              <Select label="Statut" {...register("parent1Status")}>
                 <option value="mother">Mère</option>
                 <option value="father">Père</option>
                 <option value="representant">Représentant légal</option>
               </Select>
               <Input
                 label="Nom"
-                name="parent1LastName"
                 placeholder="Dupond"
-                validate={validate(validateRequired)}
-                onChange={setValues("parent1LastName")}
-                value={values.parent1LastName}
-                error={errors.parent1LastName}
+                {...register("parent1LastName", {
+                  validate: validateRequired,
+                })}
+                error={errors?.parent1LastName?.message}
               />
               <Input
                 label="Prénom"
-                name="parent1FirstName"
                 placeholder="Gaspard"
-                validate={validate(validateRequired)}
-                onChange={setValues("parent1FirstName")}
-                value={values.parent1FirstName}
-                error={errors.parent1FirstName}
+                {...register("parent1FirstName", {
+                  validate: validateRequired,
+                })}
+                error={errors?.parent1FirstName?.message}
               />
               <Input
                 type="email"
                 label="Adresse email"
-                name="parent1Email"
-                error={errors.parent1Email}
+                error={errors?.parent1Email?.message}
                 placeholder="example@example.com"
-                value={values.parent1Email}
-                onChange={setValues("parent1Email")}
-                validate={validate(validateEmail)}
+                {...register("parent1Email", {
+                  validate: validateEmail,
+                })}
               />
               <InputPhone
                 label="Téléphone"
+                error={errors?.parent1Phone?.message}
+                placeholder={PHONE_ZONES[getValues().parent1Phone.phoneZone].example}
+                control={control}
                 name="parent1Phone"
-                value={values.parent1Phone}
-                error={errors.parent1Phone}
-                onChange={setValues("parent1Phone")}
-                placeholder={PHONE_ZONES[values.parent1Phone.phoneZone].example}
-                validate={validate(validatePhoneNumber)}
+                rules={{ validate: validatePhoneNumber }}
               />
             </section>
             <Checkbox label="Je ne possède pas de second(e) réprésensant(e) légal(e)" onChange={setHasParent2} value={hasParent2} useCheckedAsValue />
             {hasParent2 && (
               <section className="mb-4">
                 <SectionTitle>Représentant légal 2</SectionTitle>
-                <Select label="Statut" name="parent2Status" value={values.parent2Status} onChange={setValues("parent2Status")}>
+                <Select label="Statut" {...register("parent2Status")}>
                   <option value="mother">Mère</option>
                   <option value="father">Père</option>
                   <option value="representant">Représentant légal</option>
                 </Select>
                 <Input
                   label="Nom"
-                  name="parent2LastName"
                   placeholder="Dupond"
-                  validate={validate(validateRequired)}
-                  onChange={setValues("parent2LastName")}
-                  value={values.parent2LastName}
-                  error={errors.parent2LastName}
+                  {...register("parent2LastName", {
+                    validate: validateRequired,
+                  })}
+                  error={errors?.parent2LastName?.message}
                 />
                 <Input
                   label="Prénom"
-                  name="parent2FirstName"
                   placeholder="Gaspard"
-                  validate={validate(validateRequired)}
-                  onChange={setValues("parent2FirstName")}
-                  value={values.parent2FirstName}
-                  error={errors.parent2FirstName}
+                  {...register("parent2FirstName", {
+                    validate: validateRequired,
+                  })}
+                  error={errors?.parent2FirstName?.message}
                 />
                 <Input
                   type="email"
                   label="Adresse email"
-                  name="parent2Email"
-                  error={errors.parent2Email}
+                  error={errors?.parent2Email?.message}
                   placeholder="example@example.com"
-                  value={values.parent2Email}
-                  onChange={setValues("parent2Email")}
-                  validate={validate(validateEmail)}
+                  {...register("parent2Email", {
+                    validate: validateEmail,
+                  })}
                 />
                 <InputPhone
                   label="Téléphone"
                   name="parent2Phone"
-                  value={values.parent2Phone}
-                  error={errors.parent2Phone}
-                  onChange={setValues("parent2Phone")}
-                  placeholder={PHONE_ZONES[values.parent2Phone.phoneZone].example}
-                  validate={validate(validatePhoneNumber)}
+                  error={errors?.parent2Phone?.message}
+                  placeholder={PHONE_ZONES[getValues().parent2Phone.phoneZone].example}
+                  control={control}
+                  rules={{ validate: validatePhoneNumber }}
                 />
               </section>
             )}
@@ -169,8 +172,8 @@ const AccountRepresentantsPage = () => {
           <ButtonLinkLight className="w-full lg:w-fit" to="/account">
             Annuler
           </ButtonLinkLight>
-          <ButtonPrimary type="submit" className="w-full lg:w-fit" disabled={isSubmitionPending || !isValid}>
-            {isSubmitionPending && <BiLoaderAlt className="animate-spin" />}
+          <ButtonPrimary type="submit" className="w-full lg:w-fit" disabled={isSubmitting || !isValid}>
+            {isSubmitting && <BiLoaderAlt className="animate-spin" />}
             Enregistrer
           </ButtonPrimary>
         </div>
