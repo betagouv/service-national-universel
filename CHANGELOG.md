@@ -1,3 +1,25 @@
+# [1.255.0](https://github.com/betagouv/service-national-universel/compare/v1.254.0...v1.255.0) (2023-04-18)
+
+
+### Bug Fixes
+
+* **admin:** Ajout de la "propriété modifiée" dans l'export du plan de transport ([#2506](https://github.com/betagouv/service-national-universel/issues/2506)) ([b1966e9](https://github.com/betagouv/service-national-universel/commit/b1966e92fb57a07c951f04a61a7744d885855ea7))
+* **admin:** Fix eligibility for not scolarise ([204e0b5](https://github.com/betagouv/service-national-universel/commit/204e0b5d1a00f48b0bdf164fe8cab0e83c5963b7))
+* **admin:** History - Display entire field name on hover ([6b33537](https://github.com/betagouv/service-national-universel/commit/6b335370e410685af6087c99b1adeb70e541c0d2))
+* **api:** Add index on ligneId ([0260d81](https://github.com/betagouv/service-national-universel/commit/0260d8130fb5c42e11d264177f5cde16edc74256))
+* **api:** Correction connexion depuis JVA ([2f247fe](https://github.com/betagouv/service-national-universel/commit/2f247fee17ff28e26054bf4915f65f0111510ebb))
+* **api:** Correction de la récupération des filtres sur l'historique du plan de transport + petite correction sur le filtre des users ([#2505](https://github.com/betagouv/service-national-universel/issues/2505)) ([56dc343](https://github.com/betagouv/service-national-universel/commit/56dc343e0c671c20a7673207c1c6cbd2cc74f844))
+* **api:** Correction token jva ([6eb7660](https://github.com/betagouv/service-national-universel/commit/6eb76604d88e43117279e226893af9721788b528))
+* **api:** fix signin controllers get token ([#2508](https://github.com/betagouv/service-national-universel/issues/2508)) ([9d64969](https://github.com/betagouv/service-national-universel/commit/9d64969ec902fd957aa310b49ca024a7a06e5112))
+* **api:** Je veux aider correction protection token ([38d0097](https://github.com/betagouv/service-national-universel/commit/38d00976fa6e1d5cf79d58ca69cd14f0e55b04c9))
+* **app:** Clarification de certains termes dans le processus de pré-inscription ([#2503](https://github.com/betagouv/service-national-universel/issues/2503)) ([07d76ea](https://github.com/betagouv/service-national-universel/commit/07d76ea3cbdfc6ef52863a0ee2b441121c0ac801))
+
+
+### Features
+
+* **admin:** Configurer le paramétrage dynamique de l'édition des PDR ([#2490](https://github.com/betagouv/service-national-universel/issues/2490)) ([e7283a3](https://github.com/betagouv/service-national-universel/commit/e7283a378bde7641d717e7697f991748ae4ffa01))
+* **admin,api:** Ajout d'un bouton d'export de l'historique des lignes de bus pour les Admin ([#2504](https://github.com/betagouv/service-national-universel/issues/2504)) ([e1be055](https://github.com/betagouv/service-national-universel/commit/e1be05527bccb19161d6aeff97ddc4c08524d26a))
+
 # [1.254.0](https://github.com/betagouv/service-national-universel/compare/v1.253.1...v1.254.0) (2023-04-17)
 
 
