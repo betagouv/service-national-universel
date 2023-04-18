@@ -122,6 +122,7 @@ export default function Historic() {
           Ligne: row.refName,
           Action: row.op,
           Date: new Date(row.date),
+          ["Propriété"]: row.path,
           ["Valeur originale"]: row.originalValue,
           ["Nouvelle valeur"]: row.value,
           ["Identifiant utilisateur"]: row.user ? row.user._id : "?",
