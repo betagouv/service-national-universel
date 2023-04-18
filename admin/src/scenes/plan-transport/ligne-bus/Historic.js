@@ -12,6 +12,7 @@ import Loader from "../../../components/Loader";
 import { ROLES } from "snu-lib";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
+import { BsDownload } from "react-icons/bs";
 
 let filterOptionsCache = null;
 
@@ -143,17 +144,20 @@ export default function Historic() {
     FileSaver.saveAs(resultData, fileName + fileExtension);
   }
 
+  const exportButton =
+    user.role === ROLES.ADMIN ? (
+      <button className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm" onClick={exportHistoric}>
+        <BsDownload className="text-gray-400" />
+        {exporting ? <Loader size="20px" /> : "Exporter"}
+      </button>
+    ) : null;
+
   return (
     <>
       <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${cohort}` }, { label: "Historique du plan de transport" }]} />
       <div className="w-full px-8 pt-3 pb-4">
         <div className="flex pb-6 items-center justify-between">
           <Title>Historique du plan de transport</Title>
-          {user.role === ROLES.ADMIN && (
-            <button className="text-gray-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm" onClick={exportHistoric}>
-              {exporting ? <Loader size="20px" /> : "Exporter"}
-            </button>
-          )}
           <Select
             options={cohortList}
             value={cohort}
@@ -173,6 +177,7 @@ export default function Historic() {
           filters={filters}
           changeFilters={setFilters}
           filterOptions={options}
+          extraTool={exportButton}
         />
       </div>
     </>
