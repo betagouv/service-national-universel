@@ -16,6 +16,7 @@ import InfoMessage from "../../../components/ui/InfoMessage";
 import Engagement from "../../../components/ui/icons/Engagement";
 import Inscription from "../../../components/ui/icons/Inscription";
 import Sejour from "../../../components/ui/icons/Sejour";
+import CustomFilter from "./components/CustomFilter";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -24,6 +25,10 @@ export default function Index() {
 
   const [inscriptionDetailObject, setInscriptionDetailObject] = useState({});
   const [inscriptionGoals, setInscriptionGoals] = useState();
+
+  const [notesFromDate, setNotesFromDate] = useState(null);
+  const [notesToDate, setNotesToDate] = useState(null);
+  const [notesPhase, setNotesPhase] = useState("all");
 
   const [filterArray, setFilterArray] = useState([]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
@@ -96,7 +101,7 @@ export default function Index() {
       inscriptionGoals
         .filter((e) => filterByRegionAndDepartement(e, selectedFilters, user))
         // if selectedFilters.cohort is empty --> we select all cohorts thus no .filter()
-        .filter((e) => !selectedFilters.cohort.length || selectedFilters.cohort.includes(e.cohort))
+        .filter((e) => !selectedFilters?.cohort?.length || selectedFilters.cohort.includes(e.cohort))
         .reduce((acc, current) => acc + (current.max && !isNaN(Number(current.max)) ? Number(current.max) : 0), 0),
     [inscriptionGoals, selectedFilters.cohort, selectedFilters.department, selectedFilters.region, selectedFilters.academy],
   );
@@ -173,7 +178,7 @@ export default function Index() {
                 <div className="text-sm font-bold leading-5 text-gray-900">Chiffres clés</div>
                 <div className=" text-medium rounded-full bg-blue-50 px-2.5 py-0.5 text-sm leading-none text-blue-600">22</div>
               </div>
-              <FilterPopOver />
+              <CustomFilter setFromDate={setNotesFromDate} setToDate={setNotesToDate} notesPhase={notesPhase} setNotesPhase={setNotesPhase} />
             </div>
             <div className="flex h-full flex-col justify-between">
               {Array.from(Array(22).keys())
@@ -306,95 +311,6 @@ const NoteContainer = ({ title, number, content, btnLabel }) => {
   );
 };
 
-const FilterPopOver = () => {
-  return (
-    <Popover className="relative">
-      <Popover.Button className="inline-flex items-center gap-x-1 text-sm font-bold text-gray-500 outline-none">
-        <span>Filtrer</span>
-        <HiChevronDown className="h-5 w-5 text-gray-400" aria-hidden="true" />
-      </Popover.Button>
-
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-200"
-        enterFrom="opacity-0 translate-y-1"
-        enterTo="opacity-100 translate-y-0"
-        leave="transition ease-in duration-150"
-        leaveFrom="opacity-100 translate-y-0"
-        leaveTo="opacity-0 translate-y-1">
-        <Popover.Panel className="absolute right-0 z-10 mt-2 flex w-screen max-w-min">
-          <div className="w-60 shrink rounded-lg bg-white pt-3 pb-1 text-sm leading-6 shadow-lg ring-1 ring-black ring-opacity-5">
-            <div className="flex flex-col">
-              <span className="mb-1 px-4 text-sm text-gray-500">Phase</span>
-              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
-                <span className="text-sm font-normal leading-5 text-gray-700">Tous</span>
-              </div>
-              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
-                <span className="text-sm font-normal leading-5 text-gray-700">Inscription</span>
-              </div>
-              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
-                <span className="text-sm font-normal leading-5 text-gray-700">Séjour</span>
-              </div>
-              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
-                <span className="text-sm font-normal leading-5 text-gray-700">Engagement</span>
-              </div>
-              <hr className="my-2 text-gray-100" />
-              <span className="mb-1 px-4 text-sm text-gray-500">Période</span>
-              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
-                <span className="text-sm font-normal leading-5 text-gray-700">Les 15 derniers jours</span>
-              </div>
-              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
-                <span className="text-sm font-normal leading-5 text-gray-700">Les 30 derniers jours</span>
-              </div>
-              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
-                <span className="text-sm font-normal leading-5 text-gray-700">La semaine dernière</span>
-              </div>
-              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50">
-                <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
-                <span className="text-sm font-normal leading-5 text-gray-700">Le mois dernier</span>
-              </div>
-              <DatePickerPopOver />
-            </div>
-          </div>
-        </Popover.Panel>
-      </Transition>
-    </Popover>
-  );
-};
-
-const DatePickerPopOver = () => {
-  return (
-    <Popover className="relative">
-      <Popover.Button className="flex w-full cursor-pointer items-center gap-3 px-4 py-1.5 outline-none hover:bg-gray-50">
-        <input id="candidates" aria-describedby="candidates-description" name="candidates" type="checkbox" className="h-4 w-4 cursor-pointer" />
-        <span className="text-sm font-normal leading-5 text-gray-700">Une date spécifique</span>
-      </Popover.Button>
-
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-200"
-        enterFrom="opacity-0 translate-y-1"
-        enterTo="opacity-100 translate-y-0"
-        leave="transition ease-in duration-150"
-        leaveFrom="opacity-100 translate-y-0"
-        leaveTo="opacity-0 translate-y-1">
-        <Popover.Panel className="absolute right-0 z-10 mt-2 flex w-screen max-w-min">
-          <div className="flex flex-auto rounded-2xl bg-white shadow-lg ring-1 ring-gray-900/5 ">
-            <DatePicker mode="range" fromYear={2022} toYear={2030} />
-          </div>
-        </Popover.Panel>
-      </Transition>
-    </Popover>
-  );
-};
-
 function filterByRegionAndDepartement(e, filters, user) {
   if (filters?.department?.length) return filters.department.includes(e.department);
   else if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) return user.department.includes(e.department);
@@ -410,7 +326,7 @@ const getInscriptionGoals = async () => {
     size: ES_NO_LIMIT,
   };
   const { responses } = await api.esQuery("inscriptiongoal", query);
-  if (!responses.length) {
+  if (!responses?.length) {
     toastr.error("Une erreur est survenue");
     return [];
   }
@@ -451,6 +367,6 @@ async function getCurrentInscriptions(filters) {
   if (filters?.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filters.department } });
 
   const { responses } = await api.esQuery("young", body);
-  if (!responses.length) return {};
+  if (!responses?.length) return {};
   return api.getAggregations(responses[0]);
 }
