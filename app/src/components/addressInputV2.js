@@ -85,7 +85,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
     if (errors.length) return;
 
     setLoading(true);
-    const res = await apiAdress(query, [`postcode=${values[keys.zip]}`]);
+    const res = await apiAdress(query, { postcode: values[keys.zip] });
     const arr = res?.features;
 
     setLoading(false);
