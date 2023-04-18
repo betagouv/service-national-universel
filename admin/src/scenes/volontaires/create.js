@@ -378,7 +378,7 @@ export default function Create() {
             };
           } else {
             body = {
-              grade: values.department,
+              grade: values.grade,
               birthdateAt: values.birthdateAt,
               zip: values.zip,
             };
