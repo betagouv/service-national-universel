@@ -11,7 +11,7 @@ import { HiOutlineArrowRight } from "react-icons/hi";
 import PaginationServerDriven from "../PaginationServerDriven";
 import Loader from "../Loader";
 
-export default function HistoricServerDriven({ data, refName, path, pagination, changePage, filters, changeFilters, filterOptions, loading = false }) {
+export default function HistoricServerDriven({ data, refName, path, pagination, changePage, filters, changeFilters, filterOptions, loading = false, extraTool }) {
   const [query, setQuery] = useState(filters?.query ? filters.query : "");
   const [isOpen, setIsOpen] = useState(
     filters && ((filters.op && filters.op.length > 0) || (filters.path && filters.path.length > 0) || (filters.author && filters.author.length > 0)),
@@ -42,15 +42,18 @@ export default function HistoricServerDriven({ data, refName, path, pagination, 
           </button>
         </div>
         {!loading && (
-          <PaginationServerDriven
-            pageCount={pagination.pageCount}
-            currentPage={pagination.page}
-            changePage={changePage}
-            count={pagination.count}
-            itemsPerPage={pagination.itemsPerPage}
-            itemsCount={data.length}
-            className="p-4"
-          />
+          <div className="flex items-center gap-4">
+            <PaginationServerDriven
+              pageCount={pagination.pageCount}
+              currentPage={pagination.page}
+              changePage={changePage}
+              count={pagination.count}
+              itemsPerPage={pagination.itemsPerPage}
+              itemsCount={data.length}
+              className="p-4"
+            />
+            {extraTool}
+          </div>
         )}
       </div>
       {isOpen && FilterDrawer({ filters, changeFilters, filterOptions })}
