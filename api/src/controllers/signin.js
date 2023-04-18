@@ -40,7 +40,7 @@ router.get("/token", async (req, res) => {
       });
     });
     if (!jwtPayload) return res.status(401).send({ ok: false, user: { restriction: "public" } });
-    const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.string().required(), lastLogoutAt: Joi.date().required() }).validate({
+    const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.string(), lastLogoutAt: Joi.date() }).validate({
       _id: jwtPayload._id,
       passwordChangedAt: jwtPayload.passwordChangedAt,
       lastLogoutAt: jwtPayload.lastLogoutAt,
