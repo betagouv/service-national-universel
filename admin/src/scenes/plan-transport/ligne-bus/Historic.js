@@ -8,6 +8,10 @@ import Select from "../components/Select";
 import { cohortList } from "../util";
 import { createEvent } from "../../../utils";
 import { useHistory } from "react-router-dom";
+import Loader from "../../../components/Loader";
+import { ROLES } from "snu-lib";
+import * as XLSX from "xlsx";
+import * as FileSaver from "file-saver";
 
 let filterOptionsCache = null;
 
@@ -21,6 +25,7 @@ export default function Historic() {
   const [currentPage, setCurrentPage] = React.useState(0);
   const [filters, setFilters] = React.useState({ op: [], userId: [], path: [], query: "" });
   const [options, setOptions] = React.useState(filterOptionsCache);
+  const [exporting, setExporting] = React.useState(false);
   const history = useHistory();
 
   useEffect(() => {
@@ -59,8 +64,10 @@ export default function Historic() {
   const formattedData = formatHistory(data, user.role);
 
   // Insert fetch and format logic here
-  const getPatches = async () => {
-    setLoading(true);
+  async function getPatches(forExport = false) {
+    if (!forExport) {
+      setLoading(true);
+    }
     try {
       let query = { page: currentPage };
       if (filters.op && filters.op.length > 0) {
@@ -75,22 +82,65 @@ export default function Historic() {
       if (filters.query && filters.query.trim().length > 0) {
         query.query = filters.query.trim();
       }
+
+      if (forExport) {
+        query.nopagination = "true";
+      }
+
       const queryString = Object.keys(query)
         .map((key) => key + "=" + query[key])
         .join("&");
       const { ok, data, pagination } = await API.get(`/ligne-de-bus/patches/${cohort}?${queryString}`);
-      if (!ok) return;
-      setData(data);
-      setPagination(pagination);
+      if (!ok) return null;
+      if (forExport) {
+        return data;
+      } else {
+        setData(data);
+        setPagination(pagination);
+      }
     } catch (error) {
       console.log(error);
     } finally {
-      setLoading(false);
+      if (!forExport) {
+        setLoading(false);
+      }
     }
-  };
+  }
 
   function changePage(page) {
     setCurrentPage(page);
+  }
+
+  async function exportHistoric() {
+    if (!exporting) {
+      setExporting(true);
+      const data = await getPatches(true);
+      const formattedData = data.map((row) => {
+        return {
+          ["Identifiant ligne"]: row.lineId,
+          Ligne: row.refName,
+          Action: row.op,
+          Date: new Date(row.date),
+          ["Valeur originale"]: row.originalValue,
+          ["Nouvelle valeur"]: row.value,
+          ["Identifiant utilisateur"]: row.user ? row.user._id : "?",
+          ["Nom utilisateur"]: row.user ? row.user.firstName + " " + row.user.lastName : "?",
+          ["Role utilisateur"]: row.user ? row.user.role : "?",
+        };
+      });
+      exportExcel("Historique-Ligne-Bus-" + new Date().toISOString(), formattedData);
+      setExporting(false);
+    }
+  }
+
+  async function exportExcel(fileName, data) {
+    const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const resultData = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(resultData, fileName + fileExtension);
   }
 
   return (
@@ -99,6 +149,11 @@ export default function Historic() {
       <div className="w-full px-8 pt-3 pb-4">
         <div className="flex pb-6 items-center justify-between">
           <Title>Historique du plan de transport</Title>
+          {user.role === ROLES.ADMIN && (
+            <button className="text-gray-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm" onClick={exportHistoric}>
+              {exporting ? <Loader size="20px" /> : "Exporter"}
+            </button>
+          )}
           <Select
             options={cohortList}
             value={cohort}

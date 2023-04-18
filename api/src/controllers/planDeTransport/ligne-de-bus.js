@@ -609,12 +609,13 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
       path: Joi.string(),
       userId: Joi.string(),
       query: Joi.string().trim().lowercase(),
+      nopagination: Joi.string(),
       // filter: Joi.string().trim().allow("", null),
     }).validate(req.query, {
       stripUnknown: true,
     });
     if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    let { offset, limit, page, op: filterOp, path: filterPath, userId: filterUserId, query: filterQuery } = valueQuery;
+    let { offset, limit, page, op: filterOp, path: filterPath, userId: filterUserId, query: filterQuery, nopagination } = valueQuery;
     if (filterQuery && filterQuery.trim().length === 0) {
       filterQuery = undefined;
     }
@@ -626,6 +627,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
     // ------ find all patches ids
     const { cohort } = value;
     const lines = await LigneBusModel.find({ cohort }, { _id: 1 });
+    console.log("Count lines: ", lines.length);
     if (lines.length > 0) {
       const lineIds = lines.map((line) => line._id);
       const lineStringIds = lineIds.map((l) => l.toString());
@@ -767,17 +769,31 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
           results = patches;
         }
 
-        // --- result with pagination
-        return res.status(200).send({
-          ok: true,
-          data: results.slice(offset, offset + limit),
-          pagination: {
-            count: results.length,
-            pageCount: Math.ceil(results.length / limit),
-            page: Math.floor(offset / limit),
-            itemsPerPage: limit,
-          },
-        });
+        if (nopagination) {
+          // --- result without pagination
+          return res.status(200).send({
+            ok: true,
+            data: results,
+            pagination: {
+              count: results.length,
+              pageCount: 1,
+              page: 0,
+              itemsPerPage: results.length,
+            },
+          });
+        } else {
+          // --- result with pagination
+          return res.status(200).send({
+            ok: true,
+            data: results.slice(offset, offset + limit),
+            pagination: {
+              count: results.length,
+              pageCount: Math.ceil(results.length / limit),
+              page: Math.floor(offset / limit),
+              itemsPerPage: limit,
+            },
+          });
+        }
       } else {
         return res.status(200).send({
           ok: true,
