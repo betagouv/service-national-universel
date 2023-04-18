@@ -25,10 +25,10 @@ router.get("/signin", async (req, res) => {
 
     const { token_jva } = value;
 
-    const { _id, lastLogoutAt, passwordChangedAt } = jwt.verify(token_jva, config.secret);
+    const { _id } = jwt.verify(token_jva, config.secret);
     if (!_id) return res.status(401).send({ ok: false, code: ERRORS.TOKEN_INVALID });
 
-    const user = await ReferentModel.find({ _id, lastLogoutAt, passwordChangedAt });
+    const user = await ReferentModel.find({ _id });
 
     // si l'utilisateur n'existe pas, on bloque
     if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
