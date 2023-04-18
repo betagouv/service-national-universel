@@ -53,7 +53,7 @@ export default function StepDone() {
           <div className="flex items-center p-2 rounded-full bg-[#EEEEEE]">
             <GrAttachment className="text-[#3A3A3A]" />
           </div>
-          <div className="text-[#3A3A3A] text-sm">Pièce d’identité (ou passeport)</div>
+          <div className="text-[#3A3A3A] text-sm">Carte d&apos;identité ou passeport</div>
         </div>
       </div>
       <SignupButtonContainer onClickNext={handleClick} labelNext="Compléter mon inscription" onClickPrevious={logout} labelPrevious="Plus tard" />
