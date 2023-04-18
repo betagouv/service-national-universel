@@ -7,7 +7,7 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
 import validator from "validator";
-import AddressInput from "../../components/addressInputV2";
+import AddressInput from "../../components/addressInput";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";

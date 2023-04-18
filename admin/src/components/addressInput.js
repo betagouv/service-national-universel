@@ -12,7 +12,7 @@ countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
 // eslint-disable-next-line prettier/prettier
-export default function AddressInputV2({
+export default function AddressInput({
   keys,
   values,
   handleChange,
