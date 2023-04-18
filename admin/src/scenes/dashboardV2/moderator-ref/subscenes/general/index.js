@@ -1,12 +1,10 @@
-import React, { Fragment, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
-import { Popover, Transition } from "@headlessui/react";
 import { HiChevronDown, HiChevronRight, HiChevronUp, HiOutlineExclamationCircle, HiOutlineInformationCircle } from "react-icons/hi";
 import { IoWarningOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { COHORTS, ES_NO_LIMIT, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
-import DatePicker from "../../../../../components/ui/forms/DatePicker";
 import api from "../../../../../services/api";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
@@ -17,6 +15,7 @@ import Engagement from "../../../components/ui/icons/Engagement";
 import Inscription from "../../../components/ui/icons/Inscription";
 import Sejour from "../../../components/ui/icons/Sejour";
 import CustomFilter from "./components/CustomFilter";
+import VolontaireSection from "./components/VolontaireSection";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -25,6 +24,8 @@ export default function Index() {
 
   const [inscriptionDetailObject, setInscriptionDetailObject] = useState({});
   const [inscriptionGoals, setInscriptionGoals] = useState();
+  const [volontairesData, setVolontairesData] = useState();
+  const [inAndOutCohort, setInAndOutCohort] = useState();
 
   const [notesFromDate, setNotesFromDate] = useState(null);
   const [notesToDate, setNotesToDate] = useState(null);
@@ -82,17 +83,24 @@ export default function Index() {
   }
   async function fetchCurrentInscriptions() {
     const res = await getCurrentInscriptions(selectedFilters);
-    setInscriptionDetailObject(res);
+    setVolontairesData(res);
+  }
+
+  async function fetchInOutCohort() {
+    const res = await getInAndOutCohort(selectedFilters);
+    setInAndOutCohort(res);
   }
 
   useEffect(() => {
     fetchInscriptionGoals();
+    fetchInOutCohort();
   }, []);
 
   useEffect(() => {
     if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
     else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
     fetchCurrentInscriptions();
+    fetchInOutCohort();
   }, [JSON.stringify(selectedFilters)]);
 
   const goal = useMemo(
@@ -109,7 +117,7 @@ export default function Index() {
   return (
     <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}>
       <div className="flex flex-col gap-8">
-        <InfoMessage
+        {/* <InfoMessage
           bg="bg-blue-800"
           Icon={HiOutlineInformationCircle}
           message="Message d’information (white + blue/800), l'instruction des dossiers pour le séjour de février est à finaliser pour ce soir à 23h59."
@@ -118,7 +126,7 @@ export default function Index() {
           bg="bg-yellow-700"
           Icon={HiOutlineExclamationCircle}
           message="Message important (white + yellow/700), l'instruction des dossiers pour le séjour de février est à finaliser pour ce soir à 23h59."
-        />
+        /> */}
         <InfoMessage
           bg="bg-red-800"
           Icon={IoWarningOutline}
@@ -209,83 +217,16 @@ export default function Index() {
             title="Objectif des inscriptions"
             labels={["Sur la liste principale", "Sur liste complémentaire", "En attente de validation", "En attente de correction", "En cours"]}
             values={[
-              inscriptionDetailObject.VALIDATED || 0,
-              inscriptionDetailObject.WAITING_LIST || 0,
-              inscriptionDetailObject.WAITING_VALIDATION || 0,
-              inscriptionDetailObject.WAITING_CORRECTION || 0,
-              inscriptionDetailObject.IN_PROGRESS || 0,
+              volontairesData?.VALIDATED?.total || 0,
+              volontairesData?.WAITING_LIST?.total || 0,
+              volontairesData?.WAITING_VALIDATION?.total || 0,
+              volontairesData?.WAITING_CORRECTION?.total || 0,
+              volontairesData?.IN_PROGRESS?.total || 0,
             ]}
             goal={goal}
           />
         </div>
-        <h1 className="text-[28px] font-bold leading-8 text-gray-900">Volontaires</h1>
-        <div className="flex gap-4">
-          <div className="flex w-1/4 flex-col gap-4">
-            <div className="flex items-center justify-between rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
-              <p className="text-base font-bold text-gray-900">Volontaires</p>
-              <p className="text-2xl font-bold text-gray-900">156</p>
-            </div>
-            <div className="flex items-center justify-between rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
-              <p className="text-base font-bold text-gray-900">Désistements</p>
-              <p className="text-2xl font-bold text-gray-900">4</p>
-            </div>
-          </div>
-          <div className="flex w-1/4 flex-col gap-8 rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
-            <p className="text-base font-bold text-gray-900">Changement de cohorte</p>
-            <div className="my-auto flex items-center ">
-              <div className="flex w-[45%] flex-col items-center justify-center gap-4 ">
-                <p className="text-xs text-gray-600">Sorties</p>
-                <p className="text-2xl font-bold text-gray-900">1</p>
-              </div>
-              <div className="flex h-full w-[10%] items-center justify-center">
-                <div className="h-full w-[1px] border-r-[1px] border-gray-300 "></div>
-              </div>
-              <div className="flex w-[45%] flex-col items-center justify-center gap-4">
-                <p className="text-xs text-gray-600">Entrées</p>
-                <p className="text-2xl font-bold text-gray-900">0</p>
-              </div>
-            </div>
-          </div>
-          <div className="flex w-1/2 flex-col gap-2 rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
-            <p className="text-base font-bold text-gray-900">Validations par phases</p>
-            <div className="flex gap-4">
-              <div className="flex w-[55%] items-center">
-                <div className="flex w-[30%] flex-col items-center gap-2">
-                  <div className="h-[10px] w-[10px] rounded-full bg-blue-800"></div>
-                  <p className="text-2xl font-bold text-gray-900">146</p>
-                  <p className="text-center text-xs text-gray-600">Ayant validé la Phase 1</p>
-                </div>
-                <div className="flex h-full w-[5%] gap-2">
-                  <div className="m-auto h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
-                </div>
-                <div className="flex w-[30%] flex-col items-center gap-2">
-                  <div className="h-[10px] w-[10px] rounded-full bg-blue-800"></div>
-                  <p className="text-2xl font-bold text-gray-900">6</p>
-                  <p className="text-center text-xs text-gray-600">Ayant validé la Phase 2</p>
-                </div>
-                <div className="flex h-full w-[5%] gap-2">
-                  <div className="m-auto h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
-                </div>
-                <div className="flex w-[30%] flex-col items-center gap-2">
-                  <div className="h-[10px] w-[10px] rounded-full bg-blue-800"></div>
-                  <p className="text-2xl font-bold text-gray-900">0</p>
-                  <p className="text-center text-xs text-gray-600">Ayant validé la Phase 3</p>
-                </div>
-              </div>
-              <div className="flex w-[45%] flex-col gap-2">
-                <div className="w-full">
-                  <div className="h-8  rounded-full bg-blue-800" style={{ width: "100%" }}></div>
-                </div>
-                <div className="w-full">
-                  <div className="h-8  rounded-full bg-blue-500" style={{ width: "50%" }}></div>
-                </div>
-                <div className="w-full">
-                  <div className="h-8  rounded-full bg-blue-300" style={{ width: "30%" }}></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <VolontaireSection volontairesData={volontairesData} inAndOutCohort={inAndOutCohort} />
       </div>
     </DashboardContainer>
   );
@@ -348,6 +289,26 @@ async function getCurrentInscriptions(filters) {
           field: "status.keyword",
           size: ES_NO_LIMIT,
         },
+        aggs: {
+          statusPhase1: {
+            terms: {
+              field: "statusPhase1.keyword",
+              size: ES_NO_LIMIT,
+            },
+          },
+          statusPhase2: {
+            terms: {
+              field: "statusPhase2.keyword",
+              size: ES_NO_LIMIT,
+            },
+          },
+          statusPhase3: {
+            terms: {
+              field: "statusPhase3.keyword",
+              size: ES_NO_LIMIT,
+            },
+          },
+        },
       },
     },
     size: 0,
@@ -368,5 +329,69 @@ async function getCurrentInscriptions(filters) {
 
   const { responses } = await api.esQuery("young", body);
   if (!responses?.length) return {};
-  return api.getAggregations(responses[0]);
+  let result = responses[0].aggregations.status.buckets.reduce((acc, status) => {
+    acc[status.key] = {
+      total: status.doc_count,
+      phase1: status.statusPhase1.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {}),
+      phase2: status.statusPhase2.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {}),
+      phase3: status.statusPhase3.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {}),
+    };
+    return acc;
+  }, {});
+  return result;
+}
+
+async function getInAndOutCohort(filters) {
+  const cohortList = filters?.cohort?.length ? filters.cohort : COHORTS;
+
+  const aggs = cohortList.reduce((acc, cohort) => {
+    acc["in&" + cohort] = {
+      filter: {
+        bool: {
+          must: [{ term: { "cohort.keyword": cohort } }, { term: { "status.keyword": "VALIDATED" } }, { exists: { field: "originalCohort.keyword" } }],
+          must_not: [{ term: { "originalCohort.keyword": cohort } }],
+          filter: [],
+        },
+      },
+    };
+    acc["out&" + cohort] = {
+      filter: {
+        bool: {
+          must: [{ term: { "originalCohort.keyword": cohort } }, { term: { "status.keyword": "VALIDATED" } }, { exists: { field: "originalCohort.keyword" } }],
+          must_not: [{ term: { "cohort.keyword": cohort } }],
+          filter: [],
+        },
+      },
+    };
+    return acc;
+  }, {});
+
+  const body = {
+    query: { bool: { must: { match_all: {} }, filter: [] } },
+    aggs,
+    size: 0,
+  };
+
+  if (filters?.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filters.academy } });
+  if (filters?.region?.length)
+    body.query.bool.filter.push({
+      bool: {
+        should: [
+          { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": filters.region } }] } },
+          { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": filters.region } }] } },
+        ],
+      },
+    });
+  if (filters?.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filters.department } });
+
+  const { responses } = await api.esQuery("young", body);
+  if (!responses?.length) return {};
+  const aggreg = responses[0].aggregations;
+  let result = Object.keys(aggreg).reduce((acc, cohort) => {
+    const type = cohort.split("&")[0];
+    acc[type] = acc[type] ? acc[type] + aggreg[cohort].doc_count : aggreg[cohort].doc_count;
+    return acc;
+  }, {});
+
+  return result;
 }
