@@ -1,5 +1,7 @@
 import React, { useEffect } from "react";
 import { isPhoneZoneKnown, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
+import Label from '../layout/Label';
+import ErrorMessage from '../ErrorMessage';
 
 const InputPhone = ({
   value = {
@@ -36,11 +38,7 @@ const InputPhone = ({
 
   return (
     <div className={`mb-[1rem] ${className}`}>
-      <label
-        className={`flex flex-col justify-center border-[1px] min-h-[54px] w-full py-2 px-3 rounded-lg bg-white border-gray-300 disabled:border-gray-200 focus-within:border-blue-600 m-0 ${
-          error && "border-red-500"
-        }`}>
-        {label ? <p className="text-xs leading-4 text-gray-500 disabled:text-gray-400">{label}</p> : null}
+      <Label title={label} hasError={error}>
         <div className={`flex items-center w-full ${className}`}>
           <select className="mr-3 bg-transparent max-w-[120px] text-ellipsis text-sm" onChange={handleChange("phoneZone")} value={value.phoneZone}>
             {Object.entries(PHONE_ZONES).map(([key, phoneZone]) => (
@@ -58,8 +56,8 @@ const InputPhone = ({
             onChange={handleChange("phoneNumber")}
           />
         </div>
-      </label>
-      {error ? <p className="text-red-500 text-sm px-3 pt-1">{error}</p> : null}
+      </Label>
+      <ErrorMessage error={error} />
     </div>
   );
 };

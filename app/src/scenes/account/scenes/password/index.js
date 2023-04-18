@@ -51,26 +51,25 @@ const AccountPasswordPage = () => {
               name="password"
               onChange={setValues("password")}
               error={errors.password}
-              placeholder="********"
               value={values.password}
               validate={validate(({ value }) => !value && requiredErrorMessage)}
             />
             <InputPassword
+              label="Nouveau mot de passe"
               name="newPassword"
               error={errors.newPassword}
               onChange={setValues("newPassword")}
               validate={validate(validatePassword)}
-              placeholder="Nouveau mot de passe"
               value={values.newPassword}
             />
             <InputPassword
+              label="Confirmer nouveau mot de passe"
               name="verifyPassword"
               onChange={setValues("verifyPassword")}
               error={errors.verifyPassword}
               validate={validate(({ value, formValues }) => {
                 return (!value && requiredErrorMessage) || (value !== formValues.newPassword && "Les mots de passe renseignés doivent être identiques.");
               })}
-              placeholder="Confirmer nouveau mot de passe"
               value={values.verifyPassword}
             />
           </div>

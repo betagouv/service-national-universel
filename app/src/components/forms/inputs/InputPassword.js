@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
+import Label from '../layout/Label';
+import ErrorMessage from '../ErrorMessage';
 
 const InputPassword = ({ label = "", className = "", validate = () => null, name = "", value = "", onChange = () => null, error = null, ...rest }) => {
   const [inputType, setInputType] = useState("password");
@@ -30,11 +32,7 @@ const InputPassword = ({ label = "", className = "", validate = () => null, name
 
   return (
     <div className={`mb-[1rem] ${className}`}>
-      <label
-        className={`flex flex-col justify-center border-[1px] min-h-[54px] w-full py-2 px-3 rounded-lg bg-white border-gray-300 disabled:border-gray-200 focus-within:border-blue-600 m-0 ${
-          error && "border-red-500"
-        }`}>
-        {label ? <p className="text-xs leading-4 text-gray-500 disabled:text-gray-400">{label}</p> : null}
+      <Label title={label} hasError={error}>
         <div className="flex">
           <input
             className="text-sm flex-grow bg-white text-gray-900 disabled:text-gray-400 placeholder:text-gray-500 focus:outline-none"
@@ -55,8 +53,8 @@ const InputPassword = ({ label = "", className = "", validate = () => null, name
             </button>
           )}
         </div>
-      </label>
-      {error ? <p className="text-red-500 text-sm px-3 pt-1">{error}</p> : null}
+      </Label>
+      <ErrorMessage error={error} />
     </div>
   );
 };

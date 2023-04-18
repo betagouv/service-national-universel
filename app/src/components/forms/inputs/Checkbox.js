@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import ErrorMessage from '../ErrorMessage';
 
 const Checkbox = ({ label = "", className = "", validate = () => null, name = "", value = "", useCheckedAsValue = false, onChange = () => null, error = null, ...rest }) => {
   if ("type" in rest) {
@@ -34,7 +35,7 @@ const Checkbox = ({ label = "", className = "", validate = () => null, name = ""
         />
         {label ? <p className="text-sm leading-4 text-gray-700">{label}</p> : null}
       </label>
-      {error ? <p className="text-red-500 text-sm px-3 pt-1">{error}</p> : null}
+      <ErrorMessage error={error} />
     </div>
   );
 };

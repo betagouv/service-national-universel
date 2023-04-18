@@ -5,6 +5,7 @@ import Input from "../../../../components/forms/inputs/Input";
 import Select from "../../../../components/forms/inputs/Select";
 import { getSchoolGradesOptions, getYoungSchooledSituationOptions } from "../../../../utils/school-situation.utils";
 import SectionTitle from "../../components/SectionTitle";
+import FormDescription from '../../components/FormDescription';
 
 const AccountSchoolSituationPage = () => {
   const young = useSelector((state) => state.Auth.young);
@@ -24,9 +25,11 @@ const AccountSchoolSituationPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3">
           <div className="hidden lg:block lg:col-start-1 py-6 pl-6">
             <h2 className="text-gray-900 text-lg leading-6 font-medium m-0 mb-1">Situation scolaire</h2>
+            <FormDescription>Ma situation scolaire au moment de mon inscription.</FormDescription>
           </div>
           <div className="px-4 pt-6 pb-2 lg:col-start-2 lg:col-span-2">
             <SectionTitle>Scolarité</SectionTitle>
+            <FormDescription className="lg:hidden">Ma situation scolaire au moment de mon inscription.</FormDescription>
             <Select label="Statut" name="situation" value={values.situation} disabled>
               {getYoungSchooledSituationOptions().map(({ label, value }) => (
                 <option value={value} key={value}>

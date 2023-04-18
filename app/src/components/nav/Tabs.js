@@ -53,7 +53,7 @@ const Tabs = ({ tabs = [], selectedTabKey = "", className = "", onChange = () =>
               paddingRight: 20,
               paddingLeft: 20,
             }}
-            className={`appearance-none focus-visible:outline-none ${tabClassName}`}
+            className={`appearance-none focus-visible:outline-none transition-all duration-300 ${key === activeTabKey ? "text-blue-600" : ""} ${tabClassName}`}
             {...rest}>
             {title}
           </button>
