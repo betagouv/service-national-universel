@@ -23,7 +23,13 @@ const AccountGeneralPage = () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
 
-  const { handleSubmit, formState: { isValid, errors, isSubmitting }, getValues, register, control } = useForm({
+  const {
+    handleSubmit,
+    formState: { isValid, errors, isSubmitting },
+    getValues,
+    register,
+    control,
+  } = useForm({
     mode: "onBlur",
     defaultValues: {
       lastName: young.lastName || "",
@@ -38,7 +44,7 @@ const AccountGeneralPage = () => {
       address: young.address || "",
       zip: young.zip || "",
       city: young.city || "",
-    }
+    },
   });
 
   const handleSubmitGeneralForm = async (values) => {
@@ -84,7 +90,7 @@ const AccountGeneralPage = () => {
                   error={errors?.email?.message}
                   placeholder="example@example.com"
                   {...register("email", {
-                    validate: validateEmail
+                    validate: validateEmail,
                   })}
                 />
                 <InputPhone
@@ -93,7 +99,7 @@ const AccountGeneralPage = () => {
                   error={errors?.phone?.message}
                   control={control}
                   placeholder={PHONE_ZONES[getValues().phone.phoneZone].example}
-                  rules={{validate: validatePhoneNumber}}
+                  rules={{ validate: validatePhoneNumber }}
                 />
               </section>
               <section className="mb-4">
