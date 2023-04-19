@@ -10,7 +10,7 @@ const ApplicationObject = require("../models/application");
 const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
 // eslint-disable-next-line no-unused-vars
-const { ERRORS, isYoung, updateApplication } = require("../utils/index.js");
+const { ERRORS, isYoung, updateApplicationStatus, updateApplicationTutor } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
 const { ROLES, canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib/roles");
 const { MISSION_STATUS } = require("snu-lib/constants");
@@ -145,6 +145,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const oldRegion = mission.region;
 
     const oldStatus = mission.status;
+
+    const oldTutorId = mission.tutorId;
+
     mission.set(checkedMission);
     await mission.save({ fromUser: req.user });
 
@@ -158,9 +161,14 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       }
     }
 
+    // if there is a tutor change, update the application tutor as well
+    if (oldTutorId !== mission.tutorId) {
+      updateApplicationTutor(mission, req.user);
+    }
+
     // if there is a status change, update the application
     if (oldStatus !== mission.status) {
-      await updateApplication(mission, req.user);
+      await updateApplicationStatus(mission, req.user);
       if (mission.status === MISSION_STATUS.WAITING_VALIDATION) {
         const referentsDepartment = await UserObject.find({
           department: checkedMission.department,
@@ -229,17 +237,8 @@ router.post("/multiaction/change-tutor", passport.authenticate("referent", { ses
     for (let mission of missions) {
       mission.set({ tutorId, tutorName });
       await mission.save({ fromUser: req.user });
-
-      // ! update application ne met pas à jour le tutorId. Faire cette tache pour corriger : https://www.notion.so/jeveuxaider/Model-Supprimer-tutorId-de-applications-et-contrats-5dae140ba40745e69dde7029baecdabd
-      //await updateApplication(mission, req.user);
-
-      // ? Envoi d'un email au nouveau responsable
-      // await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
-      //   emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
-      //   params: {
-      //     missionName: mission.name,
-      //   },
-      // });
+      // @todo need to send email to the new tutor ?
+      await updateApplicationTutor(mission, req.user);
     }
 
     res.status(200).send({ ok: true });
