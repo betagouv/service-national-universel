@@ -215,7 +215,7 @@ export default function Index() {
         <div className="rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
           <HorizontalBar
             title="Objectif des inscriptions"
-            labels={["Sur la liste principale", "Sur liste complémentaire", "En attente de validation", "En attente de correction", "En cours"]}
+            labels={["Sur liste principale", "Sur liste complémentaire", "En attente de validation", "En attente de correction", "En cours"]}
             values={[
               volontairesData?.VALIDATED?.total || 0,
               volontairesData?.WAITING_LIST?.total || 0,
@@ -224,6 +224,7 @@ export default function Index() {
               volontairesData?.IN_PROGRESS?.total || 0,
             ]}
             goal={goal}
+            showTooltips={true}
           />
         </div>
         <VolontaireSection volontairesData={volontairesData} inAndOutCohort={inAndOutCohort} />

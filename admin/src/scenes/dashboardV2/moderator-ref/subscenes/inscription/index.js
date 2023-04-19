@@ -116,7 +116,7 @@ export default function Index() {
       }>
       <div className="flex flex-col gap-8 ">
         <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
-        <div className="bg-white p-8 rounded-lg shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+        <div className="rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
           <HorizontalBar
             title="Objectif des inscriptions"
             labels={["Sur la liste principale", "Sur liste complémentaire", "En attente de validation", "En attente de correction", "En cours"]}
@@ -128,6 +128,7 @@ export default function Index() {
               inscriptionDetailObject.IN_PROGRESS || 0,
             ]}
             goal={goal}
+            showTooltips={true}
           />
         </div>
         <StatutPhase values={inscriptionDetailObject} />
