@@ -9,11 +9,12 @@ import GhostButton from "./GhostButton";
 import { FiChevronLeft } from "react-icons/fi";
 import validator from "validator";
 import ErrorMessage from "./ErrorMessage";
+import { environment } from "../../../config";
 
 const addressValidationInfo = "Pour valider votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.";
 const addressValidationSuccess = "L'adresse a été vérifiée";
 
-export const messageStyles = {
+const messageStyles = {
   info: "info",
   error: "error",
 };
@@ -181,16 +182,18 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
     <>
       <SearchableSelect
         label="Commune de l'établissement"
-        value={city}
         options={cities.map((c) => ({ value: c, label: c }))}
         onChange={(value) => {
           setCity(value);
           setManualSchool({ city: value, addressVerified: undefined });
           onSelectSchool(null);
         }}
-        placeholder="Sélectionnez une commune"
+        value={city}
+        placeholder={environment === "production" ? "Sélectionnez une commune" : "Recherchez une commune"}
         error={errors.city}
         correction={corrections?.schoolCity}
+        noOptionsMessage="Veuillez rechercher une commune existante."
+        isDebounced={environment === "production" ? false : true}
       />
       <CreatableSelect
         label="Nom de l'établissement"
