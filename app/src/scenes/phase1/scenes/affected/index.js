@@ -6,7 +6,6 @@ import { getCohortDetail } from "../../../../utils/cohorts.js";
 import { isStepMedicalFieldDone } from "./utils/steps.utils.js";
 import api from "../../../../services/api";
 
-import { AlertBoxInformation } from "../../../../components/Content";
 import ChangeStayLink from "../../components/ChangeStayLink.js";
 import CenterInfo from "./components/CenterInfo";
 import FaqAffected from "./components/FaqAffected.js";
@@ -17,14 +16,16 @@ import StepsAffected from "./components/StepsAffected";
 import TravelInfoAlone from "./components/TravelInfoAlone.js";
 import TravelInfoBus from "./components/TravelInfoBus";
 import TodoBackpack from "./components/TodoBackpack";
+import AlertPrimary from "../../../../components/ui/alerts/AlertPrimary.js";
+import InformationCircle from "../../../../assets/icons/InformationCircle.js";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
   const [meetingPoint, setMeetingPoint] = useState();
-  const [showInfoMessage, setShowInfoMessage] = useState(false);
   const [loading, setLoading] = useState(true);
   const cohortDetails = getCohortDetail(young.cohort);
+  const showInfoMessage = false;
 
   if (isStepMedicalFieldDone(young)) {
     window.scrollTo(0, 0);
@@ -64,11 +65,17 @@ export default function Affected() {
     <div className="md:m-10">
       <div className="max-w-[80rem] rounded-xl shadow-nina md:mx-auto py-8 relative overflow-hidden flex flex-col justify-between bg-gray-50 md:bg-white mb-4">
         {showInfoMessage && (
-          <AlertBoxInformation
-            title="Information"
-            message="Suite au séjour de cohésion, les espaces volontaires vont s'actualiser dans les prochaines semaines, les attestations seront disponibles directement en ligne."
-            onClose={() => setShowInfoMessage(false)}
-          />
+          <AlertPrimary className="md:!mx-8 lg:!mx-16">
+            <div className="text-blue-400 my-1">
+              <InformationCircle />
+            </div>
+            <span className="flex flex-col">
+              <span className="font-bold">Information</span>
+              <span>
+                Suite au séjour de cohésion, les espaces volontaires vont s&apos;actualiser dans les prochaines semaines, les attestations seront disponibles directement en ligne.
+              </span>
+            </span>
+          </AlertPrimary>
         )}
         <header className="flex flex-col items-between px-4 md:!px-8 lg:!px-16 py-4 lg:justify-between lg:flex-row order-1">
           <div>

@@ -1,46 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { Container } from "reactstrap";
 import { HERO_IMAGES_LIST } from "../utils";
-
-export const AlertBoxInformation = ({ title, message, onClose }) => (
-  <AlertBoxStyle>
-    <img src={require("../assets/information.svg")} height={15} width={15} />
-    <div className="text">
-      <strong>{title}</strong>
-      <p>{message}</p>
-    </div>
-    <img src={require("../assets/close.svg")} height={15} width={15} onClick={onClose} style={{ cursor: "pointer" }} />
-  </AlertBoxStyle>
-);
-
-const AlertBoxStyle = styled(Container)`
-  border-radius: 8px;
-  @media (max-width: 768px) {
-    border-radius: 0;
-  }
-  display: flex;
-  align-items: center;
-  background-color: #5949d0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  .text {
-    margin-left: 20px;
-    margin-right: auto;
-    color: #fff;
-    strong {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 3px;
-    }
-    p {
-      margin-bottom: 0;
-      font-size: 12px;
-      font-weight: 500;
-    }
-  }
-`;
 
 export const Hero = ({ children, ...props }) => <HeroStyle {...props}>{children}</HeroStyle>;
 
@@ -161,48 +121,11 @@ export const Content = styled.div`
   }
 `;
 
-export const Alert = ({ children, ...props }) => <AlertStyle {...props}>{children}</AlertStyle>;
-
-const AlertStyle = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: ${({ color }) => (color ? color : "#5145cd")};
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  position: absolute;
-  z-index: 10;
-  width: 100%;
-  .text {
-    margin: 0 20px;
-    color: #fff;
-    strong {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 3px;
-    }
-  }
-  img {
-    position: absolute;
-    right: 0;
-    margin-right: 1rem;
-    cursor: pointer;
-  }
-`;
-
 export const Separator = styled.hr`
   margin: 2.5rem 0;
   height: 1px;
   border-style: none;
   background-color: #e5e7eb;
-`;
-export const SeparatorXS = styled.hr`
-  margin: 2.5rem 0;
-  height: 1px;
-  border-style: none;
-  background-color: #e5e7eb;
-  max-width: 20rem;
 `;
 
 export const WhiteButton = styled.button`
