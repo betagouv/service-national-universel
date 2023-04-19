@@ -51,6 +51,7 @@ jobs:
         run: npm install
 
       - name: Lint code
+        working-directory: ${{ env.SUBFOLDER_NAME }}
         continue-on-error: true
         run: npm run lint
 
