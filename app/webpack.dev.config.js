@@ -27,6 +27,7 @@ module.exports = (env) => {
       path: path.resolve("build"),
       filename: "[contenthash].index.js",
       publicPath: "/",
+      pathinfo: false,
     },
     devServer: {
       contentBase: "build",
@@ -44,7 +45,7 @@ module.exports = (env) => {
         {
           test: /\.js$/,
           loader: "babel-loader",
-          include: path.resolve("src"),
+          include: path.resolve(__dirname, "src"),
           exclude: /node_modules(?!\/snu-lib)/,
           options: {
             babelrc: true,
@@ -66,5 +67,11 @@ module.exports = (env) => {
       ],
     },
     plugins,
+    optimization: {
+      removeAvailableModules: false,
+      removeEmptyChunks: false,
+      splitChunks: false,
+      runtimeChunk: true,
+    },
   };
 };
