@@ -1,3 +1,17 @@
+# [1.256.0](https://github.com/betagouv/service-national-universel/compare/v1.255.0...v1.256.0) (2023-04-19)
+
+
+### Bug Fixes
+
+* **api:** Add check for parent1 image rights authorization when parent2 responds ([b87de5c](https://github.com/betagouv/service-national-universel/commit/b87de5c8018e7433179ff6228ecbe91bebdf7547))
+* **api:** Fix check for parent1 image rights ([5069667](https://github.com/betagouv/service-national-universel/commit/50696670a19cc2af6394ab0dce071864a76e5dec))
+* **api:** update application tutor on mission tutor change ([#2512](https://github.com/betagouv/service-national-universel/issues/2512)) ([64c98b0](https://github.com/betagouv/service-national-universel/commit/64c98b03775516526ed31bb2b7076a10a5273e1f))
+
+
+### Features
+
+* **api:** getTutorName service ([c0c4ab7](https://github.com/betagouv/service-national-universel/commit/c0c4ab7681b71329011af4562b7f435406807094))
+
 # [1.255.0](https://github.com/betagouv/service-national-universel/compare/v1.254.0...v1.255.0) (2023-04-18)
 
 
