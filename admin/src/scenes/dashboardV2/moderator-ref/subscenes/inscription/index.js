@@ -11,6 +11,7 @@ import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import StatutPhase from "../../../components/inscription/StatutPhase.js";
 
 import plausibleEvent from "../../../../../services/plausible";
+import { getLink as getOldLink } from "../../../../../utils";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import Details from "../../../components/inscription/Details";
 import TabSchool from "../../../components/inscription/TabSchool";
@@ -129,6 +130,13 @@ export default function Index() {
             ]}
             goal={goal}
             showTooltips={true}
+            legendUrls={[
+              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] }),
+              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_LIST"%5D'] }),
+              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_VALIDATION"%5D'] }),
+              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_CORRECTION"%5D'] }),
+              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] }),
+            ]}
           />
         </div>
         <StatutPhase values={inscriptionDetailObject} />

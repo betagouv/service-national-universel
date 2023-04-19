@@ -87,7 +87,7 @@ export default function HorizontalBar({ title, values, labels, showTooltips = fa
       </div>
       <div className="mt-4 mr-8 flex justify-between last:mr-0">
         {bars.map((bar, idx) => (
-          <div key={"legend-" + idx} onClick={() => clickOnLegend({ index: idx, label: bar.label, value: bar.percent, color: bar.color })}>
+          <div key={"legend-" + idx} className="cursor-pointer" onClick={() => clickOnLegend({ index: idx, label: bar.label, value: bar.percent, color: bar.color })}>
             <div className="flex">
               <div className="mr-2 mt-2 h-[12px] w-[12px] rounded-full" style={{ backgroundColor: bar.color }}></div>
               <div>

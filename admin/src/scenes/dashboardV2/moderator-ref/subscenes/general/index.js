@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-import { HiChevronDown, HiChevronRight, HiChevronUp, HiOutlineExclamationCircle, HiOutlineInformationCircle } from "react-icons/hi";
+import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
 import { IoWarningOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { COHORTS, ES_NO_LIMIT, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
 import api from "../../../../../services/api";
+import { getLink as getOldLink } from "../../../../../utils";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
@@ -22,7 +23,6 @@ export default function Index() {
   const [fullNote, setFullNote] = useState(false);
   const [fullKeyNumber, setFullKeyNumber] = useState(false);
 
-  const [inscriptionDetailObject, setInscriptionDetailObject] = useState({});
   const [inscriptionGoals, setInscriptionGoals] = useState();
   const [volontairesData, setVolontairesData] = useState();
   const [inAndOutCohort, setInAndOutCohort] = useState();
@@ -225,9 +225,16 @@ export default function Index() {
             ]}
             goal={goal}
             showTooltips={true}
+            legendUrls={[
+              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] }),
+              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_LIST"%5D'] }),
+              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_VALIDATION"%5D'] }),
+              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_CORRECTION"%5D'] }),
+              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] }),
+            ]}
           />
         </div>
-        <VolontaireSection volontairesData={volontairesData} inAndOutCohort={inAndOutCohort} />
+        <VolontaireSection volontairesData={volontairesData} inAndOutCohort={inAndOutCohort} filter={selectedFilters} />
       </div>
     </DashboardContainer>
   );
