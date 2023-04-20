@@ -20,19 +20,19 @@ export function getGraphColors(count) {
   return graphColors[Math.max(1, Math.min(14, count))];
 }
 
-export function Legend({ color, name, value = null, className = "", onClick = () => {} }) {
+export function Legend({ color, name, value = null, noValue = false, className = "", onClick = () => {} }) {
   return (
     <div className={`flex flex-row-reverse items-center ${className}`} onClick={onClick}>
-      <div className="ml-2 text-xs text-gray-600">{name}</div>
+      <div className="ml-2 text-xs text-gray-600 whitespace-nowrap">{name}</div>
       <div className={`flex items-center`}>
         <div className={`h-[10px] w-[10px] rounded-full`} style={{ backgroundColor: color }}></div>
-        <div className="ml-2 text-lg font-medium text-gray-900">{value ? value : 0}</div>
+        <div className="ml-2 text-lg font-medium text-gray-900">{noValue ? null : value ? value : 0}</div>
       </div>
     </div>
   );
 }
 
-export function Legends({ labels, values = null, legendUrls, className = "", onLegendClicked = () => {} }) {
+export function Legends({ labels, values = null, noValue = false, legendUrls, className = "", onLegendClicked = () => {} }) {
   const colors = getGraphColors(labels.length);
 
   function clickOnLegend({ index, label, value, color }) {
@@ -50,6 +50,7 @@ export function Legends({ labels, values = null, legendUrls, className = "", onL
           color={colors[idx % colors.length]}
           name={label}
           value={values ? values[idx] : 0}
+          noValue={noValue}
           key={label}
           className="mr-4 last:mr-0"
           onClick={() => clickOnLegend({ index: idx, label, value: values ? values[idx] : 0, color: colors[idx] })}

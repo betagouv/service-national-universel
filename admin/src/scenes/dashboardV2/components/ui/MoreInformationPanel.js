@@ -24,7 +24,7 @@ export default function MoreInfoPanel({ children, className = "" }) {
 
   return (
     <div className={`relative ${className}`}>
-      <InformationCircle className="text-gray-400 ml-2 cursor-pointer" onClick={click} />
+      <InformationCircle className="text-gray-400 mx-2 cursor-pointer" onClick={click} />
       <div ref={panel} className={`${open ? "block" : "hidden"} absolute bg-[#FFFFFF] rounded-xl shadow left-[50%] translate-x-[-50%] bottom-[30px]`}>
         {children}
       </div>

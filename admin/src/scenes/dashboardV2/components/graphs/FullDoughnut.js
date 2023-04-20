@@ -23,6 +23,7 @@ export default function FullDoughnut({
   const [legends, setLegends] = useState([]);
   const [tooltip, setTooltip] = useState(null);
   const [dataIsZero, setDataIsZero] = useState(true);
+  const [legendCols, setLegendCols] = useState(maxLegends);
 
   useEffect(() => {
     if (values) {
@@ -124,47 +125,49 @@ export default function FullDoughnut({
           info: legendInfoPanels && legendInfoPanels.length > idx ? legendInfoPanels[idx] : undefined,
         };
       });
+
       // sort legends to be displayed by grid
-      if (legends.length > maxLegends) {
-        switch (legendSide) {
-          case "left": {
-            const cols = Math.ceil(legends.length / maxLegends);
-            let newLegends = [];
-            for (let j = 0; j < maxLegends; ++j) {
-              for (let i = cols - 1; i >= 0; --i) {
-                const idx = i * cols + j;
-                if (idx < legends.length) {
-                  newLegends.push(legends[idx]);
-                } else {
-                  newLegends.push(null);
-                }
+      let legendCols = maxLegends;
+      switch (legendSide) {
+        case "left": {
+          legendCols = Math.ceil(legends.length / maxLegends);
+          let newLegends = [];
+          for (let j = 0; j < maxLegends; ++j) {
+            for (let i = legendCols - 1; i >= 0; --i) {
+              const idx = i * legendCols + j;
+              if (idx < legends.length) {
+                newLegends.push(legends[idx]);
+              } else {
+                newLegends.push(null);
               }
             }
-            legends = newLegends;
-            break;
           }
-          case "right": {
-            const cols = Math.ceil(legends.length / maxLegends);
-            let newLegends = [];
-            for (let j = 0; j < maxLegends; ++j) {
-              for (let i = 0; i < cols; ++i) {
-                const idx = i * cols + j;
-                if (idx < legends.length) {
-                  newLegends.push(legends[idx]);
-                } else {
-                  newLegends.push(null);
-                }
-              }
-            }
-            legends = newLegends;
-            break;
-          }
-          case "bottom":
-          case "top":
-            // rien à faire, c'est déjà dans le bon sens.
-            break;
+          legends = newLegends;
+          break;
         }
+        case "right": {
+          legendCols = Math.ceil(legends.length / maxLegends);
+          let newLegends = [];
+          for (let j = 0; j < maxLegends; ++j) {
+            for (let i = 0; i < legendCols; ++i) {
+              const idx = i * legendCols + j;
+              if (idx < legends.length) {
+                newLegends.push(legends[idx]);
+              } else {
+                newLegends.push(null);
+              }
+            }
+          }
+          legends = newLegends;
+          break;
+        }
+        case "bottom":
+        case "top":
+          // rien à faire, c'est déjà dans le bon sens.
+          legendCols = maxLegends;
+          break;
       }
+      setLegendCols(legendCols);
       setLegends(legends);
     } else {
       setGraphData(null);
@@ -188,18 +191,14 @@ export default function FullDoughnut({
       legendClass += "flex flex-col items-end mb-[16px] last:mb-0";
       legendValueClass += " flex-row-reverse";
       legendDotClass = "ml-2";
-      if (maxLegends <= legends.length) {
-        legendsClass += ` grid grid-rows-${maxLegends}`;
-      }
+      legendsClass += ` grid grid-cols-${legendCols} gap-2`;
       titleClass = "ml-10 py-[44px]";
       textLegendClass = "text-right";
       break;
     case "right":
       mainClass += " flex-row";
       legendClass += " mb-[16px] last:mb-0";
-      if (maxLegends <= legends.length) {
-        legendsClass += ` grid grid-rows-${maxLegends}`;
-      }
+      legendsClass += ` grid grid-cols-${legendCols} gap-2`;
       titleClass = "mr-10 py-[44px]";
       textLegendClass = "text-left";
       break;
@@ -208,7 +207,7 @@ export default function FullDoughnut({
       if (maxLegends > legends.length) {
         legendsClass += " flex justify-center";
       } else {
-        legendsClass += ` grid grid-cols-${maxLegends}`;
+        legendsClass += ` grid grid-cols-${legendCols} gap-2`;
       }
       legendClass += " mr-7 last:mr-0";
       titleClass = "mt-10 px-[44px]";
@@ -219,7 +218,7 @@ export default function FullDoughnut({
       if (maxLegends > legends.length) {
         legendsClass += " flex justify-center";
       } else {
-        legendsClass += ` grid grid-cols-${maxLegends}`;
+        legendsClass += ` grid grid-cols-${legendCols} gap-2`;
       }
       legendClass += " mr-7 last:mr-0";
       titleClass = "mb-10 px-[44px]";
