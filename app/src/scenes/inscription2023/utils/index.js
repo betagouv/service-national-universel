@@ -33,8 +33,9 @@ export const youngActiveSituationOptions = Object.keys(YOUNG_ACTIVE_SITUATIONS).
   label: translation.translate(situation),
 }));
 
-export const countryOptions = Object.values(countriesList)
+export const foreignCountryOptions = Object.values(countriesList)
   .sort((a, b) => a.localeCompare(b))
+  .filter((countryName) => countryName !== "France")
   .map((countryName) => ({ value: countryName, label: countryName }));
 
 export const hostRelationshipOptions = [
