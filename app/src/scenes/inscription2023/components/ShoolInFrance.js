@@ -9,7 +9,6 @@ import GhostButton from "./GhostButton";
 import { FiChevronLeft } from "react-icons/fi";
 import validator from "validator";
 import ErrorMessage from "./ErrorMessage";
-import { environment } from "../../../config";
 
 const addressValidationInfo = "Pour valider votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.";
 const addressValidationSuccess = "L'adresse a été vérifiée";
@@ -168,8 +167,8 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
       </div>
       <GhostButton
         name={
-          <div className="flex text-center items-center justify-center gap-1">
-            <FiChevronLeft className="text-[#000091] font-bold" />
+          <div className="flex items-center justify-center gap-1 text-center">
+            <FiChevronLeft className="font-bold text-[#000091]" />
             Revenir à la liste des établissements
           </div>
         }
@@ -189,11 +188,11 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
           onSelectSchool(null);
         }}
         value={city}
-        placeholder={environment === "production" ? "Sélectionnez une commune" : "Recherchez une commune"}
+        placeholder="Recherchez une commune"
         error={errors.city}
         correction={corrections?.schoolCity}
         noOptionsMessage="Veuillez rechercher une commune existante."
-        isDebounced={environment === "production" ? false : true}
+        isDebounced
       />
       <CreatableSelect
         label="Nom de l'établissement"
