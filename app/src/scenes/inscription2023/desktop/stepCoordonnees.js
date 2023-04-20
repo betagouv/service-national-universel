@@ -12,7 +12,7 @@ import ErrorMessage from "../components/ErrorMessage";
 import {
   youngSchooledSituationOptions,
   youngActiveSituationOptions,
-  countryOptions,
+  foreignCountryOptions,
   hostRelationshipOptions,
   inFranceOrAbroadOptions,
   genderOptions,
@@ -189,7 +189,7 @@ export default function StepCoordonnees() {
         setSpecialSituation(true);
       }
 
-      setWasBornInFrance(young.birthCountry === FRANCE ? "true" : "false");
+      setWasBornInFrance(!young.birthCountry || young.birthCountry === FRANCE ? "true" : "false");
 
       setData({
         ...data,
@@ -541,7 +541,7 @@ export default function StepCoordonnees() {
         <SearchableSelect
           label="Pays de naissance"
           value={birthCountry}
-          options={countryOptions}
+          options={foreignCountryOptions}
           onChange={updateData("birthCountry")}
           placeholder="Sélectionnez un pays"
           error={errors.birthCountry}
@@ -604,7 +604,7 @@ export default function StepCoordonnees() {
         <SearchableSelect
           label="Pays de résidence"
           value={foreignCountry}
-          options={countryOptions}
+          options={foreignCountryOptions}
           onChange={updateData("foreignCountry")}
           placeholder="Sélectionnez un pays"
           error={errors.foreignCountry}
