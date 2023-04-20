@@ -416,6 +416,7 @@ router.post("/check-token/:token", async (req, res) => {
         },
       };
       const youngs = await YoungModel.find({ status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: sessionPhase1._id });
+      console.log("youngs", youngs.length);
 
       const ligneBus = await LigneBusModel.find({ cohort: sessionPhase1.cohort, centerId: sessionPhase1.cohesionCenterId });
 
@@ -452,8 +453,8 @@ router.post("/check-token/:token", async (req, res) => {
           result.transportInfoGivenByLocal.youngs.push(tempYoung);
         } else {
           const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
-          const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
-          if (youngMeetingPoint) {
+          const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId && young?.cohesionStayPresence !== "false" && young?.departInform !== "true");
+          if (youngMeetingPoint && youngLigneBus) {
             if (!result[youngLigneBus.busId]) {
               result[youngLigneBus.busId] = {};
               result[youngLigneBus.busId]["youngs"] = [];
