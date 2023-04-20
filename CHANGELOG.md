@@ -1,3 +1,21 @@
+# [1.257.0](https://github.com/betagouv/service-national-universel/compare/v1.256.0...v1.257.0) (2023-04-20)
+
+
+### Bug Fixes
+
+* **admin:** correction du contrôle de la capacité de volontaires sur plan de transport ([#2518](https://github.com/betagouv/service-national-universel/issues/2518)) ([6aa613f](https://github.com/betagouv/service-national-universel/commit/6aa613f0ec2abe7954b7a1c862db6befe2204901))
+* **admin:** Correction legendURl sur les FullDoughnut ([#2522](https://github.com/betagouv/service-national-universel/issues/2522)) ([ab37853](https://github.com/betagouv/service-national-universel/commit/ab37853b1c9e936de3e19fb8dcd5caa3ab54376e))
+* **api:** dont check is session is full at inscription ([#2517](https://github.com/betagouv/service-national-universel/issues/2517)) ([f8535f9](https://github.com/betagouv/service-national-universel/commit/f8535f954a684a6b7846668abfd6f6b03b6af83a))
+* **app:** inscription birth country select ([#2523](https://github.com/betagouv/service-national-universel/issues/2523)) ([520af7c](https://github.com/betagouv/service-national-universel/commit/520af7cedc5eed2fd34b4104d645256c143d4e5c))
+* **app:** Optimisation des performances de sélection d'établissement scolaire lors de la pré-inscription ([#2519](https://github.com/betagouv/service-national-universel/issues/2519)) ([c0d93e7](https://github.com/betagouv/service-national-universel/commit/c0d93e71a44525b0491845fcfd3bbfa1b194cbce))
+* **lib:** set july inscription end time to 23:59 ([fd68884](https://github.com/betagouv/service-national-universel/commit/fd68884ed2b8c80c1631b7319703401bb4d8adc2))
+
+
+### Features
+
+* **admin/api:** Update listes des volontaires depuis les centres / les PDR / les lignes de bus ([#2516](https://github.com/betagouv/service-national-universel/issues/2516)) ([b67ed95](https://github.com/betagouv/service-national-universel/commit/b67ed958925118f11ac0ee3c28793dfe286603f8))
+* **api/admin:** Add returnHour to young export ([#2526](https://github.com/betagouv/service-national-universel/issues/2526)) ([74a5297](https://github.com/betagouv/service-national-universel/commit/74a52974f1f9efbf2a9f08020deae391ba1d703b))
+
 # [1.256.0](https://github.com/betagouv/service-national-universel/compare/v1.255.0...v1.256.0) (2023-04-19)
 
 
