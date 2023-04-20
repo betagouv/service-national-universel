@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
-import FileIcon from "../../../assets/FileIcon";
-import api from "../../../services/api";
-import { SENDINBLUE_TEMPLATES, translate } from "../../../utils";
-import ButtonPlain from "./ButtonPlain";
-import { capture } from "../../../sentry";
-import Select from "../../../components/TailwindSelect";
+import FileIcon from "../../../../assets/FileIcon";
+import api from "../../../../services/api";
+import { SENDINBLUE_TEMPLATES, translate } from "../../../../utils";
+import { capture } from "../../../../sentry";
+import Select from "../../../../components/TailwindSelect";
+import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
 
 export default function DocumentPhase1(props) {
   const [young, setYoung] = useState(props.young);
@@ -114,13 +114,9 @@ export default function DocumentPhase1(props) {
             <p className="text-base font-bold mt-2">Fiche sanitaire</p>
           </section>
           {statusCohesionStayMedical === "TO_DOWNLOAD" && (
-            <ButtonPlain
-              tw="bg-white border-[1px] border-indigo-600 text-indigo-600"
-              disabled={loading}
-              className="border rounded-lg m-2 px-4 py-2"
-              onClick={() => handleEmailClick("cohesionStayMedical")}>
+            <ButtonPrimary disabled={loading} onClick={() => handleEmailClick("cohesionStayMedical")}>
               Relancer le volontaire
-            </ButtonPlain>
+            </ButtonPrimary>
           )}
         </div>
       </article>

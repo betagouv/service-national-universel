@@ -30,3 +30,26 @@ export const deleteYoungAccount = async (youngId) => {
     };
   }
 };
+
+export const updateYoungPhase1Agreement = async ({ youngId, isAgree }) => {
+  try {
+    const { data, ok, code } = await API.post(`/young/${youngId}/phase1/youngPhase1Agreement`, { value: isAgree });
+    if (!ok) {
+      throw {
+        title: "Une erreur s'est produite :",
+        message: translate(code),
+      };
+    }
+    return {
+      title: "Succès",
+      message: "Le statut du (de la) volontaire a bien été mis à jour.",
+      data,
+    };
+  } catch (error) {
+    console.error(error);
+    throw {
+      title: "Oups, une erreur est survenue pendant la supression du (de la) volontaire :",
+      message: translate(error.code),
+    };
+  }
+};
