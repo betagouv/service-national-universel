@@ -123,6 +123,7 @@ export default function FullDoughnut({
           name: labels[idx],
           color: dataColors[idx % dataColors.length],
           info: legendInfoPanels && legendInfoPanels.length > idx ? legendInfoPanels[idx] : undefined,
+          url: legendUrls && legendUrls.length > idx ? legendUrls[idx] : undefined,
         };
       });
 
@@ -259,9 +260,9 @@ export default function FullDoughnut({
     },
   };
 
-  function clickOnLegend({ index, label, value, color }) {
-    if (legendUrls && legendUrls[index]) {
-      window.open(legendUrls[index], "_blank");
+  function clickOnLegend({ index, label, value, color, url }) {
+    if (url) {
+      window.open(url, "_blank");
     } else {
       onLegendClicked(index, label, value, color);
     }
@@ -280,7 +281,10 @@ export default function FullDoughnut({
       <div className={legendsClass}>
         {legends.map((legend, idx) => {
           return legend ? (
-            <div className={legendClass} key={legend.name} onClick={() => clickOnLegend({ index: idx, label: legend.name, value: legend.value, color: legend.color })}>
+            <div
+              className={legendClass}
+              key={legend.name}
+              onClick={() => clickOnLegend({ index: idx, label: legend.name, value: legend.value, color: legend.color, url: legend.url })}>
               <div className={`mb-[4px] text-xs text-gray-600 ${textLegendClass}`}>{legend.name}</div>
               <div className={legendValueClass}>
                 <div className={`h-[10px] w-[10px] rounded-full ${legendDotClass}`} style={{ backgroundColor: legend.color }}></div>
