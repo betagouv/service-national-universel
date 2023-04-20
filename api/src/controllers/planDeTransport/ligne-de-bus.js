@@ -33,7 +33,8 @@ router.get("/all", passport.authenticate("referent", { session: false, failWithE
     let arrayMeetingPoints = [];
     ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
     const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints } });
-    return res.status(200).send({ ok: true, data: { ligneBus, meetingPoints } });
+    const ligneToPoints = await LigneToPointModel.find({ ligneBusId: { $in: ligneBus.map((l) => l._id) } });
+    return res.status(200).send({ ok: true, data: { ligneBus, meetingPoints, ligneToPoints } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
