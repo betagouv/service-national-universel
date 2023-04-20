@@ -66,5 +66,11 @@ module.exports = (env) => {
       ],
     },
     plugins,
+    optimization: {
+      removeAvailableModules: false,
+      removeEmptyChunks: false,
+      splitChunks: false,
+      runtimeChunk: true,
+    },
   };
 };

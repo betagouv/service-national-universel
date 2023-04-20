@@ -475,6 +475,8 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
 
     const dataYoung = await LigneBusModel.aggregate(queryYoung).exec();
 
+    console.log(dataYoung);
+
     let result = {
       meetingPoints: [],
     };
@@ -486,7 +488,7 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
     result.youngsCountBus = youngsCountBus;
 
     //Get young volume need for the destination center in schema
-    const dataSchema = await schemaRepartitionModel.find({ sessionId: ligneBus.sessionId });
+    const dataSchema = await schemaRepartitionModel.find({ sessionId: ligneBus.sessionId, $where: "this.fromDepartment!==this.toDepartment" });
 
     let schemaVolume = 0;
     for (let data of dataSchema) {
@@ -504,6 +506,8 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
     }
 
     result.busVolume = busVolume;
+
+    console.log("RESULT >>>", result);
 
     return res.status(200).send({ ok: true, data: result });
   } catch (error) {
