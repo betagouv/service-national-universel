@@ -479,7 +479,7 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
   }
 
   const checkIfUserIsAuthorizedToExportData = async () => {
-    const cohort = await getCohortByName(cohortName);
+    const { data: cohort } = await getCohortByName(cohortName);
     if ((!cohort || !cohort.repartitionSchemaDownloadAvailability) && user.role === ROLES.TRANSPORTER) {
       setIsUserAuthorizedToExportData(false);
       return;

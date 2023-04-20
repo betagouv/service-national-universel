@@ -1,11 +1,11 @@
 import React from "react";
 import { BiLoaderAlt } from "react-icons/bi";
-import DangerTriangle from "../../../assets/icons/DangerTriangle";
-import ButtonDanger from "../buttons/ButtonDanger";
 import ButtonLight from "../buttons/ButtonLight";
 import Modal from "./Modal";
+import ButtonPrimary from "../buttons/ButtonPrimary";
+import CheckCircle from "../../../assets/icons/CheckCircle";
 
-const ModalDanger = ({
+const ModalPrimary = ({
   isOpen,
   onClose: handleClose = () => {},
   onCancel: handleCancel = () => {},
@@ -19,12 +19,11 @@ const ModalDanger = ({
   cancelButtonText = "Annuler",
   isLoading = false,
   children = null,
-  icon = <DangerTriangle />,
+  icon = <CheckCircle className="text-[#D1D5DB] w-[40px] h-[40px]" />,
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={handleClose} className={className}>
       <Modal.Header className="flex-col items-center justify-center">
-        <DangerTriangle />
         {icon}
         <h3 className="text-xl font-medium text-gray-900 text-center">{title}</h3>
       </Modal.Header>
@@ -36,17 +35,17 @@ const ModalDanger = ({
         <ButtonLight className="flex-1" onClick={handleCancel} disabled={isCancelButtonDisabled || isLoading}>
           {cancelButtonText}
         </ButtonLight>
-        <ButtonDanger className="flex-1" onClick={handleConfirm} disabled={isConfirmButtonDisabled || isLoading}>
+        <ButtonPrimary className="flex-1" onClick={handleConfirm} disabled={isConfirmButtonDisabled || isLoading}>
           {isLoading && (
             <span className="animate-spin">
               <BiLoaderAlt />
             </span>
           )}
           {confirmButtonText}
-        </ButtonDanger>
+        </ButtonPrimary>
       </Modal.Footer>
     </Modal>
   );
 };
 
-export default ModalDanger;
+export default ModalPrimary;
