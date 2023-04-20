@@ -475,8 +475,6 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
 
     const dataYoung = await LigneBusModel.aggregate(queryYoung).exec();
 
-    console.log(dataYoung);
-
     let result = {
       meetingPoints: [],
     };
@@ -506,8 +504,6 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
     }
 
     result.busVolume = busVolume;
-
-    console.log("RESULT >>>", result);
 
     return res.status(200).send({ ok: true, data: result });
   } catch (error) {
