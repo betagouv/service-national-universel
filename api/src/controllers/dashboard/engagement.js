@@ -194,8 +194,17 @@ router.post("/structures", passport.authenticate("referent", { session: false, f
     const pipeline = [
       { $match: computeYoungFilter(filters) },
       {
+        $unwind: {
+          path: "$types",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $group: {
-          _id: "$legalStatus",
+          _id: {
+            legalStatus: "$legalStatus",
+            type: "$types",
+          },
           total: { $sum: 1 },
           national: {
             $sum: {
@@ -216,7 +225,7 @@ router.post("/structures", passport.authenticate("referent", { session: false, f
     let data = await StructureModel.aggregate(pipeline);
 
     // --- format data
-    data = data.filter((structure) => structure._id != null);
+    data = data.filter((structure) => structure._id.legalStatus !== null && structure._id.legalStatus !== undefined);
 
     // --- result
     return res.status(200).send({ ok: true, data });

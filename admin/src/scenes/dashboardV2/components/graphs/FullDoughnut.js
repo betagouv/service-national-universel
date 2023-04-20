@@ -283,9 +283,9 @@ export default function FullDoughnut({
           return legend ? (
             <div
               className={legendClass}
-              key={legend.name}
+              key={legend.name + idx}
               onClick={() => clickOnLegend({ index: idx, label: legend.name, value: legend.value, color: legend.color, url: legend.url })}>
-              <div className={`mb-[4px] text-xs text-gray-600 ${textLegendClass}`}>{legend.name}</div>
+              <div className={`mb-[4px] text-xs text-gray-600 max-w-[250px] ${textLegendClass}`}>{legend.name}</div>
               <div className={legendValueClass}>
                 <div className={`h-[10px] w-[10px] rounded-full ${legendDotClass}`} style={{ backgroundColor: legend.color }}></div>
                 <div className="text-lg font-medium text-gray-900">
