@@ -36,6 +36,7 @@ export default function SectionStructures({ filters }) {
             _id: translate(structure._id),
             total: structure.total,
             national: structure.national,
+            info: getInfoPanel(structure),
           })),
         );
       } else {
@@ -47,6 +48,18 @@ export default function SectionStructures({ filters }) {
       setError("Erreur: impossible de charger les données.");
     }
     setLoading(false);
+  }
+
+  function getInfoPanel(structure) {
+    switch (structure._id) {
+      case "PRIVATE":
+      case "PUBLIC":
+        return <div className="p-8">{translate(structure._id)} + DOUGHNUT</div>;
+      case "ASSOCIATION":
+        return <div className="p-8">{translate(structure._id)} + STATUS-TABLE</div>;
+      default:
+        return null;
+    }
   }
 
   return (
@@ -74,6 +87,8 @@ export default function SectionStructures({ filters }) {
               labels={structures.map((structure) => structure._id)}
               values={structures.map((structure) => structure.total)}
               tooltipsPercent
+              className="justify-center"
+              legendInfoPanels={structures.map((structure) => structure.info)}
             />
           </DashboardBox>
         </div>
