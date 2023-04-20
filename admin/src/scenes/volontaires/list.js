@@ -143,7 +143,7 @@ export default function VolontaireList() {
       if (data.meetingPointId && meetingPoints) {
         meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
         bus = ligneBus.find((lb) => lb._id === data.ligneId);
-        ligneToPoint = ligneToPoints.find((ltp) => ltp.lineId === data.lineId && ltp.meetingPointId === data.meetingPointId);
+        ligneToPoint = ligneToPoints.find((ltp) => ltp.lineId === data.ligneId && ltp.meetingPointId === data.meetingPointId);
       }
 
       if (!data.domains) data.domains = [];
