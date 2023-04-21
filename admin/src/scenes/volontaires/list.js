@@ -264,8 +264,12 @@ export default function VolontaireList() {
           "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
           "Informations de transport sont transmises par les services locaux": translate(data.transportInfoGivenByLocal),
           "Bus n˚": bus?.busId,
+          "Nom du point de rassemblement": meetingPoint?.name,
           "Adresse point de rassemblement": meetingPoint?.address,
+          "Ville du point de rassemblement": meetingPoint?.city,
           "Date aller": formatDateFR(bus?.departuredDate),
+          "Heure de départ": ligneToPoint?.departureHour,
+          "Heure de convocation": ligneToPoint?.meetingHour,
           "Date retour": formatDateFR(bus?.returnDate),
           "Heure de retour": ligneToPoint?.returnHour,
         },
@@ -920,6 +924,20 @@ export default function VolontaireList() {
                   renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires", "Fiches sanitaires")}
                   showMissing
                   missingLabel="Non renseigné"
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="LINE"
+                  dataField="ligneId.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "LINE") }}
+                  renderItem={(e, count) => {
+                    return `${e} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Ligne", "Ligne")}
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
