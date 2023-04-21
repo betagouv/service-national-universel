@@ -1,3 +1,15 @@
+# [1.258.0](https://github.com/betagouv/service-national-universel/compare/v1.257.0...v1.258.0) (2023-04-21)
+
+
+### Bug Fixes
+
+* **app:** Autoriser temporairement les volontaires en cours de juin des DROM à accéder à la page d'inscription ([#2527](https://github.com/betagouv/service-national-universel/issues/2527)) ([dca2b5f](https://github.com/betagouv/service-national-universel/commit/dca2b5ff12550bab47b1d2fefe34efb7bc08658a))
+
+
+### Features
+
+* **lib, admin:** Ajout d'informations sur le trajet dans l'export des volontaires ([f5f10ea](https://github.com/betagouv/service-national-universel/commit/f5f10ea0a01fd3b5c35ac00a2db52d6a50778e5f))
+
 # [1.257.0](https://github.com/betagouv/service-national-universel/compare/v1.256.0...v1.257.0) (2023-04-20)
 
 
