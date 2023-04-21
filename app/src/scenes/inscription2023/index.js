@@ -126,7 +126,7 @@ export default function Index() {
   }
 
   //si la periode de modification est finie
-  if (!inscriptionModificationOpenForYoungs(young.cohort) && !isFromDOMTOM(young)) {
+  if (!inscriptionModificationOpenForYoungs(young.cohort) && !(young.cohort === "Juin 2023" && isFromDOMTOM(young))) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
