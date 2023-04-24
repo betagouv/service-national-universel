@@ -9,6 +9,9 @@ const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 const { YOUNG_STATUS_PHASE1, ES_NO_LIMIT } = require("snu-lib");
 const { serializeYoungs } = require("../../utils/es-serializer");
+const StructureObject = require("../../models/structure");
+const ApplicationObject = require("../../models/application");
+const SessionPhase1Object = require("../../models/sessionPhase1");
 
 async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
   const contextFilters = [];
