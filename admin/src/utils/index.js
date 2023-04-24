@@ -168,9 +168,12 @@ export const getLink = ({ base = "/", filter, filtersUrl = [] }) => {
   if (filter?.fromDate?.length && filter?.toDate?.length) filtersUrl.push(`DATE=%5B"FROMDATE"%2C"${filter.fromDate}"%2C"TODATE"%2C"${filter.toDate}"%5D`);
   if (filter?.region?.length) filtersUrl.push(`REGION=%5B${replaceSpaces(filter?.region?.map((c) => `"${c}"`)?.join("%2C"))}%5D`);
   if (filter?.cohort?.length) filtersUrl.push(`COHORT=%5B${replaceSpaces(filter?.cohort?.map((c) => `"${c}"`)?.join("%2C"))}%5D`);
+  if (filter?.cohorts?.length) filtersUrl.push(`COHORT=%5B${replaceSpaces(filter?.cohorts?.map((c) => `"${c}"`)?.join("%2C"))}%5D`);
   if (filter?.department?.length) filtersUrl.push(`DEPARTMENT=%5B${replaceSpaces(filter?.department?.map((c) => `"${c}"`)?.join("%2C"))}%5D`);
   if (filter?.academy?.length) filtersUrl.push(`ACADEMY=%5B${replaceSpaces(filter?.academy?.map((c) => `"${c}"`)?.join("%2C"))}%5D`);
   if (filter?.source?.length) filtersUrl.push(`SOURCE=%5B${replaceSpaces(filter?.source?.map((c) => `"${c}"`)?.join("%2C"))}%5D`);
+  if (filter?.status?.length) filtersUrl.push(`STATUS=%5B${replaceSpaces(filter?.status?.map((c) => `"${c}"`)?.join("%2C"))}%5D`);
+  if (filter?.statusPhase1?.length) filtersUrl.push(`STATUS_PHASE_1=%5B${replaceSpaces(filter?.statusPhase1?.map((c) => `"${c}"`)?.join("%2C"))}%5D`);
   let res = base;
   if (filtersUrl?.length) res += `?${filtersUrl.join("&")}`;
   return res;

@@ -73,7 +73,7 @@ export default function Inscription() {
   useDocumentTitle("Inscriptions");
   const user = useSelector((state) => state.Auth.user);
   const [young, setYoung] = useState(null);
-  const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } }, track_total_hits: true });
+  const getDefaultQuery = () => ({ query: { bool: { filter: [] } }, track_total_hits: true });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   const [filterVisible, setFilterVisible] = useState(false);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
@@ -309,10 +309,10 @@ export default function Inscription() {
                   URLParams={true}
                   autosuggest={false}
                 />
-                <HiAdjustments onClick={handleShowFilter} className="text-xl text-coolGray-700 cursor-pointer hover:scale-105" />
+                <HiAdjustments onClick={handleShowFilter} className="cursor-pointer text-xl text-coolGray-700 hover:scale-105" />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <div className="uppercase text-xs text-snu-purple-800">Général</div>
+                <div className="text-xs uppercase text-snu-purple-800">Général</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -395,7 +395,7 @@ export default function Inscription() {
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <div className="uppercase text-xs text-snu-purple-800">Dossier</div>
+                <div className="text-xs uppercase text-snu-purple-800">Dossier</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -519,6 +519,8 @@ export default function Inscription() {
                   title=""
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "QPV", "QPV")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}

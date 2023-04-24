@@ -22,8 +22,8 @@ export function getGraphColors(count) {
 
 export function Legend({ color, name, value = null, noValue = false, className = "", onClick = () => {} }) {
   return (
-    <div className={`flex flex-row-reverse items-center ${className}`} onClick={onClick}>
-      <div className="ml-2 text-xs text-gray-600 whitespace-nowrap">{name}</div>
+    <div className={`flex flex-row-reverse items-center gap-2 ${className}`} onClick={onClick}>
+      <div className="text-xs text-gray-600">{name}</div>
       <div className={`flex items-center`}>
         <div className={`h-[10px] w-[10px] rounded-full`} style={{ backgroundColor: color }}></div>
         <div className="ml-2 text-lg font-medium text-gray-900">{noValue ? null : value ? value : 0}</div>

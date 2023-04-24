@@ -27,6 +27,7 @@ import OccupationCardHorizontal from "./components/OccupationCardHorizontal";
 import Presences from "./components/Presences";
 import StatusPhase1 from "./components/StatusPhase1";
 import TabSession from "./components/TabSession";
+import { getLink as getOldLink } from "../../../../../utils";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -65,7 +66,7 @@ export default function Index() {
         fullValue: "Tous",
         fixed: [YOUNG_STATUS_PHASE1.AFFECTED],
         options: Object.keys(YOUNG_STATUS_PHASE1)
-          .filter((s) => ![YOUNG_STATUS_PHASE1.WAITING_LIST, YOUNG_STATUS_PHASE1.WITHDRAWN].includes(s))
+          .filter((s) => ![YOUNG_STATUS_PHASE1.WAITING_LIST, YOUNG_STATUS_PHASE1.WITHDRAWN, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION].includes(s))
           .map((status) => ({ key: status, label: translatePhase1(status) })),
       },
       ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
@@ -102,7 +103,7 @@ export default function Index() {
 
   const queryYoung = async () => {
     const { responses } = await api.post("/elasticsearch/young/moderator/sejour/", {
-      filters: Object.fromEntries(Object.entries(selectedFilters).filter(([key]) => key !== "cohorts")),
+      filters: Object.fromEntries(Object.entries(selectedFilters)),
     });
     if (responses?.length) {
       let result = {};
@@ -198,10 +199,22 @@ export default function Index() {
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">Volontaires</h1>
         <div className="flex items-stretch gap-4 ">
           <div className="flex w-[30%] flex-col gap-4">
-            <BoxWithPercentage total={data?.pdrTotal || 0} number={data?.pdr?.NR + data?.pdr?.false || 0} title="Point de rassemblement" subLabel="restants à confirmer" />
-            <BoxWithPercentage total={data?.participationTotal || 0} number={data?.participation?.false || 0} title="Participation" subLabel="restants à confirmer" />
+            <BoxWithPercentage
+              total={data?.pdrTotal || 0}
+              number={data?.pdr?.NR + data?.pdr?.false || 0}
+              title="Point de rassemblement"
+              subLabel="restants à confirmer"
+              redirect={getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['MEETING_INFO=%5B"false"%5D'] })}
+            />
+            <BoxWithPercentage
+              total={data?.participationTotal || 0}
+              number={data?.participation?.false || 0}
+              title="Participation"
+              subLabel="restants à confirmer"
+              redirect={getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['COHESION_PARTICIPATION=%5B"false"%5D'] })}
+            />
           </div>
-          <StatusPhase1 statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} />
+          <StatusPhase1 statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} filter={selectedFilters} />
         </div>
         <Presences presence={data?.presence} JDM={data?.JDM} depart={data?.depart} departTotal={data?.departTotal} departMotif={data?.departMotif} />
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">Centres</h1>
@@ -209,7 +222,9 @@ export default function Index() {
           <CardCenterCapacity nbCenter={dataCenter?.totalCenter || 0} capacity={dataCenter?.capacity || 0} />
           <Cardsession nbValidated={dataCenter?.status?.VALIDATED || 0} nbPending={dataCenter?.status?.WAITING_VALIDATION || 0} />
           <OccupationCardHorizontal total={dataCenter?.placesTotalSession || 0} taken={dataCenter?.placesTotalSession - dataCenter?.placesLeftSession || 0} />
-          <BoxWithPercentage total={dataCenter?.totalSession || 0} number={dataCenter?.timeSchedule?.false || 0} title="Emplois du temps" subLabel="restants à renseigner" />
+          <BoxWithPercentage total={dataCenter?.totalSession || 0} number={dataCenter?.timeSchedule?.false || 0} title="Emplois du temps" subLabel="restants à renseigner"  
+          redirect={getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['COHESION_PARTICIPATION=%5B"false"%5D'] })}
+            />
         </div>
         <div className="flex gap-4">
           <MoreInfo typology={dataCenter?.typology} domains={dataCenter?.domains} />
