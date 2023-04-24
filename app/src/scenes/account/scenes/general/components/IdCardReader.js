@@ -29,16 +29,16 @@ const IdCardReader = ({ young, cniFile }) => {
 
   return (
     <>
-      <div className="bg-gray-50 rounded-md p-6 flex flex-col xl:flex-row xl:items-center xl:gap-5">
-        <PaperClip className="text-blue-600 mb-4 self-start xl:text-xl" />
+      <div className="flex flex-col rounded-md bg-gray-50 p-6 xl:flex-row xl:items-center xl:gap-5">
+        <PaperClip className="mb-4 self-start text-blue-600 xl:text-xl" />
         <div>
-          <p className="text-sm text-gray-900 font-medium mb-1">{getFileTitle()}</p>
+          <p className="mb-1 text-sm font-medium text-gray-900">{getFileTitle()}</p>
           <div className="flex flex-col xl:flex-row xl:items-center">
-            <p className="text-sm text-gray-500 mb-1 xl:max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap">
+            <p className="mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-gray-500 xl:max-w-[300px]">
               Nom : <span>{cniFile.name}</span>
             </p>
-            <p className="hidden xl:block mx-2 text-gray-500">•</p>
-            <p className="text-sm text-gray-500 mb-[1rem] xl:mb-0">Expire le {new Date(cniFile.expirationDate).toLocaleDateString("fr-fr")}</p>
+            <p className="mx-2 hidden text-gray-500 xl:block">•</p>
+            <p className="mb-[1rem] text-sm text-gray-500 xl:mb-0">Expire le {new Date(cniFile.expirationDate).toLocaleDateString("fr-fr")}</p>
           </div>
         </div>
         <ButtonLight onClick={handleDownloadFile} disabled={isDownloading} className="xl:ml-auto">

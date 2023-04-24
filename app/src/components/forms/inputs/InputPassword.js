@@ -1,26 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
-import Label from '../layout/Label';
-import ErrorMessage from '../ErrorMessage';
+import Label from "../layout/Label";
+import ErrorMessage from "../ErrorMessage";
 
-const InputPassword = ({ label = "", className = "", validate = () => null, name = "", value = "", onChange = () => null, error = null, ...rest }) => {
+const InputPassword = ({ label = "", className = "", name = "", value = "", onChange = () => null, error = null, ...rest }) => {
   const [inputType, setInputType] = useState("password");
 
   if ("type" in rest) {
     rest.type = inputType;
   }
-
-  useEffect(() => {
-    if (validate) {
-      const removeValidation = validate(name);
-      return () => {
-        if (removeValidation) {
-          removeValidation();
-        }
-      };
-    }
-  }, [value]);
 
   const handleChange = (event) => {
     onChange(event.target.value);
@@ -35,7 +24,7 @@ const InputPassword = ({ label = "", className = "", validate = () => null, name
       <Label title={label} hasError={error}>
         <div className="flex">
           <input
-            className="text-sm flex-grow bg-white text-gray-900 disabled:text-gray-400 placeholder:text-gray-500 focus:outline-none"
+            className="flex-grow bg-white text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none disabled:text-gray-400"
             name={name}
             type={inputType}
             value={value}

@@ -1,7 +1,7 @@
 import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib/phone-number";
 import validator from "validator";
 
-export const requiredErrorMessage = "Ce champ est obligatoire.";
+const requiredErrorMessage = "Ce champ est obligatoire.";
 
 export const validateRequired = ({ value }) => !value && requiredErrorMessage;
 
@@ -21,4 +21,9 @@ export const validateEmail = ({ value }) => {
 export const validatePhoneNumber = ({ value }) => {
   if (!value.phoneNumber) return requiredErrorMessage;
   return !isPhoneNumberWellFormated(value.phoneNumber, value.phoneZone) && PHONE_ZONES[value.phoneZone].errorMessage;
+};
+
+export const validateVerifyPassword = ({ value, valueToCompare }) => {
+  if (!value) return requiredErrorMessage;
+  if (value !== valueToCompare) return "Les mots de passe renseignés doivent être identiques.";
 };

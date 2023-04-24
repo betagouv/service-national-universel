@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import useForm from "../../../../hooks/useForm";
 import { PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
 import { setYoung } from "../../../../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
@@ -18,40 +17,96 @@ import SectionTitle from "../../components/SectionTitle";
 const AccountRepresentantsPage = () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
-  const [hasParent2, setHasParent2] = useState(young?.parent2Email || false);
 
-  const { values, setValues, validate, errors, handleSubmit, isSubmitionPending, isValid } = useForm({
-    initialValues: {
-      parent1Status: young?.parent1Status || "representant",
-      parent1LastName: young?.parent1LastName || "",
-      parent1FirstName: young?.parent1FirstName || "",
-      parent1Email: young?.parent1Email || "",
-      parent1Phone: {
-        phoneNumber: young?.parent1Phone || "",
-        phoneZone: young?.parent1PhoneZone || PHONE_ZONES_NAMES.FRANCE,
-      },
-      parent2Status: young?.parent2Status || "representant",
-      parent2LastName: young?.parent2LastName || "",
-      parent2FirstName: young?.parent2FirstName || "",
-      parent2Email: young?.parent2Email || "",
-      parent2Phone: {
-        phoneNumber: young?.parent2Phone || "",
-        phoneZone: young?.parent2PhoneZone || PHONE_ZONES_NAMES.FRANCE,
-      },
+  const [formValues, setFormValues] = useState({
+    parent1Status: young?.parent1Status || "representant",
+    parent1LastName: young?.parent1LastName || "",
+    parent1FirstName: young?.parent1FirstName || "",
+    parent1Email: young?.parent1Email || "",
+    parent1Phone: {
+      phoneNumber: young?.parent1Phone || "",
+      phoneZone: young?.parent1PhoneZone || PHONE_ZONES_NAMES.FRANCE,
     },
-    validateOnChange: true,
+    parent2Status: young?.parent2Status || "representant",
+    parent2LastName: young?.parent2LastName || "",
+    parent2FirstName: young?.parent2FirstName || "",
+    parent2Email: young?.parent2Email || "",
+    parent2Phone: {
+      phoneNumber: young?.parent2Phone || "",
+      phoneZone: young?.parent2PhoneZone || PHONE_ZONES_NAMES.FRANCE,
+    },
   });
 
-  const handleSubmitRepresentantsForm = async (values) => {
+  const [errors, setErrors] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasParent2, setHasParent2] = useState(young?.parent2Email || false);
+
+  const validateForm = () => {
+    const foundErrors = {};
+    let hasError = false;
+    const parent1LastNameError = validateRequired({ value: formValues.parent1LastName });
+    const parent1FirstNameError = validateRequired({ value: formValues.parent1FirstName });
+    const parent1EmailError = validateEmail({ value: formValues.parent1Email });
+    const parent1PhoneError = validatePhoneNumber({ value: formValues.parent1Phone });
+    if (parent1LastNameError) {
+      foundErrors.parent1LastName = parent1LastNameError;
+      hasError = true;
+    }
+    if (parent1FirstNameError) {
+      foundErrors.parent1FirstName = parent1FirstNameError;
+      hasError = true;
+    }
+    if (parent1EmailError) {
+      foundErrors.parent1Email = parent1EmailError;
+      hasError = true;
+    }
+    if (parent1PhoneError) {
+      foundErrors.parent1Phone = parent1PhoneError;
+      hasError = true;
+    }
+    if (hasParent2) {
+      const parent2LastNameError = validateRequired({ value: formValues.parent2LastName });
+      const parent2FirstNameError = validateRequired({ value: formValues.parent2FirstName });
+      const parent2EmailError = validateEmail({ value: formValues.parent2Email });
+      const parent2PhoneError = validatePhoneNumber({ value: formValues.parent2Phone });
+      if (parent2LastNameError) {
+        foundErrors.parent2LastName = parent2LastNameError;
+        hasError = true;
+      }
+      if (parent2FirstNameError) {
+        foundErrors.parent2FirstName = parent2FirstNameError;
+        hasError = true;
+      }
+      if (parent2EmailError) {
+        foundErrors.parent2Email = parent2EmailError;
+        hasError = true;
+      }
+      if (parent2PhoneError) {
+        foundErrors.parent2Phone = parent2PhoneError;
+        hasError = true;
+      }
+    }
+    setErrors(foundErrors);
+    return !hasError;
+  };
+
+  const handleSubmitRepresentantsForm = async (event) => {
+    event.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
     try {
+      setIsSubmitting(true);
       const youngDataToUpdate = {
-        ...values,
-        parent1Phone: values.parent1Phone.phoneNumber.trim(),
-        parent1PhoneZone: values.parent1Phone.phoneZone,
-        parent1Email: values.parent1Email.trim(),
-        parent2Phone: values.parent2Phone.phoneNumber.trim(),
-        parent2PhoneZone: values.parent2Phone.phoneZone,
-        parent2Email: values.parent2Email.trim(),
+        ...formValues,
+        parent1Phone: formValues.parent1Phone.phoneNumber.trim(),
+        parent1PhoneZone: formValues.parent1Phone.phoneZone,
+        parent1Email: formValues.parent1Email.trim(),
+        parent2LastName: (hasParent2 && formValues.parent2LastName.trim()) || "",
+        parent2FirstName: (hasParent2 && formValues.parent2FirstName.trim()) || "",
+        parent2Phone: (hasParent2 && formValues.parent2Phone.phoneNumber.trim()) || "",
+        parent2PhoneZone: (hasParent2 && formValues.parent2Phone.phoneZone) || PHONE_ZONES_NAMES.FRANCE,
+        parent2Email: (hasParent2 && formValues.parent2Email.trim()) || "",
       };
       const { title, message, data: updatedYoung } = await updateYoung({ _id: young._id, ...youngDataToUpdate });
       toastr.success(title, message);
@@ -59,20 +114,29 @@ const AccountRepresentantsPage = () => {
     } catch (error) {
       const { title, message } = error;
       toastr.error(title, message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  const handleChangeValue = (inputName) => (value) => {
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      [inputName]: value,
+    }));
+  };
+
   return (
-    <div className="bg-white shadow-sm mb-6 lg:rounded-lg">
-      <form onSubmit={handleSubmit(handleSubmitRepresentantsForm)}>
+    <div className="mb-6 bg-white shadow-sm lg:rounded-lg">
+      <form onSubmit={handleSubmitRepresentantsForm}>
         <div className="grid grid-cols-1 lg:grid-cols-3">
-          <div className="hidden lg:block lg:col-start-1 py-6 pl-6">
-            <h2 className="text-gray-900 text-lg leading-6 font-medium m-0 mb-1">Représentants légaux</h2>
+          <div className="hidden py-6 pl-6 lg:col-start-1 lg:block">
+            <h2 className="m-0 mb-1 text-lg font-medium leading-6 text-gray-900">Représentants légaux</h2>
           </div>
-          <div className="px-4 pt-6 pb-2 lg:col-start-2 lg:col-span-2">
+          <div className="px-4 pt-6 pb-2 lg:col-span-2 lg:col-start-2">
             <section className="mb-4">
               <SectionTitle>Représentant légal 1</SectionTitle>
-              <Select label="Statut" name="parent1Status" value={values.parent1Status} onChange={setValues("parent1Status")}>
+              <Select label="Statut" name="parent1Status" value={formValues.parent1Status} onChange={handleChangeValue("parent1Status")}>
                 <option value="mother">Mère</option>
                 <option value="father">Père</option>
                 <option value="representant">Représentant légal</option>
@@ -81,45 +145,41 @@ const AccountRepresentantsPage = () => {
                 label="Nom"
                 name="parent1LastName"
                 placeholder="Dupond"
-                validate={validate(validateRequired)}
-                onChange={setValues("parent1LastName")}
-                value={values.parent1LastName}
-                error={errors.parent1LastName}
+                onChange={handleChangeValue("parent1LastName")}
+                value={formValues.parent1LastName}
+                error={errors?.parent1LastName}
               />
               <Input
                 label="Prénom"
                 name="parent1FirstName"
                 placeholder="Gaspard"
-                validate={validate(validateRequired)}
-                onChange={setValues("parent1FirstName")}
-                value={values.parent1FirstName}
-                error={errors.parent1FirstName}
+                onChange={handleChangeValue("parent1FirstName")}
+                value={formValues.parent1FirstName}
+                error={errors?.parent1FirstName}
               />
               <Input
                 type="email"
                 label="Adresse email"
                 name="parent1Email"
-                error={errors.parent1Email}
+                error={errors?.parent1Email}
                 placeholder="example@example.com"
-                value={values.parent1Email}
-                onChange={setValues("parent1Email")}
-                validate={validate(validateEmail)}
+                value={formValues.parent1Email}
+                onChange={handleChangeValue("parent1Email")}
               />
               <InputPhone
                 label="Téléphone"
                 name="parent1Phone"
-                value={values.parent1Phone}
-                error={errors.parent1Phone}
-                onChange={setValues("parent1Phone")}
-                placeholder={PHONE_ZONES[values.parent1Phone.phoneZone].example}
-                validate={validate(validatePhoneNumber)}
+                value={formValues.parent1Phone}
+                error={errors?.parent1Phone}
+                onChange={handleChangeValue("parent1Phone")}
+                placeholder={PHONE_ZONES[formValues.parent1Phone.phoneZone].example}
               />
             </section>
-            <Checkbox label="Je ne possède pas de second(e) réprésensant(e) légal(e)" onChange={setHasParent2} value={hasParent2} useCheckedAsValue />
+            <Checkbox label="Je ne possède pas de second(e) réprésensant(e) légal(e)" onChange={(value) => setHasParent2(!value)} value={!hasParent2} useCheckedAsValue />
             {hasParent2 && (
               <section className="mb-4">
                 <SectionTitle>Représentant légal 2</SectionTitle>
-                <Select label="Statut" name="parent2Status" value={values.parent2Status} onChange={setValues("parent2Status")}>
+                <Select label="Statut" name="parent2Status" value={formValues.parent2Status} onChange={handleChangeValue("parent2Status")}>
                   <option value="mother">Mère</option>
                   <option value="father">Père</option>
                   <option value="representant">Représentant légal</option>
@@ -128,49 +188,45 @@ const AccountRepresentantsPage = () => {
                   label="Nom"
                   name="parent2LastName"
                   placeholder="Dupond"
-                  validate={validate(validateRequired)}
-                  onChange={setValues("parent2LastName")}
-                  value={values.parent2LastName}
-                  error={errors.parent2LastName}
+                  onChange={handleChangeValue("parent2LastName")}
+                  value={formValues.parent2LastName}
+                  error={errors?.parent2LastName}
                 />
                 <Input
                   label="Prénom"
                   name="parent2FirstName"
                   placeholder="Gaspard"
-                  validate={validate(validateRequired)}
-                  onChange={setValues("parent2FirstName")}
-                  value={values.parent2FirstName}
-                  error={errors.parent2FirstName}
+                  onChange={handleChangeValue("parent2FirstName")}
+                  value={formValues.parent2FirstName}
+                  error={errors?.parent2FirstName}
                 />
                 <Input
                   type="email"
                   label="Adresse email"
                   name="parent2Email"
-                  error={errors.parent2Email}
+                  error={errors?.parent2Email}
                   placeholder="example@example.com"
-                  value={values.parent2Email}
-                  onChange={setValues("parent2Email")}
-                  validate={validate(validateEmail)}
+                  value={formValues.parent2Email}
+                  onChange={handleChangeValue("parent2Email")}
                 />
                 <InputPhone
                   label="Téléphone"
                   name="parent2Phone"
-                  value={values.parent2Phone}
-                  error={errors.parent2Phone}
-                  onChange={setValues("parent2Phone")}
-                  placeholder={PHONE_ZONES[values.parent2Phone.phoneZone].example}
-                  validate={validate(validatePhoneNumber)}
+                  value={formValues.parent2Phone}
+                  error={errors?.parent2Phone}
+                  onChange={handleChangeValue("parent2Phone")}
+                  placeholder={PHONE_ZONES[formValues.parent2Phone.phoneZone].example}
                 />
               </section>
             )}
           </div>
         </div>
-        <div className="bg-gray-50 py-3 px-4 flex flex-col lg:flex-row lg:justify-end gap-3">
+        <div className="flex flex-col gap-3 bg-gray-50 py-3 px-4 lg:flex-row lg:justify-end">
           <ButtonLinkLight className="w-full lg:w-fit" to="/account">
             Annuler
           </ButtonLinkLight>
-          <ButtonPrimary type="submit" className="w-full lg:w-fit" disabled={isSubmitionPending || !isValid}>
-            {isSubmitionPending && <BiLoaderAlt className="animate-spin" />}
+          <ButtonPrimary type="submit" className="w-full lg:w-fit" disabled={isSubmitting}>
+            {isSubmitting && <BiLoaderAlt className="animate-spin" />}
             Enregistrer
           </ButtonPrimary>
         </div>
