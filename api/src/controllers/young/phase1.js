@@ -221,7 +221,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
 
 router.post("/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived", "youngPhase1Agreement"];
+    const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived", "youngPhase1Agreement", "isTravelingByPlane"];
     const { error, value } = Joi.object({
       value: Joi.string().trim().valid("true", "false", "").required(),
       key: Joi.string()
@@ -246,7 +246,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    if ((key === "cohesionStayPresence" || key === "presenceJDM") && newValue == "") {
+    if ((key === "cohesionStayPresence" || key === "presenceJDM" || key === "isTravelingByPlane") && newValue == "") {
       young[key] = undefined;
     } else {
       young.set({ [key]: newValue });
@@ -254,7 +254,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
 
     await young.save({ fromUser: req.user });
 
-    if (key !== "youngPhase1Agreement") {
+    if (!["youngPhase1Agreement", "isTravelingByPlane"].includes(key)) {
       const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
       if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       await autoValidationSessionPhase1Young({ young, sessionPhase1, req });

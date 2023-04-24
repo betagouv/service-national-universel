@@ -4,9 +4,11 @@ import Plane from "../../../../assets/icons/Plane";
 import { updateYoungPhase1Agreement } from "../../../../services/young.service";
 import { toastr } from "react-redux-toastr";
 import ModalPrimary from "../../../../components/ui/modals/ModalPrimary";
+import ModalChangeTravelByPlane from "../../../../components/modals/young/ModalChangeTravelByPlane";
 
 const Phase1ConfirmationFormBlock = ({ className = "", young = null, values = null, setValues, setYoung, editing = false, setLoading }) => {
   const [isYoungModalAgreementOpen, setIsYoungModalAgreementOpen] = useState(false);
+  const [isYoungTravelingByPlaneModalOpen, setIsYoungTravelingByPlaneModalOpen] = useState(false);
 
   const handleChangeYoungAgreement = ({ value }) => {
     setValues((prevValue) => ({
@@ -14,14 +16,6 @@ const Phase1ConfirmationFormBlock = ({ className = "", young = null, values = nu
       youngPhase1Agreement: value,
     }));
     setIsYoungModalAgreementOpen(true);
-  };
-
-  const handleCancelConfirmYoungAgreement = () => {
-    setValues((prevValue) => ({
-      ...prevValue,
-      youngPhase1Agreement: young?.youngPhase1Agreement || "false",
-    }));
-    setIsYoungModalAgreementOpen(false);
   };
 
   const handleConfirmationYoungAgreement = async (value) => {
@@ -42,6 +36,29 @@ const Phase1ConfirmationFormBlock = ({ className = "", young = null, values = nu
       setLoading(false);
       setIsYoungModalAgreementOpen(false);
     }
+  };
+
+  const handleChangeTravelingByPlane = ({ value }) => {
+    setValues((prevValue) => ({
+      ...prevValue,
+      isTravelingByPlane: value,
+    }));
+    setIsYoungTravelingByPlaneModalOpen(true);
+  };
+
+  const handleConfirmYoungTravelingByPlane = (data) => {
+    setValues(data);
+    setYoung(data);
+    setIsYoungTravelingByPlaneModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setValues((prevValue) => ({
+      ...prevValue,
+      youngPhase1Agreement: young?.youngPhase1Agreement || "false",
+      isTravelingByPlane: young?.isTravelingByPlane || "",
+    }));
+    setIsYoungModalAgreementOpen(false);
   };
 
   return (
@@ -69,7 +86,7 @@ const Phase1ConfirmationFormBlock = ({ className = "", young = null, values = nu
               label="Voyage en avion"
               icon={<Plane className="!text-gray-500" />}
               readOnly={!editing}
-              setSelected={handleChangeYoungAgreement}
+              setSelected={handleChangeTravelingByPlane}
               selected={values.isTravelingByPlane || ""}
               hint="Indiquez “Oui” si vous avez confirmé individuellement avec le jeune son affectation à un séjour qui nécessite un voyage en avion."
               options={[
@@ -88,7 +105,15 @@ const Phase1ConfirmationFormBlock = ({ className = "", young = null, values = nu
         }`}
         isOpen={isYoungModalAgreementOpen}
         onConfirm={handleConfirmationYoungAgreement}
-        onCancel={handleCancelConfirmYoungAgreement}
+        onCancel={handleCancel}
+      />
+      <ModalChangeTravelByPlane
+        isOpen={isYoungTravelingByPlaneModalOpen}
+        young={young}
+        value={values.isTravelingByPlane}
+        onConfirm={handleConfirmYoungTravelingByPlane}
+        onCancel={handleCancel}
+        onLoading={setLoading}
       />
     </>
   );
