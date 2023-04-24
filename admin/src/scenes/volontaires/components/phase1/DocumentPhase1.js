@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import FileIcon from "../../../../assets/FileIcon";
 import api from "../../../../services/api";
@@ -7,9 +7,23 @@ import { capture } from "../../../../sentry";
 import Select from "../../../../components/TailwindSelect";
 import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
 
+const getStatusCohesionStayMedical = (young) => {
+  if (young) {
+    if (young.cohesionStayMedicalFileReceived !== "true") {
+      if (young.cohesionStayMedicalFileDownload === "false") {
+        return "TO_DOWNLOAD";
+      } else {
+        return "DOWNLOADED";
+      }
+    } else {
+      return "RECEIVED";
+    }
+  }
+};
+
 export default function DocumentPhase1(props) {
   const [young, setYoung] = useState(props.young);
-  const [statusCohesionStayMedical, setStatusCohesionStayMedical] = useState();
+  const [statusCohesionStayMedical, setStatusCohesionStayMedical] = useState(getStatusCohesionStayMedical(props.young));
   const [loading, setLoading] = useState(false);
   const medicalFileOptions = [
     { value: "RECEIVED", label: "Réceptionné" },
@@ -26,6 +40,8 @@ export default function DocumentPhase1(props) {
   const updateYoung = async () => {
     const { data } = await api.get(`/referent/young/${young._id}`);
     if (data) setYoung(data);
+    const status = getStatusCohesionStayMedical(data);
+    setStatusCohesionStayMedical(status);
     setLoading(false);
   };
 
@@ -49,20 +65,6 @@ export default function DocumentPhase1(props) {
     }
   };
 
-  useEffect(() => {
-    if (young) {
-      if (young.cohesionStayMedicalFileReceived !== "true") {
-        if (young.cohesionStayMedicalFileDownload === "false") {
-          setStatusCohesionStayMedical("TO_DOWNLOAD");
-        } else {
-          setStatusCohesionStayMedical("DOWNLOADED");
-        }
-      } else {
-        setStatusCohesionStayMedical("RECEIVED");
-      }
-    }
-  }, [young]);
-
   const setState = (key, value) => {
     switch (key) {
       case "cohesionStayMedical":
@@ -79,7 +81,6 @@ export default function DocumentPhase1(props) {
 
   const handleChange = async ({ value, name }) => {
     let params = {};
-    console.log(value, name);
     try {
       if (name !== "cohesionStayMedical") throw new Error("name not possible : " + name);
       params = medicalFileValue[value];

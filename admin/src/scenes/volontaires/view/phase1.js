@@ -2,29 +2,22 @@ import React, { useEffect, useState } from "react";
 import { ImQuotesLeft } from "react-icons/im";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 import api from "../../../services/api";
-import { formatDateFR, translate, canAssignManually, YOUNG_STATUS_PHASE1, youngCheckinField } from "../../../utils";
-import ModalPointageDepart from "../../centersV2/components/modals/ModalPointageDepart";
-import ModalPointagePresenceArrivee from "../../centersV2/components/modals/ModalPointagePresenceArrivee";
-import ModalPointagePresenceJDM from "../../centersV2/components/modals/ModalPointagePresenceJDM";
+import { translate, canAssignManually, YOUNG_STATUS_PHASE1, youngCheckinField } from "../../../utils";
 import DocumentPhase1 from "../components/phase1/DocumentPhase1";
 import ModalAffectations from "../components/ModalAffectation";
-import TailwindSelect from "../../../components/TailwindSelect";
 import YoungHeader from "../../phase0/components/YoungHeader";
-import SpeakerPhone from "../../../assets/icons/SpeakerPhone.js";
-import BadgeCheck from "../../../assets/icons/BadgeCheck.js";
 import Refresh from "../../../assets/icons/Refresh";
 import { capture } from "../../../sentry";
 import dayjs from "dayjs";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import { adminURL } from "../../../config";
-import Warning from "../../../assets/icons/Warning";
 import Phase1ConfirmationFormBlock from "../components/phase1/Phase1ConfirmationFormBlock";
 import { getCohortByName } from "../../../services/cohort.service";
 import Phase1Header from "../components/phase1/Phase1Header";
+import Phase1PresenceFormBlock from "../components/phase1/Phase1PresenceFormBlock";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -32,9 +25,6 @@ export default function Phase1(props) {
   const [young, setYoung] = useState(props.young);
   const [cohesionCenter, setCohesionCenter] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
-  const [modalPointagePresenceJDM, setModalPointagePresenceJDM] = useState({ isOpen: false });
-  const [modalPointageDepart, setModalPointageDepart] = useState({ isOpen: false });
   const [modalAffectations, setModalAffectation] = useState({ isOpen: false });
   // new useState
   const [editing, setEditing] = useState(false);
@@ -43,7 +33,7 @@ export default function Phase1(props) {
 
   const [isCohortOpenForAffectation, setIsCohortOpenForAffection] = useState(false);
   const [cohort, setCohort] = useState();
-  const [isYoungCheckinOpen, setIsYoungCheckinOpen] = React.useState(false);
+  const [isYoungCheckinOpen, setIsYoungCheckinOpen] = useState(false);
 
   function getDisplayCenterButton() {
     if ((young.status !== "VALIDATED" && young.status !== "WAITING_LIST") || (young.statusPhase1 !== "WAITING_AFFECTATION" && young.statusPhase1 !== "AFFECTED")) {
@@ -110,33 +100,13 @@ export default function Phase1(props) {
     }
   }, [cohort]);
 
-  const onSuccess = async (newValue) => {
-    setYoung(newValue);
-    setValues(newValue);
-
-    // on ferme les modales
-    setModalPointagePresenceArrivee({ isOpen: false, value: null });
-    setModalPointagePresenceJDM({ isOpen: false, value: null });
-    setModalPointageDepart({ isOpen: false, value: null });
-  };
-
   return (
     <>
       <YoungHeader young={props.young} tab="phase1" onChange={props.onChange} />
       <div className="p-[30px]">
         <div className="mt-[30px] rounded bg-white shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
           <div className="mx-8 py-4">
-            <Phase1Header
-              user={user}
-              young={young}
-              setYoung={setYoung}
-              editing={editing}
-              setEditing={setEditing}
-              loading={loading}
-              setLoading={setLoading}
-              setValues={setValues}
-              onSuccess={onSuccess}
-            />
+            <Phase1Header user={user} young={young} setYoung={setYoung} editing={editing} setEditing={setEditing} loading={loading} setLoading={setLoading} setValues={setValues} />
             <div className="grid grid-cols-2">
               <Phase1ConfirmationFormBlock
                 className="col-start-1 pr-11 border-r-[1px] border-gray-200"
@@ -147,65 +117,16 @@ export default function Phase1(props) {
                 setValues={setValues}
                 setLoading={setLoading}
               />
-              <div className="col-start-2 pl-11">
-                <div className="flex items-center gap-2 mb-2">
-                  <p className="text-xs text-gray-900 font-medium">Présence</p>
-                  {!isYoungCheckinOpen && (
-                    <div className="group relative">
-                      <Warning className="text-red-900" />
-                      <div className="hidden group-hover:block absolute top-[calc(100%+5px)] left-[50%] bg-gray-200 rounded-lg translate-x-[-50%] px-2 py-1 text-black shadow-sm z-10 min-w-[200px] text-center">
-                        <div className="absolute left-[50%] translate-x-[-50%] bg-gray-200 w-[10px] h-[10px] rotate-45 top-[-5px]"></div>
-                        Le pointage n&apos;est pas ouvert
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-row gap-4 mt-2 flex-wrap w-full items-stretch">
-                  <div className="flex-1 min-w-[250px]">
-                    <TailwindSelect
-                      name="cohesionStayPresence"
-                      label="Présence à l'arrivée"
-                      readOnly={!editing || !isYoungCheckinOpen}
-                      className="flex-1 min-w-[250px]"
-                      icon={<SpeakerPhone className="text-gray-500" width={20} height={20} />}
-                      setSelected={({ value }) => setModalPointagePresenceArrivee({ isOpen: true, value })}
-                      selected={values.cohesionStayPresence || ""}
-                      options={[
-                        { label: "Non renseigné", value: "", disabled: true, hidden: true },
-                        { label: "Présent", value: "true" },
-                        { label: "Absent", value: "false" },
-                      ]}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-[250px]">
-                    <TailwindSelect
-                      name="presenceJDM"
-                      label="Présence JDM"
-                      readOnly={!editing || !isYoungCheckinOpen}
-                      type="select"
-                      icon={<BadgeCheck className="text-gray-500" width={20} height={20} />}
-                      setSelected={({ value }) => setModalPointagePresenceJDM({ isOpen: true, value })}
-                      selected={values.presenceJDM || ""}
-                      options={[
-                        { label: "Non renseigné", value: "", disabled: true, hidden: true },
-                        { label: "Présent", value: "true" },
-                        { label: "Absent", value: "false" },
-                      ]}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-[250px] items-stretch">
-                    <div
-                      onClick={() => {
-                        if (!editing || !isYoungCheckinOpen) return;
-                        setModalPointageDepart({ isOpen: true });
-                      }}
-                      className={` border-gray-300 border rounded py-2 px-2.5 flex flex-row items-center justify-start ${editing && "cursor-pointer"} h-full`}>
-                      <ArrowCircleRight width={16} height={16} className="text-gray-400 group-hover:scale-105 mx-2 mr-3" />
-                      {values?.departSejourAt ? <div>{formatDateFR(values.departSejourAt)}</div> : <div className="text-gray-500">Renseigner un départ</div>}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <Phase1PresenceFormBlock
+                className="col-start-2 pl-11"
+                young={young}
+                setYoung={setYoung}
+                editing={editing}
+                values={values}
+                setValues={setValues}
+                setLoading={setLoading}
+                isYoungCheckinOpen={isYoungCheckinOpen}
+              />
             </div>
 
             {young.departSejourAt ? (
@@ -321,27 +242,6 @@ export default function Phase1(props) {
           modal?.onConfirm();
           setModal({ isOpen: false, onConfirm: null });
         }}
-      />
-      <ModalPointagePresenceArrivee
-        isOpen={modalPointagePresenceArrivee?.isOpen}
-        onCancel={() => setModalPointagePresenceArrivee({ isOpen: false, value: null })}
-        onSubmit={onSuccess}
-        value={modalPointagePresenceArrivee?.value}
-        young={young}
-      />
-      <ModalPointagePresenceJDM
-        isOpen={modalPointagePresenceJDM?.isOpen}
-        onCancel={() => setModalPointagePresenceJDM({ isOpen: false, value: null })}
-        onSubmit={onSuccess}
-        value={modalPointagePresenceJDM?.value}
-        young={young}
-      />
-      <ModalPointageDepart
-        isOpen={modalPointageDepart?.isOpen}
-        onCancel={() => setModalPointageDepart({ isOpen: false, value: null })}
-        onSubmit={onSuccess}
-        value={modalPointageDepart?.value}
-        young={young}
       />
       <ModalAffectations
         isOpen={modalAffectations?.isOpen}

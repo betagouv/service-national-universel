@@ -9,7 +9,7 @@ import Pencil from "../../../../assets/icons/Pencil";
 import { capture } from "../../../../sentry";
 import ModalDispense from "../ModalDispense";
 
-const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, loading = false, setValues, setYoung, user, onSuccess }) => {
+const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, loading = false, setValues, setYoung, user }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalDispense, setModalDispense] = useState({ isOpen: false });
 
@@ -147,7 +147,6 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
       <ModalDispense
         isOpen={modalDispense?.isOpen}
         youngId={young?._id}
-        onSubmit={onSuccess}
         onCancel={() => setModalDispense({ isOpen: false })}
         onSuccess={(young) => {
           setModalDispense({ isOpen: false });
