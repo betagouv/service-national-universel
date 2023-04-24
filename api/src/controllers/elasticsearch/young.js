@@ -108,6 +108,7 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
       ...(await buildYoungContext(req.user, true)),
       { terms: { "ligneId.keyword": [String(req.params.ligneId)] } },
       { terms: { "status.keyword": ["VALIDATED"] } },
+      { bool: { must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }] } },
     ];
 
     // Body params validation
