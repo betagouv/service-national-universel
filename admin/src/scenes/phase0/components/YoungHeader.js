@@ -57,7 +57,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       } else {
         switch (young.status) {
           case YOUNG_STATUS.WAITING_LIST:
-            if (user.role === ROLES.REFERENT_DEPARTMENT) {
+            if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
               options = [YOUNG_STATUS.WITHDRAWN];
             } else {
               options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
@@ -99,7 +99,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   const onSelectStatus = (status) => {
     setWithdrawn({ reason: "", message: "", error: null });
     setConfirmModal({
-      icon: <Warning className="text-[#D1D5DB] w-[36px] h-[36px]" />,
+      icon: <Warning className="h-[36px] w-[36px] text-[#D1D5DB]" />,
       title: "Modification de statut",
       message: `Êtes-vous sûr(e) de vouloir modifier le statut de ce profil? Un email sera automatiquement envoyé à l'utlisateur.`,
       type: status,
@@ -211,9 +211,9 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   };
 
   return (
-    <div className="px-[30px] pt-[15px] flex justify-end items-end border-b-[#E5E7EB] border-b-[1px]">
+    <div className="flex items-end justify-end border-b-[1px] border-b-[#E5E7EB] px-[30px] pt-[15px]">
       <NoteDisplayModal notes={viewedNotes} isOpen={viewedNotes.length > 0} onClose={() => setVieweNotes([])} user={user} />
-      <div className={`flex flex-row flex-wrap-reverse w-full items-end justify-end ${user.role === ROLES.HEAD_CENTER ? "pt-[57px]" : ""}`}>
+      <div className={`flex w-full flex-row flex-wrap-reverse items-end justify-end ${user.role === ROLES.HEAD_CENTER ? "pt-[57px]" : ""}`}>
         <div className="grow self-start">
           <Title>
             <div className="mr-[15px]">
@@ -235,7 +235,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               {young.status !== YOUNG_STATUS.WAITING_CORRECTION && young.status !== YOUNG_STATUS.WAITING_VALIDATION && user.role !== ROLES.HEAD_CENTER && (
                 <Tab isActive={tab === "candidature"} onClick={() => history.push(`/volontaire/${young._id}/phase2/application/${applicationId}`)}>
                   <div className="flex items-center">
-                    Candidature{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_2)} />}
+                    Candidature{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_2)} />}
                   </div>
                 </Tab>
               )}
@@ -243,7 +243,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                 <div className="flex items-center">
                   Dossier d&apos;inscription
                   {user.role !== ROLES.HEAD_CENTER && getNotesByPhase(PHASE_INSCRIPTION).length > 0 && (
-                    <NoteIcon id={PHASE_INSCRIPTION} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_INSCRIPTION)} />
+                    <NoteIcon id={PHASE_INSCRIPTION} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_INSCRIPTION)} />
                   )}
                 </div>
               </Tab>
@@ -254,7 +254,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                 <div className="flex items-center">
                   Dossier d&apos;inscription
                   {user.role !== ROLES.HEAD_CENTER && getNotesByPhase(PHASE_INSCRIPTION).length > 0 && (
-                    <NoteIcon id={PHASE_INSCRIPTION} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_INSCRIPTION)} />
+                    <NoteIcon id={PHASE_INSCRIPTION} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_INSCRIPTION)} />
                   )}
                 </div>
               </Tab>
@@ -262,19 +262,19 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                 <>
                   <Tab isActive={tab === "phase1"} onClick={() => history.push(`/volontaire/${young._id}/phase1`)}>
                     <div className="flex items-center">
-                      Phase 1{getNotesByPhase(PHASE_1).length > 0 && <NoteIcon id={PHASE_1} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_1)} />}
+                      Phase 1{getNotesByPhase(PHASE_1).length > 0 && <NoteIcon id={PHASE_1} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_1)} />}
                     </div>
                   </Tab>
                   {user.role !== ROLES.HEAD_CENTER && (
                     <>
                       <Tab isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
                         <div className="flex items-center">
-                          Phase 2{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_2)} />}
+                          Phase 2{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_2)} />}
                         </div>
                       </Tab>
                       <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
                         <div className="flex items-center">
-                          Phase 3{getNotesByPhase(PHASE_3).length > 0 && <NoteIcon id={PHASE_3} className="block ml-1" onClick={setViewedNoteParPhase(PHASE_3)} />}
+                          Phase 3{getNotesByPhase(PHASE_3).length > 0 && <NoteIcon id={PHASE_3} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_3)} />}
                         </div>
                       </Tab>
                     </>
@@ -284,7 +284,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               {user.role !== ROLES.HEAD_CENTER && (
                 <Tab isActive={tab === "historique"} onClick={() => history.push(`/volontaire/${young._id}/historique`)}>
                   <div className="flex items-center">
-                    <History className="block flex-[0_0_18px] mr-[4px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
+                    <History className="mr-[4px] block flex-[0_0_18px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
                     Historique
                   </div>
                 </Tab>
@@ -321,7 +321,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               className={young.status === YOUNG_STATUS.DELETED ? "my-[15px]" : ""}
             />
             {young.status !== YOUNG_STATUS.DELETED && (
-              <div className="flex items-center justify-between my-[15px]">
+              <div className="my-[15px] flex items-center justify-between">
                 <Button icon={<Bin fill="red" />} onClick={handleDeleteYoung}>
                   Supprimer
                 </Button>
@@ -352,13 +352,13 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
           onConfirm={confirmModal.type ? onConfirmStatus : () => {}}>
           {confirmModal.type === YOUNG_STATUS.WITHDRAWN && (
             <div className="mt-[24px]">
-              <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
+              <div className="mb-[16px] flex w-[100%] items-center rounded-[6px] border-[1px] border-[#D1D5DB] bg-white pr-[15px]">
                 <select
                   value={withdrawn.reason}
                   onChange={(e) => {
                     setWithdrawn({ ...withdrawn, reason: e.target.value });
                   }}
-                  className="block grow p-[15px] bg-[transparent] appearance-none">
+                  className="block grow appearance-none bg-[transparent] p-[15px]">
                   {withdrawnReasonOptions}
                 </select>
                 <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
@@ -368,7 +368,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                 onChange={(e) => {
                   setWithdrawn({ ...withdrawn, message: e.target.value });
                 }}
-                className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] p-[15px]"
+                className="w-[100%] rounded-[6px] border-[1px] border-[#D1D5DB] bg-white p-[15px]"
                 rows="5"
                 placeholder="Précisez la raison de votre refus ici"
               />
