@@ -68,7 +68,14 @@ const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscripti
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
-router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.logout(req, res));
+router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    await YoungAuth.logout(req, res);
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 router.get("/signin_token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.signinToken(req, res));
 router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
 router.post("/forgot_password_reset", async (req, res) => YoungAuth.forgotPasswordReset(req, res));
