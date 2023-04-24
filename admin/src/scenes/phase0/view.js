@@ -587,6 +587,11 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     setData({ ...data, [field]: value });
   }
 
+  function onLocalAddressChange(field, value) {
+    onLocalChange(field, value);
+    setData((prev) => ({ ...prev, addressVerified: "false" }));
+  }
+
   function onCancel() {
     setData({ ...young });
     setErrors({});
@@ -793,7 +798,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               currentRequest={currentRequest}
               correctionRequest={getCorrectionRequest(requests, "address")}
               onCorrectionRequestChange={onCorrectionRequestChange}
-              onChange={(value) => onLocalChange("address", value)}
+              onChange={(value) => onLocalAddressChange("address", value)}
               young={young}
             />
             <div className="mb-[16px] flex items-start justify-between">
@@ -807,7 +812,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 currentRequest={currentRequest}
                 correctionRequest={getCorrectionRequest(requests, "zip")}
                 onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={(value) => onLocalChange("zip", value)}
+                onChange={(value) => onLocalAddressChange("zip", value)}
                 young={young}
               />
               <Field
@@ -820,7 +825,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 currentRequest={currentRequest}
                 correctionRequest={getCorrectionRequest(requests, "city")}
                 onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={(value) => onLocalChange("city", value)}
+                onChange={(value) => onLocalAddressChange("city", value)}
                 young={young}
               />
             </div>
@@ -837,7 +842,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               type="select"
               options={countryOptions}
               filterOnType
-              onChange={(value) => onLocalChange("country", value)}
+              onChange={(value) => onLocalAddressChange("country", value)}
               young={young}
             />
             <div className="mb-[16px] flex items-start justify-between">

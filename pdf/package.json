@@ -19,5 +19,10 @@
     "@sentry/integrations": "^7.17.4",
     "@sentry/node": "^7.17.4",
     "@sentry/tracing": "^7.17.4"
+  },
+  "engines": {
+    "node": "^18.16.0",
+    "npm": "^9.5.1",
+    "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   }
 }

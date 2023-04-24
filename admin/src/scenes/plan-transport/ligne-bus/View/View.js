@@ -34,7 +34,7 @@ export default function View(props) {
         size: 0,
       };
 
-      const { responses } = await api.esQuery("young", body);
+      const { responses } = await api.esQuery("young", body, null, "?showAffectedToRegionOrDep=1");
 
       setNbYoung(responses[0].hits.total.value);
 

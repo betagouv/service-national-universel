@@ -41,7 +41,7 @@ export default function MissionsProposedPlaces({ filters, missionFilters, classN
           <Loader />
         </div>
       ) : (
-        <DemiDoughnut labels={graph.labels} values={graph.values} className="mt-8" />
+        <DemiDoughnut labels={graph.labels} values={graph.values} className="mt-8" tooltipsPercent />
       )}
     </DashboardBox>
   );

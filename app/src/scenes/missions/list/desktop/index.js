@@ -29,7 +29,6 @@ import VoitureSvg from "../../assets/Voiture";
 import TrainSvg from "../../assets/Train";
 import FuseeSvg from "../../assets/Fusee";
 import ReactTooltip from "react-tooltip";
-import { toastr } from "react-redux-toastr";
 import { capture } from "../../../../../src/sentry";
 import InfobulleIcon from "../../../../assets/infobulleIcon.svg";
 import RadioInput from "../../../../assets/radioInput.svg";
@@ -53,7 +52,7 @@ export default function List() {
 
   const callSingleAddressAPI = async (q, postcode) => {
     try {
-      const res = await apiAdress(q, [`postcode=${postcode}`]);
+      const res = await apiAdress(q, { postcode });
       return res?.features[0];
     } catch (e) {
       console.error(e);

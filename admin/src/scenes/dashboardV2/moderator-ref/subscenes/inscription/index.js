@@ -11,6 +11,7 @@ import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import StatutPhase from "../../../components/inscription/StatutPhase.js";
 
 import plausibleEvent from "../../../../../services/plausible";
+import { getLink as getOldLink } from "../../../../../utils";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import Details from "../../../components/inscription/Details";
 import TabSchool from "../../../components/inscription/TabSchool";
@@ -116,7 +117,7 @@ export default function Index() {
       }>
       <div className="flex flex-col gap-8 ">
         <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
-        <div className="bg-white p-8 rounded-lg shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+        <div className="rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
           <HorizontalBar
             title="Objectif des inscriptions"
             labels={["Sur la liste principale", "Sur liste complémentaire", "En attente de validation", "En attente de correction", "En cours"]}
@@ -128,6 +129,14 @@ export default function Index() {
               inscriptionDetailObject.IN_PROGRESS || 0,
             ]}
             goal={goal}
+            showTooltips={true}
+            legendUrls={[
+              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] }),
+              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_LIST"%5D'] }),
+              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_VALIDATION"%5D'] }),
+              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_CORRECTION"%5D'] }),
+              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] }),
+            ]}
           />
         </div>
         <StatutPhase values={inscriptionDetailObject} />

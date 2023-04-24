@@ -130,6 +130,8 @@ router.post("/schoolramses-limited-roles/:action(_msearch|export)", passport.aut
 
 // Routes accessible by referents only
 router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  // uses for listing youngs for bus lines and assembling points (referents need to access to youngs assinged to their region or department)
+  const { showAffectedToRegionOrDep } = req.query;
   try {
     const { user, body } = req;
     if (user.role === ROLES.ADMIN) {
@@ -179,34 +181,42 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
       filter.push({ terms: { _id: applications.map((e) => e.youngId) } });
     }
 
-    if (user.role === ROLES.REFERENT_REGION) {
-      const sessionPhase1 = await SessionPhase1Object.find({ region: user.region });
-      if (sessionPhase1.length === 0) {
-        filter.push({ term: { "region.keyword": user.region } });
-      } else {
-        filter.push({
-          bool: {
-            should: [{ terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } }, { term: { "region.keyword": user.region } }],
-          },
-        });
-      }
+    if (user.role === ROLES.REFERENT_REGION && !showAffectedToRegionOrDep) {
+      filter.push({ term: { "region.keyword": user.region } });
     }
 
-    if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      const sessionPhase1 = await SessionPhase1Object.find({ department: { $in: user.department } });
-      if (sessionPhase1.length === 0) {
-        filter.push({ terms: { "department.keyword": user.department } });
-      } else {
-        filter.push({
-          bool: {
-            should: [
-              { terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } },
-              { terms: { "department.keyword": user.department } },
-            ],
-          },
-        });
-      }
+    // if (user.role === ROLES.REFERENT_REGION && showAffectedToRegionOrDep) {
+    //   const sessionPhase1 = await SessionPhase1Object.find({ region: user.region });
+    //   if (sessionPhase1.length === 0) {
+    //     filter.push({ term: { "region.keyword": user.region } });
+    //   } else {
+    //     filter.push({
+    //       bool: {
+    //         should: [{ terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } }, { term: { "region.keyword": user.region } }],
+    //       },
+    //     });
+    //   }
+    // }
+
+    if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
+      filter.push({ terms: { "department.keyword": user.department } });
     }
+
+    // if (user.role === ROLES.REFERENT_DEPARTMENT && showAffectedToRegionOrDep) {
+    //   const sessionPhase1 = await SessionPhase1Object.find({ department: { $in: user.department } });
+    //   if (sessionPhase1.length === 0) {
+    //     filter.push({ terms: { "department.keyword": user.department } });
+    //   } else {
+    //     filter.push({
+    //       bool: {
+    //         should: [
+    //           { terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } },
+    //           { terms: { "department.keyword": user.department } },
+    //         ],
+    //       },
+    //     });
+    //   }
+    // }
 
     // Visitors can only get aggregations and is limited to its region.
     if (user.role === ROLES.VISITOR) {

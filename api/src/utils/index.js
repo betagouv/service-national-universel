@@ -567,7 +567,21 @@ const getBaseUrl = () => {
   return "http://localhost:8080";
 };
 
-const updateApplication = async (mission, fromUser = null) => {
+const updateApplicationTutor = async (mission, fromUser = null) => {
+  const applications = await ApplicationModel.find({
+    missionId: mission._id,
+  });
+
+  for (let application of applications) {
+    if (application.tutorId !== mission.tutorId) {
+      const tutor = await ReferentModel.findById(mission.tutorId);
+      application.set({ tutorId: mission.tutorId, tutorName: `${tutor?.firstName} ${tutor?.lastName}` });
+      await application.save({ fromUser });
+    }
+  }
+};
+
+const updateApplicationStatus = async (mission, fromUser = null) => {
   if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status))
     return console.log(`no need to update applications, new status for mission ${mission._id} is ${mission.status}`);
   const applications = await ApplicationModel.find({
@@ -891,7 +905,8 @@ module.exports = {
   STEPS,
   STEPS2023,
   STEPS2023REINSCRIPTION,
-  updateApplication,
+  updateApplicationStatus,
+  updateApplicationTutor,
   FILE_STATUS_PHASE1,
   translateFileStatusPhase1,
   getCcOfYoung,

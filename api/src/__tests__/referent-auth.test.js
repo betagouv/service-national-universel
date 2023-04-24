@@ -117,8 +117,13 @@ describe("Referent", () => {
   });
   describe("POST /referent/logout", () => {
     it("should return 200", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = referent;
       const res = await request(getAppHelper()).post("/referent/logout");
       expect(res.status).toBe(200);
+      passport.user = previous;
     });
   });
 

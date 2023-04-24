@@ -33,7 +33,8 @@ router.get("/all", passport.authenticate("referent", { session: false, failWithE
     let arrayMeetingPoints = [];
     ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
     const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints } });
-    return res.status(200).send({ ok: true, data: { ligneBus, meetingPoints } });
+    const ligneToPoints = await LigneToPointModel.find({ lineId: { $in: ligneBus.map((l) => l._id) } });
+    return res.status(200).send({ ok: true, data: { ligneBus, meetingPoints, ligneToPoints } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -486,7 +487,7 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
     result.youngsCountBus = youngsCountBus;
 
     //Get young volume need for the destination center in schema
-    const dataSchema = await schemaRepartitionModel.find({ sessionId: ligneBus.sessionId });
+    const dataSchema = await schemaRepartitionModel.find({ sessionId: ligneBus.sessionId, intradepartmental: "false" });
 
     let schemaVolume = 0;
     for (let data of dataSchema) {
@@ -609,12 +610,13 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
       path: Joi.string(),
       userId: Joi.string(),
       query: Joi.string().trim().lowercase(),
+      nopagination: Joi.string(),
       // filter: Joi.string().trim().allow("", null),
     }).validate(req.query, {
       stripUnknown: true,
     });
     if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    let { offset, limit, page, op: filterOp, path: filterPath, userId: filterUserId, query: filterQuery } = valueQuery;
+    let { offset, limit, page, op: filterOp, path: filterPath, userId: filterUserId, query: filterQuery, nopagination } = valueQuery;
     if (filterQuery && filterQuery.trim().length === 0) {
       filterQuery = undefined;
     }
@@ -626,6 +628,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
     // ------ find all patches ids
     const { cohort } = value;
     const lines = await LigneBusModel.find({ cohort }, { _id: 1 });
+    console.log("Count lines: ", lines.length);
     if (lines.length > 0) {
       const lineIds = lines.map((line) => line._id);
       const lineStringIds = lineIds.map((l) => l.toString());
@@ -655,8 +658,12 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
         hasFilter = true;
       }
       if (filterUserId && filterUserId.trim().length > 0) {
-        filter["user._id"] = ObjectId(filterUserId);
-        hasFilter = true;
+        try {
+          filter["user._id"] = ObjectId(filterUserId);
+          hasFilter = true;
+        } catch (err) {
+          // bad filterUserId... let us ignore this filter.
+        }
       }
       const pipelineFilter = hasFilter ? [{ $match: filter }] : [];
 
@@ -767,17 +774,31 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
           results = patches;
         }
 
-        // --- result with pagination
-        return res.status(200).send({
-          ok: true,
-          data: results.slice(offset, offset + limit),
-          pagination: {
-            count: results.length,
-            pageCount: Math.ceil(results.length / limit),
-            page: Math.floor(offset / limit),
-            itemsPerPage: limit,
-          },
-        });
+        if (nopagination) {
+          // --- result without pagination
+          return res.status(200).send({
+            ok: true,
+            data: results,
+            pagination: {
+              count: results.length,
+              pageCount: 1,
+              page: 0,
+              itemsPerPage: results.length,
+            },
+          });
+        } else {
+          // --- result with pagination
+          return res.status(200).send({
+            ok: true,
+            data: results.slice(offset, offset + limit),
+            pagination: {
+              count: results.length,
+              pageCount: Math.ceil(results.length / limit),
+              page: Math.floor(offset / limit),
+              itemsPerPage: limit,
+            },
+          });
+        }
       } else {
         return res.status(200).send({
           ok: true,
@@ -830,9 +851,19 @@ function filterPatchWithQuery(p, query) {
 function mergeArrayItems(array, subProperty) {
   let set = {};
   for (const item of array) {
-    let p = subProperty ? item[subProperty].toString() : item;
-    p = pathToKey(p);
-    set[p] = subProperty ? item : p;
+    if (subProperty) {
+      if (item[subProperty]) {
+        const p = pathToKey(item[subProperty].toString());
+        if (p) {
+          set[p] = item;
+        }
+      }
+    } else {
+      const p = pathToKey(item);
+      if (p) {
+        set[p] = p;
+      }
+    }
   }
   return Object.values(set);
 }

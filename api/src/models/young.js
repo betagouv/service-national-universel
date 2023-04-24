@@ -474,6 +474,20 @@ const Schema = new mongoose.Schema({
       description: "Date de dernière connexion",
     },
   },
+  lastLogoutAt: {
+    type: Date,
+    select: true,
+    documentation: {
+      description: "Date de dernière déconnexion",
+    },
+  },
+  passwordChangedAt: {
+    type: Date,
+    select: true,
+    documentation: {
+      description: "Date de dernier changement de password",
+    },
+  },
   nextLoginAttemptIn: {
     type: Date,
     documentation: {
@@ -1948,6 +1962,8 @@ Schema.plugin(patchHistory, {
   excludes: [
     "/password",
     "/lastLoginAt",
+    "/lastLogoutAt",
+    "/passwordChangedAt",
     "/nextLoginAttemptIn",
     "/forgotPasswordResetToken",
     "/forgotPasswordResetExpires",
@@ -1969,6 +1985,8 @@ Schema.plugin(
       "historic",
       "missionsInMail",
       "password",
+      "lastLogoutAt",
+      "passwordChangedAt",
       "nextLoginAttemptIn",
       "forgotPasswordResetToken",
       "forgotPasswordResetExpires",
@@ -1982,6 +2000,7 @@ Schema.plugin(
   MODELNAME,
 );
 
+Schema.index({ ligneId: 1 });
 Schema.index({ sessionPhase1Id: 1 });
 Schema.index({ sessionPhase1Id: 1, status: 1 });
 
