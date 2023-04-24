@@ -323,6 +323,8 @@ router.post("/missions-statuts", passport.authenticate("referent", { session: fa
         $group: {
           _id: "$status",
           count: { $sum: 1 },
+          total: { $sum: "$placesTotal" },
+          left: { $sum: "$placesLeft" },
         },
       },
     ];
@@ -333,6 +335,8 @@ router.post("/missions-statuts", passport.authenticate("referent", { session: fa
       status: status._id,
       value: status.count,
       percentage: total ? status.count / total : 0,
+      total: status.total,
+      left: status.left,
     }));
 
     // --- result

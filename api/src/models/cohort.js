@@ -131,6 +131,22 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  pdrEditionOpenForReferentRegion: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Ouverture ou fermeture de l'édition des PDR pour les référents régionaux",
+    },
+  },
+
+  pdrEditionOpenForReferentDepartment: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Ouverture ou fermeture de l'édition des PDR pour les référents départementaux",
+    },
+  },
+
   repartitionSchemaCreateAndEditGroupAvailability: {
     type: Boolean,
     documentation: {

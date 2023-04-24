@@ -50,6 +50,11 @@ jobs:
         working-directory: ${{ env.SUBFOLDER_NAME }}
         run: npm install
 
+      - name: Lint code
+        working-directory: ${{ env.SUBFOLDER_NAME }}
+        continue-on-error: true
+        run: npm run lint
+
       - name: Test and Send coverage
         uses: paambaati/codeclimate-action@v2.7.5
         env:

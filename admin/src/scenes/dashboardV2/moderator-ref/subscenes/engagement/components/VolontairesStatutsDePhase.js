@@ -27,11 +27,13 @@ export default function VolontairesStatutsDePhase({ filters, className = "" }) {
         // console.log("RESULT Statuts de Phase: ", result.data);
         const labels = [];
         const values = [];
+        const legendUrls = [];
         for (const data of result.data) {
           labels.push(translate(data._id));
           values.push(data.count);
+          legendUrls.push(`http://localhost:8082/volontaire?STATUS=%5B"VALIDATED"%5D&STATUS_PHASE_${phase}=%5B"${encodeURIComponent(data._id)}"%5D`);
         }
-        setGraph({ values, labels });
+        setGraph({ values, labels, legendUrls });
       } else {
         console.log("error : ", result);
         setError("Erreur: impossible de charger les données.");
@@ -59,7 +61,7 @@ export default function VolontairesStatutsDePhase({ filters, className = "" }) {
           <Loader />
         </div>
       ) : (
-        <FullDoughnut labels={graph.labels} values={graph.values} legendSide="bottom" maxLegends={2} className="mt-8" tooltipsPercent />
+        <FullDoughnut labels={graph.labels} values={graph.values} legendUrls={graph.legendUrls} legendSide="bottom" maxLegends={2} className="mt-8" tooltipsPercent />
       )}
     </DashboardBox>
   );

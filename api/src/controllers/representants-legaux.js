@@ -209,7 +209,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
       }
     } else {
       value.parent2ValidationDate = new Date();
-      if (value.parent2AllowImageRights === "true") {
+      if (value.parent2AllowImageRights === "true" && young.parent1AllowImageRights === "true") {
         value.imageRight = "true";
       } else {
         value.imageRight = "false";

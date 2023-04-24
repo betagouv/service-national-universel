@@ -13,7 +13,7 @@ import ErrorMessage from "./ErrorMessage";
 const addressValidationInfo = "Pour valider votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.";
 const addressValidationSuccess = "L'adresse a été vérifiée";
 
-export const messageStyles = {
+const messageStyles = {
   info: "info",
   error: "error",
 };
@@ -167,8 +167,8 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
       </div>
       <GhostButton
         name={
-          <div className="flex text-center items-center justify-center gap-1">
-            <FiChevronLeft className="text-[#000091] font-bold" />
+          <div className="flex items-center justify-center gap-1 text-center">
+            <FiChevronLeft className="font-bold text-[#000091]" />
             Revenir à la liste des établissements
           </div>
         }
@@ -181,16 +181,18 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
     <>
       <SearchableSelect
         label="Commune de l'établissement"
-        value={city}
         options={cities.map((c) => ({ value: c, label: c }))}
         onChange={(value) => {
           setCity(value);
           setManualSchool({ city: value, addressVerified: undefined });
           onSelectSchool(null);
         }}
-        placeholder="Sélectionnez une commune"
+        value={city}
+        placeholder="Recherchez une commune"
         error={errors.city}
         correction={corrections?.schoolCity}
+        noOptionsMessage="Veuillez rechercher une commune existante."
+        isDebounced
       />
       <CreatableSelect
         label="Nom de l'établissement"

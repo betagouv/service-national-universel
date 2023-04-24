@@ -79,8 +79,9 @@ export default function Details({ selectedFilters }) {
             labels={["Né en 2005", "Né en 2006", "Né en 2007", "Né en 2008"]}
             values={[age["2005"] || 0, age["2006"] || 0, age["2007"] || 0, age["2008"] || 0]}
             maxLegends={2}
+            tooltipsPercent={true}
           />
-          <FullDoughnut title="Sexe" legendSide="left" labels={["Garçons", "Filles"]} values={[sexe.male || 0, sexe.female || 0]} maxLegends={2} />
+          <FullDoughnut title="Sexe" legendSide="left" labels={["Garçons", "Filles"]} values={[sexe.male || 0, sexe.female || 0]} maxLegends={2} tooltipsPercent={true} />
         </div>
       ) : selectedDetail === "class" ? (
         <div className="flex flex-col justify-center items-center w-full gap-10">
@@ -90,6 +91,7 @@ export default function Details({ selectedFilters }) {
             labels={["2nde GT", "1ère GT", "2nde Pro", "1ère Pro", "3ème", "Autre", "CAP"]}
             values={[grade["2ndeGT"] || 0, grade["1ereGT"] || 0, grade["2ndePro"] || 0, grade["1erePro"] || 0, grade["3eme"] || 0, grade["Autre"] || 0, grade["CAP"] || 0]}
             maxLegends={3}
+            tooltipsPercent={true}
           />
           <FullDoughnut
             title="Situation"
@@ -97,6 +99,7 @@ export default function Details({ selectedFilters }) {
             labels={["En voie générale ou technologique", "En voie professionnelle (hors apprentissage)", "En enseignement adapté"]}
             values={[situation[YOUNG_SITUATIONS.GENERAL_SCHOOL] || 0, situation[YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL] || 0, situation[YOUNG_SITUATIONS.SPECIALIZED_SCHOOL] || 0]}
             maxLegends={3}
+            tooltipsPercent={true}
           />
         </div>
       ) : selectedDetail === "situation" ? (
@@ -142,8 +145,15 @@ export default function Details({ selectedFilters }) {
         </div>
       ) : selectedDetail === "qpv" ? (
         <div className="flex flex-col justify-center items-center w-full gap-10">
-          <FullDoughnut title="Quartier prioritaires" legendSide="right" labels={["Oui", "Non"]} values={[qpv.true || 0, qpv[""] || 0 + qpv.false || 0]} maxLegends={3} />
-          <FullDoughnut title="Zone rurale" legendSide="left" labels={["Oui", "Non"]} values={[rural.true || 0, rural.false || 0]} maxLegends={3} />
+          <FullDoughnut
+            title="Quartier prioritaires"
+            legendSide="right"
+            labels={["Oui", "Non"]}
+            values={[qpv.true || 0, qpv[""] || 0 + qpv.false || 0]}
+            maxLegends={3}
+            tooltipsPercent={true}
+          />
+          <FullDoughnut title="Zone rurale" legendSide="left" labels={["Oui", "Non"]} values={[rural.true || 0, rural.false || 0]} maxLegends={3} tooltipsPercent={true} />
         </div>
       ) : null}
     </div>

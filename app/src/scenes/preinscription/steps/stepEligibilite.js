@@ -154,13 +154,13 @@ export default function StepEligibilite() {
         {data.scolarity && (
           <>
             <div className="flex justify-between items-center">
-              <p>
-                <div>
+              <p className="flex flex-col">
+                <span>
                   <span className="font-bold">{data.scolarity === "NOT_SCOLARISE" ? "Je réside" : "Mon établissement scolaire est"}</span> en France
-                </div>
-                <div className="h-5 flex items-center">
+                </span>
+                <span className="h-5 flex items-center">
                   <span className="text-xs leading-5 text-[#666666]">Métropolitaine ou Outre-mer</span>
-                </div>
+                </span>
               </p>
 
               <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad })} toggled={!data.isAbroad} />

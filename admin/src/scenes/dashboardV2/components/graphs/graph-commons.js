@@ -1,5 +1,4 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
 
 export const graphColors = {
   1: ["#1E40AF"],
@@ -21,26 +20,24 @@ export function getGraphColors(count) {
   return graphColors[Math.max(1, Math.min(14, count))];
 }
 
-export function Legend({ color, name, value = null, className = "", onClick = () => {} }) {
+export function Legend({ color, name, value = null, noValue = false, className = "", onClick = () => {} }) {
   return (
     <div className={`flex flex-row-reverse items-center ${className}`} onClick={onClick}>
-      <div className="text-xs text-gray-600 ml-2">{name}</div>
+      <div className="ml-2 text-xs text-gray-600 whitespace-nowrap">{name}</div>
       <div className={`flex items-center`}>
-        <div className={`rounded-full w-[10px] h-[10px]`} style={{ backgroundColor: color }}></div>
-        <div className="font-medium text-lg text-gray-900 ml-2">{value ? value : 0}</div>
+        <div className={`h-[10px] w-[10px] rounded-full`} style={{ backgroundColor: color }}></div>
+        <div className="ml-2 text-lg font-medium text-gray-900">{noValue ? null : value ? value : 0}</div>
       </div>
     </div>
   );
 }
 
-export function Legends({ labels, values = null, legendUrls, className = "", onLegendClicked = () => {} }) {
-  const history = useHistory();
-
+export function Legends({ labels, values = null, noValue = false, legendUrls, className = "", onLegendClicked = () => {} }) {
   const colors = getGraphColors(labels.length);
 
   function clickOnLegend({ index, label, value, color }) {
     if (legendUrls && legendUrls[index]) {
-      history.push(legendUrls[index]);
+      window.open(legendUrls[index], "_blank");
     } else {
       onLegendClicked(index, label, value, color);
     }
@@ -53,6 +50,7 @@ export function Legends({ labels, values = null, legendUrls, className = "", onL
           color={colors[idx % colors.length]}
           name={label}
           value={values ? values[idx] : 0}
+          noValue={noValue}
           key={label}
           className="mr-4 last:mr-0"
           onClick={() => clickOnLegend({ index: idx, label, value: values ? values[idx] : 0, color: colors[idx] })}

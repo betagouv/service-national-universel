@@ -52,6 +52,9 @@ import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 import { cohortsInit } from "./utils/cohorts";
 import { getAvailableSessions } from "./services/cohort.service";
+import Modal from "./components/ui/modals/Modal";
+import ButtonLight from "./components/ui/buttons/ButtonLight";
+import Warning from "./assets/icons/Warning";
 
 initSentry();
 initApi();
@@ -134,7 +137,39 @@ const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
 
+  // ! To clean after depart April B
+  const [warningBusDepartLundiGoodModalOpen, setWarningBusDepartLundiGoodModalOpen] = useState(false);
+  // ! To clean after depart April B
+
   const young = useSelector((state) => state.Auth.young);
+
+  // ! To clean after depart April B
+
+  const busDepartLundiGood = [
+    "6422a6bc2e94300602510605",
+    "6422a6bd2e94300602510652",
+    "6422a6bd2e943006025106a8",
+    "6422a6bd2e94300602510708",
+    "6422a6c12e94300602510a56",
+    "6422a6c22e94300602510b03",
+    "6422a6c32e94300602510c13",
+    "6422a6c42e94300602510ca5",
+    "6422a6c42e94300602510cf9",
+    "6422a6c62e94300602510e72",
+    "6422a6c82e9430060251101b",
+    "6422a6c92e94300602511196",
+    "6422a6c92e943006025111b2",
+    "6422a6c92e94300602511206",
+    "6422a6ca2e94300602511298",
+    "6422a6ca2e94300602511312",
+    "6422a6d02e943006025117d6",
+    "6422a6de2e94300602512250",
+    "6422a6de2e9430060251228e",
+    "6422a6df2e94300602512309",
+    "6422a6df2e94300602512372",
+  ];
+
+  // ! To clean after depart April B
 
   const handleModalCGUConfirm = async () => {
     setIsModalCGUOpen(false);
@@ -150,6 +185,13 @@ const Espace = () => {
     if (young && young.acceptCGU !== "true") {
       setIsModalCGUOpen(true);
     }
+
+    // ! To clean after depart April B
+    if (young && busDepartLundiGood.includes(young.ligneId)) {
+      setWarningBusDepartLundiGoodModalOpen(true);
+    }
+    // ! To clean after depart April B
+
     if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       getAvailableSessions(young).then((sessions) => {
         if (sessions.length) setIsResumePhase1WithdrawnModalOpen(true);
@@ -202,6 +244,7 @@ const Espace = () => {
       <Footer />
       <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
       <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
+      <ModalBusDepartLundiGood isOpen={warningBusDepartLundiGoodModalOpen} onClose={() => setWarningBusDepartLundiGoodModalOpen(false)} />
     </>
   );
 };
@@ -218,3 +261,33 @@ function ScrollToTop() {
 
   return null;
 }
+
+// ! To clean after depart April B
+
+const ModalBusDepartLundiGood = ({ isOpen, onClose }) => {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} className="w-[512px] bg-white rounded-xl p-6">
+      <div className="flex flex-col gap-2">
+        <Warning className="w-10 h-10 mx-auto text-gray-400" />
+        <h4 className="flex text-center mx-auto">Départ en séjour - Lundi 17 avril - Confirmé</h4>
+      </div>
+      <p className="text-sm text-gray-500 leading-5 mt-4 mx-2">
+        Bonjour, <br />
+        <br />
+        Votre départ est confirmé pour lundi 17 avril 2023 : les éléments complémentaires (lieu de rassemblement et horaire) sont à retrouver sur votre convocation : onglet Phase
+        1. <br />
+        <br />
+        Nous vous prions de bien vouloir nous excuser pour la gêne occasionnée, et vous remercions pour votre engagement.
+        <br />
+        <br />
+        Cordialement, <br />
+        Les équipes du Service National Universel
+      </p>
+      <div className="mt-12">
+        <ButtonLight className="w-full" onClick={onClose}>
+          Fermer
+        </ButtonLight>
+      </div>
+    </Modal>
+  );
+};

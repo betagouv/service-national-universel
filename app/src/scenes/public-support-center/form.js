@@ -9,7 +9,7 @@ import api from "../../services/api";
 import { translate, departmentList, department2region } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../inscription2023/components/ErrorMessageOld";
-import { SelectTag, step1Public, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/worflow";
+import { SelectTag, step1Public, step2TransportPublic, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/worflow";
 import { capture } from "../../sentry";
 import FileUpload, { useFileUpload } from "../../components/FileUpload";
 
@@ -136,6 +136,20 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
               errors={errors}
               touched={touched}
             />
+            {values.step1?.id === "TRANSPORT" ? (
+              <SelectTag
+                name="step2"
+                options={Object.values(step2TransportPublic)}
+                title={"Précision"}
+                selectPlaceholder={"Préciser"}
+                handleChange={handleChange}
+                values={values}
+                value={values.step2?.id}
+                validate={(v) => !v && requiredMessage}
+                errors={errors}
+                touched={touched}
+              />
+            ) : null}
             {values.step1?.id === "TECHNICAL" ? (
               <SelectTag
                 name="step2"

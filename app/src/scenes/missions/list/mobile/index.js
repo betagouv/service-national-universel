@@ -30,7 +30,6 @@ import TrainSvg from "../../assets/Train";
 import FuseeSvg from "../../assets/Fusee";
 import { Modal } from "reactstrap";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
-import { toastr } from "react-redux-toastr";
 import { capture } from "../../../../../src/sentry";
 import RadioInput from "../../../../assets/radioInput.svg";
 import RadioUnchecked from "../../../../assets/radioUnchecked.svg";
@@ -57,7 +56,7 @@ export default function List() {
 
   const callSingleAddressAPI = async (q, postcode) => {
     try {
-      const res = await apiAdress(q, [`postcode=${postcode}`]);
+      const res = await apiAdress(q, { postcode });
       return res?.features[0];
     } catch (e) {
       console.error(e);

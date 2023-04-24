@@ -10,7 +10,7 @@ const ApplicationObject = require("../models/application");
 const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
 // eslint-disable-next-line no-unused-vars
-const { ERRORS, isYoung, updateApplication } = require("../utils/index.js");
+const { ERRORS, isYoung, updateApplicationStatus, updateApplicationTutor } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
 const { ROLES, canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib/roles");
 const { MISSION_STATUS } = require("snu-lib/constants");
@@ -20,6 +20,17 @@ const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
 const { putLocation } = require("../services/api-adresse");
+
+//@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
+const fixDate = (dateString) => {
+  const date = new Date(dateString);
+  if (date.getUTCHours() >= 22) {
+    const hoursToAdd = 24 - date.getUTCHours();
+    const newDate = new Date(date).setUTCHours(date.getUTCHours() + hoursToAdd);
+    return new Date(newDate).toISOString();
+  }
+  return dateString;
+};
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -33,6 +44,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (req.user.role === ROLES.SUPERVISOR) structure = await StructureObject.findById(checkedMission.structureId);
 
     if (!canCreateOrModifyMission(req.user, checkedMission, structure)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
+
+    //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
+    if (checkedMission.startAt) checkedMission.startAt = fixDate(checkedMission.startAt);
+    if (checkedMission.endAt) checkedMission.endAt = fixDate(checkedMission.endAt);
 
     if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
       if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
@@ -93,6 +108,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
+    //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
+    if (checkedMission.startAt) checkedMission.startAt = fixDate(checkedMission.startAt);
+    if (checkedMission.endAt) checkedMission.endAt = fixDate(checkedMission.endAt);
+
     if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
       if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
         checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
@@ -126,6 +145,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const oldRegion = mission.region;
 
     const oldStatus = mission.status;
+
+    const oldTutorId = mission.tutorId;
+
     mission.set(checkedMission);
     await mission.save({ fromUser: req.user });
 
@@ -139,9 +161,14 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       }
     }
 
+    // if there is a tutor change, update the application tutor as well
+    if (oldTutorId !== mission.tutorId) {
+      updateApplicationTutor(mission, req.user);
+    }
+
     // if there is a status change, update the application
     if (oldStatus !== mission.status) {
-      await updateApplication(mission, req.user);
+      await updateApplicationStatus(mission, req.user);
       if (mission.status === MISSION_STATUS.WAITING_VALIDATION) {
         const referentsDepartment = await UserObject.find({
           department: checkedMission.department,
@@ -210,17 +237,8 @@ router.post("/multiaction/change-tutor", passport.authenticate("referent", { ses
     for (let mission of missions) {
       mission.set({ tutorId, tutorName });
       await mission.save({ fromUser: req.user });
-
-      // ! update application ne met pas à jour le tutorId. Faire cette tache pour corriger : https://www.notion.so/jeveuxaider/Model-Supprimer-tutorId-de-applications-et-contrats-5dae140ba40745e69dde7029baecdabd
-      //await updateApplication(mission, req.user);
-
-      // ? Envoi d'un email au nouveau responsable
-      // await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
-      //   emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
-      //   params: {
-      //     missionName: mission.name,
-      //   },
-      // });
+      // @todo need to send email to the new tutor ?
+      await updateApplicationTutor(mission, req.user);
     }
 
     res.status(200).send({ ok: true });

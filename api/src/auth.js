@@ -133,8 +133,7 @@ class Auth {
 
       const sessions = await getFilteredSessions(value);
       const session = sessions.find(({ name }) => name === value.cohort);
-      if (!session || session.goalReached) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED }); //|| session.isFull --> session toujours ouverte
-
+      if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       const formatedDate = birthdateAt;
       formatedDate.setUTCHours(11, 0, 0);
       const user = await this.model.create({

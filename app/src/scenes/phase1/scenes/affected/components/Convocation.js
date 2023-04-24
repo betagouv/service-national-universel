@@ -128,7 +128,10 @@ export default function Convocation() {
                   Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
                   <div className="text-center">
                     <div>
-                      <b>Le </b> {dayjs(new Date(cohort?.dateStart)).locale("fr").format("dddd DD MMMM YYYY")}
+                      <b>Le </b>{" "}
+                      {meetingPoint?.bus
+                        ? dayjs(new Date(meetingPoint?.bus?.departuredDate)).locale("fr").format("dddd DD MMMM YYYY")
+                        : dayjs(new Date(cohort?.dateStart)).locale("fr").format("dddd DD MMMM YYYY")}
                     </div>
                     <div>
                       <b>A </b> {meetingPoint ? meetingPoint.ligneToPoint.meetingHour : "16:00"}
@@ -177,8 +180,11 @@ export default function Convocation() {
               </ConvocText>
             ) : (
               <ConvocText>
-                Le <b>retour de votre séjour </b>est prévu le {dayjs(new Date(cohort?.dateEnd)).locale("fr").format("dddd DD MMMM YYYY")} à{" "}
-                {meetingPoint ? meetingPoint.ligneToPoint.returnHour : "11:00"}, au même endroit que le jour du départ en centre SNU.
+                Le <b>retour de votre séjour </b>est prévu le{" "}
+                {meetingPoint?.bus
+                  ? dayjs(new Date(meetingPoint?.bus?.returnDate)).locale("fr").format("dddd DD MMMM YYYY")
+                  : dayjs(new Date(cohort?.dateEnd)).locale("fr").format("dddd DD MMMM YYYY")}{" "}
+                à {meetingPoint ? meetingPoint.ligneToPoint.returnHour : "11:00"}, au même endroit que le jour du départ en centre SNU.
               </ConvocText>
             )}
           </>

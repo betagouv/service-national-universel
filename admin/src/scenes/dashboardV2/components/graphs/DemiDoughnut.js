@@ -4,7 +4,6 @@ import { Chart as ChartJS } from "chart.js";
 
 import { getGraphColors, Legends } from "./graph-commons";
 import GraphTooltip from "./GraphTooltip";
-import { useHistory } from "react-router-dom";
 
 const centerPlugin = {
   id: "centerPlugin",
@@ -27,7 +26,6 @@ export default function DemiDoughnut({ title, values, labels, tooltips, tooltips
   const [graphData, setGraphData] = useState(null);
   const [total, setTotal] = useState(0);
   const [tooltip, setTooltip] = useState(null);
-  const history = useHistory();
 
   useEffect(() => {
     if (values) {
@@ -113,7 +111,7 @@ export default function DemiDoughnut({ title, values, labels, tooltips, tooltips
 
   function clickOnLegend({ index, label, value, color }) {
     if (legendUrls && legendUrls[index]) {
-      history.push(legendUrls[index]);
+      window.open(legendUrls[index], "_blank");
     } else {
       onLegendClicked(index, label, value, color);
     }
@@ -121,13 +119,13 @@ export default function DemiDoughnut({ title, values, labels, tooltips, tooltips
 
   return (
     <div className={className}>
-      <div className="text-left text-gray-900 text-sm font-bold w-full">{title}</div>
-      <Legends labels={labels} values={values} className="w-full my-8" onLegendClicked={clickOnLegend} />
+      <div className="w-full text-left text-sm font-bold text-gray-900">{title}</div>
+      <Legends labels={labels} values={values} className="my-8 w-full" onLegendClicked={clickOnLegend} />
       <div className="relative">
         {graphData && <Doughnut data={graphData} options={graphOptions} />}
-        <div className="flex flex-col absolute left-[0px] right-[0px] bottom-[14px] pointer-events-none">
-          <div className="text-xs text-gray-600 text-center">Total</div>
-          <div className="text-2xl text-gray-900 font-bold text-center">{total}</div>
+        <div className="pointer-events-none absolute left-[0px] right-[0px] bottom-[14px] flex flex-col">
+          <div className="text-center text-xs text-gray-600">Total</div>
+          <div className="text-center text-2xl font-bold text-gray-900">{total}</div>
         </div>
         {tooltip && <GraphTooltip style={tooltip.style}>{tooltip.value}</GraphTooltip>}
       </div>

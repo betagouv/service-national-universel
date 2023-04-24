@@ -3,7 +3,6 @@ import { Doughnut } from "react-chartjs-2";
 import { getGraphColors } from "./graph-commons";
 import GraphTooltip from "./GraphTooltip";
 import MoreInfoPanel from "../ui/MoreInformationPanel";
-import { useHistory } from "react-router-dom";
 
 export default function FullDoughnut({
   title,
@@ -24,7 +23,7 @@ export default function FullDoughnut({
   const [legends, setLegends] = useState([]);
   const [tooltip, setTooltip] = useState(null);
   const [dataIsZero, setDataIsZero] = useState(true);
-  const history = useHistory();
+  const [legendCols, setLegendCols] = useState(maxLegends);
 
   useEffect(() => {
     if (values) {
@@ -124,49 +123,52 @@ export default function FullDoughnut({
           name: labels[idx],
           color: dataColors[idx % dataColors.length],
           info: legendInfoPanels && legendInfoPanels.length > idx ? legendInfoPanels[idx] : undefined,
+          url: legendUrls && legendUrls.length > idx ? legendUrls[idx] : undefined,
         };
       });
+
       // sort legends to be displayed by grid
-      if (legends.length > maxLegends) {
-        switch (legendSide) {
-          case "left": {
-            const cols = Math.ceil(legends.length / maxLegends);
-            let newLegends = [];
-            for (let j = 0; j < maxLegends; ++j) {
-              for (let i = cols - 1; i >= 0; --i) {
-                const idx = i * cols + j;
-                if (idx < legends.length) {
-                  newLegends.push(legends[idx]);
-                } else {
-                  newLegends.push(null);
-                }
+      let legendCols = maxLegends;
+      switch (legendSide) {
+        case "left": {
+          legendCols = Math.ceil(legends.length / maxLegends);
+          let newLegends = [];
+          for (let j = 0; j < maxLegends; ++j) {
+            for (let i = legendCols - 1; i >= 0; --i) {
+              const idx = i * legendCols + j;
+              if (idx < legends.length) {
+                newLegends.push(legends[idx]);
+              } else {
+                newLegends.push(null);
               }
             }
-            legends = newLegends;
-            break;
           }
-          case "right": {
-            const cols = Math.ceil(legends.length / maxLegends);
-            let newLegends = [];
-            for (let j = 0; j < maxLegends; ++j) {
-              for (let i = 0; i < cols; ++i) {
-                const idx = i * cols + j;
-                if (idx < legends.length) {
-                  newLegends.push(legends[idx]);
-                } else {
-                  newLegends.push(null);
-                }
-              }
-            }
-            legends = newLegends;
-            break;
-          }
-          case "bottom":
-          case "top":
-            // rien à faire, c'est déjà dans le bon sens.
-            break;
+          legends = newLegends;
+          break;
         }
+        case "right": {
+          legendCols = Math.ceil(legends.length / maxLegends);
+          let newLegends = [];
+          for (let j = 0; j < maxLegends; ++j) {
+            for (let i = 0; i < legendCols; ++i) {
+              const idx = i * legendCols + j;
+              if (idx < legends.length) {
+                newLegends.push(legends[idx]);
+              } else {
+                newLegends.push(null);
+              }
+            }
+          }
+          legends = newLegends;
+          break;
+        }
+        case "bottom":
+        case "top":
+          // rien à faire, c'est déjà dans le bon sens.
+          legendCols = maxLegends;
+          break;
       }
+      setLegendCols(legendCols);
       setLegends(legends);
     } else {
       setGraphData(null);
@@ -190,18 +192,14 @@ export default function FullDoughnut({
       legendClass += "flex flex-col items-end mb-[16px] last:mb-0";
       legendValueClass += " flex-row-reverse";
       legendDotClass = "ml-2";
-      if (maxLegends <= legends.length) {
-        legendsClass += ` grid grid-rows-${maxLegends}`;
-      }
+      legendsClass += ` grid grid-cols-${legendCols} gap-2`;
       titleClass = "ml-10 py-[44px]";
       textLegendClass = "text-right";
       break;
     case "right":
       mainClass += " flex-row";
       legendClass += " mb-[16px] last:mb-0";
-      if (maxLegends <= legends.length) {
-        legendsClass += ` grid grid-rows-${maxLegends}`;
-      }
+      legendsClass += ` grid grid-cols-${legendCols} gap-2`;
       titleClass = "mr-10 py-[44px]";
       textLegendClass = "text-left";
       break;
@@ -210,7 +208,7 @@ export default function FullDoughnut({
       if (maxLegends > legends.length) {
         legendsClass += " flex justify-center";
       } else {
-        legendsClass += ` grid grid-cols-${maxLegends}`;
+        legendsClass += ` grid grid-cols-${legendCols} gap-2`;
       }
       legendClass += " mr-7 last:mr-0";
       titleClass = "mt-10 px-[44px]";
@@ -221,7 +219,7 @@ export default function FullDoughnut({
       if (maxLegends > legends.length) {
         legendsClass += " flex justify-center";
       } else {
-        legendsClass += ` grid grid-cols-${maxLegends}`;
+        legendsClass += ` grid grid-cols-${legendCols} gap-2`;
       }
       legendClass += " mr-7 last:mr-0";
       titleClass = "mb-10 px-[44px]";
@@ -262,9 +260,9 @@ export default function FullDoughnut({
     },
   };
 
-  function clickOnLegend({ index, label, value, color }) {
-    if (legendUrls && legendUrls[index]) {
-      history.push(legendUrls[index]);
+  function clickOnLegend({ index, label, value, color, url }) {
+    if (url) {
+      window.open(url, "_blank");
     } else {
       onLegendClicked(index, label, value, color);
     }
@@ -275,7 +273,7 @@ export default function FullDoughnut({
       <div className={`relative ${graphClass}`}>
         {dataIsZero ? <Doughnut data={graphZeroData} options={graphZeroOption} /> : graphData && <Doughnut data={graphData} options={graphOptions} />}
         <div
-          className={`absolute top-[0px] bottom-[0px] left-[0px] right-[0px] flex justify-center items-center text-center text-gray-900 text-sm leading-[1.1em] font-bold p-[24px] pointer-events-none ${titleClass}`}>
+          className={`pointer-events-none absolute top-[0px] bottom-[0px] left-[0px] right-[0px] flex items-center justify-center p-[24px] text-center text-sm font-bold leading-[1.1em] text-gray-900 ${titleClass}`}>
           {title}
         </div>
         {tooltip && <GraphTooltip style={tooltip.style}>{tooltip.value}</GraphTooltip>}
@@ -283,11 +281,14 @@ export default function FullDoughnut({
       <div className={legendsClass}>
         {legends.map((legend, idx) => {
           return legend ? (
-            <div className={legendClass} key={legend.name} onClick={() => clickOnLegend({ index: idx, label: legend.name, value: legend.value, color: legend.color })}>
-              <div className={`text-xs text-gray-600 mb-[4px] ${textLegendClass}`}>{legend.name}</div>
+            <div
+              className={legendClass}
+              key={legend.name}
+              onClick={() => clickOnLegend({ index: idx, label: legend.name, value: legend.value, color: legend.color, url: legend.url })}>
+              <div className={`mb-[4px] text-xs text-gray-600 ${textLegendClass}`}>{legend.name}</div>
               <div className={legendValueClass}>
-                <div className={`rounded-full w-[10px] h-[10px] ${legendDotClass}`} style={{ backgroundColor: legend.color }}></div>
-                <div className="font-medium text-lg text-gray-900">
+                <div className={`h-[10px] w-[10px] rounded-full ${legendDotClass}`} style={{ backgroundColor: legend.color }}></div>
+                <div className="text-lg font-medium text-gray-900">
                   {legend.value}
                   {valueSuffix}
                 </div>

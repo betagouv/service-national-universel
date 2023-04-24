@@ -89,12 +89,12 @@ export default function TabSchool({ filters }) {
   }, [filters]);
 
   return (
-    <div className="flex flex-col gap-5 w-[60%] bg-white rounded-lg px-8 py-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
-      <div className="flex flex-row justify-between w-full">
+    <div className="flex w-[60%] flex-col gap-5 rounded-lg bg-white px-8 py-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+      <div className="flex w-full flex-row justify-between">
         <div className="flex items-center gap-3">
           <div className="text-base font-bold text-gray-900">Liste des établissements</div>
           <Link to={`/etablissement/liste-jeunes?${currentFilterAsUrl(filters)}`} target={"_blank"}>
-            <HiOutlineExternalLink className="h-5 w-5 text-gray-400 cursor-pointer" />
+            <HiOutlineExternalLink className="h-5 w-5 cursor-pointer text-gray-400" />
           </Link>
         </div>
         <div className="text-xs text-gray-600">
@@ -105,22 +105,22 @@ export default function TabSchool({ filters }) {
             onClick={(e) => {
               e.stopPropagation();
             }}
-            className="text-blue-600 cursor-pointer">
+            className="cursor-pointer text-blue-600">
             Inscriptions
           </Link>
         </div>
       </div>
-      <table className={`table-fixed w-full ${isLoading || noResult ? "h-full" : ""}`}>
+      <table className={`w-full table-fixed ${isLoading || noResult ? "h-full" : ""}`}>
         <thead>
           <tr className="flex items-center border-y-[1px] border-gray-100 py-4">
-            <th className="w-[80%] uppercase text-xs text-gray-400 font-medium leading-4">établissements</th>
-            <th className="w-[20%] uppercase text-xs text-gray-400 font-medium leading-4">volontaires</th>
+            <th className="w-[80%] text-xs font-medium uppercase leading-4 text-gray-400">établissements</th>
+            <th className="w-[20%] text-xs font-medium uppercase leading-4 text-gray-400">volontaires</th>
           </tr>
         </thead>
         <tbody className="">
           {isLoading ? (
             Array.from(Array(PAGE_SIZE).keys()).map((i) => (
-              <tr key={`LoadingSchool${i}`} className="flex items-center border-b-[1px] border-gray-100 h-1/6">
+              <tr key={`LoadingSchool${i}`} className="flex h-1/6 items-center border-b-[1px] border-gray-100">
                 <td className="w-[80%]">
                   <Loading width="w-[50%]" />
                 </td>
@@ -131,8 +131,8 @@ export default function TabSchool({ filters }) {
             ))
           ) : !noResult ? (
             youngBySchool?.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)?.map((school) => (
-              <tr key={school?.key} className="flex items-center border-b-[1px] border-gray-100 py-3 h-1/6 hover:bg-gray-50 cursor-default">
-                <td className="flex flex-col w-[80%] gap-1">
+              <tr key={school?.key} className="flex h-1/6 cursor-default items-center border-b-[1px] border-gray-100 py-3 hover:bg-gray-50">
+                <td className="flex w-[80%] flex-col gap-1">
                   <Link
                     to={`/inscription?SCHOOL=%5B"${replaceSpaces(school.schoolName)}"%5D`}
                     target="_blank"
@@ -140,43 +140,43 @@ export default function TabSchool({ filters }) {
                       e.stopPropagation();
                     }}
                     className="cursor-pointer">
-                    <p className="text-sm text-gray-900 font-bold leading-6 truncate w-[90%]">{school.schoolName}</p>
-                    <p className="text-xs text-gray-500 leading-4">
+                    <p className="w-[90%] truncate text-sm font-bold leading-6 text-gray-900">{school.schoolName}</p>
+                    <p className="text-xs leading-4 text-gray-500">
                       {school?.schoolCity} • {school.schoolZip}
                     </p>
                   </Link>
                 </td>
 
-                <td className="w-[20%] flex flex-col gap-1 ">
-                  <span className="text-sm text-gray-500 leading-3">
-                    <span className="text-gray-900 font-bold">{school.total}</span> (dont {school.inDepartment} au sein
+                <td className="flex w-[20%] flex-col gap-1 ">
+                  <span className="text-sm leading-3 text-gray-500">
+                    <span className="font-bold text-gray-900">{school.total}</span> (dont {school.inDepartment} au sein
                   </span>
-                  <span className="text-sm text-gray-500 leading-3"> du département)</span>
+                  <span className="text-sm leading-3 text-gray-500"> du département)</span>
                 </td>
               </tr>
             ))
           ) : (
-            <tr className="flex items-center justify-center h-full">
-              <td className="text-sm leading-5 font-normal text-gray-700">Aucun résultat</td>
+            <tr className="flex h-full items-center justify-center">
+              <td className="text-sm font-normal leading-5 text-gray-700">Aucun résultat</td>
             </tr>
           )}
         </tbody>
       </table>
-      <div className="flex items-center justify-between pt-4 w-full">
-        <p className="text-xs leading-5 font-normal text-gray-700">
+      <div className="flex w-full items-center justify-between pt-4">
+        <p className="text-xs font-normal leading-5 text-gray-700">
           {noResult ? 0 : page * PAGE_SIZE + 1}-<strong> {page * PAGE_SIZE + PAGE_SIZE >= total ? total : page * PAGE_SIZE + PAGE_SIZE}</strong> sur <strong>{total}</strong>{" "}
           résultats
         </p>
         <div className="flex items-center">
           <button
-            className="flex items-center justify-center h-10 w-10 rounded-l-md border-[1px] border-gray-300"
+            className="flex h-10 w-10 items-center justify-center rounded-l-md border-[1px] border-gray-300"
             onClick={() => {
               if (page > 0) setPage(page - 1);
             }}>
             <HiOutlineChevronLeft className="h-5 w-5 text-gray-500" />
           </button>
           <button
-            className="flex items-center justify-center h-10 w-10 rounded-r-md border-r-[1px] border-y-[1px] border-gray-300"
+            className="flex h-10 w-10 items-center justify-center rounded-r-md border-y-[1px] border-r-[1px] border-gray-300"
             onClick={() => {
               if (page < pageMax) setPage(page + 1);
             }}>
@@ -190,11 +190,11 @@ export default function TabSchool({ filters }) {
 
 function Loading({ width }) {
   return (
-    <div className={`animate-pulse flex space-x-4 ${width}`}>
+    <div className={`flex animate-pulse space-x-4 ${width}`}>
       <div className="flex-1 space-y-6">
         <div className="grid grid-cols-3 gap-4 ">
-          <div className="h-2 bg-gray-300 rounded col-span-2"></div>
-          <div className="h-2 bg-gray-300 rounded col-span-1"></div>
+          <div className="col-span-2 h-2 rounded bg-gray-300"></div>
+          <div className="col-span-1 h-2 rounded bg-gray-300"></div>
         </div>
       </div>
     </div>

@@ -1,8 +1,49 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Select from "react-select";
 import ErrorMessage from "../scenes/inscription2023/components/ErrorMessage";
 
-const SearchableSelect = ({ label, options, value, onChange, placeholder = "Sélectionner une option", error = "", correction = "" }) => {
+const SearchableSelect = ({
+  label,
+  options,
+  value,
+  onChange,
+  placeholder = "Sélectionner une option",
+  noOptionsMessage = "Pas d'option",
+  error = "",
+  correction = "",
+  isDebounced = false,
+}) => {
+  const [filteredOptions, setFilteredOptions] = useState([]);
+  const timeoutId = useRef(null);
+
+  const handleClearDebounce = () => {
+    if (timeoutId.current) {
+      clearTimeout(timeoutId.current);
+    }
+  };
+
+  const handleInputChange = (value) => {
+    if (isDebounced) {
+      handleClearDebounce();
+      timeoutId.current = setTimeout(() => {
+        if (value && value.length > 1) {
+          const searchedOptions = options.filter((option) => option.value.toLowerCase().trim().includes(value.toLowerCase().trim()));
+          setFilteredOptions(searchedOptions);
+        } else {
+          setFilteredOptions([]);
+        }
+      }, 300);
+    }
+  };
+
+  useEffect(
+    () => () => {
+      handleClearDebounce();
+      setFilteredOptions([]);
+    },
+    [],
+  );
+
   return (
     <div className="text-[#161616]" style={{ fontFamily: "Marianne" }}>
       <label className={`my-2 ${correction || error ? "text-[#CE0500]" : "text-[#161616]}"}`}>{label}</label>
@@ -10,11 +51,13 @@ const SearchableSelect = ({ label, options, value, onChange, placeholder = "Sél
         styles={customStyles}
         value={options.find((option) => option.value === value)}
         onChange={(option) => onChange(option.value)}
-        options={options}
+        options={isDebounced ? filteredOptions : options}
         isSearchable
         placeholder={placeholder}
-        noOptionsMessage={() => "Pas d’options"}
+        noOptionsMessage={() => noOptionsMessage}
         error={correction || error}
+        onInputChange={handleInputChange}
+        onKeyDown={handleClearDebounce}
       />
       <ErrorMessage>{error}</ErrorMessage>
       <ErrorMessage>{correction}</ErrorMessage>
