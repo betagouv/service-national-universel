@@ -143,6 +143,7 @@ async function getAllResults(route, selectedFilters, searchType, fieldsToExport)
       filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
         return { ...e, [key]: value.filter };
       }, {}),
+      exportFields: fieldsToExport,
     });
     if (!result.data.length) return [];
     return result.data;

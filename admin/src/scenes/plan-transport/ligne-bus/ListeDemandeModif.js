@@ -6,7 +6,7 @@ import { useHistory } from "react-router-dom";
 import { ROLES, translate } from "snu-lib";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import Breadcrumbs from "../../../components/Breadcrumbs";
-import { Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system";
+import { Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
 import Loader from "../../../components/Loader";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -33,10 +33,7 @@ export default function ListeDemandeModif() {
   const [data, setData] = React.useState([]);
   const pageId = "demande-modification-bus";
   const [selectedFilters, setSelectedFilters] = React.useState({});
-  const [paramData, setParamData] = React.useState({
-    size: 20,
-    page: 0,
-  });
+  const [paramData, setParamData] = React.useState({ page: 0 });
 
   const getTags = async () => {
     try {
@@ -62,28 +59,17 @@ export default function ListeDemandeModif() {
     getTags();
   }, [cohort]);
 
-  const getDefaultQuery = () => {
-    return {
-      query: {
-        bool: { must: [{ match_all: {} }, { term: { "cohort.keyword": cohort } }] },
-      },
-      track_total_hits: true,
-    };
-  };
-
   if (loading) return <Loader />;
 
   const filterArray = [
     {
       title: "Numéro de ligne",
-      name: "LIGNE",
-      datafield: "lineName.keyword",
+      name: "lineName",
       missingLabel: "Non renseigné",
     },
     {
       title: "Type",
-      name: "TAGS",
-      datafield: "tagIds.keyword",
+      name: "tagIds",
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A") return item;
@@ -92,16 +78,14 @@ export default function ListeDemandeModif() {
     },
     {
       title: "Statut",
-      name: "STATUS",
-      datafield: "status.keyword",
+      name: "status",
       missingLabel: "Non renseigné",
       translate: translateStatus,
     },
     [ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)
       ? {
           title: "Avis",
-          name: "OPINION",
-          datafield: "opinion.keyword",
+          name: "opinion",
           missingLabel: "Non renseigné",
           translate: (item) => {
             if (item === "N/A") return item;
@@ -109,13 +93,8 @@ export default function ListeDemandeModif() {
           },
         }
       : null,
-    { title: "Rôle", name: "ROLE", datafield: "requestUserRole.keyword", missingLabel: "Non renseigné", translate: translate },
+    { title: "Rôle", name: "requestUserRole", missingLabel: "Non renseigné", translate: translate },
   ].filter((e) => e);
-
-  const searchBarObject = {
-    placeholder: "Rechercher...",
-    datafield: ["lineName", "requestUserName", "requestMessage"],
-  };
 
   return (
     <>
@@ -138,11 +117,10 @@ export default function ListeDemandeModif() {
             <Filters
               defaultUrlParam={`cohort=${cohort}`}
               pageId={pageId}
-              esId="modificationbus"
-              defaultQuery={getDefaultQuery()}
+              route="/elasticsearch/modificationbus/search"
               setData={(value) => setData(value)}
               filters={filterArray}
-              searchBarObject={searchBarObject}
+              searchPlaceholder="Rechercher..."
               selectedFilters={selectedFilters}
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}

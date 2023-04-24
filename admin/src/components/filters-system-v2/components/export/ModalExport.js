@@ -61,9 +61,9 @@ export default function ModalExport({ isOpen, setIsOpen, route, transform, expor
         </button>
         <div className="flex w-full">
           <ExportComponent
-            handleClick={() => plausibleEvent(`${capitalizeFirstLetter(translateIndexes(index))}/CTA - Exporter ${translateIndexes(index)}`)}
-            title={`Exporter les ${exportTitle || translateIndexes(index)}`}
-            exportTitle={exportTitle ? capitalizeFirstLetter(exportTitle) : capitalizeFirstLetter(translateIndexes(index))}
+            handleClick={() => plausibleEvent(`${exportTitle}/CTA - Exporter ${exportTitle}`)}
+            title={`Exporter les ${exportTitle}`}
+            exportTitle={exportTitle}
             route={route}
             transform={(data) => transform(data, selectedFields)}
             fieldsToExport={fieldsToExport}

@@ -17,8 +17,9 @@ function searchSubQuery([value], fields) {
 }
 
 function hitsSubQuery(query, key, value, customQueries) {
-  if (customQueries?.[key]) {
-    query = customQueries[key](query, value);
+  const keyWithoutKeyword = key.replace(".keyword", "");
+  if (customQueries?.[keyWithoutKeyword]) {
+    query = customQueries[keyWithoutKeyword](query, value);
   } else if (value.includes("N/A")) {
     query.bool.filter.push({ bool: { should: [{ bool: { must_not: { exists: { field: key } } } }, { terms: { [key]: value.filter((e) => e !== "N/A") } }] } });
   } else {
@@ -30,17 +31,21 @@ function hitsSubQuery(query, key, value, customQueries) {
 function aggsSubQuery(keys, aggsSearchQuery, queryFilters, contextFilters, customQueries) {
   let aggs = {};
   for (const key of keys) {
+    const keyWithoutKeyword = key.replace(".keyword", "");
     let filter = unsafeStrucuredClone({ bool: { must: [], filter: contextFilters } });
     if (aggsSearchQuery) filter.bool.must.push(aggsSearchQuery);
 
     for (const subKey of keys) {
+      const subKeyWithoutKeyword = subKey.replace(".keyword", "");
       if (subKey === key) continue;
-      if (!queryFilters[subKey.replace(".keyword", "")]?.length) continue;
-      filter = hitsSubQuery(filter, subKey, queryFilters[subKey.replace(".keyword", "")], customQueries);
+      if (!queryFilters[subKeyWithoutKeyword]?.length) continue;
+      filter = hitsSubQuery(filter, subKey, queryFilters[subKeyWithoutKeyword], customQueries);
     }
 
-    if (key.includes(".keyword")) {
-      aggs[key.replace(".keyword", "")] = { filter, aggs: { names: { terms: { field: key, missing: "N/A", size: ES_NO_LIMIT } } } };
+    if (customQueries?.[keyWithoutKeyword + "Aggs"]) {
+      aggs[keyWithoutKeyword] = { filter, aggs: { names: customQueries[keyWithoutKeyword + "Aggs"](key) } };
+    } else if (key.includes(".keyword")) {
+      aggs[keyWithoutKeyword] = { filter, aggs: { names: { terms: { field: key, missing: "N/A", size: ES_NO_LIMIT } } } };
     } else {
       aggs[key] = { filter, aggs: { names: { histogram: { field: key, interval: 1, min_doc_count: 1 } } } };
     }
@@ -82,17 +87,19 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
 
 function joiElasticSearch({ filterFields, sortFields = [], body }) {
   const schema = Joi.object({
-    filters: Joi.object(["searchbar", ...filterFields].reduce((acc, field) => ({ ...acc, [field.replace(".keyword", "")]: Joi.array().items(Joi.string()) }), {})),
+    filters: Joi.object(["searchbar", ...filterFields].reduce((acc, field) => ({ ...acc, [field.replace(".keyword", "")]: Joi.array().items(Joi.string()).max(200) }), {})),
     page: Joi.number().integer().min(0).default(0),
     sort: Joi.array()
       .items(Joi.string().valid(...sortFields))
+      .max(200)
       .allow(null)
       .default(null),
+    exportFields: Joi.alternatives().try(Joi.array().items(Joi.string()).max(200).allow(null).default(null), Joi.string().valid("*")),
   });
 
   const { error, value } = schema.validate(body);
   if (error) capture(error);
-  return { queryFilters: value.filters, page: value.page, sort: value.sort, error };
+  return { queryFilters: value.filters, page: value.page, sort: value.sort, exportFields: value.exportFields, error };
 }
 
 module.exports = {
