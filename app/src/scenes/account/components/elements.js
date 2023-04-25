@@ -3,14 +3,14 @@ import ChevronRight from "../../../assets/icons/ChevronRight";
 
 export const ActionButton = ({ onClick, children, icon = <></> }) => {
   return (
-    <button className="my-2 p-7 border border-gray-200 rounded-lg text-gray-700 w-full md:w-[335px] h-[86px] flex items-center" onClick={onClick}>
+    <button className="my-2 flex h-[86px] w-full items-center rounded-lg border border-gray-200 p-7 text-gray-700 md:w-[335px]" onClick={onClick}>
       {icon}
-      <div className="flex-1 text-start font-medium text-[13px] md:text-sm">{children}</div>
-      <div className="rounded-full flex justify-center items-center bg-[#2563EB] w-8 h-8">
+      <div className="flex-1 text-start text-[13px] font-medium md:text-sm">{children}</div>
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2563EB]">
         <ChevronRight className="text-white" />
       </div>
     </button>
   );
 };
-export const Title = ({ children, className = "" }) => <h1 className={`font-medium md:text-center text-xl text-gray-900 mb-2 ${className}`}>{children}</h1>;
-export const SubTitle = ({ children, className = "" }) => <span className={`text-gray-500 text-sm md:text-center mb-7 ${className}`}>{children}</span>;
+export const Title = ({ children, className = "" }) => <h1 className={`mb-2 text-xl font-medium text-gray-900 md:text-center ${className}`}>{children}</h1>;
+export const SubTitle = ({ children, className = "" }) => <span className={`mb-7 text-sm text-gray-500 md:text-center ${className}`}>{children}</span>;
