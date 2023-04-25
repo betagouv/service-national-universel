@@ -58,7 +58,7 @@ describe("Meeting point", () => {
     });
     it("should return 403 when youngs are still linked to point-de-rassemblement", async () => {
       const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
-      await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: pointDeRassemblement._id });
+      await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: pointDeRassemblement._id, cohort: "Février 2023 - C" });
       const res = await request(getAppHelper())
         .put("/point-de-rassemblement/delete/cohort/" + pointDeRassemblement._id)
         .send({ cohort: "Février 2023 - C" });
