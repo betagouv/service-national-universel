@@ -1,3 +1,22 @@
+# [1.260.0](https://github.com/betagouv/service-national-universel/compare/v1.259.0...v1.260.0) (2023-04-25)
+
+
+### Bug Fixes
+
+* **api:** bug delete cohort in pdr ([#2535](https://github.com/betagouv/service-national-universel/issues/2535)) ([2411434](https://github.com/betagouv/service-national-universel/commit/24114345a8cad99a26cf9868ce9922f033855960))
+* **api:** first names where incorrectly transformed (émile changed to éMile) ([#2533](https://github.com/betagouv/service-national-universel/issues/2533)) ([71e3380](https://github.com/betagouv/service-national-universel/commit/71e3380fb8112bde33035c053b56ea26c9927179))
+* **app:** Allow youngs from DOM to make corrections ([b81be5b](https://github.com/betagouv/service-national-universel/commit/b81be5bdfa17d53a7204f0dbf2a47b7904c74afc))
+* **app:** better error handling for file upload during signup ([efa0006](https://github.com/betagouv/service-national-universel/commit/efa0006c9359c8224efd62c01b8812cfc9414309))
+* **app:** linter errors ([#2405](https://github.com/betagouv/service-national-universel/issues/2405)) ([5ad93dd](https://github.com/betagouv/service-national-universel/commit/5ad93ddc70a8b779ccad9b1c7b4f95c8faae755f))
+* **app:** Simplifier la structure du CSS sur l'écran Phase 1/Affecté ([#2470](https://github.com/betagouv/service-national-universel/issues/2470)) ([af78ea5](https://github.com/betagouv/service-national-universel/commit/af78ea578ab7e469610a6b1678b15efe68ce0300))
+
+
+### Features
+
+* **admin:** Ajout du champs "voyage en avion" sur la page phase 1 d'un volontaire ([#2525](https://github.com/betagouv/service-national-universel/issues/2525)) ([a2fa06d](https://github.com/betagouv/service-national-universel/commit/a2fa06d271a1aa725f320820749ebb9f8b846a22))
+* **admin:** Paramétrage dynamique des demandes de correction du plan de transport ([#2521](https://github.com/betagouv/service-national-universel/issues/2521)) ([74d6df2](https://github.com/betagouv/service-national-universel/commit/74d6df2eadbdbc51940d4f736f30918de3a6c157))
+* **app:** Nouvelle page de profil volontaire ([#2538](https://github.com/betagouv/service-national-universel/issues/2538)) ([2b388f3](https://github.com/betagouv/service-national-universel/commit/2b388f3e1ada6cf58101d731c30c962f9a684fa3))
+
 # [1.259.0](https://github.com/betagouv/service-national-universel/compare/v1.258.0...v1.259.0) (2023-04-24)
 
 
