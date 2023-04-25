@@ -1,3 +1,15 @@
+# [1.259.0](https://github.com/betagouv/service-national-universel/compare/v1.258.0...v1.259.0) (2023-04-24)
+
+
+### Bug Fixes
+
+* **api:** add try catch logout route ([#2532](https://github.com/betagouv/service-national-universel/issues/2532)) ([61e90c3](https://github.com/betagouv/service-national-universel/commit/61e90c379b777b11f5c7380dbef813d7c53e855a))
+
+
+### Features
+
+* list bus with new system + allow export only some fields + allow custom aggs query + limit params to 200 + simplify export title ([#2491](https://github.com/betagouv/service-national-universel/issues/2491)) ([212f884](https://github.com/betagouv/service-national-universel/commit/212f884c913fb61dc949c5e1c3741e36d6e169a6))
+
 # [1.258.0](https://github.com/betagouv/service-national-universel/compare/v1.257.0...v1.258.0) (2023-04-21)
 
 

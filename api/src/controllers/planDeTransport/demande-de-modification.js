@@ -5,6 +5,7 @@ const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const ModificationBusModel = require("../../models/PlanDeTransport/modificationBus");
 const ReferentModel = require("../../models/referent");
+const CohortModel = require("../../models/cohort");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
@@ -17,6 +18,7 @@ const {
   ligneBusCanEditTagsDemandeDeModification,
   SENDINBLUE_TEMPLATES,
   ROLES,
+  isLigneBusDemandeDeModificationOpen,
 } = require("snu-lib");
 const { ObjectId } = require("mongodb");
 const { sendTemplate } = require("../../sendinblue");
@@ -56,6 +58,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!ligneBusCanCreateDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const cohort = await CohortModel.findOne({ name: req.user.cohort });
+    if (!cohort) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!isLigneBusDemandeDeModificationOpen(cohort, req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { lineId, message } = value;
 
