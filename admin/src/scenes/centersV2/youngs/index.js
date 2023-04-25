@@ -281,7 +281,7 @@ export default function CenterYoungIndex() {
   };
 
   const exportData = async () => {
-    const data = await esYoungBySession();
+    const data = await esYoungBySession({ must_not: false });
     const result = await transformData({ data, centerId: id });
     const csv = await toArrayOfArray(result);
     await toXLSX(`volontaires_pointage_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`, csv);

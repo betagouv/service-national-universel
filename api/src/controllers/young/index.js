@@ -68,7 +68,14 @@ const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscripti
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
-router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.logout(req, res));
+router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    await YoungAuth.logout(req, res);
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 router.get("/signin_token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.signinToken(req, res));
 router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
 router.post("/forgot_password_reset", async (req, res) => YoungAuth.forgotPasswordReset(req, res));
@@ -431,9 +438,15 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
-    value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
-    value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
+    if (value.phone) {
+      value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
+    }
+    if (value.parent1Phone) {
+      value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
+    }
+    if (value.parent2Phone) {
+      value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
+    }
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

@@ -129,6 +129,7 @@ export default function VolontaireList() {
     const response = await api.get("/ligne-de-bus/all");
     const meetingPoints = response ? response.data.meetingPoints : [];
     const ligneBus = response ? response.data.ligneBus : [];
+    const ligneToPoints = response ? response.data.ligneToPoints : [];
 
     return all.map((data) => {
       let center = {};
@@ -138,9 +139,11 @@ export default function VolontaireList() {
       }
       let meetingPoint = {};
       let bus = {};
+      let ligneToPoint = {};
       if (data.meetingPointId && meetingPoints) {
         meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
         bus = ligneBus.find((lb) => lb._id === data.ligneId);
+        ligneToPoint = ligneToPoints.find((ltp) => ltp.lineId === data.ligneId && ltp.meetingPointId === data.meetingPointId);
       }
 
       if (!data.domains) data.domains = [];
@@ -261,9 +264,14 @@ export default function VolontaireList() {
           "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
           "Informations de transport sont transmises par les services locaux": translate(data.transportInfoGivenByLocal),
           "Bus n˚": bus?.busId,
+          "Nom du point de rassemblement": meetingPoint?.name,
           "Adresse point de rassemblement": meetingPoint?.address,
+          "Ville du point de rassemblement": meetingPoint?.city,
           "Date aller": formatDateFR(bus?.departuredDate),
+          "Heure de départ": ligneToPoint?.departureHour,
+          "Heure de convocation": ligneToPoint?.meetingHour,
           "Date retour": formatDateFR(bus?.returnDate),
+          "Heure de retour": ligneToPoint?.returnHour,
         },
         phase1DocumentStatus: {
           "Droit à l'image - Statut": translateFileStatusPhase1(data.imageRightFilesStatus) || "Non Renseigné",
@@ -358,7 +366,7 @@ export default function VolontaireList() {
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: ".25rem", justifyContent: "flex-end" }}>
                 <button
-                  className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
+                  className="rounded-md bg-snu-purple-300 py-2 px-4 text-sm font-semibold text-white hover:bg-snu-purple-600 hover:drop-shadow"
                   onClick={() => setIsExportOpen(true)}>
                   Exporter les volontaires
                 </button>
@@ -475,10 +483,10 @@ export default function VolontaireList() {
                   URLParams={true}
                   queryFormat="and"
                 />
-                <HiAdjustments onClick={handleShowFilter} className="text-xl text-coolGray-700 cursor-pointer hover:scale-105" />
+                <HiAdjustments onClick={handleShowFilter} className="cursor-pointer text-xl text-coolGray-700 hover:scale-105" />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <div className="uppercase text-xs text-snu-purple-800">Général</div>
+                <div className="text-xs uppercase text-snu-purple-800">Général</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -562,7 +570,7 @@ export default function VolontaireList() {
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <div className="uppercase text-xs text-snu-purple-800">Dossier</div>
+                <div className="text-xs uppercase text-snu-purple-800">Dossier</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -776,7 +784,7 @@ export default function VolontaireList() {
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <div className="uppercase text-xs text-snu-purple-800">Phase 1</div>
+                <div className="text-xs uppercase text-snu-purple-800">Phase 1</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -917,9 +925,23 @@ export default function VolontaireList() {
                   showMissing
                   missingLabel="Non renseigné"
                 />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="LINE"
+                  dataField="ligneId.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "LINE") }}
+                  renderItem={(e, count) => {
+                    return `${e} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Ligne", "Ligne")}
+                />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <div className="uppercase text-xs text-snu-purple-800">Phase 2</div>
+                <div className="text-xs uppercase text-snu-purple-800">Phase 2</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -1009,7 +1031,7 @@ export default function VolontaireList() {
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <div className="uppercase text-xs text-snu-purple-800">Phase 3</div>
+                <div className="text-xs uppercase text-snu-purple-800">Phase 3</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
