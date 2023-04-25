@@ -77,7 +77,7 @@ export default function StepUpload() {
         };
       if (!res.ok) {
         capture(res.code);
-        return res.code;
+        return { error: res.code };
       }
     } catch (e) {
       capture(e);
