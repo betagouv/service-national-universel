@@ -16,16 +16,16 @@ export default function UserMenu({ onClose }) {
   }
 
   return (
-    <nav className="p-6 pt-0 bg-[#212B44] w-full transition-all">
-      <div className="flex mb-6 gap-3">
-        <p className="rounded-full bg-[#344264] text-[#768BAC] w-9 h-9 flex text-center items-center justify-center capitalize">{user.firstName[0] + user.lastName[0]}</p>
+    <nav className="w-full bg-[#212B44] p-6 pt-0 transition-all">
+      <div className="mb-6 flex gap-3">
+        <p className="flex h-9 w-9 items-center justify-center rounded-full bg-[#344264] text-center capitalize text-[#768BAC]">{user.firstName[0] + user.lastName[0]}</p>
         <div>
           <p className="font-semibold">{user.firstName}</p>
           <p className="text-xs text-[#768BAC]">Volontaire</p>
         </div>
       </div>
       <ul>
-        <MenuLink onClose={onClose} to="account" text="Mon Profil" />
+        <MenuLink onClose={onClose} to="/account" text="Mon Profil" />
         {permissionPhase2(user) && <MenuLink onClose={onClose} to="preferences" text="Mes préférences de mission" />}
         <MenuButton onClick={logout} text="Déconnexion" />
       </ul>

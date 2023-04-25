@@ -9,10 +9,8 @@ import usePageLoad from "../../hooks/usePageLoad";
 //    ...rest
 // }
 
-// ${activeTabKey === key ? "border-b-2 border-blue-600" : ""}
-
 const Tabs = ({ tabs = [], selectedTabKey = "", className = "", onChange = () => {} }) => {
-  const [activeTabKey, setActiveTabKey] = useState(selectedTabKey || tabs[0]?.key || null);
+  const activeTabKey = selectedTabKey || tabs[0]?.key || null;
   const [tabUnderlineWidth, setTabUnderlineWidth] = useState(0);
   const [tabUnderlineOffsetLeft, setTabUnderlineOffsetLeft] = useState(0);
   const isPageLoaded = usePageLoad();
@@ -20,7 +18,6 @@ const Tabs = ({ tabs = [], selectedTabKey = "", className = "", onChange = () =>
   const tabsRef = useRef({});
 
   const handleChangeTab = (key) => () => {
-    setActiveTabKey(key);
     onChange(key);
   };
 

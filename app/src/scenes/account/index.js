@@ -51,7 +51,7 @@ const Account = () => {
     if (device === "desktop" && !pagePath) {
       history.push("/account/general");
     }
-  }, []);
+  }, [pagePath]);
 
   return (
     <>
