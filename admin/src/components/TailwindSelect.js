@@ -4,14 +4,14 @@ import { BsChevronDown, BsChevronUp } from "react-icons/bs";
 import { AiOutlineCheck } from "react-icons/ai";
 import InfoCircle from "../assets/icons/InfoCircle";
 import ReactTooltip from "react-tooltip";
-import useRandomId from "../hooks/useRandomId";
+import { getRandomId } from "../utils";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
 export default function Select({ options, selected, setSelected, label = "", readOnly = false, icon, error, classname = "", hint = "" }) {
-  const tooltipId = useRandomId();
+  const tooltipId = getRandomId();
 
   return (
     <div>
