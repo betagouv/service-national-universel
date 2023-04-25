@@ -15,7 +15,6 @@ import { inscriptionCreationOpenForYoungs } from "snu-lib";
 import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import Footer from "../../components/footerV2";
 import Header from "../../components/header";
-import { environment } from "../../config";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;

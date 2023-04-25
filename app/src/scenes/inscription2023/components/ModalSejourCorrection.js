@@ -1,12 +1,10 @@
 import React from "react";
-import { toastr } from "react-redux-toastr";
 import { Modal } from "reactstrap";
 import { formatStringDate } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
 import Loader from "../../../components/Loader";
 import { supportURL } from "../../../config";
-import { capture } from "../../../sentry";
 import plausibleEvent from "../../../services/plausible";
 
 export default function ModalSejourCorrection({ data, isOpen, onValidation }) {

@@ -88,8 +88,6 @@ export function isYoungCanApplyToPhase2Missions(young) {
 
 export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];
 
-export const ENABLE_CHOOSE_MEETING_POINT = false;
-
 export const ENABLE_PM = true;
 
 export const htmlCleaner = (text) => {

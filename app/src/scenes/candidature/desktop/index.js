@@ -1,7 +1,5 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
-import { Link } from "react-router-dom";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
 
 import api from "../../../services/api";

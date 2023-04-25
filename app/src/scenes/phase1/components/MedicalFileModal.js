@@ -93,12 +93,12 @@ const MedicalFileModal = ({ isOpen, onClose, title = "Téléchargez votre fiche 
             className="self-start mt-2"
             rel="noreferrer"
             href="https://www.ameli.fr/assure/sante/themes/suivi-medical-de-lenfant-et-de-ladolescent/examen-medical-propose-ladolescent-entre-15-et-16-ans">
-            Plus d'informations sur le bilan de santé obligatoire
+            Plus d&apos;informations sur le bilan de santé obligatoire
           </ExternalLink>
           <ExternalLink
             className="self-start mt-3"
             href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/note_relatives_aux_informations_d_ordre_sanitaire_2022.pdf">
-            Note relative aux informations d'ordre sanitaire
+            Note relative aux informations d&apos;ordre sanitaire
           </ExternalLink>
         </div>
         <ButtonLight className="mt-10 hidden md:block w-full" onClick={onClose}>

@@ -157,9 +157,7 @@ export default function StepConvocation({ young }) {
                     className="flex flex-row items-center justify-center px-4 py-2 rounded-lg border-[1px] border-blue-700 cursor-pointer hover:scale-105 mr-2"
                     onClick={() => setShowConvocation(!showConvocation)}>
                     {showConvocation ? <AiOutlineEyeInvisible className="h-5 w-5 text-blue-700 mr-2" /> : <AiOutlineEye className="h-5 w-5 text-blue-700 mr-2" />}
-                    <span young={young} uri="cohesion" className="text-blue-700 text-sm">
-                      Voir
-                    </span>
+                    <span className="text-blue-700 text-sm">Voir</span>
                   </button>
                   <button
                     onClick={() =>
@@ -174,9 +172,7 @@ export default function StepConvocation({ young }) {
                     className="flex flex-1 flex-row items-center justify-center px-4 py-2 rounded-lg border-[1px] border-blue-700 cursor-pointer hover:scale-105">
                     <HiOutlineMail className="h-5 w-5 text-blue-700 mr-2" />
 
-                    <span young={young} uri="cohesion" className="text-blue-700 text-sm">
-                      Recevoir par mail
-                    </span>
+                    <span className="text-blue-700 text-sm">Recevoir par mail</span>
                   </button>
                 </div>
               </div>
