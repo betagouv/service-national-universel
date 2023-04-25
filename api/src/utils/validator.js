@@ -200,7 +200,7 @@ function validateContract(program) {
 }
 
 function validateFirstName() {
-  return Joi.string().custom((value) => (value ? value.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) : null));
+  return Joi.string().custom((value) => (value ? value.replace(/(?<=^|\s)\S+/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) : null));
 }
 
 const applicationKeys = {
