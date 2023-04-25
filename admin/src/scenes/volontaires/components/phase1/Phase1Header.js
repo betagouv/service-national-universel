@@ -99,7 +99,6 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
           <Badge
             minify
             text={translatePhase1(young.statusPhase1)}
-            // icon={young.statusPhase1 === "AFFECTED" && <div className="w-2 h-2 rounded-full bg-blue-500 shadow-sm mr-1" />}
             color={YOUNG_STATUS_COLORS[young.statusPhase1]}
           />
           {canUserDownloadConvocation() && (
