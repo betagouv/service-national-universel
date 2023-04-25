@@ -14,13 +14,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
   const [modalDispense, setModalDispense] = useState({ isOpen: false });
 
   const canUserDownloadConvocation = () => {
-    if (
-      young.hasMeetingInformation === "true" &&
-      (young.statusPhase1 === "AFFECTED" || young.statusPhase1 === "DONE" || young.statusPhase1 === "NOT_DONE" || young.statusPhase1 === "EXEMPTED")
-    ) {
-      return true;
-    }
-    return false;
+      return young.hasMeetingInformation === "true" && ["AFFECTED", "DONE", "NOT_DONE", "EXEMPTED"].includes(young.statusPhase1);
   };
 
   const handleSendAttestationByEmail = async () => {
