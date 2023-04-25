@@ -9,7 +9,7 @@ const MobileMenu = ({ children = null, className = "" }) => {
 const ItemLink = ({ children = null, className = "", ...rest }) => {
   return (
     <Link
-      className={`border-[1px] border-gray-300 rounded-md text-gray-700 font-medium text-sm px-3 py-2 flex justify-between items-center visited:text-gray-700 ${className}`}
+      className={`flex items-center justify-between rounded-md border-[1px] border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 visited:text-gray-700 ${className}`}
       {...rest}>
       {children}
       <ChevronRight className="text-gray-300" />

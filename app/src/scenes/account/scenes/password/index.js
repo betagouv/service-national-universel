@@ -11,14 +11,16 @@ import InputPassword from "../../../../components/forms/inputs/InputPassword";
 import FormDescription from "../../components/FormDescription";
 import SectionTitle from "../../components/SectionTitle";
 
+const INITIAL_FORM_VALUES = {
+  password: "",
+  newPassword: "",
+  verifyPassword: "",
+};
+
 const AccountPasswordPage = () => {
   const dispatch = useDispatch();
 
-  const [formValues, setFormValues] = useState({
-    password: "",
-    newPassword: "",
-    verifyPassword: "",
-  });
+  const [formValues, setFormValues] = useState(INITIAL_FORM_VALUES);
 
   const [errors, setErrors] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,6 +57,7 @@ const AccountPasswordPage = () => {
       const { title, message, data } = await changeYoungPassword(formValues);
       toastr.success(title, message);
       dispatch(setYoung(data));
+      setFormValues(INITIAL_FORM_VALUES);
     } catch (error) {
       console.error(error);
       const { title, message } = error;

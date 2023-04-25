@@ -41,7 +41,7 @@ const IdCardReader = ({ young, cniFile }) => {
             <p className="mb-[1rem] text-sm text-gray-500 xl:mb-0">Expire le {new Date(cniFile.expirationDate).toLocaleDateString("fr-fr")}</p>
           </div>
         </div>
-        <ButtonLight onClick={handleDownloadFile} disabled={isDownloading} className="xl:ml-auto">
+        <ButtonLight onClick={handleDownloadFile} disabled={isDownloading} className="bg-white xl:ml-auto">
           {isDownloading && <BiLoaderAlt className="animate-spin" />}
           Télécharger
         </ButtonLight>
