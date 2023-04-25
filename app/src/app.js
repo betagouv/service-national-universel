@@ -10,6 +10,7 @@ import { setYoung } from "./redux/auth/actions";
 import Footer from "./components/footer";
 import Loader from "./components/Loader";
 import Account from "./scenes/account";
+import AccountOld from "./scenes/account/index_old";
 import AllEngagements from "./scenes/all-engagements/index";
 import AuthV2 from "./scenes/authV2";
 import Bug from "./scenes/bug";
@@ -185,7 +186,7 @@ const Espace = () => {
       </div>
       <main className="mt-16 md:mt-0 md:ml-[16rem]">
         <Switch>
-          <SentryRoute path="/account" component={Account} />
+          <SentryRoute path="/account" component={environment === "production" ? AccountOld : Account} />
           <SentryRoute path="/phase1" component={Phase1} />
           <SentryRoute path="/phase2" component={Phase2} />
           <SentryRoute path="/phase3" component={Phase3} />
