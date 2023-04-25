@@ -309,7 +309,7 @@ router.put("/delete/cohort/:id", passport.authenticate("referent", { session: fa
     const pointDeRassemblement = await PointDeRassemblementModel.findById(id);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const youngs = await YoungModel.find({ meetingPointId: id });
+    const youngs = await YoungModel.find({ meetingPointId: id, cohort: cohort });
     if (youngs.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     let cohortsToUpdate = pointDeRassemblement.cohorts.filter((c) => c !== cohort);
