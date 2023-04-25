@@ -7,12 +7,12 @@ import Trash from "../../../assets/icons/Trash";
 
 export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArray }) => {
   return (
-    <div className="bg-white w-full py-4 flex flex-row justify-between px-4 rounded-lg border-[1px] border-gray-200">
-      <div className="flex flex-row gap-2 items-center justify-center self-start h-[50px]">
-        <FilterSvg className="text-gray-300 h-4 w-4" />
-        <div className="font-bold text-gray-900 text-lg">Filtrer</div>
+    <div className="flex w-full flex-row justify-between rounded-lg border-[1px] border-gray-200 bg-white py-4 px-4">
+      <div className="flex h-[50px] flex-row items-center justify-center gap-2 self-start">
+        <FilterSvg className="h-4 w-4 text-gray-300" />
+        <div className="text-lg font-bold text-gray-900">Filtrer</div>
       </div>
-      <div className="flex flex-row gap-2 items-center justify-end flex-wrap w-7/10">
+      <div className="w-7/10 flex flex-row flex-wrap items-center justify-end gap-2">
         {filterArray.map((filter) => (
           <FilterComponent key={filter.id} filter={filter} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} />
         ))}
@@ -21,27 +21,29 @@ export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArr
   );
 };
 
-export const FilterComponent = ({ filter, selectedFilters, setSelectedFilters }) => {
+export const FilterComponent = ({ filter, selectedFilters, setSelectedFilters, maxItems = 3 }) => {
   const selectedFilterValues = selectedFilters[filter.id]?.length ? selectedFilters[filter.id] : [];
   const [visible, setVisible] = React.useState(false);
 
   return (
-    <div className="relative">
-      <div className={`p-0.5 border-[2px] ${visible ? "border-blue-600 rounded-xl" : "border-transparent"}`}>
-        <div onClick={() => setVisible(true)} className="cursor-pointer flex flex-row border-[1px] border-gray-200 rounded-md w-fit p-2 items-center gap-1">
-          <div className="text-gray-700 font-medium text-xs">{filter.name}</div>
+    <div className="relative w-fit">
+      <div className={`border-[2px] p-0.5 ${visible ? "rounded-xl border-blue-600" : "border-transparent"}`}>
+        <div
+          onClick={() => setVisible(true)}
+          className="flex cursor-pointer flex-row items-center gap-1 rounded-md border-[1px] border-gray-200 bg-[#FFFFFF] p-2 hover:border-gray-300">
+          <div className="text-xs font-medium text-gray-700">{filter.name}</div>
           {selectedFilterValues?.length === filter.options?.length ? (
-            <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">{filter?.fullValue}</div>
+            <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500">{filter?.fullValue}</div>
           ) : selectedFilterValues.length > 0 ? (
             selectedFilterValues.map((item, index) => {
               const label = filter.options.find((option) => option.key === item)?.label;
-              if (index > 2) {
+              if (index > maxItems - 1) {
                 if (index === selectedFilterValues.length - 1) {
                   return (
                     <div key={item}>
                       <ToolTipView selectedFilterValues={selectedFilterValues} filter={filter} />
-                      <div data-tip="" data-for={"tooltip-filtre" + filter.id} className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">
-                        +{index - 2}
+                      <div data-tip="" data-for={"tooltip-filtre" + filter.id} className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500">
+                        +{index - maxItems + 1}
                       </div>
                     </div>
                   );
@@ -49,13 +51,13 @@ export const FilterComponent = ({ filter, selectedFilters, setSelectedFilters })
                 return null;
               }
               return (
-                <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500" key={item}>
+                <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500" key={item}>
                   {label}
                 </div>
               );
             })
           ) : (
-            <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500">{filter?.fullValue ? filter.fullValue : "Choisir"}</div>
+            <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500">{filter?.fullValue ? filter.fullValue : "Choisir"}</div>
           )}
         </div>
       </div>
@@ -69,12 +71,12 @@ export const FilterComponent = ({ filter, selectedFilters, setSelectedFilters })
 
 const ToolTipView = ({ selectedFilterValues, filter }) => {
   return (
-    <ReactTooltip id={"tooltip-filtre" + filter.id} className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
-      <div className="flex flex-row gap-2 flex-wrap max-w-[600px] rounded">
+    <ReactTooltip id={"tooltip-filtre" + filter.id} className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
+      <div className="flex max-w-[600px] flex-row flex-wrap gap-2 rounded">
         {selectedFilterValues.map((item) => {
           const label = filter.options.find((option) => option.key === item).label;
           return (
-            <div className="bg-gray-100 rounded py-1 px-2 text-xs text-gray-500" key={item}>
+            <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500" key={item}>
               {label}
             </div>
           );
@@ -129,7 +131,7 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
     // check si c'est un isSingle (un seul filtre possible)
     if (filter?.isSingle) return setSelectedFilters({ ...selectedFilters, [filter?.id]: [value] });
     if (filter?.fixed?.includes(value)) return;
-    let newFilters = [];
+    let newFilters;
     // store localement les filtres
     if (selectedFilters[filter?.id]) {
       if (selectedFilters[filter?.id]?.includes(value)) {
@@ -161,41 +163,41 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
       leaveTo="opacity-0 translate-y-1">
       <Popover.Panel className={`absolute right-0 z-20 w-[305px] translate-y-[4px]`}>
         <div ref={ref} className="rounded-lg shadow-lg ">
-          <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100">
+          <div className="relative grid rounded-lg border-[1px] border-gray-100 bg-white py-2">
             {filter?.customComponent ? (
               filter.customComponent(handleSelect, selectedFilters[filter?.id])
             ) : (
               <>
-                <div className="flex items-center justify-between py-2 mb-1 px-3">
-                  <p className="text-gray-500 text-xs leading-5 font-light">{filter.name}</p>
-                  {filter.allowEmpty === false ? <></> : <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={handleDelete} />}
+                <div className="mb-1 flex items-center justify-between py-2 px-3">
+                  <p className="text-xs font-light leading-5 text-gray-500">{filter.name}</p>
+                  {filter.allowEmpty === false ? <></> : <Trash className="h-3 w-3 cursor-pointer font-light text-red-500" onClick={handleDelete} />}
                 </div>
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="mx-3 px-3 py-2 bg-gray-100 rounded-lg mb-2 placeholder:text-gray-600 text-xs text-gray-900 truncate"
+                  className="mx-3 mb-2 truncate rounded-lg bg-gray-100 px-3 py-2 text-xs text-gray-900 placeholder:text-gray-600"
                   placeholder={`Rechercher un(e) ${filter?.name.toLowerCase()}...`}
                 />
-                <div className="flex flex-col max-h-[400px] overflow-y-auto">
+                <div className="flex max-h-[400px] flex-col overflow-y-auto">
                   {optionsVisible?.length === 0 ? (
                     <div className="flex items-center justify-center py-2 px-3">
-                      <p className="text-gray-500 text-xs leading-5">Aucun résultat</p>
+                      <p className="text-xs leading-5 text-gray-500">Aucun résultat</p>
                     </div>
                   ) : (
                     <>
                       {optionsVisible
                         ?.sort((a, b) => {
-                          a.key.toString().localeCompare(b.key.toString());
+                          a.key?.toString().localeCompare(b.key?.toString());
                         })
                         ?.map((option) => {
                           const optionSelected = filter?.fixed?.includes(option.key) || (selectedFilters[filter.id]?.length && selectedFilters[filter?.id]?.includes(option?.key));
                           return (
                             <div
-                              className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer"
+                              className="flex cursor-pointer items-center justify-between py-2 px-3 hover:bg-gray-50"
                               key={option?.key}
                               onClick={() => handleSelect(option?.key)}>
-                              <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
+                              <div className="flex items-center gap-2 text-sm leading-5 text-gray-700">
                                 <input type="checkbox" disabled={filter?.fixed?.includes(option.key)} checked={optionSelected} onChange={() => {}} />
                                 {option.label}
                               </div>

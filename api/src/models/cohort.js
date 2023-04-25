@@ -115,6 +115,38 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  sessionEditionOpenForReferentRegion: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Ouverture ou fermeture de l'édition des sessions pour les référents régionaux",
+    },
+  },
+
+  sessionEditionOpenForReferentDepartment: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Ouverture ou fermeture de l'édition des sessions pour les référents départementaux",
+    },
+  },
+
+  pdrEditionOpenForReferentRegion: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Ouverture ou fermeture de l'édition des PDR pour les référents régionaux",
+    },
+  },
+
+  pdrEditionOpenForReferentDepartment: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Ouverture ou fermeture de l'édition des PDR pour les référents départementaux",
+    },
+  },
+
   repartitionSchemaCreateAndEditGroupAvailability: {
     type: Boolean,
     documentation: {
@@ -125,6 +157,13 @@ const Schema = new mongoose.Schema({
     type: Boolean,
     documentation: {
       description: "Ouverture ou fermeture pour les utilisateurs de la possibilité de télécharger le schéma de répartition.",
+    },
+  },
+
+  isTransportPlanCorrectionRequestOpen: {
+    type: Boolean,
+    documentation: {
+      description: "Ouverture ou fermeture pour les référents régionaux de la possibilité de demander une correction du plan de transport.",
     },
   },
 

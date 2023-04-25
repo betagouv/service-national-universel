@@ -79,7 +79,8 @@ export default function Signin() {
                       )}
                       {tooManyRequests?.status && (
                         <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">
-                          Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez {tooManyRequests.date !== "-" ? `à ${tooManyRequests.date}.` : "demain."}
+                          Vous avez atteint le maximum de tentatives de connexion autorisées. Votre accès est bloqué jusqu'à{" "}
+                          {tooManyRequests.date !== "-" ? `à ${tooManyRequests.date}.` : "demain."}. Revenez d'ici quelques minutes.
                         </div>
                       )}
 

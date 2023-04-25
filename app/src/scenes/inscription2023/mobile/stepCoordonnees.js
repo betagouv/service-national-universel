@@ -16,12 +16,11 @@ import Help from "../components/Help";
 import {
   youngSchooledSituationOptions,
   youngActiveSituationOptions,
-  countryOptions,
+  foreignCountryOptions,
   hostRelationshipOptions,
   inFranceOrAbroadOptions,
   genderOptions,
   booleanOptions,
-  debounce,
 } from "../utils";
 
 import api from "../../../services/api";
@@ -31,7 +30,7 @@ import StickyButton from "../../../components/inscription/stickyButton";
 import Toggle from "../../../components/inscription/toggle";
 import CheckBox from "../../../components/inscription/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
-import { translate } from "../../../utils";
+import { debounce, translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import { supportURL } from "../../../config";
@@ -194,7 +193,7 @@ export default function StepCoordonnees() {
         setSpecialSituation(true);
       }
 
-      setWasBornInFrance(young.birthCountry === FRANCE ? "true" : "false");
+      setWasBornInFrance(!young.birthCountry || young.birthCountry === FRANCE ? "true" : "false");
 
       setData({
         ...data,
@@ -318,7 +317,7 @@ export default function StepCoordonnees() {
   const debouncedSuggestionsRequest = useCallback(
     debounce(async (value) => {
       try {
-        const response = await apiAdress(value);
+        const response = await apiAdress(value, { type: "municipality" });
         const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
         setBirthCityZipSuggestions(suggestions);
       } catch (error) {
@@ -544,7 +543,7 @@ export default function StepCoordonnees() {
           <SearchableSelect
             label="Pays de naissance"
             value={birthCountry}
-            options={countryOptions}
+            options={foreignCountryOptions}
             onChange={updateData("birthCountry")}
             placeholder="Sélectionnez un pays"
             error={errors.birthCountry}
@@ -597,7 +596,7 @@ export default function StepCoordonnees() {
           <SearchableSelect
             label="Pays de résidence"
             value={foreignCountry}
-            options={countryOptions}
+            options={foreignCountryOptions}
             onChange={updateData("foreignCountry")}
             placeholder="Sélectionnez un pays"
             error={errors.foreignCountry}

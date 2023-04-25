@@ -33,8 +33,9 @@ export const youngActiveSituationOptions = Object.keys(YOUNG_ACTIVE_SITUATIONS).
   label: translation.translate(situation),
 }));
 
-export const countryOptions = Object.values(countriesList)
+export const foreignCountryOptions = Object.values(countriesList)
   .sort((a, b) => a.localeCompare(b))
+  .filter((countryName) => countryName !== "France")
   .map((countryName) => ({ value: countryName, label: countryName }));
 
 export const hostRelationshipOptions = [
@@ -84,16 +85,4 @@ export const ID = {
     imgFront: "passport.jpg",
     imgDate: "passportDate.jpg",
   },
-};
-
-export const debounce = (fn, delay) => {
-  let timeOutId;
-  return function (...args) {
-    if (timeOutId) {
-      clearTimeout(timeOutId);
-    }
-    timeOutId = setTimeout(() => {
-      fn(...args);
-    }, delay);
-  };
 };

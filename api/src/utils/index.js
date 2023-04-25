@@ -567,7 +567,21 @@ const getBaseUrl = () => {
   return "http://localhost:8080";
 };
 
-const updateApplication = async (mission, fromUser = null) => {
+const updateApplicationTutor = async (mission, fromUser = null) => {
+  const applications = await ApplicationModel.find({
+    missionId: mission._id,
+  });
+
+  for (let application of applications) {
+    if (application.tutorId !== mission.tutorId) {
+      const tutor = await ReferentModel.findById(mission.tutorId);
+      application.set({ tutorId: mission.tutorId, tutorName: `${tutor?.firstName} ${tutor?.lastName}` });
+      await application.save({ fromUser });
+    }
+  }
+};
+
+const updateApplicationStatus = async (mission, fromUser = null) => {
   if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status))
     return console.log(`no need to update applications, new status for mission ${mission._id} is ${mission.status}`);
   const applications = await ApplicationModel.find({
@@ -668,27 +682,32 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
   if (!dateDeValidation || !dateDeValidationTerminale) return;
 
   const now = new Date();
-  if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
-    if (
-      (now >= dateDeValidation && young?.grade !== "Terminale" && (!young?.departSejourAt || young?.departSejourAt > dateDeValidation)) ||
-      (now >= dateDeValidationTerminale && young?.grade === "Terminale" && (!young?.departSejourAt || young?.departSejourAt > dateDeValidationTerminale))
-    ) {
-      if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
-        young.set({ statusPhase1: "NOT_DONE" });
+  if ((now >= dateDeValidation && young?.grade !== "Terminale") || (now >= dateDeValidationTerminale && young?.grade === "Terminale")) {
+    if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
+      if (
+        (now >= dateDeValidation && young?.grade !== "Terminale" && (!young?.departSejourAt || young?.departSejourAt > dateDeValidation)) ||
+        (now >= dateDeValidationTerminale && young?.grade === "Terminale" && (!young?.departSejourAt || young?.departSejourAt > dateDeValidationTerminale))
+      ) {
+        if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
+          young.set({ statusPhase1: "NOT_DONE" });
+        } else {
+          young.set({ statusPhase1: "DONE" });
+        }
       } else {
-        young.set({ statusPhase1: "DONE" });
+        if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
+          young.set({ statusPhase1: "NOT_DONE" });
+        } else if (
+          young?.departSejourMotif &&
+          ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young.departSejourMotif)
+        ) {
+          young.set({ statusPhase1: "DONE" });
+        }
       }
     } else {
-      if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
-        young.set({ statusPhase1: "NOT_DONE" });
-      } else if (young?.departSejourMotif && ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young.departSejourMotif)) {
-        young.set({ statusPhase1: "DONE" });
-      }
+      young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
     }
-  } else {
-    young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
+    await young.save({ fromUser: req.user });
   }
-  await young.save({ fromUser: req.user });
 }
 
 const getReferentManagerPhase2 = async (department) => {
@@ -886,7 +905,8 @@ module.exports = {
   STEPS,
   STEPS2023,
   STEPS2023REINSCRIPTION,
-  updateApplication,
+  updateApplicationStatus,
+  updateApplicationTutor,
   FILE_STATUS_PHASE1,
   translateFileStatusPhase1,
   getCcOfYoung,

@@ -5,6 +5,8 @@ const puppeteer = require("puppeteer");
 const bodyParser = require("body-parser");
 const { initSentry, capture } = require("./sentry");
 
+require("events").EventEmitter.defaultMaxListeners = 30; // Fix warning node
+
 const fs = require("fs");
 
 const { PORT: port, GENERATE_LOCALLY } = require("./config.js");

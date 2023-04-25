@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
-import { canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession, canUpdateMeetingPoint, ROLES, START_DATE_SESSION_PHASE1 } from "snu-lib";
+import { canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession, canUpdateMeetingPoint, isPdrEditionOpen, ROLES, START_DATE_SESSION_PHASE1 } from "snu-lib";
 import Pencil from "../../assets/icons/Pencil";
 import Trash from "../../assets/icons/Trash";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -33,9 +33,20 @@ export default function View(props) {
   const [editInfo, setEditInfo] = React.useState(false);
   const [editSession, setEditSession] = React.useState(false);
   const [currentCohort, setCurrentCohort] = React.useState("");
+  const [currentCohortDetails, setCurrentCohortDetails] = React.useState({});
   const [nbYoung, setNbYoung] = React.useState([]);
   const [lines, setLines] = React.useState([]);
   const [pdrInSchema, setPdrInSchema] = React.useState(false);
+
+  useEffect(() => {
+    (async () => {
+      if (currentCohort) {
+        const { data } = await api.get(`/cohort/${currentCohort}`);
+        if (!data) return;
+        setCurrentCohortDetails(data);
+      }
+    })();
+  }, [currentCohort]);
 
   const setYoungsFromES = async (id) => {
     let body = {
@@ -44,7 +55,7 @@ export default function View(props) {
       size: 0,
     };
 
-    const { responses } = await api.esQuery("young", body);
+    const { responses } = await api.esQuery("young", body, null, "?showAffectedToRegionOrDep=1");
     setNbYoung(responses[0].aggregations.cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
   };
 
@@ -280,7 +291,7 @@ export default function View(props) {
         <div className="flex flex-col rounded-lg pt-8 pb-12 px-8 bg-white gap-8">
           <div className="flex items-center justify-between">
             <div className="text-lg leading-6 font-medium text-gray-900">Informations générales</div>
-            {canUpdateMeetingPoint(user) ? (
+            {canUpdateMeetingPoint(user, data) ? (
               <>
                 {!editInfo ? (
                   <div data-tip="" data-for="tooltip-edit-disabled">
@@ -403,7 +414,8 @@ export default function View(props) {
                     </a>
                   ))}
               </nav>
-              {canUpdateMeetingPoint(user) ? (
+
+              {canUpdateMeetingPoint(user, data) && isPdrEditionOpen(user, currentCohortDetails) ? (
                 <>
                   {!editSession ? (
                     <button
@@ -464,7 +476,7 @@ export default function View(props) {
                 <Field
                   label="Complément d’adresse"
                   onChange={(e) => changeComplement(e.target.value)}
-                  value={data.complementAddress.find((c) => c.cohort === currentCohort)?.complement}
+                  value={data.complementAddress.find((c) => c.cohort === currentCohort)?.complement || ""}
                   readOnly={!editSession}
                 />
               </div>

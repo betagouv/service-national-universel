@@ -1,21 +1,7 @@
-const { YOUNG_STATUS, sessions2023, region2zone, oldSessions, getDepartmentByZip, departmentLookUp, department2region, getRegionByZip } = require("snu-lib");
+const { YOUNG_STATUS, sessions2023, region2zone, oldSessions, getRegionForEligibility } = require("snu-lib");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
-
-function getRegionForEligibility(young) {
-  let region = young.schooled ? young.schoolRegion : young.region;
-  if (!region) {
-    let dep = young?.schoolDepartment || young?.department || getDepartmentByZip(young?.zip);
-    if (dep && (!isNaN(dep) || ["2A", "2B", "02A", "02B"].includes(dep))) {
-      if (dep.substring(0, 1) === "0" && dep.length === 3) dep = departmentLookUp[dep.substring(1)];
-      else dep = departmentLookUp[dep];
-    }
-    region = department2region[dep] || getRegionByZip(young?.zip);
-  }
-  if (!region) region = "Etranger";
-  return region;
-}
 
 async function getFilteredSessions(young) {
   const region = getRegionForEligibility(young);
@@ -23,8 +9,8 @@ async function getFilteredSessions(young) {
     (session) =>
       session.eligibility.zones.includes(region2zone[region]) &&
       session.eligibility.schoolLevels.includes(young.grade) &&
-      session.eligibility.bornAfter < young.birthdateAt &&
-      session.eligibility.bornBefore > young.birthdateAt &&
+      session.eligibility.bornAfter <= young.birthdateAt &&
+      session.eligibility.bornBefore >= young.birthdateAt &&
       (session.eligibility.inscriptionEndDate > Date.now() ||
         ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && session.eligibility.instructionEndDate > Date.now())),
   );

@@ -7,7 +7,8 @@ const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const YoungModel = require("../../models/young");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
-const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession } = require("snu-lib/roles");
+const CohortModel = require("../../models/cohort");
+const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession, isPdrEditionOpen } = require("snu-lib/roles");
 const { ERRORS, isYoung } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
@@ -223,13 +224,12 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canUpdateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const { id, name, address, city, zip, department, region, location } = value;
 
     // * Update slave PlanTransport
     const pointDeRassemblement = await PointDeRassemblementModel.findById(id);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canUpdateMeetingPoint(req.user, pointDeRassemblement)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     pointDeRassemblement.set({ name, address, city, zip, department, region, location });
     await pointDeRassemblement.save({ fromUser: req.user });
@@ -264,12 +264,15 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canUpdateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const { id, cohort, complementAddress } = value;
 
     const pointDeRassemblement = await PointDeRassemblementModel.findById(id);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canUpdateMeetingPoint(req.user, pointDeRassemblement)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const cohortData = await CohortModel.findOne({ name: cohort });
+    if (!cohortData) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!isPdrEditionOpen(req.user, cohortData)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     let cohortsToUpdate = pointDeRassemblement.cohorts;
     if (!cohortsToUpdate.includes(cohort)) cohortsToUpdate.push(cohort);
@@ -330,6 +333,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await PointDeRassemblementModel.findOne({ _id: checkedId, deletedAt: { $exists: false } });
+
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data });

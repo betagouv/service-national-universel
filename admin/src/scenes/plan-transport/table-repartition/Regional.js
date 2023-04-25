@@ -34,7 +34,7 @@ export default function Regional() {
               <Title>Table de répartition </Title>
               <div className="text-2xl text-gray-600 leading-7">{region}</div>
             </div>
-            {user.role !== ROLES.REFERENT_DEPARTMENT && <SubTitle>Assignez les départements d’accueil des volontaires de {region}</SubTitle>}
+            {user.role !== ROLES.REFERENT_DEPARTMENT && <SubTitle>Assignez les départements d&apos;accueil des volontaires de {region}</SubTitle>}
           </div>
           <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
         </div>

@@ -4,3 +4,5 @@ export { default as HorizontalBar } from "./HorizontalBar";
 export { default as DemiDoughnut } from "./DemiDoughnut";
 export { default as FullDoughnut } from "./FullDoughnut";
 export { default as RoundRatio } from "./RoundRatio";
+
+export * from "./graph-commons";

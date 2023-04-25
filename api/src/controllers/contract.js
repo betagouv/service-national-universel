@@ -236,7 +236,7 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     if (req.user.role === ROLES.SUPERVISOR) {
       if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-      if (!structures.map((e) => e._id.toString()).includes(contract.structureId.toString()) || !structures.map((e) => e._id.toString()).includes(currentStructureId.toString())) {
+      if (!structures.map((e) => e._id.toString()).includes(previousStructureId.toString()) || !structures.map((e) => e._id.toString()).includes(currentStructureId.toString())) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
     }

@@ -2,9 +2,11 @@
   "name": "admin",
   "version": "1.0.0",
   "scripts": {
-    "dev": "webpack serve --port 8082 --mode development --config webpack.dev.config.js --progress --liveReload --open --hot --inline",
-    "tailwind": "npx tailwindcss -i ./src/index.css -o ./src/tailwindcss.css --watch",
+    "dev": "webpack serve --port 8082 --mode development --config webpack.dev.config.js --progress --liveReload --hot --inline",
+    "dev:open": "webpack serve --port 8082 --mode development --config webpack.dev.config.js --progress --liveReload --open --hot --inline",
     "mobile": "webpack serve --port 8082 --mode development --config webpack.dev.config.js --progress --liveReload --open --hot --inline --host 0.0.0.0",
+    "mobile:open": "webpack serve --port 8082 --mode development --config webpack.dev.config.js --progress --liveReload --hot --inline --host 0.0.0.0",
+    "tailwind": "npx tailwindcss -i ./src/index.css -o ./src/tailwindcss.css --watch",
     "start": "node server/index.js",
     "install": "node src/build-only-on-clevercloud.js",
     "build": "node --max-old-space-size=3000 node_modules/webpack/bin/webpack.js",
@@ -40,7 +42,8 @@
     "postcss": "^8.4.18",
     "postcss-import": "^14.0.2",
     "postcss-loader": "^6.2.1",
-    "prettier": "2.7.1",
+    "prettier": "^2.7.1",
+    "prettier-plugin-tailwindcss": "^0.2.7",
     "react-refresh": "0.9.0",
     "style-loader": "2.0.0",
     "svg-inline-loader": "0.8.2",
@@ -100,8 +103,8 @@
     "xlsx": "0.17.4"
   },
   "engines": {
-    "node": "^16.10",
-    "npm": "^8.0",
+    "node": "^18.16.0",
+    "npm": "^9.5.1",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   }
 }

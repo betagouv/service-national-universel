@@ -1,8 +1,16 @@
 import { capture } from "../sentry";
+// https://adresse.data.gouv.fr/api-doc/adresse
+// Filtres possibles : postcode, citycode (INSEE), type, limit, autocomplete
 
-const apiAdress = async (path, options = {}) => {
+const apiAdress = async (query, filters = {}, options = {}) => {
+  let url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}`;
+
+  for (const [key, value] of Object.entries(filters)) {
+    url += `&${key}=${encodeURIComponent(value)}`;
+  }
+
   try {
-    const res = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${path}`, {
+    const res = await fetch(url, {
       ...options,
       retries: 3,
       retryDelay: 1000,
@@ -21,7 +29,7 @@ const putLocation = async (city, zip) => {
   try {
     if (!city && !zip) return;
     // try with municipality = city + zip
-    const resMunicipality = await apiAdress(`${encodeURIComponent(city + " " + zip)}&type=municipality`);
+    const resMunicipality = await apiAdress(city + " " + zip, { type: "municipality" });
     if (resMunicipality?.features?.length > 0) {
       return {
         lon: resMunicipality.features[0].geometry.coordinates[0],
@@ -29,7 +37,7 @@ const putLocation = async (city, zip) => {
       };
     }
     // try with locality = city + zip
-    const resLocality = await apiAdress(`${encodeURIComponent(zip + " " + city)}&type=locality`);
+    const resLocality = await apiAdress(zip + " " + city, { type: "locality" });
     if (resLocality?.features?.length > 0) {
       return {
         lon: resLocality.features[0].geometry.coordinates[0],

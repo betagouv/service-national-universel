@@ -29,7 +29,7 @@ const Header = () => {
       <header className="px-[1rem] md:px-[7rem] w-full shadow-[0px_16px_16px_-16px_rgba(0,0,0,0.32)] md:shadow-none bg-white h-[7rem] flex justify-between py-3 items-center">
         <div className="flex space-x-6 items-center">
           <img src={LogoFr} alt="Logo de la République française" className="w-18 h-16" />
-          <img src={SNU} alt="Logo du SNU" className="w-14" />
+          <img src={SNU} alt="Logo du SNU" className="w-16" />
           <div className="hidden lg:block">
             <h1 className="font-bold text-xl">Service National Universel</h1>
             <div className="text-sm ">Inscription du volontaire</div>

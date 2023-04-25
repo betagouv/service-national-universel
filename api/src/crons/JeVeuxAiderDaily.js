@@ -16,9 +16,11 @@ const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
 
 const { ROLES, departmentLookUp, department2region, MISSION_DOMAINS, MISSION_STATUS } = require("snu-lib");
-const { updateApplication } = require("../utils/index.js");
+const { updateApplicationStatus, updateApplicationTutor } = require("../utils/index.js");
 
 let startTime = new Date();
+
+const fromUser = { firstName: `Cron ${fileName}` };
 
 const jva2SnuDomaines = {
   "Mobilisation Covid19": MISSION_DOMAINS.SOLIDARITY,
@@ -160,7 +162,7 @@ const sync = async (result) => {
         //Set structureId to referent
         for (const resp of newResps) {
           resp.set({ structureId: newStructure.id });
-          await resp.save({ fromUser: { firstName: `Cron ${fileName}` } });
+          await resp.save({ fromUser });
         }
         structure = newStructure;
       }
@@ -255,6 +257,7 @@ const sync = async (result) => {
           });
         }
       } else {
+        const oldMissionTutorId = missionExist.tutorId;
         // console.log("Update mission");
         delete infoMission.status;
         delete infoMission.name;
@@ -263,7 +266,10 @@ const sync = async (result) => {
         delete infoMission.frequence;
         const left = missionExist.placesLeft + infoMission.placesTotal - missionExist.placesTotal;
         missionExist.set({ ...infoMission, placesLeft: left });
-        await missionExist.save({ fromUser: { firstName: `Cron ${fileName}` } });
+        await missionExist.save({ fromUser });
+        if (oldMissionTutorId !== infoMission.tutorId) {
+          await updateApplicationTutor(missionExist, fromUser);
+        }
       }
     } catch (e) {
       capture(e);
@@ -284,10 +290,10 @@ const cleanData = async () => {
     //Cancel mission
     for (const mission of missionsTodelete) {
       mission.set({ status: MISSION_STATUS.CANCEL });
-      await mission.save({ fromUser: { firstName: `Cron ${fileName}` } });
+      await mission.save({ fromUser });
 
       //Check and cancel application link to the mission
-      await updateApplication(mission);
+      await updateApplicationStatus(mission, fromUser);
 
       //Send mail to referent mission
       const referent = await ReferentModel.findOne({ _id: mission.tutorId });

@@ -52,6 +52,8 @@ function serializeYoung(young, user) {
     transform: (_doc, ret) => {
       delete ret.sqlId;
       delete ret.password;
+      delete ret.passwordChangedAt;
+      delete ret.lastLogoutAt;
       delete ret.nextLoginAttemptIn;
       delete ret.forgotPasswordResetToken;
       delete ret.forgotPasswordResetExpires;
@@ -73,6 +75,8 @@ function serializeReferent(referent) {
     transform: (_doc, ret) => {
       delete ret.sqlId;
       delete ret.password;
+      delete ret.passwordChangedAt;
+      delete ret.lastLogoutAt;
       delete ret.nextLoginAttemptIn;
       delete ret.forgotPasswordResetToken;
       delete ret.forgotPasswordResetExpires;

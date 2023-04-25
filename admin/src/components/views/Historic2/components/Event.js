@@ -11,7 +11,7 @@ export default function Event({ e, index, model }) {
         <p className="text-gray-400">
           {translateAction(e.op)} • {formatLongDateFR(e.date)}
         </p>
-        <p className="truncate w-10/12">{translateModelFields(model, e.path)}</p>
+        <p className="truncate w-10/12 hover:overflow-visible">{translateModelFields(model, e.path)}</p>
       </div>
       <div className="w-[20%]">
         <p className="truncate w-10/12 text-gray-400">{translateHistory(e.path, e.originalValue)}</p>

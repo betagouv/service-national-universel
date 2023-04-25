@@ -13,7 +13,7 @@ import Trash from "../../../assets/icons/Trash.js";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import Pencil from "../../../assets/icons/Pencil";
 
-import { COHESION_STAY_START } from "snu-lib";
+import { COHESION_STAY_START, isSessionEditionOpen } from "snu-lib";
 
 import Field from "../components/Field";
 import Select from "../components/Select";
@@ -40,6 +40,22 @@ export default function Index({ ...props }) {
   const [editInfoSession, setEditInfoSession] = useState({});
   const [errors, setErrors] = useState({});
   const [modalDelete, setModalDelete] = useState({ isOpen: false });
+  const [focusedCohortData, setFocusedCohortData] = useState(null);
+
+  useEffect(() => {
+    if (!focusedSession) return;
+    (async () => {
+      try {
+        const { ok, data } = await api.get("/cohort/" + focusedSession.cohort);
+        if (!ok) {
+          return toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte", translate(data.code));
+        }
+        setFocusedCohortData(data);
+      } catch (e) {
+        capture(e);
+      }
+    })();
+  }, [focusedSession]);
 
   useEffect(() => {
     (async () => {
@@ -205,8 +221,7 @@ export default function Index({ ...props }) {
               ))}
             </div>
             <div>
-              {user.role === ROLES.ADMIN ||
-              ((user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) && focusedSession?.status === "WAITING_VALIDATION") ? (
+              {isSessionEditionOpen(user, focusedCohortData) ? (
                 <>
                   {!editingBottom ? (
                     <button

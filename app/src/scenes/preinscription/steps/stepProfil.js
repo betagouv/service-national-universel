@@ -78,12 +78,12 @@ export default function StepProfil() {
     <DSFRContainer title="Créez votre compte">
       <div className="space-y-5">
         <div className="flex flex-col gap-1">
-          <label>Prénom</label>
+          <label>Prénom du volontaire</label>
           <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} />
           {error.firstName && <span className="text-red-500 text-sm">{error.firstName}</span>}
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[#161616] text-base">Nom</label>
+          <label className="text-[#161616] text-base">Nom du volontaire</label>
           <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} />
           {error.lastName && <span className="text-red-500 text-sm">{error.lastName}</span>}
         </div>

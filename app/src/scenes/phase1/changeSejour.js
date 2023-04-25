@@ -23,7 +23,6 @@ export default function changeSejour() {
   const [modalConfirmControlOk, setmodalConfirmControlOk] = useState(false);
   const [modalConfirmGoalReached, setmodalConfirmGoalReached] = useState(false);
   const [sejours, setSejours] = useState(null);
-  const [sejourGoal, setSejourGoal] = useState(null);
   const [isEligible, setIsElegible] = useState(false);
   const [messageTextArea, setMessageTextArea] = useState("");
   const [loading, setLoading] = useState(true);
@@ -38,18 +37,17 @@ export default function changeSejour() {
     "Autre",
   ];
 
+  console.log;
+
   useEffect(() => {
     (async function getInfo() {
       try {
         const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
         const isArray = Array.isArray(data);
         if (isArray) {
-          const sejourGoal = data.map((e) => ({ sejour: e.name, goal: e.isFull }));
-          const sejour = sejourGoal.map((e) => e.sejour);
-
-          setSejours(sejour);
-          setIsElegible(!!data);
-          setSejourGoal(sejourGoal);
+          const availableCohorts = data.map((cohort) => cohort.name).filter((cohort) => (young.status === YOUNG_STATUS.WITHDRAWN ? cohort : cohort !== young.cohort));
+          setSejours(availableCohorts);
+          setIsElegible(availableCohorts.length > 0);
         } else {
           setIsElegible(false);
           setSejours([]);
@@ -62,17 +60,22 @@ export default function changeSejour() {
     })();
   }, []);
 
-  const onConfirmer = () => {
-    if (newSejour && motif) {
-      let isGoalTrue = sejourGoal.find((obj) => obj.goal === true && obj.sejour === newSejour);
-      //si le volontaire est en statut de phase 1 “affectée” et que les objectifs de recrutement sont atteint pour le nouveau séjour choisi
-      if (isGoalTrue === undefined) {
-        setmodalConfirmControlOk(true);
+  const onConfirmer = async () => {
+    try {
+      if (newSejour && motif && messageTextArea) {
+        const res = await api.get(`/inscription-goal/${newSejour}/department/${young.department}/reached`);
+        if (!res.ok) throw new Error(res);
+        let isGoalReached = res.data;
+        if (!isGoalReached) {
+          setmodalConfirmControlOk(true);
+        } else {
+          setmodalConfirmGoalReached(true);
+        }
       } else {
-        setmodalConfirmGoalReached(true);
+        toastr.error("Veuillez renseigner tous les champs", "");
       }
-    } else {
-      toastr.info("Veuillez renseigner tous les champs");
+    } catch (error) {
+      return toastr.error("Oups, une erreur est survenue lors de votre changement de cohorte", translate(error.code));
     }
   };
 
@@ -98,11 +101,15 @@ export default function changeSejour() {
 
   const handleWaitingList = async () => {
     try {
-      const { data } = await api.put("/young/" + young._id + "/change-cohort/", {
+      const { ok, data, code } = await api.put("/young/" + young._id + "/change-cohort/", {
         cohortChangeReason: motif,
         cohortDetailedChangeReason: messageTextArea,
         cohort: newSejour,
       });
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", translate(code));
+      }
       toastr.success("Vous avez été ajouté en liste d'attente");
       await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
       if (data) dispatch(setYoung(data));
@@ -139,15 +146,13 @@ export default function changeSejour() {
                           <Chevron color="#9a9a9a" />
                         </DropdownToggle>
                         <DropdownMenu>
-                          {sejours
-                            .filter((e) => (young.status === YOUNG_STATUS.WITHDRAWN ? e : e !== young.cohort))
-                            .map((status) => {
-                              return (
-                                <DropdownItem key={status} className="dropdown-item" onClick={() => setNewSejour(status)}>
-                                  Séjour {translateCohort(status)}
-                                </DropdownItem>
-                              );
-                            })}
+                          {sejours.map((cohort) => {
+                            return (
+                              <DropdownItem key={cohort} className="dropdown-item" onClick={() => setNewSejour(cohort)}>
+                                Séjour {translateCohort(cohort)}
+                              </DropdownItem>
+                            );
+                          })}
                           {/* <DropdownItem className="dropdown-item" onClick={() => setNewSejour("à venir")}>
                             Séjour à venir
                           </DropdownItem> */}

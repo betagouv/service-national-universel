@@ -2,10 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import {
   academyList,
-  academyToDepartments,
   COHORTS,
-  department2region,
-  departmentList,
   departmentToAcademy,
   ES_NO_LIMIT,
   region2department,
@@ -19,6 +16,7 @@ import {
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import api from "../../../../../services/api";
 import plausibleEvent from "../../../../../services/plausible";
+import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import BoxWithPercentage from "./components/BoxWithPercentage";
@@ -52,24 +50,6 @@ export default function Index() {
     user.role === ROLES.REFERENT_REGION
       ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
       : academyList.map((a) => ({ key: a, label: a }));
-
-  const getFilteredDepartment = () => {
-    if (selectedFilters.academy?.length) {
-      setSelectedFilters({ ...selectedFilters, department: selectedFilters?.department?.filter((d) => selectedFilters.academy?.includes(departmentToAcademy[d])) });
-      return setDepartmentOptions(
-        selectedFilters.academy?.reduce((previous, current) => {
-          return [...previous, ...(academyToDepartments[current] || []).map((d) => ({ key: d, label: d }))];
-        }, []) || [],
-      );
-    }
-    if (!selectedFilters.region?.length) return setDepartmentOptions(departmentList?.map((d) => ({ key: d, label: d })));
-    setSelectedFilters({ ...selectedFilters, department: selectedFilters?.department?.filter((d) => selectedFilters.region?.includes(department2region[d])) });
-    setDepartmentOptions(selectedFilters.region?.reduce((previous, current) => previous?.concat(region2department[current]?.map((d) => ({ key: d, label: d }))), []));
-  };
-
-  const getDepartmentOptions = () => {
-    return setDepartmentOptions(user?.department?.map((d) => ({ key: d, label: d })));
-  };
 
   useEffect(() => {
     let filters = [
@@ -121,72 +101,9 @@ export default function Index() {
   }, [departmentOptions]);
 
   const queryYoung = async () => {
-    const statusPhaseTerms = selectedFilters?.statusPhase1?.length
-      ? { terms: { "statusPhase1.keyword": selectedFilters?.statusPhase1?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) } }
-      : null;
-
-    const aggsFilter = {
-      filter: {
-        bool: {
-          must: [],
-          filter: statusPhaseTerms ? [statusPhaseTerms] : [],
-        },
-      },
-    };
-
-    const body = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
-      aggs: {
-        statusPhase1: { terms: { field: "statusPhase1.keyword" } },
-        pdr: {
-          ...aggsFilter,
-          aggs: {
-            names: { terms: { field: "hasMeetingInformation.keyword", missing: "NR", size: ES_NO_LIMIT } },
-          },
-        },
-        participation: {
-          ...aggsFilter,
-          aggs: {
-            names: { terms: { field: "youngPhase1Agreement.keyword", size: ES_NO_LIMIT } },
-          },
-        },
-        precense: {
-          ...aggsFilter,
-          aggs: {
-            names: { terms: { field: "cohesionStayPresence.keyword", missing: "NR", size: ES_NO_LIMIT } },
-          },
-        },
-        JDM: {
-          ...aggsFilter,
-          aggs: {
-            names: { terms: { field: "presenceJDM.keyword", missing: "NR", size: ES_NO_LIMIT } },
-          },
-        },
-        depart: {
-          ...aggsFilter,
-          aggs: {
-            names: { terms: { field: "departInform.keyword", size: ES_NO_LIMIT } },
-          },
-        },
-        departMotif: {
-          ...aggsFilter,
-          aggs: {
-            names: { terms: { field: "departSejourMotif.keyword", size: ES_NO_LIMIT } },
-          },
-        },
-      },
-      size: 0,
-      track_total_hits: true,
-    };
-
-    if (selectedFilters.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": selectedFilters.region } });
-    if (selectedFilters.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": selectedFilters.department } });
-    if (selectedFilters.cohorts?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohorts } });
-    if (selectedFilters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": selectedFilters.academy } });
-    if (selectedFilters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.status } });
-
-    const { responses } = await api.esQuery("young", body);
-
+    const { responses } = await api.post("/elasticsearch/young/moderator/sejour/", {
+      filters: Object.fromEntries(Object.entries(selectedFilters).filter(([key]) => key !== "cohorts")),
+    });
     if (responses?.length) {
       let result = {};
       result.statusPhase1 = responses[0].aggregations.statusPhase1.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
@@ -256,14 +173,14 @@ export default function Index() {
   useEffect(() => {
     queryYoung();
     queryCenter();
-    if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions();
-    else getFilteredDepartment();
+    if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
+    else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
   }, [JSON.stringify(selectedFilters)]);
 
   return (
     <DashboardContainer
       active="sejour"
-      availableTab={["general", "engagement", "sejour", "inscription"]}
+      availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}
       navChildren={
         <div className="flex items-center gap-2">
           <ButtonPrimary
@@ -278,16 +195,16 @@ export default function Index() {
       }>
       <div className="flex flex-col gap-8">
         <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
-        <h1 className="text-[28px] leading-8 font-bold text-gray-900">Volontaires</h1>
+        <h1 className="text-[28px] font-bold leading-8 text-gray-900">Volontaires</h1>
         <div className="flex items-stretch gap-4 ">
-          <div className="flex flex-col gap-4 w-[30%]">
+          <div className="flex w-[30%] flex-col gap-4">
             <BoxWithPercentage total={data?.pdrTotal || 0} number={data?.pdr?.NR + data?.pdr?.false || 0} title="Point de rassemblement" subLabel="restants à confirmer" />
             <BoxWithPercentage total={data?.participationTotal || 0} number={data?.participation?.false || 0} title="Participation" subLabel="restants à confirmer" />
           </div>
           <StatusPhase1 statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} />
         </div>
         <Presences presence={data?.presence} JDM={data?.JDM} depart={data?.depart} departTotal={data?.departTotal} departMotif={data?.departMotif} />
-        <h1 className="text-[28px] leading-8 font-bold text-gray-900">Centres</h1>
+        <h1 className="text-[28px] font-bold leading-8 text-gray-900">Centres</h1>
         <div className="grid grid-cols-3 gap-4">
           <CardCenterCapacity nbCenter={dataCenter?.totalCenter || 0} capacity={dataCenter?.capacity || 0} />
           <Cardsession nbValidated={dataCenter?.status?.VALIDATED || 0} nbPending={dataCenter?.status?.WAITING_VALIDATION || 0} />

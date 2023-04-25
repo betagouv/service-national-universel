@@ -205,16 +205,16 @@ export default function Phase1(props) {
       <>
         {!editing ? (
           <button
-            className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => setEditing(true)}
             disabled={loading}>
-            <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+            <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
             Modifier
           </button>
         ) : (
           <div className="flex items-center gap-2">
             <button
-              className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
               onClick={() => {
                 setEditing(false);
                 setValues(young);
@@ -232,11 +232,11 @@ export default function Phase1(props) {
     <>
       <YoungHeader young={props.young} tab="phase1" onChange={props.onChange} />
       <div className="p-[30px]">
-        <div className="bg-white rounded mt-[30px] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
+        <div className="mt-[30px] rounded bg-white shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
           <div className="mx-8 py-4">
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <div className="flex items-center justify-center gap-2">
-                <div className="text-lg leading-4 font-medium">Séjour de cohésion</div>
+                <div className="text-lg font-medium leading-4">Séjour de cohésion</div>
                 <Badge
                   minify
                   text={translatePhase1(young.statusPhase1)}
@@ -274,7 +274,7 @@ export default function Phase1(props) {
                 {young.statusPhase1 === "NOT_DONE" && user.role !== ROLES.HEAD_CENTER && (
                   <div
                     onClick={() => setModalDispense({ isOpen: true })}
-                    className="cursor-pointer rounded text-blue-700 border-[1px] border-blue-700 px-2.5 py-1.5 ml-2 font-medium">
+                    className="ml-2 cursor-pointer rounded border-[1px] border-blue-700 px-2.5 py-1.5 font-medium text-blue-700">
                     Dispenser le volontaire du séjour
                   </div>
                 )}
@@ -282,24 +282,24 @@ export default function Phase1(props) {
               <EditTop />
             </div>
             <div className="mt-3">
-              <div className="text-xs text-gray-900 font-medium flex items-center">
+              <div className="flex items-center text-xs font-medium text-gray-900">
                 Présence
                 {!isYoungCheckinOpen && (
                   <div className="group relative ml-2">
                     <Warning className="text-red-900" />
-                    <div className="hidden group-hover:block absolute top-[calc(100%+5px)] left-[50%] bg-gray-200 rounded-lg translate-x-[-50%] px-2 py-1 text-black shadow-sm z-10 min-w-[200px] text-center">
-                      <div className="absolute left-[50%] translate-x-[-50%] bg-gray-200 w-[10px] h-[10px] rotate-45 top-[-5px]"></div>
+                    <div className="absolute top-[calc(100%+5px)] left-[50%] z-10 hidden min-w-[200px] translate-x-[-50%] rounded-lg bg-gray-200 px-2 py-1 text-center text-black shadow-sm group-hover:block">
+                      <div className="absolute left-[50%] top-[-5px] h-[10px] w-[10px] translate-x-[-50%] rotate-45 bg-gray-200"></div>
                       Le pointage n&apos;est pas ouvert
                     </div>
                   </div>
                 )}
               </div>
-              <div className="flex flex-row gap-4 mt-2 flex-wrap w-full items-stretch">
-                <div className="flex-1 min-w-[250px]">
+              <div className="mt-2 flex w-full flex-row flex-wrap items-stretch gap-4">
+                <div className="min-w-[250px] flex-1">
                   <TailwindSelect
                     name="youngPhase1Agreement"
                     label="Confirmation de la participation"
-                    className="flex-1 min-w-[250px]"
+                    className="min-w-[250px] flex-1"
                     readOnly={!editing}
                     type="select"
                     setSelected={({ value }) =>
@@ -319,14 +319,14 @@ export default function Phase1(props) {
                     ]}
                   />
                 </div>
-                <div className="flex-1 min-w-[250px]">
+                <div className="min-w-[250px] flex-1">
                   <TailwindSelect
                     name="cohesionStayPresence"
                     label="Présence à l'arrivée"
                     readOnly={!editing || !isYoungCheckinOpen}
                     type="select"
-                    className="flex-1 min-w-[250px]"
-                    icon={<SpeakerPhone className="text-gray-500 mx-2 mr-3" width={20} height={20} />}
+                    className="min-w-[250px] flex-1"
+                    icon={<SpeakerPhone className="mx-2 mr-3 text-gray-500" width={20} height={20} />}
                     setSelected={({ value }) => setModalPointagePresenceArrivee({ isOpen: true, value })}
                     selected={values.cohesionStayPresence || ""}
                     options={[
@@ -336,13 +336,13 @@ export default function Phase1(props) {
                     ]}
                   />
                 </div>
-                <div className="flex-1 min-w-[250px]">
+                <div className="min-w-[250px] flex-1">
                   <TailwindSelect
                     name="presenceJDM"
                     label="Présence JDM"
                     readOnly={!editing || !isYoungCheckinOpen}
                     type="select"
-                    icon={<BadgeCheck className="text-gray-500 mx-2 mr-3" width={20} height={20} />}
+                    icon={<BadgeCheck className="mx-2 mr-3 text-gray-500" width={20} height={20} />}
                     setSelected={({ value }) => setModalPointagePresenceJDM({ isOpen: true, value })}
                     selected={values.presenceJDM || ""}
                     options={[
@@ -352,14 +352,14 @@ export default function Phase1(props) {
                     ]}
                   />
                 </div>
-                <div className="flex-1 min-w-[250px] items-stretch">
+                <div className="min-w-[250px] flex-1 items-stretch">
                   <div
                     onClick={() => {
                       if (!editing || !isYoungCheckinOpen) return;
                       setModalPointageDepart({ isOpen: true });
                     }}
-                    className={` border-gray-300 border rounded py-2 px-2.5 flex flex-row items-center justify-start ${editing && "cursor-pointer"} h-full`}>
-                    <ArrowCircleRight width={16} height={16} className="text-gray-400 group-hover:scale-105 mx-2 mr-3" />
+                    className={` flex flex-row items-center justify-start rounded border border-gray-300 py-2 px-2.5 ${editing && "cursor-pointer"} h-full`}>
+                    <ArrowCircleRight width={16} height={16} className="mx-2 mr-3 text-gray-400 group-hover:scale-105" />
                     {values?.departSejourAt ? <div>{formatDateFR(values.departSejourAt)}</div> : <div className="text-gray-500">Renseigner un départ</div>}
                   </div>
                 </div>
@@ -367,10 +367,10 @@ export default function Phase1(props) {
             </div>
 
             {young.departSejourAt ? (
-              <div className="bg-blue-100 text-blue-600 px-3 py-2 rounded mt-4 flex flex-row items-center">
-                <div className="font-bold w-1/2">{young.departSejourMotif}</div>
+              <div className="mt-4 flex flex-row items-center rounded bg-blue-100 px-3 py-2 text-blue-600">
+                <div className="w-1/2 font-bold">{young.departSejourMotif}</div>
                 {young.departSejourMotifComment ? (
-                  <div className="w-1/2 flex flex-row justify-start items-center gap-2">
+                  <div className="flex w-1/2 flex-row items-center justify-start gap-2">
                     <ImQuotesLeft />
                     <div>{young.departSejourMotifComment}</div>
                   </div>
@@ -379,10 +379,10 @@ export default function Phase1(props) {
             ) : null}
 
             {cohesionCenter ? (
-              <div className="flex flex-row items-center justify-center gap-10 mt-4">
-                <div className="mt-4 w-full flex flex-col items-start justify-start self-start">
-                  <div className="text-xs text-gray-900 font-medium mb-2">Centre de cohésion</div>
-                  <div className="flex flex-col gap-4 mb-4 w-full">
+              <div className="mt-4 flex flex-row items-center justify-center gap-10">
+                <div className="mt-4 flex w-full flex-col items-start justify-start self-start">
+                  <div className="mb-2 text-xs font-medium text-gray-900">Centre de cohésion</div>
+                  <div className="mb-4 flex w-full flex-col gap-4">
                     <Field title="Code centre" value={cohesionCenter.code2022} externalLink={`${adminURL}/centre/${cohesionCenter?._id}`} />
                     <Field title="Nom" value={cohesionCenter.name} />
                     <Field title="Code postal" value={cohesionCenter.zip} />
@@ -391,15 +391,15 @@ export default function Phase1(props) {
                   {cohortOpenForAffectation && editing && (
                     <div
                       onClick={() => setModalAffectation({ isOpen: true })}
-                      className="cursor-pointer flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2 self-end">
+                      className="flex w-fit cursor-pointer flex-row items-center justify-center gap-2 self-end rounded border-[1px] border-gray-300 p-2">
                       <Refresh />
                       <div>Changer l&apos;affectation</div>
                     </div>
                   )}
                 </div>
-                <div className="mt-4 w-full flex flex-col items-start justify-start self-start">
-                  <div className="text-xs text-gray-900 font-medium mb-2">Point de rassemblement</div>
-                  <div className="flex flex-col gap-4 mb-4 text-sm text-gray-800 w-full ">
+                <div className="mt-4 flex w-full flex-col items-start justify-start self-start">
+                  <div className="mb-2 text-xs font-medium text-gray-900">Point de rassemblement</div>
+                  <div className="mb-4 flex w-full flex-col gap-4 text-sm text-gray-800 ">
                     {meetingPoint ? (
                       <div className="flex flex-col gap-4">
                         <Field
@@ -430,7 +430,7 @@ export default function Phase1(props) {
                       onClick={() => {
                         setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id });
                       }}
-                      className="cursor-pointer flex flex-row border-[1px] border-gray-300 items-center justify-center p-2 w-fit rounded gap-2 self-end">
+                      className="flex w-fit cursor-pointer flex-row items-center justify-center gap-2 self-end rounded border-[1px] border-gray-300 p-2">
                       {meetingPoint || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true" ? (
                         <>
                           <Refresh />
@@ -444,11 +444,11 @@ export default function Phase1(props) {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col my-52 gap-4 items-center justify-center">
-                <div className="font-bold text-gray-900 text-base">Ce volontaire n&apos;est affecté à aucun centre</div>
+              <div className="my-52 flex flex-col items-center justify-center gap-4">
+                <div className="text-base font-bold text-gray-900">Ce volontaire n&apos;est affecté à aucun centre</div>
                 {cohortOpenForAffectation && (
                   <div
-                    className="bg-blue-600 px-4 rounded text-white py-2 cursor-pointer"
+                    className="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white"
                     onClick={() => {
                       setModalAffectation({ isOpen: true });
                     }}>
@@ -462,9 +462,9 @@ export default function Phase1(props) {
         {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ||
         young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ||
         young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE ? (
-          <div className="bg-white rounded mt-4">
+          <div className="mt-4 rounded bg-white">
             <div className="mx-8 py-4">
-              <div className="text-lg font-medium mr-2">Documents</div>
+              <div className="mr-2 text-lg font-medium">Documents</div>
               <DocumentPhase1 young={young} />
             </div>
           </div>
@@ -525,18 +525,18 @@ export default function Phase1(props) {
 
 const Field = ({ title, value, externalLink }) => {
   return (
-    <div key={title} className="border-[1px] flex flex-col border-gray-300 p-2 rounded">
-      <div className="text-gray-500 text-xs">{title}</div>
+    <div key={title} className="flex flex-col rounded border-[1px] border-gray-300 p-2">
+      <div className="text-xs text-gray-500">{title}</div>
 
       {externalLink ? (
         <a target="_blank" rel="noreferrer" href={externalLink}>
           <div className="flex flex-row items-center justify-start gap-1">
-            <div className="text-gray-800 text-sm h-[20px]">{value}</div>
-            <ExternalLink className="text-[#9CA3AF] font-bold leading-5" />
+            <div className="h-[20px] text-sm text-gray-800">{value}</div>
+            <ExternalLink className="font-bold leading-5 text-[#9CA3AF]" />
           </div>
         </a>
       ) : (
-        <div className="text-gray-800 text-sm h-[20px]">{value}</div>
+        <div className="h-[20px] text-sm text-gray-800">{value}</div>
       )}
     </div>
   );

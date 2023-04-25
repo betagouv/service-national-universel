@@ -108,12 +108,12 @@ export default function StepEligibilite() {
       setData({ ...data, msg: res.data.msg, step: PREINSCRIPTION_STEPS.INELIGIBLE });
       return history.push("/preinscription/noneligible");
     }
-    const sessionsFiltered = res.data.filter((e) => e.goalReached === false); //&& e.isFull === false --> voir si on le rajoute
-    if (sessionsFiltered.length === 0) {
+    const sessions = res.data;
+    if (sessions.length === 0) {
       setData({ ...data, msg: "Il n'y a malheureusement plus de place dans votre département.", step: PREINSCRIPTION_STEPS.INELIGIBLE });
       return history.push("/preinscription/noneligible");
     }
-    setData({ ...data, sessions: sessionsFiltered, step: PREINSCRIPTION_STEPS.SEJOUR });
+    setData({ ...data, sessions, step: PREINSCRIPTION_STEPS.SEJOUR });
     return history.push("/preinscription/sejour");
   };
 
@@ -154,13 +154,13 @@ export default function StepEligibilite() {
         {data.scolarity && (
           <>
             <div className="flex justify-between items-center">
-              <p>
-                <div>
+              <p className="flex flex-col">
+                <span>
                   <span className="font-bold">{data.scolarity === "NOT_SCOLARISE" ? "Je réside" : "Mon établissement scolaire est"}</span> en France
-                </div>
-                <div className="h-5 flex items-center">
+                </span>
+                <span className="h-5 flex items-center">
                   <span className="text-xs leading-5 text-[#666666]">Métropolitaine ou Outre-mer</span>
-                </div>
+                </span>
               </p>
 
               <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad })} toggled={!data.isAbroad} />

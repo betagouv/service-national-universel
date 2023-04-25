@@ -31,7 +31,7 @@ import HeaderMenu from "../../components/headerMenu";
 import Footer from "./../../components/footerV2";
 import Header from "./../../components/header";
 import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
-import { YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
+import { YOUNG_STATUS, inscriptionModificationOpenForYoungs, isFromDOMTOM } from "snu-lib";
 
 function renderStep(step, device) {
   if (step === STEPS.COORDONNEES) return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;
@@ -71,7 +71,7 @@ const Step = ({ young: { inscriptionStep2023 } }) => {
   }
 
   return (
-    <div className="flex flex-col h-screen justify-between md:!bg-[#f9f6f2] bg-white">
+    <div className="flex h-screen flex-col justify-between bg-white md:!bg-[#f9f6f2]">
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       {renderStep(currentStep, device)}
@@ -101,7 +101,7 @@ const StepCorrection = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen justify-between md:!bg-[#f9f6f2] bg-white">
+    <div className="flex h-screen flex-col justify-between bg-white md:!bg-[#f9f6f2]">
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       {renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST), device)}
@@ -126,7 +126,7 @@ export default function Index() {
   }
 
   //si la periode de modification est finie
-  if (!inscriptionModificationOpenForYoungs(young.cohort)) {
+  if (!inscriptionModificationOpenForYoungs(young.cohort) && young.status !== YOUNG_STATUS.NOT_AUTORISED) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 

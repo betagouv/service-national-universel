@@ -26,6 +26,7 @@ export default function ExportComponent({
   filters,
   selectedFilters,
   searchBarObject,
+  esRouteQueryParams = "",
 }) {
   const [exporting, setExporting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -57,6 +58,7 @@ export default function ExportComponent({
         searchType={searchType}
         fieldsToExport={fieldsToExport}
         css={css}
+        esRouteQueryParams={esRouteQueryParams}
       />
     );
   }
@@ -87,7 +89,7 @@ export default function ExportComponent({
   );
 }
 
-function Loading({ onFinish, loading, exportTitle, transform, currentQuery, index, searchType, fieldsToExport, css }) {
+function Loading({ onFinish, loading, exportTitle, transform, currentQuery, index, searchType, fieldsToExport, css, esRouteQueryParams }) {
   const STATUS_LOADING = "Récupération des données";
   const STATUS_TRANSFORM = "Mise en forme";
   const STATUS_EXPORT = "Création du fichier";
@@ -106,7 +108,7 @@ function Loading({ onFinish, loading, exportTitle, transform, currentQuery, inde
     if (!status) {
       setStatus(STATUS_LOADING);
     } else if (status === STATUS_LOADING) {
-      getAllResults(index, currentQuery, searchType, fieldsToExport).then((results) => {
+      getAllResults(index, currentQuery, searchType, fieldsToExport, esRouteQueryParams).then((results) => {
         setData(results);
         setStatus(STATUS_TRANSFORM);
       });
@@ -140,14 +142,14 @@ async function toArrayOfArray(results, transform) {
   return [columns, ...data.map((item) => Object.values(item))];
 }
 
-async function getAllResults(index, query, searchType, fieldsToExport) {
+async function getAllResults(index, query, searchType, fieldsToExport, esRouteQueryParams) {
   let result;
   if (searchType === "_msearch") {
-    result = await api.esQuery(index, query);
+    result = await api.esQuery(index, query, null, esRouteQueryParams);
     if (!result.responses.length) return [];
     return result.responses[0];
   } else {
-    result = await api.post(`/es/${index}/export`, { query, fieldsToExport });
+    result = await api.post(`/es/${index}/export${esRouteQueryParams}`, { query, fieldsToExport });
     if (!result.data.length) return [];
     return result.data;
   }

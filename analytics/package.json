@@ -7,6 +7,11 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js"
   },
+  "engines": {
+    "node": "^18.16.0",
+    "npm": "^9.5.1",
+    "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
+  },
   "prettier": {
     "printWidth": 2200
   },

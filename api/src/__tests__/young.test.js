@@ -20,6 +20,8 @@ const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
 
 const { ROLES } = require("snu-lib/roles");
 
+const jwt = require("jsonwebtoken");
+
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
   sendEmail: () => Promise.resolve(),
@@ -195,23 +197,38 @@ describe("Young", () => {
     });
   });
 
-  describe("POST /young/france-connect/authorization-url", () => {
+  let storedState;
+  let storedNonce;
+
+  describe.only("POST /young/france-connect/authorization-url", () => {
     it("should return 200", async () => {
       const res = await request(getAppHelper()).post("/young/france-connect/authorization-url").send({
         callback: "foo",
       });
+      const url = res.body.data.url;
+      storedState = url.split("state=")[1].split("&")[0];
+      storedNonce = url.split("nonce=")[1].split("&")[0];
       expect(res.statusCode).toEqual(200);
     });
   });
 
-  describe("POST /young/france-connect/user-info", () => {
+  describe.only("POST /young/france-connect/user-info", () => {
     it("should return 200", async () => {
+      const secretKey = "mysecretkey";
+      const jwtPayload = {
+        nonce: storedNonce,
+      };
+      const jwtOptions = {
+        expiresIn: "1h",
+      };
+      const jwtToken = jwt.sign(jwtPayload, secretKey, jwtOptions);
+
       const jsonResponse = jest
         .fn()
         .mockReturnValueOnce(
           Promise.resolve({
             access_token: "foo",
-            id_token: "bar",
+            id_token: jwtToken,
           }),
         )
         .mockReturnValue(Promise.resolve({}));
@@ -224,6 +241,7 @@ describe("Young", () => {
       const res = await request(getAppHelper()).post("/young/france-connect/user-info").send({
         code: "foo",
         callback: "bar",
+        state: storedState,
       });
       expect(res.statusCode).toEqual(200);
     });

@@ -18,6 +18,7 @@ export default function ModalExportV2({
   filters,
   defaultQuery,
   searchBarObject = null,
+  esRouteQueryParams = "",
 }) {
   const [selectedFields, setSelectedFields] = useState(exportFields?.map((e) => e.id));
   const fieldsToExport = [].concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
@@ -89,6 +90,7 @@ export default function ModalExportV2({
               button: "w-full bg-blue-600 text-blue-50 rounded-md px-4 py-2 text-sm hover:brightness-125 transition",
               loadingButton: "w-full bg-blue-600 text-blue-50 rounded-md px-4 py-2 text-sm brightness-75 cursor-not-allowed",
             }}
+            esRouteQueryParams={esRouteQueryParams}
           />
         </div>
       </div>

@@ -102,7 +102,7 @@ export default function Create() {
           setIsLoading(false);
         }
       }}>
-      {({ values, handleChange, handleSubmit, errors, touched }) => (
+      {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
         <Wrapper>
           <Header>
             <Title>Inviter une nouvelle structure</Title>
@@ -398,6 +398,7 @@ export default function Create() {
                     handleChange={handleChange}
                     errors={errors}
                     touched={touched}
+                    validateField={validateField}
                   />
                   <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l&apos;adresse n&apos;est pas reconnue, veuillez saisir le nom de la ville.</p>
                 </Wrapper>

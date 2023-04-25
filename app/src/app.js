@@ -10,6 +10,7 @@ import { setYoung } from "./redux/auth/actions";
 import Footer from "./components/footer";
 import Loader from "./components/Loader";
 import Account from "./scenes/account";
+import AccountOld from "./scenes/account/index_old";
 import AllEngagements from "./scenes/all-engagements/index";
 import AuthV2 from "./scenes/authV2";
 import Bug from "./scenes/bug";
@@ -100,7 +101,7 @@ export default function App() {
       <Router history={history}>
         <ScrollToTop />
         {/* <GoogleTags /> */}
-        <div className={`${environment === "production" ? "main" : "flex flex-col justify-between h-screen"}`}>
+        <div className={`${environment === "production" ? "main" : "flex h-screen flex-col justify-between"}`}>
           {maintenance && !localStorage?.getItem("override_maintenance") ? (
             <Switch>
               <SentryRoute path="/" component={Maintenance} />
@@ -150,6 +151,7 @@ const Espace = () => {
     if (young && young.acceptCGU !== "true") {
       setIsModalCGUOpen(true);
     }
+
     if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       getAvailableSessions(young).then((sessions) => {
         if (sessions.length) setIsResumePhase1WithdrawnModalOpen(true);
@@ -179,12 +181,12 @@ const Espace = () => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 z-10 right-0 md:right-auto  w-screen md:w-64">
+      <div className="fixed top-0 left-0 right-0 z-10 w-screen  md:right-auto md:w-64">
         <Navbar />
       </div>
       <main className="mt-16 md:mt-0 md:ml-[16rem]">
         <Switch>
-          <SentryRoute path="/account" component={Account} />
+          <SentryRoute path="/account" component={environment === "production" ? AccountOld : Account} />
           <SentryRoute path="/phase1" component={Phase1} />
           <SentryRoute path="/phase2" component={Phase2} />
           <SentryRoute path="/phase3" component={Phase3} />

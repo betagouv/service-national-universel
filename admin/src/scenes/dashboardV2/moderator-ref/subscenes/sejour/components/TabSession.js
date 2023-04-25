@@ -105,15 +105,15 @@ export default function TabSession({ sessionList, filters }) {
           <HiOutlineExternalLink className="h-5 w-5 text-gray-400 cursor-pointer" />
         </Link>
       </div>
-      <table className="table-fixed w-full">
+      <table className={`table-fixed w-full ${isLoading || noResult ? "h-full" : ""}`}>
         <thead>
           <tr className="flex items-center border-y-[1px] border-gray-100 py-4">
-            <th className="w-[40%] uppercase text-xs text-gray-500 font-medium leading-4">centres</th>
-            <th className="w-[30%] uppercase text-xs text-gray-500 font-medium leading-4">
+            <th className="w-[40%] uppercase text-xs text-gray-400 font-medium leading-4">centres</th>
+            <th className="w-[30%] uppercase text-xs text-gray-400 font-medium leading-4">
               présence non <br />
               renseignée à l’arrivée
             </th>
-            <th className="w-[30%] uppercase text-xs text-gray-500 font-medium leading-4">
+            <th className="w-[30%] uppercase text-xs text-gray-400 font-medium leading-4">
               présence non <br />
               renseignée à LA JDM
             </th>
@@ -136,12 +136,20 @@ export default function TabSession({ sessionList, filters }) {
             ))
           ) : !noResult ? (
             sessionByCenter?.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)?.map((center) => (
-              <tr key={center?.centerId} className="flex items-center border-b-[1px] border-gray-100 py-3 h-1/6">
+              <tr key={center?.centerId} className="flex items-center border-b-[1px] border-gray-100 py-3 h-1/6 hover:bg-gray-50  cursor-default">
                 <td className="flex flex-col w-[40%] gap-1">
-                  <p className="text-sm text-gray-900 font-bold leading-6 truncate">{center.centerName}</p>
-                  <p className="text-xs text-gray-500 leading-4">
-                    {center?.centerCity} • {center.department}
-                  </p>
+                  <Link
+                    to={`/centre/${center.centerId}`}
+                    target="_blank"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                    className="cursor-pointer">
+                    <p className="text-sm text-gray-900 font-bold leading-6 truncate">{center.centerName}</p>
+                    <p className="text-xs text-gray-500 leading-4">
+                      {center?.centerCity} • {center.department}
+                    </p>
+                  </Link>
                 </td>
                 <td className="w-[30%] text-sm text-gray-500 leading-3">
                   <span className="text-gray-900 font-bold">{center.presence}</span> ({Math.round((center.presence / center.total) * 100) || 0}%)
@@ -159,7 +167,7 @@ export default function TabSession({ sessionList, filters }) {
         </tbody>
       </table>
       <div className="flex items-center justify-between pt-4">
-        <p className="text-sm leading-5 font-normal text-gray-700">
+        <p className="text-xs leading-5 font-normal text-gray-700">
           {noResult ? 0 : page * PAGE_SIZE + 1}-<strong> {page * PAGE_SIZE + PAGE_SIZE >= total ? total : page * PAGE_SIZE + PAGE_SIZE}</strong> sur <strong>{total}</strong>{" "}
           résultats
         </p>

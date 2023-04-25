@@ -1,44 +1,80 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Row, Col } from "reactstrap";
-import Autosuggest from "react-autosuggest";
-import { Field } from "formik";
-import { department2region, departmentLookUp, departmentList, regionList, region2department } from "../utils";
+import { Row, Col, Spinner } from "reactstrap";
+import { Field, useField } from "formik";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
-import validator from "validator";
-import { capture } from "../sentry";
+import { department2region, departmentLookUp, departmentToAcademy, departmentList, regionList } from "../utils";
+import InfoIcon from "./InfoIcon";
+import countries from "i18n-iso-countries";
+import { toastr } from "react-redux-toastr";
 import { apiAdress } from "../services/api-adresse";
+countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
+const countriesList = countries.getNames("fr", { select: "official" });
 
-const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
-
-export default function AddressInput({ keys, values, handleChange, errors, touched, required = true }) {
-  const [str, setStr] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
-  const [noResultMode, setNoResultMode] = useState(false);
-
-  const [departmentListFiltered, setDepartmentListFiltered] = useState(departmentList);
-  const [regionListFiltered, setRegionListFiltered] = useState(regionList);
+// eslint-disable-next-line prettier/prettier
+export default function AddressInput({
+  keys,
+  values,
+  handleChange,
+  errors,
+  touched,
+  validateField,
+  countryVisible = false,
+  onChangeCountry = () => {},
+  countryByDefault = "",
+  required = false,
+  departAndRegionVisible = false,
+  disabled = false,
+}) {
+  const [suggestion, setSuggestion] = useState({});
+  const [addressInFrance, setAddressInFrance] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [addressVerified, _, addressVerifiedHelpers] = useField({
+    value: values[keys.addressVerified],
+    name: "addressVerified",
+    validate: (v) => v !== "true" && (values[keys.address] || values[keys.zip] || values[keys.city]) && addressInFrance && "Il est obligatoire de vérifier l'adresse",
+  });
 
   useEffect(() => {
     if (document.getElementsByTagName) {
       const inputElements = document.getElementsByTagName("input");
       for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
     }
+    if (!values[keys.country]) handleChange({ target: { name: keys.country, value: countryByDefault } });
   }, []);
 
-  const onSuggestionsFetchRequested = ({ value }) => setSuggestions(getSuggestions(value));
-  const onSuggestionsClearRequested = () => setSuggestions([]);
+  useEffect(() => {
+    setAddressInFrance(!values[keys.country] || values[keys.country] === "France");
+    if (keys.country && values[keys.country] === undefined) addressVerifiedHelpers.setValue("false");
+  }, [values[keys.country]]);
 
-  const onSuggestionSelected = (event, { suggestion }) => {
-    if (suggestion === "noresult") {
-      handleChange({ target: { name: keys.location, value: null } });
-      return setNoResultMode(true);
+  useEffect(() => {
+    const zip = values[keys.zip];
+    if (!zip || zip.length < 2) {
+      handleChange({ target: { name: keys.department, value: "" } });
+      handleChange({ target: { name: keys.region, value: "" } });
+      return;
     }
-    setNoResultMode(false);
+    if (values?.cohort === "2020") return;
+    let departmentCode = zip.substr(0, 2);
+    if (["97", "98"].includes(departmentCode)) {
+      departmentCode = zip.substr(0, 3);
+    }
+    //POUR LA CORSE
+    if (departmentCode === "20") {
+      if (zip === "20000" || zip.substr(0, 3) === "201") departmentCode = "2A";
+      else departmentCode = "2B";
+    }
 
-    let depart = suggestion.properties.postcode.substr(0, 2);
+    handleChange({ target: { name: keys.department, value: departmentLookUp[departmentCode] } });
+    handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[departmentCode]] } });
+    if (keys.academy) handleChange({ target: { name: keys.academy, value: departmentToAcademy[departmentLookUp[departmentCode]] } });
+  }, [values[keys.zip]]);
+
+  const onSuggestionSelected = () => {
+    let depart = suggestion.properties.postcode?.substr(0, 2) || suggestion.properties.citycode.substr(0, 2);
     if (["97", "98"].includes(depart)) {
-      depart = suggestion.properties.postcode.substr(0, 3);
+      depart = suggestion.properties.postcode?.substr(0, 3) || suggestion.properties.citycode.substr(0, 3);
     }
     if (depart === "20") {
       depart = suggestion.properties.context.substr(0, 2);
@@ -48,23 +84,45 @@ export default function AddressInput({ keys, values, handleChange, errors, touch
     handleChange({ target: { name: keys.zip, value: suggestion.properties.postcode } });
     handleChange({ target: { name: keys.address, value: suggestion.properties.name } });
     handleChange({ target: { name: keys.location, value: { lon: suggestion.geometry.coordinates[0], lat: suggestion.geometry.coordinates[1] } } });
-    handleChange({ target: { name: keys.department, value: departmentLookUp[depart] } });
-    handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });
+    if (values?.cohort !== "2020") {
+      handleChange({ target: { name: keys.department, value: departmentLookUp[depart] } });
+      handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });
+    }
+    if (keys.cityCode) {
+      handleChange({ target: { name: keys.cityCode, value: suggestion.properties.citycode } });
+    }
+    if (keys.academy && depart) {
+      handleChange({ target: { name: keys.academy, value: departmentToAcademy[departmentLookUp[depart]] } });
+    }
+
+    setSuggestion({});
+    addressVerifiedHelpers.setValue("true");
+    addressVerifiedHelpers.setError("");
+    return;
   };
 
-  const renderSuggestion = (suggestion) => <div>{suggestion !== "noresult" ? suggestion.properties.label : NORESULTMESSAGE}</div>;
-  const getSuggestionValue = (suggestion) => (suggestion !== "noresult" ? suggestion.properties.label : "");
+  const getSuggestions = async () => {
+    const errors = await Promise.all([validateField(keys.address), validateField(keys.city), validateField(keys.zip)]).then((arr) => arr.filter((error) => error !== false));
+    if (errors.length) return;
 
-  const getSuggestions = async (item) => {
-    try {
-      const text = item;
-      const res = await apiAdress(`${encodeURIComponent(text)}`);
-      let arr = res?.features?.filter((e) => e.properties.type !== "municipality");
-      if (!arr) arr = [];
-      arr.push("noresult");
-      setSuggestions(arr);
-    } catch (e) {
-      capture(e);
+    setLoading(true);
+    // For Nouvelle-Calédonie, we don't add the postcode to the query
+    const res = await apiAdress(`${values.address}, ${values.city}, ${values.zip}`, { postcode: parseInt(values.zip.substr(0, 3)) === 988 ? "" : values.zip });
+    const arr = res?.features;
+
+    setLoading(false);
+    if (arr?.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
+    else {
+      // If no match with complete query, try with postcode only
+      const res = await apiAdress(values.zip, { postcode: values.zip });
+      const arr = res?.features.filter((e) => e.properties.type !== "municipality");
+
+      setLoading(false);
+      if (arr?.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
+      else {
+        toastr.error("Aucune adresse n'a été trouvée.");
+        addressVerifiedHelpers.setValue("false");
+      }
     }
   };
 
@@ -73,133 +131,163 @@ export default function AddressInput({ keys, values, handleChange, errors, touch
 
   return (
     <Wrapper>
-      <Row>
-        <Col md={6} style={{ marginTop: 46 }}>
-          <Autosuggest
-            suggestions={suggestions}
-            onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-            onSuggestionsClearRequested={onSuggestionsClearRequested}
-            getSuggestionValue={getSuggestionValue}
-            onSuggestionSelected={onSuggestionSelected}
-            renderSuggestion={renderSuggestion}
-            inputProps={{
-              placeholder: "Commencez à tapez votre adresse",
-              value: str,
-              onChange: (event, { newValue }) => setStr(newValue),
-              className: "form-control",
-            }}
-          />
-        </Col>
-        <Col md={6} style={{ marginTop: 15 }}>
-          <Label>Adresse auto-complétée</Label>
-          <Field
-            validate={(v) => required && !v && requiredMessage}
-            disabled={!noResultMode}
-            className="form-control"
-            placeholder="Adresse"
-            name={keys.address}
-            value={values[keys.address]}
-            onChange={(e) => {
-              const value = e.target.value;
-              handleChange({ target: { name: keys.address, value } });
-            }}
-          />
-          <ErrorMessage errors={errors} touched={touched} name={keys.address} />
-        </Col>
-        <Col md={6} style={{ marginTop: 15 }}>
-          <Row>
-            <Col md={6}>
-              <Label>Département</Label>
+      {suggestion.status !== "FOUND" ? (
+        <Row>
+          {countryVisible && (
+            <Col md={12}>
+              <Label>Pays</Label>
               <Field
+                disabled={disabled}
                 as="select"
                 validate={(v) => required && !v && requiredMessage}
-                disabled={!noResultMode}
                 className="form-control"
-                placeholder="Département"
-                name={keys.department}
-                value={values[keys.department]}
+                placeholder="Pays"
+                name={keys.country}
+                value={values[keys.country]}
                 onChange={(e) => {
                   const value = e.target.value;
-                  handleChange({ target: { name: keys.department, value } });
-                  // filter and preselect the region
-                  setRegionListFiltered(value ? [department2region[value]] : regionList);
-                  handleChange({ target: { name: keys.region, value: department2region[value] || "" } });
+                  handleChange({ target: { name: keys.country, value } });
+                  onChangeCountry();
                 }}>
-                <option label=""></option>
-                {departmentListFiltered?.sort()?.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
+                <option value="" label="Sélectionner un pays" disabled>
+                  Sélectionner un pays
+                </option>
+                {Object.values(countriesList)
+                  .sort((a, b) => a.localeCompare(b))
+                  .map((countryName) => (
+                    <option key={countryName} value={countryName} label={countryName}>
+                      {countryName}
+                    </option>
+                  ))}
               </Field>
-              <ErrorMessage errors={errors} touched={touched} name={keys.department} />
+              <ErrorMessage errors={errors} touched={touched} name={keys.country} />
             </Col>
-            <Col md={6}>
-              <Label>Région</Label>
-              <Field
-                as="select"
-                validate={(v) => required && !v && requiredMessage}
-                disabled={!noResultMode}
-                className="form-control"
-                placeholder="Région"
-                name={keys.region}
-                value={values[keys.region]}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  handleChange({ target: { name: keys.region, value } });
-                  // filter departments
-                  setDepartmentListFiltered(value ? region2department[value] : departmentList);
+          )}
+          <Col md={12} style={{ marginTop: countryVisible ? 15 : 0 }}>
+            <Label>Adresse</Label>
+            <Field
+              disabled={disabled}
+              validate={(v) => required && !v && requiredMessage}
+              className="form-control"
+              placeholder="Adresse"
+              name={keys.address}
+              value={values[keys.address]}
+              onChange={(e) => {
+                const value = e.target.value;
+                handleChange({ target: { name: keys.address, value } });
+                addressVerifiedHelpers.setValue("false");
+              }}
+            />
+            <ErrorMessage errors={errors} touched={touched} name={keys.address} />
+          </Col>
+          <Col md={6} style={{ marginTop: 15 }}>
+            <Label>Code postal</Label>
+            <Field
+              disabled={disabled}
+              validate={(v) => required && !v && requiredMessage}
+              className="form-control"
+              placeholder="Code postal"
+              name={keys.zip}
+              value={values[keys.zip]}
+              onChange={(e) => {
+                const value = e.target.value;
+                handleChange({ target: { name: keys.zip, value } });
+                addressVerifiedHelpers.setValue("false");
+              }}
+            />
+            <ErrorMessage errors={errors} touched={touched} name={keys.zip} />
+          </Col>
+          <Col md={6} style={{ marginTop: 15 }}>
+            <Label>Ville</Label>
+            <Field
+              disabled={disabled}
+              validate={(v) => required && !v && requiredMessage}
+              className="form-control"
+              placeholder="Ville"
+              name={keys.city}
+              value={values[keys.city]}
+              onChange={(e) => {
+                const value = e.target.value;
+                handleChange({ target: { name: keys.city, value } });
+                addressVerifiedHelpers.setValue("false");
+              }}
+            />
+            <ErrorMessage errors={errors} touched={touched} name={keys.city} />
+          </Col>
+          {departAndRegionVisible ? (
+            <>
+              <Col md={6} style={{ marginTop: 15 }}>
+                <Label>Département</Label>
+                <Field
+                  as="select"
+                  validate={(v) => !v && requiredMessage}
+                  disabled
+                  className="form-control"
+                  placeholder="Département"
+                  name={keys.department}
+                  value={values[keys.department]}>
+                  <option label=""></option>
+                  {departmentList.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </Field>
+                <ErrorMessage errors={errors} touched={touched} name={keys.department} />
+              </Col>
+              <Col md={6} style={{ marginTop: 15 }}>
+                <Label>Région</Label>
+                <Field as="select" validate={(v) => !v && requiredMessage} disabled className="form-control" placeholder="Région" name={keys.region} value={values[keys.region]}>
+                  <option label=""></option>
+                  {regionList.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </Field>
+                <ErrorMessage errors={errors} touched={touched} name={keys.region} />
+              </Col>
+            </>
+          ) : null}
+          {addressInFrance ? (
+            <>
+              <Col md={12} style={{ display: "flex", alignItems: "flex-end" }}>
+                {addressVerified.value !== "true" ? (
+                  <PrimaryButton style={{ marginLeft: "auto" }} onClick={() => getSuggestions(`${values[keys.address]}, ${values[keys.city]} ${values[keys.zip]}`)}>
+                    {!loading ? "Vérifier" : <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
+                  </PrimaryButton>
+                ) : (
+                  <div style={{ display: "flex", color: "#32257f", backgroundColor: "#edecfc", padding: "1rem", borderRadius: "6px", width: "100%", marginTop: "10px" }}>
+                    <InfoIcon color="#32257F" style={{ flex: "none" }} />
+                    <div style={{ fontSize: ".9rem", marginLeft: "5px" }}>L&apos;adresse a été vérifiée</div>
+                  </div>
+                )}
+              </Col>
+              <ErrorMessage errors={errors} touched={touched} name="addressVerified" />
+            </>
+          ) : null}
+        </Row>
+      ) : (
+        <Row>
+          <Col md={12} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <b style={{ marginBottom: "16px" }}>Est-ce que c&apos;est la bonne adresse ?</b>
+            <p>{suggestion.properties.name}</p>
+            <p>{`${suggestion.properties.postcode}, ${suggestion.properties.city}`}</p>
+            <p>France</p>
+            <div style={{ display: "flex" }}>
+              <SecondaryButton
+                onClick={() => {
+                  setSuggestion({});
+                  addressVerifiedHelpers.setValue("false");
                 }}>
-                <option label=""></option>
-                {regionListFiltered?.sort()?.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </Field>
-              <ErrorMessage errors={errors} touched={touched} name={keys.region} />
-            </Col>
-          </Row>
-        </Col>
-        <Col md={6} style={{ marginTop: 15 }}>
-          <Row>
-            <Col md={6}>
-              <Label>Ville</Label>
-              <Field
-                validate={(v) => required && !v && requiredMessage}
-                disabled={!noResultMode}
-                className="form-control"
-                placeholder="Ville"
-                name={keys.city}
-                value={values[keys.city]}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  handleChange({ target: { name: keys.city, value } });
-                }}
-              />
-              <ErrorMessage errors={errors} touched={touched} name={keys.city} />
-            </Col>
-            <Col md={6}>
-              <Label>Code postal</Label>
-              <Field
-                validate={(v) =>
-                  required && ((!v && requiredMessage) || (!validator.isPostalCode(v, "FR") && "Ce champ est au mauvais format. Exemples de format attendu : 44000, 08300"))
-                }
-                disabled={!noResultMode}
-                className="form-control"
-                placeholder="Code postal"
-                name={keys.zip}
-                value={values[keys.zip]}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  handleChange({ target: { name: keys.zip, value } });
-                }}
-              />
-              <ErrorMessage errors={errors} touched={touched} name={keys.zip} />
-            </Col>
-          </Row>
-        </Col>
-      </Row>
+                Non
+              </SecondaryButton>
+              <PrimaryButton onClick={onSuggestionSelected}>Oui</PrimaryButton>
+            </div>
+            <ErrorMessage errors={errors} touched={touched} name="addressVerified" />
+          </Col>
+        </Row>
+      )}
     </Wrapper>
   );
 }
@@ -230,6 +318,38 @@ const Wrapper = styled.div`
   .react-autosuggest__suggestion--highlighted {
     background-color: #f3f3f3;
   }
+`;
+
+const PrimaryButton = styled.button`
+  color: #fff;
+  border: 0;
+  background-color: #5145cd;
+  padding: 9px 20px;
+  outline: 0;
+  border-radius: 6px;
+  margin-inline: 5px;
+  margin-top: 10px;
+  display: block;
+  outline: 0;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%), 0 4px 6px -2px rgb(0 0 0 / 5%);
+  width: fit-content;
+  :hover {
+    opacity: 0.9;
+  }
+`;
+
+const SecondaryButton = styled.button`
+  border: solid 2px;
+  border-color: #e3e7ea;
+  background-color: #fff;
+  padding: 9px 20px;
+  outline: 0;
+  border-radius: 6px;
+  margin-inline: 5px;
+  margin-top: 10px;
+  display: block;
+  outline: 0;
+  width: fit-content;
 `;
 
 const Label = styled.div`

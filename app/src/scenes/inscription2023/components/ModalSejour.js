@@ -26,11 +26,11 @@ export default function ModalSejour({ isOpen, onCancel }) {
       try {
         const res = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
         if (res.data.msg) return setError({ text: res.data.msg });
-        const sessionsFiltered = res.data.filter((e) => e.goalReached === false); //&& e.isFull === false --> voir si on le rajoute
-        if (sessionsFiltered.length === 0) {
+        const cohorts = res.data;
+        if (cohorts.length === 0) {
           setError({ text: "Il n'y a malheureusement plus de place dans votre département." });
         }
-        setCohorts(sessionsFiltered);
+        setCohorts(cohorts);
       } catch (e) {
         capture(e);
         setCohorts([]);

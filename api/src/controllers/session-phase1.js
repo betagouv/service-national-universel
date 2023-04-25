@@ -26,6 +26,7 @@ const {
   canCreateOrUpdateCohesionCenter,
   isReferentOrAdmin,
   ROLES,
+  isSessionEditionOpen,
 } = require("snu-lib/roles");
 const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
@@ -174,15 +175,19 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!isReferentOrAdmin(req.user) && req.user.role !== ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const cohort = await CohortModel.findOne({ name: sessionPhase1.cohort });
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!isSessionEditionOpen(req.user, cohort)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const { error, value } = validateSessionPhase1(req.body);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    if (!(req.user.role === ROLES.ADMIN) && sessionPhase1.status === "VALIDATED") {
-      value.placesTotal = sessionPhase1.placesTotal;
-    }
+
     const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
     if (cohesionCenter.placesTotal < value.placesTotal) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
@@ -411,6 +416,7 @@ router.post("/check-token/:token", async (req, res) => {
         },
       };
       const youngs = await YoungModel.find({ status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: sessionPhase1._id });
+      console.log("youngs", youngs.length);
 
       const ligneBus = await LigneBusModel.find({ cohort: sessionPhase1.cohort, centerId: sessionPhase1.cohesionCenterId });
 
@@ -447,8 +453,8 @@ router.post("/check-token/:token", async (req, res) => {
           result.transportInfoGivenByLocal.youngs.push(tempYoung);
         } else {
           const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
-          const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
-          if (youngMeetingPoint) {
+          const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId && young?.cohesionStayPresence !== "false" && young?.departInform !== "true");
+          if (youngMeetingPoint && youngLigneBus) {
             if (!result[youngLigneBus.busId]) {
               result[youngLigneBus.busId] = {};
               result[youngLigneBus.busId]["youngs"] = [];

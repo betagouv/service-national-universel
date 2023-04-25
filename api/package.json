@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "engines": {
-    "node": "^16.10",
-    "npm": "^8.0",
+    "node": "^18.16.0",
+    "npm": "^9.5.1",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   },
   "scripts": {
@@ -61,6 +61,7 @@
     "password-validator": "^5.3.0",
     "pm2": "^5.2.2",
     "puppeteer": "^13.0.0",
+    "redis": "^4.6.5",
     "sanitize-html": "^2.7.3",
     "slugify": "^1.6.5",
     "snu-lib": "file:../lib",

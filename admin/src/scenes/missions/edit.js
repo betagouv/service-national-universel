@@ -7,8 +7,7 @@ import { Formik, Field } from "formik";
 import { Link, useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import MultiSelect from "../../components/Multiselect";
-import AddressInput from "../../components/addressInputV2";
+import AddressInput from "../../components/addressInput";
 import Toggle from "../../components/Toggle";
 
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";

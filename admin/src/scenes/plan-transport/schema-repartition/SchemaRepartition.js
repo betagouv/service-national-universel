@@ -14,7 +14,7 @@ import FrenchMap from "../../../assets/icons/FrenchMap";
 import { capture } from "../../../sentry";
 import { toastr } from "react-redux-toastr";
 import API from "../../../services/api";
-import { department2region, region2department, ROLES } from "snu-lib";
+import { department2region, getDepartmentNumber, region2department, ROLES } from "snu-lib";
 import SchemaEditor from "./SchemaEditor";
 import SchemaDepartmentDetail from "./SchemaDepartmentDetail";
 import * as XLSX from "xlsx";
@@ -149,12 +149,12 @@ export default function SchemaRepartition({ region, department }) {
   }
 
   function goToNational() {
-    if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
+    if ([ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION].includes(user.role)) {
       history.push("/schema-repartition?cohort=" + cohort);
     }
-    if (region && user.role === ROLES.REFERENT_REGION) {
-      history.push(`/schema-repartition/${region}?cohort=${cohort}`);
-    }
+    // if (region && user.role === ROLES.REFERENT_REGION) {
+    //   history.push(`/schema-repartition/${region}?cohort=${cohort}`);
+    // }
   }
 
   function goToRegion() {
@@ -216,10 +216,7 @@ export default function SchemaRepartition({ region, department }) {
         department: g.fromDepartment,
         youngsVolume: g.youngsVolume,
         centerId: g.centerId,
-        centerName: g.centerName,
-        centerAddress: g.centerAddress,
-        centerZip: g.centerZip,
-        centerCity: g.centerCity,
+        centerName: `${g.centerName} ${g.centerAddress} ${g.centerZip} ${g.centerCity}`,
         centerDepartment: g.toDepartment,
         centerRegion: g.toRegion,
       };
@@ -229,10 +226,7 @@ export default function SchemaRepartition({ region, department }) {
       for (let i = 0, n = g.gatheringPlaces.length; i < n; ++i) {
         const pdr = g.gatheringPlaces[i];
         data["gpId" + i] = pdr._id;
-        data["gpName" + i] = pdr.name;
-        data["gpAddress" + i] = pdr.address;
-        data["gpZip" + i] = pdr.zip;
-        data["gpCity" + i] = pdr.city;
+        data["gpName" + i] = `${pdr.name} ${pdr.address} ${pdr.zip} ${pdr.city}`;
       }
       return data;
     });
@@ -267,23 +261,12 @@ export default function SchemaRepartition({ region, department }) {
       "Département des volontaires",
       "Nombre de volontaires",
       "ID centre",
-      "Nom du centre",
-      "Adresse du centre",
-      "Code Postal du centre",
-      "Commune du centre",
+      "Désignation du centre",
       "Département du centre",
       "Région du centre",
     ];
     for (let i = 1; i <= maxGatheringPlaces; ++i) {
-      headers.push(
-        ...[
-          "ID du point de rassemblement " + i,
-          "Nom du point de rassemblement " + i,
-          "Adresse du point de rassemblement " + i,
-          "Code postal du point de rassemblement " + i,
-          "Ville du point de rassemblement " + i,
-        ],
-      );
+      headers.push(...["ID du point de rassemblement " + i, "Désignation du point de rassemblement " + i]);
     }
     XLSX.utils.sheet_add_aoa(sheet, [headers], { origin: "A1" });
 
@@ -326,7 +309,11 @@ export default function SchemaRepartition({ region, department }) {
           />
           <div className="flex gap-4">
             {user.role === ROLES.REFERENT_DEPARTMENT && user.department.length > 1 && <Select options={departementsList} value={department} onChange={handleChangeDepartment} />}
-            <Select options={cohortList} value={cohort} onChange={handleChangeCohort} />
+            <Select
+              options={cohortList.filter((c) => ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && c.value !== "Juin 2023") || user.role === ROLES.ADMIN)}
+              value={cohort}
+              onChange={handleChangeCohort}
+            />
           </div>
         </div>
         <div className="flex my-[40px]">
@@ -466,7 +453,11 @@ function BoxCentres({ summary, className = "", loading, isNational, isDepartment
           {summary.toRegions.map((region) => (
             <React.Fragment key={region.name}>
               <li className="text-[#171725] text-[15px] leading-[18px] font-bold mt-[12px]">{region.name}</li>
-              {isDepartmental && <li className="text-[#1F2937] text-[12px], leading-[14px] mt-[2px]">{region.departments.join(", ")}</li>}
+              {isDepartmental && (
+                <li className="text-[#1F2937] text-[12px], leading-[14px] mt-[2px]">
+                  {region.departments.map((department) => `${department} (${getDepartmentNumber(department)})`).join(", ")}
+                </li>
+              )}
             </React.Fragment>
           ))}
         </ul>
@@ -516,7 +507,7 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
             className="custom-tooltip-radius !opacity-100 !shadow-md"
             tooltipRadius="6">
             <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
-              L'export n'est pas disponible au téléchargement. Contactez-nous pour plus d'information
+              L&apos;export n&apos;est pas disponible au téléchargement. Contactez-nous pour plus d&apos;information
             </p>
           </ReactTooltip>
         </span>
@@ -536,8 +527,7 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
             {rows.map((row) => (
               <tr key={row.name} className="border-b-[1px] border-b-[#F4F5FA] hover:bg-[#F2F5FC]" onClick={() => goToRow(row)}>
                 <td className="py-[17px] px-[9px] font-bold text-[15px] text-[#242526] whitespace-nowrap">
-                  {row.name}
-                  {row.code ? " (" + row.code + ")" : ""}
+                  {row.name} {!isNational ? `(${getDepartmentNumber(row.name)})` : null}
                 </td>
                 <td className="py-[17px] px-[8px]">
                   {loading ? (
