@@ -5,6 +5,7 @@ import Section from "../../../../components/ui/Section";
 import api from "../../../../../../services/api";
 import { translate } from "snu-lib/translation";
 import Loader from "../../../../../../components/Loader";
+import StatusTable from "../../../../components/ui/StatusTable";
 
 export default function SectionStructures({ filters }) {
   const [loading, setLoading] = useState(true);
@@ -25,14 +26,34 @@ export default function SectionStructures({ filters }) {
       if (result.ok) {
         let total = 0;
         let national = 0;
+        let byStatus = {};
+
         for (const structure of result.data) {
+          if (byStatus[structure._id.legalStatus] === undefined) {
+            byStatus[structure._id.legalStatus] = {
+              _id: structure._id.legalStatus,
+              total: 0,
+              national: 0,
+              types: [],
+            };
+          }
+          byStatus[structure._id.legalStatus].total += structure.total;
+          byStatus[structure._id.legalStatus].national += structure.national;
+          byStatus[structure._id.legalStatus].types.push({
+            _id: structure._id.type,
+            total: structure.total,
+            national: structure.national,
+          });
+
           total += structure.total;
           national += structure.national;
         }
+
         setTotalStructures(total);
         setNationalStructures(national);
+
         setStructures(
-          result.data.map((structure) => ({
+          Object.values(byStatus).map((structure) => ({
             _id: translate(structure._id),
             total: structure.total,
             national: structure.national,
@@ -51,12 +72,39 @@ export default function SectionStructures({ filters }) {
   }
 
   function getInfoPanel(structure) {
+    const total = structure.types ? structure.types.reduce((acc, type) => acc + type.total, 0) : 0;
+
     switch (structure._id) {
       case "PRIVATE":
       case "PUBLIC":
-        return <div className="p-8">{translate(structure._id)} + DOUGHNUT</div>;
-      case "ASSOCIATION":
-        return <div className="p-8">{translate(structure._id)} + STATUS-TABLE</div>;
+        return (
+          <div className="p-8">
+            <div className="text-base text-gray-900 font-bold mb-4">{translate(structure._id)}</div>
+            <FullDoughnut
+              legendSide="right"
+              maxLegends={3}
+              labels={structure.types.map((type) => translate(type._id))}
+              values={structure.types.map((type) => Math.round((type.total / total) * 100))}
+              valueSuffix="%"
+              tooltips={structure.types.map((type) => type.total)}
+            />
+          </div>
+        );
+      case "ASSOCIATION": {
+        const statuses = structure.types.map((type) => {
+          return {
+            status: translate(type._id),
+            nb: type.total,
+            percentage: Math.round((type.total / total) * 100),
+          };
+        });
+        return (
+          <div className="p-8">
+            <div className="text-base text-gray-900 font-bold mb-4">{translate(structure._id)}</div>
+            <StatusTable statuses={statuses} />
+          </div>
+        );
+      }
       default:
         return null;
     }
