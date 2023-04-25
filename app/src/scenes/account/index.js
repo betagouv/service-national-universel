@@ -15,7 +15,7 @@ import Tabs from "../../components/nav/Tabs";
 
 const ACCOUNT_PAGES = {
   general: {
-    title: "Information générales",
+    title: "Informations générales",
     key: "/account/general",
   },
   password: {
