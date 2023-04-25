@@ -8,7 +8,7 @@ const InputPassword = ({ label = "", className = "", name = "", value = "", onCh
   const [inputType, setInputType] = useState("password");
 
   if ("type" in rest) {
-    rest.type = inputType;
+    throw new Error(`InputPassword component cannot handle a custom type.`);
   }
 
   const handleChange = (event) => {
