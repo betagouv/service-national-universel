@@ -13,33 +13,36 @@ import Checkbox from "../../../../components/forms/inputs/Checkbox";
 import { validateEmail, validatePhoneNumber, validateRequired } from "../../../../utils/form-validation.utils";
 import { updateYoung } from "../../../../services/young.service";
 import SectionTitle from "../../components/SectionTitle";
+import ButtonLight from "../../../../components/ui/buttons/ButtonLight";
+
+const getInitialFormValues = (young) => ({
+  parent1Status: young?.parent1Status || "representant",
+  parent1LastName: young?.parent1LastName || "",
+  parent1FirstName: young?.parent1FirstName || "",
+  parent1Email: young?.parent1Email || "",
+  parent1Phone: {
+    phoneNumber: young?.parent1Phone || "",
+    phoneZone: young?.parent1PhoneZone || PHONE_ZONES_NAMES.FRANCE,
+  },
+  parent2Status: young?.parent2Status || "representant",
+  parent2LastName: young?.parent2LastName || "",
+  parent2FirstName: young?.parent2FirstName || "",
+  parent2Email: young?.parent2Email || "",
+  parent2Phone: {
+    phoneNumber: young?.parent2Phone || "",
+    phoneZone: young?.parent2PhoneZone || PHONE_ZONES_NAMES.FRANCE,
+  },
+});
 
 const AccountRepresentantsPage = () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
 
-  const [formValues, setFormValues] = useState({
-    parent1Status: young?.parent1Status || "representant",
-    parent1LastName: young?.parent1LastName || "",
-    parent1FirstName: young?.parent1FirstName || "",
-    parent1Email: young?.parent1Email || "",
-    parent1Phone: {
-      phoneNumber: young?.parent1Phone || "",
-      phoneZone: young?.parent1PhoneZone || PHONE_ZONES_NAMES.FRANCE,
-    },
-    parent2Status: young?.parent2Status || "representant",
-    parent2LastName: young?.parent2LastName || "",
-    parent2FirstName: young?.parent2FirstName || "",
-    parent2Email: young?.parent2Email || "",
-    parent2Phone: {
-      phoneNumber: young?.parent2Phone || "",
-      phoneZone: young?.parent2PhoneZone || PHONE_ZONES_NAMES.FRANCE,
-    },
-  });
+  const [formValues, setFormValues] = useState(getInitialFormValues());
 
   const [errors, setErrors] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasParent2, setHasParent2] = useState(young?.parent2Email || false);
+  const [hasParent2, setHasParent2] = useState(young?.parent2Email ? true : false);
 
   const validateForm = () => {
     const foundErrors = {};
@@ -124,6 +127,11 @@ const AccountRepresentantsPage = () => {
       ...prevValues,
       [inputName]: value,
     }));
+  };
+
+  const handleResetForm = () => {
+    setHasParent2(young?.parent2Email ? true : false);
+    setFormValues(getInitialFormValues());
   };
 
   return (
@@ -222,9 +230,9 @@ const AccountRepresentantsPage = () => {
           </div>
         </div>
         <div className="flex flex-col gap-3 bg-gray-50 py-3 px-4 lg:flex-row lg:justify-end">
-          <ButtonLinkLight className="w-full lg:w-fit" to="/account">
+          <ButtonLight className="w-full bg-white lg:w-fit" onClick={handleResetForm}>
             Annuler
-          </ButtonLinkLight>
+          </ButtonLight>
           <ButtonPrimary type="submit" className="w-full lg:w-fit" disabled={isSubmitting}>
             {isSubmitting && <BiLoaderAlt className="animate-spin" />}
             Enregistrer

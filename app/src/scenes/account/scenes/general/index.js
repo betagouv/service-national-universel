@@ -11,31 +11,33 @@ import { updateYoung } from "../../../../services/young.service";
 import Input from "../../../../components/forms/inputs/Input";
 import Select from "../../../../components/forms/inputs/Select";
 import InputPhone from "../../../../components/forms/inputs/InputPhone";
-import ButtonLinkLight from "../../../../components/ui/buttons/ButtonLinkLight";
 import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
 import IdCardReader from "./components/IdCardReader";
 import SectionTitle from "../../components/SectionTitle";
 import Withdrawal from "./components/Withdrawal";
 import FormRow from "../../../../components/forms/layout/FormRow";
+import ButtonLight from "../../../../components/ui/buttons/ButtonLight";
+
+const getInitialFormValues = (young) => ({
+  lastName: young.lastName || "",
+  firstName: young.firstName || "",
+  gender: young.gender || "male",
+  birthdateAt: (young.birthdateAt && new Date(young.birthdateAt).toLocaleDateString("fr-fr")) || "",
+  email: young.email || "",
+  phone: {
+    phoneNumber: young.phone || "",
+    phoneZone: young.phoneZone || PHONE_ZONES_NAMES.FRANCE,
+  },
+  address: young.address || "",
+  zip: young.zip || "",
+  city: young.city || "",
+});
 
 const AccountGeneralPage = () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
 
-  const [formValues, setFormValues] = useState({
-    lastName: young.lastName || "",
-    firstName: young.firstName || "",
-    gender: young.gender || "male",
-    birthdateAt: (young.birthdateAt && new Date(young.birthdateAt).toLocaleDateString("fr-fr")) || "",
-    email: young.email || "",
-    phone: {
-      phoneNumber: young.phone || "",
-      phoneZone: young.phoneZone || PHONE_ZONES_NAMES.FRANCE,
-    },
-    address: young.address || "",
-    zip: young.zip || "",
-    city: young.city || "",
-  });
+  const [formValues, setFormValues] = useState(getInitialFormValues(young));
 
   const [errors, setErrors] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,6 +89,10 @@ const AccountGeneralPage = () => {
       ...prevValues,
       [inputName]: value,
     }));
+  };
+
+  const handleResetForm = () => {
+    setFormValues(getInitialFormValues(young));
   };
 
   return (
@@ -145,9 +151,9 @@ const AccountGeneralPage = () => {
           </div>
 
           <div className="flex flex-col gap-3 bg-gray-50 py-3 px-4 lg:flex-row lg:justify-end">
-            <ButtonLinkLight className="w-full lg:w-fit" to="/account">
+            <ButtonLight className="w-full bg-white lg:w-fit" onClick={handleResetForm}>
               Annuler
-            </ButtonLinkLight>
+            </ButtonLight>
             <ButtonPrimary type="submit" className="w-full lg:w-fit" disabled={isSubmitting}>
               {isSubmitting && <BiLoaderAlt className="animate-spin" />}
               Enregistrer

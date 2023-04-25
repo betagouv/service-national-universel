@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import ButtonLinkLight from "../../../../components/ui/buttons/ButtonLinkLight";
 import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
 import { BiLoaderAlt } from "react-icons/bi";
 import { changeYoungPassword } from "../../../../services/young.service";
@@ -10,6 +9,7 @@ import { validatePassword, validateRequired, validateVerifyPassword } from "../.
 import InputPassword from "../../../../components/forms/inputs/InputPassword";
 import FormDescription from "../../components/FormDescription";
 import SectionTitle from "../../components/SectionTitle";
+import ButtonLight from "../../../../components/ui/buttons/ButtonLight";
 
 const INITIAL_FORM_VALUES = {
   password: "",
@@ -74,6 +74,10 @@ const AccountPasswordPage = () => {
     }));
   };
 
+  const handleResetForm = () => {
+    setFormValues(INITIAL_FORM_VALUES);
+  };
+
   return (
     <div className="mb-6 bg-white shadow-sm lg:rounded-lg">
       <form onSubmit={handleChangePasswordSubmit}>
@@ -97,9 +101,9 @@ const AccountPasswordPage = () => {
           </div>
         </div>
         <div className="flex flex-col gap-3 bg-gray-50 py-3 px-4 lg:flex-row lg:justify-end">
-          <ButtonLinkLight className="w-full lg:w-fit" to="/account">
+          <ButtonLight className="w-full bg-white lg:w-fit" onClick={handleResetForm}>
             Annuler
-          </ButtonLinkLight>
+          </ButtonLight>
           <ButtonPrimary type="submit" className="w-full lg:w-fit" disabled={isSubmitting}>
             {isSubmitting && <BiLoaderAlt className="animate-spin" />}
             Enregistrer
