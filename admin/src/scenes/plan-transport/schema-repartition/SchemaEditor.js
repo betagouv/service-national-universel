@@ -49,7 +49,7 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
   };
 
   const checkUserAuthorizations = async () => {
-    const cohort = await getCohortByName(cohortName);
+    const { data: cohort } = await getCohortByName(cohortName);
     checkIfUserIsAuthorizedToExportData(cohort);
     checkIfUserIsAuthorizedToCreateGroup(cohort);
   };
