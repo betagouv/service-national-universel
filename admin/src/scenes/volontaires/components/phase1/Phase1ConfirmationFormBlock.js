@@ -59,6 +59,7 @@ const Phase1ConfirmationFormBlock = ({ className = "", young = null, values = nu
       isTravelingByPlane: young?.isTravelingByPlane || "",
     }));
     setIsYoungModalAgreementOpen(false);
+	setIsYoungTravelingByPlaneModalOpen(false);
   };
 
   return (
