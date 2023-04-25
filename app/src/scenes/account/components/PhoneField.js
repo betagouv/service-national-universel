@@ -19,9 +19,9 @@ const PhoneField = ({
 
   return (
     <div className={className}>
-      <label className="text-gray-700 font-semibold text-sm mb-[5px]">{label}</label>
-      <div className="flex items-center w-full form-control px-0">
-        <Field as="select" name={selectZoneName} className="py-2 pl-4 mr-3 bg-transparent max-w-[120px] text-ellipsis" onChange={onChangeZone} value={zoneValue}>
+      <label className="mb-[5px] text-sm font-semibold text-gray-700">{label}</label>
+      <div className="form-control flex w-full items-center px-0">
+        <Field as="select" name={selectZoneName} className="mr-3 max-w-[120px] text-ellipsis bg-transparent py-2 pl-4" onChange={onChangeZone} value={zoneValue}>
           {Object.entries(PHONE_ZONES).map(([key, phoneZone]) => (
             <option key={key} value={key} className="flex gap-1">
               {phoneZone.code} {phoneZone.name}
@@ -31,7 +31,7 @@ const PhoneField = ({
         <div className="h-6 w-[1px] bg-[#C5C5C5]" />
         <Field
           name={name}
-          className={`flex justify-between items-center gap-3 w-full bg-transparent px-4 py-2`}
+          className={`flex w-full items-center justify-between gap-3 bg-transparent px-4 py-2`}
           type="tel"
           value={value}
           placeholder={placeholder}
@@ -39,7 +39,7 @@ const PhoneField = ({
           validate={validate}
         />
       </div>
-      {error && <div className="text-[#EF4444] mt-[8px]">{error}</div>}
+      {error && <div className="mt-[8px] text-[#EF4444]">{error}</div>}
     </div>
   );
 };

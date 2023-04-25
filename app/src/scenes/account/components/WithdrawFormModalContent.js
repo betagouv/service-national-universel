@@ -21,8 +21,8 @@ const WithdrawFormModalContent = ({
 }) => {
   return (
     <>
-      <div className="flex w-full md:justify-center relative">
-        <button className="absolute left-0 w-9 h-9 justify-center items-center bg-[#E5E7EB] rounded-full hidden md:flex" onClick={onBack}>
+      <div className="relative flex w-full md:justify-center">
+        <button className="absolute left-0 hidden h-9 w-9 items-center justify-center rounded-full bg-[#E5E7EB] md:flex" onClick={onBack}>
           <ArrowLeft />
         </button>
         <Danger />
@@ -42,7 +42,7 @@ const WithdrawFormModalContent = ({
           transformer={(v) => withdrawnReasons.find((r) => r.value === v)?.label}
         />
         <Field
-          className="w-full mt-4"
+          className="mt-4 w-full"
           type="textarea"
           name="withdrawnMessage"
           label="Précisez la raison de votre désistement ici (obligatoire)"
@@ -51,8 +51,8 @@ const WithdrawFormModalContent = ({
         />
       </div>
 
-      <div className="flex flex-col md:flex-row mt-10 w-full gap-3">
-        <CancelButton className="flex-1 hidden md:block" onClick={onCancel} />
+      <div className="mt-10 flex w-full flex-col gap-3 md:flex-row">
+        <CancelButton className="hidden flex-1 md:block" onClick={onCancel} />
         <PlainButton disabled={!withdrawnReason || !withdrawnMessage} className="flex-1" onClick={onConfirm}>
           {confirmButtonName}
         </PlainButton>

@@ -37,14 +37,14 @@ export default function SimpleSelect({ value, transformer, options, onChange }) 
 
   return (
     <div>
-      <div className={`flex items-center justify-between cursor-pointer`} onClick={toggleSelectOptions}>
-        <div className={`font-normal text-[14px] leading-[20px] text-[#1F2937] ${value ? "" : "py-[10px]"}`}>{transformer ? transformer(value) : value}</div>
-        <ChevronDown className="text-gray-500 w-4" />
+      <div className={`flex cursor-pointer items-center justify-between`} onClick={toggleSelectOptions}>
+        <div className={`text-[14px] font-normal leading-[20px] text-[#1F2937] ${value ? "" : "py-[10px]"}`}>{transformer ? transformer(value) : value}</div>
+        <ChevronDown className="w-4 text-gray-500" />
       </div>
       {selectOptionsOpened && (
-        <div className="absolute z-10 mt-[10px] left-[0px] right-[0px] border-[#E5E7EB] border-[1px] rounded-[6px] bg-white text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] max-h-[400px] overflow-auto">
+        <div className="absolute left-[0px] right-[0px] z-10 mt-[10px] max-h-[400px] overflow-auto rounded-[6px] border-[1px] border-[#E5E7EB] bg-white text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
           {options.map((opt) => (
-            <div className="px-[10px] py-[5px] hover:bg-[#E5E7EB] cursor-pointer" key={opt.value} onClick={() => selectOption(opt.value)}>
+            <div className="cursor-pointer px-[10px] py-[5px] hover:bg-[#E5E7EB]" key={opt.value} onClick={() => selectOption(opt.value)}>
               {opt.label}
             </div>
           ))}
