@@ -41,7 +41,7 @@ const Tabs = ({ tabs = [], selectedTabKey = "", className = "", onChange = () =>
   }, [activeTabKey, isPageLoaded]);
 
   return (
-    <nav className={`border-b-[1px] border-gray-200 relative flex flex-nowrap overflow-x-auto scrollbar-hide ${className}`}>
+    <nav className={`scrollbar-hide relative flex flex-nowrap overflow-x-auto border-b-[1px] border-gray-200 ${className}`}>
       {tabs.map(({ className: tabClassName = "", title, key, ...rest }) => {
         return (
           <button
@@ -53,7 +53,9 @@ const Tabs = ({ tabs = [], selectedTabKey = "", className = "", onChange = () =>
               paddingRight: 20,
               paddingLeft: 20,
             }}
-            className={`appearance-none focus-visible:outline-none transition-all duration-300 whitespace-nowrap ${key === activeTabKey ? "text-blue-600" : ""} ${tabClassName}`}
+            className={`appearance-none whitespace-nowrap text-sm text-gray-500 transition-all duration-300 focus-visible:outline-none ${
+              key === activeTabKey ? "text-blue-600" : ""
+            } ${tabClassName}`}
             {...rest}>
             {title}
           </button>
