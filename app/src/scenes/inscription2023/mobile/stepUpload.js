@@ -85,53 +85,82 @@ export default function StepUpload() {
     }
   }
 
+  function resetState() {
+    setRecto([]);
+    setVerso([]);
+    setStep(getStep());
+    setLoading(false);
+  }
+
   async function onSubmit() {
     try {
       setLoading(true);
-      if (recto) {
-        const res = await uploadFiles();
-        if (res?.error) {
-          setRecto([]);
-          setVerso([]);
-          setHasChanged(false);
-          setStep(getStep());
-          setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res?.error });
+
+      let files = [];
+      if (recto) files = [...files, ...recto];
+      if (verso) files = [...files, ...verso];
+
+      for (const file of files) {
+        if (file.size > 5000000) {
           setLoading(false);
+          setError({ text: `Ce fichier ${files.name} est trop volumineux.` });
           return;
         }
       }
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: dayjs(date).locale("fr").format("YYYY-MM-DD") });
-      if (!ok) {
-        capture(code);
-        setLoading(false);
-        setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(code) });
+
+      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
+
+      if (!res.ok) {
+        capture(res.code);
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code });
+        resetState();
         return;
       }
+
+      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: dayjs(date).locale("fr").format("YYYY-MM-DD") });
+
+      if (!ok) {
+        capture(code);
+        setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: code });
+        resetState();
+        return;
+      }
+
       plausibleEvent("Phase0/CTA inscription - CI mobile");
       dispatch(setYoung(responseData));
       history.push("/inscription2023/confirm");
     } catch (e) {
       capture(e);
-      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(e) });
-      setLoading(false);
+      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données." });
+      resetState();
     }
   }
 
   async function onCorrect() {
     try {
       setLoading(true);
-      if (recto || verso) {
-        const res = await uploadFiles();
-        if (res?.error) {
-          setRecto([]);
-          setVerso([]);
-          setHasChanged(false);
-          setStep(getStep());
-          setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res?.error });
+
+      let files = [];
+      if (recto) files = [...files, ...recto];
+      if (verso) files = [...files, ...verso];
+
+      for (const file of files) {
+        if (file.size > 5000000) {
           setLoading(false);
+          setError({ text: `Ce fichier ${files.name} est trop volumineux.` });
           return;
         }
       }
+
+      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
+
+      if (!res.ok) {
+        capture(res.code);
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code });
+        resetState();
+        return;
+      }
+
       const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
       if (!ok) {
@@ -145,7 +174,7 @@ export default function StepUpload() {
       history.push("/");
     } catch (e) {
       capture(e);
-      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(e) });
+      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données." });
       setLoading(false);
     }
   }
