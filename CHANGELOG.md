@@ -1,3 +1,19 @@
+# [1.261.0](https://github.com/betagouv/service-national-universel/compare/v1.260.0...v1.261.0) (2023-04-26)
+
+
+### Bug Fixes
+
+* **api:** dont check if session isFull for reinscription ([#2543](https://github.com/betagouv/service-national-universel/issues/2543)) ([83783db](https://github.com/betagouv/service-national-universel/commit/83783db78f2272c238e06aeafb4f79ea91c8dc5a))
+* **app:** Account - Do not change birthdate locale in initial form values ([84c7614](https://github.com/betagouv/service-national-universel/commit/84c7614b8fb67d07d56dc6d78c18742703e8ab0a))
+* **app:** probleme de cache sentry ([#2542](https://github.com/betagouv/service-national-universel/issues/2542)) ([58e09d7](https://github.com/betagouv/service-national-universel/commit/58e09d7f735030c86a8a6790761e7c5f838c7ffb))
+* **app:** reversed firstname lastname on profil page ([2d6940b](https://github.com/betagouv/service-national-universel/commit/2d6940b02c7cc847523a27f2b301dffe2e29e033))
+* fix missing region to avoid crash ([868f6bb](https://github.com/betagouv/service-national-universel/commit/868f6bbb00ee5cc7413385670d37c5612515f14f))
+
+
+### Features
+
+* add step point typs in model ([e8c6381](https://github.com/betagouv/service-national-universel/commit/e8c6381184ebdccd175083457aaa941a6ce8d91f))
+
 # [1.260.0](https://github.com/betagouv/service-national-universel/compare/v1.259.0...v1.260.0) (2023-04-25)
 
 
