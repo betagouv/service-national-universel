@@ -22,7 +22,7 @@ const getInitialFormValues = (young) => ({
   lastName: young.lastName || "",
   firstName: young.firstName || "",
   gender: young.gender || "male",
-  birthdateAt: (young.birthdateAt && new Date(young.birthdateAt).toLocaleDateString("fr-fr")) || "",
+  birthdateAt: (young.birthdateAt && new Date(young.birthdateAt)) || "",
   email: young.email || "",
   phone: {
     phoneNumber: young.phone || "",
@@ -114,7 +114,7 @@ const AccountGeneralPage = () => {
                   <option value="male">Homme</option>
                   <option value="female">Femme</option>
                 </Select>
-                <Input label="Date de naissance" name="birthdateAt" placeholder="JJ/MM/AAAA" value={formValues.birthdateAt} disabled />
+                <Input label="Date de naissance" name="birthdateAt" placeholder="JJ/MM/AAAA" value={formValues.birthdateAt.toLocaleDateString("fr-fr")} disabled />
                 <Input
                   type="email"
                   label="Adresse email"
