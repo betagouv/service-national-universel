@@ -52,6 +52,7 @@ export default function StepUpload() {
         capture(res.code);
         return { error: res.code };
       }
+      return res;
     } catch (e) {
       capture(e);
       return { error: translate(e) };
@@ -132,6 +133,7 @@ export default function StepUpload() {
   const isEnabled = checkIfValid();
 
   if (!category) return <div>Loading</div>;
+
   return (
     <DesktopPageContainer
       title={ID[category].title}
@@ -180,7 +182,7 @@ export default function StepUpload() {
       />
       <div className="flex w-full my-4">
         <div>
-          <label htmlFor="file-upload" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
+          <label htmlFor="file-upload-recto" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
             Parcourir...
           </label>
         </div>
@@ -221,7 +223,7 @@ export default function StepUpload() {
           />
           <div className="flex w-full my-4">
             <div>
-              <label htmlFor="file-upload" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
+              <label htmlFor="file-upload-verso" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
                 Parcourir...
               </label>
             </div>
