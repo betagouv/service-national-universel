@@ -107,8 +107,8 @@ const AccountGeneralPage = () => {
               <section className="mb-4">
                 <SectionTitle>Identité et contact</SectionTitle>
                 <FormRow>
-                  <Input label="Nom" name="lastName" placeholder="Dupond" className="basis-1/2" value={formValues.firstName} disabled />
-                  <Input label="Prénom" name="firstName" placeholder="Gaspard" className="basis-1/2" value={formValues.lastName} disabled />
+                  <Input label="Nom" name="lastName" placeholder="Dupond" className="basis-1/2" value={formValues.lastName} disabled />
+                  <Input label="Prénom" name="firstName" placeholder="Gaspard" className="basis-1/2" value={formValues.firstName} disabled />
                 </FormRow>
                 <Select label="Sexe" name="gender" value={formValues.gender} onChange={handleChangeValue("gender")}>
                   <option value="male">Homme</option>
