@@ -433,6 +433,7 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
 router.put("/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body, req.user);
+    console.log("🚀 ~ file: index.js:436 ~ router.put ~ value:", value);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -447,6 +448,39 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (value.parent2Phone) {
       value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
     }
+
+    const fieldsToKeep = [
+      "email",
+      "phone",
+      "phoneZone",
+      "gender",
+      "password",
+      "parent1Status",
+      "parent1FirstName",
+      "parent1LastName",
+      "parent1Email",
+      "parent1Phone",
+      "parent1PhoneZone",
+      "parent2Status",
+      "parent2FirstName",
+      "parent2LastName",
+      "parent2Email",
+      "parent2Phone",
+      "parent2PhoneZone",
+      "handicap",
+      "ppsBeneficiary",
+      "paiBeneficiary",
+      "allergies",
+      "specificAmenagment",
+      "specificAmenagmentType",
+      "reducedMobilityAccess",
+      "handicapInSameDepartment",
+    ];
+
+    for (const key in value) {
+      if (!fieldsToKeep.includes(key)) delete value[key];
+    }
+    console.log("🚀 ~ file: index.js:480 ~ router.put ~ value:", value);
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
