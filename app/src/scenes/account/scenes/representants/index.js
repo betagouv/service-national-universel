@@ -182,7 +182,7 @@ const AccountRepresentantsPage = () => {
                 placeholder={PHONE_ZONES[formValues.parent1Phone.phoneZone].example}
               />
             </section>
-            <Checkbox label="Je ne possède pas de second(e) réprésensant(e) légal(e)" onChange={(value) => setHasParent2(!value)} value={!hasParent2} useCheckedAsValue />
+            <Checkbox label="Je ne possède pas de second(e) représentant(e) légal(e)" onChange={(value) => setHasParent2(!value)} value={!hasParent2} useCheckedAsValue />
             {hasParent2 && (
               <section className="mb-4">
                 <SectionTitle>Représentant légal 2</SectionTitle>
