@@ -448,12 +448,18 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
     }
 
+    // TODO: diviser en 4 endpoints
     const fieldsToKeep = [
+      //CGU
       "acceptCGU",
+
+      // Infos générales
+      "gender",
       "email",
       "phone",
       "phoneZone",
-      "gender",
+
+      // Représentants légaux
       "parent1Status",
       "parent1FirstName",
       "parent1LastName",
@@ -466,6 +472,29 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       "parent2Email",
       "parent2Phone",
       "parent2PhoneZone",
+
+      // Préférences de MIG
+      "domains",
+      "missionFormat",
+      "period",
+      "periodRanking",
+      "mobilityTransport",
+      "mobilityTransportOther",
+      "professionnalProject",
+      "professionnalProjectPrecision",
+      "desiredLocation",
+      "engaged",
+      "engagedDescription",
+      "city",
+      "schoolCity",
+      "schooled",
+      "mobilityNearHome",
+      "mobilityNearSchool",
+      "mobilityNearRelative",
+      "mobilityNearRelativeName",
+      "mobilityNearRelativeAddress",
+      "mobilityNearRelativeZip",
+      "mobilityNearRelativeCity",
     ];
 
     for (const key in value) {
