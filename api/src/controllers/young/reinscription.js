@@ -160,7 +160,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     const sessions = await getFilteredSessions(young);
     const session = sessions.find(({ name }) => name === value.cohort);
     if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    if (session.goalReached || session.isFull) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (session.goalReached) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     value.reinscriptionStep2023 = STEPS2023REINSCRIPTION.DOCUMENTS;
 
