@@ -263,6 +263,8 @@ function dsnj({ onClick }) {
 function transporter({ onClick }) {
   return (
     <>
+      <DrawerTab to="/point-de-rassemblement/liste/liste-points" title="Points de rassemblement" onClick={onClick} />
+      <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
       <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
     </>

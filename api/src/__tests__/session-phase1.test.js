@@ -66,7 +66,9 @@ describe("Session Phase 1", () => {
     });
     it("should return 200 when session-phase1 is found and updated", async () => {
       const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION }));
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "2020", sessionEditionOpenForReferentRegion: true, sessionEditionOpenForReferentDepartment: true }));
+      const cohort = await createCohortHelper(
+        getNewCohortFixture({ name: "2020", sessionEditionOpenForReferentRegion: true, sessionEditionOpenForReferentDepartment: true, sessionEditionOpenForTransporter: true }),
+      );
       const sessionPhase1 = await createSessionWithCohesionCenter(getNewCohesionCenterFixtureV2(), getNewSessionPhase1Fixture({ headCenterId: referent.id, cohort: cohort.name }));
       const res = await request(getAppHelper())
         .put("/session-phase1/" + sessionPhase1._id)
@@ -80,7 +82,12 @@ describe("Session Phase 1", () => {
       passport.user.role = ROLES.RESPONSIBLE;
       const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
       const cohort = await createCohortHelper(
-        getNewCohortFixture({ name: sessionPhase1.cohort, sessionEditionOpenForReferentRegion: true, sessionEditionOpenForReferentDepartment: true }),
+        getNewCohortFixture({
+          name: sessionPhase1.cohort,
+          sessionEditionOpenForReferentRegion: true,
+          sessionEditionOpenForReferentDepartment: true,
+          sessionEditionOpenForTransporter: true,
+        }),
       );
       const res = await request(getAppHelper())
         .put("/session-phase1/" + sessionPhase1._id)

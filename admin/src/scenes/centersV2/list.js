@@ -24,7 +24,7 @@ import { useHistory, useParams } from "react-router-dom";
 
 import ModalRattacherCentre from "./components/ModalRattacherCentre";
 
-import { Filters, ResultTable, getDefaultQuery, Save, SelectedFilters, ExportComponent } from "../../components/filters-system-v2";
+import { Filters, ResultTable, Save, SelectedFilters, ExportComponent } from "../../components/filters-system-v2";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
