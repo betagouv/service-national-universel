@@ -53,15 +53,15 @@ export default function NonEligible() {
     <DSFRContainer>
       <h1 className="text-[22px] font-bold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
       {_.msg && <div className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">{_.msg}</div>}
-      <div className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</div>
-      <div className="overflow-x-auto flex md:grid md:grid-cols-2 gap-8">
+      <div className="my-4 text-base font-bold">Découvrez d’autres formes d’engagement</div>
+      <div className="flex gap-8 overflow-x-auto md:grid md:grid-cols-2">
         {engagementPrograms.map((program, index) => (
           <CardEngagement program={program} key={index} />
         ))}
       </div>
-      <dic className="flex justify-center mt-6">
+      <dic className="mt-6 flex justify-center">
         <button
-          className="w-full md:w-96 mx-auto text-blue-france-sun-113 text-center border-[1px] border-blue-france-sun-113 hover:text-blue-france-sun-113-hover hover:border-blue-france-sun-113-hover hove my-4 p-2"
+          className="hove mx-auto my-4 w-full border-[1px] border-blue-france-sun-113 p-2 text-center text-blue-france-sun-113 hover:border-blue-france-sun-113-hover hover:text-blue-france-sun-113-hover md:w-96"
           onClick={() => {
             history.push("/public-engagements");
           }}>
@@ -77,21 +77,21 @@ function CardEngagement({ program }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="min-w-[16rem] md:w-full h-min-[700px] ">
-      <div className="w-full h-[155px] ">
+    <div className="h-min-[700px] min-w-[16rem] md:w-full ">
+      <div className="h-[155px] w-full ">
         <a href={program.link} target="_blank" rel="noreferrer">
-          <img src={program.picture} className="object-cover w-full h-full" />
+          <img src={program.picture} className="h-full w-full object-cover" />
         </a>
       </div>
-      <div className={`min-h-min px-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen && "h-[250px]"}`}>
-        <div className="font-semibold my-4 min-h-[40px]">{program.title}</div>
-        <div className={`text-[13px] leading-6 mb-4 ${!isOpen && "h-[70px] text-ellipsis overflow-hidden"}`}>
+      <div className={`min-h-min border border-[#E5E5E5] px-4 pr-1 pb-2 ${!isOpen && "h-[250px]"}`}>
+        <div className="my-4 min-h-[40px] font-semibold">{program.title}</div>
+        <div className={`mb-4 text-[13px] leading-6 ${!isOpen && "h-[70px] overflow-hidden text-ellipsis"}`}>
           <a href={program.link} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
             {program.description}
           </a>
         </div>
         <div
-          className="text-[13px] flex justify-between pr-2"
+          className="flex justify-between pr-2 text-[13px]"
           onClick={() => {
             setIsOpen(!isOpen);
           }}>

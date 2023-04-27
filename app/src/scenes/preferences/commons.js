@@ -17,21 +17,21 @@ import Sun from "../../assets/icons/Sun";
 // --- COMPONENTS
 
 export function BigTitle({ children, className = "" }) {
-  return <div className={`font-bold text-2xl md:text-4xl text-gray-800 mb-1.5 ${className}`}>{children}</div>;
+  return <div className={`mb-1.5 text-2xl font-bold text-gray-800 md:text-4xl ${className}`}>{children}</div>;
 }
 
 export function Title({ children, className = "", noBorder = false }) {
   return (
-    <div className={`font-bold text-base md:text-xl text-[#242526] mb-8 md:text-center ${noBorder ? "" : "border-t border-t-gray-200 pt-8 md:pt-16"} ${className}`}>{children}</div>
+    <div className={`mb-8 text-base font-bold text-[#242526] md:text-center md:text-xl ${noBorder ? "" : "border-t border-t-gray-200 pt-8 md:pt-16"} ${className}`}>{children}</div>
   );
 }
 
 export function MiniTitle({ children, className = "" }) {
-  return <div className={`font-bold text-sm text-[#242526] mb-6 text-center ${className}`}>{children}</div>;
+  return <div className={`mb-6 text-center text-sm font-bold text-[#242526] ${className}`}>{children}</div>;
 }
 
 export function Box({ children, className = "" }) {
-  return <div className={`bg-[#FFFFFF] text-sm text-gray-700 md:shadow-lg p-4 md:p-8 md:rounded-lg ${className}`}>{children}</div>;
+  return <div className={`bg-[#FFFFFF] p-4 text-sm text-gray-700 md:rounded-lg md:p-8 md:shadow-lg ${className}`}>{children}</div>;
 }
 
 export function Section({ children, className = "" }) {
@@ -41,7 +41,7 @@ export function Section({ children, className = "" }) {
 export function PlainButton({ children, className = "", onClick = () => {}, spinner = false }) {
   return (
     <button
-      className={`flex items-center justify-center whitespace-nowrap px-12 py-2 cursor-pointer bg-blue-600 text-[#FFFFFF] border-[transparent] border-[1px] hover:!text-blue-600 hover:bg-[#FFFFFF] hover:border-blue-600 rounded-md ${className}`}
+      className={`flex cursor-pointer items-center justify-center whitespace-nowrap rounded-md border-[1px] border-[transparent] bg-blue-600 px-12 py-2 text-[#FFFFFF] hover:border-blue-600 hover:bg-[#FFFFFF] hover:!text-blue-600 ${className}`}
       onClick={(e) => {
         if (!spinner) onClick(e);
       }}>

@@ -76,11 +76,11 @@ export default function Verification({ step, parentId }) {
   return (
     <>
       <Navbar step={step} />
-      <div className="bg-[#f9f6f2] flex justify-center py-10">
-        <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] text-[#161616]">
-          <h1 className="text-[24px] leading-[32px] font-bold leading-40 text-[#21213F] mb-2">Voici les informations transmises par {young.firstName}</h1>
+      <div className="flex justify-center bg-[#f9f6f2] py-10">
+        <div className="mx-auto my-0 basis-[70%] bg-white px-[102px] py-[60px] text-[#161616]">
+          <h1 className="leading-40 mb-2 text-[24px] font-bold leading-[32px] text-[#21213F]">Voici les informations transmises par {young.firstName}</h1>
 
-          <div className="text-[14px] leading-[20px] text-[#666666] mb-[32px] mt-2">
+          <div className="mb-[32px] mt-2 text-[14px] leading-[20px] text-[#666666]">
             {parentId === 2 ? (
               <p>
                 La validité de ces informations a été vérifiée par {young.parent1FirstName} {young.parent1LastName}. Pour toute demande de correction, adressez-vous à{" "}
@@ -103,7 +103,7 @@ export default function Verification({ step, parentId }) {
             )}
           </div>
 
-          <div className="border-b-[1px] border-b-[#E5E5E5] border-b-solid">{sections}</div>
+          <div className="border-b-solid border-b-[1px] border-b-[#E5E5E5]">{sections}</div>
 
           {parentId === 1 && (
             <>
@@ -120,11 +120,11 @@ export default function Verification({ step, parentId }) {
                   avant de valider.
                 </Check>
               </div>
-              {error && <div className="text-[#CE0500] text-[14px] leading-[19px] mt-2 ml-[40px]">{error}</div>}
+              {error && <div className="mt-2 ml-[40px] text-[14px] leading-[19px] text-[#CE0500]">{error}</div>}
             </>
           )}
 
-          <div className="flex justify-content-end pt-[32px]">
+          <div className="justify-content-end flex pt-[32px]">
             <BorderButton className="mr-2" onClick={onPrevious}>
               Précédent
             </BorderButton>
@@ -146,8 +146,8 @@ function Section(section, idx) {
   const fields = section.fields.map(SectionField);
 
   return (
-    <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid" key={idx.toString()}>
-      <h2 className="mt-0 mb-[19px] font-bold text-[18px] leading-[32px]">{section.title}</h2>
+    <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px]" key={idx.toString()}>
+      <h2 className="mt-0 mb-[19px] text-[18px] font-bold leading-[32px]">{section.title}</h2>
       {fields}
     </div>
   );
@@ -155,8 +155,8 @@ function Section(section, idx) {
 
 function SectionSubtitle(section, idx) {
   return (
-    <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid" key={idx.toString()}>
-      <h2 className="mt-0 mb-[19px] font-400 text-[18px] leading-[32px]">
+    <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px]" key={idx.toString()}>
+      <h2 className="font-400 mt-0 mb-[19px] text-[18px] leading-[32px]">
         <b>{section.title} : </b> {section.subtitle}
       </h2>
     </div>
@@ -166,18 +166,18 @@ function SectionSubtitle(section, idx) {
 function SectionField(field, idx) {
   let content;
   if (field.subtitle) {
-    content = <div className="text-[16px] font-400 text-[#666666]">{field.subtitle} :</div>;
+    content = <div className="font-400 text-[16px] text-[#666666]">{field.subtitle} :</div>;
   } else {
     content = (
       <>
-        <div className="text-[16px] font-400 text-[#666666]">{field.label} :</div>
-        <div className="text-[16px] font-400 text-[#161616]">{field.value ? field.value : "-"}</div>
+        <div className="font-400 text-[16px] text-[#666666]">{field.label} :</div>
+        <div className="font-400 text-[16px] text-[#161616]">{field.value ? field.value : "-"}</div>
       </>
     );
   }
 
   return (
-    <div className={"flex justify-content-between items-center mb-[15px]" + (field.separator ? " border-t-[1px] border-t-[#E5E5E5] border-t-solid m-t-2 pt-2" : "")} key={idx}>
+    <div className={"justify-content-between mb-[15px] flex items-center" + (field.separator ? " border-t-solid m-t-2 border-t-[1px] border-t-[#E5E5E5] pt-2" : "")} key={idx}>
       {content}
     </div>
   );

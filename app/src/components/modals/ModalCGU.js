@@ -6,7 +6,7 @@ import { appURL } from "../../config";
 import Danger from "../../assets/icons/Danger";
 
 const ModalCGU = ({ isOpen = false, onAccept: handleAccept = () => {} }) => (
-  <Modal isOpen={isOpen} className="w-[512px] bg-white rounded-xl p-6">
+  <Modal isOpen={isOpen} className="w-[512px] rounded-xl bg-white p-6">
     <Modal.Header>
       <Danger />
       <h2 className="my-0 text-xl font-bold">Conditions générales d&apos;utilisation</h2>
@@ -18,7 +18,7 @@ const ModalCGU = ({ isOpen = false, onAccept: handleAccept = () => {} }) => (
       </p>
     </Modal.Content>
     <Modal.Footer>
-      <ButtonPrimary className="drop-shadow-none shadow-ninaBlue w-full" onClick={handleAccept}>
+      <ButtonPrimary className="w-full shadow-ninaBlue drop-shadow-none" onClick={handleAccept}>
         J&apos;accepte les conditions générales d&apos;utilisation
       </ButtonPrimary>
     </Modal.Footer>

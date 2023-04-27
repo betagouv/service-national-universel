@@ -312,11 +312,11 @@ export default function Consentement({ step, parentId }) {
   return (
     <>
       <Navbar step={step} />
-      <div className="bg-[#f9f6f2] flex justify-center py-10">
-        <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] text-[#161616]">
-          <h1 className="text-[24px] leading-[32px] font-bold leading-40 text-[#21213F] mb-2">Apporter votre consentement</h1>
+      <div className="flex justify-center bg-[#f9f6f2] py-10">
+        <div className="mx-auto my-0 basis-[70%] bg-white px-[102px] py-[60px] text-[#161616]">
+          <h1 className="leading-40 mb-2 text-[24px] font-bold leading-[32px] text-[#21213F]">Apporter votre consentement</h1>
 
-          <div className="text-[14px] leading-[20px] text-[#666666] mb-[32px] mt-2">
+          <div className="mb-[32px] mt-2 text-[14px] leading-[20px] text-[#666666]">
             <p>
               En tant que représentant(e) légal(e), utilisez ce bouton pour vous identifier avec FranceConnect et <b>vérifier votre identité et vos données personnelles</b> (nom,
               prénom, adresse email), ou complétez les informations <b>manuellement</b> ci-dessous.
@@ -325,7 +325,7 @@ export default function Consentement({ step, parentId }) {
 
           <div>
             {isParentFromFranceConnect ? (
-              <div className="w-[400px] text-[14px] leading-[20px] text-[#666666] mx-auto mb-[32px]">
+              <div className="mx-auto mb-[32px] w-[400px] text-[14px] leading-[20px] text-[#666666]">
                 Les information en provenance de FranceConnect du représentant légal ont bien été enregistrées.
               </div>
             ) : (
@@ -333,23 +333,23 @@ export default function Consentement({ step, parentId }) {
             )}
           </div>
 
-          <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+          <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px]">
             <div className="flex">
-              <Input className="flex-[1_0_0] mr-2" value={data.firstName} label="Prénom" onChange={(e) => setData({ ...data, firstName: e })} error={errors.firstName} />
-              <Input className="flex-[1_0_0] ml-2" value={data.lastName} label="Nom" onChange={(e) => setData({ ...data, lastName: e })} error={errors.lastName} />
+              <Input className="mr-2 flex-[1_0_0]" value={data.firstName} label="Prénom" onChange={(e) => setData({ ...data, firstName: e })} error={errors.firstName} />
+              <Input className="ml-2 flex-[1_0_0]" value={data.lastName} label="Nom" onChange={(e) => setData({ ...data, lastName: e })} error={errors.lastName} />
             </div>
             <Input className="" value={data.email} label="Adresse email" onChange={(e) => setData({ ...data, email: e })} error={errors.email} type="email" />
             <Input className="" value={data.phone} label="Votre téléphone" onChange={(e) => setData({ ...data, phone: e })} error={errors.phone} type="tel" />
           </div>
 
-          <div className="py-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+          <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] py-[32px]">
             <div className="flex items-center">
               <div className="flex-grow-1">
                 <b>Je réside</b> {formattedAddress}
               </div>
 
               <Toggle onClick={() => setData({ ...data, confirmAddress: !data.confirmAddress })} toggled={data.confirmAddress} />
-              {errors.confirmAddress ? <span className="text-red-500 text-sm">{errors.confirmAddress}</span> : null}
+              {errors.confirmAddress ? <span className="text-sm text-red-500">{errors.confirmAddress}</span> : null}
             </div>
             {!data.confirmAddress && (
               <>
@@ -363,8 +363,8 @@ export default function Consentement({ step, parentId }) {
                   error={errors.addressComplement}
                 />
                 <div className="flex">
-                  <Input className="flex-[1_0_0] mr-2" value={data.zip} label="Code postal" onChange={(e) => setData({ ...data, zip: e })} error={errors.zip} />
-                  <Input className="flex-[1_0_0] ml-2" value={data.city} label="Ville" onChange={(e) => setData({ ...data, city: e })} error={errors.city} />
+                  <Input className="mr-2 flex-[1_0_0]" value={data.zip} label="Code postal" onChange={(e) => setData({ ...data, zip: e })} error={errors.zip} />
+                  <Input className="ml-2 flex-[1_0_0]" value={data.city} label="Ville" onChange={(e) => setData({ ...data, city: e })} error={errors.city} />
                 </div>
                 {data.addressType === ABROAD ? (
                   <Input className="" value={data.country} label="Pays de résidence" onChange={(e) => setData({ ...data, country: e })} error={errors.country} />
@@ -387,7 +387,7 @@ export default function Consentement({ step, parentId }) {
           </div>
 
           {parentId === 1 && (
-            <div className="py-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+            <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] py-[32px]">
               <AuthorizeBlock title="Participation au SNU" value={data.allowSNU} onChange={(e) => setData({ ...data, allowSNU: e })} error={errors.allowSNU}>
                 <b>{youngFullname}</b> à participer à la session <b>{sessionDate}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
                 réalisation d&apos;une mission d&apos;intérêt général.
@@ -430,7 +430,7 @@ export default function Consentement({ step, parentId }) {
             </div>
           )}
           {(data.allowSNU || parentId === 2) && (
-            <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+            <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px]">
               {/*<AuthorizeBlock
                 title="Utilisation d’autotests COVID"
                 value={data.allowCovidAutotest}
@@ -484,7 +484,7 @@ export default function Consentement({ step, parentId }) {
                   des préfectures à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou séparément, sur
                   leurs publications respectives.{" "}
                   {!imageRightsExplanationShown && (
-                    <a className="underline whitespace-nowrap" href="#" onClick={toggleImageRightsExplanationShown}>
+                    <a className="whitespace-nowrap underline" href="#" onClick={toggleImageRightsExplanationShown}>
                       Lire plus
                     </a>
                   )}
@@ -510,7 +510,7 @@ export default function Consentement({ step, parentId }) {
             </div>
           )}
 
-          <div className="mt-[32px] pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+          <div className="border-t-solid mt-[32px] border-t-[1px] border-t-[#E5E5E5] pt-[32px]">
             {errors.global && <ErrorMessage className="mb-[32px]">{errors.global}</ErrorMessage>}
             <div className="flex justify-end ">
               <BorderButton className="mr-2" onClick={onPrevious}>

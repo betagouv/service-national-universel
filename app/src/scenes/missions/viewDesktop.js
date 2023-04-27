@@ -178,10 +178,10 @@ export default function viewDesktop() {
 
   return (
     <div className="flex">
-      <div className="bg-white mx-4 pb-12 my-4 rounded-xl w-full">
+      <div className="mx-4 my-4 w-full rounded-xl bg-white pb-12">
         {/* BEGIN HEADER */}
 
-        <div className="flex flex-col lg:flex-row justify-between pt-8 px-12  border-gray-100 gap-4">
+        <div className="flex flex-col justify-between gap-4 border-gray-100 px-12  pt-8 lg:flex-row">
           <div className="flex gap-4">
             {/* icon */}
             <div className="flex items-center">
@@ -191,32 +191,32 @@ export default function viewDesktop() {
             {/* infos mission */}
             <div className="flex flex-col">
               <div className="">
-                <div className="text-gray-500 text-xs uppercase">{mission.structureName}</div>
-                <div className="text-gray-900 font-bold text-base">{mission.name}</div>
-                <div className="flex gap-2 flex-wrap">
+                <div className="text-xs uppercase text-gray-500">{mission.structureName}</div>
+                <div className="text-base font-bold text-gray-900">{mission.name}</div>
+                <div className="flex flex-wrap gap-2">
                   {getTags()?.map((e, i) => (
-                    <div key={i} className="flex justify-center items-center text-gray-600 border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">
+                    <div key={i} className="flex items-center justify-center rounded-full border-[1px] border-gray-200 px-4 py-1 text-xs text-gray-600">
                       {e}
                     </div>
                   ))}
                   {mission.isMilitaryPreparation === "true" ? (
-                    <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">Préparation militaire</div>
+                    <div className="flex items-center justify-center rounded-full border-[1px] border-gray-200 bg-blue-900 px-4 py-1 text-xs text-white">Préparation militaire</div>
                   ) : null}
                   {mission?.hebergement === "true" && (
                     <>
                       {mission.hebergementPayant === "true" ? (
-                        <div className="p-2 bg-yellow-100 rounded-full">
+                        <div className="rounded-full bg-yellow-100 p-2">
                           <House id="tooltip-payant" tooltip={"Hébergement payant proposé"} color="#D97706" />
                         </div>
                       ) : (
-                        <div className="p-2 bg-green-50 rounded-full">
+                        <div className="rounded-full bg-green-50 p-2">
                           <House id="tooltip-gratuit" tooltip={"Hébergement gratuit proposé"} color="#059669" />
                         </div>
                       )}
                     </>
                   )}
                   {mission?.duration ? (
-                    <div className="flex items-center gap-1 ml-2">
+                    <div className="ml-2 flex items-center gap-1">
                       <AiOutlineClockCircle className="text-gray-400" />
                       <div className="text-xs">{mission.duration} heure(s)</div>
                     </div>
@@ -225,7 +225,7 @@ export default function viewDesktop() {
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-center mt-3 lg:!mt-0">
+          <div className="mt-3 flex items-center justify-center lg:!mt-0">
             {mission.application ? (
               <ApplicationStatus
                 application={mission.application}
@@ -258,23 +258,23 @@ export default function viewDesktop() {
         {/* Bouton de contrat */}
 
         {contract && (
-          <div className="flex gap-7 mt-6 mx-12 flex-col">
+          <div className="mx-12 mt-6 flex flex-col gap-7">
             {contractHasAllValidation(contract, young) ? (
               <div className="relative w-1/6" ref={refContractButton}>
                 <button
                   disabled={loading}
-                  className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 hover:border-blue-500 hover:bg-blue-500 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
+                  className="flex w-full items-center justify-between gap-3 rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 hover:border-blue-500 hover:bg-blue-500 disabled:cursor-wait disabled:opacity-50"
                   onClick={() => setOpenContractButton((e) => !e)}>
                   <div className="flex items-center gap-2">
-                    <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d&apos;engagement</span>
+                    <span className="whitespace-nowrap text-xs font-medium leading-4 text-white">Contrat d&apos;engagement</span>
                   </div>
-                  <ChevronDown className="text-white font-medium" />
+                  <ChevronDown className="font-medium text-white" />
                 </button>
                 {/* display options */}
                 <div
                   className={`${
                     openContractButton ? "block" : "hidden"
-                  }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
+                  }  absolute right-0 top-[40px] z-50 !min-w-full overflow-hidden rounded-lg bg-white shadow transition lg:!min-w-3/4`}>
                   <div
                     key="download"
                     onClick={() => {
@@ -283,8 +283,8 @@ export default function viewDesktop() {
                       setOpenContractButton(false);
                       setLoading(false);
                     }}>
-                    <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                      <Download className="text-gray-400 w-4 h-4" />
+                    <div className="group flex cursor-pointer items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
+                      <Download className="h-4 w-4 text-gray-400" />
                       <div>Télécharger</div>
                     </div>
                   </div>
@@ -292,17 +292,17 @@ export default function viewDesktop() {
                 </div>
               </div>
             ) : (
-              <div className="bg-gray-50 rounded-lg  px-10 py-6">
+              <div className="rounded-lg bg-gray-50  px-10 py-6">
                 <div className="flex justify-between">
                   <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
-                  <div className="text-xs font-normal px-2  bg-sky-100 text-sky-500 rounded-sm items-center flex space-x-1">
+                  <div className="flex items-center space-x-1  rounded-sm bg-sky-100 px-2 text-xs font-normal text-sky-500">
                     <AiFillClockCircle className="text-sky-500" />
                     <div>Contrat {contract?.invitationSent ? "envoyé" : "en brouillon"}</div>
                   </div>
                 </div>
-                <div className="text-sm mt-1">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
+                <div className="mt-1 text-sm">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
                 {contract?.invitationSent && (
-                  <div className="grid gap-4 grid-cols-4   mt-4">
+                  <div className="mt-4 grid grid-cols-4   gap-4">
                     <StatusContractPeople
                       value={contract?.projectManagerStatus}
                       description="Représentant de l’État"
@@ -347,18 +347,18 @@ export default function viewDesktop() {
           </div>
         )}
 
-        <div className="flex flex-col lg:flex-row my-8 ">
-          <div className="flex flex-col w-full lg:w-1/2 px-12">
-            <div className="text-lg font-bold mb-2">La mission en quelques mots</div>
+        <div className="my-8 flex flex-col lg:flex-row ">
+          <div className="flex w-full flex-col px-12 lg:w-1/2">
+            <div className="mb-2 text-lg font-bold">La mission en quelques mots</div>
             <Detail title="Format" content={translate(mission.format)} />
             <Detail title="Objectifs" content={mission.description} />
             <Detail title="Actions" content={mission.actions} />
             <Detail title="Contraintes" content={mission.contraintes} />
             <InfoStructure title="à propos de la structure" structure={mission.structureId} />
           </div>
-          <div className="flex flex-col w-full lg:w-1/2 px-12 lg:border-l-[1px] lg:border-gray-100">
+          <div className="flex w-full flex-col px-12 lg:w-1/2 lg:border-l-[1px] lg:border-gray-100">
             <div className="flex items-center justify-between">
-              <div className="text-lg font-bold mb-2">Informations pratiques</div>
+              <div className="mb-2 text-lg font-bold">Informations pratiques</div>
               <DoubleDayTile date1={mission.startAt} date2={mission.endAt} />
             </div>
             <Detail
@@ -372,12 +372,12 @@ export default function viewDesktop() {
             <Detail title="Période pour réaliser la mission" content={mission.period} />
             <Detail title="Lieu" content={[mission.address, mission.zip, mission.city, mission.department]} />
             {mission?.hebergement === "true" && (
-              <div className="bg-white shadow-sm rounded-lg p-3">
+              <div className="rounded-lg bg-white p-3 shadow-sm">
                 {mission.hebergementPayant === "true" ? (
                   <div>
                     <div className="flex flex-row justify-between">
                       <div className="text-sm font-bold">Hébergement payant proposé</div>
-                      <div className="p-2 bg-yellow-100 rounded-full">
+                      <div className="rounded-full bg-yellow-100 p-2">
                         <House color="#D97706" id="tooltip-payant" tooltip={"Hébergement payant proposé"} />
                       </div>
                     </div>
@@ -389,7 +389,7 @@ export default function viewDesktop() {
                   <div>
                     <div className="flex flex-row justify-between">
                       <div className="text-sm font-bold">Hébergement gratuit proposé</div>
-                      <div className="p-2 bg-green-50 rounded-full">
+                      <div className="rounded-full bg-green-50 p-2">
                         <House color="#059669" id="tooltip-gratuit" tooltip={"Hébergement gratuit proposé"} />
                       </div>
                     </div>
@@ -415,18 +415,18 @@ export default function viewDesktop() {
             <hr className="text-gray-100" />
             <div className="mx-8 mt-8">
               <div className="flex justify-between">
-                <div className="text-lg leading-6 font-semibold">Pièces jointes</div>
-                <div className="flex space-x-4 items-center">
+                <div className="text-lg font-semibold leading-6">Pièces jointes</div>
+                <div className="flex items-center space-x-4">
                   {optionsType.reduce((nmb, option) => nmb + mission.application[option].length, 0) !== 0 && (
                     <div
-                      className="group flex items-center rounded-lg text-blue-600 text-center text-sm py-2 px-10 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out"
+                      className="group flex items-center rounded-lg border-[1px] border-blue-600 py-2 px-10 text-center text-sm text-blue-600 transition duration-100 ease-in-out hover:bg-blue-600 hover:text-white"
                       onClick={() => setOpenAttachments(!openAttachments)}>
                       Voir mes pièces jointes
-                      <BsChevronDown className={`ml-3 text-blue-600 group-hover:text-white h-5 w-5 ${openAttachments ? "rotate-180" : ""}`} />
+                      <BsChevronDown className={`ml-3 h-5 w-5 text-blue-600 group-hover:text-white ${openAttachments ? "rotate-180" : ""}`} />
                     </div>
                   )}
                   <div
-                    className="text-white bg-blue-600  rounded-full p-2 "
+                    className="rounded-full bg-blue-600  p-2 text-white "
                     onClick={() => {
                       setModalDocument({
                         isOpen: true,
@@ -438,7 +438,7 @@ export default function viewDesktop() {
                 </div>
               </div>
               {openAttachments && (
-                <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full ">
+                <div className="my-4 flex w-full flex-row gap-4 overflow-x-auto ">
                   {optionsType.map(
                     (option, index) =>
                       mission.application[option].length > 0 && (
@@ -518,11 +518,11 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
     return (
       <div className="flex flex-col items-center gap-2">
         <WithTooltip tooltipText="Vous ne pouvez candidater qu'à 15 missions différentes.">
-          <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
+          <button disabled className="cursor-pointer rounded-lg bg-blue-600 px-12 py-2 text-sm text-white disabled:bg-blue-600/60">
             Candidater
           </button>
         </WithTooltip>
-        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places restantes</div>
+        <div className="text-xs font-normal leading-none text-gray-500">{placesLeft} places restantes</div>
       </div>
     );
 
@@ -530,11 +530,11 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
     return (
       <div className="flex flex-col items-center gap-2">
         <WithTooltip tooltipText="Pour candidater, vous devez avoir terminé votre séjour de cohésion">
-          <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
+          <button disabled className="cursor-pointer rounded-lg bg-blue-600 px-12 py-2 text-sm text-white disabled:bg-blue-600/60">
             Candidater
           </button>
         </WithTooltip>
-        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places restantes</div>
+        <div className="text-xs font-normal leading-none text-gray-500">{placesLeft} places restantes</div>
       </div>
     );
 
@@ -542,11 +542,11 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
     return (
       <div className="flex flex-col items-center gap-2">
         <WithTooltip tooltipText="Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)">
-          <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
+          <button disabled className="cursor-pointer rounded-lg bg-blue-600 px-12 py-2 text-sm text-white disabled:bg-blue-600/60">
             Candidater
           </button>
         </WithTooltip>
-        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places restantes</div>
+        <div className="text-xs font-normal leading-none text-gray-500">{placesLeft} places restantes</div>
       </div>
     );
 
@@ -554,27 +554,27 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
     return (
       <div className="flex flex-col items-center gap-2">
         <WithTooltip tooltipText="Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater">
-          <button className="px-12 py-2 rounded-lg text-white bg-blue-600/60  text-sm cursor-pointer">Candidater</button>
+          <button className="cursor-pointer rounded-lg bg-blue-600/60 px-12 py-2  text-sm text-white">Candidater</button>
         </WithTooltip>
-        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places restantes</div>
+        <div className="text-xs font-normal leading-none text-gray-500">{placesLeft} places restantes</div>
       </div>
     );
   if (disabledIncomplete)
     return (
       <div className="flex flex-col items-center gap-2">
         <WithTooltip tooltipText="Pour candidater, veuillez téléverser le dossier d’éligibilité présent en bas de page">
-          <button className="px-12 py-2 rounded-lg text-white bg-blue-600  text-sm cursor-pointer" onClick={() => scrollToBottom()}>
+          <button className="cursor-pointer rounded-lg bg-blue-600 px-12 py-2  text-sm text-white" onClick={() => scrollToBottom()}>
             Candidater
           </button>
         </WithTooltip>
-        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places restantes</div>
+        <div className="text-xs font-normal leading-none text-gray-500">{placesLeft} places restantes</div>
       </div>
     );
 
   return (
     <div className="flex flex-col items-center gap-2">
       <button
-        className="px-12 py-2 rounded-lg text-white bg-blue-600 text-sm cursor-pointer "
+        className="cursor-pointer rounded-lg bg-blue-600 px-12 py-2 text-sm text-white "
         onClick={() => {
           if (isMilitaryPreparation === "true") {
             plausibleEvent("Phase 2/CTA - PM - Candidater");
@@ -585,7 +585,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
         }}>
         Candidater
       </button>
-      <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places restantes</div>
+      <div className="text-xs font-normal leading-none text-gray-500">{placesLeft} places restantes</div>
     </div>
   );
 };
@@ -628,11 +628,11 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
   if (["WAITING_VALIDATION", "WAITING_VERIFICATION", "REFUSED", "CANCEL"].includes(application.status)) {
     return (
       <>
-        <div className="flex flex-col justify-center items-center lg:items-end gap-4">
+        <div className="flex flex-col items-center justify-center gap-4 lg:items-end">
           <div className="flex items-center gap-6">
             {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? (
               <button
-                className={`group flex items-center gap-1 ${loading ? "hover:scale-100 cursor-wait" : "cursor-pointer hover:scale-105"}`}
+                className={`group flex items-center gap-1 ${loading ? "cursor-wait hover:scale-100" : "cursor-pointer hover:scale-105"}`}
                 disabled={loading}
                 onClick={() =>
                   setCancelModal({
@@ -643,14 +643,14 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
                   })
                 }>
                 <IoMdInformationCircleOutline className={`h-4 w-4 ${loading ? "text-gray-400" : "text-gray-700"}`} />
-                <div className={`text-xs leading-none font-normal underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Annuler cette candidature</div>
+                <div className={`text-xs font-normal leading-none underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Annuler cette candidature</div>
               </button>
             ) : null}
-            <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
+            <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} rounded-sm px-2 py-[2px]`}>
               {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? "Candidature en attente" : translateApplication(application.status)}
             </div>
           </div>
-          <div className="text-xs leading-none font-normal text-gray-500">Places restantes : {mission.placesLeft}</div>
+          <div className="text-xs font-normal leading-none text-gray-500">Places restantes : {mission.placesLeft}</div>
         </div>
         <ModalConfirm
           isOpen={cancelModal?.isOpen}
@@ -668,11 +668,11 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
   if (["IN_PROGRESS", "VALIDATED", "DONE", "ABANDON"].includes(application.status)) {
     return (
       <>
-        <div className="flex flex-col justify-center items-center lg:items-end gap-4">
+        <div className="flex flex-col items-center justify-center gap-4 lg:items-end">
           <div className="flex items-center gap-6">
             {["IN_PROGRESS", "VALIDATED"].includes(application.status) ? (
               <button
-                className={`group flex items-center gap-1 ${loading ? "hover:scale-100 cursor-wait" : "cursor-pointer hover:scale-105"}`}
+                className={`group flex items-center gap-1 ${loading ? "cursor-wait hover:scale-100" : "cursor-pointer hover:scale-105"}`}
                 disabled={loading}
                 onClick={() =>
                   setCancelModal({
@@ -683,15 +683,15 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
                   })
                 }>
                 <IoMdInformationCircleOutline className={`h-4 w-4 ${loading ? "text-gray-400" : "text-gray-700"}`} />
-                <div className={`text-xs leading-none font-normal underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Abandonner la mission</div>
+                <div className={`text-xs font-normal leading-none underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Abandonner la mission</div>
               </button>
             ) : null}
-            <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
+            <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} rounded-sm px-2 py-[2px]`}>
               {translateApplication(application.status)}
             </div>
           </div>
           {tutor ? (
-            <div className="border border-gray-200 rounded-lg py-2 px-3 flex gap-6 mb-4">
+            <div className="mb-4 flex gap-6 rounded-lg border border-gray-200 py-2 px-3">
               <div className="flex flex-col gap-1">
                 <div className="text-sm font-bold">Contacter mon tuteur</div>
                 <div className="text-xs text-gray-600">
@@ -699,7 +699,7 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
                 </div>
               </div>
               <MdOutlineContentCopy
-                className="text-gray-400 hover:text-blue-600 cursor-pointer h-4 w-4"
+                className="h-4 w-4 cursor-pointer text-gray-400 hover:text-blue-600"
                 onClick={() => {
                   copyToClipboard(tutor.email);
                   toastr.info("L'email de votre tuteur a été copié dans le presse-papier");
@@ -724,23 +724,23 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
 
   if (["WAITING_ACCEPTATION"].includes(application.status)) {
     return (
-      <div className="flex flex-col justify-center items-center gap-4">
-        <div className="text-xs text-center leading-none font-normal text-gray-500">
+      <div className="flex flex-col items-center justify-center gap-4">
+        <div className="text-center text-xs font-normal leading-none text-gray-500">
           Cette mission vous a été proposée <br /> par votre référent
         </div>
         <div className="flex items-center gap-3">
           {disabledAge || disabledIncomplete || disabledPmRefused ? (
             <WithTooltip tooltipText={message}>
               <button
-                className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-400"
+                className="group flex items-center justify-center rounded-lg bg-blue-400 px-4 py-2"
                 onClick={() => disabledIncomplete && !disabledPmRefused && !disabledAge && scrollToBottom()}>
-                <CheckCircle className="text-blue-400 mr-2 w-5 h-5" />
-                <span className="text-sm leading-5 font-medium text-white">Accepter</span>
+                <CheckCircle className="mr-2 h-5 w-5 text-blue-400" />
+                <span className="text-sm font-medium leading-5 text-white">Accepter</span>
               </button>
             </WithTooltip>
           ) : (
             <button
-              className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-500 transition duration-300 ease-in-out disabled:bg-blue-400"
+              className="group flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 transition duration-300 ease-in-out hover:bg-blue-500 disabled:bg-blue-400"
               disabled={loading}
               onClick={async () => {
                 try {
@@ -764,20 +764,20 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
                   toastr.error("Oups, une erreur est survenue lors de la candidature.");
                 }
               }}>
-              <CheckCircle className="text-blue-600 mr-2 w-5 h-5 hover:text-blue-500 group-disabled:text-blue-400" />
-              <span className="text-sm leading-5 font-medium text-white">Accepter</span>
+              <CheckCircle className="mr-2 h-5 w-5 text-blue-600 hover:text-blue-500 group-disabled:text-blue-400" />
+              <span className="text-sm font-medium leading-5 text-white">Accepter</span>
             </button>
           )}
 
           <button
-            className="group flex items-center justify-center rounded-lg shadow-ninaButton px-4 py-2 transition duration-300 ease-in-out border-[1px] border-[#fff] hover:border-gray-200 disabled:shadow-none disabled:border-gray-200"
+            className="group flex items-center justify-center rounded-lg border-[1px] border-[#fff] px-4 py-2 shadow-ninaButton transition duration-300 ease-in-out hover:border-gray-200 disabled:border-gray-200 disabled:shadow-none"
             disabled={loading}
             onClick={() => updateApplication(APPLICATION_STATUS.CANCEL)}>
-            <XCircle className="text-red-500 mr-2 w-5 h-5" />
-            <span className="text-sm leading-5 font-medium text-black">Décliner</span>
+            <XCircle className="mr-2 h-5 w-5 text-red-500" />
+            <span className="text-sm font-medium leading-5 text-black">Décliner</span>
           </button>
         </div>
-        <div className="text-xs leading-none font-normal text-gray-500">Places restantes : {mission.placesLeft}</div>
+        <div className="text-xs font-normal leading-none text-gray-500">Places restantes : {mission.placesLeft}</div>
       </div>
     );
   }
@@ -787,9 +787,9 @@ const Detail = ({ title, content }) => {
   const [value] = useState((Array.isArray(content) && content) || [content]);
   return content && content.length ? (
     <div className="my-3">
-      <div className="text-gray-500 text-xs uppercase">{title}</div>
+      <div className="text-xs uppercase text-gray-500">{title}</div>
       {value.map((e, i) => (
-        <div key={i} className="text-sm leading-5 font-normal" dangerouslySetInnerHTML={{ __html: htmlCleaner(translate(e)) }} />
+        <div key={i} className="text-sm font-normal leading-5" dangerouslySetInnerHTML={{ __html: htmlCleaner(translate(e)) }} />
       ))}
     </div>
   ) : (
@@ -818,8 +818,8 @@ const InfoStructure = ({ title, structure }) => {
 
   return value ? (
     <div className="my-3">
-      <div className="text-gray-500 text-xs uppercase">{title}</div>
-      <div className="text-sm leading-5 font-normal">
+      <div className="text-xs uppercase text-gray-500">{title}</div>
+      <div className="text-sm font-normal leading-5">
         {rest ? (
           <div className="my-2">
             <div dangerouslySetInnerHTML={{ __html: preview + (expandNote ? rest : " ...") + " " }} />
@@ -845,11 +845,11 @@ const StatusContractPeople = ({ value, description, firstName, lastName }) => (
       </div>
     </WithTooltip>
     <div>
-      <div className="flex font-semibold space-x-2">
+      <div className="flex space-x-2 font-semibold">
         <div>{firstName}</div>
         <div>{lastName?.toUpperCase()}</div>
       </div>
-      <div className="text-gray-500 text-xs">{description}</div>
+      <div className="text-xs text-gray-500">{description}</div>
     </div>
   </div>
 );
@@ -873,7 +873,7 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
   return (
     <>
       <div
-        className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer"
+        className="group flex cursor-pointer items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50"
         onClick={() =>
           setModalMail({
             isOpen: true,
@@ -882,7 +882,7 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
             message: `Vous allez recevoir le document par mail à l'adresse ${young.email}.`,
           })
         }>
-        <HiOutlineMail className="text-gray-400 w-4 h-4" />
+        <HiOutlineMail className="h-4 w-4 text-gray-400" />
         <div className="text-sm">Envoyer par mail</div>
       </div>
       <ModalConfirm

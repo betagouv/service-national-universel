@@ -54,7 +54,7 @@ export default function Index() {
 
   return (
     <PreInscriptionContextProvider>
-      <div className="flex flex-col min-h-screen justify-between bg-beige-gris-galet-975">
+      <div className="flex min-h-screen flex-col justify-between bg-beige-gris-galet-975">
         <Header />
         <Switch>
           <SentryRoute path="/preinscription/:step" component={Step} />;

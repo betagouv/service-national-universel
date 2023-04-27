@@ -8,12 +8,12 @@ export default function JDMDone() {
   const [isCensusNotDoneOpen, setIsCensusNotDoneOpen] = React.useState(false);
 
   return (
-    <div className="mt-8 md:mt-0 mb-16 md:mb-8 md:px-10 space-y-3">
+    <div className="mt-8 mb-16 space-y-3 md:mt-0 md:mb-8 md:px-10">
       <div className="flex justify-center">
         <Unlock />
       </div>
-      <p className="text-lg text-center font-bold">Vous avez participé à la JDM</p>
-      <p className="leading-7 text-xl text-center font-bold">
+      <p className="text-center text-lg font-bold">Vous avez participé à la JDM</p>
+      <p className="text-center text-xl font-bold leading-7">
         Obtenez votre certificat <br /> de participation à la JDC !
       </p>
 

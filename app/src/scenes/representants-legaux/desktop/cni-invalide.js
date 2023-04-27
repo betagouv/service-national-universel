@@ -59,9 +59,9 @@ export default function CniInvalide() {
   }
 
   return (
-    <div className="bg-[#f9f6f2] flex justify-center py-10">
-      <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] text-[#161616] relative">
-        <h2 className="font-bold text-[#161616] text-[24px] leading-[32px] pb-[32px] border-b-solid border-b-[1px] border-b-[#E5E5E5] m-[0] mb-[32px]">
+    <div className="flex justify-center bg-[#f9f6f2] py-10">
+      <div className="relative mx-auto my-0 basis-[70%] bg-white px-[102px] py-[60px] text-[#161616]">
+        <h2 className="border-b-solid m-[0] mb-[32px] border-b-[1px] border-b-[#E5E5E5] pb-[32px] text-[24px] font-bold leading-[32px] text-[#161616]">
           Déclaration sur l’honneur
         </h2>
         <p>
@@ -76,7 +76,7 @@ export default function CniInvalide() {
             engager les démarches de renouvellement de cette pièce d’identité.
           </p>
         </Check>
-        <div className="mt-[32px] pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid flex justify-end">
+        <div className="border-t-solid mt-[32px] flex justify-end border-t-[1px] border-t-[#E5E5E5] pt-[32px]">
           <PlainButton onClick={onSubmit} spinner={saving}>
             Valider ma déclaration
           </PlainButton>

@@ -5,15 +5,15 @@ import IconTwitter from "../assets/IconTwitter";
 
 export default function Socials() {
   return (
-    <div className="flex justify-end mx-3 mt-3 gap-8 items-center text-[#7A90C3]">
+    <div className="mx-3 mt-3 flex items-center justify-end gap-8 text-[#7A90C3]">
       <a href="https://www.facebook.com/snu.jemengage/" target="_blank" rel="noreferrer">
-        <IconFacebook className="hover:text-[#D1DAEF] transition-colors duration-200" />
+        <IconFacebook className="transition-colors duration-200 hover:text-[#D1DAEF]" />
       </a>
       <a href="https://twitter.com/snujemengage" target="_blank" rel="noreferrer">
-        <IconTwitter className="hover:text-[#D1DAEF] transition-colors duration-200" />
+        <IconTwitter className="transition-colors duration-200 hover:text-[#D1DAEF]" />
       </a>
       <a href="https://www.instagram.com/snujemengage/" target="_blank" rel="noreferrer">
-        <IconInstagram className="hover:text-[#D1DAEF] transition-colors duration-200" />
+        <IconInstagram className="transition-colors duration-200 hover:text-[#D1DAEF]" />
       </a>
     </div>
   );

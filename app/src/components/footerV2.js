@@ -5,30 +5,30 @@ import SNU from "../assets/logo-snu.png";
 
 const Footer = () => {
   return (
-    <footer className="flex flex-col md:flex-row px-[1rem] md:px-[7rem] w-full bg-white pt-[1rem] md:pt-[2rem] pb-32 md:pb-8 justify-between border-t-2 md:border-t-blue-france-sun-113 mt-[0rem] md:mt-[4rem]">
-      <div className="w-full flex items-center">
+    <footer className="mt-[0rem] flex w-full flex-col justify-between border-t-2 bg-white px-[1rem] pt-[1rem] pb-32 md:mt-[4rem] md:flex-row md:border-t-blue-france-sun-113 md:px-[7rem] md:pt-[2rem] md:pb-8">
+      <div className="flex w-full items-center">
         <img src={LogoFr} alt="République Française" className="w-26 h-24" />
-        <img src={SNU} alt="Logo du SNU" className="w-20 h-20 flex-none ml-8 hidden md:block" />
+        <img src={SNU} alt="Logo du SNU" className="ml-8 hidden h-20 w-20 flex-none md:block" />
       </div>
       <div className="w-full text-xs">
-        <p className="leading-relaxed md:leading-loose py-[1rem] md:py-0 text-slate-500">
+        <p className="py-[1rem] leading-relaxed text-slate-500 md:py-0 md:leading-loose">
           Le Service national universel s’adresse à tous les jeunes de 15 à 17 ans qui souhaitent vivre une belle expérience collective, se rendre utile aux autres, créer des liens
           forts et se découvrir un talent pour l’engagement&nbsp;!
         </p>
-        <nav className="flex flex-wrap gap-6 font-bold pt-2">
-          <a href="https://www.legifrance.gouv.fr/" target="_blank" rel="noreferrer" className="flex gap-2 items-center">
+        <nav className="flex flex-wrap gap-6 pt-2 font-bold">
+          <a href="https://www.legifrance.gouv.fr/" target="_blank" rel="noreferrer" className="flex items-center gap-2">
             legifrance.gouv.fr
             <LinkTo />
           </a>
-          <a href="https://www.gouvernement.fr/" target="_blank" rel="noreferrer" className="flex gap-2 items-center">
+          <a href="https://www.gouvernement.fr/" target="_blank" rel="noreferrer" className="flex items-center gap-2">
             gouvernement.fr
             <LinkTo />
           </a>
-          <a href="https://www.service-public.fr/" target="_blank" rel="noreferrer" className="flex gap-2 items-center">
+          <a href="https://www.service-public.fr/" target="_blank" rel="noreferrer" className="flex items-center gap-2">
             service-public.fr
             <LinkTo />
           </a>
-          <a href="https://www.data.gouv.fr/fr/" target="_blank" rel="noreferrer" className="flex gap-2 items-center">
+          <a href="https://www.data.gouv.fr/fr/" target="_blank" rel="noreferrer" className="flex items-center gap-2">
             data.gouv.fr
             <LinkTo />
           </a>

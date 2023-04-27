@@ -150,7 +150,7 @@ export default function StepUpload() {
             {e.message && ` : ${e.message}`}
           </ErrorMessage>
         ))}
-      <div className="w-full my-16 flex justify-around">
+      <div className="my-16 flex w-full justify-around">
         <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
         {ID[category].imgBack && <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />}
       </div>
@@ -158,9 +158,9 @@ export default function StepUpload() {
         Toutes les informations doivent être <strong>lisibles</strong>, le document doit être visible <strong>entièrement</strong>, la photo doit être <strong>nette</strong>. Le
         document doit être téléversé en <strong>recto</strong> et <strong>verso</strong>.
       </div>
-      <hr className="my-8 h-px bg-gray-200 border-0" />
+      <hr className="my-8 h-px border-0 bg-gray-200" />
       <div className="my-4">Ajouter un fichier</div>
-      <div className="text-gray-500 text-sm my-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Trois fichiers maximum.</div>
+      <div className="my-4 text-sm text-gray-500">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Trois fichiers maximum.</div>
       <input
         type="file"
         multiple
@@ -174,25 +174,25 @@ export default function StepUpload() {
         }}
         className="hidden"
       />
-      <div className="flex w-full my-4">
+      <div className="my-4 flex w-full">
         <div>
-          <label htmlFor="file-upload" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
+          <label htmlFor="file-upload" className="cursor-pointer rounded bg-[#EEEEEE] py-2 px-3 text-sm text-gray-600">
             Parcourir...
           </label>
         </div>
         <div className="ml-4 mt-2">
           {files ? (
             Array.from(files).map((e) => (
-              <p className="text-gray-800 text-sm" key={e.name}>
+              <p className="text-sm text-gray-800" key={e.name}>
                 {e.name}
               </p>
             ))
           ) : (
-            <div className="text-gray-800 text-sm">Aucun fichier sélectionné.</div>
+            <div className="text-sm text-gray-800">Aucun fichier sélectionné.</div>
           )}
         </div>
       </div>
-      <div className="text-gray-800 text-sm my-4">
+      <div className="my-4 text-sm text-gray-800">
         Vous avez besoin d’aide pour téléverser les documents ?{" "}
         <a href="https://support.snu.gouv.fr/base-de-connaissance/je-televerse-un-document/" className="underline">
           Cliquez ici
@@ -202,11 +202,11 @@ export default function StepUpload() {
       {error?.text && young?.files?.cniFiles?.length + files?.length > 2 && <MyDocs />}
       {(files || date) && (
         <>
-          <hr className="my-8 h-px bg-gray-200 border-0" />
-          <div className="my-4 w-full flex">
+          <hr className="my-8 h-px border-0 bg-gray-200" />
+          <div className="my-4 flex w-full">
             <div className="w-1/2">
               <div className="text-xl font-medium">Renseignez la date d’expiration</div>
-              <div className="text-gray-600 leading-loose mt-2 mb-8">
+              <div className="mt-2 mb-8 leading-loose text-gray-600">
                 Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
                 ).
               </div>
@@ -218,7 +218,7 @@ export default function StepUpload() {
                     {e.message && ` : ${e.message}`}
                   </ErrorMessage>
                 ))}
-              <p className="text-gray-800 mt-4">Date d&apos;expiration</p>
+              <p className="mt-4 text-gray-800">Date d&apos;expiration</p>
               <DatePickerList
                 value={date}
                 onChange={(date) => {
@@ -228,7 +228,7 @@ export default function StepUpload() {
               />
             </div>
             <div className="w-1/2">
-              <img className="h-32 mx-auto" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
+              <img className="mx-auto h-32" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
             </div>
           </div>
         </>

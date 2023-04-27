@@ -39,9 +39,9 @@ export default function Presentation({ step, parentId }) {
   }
   if (["NOT_ELIGIBLE", "ABANDONED", "REFUSED"].includes(young.status))
     return (
-      <div className="bg-[#f9f6f2] flex justify-center py-10">
-        <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] text-[#161616]">
-          <h1 className="text-[31px] font-bold leading-40 text-[#21213F] mb-2">Votre accord n&apos;est plus requis</h1>
+      <div className="flex justify-center bg-[#f9f6f2] py-10">
+        <div className="mx-auto my-0 basis-[70%] bg-white px-[102px] py-[60px] text-[#161616]">
+          <h1 className="leading-40 mb-2 text-[31px] font-bold text-[#21213F]">Votre accord n&apos;est plus requis</h1>
           <div>Le jeune dont vous êtes représentant légal {translateNonNecessary(young.status)} au SNU. Votre accord n&apos;est plus requis.</div>
         </div>
       </div>
@@ -49,12 +49,12 @@ export default function Presentation({ step, parentId }) {
   return (
     <>
       <Navbar step={step} />
-      <div className="bg-[#f9f6f2] flex justify-center py-10">
-        <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] text-[#161616]">
-          <h1 className="text-[31px] font-bold leading-40 text-[#21213F] mb-2">
+      <div className="flex justify-center bg-[#f9f6f2] py-10">
+        <div className="mx-auto my-0 basis-[70%] bg-white px-[102px] py-[60px] text-[#161616]">
+          <h1 className="leading-40 mb-2 text-[31px] font-bold text-[#21213F]">
             {parentId === 2 ? <>{young.firstName} s&apos;est inscrit(e) au SNU&nbsp;!</> : <>{young.firstName} souhaite s&apos;inscrire au SNU&nbsp;!</>}
           </h1>
-          <p className="text-[17px] leading-[28px] text-[#161616] mb-8">
+          <p className="mb-8 text-[17px] leading-[28px] text-[#161616]">
             {parentId === 2 ? (
               <>Nous avons besoin de votre consentement au droit à l’image.</>
             ) : (
@@ -66,52 +66,52 @@ export default function Presentation({ step, parentId }) {
             Découvrir le SNU <LinkTo className="ml-2" />
           </BorderButton>
 
-          <div className="flex my-8 pb-8  border-b border-[#e5e5e5] border-b-solid">
-            <div className="flex-[1_0_0] mr-3 p-7 bg-[#fbfbfb]">
+          <div className="border-b-solid my-8 flex  border-b border-[#e5e5e5] pb-8">
+            <div className="mr-3 flex-[1_0_0] bg-[#fbfbfb] p-7">
               <ul>
-                <li className="flex items-center mb-4 text-[14px] font-500">
+                <li className="font-500 mb-4 flex items-center text-[14px]">
                   <CheckCircleStroke stroke="#979FAA" className="mr-2 flex-shrink-0" />
                   Dispositif financé par l&apos;État
                 </li>
-                <li className="flex items-center mb-4 text-[14px] font-500">
+                <li className="font-500 mb-4 flex items-center text-[14px]">
                   <CheckCircleStroke stroke="#D1D5DB" className="mr-2 flex-shrink-0" />
                   80 000 jeunes déjà engagés
                 </li>
-                <li className="flex items-center mb-4 text-[14px] font-500">
+                <li className="font-500 mb-4 flex items-center text-[14px]">
                   <CheckCircleStroke stroke="#979FAA" className="mr-2 flex-shrink-0" />
                   Renforcement de la cohésion nationale en développant une culture de l&apos;engagement
                 </li>
-                <li className="flex items-center mb-4 text-[14px] font-500">
+                <li className="font-500 mb-4 flex items-center text-[14px]">
                   <CheckCircleStroke stroke="#D1D5DB" className="mr-2 flex-shrink-0" />
                   Mixité sociale et territoriale
                 </li>
-                <li className="flex items-center text-[14px] font-500">
+                <li className="font-500 flex items-center text-[14px]">
                   <CheckCircleStroke stroke="#979FAA" className="mr-2 flex-shrink-0" />
                   Accompagnement à l&apos;insertion sociale et professionnelle
                 </li>
               </ul>
             </div>
-            <div className="flex-[1_0_0] ml-3 py-7 px-[20px] bg-[#fbfbfb]">
-              <h2 className="text-[19px] font-bold mb-1.5 mt-0">Première étape</h2>
+            <div className="ml-3 flex-[1_0_0] bg-[#fbfbfb] py-7 px-[20px]">
+              <h2 className="mb-1.5 mt-0 text-[19px] font-bold">Première étape</h2>
               <p className="text-[14px] font-bold">Le séjour de cohésion : 2 semaines dans un autre département</p>
-              <div className="flex items-center justify-center mt-9">
+              <div className="mt-9 flex items-center justify-center">
                 <div className="relative ">
                   <CalendarBig />
-                  <CheckCircleStroke stroke="#E1000F" className="absolute bottom-[-5px] right-[-5px] w-[21px] h-[21px]" />
+                  <CheckCircleStroke stroke="#E1000F" className="absolute bottom-[-5px] right-[-5px] h-[21px] w-[21px]" />
                 </div>
               </div>
               {sejourDate && (
-                <p className="text-[15px] font-400 leading-[19px] mt-3 text-center">
+                <p className="font-400 mt-3 text-center text-[15px] leading-[19px]">
                   {young.firstName} a choisi le séjour du <span className="">{sejourDate}</span>
                 </p>
               )}
             </div>
           </div>
 
-          <div className="flex justify-content-end">
+          <div className="justify-content-end flex">
             <div className="w-[256px]">
               <PlainButton onClick={onSubmit}>Continuer vers la vérification</PlainButton>
-              <div className="text-center text-[13px] leading-[18px] font-400 mt-1.5">
+              <div className="font-400 mt-1.5 text-center text-[13px] leading-[18px]">
                 Votre consentement ne sera recueilli qu’à la <b>troisième étape</b> de ce formulaire
               </div>
             </div>

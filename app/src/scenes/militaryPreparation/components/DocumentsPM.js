@@ -38,21 +38,21 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
 
   return (
     <>
-      <div className="w-full mb-4 " ref={docRef}>
+      <div className="mb-4 w-full " ref={docRef}>
         {showHelp ? (
           <>
-            <div className="hidden md:flex items-center lg:justify-between flex-wrap lg:!flex-nowrap justify-center gap-4 w-full ">
+            <div className="hidden w-full flex-wrap items-center justify-center gap-4 md:flex lg:!flex-nowrap lg:justify-between ">
               {!showFolder ? (
                 <>
                   <div className="flex flex-col items-center lg:items-start">
-                    <div className="text-lg leading-6 font-semibold">Dossier d&apos;éligibilité aux préparations militaires</div>
-                    <div className="text-sm leading-5 font-normal text-gray-500 mt-1 text-center lg:!text-left">
+                    <div className="text-lg font-semibold leading-6">Dossier d&apos;éligibilité aux préparations militaires</div>
+                    <div className="mt-1 text-center text-sm font-normal leading-5 text-gray-500 lg:!text-left">
                       Pour candidater, veuillez téléverser les documents justificatifs ci-dessous.
                     </div>
                   </div>
 
                   <div
-                    className="rounded-lg text-blue-600 text-center text-sm py-2 px-10 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out"
+                    className="rounded-lg border-[1px] border-blue-600 py-2 px-10 text-center text-sm text-blue-600 transition duration-100 ease-in-out hover:bg-blue-600 hover:text-white"
                     onClick={() => setModalInform({ isOpen: true })}>
                     En savoir plus
                   </div>
@@ -60,34 +60,34 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
               ) : (
                 <>
                   <div className="flex items-center gap-4">
-                    <div className="text-lg leading-6 font-semibold ">Dossier d&apos;éligibilité aux préparations militaires</div>
+                    <div className="text-lg font-semibold leading-6 ">Dossier d&apos;éligibilité aux préparations militaires</div>
                     <div
                       className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
                         theme.text[young.statusMilitaryPreparationFiles]
-                      } px-2 py-[2px] rounded-sm `}>
+                      } rounded-sm px-2 py-[2px] `}>
                       {translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}
                     </div>
                   </div>
                   {young.statusMilitaryPreparationFiles !== "REFUSED" ? (
                     <div
-                      className="group flex items-center rounded-lg text-blue-600 text-center text-sm py-2 px-10 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out"
+                      className="group flex items-center rounded-lg border-[1px] border-blue-600 py-2 px-10 text-center text-sm text-blue-600 transition duration-100 ease-in-out hover:bg-blue-600 hover:text-white"
                       onClick={() => setOpen(!open)}>
                       Voir mon dossier
-                      <BsChevronDown className={`ml-3 text-blue-600 group-hover:text-white h-5 w-5 ${open ? "rotate-180" : ""}`} />
+                      <BsChevronDown className={`ml-3 h-5 w-5 text-blue-600 group-hover:text-white ${open ? "rotate-180" : ""}`} />
                     </div>
                   ) : null}
                 </>
               )}
             </div>
-            <div className="flex md:hidden items-center lg:justify-between flex-wrap lg:!flex-nowrap justify-center gap-4 " ref={docRef}>
+            <div className="flex flex-wrap items-center justify-center gap-4 md:hidden lg:!flex-nowrap lg:justify-between " ref={docRef}>
               {!showFolder ? (
                 <>
                   <div className="flex flex-col items-start">
-                    <div className="text-[15px] leading-6 font-semibold">Dossier d&apos;éligibilité aux préparations militaires</div>
-                    <p className="text-[13px] leading-5 font-normal text-gray-500 mt-1">
+                    <div className="text-[15px] font-semibold leading-6">Dossier d&apos;éligibilité aux préparations militaires</div>
+                    <p className="mt-1 text-[13px] font-normal leading-5 text-gray-500">
                       Pour candidater, veuillez téléverser les documents justificatifs ci-dessous.
                       <span className="inline-flex">
-                        <div className="flex items-center gap-1 cursor-pointer underline ml-2" onClick={() => setModalInform({ isOpen: true })}>
+                        <div className="ml-2 flex cursor-pointer items-center gap-1 underline" onClick={() => setModalInform({ isOpen: true })}>
                           <AiOutlineInfoCircle /> En savoir plus
                         </div>
                       </span>
@@ -101,15 +101,15 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
                       <div
                         className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
                           theme.text[young.statusMilitaryPreparationFiles]
-                        } px-2 py-[2px] rounded-sm `}>
+                        } rounded-sm px-2 py-[2px] `}>
                         {translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}
                       </div>
-                      <div className="text-[15px] leading-6 font-semibold">Dossier d&apos;éligibilité aux préparations militaires</div>
+                      <div className="text-[15px] font-semibold leading-6">Dossier d&apos;éligibilité aux préparations militaires</div>
                     </div>
                     {young.statusMilitaryPreparationFiles !== "REFUSED" ? (
-                      <div className="flex items-center rounded-lg text-blue-600 text-center text-sm py-2 px-4 border-blue-600 border-[1px] " onClick={() => setOpen(!open)}>
+                      <div className="flex items-center rounded-lg border-[1px] border-blue-600 py-2 px-4 text-center text-sm text-blue-600 " onClick={() => setOpen(!open)}>
                         {!open ? "Voir" : "Masquer"}
-                        <BsChevronDown className={`ml-3 text-blue-600  h-5 w-5 ${open ? "rotate-180" : ""}`} />
+                        <BsChevronDown className={`ml-3 h-5  w-5 text-blue-600 ${open ? "rotate-180" : ""}`} />
                       </div>
                     ) : null}
                   </div>
@@ -119,7 +119,7 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
           </>
         ) : null}
         {open ? (
-          <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full justify-between ">
+          <div className="my-4 flex w-full flex-row justify-between gap-4 overflow-x-auto ">
             <FileCard
               name="Pièce d’identité"
               icon="reglement"
