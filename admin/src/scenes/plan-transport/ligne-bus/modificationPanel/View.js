@@ -168,30 +168,30 @@ export default function View({ open, setOpen, modification, getModification, tag
   return (
     <PanelV2 title="Demandes" open={open} onClose={onClose}>
       <>
-        <div className="flex flex-col mt-4 gap-4 h-full">
-          <div className="flex flex-col gap-2 mb-14">
-            <div className="flex flex-col gap-2 rounded-xl bg-[#F6F7F9] w-full p-4">
+        <div className="mt-4 flex h-full flex-col gap-4">
+          <div className="mb-14 flex flex-col gap-2">
+            <div className="flex w-full flex-col gap-2 rounded-xl bg-[#F6F7F9] p-4">
               <div className="flex justify-start">
                 <Quote className="text-gray-400" />
               </div>
-              <div className="text-sm text-gray-800 leading-5 whitespace-pre-wrap">{modification.requestMessage}</div>
+              <div className="whitespace-pre-wrap text-sm leading-5 text-gray-800">{modification.requestMessage}</div>
               <div className="flex justify-end">
-                <Quote className="text-gray-400 rotate-180" />
+                <Quote className="rotate-180 text-gray-400" />
               </div>
             </div>
             <div className="flex justify-between py-1">
-              <div className="flex gap-2 items-center">
-                <div className={`flex items-center justify-center text-white text-xs rounded-full pt-1 pb-1.5 px-3 ${getStatusClass(modification.status)}`}>
+              <div className="flex items-center gap-2">
+                <div className={`flex items-center justify-center rounded-full px-3 pt-1 pb-1.5 text-xs text-white ${getStatusClass(modification.status)}`}>
                   {translateStatus(modification.status)}
                 </div>
                 {modification?.opinion && (
-                  <div className="flex items-center justify-center text-white text-xs rounded-full p-1.5 bg-[#3D5B85]">
-                    <Thumbs className={`text-white h-3 w-3 ${modification.opinion === "false" && "rotate-180"}`} />
+                  <div className="flex items-center justify-center rounded-full bg-[#3D5B85] p-1.5 text-xs text-white">
+                    <Thumbs className={`h-3 w-3 text-white ${modification.opinion === "false" && "rotate-180"}`} />
                   </div>
                 )}
               </div>
-              <div className="flex gap-2 items-center">
-                <div className="flex items-center justify-center text-blue-600 text-[10px] rounded-full p-1.5 bg-gray-100 border-[1px] border-white shadow-md">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center rounded-full border-[1px] border-white bg-gray-100 p-1.5 text-[10px] text-blue-600 shadow-md">
                   {getInitials(modification?.requestUserName)}
                 </div>
                 <div className="text-xs text-gray-800">
@@ -210,22 +210,22 @@ export default function View({ open, setOpen, modification, getModification, tag
                 isLoading={isLoading}
               />
             </div>
-            <div className="text-lg leading-6 font-medium text-[#242526] mt-2">Commentaires</div>
-            <div className="flex flex-col gap-6 pl-2 mt-2">
+            <div className="mt-2 text-lg font-medium leading-6 text-[#242526]">Commentaires</div>
+            <div className="mt-2 flex flex-col gap-6 pl-2">
               {modification?.status !== "PENDING" && (
                 <div className="flex items-start gap-3 rounded-xl">
                   <div
-                    className={`flex items-center justify-center text-white text-sm font-bold rounded-full p-2.5 border-[1px] border-white shadow-lg h-11 w-11 ${
+                    className={`flex h-11 w-11 items-center justify-center rounded-full border-[1px] border-white p-2.5 text-sm font-bold text-white shadow-lg ${
                       modification.status === "ACCEPTED" ? "bg-[#10B981]" : "bg-[#EF4444]"
                     }`}>
                     {getInitials(modification?.statusUserName)}
                   </div>
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
-                      <div className="text-base text-gray-800 font-medium">{user._id === modification.statusUserId ? "Vous" : modification?.statusUserName}</div>
+                      <div className="text-base font-medium text-gray-800">{user._id === modification.statusUserId ? "Vous" : modification?.statusUserName}</div>
                       <div className="text-sm text-gray-500">{dayjs(modification.statusDate).locale("fr").format("DD/MM/YYYY • HH:mm")}</div>
                     </div>
-                    <div className="text-gray-800 text-sm leading-5 whitespace-pre-wrap">
+                    <div className="whitespace-pre-wrap text-sm leading-5 text-gray-800">
                       {modification.status === "ACCEPTED" ? "A accepté la demande de modification" : "A refusé la demande de modification"}
                     </div>
                   </div>
@@ -234,21 +234,21 @@ export default function View({ open, setOpen, modification, getModification, tag
               {conversation.map((message, index) => (
                 <div key={index} className="flex items-start gap-3 rounded-xl">
                   {message.type === "message" && (
-                    <div className="flex items-center justify-center text-blue-600 font-bold text-sm rounded-full p-2.5 bg-gray-100 border-[1px] border-white shadow-lg h-11 w-11">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full border-[1px] border-white bg-gray-100 p-2.5 text-sm font-bold text-blue-600 shadow-lg">
                       {getInitials(user.firstName + " " + user.lastName)}
                     </div>
                   )}
                   {message.type === "opinion" && (
-                    <div className="flex items-center justify-center text-white text-xs rounded-full p-2.5 bg-[#3D5B85] cursor-pointer  border-[1px] border-white shadow-lg h-11 w-11">
+                    <div className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-[1px] border-white  bg-[#3D5B85] p-2.5 text-xs text-white shadow-lg">
                       <Thumbs className={`text-white ${message.opinion === "false" && "rotate-180"}`} />
                     </div>
                   )}
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
-                      <div className="text-base text-gray-800 font-medium">{user._id === message.userId ? "Vous" : message?.userName}</div>
+                      <div className="text-base font-medium text-gray-800">{user._id === message.userId ? "Vous" : message?.userName}</div>
                       <div className="text-sm text-gray-500">{dayjs(message.date).locale("fr").format("DD/MM/YYYY • HH:mm")}</div>
                     </div>
-                    <div className="text-gray-800 text-sm leading-5 whitespace-pre-wrap">
+                    <div className="whitespace-pre-wrap text-sm leading-5 text-gray-800">
                       {message.type === "message" ? message?.message : message.opinion === "true" ? "A donné un avis favorable" : "A donné un avis défavorable"}
                     </div>
                   </div>
@@ -264,18 +264,18 @@ export default function View({ open, setOpen, modification, getModification, tag
                 <button
                   onClick={() => onSendStatus("ACCEPTED")}
                   disabled={isLoading}
-                  className="flex items-center justify-center text-white text-xs rounded-full h-full px-4 pt-1 pb-1.5 bg-[#10B981] hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                  className="flex h-full items-center justify-center rounded-full bg-[#10B981] px-4 pt-1 pb-1.5 text-xs text-white hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100">
                   Valider la demande
                 </button>
                 <button
                   onClick={() => onSendStatus("REJECTED")}
                   disabled={isLoading}
-                  className="flex items-center justify-center text-white text-xs rounded-full h-full px-4 pt-1 pb-1.5 bg-red-400 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                  className="flex h-full items-center justify-center rounded-full bg-red-400 px-4 pt-1 pb-1.5 text-xs text-white hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100">
                   Refuser la demande
                 </button>
               </div>
-              <div className="rounded-full flex items-start border-[1px] border-gray-300 gap-2 p-2">
-                <div className="flex items-center justify-center text-blue-600 text-[10px] rounded-full h-[30px] w-[30px] bg-gray-100 border-[1px] border-white shadow-lg">
+              <div className="flex items-start gap-2 rounded-full border-[1px] border-gray-300 p-2">
+                <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full border-[1px] border-white bg-gray-100 text-[10px] text-blue-600 shadow-lg">
                   {getInitials(user.firstName + " " + user.lastName)}
                 </div>
                 <textarea rows={1} className="flex-1 appearance-none p-1" placeholder="Répondre" value={message} onChange={(e) => setMessage(e.target.value)} />
@@ -286,11 +286,11 @@ export default function View({ open, setOpen, modification, getModification, tag
                       data-for="tool-up"
                       disabled={isLoading}
                       onClick={() => onSendOpinion("true")}
-                      className="flex items-center justify-center text-white text-xs rounded-full h-[30px] w-[30px] bg-[#3D5B85] cursor-pointer hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
-                      <Thumbs className="text-white h-4 w-4" />
+                      className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full bg-[#3D5B85] text-xs text-white hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100">
+                      <Thumbs className="h-4 w-4 text-white" />
                     </button>
                     <ReactTooltip id="tool-up" className="bg-white shadow-xl" arrowColor="white" place="left">
-                      <div className="text-[#414458] text-xs">Donner un avis favorable</div>
+                      <div className="text-xs text-[#414458]">Donner un avis favorable</div>
                     </ReactTooltip>
 
                     <button
@@ -298,27 +298,27 @@ export default function View({ open, setOpen, modification, getModification, tag
                       data-for="tool-down"
                       disabled={isLoading}
                       onClick={() => onSendOpinion("false")}
-                      className="flex items-center justify-center text-white text-xs rounded-full h-[30px] w-[30px] bg-[#3D5B85] cursor-pointer hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
-                      <Thumbs className="text-white h-4 w-4 rotate-180" />
+                      className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full bg-[#3D5B85] text-xs text-white hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100">
+                      <Thumbs className="h-4 w-4 rotate-180 text-white" />
                     </button>
                     <ReactTooltip id="tool-down" className="bg-white shadow-xl" arrowColor="white" place="left">
-                      <div className="text-[#414458] text-xs">Donner un avis défavorable</div>
+                      <div className="text-xs text-[#414458]">Donner un avis défavorable</div>
                     </ReactTooltip>
                   </>
                 )}
                 {message !== "" && (
                   <button
                     disabled={isLoading}
-                    className="flex items-center justify-center text-white text-xs rounded-full h-[30px] w-[30px] bg-[#3D5B85] cursor-pointer hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full bg-[#3D5B85] text-xs text-white hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
                     onClick={onSendMessage}>
-                    <Send className="text-white h-4 w-4" />
+                    <Send className="h-4 w-4 text-white" />
                   </button>
                 )}
               </div>
             </>
           ) : (
-            <div className="rounded-full border-[1px] border-gray-300 gap-2 p-2">
-              <div className="text-gray-600 text-sm leading-5 font-light px-3">La demande est clôturée.</div>
+            <div className="gap-2 rounded-full border-[1px] border-gray-300 p-2">
+              <div className="px-3 text-sm font-light leading-5 text-gray-600">La demande est clôturée.</div>
             </div>
           )}
         </div>

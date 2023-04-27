@@ -47,7 +47,7 @@ export default function Index() {
     <>
       <Row>
         <Col style={{ display: "flex" }}>
-          <h2 className="m-0 font-bold text-2xl">Volontaires</h2>
+          <h2 className="m-0 text-2xl font-bold">Volontaires</h2>
           {filter ? (
             <FiltersList>
               <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />

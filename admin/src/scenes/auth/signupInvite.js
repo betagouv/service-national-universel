@@ -178,7 +178,7 @@ export default function SignupInvite() {
                         checked={values.acceptCGU === "true"}
                         className="rounded border-brand-grey text-brand-purple focus:ring-offset-0"
                       />
-                      <label htmlFor="checkboxCGU" className="flex-1 text-brand-grey mb-0">
+                      <label htmlFor="checkboxCGU" className="mb-0 flex-1 text-brand-grey">
                         J&apos;ai lu et j&apos;accepte les{" "}
                         <a
                           href={`${adminURL}/conditions-generales-utilisation`}

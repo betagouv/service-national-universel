@@ -17,7 +17,7 @@ export default function Index() {
           </ButtonPrimary>
         </div>
       }>
-      <div className="rounded-lg w-full bg-white p-8">Inscription</div>
+      <div className="w-full rounded-lg bg-white p-8">Inscription</div>
     </DashboardContainer>
   );
 }

@@ -32,7 +32,7 @@ export default function Itineraire({ meetingsPoints, center, aller, retour }) {
     for (let i = 0; i < meetingsPoints.length; i++) {
       flatMeetingsPoints.push(meetingsPoints[i]);
       if (meetingsPoints[i]?.stepPoints.length) {
-        for (const stepPoint of  meetingsPoints[i].stepPoints) {
+        for (const stepPoint of meetingsPoints[i].stepPoints) {
           const allerRetourStepsConfigured = Boolean(stepPoint.type);
           const isRetourStep = stepPoint.type === "retour" && showRetour;
           const isAllerStep = stepPoint.type === "aller" && !showRetour;

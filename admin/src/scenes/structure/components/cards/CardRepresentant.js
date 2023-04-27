@@ -46,7 +46,7 @@ export default function CardRepresentant() {
 
   return (
     <>
-      <Card className="w-96 h-36">
+      <Card className="h-36 w-96">
         {representant ? <Representative representant={representant} handleShowModal={handleShowModal} /> : <CreateRepresentative handleShowModal={handleShowModal} />}
       </Card>
       <ModalRepresentant isOpen={isOpen} setIsOpen={setIsOpen} onSubmit={onSubmit} onDelete={onDelete} />
@@ -58,12 +58,12 @@ function Representative({ representant, handleShowModal }) {
   const [copied, setCopied] = React.useState(false);
 
   return (
-    <div className="flex flex-col h-full justify-between">
-      <div className="px-4 py-3 space-y-1 cursor-pointer" onClick={handleShowModal}>
+    <div className="flex h-full flex-col justify-between">
+      <div className="cursor-pointer space-y-1 px-4 py-3" onClick={handleShowModal}>
         <div className="flex items-center gap-2">
           <p className="text-sm">Représentant de la structure</p>
           <AiOutlineInfoCircle data-tip data-for="representant" className="text-gray-500" />
-          <ReactTooltip id="representant" type="light" place="top" effect="solid" className="shadow-sm custom-tooltip-radius !opacity-100" tooltipRadius="6">
+          <ReactTooltip id="representant" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 shadow-sm" tooltipRadius="6">
             <div className="w-[450px] text-center">
               Dans le cadre du contrat d&apos;engagement préalable à l&apos;engagement d&apos;un volontaire, vous pouvez préciser le signataire de l&apos;ensemble des contrats et
               sa fonction au sein de votre structure
@@ -80,13 +80,13 @@ function Representative({ representant, handleShowModal }) {
         {representant.mobile && (
           <div className="flex items-center border-r-[1px] border-gray-200 pr-3">
             <HiPhone className="text-gray-400" />
-            <p className="pl-2 text-gray-700 whitespace-nowrap text-xs">{formatPhoneNumberFR(representant.mobile)}</p>
+            <p className="whitespace-nowrap pl-2 text-xs text-gray-700">{formatPhoneNumberFR(representant.mobile)}</p>
           </div>
         )}
-        <div className="w-full flex my-1 ml-2 justify-between">
-          <p className="text-gray-700 max-w-[180px] truncate text-xs">{representant.email}</p>
+        <div className="my-1 ml-2 flex w-full justify-between">
+          <p className="max-w-[180px] truncate text-xs text-gray-700">{representant.email}</p>
           <div
-            className="flex items-center justify-center cursor-pointer hover:scale-105"
+            className="flex cursor-pointer items-center justify-center hover:scale-105"
             onClick={() => {
               copyToClipboard(representant.email);
               setCopied(true);
@@ -102,7 +102,7 @@ function Representative({ representant, handleShowModal }) {
 
 function CreateRepresentative({ handleShowModal }) {
   return (
-    <div className="flex flex-col justify-between px-4 py-3 h-full">
+    <div className="flex h-full flex-col justify-between px-4 py-3">
       <p className="text-sm">Représentant de la structure</p>
       <Button onClick={handleShowModal}>Renseigner</Button>
     </div>

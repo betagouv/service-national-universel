@@ -57,12 +57,12 @@ export default function List() {
       <Breadcrumbs items={[{ label: "Centres" }]} />
       <ModalRattacherCentre isOpen={modalVisible} onCancel={() => setModalVisible(false)} user={user} />
       <div className="flex flex-row">
-        <div className="flex flex-1 flex-col w-full px-8">
-          <div className="py-8 flex items-center justify-between">
+        <div className="flex w-full flex-1 flex-col px-8">
+          <div className="flex items-center justify-between py-8">
             <Title>Centres</Title>
             {canCreateOrUpdateCohesionCenter(user) ? (
               <button
-                className="border-[1px] border-blue-600 bg-blue-600 shadow-sm px-4 py-2 text-white hover:!text-blue-600 hover:bg-white transition duration-300 ease-in-out rounded-lg"
+                className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
                 onClick={() => setModalVisible(true)}>
                 Rattacher un centre à un séjour
               </button>
@@ -73,8 +73,8 @@ export default function List() {
               <TabItem icon={<Menu />} title="Liste des centres" onClick={() => history.replace(`/centre/liste/liste-centre`)} active={currentTab === "liste-centre"} />
               <TabItem icon={<Calendar />} title="Sessions" onClick={() => history.replace(`/centre/liste/session`)} active={currentTab === "session"} />
             </div>
-            <div className={`bg-white rounded-b-lg rounded-tr-lg mb-8 relative items-start`}>
-              <div className="flex flex-col w-full pt-4">
+            <div className={`relative mb-8 items-start rounded-b-lg rounded-tr-lg bg-white`}>
+              <div className="flex w-full flex-col pt-4">
                 {currentTab === "liste-centre" && <ListCenter firstSession={firstSession} />}
                 {currentTab === "session" && <ListSession firstSession={firstSession} />}
               </div>
@@ -132,9 +132,9 @@ const ListSession = ({ firstSession }) => {
 
   if (!firstSession) return <div></div>;
   return (
-    <div className="flex-1 flex-column bg-white flex-wrap">
+    <div className="flex-column flex-1 flex-wrap bg-white">
       <div className="mx-4">
-        <div className="flex flex-row justify-between w-full">
+        <div className="flex w-full flex-row justify-between">
           <Filters
             pageId={pageId}
             route="/elasticsearch/sessionphase1/search"
@@ -231,9 +231,9 @@ const ListSession = ({ firstSession }) => {
         setParamData={setParamData}
         currentEntryOnPage={data?.length}
         render={
-          <div className="flex w-full flex-col gap-1 mt-6 mb-2">
+          <div className="mt-6 mb-2 flex w-full flex-col gap-1">
             <hr />
-            <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
+            <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400">
               <div className="w-[40%]">Centre</div>
               <div className="w-[20%]">Cohortes</div>
               <div className="w-[20%]">Places</div>
@@ -309,9 +309,9 @@ const ListCenter = ({ firstSession }) => {
 
   if (!firstSession) return <div></div>;
   return (
-    <div className="flex-1 flex-column bg-white flex-wrap">
+    <div className="flex-column flex-1 flex-wrap bg-white">
       <div className="mx-4">
-        <div className="flex flex-row justify-between w-full">
+        <div className="flex w-full flex-row justify-between">
           <Filters
             pageId={pageId}
             route="/elasticsearch/cohesioncenter/search"
@@ -373,9 +373,9 @@ const ListCenter = ({ firstSession }) => {
         setParamData={setParamData}
         currentEntryOnPage={data?.length}
         render={
-          <div className="flex w-full flex-col gap-1 mt-6 mb-2">
+          <div className="mt-6 mb-2 flex w-full flex-col gap-1">
             <hr />
-            <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
+            <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400">
               <div className="w-[40%]">Centre</div>
               <div className="w-[60%]">Cohortes à venir</div>
             </div>
@@ -400,12 +400,12 @@ const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
   return (
     <>
       <hr />
-      <div onClick={onClick} className="flex py-3 items-center px-4 hover:bg-gray-50 cursor-pointer">
-        <div className="flex flex-col gap-1 w-[40%]">
+      <div onClick={onClick} className="flex cursor-pointer items-center py-3 px-4 hover:bg-gray-50">
+        <div className="flex w-[40%] flex-col gap-1">
           <div className="font-bold leading-6 text-gray-900">{hit?.name}</div>
-          <div className="font-normal text-sm leading-4 text-gray-500">{`${hit?.city || ""} • ${hit?.department || ""}`}</div>
+          <div className="text-sm font-normal leading-4 text-gray-500">{`${hit?.city || ""} • ${hit?.department || ""}`}</div>
         </div>
-        <div className="flex items-center flex-wrap w-[60%]">
+        <div className="flex w-[60%] flex-wrap items-center">
           {orderedSession.map((sessionPhase1) => (
             <div className="p-1" key={sessionPhase1._id}>
               <div className="flex items-center">
@@ -428,32 +428,32 @@ const HitSession = ({ center, hit, onClick }) => {
   return (
     <>
       <hr />
-      <div onClick={onClick} className="flex py-3 items-center px-4 hover:bg-gray-50 cursor-pointer">
-        <div className="flex flex-col gap-1 w-[40%]">
+      <div onClick={onClick} className="flex cursor-pointer items-center py-3 px-4 hover:bg-gray-50">
+        <div className="flex w-[40%] flex-col gap-1">
           <div className="font-bold leading-6 text-gray-900">{center?._source.name}</div>
-          <div className="font-normal text-sm leading-4 text-gray-500">{`${center?._source.city || ""} • ${center?._source.department || ""}`}</div>
+          <div className="text-sm font-normal leading-4 text-gray-500">{`${center?._source.city || ""} • ${center?._source.department || ""}`}</div>
         </div>
-        <div className="flex items-center flex-wrap w-[20%]">
+        <div className="flex w-[20%] flex-wrap items-center">
           <Badge cohort={hit} />
         </div>
-        <div className="flex flex-col w-[20%]">
+        <div className="flex w-[20%] flex-col">
           <div>
             {hit.placesLeft === 0 ? (
-              <div className="text-xs text-grey-500">0 place</div>
+              <div className="text-grey-500 text-xs">0 place</div>
             ) : (
-              <div className="text-xs text-400">{hit.placesLeft > 1 ? hit.placesLeft + " places" : hit.placesLeft + " place"}</div>
+              <div className="text-400 text-xs">{hit.placesLeft > 1 ? hit.placesLeft + " places" : hit.placesLeft + " place"}</div>
             )}
           </div>
-          <div className="text-xs flex flex-row">
+          <div className="flex flex-row text-xs">
             <div className="text-grey-500">sur</div>
             <div>&nbsp;{hit.placesTotal}</div>
           </div>
         </div>
-        <div className="flex items-center flex-wrap w-[20%]">
+        <div className="flex w-[20%] flex-wrap items-center">
           {hit.placesLeft === 0 ? (
-            <div className="text-gray-700 font-bold bg-gray-200 rounded w-fit px-1 text-sm">COMPLET</div>
+            <div className="w-fit rounded bg-gray-200 px-1 text-sm font-bold text-gray-700">COMPLET</div>
           ) : (
-            <div className="text-[#0063CB] font-bold bg-[#E8EDFF] rounded w-fit px-1 text-sm">PLACES DISPONIBLES</div>
+            <div className="w-fit rounded bg-[#E8EDFF] px-1 text-sm font-bold text-[#0063CB]">PLACES DISPONIBLES</div>
           )}
         </div>
       </div>

@@ -37,7 +37,7 @@ export default function Missions() {
   return (
     <Row>
       <Col md={6}>
-        <h2 className="m-0 font-bold text-2xl">Missions</h2>
+        <h2 className="m-0 text-2xl font-bold">Missions</h2>
       </Col>
       <Col md={12}>
         <h4 style={{ fontWeight: "normal", margin: "25px 0" }}>Statut des missions proposées par ma structure</h4>

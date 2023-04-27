@@ -61,32 +61,32 @@ export default function Centre({ bus, setBus }) {
     }
   };
   return (
-    <div className="p-8 w-1/2 bg-white rounded-xl">
+    <div className="w-1/2 rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <div className="text-xl leading-6 text-[#242526]">Centre de cohésion</div>
         {canEditLigneBusCenter(user) ? (
           <>
             {!editCenter ? (
               <button
-                className="flex items-center gap-2 rounded-full text-xs leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => setEditCenter(true)}
                 disabled={isLoading}>
-                <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
                 Modifier
               </button>
             ) : (
               <div className="flex items-center gap-2">
                 <button
-                  className="flex items-center gap-2 rounded-full text-xs leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => setEditCenter(false)}
                   disabled={isLoading}>
                   Annuler
                 </button>
                 <button
-                  className="flex items-center gap-2 rounded-full text-xs  leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex cursor-pointer items-center gap-2 rounded-full  border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={onSubmitInfo}
                   disabled={isLoading}>
-                  <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                  <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                   Enregistrer les changements
                 </button>
               </div>
@@ -94,10 +94,10 @@ export default function Centre({ bus, setBus }) {
           </>
         ) : null}
       </div>
-      <div className="flex flex-col mt-8">
+      <div className="mt-8 flex flex-col">
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <p className="font-medium text-[15px] leading-6 text-[#242526]">
+            <p className="text-[15px] font-medium leading-6 text-[#242526]">
               {bus.centerDetail.department} • {bus.centerDetail.region}
             </p>
             {user.role !== ROLES.TRANSPORTER && (
@@ -110,13 +110,13 @@ export default function Centre({ bus, setBus }) {
               </Link>
             )}
           </div>
-          <p className="text-xs leading-4 text-[#738297] font-light">{bus.centerDetail.name}</p>
-          <p className="text-xs leading-4 text-[#738297] font-light">
+          <p className="text-xs font-light leading-4 text-[#738297]">{bus.centerDetail.name}</p>
+          <p className="text-xs font-light leading-4 text-[#738297]">
             {bus.centerDetail.address}, {bus.centerDetail.zip}, {bus.centerDetail.city}
           </p>
         </div>
         <div>{/* TODO V2 modif de centre de destination */}</div>
-        <div className="flex items-center mt-8 gap-4">
+        <div className="mt-8 flex items-center gap-4">
           <Field
             label="Heure d’arrivée"
             onChange={(e) => setData({ ...data, centerArrivalTime: e.target.value })}
@@ -134,7 +134,7 @@ export default function Centre({ bus, setBus }) {
             readOnly={!editCenter}
           />
         </div>
-        <div className="flex justify-end mt-8">
+        <div className="mt-8 flex justify-end">
           <Iceberg />
         </div>
       </div>

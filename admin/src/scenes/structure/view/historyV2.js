@@ -29,7 +29,7 @@ export default function History() {
 
   return (
     <WrapperHistoryV2 tab="historique">
-      {formattedData?.length ? <HistoricComponent2 model="structure" data={formattedData} /> : <div className="text-center animate-pulse">Chargement des données</div>}
+      {formattedData?.length ? <HistoricComponent2 model="structure" data={formattedData} /> : <div className="animate-pulse text-center">Chargement des données</div>}
     </WrapperHistoryV2>
   );
 }

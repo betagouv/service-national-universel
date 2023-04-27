@@ -158,38 +158,38 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
       {ENABLE_PM && mission?.isMilitaryPreparation === "true" && <Phase2MilitaryPreparation young={young} FileCard={FileCard} />}
 
       <div className="p-7">
-        <div className="bg-white w-full h-full rounded-lg px-4">
+        <div className="h-full w-full rounded-lg bg-white px-4">
           <div className="flex items-center justify-center py-6">
             <div className="flex items-center gap-3 text-2xl font-bold">
               <div>Espace&nbsp;candidature </div>
               <div className="flex items-center justify-end">
-                <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-1.5 py-[5px] rounded-sm`}>
+                <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} rounded-sm px-1.5 py-[5px]`}>
                   {translateApplication(application.status)}
                 </div>
               </div>
             </div>
           </div>
           <hr />
-          <div className="flex relative items-center justify-center w-full rounded-xl  border-[1px] border-white hover:border-gray-200">
+          <div className="relative flex w-full items-center justify-center rounded-xl  border-[1px] border-white hover:border-gray-200">
             {/* Choix*/}
-            <div className="flex flex-col w-full pr-2 flex-1 justify-between basis-[60%] h-full">
-              <div className="w-full flex justify-end">
+            <div className="flex h-full w-full flex-1 basis-[60%] flex-col justify-between pr-2">
+              <div className="flex w-full justify-end">
                 <button
-                  className="flex items-center gap-2 bg-gray-100 rounded py-2 px-4 border-[1px] border-gray-100 hover:border-gray-300"
+                  className="flex items-center gap-2 rounded border-[1px] border-gray-100 bg-gray-100 py-2 px-4 hover:border-gray-300"
                   onClick={() => history.push(`/mission/${mission._id.toString()}`)}>
                   <div className="text-xs text-gray-800 ">Voir la mission</div>
                 </button>
               </div>
-              <Link className="flex flex-col w-full" to={`/mission/${application.missionId}`}>
+              <Link className="flex w-full flex-col" to={`/mission/${application.missionId}`}>
                 {/* mission info */}
-                <div className="flex flex-1 justify-between items-start">
+                <div className="flex flex-1 items-start justify-between">
                   {/* icon */}
-                  <div className="flex items-center mr-4">
+                  <div className="mr-4 flex items-center">
                     <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
                   </div>
-                  <div className="flex flex-col flex-1 justify-center">
-                    <div className="uppercase text-gray-500 font-medium text-[11px] tracking-wider mb-1">{mission.structureName}</div>
-                    <div className="text-[#242526] font-bold text-base mb-2">{mission.name}</div>
+                  <div className="flex flex-1 flex-col justify-center">
+                    <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-gray-500">{mission.structureName}</div>
+                    <div className="mb-2 text-base font-bold text-[#242526]">{mission.name}</div>
                     {/* tags */}
                     {tags && (
                       <div className=" inline-flex flex-wrap">
@@ -197,13 +197,13 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
                           return (
                             <div
                               key={index}
-                              className=" flex text-[11px] text-gray-600 rounded-full border-gray-200 border-[1px] justify-center items-center mb-2 mt-1 mr-1 px-3  py-0.5 font-medium ">
+                              className=" mb-2 mt-1 mr-1 flex items-center justify-center rounded-full border-[1px] border-gray-200 px-3 py-0.5 text-[11px]  font-medium text-gray-600 ">
                               {tag}
                             </div>
                           );
                         })}
                         {mission.isMilitaryPreparation === "true" ? (
-                          <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full text-[11px] mb-2 mr-1 px-3 py-0.5 font-medium">
+                          <div className="mb-2 mr-1 flex items-center justify-center rounded-full border-[1px] border-gray-200 bg-blue-900 px-3 py-0.5 text-[11px] font-medium text-white">
                             Préparation militaire
                           </div>
                         ) : null}
@@ -214,19 +214,19 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
               </Link>
               <div className="flex flex-1 py-2" />
             </div>
-            <div className="border-x border-x-gray-200 basis-[40%] items-center justify-center my-4">
-              <div className="flex flex-col justify-center items-center p-4 m-0 border-b border-b-gray-200">
-                <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG prévisionnelles</div>
+            <div className="my-4 basis-[40%] items-center justify-center border-x border-x-gray-200">
+              <div className="m-0 flex flex-col items-center justify-center border-b border-b-gray-200 p-4">
+                <div className="text-[11px] uppercase tracking-[5%] text-[#7E858C]">Heures de MIG prévisionnelles</div>
                 {/* get duration du contrat ou de la mission ? */}
-                <div className="font-bold text-2xl text-[#242526]">{contract?.missionDuration || "0"}h</div>
+                <div className="text-2xl font-bold text-[#242526]">{contract?.missionDuration || "0"}h</div>
               </div>
-              <div className="flex flex-col justify-center items-center p-4 m-0">
-                <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG réalisées</div>
-                <div className="flex items-center gap-2 font-bold text-2xl text-[#242526]">
+              <div className="m-0 flex flex-col items-center justify-center p-4">
+                <div className="text-[11px] uppercase tracking-[5%] text-[#7E858C]">Heures de MIG réalisées</div>
+                <div className="flex items-center gap-2 text-2xl font-bold text-[#242526]">
                   <div>{application?.missionDuration || "0"}h</div>
                   {["VALIDATED", "IN_PROGRESS", "DONE"].includes(application.status) ? (
-                    <div className="group flex justify-center items-center cursor-pointer" onClick={() => setModalDurationOpen(true)}>
-                      <div className="flex justify-center items-center h-8 w-8 group-hover:bg-gray-50 text-blue-500 rounded-full">
+                    <div className="group flex cursor-pointer items-center justify-center" onClick={() => setModalDurationOpen(true)}>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full text-blue-500 group-hover:bg-gray-50">
                         <Pencil width={16} height={16} />
                       </div>
                     </div>
@@ -239,7 +239,7 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
           {["VALIDATED", "IN_PROGRESS", "DONE"].includes(application.status) ? (
             <>
               <div className="p-4">
-                <div className="bg-gray-50 rounded-lg  px-10 py-6">
+                <div className="rounded-lg bg-gray-50  px-10 py-6">
                   <div className="flex justify-between">
                     <div className="flex flex-row items-center justify-center gap-4">
                       <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
@@ -248,49 +248,49 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
                           onClick={() => {
                             history.push(`/volontaire/${young._id}/phase2/application/${application._id}/contrat`);
                           }}
-                          className="flex flex-row items-center justify-center gap-2 text-blue-500 text-xs cursor-pointer">
+                          className="flex cursor-pointer flex-row items-center justify-center gap-2 text-xs text-blue-500">
                           <Pencil width={14} height={14} />
                           <div>Modifier le contrat</div>
                         </div>
                       ) : null}
                     </div>
                     {contractStatus === "SENT" ? (
-                      <div className="text-xs font-normal px-2  bg-sky-100 text-sky-500 rounded-sm items-center flex space-x-1">
+                      <div className="flex items-center space-x-1  rounded-sm bg-sky-100 px-2 text-xs font-normal text-sky-500">
                         <AiFillClockCircle className="text-sky-500" />
                         <div>Contrat envoyé</div>
                       </div>
                     ) : contractStatus === "DRAFT" ? (
-                      <div className="text-xs font-normal px-2  bg-orange-500 text-white rounded-sm items-center flex space-x-1">
+                      <div className="flex items-center space-x-1  rounded-sm bg-orange-500 px-2 text-xs font-normal text-white">
                         <Bell />
                         <div>Contrat en brouillon</div>
                       </div>
                     ) : contractStatus === "VALIDATED" ? (
-                      <div className="text-xs font-normal px-2  bg-green-400 rounded-sm items-center flex space-x-1">
+                      <div className="flex items-center space-x-1  rounded-sm bg-green-400 px-2 text-xs font-normal">
                         <Check className="text-white" />
                         <div className="text-white">Contrat signé</div>
                       </div>
                     ) : null}
                   </div>
                   {contractStatus === "DRAFT" ? (
-                    <div className="text-sm mt-1">
+                    <div className="mt-1 text-sm">
                       Vous devez renseigner ce contrat d&apos;engagement puis l&apos;envoyer pour validation aux représentant(s) légal(aux) du volontaire, au tuteur de la mission
                       et au représentant de l&apos;État
                     </div>
                   ) : null}
                   {contractStatus === "SENT" ? (
-                    <div className="text-sm mt-1">
+                    <div className="mt-1 text-sm">
                       Ce contrat doit être validé par les représentant(s) légal(aux) du volontaire, le tuteur de la mission et le représentant de l&apos;État.
                     </div>
                   ) : null}
                   {contractStatus === "VALIDATED" ? (
-                    <div className="text-sm mt-1">
+                    <div className="mt-1 text-sm">
                       Ce contrat a été validé par les représentant(s) légal(aux) du volontaire, le tuteur de la mission et le représentant de l&apos;État.
                     </div>
                   ) : null}
 
                   {contract?.invitationSent ? (
                     <div>
-                      <div className="grid gap-4 grid-cols-4 mt-4">
+                      <div className="mt-4 grid grid-cols-4 gap-4">
                         <StatusContractPeople
                           value={contract?.projectManagerStatus}
                           description="Représentant de l’État"
@@ -350,9 +350,9 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
                         )}
                       </div>
                       {contractStatus === "VALIDATED" ? (
-                        <div onClick={() => downloadContract()} className="cursor-pointer py-2 rounded-md mt-7 h-10 bg-green-400 w-48 max-w-xs items-center flex justify-center">
+                        <div onClick={() => downloadContract()} className="mt-7 flex h-10 w-48 max-w-xs cursor-pointer items-center justify-center rounded-md bg-green-400 py-2">
                           {loadingContract ? (
-                            <div className="h-10 flex items-center justify-center">
+                            <div className="flex h-10 items-center justify-center">
                               <ReactLoading type="spin" color="#FFFFFF" width={20} height={20} />
                             </div>
                           ) : (
@@ -366,7 +366,7 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
                       onClick={() => {
                         history.push(`/volontaire/${young._id}/phase2/application/${application._id}/contrat`);
                       }}
-                      className="cursor-pointer py-2 rounded-md mt-7 bg-blue-600 w-48 max-w-xs items-center flex justify-center">
+                      className="mt-7 flex w-48 max-w-xs cursor-pointer items-center justify-center rounded-md bg-blue-600 py-2">
                       <div className="text-white">Editer</div>
                     </div>
                   )}
@@ -374,9 +374,9 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
               </div>
               <div className="mx-8 mt-8 pb-8">
                 <div className="flex justify-between">
-                  <div className="text-lg leading-6 font-semibold">Documents</div>
+                  <div className="text-lg font-semibold leading-6">Documents</div>
                 </div>
-                <div className="flex flex-row justify-start gap-4 my-4 flex-wrap self-center">
+                <div className="my-4 flex flex-row flex-wrap justify-start gap-4 self-center">
                   {optionsType.map(
                     (option, index) =>
                       application[option].length > 0 && (
@@ -420,8 +420,8 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
                           stepOne: true,
                         });
                       }}
-                      className={`group min-h-[230px] w-[300px] border-[1px] border-dashed border-blue-600 rounded-lg m-2 text-center flex flex-col items-center justify-center p-4 hover:border-solid hover:bg-blue-50 cursor-pointer`}>
-                      <div className="flex items-center gap-1 px-3 py-2 border-[1px] border-blue-600 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white ">
+                      className={`group m-2 flex min-h-[230px] w-[300px] cursor-pointer flex-col items-center justify-center rounded-lg border-[1px] border-dashed border-blue-600 p-4 text-center hover:border-solid hover:bg-blue-50`}>
+                      <div className="flex items-center gap-1 rounded-lg border-[1px] border-blue-600 px-3 py-2 text-blue-600 group-hover:bg-blue-600 group-hover:text-white ">
                         <HiPlus />
                         Ajouter une pièce jointe
                       </div>
@@ -495,17 +495,17 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
 }
 
 const StatusContractPeople = ({ value, description, firstName, lastName, token, contract, target }) => (
-  <div className="flex flex-col justify-center items-start ">
-    <div className="flex flex-col justify-center items-start " data-tip data-for={`${firstName}${lastName}-validation`}>
+  <div className="flex flex-col items-start justify-center ">
+    <div className="flex flex-col items-start justify-center " data-tip data-for={`${firstName}${lastName}-validation`}>
       <div className="mr-2">
         {value === "VALIDATED" ? <img src={rubberStampValided} alt="rubberStampValided" /> : <img src={rubberStampNotValided} alt="rubberStampNotValided" />}
       </div>
       <div>
-        <div className="flex font-semibold space-x-2">
+        <div className="flex space-x-2 font-semibold">
           <div>{firstName}</div>
           <div>{lastName?.toUpperCase()}</div>
         </div>
-        <div className="text-gray-500 text-xs">{description}</div>
+        <div className="text-xs text-gray-500">{description}</div>
       </div>
       {value !== "VALIDATED" ? (
         <ReactTooltip id={`${firstName}${lastName}-validation`} type="light">
@@ -516,7 +516,7 @@ const StatusContractPeople = ({ value, description, firstName, lastName, token, 
     {value !== "VALIDATED" ? (
       <div className="mt-4">
         <div
-          className="text-xs text-blue-500 cursor-pointer hover:underline"
+          className="cursor-pointer text-xs text-blue-500 hover:underline"
           onClick={() => {
             copyToClipboard(`${appURL}/validate-contract?token=${token}`);
             toastr.success("Le lien a été copié dans le presse papier.");
@@ -535,7 +535,7 @@ function SendContractLink({ contract, target }) {
   return (
     <>
       <div
-        className="text-xs text-blue-500 cursor-pointer hover:underline"
+        className="cursor-pointer text-xs text-blue-500 hover:underline"
         onClick={async () => {
           try {
             const email = contract[target + "Email"];
@@ -571,12 +571,12 @@ function SendContractLink({ contract, target }) {
 
 function FileCard({ name, filled, icon, onClick, tw, description, showNumber = false, topSubComment }) {
   return (
-    <section className={` bg-gray-50 rounded-lg m-2 text-center flex flex-col items-center justify-between px-4 pt-4 ${tw} w-[300px]`}>
+    <section className={` m-2 flex flex-col items-center justify-between rounded-lg bg-gray-50 px-4 pt-4 text-center ${tw} w-[300px]`}>
       <FileIcon filled={filled} icon={icon} />
       <section className="mt-2">
         {topSubComment ? <p className="text-xs">{topSubComment}</p> : null}
         <p className="text-base font-bold">{name}</p>
-        {description ? <p className="ttext-xs leading-4 font-normal mt-1">{description}</p> : null}
+        {description ? <p className="ttext-xs mt-1 font-normal leading-4">{description}</p> : null}
       </section>
       {showNumber ? (
         <div className="text-gray-500">
@@ -584,11 +584,11 @@ function FileCard({ name, filled, icon, onClick, tw, description, showNumber = f
         </div>
       ) : null}
       <div></div>
-      <div className="flex flex-col w-full justify-end items-end self-end my-2">
+      <div className="my-2 flex w-full flex-col items-end justify-end self-end">
         <div
           onClick={() => onClick()}
-          className="relative border-red-600 border-3 self-endtransition duration-150 flex rounded-full bg-blue-600 p-2 items-center justify-center hover:scale-110 ease-out hover:ease-in cursor-pointer">
-          <Download className=" text-indigo-100 bg-blue-600" />
+          className="border-3 self-endtransition relative flex cursor-pointer items-center justify-center rounded-full border-red-600 bg-blue-600 p-2 duration-150 ease-out hover:scale-110 hover:ease-in">
+          <Download className=" bg-blue-600 text-indigo-100" />
         </div>
       </div>
     </section>

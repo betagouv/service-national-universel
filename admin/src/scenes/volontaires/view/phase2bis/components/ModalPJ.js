@@ -69,17 +69,17 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, application,
     setSelectedOption(defaultOption || selectedOption);
   }, [defaultOption]);
   return (
-    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[512px] bg-white rounded-lg shadow-xl">
-      <div className="flex flex-col items-center justify-center mx-4 mt-3">
-        <div className="text-gray-900 text-xl font-bold text-center">Joindre un fichier à la mission</div>
-        <div className="w-3/4 mt-4">
+    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[512px] rounded-lg bg-white shadow-xl">
+      <div className="mx-4 mt-3 flex flex-col items-center justify-center">
+        <div className="text-center text-xl font-bold text-gray-900">Joindre un fichier à la mission</div>
+        <div className="mt-4 w-3/4">
           <Select options={optionsType} selected={selectedOption} setSelected={setSelectedOption} label="Choissisez le document à téléverser" />
         </div>
         {filesList && filesList.length > 0 && (
           <div className="mt-4 flex flex-col gap-2">
             {filesList.map((file, index) => {
               return (
-                <div key={index} className="flex flex-row justify-between items-center border-[1px] border-gray-400 p-2 rounded-md">
+                <div key={index} className="flex flex-row items-center justify-between rounded-md border-[1px] border-gray-400 p-2">
                   <FileName className="mr-2">{getFileName(file)}</FileName>
                   <div className="flex flex-row">
                     <IconButton icon={deleteIcon} buttonsLoading={false} bgColor="bg-indigo-600" onClick={() => setModal({ isOpen: true, onConfirm: () => handleDelete(file) })} />
@@ -109,14 +109,14 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, application,
           className="hidden"
         />
         <FileInput disabled={selectedOption === null} refInput={inputFileRef} loading={loading} />
-        <div className="w-full flex flex-col mt-3">
-          {numberNewFile >= 1 && <div className="self-end text-xs text-gray-500 mr-1">Les parties prenantes seront averties</div>}
-          <div className="space-x-2 w-full flex flex-row mb-4">
-            <button className="border-[1px] border-gray-300 text-gray-700 rounded-lg py-2 cursor-pointer w-full" onClick={handleCancel}>
+        <div className="mt-3 flex w-full flex-col">
+          {numberNewFile >= 1 && <div className="mr-1 self-end text-xs text-gray-500">Les parties prenantes seront averties</div>}
+          <div className="mb-4 flex w-full flex-row space-x-2">
+            <button className="w-full cursor-pointer rounded-lg border-[1px] border-gray-300 py-2 text-gray-700" onClick={handleCancel}>
               Annuler
             </button>
             <button
-              className={`border-[1px] border-gray-300 text-white rounded-lg disabled:opacity-50 cursor-pointer disabled:cursor-default py-2 px-1  w-full bg-blue-600`}
+              className={`w-full cursor-pointer rounded-lg border-[1px] border-gray-300 bg-blue-600 py-2 px-1 text-white  disabled:cursor-default disabled:opacity-50`}
               onClick={() => onSend(selectedOption, numberNewFile > 1 ? "true" : "false")}
               disabled={loading || selectedOption === null || numberNewFile === 0}>
               Envoyer

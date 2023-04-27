@@ -9,9 +9,9 @@ import { getPhaseLabel } from "../utils";
 const NoteDisplayModal = ({ notes, isOpen, onClose, user }) => {
   return (
     <Modal isOpen={isOpen} toggle={onClose} centered>
-      <div className="p-6 w-[512px]">
-        <div className="max-h-[500px] overflow-y-auto flex flex-col items-center px-6">
-          <div className="text-xl font-medium mb-3">{`Notes internes${notes[0]?.phase ? ` - ${getPhaseLabel(notes[0].phase)}` : ""}`}</div>
+      <div className="w-[512px] p-6">
+        <div className="flex max-h-[500px] flex-col items-center overflow-y-auto px-6">
+          <div className="mb-3 text-xl font-medium">{`Notes internes${notes[0]?.phase ? ` - ${getPhaseLabel(notes[0].phase)}` : ""}`}</div>
           {notes.map(({ referent, createdAt, note, _id }) => {
             const isAuthor = referent._id === user._id;
             return (
@@ -21,15 +21,15 @@ const NoteDisplayModal = ({ notes, isOpen, onClose, user }) => {
                   {!isAuthor && <span className="font-bold capitalize">{` ${referent.role}`}</span>}
                   <span>{` (le ${dayjs(createdAt).locale("fr").format("DD/MM/YYYY HH:mm")})`}</span>
                 </div>
-                <div className="bg-[#F3F4F6] rounded-lg py-3 px-3 mb-3 flex justify-between items-center">
-                  <div className="flex mr-2 self-start">
+                <div className="mb-3 flex items-center justify-between rounded-lg bg-[#F3F4F6] py-3 px-3">
+                  <div className="mr-2 flex self-start">
                     <img src={quotation} />
                     <img src={quotation} />
                   </div>
                   <div className="flex-1">
-                    <div className="text-[#374151] my-3 whitespace-pre-wrap">{note}</div>
+                    <div className="my-3 whitespace-pre-wrap text-[#374151]">{note}</div>
                   </div>
-                  <div className="flex rotate-180 ml-2 self-end">
+                  <div className="ml-2 flex rotate-180 self-end">
                     <img src={quotation} />
                     <img src={quotation} />
                   </div>
@@ -39,7 +39,7 @@ const NoteDisplayModal = ({ notes, isOpen, onClose, user }) => {
           })}
         </div>
 
-        <div className="flex justify-between w-[100%] pt-4 bg-white">
+        <div className="flex w-[100%] justify-between bg-white pt-4">
           <BorderButton className="grow" onClick={onClose}>
             Retour
           </BorderButton>

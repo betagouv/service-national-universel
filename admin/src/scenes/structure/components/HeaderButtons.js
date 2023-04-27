@@ -29,17 +29,17 @@ export default function Actions() {
   };
 
   return (
-    <div className="pr-8 pt-8 space-y-7">
+    <div className="space-y-7 pr-8 pt-8">
       {user.role !== ROLES.RESPONSIBLE && structure.status !== "DRAFT" && (
         <a
-          className="px-3 py-2 cursor-pointer rounded-lg bg-blue-600 text-blue-50 hover:brightness-110 hover:text-blue-50 active:brightness-125"
+          className="cursor-pointer rounded-lg bg-blue-600 px-3 py-2 text-blue-50 hover:text-blue-50 hover:brightness-110 active:brightness-125"
           href={"/mission/create/" + structure._id}>
           Nouvelle mission
         </a>
       )}
       {canDeleteStructure(user, structure) && (
         <button
-          className="text-xs flex items-center justify-center whitespace-nowrap px-3 py-1.5 cursor-pointer bg-[#FFFFFF] text-[#1F2937] border-[transparent] border-[1px] border-solid rounded-[6px] hover:border-[#D1D5DB] gap-2 mb-auto ml-auto"
+          className="mb-auto ml-auto flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[6px] border-[1px] border-solid border-[transparent] bg-[#FFFFFF] px-3 py-1.5 text-xs text-[#1F2937] hover:border-[#D1D5DB]"
           onClick={() => setIsOpen(true)}>
           <Bin fill="red" className="h-3" />
           <p>Supprimer</p>

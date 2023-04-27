@@ -135,11 +135,11 @@ export default function List() {
   }, [schoolIds, selectedFilters]);
 
   return (
-    <div className="flex flex-1 flex-col w-full p-8 gap-8">
+    <div className="flex w-full flex-1 flex-col gap-8 p-8">
       <Title>Établissements</Title>
-      <div className="flex-1 flex-column bg-white flex-wrap rounded-lg py-4">
+      <div className="flex-column flex-1 flex-wrap rounded-lg bg-white py-4">
         <div className="mx-4">
-          <div className="flex flex-row justify-between w-full">
+          <div className="flex w-full flex-row justify-between">
             <Filters
               pageId={pageId}
               esId="schoolramses"
@@ -208,8 +208,8 @@ export default function List() {
           setParamData={setParamData}
           currentEntryOnPage={data?.length}
           render={
-            <div className="flex w-full flex-col mt-6 mb-2 border-y-[1px] border-gray-100">
-              <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
+            <div className="mt-6 mb-2 flex w-full flex-col border-y-[1px] border-gray-100">
+              <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400">
                 <div className="w-[70%] uppercase">Établissements</div>
                 <div className="w-[30%] uppercase">Volontaires</div>
               </div>
@@ -226,20 +226,20 @@ export default function List() {
 
 const Hit = ({ hit, infoYoungs, isLoading }) => {
   return (
-    <div className="flex py-3 items-center px-4 cursor-pointer hover:bg-gray-50 border-t-[1px] border-gray-100">
-      <div className="flex flex-col gap-1 w-[70%]">
-        <div className="font-bold text-base leading-6 text-gray-900 truncate">{hit?.fullName}</div>
-        <div className="font-normal text-xs leading-4 text-gray-500">{`${hit?.city || ""} • ${hit?.departmentName || ""}`}</div>
+    <div className="flex cursor-pointer items-center border-t-[1px] border-gray-100 py-3 px-4 hover:bg-gray-50">
+      <div className="flex w-[70%] flex-col gap-1">
+        <div className="truncate text-base font-bold leading-6 text-gray-900">{hit?.fullName}</div>
+        <div className="text-xs font-normal leading-4 text-gray-500">{`${hit?.city || ""} • ${hit?.departmentName || ""}`}</div>
       </div>
-      <div className="flex flex-col gap-2 w-[30%]">
+      <div className="flex w-[30%] flex-col gap-2">
         {isLoading ? (
           <Loading width="w-[80%]" />
         ) : (
           <>
-            <div className="text-xs leading-none font-normal text-gray-900">
+            <div className="text-xs font-normal leading-none text-gray-900">
               <strong>{infoYoungs.total || 0}</strong> Volontaires
             </div>
-            <div className="text-xs leading-none font-normal text-gray-500 uppercase">
+            <div className="text-xs font-normal uppercase leading-none text-gray-500">
               Dont <strong>{infoYoungs.inDepartment || 0}</strong> au sein du département ({(((infoYoungs.inDepartment || 0) * 100) / (infoYoungs.total || 1)).toFixed(0)}%)
             </div>
           </>
@@ -251,11 +251,11 @@ const Hit = ({ hit, infoYoungs, isLoading }) => {
 
 const Loading = ({ width }) => {
   return (
-    <div className={`animate-pulse flex space-x-4 ${width}`}>
+    <div className={`flex animate-pulse space-x-4 ${width}`}>
       <div className="flex-1 space-y-6">
         <div className="grid grid-cols-3 gap-4 ">
-          <div className="h-2 bg-gray-300 rounded col-span-2"></div>
-          <div className="h-2 bg-gray-300 rounded col-span-1"></div>
+          <div className="col-span-2 h-2 rounded bg-gray-300"></div>
+          <div className="col-span-1 h-2 rounded bg-gray-300"></div>
         </div>
       </div>
     </div>

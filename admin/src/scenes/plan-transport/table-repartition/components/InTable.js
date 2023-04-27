@@ -173,31 +173,31 @@ export function InTable({ region, cohort }) {
   return (
     <>
       {/* INFO */}
-      <div className="flex flex-col gap-4 w-4/12 pb-6">
-        <div className="flex flex-col gap-3 bg-white rounded-lg shadow-sm p-4">
-          <div className="text-sm text-gray-800 font-bold leading-5">Centres en {region}</div>
+      <div className="flex w-4/12 flex-col gap-4 pb-6">
+        <div className="flex flex-col gap-3 rounded-lg bg-white p-4 shadow-sm">
+          <div className="text-sm font-bold leading-5 text-gray-800">Centres en {region}</div>
           <div className="flex items-center gap-3 ">
-            <div className="text-2xl text-gray-800 font-bold leading-7">{centerTotal}</div>
-            <div className="text-xs text-[#0063CB] leading-5 font-bold px-1 bg-[#E8EDFF] rounded-lg uppercase">{placesTotal} Places</div>
+            <div className="text-2xl font-bold leading-7 text-gray-800">{centerTotal}</div>
+            <div className="rounded-lg bg-[#E8EDFF] px-1 text-xs font-bold uppercase leading-5 text-[#0063CB]">{placesTotal} Places</div>
           </div>
         </div>
       </div>
       {/* TABLE */}
       <div className="flex flex-col gap-2 rounded-lg bg-white pb-3">
-        <div className="flex px-4 py-3 items-center justify-between w-full">
+        <div className="flex w-full items-center justify-between px-4 py-3">
           <input
             type="text"
             name="search"
-            className=" border border-gray-300 rounded-lg px-4 py-2 w-1/3"
+            className=" w-1/3 rounded-lg border border-gray-300 px-4 py-2"
             placeholder="Rechercher un département"
             onChange={(e) => setSearchDepartment(e.target.value)}
           />
           <ButtonPrimary onClick={handleExportData}>Exporter</ButtonPrimary>
         </div>
         <hr />
-        <div className="flex px-4 py-2 items-center">
-          <div className="w-[30%] uppercase text-[#7E858C] text-xs leading-3">Départements d&apos;accueil</div>
-          <div className="w-[70%] uppercase text-[#7E858C] text-xs leading-3">Régions accueillies</div>
+        <div className="flex items-center px-4 py-2">
+          <div className="w-[30%] text-xs uppercase leading-3 text-[#7E858C]">Départements d&apos;accueil</div>
+          <div className="w-[70%] text-xs uppercase leading-3 text-[#7E858C]">Régions accueillies</div>
         </div>
         {departments?.length ? (
           departments.map((department) => {
@@ -215,8 +215,8 @@ export function InTable({ region, cohort }) {
         ) : (
           <>
             <hr />
-            <div className="flex px-4 pb-4 pt-2 items-center justify-center w-full">
-              <div className="text-sm text-[#7E858C] leading-6">Aucun département ne correspond à votre recherche</div>
+            <div className="flex w-full items-center justify-center px-4 pb-4 pt-2">
+              <div className="text-sm leading-6 text-[#7E858C]">Aucun département ne correspond à votre recherche</div>
             </div>
           </>
         )}
@@ -246,19 +246,19 @@ const Department = ({ department, loadingQuery, data, objectifByDepartment, youn
   return (
     <>
       <hr />
-      <div className="flex px-4 py-2 items-center">
+      <div className="flex items-center px-4 py-2">
         <div className="w-[30%]">
-          <div className="text-base text-[#242526] font-bold leading-6">{department}</div>
+          <div className="text-base font-bold leading-6 text-[#242526]">{department}</div>
         </div>
         <div className="w-[70%]">
           {loadingQuery ? (
             <Loading width="w-1/3" />
           ) : (
-            <div className="relative flex flex-row gap-2 items-center flex-wrap">
+            <div className="relative flex flex-row flex-wrap items-center gap-2">
               {listRegion.map((assign, i) => (
                 <div key={i + "assignRegion"}>
                   <div
-                    className="relative text-xs text-gray-700 bg-gray-100 rounded-full p-2 cursor-pointer hover:scale-105 flex gap-2 items-center"
+                    className="relative flex cursor-pointer items-center gap-2 rounded-full bg-gray-100 p-2 text-xs text-gray-700 hover:scale-105"
                     onClick={() => setOpen({ open: true, region: assign.fromRegion })}>
                     {assign.fromRegion} {open.open ? <BsChevronUp /> : <BsChevronDown />}
                   </div>
@@ -297,28 +297,28 @@ const InfoDepartment = ({ setOpen, assignDepartment, region, objectifByDepartmen
   }, []);
 
   return (
-    <div ref={ref} className="absolute z-50 flex flex-col bg-white top-[110%] left-[0px] shadow-ninaButton rounded-lg min-w-[400px] py-2 max-h-60 overflow-y-auto">
+    <div ref={ref} className="max-h-60 absolute top-[110%] left-[0px] z-50 flex min-w-[400px] flex-col overflow-y-auto rounded-lg bg-white py-2 shadow-ninaButton">
       <div className="flex flex-col">
         <div className="flex gap-4 p-2">
-          <div className="text-gray-500 text-xs font-medium leading-4 basis-3/6">{region}</div>
-          <div className="text-gray-500 text-xs font-medium leading-4 basis-1/6">Objectif</div>
-          <div className="text-gray-500 text-xs font-medium leading-4 basis-2/6">Inscrits</div>
+          <div className="basis-3/6 text-xs font-medium leading-4 text-gray-500">{region}</div>
+          <div className="basis-1/6 text-xs font-medium leading-4 text-gray-500">Objectif</div>
+          <div className="basis-2/6 text-xs font-medium leading-4 text-gray-500">Inscrits</div>
         </div>
         {assignDepartment.map((assign, i) => {
           const goal = objectifByDepartment.find((e) => e.department === assign) ? objectifByDepartment.find((e) => e.department === assign).max || 0 : 0;
           const youngsInDepartment = youngsByDepartment.find((r) => r.key === assign)?.doc_count || 0;
           return (
-            <div key={i + "assignDepartment"} className="flex gap-4 justify-between relative hover:bg-gray-100 cursor-default p-2">
-              <div className="text-sm leading-5 text-gray-700 basis-3/6">
+            <div key={i + "assignDepartment"} className="relative flex cursor-default justify-between gap-4 p-2 hover:bg-gray-100">
+              <div className="basis-3/6 text-sm leading-5 text-gray-700">
                 {getDepartmentNumber(assign)} - {assign}
               </div>
-              <div className="flex items-center gap-2 basis-1/6">
+              <div className="flex basis-1/6 items-center gap-2">
                 <Profil className="text-gray-400" />
-                <div className="text-sm leading-5 text-gray-500 font-normal">{goal}</div>
+                <div className="text-sm font-normal leading-5 text-gray-500">{goal}</div>
               </div>
-              <div className="flex items-center gap-2 basis-2/6">
+              <div className="flex basis-2/6 items-center gap-2">
                 <Profil className="text-gray-400" />
-                <div className="text-sm leading-5 text-gray-500 font-normal flex gap-2 flex-grow">
+                <div className="flex flex-grow gap-2 text-sm font-normal leading-5 text-gray-500">
                   <span>{youngsInDepartment}</span>
                   <span className="text-gray-400">({goal !== 0 ? Math.round((youngsInDepartment / goal) * 100) : 100} %)</span>
                 </div>

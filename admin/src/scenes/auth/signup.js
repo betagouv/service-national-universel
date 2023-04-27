@@ -81,8 +81,8 @@ export default function Signup() {
         }}>
         {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
           return (
-            <div className="p-8 mx-auto w-[1100px]">
-              <div className="text-center space-y-4 text-brand-grey">
+            <div className="mx-auto w-[1100px] p-8">
+              <div className="space-y-4 text-center text-brand-grey">
                 <h1 className="text-3xl font-bold text-brand-black">Inscrivez votre structure d&apos;accueil</h1>
                 <p>A destination des structures souhaitant accueillir des volontaires</p>
                 <p>
@@ -93,10 +93,10 @@ export default function Signup() {
                 </p>
               </div>
 
-              <div className="mx-auto flex w-full gap-4 my-4">
+              <div className="mx-auto my-4 flex w-full gap-4">
                 {/* left form */}
                 <form onSubmit={handleSubmit} className="w-1/2 space-y-4 rounded-lg bg-white p-4 shadow-xl">
-                  <h2 className="text-base font-normal text-brand-grey m-0">INFORMATIONS SUR LE RESPONSABLE DE STRUCTURE</h2>
+                  <h2 className="m-0 text-base font-normal text-brand-grey">INFORMATIONS SUR LE RESPONSABLE DE STRUCTURE</h2>
                   <div>
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       <span className="mr-1 text-red-500">*</span>ADRESSE EMAIL
@@ -192,7 +192,7 @@ export default function Signup() {
 
                 {/* right form */}
                 <form onSubmit={handleSubmit} className="w-1/2 space-y-4 rounded-lg bg-white p-4 shadow-xl">
-                  <h2 className="text-base font-normal text-brand-grey m-0">INFORMATIONS SUR LA STRUCTURE</h2>
+                  <h2 className="m-0 text-base font-normal text-brand-grey">INFORMATIONS SUR LA STRUCTURE</h2>
                   <div>
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       <span className="mr-1 text-red-500">*</span>NOM DE LA STRUCTURE
@@ -285,7 +285,7 @@ export default function Signup() {
                     <>
                       <div>
                         <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
-                          <span className="text-red-500 mr-1">*</span>TYPE DE STRUCTURE PUBLIQUE
+                          <span className="mr-1 text-red-500">*</span>TYPE DE STRUCTURE PUBLIQUE
                         </label>
                         <Field
                           className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
@@ -315,7 +315,7 @@ export default function Signup() {
                       ) && (
                         <div>
                           <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
-                            <span className="text-red-500 mr-1">*</span>SOUS-TYPE DE STRUCTURE
+                            <span className="mr-1 text-red-500">*</span>SOUS-TYPE DE STRUCTURE
                           </label>
                           <Field
                             className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
@@ -342,7 +342,7 @@ export default function Signup() {
                   )}
                   <div>
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
-                      <span className="text-red-500 mr-1">*</span>Code postal de la structure
+                      <span className="mr-1 text-red-500">*</span>Code postal de la structure
                     </label>
                     <Field
                       className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
@@ -369,7 +369,7 @@ export default function Signup() {
                     name="user.acceptCGU"
                     checked={values.user.acceptCGU === "true"}
                   />
-                  <label htmlFor="checkboxCGU" className="flex-1 text-brand-grey mb-0">
+                  <label htmlFor="checkboxCGU" className="mb-0 flex-1 text-brand-grey">
                     J&apos;ai lu et j&apos;accepte les{" "}
                     <a
                       href={`${adminURL}/conditions-generales-utilisation`}

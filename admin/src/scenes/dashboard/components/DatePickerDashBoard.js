@@ -2,9 +2,9 @@ import React from "react";
 
 export default function DatePickerDashboard({ title, value, onChange }) {
   return (
-    <div className="flex flex-wrap p-[5px] bg-white rounded-[0.4rem] box-border shadow-sm">
+    <div className="box-border flex flex-wrap rounded-[0.4rem] bg-white p-[5px] shadow-sm">
       <div className="flex py-[2px] px-[8px]">
-        <div className="flex justify-between items-center pr-[5px] text-brand-darkPurple text-[0.8rem]">{title} :</div>
+        <div className="flex items-center justify-between pr-[5px] text-[0.8rem] text-brand-darkPurple">{title} :</div>
         <input className="cursor-pointer text-[0.8rem]" type="date" value={value} onChange={onChange}></input>
       </div>
     </div>

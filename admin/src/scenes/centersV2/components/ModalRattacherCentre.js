@@ -162,21 +162,21 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
   ];
 
   return (
-    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[600px] bg-white rounded-lg shadow-xl">
-      <div className="flex flex-col p-8 h-[650px] w-full justify-between">
-        <div className="flex flex-col w-full">
-          <div className="font-medium text-xl text-gray-800 leading-7 text-center">Rattacher un centre à un séjour</div>
+    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[600px] rounded-lg bg-white shadow-xl">
+      <div className="flex h-[650px] w-full flex-col justify-between p-8">
+        <div className="flex w-full flex-col">
+          <div className="text-center text-xl font-medium leading-7 text-gray-800">Rattacher un centre à un séjour</div>
           <hr className="my-8" />
-          <div className="text-gray-800 text-sm font-medium leading-6">Choisissez un séjour</div>
-          <div className="flex flex-row gap-2 flex-wrap py-2">
+          <div className="text-sm font-medium leading-6 text-gray-800">Choisissez un séjour</div>
+          <div className="flex flex-row flex-wrap gap-2 py-2">
             {availableCohorts.map((cohort) => (
               <>
                 {defaultCentre && !selectedCentre?.cohorts?.includes(cohort) ? (
                   <div
                     key={cohort}
                     onClick={() => setSelectedCohort(cohort)}
-                    className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] ${
-                      selectedCohort === cohort ? "border-blue-600 text-white bg-blue-600" : "border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF] "
+                    className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
+                      selectedCohort === cohort ? "border-blue-600 bg-blue-600 text-white" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF] "
                     }`}>
                     {cohort}
                   </div>
@@ -185,8 +185,8 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
                   <div
                     key={cohort}
                     onClick={() => setSelectedCohort(cohort)}
-                    className={`rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-1 border-[1px] ${
-                      selectedCohort === cohort ? "border-blue-600 text-white bg-blue-600" : "border-[#66A7F4] text-[#0C7CFF] bg-[#F9FCFF] "
+                    className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
+                      selectedCohort === cohort ? "border-blue-600 bg-blue-600 text-white" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF] "
                     }`}>
                     {cohort}
                   </div>
@@ -196,32 +196,32 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
           </div>
           {selectedCohort ? (
             <>
-              <div className="text-gray-500 text-sm font-medium leading-6 mt-4">Sélectionnez un centre</div>
+              <div className="mt-4 text-sm font-medium leading-6 text-gray-500">Sélectionnez un centre</div>
               <div className="relative">
                 <div
                   ref={refContainer}
-                  className={`mt-2 py-2 pl-2 pr-4 flex items-center justify-between rounded-lg bg-white ${open ? "border-blue-500 border-2" : "border-[1px] border-gray-300"}`}>
+                  className={`mt-2 flex items-center justify-between rounded-lg bg-white py-2 pl-2 pr-4 ${open ? "border-2 border-blue-500" : "border-[1px] border-gray-300"}`}>
                   <div className="flex flex-col justify-center">
-                    <div className="text-xs leading-6 font-normal text-gray-500">Choisir un centre</div>
-                    {!selectedCentre ? <div className="text-sm leading-6 text-gray-800 h-5" /> : <div className="text-sm leading-6 text-gray-800">{selectedCentre.name}</div>}
+                    <div className="text-xs font-normal leading-6 text-gray-500">Choisir un centre</div>
+                    {!selectedCentre ? <div className="h-5 text-sm leading-6 text-gray-800" /> : <div className="text-sm leading-6 text-gray-800">{selectedCentre.name}</div>}
                   </div>
-                  {editable && <BsChevronDown className={`text-gray-500 ${open ? "transform rotate-180" : ""}`} />}
+                  {editable && <BsChevronDown className={`text-gray-500 ${open ? "rotate-180 transform" : ""}`} />}
                 </div>
 
                 <div
                   ref={refSelect}
                   className={`${!open ? "hidden" : ""} ${
                     listCentre.length > 3 ? "h-[300px] overflow-y-auto" : ""
-                  } absolute left-0 w-full bg-white shadow-lg rounded-lg border border-gray-300 px-3 z-50`}>
-                  <div className="sticky top-0 bg-white z-10 pt-3">
-                    <div className="flex flex-row gap-2 items-center">
+                  } absolute left-0 z-50 w-full rounded-lg border border-gray-300 bg-white px-3 shadow-lg`}>
+                  <div className="sticky top-0 z-10 bg-white pt-3">
+                    <div className="flex flex-row items-center gap-2">
                       <BsSearch className="text-gray-400" />
                       <input
                         ref={refInput}
                         type="text"
                         placeholder="Rechercher un centre"
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full text-gray-800 text-[13px] leading-3"
+                        className="w-full text-[13px] leading-3 text-gray-800"
                       />
                     </div>
                     <hr className="my-2" />
@@ -233,7 +233,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
                         setSelectedCentre(centre);
                         setOpen(false);
                       }}
-                      className="flex flex-col py-1 px-2 cursor-pointer hover:bg-gray-50 rounded-lg">
+                      className="flex cursor-pointer flex-col rounded-lg py-1 px-2 hover:bg-gray-50">
                       <div className="text-sm leading-5 text-gray-900">{centre.name}</div>
                       <div className="text-sm leading-5 text-gray-500">
                         {centre.department} • {centre.region}
@@ -241,15 +241,15 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
                     </div>
                   ))}
                   {listCentre.length === 0 && (
-                    <div className="flex items-center gap-2 py-2 justify-center">
+                    <div className="flex items-center justify-center gap-2 py-2">
                       <div className="text-xs leading-4 text-gray-900">Aucun centre trouvé</div>
                     </div>
                   )}
                   <hr className="my-2" />
-                  <div className="flex flex-col items-center gap-2 justify-center pb-3">
+                  <div className="flex flex-col items-center justify-center gap-2 pb-3">
                     <div className="text-sm leading-5 text-gray-900">Le centre n’est pas dans la liste ?</div>
                     <div
-                      className="text-xs leading-4 text-blue-600 py-1 px-2 rounded-lg hover:bg-blue-50 cursor-pointer"
+                      className="cursor-pointer rounded-lg py-1 px-2 text-xs leading-4 text-blue-600 hover:bg-blue-50"
                       onClick={() => history.push(`/centre/nouveau?cohort=${selectedCohort}`)}>
                       Créer un centre
                     </div>
@@ -257,7 +257,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
                 </div>
               </div>
               {selectedCentre && (
-                <div className="text-sm font-medium leading-6 mt-4">
+                <div className="mt-4 text-sm font-medium leading-6">
                   <Field label="Nombre de places ouvertes" onChange={(e) => setPlacesTotal(e.target.value)} value={placesTotal} />
                 </div>
               )}
@@ -266,20 +266,20 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
                 <div className="relative">
                   <div
                     ref={refStatus}
-                    className={`mt-6 py-2 pl-2 pr-4 flex items-center justify-between rounded-lg bg-white ${
-                      statusOpen ? "border-blue-500 border-2" : "border-[1px] border-gray-300"
+                    className={`mt-6 flex items-center justify-between rounded-lg bg-white py-2 pl-2 pr-4 ${
+                      statusOpen ? "border-2 border-blue-500" : "border-[1px] border-gray-300"
                     }`}>
                     <div className="flex flex-col justify-center">
-                      <div className="text-xs leading-6 font-normal text-gray-500 ">Statut de la session</div>
+                      <div className="text-xs font-normal leading-6 text-gray-500 ">Statut de la session</div>
                       {status === "" ? (
-                        <div className="text-sm leading-6 text-gray-800 h-5" />
+                        <div className="h-5 text-sm leading-6 text-gray-800" />
                       ) : (
                         <div className="text-sm leading-6 text-gray-800">{statusOptions.find((e) => e.value === status).label}</div>
                       )}
                     </div>
-                    <BsChevronDown className={`text-gray-500 ${open ? "transform rotate-180" : ""}`} />
+                    <BsChevronDown className={`text-gray-500 ${open ? "rotate-180 transform" : ""}`} />
                   </div>
-                  <div ref={refStatusSelect} className={`${!statusOpen ? "hidden" : ""} absolute w-full bg-white shadow-lg rounded-lg border border-gray-300 px-3 z-50`}>
+                  <div ref={refStatusSelect} className={`${!statusOpen ? "hidden" : ""} absolute z-50 w-full rounded-lg border border-gray-300 bg-white px-3 shadow-lg`}>
                     {statusOptions.map((item) => {
                       return (
                         <div
@@ -288,7 +288,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
                             setStatus(item.value);
                             setStatusOpen(false);
                           }}
-                          className="flex flex-col py-1 px-2 cursor-pointer hover:bg-gray-50 rounded-lg">
+                          className="flex cursor-pointer flex-col rounded-lg py-1 px-2 hover:bg-gray-50">
                           <div className="text-sm leading-5 text-gray-900">{item.label}</div>
                         </div>
                       );
@@ -299,14 +299,14 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
             </>
           ) : null}
         </div>
-        <div className="flex items-center gap-4 mt-4">
-          <button onClick={onCancel} className="w-1/2 border-[1px] border-gray-300 py-2 rounded-lg hover:shadow-ninaButton ">
+        <div className="mt-4 flex items-center gap-4">
+          <button onClick={onCancel} className="w-1/2 rounded-lg border-[1px] border-gray-300 py-2 hover:shadow-ninaButton ">
             Annuler
           </button>
           <button
             onClick={onSubmit}
             disabled={disabled || isLoading}
-            className="border-[1px] border-blue-600 text-white bg-blue-600 py-2 w-1/2 rounded-lg hover:shadow-ninaButton disabled:opacity-50 disabled:cursor-not-allowed">
+            className="w-1/2 rounded-lg border-[1px] border-blue-600 bg-blue-600 py-2 text-white hover:shadow-ninaButton disabled:cursor-not-allowed disabled:opacity-50">
             Créer la session
           </button>
         </div>
