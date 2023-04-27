@@ -130,7 +130,7 @@ const AccountRepresentantsPage = () => {
 
   const handleResetForm = () => {
     setHasParent2(young?.parent2Email ? true : false);
-    setFormValues(getInitialFormValues());
+    setFormValues(getInitialFormValues(young));
   };
 
   return (
