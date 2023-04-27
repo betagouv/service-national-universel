@@ -8,11 +8,11 @@ const RadioButton = ({ options, label, onChange, value: currentValue, readonly =
   }
   return (
     <div className="mt-2 mb-6">
-      {label && <label className="mb-2 font-bold text-[15px] text-[#161616]">{label}</label>}
+      {label && <label className="mb-2 text-[15px] font-bold text-[#161616]">{label}</label>}
       <div className="flex flex-wrap">
         {options.map(({ label, value }, idx) => (
           <React.Fragment key={value}>
-            {idx > 0 && <div className="w-[1px] bg-[#E5E5E5] mx-4" />}
+            {idx > 0 && <div className="mx-4 w-[1px] bg-[#E5E5E5]" />}
             <Option label={label} value={value === currentValue} onChange={() => change(value)} readonly={readonly} />
           </React.Fragment>
         ))}
@@ -23,8 +23,8 @@ const RadioButton = ({ options, label, onChange, value: currentValue, readonly =
 
 const Option = ({ label, value, onChange, readonly }) => {
   return (
-    <label className={`mb-0 ${readonly ? "" : "hover:underline cursor-pointer"}`}>
-      <input className="mr-3 accent-[#000091] border-dashed" type="radio" checked={value} onChange={onChange} disabled={readonly} />
+    <label className={`mb-0 ${readonly ? "" : "cursor-pointer hover:underline"}`}>
+      <input className="mr-3 border-dashed accent-[#000091]" type="radio" checked={value} onChange={onChange} disabled={readonly} />
       {label}
     </label>
   );

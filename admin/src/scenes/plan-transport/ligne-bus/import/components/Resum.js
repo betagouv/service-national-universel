@@ -28,24 +28,24 @@ export default function Resum({ summary, cohort }) {
 
   return (
     <>
-      <div className="flex flex-col w-full rounded-xl bg-white mt-8 pt-12 pb-24 px-8 gap-6">
-        <div className="text-xl leading-7 font-medium text-gray-900 text-center pb-4">Vous vous apprêtez à importer...</div>
+      <div className="mt-8 flex w-full flex-col gap-6 rounded-xl bg-white px-8 pt-12 pb-24">
+        <div className="pb-4 text-center text-xl font-medium leading-7 text-gray-900">Vous vous apprêtez à importer...</div>
         <div className="flex items-stretch justify-center gap-6 pt-6 pb-12">
-          <div className="flex flex-col px-4 rounded-xl bg-gray-100 w-52 h-32 justify-center">
-            <div className="text-[42px] leading-[120%] font-extrabold text-gray-800">{summary.busLineCount}</div>
-            <div className="text-xs leading-5 font-medium text-gray-800">lignes de transport</div>
+          <div className="flex h-32 w-52 flex-col justify-center rounded-xl bg-gray-100 px-4">
+            <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary.busLineCount}</div>
+            <div className="text-xs font-medium leading-5 text-gray-800">lignes de transport</div>
           </div>
-          <div className="flex flex-col px-4 rounded-xl bg-gray-100 w-52 h-32 justify-center">
-            <div className="text-[42px] leading-[120%] font-extrabold text-gray-800">{summary.centerCount}</div>
-            <div className="text-xs leading-5 font-medium text-gray-800">centres de cohésion</div>
+          <div className="flex h-32 w-52 flex-col justify-center rounded-xl bg-gray-100 px-4">
+            <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary.centerCount}</div>
+            <div className="text-xs font-medium leading-5 text-gray-800">centres de cohésion</div>
           </div>
-          <div className="flex flex-col px-4 rounded-xl bg-gray-100 w-52 h-32 justify-center">
-            <div className="text-[42px] leading-[120%] font-extrabold text-gray-800">{summary.pdrCount}</div>
-            <div className="text-xs leading-5 font-medium text-gray-800">points de rassemblement</div>
+          <div className="flex h-32 w-52 flex-col justify-center rounded-xl bg-gray-100 px-4">
+            <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary.pdrCount}</div>
+            <div className="text-xs font-medium leading-5 text-gray-800">points de rassemblement</div>
           </div>
         </div>
       </div>
-      <div className="flex justify-end mt-4">
+      <div className="mt-4 flex justify-end">
         <PlainButton className="w-52" disabled={isLoading} spinner={isLoading} onClick={onSubmit}>
           Importer
         </PlainButton>

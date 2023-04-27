@@ -8,7 +8,7 @@ const Button = ({ onClick, children = "Continuer", disabled = false, className =
   return (
     <button
       disabled={disabled}
-      className={`flex items-center justify-center px-3 py-2 border ${disabled ? disabledStyle : style} ${!disabled && hoveredStyle} ${className}`}
+      className={`flex items-center justify-center border px-3 py-2 ${disabled ? disabledStyle : style} ${!disabled && hoveredStyle} ${className}`}
       onClick={onClick}>
       {children}
     </button>

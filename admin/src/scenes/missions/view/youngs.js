@@ -258,7 +258,7 @@ export default function Youngs({ mission, applications, updateMission }) {
   };
   const RenderText = (text) => {
     return (
-      <div key={text} className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+      <div key={text} className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
         <div className="font-normal">
           Marquer en <span className="font-bold">{text}</span>
           {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
@@ -374,9 +374,9 @@ export default function Youngs({ mission, applications, updateMission }) {
             <TabItem count={countFollow} title="À suivre" onClick={() => setCurrentTab("follow")} active={currentTab === "follow"} />
           </div>
           <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-            <div className={`relative items-start mb-4`}>
-              <div className="flex-1 flex-column bg-white flex-wrap rounded-b-lg rounded-tr-lg">
-                <div className="flex flex-row pt-4 justify-between items-center px-8">
+            <div className={`relative mb-4 items-start`}>
+              <div className="flex-column flex-1 flex-wrap rounded-b-lg rounded-tr-lg bg-white">
+                <div className="flex flex-row items-center justify-between px-8 pt-4">
                   <div className="flex flex-row">
                     <DataSearch
                       defaultQuery={getDefaultQuery}
@@ -397,7 +397,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                     <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={[{ items: optionsFilteredRole }]} />
                   ) : (
                     <button
-                      className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
+                      className="rounded-md bg-snu-purple-300 py-2 px-4 text-sm font-semibold text-white hover:bg-snu-purple-600 hover:drop-shadow"
                       onClick={() => setIsExportOpen(true)}>
                       Exporter les candidatures
                     </button>
@@ -414,7 +414,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                   />
                 </div>
 
-                <div className={`mt-3 gap-2 flex flex-wrap mx-8 items-center ${!filterVisible ? "hidden" : ""}`}>
+                <div className={`mx-8 mt-3 flex flex-wrap items-center gap-2 ${!filterVisible ? "hidden" : ""}`}>
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
                     className="dropdown-filter"
@@ -479,7 +479,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                     render={({ data }) => (
                       <Table>
                         <thead>
-                          <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100 mt-6 mb-2 text-start">
+                          <tr className="mt-6 mb-2 border-y-[1px] border-gray-100 text-start text-xs uppercase text-gray-400">
                             {currentTab !== "all" && (
                               <th className="w-1/12">
                                 <input ref={checkboxRef} className="cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
@@ -549,7 +549,7 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab
   return (
     <tr className={`${!opened && "hover:!bg-gray-100"}`} onClick={onClick}>
       {currentTab !== "all" && (
-        <td className={`${bgColor} pl-4 ml-2 rounded-l-lg`}>
+        <td className={`${bgColor} ml-2 rounded-l-lg pl-4`}>
           <div onClick={(e) => e.stopPropagation()}>
             <input className="cursor-pointer" type="checkbox" checked={selected} onChange={() => onSelect(hit)} />
           </div>
@@ -567,7 +567,7 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab
         </MultiLine>
       </td>
       <td className={`${bgColor}`}>
-        <div className={`font-normal text-xs ${mainTextColor}`}>{formatDateFRTimezoneUTC(hit.createdAt)}</div>
+        <div className={`text-xs font-normal ${mainTextColor}`}>{formatDateFRTimezoneUTC(hit.createdAt)}</div>
       </td>
       {currentTab !== "pending" && (
         <>
@@ -576,9 +576,9 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab
           </td>
           <td className={`${bgColor}`}>
             {numberOfFiles > 0 && (
-              <div className="flex flex-row justify-center items-center">
-                {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && <div className="w-[8px] h-[8px] rounded-full bg-orange-500 mr-1.5" />}
-                <div className="font-medium text-sm text-gray-700 mr-1">{numberOfFiles}</div>
+              <div className="flex flex-row items-center justify-center">
+                {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && <div className="mr-1.5 h-[8px] w-[8px] rounded-full bg-orange-500" />}
+                <div className="mr-1 text-sm font-medium text-gray-700">{numberOfFiles}</div>
                 <PaperClip />
               </div>
             )}
@@ -589,13 +589,13 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab
       <td className={`${bgColor}`} onClick={(e) => e.stopPropagation()}>
         <SelectStatusApplicationPhase2 hit={hit} callback={onChangeApplication} />
       </td>
-      <td className={`${bgColor} rounded-r-lg mr-2`}>
-        <ReactTooltip id="tooltip-delete" className="bg-white shadow-sm text-black" arrowColor="white" disable={false}>
+      <td className={`${bgColor} mr-2 rounded-r-lg`}>
+        <ReactTooltip id="tooltip-delete" className="bg-white text-black shadow-sm" arrowColor="white" disable={false}>
           <div className="text-[black]">Voir l&apos;espace candidature</div>
         </ReactTooltip>
         <div
           data-tip=""
-          className="flex justify-center items-center h-8 w-8 bg-gray-100 !text-gray-600 rounded-full hover:scale-105 cursor-pointer border-[1px] border-gray-100 hover:border-gray-300"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-[1px] border-gray-100 bg-gray-100 !text-gray-600 hover:scale-105 hover:border-gray-300"
           onClick={() => history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id.toString()}`)}
           data-for="tooltip-delete">
           <Eye width={16} height={16} />
@@ -608,9 +608,9 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, onSelect, currentTab
 const BadgeContract = (status, applicationStatus) => {
   // TODO : a quel moment affiche t on le status du contrat ?
   if (!status || ["WAITING_VALIDATION", "WAITING_ACCEPTATION"].includes(applicationStatus)) return;
-  if (status === "DRAFT") return <span className="text-xs font-medium border-[0.5px] text-white px-2 rounded-3xl py-1 bg-orange-500">Brouillon</span>;
-  if (status === "SENT") return <span className="text-xs border-[0.5px] border-[#CECECE] font-medium text-gray-600 px-2 rounded-3xl py-1 bg-white">Envoyé</span>;
-  if (status === "VALIDATED") return <span className="text-xs border-[0.5px] border-[#CECECE] font-medium text-gray-600 px-2 rounded-3xl py-1 bg-gray-100">Signé</span>;
+  if (status === "DRAFT") return <span className="rounded-3xl border-[0.5px] bg-orange-500 px-2 py-1 text-xs font-medium text-white">Brouillon</span>;
+  if (status === "SENT") return <span className="rounded-3xl border-[0.5px] border-[#CECECE] bg-white px-2 py-1 text-xs font-medium text-gray-600">Envoyé</span>;
+  if (status === "VALIDATED") return <span className="rounded-3xl border-[0.5px] border-[#CECECE] bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">Signé</span>;
 };
 const PaperClip = () => {
   return (
@@ -624,22 +624,22 @@ const PaperClip = () => {
 };
 function FilterButton({ onClick }) {
   return (
-    <div onClick={onClick} className="cursor-pointer bg-[#F3F4F6] w-24 h-10 rounded-md flex flex-row justify-center items-center">
+    <div onClick={onClick} className="flex h-10 w-24 cursor-pointer flex-row items-center justify-center rounded-md bg-[#F3F4F6]">
       <svg width={12} height={11} viewBox="0 0 12 11" fill="#9CA3AF" xmlns="http://www.w3.org/2000/svg">
         <path
           d="M0 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1.252a1 1 0 0 1-.293.708l-4.08 4.08a1 1 0 0 0-.294.708v1.171a1 1 0 0 1-.293.707l-.666.667c-.63.63-1.707.184-1.707-.707V7.748a1 1 0 0 0-.293-.708L.293 2.96A1 1 0 0 1 0 2.252V1Z"
           fill="#9CA3AF"
         />
       </svg>
-      <div className="ml-2 text-grey-700">Filtres</div>
+      <div className="text-grey-700 ml-2">Filtres</div>
     </div>
   );
 }
 const TabItem = ({ active, title, count, onClick, icon }) => (
   <div
     onClick={onClick}
-    className={`text-[13px] px-3 py-2 mr-2 cursor-pointer text-gray-600 rounded-t-lg hover:text-blue-600 ${
-      active ? "!text-blue-600 bg-white border-none" : "bg-gray-100 border-t border-x border-gray-200"
+    className={`mr-2 cursor-pointer rounded-t-lg px-3 py-2 text-[13px] text-gray-600 hover:text-blue-600 ${
+      active ? "border-none bg-white !text-blue-600" : "border-x border-t border-gray-200 bg-gray-100"
     }`}>
     <div className={"flex items-center gap-2"}>
       <div className="flex flex-row items-center gap-2">
@@ -647,7 +647,7 @@ const TabItem = ({ active, title, count, onClick, icon }) => (
         <div>{title}</div>
       </div>
 
-      <div className={`px-2 border-[0.5px] font-medium text-xs rounded-3xl ${active ? "border-blue-300 text-blue-600" : "border-gray-400 text-gray-500"}`}>{count}</div>
+      <div className={`rounded-3xl border-[0.5px] px-2 text-xs font-medium ${active ? "border-blue-300 text-blue-600" : "border-gray-400 text-gray-500"}`}>{count}</div>
     </div>
   </div>
 );

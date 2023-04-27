@@ -20,7 +20,7 @@ function FilterButton({ filter, setCustomFilter, customFilter }) {
   }
 
   return (
-    <label className={`text-blue-500 py-2 px-3 m-0 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-slate-50 ${checked && "bg-blue-50"}`}>
+    <label className={`m-0 flex cursor-pointer items-center gap-2 rounded-lg py-2 px-3 text-blue-500 hover:bg-slate-50 ${checked && "bg-blue-50"}`}>
       <FilterIcon className="fill-blue-300" />
       {filter.label}
       <input type="checkbox" checked={checked} onChange={() => handleChange()} className="hidden" />

@@ -69,11 +69,11 @@ export default function SimpleSelect({ value, transformer, options, onChange, fi
 
   return (
     <div ref={selectOptionsRef}>
-      <div className={`flex items-center justify-between cursor-pointer p-[5px] ${showBackgroundColor && "bg-gray-50"}`} onClick={toggleSelectOptions}>
+      <div className={`flex cursor-pointer items-center justify-between p-[5px] ${showBackgroundColor && "bg-gray-50"}`} onClick={toggleSelectOptions}>
         {filterOnType ? (
           <input
             type="text"
-            className="font-normal text-[14px] leading-[20px] text-[#1F2937] w-[100%] bg-[transparent]"
+            className="w-[100%] bg-[transparent] text-[14px] font-normal leading-[20px] text-[#1F2937]"
             value={filter}
             onChange={changeFilter}
             onFocus={() => setInputHasFocus(true)}
@@ -82,18 +82,18 @@ export default function SimpleSelect({ value, transformer, options, onChange, fi
         ) : (
           <>
             {value ? (
-              <div className="font-normal text-[14px] leading-[20px] text-[#1F2937]">{transformer ? transformer(value) : value}</div>
+              <div className="text-[14px] font-normal leading-[20px] text-[#1F2937]">{transformer ? transformer(value) : value}</div>
             ) : (
-              <div className="font-normal text-[14px] leading-[20px] py-[10px] text-[#1F2937]">{transformer ? transformer(value) : value}</div>
+              <div className="py-[10px] text-[14px] font-normal leading-[20px] text-[#1F2937]">{transformer ? transformer(value) : value}</div>
             )}
           </>
         )}
-        <ChevronDown className="text-[#1F2937] ml-[8px]" />
+        <ChevronDown className="ml-[8px] text-[#1F2937]" />
       </div>
       {selectOptionsOpened && (
-        <div className="absolute z-10 mt-[-1] left-[0px] right-[0px] border-[#E5E7EB] border-[1px] rounded-[6px] bg-white text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] max-h-[400px] overflow-auto">
+        <div className="absolute left-[0px] right-[0px] z-10 mt-[-1] max-h-[400px] overflow-auto rounded-[6px] border-[1px] border-[#E5E7EB] bg-white text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
           {filteredOptions.map((opt) => (
-            <div className="px-[10px] py-[5px] hover:bg-[#E5E7EB] cursor-pointer" key={opt.value} onClick={() => selectOption(opt.value)}>
+            <div className="cursor-pointer px-[10px] py-[5px] hover:bg-[#E5E7EB]" key={opt.value} onClick={() => selectOption(opt.value)}>
               {opt.label}
             </div>
           ))}

@@ -40,15 +40,15 @@ export default function Engagement() {
 
   return (
     <section>
-      <p className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</p>
-      <div className="overflow-x-auto flex gap-6">
+      <p className="my-4 text-base font-bold">Découvrez d’autres formes d’engagement</p>
+      <div className="flex gap-6 overflow-x-auto">
         {engagementPrograms.map((program) => {
           return <EngagementCard key={program.title} program={program} />;
         })}
       </div>
       <div className="mx-auto my-8 w-fit">
         <Link
-          className="text-[#000091] text-center border-[1px] border-[#000091] px-3 py-2 hover:border-blue-france-sun-113-hover hover:text-blue-france-sun-113-hover"
+          className="border-[1px] border-[#000091] px-3 py-2 text-center text-[#000091] hover:border-blue-france-sun-113-hover hover:text-blue-france-sun-113-hover"
           to="/public-engagements">
           Voir plus de formes d’engagement
         </Link>
@@ -62,18 +62,18 @@ function EngagementCard({ program }) {
 
   return (
     <div className="w-60 flex-none border">
-      <div className="w-full h-32">
+      <div className="h-32 w-full">
         <a href={program.link} target="_blank" rel="noreferrer">
-          <img src={program.picture} className="object-cover w-full h-full" />
+          <img src={program.picture} className="h-full w-full object-cover" />
         </a>
       </div>
 
-      <div className="h-fit p-6 space-y-4">
+      <div className="h-fit space-y-4 p-6">
         <div>
-          <p className="font-medium leading-6 h-12">{program.title}</p>
-          <p className={`text-gray-700 text-sm leading-6 text-ellipsis overflow-hidden ${isOpen ? "h-auto" : "h-[72px]"}`}>{program.description}</p>
+          <p className="h-12 font-medium leading-6">{program.title}</p>
+          <p className={`overflow-hidden text-ellipsis text-sm leading-6 text-gray-700 ${isOpen ? "h-auto" : "h-[72px]"}`}>{program.description}</p>
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <button
             className="text-xs text-gray-500"
             onClick={() => {

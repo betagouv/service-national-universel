@@ -12,8 +12,8 @@ const InputPhone = ({ value = "", onChange = () => {}, zoneValue = "FRANCE", onC
     onChange(event.target.value);
   };
   return (
-    <div className={`flex items-center w-full ${className}`}>
-      <select className="py-2 pl-4 mr-3 bg-transparent max-w-[120px] text-ellipsis" onChange={handleChangePhoneZone} value={zoneValue}>
+    <div className={`flex w-full items-center ${className}`}>
+      <select className="mr-3 max-w-[120px] text-ellipsis bg-transparent py-2 pl-4" onChange={handleChangePhoneZone} value={zoneValue}>
         {Object.entries(PHONE_ZONES).map(([key, phoneZone]) => (
           <option key={key} value={key} className="flex gap-1">
             {phoneZone.code} {phoneZone.name}
@@ -22,7 +22,7 @@ const InputPhone = ({ value = "", onChange = () => {}, zoneValue = "FRANCE", onC
       </select>
       <div className="h-6 w-[1px] bg-[#C5C5C5]" />
       <input
-        className={`flex justify-between items-center gap-3 w-full bg-transparent px-4 py-2`}
+        className={`flex w-full items-center justify-between gap-3 bg-transparent px-4 py-2`}
         type="tel"
         value={value}
         placeholder={placeholder}

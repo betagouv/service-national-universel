@@ -48,18 +48,18 @@ export default function ModalPointagePresenceJDM({ isOpen, onSubmit, onCancel, v
           <SpeakerPhone width={36} height={36} />
         </div>
         <div className="m-4">
-          <div className="flex text-center items-center justify-center text-gray-900 text-xl font-medium">{getTitle()}</div>
-          <div className="flex items-center justify-center text-gray-500 text-base font-normal text-center">{getMessage()}</div>
+          <div className="flex items-center justify-center text-center text-xl font-medium text-gray-900">{getTitle()}</div>
+          <div className="flex items-center justify-center text-center text-base font-normal text-gray-500">{getMessage()}</div>
         </div>
-        <div className="flex p-4 gap-2">
+        <div className="flex gap-2 p-4">
           <button
-            className="flex items-center justify-center flex-1 border-[1px] border-gray-300 text-gray-700 rounded-lg py-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+            className="flex flex-1 cursor-pointer items-center justify-center rounded-lg border-[1px] border-gray-300 py-2 text-gray-700 disabled:cursor-wait disabled:opacity-50"
             disabled={isLoading}
             onClick={onClickCancel}>
             Annuler
           </button>
           <button
-            className="flex items-center justify-center flex-1 bg-snu-purple-300 text-white rounded-lg py-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+            className="flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-snu-purple-300 py-2 text-white disabled:cursor-wait disabled:opacity-50"
             disabled={isLoading}
             type="submit">
             Confirmer

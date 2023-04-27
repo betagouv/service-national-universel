@@ -44,16 +44,16 @@ export default function StepConvocation({ young }) {
   return (
     <>
       {/* Desktop */}
-      <div className="hidden md:flex flex-col lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-1 flex-row py-4 items-center">
+      <div className="hidden flex-col md:flex lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-1 flex-row items-center py-4">
           {valid ? (
-            <div className="flex items-center justify-center bg-green-500 h-9 w-9 rounded-full mr-4">
-              <BsCheck2 className="text-white h-5 w-5" />
+            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
+              <BsCheck2 className="h-5 w-5 text-white" />
             </div>
           ) : (
-            <div className="flex items-center justify-center h-9 w-9 rounded-full mr-4 border-[1px] border-gray-200 text-gray-700">3</div>
+            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full border-[1px] border-gray-200 text-gray-700">3</div>
           )}
-          <div className="flex flex-1 flex-col mx-3">
+          <div className="mx-3 flex flex-1 flex-col">
             <h1 className={`text-base leading-7 ${enabled ? "text-gray-900" : "text-gray-400"}`}>Téléchargez votre convocation</h1>
             <p className={`text-sm leading-5 ${enabled ? "text-gray-500" : "text-gray-400"}`}>
               Votre convocation sera à présenter à l&apos;arrivée munie d&apos;une <span className="text-bold">pièce d&apos;identité valide</span>.
@@ -66,7 +66,7 @@ export default function StepConvocation({ young }) {
             <div className="flex flex-row items-center justify-center pb-4 lg:!pb-0">
               <button
                 type="button"
-                className="flex items-center justify-center bg-gray-100 h-8 w-8 rounded-full mr-4 cursor-pointer hover:scale-110"
+                className="mr-4 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-gray-100 hover:scale-110"
                 onClick={() => setShowConvocation(!showConvocation)}>
                 <WithTooltip tooltipText={showConvocation ? "Cacher" : "Voir"}>
                   {showConvocation ? <AiOutlineEyeInvisible className="h-5 w-5 text-gray-600" /> : <AiOutlineEye className="h-5 w-5 text-gray-600" />}
@@ -75,7 +75,7 @@ export default function StepConvocation({ young }) {
 
               <button
                 type="button"
-                className="flex items-center justify-center bg-gray-100 h-8 w-8 rounded-full mr-4 cursor-pointer hover:scale-110"
+                className="mr-4 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-gray-100 hover:scale-110"
                 onClick={() =>
                   setModal({
                     isOpen: true,
@@ -92,7 +92,7 @@ export default function StepConvocation({ young }) {
               <DownloadConvocationButton
                 young={young}
                 uri="cohesion"
-                className={`flex flex-row  items-center justify-center px-4 py-2 rounded-lg ${
+                className={`flex flex-row  items-center justify-center rounded-lg px-4 py-2 ${
                   valid ? "border-[1px] border-blue-700 " : "bg-blue-600"
                 } cursor-pointer hover:scale-105 ${valid ? "text-blue-700" : "text-white"}`}>
                 <HiOutlineDownload className={`h-5 w-5 ${valid ? "text-blue-700" : "text-blue-300"} mr-2`} />
@@ -104,22 +104,22 @@ export default function StepConvocation({ young }) {
       </div>
       {/* Mobile */}
       <div
-        className={`md:hidden flex items-center border-[1px] mb-3 ml-4 rounded-xl h-36 cursor-pointer ${valid ? "border-green-500 bg-green-50" : "bg-white"} `}
+        className={`mb-3 ml-4 flex h-36 cursor-pointer items-center rounded-xl border-[1px] md:hidden ${valid ? "border-green-500 bg-green-50" : "bg-white"} `}
         onClick={() => setStateMobil(enabled ? !stateMobil : false)}>
-        <div className="-translate-x-5 flex flex-row items-center w-full">
+        <div className="flex w-full -translate-x-5 flex-row items-center">
           {valid ? (
-            <div className="flex items-center justify-center bg-green-500 h-9 w-9 rounded-full mr-4">
-              <BsCheck2 className="text-white h-5 w-5" />
+            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
+              <BsCheck2 className="h-5 w-5 text-white" />
             </div>
           ) : (
-            <div className="flex items-center justify-center h-9 w-9 rounded-full border-[1px] bg-white border-gray-200 text-gray-700">3</div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-full border-[1px] border-gray-200 bg-white text-gray-700">3</div>
           )}
-          <div className="flex flex-1 flex-col ml-3">
+          <div className="ml-3 flex flex-1 flex-col">
             <div className={`text-sm ${valid && "text-green-600"} ${enabled ? "text-gray-900" : "text-gray-400"}`}>Téléchargez votre convocation</div>
             <div className={` text-sm leading-5 ${valid && "text-green-600 opacity-70"} ${enabled ? "text-gray-500" : "text-gray-400"}`}>
               Votre convocation sera à présenter à l&apos;arrivée munie d&apos;une pièce d&apos;identité valide.
             </div>
-            {enabled ? <div className={` text-sm text-right leading-5 ${valid ? "text-green-500" : "text-blue-600"}`}>Télécharger</div> : null}
+            {enabled ? <div className={` text-right text-sm leading-5 ${valid ? "text-green-500" : "text-blue-600"}`}>Télécharger</div> : null}
           </div>
         </div>
       </div>
@@ -132,7 +132,7 @@ export default function StepConvocation({ young }) {
       />
 
       {showConvocation ? (
-        <div className="hidden md:flex pb-4">
+        <div className="hidden pb-4 md:flex">
           <Convocation />
         </div>
       ) : null}
@@ -142,22 +142,22 @@ export default function StepConvocation({ young }) {
             <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={() => setStateMobil(false)} />
             <div className="w-full p-4">
               <div className="flex flex-col items-center justify-center">
-                <h1 className="text-gray-900 text-xl text-center pb-3">Choisissez une option de téléchargement</h1>
+                <h1 className="pb-3 text-center text-xl text-gray-900">Choisissez une option de téléchargement</h1>
                 <DownloadConvocationButton
                   young={young}
                   uri="cohesion"
-                  className="flex flex-row w-full items-center justify-center px-4 py-2 rounded-lg bg-blue-600 cursor-pointer hover:scale-105 text-white text-sm">
-                  <HiOutlineDownload className="h-5 w-5 text-blue-300 mr-2" />
+                  className="flex w-full cursor-pointer flex-row items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:scale-105">
+                  <HiOutlineDownload className="mr-2 h-5 w-5 text-blue-300" />
                   Télécharger
                 </DownloadConvocationButton>
 
-                <div className="flex w-full flex-row flex-shrink items-center py-2">
+                <div className="flex w-full flex-shrink flex-row items-center py-2">
                   <button
                     type="button"
-                    className="flex flex-row items-center justify-center px-4 py-2 rounded-lg border-[1px] border-blue-700 cursor-pointer hover:scale-105 mr-2"
+                    className="mr-2 flex cursor-pointer flex-row items-center justify-center rounded-lg border-[1px] border-blue-700 px-4 py-2 hover:scale-105"
                     onClick={() => setShowConvocation(!showConvocation)}>
-                    {showConvocation ? <AiOutlineEyeInvisible className="h-5 w-5 text-blue-700 mr-2" /> : <AiOutlineEye className="h-5 w-5 text-blue-700 mr-2" />}
-                    <span className="text-blue-700 text-sm">Voir</span>
+                    {showConvocation ? <AiOutlineEyeInvisible className="mr-2 h-5 w-5 text-blue-700" /> : <AiOutlineEye className="mr-2 h-5 w-5 text-blue-700" />}
+                    <span className="text-sm text-blue-700">Voir</span>
                   </button>
                   <button
                     onClick={() =>
@@ -169,10 +169,10 @@ export default function StepConvocation({ young }) {
                       })
                     }
                     type="button"
-                    className="flex flex-1 flex-row items-center justify-center px-4 py-2 rounded-lg border-[1px] border-blue-700 cursor-pointer hover:scale-105">
-                    <HiOutlineMail className="h-5 w-5 text-blue-700 mr-2" />
+                    className="flex flex-1 cursor-pointer flex-row items-center justify-center rounded-lg border-[1px] border-blue-700 px-4 py-2 hover:scale-105">
+                    <HiOutlineMail className="mr-2 h-5 w-5 text-blue-700" />
 
-                    <span className="text-blue-700 text-sm">Recevoir par mail</span>
+                    <span className="text-sm text-blue-700">Recevoir par mail</span>
                   </button>
                 </div>
               </div>

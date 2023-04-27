@@ -32,13 +32,13 @@ export default function PaginationServerDriven({ pageCount, currentPage, count, 
 
   return (
     <div className={`flex items-center justify-end gap-2 ${className}`}>
-      <div className="text-[#242526] text-[12px]">
+      <div className="text-[12px] text-[#242526]">
         {currentPage * itemsPerPage + 1} - {currentPage * itemsPerPage + itemsCount} sur {count}
       </div>
       <a
         href="#"
         onClick={goToPrevious}
-        className={`flex items-center justify-center rounded-[3px] border-[1px] border-[transparent] bg-[#f7fafc] text-[#242526] py-[3px] px-[10px] ml-[5px] text-[12px] font-bold min-h-[30px] ${
+        className={`ml-[5px] flex min-h-[30px] items-center justify-center rounded-[3px] border-[1px] border-[transparent] bg-[#f7fafc] py-[3px] px-[10px] text-[12px] font-bold text-[#242526] ${
           currentPage > 0 ? "cursor-pointer" : "cursor-not-allowed"
         }`}>
         <img src={require("../assets/left.svg")} alt="icon left" />
@@ -48,7 +48,7 @@ export default function PaginationServerDriven({ pageCount, currentPage, count, 
       <a
         href="#"
         onClick={goToNext}
-        className={`flex items-center justify-center rounded-[3px] border-[1px] border-[transparent] bg-[#f7fafc] text-[#242526] py-[3px] px-[10px] ml-[5px] text-[12px] font-bold min-h-[30px] ${
+        className={`ml-[5px] flex min-h-[30px] items-center justify-center rounded-[3px] border-[1px] border-[transparent] bg-[#f7fafc] py-[3px] px-[10px] text-[12px] font-bold text-[#242526] ${
           lastItem < count ? "cursor-pointer" : "cursor-not-allowed"
         }`}>
         <img src={require("../assets/right.svg")} alt="icon right" />
@@ -62,7 +62,7 @@ function PageButton({ page, changePage, active }) {
     <a
       href="#"
       onClick={() => changePage(page)}
-      className={`flex items-center justify-center rounded-[3px] border-[1px] border-[transparent] bg-[#f7fafc] text-[#242526] py-[3px] px-[10px] ml-[5px] text-[12px] cursor-pointer min-h-[30px] ${
+      className={`ml-[5px] flex min-h-[30px] cursor-pointer items-center justify-center rounded-[3px] border-[1px] border-[transparent] bg-[#f7fafc] py-[3px] px-[10px] text-[12px] text-[#242526] ${
         active ? "font-bold" : "font-regular"
       }`}>
       {page + 1}

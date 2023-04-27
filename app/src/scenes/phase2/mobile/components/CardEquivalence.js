@@ -30,19 +30,19 @@ export default function CardEquivalence({ equivalence, young }) {
 
   return (
     <>
-      <div className="flex flex-col rounded-lg bg-white px-3 pt-2 mb-4 shadow-md -translate-y-4 space-y-4 ">
+      <div className="mb-4 flex -translate-y-4 flex-col space-y-4 rounded-lg bg-white px-3 pt-2 shadow-md ">
         <div className="mb-3 cursor-pointer" onClick={() => setOpen(!open)}>
           <div className="flex items-center justify-between ">
-            <div className={`text-xs font-normal ${theme.background[equivalence.status]} ${theme.text[equivalence.status]} px-2 py-[2px] rounded-sm flex `}>
+            <div className={`text-xs font-normal ${theme.background[equivalence.status]} ${theme.text[equivalence.status]} flex rounded-sm px-2 py-[2px] `}>
               {/* <img src={clock} alt="clock icon" className="w-5 h-5 bg-blue-50" /> */}
               {translateEquivalenceStatus(equivalence.status)}
             </div>
-            <BsArrowUpShort className="rotate-45 text-gray-400 h-8 w-8" />
+            <BsArrowUpShort className="h-8 w-8 rotate-45 text-gray-400" />
           </div>
           <div className="flex items-center justify-between">
             <div className="flex-col items-center ">
-              <div className="text-base leading-5 font-bold">Ma demande de reconnaissance d’engagement externe</div>
-              <div className="text-xs font-normal text-gray-500 leading-4 uppercase mt-2">envoyée le {formatDateFR(equivalence.createdAt)}</div>
+              <div className="text-base font-bold leading-5">Ma demande de reconnaissance d’engagement externe</div>
+              <div className="mt-2 text-xs font-normal uppercase leading-4 text-gray-500">envoyée le {formatDateFR(equivalence.createdAt)}</div>
             </div>
           </div>
         </div>

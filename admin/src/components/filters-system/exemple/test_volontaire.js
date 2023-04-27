@@ -291,8 +291,8 @@ export default function test_volontaire() {
   }
 
   return (
-    <div className="bg-white h-full">
-      <div className="flex flex-col  m-4">
+    <div className="h-full bg-white">
+      <div className="m-4 flex  flex-col">
         <div>{paramData?.count} résultats aa</div>
         {/* display filtter button + currentfilters + searchbar */}
         <div className="p-[15px]">
@@ -310,7 +310,7 @@ export default function test_volontaire() {
           />
         </div>
 
-        <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
+        <div className="mt-2 flex flex-row flex-wrap items-center gap-2">
           <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>

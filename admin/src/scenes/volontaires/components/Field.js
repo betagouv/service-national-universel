@@ -18,8 +18,8 @@ export default function Field({
 }) {
   return (
     <div className={className}>
-      <div className={`relative bg-white py-2 px-3 border-[#D1D5DB] border rounded-md ${errors[name] ? "border-red-500" : "border-[#D1D5DB]"}`} key={name}>
-        {label && <label className="font-normal text-xs leading-4 text-[#6B7280]">{label}</label>}
+      <div className={`relative rounded-md border border-[#D1D5DB] bg-white py-2 px-3 ${errors[name] ? "border-red-500" : "border-[#D1D5DB]"}`} key={name}>
+        {label && <label className="text-xs font-normal leading-4 text-[#6B7280]">{label}</label>}
         {type === "date" && <DatePickerList fromEdition={false} value={value ? new Date(value) : null} onChange={(date) => setFielValue(name, new Date(date))} />}
         {type === "select" && (
           <SimpleSelect
@@ -32,8 +32,8 @@ export default function Field({
             filterOnType={filterOnType}
           />
         )}
-        {type === "text" && <input readOnly={readOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className="block p-1 w-[100%]" />}
-        {errors[name] && <div className="text-red-500 mt-2">{errors[name]}</div>}
+        {type === "text" && <input readOnly={readOnly && "readonly"} type="text" name={name} value={value} onChange={handleChange} className="block w-[100%] p-1" />}
+        {errors[name] && <div className="mt-2 text-red-500">{errors[name]}</div>}
       </div>
     </div>
   );

@@ -7,9 +7,8 @@ import Format from "./Format";
 import ProfessionalProject from "./ProfessionalProject";
 import Mobility from "./Mobility";
 import Volunteer from "./Volunteer";
-import { getLink } from "../../../utils";
+import { getLink, ES_NO_LIMIT } from "../../../utils";
 import api from "../../../services/api";
-import { ES_NO_LIMIT } from "../../../utils";
 
 export default function Places({ filter, updateFilter }) {
   const [youngsDomains, setYoungsDomains] = useState({});

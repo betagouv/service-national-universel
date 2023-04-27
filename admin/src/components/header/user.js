@@ -34,8 +34,8 @@ export default function HeaderUser() {
         <div
           className={`${
             open ? "block" : "hidden"
-          } group-hover:block min-w-[250px] rounded-lg bg-white transition absolute top-[calc(100%)] right-0 border-3 border-red-600 shadow overflow-hidden`}>
-          <div className="my-2 text-xs px-3 text-coolGray-600">
+          } border-3 absolute top-[calc(100%)] right-0 min-w-[250px] overflow-hidden rounded-lg border-red-600 bg-white shadow transition group-hover:block`}>
+          <div className="my-2 px-3 text-xs text-coolGray-600">
             <p>
               {user.firstName} {user.lastName}
             </p>
@@ -43,20 +43,20 @@ export default function HeaderUser() {
           </div>
           <hr className="m-0 border-t-coolGray-100" />
           <NavLink to="/profil">
-            <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100  flex items-center gap-2  hover:text-coolGray-800">
+            <div className="group flex cursor-pointer items-center gap-2  p-3 text-coolGray-800 hover:bg-coolGray-100  hover:text-coolGray-800">
               <HiUser className="group-hover:scale-110" />
               Profil
             </div>
           </NavLink>
           {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
-            <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2">
+            <div className="group flex cursor-pointer items-center gap-2 p-3 text-coolGray-800 hover:bg-coolGray-100 hover:text-coolGray-800">
               <HiUserAdd className="group-hover:scale-110" />
               <InviteReferent role={user.role} />
             </div>
           ) : null}
           {[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && user.structureId ? (
             <NavLink to={`/structure/${user.structureId}`}>
-              <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100  flex items-center gap-2  hover:text-coolGray-800">
+              <div className="group flex cursor-pointer items-center gap-2  p-3 text-coolGray-800 hover:bg-coolGray-100  hover:text-coolGray-800">
                 <HiUserAdd className="group-hover:scale-110" />
                 Inviter&nbsp;un&nbsp;utilisateur
               </div>
@@ -64,7 +64,7 @@ export default function HeaderUser() {
           ) : null}
           {[ROLES.ADMIN].includes(user.role) && (
             <NavLink to="/settings">
-              <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100  flex items-center gap-2  hover:text-coolGray-800">
+              <div className="group flex cursor-pointer items-center gap-2  p-3 text-coolGray-800 hover:bg-coolGray-100  hover:text-coolGray-800">
                 <FiSettings className=" group-hover:scale-110" />
                 Paramétrage dynamique
               </div>
@@ -72,7 +72,7 @@ export default function HeaderUser() {
           )}
           <hr className="m-0 border-t-coolGray-100" />
           <NavLink to="/logout" onClick={logout}>
-            <div className="group  cursor-pointer p-3 hover:bg-coolGray-100  flex items-center gap-2 text-red-700 hover:text-red-700">
+            <div className="group  flex cursor-pointer items-center  gap-2 p-3 text-red-700 hover:bg-coolGray-100 hover:text-red-700">
               <HiLogout className="text-red-700 group-hover:scale-110" />
               Se déconnecter
             </div>

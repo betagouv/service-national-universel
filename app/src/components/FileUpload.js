@@ -22,8 +22,8 @@ const FileUpload = ({ className, files = [], addFiles, deleteFile, filesAccepted
 
   return (
     <div className={className}>
-      <label className="text-[#374151] font-semibold text-[14px]">Ajouter un fichier</label>
-      <div className="text-gray-500 text-sm mt-1">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf, docx, xlsx. Plusieurs fichiers possibles.</div>
+      <label className="text-[14px] font-semibold text-[#374151]">Ajouter un fichier</label>
+      <div className="mt-1 text-sm text-gray-500">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf, docx, xlsx. Plusieurs fichiers possibles.</div>
       <input
         ref={inputRef}
         disabled={disabled}
@@ -37,17 +37,17 @@ const FileUpload = ({ className, files = [], addFiles, deleteFile, filesAccepted
         }}
         className="hidden"
       />
-      <div className={`flex md:flex-row flex-col ${files.length === 0 && "flex-row"} w-full mt-4`}>
+      <div className={`flex flex-col md:flex-row ${files.length === 0 && "flex-row"} mt-4 w-full`}>
         <div>
-          <label htmlFor="file-upload" className={`cursor-pointer ${disabled && "cursor-not-allowed"} bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600`}>
+          <label htmlFor="file-upload" className={`cursor-pointer ${disabled && "cursor-not-allowed"} rounded bg-[#EEEEEE] py-2 px-3 text-sm text-gray-600`}>
             Parcourir...
           </label>
         </div>
-        <div className="md:ml-4 mb-2">
+        <div className="mb-2 md:ml-4">
           {files.length !== 0 ? (
             files.map((e, i) => (
-              <div key={i} className="flex mb-2">
-                <p className="text-gray-800 text-sm w-3/5 md:w-1/3 lg:w-1/2 xl:w-3/5 truncate overflow-hidden" key={e.name}>
+              <div key={i} className="mb-2 flex">
+                <p className="w-3/5 overflow-hidden truncate text-sm text-gray-800 md:w-1/3 lg:w-1/2 xl:w-3/5" key={e.name}>
                   {e.name}
                 </p>
                 <div
@@ -57,16 +57,16 @@ const FileUpload = ({ className, files = [], addFiles, deleteFile, filesAccepted
                       inputRef.current.value = "";
                     }
                   }}
-                  className={`cursor-pointer ${disabled && "cursor-not-allowed"} text-blue-800 flex ml-2 w-1/3`}>
+                  className={`cursor-pointer ${disabled && "cursor-not-allowed"} ml-2 flex w-1/3 text-blue-800`}>
                   <div className="mt-1">
                     <Bin />
                   </div>
-                  <p className="text-sm font-medium ml-2">Supprimer</p>
+                  <p className="ml-2 text-sm font-medium">Supprimer</p>
                 </div>
               </div>
             ))
           ) : (
-            <div className="text-gray-800 text-sm ml-3 mt-2">Aucun fichier sélectionné.</div>
+            <div className="ml-3 mt-2 text-sm text-gray-800">Aucun fichier sélectionné.</div>
           )}
         </div>
       </div>

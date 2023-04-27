@@ -173,9 +173,9 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
   return (
     <DashboardBox title="Statut des missions proposées" className={className} headerChildren={exportButton}>
       {error ? (
-        <div className="flex justify-center items-center text-center text-sm text-red-600 font-medium p-8">{error}</div>
+        <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : loading ? (
-        <div className="flex justify-center items-center">
+        <div className="flex items-center justify-center">
           <Loader />
         </div>
       ) : (

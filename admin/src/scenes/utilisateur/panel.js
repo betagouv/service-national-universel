@@ -339,7 +339,7 @@ function Sessions({ user }) {
           return (
             <div key={e._id} className="space-y-2">
               <p className="font-semibold">{e.nameCentre}</p>
-              <p className="w-fit bg-blue-50 rounded-full border-[1px] border-blue-500 text-blue-500 text-xs px-3 py-1">{e.cohort}</p>
+              <p className="w-fit rounded-full border-[1px] border-blue-500 bg-blue-50 px-3 py-1 text-xs text-blue-500">{e.cohort}</p>
             </div>
           );
         })}

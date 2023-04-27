@@ -4,18 +4,18 @@ import ButtonLight from "../buttons/ButtonLight";
 import ButtonPrimary from "../buttons/ButtonPrimary";
 import Modal from "./Modal";
 
-const ConfirmationModal = ({ isOpen, icon = <ShieldCheck className="text-[#D1D5DB] w-[36px] h-[36px]" />, title, message, onClose, onConfirm, confirmLabel = "Confirmer" }) => {
+const ConfirmationModal = ({ isOpen, icon = <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />, title, message, onClose, onConfirm, confirmLabel = "Confirmer" }) => {
   return (
     <Modal isOpen={isOpen}>
       <Modal.Header className="flex-col">
-        {icon && <div className="flex justify-center mb-auto">{icon}</div>}
-        <h2 className="leading-7 text-xl text-center m-0">{title}</h2>
+        {icon && <div className="mb-auto flex justify-center">{icon}</div>}
+        <h2 className="m-0 text-center text-xl leading-7">{title}</h2>
       </Modal.Header>
       <Modal.Content>
-        <p className="leading-7 text-xl mb-0 text-center">{message}</p>
+        <p className="mb-0 text-center text-xl leading-7">{message}</p>
       </Modal.Content>
       <Modal.Footer>
-        <div className="flex gap-2 items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <ButtonLight className="grow" onClick={onClose}>
             Annuler
           </ButtonLight>

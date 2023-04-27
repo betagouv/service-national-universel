@@ -40,9 +40,9 @@ export default function ModalDispense({ isOpen, onCancel, youngId, onSuccess }) 
     }
   };
   return (
-    <ModalTailwind centered isOpen={isOpen} onClose={onCancel} className="w-[512px] bg-white rounded-lg py-3 px-3">
-      <div className="text-gray-900 font-medium text-center text-xl my-2">Renseignez un motif de dispense</div>
-      <div className="text-gray-500 text-sm text-center">
+    <ModalTailwind centered isOpen={isOpen} onClose={onCancel} className="w-[512px] rounded-lg bg-white py-3 px-3">
+      <div className="my-2 text-center text-xl font-medium text-gray-900">Renseignez un motif de dispense</div>
+      <div className="text-center text-sm text-gray-500">
         La dispence de séjour permet de réaliser sa phase 2 et 3 sans ouvrir les droits à la prise en charge du code de la route ni à l&apos;équivalence JDC.
       </div>
 
@@ -58,17 +58,17 @@ export default function ModalDispense({ isOpen, onCancel, youngId, onSuccess }) 
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="border-[1px] border-gray-300 rounded w-full py-2 px-2.5"
+          className="w-full rounded border-[1px] border-gray-300 py-2 px-2.5"
           rows={5}
           placeholder="Ajoutez un texte explicatif..."
         />
       </div>
 
-      <div className="w-full flex items-center justify-center gap-4 font-medium">
-        <div className="cursor-pointer w-1/2 border-[1px] border-gray-300 text-center py-2 rounded" onClick={onCancel}>
+      <div className="flex w-full items-center justify-center gap-4 font-medium">
+        <div className="w-1/2 cursor-pointer rounded border-[1px] border-gray-300 py-2 text-center" onClick={onCancel}>
           Retour
         </div>
-        <div onClick={onSubmit} className={`${disabled ? "opacity-60" : "cursor-pointer"} w-1/2 border-[1px] bg-blue-600 text-white text-center py-2 rounded`}>
+        <div onClick={onSubmit} className={`${disabled ? "opacity-60" : "cursor-pointer"} w-1/2 rounded border-[1px] bg-blue-600 py-2 text-center text-white`}>
           Valider
         </div>
       </div>

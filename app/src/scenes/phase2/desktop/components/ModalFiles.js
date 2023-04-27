@@ -44,13 +44,13 @@ export default function ModalFiles({ isOpen, onCancel, initialValues, young, nam
       <Modal centered isOpen={isOpen} toggle={onCancel} size="lg">
         <ModalContainer>
           <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={onCancel} />
-          <div className="px-2 pt-2 pb-4 text-center w-full flex flex-col items-center">
+          <div className="flex w-full flex-col items-center px-2 pt-2 pb-4 text-center">
             <div className="mb-4">
               <h3 className="mb-3">Télécharger vos documents d&apos;équivalence</h3>
             </div>
 
-            <div className="text-lg mb-4">Telecharger le(s) document(s) : </div>
-            <div className="flex flex-col gap-2 justify-start">
+            <div className="mb-4 text-lg">Telecharger le(s) document(s) : </div>
+            <div className="flex flex-col justify-start gap-2">
               {initialValues.map((e, i) => (
                 <div key={i} className=" flex items-center">
                   <LoadingButton className="mr-2" color="#EFF6FF" textColor="#5145cd" loading={loading && modal?.value === e} onClick={() => handleClick(e)}>

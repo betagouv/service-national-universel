@@ -60,7 +60,7 @@ export default function MissionsYoungPreferences({ filters, missionFilters, clas
                 ));
                 infoPanels.push(
                   <div key={`info-${i}`} className="p-8">
-                    <div className="font-bold test-base text-gray-800">{translate(data._id)}</div>
+                    <div className="test-base font-bold text-gray-800">{translate(data._id)}</div>
                     <FullDoughnut
                       labels={data.extra.map((e) => (e._id !== "" ? translate(e._id) : "Non précisé"))}
                       values={data.extra.map((e) => (extraTotal ? Math.round((e.count / extraTotal) * 100) : 0))}
@@ -101,15 +101,15 @@ export default function MissionsYoungPreferences({ filters, missionFilters, clas
     <DashboardBox title="Selon les préférences volontaires" className={className}>
       <Tabs selected={selectedTab} tabs={tabs} onChange={setSelectedTab} className="my-6" />
       {error ? (
-        <div className="flex justify-center items-center text-center text-sm text-red-600 font-medium p-8">{error}</div>
+        <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : loading ? (
-        <div className="flex justify-center items-center">
+        <div className="flex items-center justify-center">
           <Loader />
         </div>
       ) : graphs.length === 0 ? (
-        <div className="text-gray-500 text-center">Aucune données</div>
+        <div className="text-center text-gray-500">Aucune données</div>
       ) : (
-        <div className="flex items-center justify-around mt-8">
+        <div className="mt-8 flex items-center justify-around">
           {graphs.map((graph, idx) => (
             <FullDoughnut
               title={getGraphTitle(idx)}

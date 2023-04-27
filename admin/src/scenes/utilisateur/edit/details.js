@@ -341,8 +341,8 @@ export default function Details({ user, setUser, currentUser }) {
       <UserHeader user={user} tab="profile" currentUser={currentUser} />
       <div className="p-8">
         <Box className="p-6">
-          <div className="flex justify-between mb-6">
-            <div className="font-medium text-lg">Informations générales</div>
+          <div className="mb-6 flex justify-between">
+            <div className="text-lg font-medium">Informations générales</div>
             {!isSaving && (
               <>
                 {mode === MODE_EDITION ? (
@@ -351,13 +351,13 @@ export default function Details({ user, setUser, currentUser }) {
                       Annuler
                     </RoundButton>
                     <RoundButton className="ml-[8px]" onClick={onSave} disabled={!!newCenter}>
-                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                      <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                       Enregistrer les changements
                     </RoundButton>
                   </div>
                 ) : (
                   <RoundButton className="" onClick={startEdit}>
-                    <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                    <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                     Modifier
                   </RoundButton>
                 )}
@@ -367,7 +367,7 @@ export default function Details({ user, setUser, currentUser }) {
           </div>
 
           <div className="flex">
-            <div className="pr-16 flex-1 flex flex-col">
+            <div className="flex flex-1 flex-col pr-16">
               <div className="mb-2">Identité</div>
               <Field mode={mode} className="mb-4" name="lastName" label="Nom" value={data.lastName} onChange={onChange("lastName")} error={errors.lastName} />
               <Field mode={mode} name="firstName" label="Prénom" value={data.firstName} onChange={onChange("firstName")} error={errors.firstName} />
@@ -427,7 +427,7 @@ export default function Details({ user, setUser, currentUser }) {
                           />
                         ))}
                       {newCenter && (
-                        <div className="pb-4 border-b border-gray-200 flex flex-col">
+                        <div className="flex flex-col border-b border-gray-200 pb-4">
                           <CustomSelect
                             className="mt-4"
                             key={newCenter?.cohesionCenterId || "newCenter"}
@@ -461,12 +461,12 @@ export default function Details({ user, setUser, currentUser }) {
                         </div>
                       )}
                       {roleMode === MODE_EDITION && currentUser.role === ROLES.ADMIN && !newCenter && (
-                        <AddButton onClick={addNewCenter} className={`self-end mt-4 ${sessionsWhereUserIsHeadCenter?.length > 0 ? "" : "mt-4"}`}>
+                        <AddButton onClick={addNewCenter} className={`mt-4 self-end ${sessionsWhereUserIsHeadCenter?.length > 0 ? "" : "mt-4"}`}>
                           Ajouter un centre
                         </AddButton>
                       )}
                       {roleMode === MODE_EDITION && newCenter && (
-                        <div className="flex mt-4 justify-end">
+                        <div className="mt-4 flex justify-end">
                           <PlainButton mode="white" className="mr-2" onClick={() => setNewCenter(undefined)}>
                             Annuler
                           </PlainButton>
@@ -506,7 +506,7 @@ export default function Details({ user, setUser, currentUser }) {
               )}
             </div>
             <div className="w-[1px] bg-[#E5E7EB]" />
-            <div className="pl-16 flex-1">
+            <div className="flex-1 pl-16">
               <div className="mb-2">Contact</div>
               <Field mode={mode} className="mb-4" label="E-mail" name="email" value={data.email} onChange={onChange("email")} error={errors.email} />
               <Field mode={mode} className="mb-4" label="Téléphone fixe" name="phone" value={data.phone} onChange={onChange("phone")} error={errors.phone} />
@@ -515,7 +515,7 @@ export default function Details({ user, setUser, currentUser }) {
           </div>
         </Box>
         {canDeleteReferent({ actor: currentUser, originalTarget: user, structure }) && (
-          <div className="flex justify-center items-center">
+          <div className="flex items-center justify-center">
             <BorderButton mode="red" className="mt-3" onClick={onClickDelete}>
               Supprimer le compte
             </BorderButton>

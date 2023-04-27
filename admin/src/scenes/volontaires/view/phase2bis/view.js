@@ -369,12 +369,12 @@ export default function Phase2({ young, onChange }) {
                   margin: 0,
                   borderBottom: "2px solid #f4f5f7",
                 }}>
-                <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG prévisionnelles</div>
-                <div className="font-bold text-2xl text-[#242526]">{young.phase2NumberHoursEstimated || "0"}h</div>
+                <div className="text-[11px] uppercase tracking-[5%] text-[#7E858C]">Heures de MIG prévisionnelles</div>
+                <div className="text-2xl font-bold text-[#242526]">{young.phase2NumberHoursEstimated || "0"}h</div>
               </Row>
               <Row style={{ height: "50%", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "1rem", margin: 0 }}>
-                <div className="uppercase text-[11px] text-[#7E858C] tracking-[5%]">Heures de MIG réalisées</div>
-                <div className="font-bold text-2xl text-[#242526]">{young.phase2NumberHoursDone || "0"}h sur 84h</div>
+                <div className="text-[11px] uppercase tracking-[5%] text-[#7E858C]">Heures de MIG réalisées</div>
+                <div className="text-2xl font-bold text-[#242526]">{young.phase2NumberHoursDone || "0"}h sur 84h</div>
               </Row>
             </Col>
             <Col md={4} sm={4} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -394,41 +394,41 @@ export default function Phase2({ young, onChange }) {
 
         <Toolbox young={young} />
         <Box>
-          <div className="flex border-b-[1px] border-b-gray-200 mb-3 items-center justify-between mx-8">
+          <div className="mx-8 mb-3 flex items-center justify-between border-b-[1px] border-b-gray-200">
             <div className="flex items-center">
               <div
-                className={`py-4 flex border-b-[2px] items-center cursor-pointer ${blocOpened === "missions" ? "border-blue-500" : "border-transparent"}`}
+                className={`flex cursor-pointer items-center border-b-[2px] py-4 ${blocOpened === "missions" ? "border-blue-500" : "border-transparent"}`}
                 onClick={() => {
                   setBlocOpened("missions");
                 }}>
                 <Menu className={blocOpened === "missions" ? "text-blue-600" : "text-gray-500"} />
-                <div className={`text-sm font-medium ml-2 ${blocOpened === "missions" ? "text-blue-600" : "text-gray-500"}`}>Missions candidatées</div>
+                <div className={`ml-2 text-sm font-medium ${blocOpened === "missions" ? "text-blue-600" : "text-gray-500"}`}>Missions candidatées</div>
               </div>
               <div
-                className={`ml-8 py-4 flex border-b-[2px] items-center cursor-pointer ${blocOpened === "preferences" ? "border-blue-500" : "border-transparent"}`}
+                className={`ml-8 flex cursor-pointer items-center border-b-[2px] py-4 ${blocOpened === "preferences" ? "border-blue-500" : "border-transparent"}`}
                 onClick={() => {
                   setBlocOpened("preferences");
                 }}>
-                <HiOutlineAdjustments className={`w-5 h-5 ${blocOpened === "preferences" ? "text-blue-600" : "text-gray-500"}`} />
-                <div className={`text-sm font-medium ml-2 ${blocOpened === "preferences" ? "text-blue-600" : "text-gray-500"}`}>Préférences de missions</div>
+                <HiOutlineAdjustments className={`h-5 w-5 ${blocOpened === "preferences" ? "text-blue-600" : "text-gray-500"}`} />
+                <div className={`ml-2 text-sm font-medium ${blocOpened === "preferences" ? "text-blue-600" : "text-gray-500"}`}>Préférences de missions</div>
               </div>
             </div>
 
             {blocOpened === "preferences" && !savePreference ? (
               <div className="flex items-center gap-4">
                 {editPreference ? (
-                  <div className="hover:scale-105 flex items-center gap-2 bg-gray-100 rounded-[28px] px-[9px] py-[7px] h-[32px]" onClick={() => setEditPreference(false)}>
-                    <div className="text-gray-700 text-xs font-medium cursor-pointer">Annuler</div>
+                  <div className="flex h-[32px] items-center gap-2 rounded-[28px] bg-gray-100 px-[9px] py-[7px] hover:scale-105" onClick={() => setEditPreference(false)}>
+                    <div className="cursor-pointer text-xs font-medium text-gray-700">Annuler</div>
                   </div>
                 ) : null}
                 <div
-                  className="hover:scale-105 flex items-center gap-2 bg-blue-100 rounded-[28px] px-[9px] py-[7px] h-[32px]"
+                  className="flex h-[32px] items-center gap-2 rounded-[28px] bg-blue-100 px-[9px] py-[7px] hover:scale-105"
                   onClick={() => {
                     if (!editPreference) setEditPreference(true);
                     else onSubmit();
                   }}>
                   <Pencil className="h-4 w-4 text-blue-600" />
-                  <div className="text-blue-600 text-xs font-medium cursor-pointer">{editPreference ? "Enregistrer les changements" : "Modifier"}</div>
+                  <div className="cursor-pointer text-xs font-medium text-blue-600">{editPreference ? "Enregistrer les changements" : "Modifier"}</div>
                 </div>
               </div>
             ) : null}
@@ -438,7 +438,7 @@ export default function Phase2({ young, onChange }) {
                 <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
                   <div className="py-2">
                     <button
-                      className="rounded-md border-[1px] py-1.5 px-2.5 items-center justify-center border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white text-sm"
+                      className="items-center justify-center rounded-md border-[1px] border-blue-600 py-1.5 px-2.5 text-sm text-blue-600 hover:bg-blue-600 hover:text-white"
                       onClick={() => {
                         setIsExportOpen(true);
                       }}>

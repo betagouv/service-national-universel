@@ -68,13 +68,13 @@ export default function CorrectionRequest({ name, label, correctionRequest, onCh
   }
 
   return (
-    <div className="p-[24px] bg-[#F9FAFB] rounded-[7px] my-[16px]">
+    <div className="my-[16px] rounded-[7px] bg-[#F9FAFB] p-[24px]">
       <MiniTitle>
         {!correctionRequest || correctionRequest.status === "PENDING" ? "Demander une correction" : `Correction demandée le ${lastDate}`} - {label}
       </MiniTitle>
       {reasons && reasons.length > 0 && (
-        <div className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] mb-[16px] flex items-center pr-[15px]">
-          <select value={requestReason} onChange={changeReason} className="grow p-[15px] bg-[transparent] appearance-none">
+        <div className="mb-[16px] flex w-[100%] items-center rounded-[6px] border-[1px] border-[#D1D5DB] bg-white pr-[15px]">
+          <select value={requestReason} onChange={changeReason} className="grow appearance-none bg-[transparent] p-[15px]">
             {reasonOptions}
           </select>
           <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
@@ -83,12 +83,12 @@ export default function CorrectionRequest({ name, label, correctionRequest, onCh
       <textarea
         value={requestText}
         onChange={changeText}
-        className="w-[100%] bg-white border-[#D1D5DB] border-[1px] rounded-[6px] p-[15px]"
+        className="w-[100%] rounded-[6px] border-[1px] border-[#D1D5DB] bg-white p-[15px]"
         rows="5"
         placeholder={messagePlaceholder}
       />
-      <div className="text-right mt-[16px]">
-        <button className="text-[12px] text-[#F87171] ml-[6px] flex items-center" onClick={deleteRequest}>
+      <div className="mt-[16px] text-right">
+        <button className="ml-[6px] flex items-center text-[12px] text-[#F87171]" onClick={deleteRequest}>
           <Bin fill="#F87171" className="mr-[6px]" /> Supprimer la demande
         </button>
       </div>

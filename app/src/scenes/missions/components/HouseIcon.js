@@ -5,7 +5,7 @@ export default function House({ color, tooltip, id }) {
   return (
     <div data-tip="" data-for={id ? id : tooltip}>
       {tooltip ? (
-        <ReactTooltip id={id ? id : tooltip} className="bg-white shadow-xl text-black" arrowColor="white" disable={false}>
+        <ReactTooltip id={id ? id : tooltip} className="bg-white text-black shadow-xl" arrowColor="white" disable={false}>
           <div className="text-[black]">{tooltip}</div>
         </ReactTooltip>
       ) : null}

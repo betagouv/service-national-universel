@@ -40,9 +40,9 @@ export default function User() {
 
   return (
     <>
-      <div className="relative w-full h-16 flex border-t-[1px] border-[#1A243C] px-3 md:p-6 items-center cursor-default justify-between ">
+      <div className="relative flex h-16 w-full cursor-default items-center justify-between border-t-[1px] border-[#1A243C] px-3 md:p-6 ">
         <Link to="/account" className="flex gap-3">
-          <p className="rounded-full bg-[#344264] text-[#768BAC] w-9 h-9 flex text-center items-center justify-center capitalize">{user.firstName[0] + user.lastName[0]}</p>
+          <p className="flex h-9 w-9 items-center justify-center rounded-full bg-[#344264] text-center capitalize text-[#768BAC]">{user.firstName[0] + user.lastName[0]}</p>
           <div>
             <p className="font-semibold hover:text-[#D2DAEF]">{user.firstName}</p>
             <p className="text-xs text-[#768BAC]">Volontaire</p>
@@ -50,7 +50,7 @@ export default function User() {
         </Link>
         <button
           ref={buttonRef}
-          className={`flex rounded-full hover:bg-[#344264] text-[#768BAC] w-9 h-9 text-center items-center justify-center transition-all duration-200 ${!open && "rotate-180"}`}
+          className={`flex h-9 w-9 items-center justify-center rounded-full text-center text-[#768BAC] transition-all duration-200 hover:bg-[#344264] ${!open && "rotate-180"}`}
           onClick={handleClick}>
           <ChevronDown />
         </button>
@@ -70,19 +70,19 @@ function Menu({ open, menuRef, user, onClose }) {
 
   return (
     <nav
-      className={`rounded-lg w-56 bg-white transition-all absolute left-4 shadow overflow-hidden z-10 bottom-20 flex flex-col justify-around ease-in-out duration-200 ${
+      className={`absolute left-4 bottom-20 z-10 flex w-56 flex-col justify-around overflow-hidden rounded-lg bg-white shadow transition-all duration-200 ease-in-out ${
         open ? (permissionPhase2(user) ? "h-28" : "h-20") : "h-0"
       }`}
       ref={menuRef}>
-      <Link to="/account" onClick={onClose} className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
+      <Link to="/account" onClick={onClose} className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
         Mon profil
       </Link>
       {permissionPhase2(user) && (
-        <Link to="/preferences" onClick={onClose} className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
+        <Link to="/preferences" onClick={onClose} className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
           Mes préférences de mission
         </Link>
       )}
-      <button onClick={logout} type="button" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-100 text-gray-900 hover:text-gray-900">
+      <button onClick={logout} type="button" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
         Se déconnecter
       </button>
     </nav>

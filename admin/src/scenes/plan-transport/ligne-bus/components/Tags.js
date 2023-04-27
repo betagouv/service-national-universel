@@ -26,8 +26,8 @@ export default function Tags({ placeholder, options, onChange, onCreateOption, v
           formatCreateLabel={(inputValue) => {
             return (
               <div className="flex items-center gap-2">
-                <AiOutlinePlus className="text-gray-400 h-5 w-5" />
-                <div className="text-gray-700 text-sm leading-5">
+                <AiOutlinePlus className="h-5 w-5 text-gray-400" />
+                <div className="text-sm leading-5 text-gray-700">
                   Créer <b>&quot;{inputValue}&quot;</b>
                 </div>
               </div>
@@ -38,9 +38,9 @@ export default function Tags({ placeholder, options, onChange, onCreateOption, v
       )}
       <div className="flex flex-wrap gap-2">
         {values.map((value, index) => (
-          <div key={index} className={`flex items-center gap-2 p-2 rounded-lg bg-[#E8EDFF] max-w-[170px] ${isLoading && "opacity-70"}`}>
-            <div className="flex-1 text-xs text-[#0063CB] leading-4">{options.find((option) => option.value === value)?.label}</div>
-            {user.role === ROLES.ADMIN && <IoCloseOutline className="text-lg text-[#3B82F6] cursor-pointer" onClick={() => !isLoading && onDeleteOption(value)} />}
+          <div key={index} className={`flex max-w-[170px] items-center gap-2 rounded-lg bg-[#E8EDFF] p-2 ${isLoading && "opacity-70"}`}>
+            <div className="flex-1 text-xs leading-4 text-[#0063CB]">{options.find((option) => option.value === value)?.label}</div>
+            {user.role === ROLES.ADMIN && <IoCloseOutline className="cursor-pointer text-lg text-[#3B82F6]" onClick={() => !isLoading && onDeleteOption(value)} />}
           </div>
         ))}
       </div>

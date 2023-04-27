@@ -99,8 +99,8 @@ export default function ListeDemandeModif() {
   return (
     <>
       <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${cohort}` }, { label: "Toutes les demandes de modifications" }]} />
-      <div className="flex flex-col w-full px-8 pb-8 ">
-        <div className="py-8 flex items-center justify-between">
+      <div className="flex w-full flex-col px-8 pb-8 ">
+        <div className="flex items-center justify-between py-8">
           <Title>Demandes de modifications</Title>
           <Select
             options={cohortList}
@@ -112,8 +112,8 @@ export default function ListeDemandeModif() {
           />
         </div>
 
-        <div className="flex flex-col bg-white py-4 mb-8 rounded-xl">
-          <div className="flex items-stretch gap-2 bg-white pt-2 px-4">
+        <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
+          <div className="flex items-stretch gap-2 bg-white px-4 pt-2">
             <Filters
               defaultUrlParam={`cohort=${cohort}`}
               pageId={pageId}
@@ -127,7 +127,7 @@ export default function ListeDemandeModif() {
               setParamData={setParamData}
             />
           </div>
-          <div className="mt-2 px-4 flex flex-row flex-wrap items-center">
+          <div className="mt-2 flex flex-row flex-wrap items-center px-4">
             <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
             <SelectedFilters
               filterArray={filterArray}
@@ -142,9 +142,9 @@ export default function ListeDemandeModif() {
             setParamData={setParamData}
             currentEntryOnPage={data?.length}
             render={
-              <div className="flex w-full flex-col mt-6 mb-2">
+              <div className="mt-6 mb-2 flex w-full flex-col">
                 <hr />
-                <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 w-full gap-6">
+                <div className="flex w-full items-center gap-6 py-3 px-4 text-xs uppercase text-gray-400">
                   <div className="w-[35%]">Contenu</div>
                   <div className="w-[12%]">Ligne</div>
                   <div className="w-[23%]">Type</div>
@@ -194,33 +194,33 @@ const Line = ({ modification, tagsOptions, user }) => {
   return (
     <>
       <hr />
-      <div className="flex py-4 items-center px-4 hover:bg-gray-50 gap-6">
-        <div className="w-[35%] flex flex-col gap-1 cursor-pointer" onClick={() => history.push(`/ligne-de-bus/${modification.lineId}?demande=${modification._id.toString()}`)}>
-          <div className="line-clamp-3 text-sm text-[#242526] text-start">{modification.requestMessage}</div>
+      <div className="flex items-center gap-6 py-4 px-4 hover:bg-gray-50">
+        <div className="flex w-[35%] cursor-pointer flex-col gap-1" onClick={() => history.push(`/ligne-de-bus/${modification.lineId}?demande=${modification._id.toString()}`)}>
+          <div className="text-start text-sm text-[#242526] line-clamp-3">{modification.requestMessage}</div>
           <div className="text-sm text-[#738297]">{dayjs(modification.createdAt).locale("fr").format("DD/MM/YYYY • HH:mm")}</div>
         </div>
-        <div className="w-[12%] flex items-center gap-2">
-          <div className="text-base text-[#242526] font-medium">{modification.lineName}</div>
-          <ExternalLink className="h-3 w-3 text-[#9CA3AF] cursor-pointer hover:scale-110" onClick={() => history.push(`/ligne-de-bus/${modification.lineId}`)} />
+        <div className="flex w-[12%] items-center gap-2">
+          <div className="text-base font-medium text-[#242526]">{modification.lineName}</div>
+          <ExternalLink className="h-3 w-3 cursor-pointer text-[#9CA3AF] hover:scale-110" onClick={() => history.push(`/ligne-de-bus/${modification.lineId}`)} />
         </div>
-        <div className="w-[23%] flex pr-4">
+        <div className="flex w-[23%] pr-4">
           {modification?.tagIds?.length === 0 ? (
-            <div className=" text-sm text-gray-700 p-2 bg-gray-100 leading-4 rounded-lg">Non renseigné</div>
+            <div className=" rounded-lg bg-gray-100 p-2 text-sm leading-4 text-gray-700">Non renseigné</div>
           ) : (
             <div className="flex items-center gap-1">
-              <div className="px-2 py-1 rounded-lg bg-[#E8EDFF]">
+              <div className="rounded-lg bg-[#E8EDFF] px-2 py-1">
                 <div className="text-sm text-[#0063CB]  line-clamp-2">{tagsOptions.find((option) => option.value === modification.tagIds[0])?.label}</div>
               </div>
               {modification.tagIds.length > 1 && (
                 <div
                   ref={refContainer}
-                  className="relative flex justify-center items-center text-sm text-[#0063CB] h-full leading-4 px-2 py-1 rounded-lg bg-[#E8EDFF] cursor-pointer">
+                  className="relative flex h-full cursor-pointer items-center justify-center rounded-lg bg-[#E8EDFF] px-2 py-1 text-sm leading-4 text-[#0063CB]">
                   +{modification.tagIds.length - 1}
-                  <div ref={refChildren} className={`absolute top-[105%] left-[95%] bg-white shadow-lg rounded-xl z-10 w-96 ${!open ? "hidden" : ""}`}>
-                    <div className="flex flex-col p-3 gap-2">
+                  <div ref={refChildren} className={`absolute top-[105%] left-[95%] z-10 w-96 rounded-xl bg-white shadow-lg ${!open ? "hidden" : ""}`}>
+                    <div className="flex flex-col gap-2 p-3">
                       {modification.tagIds.map((value, index) => (
-                        <div key={index + modification._id.toString()} className="px-2 py-1 rounded-lg bg-[#E8EDFF] w-fit max-w-full">
-                          <div className="text-sm text-[#0063CB] truncate">{tagsOptions.find((option) => option.value === value)?.label}</div>
+                        <div key={index + modification._id.toString()} className="w-fit max-w-full rounded-lg bg-[#E8EDFF] px-2 py-1">
+                          <div className="truncate text-sm text-[#0063CB]">{tagsOptions.find((option) => option.value === value)?.label}</div>
                         </div>
                       ))}
                     </div>
@@ -230,25 +230,25 @@ const Line = ({ modification, tagsOptions, user }) => {
             </div>
           )}
         </div>
-        <div className="flex gap-2 items-center w-[12%]">
-          <div className={`flex items-center justify-center text-white text-sm rounded-full py-1 px-3 whitespace-nowrap ${getStatusClass(modification.status)}`}>
+        <div className="flex w-[12%] items-center gap-2">
+          <div className={`flex items-center justify-center whitespace-nowrap rounded-full py-1 px-3 text-sm text-white ${getStatusClass(modification.status)}`}>
             {translateStatus(modification.status)}
           </div>
           {modification?.opinion && [ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role) && (
-            <div className="flex items-center justify-center text-white text-sm rounded-full p-2 bg-[#3D5B85]">
-              <Thumbs className={`text-white h-4 w-4 ${modification.opinion === "false" && "rotate-180"}`} />
+            <div className="flex items-center justify-center rounded-full bg-[#3D5B85] p-2 text-sm text-white">
+              <Thumbs className={`h-4 w-4 text-white ${modification.opinion === "false" && "rotate-180"}`} />
             </div>
           )}
         </div>
         <div className="w-[18%]">
-          <a href={getlink(modification.requestUserId, modification.requestUserRole)} className="hover:cursor-pointer group">
+          <a href={getlink(modification.requestUserId, modification.requestUserRole)} className="group hover:cursor-pointer">
             <div className="flex gap-2">
-              <div className="rounded-full w-10 h-10 overflow-hidden bg-slate-100 flex items-center justify-center border-2 border-white text-blue-600 uppercase group-hover:bg-blue-600 group-hover:text-slate-100">
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-slate-100 uppercase text-blue-600 group-hover:bg-blue-600 group-hover:text-slate-100">
                 {getInitials(modification.requestUserName)}
               </div>
               <div className="max-w-xs">
-                <p className="font-medium truncate underline-offset-2 decoration-2">{modification.requestUserName}</p>
-                <p className="capitalize text-gray-400 truncate underline-offset-2 decoration-2">{translate(modification.requestUserRole)}</p>
+                <p className="truncate font-medium decoration-2 underline-offset-2">{modification.requestUserName}</p>
+                <p className="truncate capitalize text-gray-400 decoration-2 underline-offset-2">{translate(modification.requestUserRole)}</p>
               </div>
             </div>
           </a>

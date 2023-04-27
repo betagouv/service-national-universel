@@ -52,15 +52,15 @@ export function FieldsGroup({
   return (
     <>
       {mode === "edition" && type === "date" ? (
-        <div className={`relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px] ${className}`}>
-          {title && <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">{title}</label>}
+        <div className={`relative rounded-[6px] border-[1px] border-[#D1D5DB] bg-white py-[9px] px-[13px] ${className}`}>
+          {title && <label className="text-[12px] font-normal leading-[16px] text-[#6B7280]">{title}</label>}
           <DatePickerList value={value ? new Date(value) : null} onChange={(date) => onChange(new Date(date))} />
           {correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} young={young} />}
         </div>
       ) : (
         <div className={className} onMouseEnter={() => setMouseIn(true)} onMouseLeave={() => setMouseIn(false)}>
           {title && <MiniTitle>{title}</MiniTitle>}
-          <div className={`${noflex ? "" : "flex items center"}`}>{childs}</div>
+          <div className={`${noflex ? "" : "items center flex"}`}>{childs}</div>
           {correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} young={young} />}
         </div>
       )}

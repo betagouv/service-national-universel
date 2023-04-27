@@ -25,12 +25,15 @@ export default function StepUpload() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const [hasChanged, setHasChanged] = useState(false);
-  const [files, setFiles] = useState([]);
+  const [recto, setRecto] = useState([]);
+  const [verso, setVerso] = useState([]);
+  const files = [...recto, ...verso];
   const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
   const corrections = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
 
   function resetState() {
-    setFiles([]);
+    setRecto([]);
+    setVerso([]);
     setHasChanged(false);
     setLoading(false);
   }
@@ -128,7 +131,15 @@ export default function StepUpload() {
     }
   }
 
-  const isEnabled = corrections?.length ? hasChanged && !loading && !error.text : (young?.files?.cniFiles?.length || files?.length) && date && !loading && !error.text;
+  function checkIfValid() {
+    if (corrections?.length) {
+      return hasChanged && !loading && !error.text;
+    } else {
+      return (young?.files?.cniFiles?.length || (recto?.length && (verso.length || category === "passport"))) && date && !loading && !error.text;
+    }
+  }
+
+  const isEnabled = checkIfValid();
 
   if (!category) return <div>Loading</div>;
 
@@ -150,7 +161,7 @@ export default function StepUpload() {
             {e.message && ` : ${e.message}`}
           </ErrorMessage>
         ))}
-      <div className="w-full my-16 flex justify-around">
+      <div className="my-16 flex w-full justify-around">
         <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
         {ID[category].imgBack && <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />}
       </div>
@@ -159,39 +170,83 @@ export default function StepUpload() {
         document doit être téléversé en <strong>recto</strong> et <strong>verso</strong>.
       </div>
       <hr className="my-8 h-px bg-gray-200 border-0" />
-      <div className="my-4">Ajouter un fichier</div>
+
+      <p className="my-4">
+        Ajouter <strong>le recto</strong>
+      </p>
       <div className="text-gray-500 text-sm my-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Trois fichiers maximum.</div>
       <input
         type="file"
-        multiple
-        id="file-upload"
-        name="file-upload"
+        id="file-upload-recto"
+        name="file-upload-recto"
         accept=".png, .jpg, .jpeg, .pdf"
         onChange={(e) => {
-          setFiles(files.concat(Array.from(e.target.files)));
+          setRecto(e.target.files);
           setError({});
           setHasChanged(true);
         }}
         className="hidden"
       />
-      <div className="flex w-full my-4">
+      <div className="my-4 flex w-full">
         <div>
-          <label htmlFor="file-upload" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
+          <label htmlFor="file-upload-recto" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
             Parcourir...
           </label>
         </div>
         <div className="ml-4 mt-2">
-          {files ? (
-            Array.from(files).map((e) => (
+          {recto ? (
+            Array.from(recto).map((e) => (
               <p className="text-gray-800 text-sm" key={e.name}>
                 {e.name}
               </p>
             ))
           ) : (
-            <div className="text-gray-800 text-sm">Aucun fichier sélectionné.</div>
+            <div className="text-sm text-gray-800">Aucun fichier sélectionné.</div>
           )}
         </div>
       </div>
+
+      {category !== "passport" && (
+        <>
+          <hr className="my-8 h-px bg-gray-200 border-0" />
+
+          <p className="my-4">
+            Ajouter <strong>le verso</strong>
+          </p>
+          <div className="text-gray-500 text-sm my-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Trois fichiers maximum.</div>
+          <input
+            type="file"
+            id="file-upload-verso"
+            name="file-upload-verso"
+            accept=".png, .jpg, .jpeg, .pdf"
+            onChange={(e) => {
+              setVerso(e.target.files);
+              setError({});
+              setHasChanged(true);
+            }}
+            className="hidden"
+          />
+          <div className="flex w-full my-4">
+            <div>
+              <label htmlFor="file-upload-verso" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
+                Parcourir...
+              </label>
+            </div>
+            <div className="ml-4 mt-2">
+              {verso ? (
+                Array.from(verso).map((e) => (
+                  <p className="text-gray-800 text-sm" key={e.name}>
+                    {e.name}
+                  </p>
+                ))
+              ) : (
+                <div className="text-gray-800 text-sm">Aucun fichier sélectionné.</div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
       <div className="text-gray-800 text-sm my-4">
         Vous avez besoin d’aide pour téléverser les documents ?{" "}
         <a href="https://support.snu.gouv.fr/base-de-connaissance/je-televerse-un-document/" className="underline">
@@ -199,14 +254,16 @@ export default function StepUpload() {
         </a>
         .
       </div>
+
       {error?.text && young?.files?.cniFiles?.length + files?.length > 2 && <MyDocs />}
+
       {(files || date) && (
         <>
-          <hr className="my-8 h-px bg-gray-200 border-0" />
-          <div className="my-4 w-full flex">
+          <hr className="my-8 h-px border-0 bg-gray-200" />
+          <div className="my-4 flex w-full">
             <div className="w-1/2">
               <div className="text-xl font-medium">Renseignez la date d’expiration</div>
-              <div className="text-gray-600 leading-loose mt-2 mb-8">
+              <div className="mt-2 mb-8 leading-loose text-gray-600">
                 Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
                 ).
               </div>
@@ -218,7 +275,7 @@ export default function StepUpload() {
                     {e.message && ` : ${e.message}`}
                   </ErrorMessage>
                 ))}
-              <p className="text-gray-800 mt-4">Date d&apos;expiration</p>
+              <p className="mt-4 text-gray-800">Date d&apos;expiration</p>
               <DatePickerList
                 value={date}
                 onChange={(date) => {
@@ -228,11 +285,12 @@ export default function StepUpload() {
               />
             </div>
             <div className="w-1/2">
-              <img className="h-32 mx-auto" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
+              <img className="mx-auto h-32" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
             </div>
           </div>
         </>
       )}
+
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
     </DesktopPageContainer>
   );

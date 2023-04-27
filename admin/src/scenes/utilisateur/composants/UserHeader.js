@@ -41,12 +41,12 @@ export default function UserHeader({ user, tab, currentUser }) {
   };
 
   return (
-    <div className="px-[30px] pt-[15px] flex justify-end items-end border-b-[#E5E7EB] border-b-[1px]">
-      <div className="flex flex-row flex-wrap-reverse w-full items-end justify-end ">
+    <div className="flex items-end justify-end border-b-[1px] border-b-[#E5E7EB] px-[30px] pt-[15px]">
+      <div className="flex w-full flex-row flex-wrap-reverse items-end justify-end ">
         <div className="grow self-start text-center">
-          <div className="flex flex-col justify-between mt-3 md:flex-row">
-            <div className="flex items-center mb-3 md:mb-0">
-              <span className="font-bold text-2xl mr-2">{`${user.firstName} ${user.lastName}`}</span>
+          <div className="mt-3 flex flex-col justify-between md:flex-row">
+            <div className="mb-3 flex items-center md:mb-0">
+              <span className="mr-2 text-2xl font-bold">{`${user.firstName} ${user.lastName}`}</span>
               <span className="text-xs">{getSubtitle(user)}</span>
             </div>
             <div className="flex items-center">
@@ -68,7 +68,7 @@ export default function UserHeader({ user, tab, currentUser }) {
             </Tab>
             <Tab isActive={tab === "historique"} onClick={() => history.push(`/user/${user._id}/historique`)}>
               <div className="flex items-center">
-                <History className="block flex-[0_0_18px] mr-[4px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
+                <History className="mr-[4px] block flex-[0_0_18px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
                 Historique
               </div>
             </Tab>

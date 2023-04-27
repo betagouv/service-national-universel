@@ -184,14 +184,14 @@ export default function StepEligibilite() {
     <>
       <Navbar />
       <div className="bg-white p-4">
-        <div className="w-full flex justify-between items-center">
+        <div className="flex w-full items-center justify-between">
           <h1 className="text-2xl font-semibold">Vérifiez votre éligibilité au SNU</h1>
           <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
           </a>
         </div>
-        <hr className="my-4 h-px bg-gray-200 border-0" />
-        <div className="flex flex-col flex-start my-4">
+        <hr className="my-4 h-px border-0 bg-gray-200" />
+        <div className="flex-start my-4 flex flex-col">
           <div className="flex items-center">
             <CheckBox disabled={true} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
             <div className="flex items-center backdrop-opacity-100">
@@ -200,7 +200,7 @@ export default function StepEligibilite() {
               <IconFrance />
             </div>
           </div>
-          {error.frenchNationality ? <span className="text-red-500 text-sm">{error.frenchNationality}</span> : null}
+          {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
         </div>
         <div className="form-group">
           <SearchableSelect
@@ -212,27 +212,27 @@ export default function StepEligibilite() {
             }}
             placeholder="Sélectionnez une option"
           />
-          {error.scolarity ? <span className="text-red-500 text-sm">{error.scolarity}</span> : null}
+          {error.scolarity ? <span className="text-sm text-red-500">{error.scolarity}</span> : null}
         </div>
-        <div className="flex flex-col flex-start my-4 text-[#929292]">
+        <div className="flex-start my-4 flex flex-col text-[#929292]">
           Date de naissance
           <DatePickerList disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
-          {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
+          {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
         </div>
         {data.scolarity && (
           <>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <p>
                 <div>
                   <span className="font-bold">{data.scolarity === "NOT_SCOLARISE" ? "Je réside" : "Mon établissement scolaire est"}</span> en France
                 </div>
-                <div className="h-5 flex items-center">
+                <div className="flex h-5 items-center">
                   <span className="text-xs leading-5 text-[#666666]">Métropolitaine ou Outre-mer</span>
                 </div>
               </p>
 
               <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad, zip: data.isAbroad ? null : data.zip })} toggled={!data.isAbroad} />
-              {error.isAbroad ? <span className="text-red-500 text-sm">{error.isAbroad}</span> : null}
+              {error.isAbroad ? <span className="text-sm text-red-500">{error.isAbroad}</span> : null}
             </div>
 
             {data.scolarity !== "NOT_SCOLARISE" ? (
@@ -246,13 +246,13 @@ export default function StepEligibilite() {
                 </>
               )
             ) : !data.isAbroad ? (
-              <div className="flex flex-col flex-start my-4">
+              <div className="flex-start my-4 flex flex-col">
                 Code Postal
-                <div className="h-5 flex items-center">
+                <div className="flex h-5 items-center">
                   <span className="text-xs leading-5 text-[#666666]">Exemple : 75008</span>
                 </div>
                 <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} />
-                {error.zip ? <span className="text-red-500 text-sm">{error.zip}</span> : null}
+                {error.zip ? <span className="text-sm text-red-500">{error.zip}</span> : null}
               </div>
             ) : null}
           </>
