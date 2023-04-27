@@ -16,12 +16,12 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
         onClick={() => setIsShowing(filter.name)}
         className={classNames(
           isShowing ? "bg-gray-100 font-bold" : "",
-          "flex items-center justify-between transition rounded-lg duration-150 ease-in-out hover:bg-gray-50 cursor-pointer py-2 px-4 outline-none w-full",
+          "flex w-full cursor-pointer items-center justify-between rounded-lg py-2 px-4 outline-none transition duration-150 ease-in-out hover:bg-gray-50",
         )}>
-        <p className="text-gray-700 text-sm leading-5">{filter.title}</p>
+        <p className="text-sm leading-5 text-gray-700">{filter.title}</p>
         <div className="flex items-center gap-2">
           {selectedFilters[filter?.name]?.filter?.length > 0 && (
-            <div className="flex items-center justify-center text-blue-600 bg-indigo-100 rounded-full font-normal w-6 h-6 text-xs">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-normal text-blue-600">
               {selectedFilters[filter?.name]?.filter?.length}
             </div>
           )}
@@ -117,10 +117,10 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
       leaveTo="opacity-0 translate-y-1">
       <Popover.Panel className={`absolute left-[101%] z-20 w-[305px] ${inListFilter ? "-translate-y-[36px]" : "translate-y-[4px]"}`}>
         <div ref={ref} className="rounded-lg shadow-lg ">
-          <div className="relative grid bg-white py-2 rounded-lg border-[1px] border-gray-100">
-            <div className="flex items-center justify-between py-2 mb-1 px-3">
-              <p className="text-gray-500 text-xs leading-5 font-light">{filter?.title}</p>
-              {filter.allowEmpty === false ? <></> : <Trash className="text-red-500 h-3 w-3 font-light cursor-pointer" onClick={handleDelete} />}
+          <div className="relative grid rounded-lg border-[1px] border-gray-100 bg-white py-2">
+            <div className="mb-1 flex items-center justify-between py-2 px-3">
+              <p className="text-xs font-light leading-5 text-gray-500">{filter?.title}</p>
+              {filter.allowEmpty === false ? <></> : <Trash className="h-3 w-3 cursor-pointer font-light text-red-500" onClick={handleDelete} />}
             </div>
             {filter?.customComponent ? (
               filter.customComponent(handleCustomComponent, selectedFilters[filter?.name]?.filter)
@@ -130,13 +130,13 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="mx-3 px-3 py-2 bg-gray-100 rounded-lg mb-2 placeholder:text-gray-600 text-xs text-gray-900 truncate"
+                  className="mx-3 mb-2 truncate rounded-lg bg-gray-100 px-3 py-2 text-xs text-gray-900 placeholder:text-gray-600"
                   placeholder={`Rechercher un(e) ${filter?.title.toLowerCase()}...`}
                 />
-                <div className="flex flex-col max-h-[400px] overflow-y-auto">
+                <div className="flex max-h-[400px] flex-col overflow-y-auto">
                   {optionsVisible?.length === 0 ? (
                     <div className="flex items-center justify-center py-2 px-3">
-                      <p className="text-gray-500 text-xs leading-5">Aucun résultat</p>
+                      <p className="text-xs leading-5 text-gray-500">Aucun résultat</p>
                     </div>
                   ) : (
                     <>
@@ -151,16 +151,16 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                           const optionSelected = selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.key);
                           return (
                             <div
-                              className="flex items-center justify-between hover:bg-gray-50 py-2 px-3 cursor-pointer"
+                              className="flex cursor-pointer items-center justify-between py-2 px-3 hover:bg-gray-50"
                               key={option?.key}
                               onClick={() => handleSelect(option?.key)}>
-                              <div className="flex items-center gap-2 text-gray-700 text-sm leading-5">
+                              <div className="flex items-center gap-2 text-sm leading-5 text-gray-700">
                                 <input type="checkbox" checked={optionSelected} />
                                 <div className={`${optionSelected && "font-bold"}`}>
                                   {option.key === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.key) : option?.key}
                                 </div>
                               </div>
-                              <div className="text-gray-500 text-xs leading-5">{option.doc_count}</div>
+                              <div className="text-xs leading-5 text-gray-500">{option.doc_count}</div>
                             </div>
                           );
                         })}

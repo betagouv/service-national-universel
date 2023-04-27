@@ -87,18 +87,18 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
 
   return (
     <Modal size={size} centered isOpen={isOpen} toggle={onCancel || onChange}>
-      <div className="flex justify-center items-center flex-col rounded-2xl overflow-hidden pt-8">
+      <div className="flex flex-col items-center justify-center overflow-hidden rounded-2xl pt-8">
         <CloseSvg className="absolute right-0 top-0 m-4 cursor-pointer text-gray-500" height={10} width={10} onClick={onCancel || onChange} />
         <div className="mx-6">
-          <div className="flex items-center justify-center text-gray-900 text-xl text-center mb-3">Nommer un nouveau tuteur</div>
-          <div className="flex flex-col items-center justify-center text-gray-500 text-sm font-normal text-center mb-3">
+          <div className="mb-3 flex items-center justify-center text-center text-xl text-gray-900">Nommer un nouveau tuteur</div>
+          <div className="mb-3 flex flex-col items-center justify-center text-center text-sm font-normal text-gray-500">
             <div>
               {tutor.firstName} {tutor.lastName} est tuteur/tutrice sur une ou plusieurs missions.
             </div>
             <div>Afin de supprimer son compte, veuillez rattacher cette/ces missions à un nouveau tuteur.</div>
           </div>
         </div>
-        <div className="flex flex-col items-center justify-center text-center px-8 w-full ">
+        <div className="flex w-full flex-col items-center justify-center px-8 text-center ">
           <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
               <div style={{ flex: 1, position: "relative" }}>
@@ -139,9 +139,9 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
                     }}
                     renderNoResults={() => {
                       return (
-                        <div className="flex gap-2 justify-center items-center ">
-                          <CheckCircle className="w-10 h-10 text-green-600" />
-                          <h1 className="text-center text-gray-600 font-normal">Toutes les missions ont bien été redistribuées</h1>
+                        <div className="flex items-center justify-center gap-2 ">
+                          <CheckCircle className="h-10 w-10 text-green-600" />
+                          <h1 className="text-center font-normal text-gray-600">Toutes les missions ont bien été redistribuées</h1>
                         </div>
                       );
                     }}
@@ -151,7 +151,7 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
             </div>
           </ReactiveBase>
         </div>
-        <div className="flex gap-2 justify-center mb-4">
+        <div className="mb-4 flex justify-center gap-2">
           <ModalButton disabled={sending} onClick={onCancel || onChange}>
             {cancelText}
           </ModalButton>
@@ -173,16 +173,16 @@ const Header = ({ missionsSelected, setMissionsSelected, responsablesOptions, fo
     <components.SingleValue {...props}>
       <div className="flex items-center gap-2">
         <CursorClick className="text-gray-400" />
-        {loading ? <span className={`font-medium text-sm text-gray-400`}>Chargement...</span> : <span className={`font-medium text-sm text-gray-400`}>Actions groupée</span>}
+        {loading ? <span className={`text-sm font-medium text-gray-400`}>Chargement...</span> : <span className={`text-sm font-medium text-gray-400`}>Actions groupée</span>}
       </div>
     </components.SingleValue>
   );
 
   return (
-    <div className="flex justify-between mb-2">
-      <div className="flex items-center mb-2 gap-2">
+    <div className="mb-2 flex justify-between">
+      <div className="mb-2 flex items-center gap-2">
         <div>
-          <div className="text-gray-600 font-normal text-sm">
+          <div className="text-sm font-normal text-gray-600">
             <span className="font-bold">{missionsSelected?.length}</span> &nbsp;sélectionné{missionsSelected?.length > 1 ? "s" : ""}
           </div>
         </div>
@@ -193,7 +193,7 @@ const Header = ({ missionsSelected, setMissionsSelected, responsablesOptions, fo
         placeholder={
           <div className="flex items-center gap-2">
             <CursorClick className="text-gray-400" />
-            {loading ? <span className={`font-medium text-sm text-gray-400`}>Chargement...</span> : <span className={`font-medium text-sm text-gray-400`}>Actions groupée</span>}
+            {loading ? <span className={`text-sm font-medium text-gray-400`}>Chargement...</span> : <span className={`text-sm font-medium text-gray-400`}>Actions groupée</span>}
           </div>
         }
         isDisabled={missionsSelected.length === 0}
@@ -245,9 +245,9 @@ function Table({ data, checkboxRef, onClickMainCheckBox, responsablesOptions, mi
   return (
     <table className="w-full">
       <thead className="">
-        <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-10">
+        <tr className="border-gray-10 border-y-[1px] text-xs uppercase text-gray-400">
           <th className="py-3 px-4">
-            <input ref={checkboxRef} className="cursor-pointer m-auto" type="checkbox" onChange={onClickMainCheckBox} />
+            <input ref={checkboxRef} className="m-auto cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
           </th>
           <th className="py-3 pl-2 text-left">Mission</th>
           <th className="py-3 pl-2 text-left">Date</th>
@@ -311,30 +311,30 @@ const Line = ({ hit, opened, onSelect, onChange, selected, responsablesOptions }
 
   return (
     <tr className={`${!opened && "hover:!bg-gray-100"}`}>
-      <td className={`${bgColor} px-4 rounded-l-lg`}>
+      <td className={`${bgColor} rounded-l-lg px-4`}>
         <div onClick={(e) => e.stopPropagation()}>
-          <input className="cursor-pointer m-auto" type="checkbox" checked={selected} onChange={() => onSelect(value)} />
+          <input className="m-auto cursor-pointer" type="checkbox" checked={selected} onChange={() => onSelect(value)} />
         </div>
       </td>
       <td className={`${bgColor} py-3 text-left`}>
         <div>
           <div className={`font-bold ${mainTextColor} text-[15px]`}>{`${hit.name}`}</div>
-          <div className={`font-normal text-xs ${secondTextColor}`}>{`${hit.structureName}`}</div>
-          <div className={`font-normal text-xs ${secondTextColor}`}>{`${hit.city || ""} • (${hit.department || ""})`}</div>
+          <div className={`text-xs font-normal ${secondTextColor}`}>{`${hit.structureName}`}</div>
+          <div className={`text-xs font-normal ${secondTextColor}`}>{`${hit.city || ""} • (${hit.department || ""})`}</div>
         </div>
       </td>
       <td className={`${bgColor} py-3 text-left`}>
         <div>
-          <span className={"text-[#cbd5e0] mr-1"}>Du</span> {formatStringDateTimezoneUTC(hit.startAt)}
+          <span className={"mr-1 text-[#cbd5e0]"}>Du</span> {formatStringDateTimezoneUTC(hit.startAt)}
         </div>
         <div>
-          <span className={"text-[#cbd5e0] mr-1"}>Au</span> {formatStringDateTimezoneUTC(hit.endAt)}
+          <span className={"mr-1 text-[#cbd5e0]"}>Au</span> {formatStringDateTimezoneUTC(hit.endAt)}
         </div>
       </td>
       <td className={`${bgColor} rounded-r-lg text-left`}>
-        <div className="font-normal text-xs text-[#242526]" onClick={(e) => e.stopPropagation()}>
+        <div className="text-xs font-normal text-[#242526]" onClick={(e) => e.stopPropagation()}>
           <ReactSelect
-            className="text-sm w-[260px]"
+            className="w-[260px] text-sm"
             options={responsablesOptions}
             placeholder="Choisissez un nouveau tuteur"
             noOptionsMessage={() => "Pas de tuteur trouvé"}

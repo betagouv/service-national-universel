@@ -25,8 +25,8 @@ const Modal = ({ isOpen, onClose = () => {}, children, className = "" }) => {
               leave="ease-in duration-200"
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-              <Dialog.Panel className={`relative transform transition-all w-full md:w-auto md:max-w-[540px] ${className}`}>
-                <div className="bg-white rounded-md">{children}</div>
+              <Dialog.Panel className={`relative w-full transform transition-all md:w-auto md:max-w-[540px] ${className}`}>
+                <div className="rounded-md bg-white">{children}</div>
               </Dialog.Panel>
             </Transition.Child>
           </div>
@@ -38,7 +38,7 @@ const Modal = ({ isOpen, onClose = () => {}, children, className = "" }) => {
 
 const ModalHeader = ({ className = "", children, ...rest }) => {
   return (
-    <div className={`px-6 pt-6 text-gray-900 flex gap-6 ${className}`} {...rest}>
+    <div className={`flex gap-6 px-6 pt-6 text-gray-900 ${className}`} {...rest}>
       {children}
     </div>
   );

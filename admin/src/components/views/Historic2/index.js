@@ -24,14 +24,14 @@ export default function Historic({ model, data, customFilterOptions, refName }) 
   const authorOptions = getOptions(data, "author");
 
   return (
-    <div className="bg-white max-w-[1600px] rounded-xl shadow-md text-gray-700">
-      {!data.length && <div className="italic p-4">Aucune donnée</div>}
-      <div className="p-4 space-y-6">
+    <div className="max-w-[1600px] rounded-xl bg-white text-gray-700 shadow-md">
+      {!data.length && <div className="p-4 italic">Aucune donnée</div>}
+      <div className="space-y-6 p-4">
         <div className="flex gap-4">
-          <input onChange={(e) => setQuery(e.target.value)} value={query} className="border p-2 rounded-lg w-64 text-xs" placeholder="Rechercher..." />
-          <button onClick={() => setIsOpen(!isOpen)} className="group py-2 px-3 rounded-lg flex items-center gap-2 bg-gray-100 hover:bg-gray-400 transition">
-            <FilterIcon className="fill-gray-400 group-hover:fill-gray-100 transition" />
-            <p className="text-gray-400 group-hover:text-gray-100 transition">Filtres</p>
+          <input onChange={(e) => setQuery(e.target.value)} value={query} className="w-64 rounded-lg border p-2 text-xs" placeholder="Rechercher..." />
+          <button onClick={() => setIsOpen(!isOpen)} className="group flex items-center gap-2 rounded-lg bg-gray-100 py-2 px-3 transition hover:bg-gray-400">
+            <FilterIcon className="fill-gray-400 transition group-hover:fill-gray-100" />
+            <p className="text-gray-400 transition group-hover:text-gray-100">Filtres</p>
           </button>
           {customFilterOptions && <CustomFilters customFilterOptions={customFilterOptions} customFilter={customFilter} setCustomFilter={setCustomFilter} />}
         </div>
@@ -43,8 +43,8 @@ export default function Historic({ model, data, customFilterOptions, refName }) 
           </div>
         )}
       </div>
-      <div className="flex w-full flex-col mt-6 mb-2 divide-y divide-gray-100 border-y-[1px] border-gray-100">
-        <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4">
+      <div className="mt-6 mb-2 flex w-full flex-col divide-y divide-gray-100 border-y-[1px] border-gray-100">
+        <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400">
           <div className="w-[25%]">Action</div>
           <div className="w-[20%]">Détails</div>
           <div className="w-[10%]"></div>

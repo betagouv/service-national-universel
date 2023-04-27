@@ -12,16 +12,16 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
   const fieldsToExport = [].concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
 
   return (
-    <ModalTailwind isOpen={isOpen} onClose={() => setIsOpen(false)} className="bg-white rounded-xl w-[900px]">
-      <div className="px-8 py-6 space-y-6">
-        <div className="text-lg text-center">Sélectionnez les données à exporter</div>
+    <ModalTailwind isOpen={isOpen} onClose={() => setIsOpen(false)} className="w-[900px] rounded-xl bg-white">
+      <div className="space-y-6 px-8 py-6">
+        <div className="text-center text-lg">Sélectionnez les données à exporter</div>
         <SelectedFilters
           showClearAll={false}
           render={(props) => {
             const values = Object.values(props.selectedValues);
             if (values.some((e) => e.value?.length))
               return (
-                <div className="rounded-xl bg-gray-100 p-3 space-y-2">
+                <div className="space-y-2 rounded-xl bg-gray-100 p-3">
                   <p className="text-center text-sm text-gray-400">Rappel des filtres appliqués</p>
                   <p className="text-center text-sm text-gray-600">
                     {values
@@ -39,11 +39,11 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
           <p className="text-left">Sélectionnez pour choisir des sous-catégories</p>
           <div className="flex flex-row-reverse gap-2">
             {selectedFields == "" ? (
-              <div className="text-blue-600 hover:text-blue-400 cursor-pointer" onClick={() => setSelectedFields(exportFields.map((e) => e.id))}>
+              <div className="cursor-pointer text-blue-600 hover:text-blue-400" onClick={() => setSelectedFields(exportFields.map((e) => e.id))}>
                 Tout sélectionner
               </div>
             ) : (
-              <div className="text-blue-600 hover:text-blue-400 cursor-pointer" onClick={() => setSelectedFields([])}>
+              <div className="cursor-pointer text-blue-600 hover:text-blue-400" onClick={() => setSelectedFields([])}>
                 Tout déselectionner
               </div>
             )}
@@ -58,15 +58,15 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
         </div>
       </div>
       <div className="shadow-[inset_0_-10px_10px_rgb(220,220,220)]">
-        <div className="overflow-auto grid grid-cols-2 gap-4 px-8 pb-6 h-96">
+        <div className="grid h-96 grid-cols-2 gap-4 overflow-auto px-8 pb-6">
           {exportFields.map((category) => (
             <ExportFieldCard key={category.id} category={category} selectedFields={selectedFields} setSelectedFields={setSelectedFields} />
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 px-8 pt-8 mb-8 bg-white">
-        <button className="rounded-md border bg-[#ffffff] text-gray-500 hover:bg-[#f9fafb] transition" onClick={() => setIsOpen(false)}>
+      <div className="mb-8 grid grid-cols-2 gap-4 bg-white px-8 pt-8">
+        <button className="rounded-md border bg-[#ffffff] text-gray-500 transition hover:bg-[#f9fafb]" onClick={() => setIsOpen(false)}>
           Annuler
         </button>
         <div className="flex w-full">

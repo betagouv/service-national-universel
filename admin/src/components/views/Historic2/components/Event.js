@@ -6,21 +6,21 @@ import UserCard from "../../../UserCard";
 
 export default function Event({ e, index, model }) {
   return (
-    <div key={index} className="flex items-center hover:bg-slate-50 cursor-default px-4 py-3">
+    <div key={index} className="flex cursor-default items-center px-4 py-3 hover:bg-slate-50">
       <div className="w-[25%]">
         <p className="text-gray-400">
           {translateAction(e.op)} • {formatLongDateFR(e.date)}
         </p>
-        <p className="truncate w-10/12 hover:overflow-visible">{translateModelFields(model, e.path)}</p>
+        <p className="w-10/12 truncate hover:overflow-visible">{translateModelFields(model, e.path)}</p>
       </div>
       <div className="w-[20%]">
-        <p className="truncate w-10/12 text-gray-400">{translateHistory(e.path, e.originalValue)}</p>
+        <p className="w-10/12 truncate text-gray-400">{translateHistory(e.path, e.originalValue)}</p>
       </div>
-      <div className="flex items-center justify-center w-[10%]">
+      <div className="flex w-[10%] items-center justify-center">
         <HiOutlineArrowRight />
       </div>
       <div className="w-[20%]">
-        <p className="truncate w-10/12 text-gray-900">{translateHistory(e.path, e.value)}</p>
+        <p className="w-10/12 truncate text-gray-900">{translateHistory(e.path, e.value)}</p>
       </div>
       <div className="w-[25%]">
         <UserCard user={e.user} />
