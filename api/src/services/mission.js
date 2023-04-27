@@ -1,4 +1,4 @@
-const getTutorName = async ({ firstName, lastName }) => {
+const getTutorName = ({ firstName, lastName }) => {
   return `${firstName} ${lastName}`;
 };
 
