@@ -531,13 +531,13 @@ export default function StepCoordonnees() {
     <>
       <Navbar onSave={onSave} />
       <div className="bg-white p-4 text-[#161616]">
-        <div className="w-full flex justify-between items-center mt-2">
+        <div className="mt-2 flex w-full items-center justify-between">
           <h1 className="text-xl font-bold">Déclaration sur l’honneur</h1>
           <a href={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
           </a>
         </div>
-        <hr className="my-4 h-px bg-gray-200 border-0" />
+        <hr className="my-4 h-px border-0 bg-gray-200" />
         <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />
         {!wasBornInFranceBool && (
           <SearchableSelect
@@ -560,13 +560,13 @@ export default function StepCoordonnees() {
             correction={corrections?.birthCity}
           />
           {wasBornInFranceBool && (
-            <div ref={ref} className="w-full absolute z-[100] bg-white border-3 border-red-600 shadow overflow-hidden mt-[-24px]">
+            <div ref={ref} className="border-3 absolute z-[100] mt-[-24px] w-full overflow-hidden border-red-600 bg-white shadow">
               {birthCityZipSuggestions.map(({ city, postcode }, index) => (
                 <div
                   onClick={() => {
                     onClickBirthCitySuggestion(city, postcode);
                   }}
-                  className="group flex justify-between items-center gap-2 p-2 px-3  hover:bg-gray-50 cursor-pointer"
+                  className="group flex cursor-pointer items-center justify-between gap-2 p-2  px-3 hover:bg-gray-50"
                   key={`${index} - ${postcode}`}>{`${city} - ${postcode}`}</div>
               ))}
             </div>
@@ -627,15 +627,15 @@ export default function StepCoordonnees() {
         {!isFrenchResident && (
           <>
             <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
-            <div className="flex my-3">
-              <div className="w-[40px] min-w-[40px] flex justify-center items-center bg-[#0063CB]">
+            <div className="my-3 flex">
+              <div className="flex w-[40px] min-w-[40px] items-center justify-center bg-[#0063CB]">
                 <img src={require("../../../assets/infoSquared.svg")} height={20} width={20} />
               </div>
-              <div className="text-[#3A3A3A] border-2 border-[#0063CB] p-3  text-justify shadow-sm">
+              <div className="border-2 border-[#0063CB] p-3 text-justify  text-[#3A3A3A] shadow-sm">
                 Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).
               </div>
             </div>
-            <p className="text-[14px] text-[#666666] leading-tight text-justify">
+            <p className="text-justify text-[14px] leading-tight text-[#666666]">
               À noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
             </p>
             <Input
@@ -677,13 +677,13 @@ export default function StepCoordonnees() {
           error={errors.situation}
           correction={corrections?.situation}
         />
-        <div className="flex items-center mb-4">
+        <div className="mb-4 flex items-center">
           <div>
             <h2 className="mt-0 text-[16px] font-bold">
               Souhaitez-vous nous faire part d’une situation particulière ?
               <span className="text-[14px] ">(allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)</span>
             </h2>
-            <div className=" text-[#666666] text-[14px] leading-tight mt-1">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
+            <div className=" mt-1 text-[14px] leading-tight text-[#666666]">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
           </div>
           <div className="ml-3">
             <Toggle toggled={hasSpecialSituation} onClick={() => updateSpecialSituation(!hasSpecialSituation)} />
@@ -727,7 +727,7 @@ export default function StepCoordonnees() {
             <ErrorMessage>{errors.hasSpecialSituation}</ErrorMessage>
             {moreInformation && (
               <>
-                <hr className="my-4 h-px bg-gray-200 border-0" />
+                <hr className="my-4 h-px border-0 bg-gray-200" />
                 <RadioButton
                   label="Avez-vous besoin d’aménagements spécifiques ?"
                   description="(accompagnant professionnel, participation de jour, activités adaptées... )"

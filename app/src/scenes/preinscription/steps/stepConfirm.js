@@ -76,63 +76,63 @@ export default function StepDone() {
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
 
       <div className="space-y-4">
-        <div className="flex flex-row justify-between items-center my-2">
-          <p className="text-[#161616] text-lg font-semibold">Mon éligibilité</p>
+        <div className="my-2 flex flex-row items-center justify-between">
+          <p className="text-lg font-semibold text-[#161616]">Mon éligibilité</p>
           <Link to="./eligibilite">
             <EditPen />
           </Link>
         </div>
-        <div className="flex justify-between items-center">
-          <p className="text-[#666666] text-sm">Niveau de scolarité&nbsp;:</p>
-          <p className="text-[#161616] text-right">{translateGrade(data.scolarity)}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-[#666666]">Niveau de scolarité&nbsp;:</p>
+          <p className="text-right text-[#161616]">{translateGrade(data.scolarity)}</p>
         </div>
-        <div className="flex justify-between items-center">
-          <p className="text-[#666666] text-sm">Date de naissance&nbsp;:</p>
-          <p className="text-[#161616] text-right">{formatDateFR(data.birthDate)}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-[#666666]">Date de naissance&nbsp;:</p>
+          <p className="text-right text-[#161616]">{formatDateFR(data.birthDate)}</p>
         </div>
         {data.school ? (
           <>
             {data.school?.country && (
-              <div className="flex justify-between items-center">
-                <p className="text-[#666666] text-sm">Pays de l&apos;établissement&nbsp;:</p>
-                <p className="text-[#161616] text-right capitalize">{data.school?.country?.toLowerCase()}</p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-[#666666]">Pays de l&apos;établissement&nbsp;:</p>
+                <p className="text-right capitalize text-[#161616]">{data.school?.country?.toLowerCase()}</p>
               </div>
             )}
             {data.school?.city && (
-              <div className="flex justify-between items-center">
-                <p className="text-[#666666] text-sm">Commune de l&apos;établissement&nbsp;:</p>
-                <p className="text-[#161616] text-right">{data.school.city}</p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-[#666666]">Commune de l&apos;établissement&nbsp;:</p>
+                <p className="text-right text-[#161616]">{data.school.city}</p>
               </div>
             )}
-            <div className="flex justify-between items-center">
-              <p className="text-[#666666] text-sm">Nom de l&apos;établissement&nbsp;:</p>
-              <p className="text-[#161616] text-right truncate">{data.school.fullName}</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-[#666666]">Nom de l&apos;établissement&nbsp;:</p>
+              <p className="truncate text-right text-[#161616]">{data.school.fullName}</p>
             </div>
           </>
         ) : (
-          <div className="flex justify-between items-center">
-            <p className="text-[#666666] text-sm">Code postal&nbsp;:</p>
-            <p className="text-[#161616] text-base">{data.zip}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-[#666666]">Code postal&nbsp;:</p>
+            <p className="text-base text-[#161616]">{data.zip}</p>
           </div>
         )}
 
-        <div className="flex justify-between items-center my-16 pt-8">
-          <p className="text-[#161616] text-lg font-semibold">Mes informations personnelles</p>
+        <div className="my-16 flex items-center justify-between pt-8">
+          <p className="text-lg font-semibold text-[#161616]">Mes informations personnelles</p>
           <Link to="profil">
             <EditPen />
           </Link>
         </div>
-        <div className="flex justify-between items-center">
-          <p className="text-[#666666] text-sm">Prénom&nbsp;:</p>
-          <p className="text-[#161616] text-right">{data.firstName}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-[#666666]">Prénom&nbsp;:</p>
+          <p className="text-right text-[#161616]">{data.firstName}</p>
         </div>
-        <div className="flex justify-between items-center">
-          <p className="text-[#666666] text-sm">Nom&nbsp;:</p>
-          <p className="text-[#161616] text-right">{data.lastName}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-[#666666]">Nom&nbsp;:</p>
+          <p className="text-right text-[#161616]">{data.lastName}</p>
         </div>
-        <div className="flex justify-between items-center">
-          <p className="text-[#666666] text-sm">Email&nbsp;:</p>
-          <p className="text-[#161616] text-right">{data.email}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-[#666666]">Email&nbsp;:</p>
+          <p className="text-right text-[#161616]">{data.email}</p>
         </div>
       </div>
 

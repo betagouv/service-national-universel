@@ -4,7 +4,7 @@ import React from "react";
 const Label = ({ children = null, title = "", hasError = false, className = "", titleClassName = "", ...rest }) => {
   return (
     <label
-      className={`flex flex-col justify-center border-[1px] min-h-[54px] w-full py-2 px-3 rounded-lg bg-white border-gray-300 disabled:border-gray-200 focus-within:border-blue-600 m-0 ${
+      className={`m-0 flex min-h-[54px] w-full flex-col justify-center rounded-lg border-[1px] border-gray-300 bg-white py-2 px-3 focus-within:border-blue-600 disabled:border-gray-200 ${
         hasError && "border-red-500"
       } ${className}`}
       {...rest}>

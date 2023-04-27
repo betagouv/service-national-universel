@@ -122,13 +122,13 @@ export default function StepWaitingConsent() {
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-4">
                 <ConsentDone />
-                <h1 className="text-[22px] font-bold flex-1">Bravo, nous allons étudier votre dossier !</h1>
+                <h1 className="flex-1 text-[22px] font-bold">Bravo, nous allons étudier votre dossier !</h1>
               </div>
-              <hr className="my-2 h-px bg-gray-200 border-0" />
-              <p className="text-[#161616] text-base ">
+              <hr className="my-2 h-px border-0 bg-gray-200" />
+              <p className="text-base text-[#161616] ">
                 Bonne nouvelle, votre représentant légal a <strong>déjà donné son consentement.</strong>
               </p>
-              <p className="text-[#161616] text-base mt-2">Vous pouvez désormais accéder à votre compte volontaire.</p>
+              <p className="mt-2 text-base text-[#161616]">Vous pouvez désormais accéder à votre compte volontaire.</p>
             </div>
           </div>
           <Footer marginBottom="mb-[88px]" />
@@ -138,20 +138,20 @@ export default function StepWaitingConsent() {
         <>
           <div className="bg-white p-4 text-[#161616]">
             {error?.text && <Error {...error} onClose={() => setError({})} />}
-            <h1 className="text-xl font-bold mt-2">Bravo, vous avez terminé votre inscription.</h1>
-            <div className="text-[#666666] text-sm mt-2">
+            <h1 className="mt-2 text-xl font-bold">Bravo, vous avez terminé votre inscription.</h1>
+            <div className="mt-2 text-sm text-[#666666]">
               Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à l’administration pour le valider.
             </div>
 
-            <div className="flex flex-col mt-4 border-[1px] border-b-4 border-b-[#000091] border-[#E5E5E5] p-4 gap-1">
-              <div className="text-[#161616] text-base font-bold">En attente du consentement de :</div>
-              <div className="text-[#3A3A3A] text-base ">
+            <div className="mt-4 flex flex-col gap-1 border-[1px] border-b-4 border-[#E5E5E5] border-b-[#000091] p-4">
+              <div className="text-base font-bold text-[#161616]">En attente du consentement de :</div>
+              <div className="text-base text-[#3A3A3A] ">
                 {young?.parent1FirstName} {young.parent1LastName}
               </div>
-              <div className="text-[#666666] text-sm ">{young?.parent1Email}</div>
-              <div className="flex justify-between mt-2">
+              <div className="text-sm text-[#666666] ">{young?.parent1Email}</div>
+              <div className="mt-2 flex justify-between">
                 <button
-                  className="mt-2 h-10 text-base w-1/2 disabled:bg-[#E5E5E5] disabled:text-[#929292] bg-[#000091]  text-white "
+                  className="mt-2 h-10 w-1/2 bg-[#000091] text-base text-white disabled:bg-[#E5E5E5]  disabled:text-[#929292] "
                   disabled={disabled}
                   onClick={() => handleClick()}>
                   Relancer
@@ -159,21 +159,21 @@ export default function StepWaitingConsent() {
                 <img className="translate-y-4" src={Avatar} />
               </div>
             </div>
-            <div className="flex items-center justify-end text-[#000091] text-base my-4 gap-2 cursor-pointer" onClick={() => history.push("/inscription2023/confirm")}>
+            <div className="my-4 flex cursor-pointer items-center justify-end gap-2 text-base text-[#000091]" onClick={() => history.push("/inscription2023/confirm")}>
               <EditPen />
               Modifier mes informations
             </div>
-            <div className="w-full flex justify-end">
+            <div className="flex w-full justify-end">
               <a className="w-1/3" href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3504?&view-mode=formulaire-avis&nd_source=button&key=060c41afff346d1b228c2c02d891931f">
                 <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu.svg" alt="Je donne mon avis" />
               </a>
             </div>
           </div>
 
-          <div className="fixed bottom-0 w-full z-50">
-            <div className="flex flex-row shadow-ninaInverted p-4 bg-white gap-4">
+          <div className="fixed bottom-0 z-50 w-full">
+            <div className="flex flex-row gap-4 bg-white p-4 shadow-ninaInverted">
               <button
-                className="flex items-center justify-center p-2 w-full cursor-pointer border-[1px] border-[#000091] text-[#000091] disabled:bg-[#E5E5E5] disabled:text-[#929292] disabled:border-[#E5E5E5]"
+                className="flex w-full cursor-pointer items-center justify-center border-[1px] border-[#000091] p-2 text-[#000091] disabled:border-[#E5E5E5] disabled:bg-[#E5E5E5] disabled:text-[#929292]"
                 disabled={loading}
                 onClick={() => logout()}>
                 Revenir à l&apos;accueil
@@ -187,38 +187,38 @@ export default function StepWaitingConsent() {
   ) : (
     <>
       <div className="bg-white p-4 text-[#161616]">
-        <div className="flex gap-4 items-center">
+        <div className="flex items-center gap-4">
           <img src={ErrorPic} />
-          <div className="text-[#161616] text-xl font-bold">Mauvaise nouvelle...</div>
+          <div className="text-xl font-bold text-[#161616]">Mauvaise nouvelle...</div>
         </div>
-        <hr className="my-4 h-px bg-gray-200 border-0" />
+        <hr className="my-4 h-px border-0 bg-gray-200" />
         <div className="text-base text-[#161616]">
           Malheureusement votre représentant légal n&apos;a <strong>pas consenti</strong> à votre participation au SNU.
           <br />
           <br />
           Mais tout n’est pas perdu, il existe d’autres moyens de s’engager ! Découvrez-les maintenant.
         </div>
-        <div className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</div>
-        <div className="overflow-x-auto flex space-x-6">
+        <div className="my-4 text-base font-bold">Découvrez d’autres formes d’engagement</div>
+        <div className="flex space-x-6 overflow-x-auto">
           {engagementPrograms.map((program, index) => {
             return (
               <div key={index} className="flex w-96">
-                <div className="w-64 h-min-[700px] ">
-                  <div className="w-full h-[155px] ">
+                <div className="h-min-[700px] w-64 ">
+                  <div className="h-[155px] w-full ">
                     <a href={program.link} target="_blank" rel="noreferrer">
-                      <img src={program.picture} className="object-cover w-full h-full" />
+                      <img src={program.picture} className="h-full w-full object-cover" />
                     </a>
                   </div>
-                  <div className={`min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen[index] && "h-[250px]"}`}>
-                    <div className="font-semibold my-4 min-h-[40px]">{program.title}</div>
-                    <div className={`text-[13px] leading-6 mb-4 ${!isOpen[index] && "h-[70px] text-ellipsis overflow-hidden"}`}>
+                  <div className={`min-h-min border border-[#E5E5E5] pl-4 pr-1 pb-2 ${!isOpen[index] && "h-[250px]"}`}>
+                    <div className="my-4 min-h-[40px] font-semibold">{program.title}</div>
+                    <div className={`mb-4 text-[13px] leading-6 ${!isOpen[index] && "h-[70px] overflow-hidden text-ellipsis"}`}>
                       {" "}
                       <a href={program.link} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
                         {program.description}
                       </a>
                     </div>
                     <div
-                      className="text-[13px] flex justify-between pr-2"
+                      className="flex justify-between pr-2 text-[13px]"
                       onClick={() => {
                         setIsOpen({ ...isOpen, [index]: !isOpen[index] });
                       }}>
@@ -232,17 +232,17 @@ export default function StepWaitingConsent() {
           })}
         </div>
         <div
-          className="text-[#000091] text-center border-[1px] border-[#000091] my-4 p-2"
+          className="my-4 border-[1px] border-[#000091] p-2 text-center text-[#000091]"
           onClick={() => {
             history.push("/public-engagements");
           }}>
           Voir plus de formes d’engagement
         </div>
       </div>
-      <div className="fixed bottom-0 w-full z-50">
-        <div className="flex flex-row shadow-ninaInverted p-4 bg-white gap-4">
+      <div className="fixed bottom-0 z-50 w-full">
+        <div className="flex flex-row gap-4 bg-white p-4 shadow-ninaInverted">
           <button
-            className="flex items-center justify-center p-2 w-full cursor-pointer border-[1px] border-[#000091] bg-[#000091] text-white disabled:bg-[#E5E5E5] disabled:text-[#929292] disabled:border-[#E5E5E5]"
+            className="flex w-full cursor-pointer items-center justify-center border-[1px] border-[#000091] bg-[#000091] p-2 text-white disabled:border-[#E5E5E5] disabled:bg-[#E5E5E5] disabled:text-[#929292]"
             disabled={loading}
             onClick={() => logout()}>
             Revenir à l&apos;accueil

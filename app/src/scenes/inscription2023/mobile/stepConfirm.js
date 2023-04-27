@@ -66,28 +66,28 @@ export default function StepConfirm() {
     <>
       <div className="bg-white p-4 text-[#161616]">
         {error?.text && <Error {...error} onClose={() => setError({})} />}
-        <div className="w-full flex justify-between items-center mt-2">
+        <div className="mt-2 flex w-full items-center justify-between">
           <h1 className="text-xl font-bold">Vous y êtes presque...</h1>
           <a href={`${supportURL}/base-de-connaissance/je-minscris-et-donne-mon-consentement`} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
           </a>
         </div>
-        <div className="text-[#666666] text-sm mt-2">
+        <div className="mt-2 text-sm text-[#666666]">
           Vous êtes sur le point de soumettre votre dossier à l’administration du SNU. Veuillez vérifier vos informations avant de valider votre demande d’inscription.
         </div>
 
-        <hr className="my-4 h-px bg-gray-200 border-0" />
+        <hr className="my-4 h-px border-0 bg-gray-200" />
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1">
-            <h1 className="text-lg font-bold mt-2 text-[#161616]">Séjour de cohésion :</h1>
+            <h1 className="mt-2 text-lg font-bold text-[#161616]">Séjour de cohésion :</h1>
             <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(COHESION_STAY_LIMIT_DATE[young?.cohort])}</div>
           </div>
           <EditPen onClick={() => setModal({ isOpen: true })} />
         </div>
-        <hr className="my-4 h-px bg-gray-200 border-0" />
+        <hr className="my-4 h-px border-0 bg-gray-200" />
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-bold mt-2 text-[#161616]">Mon profil</h1>
+            <h1 className="mt-2 text-lg font-bold text-[#161616]">Mon profil</h1>
             <EditPen onClick={() => history.push("/inscription2023/coordonnee")} />
           </div>
           <Details title="Pays de naissance" value={young.birthCountry} />
@@ -100,7 +100,7 @@ export default function StepConfirm() {
           <Details title="Ville" value={young.city} />
           {young.foreignAddress && (
             <>
-              <div className="text-[#666666] text-sm text-center">L&apos;adresse affichée ci-dessus est celle de votre hébergeur. Votre adresse à l&apos;étranger :</div>
+              <div className="text-center text-sm text-[#666666]">L&apos;adresse affichée ci-dessus est celle de votre hébergeur. Votre adresse à l&apos;étranger :</div>
               <Details title="Adresse à l'étranger" value={young.foreignAddress} />
               <Details title="Code postal à l'étranger" value={young.foreignZip} />
               <Details title="Ville à l'étranger" value={young.foreignCity} />
@@ -124,10 +124,10 @@ export default function StepConfirm() {
             <Details title="Situation particulière" value="Non" />
           )}
         </div>
-        <hr className="my-4 h-px bg-gray-200 border-0" />
+        <hr className="my-4 h-px border-0 bg-gray-200" />
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-bold mt-2 text-[#161616]">Mes représentants légaux</h1>
+            <h1 className="mt-2 text-lg font-bold text-[#161616]">Mes représentants légaux</h1>
             <EditPen onClick={() => history.push("/inscription2023/representants")} />
           </div>
           <Details title="Votre lien" value={translate(young.parent1Status)} />
@@ -137,7 +137,7 @@ export default function StepConfirm() {
           <Details title="Son téléphone" value={concatPhoneNumberWithZone(young.parent1Phone, young.parent1PhoneZone)} />
           {young.parent2Status ? (
             <>
-              <hr className="my-2 mx-10 h-px bg-gray-200 border-0" />
+              <hr className="my-2 mx-10 h-px border-0 bg-gray-200" />
               <Details title="Votre lien" value={translate(young.parent2Status)} />
               <Details title="Son prénom" value={young.parent2FirstName} />
               <Details title="Son nom" value={young.parent2LastName} />
@@ -148,14 +148,14 @@ export default function StepConfirm() {
         </div>
       </div>
       <Footer marginBottom="mb-[88px]" />
-      <div className="fixed bottom-0 w-full z-50">
-        <div className="flex flex-col shadow-ninaInverted p-4 bg-white gap-1 ">
+      <div className="fixed bottom-0 z-50 w-full">
+        <div className="flex flex-col gap-1 bg-white p-4 shadow-ninaInverted ">
           <div className="flex flex-row gap-2">
-            <button className="flex items-center justify-center w-10 border-[1px] border-[#000091]" onClick={() => history.push("/inscription2023/documents")}>
-              <FiChevronLeft className="text-[#000091] font-bold" />
+            <button className="flex w-10 items-center justify-center border-[1px] border-[#000091]" onClick={() => history.push("/inscription2023/documents")}>
+              <FiChevronLeft className="font-bold text-[#000091]" />
             </button>
             <button
-              className={`flex items-center justify-center p-2 w-full cursor-pointer ${loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+              className={`flex w-full cursor-pointer items-center justify-center p-2 ${loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
               onClick={() => !loading && onSubmit()}>
               Valider mon inscription au SNU
             </button>
@@ -179,8 +179,8 @@ const Details = ({ title, value }) => {
   if (!value) return null;
   return (
     <div className="flex items-center justify-between">
-      <div className="text-sm text-[#666666] min-w-[90px] mr-4">{`${title} :`}</div>
-      <div className="text-base text-[#161616] text-right">{value}</div>
+      <div className="mr-4 min-w-[90px] text-sm text-[#666666]">{`${title} :`}</div>
+      <div className="text-right text-base text-[#161616]">{value}</div>
     </div>
   );
 };

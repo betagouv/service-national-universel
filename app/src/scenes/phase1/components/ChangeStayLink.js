@@ -4,7 +4,7 @@ import ChevronRight from "../../../assets/icons/ChevronRight";
 
 const ChangeStayLink = ({ className }) => {
   return (
-    <Link to="/changer-de-sejour" className={`d-flex gap-2 items-center text-blue-600 text-xs ${className}`}>
+    <Link to="/changer-de-sejour" className={`d-flex items-center gap-2 text-xs text-blue-600 ${className}`}>
       Changer de séjour <ChevronRight className="mt-1" />
     </Link>
   );

@@ -35,20 +35,20 @@ export default function application({ application }) {
   return (
     <Link
       to={`/mission/${application.missionId}`}
-      className="group flex shrink-0  bg-white flex-col w-56 justify-start items-start  shadow-nina rounded-lg  p-3 pb-4 transition duration-100 ease-in">
-      <div className={`flex gap-1 items-center text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm mb-2`}>
+      className="group flex w-56  shrink-0 flex-col items-start justify-start rounded-lg  bg-white p-3  pb-4 shadow-nina transition duration-100 ease-in">
+      <div className={`flex items-center gap-1 text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} mb-2 rounded-sm px-2 py-[2px]`}>
         {theme.icon[application.status] ? theme.icon[application.status] : null}
         {translateApplicationForYoungs(application.status)}
       </div>
       <div className="flex flex-1 flex-col justify-between">
         <div className="flex flex-1 flex-col">
-          <div className="text-gray-500 text-xs mt-2 uppercase tracking-wider">{application.mission?.structureName}</div>
-          <div className="font-bold text-sm mt-2 break-words">
+          <div className="mt-2 text-xs uppercase tracking-wider text-gray-500">{application.mission?.structureName}</div>
+          <div className="mt-2 break-words text-sm font-bold">
             {application.missionName?.substring(0, 150)}
             {application.missionName?.length > 150 ? "..." : ""}
           </div>
         </div>
-        <div className="text-gray-500 text-xs mt-3">Voir ma candidature&nbsp;›</div>
+        <div className="mt-3 text-xs text-gray-500">Voir ma candidature&nbsp;›</div>
       </div>
     </Link>
   );

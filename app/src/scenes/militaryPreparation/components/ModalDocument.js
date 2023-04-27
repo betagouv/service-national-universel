@@ -11,26 +11,26 @@ export default function ModalDocument({ isOpen, onCancel, title, subTitle, subsu
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="lg">
       <div className="w-full">
-        <div className="flex flex-col items-center justify-center mx-4">
-          <div className="text-gray-900 text-lg font-medium mt-4 mb-1 uppercase">Documents requis</div>
-          <div className="text-gray-900 text-xl font-bold text-center uppercase">{title}</div>
-          <div className=" text-gray-500 text-base font-normal text-center mt-4">{subTitle}</div>
-          {subsubTitle ? <div className=" text-gray-500 text-sm font-normal text-center mt-4">{subsubTitle}</div> : null}
+        <div className="mx-4 flex flex-col items-center justify-center">
+          <div className="mt-4 mb-1 text-lg font-medium uppercase text-gray-900">Documents requis</div>
+          <div className="text-center text-xl font-bold uppercase text-gray-900">{title}</div>
+          <div className=" mt-4 text-center text-base font-normal text-gray-500">{subTitle}</div>
+          {subsubTitle ? <div className=" mt-4 text-center text-sm font-normal text-gray-500">{subsubTitle}</div> : null}
           {template ? (
-            <div className="flex flex-col items-center bg-gray-50 mt-4 py-3 rounded-lg mb-3 w-full">
+            <div className="mt-4 mb-3 flex w-full flex-col items-center rounded-lg bg-gray-50 py-3">
               <a
                 href={urlWithScheme(template)}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-[10px] border-[1px] py-2.5 px-3 items-center bg-blue-600 hover:bg-white hover:border-blue-600 mt-4 text-[#ffffff] hover:text-blue-600 text-sm">
+                className="mt-4 items-center rounded-[10px] border-[1px] bg-blue-600 py-2.5 px-3 text-sm text-[#ffffff] hover:border-blue-600 hover:bg-white hover:text-blue-600">
                 Télécharger le modèle obligatoire
               </a>
-              <div className="text-xs leading-none font-normal text-gray-700 mt-2">puis téléversez le formulaire rempli ci-contre</div>
+              <div className="mt-2 text-xs font-normal leading-none text-gray-700">puis téléversez le formulaire rempli ci-contre</div>
             </div>
           ) : null}
 
           <Formik initialValues={young} validateOnChange={false} validateOnBlur={false}>
-            <div className="flex mt-2 items-center justify-center">
+            <div className="mt-2 flex items-center justify-center">
               <DndFileInput
                 className="flex flex-col items-center"
                 value={undefined}
@@ -40,7 +40,7 @@ export default function ModalDocument({ isOpen, onCancel, title, subTitle, subsu
               />
             </div>
           </Formik>
-          <button className="my-4 border-[1px] border-gray-300 text-gray-700 rounded-lg py-2 cursor-pointer w-full" onClick={onCancel}>
+          <button className="my-4 w-full cursor-pointer rounded-lg border-[1px] border-gray-300 py-2 text-gray-700" onClick={onCancel}>
             Fermer
           </button>
         </div>

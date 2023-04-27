@@ -31,41 +31,41 @@ export default function Forgot() {
     }
   };
   return (
-    <div className="bg-[#F9F6F2] py-8 flex">
-      <div className="bg-white basis-[50%] mx-auto my-0 px-[102px] py-[60px]">
+    <div className="flex bg-[#F9F6F2] py-8">
+      <div className="mx-auto my-0 basis-[50%] bg-white px-[102px] py-[60px]">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <div className="text-[#161616] text-[22px] font-bold">Réinitialiser mon mot de passe</div>
-        <div className="flex items-center py-4 gap-4">
+        <div className="text-[22px] font-bold text-[#161616]">Réinitialiser mon mot de passe</div>
+        <div className="flex items-center gap-4 py-4">
           <RightArrow />
-          <div className="text-[#161616] text-[17px] font-bold">Mon espace volontaire</div>
+          <div className="text-[17px] font-bold text-[#161616]">Mon espace volontaire</div>
         </div>
         {!done ? (
           <>
             <div className="flex flex-col gap-1 py-3">
-              <label className="text-[#161616] text-base">E-mail</label>
+              <label className="text-base text-[#161616]">E-mail</label>
               <Input value={email} onChange={(e) => setEmail(e)} />
             </div>
             <div className="flex justify-end">
               <button
                 disabled={disabled || loading}
-                className="flex items-center justify-center px-3 py-2 mt-3 cursor-pointer bg-[#000091] text-white hover:!text-[#000091] hover:bg-white hover:border hover:border-[#000091]  disabled:bg-[#E5E5E5] disabled:!text-[#929292] disabled:border-0 disabled:cursor-default"
+                className="mt-3 flex cursor-pointer items-center justify-center bg-[#000091] px-3 py-2 text-white hover:border hover:border-[#000091] hover:bg-white hover:!text-[#000091]  disabled:cursor-default disabled:border-0 disabled:bg-[#E5E5E5] disabled:!text-[#929292]"
                 onClick={onSubmit}>
                 M&apos;envoyer le lien de réinitialisation
               </button>
             </div>
           </>
         ) : (
-          <div className="text-[#161616] text-base ">
+          <div className="text-base text-[#161616] ">
             <span className="font-medium"> Un email de réinitialisation de mot de passe a été envoyé à </span> {email} <br /> <br /> Cet email contient un lien permettant de
             réinitialiser votre mot de passe. <br /> <br /> Vous allez le recevoir d’ici quelques minutes, pensez à vérifier vos spams et courriers indésirables.
             <br /> <br /> Si vous ne recevez aucun email, cela veut dire que vous n&apos;avez pas encore de compte.
           </div>
         )}
-        <hr className="text-[#E5E5E5] mt-4" />
-        <div className="text-[#161616] text-[17px] font-bold py-4 text-center mt-2">Retourner à la connexion</div>
+        <hr className="mt-4 text-[#E5E5E5]" />
+        <div className="mt-2 py-4 text-center text-[17px] font-bold text-[#161616]">Retourner à la connexion</div>
         <div className="flex justify-center">
           <button
-            className="flex items-center justify-center p-2 cursor-pointer border-[1px] border-[#000091] text-[#000091] hover:text-white hover:bg-[#000091]"
+            className="flex cursor-pointer items-center justify-center border-[1px] border-[#000091] p-2 text-[#000091] hover:bg-[#000091] hover:text-white"
             onClick={() => history.push("/auth")}>
             Se connecter
           </button>
