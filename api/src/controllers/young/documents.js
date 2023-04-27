@@ -287,7 +287,8 @@ router.post(
               capture(`File ${name} of user(${req.user.id})is infected`);
               return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
             }
-          } catch {
+          } catch (e) {
+            capture(e);
             return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
           }
         }
