@@ -227,4 +227,37 @@ router.post("/moderator/sejour/", passport.authenticate(["referent"], { session:
   }
 });
 
+router.post("/pointderassemblement/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { queryFilters, error } = joiElasticSearch({ filterFields: ["meetingPointIds", "cohort"], body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const body = {
+      query: {
+        bool: {
+          filter: [
+            ...(await buildYoungContext(req.user, true)),
+            { terms: { "meetingPointId.keyword": queryFilters.meetingPointIds } },
+            { terms: { "status.keyword": ["VALIDATED"] } },
+            { terms: { "cohort.keyword": queryFilters.cohort } },
+          ],
+        },
+      },
+      aggs: {
+        group_by_meetingPointId: {
+          terms: { field: "meetingPointId.keyword", size: ES_NO_LIMIT },
+        },
+      },
+      size: 0,
+      track_total_hits: true,
+    };
+
+    const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
+    return res.status(200).send(response.body);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;
