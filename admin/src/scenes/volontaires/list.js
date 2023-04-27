@@ -358,7 +358,7 @@ export default function VolontaireList() {
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: ".25rem", justifyContent: "flex-end" }}>
                 <button
-                  className="rounded-md py-2 px-4 text-sm text-white bg-snu-purple-300 hover:bg-snu-purple-600 hover:drop-shadow font-semibold"
+                  className="rounded-md bg-snu-purple-300 py-2 px-4 text-sm font-semibold text-white hover:bg-snu-purple-600 hover:drop-shadow"
                   onClick={() => setIsExportOpen(true)}>
                   Exporter les volontaires
                 </button>
@@ -475,10 +475,10 @@ export default function VolontaireList() {
                   URLParams={true}
                   queryFormat="and"
                 />
-                <HiAdjustments onClick={handleShowFilter} className="text-xl text-coolGray-700 cursor-pointer hover:scale-105" />
+                <HiAdjustments onClick={handleShowFilter} className="cursor-pointer text-xl text-coolGray-700 hover:scale-105" />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <div className="uppercase text-xs text-snu-purple-800">Général</div>
+                <div className="text-xs uppercase text-snu-purple-800">Général</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -562,7 +562,7 @@ export default function VolontaireList() {
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <div className="uppercase text-xs text-snu-purple-800">Dossier</div>
+                <div className="text-xs uppercase text-snu-purple-800">Dossier</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -776,7 +776,7 @@ export default function VolontaireList() {
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <div className="uppercase text-xs text-snu-purple-800">Phase 1</div>
+                <div className="text-xs uppercase text-snu-purple-800">Phase 1</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -919,7 +919,7 @@ export default function VolontaireList() {
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <div className="uppercase text-xs text-snu-purple-800">Phase 2</div>
+                <div className="text-xs uppercase text-snu-purple-800">Phase 2</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -1009,7 +1009,7 @@ export default function VolontaireList() {
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <div className="uppercase text-xs text-snu-purple-800">Phase 3</div>
+                <div className="text-xs uppercase text-snu-purple-800">Phase 3</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"

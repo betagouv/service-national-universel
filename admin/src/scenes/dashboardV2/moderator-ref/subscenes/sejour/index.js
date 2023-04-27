@@ -28,6 +28,7 @@ import Presences from "./components/Presences";
 import StatusPhase1 from "./components/StatusPhase1";
 import TabSession from "./components/TabSession";
 import { getLink as getOldLink } from "../../../../../utils";
+import { getNewLink } from "../../../../../utils";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -177,7 +178,6 @@ export default function Index() {
     if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
     else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
   }, [JSON.stringify(selectedFilters)]);
-
   return (
     <DashboardContainer
       active="sejour"
@@ -216,18 +216,25 @@ export default function Index() {
           </div>
           <StatusPhase1 statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} filter={selectedFilters} />
         </div>
-        <Presences presence={data?.presence} JDM={data?.JDM} depart={data?.depart} departTotal={data?.departTotal} departMotif={data?.departMotif} />
+        <Presences presence={data?.presence} JDM={data?.JDM} depart={data?.depart} departTotal={data?.departTotal} departMotif={data?.departMotif} filter={selectedFilters} />
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">Centres</h1>
         <div className="grid grid-cols-3 gap-4">
-          <CardCenterCapacity nbCenter={dataCenter?.totalCenter || 0} capacity={dataCenter?.capacity || 0} />
-          <Cardsession nbValidated={dataCenter?.status?.VALIDATED || 0} nbPending={dataCenter?.status?.WAITING_VALIDATION || 0} />
+          <CardCenterCapacity
+            nbCenter={dataCenter?.totalCenter || 0}
+            capacity={dataCenter?.capacity || 0}
+            redirect={getNewLink({ base: "/centre/liste/liste-centre", filter: selectedFilters }, "center")}
+          />
           <OccupationCardHorizontal total={dataCenter?.placesTotalSession || 0} taken={dataCenter?.placesTotalSession - dataCenter?.placesLeftSession || 0} />
-          <BoxWithPercentage total={dataCenter?.totalSession || 0} number={dataCenter?.timeSchedule?.false || 0} title="Emplois du temps" subLabel="restants à renseigner"  
-          redirect={getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['COHESION_PARTICIPATION=%5B"false"%5D'] })}
-            />
+          <BoxWithPercentage
+            total={dataCenter?.totalSession || 0}
+            number={dataCenter?.timeSchedule?.false || 0}
+            title="Emplois du temps"
+            subLabel="restants à renseigner"
+            redirect={getNewLink({ base: `/centre/liste/session`, filter: selectedFilters, filtersUrl: ["hasTimeSchedule=false"] }, "session")}
+          />
         </div>
         <div className="flex gap-4">
-          <MoreInfo typology={dataCenter?.typology} domains={dataCenter?.domains} />
+          <MoreInfo typology={dataCenter?.typology} domains={dataCenter?.domains} filter={selectedFilters} />
           <TabSession sessionList={sessionList} filters={selectedFilters} />
         </div>
       </div>

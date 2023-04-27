@@ -1,7 +1,9 @@
 import React from "react";
-import StatusText from "./StatusText";
+/* import StatusText from "./StatusText"; */
+import { getLink as getOldLink } from "../../../../../../utils";
+import { Link } from "react-router-dom";
 
-export default function OccupationBarVertical({ percentage, nbDepart, departMotif }) {
+export default function OccupationBarVertical({ percentage, nbDepart, departMotif, filter }) {
   let height = `h-0`;
   let bgColor = "bg-blue-700";
   let occupationPercentage = percentage * 100;
@@ -27,23 +29,80 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
     <div className="flex items-center gap-10">
       <div className="flex flex-col gap-5">
         {Math.floor(occupationPercentage) === 0 ? (
-          <div className="flex flex-col justify-center items-center font-bold text-xs w-16 h-52 bg-gray-100 rounded-lg overflow-hidden">0%</div>
+          <div className="flex h-52 w-16 flex-col items-center justify-center overflow-hidden rounded-lg bg-gray-100 text-xs font-bold">0%</div>
         ) : (
-          <div className="flex flex-col justify-end  w-16 h-52 bg-gray-100 rounded-lg overflow-hidden">
-            <div className={`flex justify-center items-center w-16 ${height} ${bgColor} rounded-lg text-white font-bold text-xs`}>{Math.floor(occupationPercentage)}%</div>
+          <div className="flex h-52 w-16  flex-col justify-end overflow-hidden rounded-lg bg-gray-100">
+            <div className={`flex w-16 items-center justify-center ${height} ${bgColor} rounded-lg text-xs font-bold text-white`}>{Math.floor(occupationPercentage)}%</div>
           </div>
         )}
-        <p className="text-sm leading-4 font-bold text-gray-900">{nbDepart || 0} départs</p>
+        {nbDepart === undefined ? (
+          <p className="text-sm font-bold leading-4 text-gray-900">{nbDepart || 0} départs</p>
+        ) : (
+          <div className="text-sm font-bold leading-4 text-gray-900">
+            <StatusTextDepart status="départs" nb={nbDepart || 0} filter={filter} base="/volontaire" filtersUrl={['DEPART=%5B"true"%5D']} />
+          </div>
+        )}
       </div>
       <div className="flex flex-col gap-5">
-        <p className="text-base leading-5 font-bold text-gray-900">Motifs de départ</p>
+        <p className="text-base font-bold leading-5 text-gray-900">Motifs de départ</p>
         <div className="flex flex-col gap-1">
-          <StatusText status="Exclusion" nb={exclusion} percentage={nbDepart ? Math.floor((exclusion / nbDepart) * 100) : 0} />
-          <StatusText status="Cas de force majeur" nb={forceMajeure} percentage={nbDepart ? Math.floor((forceMajeure / nbDepart) * 100) : 0} />
-          <StatusText status="Annulation séjour, éviction sanitaire" nb={annulation} percentage={nbDepart ? Math.floor((annulation / nbDepart) * 100) : 0} />
-          <StatusText status="Autre" nb={autre} percentage={nbDepart ? Math.floor((autre / nbDepart) * 100) : 0} />
+          <StatusText
+            status="Exclusion"
+            nb={exclusion}
+            percentage={nbDepart ? Math.floor((exclusion / nbDepart) * 100) : 0}
+            filter={filter}
+            base="/volontaire"
+            filtersUrl={['DEPART_MOTIF=%5B"Exclusion"%5D']}
+          />
+          <StatusText
+            status="Cas de force majeur"
+            nb={forceMajeure}
+            percentage={nbDepart ? Math.floor((forceMajeure / nbDepart) * 100) : 0}
+            filter={filter}
+            base="/volontaire"
+            filtersUrl={['DEPART_MOTIF=%5B"Cas de force majeure pour le volontaire"%5D']}
+          />
+          <StatusText
+            status="Annulation séjour, éviction sanitaire"
+            nb={annulation}
+            percentage={nbDepart ? Math.floor((annulation / nbDepart) * 100) : 0}
+            filter={filter}
+            base="/volontaire"
+            filtersUrl={['DEPART_MOTIF=%5B"Annulation du séjour ou mesure d’éviction sanitaire"%5D']}
+          />
+          <StatusText
+            status="Autre"
+            nb={autre}
+            percentage={nbDepart ? Math.floor((autre / nbDepart) * 100) : 0}
+            filter={filter}
+            base="/volontaire"
+            filtersUrl={['DEPART_MOTIF=%5B"Autre"%5D']}
+          />
         </div>
       </div>
     </div>
+  );
+}
+
+function StatusTextDepart({ status, nb, filter, filtersUrl, base }) {
+  return (
+    <Link className="flex items-center justify-between gap-2" to={getOldLink({ base, filter, filtersUrl })} target={"_blank"}>
+      <div className="flex w-[80%] items-center justify-start gap-1">
+        <span className="w-[20%] text-sm font-bold text-gray-900">{nb}</span>
+        <div className="flex items-center text-left text-sm text-gray-900">{status}</div>
+      </div>
+    </Link>
+  );
+}
+
+function StatusText({ status, nb, percentage, filter, filtersUrl, base }) {
+  return (
+    <Link className="flex items-center justify-between gap-2" to={getOldLink({ base, filter, filtersUrl })} target={"_blank"}>
+      <div className="flex w-[80%] items-center justify-start gap-2">
+        <span className="w-[20%] text-lg font-bold text-gray-900">{nb}</span>
+        <div className="flex w-[80%] items-center text-left text-sm text-gray-600">{status}</div>
+      </div>
+      <p className="text-sm text-gray-400">({percentage}%)</p>
+    </Link>
   );
 }

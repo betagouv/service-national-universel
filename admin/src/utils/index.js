@@ -179,6 +179,19 @@ export const getLink = ({ base = "/", filter, filtersUrl = [] }) => {
   return res;
 };
 
+export const replaceSpaces2 = (v) => v?.replace(/\s+/g, "%20");
+export const getNewLink = ({ base = "/", filter, filtersUrl = [] }, from) => {
+  if (filter?.cohorts?.length && from === "center") {
+    filtersUrl.push(`cohorts=${replaceSpaces2(filter?.cohorts?.map((c) => `${c}`)?.join(","))}`);
+  }
+  if (filter?.cohorts?.length && from === "session") {
+    filtersUrl.push(`cohort=${replaceSpaces2(filter?.cohorts?.map((c) => `${c}`)?.join(","))}`);
+  }
+  let res = base;
+  if (filtersUrl?.length) res += `?${filtersUrl.join("&")}`;
+  return res;
+};
+
 export function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
