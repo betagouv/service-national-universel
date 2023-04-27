@@ -31,7 +31,7 @@ export const Details = ({ title, value, copy }) => {
         {typeof value === "object" ? <div className="detail-text">{value}</div> : <div className="detail-text" dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }} />}
         {copy ? (
           <div
-            className="flex items-center justify-center mx-1 cursor-pointer hover:scale-105 text-snu-purple-400"
+            className="text-snu-purple-400 mx-1 flex cursor-pointer items-center justify-center hover:scale-105"
             onClick={() => {
               copyToClipboard(value);
               setCopied(true);

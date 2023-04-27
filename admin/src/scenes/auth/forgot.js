@@ -13,7 +13,7 @@ export default function Forgot() {
   const [mail, setMail] = useState("");
 
   return (
-    <div className="flex flex-1 flex-col min-h-screen">
+    <div className="flex min-h-screen flex-1 flex-col">
       <Header />
       <div className="flex flex-1 justify-center">
         <div className="hidden min-h-[400px] flex-[1] bg-[url('./assets/computer.jpeg')] bg-cover bg-center bg-no-repeat md:block" />
@@ -31,14 +31,14 @@ export default function Forgot() {
             }}>
             {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
               return (
-                <form onSubmit={handleSubmit} className="mb-6 flex flex-col gap-4 items-start">
+                <form onSubmit={handleSubmit} className="mb-6 flex flex-col items-start gap-4">
                   {mail ? (
                     <>
-                      <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl mb-0">Email envoyé à : {mail}</h1>
-                      <h2 className="mb-8 text-base font-normal text-brand-grey mb-0">
+                      <h1 className="mb-4 mb-0 text-xl font-bold text-brand-black md:text-3xl">Email envoyé à : {mail}</h1>
+                      <h2 className="mb-8 mb-0 text-base font-normal text-brand-grey">
                         Si vous possedez un compte chez nous, un email contenant les instructions pour réinitialiser votre mot de passe vient de vous être envoyé.
                       </h2>
-                      <h2 className="mb-8 text-base font-normal text-brand-grey mb-4">
+                      <h2 className="mb-8 mb-4 text-base font-normal text-brand-grey">
                         Si vous ne vous souvenez plus de votre email de connexion, écrivez-nous à{" "}
                         <a href="mailto:contact@snu.gouv.fr" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
                           contact@snu.gouv.fr
@@ -48,8 +48,8 @@ export default function Forgot() {
                     </>
                   ) : (
                     <>
-                      <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl mb-0">Réinitialisation du mot de passe</h1>
-                      <h2 className="mb-8 text-base font-normal text-brand-grey mb-4">
+                      <h1 className="mb-4 mb-0 text-xl font-bold text-brand-black md:text-3xl">Réinitialisation du mot de passe</h1>
+                      <h2 className="mb-8 mb-4 text-base font-normal text-brand-grey">
                         Pour réinitialiser votre mot de passe, entrez l&apos;adresse mail que vous avez utilisée pour vous connecter à la plateforme
                       </h2>
                       <div className="self-stretch">

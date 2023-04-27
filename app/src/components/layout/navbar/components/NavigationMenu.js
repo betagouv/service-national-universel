@@ -18,7 +18,7 @@ export default function NavigationMenu({ onClose = () => {} }) {
   const young = useSelector((state) => state.Auth.young);
 
   return (
-    <nav className="p-[24px] md:p-[8px] md:pb-[24px] bg-[#212B44] w-full transition-all md:flex-1 flex flex-col justify-between h-full">
+    <nav className="flex h-full w-full flex-col justify-between bg-[#212B44] p-[24px] transition-all md:flex-1 md:p-[8px] md:pb-[24px]">
       <ul>
         <MenuLink to="/" icon={<IconHome />} text="Accueil" onClose={onClose} />
         <MenuLink to="/phase1" icon={<IconPhase1 />} text="Phase 1 - Séjour" enabled={permissionPhase1(young)} status={young.statusPhase1} onClose={onClose} />

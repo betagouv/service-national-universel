@@ -4,7 +4,6 @@ import { useHistory, useParams } from "react-router-dom";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import { translate } from "../../../utils";
 import { ID } from "../utils";
 import { supportURL } from "../../../config";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
@@ -32,93 +31,103 @@ export default function StepUpload() {
   const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
   const corrections = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
 
-  async function uploadFiles() {
-    try {
-      if (young?.files?.cniFiles?.length + files?.length > 3) {
-        return young?.files?.cniFiles?.length
-          ? { error: `Vous ne pouvez téléverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.` }
-          : { error: "Vous ne pouvez téléverser plus de 3 fichiers." };
-      }
-      for (const file of files) {
-        if (file.size > 5000000) return { error: `Ce fichier ${files.name} est trop volumineux.` };
-      }
-      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
-      if (res.code === "FILE_CORRUPTED")
-        return {
-          error:
-            "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support : inscription@snu.gouv.fr",
-        };
-      if (!res.ok && res.code) {
-        capture(res.code);
-        return { error: res.code };
-      }
-      return res;
-    } catch (e) {
-      capture(e);
-      return { error: translate(e) };
-    }
+  function resetState() {
+    setRecto([]);
+    setVerso([]);
+    setHasChanged(false);
+    setLoading(false);
   }
 
   async function onSubmit() {
     try {
       setLoading(true);
-      if (files) {
-        const res = await uploadFiles();
-        if (res?.error) {
-          setRecto([]);
-          setVerso([]);
-          setHasChanged(false);
-          setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res?.error });
+
+      if (young?.files?.cniFiles?.length + files?.length > 3) {
+        return young?.files?.cniFiles?.length
+          ? { error: `Vous ne pouvez téléverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.` }
+          : { error: "Vous ne pouvez téléverser plus de 3 fichiers." };
+      }
+
+      for (const file of files) {
+        if (file.size > 5000000) {
           setLoading(false);
+          setError({ text: `Ce fichier ${files.name} est trop volumineux.` });
           return;
         }
       }
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: dayjs(date).locale("fr").format("YYYY-MM-DD") });
-      if (!ok) {
-        capture(code);
-        setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(code) });
-        setLoading(false);
+
+      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
+
+      if (!res.ok) {
+        capture(res.code);
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code });
+        resetState();
         return;
       }
+
+      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: dayjs(date).locale("fr").format("YYYY-MM-DD") });
+
+      if (!ok) {
+        capture(code);
+        setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: code });
+        resetState();
+        return;
+      }
+
       dispatch(setYoung(responseData));
       plausibleEvent("Phase0/CTA inscription - CI desktop");
       history.push("/inscription2023/confirm");
     } catch (e) {
       capture(e);
-      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(e) });
-      setLoading(false);
+      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données." });
+      resetState();
     }
   }
 
   async function onCorrect() {
     try {
       setLoading(true);
-      if (files) {
-        const res = await uploadFiles();
-        if (res?.error) {
-          setRecto([]);
-          setVerso([]);
-          setHasChanged(false);
-          setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res?.error });
+
+      if (young?.files?.cniFiles?.length + files?.length > 3) {
+        return young?.files?.cniFiles?.length
+          ? { error: `Vous ne pouvez téléverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.` }
+          : { error: "Vous ne pouvez téléverser plus de 3 fichiers." };
+      }
+
+      for (const file of files) {
+        if (file.size > 5000000) {
           setLoading(false);
+          setError({ text: `Ce fichier ${files.name} est trop volumineux.` });
           return;
         }
       }
-      const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
-      if (!ok) {
-        capture(code);
-        setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(code) });
-        setLoading(false);
+
+      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
+
+      if (!res.ok) {
+        capture(res.code);
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code });
+        resetState();
         return;
       }
+
+      const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
+      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
+
+      if (!ok) {
+        capture(code);
+        setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: code });
+        resetState();
+        return;
+      }
+
       plausibleEvent("Phase0/CTA demande correction - Corriger ID");
       dispatch(setYoung(responseData));
       history.push("/");
     } catch (e) {
       capture(e);
-      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(e) });
-      setLoading(false);
+      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données." });
+      resetState();
     }
   }
 
@@ -152,7 +161,7 @@ export default function StepUpload() {
             {e.message && ` : ${e.message}`}
           </ErrorMessage>
         ))}
-      <div className="w-full my-16 flex justify-around">
+      <div className="my-16 flex w-full justify-around">
         <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
         {ID[category].imgBack && <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />}
       </div>
@@ -165,7 +174,6 @@ export default function StepUpload() {
       <p className="my-4">
         Ajouter <strong>le recto</strong>
       </p>
-      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       <div className="text-gray-500 text-sm my-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Trois fichiers maximum.</div>
       <input
         type="file"
@@ -180,7 +188,7 @@ export default function StepUpload() {
         }}
         className="hidden"
       />
-      <div className="flex w-full my-4">
+      <div className="my-4 flex w-full">
         <div>
           <label htmlFor="file-upload-recto" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
             Parcourir...
@@ -194,7 +202,7 @@ export default function StepUpload() {
               </p>
             ))
           ) : (
-            <div className="text-gray-800 text-sm">Aucun fichier sélectionné.</div>
+            <div className="text-sm text-gray-800">Aucun fichier sélectionné.</div>
           )}
         </div>
       </div>
@@ -206,7 +214,6 @@ export default function StepUpload() {
           <p className="my-4">
             Ajouter <strong>le verso</strong>
           </p>
-          {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
           <div className="text-gray-500 text-sm my-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Trois fichiers maximum.</div>
           <input
             type="file"
@@ -249,14 +256,16 @@ export default function StepUpload() {
         </a>
         .
       </div>
+
       {error?.text && young?.files?.cniFiles?.length + files?.length > 2 && <MyDocs />}
+
       {(files || date) && (
         <>
-          <hr className="my-8 h-px bg-gray-200 border-0" />
-          <div className="w-full flex">
+          <hr className="my-8 h-px border-0 bg-gray-200" />
+          <div className="my-4 flex w-full">
             <div className="w-1/2">
               <div className="text-xl font-medium">Renseignez la date d’expiration</div>
-              <div className="text-gray-600 leading-loose mt-2 mb-8">
+              <div className="mt-2 mb-8 leading-loose text-gray-600">
                 Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
                 ).
               </div>
@@ -268,7 +277,7 @@ export default function StepUpload() {
                     {e.message && ` : ${e.message}`}
                   </ErrorMessage>
                 ))}
-              <p className="text-gray-800 mt-4">Date d&apos;expiration</p>
+              <p className="mt-4 text-gray-800">Date d&apos;expiration</p>
               <DatePickerList
                 value={date}
                 onChange={(date) => {
@@ -278,11 +287,13 @@ export default function StepUpload() {
               />
             </div>
             <div className="w-1/2">
-              <img className="h-32 mx-auto" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
+              <img className="mx-auto h-32" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
             </div>
           </div>
         </>
       )}
+
+      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
     </DesktopPageContainer>
   );
 }

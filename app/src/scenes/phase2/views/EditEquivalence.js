@@ -176,53 +176,53 @@ export default function EditEquivalence() {
   if (data?._id && !["WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(data?.status)) history.push("/phase2");
 
   return (
-    <div className="flex justify-center align-center my-4 ">
-      <div className="lg:w-1/2 p-4">
-        <div className="text-2xl md:text-4xl text-center font-extrabold leading-10 tracking-tight ">
+    <div className="align-center my-4 flex justify-center ">
+      <div className="p-4 lg:w-1/2">
+        <div className="text-center text-2xl font-extrabold leading-10 tracking-tight md:text-4xl ">
           {mode === "create" ? "Je demande la reconnaissance d'un engagement déjà réalisé" : "Je modifie ma demande d'équivalence"}
         </div>
-        <div className="border-[1px] border-blue-400 rounded-lg bg-blue-50 mt-4">
+        <div className="mt-4 rounded-lg border-[1px] border-blue-400 bg-blue-50">
           <div className="flex items-center px-4 py-3">
             <InformationCircle className="text-blue-400" />
-            <div className="flex-1 ml-4 text-blue-800 text-sm leading-5 font-medium">Pour être reconnu et validé, votre engagement doit être terminé.</div>
+            <div className="ml-4 flex-1 text-sm font-medium leading-5 text-blue-800">Pour être reconnu et validé, votre engagement doit être terminé.</div>
           </div>
         </div>
         {data?.status === "WAITING_CORRECTION" ? (
-          <div className="border-[1px] border-gray-200 rounded-lg bg-white mt-4">
-            <div className="flex flex-col px-3 py-2 gap-2">
-              <div className="text-neutral-900 text-base leading-5 font-medium">Corrections demandées</div>
-              <div className="text-gray-500 text-sm leading-5 font-medium">{data?.message}</div>
+          <div className="mt-4 rounded-lg border-[1px] border-gray-200 bg-white">
+            <div className="flex flex-col gap-2 px-3 py-2">
+              <div className="text-base font-medium leading-5 text-neutral-900">Corrections demandées</div>
+              <div className="text-sm font-medium leading-5 text-gray-500">{data?.message}</div>
             </div>
           </div>
         ) : null}
 
         {error ? (
-          <div className="border-[1px] border-red-400 rounded-lg bg-red-50 mt-4">
+          <div className="mt-4 rounded-lg border-[1px] border-red-400 bg-red-50">
             <div className="flex items-center px-4 py-3">
               <InformationCircle className="text-red-400" />
-              <div className="flex-1 ml-4 text-red-800 text-xs leading-5 font-medium">Vous devez remplir tous les champs du formulaire pour pouvoir le soumettre</div>
+              <div className="ml-4 flex-1 text-xs font-medium leading-5 text-red-800">Vous devez remplir tous les champs du formulaire pour pouvoir le soumettre</div>
             </div>
           </div>
         ) : null}
-        <div className="rounded-lg bg-white mt-4 p-6">
-          <div className="text-lg leading-7 font-bold">Informations générales</div>
-          <div className="text-sm leading-5 font-normal text-gray-500 mt-2">Veuillez compléter le formulaire ci-dessous.</div>
-          <div className="mt-6 text-xs leading-4 font-medium">Quoi ?</div>
-          <div className="border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
-            {data?.type ? <div className="text-xs leading-4 font-normal text-gray-500">Type d&apos;engagement</div> : null}
+        <div className="mt-4 rounded-lg bg-white p-6">
+          <div className="text-lg font-bold leading-7">Informations générales</div>
+          <div className="mt-2 text-sm font-normal leading-5 text-gray-500">Veuillez compléter le formulaire ci-dessous.</div>
+          <div className="mt-6 text-xs font-medium leading-4">Quoi ?</div>
+          <div className="mt-3 w-full rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
+            {data?.type ? <div className="text-xs font-normal leading-4 text-gray-500">Type d&apos;engagement</div> : null}
             <div className="relative" ref={refType}>
-              <button className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full" onClick={() => setOpenType((e) => !e)}>
+              <button className="flex w-full cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50" onClick={() => setOpenType((e) => !e)}>
                 <div className="flex items-center gap-2">
                   {data?.type ? (
-                    <span className="text-sm leading-5 font-normal">{data?.type}</span>
+                    <span className="text-sm font-normal leading-5">{data?.type}</span>
                   ) : (
-                    <span className="text-gray-400 text-sm leading-5 font-normal">Type d’engagement</span>
+                    <span className="text-sm font-normal leading-5 text-gray-400">Type d’engagement</span>
                   )}
                 </div>
                 <ChevronDown className="text-gray-400" />
               </button>
               {/* display options */}
-              <div className={`${openType ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
+              <div className={`${openType ? "block" : "hidden"}  absolute left-0 top-[30px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
                 {ENGAGEMENT_TYPES.map((option) => (
                   <div
                     key={option}
@@ -230,8 +230,8 @@ export default function EditEquivalence() {
                       setData({ ...data, type: option, sousType: "" });
                       setOpenType(false);
                     }}
-                    className={`${option === data?.type && "font-bold bg-gray"}`}>
-                    <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                    className={`${option === data?.type && "bg-gray font-bold"}`}>
+                    <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
                       <div>{option}</div>
                       {option === data?.type ? <BsCheck2 /> : null}
                     </div>
@@ -239,24 +239,24 @@ export default function EditEquivalence() {
                 ))}
               </div>
             </div>
-            {error?.type ? <div className="text-xs leading-4 font-normal text-red-500">{error.type}</div> : null}
+            {error?.type ? <div className="text-xs font-normal leading-4 text-red-500">{error.type}</div> : null}
           </div>
           {data?.type === "Certification Union Nationale du Sport scolaire (UNSS)" ? (
-            <div className="border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
-              {data?.sousType ? <div className="text-xs leading-4 font-normal text-gray-500">Catégorie</div> : null}
+            <div className="mt-3 w-full rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
+              {data?.sousType ? <div className="text-xs font-normal leading-4 text-gray-500">Catégorie</div> : null}
               <div className="relative" ref={refSousType}>
-                <button className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full" onClick={() => setOpenSousType((e) => !e)}>
+                <button className="flex w-full cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50" onClick={() => setOpenSousType((e) => !e)}>
                   <div className="flex items-center gap-2">
                     {data?.sousType ? (
-                      <span className="text-sm leading-5 font-normal">{data?.sousType}</span>
+                      <span className="text-sm font-normal leading-5">{data?.sousType}</span>
                     ) : (
-                      <span className="text-gray-400 text-sm leading-5 font-normal">Catégorie</span>
+                      <span className="text-sm font-normal leading-5 text-gray-400">Catégorie</span>
                     )}
                   </div>
                   <ChevronDown className="text-gray-400" />
                 </button>
                 {/* display options */}
-                <div className={`${openSousType ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
+                <div className={`${openSousType ? "block" : "hidden"}  absolute left-0 top-[30px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
                   {UNSS_TYPE.map((option) => (
                     <div
                       key={option}
@@ -264,8 +264,8 @@ export default function EditEquivalence() {
                         setData({ ...data, sousType: option });
                         setOpenSousType(false);
                       }}
-                      className={`${option === data?.sousType && "font-bold bg-gray"}`}>
-                      <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                      className={`${option === data?.sousType && "bg-gray font-bold"}`}>
+                      <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
                         <div>{option}</div>
                         {option === data?.sousType ? <BsCheck2 /> : null}
                       </div>
@@ -273,26 +273,26 @@ export default function EditEquivalence() {
                   ))}
                 </div>
               </div>
-              {error?.sousType ? <div className="text-xs leading-4 font-normal text-red-500">{error.sousType}</div> : null}
+              {error?.sousType ? <div className="text-xs font-normal leading-4 text-red-500">{error.sousType}</div> : null}
             </div>
           ) : null}
 
           {data?.type === "Engagements lycéens" && (
-            <div className="border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
-              {data?.sousType && <div className="text-xs leading-4 font-normal text-gray-500">Catégorie</div>}
+            <div className="mt-3 w-full rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
+              {data?.sousType && <div className="text-xs font-normal leading-4 text-gray-500">Catégorie</div>}
               <div className="relative" ref={refSousType}>
-                <button className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full" onClick={() => setOpenSousType((e) => !e)}>
+                <button className="flex w-full cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50" onClick={() => setOpenSousType((e) => !e)}>
                   <div className="flex items-center gap-2">
                     {data?.sousType ? (
-                      <span className="text-sm leading-5 font-normal">{data?.sousType}</span>
+                      <span className="text-sm font-normal leading-5">{data?.sousType}</span>
                     ) : (
-                      <span className="text-gray-400 text-sm leading-5 font-normal">Catégorie</span>
+                      <span className="text-sm font-normal leading-5 text-gray-400">Catégorie</span>
                     )}
                   </div>
                   <ChevronDown className="text-gray-400" />
                 </button>
                 {/* display options */}
-                <div className={`${openSousType ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
+                <div className={`${openSousType ? "block" : "hidden"}  absolute left-0 top-[30px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
                   {ENGAGEMENT_LYCEEN_TYPES.map((option) => (
                     <div
                       key={option}
@@ -300,8 +300,8 @@ export default function EditEquivalence() {
                         setData({ ...data, sousType: option });
                         setOpenSousType(false);
                       }}
-                      className={`${option === data?.sousType && "font-bold bg-gray"}`}>
-                      <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                      className={`${option === data?.sousType && "bg-gray font-bold"}`}>
+                      <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
                         <div>{option}</div>
                         {option === data?.sousType && <BsCheck2 />}
                       </div>
@@ -309,25 +309,25 @@ export default function EditEquivalence() {
                   ))}
                 </div>
               </div>
-              {error?.sousType && <div className="text-xs leading-4 font-normal text-red-500">{error.sousType}</div>}
+              {error?.sousType && <div className="text-xs font-normal leading-4 text-red-500">{error.sousType}</div>}
             </div>
           )}
 
-          <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-            {data?.structureName ? <div className="text-xs leading-4 font-normal text-gray-500">Nom de la structure</div> : null}
+          <div className="mt-3 w-full rounded-lg border-[1px] border-gray-300 px-3 py-2">
+            {data?.structureName ? <div className="text-xs font-normal leading-4 text-gray-500">Nom de la structure</div> : null}
             <input
-              className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
+              className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
               placeholder="Nom de la structure d’accueil"
               type="text"
               value={data?.structureName}
               onChange={(e) => setData({ ...data, structureName: e.target.value })}
             />
           </div>
-          <div className="mt-4 text-xs leading-4 font-medium">Où ?</div>
-          <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-            {data?.address ? <div className="text-xs leading-4 font-normal text-gray-500">Adresse du lieu</div> : null}
+          <div className="mt-4 text-xs font-medium leading-4">Où ?</div>
+          <div className="mt-3 w-full rounded-lg border-[1px] border-gray-300 px-3 py-2">
+            {data?.address ? <div className="text-xs font-normal leading-4 text-gray-500">Adresse du lieu</div> : null}
             <input
-              className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
+              className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
               placeholder="Adresse du lieu"
               type="text"
               value={data?.address}
@@ -335,20 +335,20 @@ export default function EditEquivalence() {
             />
           </div>
           <div className="flex items-stretch gap-2">
-            <div className="flex flex-col justify-center border-[1px] border-gray-300 w-2/3 px-3 py-2 rounded-lg mt-3">
-              {data?.zip ? <div className="text-xs leading-4 font-normal text-gray-500">Code postal</div> : null}
+            <div className="mt-3 flex w-2/3 flex-col justify-center rounded-lg border-[1px] border-gray-300 px-3 py-2">
+              {data?.zip ? <div className="text-xs font-normal leading-4 text-gray-500">Code postal</div> : null}
               <input
-                className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
+                className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
                 placeholder="Code postal"
                 type="text"
                 value={data?.zip}
                 onChange={(e) => setData({ ...data, zip: e.target.value })}
               />
             </div>
-            <div className="flex flex-col justify-center border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-              {data?.city ? <div className="text-xs leading-4 font-normal text-gray-500">Ville</div> : null}
+            <div className="mt-3 flex w-full flex-col justify-center rounded-lg border-[1px] border-gray-300 px-3 py-2">
+              {data?.city ? <div className="text-xs font-normal leading-4 text-gray-500">Ville</div> : null}
               <input
-                className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
+                className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
                 placeholder="Ville"
                 type="text"
                 value={data?.city}
@@ -356,12 +356,12 @@ export default function EditEquivalence() {
               />
             </div>
           </div>
-          <div className="mt-4 text-xs leading-4 font-medium">Quand ?</div>
-          <div className="flex gap-2 items-stretch align-middle">
-            <div className="flex justify-center flex-col border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-              {data?.startDate ? <div className="text-xs leading-4 font-normal text-gray-500">Date de début</div> : null}
+          <div className="mt-4 text-xs font-medium leading-4">Quand ?</div>
+          <div className="flex items-stretch gap-2 align-middle">
+            <div className="mt-3 flex w-full flex-col justify-center rounded-lg border-[1px] border-gray-300 px-3 py-2">
+              {data?.startDate ? <div className="text-xs font-normal leading-4 text-gray-500">Date de début</div> : null}
               <input
-                className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
+                className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
                 placeholder="Date de début"
                 type="date"
                 max={formatDate(new Date())}
@@ -369,10 +369,10 @@ export default function EditEquivalence() {
                 onChange={(e) => setData({ ...data, startDate: e.target.value })}
               />
             </div>
-            <div className="flex justify-center flex-col border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-              {data?.endDate ? <div className="text-xs leading-4 font-normal text-gray-500">Date de fin</div> : null}
+            <div className="mt-3 flex w-full flex-col justify-center rounded-lg border-[1px] border-gray-300 px-3 py-2">
+              {data?.endDate ? <div className="text-xs font-normal leading-4 text-gray-500">Date de fin</div> : null}
               <input
-                className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
+                className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
                 placeholder="Date de fin"
                 min={formatDate(data?.startDate)}
                 max={formatDate(new Date())}
@@ -384,33 +384,33 @@ export default function EditEquivalence() {
           </div>
           {frequence ? (
             <>
-              <div className="flex items-stretch gap-2 mt-2 flex-wrap md:!flex-nowrap">
+              <div className="mt-2 flex flex-wrap items-stretch gap-2 md:!flex-nowrap">
                 <div className="flex flex-1 gap-2 md:flex-none">
-                  <div className="flex flex-col justify-center border-[1px] border-gray-300 px-3 py-2 rounded-lg mt-3 w-1/2">
-                    {data?.frequency?.nombre ? <div className="text-xs leading-4 font-normal text-gray-500">Nombre</div> : null}
+                  <div className="mt-3 flex w-1/2 flex-col justify-center rounded-lg border-[1px] border-gray-300 px-3 py-2">
+                    {data?.frequency?.nombre ? <div className="text-xs font-normal leading-4 text-gray-500">Nombre</div> : null}
                     <input
-                      className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
+                      className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
                       placeholder="Nombre"
                       type="text"
                       value={data?.frequency?.nombre}
                       onChange={(e) => setData({ ...data, frequency: { ...data.frequency, nombre: e.target.value } })}
                     />
                   </div>
-                  <div className="flex flex-col justify-center border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
-                    {data?.frequency?.duree ? <div className="text-xs leading-4 font-normal text-gray-500">Durée</div> : null}
+                  <div className="mt-3 flex w-full flex-col justify-center rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
+                    {data?.frequency?.duree ? <div className="text-xs font-normal leading-4 text-gray-500">Durée</div> : null}
                     <div className="relative" ref={refDuree}>
-                      <button className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full" onClick={() => setOpenDuree((e) => !e)}>
+                      <button className="flex w-full cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50" onClick={() => setOpenDuree((e) => !e)}>
                         <div className="flex items-center gap-2">
                           {data?.frequency?.duree ? (
-                            <span className="text-sm leading-5 font-normal">{data?.frequency?.duree}</span>
+                            <span className="text-sm font-normal leading-5">{data?.frequency?.duree}</span>
                           ) : (
-                            <span className="text-gray-400 text-sm leading-5 font-normal">Durée</span>
+                            <span className="text-sm font-normal leading-5 text-gray-400">Durée</span>
                           )}
                         </div>
                         <ChevronDown className="text-gray-400" />
                       </button>
                       {/* display options */}
-                      <div className={`${openDuree ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
+                      <div className={`${openDuree ? "block" : "hidden"}  absolute left-0 top-[30px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
                         {optionsDuree.map((option) => (
                           <div
                             key={option}
@@ -418,8 +418,8 @@ export default function EditEquivalence() {
                               setData({ ...data, frequency: { ...data.frequency, duree: option } });
                               setOpenDuree(false);
                             }}
-                            className={`${option === data.frequency?.duree && "font-bold bg-gray"}`}>
-                            <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                            className={`${option === data.frequency?.duree && "bg-gray font-bold"}`}>
+                            <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
                               <div>{option}</div>
                               {option === data?.frequency?.duree ? <BsCheck2 /> : null}
                             </div>
@@ -429,23 +429,23 @@ export default function EditEquivalence() {
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col justify-center border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
-                  {data?.frequency?.frequence ? <div className="text-xs leading-4 font-normal text-gray-500">Fréquence</div> : null}
+                <div className="mt-3 flex w-full flex-col justify-center rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
+                  {data?.frequency?.frequence ? <div className="text-xs font-normal leading-4 text-gray-500">Fréquence</div> : null}
                   <div className="relative" ref={refFrequence}>
                     <button
-                      className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full"
+                      className="flex w-full cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50"
                       onClick={() => setOpenFrequence((e) => !e)}>
                       <div className="flex items-center gap-2">
                         {data?.frequency?.frequence ? (
-                          <span className="text-sm leading-5 font-normal">{data?.frequency?.frequence}</span>
+                          <span className="text-sm font-normal leading-5">{data?.frequency?.frequence}</span>
                         ) : (
-                          <span className="text-gray-400 text-sm leading-5 font-normal">Fréquence</span>
+                          <span className="text-sm font-normal leading-5 text-gray-400">Fréquence</span>
                         )}
                       </div>
                       <ChevronDown className="text-gray-400" />
                     </button>
                     {/* display options */}
-                    <div className={`${openFrequence ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
+                    <div className={`${openFrequence ? "block" : "hidden"}  absolute left-0 top-[30px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
                       {optionsFrequence.map((option) => (
                         <div
                           key={option}
@@ -453,8 +453,8 @@ export default function EditEquivalence() {
                             setData({ ...data, frequency: { ...data.frequency, frequence: option } });
                             setOpenFrequence(false);
                           }}
-                          className={`${option === data?.frequency?.frequence && "font-bold bg-gray"}`}>
-                          <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                          className={`${option === data?.frequency?.frequence && "bg-gray font-bold"}`}>
+                          <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
                             <div>{option}</div>
                             {option === data?.frequency?.frequence ? <BsCheck2 /> : null}
                           </div>
@@ -465,7 +465,7 @@ export default function EditEquivalence() {
                 </div>
               </div>
               <div
-                className="text-sm leading-5 font-normal text-indigo-600 mt-3 hover:underline text-center"
+                className="mt-3 text-center text-sm font-normal leading-5 text-indigo-600 hover:underline"
                 onClick={() => {
                   setFrequence(false);
                   setData({ ...data, frequency: undefined });
@@ -475,61 +475,61 @@ export default function EditEquivalence() {
             </>
           ) : (
             <>
-              <div className="group flex items-center justify-center rounded-lg mt-4 bg-blue-50 py-3 cursor-pointer" onClick={() => setFrequence(true)}>
-                <AiOutlinePlus className="text-indigo-400 mr-2 h-5 w-5 group-hover:scale-110" />
-                <div className="text-sm leading-5 font-medium text-blue-700 group-hover:underline">Ajouter la fréquence (facultatif)</div>
+              <div className="group mt-4 flex cursor-pointer items-center justify-center rounded-lg bg-blue-50 py-3" onClick={() => setFrequence(true)}>
+                <AiOutlinePlus className="mr-2 h-5 w-5 text-indigo-400 group-hover:scale-110" />
+                <div className="text-sm font-medium leading-5 text-blue-700 group-hover:underline">Ajouter la fréquence (facultatif)</div>
               </div>
             </>
           )}
         </div>
-        <div className="rounded-lg bg-white mt-4 p-6">
-          <div className="text-lg leading-7 font-bold">Personne contact au sein de la structure d’accueil</div>
-          <div className="text-sm leading-5 font-normal text-gray-500 mt-2">
+        <div className="mt-4 rounded-lg bg-white p-6">
+          <div className="text-lg font-bold leading-7">Personne contact au sein de la structure d’accueil</div>
+          <div className="mt-2 text-sm font-normal leading-5 text-gray-500">
             Cette personne doit vous connaître et pourra être contactée par l’administration sur votre dossier.
           </div>
-          <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-            {data?.contactFullName ? <div className="text-xs leading-4 font-normal text-gray-500">Prénom et Nom</div> : null}
+          <div className="mt-3 w-full rounded-lg border-[1px] border-gray-300 px-3 py-2">
+            {data?.contactFullName ? <div className="text-xs font-normal leading-4 text-gray-500">Prénom et Nom</div> : null}
             <input
-              className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
+              className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
               placeholder="Prénom et Nom"
               type="text"
               value={data?.contactFullName}
               onChange={(e) => setData({ ...data, contactFullName: e.target.value })}
             />
           </div>
-          <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-            {data?.contactEmail ? <div className="text-xs leading-4 font-normal text-gray-500">Adresse email</div> : null}
+          <div className="mt-3 w-full rounded-lg border-[1px] border-gray-300 px-3 py-2">
+            {data?.contactEmail ? <div className="text-xs font-normal leading-4 text-gray-500">Adresse email</div> : null}
             <input
-              className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
+              className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
               placeholder="Adresse email"
               type="text"
               value={data?.contactEmail}
               onChange={(e) => setData({ ...data, contactEmail: e.target.value })}
             />
           </div>
-          {errorMail ? <div className="text-sm leading-5 font-normal text-red-500 mt-2 text-center">L&apos;adresse email n&apos;est pas valide.</div> : null}
+          {errorMail ? <div className="mt-2 text-center text-sm font-normal leading-5 text-red-500">L&apos;adresse email n&apos;est pas valide.</div> : null}
         </div>
-        <div className="rounded-lg bg-white mt-4 p-6">
-          <div className="text-lg leading-7 font-bold">Document justificatif d’engagement</div>
+        <div className="mt-4 rounded-lg bg-white p-6">
+          <div className="text-lg font-bold leading-7">Document justificatif d’engagement</div>
 
           {data?.sousType === "Elu au sein du conseil des délégués pour la vie lycéenne (CVL)" && (
-            <p className="text-sm leading-5 font-normal text-gray-500 mt-2">
+            <p className="mt-2 text-sm font-normal leading-5 text-gray-500">
               Téléverser une attestation individuelle de la réalisation d&apos;un mandat d&apos;un an signée par le chef d&apos;établissement ou le référent vie lycéenne.
             </p>
           )}
           {data?.sousType === "Elu au sein du conseil académique de la vie lycéenne (CAVL)" && (
-            <p className="text-sm leading-5 font-normal text-gray-500 mt-2">
+            <p className="mt-2 text-sm font-normal leading-5 text-gray-500">
               Téléverser une attestation individuelle de la réalisation d&apos;un mandat d&apos;un an signée par le recteur ou le délégué académique à la vie lycéenne et
               collégienne.
             </p>
           )}
           {data?.sousType === "Elu au sein des conseils régionaux des jeunes" && (
-            <p className="text-sm leading-5 font-normal text-gray-500 mt-2">
+            <p className="mt-2 text-sm font-normal leading-5 text-gray-500">
               Téléverser une attestation individuelle de la réalisation d&apos;un mandat d&apos;un an signée par le président du conseil régional ou son représentant.
             </p>
           )}
           {data?.type === "Préparation militaire hors offre MIG des armées" && (
-            <p className="text-sm leading-5 font-normal text-gray-500 mt-2">Téléverser l&apos;attestation de réalisation de la préparation militaire</p>
+            <p className="mt-2 text-sm font-normal leading-5 text-gray-500">Téléverser l&apos;attestation de réalisation de la préparation militaire</p>
           )}
 
           {/* <div className="flex flex-col items-center bg-gray-50 mt-4 py-10 rounded-lg mb-3">
@@ -540,38 +540,38 @@ export default function EditEquivalence() {
           </div> */}
           {data?.files?.length
             ? data.files.map((file, index) => (
-                <div key={index} className="flex flex-row justify-between items-center border-[1px] border-gray-300 w-full rounded-lg py-2 px-3 mt-1">
+                <div key={index} className="mt-1 flex w-full flex-row items-center justify-between rounded-lg border-[1px] border-gray-300 py-2 px-3">
                   <div className="flex flex-row items-center">
-                    <PaperClip className="text-gray-400 mr-2" />
-                    <div className="text-sm leading-5 font-normal text-gray-800">{file}</div>
+                    <PaperClip className="mr-2 text-gray-400" />
+                    <div className="text-sm font-normal leading-5 text-gray-800">{file}</div>
                   </div>
                   <div
-                    className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer"
+                    className="cursor-pointer text-sm font-normal leading-5 text-gray-800 hover:underline"
                     onClick={() => setData({ ...data, files: data?.files.filter((f) => file !== f) })}>
                     Retirer
                   </div>
                 </div>
               ))
             : null}
-          <div className="flex flex-col items-center border-[1px] border-dashed border-gray-300 w-full rounded-lg py-4 mt-3">
+          <div className="mt-3 flex w-full flex-col items-center rounded-lg border-[1px] border-dashed border-gray-300 py-4">
             <AddImage className="text-gray-400" />
-            <div className="text-sm leading-5 font-medium text-blue-600 hover:underline mt-2 cursor-pointer" onClick={handleClickUpload}>
+            <div className="mt-2 cursor-pointer text-sm font-medium leading-5 text-blue-600 hover:underline" onClick={handleClickUpload}>
               Téléversez le formulaire
             </div>
             <input type="file" ref={hiddenFileInput} onChange={handleUpload} className="hidden" accept=".jpg, .jpeg, .png, .pdf" multiple />
-            <div className="text-xs leading-4 font-normal text-gray-500 mt-1">PDF, PNG, JPG jusqu’à 5Mo</div>
+            <div className="mt-1 text-xs font-normal leading-4 text-gray-500">PDF, PNG, JPG jusqu’à 5Mo</div>
           </div>
         </div>
         {error ? (
-          <div className="border-[1px] border-red-400 rounded-lg bg-red-50 mt-4">
+          <div className="mt-4 rounded-lg border-[1px] border-red-400 bg-red-50">
             <div className="flex items-center px-4 py-3">
               <InformationCircle className="text-red-400" />
-              <div className="flex-1 ml-4 text-red-800 text-xs leading-5 font-medium">Vous devez remplir tous les champs du formulaire pour pouvoir le soumettre</div>
+              <div className="ml-4 flex-1 text-xs font-medium leading-5 text-red-800">Vous devez remplir tous les champs du formulaire pour pouvoir le soumettre</div>
             </div>
           </div>
         ) : null}
         <button
-          className="rounded-lg w-full py-2 mt-4 text-sm leading-5 font-medium bg-blue-600 text-white border-[1px] border-blue-600 hover:bg-white hover:!text-blue-600 disabled:bg-blue-300 disabled:!text-white disabled:border-blue-300"
+          className="mt-4 w-full rounded-lg border-[1px] border-blue-600 bg-blue-600 py-2 text-sm font-medium leading-5 text-white hover:bg-white hover:!text-blue-600 disabled:border-blue-300 disabled:bg-blue-300 disabled:!text-white"
           disabled={loading || uploading}
           onClick={() => handleSubmit()}>
           {loading ? "Chargement" : mode === "edit" ? "Modifier ma demande" : "Soumettre ma demande"}

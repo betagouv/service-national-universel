@@ -826,7 +826,7 @@ export default function Contract({ young }) {
       )}
       {contract ? (
         <div className="mt-4">
-          <h3 className="text-sm my-2 mx-4 uppercase italic text-snu-purple-600">Historique des modifications du contrat d&apos;engagement</h3>
+          <h3 className="my-2 mx-4 text-sm uppercase italic text-snu-purple-600">Historique des modifications du contrat d&apos;engagement</h3>
           <HistoricComponent model="contract" value={contract} />
         </div>
       ) : null}

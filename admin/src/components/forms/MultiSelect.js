@@ -20,14 +20,14 @@ export default function MultiSelect({ options, selected, setSelected, label, rea
       {({ open }) => (
         <div className="relative">
           <Listbox.Button className="relative w-full text-left">
-            <div className={` ${readOnly ? "cursor-default" : "cursor-pointer"} ${border(open)} bg-white py-2 px-2.5 items-center space-y-0 gap-0 flex rounded-lg border-[1px]`}>
+            <div className={` ${readOnly ? "cursor-default" : "cursor-pointer"} ${border(open)} flex items-center gap-0 space-y-0 rounded-lg border-[1px] bg-white py-2 px-2.5`}>
               {icon && icon}
-              <div className="w-full flex items-center justify-between">
+              <div className="flex w-full items-center justify-between">
                 <div className="flex-1 overflow-hidden">
                   <p className="text-xs text-gray-500">{label}</p>
-                  <div className="flex items-center justify-between w-full overflow-hidden gap-2 h-5">
+                  <div className="flex h-5 w-full items-center justify-between gap-2 overflow-hidden">
                     {selected.map((e) => (
-                      <span key={e.label} className="block w-max-48 truncate">
+                      <span key={e.label} className="w-max-48 block truncate">
                         {e.label}
                       </span>
                     ))}
@@ -44,11 +44,11 @@ export default function MultiSelect({ options, selected, setSelected, label, rea
           </Listbox.Button>
 
           <Transition show={!readOnly && open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <Listbox.Options className="max-h-60 absolute z-10 mt-1 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
               {options.map((option) => (
                 <Listbox.Option
                   key={option.value}
-                  className={({ active }) => classNames(active ? "text-white bg-blue-600" : "text-gray-900", "relative cursor-default select-none py-2 pl-3 pr-9 list-none")}
+                  className={({ active }) => classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-default select-none list-none py-2 pl-3 pr-9")}
                   value={option}>
                   {({ selected, active }) => (
                     <>

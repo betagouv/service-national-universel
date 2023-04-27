@@ -64,12 +64,12 @@ export default function ModalChangeStatus({ isOpen, onCancel, status, equivalenc
     <ModalForm isOpen={isOpen} onCancel={onCancel} showCloseIcon={false}>
       <form className="w-full" onSubmit={handleSubmit}>
         <div className="mx-6">
-          <div className="flex items-center justify-center text-gray-900 text-xl text-center mb-3">{getTitle()}</div>
-          <div className="flex items-center justify-center text-gray-500 text-sm font-normal text-center mb-3">{getMessage()}</div>
+          <div className="mb-3 flex items-center justify-center text-center text-xl text-gray-900">{getTitle()}</div>
+          <div className="mb-3 flex items-center justify-center text-center text-sm font-normal text-gray-500">{getMessage()}</div>
         </div>
         {["WAITING_CORRECTION", "REFUSED"].includes(status) ? (
-          <div className="flex mx-6 mt-4">
-            <div className={`w-full border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+          <div className="mx-6 mt-4 flex">
+            <div className={`w-full rounded-lg border-[1px]  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
               <textarea
                 placeholder={getPlaceholder()}
                 className="w-full bg-inherit disabled:cursor-not-allowed"
@@ -81,22 +81,22 @@ export default function ModalChangeStatus({ isOpen, onCancel, status, equivalenc
             </div>
           </div>
         ) : null}
-        <div className="flex p-4 gap-2">
+        <div className="flex gap-2 p-4">
           <button
-            className="flex items-center justify-center flex-1 border-[1px] border-gray-300 text-gray-700 rounded-lg py-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+            className="flex flex-1 cursor-pointer items-center justify-center rounded-lg border-[1px] border-gray-300 py-2 text-gray-700 disabled:cursor-wait disabled:opacity-50"
             disabled={isLoading}
             onClick={onClickCancel}>
             Annuler
           </button>
           {message || status === "VALIDATED" ? (
             <button
-              className="flex items-center justify-center flex-1 bg-snu-purple-300 text-white rounded-lg py-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+              className="flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-snu-purple-300 py-2 text-white disabled:cursor-wait disabled:opacity-50"
               disabled={isLoading}
               type="submit">
               Envoyer
             </button>
           ) : (
-            <div className="flex items-center justify-center flex-1 bg-snu-purple-300 text-white rounded-lg py-2 opacity-50 cursor-not-allowed">Envoyer</div>
+            <div className="flex flex-1 cursor-not-allowed items-center justify-center rounded-lg bg-snu-purple-300 py-2 text-white opacity-50">Envoyer</div>
           )}
         </div>
       </form>

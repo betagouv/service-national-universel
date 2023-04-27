@@ -3,9 +3,9 @@ import FullDoughnut from "../../../../components/graphs/FullDoughnut";
 
 export default function MoreInfo({ typology, domains }) {
   return (
-    <div className="flex flex-col gap-10 bg-white rounded-lg shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] px-6 pt-8 pb-16 w-[40%] ">
-      <p className="text-base text-left leading-5 font-bold text-gray-900">Plus d’infos...</p>
-      <div className="flex flex-col gap-10 items-center">
+    <div className="flex w-[40%] flex-col gap-10 rounded-lg bg-white px-6 pt-8 pb-16 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ">
+      <p className="text-left text-base font-bold leading-5 text-gray-900">Plus d’infos...</p>
+      <div className="flex flex-col items-center gap-10">
         <FullDoughnut
           title="Typologie"
           legendSide="right"

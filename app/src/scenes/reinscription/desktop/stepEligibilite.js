@@ -182,17 +182,17 @@ export default function StepEligibilite() {
   return (
     <>
       <Navbar />
-      <div className="bg-[#f9f6f2] flex justify-center py-10">
-        <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] drop-shadow-md">
-          <div className="w-full flex justify-between items-center">
+      <div className="flex justify-center bg-[#f9f6f2] py-10">
+        <div className="mx-auto my-0 basis-[70%] bg-white px-[102px] py-[60px] drop-shadow-md">
+          <div className="flex w-full items-center justify-between">
             <h1 className="text-xl text-[#161616]">Vérifiez votre éligibilité au SNU</h1>
             <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
               <QuestionMarkBlueCircle />
             </a>
           </div>
-          <hr className="my-8 h-px bg-gray-200 border-0" />
+          <hr className="my-8 h-px border-0 bg-gray-200" />
           <div className="flex flex-col gap-5">
-            <div className="flex flex-col flex-start">
+            <div className="flex-start flex flex-col">
               <div className="flex items-center">
                 <CheckBox disabled={true} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
                 <div className="flex items-center">
@@ -200,10 +200,10 @@ export default function StepEligibilite() {
                   <IconFrance />
                 </div>
               </div>
-              {error.frenchNationality ? <span className="text-red-500 text-sm">{error.frenchNationality}</span> : null}
+              {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
             </div>
             <div className="flex w-full space-x-4">
-              <div className="flex flex-col w-1/2">
+              <div className="flex w-1/2 flex-col">
                 <SearchableSelect
                   label="Niveau de scolarité"
                   value={data.scolarity}
@@ -213,28 +213,28 @@ export default function StepEligibilite() {
                   }}
                   placeholder="Sélectionnez une option"
                 />
-                {error.scolarity ? <span className="text-red-500 text-sm">{error.scolarity}</span> : null}
+                {error.scolarity ? <span className="text-sm text-red-500">{error.scolarity}</span> : null}
               </div>
-              <label className="flex flex-col flex-start text-base w-1/2 mt-2 text-[#929292]">
+              <label className="flex-start mt-2 flex w-1/2 flex-col text-base text-[#929292]">
                 Date de naissance
                 <DatePickerList disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
-                {error.birthDate ? <span className="text-red-500 text-sm">{error.birthDate}</span> : null}
+                {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
               </label>
             </div>
             {data.scolarity && (
               <>
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                   <p>
                     <div>
                       <span className="font-bold">{data.scolarity === "NOT_SCOLARISE" ? "Je réside" : "Mon établissement scolaire est"}</span> en France
                     </div>
-                    <div className="h-5 flex items-center">
+                    <div className="flex h-5 items-center">
                       <span className="text-xs leading-5 text-[#666666]">Métropolitaine ou Outre-mer</span>
                     </div>
                   </p>
 
                   <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad, zip: data.isAbroad ? null : data.zip })} toggled={!data.isAbroad} />
-                  {error.isAbroad ? <span className="text-red-500 text-sm">{error.isAbroad}</span> : null}
+                  {error.isAbroad ? <span className="text-sm text-red-500">{error.isAbroad}</span> : null}
                 </div>
 
                 {data.scolarity !== "NOT_SCOLARISE" ? (
@@ -248,20 +248,20 @@ export default function StepEligibilite() {
                     </>
                   )
                 ) : !data.isAbroad ? (
-                  <div className="flex flex-col flex-start my-4">
+                  <div className="flex-start my-4 flex flex-col">
                     Code Postal
-                    <div className="h-5 flex items-center">
+                    <div className="flex h-5 items-center">
                       <span className="text-xs leading-5 text-[#666666]">Exemple : 75008</span>
                     </div>
                     <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} />
-                    {error.zip ? <span className="text-red-500 text-sm">{error.zip}</span> : null}
+                    {error.zip ? <span className="text-sm text-red-500">{error.zip}</span> : null}
                   </div>
                 ) : null}
               </>
             )}
             <div className="flex justify-end gap-4">
               <button
-                className="w-1/3 flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091]"
+                className="flex w-1/3 cursor-pointer items-center justify-center bg-[#000091] px-3 py-2 text-white hover:border hover:border-[#000091] hover:bg-white hover:!text-[#000091]"
                 onClick={() => onSubmit()}
                 disabled={loading}>
                 Continuer

@@ -15,19 +15,19 @@ export default function WaitingList({ young }) {
       <Container>
         <section className="flex flex-col-reverse items-center lg:flex-row lg:items-center">
           <article>
-            <h1 className="text-3xl md:text-5xl mb-4">
+            <h1 className="mb-4 text-3xl md:text-5xl">
               Mon séjour de cohésion
               <br />
               <strong className="flex items-center">
                 {translateCohort(young.cohort)}{" "}
                 {youngCanChangeSession(young) ? (
                   <Link to="/changer-de-sejour">
-                    <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
+                    <img src={edit} alt="edit icon" className="ml-2 h-9 w-9 hover:h-10 hover:w-10 hover:cursor-pointer" />
                   </Link>
                 ) : null}
               </strong>
             </h1>
-            <p className="text-gray-600 text-base md:text-xl">
+            <p className="text-base text-gray-600 md:text-xl">
               Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens
               nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
             </p>
@@ -35,7 +35,7 @@ export default function WaitingList({ young }) {
           <img src={hero} />
         </section>
         <Files young={young} />
-        <hr className="max-w-[95%] my-8 mx-auto" />
+        <hr className="my-8 mx-auto max-w-[95%]" />
         <section className="flex items-center">
           <img src={clock} />
           <article className="ml-4">

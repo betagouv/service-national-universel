@@ -51,17 +51,17 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
   if (!contacts) return null;
 
   return (
-    <div className=" flex flex-row rounded-lg bg-white shadow-sm mr-4 hover:cursor-pointer items-center hover:scale-105" onClick={handleShowModal}>
+    <div className=" mr-4 flex flex-row items-center rounded-lg bg-white shadow-sm hover:scale-105 hover:cursor-pointer" onClick={handleShowModal}>
       <div className="flex flex-col px-7 py-6">
-        <div className="font-bold mb-1 text-sm">Contacts convocation</div>
-        <div className="text-gray-500 text-xs">
+        <div className="mb-1 text-sm font-bold">Contacts convocation</div>
+        <div className="text-xs text-gray-500">
           {contactsFromCohort.length} contacts - {nbCohorts} séjours
         </div>
-        <div className="flex flex-row mt-4 -space-x-2">
+        <div className="mt-4 flex flex-row -space-x-2">
           {contactsFromCohort.map((contact, index) => {
             if (index < 6)
               return (
-                <div key={index} className={`h-8 w-8 flex justify-center items-center rounded-full bg-gray-100 text-indigo-600 text-xs border-2 border-white`}>
+                <div key={index} className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs text-indigo-600`}>
                   {getInitials(contact.contactName)}
                 </div>
               );

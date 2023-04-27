@@ -249,8 +249,8 @@ export default function ImageRights({ parentId }) {
     <>
       <div className="bg-white px-3 py-4 text-[#161616]">
         <div className="flex flex-col">
-          <h1 className="text-[22px]  font-bold text-[#21213F] mb-1">Modifier votre accord de droit à l&apos;image</h1>
-          <div className="text-[14px] leading-[20px] text-[#666666] mb-[24px]">
+          <h1 className="mb-1  text-[22px] font-bold text-[#21213F]">Modifier votre accord de droit à l&apos;image</h1>
+          <div className="mb-[24px] text-[14px] leading-[20px] text-[#666666]">
             <p>
               En tant que représentant(e) légal(e), utilisez ce bouton pour vous identifier avec FranceConnect et <b>vérifier votre identité et vos données personnelles</b> (nom,
               prénom, adresse email), ou complétez les informations <b>manuellement</b> ci-dessous.
@@ -259,7 +259,7 @@ export default function ImageRights({ parentId }) {
 
           <div>
             {isParentFromFranceConnect ? (
-              <div className="w-[400px] text-[14px] leading-[20px] text-[#666666] mx-auto mb-[32px]">
+              <div className="mx-auto mb-[32px] w-[400px] text-[14px] leading-[20px] text-[#666666]">
                 Les information en provenance de FranceConnect du représentant légal ont bien été enregistrées.
               </div>
             ) : (
@@ -267,20 +267,20 @@ export default function ImageRights({ parentId }) {
             )}
           </div>
 
-          <div className="pt-[16px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+          <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[16px]">
             <Input value={data.firstName} label="Prénom" onChange={(e) => setData({ ...data, firstName: e })} error={errors.firstName} />
             <Input value={data.lastName} label="Nom" onChange={(e) => setData({ ...data, lastName: e })} error={errors.lastName} />
             <Input value={data.email} label="Adresse email" onChange={(e) => setData({ ...data, email: e })} error={errors.email} />
             <Input value={data.phone} label="Votre téléphone" onChange={(e) => setData({ ...data, phone: e })} error={errors.phone} />
           </div>
 
-          <div className="py-[20px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+          <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] py-[20px]">
             <div className="flex items-center">
               <div className="flex-grow-1">
                 <b>Je réside</b> {formattedAddress}
               </div>
               <Toggle onClick={() => setData({ ...data, confirmAddress: !data.confirmAddress })} toggled={data.confirmAddress} />
-              {errors.confirmAddress ? <span className="text-red-500 text-sm">{errors.confirmAddress}</span> : null}
+              {errors.confirmAddress ? <span className="text-sm text-red-500">{errors.confirmAddress}</span> : null}
             </div>
             {!data.confirmAddress && (
               <>
@@ -315,14 +315,14 @@ export default function ImageRights({ parentId }) {
             )}
           </div>
 
-          <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+          <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px]">
             <AuthorizeBlock title="Droit à l’image" value={data.allowImageRights} onChange={(e) => setData({ ...data, allowImageRights: e })} error={errors.allowImageRights}>
               <div className="mb-3">
                 Le Ministère de l’Education Nationale et de la Jeunesse, ses partenaires et les journalistes dûment accrédités par les services communication du ministère et/ou des
                 préfectures à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou séparément, sur leurs
                 publications respectives.{" "}
                 {!imageRightsExplanationShown && (
-                  <a className="underline whitespace-nowrap" href="#" onClick={toggleImageRightsExplanationShown}>
+                  <a className="whitespace-nowrap underline" href="#" onClick={toggleImageRightsExplanationShown}>
                     Lire plus
                   </a>
                 )}

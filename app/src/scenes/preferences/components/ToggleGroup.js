@@ -7,11 +7,11 @@ export default function ToggleGroup({ onChange = () => {}, className = "", value
     <div className={`${className}`}>
       {options.map((option) => (
         <React.Fragment key={option.value}>
-          <ToggleButton className="hidden md:inline-flex mr-4 mb-2 last:mr-0" onClick={() => onChange(option.value)} active={option.value === value}>
+          <ToggleButton className="mr-4 mb-2 hidden last:mr-0 md:inline-flex" onClick={() => onChange(option.value)} active={option.value === value}>
             <span className={option.icon ? "mr-2" : ""}>{option.label}</span>
             {option.icon}
           </ToggleButton>
-          <MultiButton className="inline-flex md:hidden mr-4 mb-2 last:mr-0" onClick={() => onChange(option.value)} active={option.value === value}>
+          <MultiButton className="mr-4 mb-2 inline-flex last:mr-0 md:hidden" onClick={() => onChange(option.value)} active={option.value === value}>
             <span className={option.icon ? "mr-2" : ""}>{option.label}</span>
             {option.icon}
           </MultiButton>

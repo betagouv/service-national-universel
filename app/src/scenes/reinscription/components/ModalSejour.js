@@ -61,15 +61,15 @@ export default function ModalSejour({ isOpen, onCancel }) {
 
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="lg">
-      <div className="flex flex-col w-full px-3 py-4">
+      <div className="flex w-full flex-col px-3 py-4">
         {!loading ? (
-          <div className="flex justify-end items-center text-sm gap-2 text-[#000091] pb-2" onClick={onCancel}>
+          <div className="flex items-center justify-end gap-2 pb-2 text-sm text-[#000091]" onClick={onCancel}>
             <GrClose />
             Fermer
           </div>
         ) : null}
-        <div className="text-[#161616] text-lg font-bold mt-2">Choisissez la date de votre séjour</div>
-        <hr className="my-4 h-px bg-gray-200 border-0" />
+        <div className="mt-2 text-lg font-bold text-[#161616]">Choisissez la date de votre séjour</div>
+        <hr className="my-4 h-px border-0 bg-gray-200" />
         {error?.text && <Error {...error} onClose={() => setError({})} />}
 
         {loading ? (
@@ -78,17 +78,17 @@ export default function ModalSejour({ isOpen, onCancel }) {
           <>
             {cohorts.length !== 0 ? (
               <>
-                <div className="font-semibold my-2">Séjours de cohésion disponibles</div>
-                <div className="text-gray-500 text-sm">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
+                <div className="my-2 font-semibold">Séjours de cohésion disponibles</div>
+                <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
                 <div className="my-4">{cohorts?.map((e) => SessionButton(e))}</div>
               </>
             ) : (
-              <div className="text-gray-500 text-sm my-2">Aucun séjour de cohésion n’est disponible pour le moment.</div>
+              <div className="my-2 text-sm text-gray-500">Aucun séjour de cohésion n’est disponible pour le moment.</div>
             )}
             {cohorts.length < 3 && (
               <>
-                <div className="font-semibold py-2">Pourquoi je ne vois pas tous les séjours ?</div>
-                <div className="text-gray-500 text-sm">
+                <div className="py-2 font-semibold">Pourquoi je ne vois pas tous les séjours ?</div>
+                <div className="text-sm text-gray-500">
                   La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
                   <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer" className="underline hover:underline">
                     En savoir plus.
@@ -106,7 +106,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
     return (
       <div
         key={session.id}
-        className="border p-4 my-3 flex justify-between items-center"
+        className="my-3 flex items-center justify-between border p-4"
         onClick={() => {
           plausibleEvent(session.event);
           onSubmit(session.name);

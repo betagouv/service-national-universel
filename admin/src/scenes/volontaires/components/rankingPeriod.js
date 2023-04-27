@@ -38,7 +38,7 @@ export default function RankingPeriod({ period, handleChange, name, values, disa
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="list" isDropDisabled={disabled}>
           {(provided) => (
-            <div className="border-[1px] px-2  rounded-2xl " ref={provided.innerRef} {...provided.droppableProps}>
+            <div className="rounded-2xl border-[1px]  px-2 " ref={provided.innerRef} {...provided.droppableProps}>
               {items.map((e, i) => (
                 <Item key={e} index={i} value={e} values={values} updateList={updateList} name={name} disabled={disabled} />
               ))}
@@ -71,7 +71,7 @@ const Item = ({ value, values, index, updateList, name, disabled }) => {
     <Draggable draggableId={value} index={index}>
       {(provided) => (
         <div
-          className={`flex flex-1 py-2.5 items-center justify-between ${index !== 0 ? "border-t-[1px] border-gray-200" : ""}`}
+          className={`flex flex-1 items-center justify-between py-2.5 ${index !== 0 ? "border-t-[1px] border-gray-200" : ""}`}
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}>
@@ -98,7 +98,7 @@ const RoundItem = ({ value, plus, minus, onClick }) => {
     return value;
   };
   return (
-    <div className="flex justify-center items-center w-7 h-7 text-[#6b7280] text-sm border-[1px] border-[#d2d6dc] cursor-pointer rounded-full my-0 mx-[0.1rem]" onClick={onClick}>
+    <div className="my-0 mx-[0.1rem] flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border-[1px] border-[#d2d6dc] text-sm text-[#6b7280]" onClick={onClick}>
       {getValue()}
     </div>
   );

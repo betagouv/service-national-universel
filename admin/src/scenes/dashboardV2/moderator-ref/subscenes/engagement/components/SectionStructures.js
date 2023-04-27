@@ -79,7 +79,7 @@ export default function SectionStructures({ filters }) {
       case "PUBLIC":
         return (
           <div className="p-8">
-            <div className="text-base text-gray-900 font-bold mb-4">{translate(structure._id)}</div>
+            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure._id)}</div>
             <FullDoughnut
               legendSide="right"
               maxLegends={3}
@@ -100,7 +100,7 @@ export default function SectionStructures({ filters }) {
         });
         return (
           <div className="p-8">
-            <div className="text-base text-gray-900 font-bold mb-4">{translate(structure._id)}</div>
+            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure._id)}</div>
             <StatusTable statuses={statuses} />
           </div>
         );
@@ -113,14 +113,14 @@ export default function SectionStructures({ filters }) {
   return (
     <Section title="Structures">
       {error ? (
-        <div className="flex justify-center items-center text-center text-sm text-red-600 font-medium p-8">{error}</div>
+        <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : loading ? (
-        <div className="flex justify-center items-center">
+        <div className="flex items-center justify-center">
           <Loader />
         </div>
       ) : (
         <div className="flex">
-          <div className="flex flex-col flex-[0_0_332px] mr-4">
+          <div className="mr-4 flex flex-[0_0_332px] flex-col">
             <DashboardBox title="Structures" className="grow">
               <div className="text-2xl font-bold">{totalStructures}</div>
             </DashboardBox>

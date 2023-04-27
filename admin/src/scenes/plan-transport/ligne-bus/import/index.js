@@ -43,12 +43,12 @@ export default function Index(props) {
   }
 
   return (
-    <div className="flex flex-col w-full px-8 pb-8 ">
-      <div className="py-8 flex items-center justify-between">
+    <div className="flex w-full flex-col px-8 pb-8 ">
+      <div className="flex items-center justify-between py-8">
         <Title>Importer mon plan de transport</Title>
         <Select options={cohortList} value={cohort} disabled={true} />
       </div>
-      <div className="flex flex-col w-full mt-4">
+      <div className="mt-4 flex w-full flex-col">
         <NavBar steps={steps} />
         {steps[0].status === "current" && <Download nextStep={nextStep} />}
         {steps[1].status === "current" && <Import cohort={cohort} onFileVerified={fileVerified} />}

@@ -48,7 +48,11 @@ export default function ResetPassword({ location }) {
                       👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole
                     </p>
                   </div>
-                  <LoadingButton className="block w-max cursor-pointer rounded-md border-0 bg-brand-purple py-3 px-10 text-base font-medium text-white transition-colors hover:bg-brand-darkPurple" loading={isSubmitting} type="submit" disabled={isSubmitting}>
+                  <LoadingButton
+                    className="block w-max cursor-pointer rounded-md border-0 bg-brand-purple py-3 px-10 text-base font-medium text-white transition-colors hover:bg-brand-darkPurple"
+                    loading={isSubmitting}
+                    type="submit"
+                    disabled={isSubmitting}>
                     Créer
                   </LoadingButton>
                 </form>
@@ -59,7 +63,7 @@ export default function ResetPassword({ location }) {
       </div>
       <div className="flex-1 bg-blue-50">
         <div className="flex h-full flex-col items-center justify-center">
-          <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl text-blue-600">Plateforme du Service National Universel</h1>
+          <h1 className="mb-4 text-xl font-bold text-brand-black text-blue-600 md:text-3xl">Plateforme du Service National Universel</h1>
           <img className="max-w-[280px]" src={require("../../assets/auth.png")} />
         </div>
       </div>

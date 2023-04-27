@@ -350,17 +350,17 @@ export default function List() {
 
   return (
     <div className="flex">
-      <div className="bg-white mx-4 pb-12 my-4 rounded-lg p-14 w-full">
+      <div className="mx-4 my-4 w-full rounded-lg bg-white p-14 pb-12">
         {/* BEGIN HEADER */}
-        <div className="flex justify-between mb-4">
+        <div className="mb-4 flex justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-3">Trouvez une mission d&apos;intérêt général</h1>
+            <h1 className="mb-3 text-3xl font-bold text-gray-800">Trouvez une mission d&apos;intérêt général</h1>
             <div className="text-sm font-normal text-gray-700">
               Vous devez réaliser vos 84 heures de mission dans l&apos;année qui suit votre séjour de cohésion.
               <br />
               Pour plus d&apos;informations,{" "}
               <a
-                className="underline hover:underline font-medium hover:text-gray-700"
+                className="font-medium underline hover:text-gray-700 hover:underline"
                 href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"
                 target="_blank"
                 rel="noreferrer">
@@ -369,47 +369,47 @@ export default function List() {
               .
               <br />
               Astuce : si les missions proposées ne correspondent pas à votre zone géographique, pensez à{" "}
-              <a className="underline hover:underline font-medium hover:text-gray-700" href="/account" target="_blank" rel="noreferrer">
+              <a className="font-medium underline hover:text-gray-700 hover:underline" href="/account" target="_blank" rel="noreferrer">
                 vérifier votre adresse
               </a>
               .
             </div>
           </div>
           <Link to="/preferences">
-            <div className="group flex gap-1 rounded-[10px] border-[1px] border-blue-700 py-2.5 px-3 items-center hover:bg-blue-700 hover:text-[#ffffff]">
+            <div className="group flex items-center gap-1 rounded-[10px] border-[1px] border-blue-700 py-2.5 px-3 hover:bg-blue-700 hover:text-[#ffffff]">
               <HiOutlineAdjustments className="text-blue-700 group-hover:text-[#ffffff]" />
-              <div className="text-blue-700 group-hover:text-[#ffffff] text-sm flex-1">Renseigner mes préférences</div>
+              <div className="flex-1 text-sm text-blue-700 group-hover:text-[#ffffff]">Renseigner mes préférences</div>
             </div>
           </Link>
         </div>
         {/* END HEADER */}
 
         {/* BEGIN CONTROL */}
-        <div className="bg-gray-50 p-10 rounded-lg space-y-6 mb-4">
+        <div className="mb-4 space-y-6 rounded-lg bg-gray-50 p-10">
           {/* search bar recherche */}
           <div className="relative flex justify-center">
-            <div className="flex bg-white border-[1px] border-gray-300 rounded-full overflow-hidden p-1.5 items-center  w-9/12">
+            <div className="flex w-9/12 items-center overflow-hidden rounded-full border-[1px] border-gray-300 bg-white  p-1.5">
               <input
                 value={filter?.SEARCH}
                 onChange={(e) => {
                   e.persist();
                   setFilter((prev) => ({ ...prev, SEARCH: e.target.value }));
                 }}
-                className="flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm"
+                className="w-full flex-1 p-1 px-3 text-sm text-gray-700 placeholder:text-gray-400"
                 type="text"
                 placeholder="Rechercher une mission..."
               />
               <div
-                className="flex items-center flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm cursor-pointer border-l-[1px] border-gray-300"
+                className="flex w-full flex-1 cursor-pointer items-center border-l-[1px] border-gray-300 p-1 px-3 text-sm text-gray-700 placeholder:text-gray-400"
                 onClick={() => setDropdownControlDistanceOpen((e) => !e)}>
                 Distance max. {filter?.DISTANCE}km
               </div>
               <div
-                className="flex items-center flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm cursor-pointer border-l-[1px] border-gray-300"
+                className="flex w-full flex-1 cursor-pointer items-center border-l-[1px] border-gray-300 p-1 px-3 text-sm text-gray-700 placeholder:text-gray-400"
                 onClick={() => setDropdownControlWhenOpen((e) => !e)}>
                 {getLabelWhen(filter?.PERIOD_PARENT)}
               </div>
-              <div className="w-[34px] h-[34px] rounded-full bg-blue-600 flex justify-center items-center cursor-pointer hover:bg-blue-500">
+              <div className="flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-full bg-blue-600 hover:bg-blue-500">
                 <Search className="text-white" />
               </div>
             </div>
@@ -418,14 +418,14 @@ export default function List() {
               ref={refDropdownControlDistance}
               className={`${
                 dropdownControlDistanceOpen ? "block" : "hidden"
-              } w-full rounded-lg bg-white transition absolute top-[calc(100%+8px)] left-0 shadow overflow-hidden p-3 z-20`}>
-              <div className="flex justify-center items-center">
-                <div className="font-bold text-sm text-gray-00 mr-1"> Distance maximum </div>
+              } absolute top-[calc(100%+8px)] left-0 z-20 w-full overflow-hidden rounded-lg bg-white p-3 shadow transition`}>
+              <div className="flex items-center justify-center">
+                <div className="text-gray-00 mr-1 text-sm font-bold"> Distance maximum </div>
                 <div>
                   <img src={InfobulleIcon} data-tip data-for="info" />
                   <ReactTooltip delayHide={3000} clickable={true} id="info" className="w-[527px] bg-white opacity-100 shadow-xl" arrowColor="white">
-                    <div className="text-[#414458] text-[15px] text-left mb-2">Visibilité des missions</div>
-                    <div className="text-[#83869A] text-[12px] text-left">
+                    <div className="mb-2 text-left text-[15px] text-[#414458]">Visibilité des missions</div>
+                    <div className="text-left text-[12px] text-[#83869A]">
                       Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. Il existe des offres de missions accessibles pour vous sous
                       conditions partout en France, notamment certaines préparations militaires. Si vous souhaitez connaître ces offres et y accéder, contactez tout de suite votre
                       référent phase 2 : <a href={`mailto:${referentManagerPhase2?.email}`}>{referentManagerPhase2?.email}</a>
@@ -435,10 +435,10 @@ export default function List() {
               </div>
 
               <div className="flex w-full flex-col space-y-2 py-2 px-4">
-                <div className="flex justify-around flex-row my-3">
-                  <div className="flex flex-col justify-center items-center w-1/2">
+                <div className="my-3 flex flex-row justify-around">
+                  <div className="flex w-1/2 flex-col items-center justify-center">
                     <div className="w-3/4">
-                      <div className="flex items-center gap-2 w-full">
+                      <div className="flex w-full items-center gap-2">
                         <input
                           id="main-address"
                           name="main-address"
@@ -457,7 +457,7 @@ export default function List() {
                         </label>
                       </div>
                       {young?.mobilityNearRelativeCity ? (
-                        <div className="flex items-center gap-2 w-full">
+                        <div className="flex w-full items-center gap-2">
                           <input
                             id="second-address"
                             name="address"
@@ -476,7 +476,7 @@ export default function List() {
                           </label>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2 w-full">
+                        <div className="flex w-full items-center gap-2">
                           <label className="mr-2">
                             <img src={RadioUnchecked} />
                           </label>
@@ -491,8 +491,8 @@ export default function List() {
                       )}
                     </div>
                   </div>
-                  <div className="flex flex-col justify-center items-center w-1/2">
-                    <div className="w-3/4 flex flex-row items-center justify-center">
+                  <div className="flex w-1/2 flex-col items-center justify-center">
+                    <div className="flex w-3/4 flex-row items-center justify-center">
                       <Toggle toggled={hebergement} onClick={() => setHebergement((old) => !old)} />
                       <div className="ml-4">
                         <div className="text-[13px]">Mission avec hébergement</div>
@@ -505,7 +505,7 @@ export default function List() {
                   <input
                     list="distance-list"
                     type="range"
-                    className="w-full distanceKm appearance-none h-2 bg-gray-200 items-center  rounded-full cursor-pointer"
+                    className="distanceKm h-2 w-full cursor-pointer appearance-none items-center  rounded-full bg-gray-200"
                     min="1"
                     max={DISTANCE_MAX}
                     step="1"
@@ -514,11 +514,11 @@ export default function List() {
                       setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
                     }}
                   />
-                  <div className={`absolute -ml-2 -mt-10 font-bold w-full ${!marginDistance && " flex justify-center ml-1"} `} style={{ left: `${marginDistance}px` }}>
+                  <div className={`absolute -ml-2 -mt-10 w-full font-bold ${!marginDistance && " ml-1 flex justify-center"} `} style={{ left: `${marginDistance}px` }}>
                     {filter?.DISTANCE}km
                   </div>
                 </div>
-                <div className="flex justify-between w-full mt-4 px-[10px] text-gray-200 items-center">
+                <div className="mt-4 flex w-full items-center justify-between px-[10px] text-gray-200">
                   <PietonSvg />
                   <VeloSvg />
                   <VoitureSvg />
@@ -534,10 +534,10 @@ export default function List() {
               ref={refDropdownControlWhen}
               className={`${
                 dropdownControlWhenOpen ? "block" : "hidden"
-              } w-full rounded-lg bg-white transition absolute top-[calc(100%+8px)] left-0 shadow overflow-hidden p-3 z-20`}>
-              <div className="font-bold text-sm text-gray-00 text-center">Période de réalisation de la mission</div>
+              } absolute top-[calc(100%+8px)] left-0 z-20 w-full overflow-hidden rounded-lg bg-white p-3 shadow transition`}>
+              <div className="text-gray-00 text-center text-sm font-bold">Période de réalisation de la mission</div>
               <div className="flex w-full flex-col py-2 px-4">
-                <div className="flex justify-between w-full mt-4 px-[10px] font-medium text-gray-700 text-sm gap-2">
+                <div className="mt-4 flex w-full justify-between gap-2 px-[10px] text-sm font-medium text-gray-700">
                   <PeriodeTab label={getLabelWhen("")} active={!filter?.PERIOD_PARENT} name="" onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: undefined }))} />
                   <PeriodeTab
                     Icon={AcademicCap}
@@ -562,8 +562,8 @@ export default function List() {
                   />
                 </div>
                 {filter?.PERIOD_PARENT === "SCOLAIRE" ? (
-                  <div className="flex flex-col gap-2 justify-center items-center mt-6">
-                    <div className="flex flex-wrap gap-2 justify-center items-center">
+                  <div className="mt-6 flex flex-col items-center justify-center gap-2">
+                    <div className="flex flex-wrap items-center justify-center gap-2">
                       <PeriodeItem
                         name={MISSION_PERIOD_DURING_SCHOOL.EVENING}
                         onClick={handleToggleChangePeriod}
@@ -581,15 +581,15 @@ export default function List() {
                       />
                     </div>
                     {filter?.PERIOD?.length ? (
-                      <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, PERIOD: [] }))}>
+                      <div className="cursor-pointer text-xs text-gray-600 hover:underline" onClick={() => setFilter((prev) => ({ ...prev, PERIOD: [] }))}>
                         Effacer
                       </div>
                     ) : null}
                   </div>
                 ) : null}
                 {filter?.PERIOD_PARENT === "VACANCES" ? (
-                  <div className="flex flex-col gap-2 justify-center items-center mt-6">
-                    <div className="flex flex-wrap gap-2 justify-center items-center">
+                  <div className="mt-6 flex flex-col items-center justify-center gap-2">
+                    <div className="flex flex-wrap items-center justify-center gap-2">
                       <PeriodeItem
                         name={MISSION_PERIOD_DURING_HOLIDAYS.SUMMER}
                         onClick={handleToggleChangePeriod}
@@ -617,21 +617,21 @@ export default function List() {
                       />
                     </div>
                     {filter?.PERIOD?.length ? (
-                      <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, PERIOD: [] }))}>
+                      <div className="cursor-pointer text-xs text-gray-600 hover:underline" onClick={() => setFilter((prev) => ({ ...prev, PERIOD: [] }))}>
                         Effacer
                       </div>
                     ) : null}
                   </div>
                 ) : null}
                 {filter?.PERIOD_PARENT === "CUSTOM" ? (
-                  <div className="flex flex-col gap-2 justify-center items-center mt-6">
-                    <div className="flex flex-wrap gap-2 justify-center items-center">
-                      <div className="flex items-center gap-2 border-[1px] rounded-lg  py-1 px-2">
-                        <label className="text-left text-gray-500 w-full m-0">Du</label>
+                  <div className="mt-6 flex flex-col items-center justify-center gap-2">
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      <div className="flex items-center gap-2 rounded-lg border-[1px]  py-1 px-2">
+                        <label className="m-0 w-full text-left text-gray-500">Du</label>
                         <input
                           required
                           type="date"
-                          className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
+                          className="w-full cursor-pointer bg-inherit disabled:cursor-not-allowed"
                           value={filter?.FROM}
                           onChange={(e) => {
                             e.persist();
@@ -639,12 +639,12 @@ export default function List() {
                           }}
                         />
                       </div>
-                      <div className="flex items-center gap-2 border-[1px] rounded-lg  py-1 px-2">
-                        <label className="text-left text-gray-500 w-full m-0">Au</label>
+                      <div className="flex items-center gap-2 rounded-lg border-[1px]  py-1 px-2">
+                        <label className="m-0 w-full text-left text-gray-500">Au</label>
                         <input
                           required
                           type="date"
-                          className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
+                          className="w-full cursor-pointer bg-inherit disabled:cursor-not-allowed"
                           value={filter?.TO}
                           onChange={(e) => {
                             e.persist();
@@ -654,7 +654,7 @@ export default function List() {
                       </div>
                     </div>
                     {filter?.FROM || filter?.TO ? (
-                      <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, TO: "", FROM: "" }))}>
+                      <div className="cursor-pointer text-xs text-gray-600 hover:underline" onClick={() => setFilter((prev) => ({ ...prev, TO: "", FROM: "" }))}>
                         Effacer
                       </div>
                     ) : null}
@@ -664,7 +664,7 @@ export default function List() {
             </div>
             {/* END MODAL CONTROL WHEN */}
           </div>
-          <div className="flex justify-between gap-2 flex-wrap">
+          <div className="flex flex-wrap justify-between gap-2">
             <DomainFilter Icon={Sante} name="HEALTH" label="Santé" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("HEALTH")} />
             <DomainFilter Icon={Solidarite} name="SOLIDARITY" label="Solidarité" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SOLIDARITY")} />
             <DomainFilter Icon={Citoyennete} name="CITIZENSHIP" label="Citoyenneté" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("CITIZENSHIP")} />
@@ -712,7 +712,7 @@ export default function List() {
                 innerClass={{ pagination: "pagination", sortOptions: "sortOptions" }}
                 dataField="created_at"
                 renderResultStats={({ numberOfResults }) => {
-                  return <div className="text-gray-700 my-3 text-sm w-28 basis-3/4">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
+                  return <div className="my-3 w-28 basis-3/4 text-sm text-gray-700">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
                 }}
                 sortOptions={[
                   { label: "La plus récente", dataField: "createdAt.keyword", sortBy: "asc" },
@@ -731,9 +731,9 @@ export default function List() {
                   });
                 }}
                 renderNoResults={() => (
-                  <div className="text-gray-700 mb-3 text-sm">
+                  <div className="mb-3 text-sm text-gray-700">
                     Aucune mission ne correspond à votre recherche. Merci de{" "}
-                    <a className="underline hover:underline font-medium hover:text-gray-700" href="/account" target="_blank" rel="noreferrer">
+                    <a className="font-medium underline hover:text-gray-700 hover:underline" href="/account" target="_blank" rel="noreferrer">
                       vérifier votre adresse
                     </a>
                     .
@@ -750,25 +750,25 @@ export default function List() {
 
 const DomainFilter = ({ Icon, name, label, onClick, active }) => {
   return (
-    <div className="group flex flex-1 flex-col items-center justify-start space-y-2 cursor-pointer" onClick={() => onClick(name)}>
-      <div className={`${active ? "bg-[#212B44]" : "bg-gray-200"} w-9 h-9 flex justify-center items-center rounded-xl group-hover:-translate-y-1 transition duration-200 ease-in`}>
+    <div className="group flex flex-1 cursor-pointer flex-col items-center justify-start space-y-2" onClick={() => onClick(name)}>
+      <div className={`${active ? "bg-[#212B44]" : "bg-gray-200"} flex h-9 w-9 items-center justify-center rounded-xl transition duration-200 ease-in group-hover:-translate-y-1`}>
         <Icon className="text-white" />
       </div>
-      <div className="text-xs text-gray-700 text-center">{label}</div>
+      <div className="text-center text-xs text-gray-700">{label}</div>
     </div>
   );
 };
 
 const PeriodeTab = ({ Icon, name, label, onClick, active }) => {
   return (
-    <div className="group flex flex-1 flex-col items-center justify-start space-y-2 cursor-pointer" onClick={() => onClick(name)}>
+    <div className="group flex flex-1 cursor-pointer flex-col items-center justify-start space-y-2" onClick={() => onClick(name)}>
       {active ? (
-        <div className="flex border-b-2 border-blue-600 pb-2 font-bold gap-2 items-center">
+        <div className="flex items-center gap-2 border-b-2 border-blue-600 pb-2 font-bold">
           {label}
           {Icon ? <Icon className="text-gray-500" /> : null}
         </div>
       ) : (
-        <div className="flex pb-2 font-medium hover:border-b-2 hover:border-blue-600 gap-2 items-center">
+        <div className="flex items-center gap-2 pb-2 font-medium hover:border-b-2 hover:border-blue-600">
           {label}
           {Icon ? <Icon className="text-gray-500" /> : null}
         </div>
@@ -780,13 +780,13 @@ const PeriodeTab = ({ Icon, name, label, onClick, active }) => {
 const PeriodeItem = ({ name, onClick, active }) => {
   return active ? (
     <div
-      className="group flex flex-col items-center justify-center cursor-pointer rounded-full py-1 px-4 border-[1px] text-blue-600 border-blue-600 hover:border-blue-500 text-xs"
+      className="group flex cursor-pointer flex-col items-center justify-center rounded-full border-[1px] border-blue-600 py-1 px-4 text-xs text-blue-600 hover:border-blue-500"
       onClick={() => onClick(name)}>
       <div className="">{translate(name)}</div>
     </div>
   ) : (
     <div
-      className="group flex flex-col items-center justify-center cursor-pointer rounded-full py-1 px-4 border-[1px] text-gray-700 border-gray-200 hover:border-gray-300 text-xs"
+      className="group flex cursor-pointer flex-col items-center justify-center rounded-full border-[1px] border-gray-200 py-1 px-4 text-xs text-gray-700 hover:border-gray-300"
       onClick={() => onClick(name)}>
       <div className="">{translate(name)}</div>
     </div>
@@ -795,15 +795,15 @@ const PeriodeItem = ({ name, onClick, active }) => {
 
 const Toggle = ({ toggled, onClick }) => {
   return toggled ? (
-    <div onClick={onClick} name="visibility" className={`flex items-center w-10 h-6 rounded-full bg-blue-600 transition duration-100 ease-in cursor-pointer`}>
-      <div className="flex justify-center items-center h-6 w-6 rounded-full border-[1px] border-blue-600 bg-white translate-x-[16px] transition duration-100 ease-in shadow-nina"></div>
+    <div onClick={onClick} name="visibility" className={`flex h-6 w-10 cursor-pointer items-center rounded-full bg-blue-600 transition duration-100 ease-in`}>
+      <div className="flex h-6 w-6 translate-x-[16px] items-center justify-center rounded-full border-[1px] border-blue-600 bg-white shadow-nina transition duration-100 ease-in"></div>
     </div>
   ) : (
     <div
       onClick={onClick}
       name="visibility"
-      className={`flex items-center w-10 h-6 border-[1px] rounded-full border-blue-600 bg-white transition duration-100 ease-in cursor-pointer`}>
-      <div className="flex justify-center items-center h-6 w-6 rounded-full border-[1px] border-blue-600 bg-white translate-x-[-1px] transition duration-100 ease-in shadow-nina"></div>
+      className={`flex h-6 w-10 cursor-pointer items-center rounded-full border-[1px] border-blue-600 bg-white transition duration-100 ease-in`}>
+      <div className="flex h-6 w-6 translate-x-[-1px] items-center justify-center rounded-full border-[1px] border-blue-600 bg-white shadow-nina transition duration-100 ease-in"></div>
     </div>
   );
 };

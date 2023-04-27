@@ -33,7 +33,7 @@ export const cohortList = [
 export const getTransportIcon = (transportType) => {
   switch (transportType) {
     case "bus":
-      return <Bus className="text-gray-500 -rotate-12" />;
+      return <Bus className="-rotate-12 text-gray-500" />;
     case "train":
       return <Train className="text-gray-500" />;
     case "avion":

@@ -69,7 +69,7 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
     if (!suggestion.ok) {
       return (
         <div className="flex flex-col items-center justify-center">
-          <div className="text-red-500 text-center text-sm">L&apos;adresse saisie n&apos;a pas été trouvée.</div>
+          <div className="text-center text-sm text-red-500">L&apos;adresse saisie n&apos;a pas été trouvée.</div>
           <GhostButton name="Réessayer" onClick={() => setSuggestion(null)} />
         </div>
       );
@@ -88,7 +88,7 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
             onSuccess(formatResult(suggestion));
             setSuggestion(null);
           }}
-          className="w-full my-1">
+          className="my-1 w-full">
           Oui
         </Button>
         <GhostButton
@@ -125,7 +125,7 @@ export default function VerifyAddress({ address, zip, city, onSuccess, onFail, d
 }
 
 const Message = ({ children, className = "" }) => (
-  <div className={`flex items-center rounded-md p-3 text-["#32257f"] bg-[#edecfc] ${className}`}>
+  <div className={`flex items-center rounded-md bg-[#edecfc] p-3 text-["#32257f"] ${className}`}>
     <InfoIcon className="mt-1" color="#32257f" />
     <div className="ml-2">{children}</div>
   </div>

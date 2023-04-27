@@ -107,9 +107,9 @@ export default function ProposeMission({ young, onSend }) {
   return (
     <>
       <YoungHeader young={young} onChange={onSend} />
-      <div className="bg-white rounded-xl shadow-sm m-8 p-8 space-y-8 items-center">
+      <div className="m-8 items-center space-y-8 rounded-xl bg-white p-8 shadow-sm">
         <div className="grid grid-cols-9 border-b pb-8">
-          <div className="w-9 h-9 rounded-full p-2 bg-gray-200 cursor-pointer hover:scale-105">
+          <div className="h-9 w-9 cursor-pointer rounded-full bg-gray-200 p-2 hover:scale-105">
             <Link to={`/volontaire/${young._id}/phase2`}>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -122,7 +122,7 @@ export default function ProposeMission({ young, onSend }) {
               </svg>
             </Link>
           </div>
-          <h1 className="text-center text-2xl font-semibold col-span-7">
+          <h1 className="col-span-7 text-center text-2xl font-semibold">
             Proposer une mission à {young.firstName} {young.lastName}
           </h1>
         </div>
@@ -139,7 +139,7 @@ export default function ProposeMission({ young, onSend }) {
               onValueChange={setSearchedValue}
               queryFormat="and"
               innerClass={{ input: "searchbox" }}
-              className="datasearch-searchfield w-1/3 mx-auto"
+              className="datasearch-searchfield mx-auto w-1/3"
             />
             {searchedValue && (
               <ReactiveListComponent

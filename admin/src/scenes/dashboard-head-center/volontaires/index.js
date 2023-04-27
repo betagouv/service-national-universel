@@ -35,7 +35,7 @@ export default function Index() {
     <>
       <Row style={{}}>
         <Col md={6}>
-          <h2 className="m-0 font-bold text-2xl">Volontaires</h2>
+          <h2 className="m-0 text-2xl font-bold">Volontaires</h2>
         </Col>
         <Col md={6}>
           {filter && (

@@ -27,14 +27,14 @@ const MoreButton = ({ className, actions = [] }) => {
     <div className="relative" ref={ref}>
       <button
         onClick={toggleMenu}
-        className={`w-[40px] h-[40px] p-[3px] ${circleStyle} border-2 bg-[#E5E7EB] hover:bg-[#D1D5DB] active:border-[#3B82F6] ${isMenuOpen && "!border-[#3B82F6]"} ${className}`}>
-        <div className={`w-[32px] h-[32px] ${circleStyle}`}>
+        className={`h-[40px] w-[40px] p-[3px] ${circleStyle} border-2 bg-[#E5E7EB] hover:bg-[#D1D5DB] active:border-[#3B82F6] ${isMenuOpen && "!border-[#3B82F6]"} ${className}`}>
+        <div className={`h-[32px] w-[32px] ${circleStyle}`}>
           <img src={dots} alt="icon button" />
         </div>
       </button>
-      <div className={`${isMenuOpen ? "block" : "hidden"} absolute right-0 top-11 bg-white rounded-md shadow-md z-10`}>
+      <div className={`${isMenuOpen ? "block" : "hidden"} absolute right-0 top-11 z-10 rounded-md bg-white shadow-md`}>
         {actions.map(({ label, onClick }) => (
-          <div className="whitespace-nowrap px-4 py-3 cursor-pointer hover:bg-gray-50" onClick={onClick}>
+          <div className="cursor-pointer whitespace-nowrap px-4 py-3 hover:bg-gray-50" onClick={onClick}>
             {label}
           </div>
         ))}

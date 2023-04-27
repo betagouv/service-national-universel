@@ -32,9 +32,9 @@ export default function CardRepresentant({ representant, getService, department,
   return (
     <>
       {representant ? (
-        <div className="flex flex-col max-w-xs rounded-lg bg-white shadow-sm mr-4 hover:cursor-pointer hover:scale-105" onClick={handleShowModal}>
+        <div className="mr-4 flex max-w-xs flex-col rounded-lg bg-white shadow-sm hover:scale-105 hover:cursor-pointer" onClick={handleShowModal}>
           <div className="flex flex-1 flex-col px-7 py-6 ">
-            <div className="text-sm font-bold mb-1">Représentant de l’État</div>
+            <div className="mb-1 text-sm font-bold">Représentant de l’État</div>
             <div className="text-xs text-gray-500">
               {representant.firstName} {representant.lastName}
             </div>
@@ -43,16 +43,16 @@ export default function CardRepresentant({ representant, getService, department,
           <div className=" flex flex-row border-t-[1px] border-gray-200 py-2">
             {representant.mobile ? (
               <>
-                <div className="flex flex-1 flex-row justify-center items-center border-r-[1px] border-gray-200 my-2 px-2">
+                <div className="my-2 flex flex-1 flex-row items-center justify-center border-r-[1px] border-gray-200 px-2">
                   <HiPhone className="text-gray-400" />
-                  <div className="pl-2 text-gray-700 whitespace-nowrap text-xs">{formatPhoneNumberFR(representant.mobile)}</div>
+                  <div className="whitespace-nowrap pl-2 text-xs text-gray-700">{formatPhoneNumberFR(representant.mobile)}</div>
                 </div>
               </>
             ) : null}
-            <div className={`flex flex-2 my-2 px-2 truncate ${!representant.mobile ? "items-center justify-center w-full" : ""}`}>
-              <div className="pr-2 flex-row text-gray-700 truncate text-xs">{representant.email}</div>
+            <div className={`flex-2 my-2 flex truncate px-2 ${!representant.mobile ? "w-full items-center justify-center" : ""}`}>
+              <div className="flex-row truncate pr-2 text-xs text-gray-700">{representant.email}</div>
               <div
-                className="flex items-center justify-center cursor-pointer hover:scale-105"
+                className="flex cursor-pointer items-center justify-center hover:scale-105"
                 onClick={() => {
                   copyToClipboard(representant.email);
                   setCopied(true);
@@ -63,16 +63,16 @@ export default function CardRepresentant({ representant, getService, department,
           </div>
         </div>
       ) : (
-        <div className="flex flex-col rounded-lg bg-white shadow-sm mr-4">
-          <div className="flex flex-1 flex-col px-7 justify-center">
+        <div className="mr-4 flex flex-col rounded-lg bg-white shadow-sm">
+          <div className="flex flex-1 flex-col justify-center px-7">
             <div className="text-bold mb-1 text-sm">Représentant de l’État</div>
-            <div className="text-gray-500 text-xs">Non renseigné</div>
+            <div className="text-xs text-gray-500">Non renseigné</div>
             <div className=" flex flex-row pt-4">
               <div
-                className="flex border-dashed border-indigo-700 rounded-lg bg-white border-grey-200 border-[1px] shadow-sm mx-auto px-2 py-1 items-center justify-center hover:cursor-pointer hover:scale-105"
+                className="border-grey-200 mx-auto flex items-center justify-center rounded-lg border-[1px] border-dashed border-indigo-700 bg-white px-2 py-1 shadow-sm hover:scale-105 hover:cursor-pointer"
                 onClick={handleShowModal}>
                 <HiPlus className="text-indigo-300" />
-                <div className="pl-2 text-indigo-700 text-xs">Ajouter un représentant</div>
+                <div className="pl-2 text-xs text-indigo-700">Ajouter un représentant</div>
               </div>
             </div>
           </div>

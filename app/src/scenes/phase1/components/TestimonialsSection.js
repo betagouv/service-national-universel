@@ -40,8 +40,8 @@ const TestimonialsSection = () => {
   ];
   return (
     <section>
-      <h2 className="font-bold text-xl m-0 mb-4">Ils racontent leur séjour</h2>
-      <div className="flex gap-4 justify-between overflow-x-auto scrollbar-x">
+      <h2 className="m-0 mb-4 text-xl font-bold">Ils racontent leur séjour</h2>
+      <div className="scrollbar-x flex justify-between gap-4 overflow-x-auto">
         {testimonials.map((testimonial, index) => (
           <TestimonialCard key={index} {...testimonial} />
         ))}

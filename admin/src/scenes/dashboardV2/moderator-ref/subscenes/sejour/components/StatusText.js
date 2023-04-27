@@ -3,10 +3,10 @@ import MoreInfoPanel from "../../../../components/ui/MoreInformationPanel";
 
 export default function StatusText({ status, nb, percentage, infoPanel, onClick = () => {} }) {
   return (
-    <div className="flex items-center justify-between gap-2 w-full" onClick={() => onClick({ status, nb })}>
-      <div className="flex items-center gap-2 w-[80%] justify-start">
-        <span className="font-bold text-lg text-gray-900 w-[20%]">{nb}</span>
-        <div className="text-sm text-gray-600 text-left w-[80%] flex items-center">
+    <div className="flex w-full items-center justify-between gap-2" onClick={() => onClick({ status, nb })}>
+      <div className="flex w-[80%] items-center justify-start gap-2">
+        <span className="w-[20%] text-lg font-bold text-gray-900">{nb}</span>
+        <div className="flex w-[80%] items-center text-left text-sm text-gray-600">
           {status}
           {infoPanel && <MoreInfoPanel className="inline-block">{infoPanel}</MoreInfoPanel>}
         </div>

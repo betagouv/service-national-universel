@@ -37,9 +37,9 @@ export default function Nav({ filter, updateFilter }) {
 
   return (
     <>
-      <div className="flex flex-col w-full mt-4">
-        <div className="flex flex-1 flex-col lg:flex-row mb-4 border-b">
-          <nav className="px-3 flex flex-1  ">
+      <div className="mt-4 flex w-full flex-col">
+        <div className="mb-4 flex flex-1 flex-col border-b lg:flex-row">
+          <nav className="flex flex-1 px-3  ">
             {user.role === ROLES.REFERENT_REGION ? (
               <>
                 <TabItem name="region" setCurrentTab={setCurrentTab} active={currentTab === "region"}>
@@ -85,8 +85,8 @@ export default function Nav({ filter, updateFilter }) {
 const TabItem = ({ name, active, setCurrentTab, children }) => (
   <div
     onClick={() => setCurrentTab(name)}
-    className={`px-3 py-2 cursor-pointer text-coolGray-500  hover:text-snu-purple-800 hover:border-b-[3px] hover:border-snu-purple-800
-      ${active && "text-snu-purple-800 font-bold border-b-[3px] border-snu-purple-800"}`}>
+    className={`cursor-pointer px-3 py-2 text-coolGray-500  hover:border-b-[3px] hover:border-snu-purple-800 hover:text-snu-purple-800
+      ${active && "border-b-[3px] border-snu-purple-800 font-bold text-snu-purple-800"}`}>
     {children}
   </div>
 );

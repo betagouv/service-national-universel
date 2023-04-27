@@ -22,18 +22,18 @@ export default function ConfirmationModal({
     <Modal size={size} centered isOpen={isOpen} toggle={onCancel}>
       {loading ? (
         <>
-          <div className="text-[14px] leading-[20px] text-[#6B7280] mt-[8px] text-center">{loadingText}</div>
+          <div className="mt-[8px] text-center text-[14px] leading-[20px] text-[#6B7280]">{loadingText}</div>
           <Loader />
         </>
       ) : (
-        <div className="bg-white rounded-[8px]">
+        <div className="rounded-[8px] bg-white">
           <div className="px-[24px] pt-[24px]">
             {icon && <div className="flex justify-center">{icon}</div>}
-            <h1 className="text-[20px] leading-[28px] text-[#111827] mt-[24px] text-center">{title}</h1>
-            <div className="text-[14px] leading-[20px] text-[#6B7280] mt-[8px] text-center">{message}</div>
+            <h1 className="mt-[24px] text-center text-[20px] leading-[28px] text-[#111827]">{title}</h1>
+            <div className="mt-[8px] text-center text-[14px] leading-[20px] text-[#6B7280]">{message}</div>
             {children}
           </div>
-          <div className="flex p-[24px] items-center justify-between">
+          <div className="flex items-center justify-between p-[24px]">
             <BorderButton onClick={onCancel} className="mr-[6px] grow">
               {cancelText}
             </BorderButton>

@@ -114,13 +114,13 @@ export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback, dro
     <>
       <div ref={ref} className={`relative ${options.length > 1 && "cursor-pointer"}`}>
         <div className="inline-block" onClick={() => setDropDownOpen((dropDownOpen) => !dropDownOpen)}>
-          <div className={`bg-${theme.background[application.status]} text-${theme.text[application.status]} rounded flex flex-row items-center`}>
-            <div className="text-xs font-normal p-1">{translateApplication(application.status)}</div>
+          <div className={`bg-${theme.background[application.status]} text-${theme.text[application.status]} flex flex-row items-center rounded`}>
+            <div className="p-1 text-xs font-normal">{translateApplication(application.status)}</div>
             {options.length > 1 && <BiChevronDown size={20} />}
           </div>
         </div>
         {dropDownOpen && (
-          <div className={"absolute bg-white z-10 " + dropdownClassName}>
+          <div className={"absolute z-10 bg-white " + dropdownClassName}>
             {options
               .filter((e) => e !== application.status)
               .map((status) => {

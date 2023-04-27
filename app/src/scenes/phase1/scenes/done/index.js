@@ -65,24 +65,24 @@ export default function Done() {
   return (
     <>
       {/* DESKTOP VIEW*/}
-      <div className="hidden md:flex flex-col">
-        <div className="flex flex-col rounded-xl bg-white m-4 shadow-ninaBlock">
-          <div className="flex px-8 pt-4 justify-between flex-col-reverse items-start lg:!flex-row">
-            <div className="flex flex-col w-full lg:w-2/3 py-5">
+      <div className="hidden flex-col md:flex">
+        <div className="m-4 flex flex-col rounded-xl bg-white shadow-ninaBlock">
+          <div className="flex flex-col-reverse items-start justify-between px-8 pt-4 lg:!flex-row">
+            <div className="flex w-full flex-col py-5 lg:w-2/3">
               <div className="flex items-center lg:items-start">
-                <div className="flex flex-col flex-1 gap-5 ml-4">
-                  <div className="flex items-center gap-2 text-[44px] text-left leading-tight">
+                <div className="ml-4 flex flex-1 flex-col gap-5">
+                  <div className="flex items-center gap-2 text-left text-[44px] leading-tight">
                     <div>
                       <strong>{young.firstName},</strong> vous avez <br /> validé votre Phase 1 !
                     </div>
                   </div>
-                  <div className="text-sm leading-5 font-normal text-gray-500">
+                  <div className="text-sm font-normal leading-5 text-gray-500">
                     Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
                   </div>
-                  <div className="flex gap-5 items-center">
+                  <div className="flex items-center gap-5">
                     {!isCohortDone(young.cohort) && (
                       <button
-                        className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium hover:border-gray-500"
+                        className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs font-medium leading-4 hover:border-gray-500"
                         onClick={() => setModalOpen({ isOpen: true })}>
                         Mes informations de retour de séjour
                       </button>
@@ -91,26 +91,26 @@ export default function Done() {
                     <div className="relative" ref={refAttestationButton}>
                       <button
                         disabled={loading}
-                        className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 hover:bg-blue-500 hover:border-blue-500 disabled:opacity-50 disabled:cursor-wait w-full"
+                        className="flex w-full items-center justify-between gap-3 rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 hover:border-blue-500 hover:bg-blue-500 disabled:cursor-wait disabled:opacity-50"
                         onClick={() => setOpenAttestationButton((e) => !e)}>
                         <div className="flex items-center gap-2">
-                          <span className="text-white leading-4 text-xs font-medium">Attestation de réalisation phase 1</span>
+                          <span className="text-xs font-medium leading-4 text-white">Attestation de réalisation phase 1</span>
                         </div>
-                        <ChevronDown className="text-white font-medium" />
+                        <ChevronDown className="font-medium text-white" />
                       </button>
                       {/* display options */}
                       <div
                         className={`${
                           openAttestationButton ? "block" : "hidden"
-                        }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
+                        }  absolute right-0 top-[40px] z-50 !min-w-full overflow-hidden rounded-lg bg-white shadow transition lg:!min-w-3/4`}>
                         <div
                           key="download"
                           onClick={() => {
                             viewAttestation({ uri: "1" });
                             setOpenAttestationButton(false);
                           }}>
-                          <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                            <Download className="text-gray-400 w-4 h-4" />
+                          <div className="group flex cursor-pointer items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
+                            <Download className="h-4 w-4 text-gray-400" />
                             <div>Télécharger</div>
                           </div>
                         </div>
@@ -120,8 +120,8 @@ export default function Done() {
                             sendAttestation({ type: "1", template: "certificate" });
                             setOpenAttestationButton(false);
                           }}>
-                          <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                            <FiMail className="text-gray-400 w-4 h-4" />
+                          <div className="group flex cursor-pointer items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
+                            <FiMail className="h-4 w-4 text-gray-400" />
                             <div>Envoyer par mail</div>
                           </div>
                         </div>
@@ -131,15 +131,15 @@ export default function Done() {
                 </div>
               </div>
             </div>
-            <div className="flex items-start justify-center lg:items-start flex-shrink-0 w-full lg:w-1/3">
-              <img className="object-scale-down h-80" src={require("../../../../assets/validatedPhase2.png")} alt="" />
+            <div className="flex w-full flex-shrink-0 items-start justify-center lg:w-1/3 lg:items-start">
+              <img className="h-80 object-scale-down" src={require("../../../../assets/validatedPhase2.png")} alt="" />
             </div>
           </div>
-          <div className="grid grid-rows-2 lg:grid-rows-1 grid-cols-1 lg:grid-cols-2 px-8 pt-8 mb-12 lg:divide-x-[1px] gap-8 lg:gap-0">
-            <div className="flex flex-col items-center px-8 gap-3">
+          <div className="mb-12 grid grid-cols-1 grid-rows-2 gap-8 px-8 pt-8 lg:grid-cols-2 lg:grid-rows-1 lg:gap-0 lg:divide-x-[1px]">
+            <div className="flex flex-col items-center gap-3 px-8">
               <Unlock />
-              <div className="leading-7 text-xl text-center font-bold">Le code de la route, c’est facile !</div>
-              <div className="text-xs leading-relaxed font-medium text-gray-500 text-center">
+              <div className="text-center text-xl font-bold leading-7">Le code de la route, c’est facile !</div>
+              <div className="text-center text-xs font-medium leading-relaxed text-gray-500">
                 Vous bénéficiez désormais d’un accès <strong>gratuit</strong> à la <br />
                 plateforme en ligne d’apprentissage du code de la route.
               </div>
@@ -147,7 +147,7 @@ export default function Done() {
                 target="_blank"
                 rel="noreferrer"
                 href="https://support.snu.gouv.fr/base-de-connaissance/permis-et-code-de-la-route"
-                className="rounded-lg border-[1px] border-blue-700 text-blue-700 text-sm leading-5 font-medium px-12 py-2 mt-3 hover:text-white hover:bg-blue-700 transition duration-100 ease-in-out cursor-pointer">
+                className="mt-3 cursor-pointer rounded-lg border-[1px] border-blue-700 px-12 py-2 text-sm font-medium leading-5 text-blue-700 transition duration-100 ease-in-out hover:bg-blue-700 hover:text-white">
                 Plus d’informations
               </a>
             </div>
@@ -157,7 +157,7 @@ export default function Done() {
       </div>
 
       {/* MOBILE VIEW*/}
-      <div className="flex md:hidden flex-col bg-white rounded-lg mb-4">
+      <div className="mb-4 flex flex-col rounded-lg bg-white md:hidden">
         <img src={HeroPhase1Mobile} alt="" />
         <div className="px-4">
           <div className="flex items-center gap-2 text-2xl leading-tight">
@@ -165,13 +165,13 @@ export default function Done() {
               <strong>{young.firstName},</strong> vous avez <br /> validé votre Phase 1 !
             </div>
           </div>
-          <div className="text-xs leading-5 font-normal text-gray-500 mt-2">
+          <div className="mt-2 text-xs font-normal leading-5 text-gray-500">
             Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
           </div>
-          <div className="flex flex-col gap-3 items-center py-3">
+          <div className="flex flex-col items-center gap-3 py-3">
             {!isCohortDone(young.cohort) ? (
               <button
-                className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium whitespace-nowrap"
+                className="whitespace-nowrap rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs font-medium leading-4"
                 onClick={() => setModalOpen({ isOpen: true })}>
                 Mes informations de retour de séjour
               </button>
@@ -179,26 +179,26 @@ export default function Done() {
             <div className="relative" ref={refAttestationButton}>
               <button
                 disabled={loading}
-                className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
+                className="flex w-full items-center justify-between gap-3 rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 disabled:cursor-wait disabled:opacity-50"
                 onClick={() => setOpenAttestationButton((e) => !e)}>
                 <div className="flex items-center gap-2">
-                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Attestation de réalisation phase 1</span>
+                  <span className="whitespace-nowrap text-xs font-medium leading-4 text-white">Attestation de réalisation phase 1</span>
                 </div>
-                <ChevronDown className="text-white font-medium" />
+                <ChevronDown className="font-medium text-white" />
               </button>
 
               <div
                 className={`${
                   openAttestationButton ? "block" : "hidden"
-                }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-0 top-[40px]`}>
+                }  absolute right-0 top-[40px] z-0 !min-w-full overflow-hidden rounded-lg bg-white shadow transition lg:!min-w-3/4`}>
                 <div
                   key="download"
                   onClick={() => {
                     viewAttestation({ uri: "1" });
                     setOpenAttestationButton(false);
                   }}>
-                  <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                    <Download className="text-gray-400 w-4 h-4" />
+                  <div className="group flex cursor-pointer items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
+                    <Download className="h-4 w-4 text-gray-400" />
                     <div>Télécharger</div>
                   </div>
                 </div>
@@ -208,18 +208,18 @@ export default function Done() {
                     sendAttestation({ type: "1", template: "certificate" });
                     setOpenAttestationButton(false);
                   }}>
-                  <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                    <FiMail className="text-gray-400 w-4 h-4" />
+                  <div className="group flex cursor-pointer items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
+                    <FiMail className="h-4 w-4 text-gray-400" />
                     <div>Envoyer par mail</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-center gap-3 mt-4">
+          <div className="mt-4 flex flex-col items-center gap-3">
             <Unlock />
-            <div className="leading-7 text-xl text-center font-bold">Le code de la route, c’est facile !</div>
-            <div className="text-xs leading-relaxed font-medium text-gray-500 text-center">
+            <div className="text-center text-xl font-bold leading-7">Le code de la route, c’est facile !</div>
+            <div className="text-center text-xs font-medium leading-relaxed text-gray-500">
               Vous bénéficiez désormais d’un accès <strong>gratuit</strong> à la plateforme en ligne d’apprentissage du code de la route.{" "}
               <a
                 target="_blank"

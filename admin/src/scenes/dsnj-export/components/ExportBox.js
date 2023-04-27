@@ -20,7 +20,7 @@ const BoxContent = ({ availableFrom, availableUntil, onChangeDate, onDownload, e
     return (
       <>
         <DatePicker className="flex-1" value={availableUntil} disabled label="Disponible jusqu’au" />
-        <PlainButton disabled={isLoading} spinner={isLoading} className="w-full mt-4" onClick={onDownload}>
+        <PlainButton disabled={isLoading} spinner={isLoading} className="mt-4 w-full" onClick={onDownload}>
           {!isLoading && <Download className="mr-1" />}
           Télécharger
         </PlainButton>
@@ -40,8 +40,8 @@ const BoxContent = ({ availableFrom, availableUntil, onChangeDate, onDownload, e
         minDate={todayPlusOneDay}
       />
       {editable && (
-        <button className="p-2 rounded-full bg-blue-600 cursor-pointer hover:scale-105 self-end mt-2" onClick={() => setDatePickerOpen(true)}>
-          <Pencil className="w-4 h-4 text-white" />
+        <button className="mt-2 cursor-pointer self-end rounded-full bg-blue-600 p-2 hover:scale-105" onClick={() => setDatePickerOpen(true)}>
+          <Pencil className="h-4 w-4 text-white" />
         </button>
       )}
     </>
@@ -50,8 +50,8 @@ const BoxContent = ({ availableFrom, availableUntil, onChangeDate, onDownload, e
 
 const ExportBox = ({ title, availableFrom, availableUntil, onChangeDate, onDownload, editable = true, isDownloading = false }) => {
   return (
-    <div className="flex flex-col flex-1 bg-white rounded-lg shadow p-6 ">
-      <div className="text-lg font-medium mb-3">{title}</div>
+    <div className="flex flex-1 flex-col rounded-lg bg-white p-6 shadow ">
+      <div className="mb-3 text-lg font-medium">{title}</div>
       <BoxContent availableFrom={availableFrom} availableUntil={availableUntil} onChangeDate={onChangeDate} onDownload={onDownload} editable={editable} isLoading={isDownloading} />
     </div>
   );

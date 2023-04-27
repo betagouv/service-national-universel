@@ -116,9 +116,9 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen }) {
         <div>
           <ReactiveBase url={`${apiURL}/es`} app={`sessionphase1young/${focusedSession._id}`} headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
-              <div className="flex-1 relative">
-                <div className="flex flex-col mx-8">
-                  <div className="flex flex-row justify-between w-full">
+              <div className="relative flex-1">
+                <div className="mx-8 flex flex-col">
+                  <div className="flex w-full flex-row justify-between">
                     <div className="flex items-center gap-2">
                       <DataSearch
                         defaultQuery={getDefaultQuery}
@@ -135,14 +135,14 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen }) {
                         onValueChange={(e) => updateFilter({ SEARCH: e })}
                       />
                       <div
-                        className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
+                        className="flex cursor-pointer items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-[14px] font-medium text-gray-700 hover:underline"
                         onClick={() => setFilterVisible((e) => !e)}>
                         <FilterSvg className="text-gray-400" />
                         Filtres
                       </div>
                       <div>
                         {youngSelected?.length > 0 ? (
-                          <div className="text-gray-600 font-normal text-sm">
+                          <div className="text-sm font-normal text-gray-600">
                             <span className="font-bold">{youngSelected?.length}</span>&nbsp;sélectionné{youngSelected?.length > 1 ? "s" : ""}
                           </div>
                         ) : null}
@@ -183,7 +183,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen }) {
                                   });
                                 },
                                 render: (
-                                  <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                                  <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
                                     <SpeakerPhone className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
                                     <div className="font-normal">
                                       Marquer <span className="font-bold">présent</span>
@@ -218,7 +218,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen }) {
                                   });
                                 },
                                 render: (
-                                  <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                                  <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
                                     <SpeakerPhone className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
                                     <div>
                                       Marquer <span className="font-bold">absent</span>
@@ -255,7 +255,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen }) {
                                   }
                                 },
                                 render: (
-                                  <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                                  <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
                                     <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
                                     <div>
                                       Marquer <span className="font-bold">présent</span>
@@ -287,7 +287,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen }) {
                                   }
                                 },
                                 render: (
-                                  <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                                  <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
                                     <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
                                     <div>
                                       Marquer <span className="font-bold">absent</span>
@@ -313,7 +313,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen }) {
                                   });
                                 },
                                 render: (
-                                  <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                                  <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
                                     <ArrowCircleRight className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
                                     Renseigner un départ
                                     {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
@@ -327,8 +327,8 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen }) {
                     </div>
                   </div>
 
-                  <div className={`mt-3 gap-2 flex flex-wrap items-center ${!filterVisible ? "hidden" : ""}`}>
-                    <div className="uppercase text-xs text-snu-purple-800">Général</div>
+                  <div className={`mt-3 flex flex-wrap items-center gap-2 ${!filterVisible ? "hidden" : ""}`}>
+                    <div className="text-xs uppercase text-snu-purple-800">Général</div>
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
@@ -363,8 +363,8 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen }) {
                     <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} onValueChange={(e) => updateFilter({ REGION: e })} />
                     <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} onValueChange={(e) => updateFilter({ DEPARTMENT: e })} />
                   </div>
-                  <div className={`mt-3 gap-2 flex flex-wrap items-center ${!filterVisible ? "hidden" : ""}`}>
-                    <div className="uppercase text-xs text-snu-purple-800">Dossier</div>
+                  <div className={`mt-3 flex flex-wrap items-center gap-2 ${!filterVisible ? "hidden" : ""}`}>
+                    <div className="text-xs uppercase text-snu-purple-800">Dossier</div>
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
@@ -556,8 +556,8 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen }) {
                       onValueChange={(e) => updateFilter({ AUTOTEST: e })}
                     />
                   </div>
-                  <div className={`mt-3 gap-2 flex flex-wrap items-center ${!filterVisible ? "hidden" : ""}`}>
-                    <div className="uppercase text-xs text-snu-purple-800">Pointage</div>
+                  <div className={`mt-3 flex flex-wrap items-center gap-2 ${!filterVisible ? "hidden" : ""}`}>
+                    <div className="text-xs uppercase text-snu-purple-800">Pointage</div>
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
@@ -641,9 +641,9 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen }) {
                       if (rawData?.hits?.hits) setYoungsInPage(rawData.hits.hits.map((h) => ({ _id: h._id, firstName: h._source.firstName, lastName: h._source.lastName })));
                     }}
                     render={({ data }) => (
-                      <table className="w-full mt-6">
+                      <table className="mt-6 w-full">
                         <thead className="">
-                          <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100">
+                          <tr className="border-y-[1px] border-gray-100 text-xs uppercase text-gray-400">
                             <th className="py-3 pl-4">
                               <input ref={checkboxRef} className="cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
                             </th>
@@ -747,7 +747,7 @@ const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen }) 
   return (
     <>
       <tr className={`${!opened && "hover:!bg-gray-100"}`} onClick={onClick}>
-        <td className={`${bgColor} pl-4 ml-2 rounded-l-lg`}>
+        <td className={`${bgColor} ml-2 rounded-l-lg pl-4`}>
           <div onClick={(e) => e.stopPropagation()}>
             <input className="cursor-pointer" type="checkbox" checked={selected} onChange={() => onSelect(value)} />
           </div>
@@ -755,16 +755,16 @@ const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen }) 
         <td className={`${bgColor} py-3 `}>
           <div>
             <div className={`font-bold ${mainTextColor} text-[15px]`}>{`${hit.firstName} ${hit.lastName}`}</div>
-            <div className={`font-normal text-xs ${secondTextColor}`}>
+            <div className={`text-xs font-normal ${secondTextColor}`}>
               {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
             </div>
           </div>
         </td>
         <td className={`${bgColor}`}>
-          <div className="font-normal text-xs text-[#242526]" onClick={(e) => e.stopPropagation()}>
+          <div className="text-xs font-normal text-[#242526]" onClick={(e) => e.stopPropagation()}>
             {isYoungCheckinOpen ? (
               <select
-                className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer ${cohesionStayPresenceBgColor} ${cohesionStayPresenceTextColor}`}
+                className={`cursor-pointer rounded-lg border-[1px] border-gray-200 py-2 px-3 text-black ${cohesionStayPresenceBgColor} ${cohesionStayPresenceTextColor}`}
                 value={value.cohesionStayPresence || ""}
                 onChange={(e) => {
                   setModalPointagePresenceArrivee({
@@ -792,10 +792,10 @@ const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen }) 
           </div>
         </td>
         <td className={`${bgColor}`}>
-          <div className="font-normal text-xs text-[#242526]" onClick={(e) => e.stopPropagation()}>
+          <div className="text-xs font-normal text-[#242526]" onClick={(e) => e.stopPropagation()}>
             {isYoungCheckinOpen ? (
               <select
-                className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer ${presenceJDMBgColor} ${presenceJDMTextColor} disabled:text-gray-500 disabled:cursor-auto`}
+                className={`cursor-pointer rounded-lg border-[1px] border-gray-200 py-2 px-3 text-black ${presenceJDMBgColor} ${presenceJDMTextColor} disabled:cursor-auto disabled:text-gray-500`}
                 value={value.presenceJDM || ""}
                 disabled={value.cohesionStayPresence === "false"}
                 onChange={(e) => {
@@ -823,10 +823,10 @@ const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen }) 
             )}
           </div>
         </td>
-        <td className={`${bgColor} rounded-r-lg mr-2`}>
-          <div className={`font-normal text-xs  ${mainTextColor}`} onClick={(e) => e.stopPropagation()}>
+        <td className={`${bgColor} mr-2 rounded-r-lg`}>
+          <div className={`text-xs font-normal  ${mainTextColor}`} onClick={(e) => e.stopPropagation()}>
             <div
-              className="flex gap-1 items-center group cursor-pointer"
+              className="group flex cursor-pointer items-center gap-1"
               onClick={(e) => {
                 if (isYoungCheckinOpen) {
                   setModalPointageDepart({

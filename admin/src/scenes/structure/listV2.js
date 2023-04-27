@@ -135,7 +135,7 @@ export default function List() {
       <header className="m-8 flex items-center justify-between">
         {user.role === ROLES.SUPERVISOR ? <Title>Mes structures affiliées</Title> : <Title>Toutes les structures</Title>}
         <Link
-          className="px-3 py-2 bg-blue-600 rounded-lg text-sm text-white hover:brightness-110 active:brightness-125"
+          className="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:brightness-110 active:brightness-125"
           to="/structure/create"
           onClick={() => plausibleEvent("Structure/CTA - Inviter nouvelle structure")}>
           Inviter une nouvelle structure
@@ -151,8 +151,8 @@ export default function List() {
           filters={FILTERS}
           getExportQuery={getExportQuery}
         />
-        <main className="bg-white rounded-xl m-8 shadow-sm">
-          <div className="flex p-4 gap-4 border-b-[1px] border-gray-100 h-[90px]">
+        <main className="m-8 rounded-xl bg-white shadow-sm">
+          <div className="flex h-[90px] gap-4 border-b-[1px] border-gray-100 p-4">
             <DataSearch
               defaultQuery={getDefaultQuery}
               showIcon={false}
@@ -166,11 +166,11 @@ export default function List() {
               URLParams={true}
               queryFormat="and"
             />
-            <button onClick={handleShowFilter} className="group py-2 px-3 rounded-lg flex items-center gap-2 bg-gray-100 hover:bg-gray-400 transition">
-              <FilterIcon className="fill-gray-400 group-hover:fill-gray-100 transition" />
-              <p className="text-gray-400 group-hover:text-gray-100 transition">Filtres</p>
+            <button onClick={handleShowFilter} className="group flex items-center gap-2 rounded-lg bg-gray-100 py-2 px-3 transition hover:bg-gray-400">
+              <FilterIcon className="fill-gray-400 transition group-hover:fill-gray-100" />
+              <p className="text-gray-400 transition group-hover:text-gray-100">Filtres</p>
             </button>
-            <button className="flex gap-2 items-center rounded-lg px-3 text-sm border-[1px] border-gray-300 hover:bg-gray-100 ml-auto" onClick={() => setIsExportOpen(true)}>
+            <button className="ml-auto flex items-center gap-2 rounded-lg border-[1px] border-gray-300 px-3 text-sm hover:bg-gray-100" onClick={() => setIsExportOpen(true)}>
               <BsDownload className="text-gray-400" />
               <p>Exporter</p>
             </button>
@@ -178,7 +178,7 @@ export default function List() {
           <div className={`flex items-center gap-2 py-2 px-4 ${!filterVisible ? "hidden" : ""}`}>
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-x-2">
-                <div className="uppercase text-xs text-blue-600 mr-2">Généralités</div>
+                <div className="mr-2 text-xs uppercase text-blue-600">Généralités</div>
                 <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
                 <MultiDropdownList
@@ -241,7 +241,7 @@ export default function List() {
                 />
               </div>
               <div className="flex items-center gap-x-2">
-                <div className="uppercase text-xs text-blue-600 mr-2">Spécificités</div>
+                <div className="mr-2 text-xs uppercase text-blue-600">Spécificités</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -289,10 +289,10 @@ export default function List() {
               }}
               render={({ data }) => {
                 return (
-                  <table className="table-fixed w-full">
-                    <thead className="uppercase text-gray-500 text-xs font-semibold">
+                  <table className="w-full table-fixed">
+                    <thead className="text-xs font-semibold uppercase text-gray-500">
                       <tr className="border-b-[1px] border-gray-100">
-                        <th className="pl-8 py-3 w-1/3">Structures</th>
+                        <th className="w-1/3 py-3 pl-8">Structures</th>
                         <th>Equipe</th>
                         <th>Missions</th>
                         <th>Contexte</th>
@@ -332,7 +332,7 @@ const Hit = ({ hit, onClick, missions, responsibles }) => {
   };
   return (
     <tr className="border-b-[1px] border-gray-100 text-xs hover:bg-gray-50" onClick={onClick}>
-      <td className="pl-8 py-3 space-y-1">
+      <td className="space-y-1 py-3 pl-8">
         <p className="text-base font-semibold">{hit.name}</p>
         <p>
           {translate(hit.legalStatus)} • Créée le {formatStringLongDate(hit.createdAt)}

@@ -76,24 +76,24 @@ export default function GroupCenter({ group, className = "", onChangeStep, onCha
   return (
     <GroupBox className={className}>
       <GroupHeader onBack={() => onChangeStep(GROUPSTEPS.MODIFICATION)}>Choisissez un centre</GroupHeader>
-      <div className="flex items-center justify-between mb-5">
+      <div className="mb-5 flex items-center justify-between">
         <input
           type="text"
-          className="appearance-none bg-[#FFFFFF] text-sm text-gray-600 py-3 px-5 border border-gray-300 rounded-lg"
+          className="appearance-none rounded-lg border border-gray-300 bg-[#FFFFFF] py-3 px-5 text-sm text-gray-600"
           placeholder="Rechercher un centre..."
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         />
         <div className="relative" onClick={() => setTypeDropdownOpened(!typeDropdownOpened)}>
-          <div className="p-2.5 text-sm text-gray-700 flex items-center hover:text-blue-600 cursor-pointer">
-            {type === "all" ? "Voir tout" : "Places disponibles"} <ChevronDown className="w-[10px] h-[6px] ml-3" />
+          <div className="flex cursor-pointer items-center p-2.5 text-sm text-gray-700 hover:text-blue-600">
+            {type === "all" ? "Voir tout" : "Places disponibles"} <ChevronDown className="ml-3 h-[6px] w-[10px]" />
           </div>
           {typeDropdownOpened && (
-            <div className="absolute bg-[#FFFFFF] shadow rounded-md text-sm right-[0px] whitespace-nowrap z-10">
-              <div className={`px-4 py-2 ${type === "all" ? "text-gray-500" : "text-gray-700 cursor-pointer whitespace-nowrap"}`} onClick={() => setType("all")}>
+            <div className="absolute right-[0px] z-10 whitespace-nowrap rounded-md bg-[#FFFFFF] text-sm shadow">
+              <div className={`px-4 py-2 ${type === "all" ? "text-gray-500" : "cursor-pointer whitespace-nowrap text-gray-700"}`} onClick={() => setType("all")}>
                 Voir tout
               </div>
-              <div className={`px-4 py-2 ${type === "available" ? "text-gray-500" : "text-gray-700 cursor-pointer whitespace-nowrap"}`} onClick={() => setType("available")}>
+              <div className={`px-4 py-2 ${type === "available" ? "text-gray-500" : "cursor-pointer whitespace-nowrap text-gray-700"}`} onClick={() => setType("available")}>
                 Places disponibles uniquement
               </div>
             </div>
@@ -110,21 +110,21 @@ export default function GroupCenter({ group, className = "", onChangeStep, onCha
             {list.map((center) => (
               <div
                 key={center.name}
-                className={`group border-t border-t-gray-200 p-4 ${center._id === group.centerId ? "bg-gray-200" : ""} hover:bg-gray-200 flex items-center justify-between`}>
+                className={`group border-t border-t-gray-200 p-4 ${center._id === group.centerId ? "bg-gray-200" : ""} flex items-center justify-between hover:bg-gray-200`}>
                 <div className="">
-                  <div className="text-base text-[#242526] font-bold pb-2.5">{center.name}</div>
+                  <div className="pb-2.5 text-base font-bold text-[#242526]">{center.name}</div>
                   <div className="text-xs text-[#738297]">
                     {center.city} • {center.department}
                   </div>
                 </div>
                 <div
-                  className={`block group-hover:hidden text-xs leading-5 font-bold px-1.5 rounded uppercase ${
-                    center.placesTotal < group.youngsVolume ? (center.placesTotal <= 0 ? "text-gray-700 bg-gray-200" : "text-red-700 bg-red-200") : "text-[#0063CB] bg-[#E8EDFF]"
+                  className={`block rounded px-1.5 text-xs font-bold uppercase leading-5 group-hover:hidden ${
+                    center.placesTotal < group.youngsVolume ? (center.placesTotal <= 0 ? "bg-gray-200 text-gray-700" : "bg-red-200 text-red-700") : "bg-[#E8EDFF] text-[#0063CB]"
                   }`}>
                   {center.placesTotal > 0 ? center.placesTotal + " places" : "COMPLET"}
                 </div>
                 <div
-                  className={`hidden group-hover:flex w-[32px] h-[32px] bg-blue-600 rounded-full text-[#FFFFFF] items-center justify-center cursor-pointer`}
+                  className={`hidden h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-full bg-blue-600 text-[#FFFFFF] group-hover:flex`}
                   onClick={() => selectCenter(center)}>
                   <ArrowNarrowLeft className="rotate-180" />
                 </div>

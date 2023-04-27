@@ -24,7 +24,7 @@ export default function Status({ data, filter, getLink, getExportQuery }) {
 
   return (
     <React.Fragment>
-      <div className="flex justify-between items-center mt-4 mb-2">
+      <div className="mt-4 mb-2 flex items-center justify-between">
         <h3 className="text-xl">Statut des missions proposées par les structures</h3>
         <div>
           <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>

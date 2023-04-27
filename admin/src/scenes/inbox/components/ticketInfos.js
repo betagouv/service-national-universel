@@ -22,8 +22,7 @@ export default function TicketInfos({ ticket }) {
           const { data } = await api.get(`/young?email=${email}`);
           setUser(data);
           setTag("EMETTEUR_Volontaire");
-        }
-        else {
+        } else {
           const response = await api.get(`/referent?email=${email}`);
           setUser(response.data);
         }
@@ -42,7 +41,7 @@ export default function TicketInfos({ ticket }) {
   }, [user]);
 
   const resolveTicket = async () => {
-    const response = await api.put(`/zammood/ticket/${ticket._id}`, { status: "CLOSED" })
+    const response = await api.put(`/zammood/ticket/${ticket._id}`, { status: "CLOSED" });
     if (!response.ok) console.log(response.status, "error");
     if (response.ok) toastr.success("Ticket résolu !");
     history.go(0);
