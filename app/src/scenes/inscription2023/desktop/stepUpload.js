@@ -25,12 +25,15 @@ export default function StepUpload() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const [hasChanged, setHasChanged] = useState(false);
-  const [files, setFiles] = useState([]);
+  const [recto, setRecto] = useState([]);
+  const [verso, setVerso] = useState([]);
+  const files = [...recto, ...verso];
   const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
   const corrections = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
 
   function resetState() {
-    setFiles([]);
+    setRecto([]);
+    setVerso([]);
     setHasChanged(false);
     setLoading(false);
   }
@@ -128,7 +131,15 @@ export default function StepUpload() {
     }
   }
 
-  const isEnabled = corrections?.length ? hasChanged && !loading && !error.text : (young?.files?.cniFiles?.length || files?.length) && date && !loading && !error.text;
+  function checkIfValid() {
+    if (corrections?.length) {
+      return hasChanged && !loading && !error.text;
+    } else {
+      return (young?.files?.cniFiles?.length || (recto?.length && (verso.length || category === "passport"))) && date && !loading && !error.text;
+    }
+  }
+
+  const isEnabled = checkIfValid();
 
   if (!category) return <div>Loading</div>;
 
@@ -158,17 +169,20 @@ export default function StepUpload() {
         Toutes les informations doivent être <strong>lisibles</strong>, le document doit être visible <strong>entièrement</strong>, la photo doit être <strong>nette</strong>. Le
         document doit être téléversé en <strong>recto</strong> et <strong>verso</strong>.
       </div>
-      <hr className="my-8 h-px border-0 bg-gray-200" />
-      <div className="my-4">Ajouter un fichier</div>
-      <div className="my-4 text-sm text-gray-500">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Trois fichiers maximum.</div>
+      <hr className="my-8 h-px bg-gray-200 border-0" />
+
+      <p className="my-4">
+        Ajouter <strong>le recto</strong>
+      </p>
+      <div className="text-gray-500 text-sm my-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Trois fichiers maximum.</div>
       <input
         type="file"
         multiple
-        id="file-upload"
-        name="file-upload"
+        id="file-upload-recto"
+        name="file-upload-recto"
         accept=".png, .jpg, .jpeg, .pdf"
         onChange={(e) => {
-          setFiles(files.concat(Array.from(e.target.files)));
+          setRecto(e.target.files);
           setError({});
           setHasChanged(true);
         }}
@@ -176,14 +190,14 @@ export default function StepUpload() {
       />
       <div className="my-4 flex w-full">
         <div>
-          <label htmlFor="file-upload" className="cursor-pointer rounded bg-[#EEEEEE] py-2 px-3 text-sm text-gray-600">
+          <label htmlFor="file-upload-recto" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
             Parcourir...
           </label>
         </div>
         <div className="ml-4 mt-2">
-          {files ? (
-            Array.from(files).map((e) => (
-              <p className="text-sm text-gray-800" key={e.name}>
+          {recto ? (
+            Array.from(recto).map((e) => (
+              <p className="text-gray-800 text-sm" key={e.name}>
                 {e.name}
               </p>
             ))
@@ -192,14 +206,59 @@ export default function StepUpload() {
           )}
         </div>
       </div>
-      <div className="my-4 text-sm text-gray-800">
+
+      {category !== "passport" && (
+        <>
+          <hr className="my-8 h-px bg-gray-200 border-0" />
+
+          <p className="my-4">
+            Ajouter <strong>le verso</strong>
+          </p>
+          <div className="text-gray-500 text-sm my-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Trois fichiers maximum.</div>
+          <input
+            type="file"
+            multiple
+            id="file-upload-verso"
+            name="file-upload-verso"
+            accept=".png, .jpg, .jpeg, .pdf"
+            onChange={(e) => {
+              setVerso(e.target.files);
+              setError({});
+              setHasChanged(true);
+            }}
+            className="hidden"
+          />
+          <div className="flex w-full my-4">
+            <div>
+              <label htmlFor="file-upload-verso" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
+                Parcourir...
+              </label>
+            </div>
+            <div className="ml-4 mt-2">
+              {verso ? (
+                Array.from(verso).map((e) => (
+                  <p className="text-gray-800 text-sm" key={e.name}>
+                    {e.name}
+                  </p>
+                ))
+              ) : (
+                <div className="text-gray-800 text-sm">Aucun fichier sélectionné.</div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      <div className="text-gray-800 text-sm my-4">
         Vous avez besoin d’aide pour téléverser les documents ?{" "}
         <a href="https://support.snu.gouv.fr/base-de-connaissance/je-televerse-un-document/" className="underline">
           Cliquez ici
         </a>
         .
       </div>
+
       {error?.text && young?.files?.cniFiles?.length + files?.length > 2 && <MyDocs />}
+
       {(files || date) && (
         <>
           <hr className="my-8 h-px border-0 bg-gray-200" />
@@ -233,6 +292,7 @@ export default function StepUpload() {
           </div>
         </>
       )}
+
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
     </DesktopPageContainer>
   );
