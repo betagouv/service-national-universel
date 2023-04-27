@@ -21,12 +21,12 @@ export default function Select({ options, selected, setSelected, label, readOnly
         <>
           <div className="relative w-full">
             <Listbox.Button className="relative w-full text-left">
-              <div className={` ${readOnly ? "cursor-default" : "cursor-pointer"} ${border(open)} bg-white py-2 px-2.5 items-center space-y-0 gap-0 flex rounded-lg border-[1px]`}>
+              <div className={` ${readOnly ? "cursor-default" : "cursor-pointer"} ${border(open)} flex items-center gap-0 space-y-0 rounded-lg border-[1px] bg-white py-2 px-2.5`}>
                 {icon && icon}
-                <div className="w-full flex items-center justify-between">
+                <div className="flex w-full items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">{label}</p>
-                    <p className="block truncate h-5">{selected?.label || selected}</p>
+                    <p className="block h-5 truncate">{selected?.label || selected}</p>
                   </div>
                   <div className="pointer-events-none flex items-center pr-2">
                     {!readOnly && open && <BsChevronUp className="h-4 w-4 text-gray-900" aria-hidden="true" />}
@@ -38,11 +38,11 @@ export default function Select({ options, selected, setSelected, label, readOnly
             </Listbox.Button>
 
             <Transition show={!readOnly && open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-              <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+              <Listbox.Options className="max-h-60 absolute z-10 mt-1 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                 {options.map((option) => (
                   <Listbox.Option
                     key={option.value || option}
-                    className={({ active }) => classNames(active ? "text-white bg-blue-600" : "text-gray-900", "relative cursor-default select-none py-2 pl-3 pr-9 list-none")}
+                    className={({ active }) => classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-default select-none list-none py-2 pl-3 pr-9")}
                     value={option}>
                     {({ selected, active }) => (
                       <>

@@ -16,16 +16,16 @@ export default function UserCard({ user }) {
 
   if (!user) return null;
   return (
-    <a href={getlink(user)} className=" flex flex-col hover:cursor-pointer group w-full">
+    <a href={getlink(user)} className=" group flex w-full flex-col hover:cursor-pointer">
       <div className="flex items-center gap-2">
-        <div className="shrink-0 rounded-full w-10 h-10 bg-slate-100 font-medium flex items-center justify-center border-2 border-white text-blue-600 uppercase group-hover:bg-blue-600 group-hover:text-slate-100 transition">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-white bg-slate-100 font-medium uppercase text-blue-600 transition group-hover:bg-blue-600 group-hover:text-slate-100">
           {getAvatar(user)}
         </div>
-        <div className="flex flex-col leading-5 w-10/12">
-          <p className="font-medium truncate underline-offset-2 decoration-2 w-full">
+        <div className="flex w-10/12 flex-col leading-5">
+          <p className="w-full truncate font-medium decoration-2 underline-offset-2">
             {user.firstName} {user.lastName && user.lastName}
           </p>
-          <p className="capitalize text-gray-400 truncate underline-offset-2 decoration-2 w-full">{translate(user?.role)}</p>
+          <p className="w-full truncate capitalize text-gray-400 decoration-2 underline-offset-2">{translate(user?.role)}</p>
         </div>
       </div>
     </a>

@@ -27,12 +27,12 @@ export default function Field({
 
   return (
     <div className={className}>
-      <div className={`relative px-2.5 border-[1px] w-full rounded-md py-2 ${border(readOnly, errors[name])}`} key={name}>
-        <div className="w-full flex justify-between">
-          {label && <p className="font-normal text-xs text-[#6B7280]">{label}</p>}
+      <div className={`relative w-full rounded-md border-[1px] px-2.5 py-2 ${border(readOnly, errors[name])}`} key={name}>
+        <div className="flex w-full justify-between">
+          {label && <p className="text-xs font-normal text-[#6B7280]">{label}</p>}
           {copy && value && (
             <div
-              className="flex items-center justify-center cursor-pointer hover:scale-105"
+              className="flex cursor-pointer items-center justify-center hover:scale-105"
               onClick={() => {
                 copyToClipboard(value);
                 setCopied(true);
@@ -53,14 +53,14 @@ export default function Field({
             autoFocus={autoFocus}
             value={value}
             onChange={handleChange}
-            className={`w-full h-5 ${!readOnly && isJvaMission && "bg-gray-200"}`}
+            className={`h-5 w-full ${!readOnly && isJvaMission && "bg-gray-200"}`}
           />
         )}
 
         {type === "textarea" && (
           <textarea rows={row} readOnly={readOnly || isJvaMission} type="text" name={name} value={value} onChange={handleChange} className={"w-full text-start " + className} />
         )}
-        {errors[name] && <div className="text-red-500 mt-2">{errors[name]}</div>}
+        {errors[name] && <div className="mt-2 text-red-500">{errors[name]}</div>}
       </div>
     </div>
   );

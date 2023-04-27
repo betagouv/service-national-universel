@@ -5,11 +5,11 @@ export default function LoadingButton({ loading, children, disabled, loadingText
   return (
     <button
       disabled={loading || disabled}
-      className={`whitespace-nowrap overflow-hidden text-ellipsis m-0 ${loading || disabled ? "cursor-not-allowed" : "cursor-pointer"} ${style}`}
+      className={`m-0 overflow-hidden text-ellipsis whitespace-nowrap ${loading || disabled ? "cursor-not-allowed" : "cursor-pointer"} ${style}`}
       {...rest}>
       {loading && loadingText && (
         <>
-          <Spinner size="sm" key={loadingText} className="border-[0.1em] mr-[0.5em]" />
+          <Spinner size="sm" key={loadingText} className="mr-[0.5em] border-[0.1em]" />
           {loadingText}
         </>
       )}

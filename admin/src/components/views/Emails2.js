@@ -31,9 +31,9 @@ export default function Emails({ email }) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md text-gray-900">
+    <div className="rounded-xl bg-white text-gray-900 shadow-md">
       <ReactiveBase url={`${apiURL}/es`} app="email" headers={{ Authorization: `JWT ${API.getToken()}` }}>
-        <div className="p-4 space-y-6 font-marianne">
+        <div className="space-y-6 p-4 font-marianne">
           <div className="flex gap-4">
             <DataSearch
               defaultQuery={getDefaultQuery}
@@ -47,14 +47,14 @@ export default function Emails({ email }) {
               className="datasearch-searchfield"
               innerClass={{ input: "searchbox" }}
             />
-            <button onClick={() => setOpen(!open)} className="group py-2 px-3 rounded-lg flex items-center gap-2 bg-gray-100 hover:bg-gray-400 transition">
-              <FilterIcon className="fill-gray-400 group-hover:fill-gray-100 transition" />
-              <p className="text-gray-400 group-hover:text-gray-100 font-marianne">Filtres</p>
+            <button onClick={() => setOpen(!open)} className="group flex items-center gap-2 rounded-lg bg-gray-100 py-2 px-3 transition hover:bg-gray-400">
+              <FilterIcon className="fill-gray-400 transition group-hover:fill-gray-100" />
+              <p className="font-marianne text-gray-400 group-hover:text-gray-100">Filtres</p>
             </button>
           </div>
 
           {open && (
-            <div className="flex flex-wrap gap-6 items-center">
+            <div className="flex flex-wrap items-center gap-6">
               <MultiDropdownList
                 defaultQuery={getDefaultQuery}
                 className="dropdown-filter"
@@ -129,13 +129,13 @@ export default function Emails({ email }) {
           render={({ data }) => {
             if (!data || data.length === 0) return null;
             return (
-              <table className="table-auto w-full font-marianne">
+              <table className="w-full table-auto font-marianne">
                 <thead>
-                  <tr className="uppercase border-t border-t-slate-100">
-                    <th className="w-1/2 font-normal px-4 py-3 text-xs text-gray-500">Objet de l&apos;email</th>
-                    <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Template ID</th>
-                    {user.role === ROLES.ADMIN && <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Dernier statut</th>}
-                    <th className="w-1/6 font-normal px-4 py-3 text-xs text-gray-500">Date{user.role === ROLES.ADMIN && " du dernier statut"}</th>
+                  <tr className="border-t border-t-slate-100 uppercase">
+                    <th className="w-1/2 px-4 py-3 text-xs font-normal text-gray-500">Objet de l&apos;email</th>
+                    <th className="w-1/6 px-4 py-3 text-xs font-normal text-gray-500">Template ID</th>
+                    {user.role === ROLES.ADMIN && <th className="w-1/6 px-4 py-3 text-xs font-normal text-gray-500">Dernier statut</th>}
+                    <th className="w-1/6 px-4 py-3 text-xs font-normal text-gray-500">Date{user.role === ROLES.ADMIN && " du dernier statut"}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -160,15 +160,15 @@ function Email({ email }) {
     <>
       <tr
         aria-checked={open}
-        className="border-t border-gray-100 hover:bg-gray-50 text-gray-700 cursor-pointer aria-checked:bg-blue-500 aria-checked:text-white transition"
+        className="cursor-pointer border-t border-gray-100 text-gray-700 transition hover:bg-gray-50 aria-checked:bg-blue-500 aria-checked:text-white"
         onClick={() => setOpen(!open)}>
         <td className="px-4 py-3">
-          <p className="text-sm font-semibold max-w-2xl truncate">{email.subject}</p>
+          <p className="max-w-2xl truncate text-sm font-semibold">{email.subject}</p>
           <p className="text-xs">{TEMPLATE_DESCRIPTIONS[email.templateId] || ""}</p>
         </td>
-        <td className="px-4 py-3 truncate text-xs">{email.templateId || ""}</td>
-        {user.role === ROLES.ADMIN && <td className="px-4 py-3 truncate text-xs">{translateEmails(email.event)}</td>}
-        <td className="px-4 py-3 truncate text-xs">{formatLongDateFR(email.date)}</td>
+        <td className="truncate px-4 py-3 text-xs">{email.templateId || ""}</td>
+        {user.role === ROLES.ADMIN && <td className="truncate px-4 py-3 text-xs">{translateEmails(email.event)}</td>}
+        <td className="truncate px-4 py-3 text-xs">{formatLongDateFR(email.date)}</td>
       </tr>
       <EmailPanel open={open} setOpen={setOpen} email={email} />
     </>

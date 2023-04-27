@@ -7,7 +7,7 @@ export default function IconButton({ icon, value, name, bgColor, onClick, button
       {...rest}
       value={value}
       name={name}
-      className={` ${bgColor} rounded-full p-2 w-9 h-9 hover:shadow-md flex justify-center items-center m-1`}
+      className={` ${bgColor} m-1 flex h-9 w-9 items-center justify-center rounded-full p-2 hover:shadow-md`}
       loading={buttonsLoading}
       onClick={onClick}>
       {icon ? <img src={icon} alt="icon button" /> : <Download />}

@@ -23,10 +23,10 @@ export default function Select({ options, selected, setSelected, label = "", rea
                 <div
                   className={`flex flex-row ${!readOnly ? "cursor-default" : "cursor-pointer"} rounded-lg border ${
                     error ? "border-red-500" : "border-gray-300"
-                  } bg-white py-2 px-2.5 items-center`}>
+                  } items-center bg-white py-2 px-2.5`}>
                   {icon ? <span className="pr-[12px]">{icon}</span> : null}
-                  <div className={`flex flex-row w-full items-center justify-center `}>
-                    <div className="flex flex-col justify-center w-full">
+                  <div className={`flex w-full flex-row items-center justify-center `}>
+                    <div className="flex w-full flex-col justify-center">
                       <div className="text-xs text-gray-500">{label}</div>
                       <div className="">{options.find((e) => e.value === selected)?.label}</div>
                     </div>
@@ -41,11 +41,11 @@ export default function Select({ options, selected, setSelected, label = "", rea
               </Listbox.Button>
 
               <Transition show={!readOnly && open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                <Listbox.Options className="max-h-60 absolute z-10 mt-1 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                   {options.map((option) => (
                     <Listbox.Option
                       key={option.value}
-                      className={({ active }) => classNames(active ? "text-white bg-blue-600" : "text-gray-900", "relative cursor-default select-none py-2 pl-3 pr-9 list-none")}
+                      className={({ active }) => classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-default select-none list-none py-2 pl-3 pr-9")}
                       value={option}>
                       {({ selected, active }) => (
                         <>
@@ -67,7 +67,7 @@ export default function Select({ options, selected, setSelected, label = "", rea
                     <InfoCircle height={16} width={16} color="#9ca3af" />
                   </span>
                   <ReactTooltip id={tooltipId} type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                    <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">{hint}</p>
+                    <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">{hint}</p>
                   </ReactTooltip>
                 </>
               )}
