@@ -3,7 +3,16 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
-import { canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession, canUpdateMeetingPoint, canViewMeetingPointId, isPdrEditionOpen, ROLES, START_DATE_SESSION_PHASE1 } from "snu-lib";
+import {
+  canCreateMeetingPoint,
+  canDeleteMeetingPoint,
+  canDeleteMeetingPointSession,
+  canUpdateMeetingPoint,
+  canViewMeetingPointId,
+  isPdrEditionOpen,
+  ROLES,
+  START_DATE_SESSION_PHASE1,
+} from "snu-lib";
 import Pencil from "../../assets/icons/Pencil";
 import Trash from "../../assets/icons/Trash";
 import Breadcrumbs from "../../components/Breadcrumbs";
