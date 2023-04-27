@@ -1,3 +1,18 @@
+# [1.262.0](https://github.com/betagouv/service-national-universel/compare/v1.261.0...v1.262.0) (2023-04-27)
+
+
+### Bug Fixes
+
+* **api:** tutor name for missions ([#2547](https://github.com/betagouv/service-national-universel/issues/2547)) ([1f55c4d](https://github.com/betagouv/service-national-universel/commit/1f55c4d56a15f4b4e24dcb0f71c8160c2c60dd91))
+* **app:** display parent info on profil page ([ab2fb12](https://github.com/betagouv/service-national-universel/commit/ab2fb1262d3f4472ffff9a6e5dbe8483b6f170be))
+* **app:** parent form reset ([695fa5d](https://github.com/betagouv/service-national-universel/commit/695fa5d1831ef6501cb0c2bdba29bcc1bf3c0c74))
+* **app/api:** Amélio gestion d'erreur uploads ([#2545](https://github.com/betagouv/service-national-universel/issues/2545)) ([212a0be](https://github.com/betagouv/service-national-universel/commit/212a0bea1ea63939677d9bde264740efe8906c73))
+
+
+### Features
+
+* **app:** Inscription - Etape téléversement - Dissocier les uploads du recto et du verso de la CNI sur desktop ([#2544](https://github.com/betagouv/service-national-universel/issues/2544)) ([247b72d](https://github.com/betagouv/service-national-universel/commit/247b72d350f220e18eebe6cf34dfd4b2590777b4))
+
 # [1.261.0](https://github.com/betagouv/service-national-universel/compare/v1.260.0...v1.261.0) (2023-04-26)
 
 
