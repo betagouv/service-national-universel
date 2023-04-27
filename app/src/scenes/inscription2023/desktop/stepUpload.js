@@ -160,7 +160,6 @@ export default function StepUpload() {
       </div>
       <hr className="my-8 h-px bg-gray-200 border-0" />
       <div className="my-4">Ajouter un fichier</div>
-      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       <div className="text-gray-500 text-sm my-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Trois fichiers maximum.</div>
       <input
         type="file"
@@ -204,7 +203,7 @@ export default function StepUpload() {
       {(files || date) && (
         <>
           <hr className="my-8 h-px bg-gray-200 border-0" />
-          <div className="w-full flex">
+          <div className="my-4 w-full flex">
             <div className="w-1/2">
               <div className="text-xl font-medium">Renseignez la date d’expiration</div>
               <div className="text-gray-600 leading-loose mt-2 mb-8">
@@ -234,6 +233,7 @@ export default function StepUpload() {
           </div>
         </>
       )}
+      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
     </DesktopPageContainer>
   );
 }
