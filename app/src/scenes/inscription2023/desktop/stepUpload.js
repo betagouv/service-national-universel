@@ -177,7 +177,6 @@ export default function StepUpload() {
       <div className="text-gray-500 text-sm my-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Trois fichiers maximum.</div>
       <input
         type="file"
-        multiple
         id="file-upload-recto"
         name="file-upload-recto"
         accept=".png, .jpg, .jpeg, .pdf"
@@ -217,7 +216,6 @@ export default function StepUpload() {
           <div className="text-gray-500 text-sm my-4">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf. Trois fichiers maximum.</div>
           <input
             type="file"
-            multiple
             id="file-upload-verso"
             name="file-upload-verso"
             accept=".png, .jpg, .jpeg, .pdf"
