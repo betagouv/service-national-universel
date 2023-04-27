@@ -61,30 +61,6 @@ export default function StepUpload() {
     if (step === "date") return <ExpirationDate />;
   }
 
-  async function uploadFiles() {
-    try {
-      let files = [];
-      if (recto) files = [...files, ...recto];
-      if (verso) files = [...files, ...verso];
-      for (const file of files) {
-        if (file.size > 5000000) return { error: `Ce fichier ${files.name} est trop volumineux.` };
-      }
-      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
-      if (res.code === "FILE_CORRUPTED")
-        return {
-          error:
-            "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support : inscription@snu.gouv.fr",
-        };
-      if (!res.ok) {
-        capture(res.code);
-        return { error: res.code };
-      }
-    } catch (e) {
-      capture(e);
-      return { error: translate(e) };
-    }
-  }
-
   function resetState() {
     setRecto([]);
     setVerso([]);
