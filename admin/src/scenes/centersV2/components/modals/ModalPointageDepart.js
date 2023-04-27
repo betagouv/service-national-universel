@@ -70,15 +70,15 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
           <ArrowCircleRight width={36} height={36} />
         </div>
         <div className="m-4">
-          <div className="flex items-center justify-center text-gray-900 text-xl">{getTitle()}</div>
-          <div className="flex items-center justify-center text-gray-500 text-base font-normal text-center">{getMessage()}</div>
+          <div className="flex items-center justify-center text-xl text-gray-900">{getTitle()}</div>
+          <div className="flex items-center justify-center text-center text-base font-normal text-gray-500">{getMessage()}</div>
         </div>
-        <div className="flex gap-3 mx-4 mb-3">
-          <div className={`border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-            <label className="text-left text-gray-500 w-full">Motif du départ</label>
+        <div className="mx-4 mb-3 flex gap-3">
+          <div className={`rounded-lg border-[1px]  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+            <label className="w-full text-left text-gray-500">Motif du départ</label>
             <select
               required
-              className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
+              className="w-full cursor-pointer bg-inherit disabled:cursor-not-allowed"
               value={departSejourMotif}
               onChange={(e) => setDepartSejourMotif(e.target.value)}
               disabled={isLoading}>
@@ -93,21 +93,21 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
               ))}
             </select>
           </div>
-          <div className={`border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-            <label className="text-left text-gray-500 w-full">Date du départ</label>
+          <div className={`rounded-lg border-[1px]  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+            <label className="w-full text-left text-gray-500">Date du départ</label>
             <input
               required
               type="date"
-              className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
+              className="w-full cursor-pointer bg-inherit disabled:cursor-not-allowed"
               value={departSejourAt}
               onChange={(e) => setDepartSejourAt(e.target.value)}
               disabled={isLoading}
             />
           </div>
         </div>
-        <div className="flex mx-4">
-          <div className={`w-full border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-            <label className="text-left text-gray-500 w-full">Commentaire</label>
+        <div className="mx-4 flex">
+          <div className={`w-full rounded-lg border-[1px]  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+            <label className="w-full text-left text-gray-500">Commentaire</label>
             <textarea
               required
               placeholder="Votre commentaire"
@@ -121,28 +121,28 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
 
         {depart ? (
           <div className="flex justify-center">
-            <div className="flex items-center gap-2 text-sm text-red-500 hover:underline cursor-pointer mt-4" onClick={() => handleDelete()}>
+            <div className="mt-4 flex cursor-pointer items-center gap-2 text-sm text-red-500 hover:underline" onClick={() => handleDelete()}>
               <Trash className="h-4 w-4" />
               Supprimer
             </div>
           </div>
         ) : null}
-        <div className="flex p-4 gap-2">
+        <div className="flex gap-2 p-4">
           <button
-            className="flex items-center justify-center flex-1 border-[1px] border-gray-300 text-gray-700 rounded-lg py-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+            className="flex flex-1 cursor-pointer items-center justify-center rounded-lg border-[1px] border-gray-300 py-2 text-gray-700 disabled:cursor-wait disabled:opacity-50"
             disabled={isLoading}
             onClick={onClickCancel}>
             Annuler
           </button>
           {departSejourMotif && departSejourAt && departSejourMotifComment ? (
             <button
-              className="flex items-center justify-center flex-1 bg-snu-purple-300 text-white rounded-lg py-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+              className="flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-snu-purple-300 py-2 text-white disabled:cursor-wait disabled:opacity-50"
               disabled={isLoading}
               type="submit">
               Confirmer
             </button>
           ) : (
-            <div className="flex items-center justify-center flex-1 bg-snu-purple-300 text-white rounded-lg py-2 opacity-50 cursor-not-allowed">Confirmer</div>
+            <div className="flex flex-1 cursor-not-allowed items-center justify-center rounded-lg bg-snu-purple-300 py-2 text-white opacity-50">Confirmer</div>
           )}
         </div>
       </form>

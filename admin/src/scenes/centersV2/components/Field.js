@@ -13,7 +13,7 @@ export default function Field({ onChange, value, label, disabled = false, error,
   }, [copied]);
 
   return (
-    <div className={`flex flex-col border-[1px] border-gray-300 w-full py-2 px-2.5 rounded-lg ${disabled ? "bg-gray-100" : ""} ${error ? "border-red-500" : ""} ${className}`}>
+    <div className={`flex w-full flex-col rounded-lg border-[1px] border-gray-300 py-2 px-2.5 ${disabled ? "bg-gray-100" : ""} ${error ? "border-red-500" : ""} ${className}`}>
       <label className="text-xs leading-4 text-gray-500">{label}</label>
       <div className="flex items-center gap-2">
         {copy && value && (

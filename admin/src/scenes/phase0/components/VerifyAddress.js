@@ -71,7 +71,7 @@ export default function VerifyAddress({
     if (!suggestion.ok) {
       return (
         <div className="flex flex-col items-center justify-center">
-          <div className="text-red-500 text-center text-sm">L&apos;adresse saisie n&apos;a pas été trouvée.</div>
+          <div className="text-center text-sm text-red-500">L&apos;adresse saisie n&apos;a pas été trouvée.</div>
           <BorderButton onClick={() => setSuggestion(null)}>Réessayer</BorderButton>
         </div>
       );
@@ -81,7 +81,7 @@ export default function VerifyAddress({
         <b className="mb-8">Est-ce que c&apos;est la bonne adresse ?</b>
         <p>{suggestion.properties.name}</p>
         <p>{`${suggestion.properties.postcode}, ${suggestion.properties.city}`}</p>
-        <div className="space-y-4 mt-2">
+        <div className="mt-2 space-y-4">
           <BorderButton
             className="w-full"
             onClick={() => {
@@ -127,7 +127,7 @@ export default function VerifyAddress({
 }
 
 const Message = ({ children, className = "" }) => (
-  <div className={`flex items-center rounded-md p-3 text-["#32257f"] bg-[#edecfc] ${className}`}>
+  <div className={`flex items-center rounded-md bg-[#edecfc] p-3 text-["#32257f"] ${className}`}>
     <InfoIcon className="mt-1" color="#32257f" />
     <div className="ml-2">{children}</div>
   </div>

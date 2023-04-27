@@ -18,7 +18,7 @@ export function BorderButton({ children, className = "", onClick = () => {}, to,
   if (href) {
     return (
       <a
-        className={`inline-flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer border-[1px] border-solid hover:border-[transparent] ${color} ${className}`}
+        className={`inline-flex cursor-pointer items-center justify-center whitespace-nowrap border-[1px] border-solid px-3 py-2 hover:border-[transparent] ${color} ${className}`}
         href={href}
         target={target}
         rel={rel}
@@ -29,7 +29,7 @@ export function BorderButton({ children, className = "", onClick = () => {}, to,
   } else if (to) {
     return (
       <Link
-        className={`inline-flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer border-[1px] rounded-[6px] hover:border-[transparent] ${color} ${className}`}
+        className={`inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[6px] border-[1px] px-3 py-2 hover:border-[transparent] ${color} ${className}`}
         to={to}>
         {children}
       </Link>
@@ -37,7 +37,7 @@ export function BorderButton({ children, className = "", onClick = () => {}, to,
   } else {
     return (
       <button
-        className={`flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer border-[1px] rounded-[6px] hover:border-[transparent] ${color} ${className}`}
+        className={`flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[6px] border-[1px] px-3 py-2 hover:border-[transparent] ${color} ${className}`}
         onClick={onClick}>
         {children}
       </button>
@@ -64,7 +64,7 @@ export function PlainButton({ children, className = "", onClick = () => {}, spin
   }
   return (
     <button
-      className={`flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer border-[transparent] border-[1px] border-solid rounded-[6px] ${
+      className={`flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[6px] border-[1px] border-solid border-[transparent] px-3 py-2 ${
         disabled && "cursor-not-allowed"
       } ${color} ${className}`}
       onClick={onClick}
@@ -79,7 +79,7 @@ export function Button({ children, className = "", onClick = () => {}, spinner =
   if (href) {
     return (
       <a
-        className={`inline-flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-[#FFFFFF] text-[#1F2937] border-[transparent] border-[1px] border-solid rounded-[6px] hover:border-[#D1D5DB] ${className}`}
+        className={`inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[6px] border-[1px] border-solid border-[transparent] bg-[#FFFFFF] px-3 py-2 text-[#1F2937] hover:border-[#D1D5DB] ${className}`}
         href={href}
         target={target}
         rel={rel}
@@ -91,7 +91,7 @@ export function Button({ children, className = "", onClick = () => {}, spinner =
   } else {
     return (
       <button
-        className={`flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer bg-[#FFFFFF] text-[#1F2937] border-[transparent] border-[1px] border-solid rounded-[6px] hover:border-[#D1D5DB] ${className}`}
+        className={`flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[6px] border-[1px] border-solid border-[transparent] bg-[#FFFFFF] px-3 py-2 text-[#1F2937] hover:border-[#D1D5DB] ${className}`}
         onClick={onClick}>
         {spinner && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
         {icon && <icon.type {...icon.props} className={`mr-[8px] ${icon.props.className}`} />}
@@ -116,7 +116,7 @@ export function RoundButton({ children, className = "", onClick = () => {}, spin
   if (href) {
     return (
       <a
-        className={`inline-flex items-center justify-center whitespace-nowrap px-3 py-2 cursor-pointer border-[transparent] border-[1px] border-solid rounded-[6px] ${color} ${className}`}
+        className={`inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[6px] border-[1px] border-solid border-[transparent] px-3 py-2 ${color} ${className}`}
         href={href}
         target={target}
         rel={rel}
@@ -128,7 +128,7 @@ export function RoundButton({ children, className = "", onClick = () => {}, spin
   } else {
     return (
       <button
-        className={`flex items-center justify-center whitespace-nowrap px-[17px] py-[8px] cursor-pointer border-[transparent] border-[1px] border-solid rounded-[100px] ${color} ${className}`}
+        className={`flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[100px] border-[1px] border-solid border-[transparent] px-[17px] py-[8px] ${color} ${className}`}
         onClick={onClick}>
         {spinner && <Spinner size="sm" style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />}
         {icon && <icon.type {...icon.props} className={`mr-[7px] ${icon.props.className}`} />}

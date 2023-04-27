@@ -44,10 +44,10 @@ export default function SessionShareIndex() {
     <Loader />
   ) : isAuthorized ? (
     <>
-      <div className="md:flex hidden flex-1">
+      <div className="hidden flex-1 md:flex">
         <List data={data} />
       </div>
-      <div className="md:hidden flex flex-1">
+      <div className="flex flex-1 md:hidden">
         <MobileList data={data} />
       </div>
     </>

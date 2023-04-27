@@ -275,20 +275,20 @@ export default function DetailsView({ mission, setMission, getMission }) {
       />
       <MissionView mission={mission} getMission={getMission} tab="details">
         {(editing || editingBottom) && mission?.isJvaMission === "true" ? (
-          <div className="bg-violet-100 text-indigo-800 p-4 mb-2.5 rounded-lg text-center text-base">
+          <div className="mb-2.5 rounded-lg bg-violet-100 p-4 text-center text-base text-indigo-800">
             Les informations grisées sont à modifier par le responsable de la structure depuis son espace{" "}
             <a target="_blank" rel="noreferrer" href="https://www.jeveuxaider.gouv.fr/">
               jeveuxaider.gouv.fr
             </a>
           </div>
         ) : null}
-        <div className="bg-white rounded-xl mb-8 pt-2">
-          <div className="flex flex-col rounded-xl pb-12 px-8 bg-white">
-            <div className="flex items-center justify-between my-4">
-              <div className="flex flex-row gap-4 items-center justify-start w-full flex-1">
+        <div className="mb-8 rounded-xl bg-white pt-2">
+          <div className="flex flex-col rounded-xl bg-white px-8 pb-12">
+            <div className="my-4 flex items-center justify-between">
+              <div className="flex w-full flex-1 flex-row items-center justify-start gap-4">
                 <div className="text-lg font-medium text-gray-900">Informations générales</div>
                 {mission.status === "VALIDATED" && (
-                  <div className="flex flex-row gap-2 items-center justify-center">
+                  <div className="flex flex-row items-center justify-center gap-2">
                     <Toggle
                       id="visibility"
                       name="visibility"
@@ -305,7 +305,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       {thresholdPendingReached && (
                         <span>
                           <strong>&nbsp; &#183;</strong> Vous avez atteint le seuil des&nbsp;
-                          <span className="text-blue-600 underline cursor-pointer" onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
+                          <span className="cursor-pointer text-blue-600 underline" onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
                             candidatures à traiter
                           </span>
                         </span>
@@ -318,16 +318,16 @@ export default function DetailsView({ mission, setMission, getMission }) {
                 <>
                   {!editing ? (
                     <button
-                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                       onClick={() => setEditing(true)}
                       disabled={loading}>
-                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                      <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
                       Modifier
                     </button>
                   ) : (
                     <div className="flex items-center gap-2">
                       <button
-                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                         onClick={() => {
                           setEditing(false);
                           setValues({ ...mission });
@@ -337,10 +337,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         Annuler
                       </button>
                       <button
-                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                         onClick={onSubmit}
                         disabled={loading}>
-                        <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                        <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                         Enregistrer les changements
                       </button>
                     </div>
@@ -349,9 +349,9 @@ export default function DetailsView({ mission, setMission, getMission }) {
               )}
             </div>
             <div className="flex flex-wrap gap-14">
-              <div className="flex flex-col gap-4 flex-1 min-w-[350px]">
+              <div className="flex min-w-[350px] flex-1 flex-col gap-4">
                 <div>
-                  <div className="text-xs font-medium mb-2">
+                  <div className="mb-2 text-xs font-medium">
                     Donnez un nom à votre mission. Privilégiez une phrase précisant l&apos;action du volontaire. Ex : « Je fais les courses de produits pour mes voisins les plus
                     fragiles »
                   </div>
@@ -365,7 +365,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   />
                 </div>
                 <div className="mt-4">
-                  <div className="text-xs font-medium mb-2">Structure rattachée</div>
+                  <div className="mb-2 text-xs font-medium">Structure rattachée</div>
                   <AsyncSelect
                     label="Structure"
                     value={{ label: values.structureName }}
@@ -391,7 +391,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   {values.structureName && <ViewStructureLink structureId={values.structureId} />}
                 </div>
                 <div className="mt-4">
-                  <div className="text-xs font-medium mb-2">Domaine d&apos;action principal</div>
+                  <div className="mb-2 text-xs font-medium">Domaine d&apos;action principal</div>
                   <CustomSelect
                     readOnly={!editing}
                     isJvaMission={mission?.isJvaMission === "true"}
@@ -403,7 +403,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     }}
                     value={values.mainDomain}
                   />
-                  <div className="flex flex-row text-xs font-medium my-2">
+                  <div className="my-2 flex flex-row text-xs font-medium">
                     <div>Domaine(s) d&apos;action secondaire(s)</div>
                     <div className="text-gray-400">&nbsp;(facultatif)</div>
                   </div>
@@ -420,8 +420,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   />
                 </div>
                 <div>
-                  <div className="text-lg font-medium text-gray-900 mt-8 mb-4">Lieu où se déroule la mission</div>
-                  <div className="text-xs font-medium mb-2">Adresse</div>
+                  <div className="mt-8 mb-4 text-lg font-medium text-gray-900">Lieu où se déroule la mission</div>
+                  <div className="mb-2 text-xs font-medium">Adresse</div>
                   <Field
                     errors={errors}
                     readOnly={!editing}
@@ -434,7 +434,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     value={values.address}
                     error={errors?.address}
                   />
-                  <div className="flex flex-row justify-between gap-3 my-4">
+                  <div className="my-4 flex flex-row justify-between gap-3">
                     <Field
                       errors={errors}
                       readOnly={!editing}
@@ -475,13 +475,13 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   )}
                 </div>
                 <div>
-                  <div className="text-lg font-medium text-gray-900 mt-8 mb-4">Tuteur de la mission</div>
-                  <div className="text-xs font-medium mb-2">
+                  <div className="mt-8 mb-4 text-lg font-medium text-gray-900">Tuteur de la mission</div>
+                  <div className="mb-2 text-xs font-medium">
                     Sélectionner le tuteur qui va s&apos;occuper de la mission. Vous pouvez également ajouter un nouveau tuteur à votre équipe.
                   </div>
                   {!editing ? (
                     <a target="_blank" rel="noreferrer" href={`${adminURL}/user/${referents?.find((ref) => ref.value === values.tutorId)?.value}`}>
-                      <div className="flex flex-row items-center gap-2 w-full border-[1px] border-[#D1D5DB] rounded p-2 cursor-pointer">
+                      <div className="flex w-full cursor-pointer flex-row items-center gap-2 rounded border-[1px] border-[#D1D5DB] p-2">
                         <div className="ml-1">{referents?.find((ref) => ref.value === values.tutorId)?.label}</div>
                         <ExternalLink />
                       </div>
@@ -507,9 +507,9 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       }}
                       formatCreateLabel={() => {
                         return (
-                          <div className="flex items-center gap-2 flex-col" onClick={() => setCreationTutor(true)}>
+                          <div className="flex flex-col items-center gap-2" onClick={() => setCreationTutor(true)}>
                             <div className="text-sm">Le tuteur recherché n&apos;est pas dans la liste ?</div>
-                            <div className="font-medium text-blue-600 text-">Ajouter un nouveau tuteur</div>
+                            <div className="text- font-medium text-blue-600">Ajouter un nouveau tuteur</div>
                           </div>
                         );
                       }}
@@ -520,9 +520,9 @@ export default function DetailsView({ mission, setMission, getMission }) {
 
                   {editing && creationTutor && (
                     <div>
-                      <div className="text-lg font-medium text-gray-900 mt-8 mb-4">Créer un tuteur</div>
-                      <div className="text-xs font-medium mb-2">Identité et contact</div>
-                      <div className="flex flex-row justify-between gap-3 mb-4">
+                      <div className="mt-8 mb-4 text-lg font-medium text-gray-900">Créer un tuteur</div>
+                      <div className="mb-2 text-xs font-medium">Identité et contact</div>
+                      <div className="mb-4 flex flex-row justify-between gap-3">
                         <Field
                           errors={errors}
                           readOnly={!editing}
@@ -564,7 +564,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         error={errors}
                       />
                       <div className="flex w-full justify-end">
-                        <div className="bg-blue-600 rounded text-sm py-2.5 px-4 text-white font-medium inline-block cursor-pointer" onClick={sendInvitation}>
+                        <div className="inline-block cursor-pointer rounded bg-blue-600 py-2.5 px-4 text-sm font-medium text-white" onClick={sendInvitation}>
                           Envoyer l&apos;invitation
                         </div>
                       </div>
@@ -572,12 +572,12 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   )}
                 </div>
               </div>
-              <div className="hidden xl:flex justify-center items-center">
-                <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
+              <div className="hidden items-center justify-center xl:flex">
+                <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
               </div>
-              <div className="flex flex-col gap-4 flex-1 min-w-[350px]">
+              <div className="flex min-w-[350px] flex-1 flex-col gap-4">
                 <div>
-                  <div className="text-xs font-medium mb-2">Type de mission</div>
+                  <div className="mb-2 text-xs font-medium">Type de mission</div>
                   <CustomSelect
                     errors={errors}
                     readOnly={!editing}
@@ -588,11 +588,11 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   />
                 </div>
                 <div>
-                  <div className="flex flex-row text-xs font-medium mt-2">
+                  <div className="mt-2 flex flex-row text-xs font-medium">
                     <div>Durée de la mission</div>
                     <div className="text-gray-400">&nbsp;(facultatif)</div>
                   </div>
-                  <div className="text-xs font-medium mb-2">Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</div>
+                  <div className="mb-2 text-xs font-medium">Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</div>
                   <Field
                     errors={errors}
                     readOnly={!editing}
@@ -603,7 +603,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   />
                 </div>
                 <div>
-                  <div className="flex flex-row text-xs font-medium my-2">
+                  <div className="my-2 flex flex-row text-xs font-medium">
                     <div>
                       Objectifs de la mission -
                       <span className="text-gray-400">
@@ -624,7 +624,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   />
                 </div>
                 <div>
-                  <div className="flex flex-row text-xs font-medium my-2">
+                  <div className="my-2 flex flex-row text-xs font-medium">
                     <div>
                       Actions concrètes confiées au(x) volontaire(s) -
                       <span className="text-gray-400">
@@ -645,7 +645,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   />
                 </div>
                 <div>
-                  <div className="flex flex-col text-xs font-medium my-2">
+                  <div className="my-2 flex flex-col text-xs font-medium">
                     <div>
                       Contraintes spécifiques pour cette mission
                       <span className="text-gray-400">&nbsp;(facultatif).&nbsp;</span>
@@ -662,9 +662,9 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   />
                 </div>
                 <div>
-                  <div className="text-lg font-medium text-gray-900 mt-8 mb-4">Hébergement</div>
-                  <div className="flex flex-row justify-between items-center">
-                    <div className="text-gray-800 font-medium">Hébergement proposé : {values?.hebergement === "true" ? "oui" : "non"}</div>
+                  <div className="mt-8 mb-4 text-lg font-medium text-gray-900">Hébergement</div>
+                  <div className="flex flex-row items-center justify-between">
+                    <div className="font-medium text-gray-800">Hébergement proposé : {values?.hebergement === "true" ? "oui" : "non"}</div>
                     <Toggle
                       id="hebergement"
                       name="hebergement"
@@ -676,18 +676,18 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     />
                   </div>
                   {values?.hebergement === "true" && (
-                    <div className="flex flex-row gap-8 mt-4">
+                    <div className="mt-4 flex flex-row gap-8">
                       <div
                         onClick={() => editing && setValues({ ...values, hebergementPayant: "false" })}
-                        className={`flex flex-row justify-center items-center gap-2 ${editing && "cursor-pointer"}`}>
+                        className={`flex flex-row items-center justify-center gap-2 ${editing && "cursor-pointer"}`}>
                         <CheckBox value={values?.hebergementPayant === "false"} />
-                        <div className="text-gray-700 font-medium">Hébergement gratuit</div>
+                        <div className="font-medium text-gray-700">Hébergement gratuit</div>
                       </div>
                       <div
                         onClick={() => editing && setValues({ ...values, hebergementPayant: "true" })}
-                        className={`flex flex-row justify-center items-center gap-2 ${editing && "cursor-pointer"}`}>
+                        className={`flex flex-row items-center justify-center gap-2 ${editing && "cursor-pointer"}`}>
                         <CheckBox value={values.hebergementPayant === "true"} />
-                        <div className="text-gray-700 font-medium">Hébergement payant</div>
+                        <div className="font-medium text-gray-700">Hébergement payant</div>
                       </div>
                     </div>
                   )}
@@ -696,9 +696,9 @@ export default function DetailsView({ mission, setMission, getMission }) {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl mb-8 pt-2">
-          <div className="flex flex-col rounded-xl pb-12 px-8 bg-white">
-            <div className="flex items-center justify-between my-4">
+        <div className="mb-8 rounded-xl bg-white pt-2">
+          <div className="flex flex-col rounded-xl bg-white px-8 pb-12">
+            <div className="my-4 flex items-center justify-between">
               <div className="text-lg font-medium text-gray-900">
                 <div>Dates et places disponibles</div>
               </div>
@@ -706,16 +706,16 @@ export default function DetailsView({ mission, setMission, getMission }) {
                 <>
                   {!editingBottom ? (
                     <button
-                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                       onClick={() => setEdittingBottom(true)}
                       disabled={loadingBottom}>
-                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                      <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
                       Modifier
                     </button>
                   ) : (
                     <div className="flex items-center gap-2">
                       <button
-                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                         onClick={() => {
                           setEdittingBottom(false);
                           setValues({ ...mission });
@@ -725,10 +725,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         Annuler
                       </button>
                       <button
-                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                         onClick={onSubmitBottom}
                         disabled={loadingBottom}>
-                        <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                        <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                         Enregistrer les changements
                       </button>
                     </div>
@@ -737,10 +737,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
               )}
             </div>
             <div className="flex flex-wrap gap-12">
-              <div className="flex flex-col gap-4 flex-1 min-w-[350px]">
+              <div className="flex min-w-[350px] flex-1 flex-col gap-4">
                 <div>
-                  <div className="text-xs font-medium mb-2">Dates de la mission</div>
-                  <div className="flex flex-row justify-between gap-3 my-2">
+                  <div className="mb-2 text-xs font-medium">Dates de la mission</div>
+                  <div className="my-2 flex flex-row justify-between gap-3">
                     <Field
                       errors={errorsBottom}
                       name="startAt"
@@ -765,7 +765,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       error={errors?.endAt}
                     />
                   </div>
-                  <div className="flex flex-col text-xs font-medium my-2">
+                  <div className="my-2 flex flex-col text-xs font-medium">
                     <div>
                       Fréquence estimée de la mission
                       <span className="text-gray-400">&nbsp;(facultatif)&nbsp;</span>
@@ -785,12 +785,12 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   />
                 </div>
               </div>
-              <div className="hidden xl:flex justify-center items-center">
-                <div className="w-[1px] h-4/5 border-r-[1px] border-gray-300"></div>
+              <div className="hidden items-center justify-center xl:flex">
+                <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
               </div>
-              <div className="flex flex-col gap-4 flex-1 min-w-[350px]">
+              <div className="flex min-w-[350px] flex-1 flex-col gap-4">
                 <div>
-                  <div className="flex flex-row text-xs font-medium my-2">
+                  <div className="my-2 flex flex-row text-xs font-medium">
                     <div>Période de réalisation de la mission</div>
                     <div className="text-gray-400">&nbsp;(facultatif)</div>
                   </div>
@@ -823,7 +823,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   )}
                 </div>
                 <div>
-                  <div className="flex flex-col text-xs font-medium my-2">
+                  <div className="my-2 flex flex-col text-xs font-medium">
                     Nombre de volontaire(s) recherché(s). Précisez ce nombre en fonction de vos contraintes logistiques et votre capacité à accompagner les volontaires.
                   </div>
                   <Field

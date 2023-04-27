@@ -36,12 +36,12 @@ export default function SchemaDepartmentDetail({ departmentData, cohort, departm
 
   return (
     <div className={`mt-[80px] ${className}`}>
-      <div className="text-gray-800 text-lg font-bold mb-2 text-center">
+      <div className="mb-2 text-center text-lg font-bold text-gray-800">
         {shown ? "Masquer" : "Afficher"} les volontaires accueillis en {department}
       </div>
       <div className="flex items-center justify-center">
         <div
-          className="w-[38px] h-[38px] bf-[#FFFFFF] shadow rounded-full flex items-center justify-center text-gray-700 hover:bg-gray-700 hover:text-[#FFFFFF] cursor-pointer"
+          className="bf-[#FFFFFF] flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-full text-gray-700 shadow hover:bg-gray-700 hover:text-[#FFFFFF]"
           onClick={() => setShown(!shown)}>
           <ChevronDown className={shown ? "rotate-180" : ""} />
         </div>
@@ -58,11 +58,11 @@ export default function SchemaDepartmentDetail({ departmentData, cohort, departm
                 ) : error ? (
                   <span className="text-[#DC5318]">{error}</span>
                 ) : (
-                  <span className="text-2xl text-[#171725] font-bold">{data.affectedYoungs}</span>
+                  <span className="text-2xl font-bold text-[#171725]">{data.affectedYoungs}</span>
                 )}
               </div>
             </Box>
-            <Box className="grow mx-4">
+            <Box className="mx-4 grow">
               <div className="mb-2">Places disponibles</div>
               <div className="flex items-center">
                 {loading ? (
@@ -70,7 +70,7 @@ export default function SchemaDepartmentDetail({ departmentData, cohort, departm
                 ) : error ? (
                   <span className="text-[#DC5318]">{error}</span>
                 ) : (
-                  <span className="text-2xl text-[#171725] font-bold">{data.placesLeft}</span>
+                  <span className="text-2xl font-bold text-[#171725]">{data.placesLeft}</span>
                 )}
               </div>
             </Box>
@@ -84,14 +84,14 @@ export default function SchemaDepartmentDetail({ departmentData, cohort, departm
                 <span className="text-[#DC5318]">{error}</span>
               ) : (
                 <div className="flex items-center">
-                  <span className="text-2xl text-[#171725] font-bold mr-2">{data.centers.length}</span>
+                  <span className="mr-2 text-2xl font-bold text-[#171725]">{data.centers.length}</span>
                   <Badge>{data.placesTotal > 1 ? data.placesTotal + " places" : data.placesTotal + " place"}</Badge>
                 </div>
               )}
             </Box>
           </div>
           <Box className="mt-4">
-            <div className="border-b border-b-gray-200 text-lg text-gray-900 py-4">Détail des affectations</div>
+            <div className="border-b border-b-gray-200 py-4 text-lg text-gray-900">Détail des affectations</div>
             <div className="mt-8 grid grid-cols-3">
               {loading ? (
                 <Loading />
@@ -115,11 +115,11 @@ export default function SchemaDepartmentDetail({ departmentData, cohort, departm
 function CenterDetail({ center }) {
   return (
     <div className="pr-4 pb-4">
-      <div className="shadow p-4">
-        <div className="flex items-start pb-4 border-b border-b-gray-200 mb-2">
-          <IcebergColor className="w-[38px] h-[36px] mr-4" />
+      <div className="p-4 shadow">
+        <div className="mb-2 flex items-start border-b border-b-gray-200 pb-4">
+          <IcebergColor className="mr-4 h-[36px] w-[38px]" />
           <div className="grow">
-            <div className="text-base text-gray-900 font-bold">{center.name}</div>
+            <div className="text-base font-bold text-gray-900">{center.name}</div>
             <div className="text-sm text-gray-500">
               {center.city} • {center.department} ({getDepartmentNumber(center.department)})
             </div>
@@ -129,13 +129,13 @@ function CenterDetail({ center }) {
         <div className="">
           {center.groups && center.groups.length > 0 ? (
             center.groups.map((group, index) => (
-              <div key={"group-" + index} className="flex items-center mb-3">
-                <div className="flex items-center mr-7 w-[50px]">
-                  <People className="text-gray-400 mr-1.5" />
-                  <div className="text-base text-gray-900 font-bold">{group.youngsVolume}</div>
+              <div key={"group-" + index} className="mb-3 flex items-center">
+                <div className="mr-7 flex w-[50px] items-center">
+                  <People className="mr-1.5 text-gray-400" />
+                  <div className="text-base font-bold text-gray-900">{group.youngsVolume}</div>
                 </div>
                 <div className="grow">
-                  <div className="text-base text-gray-900 font-bold">
+                  <div className="text-base font-bold text-gray-900">
                     De : {group.department} ({getDepartmentNumber(group.department)})
                   </div>
                   <div className="text-sm text-gray-500">{group.region}</div>
@@ -143,13 +143,13 @@ function CenterDetail({ center }) {
               </div>
             ))
           ) : (
-            <div className="opacity-50 text-center">Aucun groupe pour l&apos;instant.</div>
+            <div className="text-center opacity-50">Aucun groupe pour l&apos;instant.</div>
           )}
         </div>
 
-        <div className="pt-4 border-t border-t-gray-200 mt-2 align-middle">
-          <People className="inline-block text-gray-400 mr-1.5 mb-[5px]" />
-          <span className="text-base text-gray-900 font-bold">{center.affectedYoungs} volontaires accueillis&nbsp;</span>
+        <div className="mt-2 border-t border-t-gray-200 pt-4 align-middle">
+          <People className="mr-1.5 mb-[5px] inline-block text-gray-400" />
+          <span className="text-base font-bold text-gray-900">{center.affectedYoungs} volontaires accueillis&nbsp;</span>
           <span className="text-sm text-gray-500"> / {center.placesTotal} places</span>
         </div>
       </div>

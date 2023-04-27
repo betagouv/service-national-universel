@@ -87,11 +87,11 @@ export default function FieldSituationsParticulieres({
   for (const key of SPECIFIC_SITUATIONS_KEY) {
     if (young[key] === "true") {
       tags.push(
-        <div className="inline-flex mr-[8px] mb-[8px]" key={key}>
-          <div className="text-[12px] text-[#FFFFFF] leading-[22px] px-[10px] py-[1px] bg-[#3B82F6] rounded-[100px]">{translateSpecialSituation(key)}</div>
+        <div className="mr-[8px] mb-[8px] inline-flex" key={key}>
+          <div className="rounded-[100px] bg-[#3B82F6] px-[10px] py-[1px] text-[12px] leading-[22px] text-[#FFFFFF]">{translateSpecialSituation(key)}</div>
           {mode === "edition" && (
             <div
-              className="ml-[8px] border-[1px] border-[#CECECE] rounded-[100px] py-[8px] px-[6px] text-[#CECECE] flex items-center hover:text-[#3B82F6] hover:border-[#3B82F6] cursor-pointer"
+              className="ml-[8px] flex cursor-pointer items-center rounded-[100px] border-[1px] border-[#CECECE] py-[8px] px-[6px] text-[#CECECE] hover:border-[#3B82F6] hover:text-[#3B82F6]"
               onClick={() => removeSituation(key)}>
               <Minus />
             </div>
@@ -104,9 +104,9 @@ export default function FieldSituationsParticulieres({
     for (const key of SPECIFIC_SITUATIONS_KEY) {
       if (young[key] !== "true" && !["qpv"].includes(key)) {
         tags.push(
-          <div className="inline-flex mr-[8px] mb-[8px]" key={key}>
+          <div className="mr-[8px] mb-[8px] inline-flex" key={key}>
             <div
-              className="text-[12px] text-[#374151] leading-[22px] px-[10px] py-[1px] bg-[#F3F4F6] rounded-[100px] cursor-pointer border-[transparent] border-[1px] hover:border-[#374151]"
+              className="cursor-pointer rounded-[100px] border-[1px] border-[transparent] bg-[#F3F4F6] px-[10px] py-[1px] text-[12px] leading-[22px] text-[#374151] hover:border-[#374151]"
               onClick={() => addSituation(key)}>
               {translateSpecialSituation(key)}
             </div>
@@ -122,7 +122,7 @@ export default function FieldSituationsParticulieres({
         <div className="pr-[36px]">{tags}</div>
         {mode === "correction" && (
           <div className={requestButtonClass} onClick={startRequest}>
-            <PencilAlt className={`w-[14px] h-[14px]  ${hasValidRequest ? "text-white" : "text-[#F97316]"} group-hover:text-white`} />
+            <PencilAlt className={`h-[14px] w-[14px]  ${hasValidRequest ? "text-white" : "text-[#F97316]"} group-hover:text-white`} />
           </div>
         )}
       </div>

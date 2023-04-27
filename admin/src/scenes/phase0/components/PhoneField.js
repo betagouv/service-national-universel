@@ -67,8 +67,8 @@ const PhoneField = ({
   };
 
   return (
-    <div className={`relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-md ${error ? "border-[#EF4444]" : "border-[#D1D5DB]"} ${className}`} ref={fieldRef}>
-      {label && <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">{label}</label>}
+    <div className={`relative rounded-md border-[1px] border-[#D1D5DB] bg-white py-[9px] px-[13px] ${error ? "border-[#EF4444]" : "border-[#D1D5DB]"} ${className}`} ref={fieldRef}>
+      {label && <label className="text-[12px] font-normal leading-[16px] text-[#6B7280]">{label}</label>}
       {mode === "edition" && (
         <>
           <InputPhone
@@ -80,15 +80,15 @@ const PhoneField = ({
             placeholder={placeholder}
             error={error}
           />
-          {error && <div className="text-[#EF4444] mt-[8px]">{error}</div>}
+          {error && <div className="mt-[8px] text-[#EF4444]">{error}</div>}
         </>
       )}
       {mode !== "edition" && (
         <div className="flex items-center gap-2">
-          <div className="font-normal text-[14px] leading-[20px] text-[#1F2937]">{getReadOnlyValue()}</div>
+          <div className="text-[14px] font-normal leading-[20px] text-[#1F2937]">{getReadOnlyValue()}</div>
           {mode === "correction" && (
             <div className={requestButtonClass} onClick={handleStartRequest}>
-              <PencilAlt className={`w-[14px] h-[14px]  ${hasValidRequest ? "text-white" : "text-[#F97316]"} group-hover:text-white`} />
+              <PencilAlt className={`h-[14px] w-[14px]  ${hasValidRequest ? "text-white" : "text-[#F97316]"} group-hover:text-white`} />
             </div>
           )}
         </div>

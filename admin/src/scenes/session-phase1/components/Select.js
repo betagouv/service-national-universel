@@ -25,7 +25,7 @@ export default function Select({ options, value, alignItems = "left", onChange }
       <div className="relative">
         {/* select item */}
         <button
-          className="flex justify-between items-center gap-3 bg-inherit px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50"
+          className="flex cursor-pointer items-center justify-between gap-3 rounded-lg bg-inherit px-3 py-2 disabled:opacity-50"
           style={{ fontFamily: "Marianne" }}
           onClick={() => setOpen((e) => !e)}>
           <div className="flex items-center gap-2 text-base text-blue-600">
@@ -43,7 +43,7 @@ export default function Select({ options, value, alignItems = "left", onChange }
         </button>
 
         {/* display options */}
-        <div className={`${open ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute right-0 border-3 border-red-600 shadow overflow-hidden z-50`}>
+        <div className={`${open ? "block" : "hidden"}  border-3 absolute right-0 z-50 min-w-full overflow-hidden rounded-lg border-red-600 bg-white shadow transition`}>
           {options.map((option, index) => (
             <div
               key={option?.key || index}
@@ -52,8 +52,8 @@ export default function Select({ options, value, alignItems = "left", onChange }
                 setOpen(false);
               }}
               className={`${option.value === value ? "bg-gray-200" : ""}`}>
-              <div className="group flex justify-between items-center gap-2 p-2 px-3 text-gray-700 bg-inherit cursor-pointer ">
-                <div className="flex items-center bg-inherit gap-2 text-base ">
+              <div className="group flex cursor-pointer items-center justify-between gap-2 bg-inherit p-2 px-3 text-gray-700 ">
+                <div className="flex items-center gap-2 bg-inherit text-base ">
                   {option.value === "noMeetingPoint" ? (
                     <>
                       <BiWalk className="text-blue-600 opacity-40" /> Autonome(s)

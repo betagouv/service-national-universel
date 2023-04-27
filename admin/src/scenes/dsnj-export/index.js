@@ -88,8 +88,8 @@ const DSNJExport = () => {
 
   return (
     <>
-      <div className="flex flex-col w-full p-8 ">
-        <div className="py-8 flex items-center justify-between">
+      <div className="flex w-full flex-col p-8 ">
+        <div className="flex items-center justify-between py-8">
           <Title>Données sur les centres et les volontaires (accès DSNJ)</Title>
           <Select options={cohortOptions} value={cohortId} onChange={setCohortId} />
         </div>

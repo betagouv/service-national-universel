@@ -20,33 +20,33 @@ export default function OccupationCardHorizontal({ total, taken }) {
   else if (occupationPercentage >= 100) width = "w-[100%]";
 
   return (
-    <div className="relative flex flex-col gap-2 bg-white w-full rounded-lg px-6 py-4 shadow-[0_8px_16px_rgba(0,0,0,0.05)] h-[102px]">
-      <p className="text-base leading-5 font-bold text-gray-900">Places</p>
+    <div className="relative flex h-[102px] w-full flex-col gap-2 rounded-lg bg-white px-6 py-4 shadow-[0_8px_16px_rgba(0,0,0,0.05)]">
+      <p className="text-base font-bold leading-5 text-gray-900">Places</p>
       <div className="">
         {Math.floor(occupationPercentage) === 0 ? (
-          <div className="flex flex-col justify-center items-center w-full h-[6px] bg-gray-100 rounded-full overflow-hidden" />
+          <div className="flex h-[6px] w-full flex-col items-center justify-center overflow-hidden rounded-full bg-gray-100" />
         ) : (
-          <div className="flex flex-col justify-end h-[6px] bg-gray-100 rounded-full overflow-hidden">
-            <div className={`flex justify-center items-center h-[6px] ${width} ${bgColor} rounded-full`} />
+          <div className="flex h-[6px] flex-col justify-end overflow-hidden rounded-full bg-gray-100">
+            <div className={`flex h-[6px] items-center justify-center ${width} ${bgColor} rounded-full`} />
           </div>
         )}
       </div>
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <div className="rounded-full w-[7px] h-[7px] bg-blue-700" />
+          <div className="h-[7px] w-[7px] rounded-full bg-blue-700" />
           <p className="text-xs text-gray-600">
             <span className="font-bold text-gray-900">{taken}</span> occupées
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="rounded-full w-[7px] h-[7px] bg-gray-200" />
+          <div className="h-[7px] w-[7px] rounded-full bg-gray-200" />
           <p className="text-xs text-gray-600">
             <span className="font-bold text-gray-900">{total - taken}</span> disponibles
           </p>
         </div>
       </div>
 
-      <div className="absolute top-4 right-4 bg-blue-100 text-blue-600 px-2 py-1 rounded uppercase text-xs font-bold">{total} au total</div>
+      <div className="absolute top-4 right-4 rounded bg-blue-100 px-2 py-1 text-xs font-bold uppercase text-blue-600">{total} au total</div>
     </div>
   );
 }

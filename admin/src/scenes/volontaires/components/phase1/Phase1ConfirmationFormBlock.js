@@ -59,15 +59,15 @@ const Phase1ConfirmationFormBlock = ({ className = "", young = null, values = nu
       isTravelingByPlane: young?.isTravelingByPlane || "",
     }));
     setIsYoungModalAgreementOpen(false);
-	setIsYoungTravelingByPlaneModalOpen(false);
+    setIsYoungTravelingByPlaneModalOpen(false);
   };
 
   return (
     <>
       <div className={className}>
-        <p className="text-xs text-gray-900 font-medium mb-2">Confirmation</p>
-        <div className="flex gap-4 mt-2 flex-wrap w-full items-stretch">
-          <div className="flex-1 min-w-[250px]">
+        <p className="mb-2 text-xs font-medium text-gray-900">Confirmation</p>
+        <div className="mt-2 flex w-full flex-wrap items-stretch gap-4">
+          <div className="min-w-[250px] flex-1">
             <TailwindSelect
               name="youngPhase1Agreement"
               label="Confirmation de la participation"
@@ -81,7 +81,7 @@ const Phase1ConfirmationFormBlock = ({ className = "", young = null, values = nu
               ]}
             />
           </div>
-          <div className="flex-1 min-w-[250px]">
+          <div className="min-w-[250px] flex-1">
             <TailwindSelect
               name="isTravelingByPlane"
               label="Voyage en avion"

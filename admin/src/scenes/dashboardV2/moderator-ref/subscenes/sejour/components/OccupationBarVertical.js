@@ -27,16 +27,16 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
     <div className="flex items-center gap-10">
       <div className="flex flex-col gap-5">
         {Math.floor(occupationPercentage) === 0 ? (
-          <div className="flex flex-col justify-center items-center font-bold text-xs w-16 h-52 bg-gray-100 rounded-lg overflow-hidden">0%</div>
+          <div className="flex h-52 w-16 flex-col items-center justify-center overflow-hidden rounded-lg bg-gray-100 text-xs font-bold">0%</div>
         ) : (
-          <div className="flex flex-col justify-end  w-16 h-52 bg-gray-100 rounded-lg overflow-hidden">
-            <div className={`flex justify-center items-center w-16 ${height} ${bgColor} rounded-lg text-white font-bold text-xs`}>{Math.floor(occupationPercentage)}%</div>
+          <div className="flex h-52 w-16  flex-col justify-end overflow-hidden rounded-lg bg-gray-100">
+            <div className={`flex w-16 items-center justify-center ${height} ${bgColor} rounded-lg text-xs font-bold text-white`}>{Math.floor(occupationPercentage)}%</div>
           </div>
         )}
-        <p className="text-sm leading-4 font-bold text-gray-900">{nbDepart || 0} départs</p>
+        <p className="text-sm font-bold leading-4 text-gray-900">{nbDepart || 0} départs</p>
       </div>
       <div className="flex flex-col gap-5">
-        <p className="text-base leading-5 font-bold text-gray-900">Motifs de départ</p>
+        <p className="text-base font-bold leading-5 text-gray-900">Motifs de départ</p>
         <div className="flex flex-col gap-1">
           <StatusText status="Exclusion" nb={exclusion} percentage={nbDepart ? Math.floor((exclusion / nbDepart) * 100) : 0} />
           <StatusText status="Cas de force majeur" nb={forceMajeure} percentage={nbDepart ? Math.floor((forceMajeure / nbDepart) * 100) : 0} />

@@ -20,7 +20,7 @@ import CardRepresentant from "../components/cards/CardRepresentant";
 export default function DetailsView() {
   return (
     <StructureView tab="details">
-      <div className="flex gap-6 my-4">
+      <div className="my-4 flex gap-6">
         <CardRepresentant />
         <TeamCard />
       </div>
@@ -87,16 +87,16 @@ function StructureForm() {
   };
 
   return (
-    <main className="bg-white p-8 rounded-xl shadow-sm">
-      <div className="flex justify-between items-center w-full">
-        <h2 className="text-lg leading-6 font-medium text-gray-900 my-0">Informations générales</h2>
+    <main className="rounded-xl bg-white p-8 shadow-sm">
+      <div className="flex w-full items-center justify-between">
+        <h2 className="my-0 text-lg font-medium leading-6 text-gray-900">Informations générales</h2>
         {canCreateStructure(user) && (
           <EditButton isEditing={isEditing} setIsEditing={setIsEditing} isLoading={isLoading} onSubmit={onSubmit} defaultData={structure} setData={setData} setErrors={setErrors} />
         )}
       </div>
 
-      <div className="flex my-4">
-        <div className="space-y-4 w-[47%]">
+      <div className="my-4 flex">
+        <div className="w-[47%] space-y-4">
           <div className="space-y-2">
             <div className="text-xs font-medium leading-4 text-gray-900">Nom de la structure</div>
             <Field
@@ -109,7 +109,7 @@ function StructureForm() {
             />
           </div>
 
-          <div className="space-y-2 my-4">
+          <div className="my-4 space-y-2">
             <div className="text-xs font-medium leading-4 text-gray-900">Présentation de la structure (facultatif)</div>
             <Field
               name="description"
@@ -182,11 +182,11 @@ function StructureForm() {
           </div>
         </div>
 
-        <div className="flex w-[6%] justify-center items-center">
-          <div className="w-[1px] h-4/5 border-r-[1px] border-gray-200" />
+        <div className="flex w-[6%] items-center justify-center">
+          <div className="h-4/5 w-[1px] border-r-[1px] border-gray-200" />
         </div>
 
-        <div className="space-y-4 w-[47%]">
+        <div className="w-[47%] space-y-4">
           <div className="flex flex-col gap-2">
             <div className="text-xs font-medium leading-4 text-gray-900">Informations juridiques</div>
             <Select
@@ -216,7 +216,7 @@ function StructureForm() {
               errors={errors}
             />
             {(!data.isNetwork || data.isNetwork === "false") && (
-              <div className="space-y-2 my-3">
+              <div className="my-3 space-y-2">
                 <h3 className="text-xs font-medium leading-4 text-gray-900">Réseau national</h3>
                 <p className="text-xs font-medium leading-4 text-gray-400">
                   Si l&apos;organisation est membre d&apos;un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettrez ainsi au
@@ -245,23 +245,23 @@ function StructureForm() {
               </div>
             )}
             {user.role === ROLES.ADMIN && (
-              <div className="flex justify-between my-3">
+              <div className="my-3 flex justify-between">
                 <p className="text-gray-500">Tête de réseau</p>
-                <div className="flex gap-2 items-center">
+                <div className="flex items-center gap-2">
                   <Toggle value={data.isNetwork === "true"} onChange={(e) => setData({ ...data, isNetwork: e.toString() })} disabled={!isEditing} />
                   {data.isNetwork ? "Oui" : "Non"}
                 </div>
               </div>
             )}
-            <div className="flex justify-between my-3">
+            <div className="my-3 flex justify-between">
               <p className="text-gray-500">Préparation militaire</p>
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 <Toggle value={data.isMilitaryPreparation === "true"} onChange={(e) => setData({ ...data, isMilitaryPreparation: e.toString() })} disabled={!isEditing} />
                 {data.isMilitaryPreparation ? "Oui" : "Non"}
               </div>
             </div>
 
-            <div className="space-y-2 my-3">
+            <div className="my-3 space-y-2">
               <h3 className="text-xs font-medium leading-4 text-gray-900">Réseaux sociaux (facultatif)</h3>
               <div className="grid grid-cols-2 gap-2">
                 <Field

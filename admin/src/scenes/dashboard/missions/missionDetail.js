@@ -11,7 +11,7 @@ export default function MissionDetail({ youngsDomains, missionsDomains, filter, 
 
   return (
     <React.Fragment>
-      <div className="flex justify-between items-center mt-4 mb-2">
+      <div className="mt-4 mb-2 flex items-center justify-between">
         <h3 className=" text-xl">Dans le détail des missions</h3>
         <FiltreCohort onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} filter={filter} />
       </div>

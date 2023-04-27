@@ -135,29 +135,29 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
   }
 
   return (
-    <ModalTailwind centered isOpen={isOpen} onClose={closeModal} className="w-[850px] bg-white rounded-lg py-2 px-8">
+    <ModalTailwind centered isOpen={isOpen} onClose={closeModal} className="w-[850px] rounded-lg bg-white py-2 px-8">
       <div className="mb-4 ">
-        <div className="flex flex-row w-full justify-between gap-6 mt-6">
+        <div className="mt-6 flex w-full flex-row justify-between gap-6">
           <div className="w-1/3">
-            <div className="h-1 bg-blue-600 rounded mb-2" />
-            <div className="uppercase text-xs text-blue-600">étape 1</div>
-            <div className="text-gray-900 font-medium text-xs">Le centre</div>
+            <div className="mb-2 h-1 rounded bg-blue-600" />
+            <div className="text-xs uppercase text-blue-600">étape 1</div>
+            <div className="text-xs font-medium text-gray-900">Le centre</div>
           </div>
           <div className="w-1/3">
-            <div className={`h-1 ${step > 1 ? "bg-blue-600" : "bg-gray-200"} rounded mb-2`} />
-            <div className={`uppercase text-xs ${step > 1 ? "text-blue-600" : "text-gray-500"}`}>étape 2</div>
-            <div className="text-gray-900 font-medium text-xs">Le point de rassemblement</div>
+            <div className={`h-1 ${step > 1 ? "bg-blue-600" : "bg-gray-200"} mb-2 rounded`} />
+            <div className={`text-xs uppercase ${step > 1 ? "text-blue-600" : "text-gray-500"}`}>étape 2</div>
+            <div className="text-xs font-medium text-gray-900">Le point de rassemblement</div>
           </div>
           <div className="w-1/3">
-            <div className={`h-1 ${step > 2 ? "bg-blue-600" : "bg-gray-200"} rounded mb-2`} />
-            <div className={`uppercase text-xs ${step > 2 ? "text-blue-600" : "text-gray-500"}`}>étape 3</div>
-            <div className="text-gray-900 font-medium text-xs">Résumé</div>
+            <div className={`h-1 ${step > 2 ? "bg-blue-600" : "bg-gray-200"} mb-2 rounded`} />
+            <div className={`text-xs uppercase ${step > 2 ? "text-blue-600" : "text-gray-500"}`}>étape 3</div>
+            <div className="text-xs font-medium text-gray-900">Résumé</div>
           </div>
         </div>
 
         {step === 1 && (
           <>
-            <div className="my-4 text-gray-900 text-xl text-center font-medium">Sélectionnez votre centre</div>
+            <div className="my-4 text-center text-xl font-medium text-gray-900">Sélectionnez votre centre</div>
             <ReactiveBase url={`${apiURL}/es`} app="sessionphase1" headers={{ Authorization: `JWT ${api.getToken()}` }}>
               <DataSearch
                 defaultQuery={getDefaultQuery}
@@ -172,7 +172,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                 react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                 style={{ marginRight: "1rem", flex: 1 }}
                 innerClass={{ input: "searchbox" }}
-                className="datasearch-searchfield shadow-sm self-center w-2/3 mx-auto"
+                className="datasearch-searchfield mx-auto w-2/3 self-center shadow-sm"
                 URLParams={true}
                 autosuggest={false}
               />
@@ -185,7 +185,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                   showTopResultStats={false}
                   pageSize={3}
                   render={({ data }) => (
-                    <div className="flex flex-col justify-center items-center gap-4 w-full">
+                    <div className="flex w-full flex-col items-center justify-center gap-4">
                       {data.map((hit) => (
                         <HitCenter
                           key={hit._id}
@@ -208,17 +208,17 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
           <>
             {pdrOption === "" && (
               <>
-                <div className="my-4 text-gray-900 text-xl text-center font-medium">Choix du point de rassemblement</div>
+                <div className="my-4 text-center text-xl font-medium text-gray-900">Choix du point de rassemblement</div>
                 {youngSelectDisabled ? (
-                  <ReactTooltip id="tooltip-delai" className="bg-white shadow-xl text-black !opacity-100" arrowColor="white" disable={false}>
+                  <ReactTooltip id="tooltip-delai" className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
                     <div className="text-[black]">Le délai de confirmation du point de rassemblement par le volontaire est dépassé</div>
                   </ReactTooltip>
                 ) : null}
                 <div className="flex flex-row flex-wrap gap-4 px-4">
                   <div
                     onClick={() => setPdrOption("ref-select")}
-                    className="flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg hover:bg-gray-100 cursor-pointer">
-                    <div className="text-sm w-5/6">
+                    className="flex w-1/3 flex-auto cursor-pointer flex-row items-center justify-center gap-4 rounded-lg border-[1px] border-gray-200 py-3 hover:bg-gray-100">
+                    <div className="w-5/6 text-sm">
                       <span className="font-bold">Je choisis</span> un point de rassemblement
                     </div>
                     <ChevronRight className="text-gray-400" width={8} height={16} />
@@ -233,10 +233,10 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                       setPdrOption("young-select");
                       setStep(3);
                     }}
-                    className={`flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg ${
-                      youngSelectDisabled ? "bg-gray-100 cursor-not-allowed" : "cursor-pointer"
+                    className={`flex w-1/3 flex-auto flex-row items-center justify-center gap-4 rounded-lg border-[1px] border-gray-200 py-3 ${
+                      youngSelectDisabled ? "cursor-not-allowed bg-gray-100" : "cursor-pointer"
                     } hover:bg-gray-100`}>
-                    <div className="text-sm w-5/6">
+                    <div className="w-5/6 text-sm">
                       <span className="font-bold">Je laisse {young.firstName} choisir</span> son point de rassemblement
                     </div>
                     <ChevronRight className="text-gray-400" width={8} height={16} />
@@ -246,8 +246,8 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                       setPdrOption("self-going");
                       setStep(3);
                     }}
-                    className="flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg hover:bg-gray-100 cursor-pointer">
-                    <div className="text-sm w-5/6">
+                    className="flex w-1/3 flex-auto cursor-pointer flex-row items-center justify-center gap-4 rounded-lg border-[1px] border-gray-200 py-3 hover:bg-gray-100">
+                    <div className="w-5/6 text-sm">
                       {young.firstName} se rendra au centre et en reviendra <span className="font-bold">par ses propres moyens</span>
                     </div>
                     <ChevronRight className="text-gray-400" width={8} height={16} />
@@ -257,8 +257,8 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                       setPdrOption("local");
                       setStep(3);
                     }}
-                    className="flex flex-row gap-4 items-center justify-center border-[1px] border-gray-200 w-1/3 flex-auto py-3 rounded-lg hover:bg-gray-100 cursor-pointer">
-                    <div className="text-sm w-5/6">
+                    className="flex w-1/3 flex-auto cursor-pointer flex-row items-center justify-center gap-4 rounded-lg border-[1px] border-gray-200 py-3 hover:bg-gray-100">
+                    <div className="w-5/6 text-sm">
                       Plan de transport <span className="font-bold">transmis par les services locaux</span>
                     </div>
                     <ChevronRight className="text-gray-400" width={8} height={16} />
@@ -268,12 +268,12 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
             )}
             {pdrOption === "ref-select" && (
               <>
-                <div className="my-4 text-gray-900 text-xl text-center font-medium">Sélectionnez votre point de rassemblement</div>
-                <div className="datasearch-searchfield shadow-sm self-center w-2/3 mx-auto">
+                <div className="my-4 text-center text-xl font-medium text-gray-900">Sélectionnez votre point de rassemblement</div>
+                <div className="datasearch-searchfield mx-auto w-2/3 self-center shadow-sm">
                   <input className="searchbox" placeholder="Rechercher un point de rassemblement" value={inputPdr} onChange={(e) => setInputPdr(e.target.value)} />
                 </div>
 
-                <div className="flex flex-col justify-start items-center gap-4 w-full h-[300px]">
+                <div className="flex h-[300px] w-full flex-col items-center justify-start gap-4">
                   {loadingPdr ? (
                     <div className="mt-2">Chargement ...</div>
                   ) : (
@@ -295,12 +295,12 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                           ))}
                           <div className="flex flex-row gap-4 self-end">
                             {currentPage > 0 && (
-                              <div className="border-[1px] p rounded border-gray-300 cursor-pointer" onClick={() => setCurrentPage((currentPage) => currentPage - 1)}>
+                              <div className="p cursor-pointer rounded border-[1px] border-gray-300" onClick={() => setCurrentPage((currentPage) => currentPage - 1)}>
                                 <BiChevronLeft className="text-gray-400" size={40} />
                               </div>
                             )}
                             {LIST_PAGE_LIMIT * currentPage + LIST_PAGE_LIMIT < dataPdr.length && (
-                              <div className="border-[1px] p rounded border-gray-300 cursor-pointer" onClick={() => setCurrentPage((currentPage) => currentPage + 1)}>
+                              <div className="p cursor-pointer rounded border-[1px] border-gray-300" onClick={() => setCurrentPage((currentPage) => currentPage + 1)}>
                                 <BiChevronRight className="text-gray-400" size={40} />
                               </div>
                             )}
@@ -316,30 +316,30 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
         )}
 
         {step === 3 && (
-          <div className="flex flex-col justify-center items-center">
-            <div className="mt-4 mb text-gray-900 text-xl text-center font-medium">
+          <div className="flex flex-col items-center justify-center">
+            <div className="mb mt-4 text-center text-xl font-medium text-gray-900">
               Vérifiez l&apos;affectation de {young.firstName} {young.lastName}
             </div>
             <div className="text-sm text-gray-500">Un email sera automatiquement envoyé au volontaire et à ses représentants légaux.</div>
 
-            <div className="flex flex-row gap-4 my-4">
-              <div className="w-1/2 flex flex-row gap-2 justify-center items-center mx-2">
+            <div className="my-4 flex flex-row gap-4">
+              <div className="mx-2 flex w-1/2 flex-row items-center justify-center gap-2">
                 <div>
                   <LinearIceBerg />
                 </div>
                 <div>
-                  <div className="font-bold text-gray-900 text-xl">Lieu d&apos;affectation</div>
+                  <div className="text-xl font-bold text-gray-900">Lieu d&apos;affectation</div>
                   <div className="text-sm">
                     {session.nameCentre}, {session.cityCentre} ({session.zipCentre}), {session.region}
                   </div>
                 </div>
               </div>
-              <div className="w-1/2 flex flex-row gap-2 justify-center items-center mx-2">
+              <div className="mx-2 flex w-1/2 flex-row items-center justify-center gap-2">
                 <div>
                   <LinearMap fill-opacity={`${pdrOption !== "ref-select" && "0.5"}`} />
                 </div>
                 <div>
-                  <div className="font-bold text-gray-900 text-xl">Lieu de rassemblement</div>
+                  <div className="text-xl font-bold text-gray-900">Lieu de rassemblement</div>
                   {pdrOption === "ref-select" ? (
                     <div>
                       {selectedPdr.pdr.name}, {selectedPdr.pdr.city} ({selectedPdr.pdr.zip}), {selectedPdr.pdr.region}
@@ -355,48 +355,48 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
               </div>
             </div>
             {selectedPdr && (
-              <div className="flex flex-row justify-center gap-6 mb-2">
+              <div className="mb-2 flex flex-row justify-center gap-6">
                 <div className="flex flex-row">
-                  <div className="bg-white shadow-sm flex flex-col items-center justify-center p-1 px-2 rounded-lg font-bold">
-                    <div className="text-orange-600 capitalize">{dayjs(selectedPdr?.data.ligneBus?.departuredDate).locale("fr").format("MMM")}</div>
-                    <div className="text-gray-700 text-lg">{dayjs(selectedPdr?.data.ligneBus?.departuredDate).locale("fr").format("D")}</div>
+                  <div className="flex flex-col items-center justify-center rounded-lg bg-white p-1 px-2 font-bold shadow-sm">
+                    <div className="capitalize text-orange-600">{dayjs(selectedPdr?.data.ligneBus?.departuredDate).locale("fr").format("MMM")}</div>
+                    <div className="text-lg text-gray-700">{dayjs(selectedPdr?.data.ligneBus?.departuredDate).locale("fr").format("D")}</div>
                   </div>
-                  <div className="flex flex-col items-start justify-center ml-2">
-                    <div className="text-gray-900 font-bold">Aller à {selectedPdr?.data.ligneToPoint.departureHour}</div>
+                  <div className="ml-2 flex flex-col items-start justify-center">
+                    <div className="font-bold text-gray-900">Aller à {selectedPdr?.data.ligneToPoint.departureHour}</div>
                     <div className="text-gray-600 first-letter:capitalize">{dayjs(selectedPdr?.data.ligneBus?.departuredDate).locale("fr").format("dddd D MMMM")}</div>
                   </div>
                 </div>
                 <div className="flex flex-row">
-                  <div className="bg-white shadow-sm flex flex-col items-center justify-center p-1 px-2 rounded-lg font-bold">
-                    <div className="text-orange-600 capitalize">{dayjs(selectedPdr?.data.ligneBus?.returnDate).locale("fr").format("MMM")}</div>
-                    <div className="text-gray-700 text-lg">{dayjs(selectedPdr?.data.ligneBus?.returnDate).locale("fr").format("D")}</div>
+                  <div className="flex flex-col items-center justify-center rounded-lg bg-white p-1 px-2 font-bold shadow-sm">
+                    <div className="capitalize text-orange-600">{dayjs(selectedPdr?.data.ligneBus?.returnDate).locale("fr").format("MMM")}</div>
+                    <div className="text-lg text-gray-700">{dayjs(selectedPdr?.data.ligneBus?.returnDate).locale("fr").format("D")}</div>
                   </div>
-                  <div className="flex flex-col items-start justify-center ml-2">
-                    <div className="text-gray-900 font-bold">Retour à {selectedPdr?.data.ligneToPoint.returnHour}</div>
+                  <div className="ml-2 flex flex-col items-start justify-center">
+                    <div className="font-bold text-gray-900">Retour à {selectedPdr?.data.ligneToPoint.returnHour}</div>
                     <div className="text-gray-600 first-letter:capitalize">{dayjs(selectedPdr?.data.ligneBus?.returnDate).locale("fr").format("dddd D MMMM")}</div>
                   </div>
                 </div>
               </div>
             )}
             {pdrOption === "self-going" && (
-              <div className="flex flex-row justify-center gap-6 mb-2">
+              <div className="mb-2 flex flex-row justify-center gap-6">
                 <div className="flex flex-row">
-                  <div className="bg-white shadow-sm flex flex-col items-center justify-center p-1 px-2 rounded-lg font-bold">
-                    <div className="text-orange-600 capitalize">{dayjs(cohort.dateStart).locale("fr").format("MMM")}</div>
-                    <div className="text-gray-700 text-lg">{dayjs(cohort.dateStart).locale("fr").format("D")}</div>
+                  <div className="flex flex-col items-center justify-center rounded-lg bg-white p-1 px-2 font-bold shadow-sm">
+                    <div className="capitalize text-orange-600">{dayjs(cohort.dateStart).locale("fr").format("MMM")}</div>
+                    <div className="text-lg text-gray-700">{dayjs(cohort.dateStart).locale("fr").format("D")}</div>
                   </div>
-                  <div className="flex flex-col items-start justify-center ml-2">
-                    <div className="text-gray-900 font-bold">Aller à 16h</div>
+                  <div className="ml-2 flex flex-col items-start justify-center">
+                    <div className="font-bold text-gray-900">Aller à 16h</div>
                     <div className="text-gray-600 first-letter:capitalize">{dayjs(cohort.dateStart).locale("fr").format("dddd D MMMM")}</div>
                   </div>
                 </div>
                 <div className="flex flex-row">
-                  <div className="bg-white shadow-sm flex flex-col items-center justify-center p-1 px-2 rounded-lg font-bold">
-                    <div className="text-orange-600 capitalize">{dayjs(cohort.dateEnd).locale("fr").format("MMM")}</div>
-                    <div className="text-gray-700 text-lg">{dayjs(cohort.dateEnd).locale("fr").format("D")}</div>
+                  <div className="flex flex-col items-center justify-center rounded-lg bg-white p-1 px-2 font-bold shadow-sm">
+                    <div className="capitalize text-orange-600">{dayjs(cohort.dateEnd).locale("fr").format("MMM")}</div>
+                    <div className="text-lg text-gray-700">{dayjs(cohort.dateEnd).locale("fr").format("D")}</div>
                   </div>
-                  <div className="flex flex-col items-start justify-center ml-2">
-                    <div className="text-gray-900 font-bold">Retour à 11h</div>
+                  <div className="ml-2 flex flex-col items-start justify-center">
+                    <div className="font-bold text-gray-900">Retour à 11h</div>
                     <div className="text-gray-600 first-letter:capitalize">{dayjs(cohort.dateEnd).locale("fr").format("dddd D MMMM")}</div>
                   </div>
                 </div>
@@ -413,7 +413,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
           onCancel={() => setModal((prevState) => ({ ...prevState, isOpen: false }))}
         />
       </div>
-      <div className="flex flex-row gap-2 w-full">
+      <div className="flex w-full flex-row gap-2">
         <div
           onClick={() => {
             if (step === 1) {
@@ -429,12 +429,12 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
             }
             setStep((step) => step - 1);
           }}
-          className="flex-1 border-[1px] border-gray-300 rounded text-center py-2 text-sm font-medium text-gray-700 cursor-pointer mb-2">
+          className="mb-2 flex-1 cursor-pointer rounded border-[1px] border-gray-300 py-2 text-center text-sm font-medium text-gray-700">
           Retour
         </div>
 
         {step === 3 && (
-          <div onClick={handleAffectation} className="flex-1 border-[1px] rounded bg-blue-600 text-center py-2 text-sm font-medium text-white cursor-pointer mb-2">
+          <div onClick={handleAffectation} className="mb-2 flex-1 cursor-pointer rounded border-[1px] bg-blue-600 py-2 text-center text-sm font-medium text-white">
             Confirmer
           </div>
         )}
@@ -447,7 +447,7 @@ const HitCenter = ({ hit, onSend }) => {
   return (
     <>
       <hr />
-      <div className="flex flex-row gap-4 justify-between items-center w-full px-2">
+      <div className="flex w-full flex-row items-center justify-between gap-4 px-2">
         <div className="w-1/2">
           <MultiLine>
             <span className="font-bold text-black">{hit.nameCentre}</span>
@@ -455,7 +455,7 @@ const HitCenter = ({ hit, onSend }) => {
           </MultiLine>
         </div>
         <div className="w-1/4">
-          <div key={hit.cohort} className={`rounded-full text-xs font-medium leading-5 px-3 py-1 w-fit border-[1px] border-[#0C7CFF] text-[#0C7CFF] bg-[#F9FCFF]`}>
+          <div key={hit.cohort} className={`w-fit rounded-full border-[1px] border-[#0C7CFF] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]`}>
             {hit.cohort}
           </div>
         </div>
@@ -471,7 +471,7 @@ const HitPdr = ({ hit, onSend, data }) => {
   return (
     <>
       <hr />
-      <div className="flex flex-row gap-4 justify-between items-center w-full px-2">
+      <div className="flex w-full flex-row items-center justify-between gap-4 px-2">
         <div className="w-1/2">
           <MultiLine>
             <span className="font-bold text-black">{hit.name}</span>
@@ -481,16 +481,16 @@ const HitPdr = ({ hit, onSend, data }) => {
         <div className="w-1/3 text-xs text-[#738297]">
           Num. transport <span className="text-gray-900">{data?.ligneBus.busId}</span>
         </div>
-        <div className="w-1/2 flex flex-col">
+        <div className="flex w-1/2 flex-col">
           <div className="text-xs text-[#738297]">
             Départ :{" "}
-            <span className="text-gray-900 capitalize">
+            <span className="capitalize text-gray-900">
               {formatStringDateWithDayTimezoneUTC(data?.ligneBus.departuredDate)} {data?.ligneToPoint.departureHour}
             </span>
           </div>
           <div className="text-xs text-[#738297]">
             Retour :{" "}
-            <span className="text-gray-900 capitalize">
+            <span className="capitalize text-gray-900">
               {formatStringDateWithDayTimezoneUTC(data?.ligneBus?.returnDate)} {data?.ligneToPoint.returnHour}
             </span>
           </div>
