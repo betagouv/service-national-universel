@@ -37,7 +37,7 @@ const AccountRepresentantsPage = () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
 
-  const [formValues, setFormValues] = useState(getInitialFormValues());
+  const [formValues, setFormValues] = useState(getInitialFormValues(young));
 
   const [errors, setErrors] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
