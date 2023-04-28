@@ -1,3 +1,13 @@
+## [1.262.1](https://github.com/betagouv/service-national-universel/compare/v1.262.0...v1.262.1) (2023-04-28)
+
+
+### Bug Fixes
+
+* **api:** update mission missing import and verif ([24d58fa](https://github.com/betagouv/service-national-universel/commit/24d58fad662f8270237c5892f1ccc21f89da957f))
+* **app:** waitingCorrection if no correctionRequest ([e1f4996](https://github.com/betagouv/service-national-universel/commit/e1f49960a11b0624f496ee03583692cd4822b431))
+* **lib:** Réparer la fonction d'autorisation de changement de session ([#2555](https://github.com/betagouv/service-national-universel/issues/2555)) ([f545a88](https://github.com/betagouv/service-national-universel/commit/f545a883551ad1c980dd83742c1bdbe42ca3b077))
+* **test:** fix mission put test probleme date ([#2553](https://github.com/betagouv/service-national-universel/issues/2553)) ([b468974](https://github.com/betagouv/service-national-universel/commit/b468974c197f02197f323232055163fe19245467))
+
 # [1.262.0](https://github.com/betagouv/service-national-universel/compare/v1.261.0...v1.262.0) (2023-04-27)
 
 
