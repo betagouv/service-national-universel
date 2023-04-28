@@ -44,6 +44,10 @@ const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRep
 const tableRepartitionModel = require("../../models/PlanDeTransport/tableDeRepartition");
 const pointRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const cohesionCenterModel = require("../../models/cohesionCenter");
+const { getTransporter } = require("../../utils");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { sendTemplate } = require("../../sendinblue");
+const { WorkMailMessageFlow } = require("aws-sdk");
 
 const schemaRepartitionBodySchema = Joi.object({
   cohort: Joi.string()
@@ -940,8 +944,23 @@ router.post("", passport.authenticate("referent", { session: false, failWithErro
     // --- création
     const data = await schemaRepartitionModel.create(value);
 
+    const referentTransport = await getTransporter();
+    if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+    const mail = await sendTemplate(template, {
+      emailTo: referentTransport.map((referent) => ({
+        name: `${referent.firstName} ${referent.lastName}`,
+        email: referent.email,
+      })),
+      params: {
+        trigger: "ajout d'un groupe",
+        region: bodySchema.fromRegion
+      },
+    });
+
     // --- résultat
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data, mail: mail });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -967,8 +986,23 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     await schemaRepartitionModel.deleteOne({ _id: schema._id });
 
+    const referentTransport = await getTransporter();
+    if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+    const mail = await sendTemplate(template, {
+      emailTo: referentTransport.map((referent) => ({
+        name: `${referent.firstName} ${referent.lastName}`,
+        email: referent.email,
+      })),
+      params: {
+        trigger: "groupe supprimé",
+        region: schema.fromRegion
+      },
+    });
+
     // --- résultat
-    return res.status(200).send({ ok: true });
+    return res.status(200).send({ ok: true, mail: mail });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -1009,8 +1043,23 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     schema.set(value);
     await schema.save();
 
+    const referentTransport = await getTransporter();
+    if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+    const mail = await sendTemplate(template, {
+      emailTo: referentTransport.map((referent) => ({
+        name: `${referent.firstName} ${referent.lastName}`,
+        email: referent.email,
+      })),
+      params: {
+        trigger: "groupe modifié",
+        region: schema.fromRegion
+      },
+    });
+
     // --- résultat
-    return res.status(200).send({ ok: true, data: schema });
+    return res.status(200).send({ ok: true, data: schema, mail: mail });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
