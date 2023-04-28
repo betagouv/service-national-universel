@@ -16,6 +16,9 @@ const { validateId } = require("../../utils/validator");
 const nanoid = require("nanoid");
 const { COHORTS } = require("snu-lib");
 const { getCohesionCenterFromSession } = require("./commons");
+const { getTransporter } = require("../../utils");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { sendTemplate } = require("../../sendinblue");
 
 /**
  * Récupère les points de rassemblements (avec horaire de passage) pour un jeune affecté.
@@ -243,11 +246,27 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       meetingPoint.set({ ...meetingPoint, name, address, city, zip, department, region, location });
       await p.save({ fromUser: req.user });
     }
+
+    const referentTransport = await getTransporter();
+    if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+    const mail = await sendTemplate(template, {
+      emailTo: referentTransport.map((referent) => ({
+        name: `${referent.firstName} ${referent.lastName}`,
+        email: referent.email,
+      })),
+      params: {
+        trigger: "point de rassemblement modifié",
+        pdr_id: name,
+      },
+    });
+
     // * End update slave PlanTransport
 
     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
 
-    return res.status(200).send({ ok: true, data: pointDeRassemblement });
+    return res.status(200).send({ ok: true, data: pointDeRassemblement, mail: mail });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -284,9 +303,24 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
     pointDeRassemblement.set({ cohorts: cohortsToUpdate, complementAddress: complementAddressToUpdate });
     await pointDeRassemblement.save({ fromUser: req.user });
 
+    const referentTransport = await getTransporter();
+    if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+    const mail = await sendTemplate(template, {
+      emailTo: referentTransport.map((referent) => ({
+        name: `${referent.firstName} ${referent.lastName}`,
+        email: referent.email,
+      })),
+      params: {
+        trigger: "point de rassemblement modifié",
+        pdr_id: pointDeRassemblement.name,
+      },
+    });
+
     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
 
-    return res.status(200).send({ ok: true, data: pointDeRassemblement });
+    return res.status(200).send({ ok: true, data: pointDeRassemblement, mail: mail });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
