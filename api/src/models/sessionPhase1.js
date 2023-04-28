@@ -117,6 +117,8 @@ const Schema = new mongoose.Schema({
       description: "Nombre de places disponibles",
     },
   },
+
+  // TODO: remove this field
   status: {
     type: String,
     enum: ["VALIDATED", "WAITING_VALIDATION"],
