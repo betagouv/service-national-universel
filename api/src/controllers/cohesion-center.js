@@ -16,6 +16,8 @@ const { ADMIN_URL, ENVIRONMENT } = require("../config");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateId } = require("../utils/validator");
+const { getReferentManagerPhase2 } = require("../utils");
+const { getTransporter } = require("../utils");
 
 //To update for new affectation
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -232,7 +234,22 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     await center.save({ fromUser: req.user });
 
     await updateCenterDependencies(center, req.user);
-    res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
+
+    const referentTransport = await getTransporter();
+    if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+    const mail = await sendTemplate(template, {
+      emailTo: referentTransport.map((referent) => ({
+        name: `${referent.firstName} ${referent.lastName}`,
+        email: referent.email,
+      })),
+      params: {
+        trigger: "modification d'un centre",
+        centre_id: value.name,
+      },
+    });
+    res.status(200).send({ ok: true, data: serializeCohesionCenter(center), mail: mail });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

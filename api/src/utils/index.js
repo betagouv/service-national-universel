@@ -720,6 +720,14 @@ const updateHeadCenter = async (headCenterId, user) => {
   await headCenter.save({ fromUser: user });
 };
 
+const getTransporter = async () => {
+  let toReferent = await ReferentModel.find({
+    role: ROLES.TRANSPORTER
+  });
+  return toReferent;
+}
+
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -846,4 +854,5 @@ module.exports = {
   cancelPendingApplications,
   updateYoungApplicationFilesType,
   updateHeadCenter,
+  getTransporter,
 };
