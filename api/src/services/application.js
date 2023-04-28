@@ -1,5 +1,5 @@
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { MISSION_STATUS } = require("snu-lib/constants");
+const { MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib/constants");
 const { deletePatches } = require("../controllers/patches");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
