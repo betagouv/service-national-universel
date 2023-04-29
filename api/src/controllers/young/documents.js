@@ -241,7 +241,10 @@ router.post(
           Object.keys(req.files || {}).map((e) => req.files[e]),
           { stripUnknown: true },
         );
-      if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      if (filesError) {
+        console.log("🚀 ~ file: documents.js:245 ~ filesError:", filesError);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      }
 
       const { error: bodyError, value: body } = Joi.object({
         category: Joi.string(),

@@ -139,6 +139,7 @@ class api {
   }
 
   uploadFile(path, arr, category, expirationDate) {
+    console.log("🚀 ~ file: api.js:142 ~ api ~ uploadFile ~ arr:", arr);
     const names = arr.map((e) => e.name || e);
     const files = arr.filter((e) => typeof e === "object");
     let formData = new FormData();
@@ -148,6 +149,33 @@ class api {
     formData.append("body", JSON.stringify({ names }));
     if (category) formData.set("category", category);
     if (expirationDate) formData.set("expirationDate", expirationDate);
+    return new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch(`${apiURL}${path}`, {
+          retries: 3,
+          retryDelay: 1000,
+          retryOn: [502, 503, 504],
+          mode: "cors",
+          method: "POST",
+          credentials: "include",
+          headers: { Authorization: `JWT ${this.token}` },
+          body: formData,
+        });
+        const res = await response.json();
+        resolve(res);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  uploadID(path, file, category, expirationDate) {
+    let formData = new FormData();
+    formData.append(file.name, file, file.name);
+    // formData.append("body", JSON.stringify({ names }));
+    if (category) formData.set("category", category);
+    if (expirationDate) formData.set("expirationDate", expirationDate);
+
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
