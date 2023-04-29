@@ -68,30 +68,36 @@ export default function StepUpload() {
     setLoading(false);
   }
 
+  async function uploadFiles() {
+    if (recto) {
+      const res = await api.uploadID(`/young/${young._id}/documents/cniFiles`, recto, category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
+      if (!res.ok) {
+        capture(res.code);
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+        resetState();
+        return { ok: false };
+      }
+    }
+
+    if (verso) {
+      const res = await api.uploadID(`/young/${young._id}/documents/cniFiles`, verso, category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
+      if (!res.ok) {
+        capture(res.code);
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+        resetState();
+        return { ok: false };
+      }
+    }
+
+    return { ok: true };
+  }
+
   async function onSubmit() {
     try {
       setLoading(true);
 
-      let files = [];
-      if (recto) files = [...files, ...recto];
-      if (verso) files = [...files, ...verso];
-
-      for (const file of files) {
-        if (file.size > 5000000) {
-          setLoading(false);
-          setError({ text: `Ce fichier ${files.name} est trop volumineux.` });
-          return;
-        }
-      }
-
-      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
-
-      if (!res.ok) {
-        capture(res.code);
-        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code });
-        resetState();
-        return;
-      }
+      const { ok: uploadOk } = await uploadFiles();
+      if (!uploadOk) return;
 
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: dayjs(date).locale("fr").format("YYYY-MM-DD") });
 
@@ -116,26 +122,8 @@ export default function StepUpload() {
     try {
       setLoading(true);
 
-      let files = [];
-      if (recto) files = [...files, ...recto];
-      if (verso) files = [...files, ...verso];
-
-      for (const file of files) {
-        if (file.size > 5000000) {
-          setLoading(false);
-          setError({ text: `Ce fichier ${files.name} est trop volumineux.` });
-          return;
-        }
-      }
-
-      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
-
-      if (!res.ok) {
-        capture(res.code);
-        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code });
-        resetState();
-        return;
-      }
+      const { ok: uploadOk } = await uploadFiles();
+      if (!uploadOk) return;
 
       const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
@@ -145,6 +133,7 @@ export default function StepUpload() {
         setLoading(false);
         return;
       }
+
       plausibleEvent("Phase0/CTA demande correction - Corriger ID");
       dispatch(setYoung(responseData));
       history.push("/");
@@ -203,6 +192,16 @@ export default function StepUpload() {
   );
 
   function Recto() {
+    function handleChange(e) {
+      if (e.target.files[0].size > 1000000) {
+        setError({ text: "Ce fichier est trop volumineux." });
+        return;
+      }
+      setRecto(e.target.files[0]);
+      setHasChanged(true);
+      setStep(corrections?.some(({ reason }) => reason === "MISSING_FRONT") || category === "passport" ? "verify" : "verso");
+    }
+
     return (
       <>
         <div className="mb-4">
@@ -218,18 +217,7 @@ export default function StepUpload() {
         <div className="mb-4 flex w-full items-center justify-center">
           <img src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
         </div>
-        <input
-          type="file"
-          id="file-upload"
-          name="file-upload"
-          accept="image/*"
-          onChange={(e) => {
-            setRecto(e.target.files);
-            setHasChanged(true);
-            setStep(corrections?.some(({ reason }) => reason === "MISSING_FRONT") || category === "passport" ? "verify" : "verso");
-          }}
-          className="hidden"
-        />
+        <input type="file" id="file-upload" name="file-upload" accept="image/*" onChange={handleChange} className="hidden" />
         <button className="flex w-full">
           <label htmlFor="file-upload" className="flex w-full items-center justify-center bg-[#000091] p-2 text-white">
             {category === "passport" ? "Scannez le document" : "Scannez le recto du document"}
@@ -240,6 +228,16 @@ export default function StepUpload() {
   }
 
   function Verso() {
+    function handleChange(e) {
+      if (e.target.files[0].size > 1000000) {
+        setError({ text: "Ce fichier est trop volumineux." });
+        return;
+      }
+      setVerso(e.target.files[0]);
+      setHasChanged(true);
+      setStep(corrections?.some(({ reason }) => reason === "MISSING_FRONT") || category === "passport" ? "verify" : "verso");
+    }
+
     return (
       <>
         <div className="mb-4">
@@ -255,18 +253,7 @@ export default function StepUpload() {
         <div className="mb-4 flex w-full items-center justify-center">
           {ID[category].imgBack && <img src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />}
         </div>
-        <input
-          type="file"
-          id="file-upload"
-          name="file-upload"
-          accept="image/*"
-          onChange={(e) => {
-            setVerso(e.target.files);
-            setHasChanged(true);
-            setStep("verify");
-          }}
-          className="hidden"
-        />
+        <input type="file" id="file-upload" name="file-upload" accept="image/*" onChange={handleChange} className="hidden" />
         <button className="flex w-full">
           <label htmlFor="file-upload" className="flex w-full items-center justify-center bg-[#000091] p-2 text-white">
             Scannez le verso du document

@@ -30,12 +30,21 @@ export default function StepUpload() {
   const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
   const corrections = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
   const filesCount = getFilesCount();
+  const isEnabled = getIsEnabled();
 
   function getFilesCount() {
     let count = young?.files?.cniFiles?.length || 0;
     if (recto) count++;
     if (verso) count++;
     return count;
+  }
+
+  function getIsEnabled() {
+    if (corrections?.length) {
+      return hasChanged && !loading && !error.text;
+    } else {
+      return (young?.files?.cniFiles?.length || (recto && (verso || category === "passport"))) && date && !loading && !error.text;
+    }
   }
 
   function resetState() {
@@ -132,16 +141,6 @@ export default function StepUpload() {
     }
   }
 
-  function checkIfValid() {
-    if (corrections?.length) {
-      return hasChanged && !loading && !error.text;
-    } else {
-      return (young?.files?.cniFiles?.length || (recto && (verso || category === "passport"))) && date && !loading && !error.text;
-    }
-  }
-
-  const isEnabled = checkIfValid();
-
   if (!category) return <div>Loading</div>;
 
   return (
@@ -197,7 +196,7 @@ export default function StepUpload() {
 }
 
 function AddRecto({ recto, setRecto, setError, setHasChanged }) {
-  function handleSubmit(e) {
+  function handleChange(e) {
     if (e.target.files[0].size > 1000000) {
       setError({ text: `Le fichier ${e.target.files[0].name} est trop volumineux.` });
       return;
@@ -214,7 +213,7 @@ function AddRecto({ recto, setRecto, setError, setHasChanged }) {
         Ajouter <strong>le recto</strong>
       </p>
       <div className="text-gray-500 text-sm my-4">Taille maximale : 1 Mo. Formats supportés : jpg, png, pdf.</div>
-      <input type="file" id="file-upload-recto" name="file-upload-recto" accept=".png, .jpg, .jpeg, .pdf" onChange={handleSubmit} className="hidden" />
+      <input type="file" id="file-upload-recto" name="file-upload-recto" accept=".png, .jpg, .jpeg, .pdf" onChange={handleChange} className="hidden" />
       <div className="my-4 flex w-full">
         <div>
           <label htmlFor="file-upload-recto" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
@@ -228,7 +227,7 @@ function AddRecto({ recto, setRecto, setError, setHasChanged }) {
 }
 
 function AddVerso({ verso, setVerso, setError, setHasChanged }) {
-  function handleSubmit(e) {
+  function handleChange(e) {
     if (e.target.files[0].size > 1000000) {
       setError({ text: `Ce fichier ${e.target.name} est trop volumineux.` });
       return;
@@ -246,7 +245,7 @@ function AddVerso({ verso, setVerso, setError, setHasChanged }) {
         Ajouter <strong>le verso</strong>
       </p>
       <div className="text-gray-500 text-sm my-4">Taille maximale : 1 Mo. Formats supportés : jpg, png, pdf.</div>
-      <input type="file" id="file-upload-verso" name="file-upload-verso" accept=".png, .jpg, .jpeg, .pdf" onChange={handleSubmit} className="hidden" />
+      <input type="file" id="file-upload-verso" name="file-upload-verso" accept=".png, .jpg, .jpeg, .pdf" onChange={handleChange} className="hidden" />
       <div className="flex w-full my-4">
         <div>
           <label htmlFor="file-upload-verso" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">

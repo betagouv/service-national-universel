@@ -139,7 +139,6 @@ class api {
   }
 
   uploadFile(path, arr, category, expirationDate) {
-    console.log("🚀 ~ file: api.js:142 ~ api ~ uploadFile ~ arr:", arr);
     const names = arr.map((e) => e.name || e);
     const files = arr.filter((e) => typeof e === "object");
     let formData = new FormData();
@@ -171,7 +170,7 @@ class api {
 
   uploadID(path, file, category, expirationDate) {
     let formData = new FormData();
-    formData.append(file.name, file, file.name);
+    // formData.append(file.name, file, file.name);
     formData.append("body", { names: [file.name] });
     if (category) formData.set("category", category);
     if (expirationDate) formData.set("expirationDate", expirationDate);
