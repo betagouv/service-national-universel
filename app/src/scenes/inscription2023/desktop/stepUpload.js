@@ -27,9 +27,16 @@ export default function StepUpload() {
   const [hasChanged, setHasChanged] = useState(false);
   const [recto, setRecto] = useState([]);
   const [verso, setVerso] = useState([]);
-  // const files = [...recto, ...verso];
   const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
   const corrections = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
+  const filesCount = getFilesCount();
+
+  function getFilesCount() {
+    let count = young?.files?.cniFiles?.length || 0;
+    if (recto) count++;
+    if (verso) count++;
+    return count;
+  }
 
   function resetState() {
     setRecto([]);
@@ -39,52 +46,58 @@ export default function StepUpload() {
   }
 
   async function uploadFiles() {
-    if (young?.files?.cniFiles?.length + [...recto, ...verso].length > 3) {
-      return young?.files?.cniFiles?.length
-        ? { error: `Vous ne pouvez téléverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.` }
-        : { error: "Vous ne pouvez téléverser plus de 3 fichiers." };
+    if (filesCount > 3) {
+      setError(
+        young?.files?.cniFiles?.length
+          ? { text: `Vous ne pouvez téléverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.` }
+          : { text: "Vous ne pouvez téléverser plus de 3 fichiers." },
+      );
+      setLoading(false);
+      return { ok: false };
     }
 
     if (recto) {
-      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, recto, category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
+      const res = await api.uploadID(`/young/${young._id}/documents/cniFiles`, recto, category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
         resetState();
-        return;
+        return { ok: false };
       }
     }
 
     if (verso) {
-      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, verso, category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
+      const res = await api.uploadID(`/young/${young._id}/documents/cniFiles`, verso, category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
         resetState();
-        return;
+        return { ok: false };
       }
     }
+
+    return { ok: true };
   }
 
   async function onSubmit() {
     try {
       setLoading(true);
-      await uploadFiles();
 
-      if (!error) {
-        const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: dayjs(date).locale("fr").format("YYYY-MM-DD") });
+      const { ok: uploadOk } = await uploadFiles();
+      if (!uploadOk) return;
 
-        if (!ok) {
-          capture(code);
-          setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: code });
-          resetState();
-          return;
-        }
+      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: dayjs(date).locale("fr").format("YYYY-MM-DD") });
 
-        dispatch(setYoung(responseData));
-        plausibleEvent("Phase0/CTA inscription - CI desktop");
-        history.push("/inscription2023/confirm");
+      if (!ok) {
+        capture(code);
+        setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données." });
+        resetState();
+        return;
       }
+
+      dispatch(setYoung(responseData));
+      plausibleEvent("Phase0/CTA inscription - CI desktop");
+      history.push("/inscription2023/confirm");
     } catch (e) {
       capture(e);
       setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données." });
@@ -96,23 +109,22 @@ export default function StepUpload() {
     try {
       setLoading(true);
 
-      await uploadFiles();
+      const { ok: uploadOk } = await uploadFiles();
+      if (!uploadOk) return;
 
-      if (!error) {
-        const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
-        const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
+      const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
+      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
 
-        if (!ok) {
-          capture(code);
-          setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: code });
-          resetState();
-          return;
-        }
-
-        plausibleEvent("Phase0/CTA demande correction - Corriger ID");
-        dispatch(setYoung(responseData));
-        history.push("/");
+      if (!ok) {
+        capture(code);
+        setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: code });
+        resetState();
+        return;
       }
+
+      plausibleEvent("Phase0/CTA demande correction - Corriger ID");
+      dispatch(setYoung(responseData));
+      history.push("/");
     } catch (e) {
       capture(e);
       setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données." });
@@ -124,7 +136,7 @@ export default function StepUpload() {
     if (corrections?.length) {
       return hasChanged && !loading && !error.text;
     } else {
-      return (young?.files?.cniFiles?.length || (recto?.length && (verso.length || category === "passport"))) && date && !loading && !error.text;
+      return (young?.files?.cniFiles?.length || (recto && (verso || category === "passport"))) && date && !loading && !error.text;
     }
   }
 
@@ -158,7 +170,10 @@ export default function StepUpload() {
         Toutes les informations doivent être <strong>lisibles</strong>, le document doit être visible <strong>entièrement</strong>, la photo doit être <strong>nette</strong>. Le
         document doit être téléversé en <strong>recto</strong> et <strong>verso</strong>.
       </div>
+
       <hr className="my-8 h-px bg-gray-200 border-0" />
+
+      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
 
       <AddRecto recto={recto} setRecto={setRecto} setError={setError} setHasChanged={setHasChanged} />
 
@@ -172,24 +187,23 @@ export default function StepUpload() {
         .
       </div>
 
-      {error?.text && young?.files?.cniFiles?.length + [...recto, ...verso]?.length > 2 && <MyDocs />}
-
       {(recto || verso || date) && <AddDate date={date} setDate={setDate} setHasChanged={setHasChanged} corrections={corrections} category={category} />}
 
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
+
+      {error?.text && filesCount > 2 && <MyDocs />}
     </DesktopPageContainer>
   );
 }
 
 function AddRecto({ recto, setRecto, setError, setHasChanged }) {
   function handleSubmit(e) {
-    console.log("🚀 ~ file: stepUpload.js:188 ~ handleSubmit ~ e.target.files[0]:", e.target.files[0]);
     if (e.target.files[0].size > 1000000) {
       setError({ text: `Le fichier ${e.target.files[0].name} est trop volumineux.` });
       return;
     }
 
-    setRecto(e.target.files);
+    setRecto(e.target.files[0]);
     setError({});
     setHasChanged(true);
   }
@@ -207,17 +221,7 @@ function AddRecto({ recto, setRecto, setError, setHasChanged }) {
             Parcourir...
           </label>
         </div>
-        <div className="ml-4 mt-2">
-          {recto ? (
-            Array.from(recto).map((e) => (
-              <p className="text-gray-800 text-sm" key={e.name}>
-                {e.name}
-              </p>
-            ))
-          ) : (
-            <div className="text-sm text-gray-800">Aucun fichier sélectionné.</div>
-          )}
-        </div>
+        {recto ? <p className="text-gray-800 text-sm ml-4 mt-2">{recto.name}</p> : <p className="text-sm text-gray-800 ml-4 mt-2">Aucun fichier sélectionné.</p>}
       </div>
     </>
   );
@@ -225,13 +229,11 @@ function AddRecto({ recto, setRecto, setError, setHasChanged }) {
 
 function AddVerso({ verso, setVerso, setError, setHasChanged }) {
   function handleSubmit(e) {
-    console.log("🚀 ~ file: stepUpload.js:135 ~ handleSubmitVerso ~ e.target:", e.target);
-
-    if (e.target.size > 1000000) {
+    if (e.target.files[0].size > 1000000) {
       setError({ text: `Ce fichier ${e.target.name} est trop volumineux.` });
       return;
     }
-    setVerso(e.target.files);
+    setVerso(e.target.files[0]);
     setError({});
     setHasChanged(true);
   }
@@ -251,17 +253,7 @@ function AddVerso({ verso, setVerso, setError, setHasChanged }) {
             Parcourir...
           </label>
         </div>
-        <div className="ml-4 mt-2">
-          {verso ? (
-            Array.from(verso).map((e) => (
-              <p className="text-gray-800 text-sm" key={e.name}>
-                {e.name}
-              </p>
-            ))
-          ) : (
-            <div className="text-gray-800 text-sm">Aucun fichier sélectionné.</div>
-          )}
-        </div>
+        {verso ? <p className="text-gray-800 text-sm ml-4 mt-2">{verso.name}</p> : <div className="text-gray-800 text-sm ml-4 mt-2">Aucun fichier sélectionné.</div>}
       </div>
     </>
   );

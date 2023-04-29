@@ -172,7 +172,7 @@ class api {
   uploadID(path, file, category, expirationDate) {
     let formData = new FormData();
     formData.append(file.name, file, file.name);
-    // formData.append("body", JSON.stringify({ names }));
+    formData.append("body", { names: [file.name] });
     if (category) formData.set("category", category);
     if (expirationDate) formData.set("expirationDate", expirationDate);
 
