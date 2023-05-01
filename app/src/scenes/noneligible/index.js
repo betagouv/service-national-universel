@@ -18,7 +18,7 @@ const ComponentNonEligible = () => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <div className="flex flex-col h-screen justify-between md:!bg-[#f9f6f2] bg-white">
+    <div className="flex h-screen flex-col justify-between bg-white md:!bg-[#f9f6f2]">
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <Header setIsOpen={setIsOpen} />
       {device === "desktop" ? <DesktopNonEligible /> : <MobileNonEligible />}

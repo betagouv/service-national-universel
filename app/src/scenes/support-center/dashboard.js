@@ -206,12 +206,12 @@ export default function Dashboard(props) {
       </NavLink>
       <Container>
         <h3 className="text-center text-[32px]">Besoin d&apos;aide&nbsp;?</h3>
-        <div className=" mt-2 flex w-full content-center items-center mr-auto ml-auto justify-center md:w-2/3 md:flex-1">
+        <div className=" mt-2 mr-auto ml-auto flex w-full content-center items-center justify-center md:w-2/3 md:flex-1">
           <KnowledgeBaseSearch path="/base-de-connaissance" className="rounded-md border border-gray-300 transition-colors focus:border-gray-400" restriction="public" />
         </div>
-        <div className="w-2/3 m-auto text-center !mt-3 " style={{ color: "#6B7280" }}>
-          <strong>Une question ? </strong> Utilisez notre moteur de recherche ci-dessus pour trouver l'article ou le tutoriel pour vous aider. Pour faciliter vos recherches
-          utilisez <strong>des mots clés</strong> (ex : inscriptions, contrat d'engagement …)
+        <div className="m-auto !mt-3 w-2/3 text-center " style={{ color: "#6B7280" }}>
+          <strong>Une question ? </strong> Utilisez notre moteur de recherche ci-dessus pour trouver l&apos;article ou le tutoriel pour vous aider. Pour faciliter vos recherches
+          utilisez <strong>des mots clés</strong> (ex : inscriptions, contrat d&apos;engagement …)
         </div>
         <h4 className="my-4 ml-2">Quelques articles pour vous aider&nbsp;:</h4>
         <Articles>
@@ -322,22 +322,6 @@ const Container = styled.div`
   }
 `;
 
-const LinkButton = styled.a`
-  max-width: 230px;
-  margin: 0.3rem;
-  background-color: #5245cc;
-  border: none;
-  border-radius: 5px;
-  padding: 12px 25px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-  transition: opacity 0.3s;
-  :hover {
-    color: #fff;
-    background: #463bad;
-  }
-`;
 const InternalLink = styled(NavLink)`
   max-width: 230px;
   margin: 0.3rem;

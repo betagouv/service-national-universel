@@ -1,3 +1,105 @@
+## [1.262.1](https://github.com/betagouv/service-national-universel/compare/v1.262.0...v1.262.1) (2023-04-28)
+
+
+### Bug Fixes
+
+* **api:** update mission missing import and verif ([24d58fa](https://github.com/betagouv/service-national-universel/commit/24d58fad662f8270237c5892f1ccc21f89da957f))
+* **app:** waitingCorrection if no correctionRequest ([e1f4996](https://github.com/betagouv/service-national-universel/commit/e1f49960a11b0624f496ee03583692cd4822b431))
+* **lib:** Réparer la fonction d'autorisation de changement de session ([#2555](https://github.com/betagouv/service-national-universel/issues/2555)) ([f545a88](https://github.com/betagouv/service-national-universel/commit/f545a883551ad1c980dd83742c1bdbe42ca3b077))
+* **test:** fix mission put test probleme date ([#2553](https://github.com/betagouv/service-national-universel/issues/2553)) ([b468974](https://github.com/betagouv/service-national-universel/commit/b468974c197f02197f323232055163fe19245467))
+
+# [1.262.0](https://github.com/betagouv/service-national-universel/compare/v1.261.0...v1.262.0) (2023-04-27)
+
+
+### Bug Fixes
+
+* **api:** tutor name for missions ([#2547](https://github.com/betagouv/service-national-universel/issues/2547)) ([1f55c4d](https://github.com/betagouv/service-national-universel/commit/1f55c4d56a15f4b4e24dcb0f71c8160c2c60dd91))
+* **app:** display parent info on profil page ([ab2fb12](https://github.com/betagouv/service-national-universel/commit/ab2fb1262d3f4472ffff9a6e5dbe8483b6f170be))
+* **app:** parent form reset ([695fa5d](https://github.com/betagouv/service-national-universel/commit/695fa5d1831ef6501cb0c2bdba29bcc1bf3c0c74))
+* **app/api:** Amélio gestion d'erreur uploads ([#2545](https://github.com/betagouv/service-national-universel/issues/2545)) ([212a0be](https://github.com/betagouv/service-national-universel/commit/212a0bea1ea63939677d9bde264740efe8906c73))
+
+
+### Features
+
+* **app:** Inscription - Etape téléversement - Dissocier les uploads du recto et du verso de la CNI sur desktop ([#2544](https://github.com/betagouv/service-national-universel/issues/2544)) ([247b72d](https://github.com/betagouv/service-national-universel/commit/247b72d350f220e18eebe6cf34dfd4b2590777b4))
+
+# [1.261.0](https://github.com/betagouv/service-national-universel/compare/v1.260.0...v1.261.0) (2023-04-26)
+
+
+### Bug Fixes
+
+* **api:** dont check if session isFull for reinscription ([#2543](https://github.com/betagouv/service-national-universel/issues/2543)) ([83783db](https://github.com/betagouv/service-national-universel/commit/83783db78f2272c238e06aeafb4f79ea91c8dc5a))
+* **app:** Account - Do not change birthdate locale in initial form values ([84c7614](https://github.com/betagouv/service-national-universel/commit/84c7614b8fb67d07d56dc6d78c18742703e8ab0a))
+* **app:** probleme de cache sentry ([#2542](https://github.com/betagouv/service-national-universel/issues/2542)) ([58e09d7](https://github.com/betagouv/service-national-universel/commit/58e09d7f735030c86a8a6790761e7c5f838c7ffb))
+* **app:** reversed firstname lastname on profil page ([2d6940b](https://github.com/betagouv/service-national-universel/commit/2d6940b02c7cc847523a27f2b301dffe2e29e033))
+* fix missing region to avoid crash ([868f6bb](https://github.com/betagouv/service-national-universel/commit/868f6bbb00ee5cc7413385670d37c5612515f14f))
+
+
+### Features
+
+* add step point typs in model ([e8c6381](https://github.com/betagouv/service-national-universel/commit/e8c6381184ebdccd175083457aaa941a6ce8d91f))
+
+# [1.260.0](https://github.com/betagouv/service-national-universel/compare/v1.259.0...v1.260.0) (2023-04-25)
+
+
+### Bug Fixes
+
+* **api:** bug delete cohort in pdr ([#2535](https://github.com/betagouv/service-national-universel/issues/2535)) ([2411434](https://github.com/betagouv/service-national-universel/commit/24114345a8cad99a26cf9868ce9922f033855960))
+* **api:** first names where incorrectly transformed (émile changed to éMile) ([#2533](https://github.com/betagouv/service-national-universel/issues/2533)) ([71e3380](https://github.com/betagouv/service-national-universel/commit/71e3380fb8112bde33035c053b56ea26c9927179))
+* **app:** Allow youngs from DOM to make corrections ([b81be5b](https://github.com/betagouv/service-national-universel/commit/b81be5bdfa17d53a7204f0dbf2a47b7904c74afc))
+* **app:** better error handling for file upload during signup ([efa0006](https://github.com/betagouv/service-national-universel/commit/efa0006c9359c8224efd62c01b8812cfc9414309))
+* **app:** linter errors ([#2405](https://github.com/betagouv/service-national-universel/issues/2405)) ([5ad93dd](https://github.com/betagouv/service-national-universel/commit/5ad93ddc70a8b779ccad9b1c7b4f95c8faae755f))
+* **app:** Simplifier la structure du CSS sur l'écran Phase 1/Affecté ([#2470](https://github.com/betagouv/service-national-universel/issues/2470)) ([af78ea5](https://github.com/betagouv/service-national-universel/commit/af78ea578ab7e469610a6b1678b15efe68ce0300))
+
+
+### Features
+
+* **admin:** Ajout du champs "voyage en avion" sur la page phase 1 d'un volontaire ([#2525](https://github.com/betagouv/service-national-universel/issues/2525)) ([a2fa06d](https://github.com/betagouv/service-national-universel/commit/a2fa06d271a1aa725f320820749ebb9f8b846a22))
+* **admin:** Paramétrage dynamique des demandes de correction du plan de transport ([#2521](https://github.com/betagouv/service-national-universel/issues/2521)) ([74d6df2](https://github.com/betagouv/service-national-universel/commit/74d6df2eadbdbc51940d4f736f30918de3a6c157))
+* **app:** Nouvelle page de profil volontaire ([#2538](https://github.com/betagouv/service-national-universel/issues/2538)) ([2b388f3](https://github.com/betagouv/service-national-universel/commit/2b388f3e1ada6cf58101d731c30c962f9a684fa3))
+
+# [1.259.0](https://github.com/betagouv/service-national-universel/compare/v1.258.0...v1.259.0) (2023-04-24)
+
+
+### Bug Fixes
+
+* **api:** add try catch logout route ([#2532](https://github.com/betagouv/service-national-universel/issues/2532)) ([61e90c3](https://github.com/betagouv/service-national-universel/commit/61e90c379b777b11f5c7380dbef813d7c53e855a))
+
+
+### Features
+
+* list bus with new system + allow export only some fields + allow custom aggs query + limit params to 200 + simplify export title ([#2491](https://github.com/betagouv/service-national-universel/issues/2491)) ([212f884](https://github.com/betagouv/service-national-universel/commit/212f884c913fb61dc949c5e1c3741e36d6e169a6))
+
+# [1.258.0](https://github.com/betagouv/service-national-universel/compare/v1.257.0...v1.258.0) (2023-04-21)
+
+
+### Bug Fixes
+
+* **app:** Autoriser temporairement les volontaires en cours de juin des DROM à accéder à la page d'inscription ([#2527](https://github.com/betagouv/service-national-universel/issues/2527)) ([dca2b5f](https://github.com/betagouv/service-national-universel/commit/dca2b5ff12550bab47b1d2fefe34efb7bc08658a))
+
+
+### Features
+
+* **lib, admin:** Ajout d'informations sur le trajet dans l'export des volontaires ([f5f10ea](https://github.com/betagouv/service-national-universel/commit/f5f10ea0a01fd3b5c35ac00a2db52d6a50778e5f))
+
+# [1.257.0](https://github.com/betagouv/service-national-universel/compare/v1.256.0...v1.257.0) (2023-04-20)
+
+
+### Bug Fixes
+
+* **admin:** correction du contrôle de la capacité de volontaires sur plan de transport ([#2518](https://github.com/betagouv/service-national-universel/issues/2518)) ([6aa613f](https://github.com/betagouv/service-national-universel/commit/6aa613f0ec2abe7954b7a1c862db6befe2204901))
+* **admin:** Correction legendURl sur les FullDoughnut ([#2522](https://github.com/betagouv/service-national-universel/issues/2522)) ([ab37853](https://github.com/betagouv/service-national-universel/commit/ab37853b1c9e936de3e19fb8dcd5caa3ab54376e))
+* **api:** dont check is session is full at inscription ([#2517](https://github.com/betagouv/service-national-universel/issues/2517)) ([f8535f9](https://github.com/betagouv/service-national-universel/commit/f8535f954a684a6b7846668abfd6f6b03b6af83a))
+* **app:** inscription birth country select ([#2523](https://github.com/betagouv/service-national-universel/issues/2523)) ([520af7c](https://github.com/betagouv/service-national-universel/commit/520af7cedc5eed2fd34b4104d645256c143d4e5c))
+* **app:** Optimisation des performances de sélection d'établissement scolaire lors de la pré-inscription ([#2519](https://github.com/betagouv/service-national-universel/issues/2519)) ([c0d93e7](https://github.com/betagouv/service-national-universel/commit/c0d93e71a44525b0491845fcfd3bbfa1b194cbce))
+* **lib:** set july inscription end time to 23:59 ([fd68884](https://github.com/betagouv/service-national-universel/commit/fd68884ed2b8c80c1631b7319703401bb4d8adc2))
+
+
+### Features
+
+* **admin/api:** Update listes des volontaires depuis les centres / les PDR / les lignes de bus ([#2516](https://github.com/betagouv/service-national-universel/issues/2516)) ([b67ed95](https://github.com/betagouv/service-national-universel/commit/b67ed958925118f11ac0ee3c28793dfe286603f8))
+* **api/admin:** Add returnHour to young export ([#2526](https://github.com/betagouv/service-national-universel/issues/2526)) ([74a5297](https://github.com/betagouv/service-national-universel/commit/74a52974f1f9efbf2a9f08020deae391ba1d703b))
+
 # [1.256.0](https://github.com/betagouv/service-national-universel/compare/v1.255.0...v1.256.0) (2023-04-19)
 
 

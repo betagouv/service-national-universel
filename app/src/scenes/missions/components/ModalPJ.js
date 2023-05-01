@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as FileSaver from "file-saver";
 import { Modal } from "reactstrap";
 import DndFileInput from "../../../components/dndFileInput";
@@ -6,9 +6,6 @@ import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { Formik } from "formik";
 import { translateAddFilePhase2, translate } from "../../../utils";
-import ChevronDown from "../../../assets/icons/ChevronDown";
-import { BsCheck2 } from "react-icons/bs";
-import { useEffect } from "react";
 
 function getFileName(file) {
   return (file && file.name) || file;
@@ -56,11 +53,11 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="lg">
       <div className="w-full">
-        <div className="flex flex-col items-center justify-center mx-4 mt-3">
-          <div className="text-gray-900 text-xl font-bold text-center uppercase">Joindre un fichier à ma mission</div>
-          <div className=" text-gray-500 text-base font-normal text-center ">Vous souhaitez ajouter: </div>
+        <div className="mx-4 mt-3 flex flex-col items-center justify-center">
+          <div className="text-center text-xl font-bold uppercase text-gray-900">Joindre un fichier à ma mission</div>
+          <div className=" text-center text-base font-normal text-gray-500 ">Vous souhaitez ajouter: </div>
           {stepOne ? (
-            <div className="flex flex-col space-y-2 my-3">
+            <div className="my-3 flex flex-col space-y-2">
               {optionsType.map((option, index) => (
                 <div
                   key={index}
@@ -68,7 +65,7 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
                     setType(option);
                     setStepOne(false);
                   }}
-                  className="p-2 border rounded-lg hover:bg-blue-600 hover:text-white flex justify-between space-x-2">
+                  className="flex justify-between space-x-2 rounded-lg border p-2 hover:bg-blue-600 hover:text-white">
                   <div>{translateAddFilePhase2(option)[0].toUpperCase() + translateAddFilePhase2(option).slice(1)}</div>
                   {application[option].length !== 0 && <div className="font-bold">{application[option].length}</div>}
                 </div>
@@ -80,7 +77,7 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
               <Formik initialValues={young} validateOnChange={false} validateOnBlur={false}>
                 {({ handleChange }) => (
                   <>
-                    <div className="flex mt-2 items-center justify-center">
+                    <div className="mt-2 flex items-center justify-center">
                       <DndFileInput
                         className="flex flex-col items-center"
                         value={application[type] || []}
@@ -115,12 +112,12 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
               </Formik>
             </>
           )}
-          <div className="w-full flex space-x-2">
-            <button className="my-4 border-[1px] border-gray-300 text-gray-700 rounded-lg py-2 cursor-pointer w-full" onClick={stepOne ? onCancel : handleCancel}>
+          <div className="flex w-full space-x-2">
+            <button className="my-4 w-full cursor-pointer rounded-lg border-[1px] border-gray-300 py-2 text-gray-700" onClick={stepOne ? onCancel : handleCancel}>
               Annuler
             </button>
             <button
-              className={` my-4 border-[1px] border-gray-300 text-white rounded-lg py-2 px-1 cursor-pointer w-full bg-blue-600 ${disabledSave && "bg-blue-400"}`}
+              className={` my-4 w-full cursor-pointer rounded-lg border-[1px] border-gray-300 bg-blue-600 py-2 px-1 text-white ${disabledSave && "bg-blue-400"}`}
               onClick={() => (numberNewFile >= 1 ? handleSave(type) : onSave())}
               disabled={disabledSave}>
               {numberNewFile >= 1 || disabledSave ? "Enregistrer et avertir les parties-prenantes" : "Enregistrer"}

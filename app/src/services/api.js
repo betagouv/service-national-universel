@@ -21,10 +21,6 @@ class api {
     this.token = "";
   }
 
-  getToken() {
-    return this.token;
-  }
-
   esQuery(index, body) {
     const header = { index, type: "_doc" };
     return fetch(`${apiURL}/es/${index}/_msearch`, {

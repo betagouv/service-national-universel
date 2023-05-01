@@ -25,7 +25,7 @@ export default function DocumentsPhase1({ young }) {
       <MedicalFileModal isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} />
       <h3 className="text-base font-medium">Document à préparer</h3>
       <span className="text-sm text-[#1F2937]">Complétez votre fiche sanitaire et remettez la à votre arrivée au centre de séjour.</span>
-      <div className={`flex flex-col md:flex-row items-center ${youngStatusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED && "justify-between"} overflow-x-auto scrollbar-x pt-4`}>
+      <div className={`flex flex-col items-center md:flex-row ${youngStatusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED && "justify-between"} scrollbar-x overflow-x-auto pt-4`}>
         {youngStatusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED ? (
           <>
             <FileCard

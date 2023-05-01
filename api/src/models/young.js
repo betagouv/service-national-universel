@@ -657,6 +657,13 @@ const Schema = new mongoose.Schema({
       description: "Le volontaire a été informé du lieu de rencontre",
     },
   },
+  isTravelingByPlane: {
+    type: String,
+    enum: ["true", "false", ""],
+    documentation: {
+      description: "Le volontaire voyage en avion",
+    },
+  },
 
   // Legacy ?
   codeCenterTmp: {

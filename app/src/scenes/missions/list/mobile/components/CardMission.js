@@ -9,29 +9,29 @@ import House from "../../../components/HouseIcon";
 
 export default function mission({ mission, youngLocation }) {
   return (
-    <Link to={`/mission/${mission._id}`} className="bg-white relative flex  justify-between shadow-nina rounded-xl p-3 border-[#ffffff] mb-4 z-10 pt-4 overflow-hidden ">
+    <Link to={`/mission/${mission._id}`} className="relative z-10 mb-4  flex justify-between overflow-hidden rounded-xl border-[#ffffff] bg-white p-3 pt-4 shadow-nina ">
       <div className="flex flex-1">
         {/* icon */}
-        <div className="flex items-center mr-3">
+        <div className="mr-3 flex items-center">
           <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
         </div>
 
         {/* infos mission */}
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-1 flex-col">
           <div className="space-y-2">
             <div className="flex space-x-4">
-              <div className="text-gray-500 text-xs uppercase font-medium">{mission?.structureName}</div>
+              <div className="text-xs font-medium uppercase text-gray-500">{mission?.structureName}</div>
             </div>
-            <div className="text-gray-900 font-bold text-base">{mission?.name}</div>
+            <div className="text-base font-bold text-gray-900">{mission?.name}</div>
           </div>
-          <div className="flex flex-1 items-center flex-row w-full mt-2">
+          <div className="mt-2 flex w-full flex-1 flex-row items-center">
             {/* 
             
 
             */}
-            <div className="flex flex-1 flex-row text-xs gap-2 mx-2 text-gray-900 font-bold  items-center justify-start">
-              <Calendar width={10} heigth={16} className=" min-w-[14px] min-h-[20px] text-gray-400" />
-              <div className="flex flex-row gap-1 flex-wrap">
+            <div className="mx-2 flex flex-1 flex-row items-center justify-start gap-2 text-xs  font-bold text-gray-900">
+              <Calendar width={10} heigth={16} className=" min-h-[20px] min-w-[14px] text-gray-400" />
+              <div className="flex flex-row flex-wrap gap-1">
                 <div className="whitespace-nowrap">du {dayjs(mission.startAt).format("DD/MM/YYYY")}</div>
                 <div className="whitespace-nowrap">au {dayjs(mission.endAt).format("DD/MM/YYYY")}</div>
               </div>
@@ -40,23 +40,23 @@ export default function mission({ mission, youngLocation }) {
             {youngLocation && mission.location ? (
               <div className="flex items-center justify-end space-x-2">
                 <LocationMarker className="text-gray-400" />
-                <div className="text-gray-800 text-xs font-bold">
+                <div className="text-xs font-bold text-gray-800">
                   à {getDistance(youngLocation.lat, youngLocation.lon, mission.location.lat, mission.location.lon).toFixed(1)} km
                 </div>
                 {mission?.hebergement === "true" ? (
                   <>
                     {mission.hebergementPayant === "true" ? (
-                      <div className="p-1.5 bg-yellow-100 rounded-full">
+                      <div className="rounded-full bg-yellow-100 p-1.5">
                         <House color="#D97706" />
                       </div>
                     ) : (
-                      <div className="p-1.5 bg-green-50 rounded-full">
+                      <div className="rounded-full bg-green-50 p-1.5">
                         <House color="#059669" />
                       </div>
                     )}
                   </>
                 ) : (
-                  <div className="p-1.5 w-[14px]" />
+                  <div className="w-[14px] p-1.5" />
                 )}
               </div>
             ) : (
@@ -65,9 +65,9 @@ export default function mission({ mission, youngLocation }) {
           </div>
         </div>
         {/* top-[-1px] to overlap parent div border */}
-        <div className="absolute right-[-1px] top-[-1px] bg-gray-200 rounded-bl-lg py-0.5 px-2 border-[1px] border-gray-200 overflow-hidden">
+        <div className="absolute right-[-1px] top-[-1px] overflow-hidden rounded-bl-lg border-[1px] border-gray-200 bg-gray-200 py-0.5 px-2">
           <div className="flex flex-1 items-center justify-start">
-            <div className="text-gray-500 text-xs font-medium">&nbsp;{mission?.placesLeft} places disponibles</div>
+            <div className="text-xs font-medium text-gray-500">&nbsp;{mission?.placesLeft} places disponibles</div>
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@ export default function Input({ value, placeholder = null, onChange, disabled = 
   return (
     <input
       disabled={disabled}
-      className="flex justify-between items-center gap-3 w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] border-[#3A3A3A] rounded-t-[4px]"
+      className="flex w-full items-center justify-between gap-3 rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2"
       type={type}
       value={value}
       placeholder={placeholder}

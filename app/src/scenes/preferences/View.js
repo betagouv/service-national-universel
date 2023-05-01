@@ -13,9 +13,9 @@ import SimpleCheckbox from "./components/SimpleCheckbox";
 export default function View({ young, onSave, saving, onToggleDomain, hasDomainSelected, onChange, mobile, errors }) {
   return (
     <div className="md:m-8">
-      <Box className="shadow mb-8 rounded-b-lg">
-        <div className="flex flex-col md:flex-row items-center md:items-start">
-          <div className="mr0 md:mr-4 mb-4 md:mb-0">
+      <Box className="mb-8 rounded-b-lg shadow">
+        <div className="flex flex-col items-center md:flex-row md:items-start">
+          <div className="mr0 mb-4 md:mr-4 md:mb-0">
             <BigTitle>Mes préférences de missions</BigTitle>
             <div>
               En vue de la mission d&apos;intérêt général de la Phase 2, renseignez ci-dessous vos préférences. Ces choix permettront à l&apos;administration de vous proposer des
@@ -28,7 +28,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
         </div>
         <Section>
           <Title noBorder>Sélectionnez les 3 thématiques qui vous intéressent le plus</Title>
-          <div className="grid grid-cols-4 md:grid-cols-2 gap-2 md:gap-4 md:mx-8">
+          <div className="grid grid-cols-4 gap-2 md:mx-8 md:grid-cols-2 md:gap-4">
             {PREF_DOMAINS.map((domain) => (
               <DomainSelector
                 className="mb-2 md:mb-0"
@@ -41,11 +41,11 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
               </DomainSelector>
             ))}
           </div>
-          {errors.domains && <div className="text-[#F71701] text-sm mt-2 text-center">{errors.domains}</div>}
+          {errors.domains && <div className="mt-2 text-center text-sm text-[#F71701]">{errors.domains}</div>}
         </Section>
         <Section>
           <Title>Quel est votre projet professionnel ?</Title>
-          <div className="md:grid md:grid-cols-2 md:gap-4 md:mx-8">
+          <div className="md:mx-8 md:grid md:grid-cols-2 md:gap-4">
             <SimpleSelect
               className="mb-4 md:mb-0"
               title="Projet professionnel"
@@ -137,7 +137,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
         <Section>
           <Title>Quelle période privilégiez-vous pour réaliser la mission d&apos;intérêt général ?</Title>
           <div className="md:mx-8">
-            <div className="border-[1px] border-gray-200 rounded-lg py-6 px-3 mb-8 md:border-none md:rounded-0 md:p-0 md:mb-0">
+            <div className="md:rounded-0 mb-8 rounded-lg border-[1px] border-gray-200 py-6 px-3 md:mb-0 md:border-none md:p-0">
               <MiniTitle>Format préféré</MiniTitle>
               <ToggleGroup
                 className="md:mb-8 md:text-center"
@@ -147,7 +147,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                 mode={mobile ? "multi" : "toggle"}
               />
             </div>
-            <div className="border-[1px] border-gray-200 rounded-lg py-6 px-3 mb-8 md:border-none md:rounded-0 md:p-0 md:mb-0">
+            <div className="md:rounded-0 mb-8 rounded-lg border-[1px] border-gray-200 py-6 px-3 md:mb-0 md:border-none md:p-0">
               <MiniTitle>Période de réalisation de la mission</MiniTitle>
               <ToggleGroup
                 className="md:mb-8 md:text-center"
@@ -157,7 +157,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                 mode={mobile ? "multi" : "toggle"}
               />
               {young.period && (
-                <div className="flex md:justify-center mt-4 md:mt-0">
+                <div className="mt-4 flex md:mt-0 md:justify-center">
                   <RankingPeriod handleChange={(e) => onChange("periodRanking", e.target.value)} period={young.period} values={young} name="periodRanking" />
                 </div>
               )}
@@ -167,7 +167,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
         <Section>
           <Title>Quelle est votre mobilité géographique ?</Title>
           <div className="md:mx-8">
-            <div className="border-[1px] border-gray-200 rounded-lg py-6 px-3 mb-8 md:border-none md:rounded-0 md:p-0 md:mb-0">
+            <div className="md:rounded-0 mb-8 rounded-lg border-[1px] border-gray-200 py-6 px-3 md:mb-0 md:border-none md:p-0">
               <MiniTitle>Moyen(s) de transport privilégié(s)</MiniTitle>
               <MultiGroup
                 className="mb-8 text-center"
@@ -188,9 +188,9 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                 </div>
               )}
             </div>
-            <div className="border-[1px] border-gray-200 rounded-lg py-6 px-3 mb-8 md:border-none md:rounded-0 md:p-0 md:mb-0">
+            <div className="md:rounded-0 mb-8 rounded-lg border-[1px] border-gray-200 py-6 px-3 md:mb-0 md:border-none md:p-0">
               <MiniTitle>Périmètre de recherche</MiniTitle>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                 <SimpleCheckbox value={young.mobilityNearHome} title="Autour de l’adresse principale" detail={young.city} onChange={(val) => onChange("mobilityNearHome", val)} />
                 {young.schooled && young.schoolCity && (
                   <SimpleCheckbox
@@ -208,8 +208,8 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                 />
               </div>
               {young.mobilityNearRelative && (
-                <div className="flex justify-center mt-8">
-                  <div className="w-[100%] md:w-[50%] border border-gray-200 rounded-md p-8">
+                <div className="mt-8 flex justify-center">
+                  <div className="w-[100%] rounded-md border border-gray-200 p-8 md:w-[50%]">
                     <MiniTitle>Adresse du proche</MiniTitle>
                     <div className="grid grid-rows-3 gap-4">
                       <SimpleInput
@@ -253,7 +253,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
             </div>
           </div>
         </Section>
-        <div className="flex justify-center md:justify-end mt-10">
+        <div className="mt-10 flex justify-center md:justify-end">
           <PlainButton onClick={onSave} spinner={saving}>
             Enregistrer
           </PlainButton>

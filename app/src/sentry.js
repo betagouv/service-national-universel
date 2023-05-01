@@ -22,7 +22,7 @@ function initSentry() {
         // Pass tracing info to this domain
         tracingOrigins: [apiURL].map((url) => new URL(url).host),
       }),
-      new Offline({ maxStoredEvents: 50 }),
+      new Offline({ maxStoredEvents: 50, maxCacheSize: 10000000 }),
       new ReportingObserver({
         types: ["crash", "deprecation", "intervention"],
       }),
@@ -54,6 +54,7 @@ function initSentry() {
       /window\.regainData/,
       /ztePageScrollModule/,
     ],
+    urlPrefix: "https://moncompte.snu.gouv.fr/", // Update the URL prefix to match your application
   });
 }
 

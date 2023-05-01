@@ -31,7 +31,7 @@ export default function MailAttestationButton({ young, children, type, template,
   return (
     <>
       <button
-        className="bg-[#EFF6FF] rounded-md px-6 py-2 text-indigo-700 flex items-center hover:shadow-md"
+        className="flex items-center rounded-md bg-[#EFF6FF] px-6 py-2 text-indigo-700 hover:shadow-md"
         {...rest}
         onClick={() => {
           setModal({

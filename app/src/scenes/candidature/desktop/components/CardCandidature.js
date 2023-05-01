@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { translateApplication, translate } from "../../../../utils";
+import { translate } from "../../../../utils";
 import { translateApplicationForYoungs } from "snu-lib/translation";
 import LocationMarker from "../../../../assets/icons/LocationMarker";
 import EyeOff from "../../../../assets/icons/EyeOff";
@@ -71,41 +71,41 @@ export default function application({ application: propsApplication, index, onCh
       {(provided) => (
         <div
           ref={provided.innerRef}
-          className="bg-white relative  w-full  shadow-nina rounded-xl p-4 border-[1px] border-[#ffffff] hover:border-gray-200 mb-4"
+          className="relative mb-4  w-full  rounded-xl border-[1px] border-[#ffffff] bg-white p-4 shadow-nina hover:border-gray-200"
           {...provided.draggableProps}>
           <div className="flex justify-between">
             <div className={`absolute top-0 right-0 flex space-x-2 p-4 ${loading ? "cursor-wait" : "cursor-pointer"}`} {...provided.dragHandleProps}>
-              <div className="text-gray-500 text-xs font-normal tracking-wider">CHOIX Nº{application.priority}</div>
+              <div className="text-xs font-normal tracking-wider text-gray-500">CHOIX Nº{application.priority}</div>
               <SixDotsVertical className="text-gray-400" />
             </div>
             <div className="flex flex-1">
               {/* icon */}
               <Link to={`/mission/${application.missionId}`}>
-                <div className="flex items-center mr-2">
+                <div className="mr-2 flex items-center">
                   <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
                 </div>
               </Link>
 
               {/* infos mission */}
-              <div className="flex flex-col flex-1">
+              <div className="flex flex-1 flex-col">
                 <div className="space-y-2">
                   <Link to={`/mission/${application.missionId}`}>
-                    <div className="flex space-x-4 ml-2">
-                      <div className="text-gray-500 text-xs uppercase font-medium">{mission?.structureName}</div>
-                      <div className="text-gray-500 text-xs font-normal">
+                    <div className="ml-2 flex space-x-4">
+                      <div className="text-xs font-medium uppercase text-gray-500">{mission?.structureName}</div>
+                      <div className="text-xs font-normal text-gray-500">
                         Places disponibles:&nbsp;{mission?.placesLeft}/{mission?.placesTotal}
                       </div>
                     </div>
-                    <div className="text-gray-900 font-bold text-base ml-2">{mission?.name}</div>
+                    <div className="ml-2 text-base font-bold text-gray-900">{mission?.name}</div>
                   </Link>
                   <Tags className="absolute">
                     {(tags || []).map((e, i) => (
-                      <div key={i} className="flex justify-center items-center text-gray-600 border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs ml-2 mb-2">
+                      <div key={i} className="ml-2 mb-2 flex items-center justify-center rounded-full border-[1px] border-gray-200 px-4 py-1 text-xs text-gray-600">
                         {e}
                       </div>
                     ))}
                     {mission?.isMilitaryPreparation === "true" ? (
-                      <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs ml-2 mb-2">
+                      <div className="ml-2 mb-2 flex items-center justify-center rounded-full border-[1px] border-gray-200 bg-blue-900 px-4 py-1 text-xs text-white">
                         Préparation militaire
                       </div>
                     ) : null}
@@ -119,7 +119,7 @@ export default function application({ application: propsApplication, index, onCh
               {/* DISTANCE */}
               <div className="flex basis-[31%] items-center space-x-2">
                 <LocationMarker className="text-gray-400" />
-                <div className="text-gray-800 text-base font-bold">à 11 km</div>
+                <div className="text-base font-bold text-gray-800">à 11 km</div>
               </div>
               {/* END DISTANCE */}
 
@@ -127,18 +127,18 @@ export default function application({ application: propsApplication, index, onCh
               <div className="flex basis-[25%] items-center">
                 {application.hidden === "true" ? (
                   <div className="group flex items-center">
-                    <div className="flex group-hover:hidden items-center space-x-2 text-gray-400" onClick={handleHide}>
+                    <div className="flex items-center space-x-2 text-gray-400 group-hover:hidden" onClick={handleHide}>
                       <Check />
                       <div className="text-xs font-normal">masquée</div>
                     </div>
-                    <div className="hidden group-hover:flex items-center space-x-2 text-gray-400 cursor-pointer hover:underline" onClick={handleHide}>
+                    <div className="hidden cursor-pointer items-center space-x-2 text-gray-400 hover:underline group-hover:flex" onClick={handleHide}>
                       <Eye />
                       <div className="text-xs font-normal">afficher</div>
                     </div>
                   </div>
                 ) : (
                   <div
-                    className="flex items-center space-x-2 text-gray-400 cursor-pointer hover:underline"
+                    className="flex cursor-pointer items-center space-x-2 text-gray-400 hover:underline"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleHide({ value: "true" });
@@ -153,7 +153,7 @@ export default function application({ application: propsApplication, index, onCh
 
               {/* STATUT */}
               <div className="flex basis-[44%] items-center justify-end">
-                <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
+                <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} rounded-sm px-2 py-[2px]`}>
                   {translateApplicationForYoungs(application.status)}
                 </div>
               </div>

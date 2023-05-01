@@ -20,8 +20,8 @@ export default function ProgressArc({ total, value, legend = null, hilight = nul
   const dy = Math.sin(Math.PI - angle) * -radius;
 
   return (
-    <div className={`relative rounded-t-full h-[100%] overflow-hidden ${className}`}>
-      <div className="w-[100%] h-[200%]">
+    <div className={`relative h-[100%] overflow-hidden rounded-t-full ${className}`}>
+      <div className="h-[200%] w-[100%]">
         <svg viewBox="0 0 1000 1000" width="100%" height="100%">
           <path d={`M ${strokeWidth / 2} 500 a ${radius} ${radius} 180 0 1 ${1000 - strokeWidth} 0`} fill="#F2F5FC" stroke="none" />
           <path d={`M ${strokeWidth / 2} 500 a ${radius} ${radius} 180 0 1 ${1000 - strokeWidth} 0`} fill="none" stroke={backColor} strokeWidth={strokeWidth} />
@@ -29,7 +29,7 @@ export default function ProgressArc({ total, value, legend = null, hilight = nul
         </svg>
       </div>
       <div className="absolute bottom-[14px] left-[50%] translate-x-[-50%]">
-        <div className="text-[11px] leading-[14px] text-[#1F2937] mb-[2px] text-center">{legend}</div>
+        <div className="mb-[2px] text-center text-[11px] leading-[14px] text-[#1F2937]">{legend}</div>
         <BigDigits className="text-center">{hilight}</BigDigits>
       </div>
     </div>

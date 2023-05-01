@@ -38,11 +38,11 @@ export default function SelectAction({
 
   return (
     <div style={{ fontFamily: "Marianne" }} ref={ref}>
-      <div className="py-2 relative">
+      <div className="relative py-2">
         {/* select item */}
         <button
           disabled={loading || disabled}
-          className={`flex justify-between items-center gap-3 px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 ${
+          className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2 disabled:opacity-50 ${
             loading ? "disabled:cursor-wait" : "disabled:cursor-auto"
           } ${buttonClassNames}`}
           style={{ fontFamily: "Marianne" }}
@@ -50,19 +50,19 @@ export default function SelectAction({
           <div className="flex items-center gap-2">
             {Icon ? Icon : null}
 
-            {loading ? <span className={`${textClassNames} font-medium text-sm`}>{loadingLabel}</span> : <span className={`${textClassNames}`}>{title}</span>}
+            {loading ? <span className={`${textClassNames} text-sm font-medium`}>{loadingLabel}</span> : <span className={`${textClassNames}`}>{title}</span>}
           </div>
           <ChevronDown className={`${rightIconClassNames}`} />
         </button>
 
         {/* display options */}
         <div
-          className={`${open ? "block" : "hidden"} min-w-[250px] rounded-lg bg-white transition absolute top-[55px] ${
+          className={`${open ? "block" : "hidden"} absolute top-[55px] min-w-[250px] rounded-lg bg-white transition ${
             alignItems === "right" ? "right-0" : "left-0"
-          } border-3 border-red-600 shadow overflow-hidden z-50`}>
+          } border-3 z-50 overflow-hidden border-red-600 shadow`}>
           {optionsGroup.map((group, i) => (
-            <div key={group.key || i} className="text-xs text-coolGray-600 border-b-[1px] border-gray-100 py-1">
-              {group.title ? <p className="font-medium text-xs text-gray-500 px-3 py-2">{group.title}</p> : null}
+            <div key={group.key || i} className="border-b-[1px] border-gray-100 py-1 text-xs text-coolGray-600">
+              {group.title ? <p className="px-3 py-2 text-xs font-medium text-gray-500">{group.title}</p> : null}
               {group.items.map((item) => (
                 <div key={item.key} onClick={() => onClickItem(item)}>
                   {item.render}

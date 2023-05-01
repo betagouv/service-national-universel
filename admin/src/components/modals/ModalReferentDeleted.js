@@ -9,12 +9,12 @@ export default function ModalReferentDeleted({ isOpen, onConfirm }) {
   return (
     <Modal centered isOpen={isOpen} toggle={onConfirm}>
       <ModalContainer className="flex flex-col items-center justify-center gap-4">
-        <AiOutlineCheckCircle className="w-10 h-10 text-green-700" />
-        <div className="flex flex-col items-center justify-center gap-2 w-[80%]">
-          <h1 className="font-medium text-xl">Le compte a bien été supprimé</h1>
+        <AiOutlineCheckCircle className="h-10 w-10 text-green-700" />
+        <div className="flex w-[80%] flex-col items-center justify-center gap-2">
+          <h1 className="text-xl font-medium">Le compte a bien été supprimé</h1>
         </div>
 
-        <div className="flex flex-col items-center justify-center mb-4 w-full">
+        <div className="mb-4 flex w-full flex-col items-center justify-center">
           <ModalButton onClick={onConfirm}>Fermer</ModalButton>
         </div>
       </ModalContainer>

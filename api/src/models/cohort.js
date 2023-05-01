@@ -160,6 +160,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  isTransportPlanCorrectionRequestOpen: {
+    type: Boolean,
+    documentation: {
+      description: "Ouverture ou fermeture pour les référents régionaux de la possibilité de demander une correction du plan de transport.",
+    },
+  },
+
   //information n'impactant le fonctionnement de l'application
   uselessInformation: {
     type: mongoose.Schema.Types.Mixed,

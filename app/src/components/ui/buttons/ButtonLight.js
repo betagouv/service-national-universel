@@ -1,10 +1,12 @@
 import React from "react";
 
-export default function ButtonLight({ className = "", children = null, onClick = () => {} }) {
+export default function ButtonLight({ className = "", children = null, onClick = () => {}, type = "button", ...rest }) {
   return (
     <button
       onClick={onClick}
-      className={`flex text-sm justify-center items-center gap-2 px-3 py-2 rounded-md text-center text-gray-900 border hover:bg-gray-50 transition ${className}`}>
+      type={type}
+      className={`flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-center text-sm text-gray-900 transition hover:bg-gray-50 ${className}`}
+      {...rest}>
       {children}
     </button>
   );

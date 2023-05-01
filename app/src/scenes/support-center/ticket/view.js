@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import * as FileSaver from "file-saver";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, ticketStateNameById, translateState, translate, htmlCleaner } from "../../../utils";
+import { formatStringLongDate, colors, translateState, translate, htmlCleaner } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -173,7 +173,7 @@ export default function TicketView(props) {
         <InputContainer>
           <textarea
             ref={inputRef}
-            row={2}
+            rows={2}
             placeholder="Mon message..."
             className="form-control"
             onChange={(e) => {
@@ -192,7 +192,7 @@ export default function TicketView(props) {
             )}
           </ButtonContainer>
         </InputContainer>
-        {sending && files.length > 0 && <div className="text-gray-500 text-sm mt-1">{translate("UPLOAD_IN_PROGRESS")}</div>}
+        {sending && files.length > 0 && <div className="mt-1 text-sm text-gray-500">{translate("UPLOAD_IN_PROGRESS")}</div>}
         <FileUpload files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
       </div>
     </Container>
@@ -206,8 +206,9 @@ const Message = ({ from, date, content, fromMe, files = [] }) => {
       <MessageBubble align={"right"} backgroundColor={colors.darkPurple}>
         <MessageContent color="white" dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
         <MessageDate color="#ccc">{date}</MessageDate>
-        {files.map((file) => (
+        {files.map((file, index) => (
           <File
+            key={index}
             onClick={() => {
               download(file);
             }}
@@ -223,8 +224,9 @@ const Message = ({ from, date, content, fromMe, files = [] }) => {
       <MessageBubble align={"left"} backgroundColor={colors.lightGrey} color="white">
         <MessageContent dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
         <MessageDate>{date}</MessageDate>
-        {files.map((file) => (
+        {files.map((file, index) => (
           <File
+            key={index}
             onClick={() => {
               download(file);
             }}>

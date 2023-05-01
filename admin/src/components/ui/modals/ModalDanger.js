@@ -19,15 +19,17 @@ const ModalDanger = ({
   cancelButtonText = "Annuler",
   isLoading = false,
   children = null,
+  icon = <DangerTriangle />,
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={handleClose} className={className}>
       <Modal.Header className="flex-col items-center justify-center">
         <DangerTriangle />
-        <h3 className="text-xl font-medium text-gray-900 text-center">{title}</h3>
+        {icon}
+        <h3 className="text-center text-xl font-medium text-gray-900">{title}</h3>
       </Modal.Header>
       <Modal.Content>
-        {message && <p className="text-gray-500 font-sm text-center">{message}</p>}
+        {message && <p className="font-sm text-center text-gray-500">{message}</p>}
         {children}
       </Modal.Content>
       <Modal.Footer className="flex gap-3">

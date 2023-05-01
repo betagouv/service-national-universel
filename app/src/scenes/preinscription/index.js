@@ -15,7 +15,6 @@ import { inscriptionCreationOpenForYoungs } from "snu-lib";
 import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import Footer from "../../components/footerV2";
 import Header from "../../components/header";
-import { environment } from "../../config";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -55,7 +54,7 @@ export default function Index() {
 
   return (
     <PreInscriptionContextProvider>
-      <div className="flex flex-col min-h-screen justify-between bg-beige-gris-galet-975">
+      <div className="flex min-h-screen flex-col justify-between bg-beige-gris-galet-975">
         <Header />
         <Switch>
           <SentryRoute path="/preinscription/:step" component={Step} />;

@@ -60,11 +60,11 @@ export default function StepDocuments() {
       questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       {docs.map((doc) => (
-        <div key={doc.category} className="my-4 hover:bg-gray-50 cursor-pointer" onClick={() => history.push(`televersement/${doc.category}`)}>
-          <div className="border p-4 my-3 flex justify-between items-center">
+        <div key={doc.category} className="my-4 cursor-pointer hover:bg-gray-50" onClick={() => history.push(`televersement/${doc.category}`)}>
+          <div className="my-3 flex items-center justify-between border p-4">
             <div>
               <div>{doc.title}</div>
-              {doc.subtitle && <div className="text-gray-500 text-sm">{doc.subtitle}</div>}
+              {doc.subtitle && <div className="text-sm text-gray-500">{doc.subtitle}</div>}
             </div>
             <ArrowRightBlueSquare />
           </div>

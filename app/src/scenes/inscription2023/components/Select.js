@@ -35,14 +35,14 @@ export default function Select({ label, options, value, placeholder = "Sélectio
       <div className="relative">
         {/* select item */}
         <button
-          className={`flex justify-between items-center gap-3 w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] ${
+          className={`flex w-full items-center justify-between gap-3 border-b-[2px] bg-[#EEEEEE] px-4 py-2 ${
             correction || error ? "border-[#CE0500]" : "border-[#3A3A3A]"
           } rounded-t-[4px]`}
           style={{ fontFamily: "Marianne" }}
           onClick={() => setOpen((e) => !e)}>
           <div className="flex items-center gap-2 overflow-hidden">
             {Icon ? Icon : null}
-            <span className="truncate text-base whitespace-nowrap ">{options.find((option) => option.value === value)?.label || placeholder}</span>
+            <span className="truncate whitespace-nowrap text-base ">{options.find((option) => option.value === value)?.label || placeholder}</span>
           </div>
           {value ? (
             <IoMdClose
@@ -58,12 +58,12 @@ export default function Select({ label, options, value, placeholder = "Sélectio
 
         {/* display options */}
         <div
-          className={`${open ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute ${
+          className={`${open ? "block" : "hidden"}  absolute min-w-full rounded-lg bg-white transition ${
             alignItems === "right" ? "right-0" : "left-0"
-          } border-3 border-red-600 shadow overflow-hidden z-50`}>
+          } border-3 z-50 overflow-hidden border-red-600 shadow`}>
           {options.map((option, index) => (
-            <div key={option?.key || index} onClick={() => handleChangeValue(option)} className={`${option.value === value && "font-bold bg-gray"}`}>
-              <div className="group flex justify-between items-center gap-2 p-2 px-3  hover:bg-gray-50 cursor-pointer">
+            <div key={option?.key || index} onClick={() => handleChangeValue(option)} className={`${option.value === value && "bg-gray font-bold"}`}>
+              <div className="group flex cursor-pointer items-center justify-between gap-2 p-2  px-3 hover:bg-gray-50">
                 <div>{option.label}</div>
                 {option.value === value ? <BsCheck2 /> : null}
               </div>

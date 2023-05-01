@@ -5,6 +5,7 @@ import Section from "../../../../components/ui/Section";
 import api from "../../../../../../services/api";
 import { translate } from "snu-lib/translation";
 import Loader from "../../../../../../components/Loader";
+import StatusTable from "../../../../components/ui/StatusTable";
 
 export default function SectionStructures({ filters }) {
   const [loading, setLoading] = useState(true);
@@ -25,14 +26,34 @@ export default function SectionStructures({ filters }) {
       if (result.ok) {
         let total = 0;
         let national = 0;
+        let byStatus = {};
+
         for (const structure of result.data) {
+          if (byStatus[structure._id.legalStatus] === undefined) {
+            byStatus[structure._id.legalStatus] = {
+              _id: structure._id.legalStatus,
+              total: 0,
+              national: 0,
+              types: [],
+            };
+          }
+          byStatus[structure._id.legalStatus].total += structure.total;
+          byStatus[structure._id.legalStatus].national += structure.national;
+          byStatus[structure._id.legalStatus].types.push({
+            _id: structure._id.type,
+            total: structure.total,
+            national: structure.national,
+          });
+
           total += structure.total;
           national += structure.national;
         }
+
         setTotalStructures(total);
         setNationalStructures(national);
+
         setStructures(
-          result.data.map((structure) => ({
+          Object.values(byStatus).map((structure) => ({
             _id: translate(structure._id),
             total: structure.total,
             national: structure.national,
@@ -51,12 +72,39 @@ export default function SectionStructures({ filters }) {
   }
 
   function getInfoPanel(structure) {
+    const total = structure.types ? structure.types.reduce((acc, type) => acc + type.total, 0) : 0;
+
     switch (structure._id) {
       case "PRIVATE":
       case "PUBLIC":
-        return <div className="p-8">{translate(structure._id)} + DOUGHNUT</div>;
-      case "ASSOCIATION":
-        return <div className="p-8">{translate(structure._id)} + STATUS-TABLE</div>;
+        return (
+          <div className="p-8">
+            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure._id)}</div>
+            <FullDoughnut
+              legendSide="right"
+              maxLegends={3}
+              labels={structure.types.map((type) => translate(type._id))}
+              values={structure.types.map((type) => Math.round((type.total / total) * 100))}
+              valueSuffix="%"
+              tooltips={structure.types.map((type) => type.total)}
+            />
+          </div>
+        );
+      case "ASSOCIATION": {
+        const statuses = structure.types.map((type) => {
+          return {
+            status: translate(type._id),
+            nb: type.total,
+            percentage: Math.round((type.total / total) * 100),
+          };
+        });
+        return (
+          <div className="p-8">
+            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure._id)}</div>
+            <StatusTable statuses={statuses} />
+          </div>
+        );
+      }
       default:
         return null;
     }
@@ -65,14 +113,14 @@ export default function SectionStructures({ filters }) {
   return (
     <Section title="Structures">
       {error ? (
-        <div className="flex justify-center items-center text-center text-sm text-red-600 font-medium p-8">{error}</div>
+        <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : loading ? (
-        <div className="flex justify-center items-center">
+        <div className="flex items-center justify-center">
           <Loader />
         </div>
       ) : (
         <div className="flex">
-          <div className="flex flex-col flex-[0_0_332px] mr-4">
+          <div className="mr-4 flex flex-[0_0_332px] flex-col">
             <DashboardBox title="Structures" className="grow">
               <div className="text-2xl font-bold">{totalStructures}</div>
             </DashboardBox>

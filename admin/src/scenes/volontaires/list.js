@@ -129,6 +129,7 @@ export default function VolontaireList() {
     const response = await api.get("/ligne-de-bus/all");
     const meetingPoints = response ? response.data.meetingPoints : [];
     const ligneBus = response ? response.data.ligneBus : [];
+    const ligneToPoints = response ? response.data.ligneToPoints : [];
 
     return all.map((data) => {
       let center = {};
@@ -138,9 +139,11 @@ export default function VolontaireList() {
       }
       let meetingPoint = {};
       let bus = {};
+      let ligneToPoint = {};
       if (data.meetingPointId && meetingPoints) {
         meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
         bus = ligneBus.find((lb) => lb._id === data.ligneId);
+        ligneToPoint = ligneToPoints.find((ltp) => ltp.lineId === data.ligneId && ltp.meetingPointId === data.meetingPointId);
       }
 
       if (!data.domains) data.domains = [];
@@ -261,9 +264,14 @@ export default function VolontaireList() {
           "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
           "Informations de transport sont transmises par les services locaux": translate(data.transportInfoGivenByLocal),
           "Bus n˚": bus?.busId,
+          "Nom du point de rassemblement": meetingPoint?.name,
           "Adresse point de rassemblement": meetingPoint?.address,
+          "Ville du point de rassemblement": meetingPoint?.city,
           "Date aller": formatDateFR(bus?.departuredDate),
+          "Heure de départ": ligneToPoint?.departureHour,
+          "Heure de convocation": ligneToPoint?.meetingHour,
           "Date retour": formatDateFR(bus?.returnDate),
+          "Heure de retour": ligneToPoint?.returnHour,
         },
         phase1DocumentStatus: {
           "Droit à l'image - Statut": translateFileStatusPhase1(data.imageRightFilesStatus) || "Non Renseigné",
@@ -916,6 +924,20 @@ export default function VolontaireList() {
                   renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires", "Fiches sanitaires")}
                   showMissing
                   missingLabel="Non renseigné"
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="LINE"
+                  dataField="ligneId.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "LINE") }}
+                  renderItem={(e, count) => {
+                    return `${e} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Ligne", "Ligne")}
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>

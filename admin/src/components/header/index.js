@@ -57,13 +57,13 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
     if (user.role === ROLES.HEAD_CENTER && sessionPhase1) {
       return (
         <>
-          <div className="flex items-center gap-2 mx-3 ">
+          <div className="mx-3 flex items-center gap-2 ">
             <Link to="/">
               <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 hover:scale-105" />
             </Link>
-            <div className="flex items-center group hover:text-black gap-2 mx-3 cursor-pointer" onClick={() => setSelectSessionOpen((e) => !e)}>
+            <div className="group mx-3 flex cursor-pointer items-center gap-2 hover:text-black" onClick={() => setSelectSessionOpen((e) => !e)}>
               <div>
-                <div className="text-gray-500 text-xs uppercase font-medium">{sessionPhase1.cohesionCenter?.name || "Mon espace chef de centre"}</div>
+                <div className="text-xs font-medium uppercase text-gray-500">{sessionPhase1.cohesionCenter?.name || "Mon espace chef de centre"}</div>
                 <div className="text-sm font-normal">{sessionPhase1.cohort}</div>
               </div>
               <div className="ml-4">
@@ -74,11 +74,11 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
           <div
             className={`${
               selectSessionOpen ? "block" : "hidden"
-            } group-hover:block min-w-[250px] rounded-lg bg-white transition absolute top-[calc(100%+5px)] left-20 border-3 border-red-600 shadow overflow-hidden divide-y divide-gray-100`}>
+            } border-3 absolute top-[calc(100%+5px)] left-20 min-w-[250px] divide-y divide-gray-100 overflow-hidden rounded-lg border-red-600 bg-white shadow transition group-hover:block`}>
             {(sessionsList || [])?.map((session) => (
               <div
                 key={session.cohort}
-                className="flex items-center group hover:text-black gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100"
+                className="group flex cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-100 hover:text-black"
                 onClick={() => {
                   dispatch(setSessionPhase1(session));
                   setSelectSessionOpen(false);
@@ -87,7 +87,7 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
                   history.push("/");
                 }}>
                 <div className="flex-1">
-                  <div className="text-gray-500 text-xs uppercase font-medium">{session.cohesionCenter?.name || "Mon espace chef de centre"}</div>
+                  <div className="text-xs font-medium uppercase text-gray-500">{session.cohesionCenter?.name || "Mon espace chef de centre"}</div>
                   <div className="text-sm font-normal">{session.cohort}</div>
                 </div>
                 <div className="ml-4">
@@ -100,22 +100,22 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
       );
     }
     return (
-      <Link to="/" className="flex items-center group hover:text-black gap-2 mx-3">
+      <Link to="/" className="group mx-3 flex items-center gap-2 hover:text-black">
         <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 group-hover:scale-105" />
-        <span className="text-base font-bold justify-center group-hover:underline">{getName()}</span>
+        <span className="justify-center text-base font-bold group-hover:underline">{getName()}</span>
       </Link>
     );
   };
 
   return (
-    <div className="w-full px-2 bg-white h-14 flex items-center justify-between shadow-sm sticky top-0 left-0 z-20 p-1">
+    <div className="sticky top-0 left-0 z-20 flex h-14 w-full items-center justify-between bg-white p-1 px-2 shadow-sm">
       <h1 className="flex items-center gap-2">
         <div className="flex items-center" ref={ref}>
           <div className="lg:hidden">
             {drawerVisible ? (
-              <RiMenuFoldLine className="w-7 h-7 cursor-pointer" onClick={onClickBurger} />
+              <RiMenuFoldLine className="h-7 w-7 cursor-pointer" onClick={onClickBurger} />
             ) : (
-              <RiMenuFill className="w-7 h-7 cursor-pointer" onClick={onClickBurger} />
+              <RiMenuFill className="h-7 w-7 cursor-pointer" onClick={onClickBurger} />
             )}
           </div>
           {renderBanner()}
@@ -123,7 +123,7 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
         {environment !== "production" && environmentBannerVisible ? (
           <span
             onClick={() => setEnvironmentBannerVisible(false)}
-            className="p-2 px-3 bg-red-600 text-white text-xs font-italic items-center text-center rounded-full cursor-pointer hover:opacity-50">
+            className="font-italic cursor-pointer items-center rounded-full bg-red-600 p-2 px-3 text-center text-xs text-white hover:opacity-50">
             {getTextEnvironmentBanner()}
           </span>
         ) : null}

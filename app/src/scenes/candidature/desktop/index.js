@@ -1,7 +1,5 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
-import { Link } from "react-router-dom";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
 
 import api from "../../../services/api";
@@ -55,16 +53,16 @@ export default function IndexDesktop() {
   if (!applications) return <Loader />;
 
   return (
-    <div className="bg-white mx-4 pb-12 my-3 rounded-lg w-full">
+    <div className="mx-4 my-3 w-full rounded-lg bg-white pb-12">
       {/* BEGIN HEADER */}
-      <div className="bg-gray-700 rounded-t-lg flex">
-        <div className="p-14 flex-1">
-          <div className="text-white font-bold text-3xl">Il vous reste {Math.max(0, 84 - Number(young.phase2NumberHoursDone || 0))}h à effectuer</div>
-          <div className="text-gray-300 text-sm mt-2 mb-4">
+      <div className="flex rounded-t-lg bg-gray-700">
+        <div className="flex-1 p-14">
+          <div className="text-3xl font-bold text-white">Il vous reste {Math.max(0, 84 - Number(young.phase2NumberHoursDone || 0))}h à effectuer</div>
+          <div className="mt-2 mb-4 text-sm text-gray-300">
             <div>L&apos;ordre de vos choix de missions sera pris en compte pour l&apos;attribution de votre MIG.</div>
             <div>Pour modifier l&apos;ordre, attrapez la droite du bloc et déplacez-le.</div>
           </div>
-          <div className="flex space-x-2 items-center">
+          <div className="flex items-center space-x-2">
             <ToggleVisibility value={toggleButtonDisplayHidden} onClick={() => setToggleButtonDisplayHidden((e) => !e)} />
           </div>
         </div>
@@ -73,7 +71,7 @@ export default function IndexDesktop() {
       {/* END HEADER */}
 
       {/* BEGIN CANDIDATURES */}
-      <div className="px-14 -mt-4">
+      <div className="-mt-4 px-14">
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="list">
             {(provided) => (
@@ -103,15 +101,15 @@ export default function IndexDesktop() {
 const ToggleVisibility = ({ value, onClick }) => {
   return (
     <>
-      <div onClick={onClick} className={`flex items-center w-9 h-4 rounded-full ${value ? "bg-blue-600" : "bg-gray-200"} cursor-pointer transition duration-100 ease-in`}>
+      <div onClick={onClick} className={`flex h-4 w-9 items-center rounded-full ${value ? "bg-blue-600" : "bg-gray-200"} cursor-pointer transition duration-100 ease-in`}>
         <div
-          className={`flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] ${
+          className={`flex h-5 w-5 items-center justify-center rounded-full border-[1px] border-gray-200 bg-[#ffffff] ${
             value ? "translate-x-[16px]" : "translate-x-0"
-          } transition duration-100 ease-in shadow-nina`}>
+          } shadow-nina transition duration-100 ease-in`}>
           {value ? <Eye className="text-gray-400" width={10} height={10} /> : <EyeOff className="text-gray-400" width={10} height={10} />}
         </div>
       </div>
-      <div className="text-gray-300 text-sm">Afficher les candidatures masquées</div>
+      <div className="text-sm text-gray-300">Afficher les candidatures masquées</div>
     </>
   );
 };

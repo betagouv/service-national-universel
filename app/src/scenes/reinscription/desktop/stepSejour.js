@@ -52,28 +52,28 @@ export default function StepSejour() {
   return (
     <>
       <Navbar />
-      <div className="bg-[#f9f6f2] flex justify-center py-10">
-        <div className="bg-white basis-[70%] mx-auto my-0 px-[102px] py-[60px] drop-shadow-md">
-          <div className="w-full flex justify-between items-center">
+      <div className="flex justify-center bg-[#f9f6f2] py-10">
+        <div className="mx-auto my-0 basis-[70%] bg-white px-[102px] py-[60px] drop-shadow-md">
+          <div className="flex w-full items-center justify-between">
             <h1 className="text-2xl font-semibold">Choisissez la date du séjour</h1>
             <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
               <QuestionMarkBlueCircle />
             </a>
           </div>
-          <hr className="my-8 h-px bg-gray-200 border-0" />
-          <div className="font-semibold my-2">Séjours de cohésion disponibles</div>
-          <div className="text-gray-500 text-sm">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
+          <hr className="my-8 h-px border-0 bg-gray-200" />
+          <div className="my-2 font-semibold">Séjours de cohésion disponibles</div>
+          <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
           <div className="my-4">{sessions?.map((e) => SessionButton(e))}</div>
           {sessions?.length < 3 && (
             <>
-              <div className="font-semibold py-2 mt-5">Pourquoi je ne vois pas tous les séjours ?</div>
-              <div className="text-gray-500 text-sm w-2/3">
+              <div className="mt-5 py-2 font-semibold">Pourquoi je ne vois pas tous les séjours ?</div>
+              <div className="w-2/3 text-sm text-gray-500">
                 La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
                 <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer" className="underline underline-offset-4">
                   En savoir plus.
                 </a>
               </div>
-              <div className="text-[#000091] my-4 underline underline-offset-4">
+              <div className="my-4 text-[#000091] underline underline-offset-4">
                 <Link to="/public-engagements">Consulter d’autres dispositifs d’engagement</Link>
               </div>
             </>
@@ -86,7 +86,7 @@ export default function StepSejour() {
     return (
       <div
         key={session.id}
-        className="border p-4 my-3 flex justify-between items-center hover:cursor-pointer"
+        className="my-3 flex items-center justify-between border p-4 hover:cursor-pointer"
         onClick={async () => {
           const { ok, data, code } = await api.put("/young/reinscription/changeCohort", {
             cohortChangeReason: "Réinscription à un nouveau séjour",

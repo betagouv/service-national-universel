@@ -11,7 +11,6 @@ import Loader from "../../components/Loader";
 import ChevronRight from "../../assets/icons/ChevronRight";
 import Engagement from "./components/Engagement";
 import dayjs from "dayjs";
-import { environment } from "../../config";
 
 export default function Phase1NotDone() {
   const [loading, setLoading] = useState(false);
@@ -50,10 +49,10 @@ export default function Phase1NotDone() {
   return (
     <>
       {/* DESKTOP */}
-      <div className="relative hidden lg:flex justify-between m-10 rounded-xl shadow-md bg-white overflow-hidden min-h-[450px]">
+      <div className="relative m-10 hidden min-h-[450px] justify-between overflow-hidden rounded-xl bg-white shadow-md lg:flex">
         {wasYoungExcluded(young) ? (
           <div className="m-16 space-y-10">
-            <p className="text-5xl font-medium leading-tight tracking-tight text-gray-900 max-w-4xl">
+            <p className="max-w-4xl text-5xl font-medium leading-tight tracking-tight text-gray-900">
               <strong>{young.firstName}, </strong>
               votre séjour de cohésion n&apos;a pas été validé pour motif d&apos;exclusion.
             </p>
@@ -66,21 +65,21 @@ export default function Phase1NotDone() {
           </div>
         ) : (
           <>
-            <div className="ml-16 my-16 space-y-6 ">
-              <p className="text-5xl font-medium leading-tight tracking-tight text-gray-900 max-w-lg">
+            <div className="my-16 ml-16 space-y-6 ">
+              <p className="max-w-lg text-5xl font-medium leading-tight tracking-tight text-gray-900">
                 <strong>{young.firstName}, </strong>
                 vous n&apos;avez pas réalisé votre séjour de cohésion.
               </p>
               {permissionChangeCohort(young, sessionEndDate) && <ChangeCohortPrompt />}
               {permissionPhase2(young) && (
                 <>
-                  <div className="text-base left-7 text-gray-800 mt-5">
+                  <div className="left-7 mt-5 text-base text-gray-800">
                     Mettez votre énergie au service d&apos;une société plus solidaire et découvrez <strong>votre talent pour l&apos;engagement</strong> en réalisant une mission
                     d&apos;intérêt général !
                   </div>
-                  <div className="flex flex-col items-stretch w-fit">
+                  <div className="flex w-fit flex-col items-stretch">
                     <button
-                      className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
+                      className="mt-5 rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
                       onClick={() => {
                         plausibleEvent("Phase 2/CTA - Realiser ma mission");
                         history.push("/phase2");
@@ -91,12 +90,12 @@ export default function Phase1NotDone() {
                 </>
               )}
               {permissionReinscription(young) && (
-                <div className="flex flex-col items-stretch w-fit">
+                <div className="flex w-fit flex-col items-stretch">
                   {loading ? (
                     <Loader />
                   ) : (
                     <button
-                      className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-[#FFFFFF] hover:bg-blue-600 border-blue-600 mt-5 text-blue-600 hover:text-white text-sm leading-5 font-medium transition ease-in-out duration-150"
+                      className="bg-blue-[#FFFFFF] mt-5 w-full rounded-[10px] border-[1px]  border-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-blue-600 transition duration-150 ease-in-out hover:bg-blue-600 hover:text-white"
                       onClick={goToReinscription}>
                       Se réinscrire à un autre séjour
                     </button>
@@ -104,17 +103,17 @@ export default function Phase1NotDone() {
                 </div>
               )}
             </div>
-            <div className="hidden xl:block flex-none">
+            <div className="hidden flex-none xl:block">
               <img className="object-" src={require("../../assets/homePhase2Desktop.png")} alt="" />
             </div>
           </>
         )}
       </div>
       {/* MOBILE */}
-      <div className="flex flex-col-reverse lg:hidden w-full bg-white">
+      <div className="flex w-full flex-col-reverse bg-white lg:hidden">
         {wasYoungExcluded(young) ? (
-          <div className="p-4 space-y-10">
-            <p className="text-5xl font-medium leading-tight tracking-tight text-gray-900 max-w-4xl">
+          <div className="space-y-10 p-4">
+            <p className="max-w-4xl text-5xl font-medium leading-tight tracking-tight text-gray-900">
               <strong>{young.firstName}, </strong>
               votre séjour de cohésion n&apos;a pas été validé pour motif d&apos;exclusion.
             </p>
@@ -134,12 +133,12 @@ export default function Phase1NotDone() {
               {permissionChangeCohort(young, sessionEndDate) && <ChangeCohortPrompt />}
               {permissionPhase2(young) && (
                 <>
-                  <div className="text-sm left-7 text-gray-800 mt-5">
+                  <div className="left-7 mt-5 text-sm text-gray-800">
                     Mettez votre énergie au service d&apos;une société plus solidaire et découvrez <strong>votre talent pour l&apos;engagement</strong> en réalisant une mission
                     d&apos;intérêt général !
                   </div>
                   <button
-                    className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
+                    className="mt-5 w-full rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
                     onClick={() => {
                       plausibleEvent("Phase 2/CTA - Realiser ma mission");
                       history.push("/phase2");
@@ -150,7 +149,7 @@ export default function Phase1NotDone() {
               )}
               {permissionReinscription(young) && (
                 <button
-                  className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
+                  className="mt-5 w-full rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
                   onClick={goToReinscription}>
                   Se réinscrire à un autre séjour
                 </button>
@@ -166,18 +165,18 @@ export default function Phase1NotDone() {
 
 function ChangeCohortPrompt() {
   return (
-    <div className="space-y-10 md:space-y-12 w-fit">
-      <div className="font-bold leading-7 mt-8 space-y-2">
-        <p className="text-lg md:text-xl m-0">Votre phase 1 n’est donc pas validée.</p>
-        <p className="text-gray-700 text-base max-w-sm leading-6">Pour la valider, inscrivez-vous pour participer à un prochain séjour !</p>
+    <div className="w-fit space-y-10 md:space-y-12">
+      <div className="mt-8 space-y-2 font-bold leading-7">
+        <p className="m-0 text-lg md:text-xl">Votre phase 1 n’est donc pas validée.</p>
+        <p className="max-w-sm text-base leading-6 text-gray-700">Pour la valider, inscrivez-vous pour participer à un prochain séjour !</p>
       </div>
       <Link
         to="changer-de-sejour"
-        className="w-full md:w-fit bg-blue-600 rounded-md text-white text-sm px-3 py-2 hover:brightness-110 active:brightness-125 shadow-ninaBlue transition flex justify-center items-center">
+        className="flex w-full items-center justify-center rounded-md bg-blue-600 px-3 py-2 text-sm text-white shadow-ninaBlue transition hover:brightness-110 active:brightness-125 md:w-fit">
         Choisir un nouveau séjour
       </Link>
       <div className="text-xs text-blue-600">
-        <Link to="account?desistement=1" className="flex items-center justify-center md:justify-start gap-4">
+        <Link to="account?desistement=1" className="flex items-center justify-center gap-4 md:justify-start">
           <span>Se désister du SNU</span>
           <ChevronRight />
         </Link>

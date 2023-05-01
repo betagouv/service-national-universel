@@ -14,8 +14,7 @@ import JDMA from "../../../../components/JDMA.js";
 import Loader from "../../../../components/Loader";
 import Problem from "./components/Problem";
 import StepsAffected from "./components/StepsAffected";
-import TravelInfoAlone from "./components/TravelInfoAlone.js";
-import TravelInfoBus from "./components/TravelInfoBus";
+import TravelInfo from "./components/TravelInfo.js";
 import TodoBackpack from "./components/TodoBackpack";
 
 export default function Affected() {
@@ -61,8 +60,8 @@ export default function Affected() {
   }
 
   return (
-    <div className="md:m-10">
-      <div className="max-w-[80rem] rounded-xl shadow-nina md:mx-auto py-8 relative overflow-hidden flex flex-col justify-between bg-gray-50 md:bg-white mb-4">
+    <div className="md:m-8">
+      <div className="relative mb-4 flex max-w-[80rem] flex-col justify-between overflow-hidden bg-gray-50 py-8 md:mx-auto md:rounded-xl md:bg-white md:shadow-nina">
         {showInfoMessage && (
           <AlertBoxInformation
             title="Information"
@@ -70,9 +69,10 @@ export default function Affected() {
             onClose={() => setShowInfoMessage(false)}
           />
         )}
-        <header className="flex flex-col items-between px-4 md:!px-8 lg:!px-16 py-4 lg:justify-between lg:flex-row order-1">
+
+        <header className="items-between order-1 flex flex-col px-4 py-4 md:!px-8 lg:flex-row lg:justify-between lg:!px-16">
           <div>
-            <h1 className="text-2xl md:text-5xl md:space-y-4">
+            <h1 className="text-2xl md:space-y-4 md:text-5xl">
               Mon séjour de cohésion
               <br />
               <strong className="flex items-center">{translateCohort(young.cohort)}</strong>
@@ -84,14 +84,8 @@ export default function Affected() {
         </header>
 
         {isStepMedicalFieldDone(young) && (
-          <div className="md:border-t-[1px] flex flex-col md:flex-row flex-none gap-6 md:gap-16 pt-[1rem] md:pt-[4rem] order-2 overflow-hidden">
-            {young.meetingPointId ? (
-              <TravelInfoBus meetingPoint={meetingPoint} cohortDetails={cohortDetails} />
-            ) : young.deplacementPhase1Autonomous === "true" ? (
-              <TravelInfoAlone center={center} cohortDetails={cohortDetails} />
-            ) : (
-              <></>
-            )}
+          <div className="order-2 flex flex-none flex-col gap-4 md:flex-row">
+            <TravelInfo location={young?.meetingPointId ? meetingPoint : center} cohortDetails={cohortDetails} />
             <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
           </div>
         )}

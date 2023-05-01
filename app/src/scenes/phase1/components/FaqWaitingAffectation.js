@@ -5,7 +5,7 @@ import QuestionBlock from "./QuestionBlock";
 const FaqWaitingAffectation = () => {
   return (
     <section className="mb-14">
-      <h2 className="font-bold text-xl m-0 mb-4">Questions fréquentes</h2>
+      <h2 className="m-0 mb-4 text-xl font-bold">Questions fréquentes</h2>
       <div className="flex flex-col gap-4">
         <QuestionBlock
           questionText="Quand vais-je connaître mon lieu d'affectation ?"
@@ -41,7 +41,7 @@ const FaqWaitingAffectation = () => {
           }
         />
         <a
-          className="rounded-lg border-[1px] border-gray-200 py-[22px] px-6 flex justify-between w-full items-center hover:text-inherit"
+          className="flex w-full items-center justify-between rounded-lg border-[1px] border-gray-200 py-[22px] px-6 hover:text-inherit"
           href="https://support.snu.gouv.fr/base-de-connaissance/phase-1-le-sejour-de-cohesion"
           target="_blank"
           rel="noreferrer">

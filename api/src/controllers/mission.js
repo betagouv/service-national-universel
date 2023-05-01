@@ -10,7 +10,9 @@ const ApplicationObject = require("../models/application");
 const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
 // eslint-disable-next-line no-unused-vars
-const { ERRORS, isYoung, updateApplicationStatus, updateApplicationTutor } = require("../utils/index.js");
+const { ERRORS, isYoung } = require("../utils/index.js");
+const { updateApplicationStatus, updateApplicationTutor } = require("../services/application");
+const { getTutorName } = require("../services/mission");
 const { validateId, validateMission } = require("../utils/validator");
 const { ROLES, canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib/roles");
 const { MISSION_STATUS } = require("snu-lib/constants");
@@ -41,6 +43,11 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     }
 
     let structure = {};
+    let responsible;
+    if (checkedMission.tutorId) {
+      responsible = await UserObject.findById(checkedMission.tutorId);
+    }
+
     if (req.user.role === ROLES.SUPERVISOR) structure = await StructureObject.findById(checkedMission.structureId);
 
     if (!canCreateOrModifyMission(req.user, checkedMission, structure)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
@@ -48,6 +55,11 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
     if (checkedMission.startAt) checkedMission.startAt = fixDate(checkedMission.startAt);
     if (checkedMission.endAt) checkedMission.endAt = fixDate(checkedMission.endAt);
+
+    //set tutor name
+    if (responsible) {
+      checkedMission.tutorName = getTutorName(responsible);
+    }
 
     if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
       if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
@@ -76,7 +88,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
         });
       }
 
-      const responsible = await UserObject.findById(checkedMission.tutorId);
       if (responsible)
         await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
           emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
@@ -147,6 +158,11 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const oldStatus = mission.status;
 
     const oldTutorId = mission.tutorId;
+
+    if (checkedMission.tutorId && checkedMission.tutorId !== oldTutorId) {
+      const responsible = await ReferentObject.findById(checkedMission.tutorId);
+      checkedMission.tutorName = await getTutorName(responsible);
+    }
 
     mission.set(checkedMission);
     await mission.save({ fromUser: req.user });

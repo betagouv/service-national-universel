@@ -3,7 +3,7 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 
-module.exports = (env) => {
+module.exports = () => {
   const plugins = [
     new HtmlWebpackPlugin({
       template: "./public/index.html",

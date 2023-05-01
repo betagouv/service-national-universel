@@ -18,7 +18,7 @@ export default function Menu({ tab }) {
   }
 
   return (
-    <nav className="flex gap-8 mx-8 text-gray-500">
+    <nav className="mx-8 flex gap-8 text-gray-500">
       {tabs.map((t) => (
         <Tab key={t.id} tab={t} active={t.id === tab} />
       ))}
@@ -28,7 +28,7 @@ export default function Menu({ tab }) {
 
 const Tab = ({ tab, active = false }) => {
   return (
-    <Link to={tab.src} className={`flex items-center gap-2 pb-4 cursor-pointer ${active && "text-blue-600 border-b-2 border-blue-600"}`}>
+    <Link to={tab.src} className={`flex cursor-pointer items-center gap-2 pb-4 ${active && "border-b-2 border-blue-600 text-blue-600"}`}>
       {tab.icon && <tab.icon fill="#6B7280" />}
       <p>{tab.label}</p>
     </Link>

@@ -62,16 +62,16 @@ export default function StepConsentements() {
     <>
       <Navbar />
       <div className="bg-white p-4 text-[#161616]">
-        <div className="w-full flex justify-between items-center mt-2">
+        <div className="mt-2 flex w-full items-center justify-between">
           <h1 className="text-xl font-bold">Apporter mon consentement</h1>
           <a href={`${supportURL}/base-de-connaissance/je-minscris-et-donne-mon-consentement`} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
           </a>
         </div>
-        <hr className="my-4 h-px bg-gray-200 border-0" />
+        <hr className="my-4 h-px border-0 bg-gray-200" />
         {error?.text && <Error {...error} onClose={() => setError({})} />}
-        <div className="flex flex-col gap-4 mt-4 pb-2">
-          <div className="text-[#161616] text-base">
+        <div className="mt-4 flex flex-col gap-4 pb-2">
+          <div className="text-base text-[#161616]">
             Je,{" "}
             <strong>
               {young.firstName} {young.lastName}
@@ -80,14 +80,14 @@ export default function StepConsentements() {
           </div>
           <div className="flex items-center gap-4">
             <CheckBox checked={data.consentment1} onChange={(e) => setData({ ...data, consentment1: e })} />
-            <div className="text-[#3A3A3A] text-sm flex-1">
+            <div className="flex-1 text-sm text-[#3A3A3A]">
               Suis volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}
               <strong>{COHESION_STAY_LIMIT_DATE[young.cohort]}</strong> et la réalisation d’une mission d’intérêt général.
             </div>
           </div>
           <div className="flex items-center gap-4">
             <CheckBox checked={data.consentment2} onChange={(e) => setData({ ...data, consentment2: e })} />
-            <div className="text-[#3A3A3A] text-sm flex-1">
+            <div className="flex-1 text-sm text-[#3A3A3A]">
               M&apos;engage à respecter le{" "}
               <a
                 href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/snu-reglement-interieur-2022-2023.pdf"
@@ -100,9 +100,9 @@ export default function StepConsentements() {
             </div>
           </div>
         </div>
-        <div className="flex justify-end items-center gap-2 mt-4 pb-4" onClick={() => setModal({ isOpen: true })}>
+        <div className="mt-4 flex items-center justify-end gap-2 pb-4" onClick={() => setModal({ isOpen: true })}>
           <EditPenLight />
-          <div className="text-[#000091] text-sm font-medium">Je souhaite modifier mes dates de séjour</div>
+          <div className="text-sm font-medium text-[#000091]">Je souhaite modifier mes dates de séjour</div>
         </div>
       </div>
       <Footer marginBottom="mb-[88px]" />

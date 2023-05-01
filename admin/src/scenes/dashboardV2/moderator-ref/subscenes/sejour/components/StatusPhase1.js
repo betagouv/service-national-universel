@@ -52,9 +52,14 @@ export default function StatusPhase1({ statusPhase1, total, filter }) {
             base="/volontaire"
             filtersUrl={['STATUS_PHASE_1=%5B"NOT_DONE"%5D']}
           />
-          <StatusText status="Dispensée" nb={EXEMPTED || 0} percentage={total && EXEMPTED ? ((EXEMPTED / total) * 100).toFixed(0) : 0} filter={filter}
+          <StatusText
+            status="Dispensée"
+            nb={EXEMPTED || 0}
+            percentage={total && EXEMPTED ? ((EXEMPTED / total) * 100).toFixed(0) : 0}
+            filter={filter}
             base="/volontaire"
-            filtersUrl={['STATUS_PHASE_1=%5B"EXEMPTED"%5D']}/>
+            filtersUrl={['STATUS_PHASE_1=%5B"EXEMPTED"%5D']}
+          />
         </div>
       </div>
     </div>

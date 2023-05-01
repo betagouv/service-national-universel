@@ -64,6 +64,13 @@ const Schema = new mongoose.Schema({
   stepPoints: {
     type: [
       {
+        type: {
+          type: String,
+          enum: ["aller", "retour"],
+          documentation: {
+            description: "Correspondance aller ou correspondance retour",
+          },
+        },
         address: {
           type: String,
           documentation: {

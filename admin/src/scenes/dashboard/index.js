@@ -27,14 +27,14 @@ export default function Dashboard() {
   return (
     <>
       <div className=" flex flex-1 flex-col lg:flex-row">
-        <nav className="px-3 flex flex-1 border-b">
+        <nav className="flex flex-1 border-b px-3">
           <TabItem title="Inscriptions" to="/dashboard/inscriptions" />
           <TabItem title="Volontaires" to="/dashboard/volontaires" />
           <TabItem title="Structures" to="/dashboard/structures" />
           <TabItem title="Missions" to="/dashboard/missions" />
           <TabItem title="Centres" to="/dashboard/centres" />
         </nav>
-        <div className="flex m-1 justify-end">
+        <div className="m-1 flex justify-end">
           {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && currentTab === "inscriptions" ? <ExportAll filter={filter} /> : null}
           <VioletButton
             onClick={() => {
@@ -60,7 +60,7 @@ const TabItem = ({ to, title }) => (
   <NavLink
     to={to}
     activeClassName="text-snu-purple-800 font-bold border-b-[3px] border-snu-purple-800"
-    className="px-3 py-2 cursor-pointer text-coolGray-500  hover:text-snu-purple-800 hover:border-b-[3px] hover:border-snu-purple-800">
+    className="cursor-pointer px-3 py-2 text-coolGray-500  hover:border-b-[3px] hover:border-snu-purple-800 hover:text-snu-purple-800">
     {title}
   </NavLink>
 );

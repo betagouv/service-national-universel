@@ -1,6 +1,6 @@
 import React from "react";
 
-const PrepareSejour = (props) => {
+const PrepareSejour = () => {
   return (
     <svg height="63" width="192" fill="none" viewBox="0 0 192 63" xmlns="http://www.w3.org/2000/svg">
       <path

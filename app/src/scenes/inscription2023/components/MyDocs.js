@@ -23,15 +23,15 @@ export default function MyDocs({ category = "" }) {
   if (files.length === 0) return <></>;
   return (
     <div className="w-full">
-      <h2 className="text-xl text-gray-800 font-medium my-4">Mes documents en ligne</h2>
+      <h2 className="my-4 text-xl font-medium text-gray-800">Mes documents en ligne</h2>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       {files.map((e) => (
-        <div key={e._id} className="flex w-full justify-between my-4">
+        <div key={e._id} className="my-4 flex w-full justify-between">
           <div className="w-2/3">
-            <p className="text-gray-800 text-sm truncate">{e.name}</p>
-            <p className="text-gray-500 text-xs truncate">{translate(e.category)}</p>
+            <p className="truncate text-sm text-gray-800">{e.name}</p>
+            <p className="truncate text-xs text-gray-500">{translate(e.category)}</p>
           </div>
-          <div className="text-blue-600 cursor-pointer hover:text-blue-400 flex">
+          <div className="flex cursor-pointer text-blue-600 hover:text-blue-400">
             <div className="mt-1 mr-1">
               <Bin />
             </div>

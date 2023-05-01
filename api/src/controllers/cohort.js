@@ -231,7 +231,8 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       pdrEditionOpenForReferentRegion: Joi.boolean(),
       pdrEditionOpenForReferentDepartment: Joi.boolean(),
       repartitionSchemaCreateAndEditGroupAvailability: Joi.boolean().required(),
-      repartitionSchemaDownloadAvailability: Joi.boolean().required(),
+      repartitionSchemaDownloadAvailability: Joi.boolean(),
+      isTransportPlanCorrectionRequestOpen: Joi.boolean(),
       uselessInformation: Joi.object().allow(null),
     }).validate(req.body, { stripUnknown: true });
     if (bodyError) {

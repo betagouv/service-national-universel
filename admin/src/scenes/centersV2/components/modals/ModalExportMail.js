@@ -37,27 +37,27 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel }) {
     <ModalForm isOpen={isOpen} onCancel={onCancel} showCloseIcon={false}>
       <div className="w-full">
         <div className="mx-4">
-          <div className="flex items-center justify-center text-gray-900 text-xl font-medium">Envoi par mail</div>
-          <div className="flex items-center justify-center text-gray-500 text-sm font-normal text-center">
+          <div className="flex items-center justify-center text-xl font-medium text-gray-900">Envoi par mail</div>
+          <div className="flex items-center justify-center text-center text-sm font-normal text-gray-500">
             Vous êtes sur le point d'envoyer par email un lien sécurisé vers la liste des volontaires par lieu de rassemblement et ligne de bus mise à jour en temps réel au(x)
             destinataire(s) suivant(s) :
           </div>
           <div className="mx-4">
             {emails.length ? (
-              <div className="flex flex-col justify-center items-center mt-4">
-                <div className="border-[1px] border-gray-300 rounded-lg w-full  p-2">
-                  <div className="text-xs leading-4 font-normal text-gray-500 pb-2">Destinataire(s)</div>
+              <div className="mt-4 flex flex-col items-center justify-center">
+                <div className="w-full rounded-lg border-[1px] border-gray-300  p-2">
+                  <div className="pb-2 text-xs font-normal leading-4 text-gray-500">Destinataire(s)</div>
                   {emails.map((email, index) => (
                     <div key={index} className="flex flex-row items-center">
-                      <IoMdClose onClick={() => setEmails((prev) => prev.filter((e) => e !== email))} className="text-gray-400 font-bold hover:scale-125 cursor-pointer" />
-                      <div className="text-sm leading-5 font-normal text-gray-800 pl-2">{email}</div>
+                      <IoMdClose onClick={() => setEmails((prev) => prev.filter((e) => e !== email))} className="cursor-pointer font-bold text-gray-400 hover:scale-125" />
+                      <div className="pl-2 text-sm font-normal leading-5 text-gray-800">{email}</div>
                     </div>
                   ))}
                 </div>
               </div>
             ) : null}
 
-            <div className="flex flex-row border-[1px] border-gray-300 rounded-lg w-full mt-4 overflow-hidden justify-between items-center">
+            <div className="mt-4 flex w-full flex-row items-center justify-between overflow-hidden rounded-lg border-[1px] border-gray-300">
               <form className="w-full" onSubmit={(e) => handleEmail(e)}>
                 <div className="flex flex-col px-2 py-3">
                   <input
@@ -65,24 +65,24 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel }) {
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                     placeholder="+ Ajouter un destinataire"
-                    className="text-xs leading-4 font-normal text-gray-800  w-full"
+                    className="w-full text-xs font-normal leading-4  text-gray-800"
                   />
                   {error ? <div className="text-xs font-normal text-red-500">Veuillez entrer une adresse email valide</div> : null}
                 </div>
               </form>
-              {value ? <FaPlus className="mr-4 font-bold text-snu-purple-300 hover:scale-125 cursor-pointer" onClick={() => handleEmail()} /> : null}
+              {value ? <FaPlus className="mr-4 cursor-pointer font-bold text-snu-purple-300 hover:scale-125" onClick={() => handleEmail()} /> : null}
             </div>
           </div>
         </div>
-        <div className="flex p-4 gap-2">
+        <div className="flex gap-2 p-4">
           <button
-            className="flex items-center justify-center flex-1 border-[1px] border-gray-300 text-gray-700 rounded-lg py-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+            className="flex flex-1 cursor-pointer items-center justify-center rounded-lg border-[1px] border-gray-300 py-2 text-gray-700 disabled:cursor-wait disabled:opacity-50"
             disabled={isLoading}
             onClick={onClickCancel}>
             Annuler
           </button>
           <button
-            className="flex items-center justify-center flex-1 bg-snu-purple-300 text-white rounded-lg py-2 cursor-pointer disabled:opacity-50"
+            className="flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-snu-purple-300 py-2 text-white disabled:opacity-50"
             disabled={isLoading || !emails.length}
             onClick={handleSubmit}>
             Confirmer

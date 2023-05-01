@@ -49,7 +49,7 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
   };
 
   const checkUserAuthorizations = async () => {
-    const cohort = await getCohortByName(cohortName);
+    const { data: cohort } = await getCohortByName(cohortName);
     checkIfUserIsAuthorizedToExportData(cohort);
     checkIfUserIsAuthorizedToCreateGroup(cohort);
   };
@@ -73,13 +73,13 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
             effect="solid"
             className="custom-tooltip-radius !opacity-100 !shadow-md"
             tooltipRadius="6">
-            <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
+            <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
               Précision de la ou des zones géographiques ou scolaires concernées par le séjour.
             </p>
           </ReactTooltip>
         </span>
       </BoxHeader>
-      <div className="flex mt-[48px]">
+      <div className="mt-[48px] flex">
         <div className="flex-[1_1_50%] overflow-auto">
           <GroupSelector
             title="Volontaires restants à grouper"
@@ -106,12 +106,12 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
             isUserAuthorizedToCreateGroup={isUserAuthorizedToCreateGroup}
           />
         </div>
-        <div className="flex-[0_0_1px] bg-[#E5E7EB] w-[1px] mx-[40px]" />
+        <div className="mx-[40px] w-[1px] flex-[0_0_1px] bg-[#E5E7EB]" />
         <div className="flex-[1_1_50%]">
           {selectedGroup ? (
             <GroupEditor group={selectedGroup} onChange={onChangeGroup} isUserAuthorizedToCreateGroup={isUserAuthorizedToCreateGroup} />
           ) : (
-            <div className="flex items-center justify-center min-h-[412px]">
+            <div className="flex min-h-[412px] items-center justify-center">
               <Iceberg />
             </div>
           )}

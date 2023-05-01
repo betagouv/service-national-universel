@@ -218,7 +218,7 @@ export default function changeSejour() {
                             Ancien séjour : <Badge color="#aaaaaa" backgroundColor="#F9FCFF" text={young.cohort} style={{ cursor: "default" }} />
                             <br />
                             Nouveau séjour : <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={translateCohort(newSejour)} style={{ cursor: "default" }} />
-                            <div className="text-xs mt-2">Cette action est irréversible, souhaitez-vous confirmer cette action ?</div>
+                            <div className="mt-2 text-xs">Cette action est irréversible, souhaitez-vous confirmer cette action ?</div>
                           </>
                         }
                         onCancel={() => setmodalConfirmControlOk(false)}

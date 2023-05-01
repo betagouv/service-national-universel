@@ -64,12 +64,12 @@ export default function CniInvalide() {
       <div className="bg-white p-4 text-[#161616]">
         <div className="flex flex-col gap-4">
           <h1 className="text-[22px] font-bold">Déclaration sur l’honneur</h1>
-          <div className="text-[#161616] mt-2">
+          <div className="mt-2 text-[#161616]">
             Malheureusement, la pièce d’identité de <strong>{youngFullname}</strong> périme d’ici son départ en séjour de cohésion prévu le{" "}
             <strong className="whitespace-nowrap">{dateSejour}</strong>.
           </div>
           <Check checked={validated} onChange={(e) => setValidated(e)} className="mt-[32px]" error={error}>
-            <div className="text-[#161616] text-base">
+            <div className="text-base text-[#161616]">
               Je, soussigné(e), <b>{parentFullname}</b>,
             </div>
             <div className="mt-2 text-sm text-[#3A3A3A]">

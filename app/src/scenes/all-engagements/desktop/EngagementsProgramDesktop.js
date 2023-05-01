@@ -38,33 +38,33 @@ const EngagementsProgramMobile = () => {
     <Loader />
   ) : (
     <>
-      <div className="bg-[#f9f6f2] flex justify-center py-10">
-        <div className="bg-white basis-[60%] mx-auto my-0 px-[102px] py-[60px]">
-          <h1 className="text-[22px] font-bold mb-4">Toutes les formes d&apos;engagement</h1>
-          <div className="overflow-x-auto flex flex-wrap justify-between">
+      <div className="flex justify-center bg-[#f9f6f2] py-10">
+        <div className="mx-auto my-0 basis-[60%] bg-white px-[102px] py-[60px]">
+          <h1 className="mb-4 text-[22px] font-bold">Toutes les formes d&apos;engagement</h1>
+          <div className="flex flex-wrap justify-between overflow-x-auto">
             {program.map((item) => {
               const clickId = item._id;
               return (
                 <div key={item._id} className="mb-4 w-[48%]">
-                  <div className="w-full h-[195px] cursor-pointer">
+                  <div className="h-[195px] w-full cursor-pointer">
                     <a href={item.url} target="_blank" rel="noreferrer"></a>
-                    <img src={require(`../../../assets/programmes-engagement/${item.imageString}`)} className="object-cover w-full h-full" />
+                    <img src={require(`../../../assets/programmes-engagement/${item.imageString}`)} className="h-full w-full object-cover" />
                   </div>
 
-                  <div className={`min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen[clickId] && "h-[250px]"}`}>
-                    <div className="font-semibold my-4 min-h-[40px] pr-14 text-[#161616]">{item.name}</div>
-                    <div className={`text-[13px] text-[#3A3A3A] pr-14 leading-6 mb-4 ${!isOpen[clickId] && "h-[70px] text-ellipsis overflow-hidden"}`}>
+                  <div className={`min-h-min border border-[#E5E5E5] pl-4 pr-1 pb-2 ${!isOpen[clickId] && "h-[250px]"}`}>
+                    <div className="my-4 min-h-[40px] pr-14 font-semibold text-[#161616]">{item.name}</div>
+                    <div className={`mb-4 pr-14 text-[13px] leading-6 text-[#3A3A3A] ${!isOpen[clickId] && "h-[70px] overflow-hidden text-ellipsis"}`}>
                       <a href={item.url} target="_blank" rel="noreferrer" className="visited:text-[#161616 hover:text-[#161616]">
                         {item.description}
                       </a>
                     </div>
                     <div
-                      className="text-[13px] flex justify-between pr-2"
+                      className="flex justify-between pr-2 text-[13px]"
                       onClick={() => {
                         setIsOpen({ ...isOpen, [clickId]: !isOpen[clickId] });
                       }}>
                       {" "}
-                      <div className="text-[#666666] cursor-pointer">{isOpen[clickId] ? "Lire moins" : "Lire plus"}</div>
+                      <div className="cursor-pointer text-[#666666]">{isOpen[clickId] ? "Lire moins" : "Lire plus"}</div>
                       <img src={arrowRightBlue} className="w-3" />
                     </div>
                   </div>
@@ -72,10 +72,10 @@ const EngagementsProgramMobile = () => {
               );
             })}
           </div>
-          <hr className="my-5 h-px bg-gray-200 border-0" />
+          <hr className="my-5 h-px border-0 bg-gray-200" />
           <div className="flex justify-end space-x-4">
             <button
-              className="flex items-center justify-center py-2 px-4 hover:!text-[#000091] border-[1px] hover:border-[#000091] hover:bg-white cursor-pointer bg-[#000091] text-white"
+              className="flex cursor-pointer items-center justify-center border-[1px] bg-[#000091] py-2 px-4 text-white hover:border-[#000091] hover:bg-white hover:!text-[#000091]"
               onClick={() => history.push("/")}>
               Revenir à l&apos;accueil
             </button>

@@ -1,8 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import Clock from "../../assets/icons/Clock";
-import PrepareSejour from "../../assets/icons/PrepareSejour";
 
 import plausibleEvent from "../../services/plausible";
 
@@ -15,15 +13,15 @@ export default function Affected() {
       {/* DESKTOP */}
       <div className="hidden lg:flex">
         <div className="my-12 mx-10 w-full">
-          <div className="flex justify-between items-center rounded-lg bg-white ">
-            <div className="w-1/2 pl-10 pt-6 py-6">
+          <div className="flex items-center justify-between rounded-lg bg-white ">
+            <div className="w-1/2 py-6 pl-10 pt-6">
               <div className="text-[48px] font-medium leading-tight tracking-tight text-gray-800">
                 <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
               </div>
-              <div className="left-7 text-[#242526] font-bold mt-3">Bonne nouvelle vous avez été affecté à un lieu pour votre séjour de cohésion !</div>
-              <div className="flex flex-col items-stretch w-fit">
+              <div className="left-7 mt-3 font-bold text-[#242526]">Bonne nouvelle vous avez été affecté à un lieu pour votre séjour de cohésion !</div>
+              <div className="flex w-fit flex-col items-stretch">
                 <button
-                  className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
+                  className="mt-5 rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
                   onClick={() => {
                     plausibleEvent("Phase1/CTA - Choose Meeting Point");
                     history.push("/phase1");
@@ -37,15 +35,15 @@ export default function Affected() {
         </div>
       </div>
       {/* MOBILE */}
-      <div className="flex lg:hidden w-full">
+      <div className="flex w-full lg:hidden">
         <div className="flex flex-col-reverse ">
           <div className="px-4 pb-4">
             <div className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
               <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
             </div>
-            <div className="left-7 text-[#242526] font-bold mt-3">Bonne nouvelle vous avez été affecté à un lieu pour votre séjour de cohésion !</div>
+            <div className="left-7 mt-3 font-bold text-[#242526]">Bonne nouvelle vous avez été affecté à un lieu pour votre séjour de cohésion !</div>
             <button
-              className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-3 text-white hover:!text-blue-600 text-sm leading-5 transition ease-in-out duration-150"
+              className="mt-3 w-full rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
               onClick={() => {
                 plausibleEvent("Phase1/CTA - Choose Meeting Point");
                 history.push("/phase1");

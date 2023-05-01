@@ -1,6 +1,6 @@
 import React from "react";
 
-const IconFrance = (props) => {
+const IconFrance = () => {
   return (
     <svg height="10" width="14" fill="none" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg">
       <path d="M0 1C0 0.447716 0.447715 0 1 0H5V10H1C0.447715 10 0 9.55228 0 9V1Z" fill="#000091" />

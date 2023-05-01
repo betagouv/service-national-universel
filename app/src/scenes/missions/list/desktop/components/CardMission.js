@@ -15,64 +15,64 @@ export default function mission({ mission, youngLocation }) {
   return (
     <Link
       to={`/mission/${mission._id}`}
-      className="bg-white relative flex w-full justify-between shadow-nina rounded-xl p-4 border-[1px] border-[#ffffff] mb-4 hover:translate-x-1 transition duration-200 ease-in z-10">
+      className="relative z-10 mb-4 flex w-full justify-between rounded-xl border-[1px] border-[#ffffff] bg-white p-4 shadow-nina transition duration-200 ease-in hover:translate-x-1">
       <div className="flex flex-1 basis-[60%]">
         {/* icon */}
-        <div className="flex items-center mr-3">
+        <div className="mr-3 flex items-center">
           <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
         </div>
 
         {/* infos mission */}
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-1 flex-col">
           <div className="space-y-2">
             <div className="flex space-x-4">
-              <div className="text-gray-500 text-xs uppercase font-medium">{mission?.structureName}</div>
+              <div className="text-xs font-medium uppercase text-gray-500">{mission?.structureName}</div>
             </div>
-            <div className="text-gray-900 font-bold text-base">{mission?.name}</div>
+            <div className="text-base font-bold text-gray-900">{mission?.name}</div>
             <div className="flex flex-wrap gap-2">
               {tags.map((e, i) => (
-                <div key={i} className="flex justify-center items-center text-gray-600 border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">
+                <div key={i} className="flex items-center justify-center rounded-full border-[1px] border-gray-200 px-4 py-1 text-xs text-gray-600">
                   {e}
                 </div>
               ))}
               {mission?.isMilitaryPreparation === "true" ? (
-                <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">Préparation militaire</div>
+                <div className="flex items-center justify-center rounded-full border-[1px] border-gray-200 bg-blue-900 px-4 py-1 text-xs text-white">Préparation militaire</div>
               ) : null}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-1 justify-end items-center basis-[40%]">
-        <div className="flex flex-row w-full justify-end items-center flex-wrap">
-          <div className="flex flex-row text-sm gap-2 mx-2 text-gray-900 font-bold items-center justify-center">
-            <Calendar className=" min-w-[14px] min-h-[20px] text-gray-400" />
-            <div className="flex flex-row gap-1 flex-wrap max-w-min xl:max-w-full">
+      <div className="flex flex-1 basis-[40%] items-center justify-end">
+        <div className="flex w-full flex-row flex-wrap items-center justify-end">
+          <div className="mx-2 flex flex-row items-center justify-center gap-2 text-sm font-bold text-gray-900">
+            <Calendar className=" min-h-[20px] min-w-[14px] text-gray-400" />
+            <div className="flex max-w-min flex-row flex-wrap gap-1 xl:max-w-full">
               <div className="whitespace-nowrap">du {dayjs(mission.startAt).format("DD/MM/YYYY")}</div>
               <div className="whitespace-nowrap">au {dayjs(mission.endAt).format("DD/MM/YYYY")}</div>
             </div>
           </div>
           {/* DISTANCE */}
           {youngLocation && mission.location ? (
-            <div className="flex flex-none items-center justify-end space-x-2 ml-4">
+            <div className="ml-4 flex flex-none items-center justify-end space-x-2">
               <LocationMarker className="text-gray-400" />
-              <div className="text-gray-800 text-base font-bold">
+              <div className="text-base font-bold text-gray-800">
                 à {getDistance(youngLocation.lat, youngLocation.lon, mission.location.lat, mission.location.lon).toFixed(1)} km
               </div>
               {mission?.hebergement === "true" ? (
                 <>
                   {mission.hebergementPayant === "true" ? (
-                    <div className="p-2 bg-yellow-100 rounded-full">
+                    <div className="rounded-full bg-yellow-100 p-2">
                       <House tooltip={"Hébergement payant proposé"} color="#D97706" />
                     </div>
                   ) : (
-                    <div className="p-2 bg-green-50 rounded-full">
+                    <div className="rounded-full bg-green-50 p-2">
                       <House tooltip={"Hébergement gratuit proposé"} color="#059669" />
                     </div>
                   )}
                 </>
               ) : (
-                <div className="p-2 w-[14px]" />
+                <div className="w-[14px] p-2" />
               )}
             </div>
           ) : (
@@ -81,8 +81,8 @@ export default function mission({ mission, youngLocation }) {
           {/* END DISTANCE */}
         </div>
 
-        <div className="absolute top-2 bg-gray-100 rounded-lg px-3 py-1.5">
-          <div className="text-gray-700 text-xs font-medium">&nbsp;{mission?.placesLeft} places disponibles</div>
+        <div className="absolute top-2 rounded-lg bg-gray-100 px-3 py-1.5">
+          <div className="text-xs font-medium text-gray-700">&nbsp;{mission?.placesLeft} places disponibles</div>
         </div>
 
         {/* END STATUT */}

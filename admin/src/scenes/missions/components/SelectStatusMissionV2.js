@@ -81,11 +81,11 @@ export default function SelectStatusMissionV2({ hit, options = [], callback = ()
 
   if (!mission)
     return (
-      <div className={`animate-pulse flex space-x-4 w-full`}>
+      <div className={`flex w-full animate-pulse space-x-4`}>
         <div className="flex-1 space-y-6">
           <div className="grid grid-cols-3 gap-4 ">
-            <div className="h-2 bg-gray-300 rounded col-span-2"></div>
-            <div className="h-2 bg-gray-300 rounded col-span-1"></div>
+            <div className="col-span-2 h-2 rounded bg-gray-300"></div>
+            <div className="col-span-1 h-2 rounded bg-gray-300"></div>
           </div>
         </div>
       </div>

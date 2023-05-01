@@ -140,25 +140,25 @@ export default function Phase2Application({ young, onChange }) {
   return (
     <>
       <YoungHeader young={young} tab="phase2" onChange={onChange} />
-      <div className="m-8 p-8 shadow-sm bg-white rounded-xl">
+      <div className="m-8 rounded-xl bg-white p-8 shadow-sm">
         <div className="grid grid-cols-6">
           <div>
             <button
               onClick={history.goBack}
-              className="h-8 w-8 flex items-center justify-center space-x-1 bg-gray-100 rounded-full border-[1px] border-gray-100 hover:border-gray-300">
+              className="flex h-8 w-8 items-center justify-center space-x-1 rounded-full border-[1px] border-gray-100 bg-gray-100 hover:border-gray-300">
               <LeftArrow stroke={"#374151"} width={15} />
             </button>
           </div>
-          <div className="col-span-4 flex gap-4 items-center justify-center">
-            <p className="text-2xl font-bold pb-1">Espace&nbsp;candidature</p>
-            <p className={`text-xs font-normal px-2 py-1 h-min rounded-sm ${theme.background[application.status]} ${theme.text[application.status]} `}>
+          <div className="col-span-4 flex items-center justify-center gap-4">
+            <p className="pb-1 text-2xl font-bold">Espace&nbsp;candidature</p>
+            <p className={`h-min rounded-sm px-2 py-1 text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} `}>
               {translateApplication(application.status)}
             </p>
           </div>
           {application?.contractId && (
             <div className="flex justify-end">
               <button
-                className="flex items-center gap-2 bg-gray-100 rounded py-2 px-4 border-[1px] border-gray-100 hover:border-gray-300"
+                className="flex items-center gap-2 rounded border-[1px] border-gray-100 bg-gray-100 py-2 px-4 hover:border-gray-300"
                 onClick={() => history.push(`/volontaire/${young._id.toString()}/phase2/application/${application._id.toString()}/historique`)}>
                 <img src={Clock} /> <div className="text-xs text-gray-800 ">Historique</div>
               </button>
@@ -168,8 +168,8 @@ export default function Phase2Application({ young, onChange }) {
 
         <div className="space-y-16">
           <>
-            <div className="grid grid-cols-3 grid-rows-2 border-t border-b my-8">
-              <div className="col-span-2 row-span-2 py-4 pr-4 border-r flex flex-col justify-center relative w-full">
+            <div className="my-8 grid grid-cols-3 grid-rows-2 border-t border-b">
+              <div className="relative col-span-2 row-span-2 flex w-full flex-col justify-center border-r py-4 pr-4">
                 {/* mission info */}
                 <div className="flex gap-5">
                   {/* icon */}
@@ -177,11 +177,11 @@ export default function Phase2Application({ young, onChange }) {
                     <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
                   </div>
                   <div className="space-y-2">
-                    <div className="uppercase text-gray-400 font-medium text-xs tracking-wide">{mission.structureName}</div>
-                    <div className="text-font-gray-800 font-bold text-2xl">{mission.name}</div>
+                    <div className="text-xs font-medium uppercase tracking-wide text-gray-400">{mission.structureName}</div>
+                    <div className="text-font-gray-800 text-2xl font-bold">{mission.name}</div>
                     {/* tags */}
                     {tags && (
-                      <div className="inline-flex flex-wrap pt-2 gap-2">
+                      <div className="inline-flex flex-wrap gap-2 pt-2">
                         {tags.map((tag, index) => (
                           <Tag key={index} tag={tag} />
                         ))}
@@ -191,28 +191,28 @@ export default function Phase2Application({ young, onChange }) {
                   </div>
                 </div>
 
-                <div className="flex justify-end absolute z-10 inset-0 h-14 pt-4 px-4">
+                <div className="absolute inset-0 z-10 flex h-14 justify-end px-4 pt-4">
                   <a
-                    className="flex items-center gap-2 bg-gray-100 rounded py-2 px-4 border-[1px] border-gray-100 hover:border-gray-300 text-xs text-gray-800"
+                    className="flex items-center gap-2 rounded border-[1px] border-gray-100 bg-gray-100 py-2 px-4 text-xs text-gray-800 hover:border-gray-300"
                     href={`/mission/${mission._id}`}>
                     Voir la mission
                   </a>
                 </div>
               </div>
 
-              <div className="flex flex-col justify-center items-center border-b gap-1 h-28">
-                <div className="uppercase text-xs text-gray-400 tracking-wide">Heures de MIG prévisionnelles</div>
-                <div className="font-bold text-2xl text-gray-800">{contract?.missionDuration || "0"}h</div>
+              <div className="flex h-28 flex-col items-center justify-center gap-1 border-b">
+                <div className="text-xs uppercase tracking-wide text-gray-400">Heures de MIG prévisionnelles</div>
+                <div className="text-2xl font-bold text-gray-800">{contract?.missionDuration || "0"}h</div>
               </div>
 
-              <div className="flex flex-col justify-center items-center gap-1">
-                <div className="uppercase text-xs text-gray-400 tracking-wide">Heures de MIG réalisées</div>
+              <div className="flex flex-col items-center justify-center gap-1">
+                <div className="text-xs uppercase tracking-wide text-gray-400">Heures de MIG réalisées</div>
                 <div className="grid grid-cols-3">
                   <div />
-                  <p className="font-bold text-2xl text-gray-800">{application?.missionDuration || "0"}h</p>
+                  <p className="text-2xl font-bold text-gray-800">{application?.missionDuration || "0"}h</p>
                   {["VALIDATED", "IN_PROGRESS", "DONE"].includes(application.status) && (
-                    <div className="group flex justify-center items-center cursor-pointer" onClick={() => setModalDurationOpen(true)}>
-                      <div className="flex justify-center items-center h-8 w-8 group-hover:bg-gray-50 text-blue-500 rounded-full">
+                    <div className="group flex cursor-pointer items-center justify-center" onClick={() => setModalDurationOpen(true)}>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full text-blue-500 group-hover:bg-gray-50">
                         <Pencil width={16} height={16} />
                       </div>
                     </div>
@@ -223,29 +223,29 @@ export default function Phase2Application({ young, onChange }) {
           </>
           {["VALIDATED", "IN_PROGRESS", "DONE"].includes(application.status) ? (
             <>
-              <div className="bg-gray-50 rounded-xl p-6 space-y-4">
+              <div className="space-y-4 rounded-xl bg-gray-50 p-6">
                 <div className="flex justify-between">
                   <div className="flex items-center justify-center gap-4">
                     <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
                     {contractStatus === "SENT" && (
-                      <Link to={`/volontaire/${young._id}/phase2/application/${application._id}/contrat`} className="flex items-center justify-center gap-2 text-blue-600 text-xs">
+                      <Link to={`/volontaire/${young._id}/phase2/application/${application._id}/contrat`} className="flex items-center justify-center gap-2 text-xs text-blue-600">
                         <Pencil width={14} height={14} />
                         <div>Modifier le contrat</div>
                       </Link>
                     )}
                   </div>
                   {contractStatus === "SENT" ? (
-                    <div className="text-xs font-normal px-2 bg-sky-100 text-sky-600 rounded-sm items-center flex">
+                    <div className="flex items-center rounded-sm bg-sky-100 px-2 text-xs font-normal text-sky-600">
                       <AiFillClockCircle className="text-sky-400" />
                       <div>Contrat envoyé</div>
                     </div>
                   ) : contractStatus === "DRAFT" ? (
-                    <div className="text-xs font-normal px-2 bg-orange-500 text-white rounded-sm items-center flex">
+                    <div className="flex items-center rounded-sm bg-orange-500 px-2 text-xs font-normal text-white">
                       <Bell />
                       <div>Contrat en brouillon</div>
                     </div>
                   ) : contractStatus === "VALIDATED" ? (
-                    <div className="text-xs font-normal px-2 bg-[#71C784] rounded-sm items-center flex text-white">
+                    <div className="flex items-center rounded-sm bg-[#71C784] px-2 text-xs font-normal text-white">
                       <Check />
                       <div>Contrat signé</div>
                     </div>
@@ -335,7 +335,7 @@ export default function Phase2Application({ young, onChange }) {
                       )}
                     </div>
                     {contractStatus === "VALIDATED" && (
-                      <button onClick={() => downloadContract()} className="py-2 px-3 rounded-md bg-[#71C784] items-center flex justify-center gap-2">
+                      <button onClick={() => downloadContract()} className="flex items-center justify-center gap-2 rounded-md bg-[#71C784] py-2 px-3">
                         {loadingContract ? (
                           <div className="flex items-center justify-center">
                             <ReactLoading type="spin" color="#FFFFFF" width={20} height={20} />
@@ -349,14 +349,14 @@ export default function Phase2Application({ young, onChange }) {
                 ) : (
                   <a
                     href={`/volontaire/${young._id}/phase2/application/${application._id}/contrat`}
-                    className="py-2 rounded-md bg-blue-600 w-48 items-center flex justify-center text-white hover:brightness-110 active:brightness-125">
+                    className="flex w-48 items-center justify-center rounded-md bg-blue-600 py-2 text-white hover:brightness-110 active:brightness-125">
                     Editer
                   </a>
                 )}
               </div>
               <div className="space-y-6">
-                <p className="text-lg leading-6 font-semibold">Documents</p>
-                <div className="flex overflow-x-auto gap-6 w-full">
+                <p className="text-lg font-semibold leading-6">Documents</p>
+                <div className="flex w-full gap-6 overflow-x-auto">
                   {optionsType.map(
                     (option, index) =>
                       application[option].length > 0 && (
@@ -387,8 +387,8 @@ export default function Phase2Application({ young, onChange }) {
                           stepOne: true,
                         });
                       }}
-                      className="w-64 h-64 group border-[1px] border-dashed border-blue-600 rounded-lg text-center flex flex-col items-center justify-center hover:border-solid hover:bg-blue-50 cursor-pointer transition">
-                      <div className="flex items-center gap-1 px-3 py-2 border-[1px] border-blue-600 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white hover:brightness-110 active:brightness-125 transition">
+                      className="group flex h-64 w-64 cursor-pointer flex-col items-center justify-center rounded-lg border-[1px] border-dashed border-blue-600 text-center transition hover:border-solid hover:bg-blue-50">
+                      <div className="flex items-center gap-1 rounded-lg border-[1px] border-blue-600 px-3 py-2 text-blue-600 transition hover:brightness-110 active:brightness-125 group-hover:bg-blue-600 group-hover:text-white">
                         <HiPlus />
                         Ajouter une pièce jointe
                       </div>
@@ -471,10 +471,10 @@ const StatusContractPeople = ({ value, description, firstName, lastName, token, 
         {value === "VALIDATED" ? <img src={rubberStampValided} alt="rubberStampValided" /> : <img src={rubberStampNotValided} alt="rubberStampNotValided" />}
       </div>
       <div>
-        <p className="font-semibold max-w-[200px] truncate">
+        <p className="max-w-[200px] truncate font-semibold">
           {firstName} {lastName?.toUpperCase()}
         </p>
-        <p className="text-gray-500 text-xs">{description}</p>
+        <p className="text-xs text-gray-500">{description}</p>
       </div>
       {value !== "VALIDATED" ? (
         <ReactTooltip id={`${firstName}${lastName}-validation`} type="light" effect="solid">
@@ -485,7 +485,7 @@ const StatusContractPeople = ({ value, description, firstName, lastName, token, 
     {value !== "VALIDATED" ? (
       <div className="mt-2">
         <div
-          className="text-xs text-blue-600 cursor-pointer"
+          className="cursor-pointer text-xs text-blue-600"
           onClick={() => {
             copyToClipboard(`${appURL}/validate-contract?token=${token}`);
             toastr.success("Le lien a été copié dans le presse papier.");
@@ -504,7 +504,7 @@ function SendContractLink({ contract, target }) {
   return (
     <>
       <div
-        className="text-xs text-blue-600 cursor-pointer"
+        className="cursor-pointer text-xs text-blue-600"
         onClick={async () => {
           try {
             const email = contract[target + "Email"];
@@ -540,11 +540,11 @@ function SendContractLink({ contract, target }) {
 
 function FileCard({ name, filled, icon, onClick, description, showNumber = false }) {
   return (
-    <section className="bg-gray-50 w-64 h-64 rounded-xl text-center flex flex-col items-center justify-between px-4 pt-4">
+    <section className="flex h-64 w-64 flex-col items-center justify-between rounded-xl bg-gray-50 px-4 pt-4 text-center">
       <FileIcon filled={filled} icon={icon} />
       <section>
-        <p className="text-base font-bold mt-2">{name}</p>
-        {description ? <p className="ttext-xs leading-4 font-normal mt-1">{description}</p> : null}
+        <p className="mt-2 text-base font-bold">{name}</p>
+        {description ? <p className="ttext-xs mt-1 font-normal leading-4">{description}</p> : null}
       </section>
       {showNumber ? (
         <div className="text-gray-500">
@@ -552,11 +552,11 @@ function FileCard({ name, filled, icon, onClick, description, showNumber = false
         </div>
       ) : null}
       <div></div>
-      <div className="flex flex-col w-full justify-end items-end self-end my-2">
+      <div className="my-2 flex w-full flex-col items-end justify-end self-end">
         <div
           onClick={() => onClick()}
-          className="relative border-red-600 border-3 self-endtransition duration-150 flex rounded-full bg-blue-600 p-2 items-center justify-center hover:scale-110 ease-out hover:ease-in cursor-pointer">
-          <Download className=" text-indigo-100 bg-blue-600" />
+          className="border-3 self-endtransition relative flex cursor-pointer items-center justify-center rounded-full border-red-600 bg-blue-600 p-2 duration-150 ease-out hover:scale-110 hover:ease-in">
+          <Download className=" bg-blue-600 text-indigo-100" />
         </div>
       </div>
     </section>
