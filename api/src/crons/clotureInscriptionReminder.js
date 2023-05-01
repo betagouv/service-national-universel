@@ -25,18 +25,14 @@ exports.handler = async () => {
     let countReferents = 0;
     // liste des cohortes pour lesquelles on est la veille de la fin de l'instruction
     const cohorts = await getCohortsEndingTomorrow();
-    console.log("Cohorts: ", cohorts);
     // pour chaque cohorte :
     for (const cohort of cohorts) {
-      console.log("COHORT: ", cohort);
       // ---  liste des départements ou il reste des jeunes en attente de validation
       const departments = await getDepatmentsWithWaitingYoungs(cohort);
-      console.log("     Departments: ", departments);
       // --- Pour chaque département :
       for (const department of departments) {
         // --- --- Trouver les référent departementaux avec subrole secretariat ou manager_department
         const referents = await getReferentForDepartment(department._id);
-        console.log(`    Referents pour le département ${department._id}: `, referents.length);
         // --- --- Pour chaque référent :
         for (const referent of referents) {
           // --- --- --- envoyer la relance.
@@ -58,7 +54,6 @@ async function getCohortsEndingTomorrow() {
   const month = now.getMonth() + 1;
   const todayDate = new Date(`${now.getFullYear()}-${month < 9 ? "0" + month : month}-${now.getDate()}T14:00:00.000Z`);
   const today = todayDate.valueOf();
-  console.log("Test date: ", todayDate);
   return sessions2023
     .filter((session) => {
       return (
