@@ -127,15 +127,16 @@ class Auth {
       } = value;
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
-      let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt });
-      console.log("count = ", countDocuments, typeof countDocuments, countDocuments > 0);
+      const formatedDate = birthdateAt;
+      formatedDate.setUTCHours(11, 0, 0);
+
+      let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
       const sessions = await getFilteredSessions(value);
       const session = sessions.find(({ name }) => name === value.cohort);
       if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      const formatedDate = birthdateAt;
-      formatedDate.setUTCHours(11, 0, 0);
+
       const user = await this.model.create({
         email,
         firstName,
