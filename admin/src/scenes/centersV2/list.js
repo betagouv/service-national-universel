@@ -1,30 +1,30 @@
-import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
 import { BsDownload } from "react-icons/bs";
-import api from "../../services/api";
+import { useSelector } from "react-redux";
 import {
   COHESION_STAY_START,
   COHORTS,
-  translate,
-  formatLongDateFR,
   ES_NO_LIMIT,
   ROLES,
   canCreateOrUpdateCohesionCenter,
-  translateTypologieCenter,
-  translateDomainCenter,
+  formatLongDateFR,
   getDepartmentNumber,
+  translate,
+  translateDomainCenter,
+  translateTypologieCenter,
 } from "snu-lib";
-import { Title } from "../pointDeRassemblement/components/common";
-import { TabItem, Badge } from "./components/commons";
-import Breadcrumbs from "../../components/Breadcrumbs";
-import Menu from "../../assets/icons/Menu";
 import Calendar from "../../assets/icons/Calendar";
+import Menu from "../../assets/icons/Menu";
+import Breadcrumbs from "../../components/Breadcrumbs";
+import api from "../../services/api";
+import { Title } from "../pointDeRassemblement/components/common";
+import { Badge, TabItem } from "./components/commons";
 
 import { useHistory, useParams } from "react-router-dom";
 
 import ModalRattacherCentre from "./components/ModalRattacherCentre";
 
-import { Filters, ResultTable, Save, SelectedFilters, ExportComponent } from "../../components/filters-system-v2";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -278,6 +278,18 @@ const ListCenter = ({ firstSession }) => {
       missingLabel: "Non renseignée",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
+    },
+    {
+      title: "Typologie",
+      name: "typology",
+      missingLabel: "Non renseignée",
+      translate: (e) => translateTypologieCenter(e),
+    },
+    {
+      title: "Domaine",
+      name: "domain",
+      missingLabel: "Non renseignée",
+      translate: (e) => translateDomainCenter(e),
     },
   ];
   if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code2022", missingLabel: "Non renseignée" });
