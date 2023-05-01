@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Loader from "../../../../../../components/Loader";
 import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
-import { translate } from "snu-lib";
+import { translate, translateApplication } from "snu-lib";
 import Tabs from "../../../../../phase0/components/Tabs";
 import StatusTable from "../../../../components/ui/StatusTable";
 
@@ -34,7 +34,24 @@ export default function VolontairesStatutsDivers({ filters, className = "" }) {
           if (statuses[status.category] === undefined) {
             statuses[status.category] = [];
           }
-          statuses[status.category].push({ status: translate(status.status), nb: status.value, percentage: Math.round(status.percentage * 100) });
+          let url = '/volontaire?STATUS=%5B"VALIDATED"%5D';
+          switch (status.category) {
+            case "phase2":
+              url += `&APPLICATION_STATUS=%5B"${encodeURIComponent(status.status)}"%5D`;
+              break;
+            case "contract":
+              url += `&CONTRACT_STATUS=%5B"${encodeURIComponent(status.status)}"%5D`;
+              break;
+            case "equivalence":
+              url += `&EQUIVALENCE_STATUS=%5B"${encodeURIComponent(status.status)}"%5D`;
+          }
+
+          statuses[status.category].push({
+            status: status.category === "phase2" ? translateApplication(status.status) : translate(status.status),
+            nb: status.value,
+            percentage: Math.round(status.percentage * 100),
+            url,
+          });
         }
         setStatuses(statuses);
       } else {

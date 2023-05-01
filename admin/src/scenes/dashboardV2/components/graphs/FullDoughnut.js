@@ -260,7 +260,8 @@ export default function FullDoughnut({
     },
   };
 
-  function clickOnLegend({ index, label, value, color, url }) {
+  function clickOnLegend({ event, index, label, value, color, url }) {
+    event.stopPropagation();
     if (url) {
       window.open(url, "_blank");
     } else {
@@ -284,7 +285,7 @@ export default function FullDoughnut({
             <div
               className={legendClass}
               key={legend.name + idx}
-              onClick={() => clickOnLegend({ index: idx, label: legend.name, value: legend.value, color: legend.color, url: legend.url })}>
+              onClick={(event) => clickOnLegend({ event, index: idx, label: legend.name, value: legend.value, color: legend.color, url: legend.url })}>
               <div className={`mb-[4px] max-w-[250px] text-xs text-gray-600 ${textLegendClass}`}>{legend.name}</div>
               <div className={legendValueClass}>
                 <div className={`h-[10px] w-[10px] rounded-full ${legendDotClass}`} style={{ backgroundColor: legend.color }}></div>

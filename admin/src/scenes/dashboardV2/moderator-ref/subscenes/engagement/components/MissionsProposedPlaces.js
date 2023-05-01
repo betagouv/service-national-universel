@@ -3,13 +3,16 @@ import { DemiDoughnut } from "../../../../components/graphs";
 import Loader from "../../../../../../components/Loader";
 import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
+import { computeMissionUrl } from "../../../../components/common";
 
 export default function MissionsProposedPlaces({ filters, missionFilters, className = "" }) {
   const [graph, setGraph] = useState(null);
   const [error, setError] = useState(null);
+  const [url, setUrl] = useState(null);
 
   useEffect(() => {
     loadData();
+    setUrl(computeMissionUrl(filters, missionFilters));
   }, [filters, missionFilters]);
 
   async function loadData() {
@@ -33,7 +36,7 @@ export default function MissionsProposedPlaces({ filters, missionFilters, classN
   }
 
   return (
-    <DashboardBox title="Places proposées" className={`!pb-0 ${className}`}>
+    <DashboardBox title="Places proposées" className={`!pb-0 ${className}`} to={url}>
       {error ? (
         <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : graph === null ? (

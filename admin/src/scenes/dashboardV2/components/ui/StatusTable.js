@@ -16,7 +16,7 @@ export default function StatusTable({ statuses, className = "", onStatusClicked 
     <div className={`flex ${className}`}>
       <div className="flex w-[45%] flex-col gap-4">
         {columns.left.map((column) => (
-          <StatusText status={column.status} nb={column.nb} percentage={column.percentage} key={column.status} infoPanel={column.info} onClick={onStatusClicked} />
+          <StatusText status={column.status} nb={column.nb} percentage={column.percentage} key={column.status} infoPanel={column.info} url={column.url} onClick={onStatusClicked} />
         ))}
       </div>
       <div className="flex w-[10%] items-center justify-center">
@@ -24,7 +24,7 @@ export default function StatusTable({ statuses, className = "", onStatusClicked 
       </div>
       <div className="flex w-[45%] flex-col gap-4">
         {columns.right.map((column) => (
-          <StatusText status={column.status} nb={column.nb} percentage={column.percentage} key={column.status} infoPanel={column.info} onClick={onStatusClicked} />
+          <StatusText status={column.status} nb={column.nb} percentage={column.percentage} key={column.status} infoPanel={column.info} url={column.url} onClick={onStatusClicked} />
         ))}
       </div>
     </div>

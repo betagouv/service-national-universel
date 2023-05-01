@@ -31,7 +31,7 @@ export default function VolontairesStatutsDePhase({ filters, className = "" }) {
         for (const data of result.data) {
           labels.push(translate(data._id));
           values.push(data.count);
-          legendUrls.push(`http://localhost:8082/volontaire?STATUS=%5B"VALIDATED"%5D&STATUS_PHASE_${phase}=%5B"${encodeURIComponent(data._id)}"%5D`);
+          legendUrls.push(`/volontaire?STATUS=%5B"VALIDATED"%5D&STATUS_PHASE_${phase}=%5B"${encodeURIComponent(data._id)}"%5D`);
         }
         setGraph({ values, labels, legendUrls });
       } else {

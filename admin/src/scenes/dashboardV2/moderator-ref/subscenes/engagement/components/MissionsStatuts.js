@@ -10,6 +10,7 @@ import ExportComponent from "../../../../../../components/ExportXlsx";
 import plausibleEvent from "../../../../../../services/plausible";
 import { ReactiveBase } from "@appbaseio/reactivesearch";
 import { ES_NO_LIMIT } from "../../../../../../utils";
+import { computeMissionUrl } from "../../../../components/common";
 
 export default function MissionsStatuts({ filters, missionFilters, className = "" }) {
   const [loading, setLoading] = useState(true);
@@ -40,6 +41,7 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
                   labels={["occupées", "disponibles"]}
                 />
               ),
+              url: computeMissionUrl(filters, missionFilters, { STATUS: status.status }),
             };
           }),
         );
