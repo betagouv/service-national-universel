@@ -333,6 +333,12 @@ export default function Settings() {
                       value={data.sessionEditionOpenForReferentDepartment}
                       onChange={() => setData({ ...data, sessionEditionOpenForReferentDepartment: !data.sessionEditionOpenForReferentDepartment })}
                     />
+                    <SimpleToggle
+                      label="Transporteurs"
+                      disabled={isLoading || readOnly}
+                      value={data.sessionEditionOpenForTransporter}
+                      onChange={() => setData({ ...data, sessionEditionOpenForTransporter: !data.sessionEditionOpenForTransporter })}
+                    />
                   </div>
 
                   <div className="flex flex-col gap-3">
@@ -356,6 +362,12 @@ export default function Settings() {
                       disabled={isLoading || readOnly}
                       value={data.pdrEditionOpenForReferentDepartment}
                       onChange={() => setData({ ...data, pdrEditionOpenForReferentDepartment: !data.pdrEditionOpenForReferentDepartment })}
+                    />
+                    <SimpleToggle
+                      label="Transporteurs"
+                      disabled={isLoading || readOnly}
+                      value={data.pdrEditionOpenForTransporter}
+                      onChange={() => setData({ ...data, pdrEditionOpenForTransporter: !data.pdrEditionOpenForTransporter })}
                     />
                   </div>
                 </div>
