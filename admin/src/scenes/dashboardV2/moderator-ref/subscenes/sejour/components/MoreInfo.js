@@ -15,10 +15,10 @@ export default function MoreInfo({ typology, domains, filter }) {
           maxLegends={4}
           tooltipsPercent={true}
           legendUrls={[
-            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["&typology=PUBLIC_ETAT"] }, "center"),
-            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["&typology=PUBLIC_COLLECTIVITE"] }, "center"),
-            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["&typology=PRIVE_ASSOCIATION"] }, "center"),
-            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["&typology=PRIVE_AUTRE"] }, "center"),
+            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["typology=PUBLIC_ETAT"] }, "center"),
+            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["typology=PUBLIC_COLLECTIVITE"] }, "center"),
+            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["typology=PRIVE_ASSOCIATION"] }, "center"),
+            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["typology=PRIVE_AUTRE"] }, "center"),
           ]}
         />
         <FullDoughnut
@@ -29,10 +29,10 @@ export default function MoreInfo({ typology, domains, filter }) {
           maxLegends={4}
           tooltipsPercent={true}
           legendUrls={[
-            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["&domain=ETABLISSEMENT"] }, "center"),
-            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["&domain=FORMATION"] }, "center"),
-            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["&domain=VACANCES"] }, "center"),
-            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["&domain=AUTRE"] }, "center"),
+            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["domain=ETABLISSEMENT"] }, "center"),
+            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["domain=FORMATION"] }, "center"),
+            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["domain=VACANCES"] }, "center"),
+            getNewLink({ base: "/centre/liste/liste-centre", filter: filter, filtersUrl: ["domain=AUTRE"] }, "center"),
           ]}
         />
       </div>

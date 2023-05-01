@@ -17,9 +17,9 @@ export default function Presences({ presence, JDM, depart, departTotal, departMo
           maxLegends={3}
           tooltipsPercent={true}
           legendUrls={[
-            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['5D=&COHESION_PRESENCE=%5B"true"%5D'] }),
-            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['5D=&COHESION_PRESENCE=%5B"false"%5D'] }),
-            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['5D=&COHESION_PRESENCE=%5B"Non+renseigné"%5D'] }),
+            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['COHESION_PRESENCE=%5B"true"%5D'] }),
+            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['COHESION_PRESENCE=%5B"false"%5D'] }),
+            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['COHESION_PRESENCE=%5B"Non+renseigné"%5D'] }),
           ]}
         />
         <div className="flex items-center justify-center">
@@ -33,9 +33,9 @@ export default function Presences({ presence, JDM, depart, departTotal, departMo
           maxLegends={3}
           tooltipsPercent={true}
           legendUrls={[
-            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['5D&COHESION_JDM=%5B"true"%5D'] }),
-            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['5D&COHESION_JDM=%5B"false"%5D'] }),
-            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['5D&COHESION_JDM=%5B"Non+renseigné"%5D'] }),
+            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['COHESION_JDM=%5B"true"%5D'] }),
+            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['COHESION_JDM=%5B"false"%5D'] }),
+            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['COHESION_JDM=%5B"Non+renseigné"%5D'] }),
           ]}
         />
         <div className="flex items-center justify-center">

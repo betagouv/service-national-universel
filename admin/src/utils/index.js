@@ -179,14 +179,23 @@ export const getLink = ({ base = "/", filter, filtersUrl = [] }) => {
   return res;
 };
 
-export const replaceSpaces2 = (v) => v?.replace(/\s+/g, "%20");
+export const replaceSpacesNewList = (v) => v?.replace(/\s+/g, "%20");
+
 export const getNewLink = ({ base = "/", filter, filtersUrl = [] }, from) => {
+  Object.keys(filter).forEach((key) => {
+    if (key === "cohorts" && from === "center") return;
+    if (key === "cohort" && from === "session") return;
+    if (filter[key]?.length) {
+      filtersUrl.push(`${key}=${replaceSpacesNewList(filter[key]?.map((c) => `${c}`)?.join(","))}`);
+    }
+  });
   if (filter?.cohorts?.length && from === "center") {
-    filtersUrl.push(`cohorts=${replaceSpaces2(filter?.cohorts?.map((c) => `${c}`)?.join(","))}`);
+    filtersUrl.push(`cohorts=${replaceSpacesNewList(filter?.cohorts?.map((c) => `${c}`)?.join(","))}`);
   }
   if (filter?.cohorts?.length && from === "session") {
-    filtersUrl.push(`cohort=${replaceSpaces2(filter?.cohorts?.map((c) => `${c}`)?.join(","))}`);
+    filtersUrl.push(`cohort=${replaceSpacesNewList(filter?.cohorts?.map((c) => `${c}`)?.join(","))}`);
   }
+
   let res = base;
   if (filtersUrl?.length) res += `?${filtersUrl.join("&")}`;
   return res;
