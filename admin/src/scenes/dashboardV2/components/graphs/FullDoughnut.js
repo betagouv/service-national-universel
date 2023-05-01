@@ -277,6 +277,10 @@ export default function FullDoughnut({
     );
   };
 
+  function stopPropagation(event) {
+    event.stopPropagation();
+  }
+
   return (
     <div className={`${mainClass} ${className}`}>
       <div className={`relative ${graphClass}`}>
@@ -287,7 +291,7 @@ export default function FullDoughnut({
         </div>
         {tooltip && <GraphTooltip style={tooltip.style}>{tooltip.value}</GraphTooltip>}
       </div>
-      <div className={legendsClass}>
+      <div className={legendsClass} onClick={(event) => stopPropagation(event)}>
         {legends.map((legend, idx) => {
           return legend ? (
             legend?.url ? (
