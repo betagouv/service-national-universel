@@ -3,6 +3,7 @@ import { Doughnut } from "react-chartjs-2";
 import { getGraphColors } from "./graph-commons";
 import GraphTooltip from "./GraphTooltip";
 import MoreInfoPanel from "../ui/MoreInformationPanel";
+import { Link } from "react-router-dom";
 
 export default function FullDoughnut({
   title,
@@ -260,14 +261,21 @@ export default function FullDoughnut({
     },
   };
 
-  function clickOnLegend({ event, index, label, value, color, url }) {
-    event.stopPropagation();
-    if (url) {
-      window.open(url, "_blank");
-    } else {
-      onLegendClicked(index, label, value, color);
-    }
-  }
+  const LegendContent = ({ name, value, color, info }) => {
+    return (
+      <>
+        <div className={`mb-[4px] text-xs text-gray-600 ${textLegendClass}`}>{name}</div>
+        <div className={legendValueClass}>
+          <div className={`h-[10px] w-[10px] rounded-full ${legendDotClass}`} style={{ backgroundColor: color }}></div>
+          <div className="text-lg font-medium text-gray-900">
+            {value}
+            {valueSuffix}
+          </div>
+          {info && <MoreInfoPanel>{info}</MoreInfoPanel>}
+        </div>
+      </>
+    );
+  };
 
   return (
     <div className={`${mainClass} ${className}`}>
@@ -282,20 +290,15 @@ export default function FullDoughnut({
       <div className={legendsClass}>
         {legends.map((legend, idx) => {
           return legend ? (
-            <div
-              className={legendClass}
-              key={legend.name + idx}
-              onClick={(event) => clickOnLegend({ event, index: idx, label: legend.name, value: legend.value, color: legend.color, url: legend.url })}>
-              <div className={`mb-[4px] max-w-[250px] text-xs text-gray-600 ${textLegendClass}`}>{legend.name}</div>
-              <div className={legendValueClass}>
-                <div className={`h-[10px] w-[10px] rounded-full ${legendDotClass}`} style={{ backgroundColor: legend.color }}></div>
-                <div className="text-lg font-medium text-gray-900">
-                  {legend.value}
-                  {valueSuffix}
-                </div>
-                {legend.info && <MoreInfoPanel>{legend.info}</MoreInfoPanel>}
+            legend?.url ? (
+              <Link to={legend.url} target={"_blank"} className="legendClass">
+                <LegendContent name={legend.name} value={legend.value} color={legend.color} info={legend.info} />
+              </Link>
+            ) : (
+              <div className={legendClass} key={legend.name} onClick={() => onLegendClicked(idx, legend.name, legend.value, legend.color)}>
+                <LegendContent name={legend.name} value={legend.value} color={legend.color} info={legend.info} />
               </div>
-            </div>
+            )
           ) : (
             <div></div>
           );
