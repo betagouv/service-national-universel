@@ -302,12 +302,13 @@ export default function Inscription() {
                   placeholder="Rechercher une inscription..."
                   componentId="SEARCH"
                   dataField={["email.keyword", "firstName.folded", "lastName.folded", "phone"]}
-                  react={{ and: FILTERS }}
+                  react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                   // fuzziness={2}
                   style={{ flex: 1, marginRight: "1rem" }}
                   innerClass={{ input: "searchbox" }}
                   URLParams={true}
                   autosuggest={false}
+                  queryFormat="and"
                 />
                 <HiAdjustments onClick={handleShowFilter} className="cursor-pointer text-xl text-coolGray-700 hover:scale-105" />
               </FilterRow>
