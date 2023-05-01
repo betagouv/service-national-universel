@@ -48,8 +48,8 @@ export default function StepUpload() {
   }
 
   function resetState() {
-    setRecto([]);
-    setVerso([]);
+    setRecto();
+    setVerso();
     setHasChanged(false);
     setLoading(false);
   }

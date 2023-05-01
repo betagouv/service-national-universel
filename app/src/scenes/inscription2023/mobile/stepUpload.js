@@ -32,8 +32,8 @@ export default function StepUpload() {
   const [loading, setLoading] = useState(false);
   const [hasChanged, setHasChanged] = useState(false);
   const [error, setError] = useState({});
-  const [recto, setRecto] = useState([]);
-  const [verso, setVerso] = useState([]);
+  const [recto, setRecto] = useState();
+  const [verso, setVerso] = useState();
   const [checked, setChecked] = useState({
     "Toutes les informations sont lisibles": false,
     "Le document n'est pas coupé": false,
@@ -62,8 +62,8 @@ export default function StepUpload() {
   }
 
   function resetState() {
-    setRecto([]);
-    setVerso([]);
+    setRecto();
+    setVerso();
     setStep(getStep());
     setLoading(false);
   }
@@ -144,9 +144,7 @@ export default function StepUpload() {
     }
   }
 
-  const isEnabled = corrections?.length
-    ? hasChanged && !loading && !error.text
-    : (young?.files?.cniFiles?.length || [...recto, ...verso].length) && date && !loading && !error.text;
+  const isEnabled = corrections?.length ? hasChanged && !loading && !error.text : (young?.files?.cniFiles?.length || recto || verso) && date && !loading && !error.text;
 
   return (
     <>
