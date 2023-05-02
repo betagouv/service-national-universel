@@ -57,6 +57,7 @@
     "autoprefixer": "^10.4.13",
     "babel-loader": "8.3.0",
     "bootstrap": "4.6.1",
+    "browser-image-resizer": "^2.4.1",
     "core-js": "3.26.0",
     "dayjs": "1.11.6",
     "express": "4.18.2",

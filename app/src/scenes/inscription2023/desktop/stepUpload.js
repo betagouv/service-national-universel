@@ -15,6 +15,7 @@ import plausibleEvent from "../../../services/plausible";
 import ErrorMessage from "../components/ErrorMessage";
 import MyDocs from "../components/MyDocs";
 import dayjs from "dayjs";
+import { resizeImage } from "../../../services/image.service";
 
 export default function StepUpload() {
   let { category } = useParams();
@@ -25,8 +26,8 @@ export default function StepUpload() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const [hasChanged, setHasChanged] = useState(false);
-  const [recto, setRecto] = useState([]);
-  const [verso, setVerso] = useState([]);
+  const [recto, setRecto] = useState();
+  const [verso, setVerso] = useState();
   const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
   const corrections = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
   const filesCount = getFilesCount();
@@ -65,8 +66,10 @@ export default function StepUpload() {
       return { ok: false };
     }
 
+    const formattedDate = dayjs(date).locale("fr").format("YYYY-MM-DD");
+
     if (recto) {
-      const res = await api.uploadID(`/young/${young._id}/documents/cniFiles`, recto, category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
+      const res = await api.uploadID(`/young/${young._id}/documents/cniFiles`, recto, category, formattedDate);
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -76,7 +79,7 @@ export default function StepUpload() {
     }
 
     if (verso) {
-      const res = await api.uploadID(`/young/${young._id}/documents/cniFiles`, verso, category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
+      const res = await api.uploadID(`/young/${young._id}/documents/cniFiles`, verso, category, formattedDate);
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -170,15 +173,25 @@ export default function StepUpload() {
         document doit être téléversé en <strong>recto</strong> et <strong>verso</strong>.
       </div>
 
-      <hr className="my-8 h-px bg-gray-200 border-0" />
+      <hr className="my-8 h-px border-0 bg-gray-200" />
 
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
 
-      <AddRecto recto={recto} setRecto={setRecto} setError={setError} setHasChanged={setHasChanged} />
+      <p className="my-4">
+        Ajouter <strong>le recto</strong>
+      </p>
+      <AddFile id="recto" file={recto} setFile={setRecto} setError={setError} setHasChanged={setHasChanged} />
 
-      {category !== "passport" && <AddVerso verso={verso} setVerso={setVerso} setError={setError} setHasChanged={setHasChanged} />}
+      {category !== "passport" && (
+        <>
+          <p className="my-4">
+            Ajouter <strong>le verso</strong>
+          </p>
+          <AddFile id="verso" file={verso} setFile={setVerso} setError={setError} setHasChanged={setHasChanged} />
+        </>
+      )}
 
-      <div className="text-gray-800 text-sm my-4">
+      <div className="my-4 text-sm text-gray-800">
         Vous avez besoin d’aide pour téléverser les documents ?{" "}
         <a href="https://support.snu.gouv.fr/base-de-connaissance/je-televerse-un-document/" className="underline">
           Cliquez ici
@@ -195,64 +208,28 @@ export default function StepUpload() {
   );
 }
 
-function AddRecto({ recto, setRecto, setError, setHasChanged }) {
-  function handleChange(e) {
-    if (e.target.files[0].size > 1000000) {
-      setError({ text: `Le fichier ${e.target.files[0].name} est trop volumineux.` });
-      return;
-    }
+function AddFile({ id, file, setFile, setError, setHasChanged }) {
+  async function handleChange(e) {
+    const image = await resizeImage(e.target.files[0]);
 
-    setRecto(e.target.files[0]);
+    if (image.size > 1000000) return setError({ text: `Le fichier ${e.target.files[0].name} est trop volumineux.` });
+
+    setFile(image);
     setError({});
     setHasChanged(true);
   }
 
   return (
     <>
-      <p className="my-4">
-        Ajouter <strong>le recto</strong>
-      </p>
-      <div className="text-gray-500 text-sm my-4">Taille maximale : 1 Mo. Formats supportés : jpg, png, pdf.</div>
-      <input type="file" id="file-upload-recto" name="file-upload-recto" accept=".png, .jpg, .jpeg, .pdf" onChange={handleChange} className="hidden" />
+      <div className="my-4 text-sm text-gray-500">Taille maximale : 1 Mo. Formats supportés : jpg, png, pdf.</div>
+      <input type="file" id={`file-upload-${id}`} name={`file-upload-${id}`} accept=".png, .jpg, .jpeg, .pdf" onChange={handleChange} className="hidden" />
       <div className="my-4 flex w-full">
         <div>
-          <label htmlFor="file-upload-recto" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
+          <label htmlFor={`file-upload-${id}`} className="cursor-pointer rounded bg-[#EEEEEE] py-2 px-3 text-sm text-gray-600">
             Parcourir...
           </label>
         </div>
-        {recto ? <p className="text-gray-800 text-sm ml-4 mt-2">{recto.name}</p> : <p className="text-sm text-gray-800 ml-4 mt-2">Aucun fichier sélectionné.</p>}
-      </div>
-    </>
-  );
-}
-
-function AddVerso({ verso, setVerso, setError, setHasChanged }) {
-  function handleChange(e) {
-    if (e.target.files[0].size > 1000000) {
-      setError({ text: `Ce fichier ${e.target.name} est trop volumineux.` });
-      return;
-    }
-    setVerso(e.target.files[0]);
-    setError({});
-    setHasChanged(true);
-  }
-
-  return (
-    <>
-      <hr className="my-8 h-px bg-gray-200 border-0" />
-
-      <p className="my-4">
-        Ajouter <strong>le verso</strong>
-      </p>
-      <div className="text-gray-500 text-sm my-4">Taille maximale : 1 Mo. Formats supportés : jpg, png, pdf.</div>
-      <input type="file" id="file-upload-verso" name="file-upload-verso" accept=".png, .jpg, .jpeg, .pdf" onChange={handleChange} className="hidden" />
-      <div className="flex w-full my-4">
-        <div>
-          <label htmlFor="file-upload-verso" className="cursor-pointer bg-[#EEEEEE] text-sm py-2 px-3 rounded text-gray-600">
-            Parcourir...
-          </label>
-        </div>
-        {verso ? <p className="text-gray-800 text-sm ml-4 mt-2">{verso.name}</p> : <div className="text-gray-800 text-sm ml-4 mt-2">Aucun fichier sélectionné.</div>}
+        {file ? <p className="ml-4 mt-2 text-sm text-gray-800">{file.name}</p> : <p className="ml-4 mt-2 text-sm text-gray-800">Aucun fichier sélectionné.</p>}
       </div>
     </>
   );
