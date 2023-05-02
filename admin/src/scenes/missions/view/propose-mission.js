@@ -90,9 +90,9 @@ const SearchBox = ({ getDefaultQuery, setSearch }) => {
           <p>Nom, prénom ou bien e-mail</p>
         </SearchStyle>
       </div>
-      <div className="flex rounded-xl mt-4 bg-gray-50 p-4 items-center">
+      <div className="mt-4 flex items-center rounded-xl bg-gray-50 p-4">
         <FilterRow visible>
-          <div className="uppercase text-sm text-gray-500">Filtres :</div>
+          <div className="text-sm uppercase text-gray-500">Filtres :</div>
           <MultiDropdownList
             defaultQuery={getDefaultQuery}
             className="dropdown-filter"

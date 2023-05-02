@@ -147,7 +147,7 @@ export default function Historic() {
 
   const exportButton =
     user.role === ROLES.ADMIN ? (
-      <button className="flex gap-2 items-center text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm" onClick={exportHistoric}>
+      <button className="text-grey-700 flex h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium" onClick={exportHistoric}>
         <BsDownload className="text-gray-400" />
         {exporting ? <Loader size="20px" /> : "Exporter"}
       </button>
@@ -157,7 +157,7 @@ export default function Historic() {
     <>
       <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${cohort}` }, { label: "Historique du plan de transport" }]} />
       <div className="w-full px-8 pt-3 pb-4">
-        <div className="flex pb-6 items-center justify-between">
+        <div className="flex items-center justify-between pb-6">
           <Title>Historique du plan de transport</Title>
           <Select
             options={cohortList}

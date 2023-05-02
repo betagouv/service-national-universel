@@ -14,14 +14,14 @@ export default function GroupYoungVolumeEditor({ value, className = "", onChange
   }
 
   return (
-    <div className={`border-y-[#E5E7EB] border-y p-[19px] flex items-center justify-between ${className}`}>
+    <div className={`flex items-center justify-between border-y border-y-[#E5E7EB] p-[19px] ${className}`}>
       <div className="grow">
-        <div className="text-[15px] text-[#1F2937] leading-[18px] font-bold mb-[4px]">Modifier le nombre de volontaires</div>
-        <div className="text-[14px] text-[#4B5563] leading-[17px]">{availableVolume + (availableVolume > 1 ? " volontaires disponibles" : " volontaire disponible")}</div>
+        <div className="mb-[4px] text-[15px] font-bold leading-[18px] text-[#1F2937]">Modifier le nombre de volontaires</div>
+        <div className="text-[14px] leading-[17px] text-[#4B5563]">{availableVolume + (availableVolume > 1 ? " volontaires disponibles" : " volontaire disponible")}</div>
       </div>
       <div className="flex">
         <div
-          className="bg-[#E5E7EB] w-[38px] h-[38px] rounded-[8px] text-[#374151] flex items-center justify-center cursor-pointer select-none hover:bg-[#374151] hover:text-[#E5E7EB]"
+          className="flex h-[38px] w-[38px] cursor-pointer select-none items-center justify-center rounded-[8px] bg-[#E5E7EB] text-[#374151] hover:bg-[#374151] hover:text-[#E5E7EB]"
           onClick={decrement}>
           <Minus />
         </div>
@@ -30,10 +30,10 @@ export default function GroupYoungVolumeEditor({ value, className = "", onChange
           value={value}
           onChange={(e) => onChange && onChange(e.target.value)}
           min={1}
-          className="appearance-none bg-[#FFFFFF] border-[#E5E7EB] border-[1px] rounded-[8px] mx-[8px] text-[#19181A] text-[14px] w-[70px] px-[16px]"
+          className="mx-[8px] w-[70px] appearance-none rounded-[8px] border-[1px] border-[#E5E7EB] bg-[#FFFFFF] px-[16px] text-[14px] text-[#19181A]"
         />
         <div
-          className="bg-[#E5E7EB] w-[38px] h-[38px] rounded-[8px] text-[#374151] flex items-center justify-center cursor-pointer select-none hover:bg-[#374151] hover:text-[#E5E7EB]"
+          className="flex h-[38px] w-[38px] cursor-pointer select-none items-center justify-center rounded-[8px] bg-[#E5E7EB] text-[#374151] hover:bg-[#374151] hover:text-[#E5E7EB]"
           onClick={increment}>
           <Plus />
         </div>

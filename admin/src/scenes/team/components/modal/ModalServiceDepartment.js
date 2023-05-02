@@ -29,10 +29,10 @@ export default function ModalServiceDepartment({ isOpen, setIsOpen, onSubmit, se
     <ModalForm isOpen={isOpen} headerText={`Service départemental ${servicesDep.department}`} onCancel={onCancel} classNameModal="max-w-3xl">
       <form className="w-full" onSubmit={handleSubmit}>
         <div className="flex flex-col items-center justify-center p-8 ">
-          <div className="w-full flex flex-row  justify-center ">
-            <div className="w-full flex flex-col m-2">
-              <div className={`border-[1px] rounded-lg w-full m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                <label htmlFor="directionName" className="text-left text-gray-500 w-full">
+          <div className="flex w-full flex-row  justify-center ">
+            <div className="m-2 flex w-full flex-col">
+              <div className={`m-2 w-full rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                <label htmlFor="directionName" className="w-full text-left text-gray-500">
                   <span className="text-red-400">*</span>&nbsp;Nom de la Direction
                 </label>
                 <input
@@ -46,8 +46,8 @@ export default function ModalServiceDepartment({ isOpen, setIsOpen, onSubmit, se
                 />
               </div>
 
-              <div className={`border-[1px] rounded-lg w-full m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                <label htmlFor="complementAddress" className="text-left text-gray-500 w-full">
+              <div className={`m-2 w-full rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                <label htmlFor="complementAddress" className="w-full text-left text-gray-500">
                   Complément d’adresse
                 </label>
                 <input
@@ -60,23 +60,23 @@ export default function ModalServiceDepartment({ isOpen, setIsOpen, onSubmit, se
                 />
               </div>
 
-              <div className={`border-[1px] rounded-lg w-full m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                <label htmlFor="city" className="text-left text-gray-500 w-full">
+              <div className={`m-2 w-full rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                <label htmlFor="city" className="w-full text-left text-gray-500">
                   <span className="text-red-400">*</span>&nbsp;Ville
                 </label>
                 <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="city" id="city" onChange={handleChange} value={data.city} />
               </div>
             </div>
-            <div className="w-full flex flex-col m-2">
-              <div className={`border-[1px] rounded-lg w-full m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                <label htmlFor="address" className="text-left text-gray-500 w-full">
+            <div className="m-2 flex w-full flex-col">
+              <div className={`m-2 w-full rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                <label htmlFor="address" className="w-full text-left text-gray-500">
                   <span className="text-red-400">*</span>&nbsp;Adresse
                 </label>
                 <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="address" id="address" onChange={handleChange} value={data.address} />
               </div>
 
-              <div className={`border-[1px] rounded-lg w-full m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                <label htmlFor="zip" className="text-left text-gray-500 w-full">
+              <div className={`m-2 w-full rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                <label htmlFor="zip" className="w-full text-left text-gray-500">
                   <span className="text-red-400">*</span>&nbsp;Code postal
                 </label>
                 <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="zip" id="zip" onChange={handleChange} value={data.zip} />

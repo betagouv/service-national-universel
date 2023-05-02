@@ -24,7 +24,7 @@ export default function InfoDepartement({ department }) {
   if (!servicesDep) return null;
 
   return (
-    <div className="flex flex-row flex-stretch flex-wrap gap-y-4">
+    <div className="flex-stretch flex flex-row flex-wrap gap-y-4">
       {department ? <CardServiceDepartemental servicesDep={servicesDep} department={department} getService={getService} /> : null}
       {department ? <CardRepresentant representant={representant} getService={getService} department={department} idServiceDep={servicesDep._id} /> : null}
       {contacts ? <CardContacts contacts={contacts} idServiceDep={servicesDep._id} getService={getService} /> : null}

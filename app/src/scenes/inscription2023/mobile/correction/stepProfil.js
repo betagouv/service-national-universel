@@ -90,13 +90,13 @@ export default function StepProfil() {
   return (
     <>
       <div className="bg-white px-4 pt-4 pb-12">
-        <div className="w-full flex justify-between items-center">
+        <div className="flex w-full items-center justify-between">
           <h1 className="text-xl text-[#161616]">Mon profil</h1>
           <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
           </a>
         </div>
-        <hr className="my-4 h-px bg-gray-200 border-0" />
+        <hr className="my-4 h-px border-0 bg-gray-200" />
         <div className="flex flex-col">
           <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} label="Prénom" error={error.firstName} correction={corrections.firstName} />
           <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} label="Nom" error={error.lastName} correction={corrections.lastName} />

@@ -5,9 +5,9 @@ const RadioButton = ({ options, label, description = "", onChange, value: curren
   return (
     <div className="mt-2 mb-6">
       <label className={`mb-2 ${correction || error ? "text-[#CE0500]" : "text-[#666666]"}`}>
-        {label} <span className="text-[#666666] text-[14px] leading-tight"> {description}</span>
+        {label} <span className="text-[14px] leading-tight text-[#666666]"> {description}</span>
       </label>
-      <div className={`flex flex-col lg:flex-row ${(correction || error) && "pl-2 border-l-2 border-l-[#CE0500]"}`}>
+      <div className={`flex flex-col lg:flex-row ${(correction || error) && "border-l-2 border-l-[#CE0500] pl-2"}`}>
         {options.map(({ label, value }) => (
           <Option key={value} label={label} value={value === currentValue} onChange={() => onChange(value)} />
         ))}
@@ -23,8 +23,8 @@ const separatorDesktop = "lg:after:border lg:last-of-type:after:border-none lg:a
 
 const Option = ({ label, value, onChange }) => {
   return (
-    <label className={`cursor-pointer mb-0 ${styleDesktop} ${separatorDesktop}`}>
-      <input className="cursor-pointer mr-3 accent-[#000091] border-dashed hover:scale-105" type="radio" checked={value} onChange={onChange} />
+    <label className={`mb-0 cursor-pointer ${styleDesktop} ${separatorDesktop}`}>
+      <input className="mr-3 cursor-pointer border-dashed accent-[#000091] hover:scale-105" type="radio" checked={value} onChange={onChange} />
       {label}
     </label>
   );

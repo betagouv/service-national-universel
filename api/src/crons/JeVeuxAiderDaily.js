@@ -16,7 +16,8 @@ const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
 
 const { ROLES, departmentLookUp, department2region, MISSION_DOMAINS, MISSION_STATUS } = require("snu-lib");
-const { updateApplicationStatus, updateApplicationTutor } = require("../utils/index.js");
+const { updateApplicationStatus, updateApplicationTutor } = require("../services/application");
+const { getTutorName } = require("../services/mission");
 
 let startTime = new Date();
 
@@ -206,7 +207,7 @@ const sync = async (result) => {
         structureName: structure.name,
         status: MISSION_STATUS.WAITING_VALIDATION,
         tutorId: referentMission.id,
-        tutorName: `${referentMission.firstName} ${referentMission.lastName}`,
+        tutorName: getTutorName(referentMission),
         zip: mission.address.zip,
         address: mission.address.address,
         city: mission.address.city,

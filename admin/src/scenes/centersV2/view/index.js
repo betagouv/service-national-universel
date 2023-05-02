@@ -103,7 +103,7 @@ export default function Index({ ...props }) {
       }
       if (allSessions.data.length === 0) setSessions([]);
       const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[0]?.cohort;
-      if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
+      if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)) {
         allSessions.data.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
         setSessions(allSessions.data);
         if (!blockFocus) setFocusedSession(allSessions.data.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
@@ -203,19 +203,19 @@ export default function Index({ ...props }) {
       <CenterInformations center={center} setCenter={setCenter} sessions={sessions} />
       {/* SESSION COMPONENT : */}
       {sessions.length > 0 ? (
-        <div className="bg-white rounded-lg mx-8 mb-8 overflow-hidden pt-2">
-          <div className="flex justify-between items-center border-bottom px-4">
-            <div className="flex justify-left items-center">
+        <div className="mx-8 mb-8 overflow-hidden rounded-lg bg-white pt-2">
+          <div className="border-bottom flex items-center justify-between px-4">
+            <div className="justify-left flex items-center">
               {(sessions || []).map((item, index) => (
                 <div
                   key={index}
-                  className={`py-3 px-2 mx-3 gap-2 flex items-center justify-center cursor-pointer  ${
-                    focusedSession?.cohort === item.cohort ? "text-blue-600 border-b-2  border-blue-600 " : null
+                  className={`mx-3 flex cursor-pointer items-center justify-center gap-2 py-3 px-2  ${
+                    focusedSession?.cohort === item.cohort ? "border-b-2 border-blue-600  text-blue-600 " : null
                   }`}
                   onClick={() => {
                     setFocusedSession(item);
                   }}>
-                  {sessions[index].status === "WAITING_VALIDATION" ? <ExclamationCircle className="w-5 h-5" fill="#2563eb" color="white" /> : null}
+                  {sessions[index].status === "WAITING_VALIDATION" ? <ExclamationCircle className="h-5 w-5" fill="#2563eb" color="white" /> : null}
                   {item.cohort}
                 </div>
               ))}
@@ -225,16 +225,16 @@ export default function Index({ ...props }) {
                 <>
                   {!editingBottom ? (
                     <button
-                      className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                       onClick={() => setEditingBottom(true)}
                       disabled={loading}>
-                      <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+                      <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
                       Modifier
                     </button>
                   ) : (
                     <div className="flex items-center gap-2">
                       <button
-                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                         onClick={() => {
                           setEditingBottom(false);
                           setEditInfoSession(focusedSession);
@@ -244,10 +244,10 @@ export default function Index({ ...props }) {
                         Annuler
                       </button>
                       <button
-                        className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                         onClick={onSubmitBottom}
                         disabled={loading}>
-                        <Pencil stroke="#2563EB" className="w-[12px] h-[12px] mr-[6px]" />
+                        <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                         Enregistrer les changements
                       </button>
                     </div>
@@ -272,26 +272,26 @@ export default function Index({ ...props }) {
                     handleSessionDelete={handleSessionDelete}
                   />
                   {/* // liste des volontaires */}
-                  <div className="flex flex-1 flex-col justify-between items-center bg-white max-w-xl gap-2 border-x-[1px] border-gray-200">
-                    <div className="flex flex-1 items-center justify-center border-b-[1px] border-gray-200 w-full">
-                      <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
+                  <div className="flex max-w-xl flex-1 flex-col items-center justify-between gap-2 border-x-[1px] border-gray-200 bg-white">
+                    <div className="flex w-full flex-1 items-center justify-center border-b-[1px] border-gray-200">
+                      <button className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
                         Voir les volontaires
                       </button>
                     </div>
                     <div className="flex flex-1 items-center justify-center">
-                      <button className="px-4 py-2 rounded-md text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/equipe`)}>
+                      <button className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/equipe`)}>
                         Voir l&apos;équipe
                       </button>
                     </div>
                   </div>
 
                   {/* // équipe */}
-                  <div className="flex gap-4 flex-1 min-w-1/4 flex-col justify-between items-center bg-white p-4 max-w-xl">
+                  <div className="flex min-w-1/4 max-w-xl flex-1 flex-col items-center justify-between gap-4 bg-white p-4">
                     <div className="w-64">
                       <Select
                         readOnly={!editingBottom || ROLES.ADMIN !== user.role}
                         label="Statut"
-                        icon={focusedSession.status === "WAITING_VALIDATION" ? <ExclamationCircle className="w-5 h-5 mr-2" fill="#2563eb" color="white" /> : null}
+                        icon={focusedSession.status === "WAITING_VALIDATION" ? <ExclamationCircle className="mr-2 h-5 w-5" fill="#2563eb" color="white" /> : null}
                         options={statusOptions}
                         setSelected={(e) => setEditInfoSession({ ...editInfoSession, status: e.value })}
                         selected={statusOptions.find((e) => e.value === editInfoSession.status)}
@@ -347,7 +347,7 @@ const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal, canBeDel
   if (occupationPercentage > 100) bgColor = "bg-red-500";
   if (isNaN(occupationPercentage)) return <></>;
   return occupationPercentage ? (
-    <div className="py-4 px-8 flex flex-1 flex-col items-center justify-center">
+    <div className="flex flex-1 flex-col items-center justify-center py-4 px-8">
       <ModalConfirmDelete
         isOpen={modalDelete.isOpen}
         title={modalDelete.title}
@@ -358,16 +358,16 @@ const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal, canBeDel
       <div className="flex items-center justify-center gap-4">
         {/* barre */}
         {Math.floor(occupationPercentage) === 0 ? (
-          <div className="flex flex-col justify-center items-center font-bold text-xs w-9 h-28 bg-gray-200 rounded-lg overflow-hidden">0%</div>
+          <div className="flex h-28 w-9 flex-col items-center justify-center overflow-hidden rounded-lg bg-gray-200 text-xs font-bold">0%</div>
         ) : (
-          <div className="flex flex-col justify-end w-9 h-28 bg-gray-200 rounded-lg overflow-hidden">
-            <div className={`flex justify-center items-center w-9 ${height} ${bgColor} rounded-lg text-white font-bold text-xs`}>{Math.floor(occupationPercentage)}%</div>
+          <div className="flex h-28 w-9 flex-col justify-end overflow-hidden rounded-lg bg-gray-200">
+            <div className={`flex w-9 items-center justify-center ${height} ${bgColor} rounded-lg text-xs font-bold text-white`}>{Math.floor(occupationPercentage)}%</div>
           </div>
         )}
 
         {/* nombres */}
         <div className="flex flex-col justify-around">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="mb-2 flex items-center gap-2">
             <div className="h-6 w-2 rounded-full bg-blue-800" />
             <div>
               <div className="text-xs font-normal">Places occupées</div>
@@ -394,7 +394,7 @@ const OccupationCard = ({ placesLeft, placesTotalModified, placesTotal, canBeDel
                 onDelete: handleSessionDelete,
               });
           }}
-          className={`w-full flex flex-row gap-2 mt-3 justify-end items-center ${canBeDeleted ? "cursor-pointer" : "cursor-default"}`}>
+          className={`mt-3 flex w-full flex-row items-center justify-end gap-2 ${canBeDeleted ? "cursor-pointer" : "cursor-default"}`}>
           <Trash className={`${canBeDeleted ? "text-red-400" : "text-gray-400"}`} width={14} height={14} />
           <div className={`${canBeDeleted ? "text-gray-800" : "text-gray-500"} text-xs`}>Supprimer le séjour</div>
         </div>

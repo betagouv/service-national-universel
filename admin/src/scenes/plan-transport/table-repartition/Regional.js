@@ -26,13 +26,13 @@ export default function Regional() {
   return (
     <>
       <Breadcrumbs items={[{ label: "Table de répartition", to: `/table-repartition${cohort && `?cohort=${cohort}`}` }, { label: region }]} />
-      <div className="flex flex-col w-full px-8 pb-8 ">
+      <div className="flex w-full flex-col px-8 pb-8 ">
         {/* HEADER */}
-        <div className="py-8 flex items-center justify-between">
+        <div className="flex items-center justify-between py-8">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <Title>Table de répartition </Title>
-              <div className="text-2xl text-gray-600 leading-7">{region}</div>
+              <div className="text-2xl leading-7 text-gray-600">{region}</div>
             </div>
             {user.role !== ROLES.REFERENT_DEPARTMENT && <SubTitle>Assignez les départements d&apos;accueil des volontaires de {region}</SubTitle>}
           </div>
@@ -43,14 +43,14 @@ export default function Regional() {
         <OutTable cohort={cohort} region={region} user={user} />
 
         {/* Reverse View */}
-        <div className="py-8 flex flex-col gap-2 items-center">
+        <div className="flex flex-col items-center gap-2 py-8">
           {/* TOGGLE REVERSE VIEW */}
-          <div className="text-lg font-medium text-gray-800 leading-7">
+          <div className="text-lg font-medium leading-7 text-gray-800">
             {openReverseView ? "Masquer" : "Voir"} les territoires accueillis en {region}
           </div>
-          <div className="p-2.5 shadow bg-white rounded-full">
+          <div className="rounded-full bg-white p-2.5 shadow">
             <BsChevronDown
-              className={`text-gray-700 font-bold h-4 w-4 cursor-pointer ${openReverseView ? "rotate-180" : ""}`}
+              className={`h-4 w-4 cursor-pointer font-bold text-gray-700 ${openReverseView ? "rotate-180" : ""}`}
               onClick={() => setOpenReverseView(!openReverseView)}
             />
           </div>

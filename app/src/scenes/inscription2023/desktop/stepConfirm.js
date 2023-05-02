@@ -62,35 +62,35 @@ export default function StepConfirm() {
 
   return (
     <>
-      <div className="bg-[#f9f6f2] flex justify-center py-10">
-        <div className="bg-white basis-[60%] mx-auto my-0 px-[102px] py-[60px]">
+      <div className="flex justify-center bg-[#f9f6f2] py-10">
+        <div className="mx-auto my-0 basis-[60%] bg-white px-[102px] py-[60px]">
           <div className="p-4 text-[#161616]">
             {error?.text && <Error {...error} onClose={() => setError({})} />}
             <div className="flex items-center justify-between">
-              <h1 className="text-[32px] font-bold mt-2 ">Vous y êtes presque...</h1>
+              <h1 className="mt-2 text-[32px] font-bold ">Vous y êtes presque...</h1>
               <a href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer">
-                <QuestionMark className="hover:scale-105 cursor-pointer" />
+                <QuestionMark className="cursor-pointer hover:scale-105" />
               </a>
             </div>
 
-            <div className="text-[#666666] text-sm mt-2">
+            <div className="mt-2 text-sm text-[#666666]">
               Vous êtes sur le point de soumettre votre dossier à l&apos;administration du SNU. Veuillez vérifier vos informations avant de valider votre demande
               d&apos;inscription.
             </div>
 
-            <hr className="my-4 h-px bg-gray-200 border-0" />
+            <hr className="my-4 h-px border-0 bg-gray-200" />
             <div className="flex items-center justify-between">
               <div className="flex flex-col gap-1">
-                <h1 className="text-lg font-bold mt-2 text-[#161616]">Séjour de cohésion :</h1>
+                <h1 className="mt-2 text-lg font-bold text-[#161616]">Séjour de cohésion :</h1>
                 <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(COHESION_STAY_LIMIT_DATE[young.cohort])}</div>
               </div>
-              <EditPen className="hover:scale-105 cursor-pointer" onClick={() => setModal({ isOpen: true })} />
+              <EditPen className="cursor-pointer hover:scale-105" onClick={() => setModal({ isOpen: true })} />
             </div>
-            <hr className="my-4 h-px bg-gray-200 border-0" />
+            <hr className="my-4 h-px border-0 bg-gray-200" />
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <h1 className="text-lg font-bold mt-2 text-[#161616]">Mon profil</h1>
-                <EditPen className="hover:scale-105 cursor-pointer" onClick={() => history.push("/inscription2023/coordonnee")} />
+                <h1 className="mt-2 text-lg font-bold text-[#161616]">Mon profil</h1>
+                <EditPen className="cursor-pointer hover:scale-105" onClick={() => history.push("/inscription2023/coordonnee")} />
               </div>
               <Details title="Pays de naissance" value={young.birthCountry} />
               <Details title="Département de naissance" value={young.birthCityZip} />
@@ -102,7 +102,7 @@ export default function StepConfirm() {
               <Details title="Ville" value={young.city} />
               {young.foreignAddress && (
                 <>
-                  <div className="text-[#666666] text-sm text-center">L&apos;adresse affichée ci-dessus est celle de votre hébergeur. Votre adresse à l&apos;étranger :</div>
+                  <div className="text-center text-sm text-[#666666]">L&apos;adresse affichée ci-dessus est celle de votre hébergeur. Votre adresse à l&apos;étranger :</div>
                   <Details title="Adresse à l'étranger" value={young.foreignAddress} />
                   <Details title="Code postal à l'étranger" value={young.foreignZip} />
                   <Details title="Ville à l'étranger" value={young.foreignCity} />
@@ -126,11 +126,11 @@ export default function StepConfirm() {
                 <Details title="Situation particulière" value="Non" />
               )}
             </div>
-            <hr className="my-5 h-px bg-gray-200 border-0" />
+            <hr className="my-5 h-px border-0 bg-gray-200" />
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <h1 className="text-lg font-bold mt-2 text-[#161616]">Mes représentants légaux</h1>
-                <EditPen className="hover:scale-105 cursor-pointer" onClick={() => history.push("/inscription2023/representants")} />
+                <h1 className="mt-2 text-lg font-bold text-[#161616]">Mes représentants légaux</h1>
+                <EditPen className="cursor-pointer hover:scale-105" onClick={() => history.push("/inscription2023/representants")} />
               </div>
               <Details title="Votre lien" value={translate(young.parent1Status)} />
               <Details title="Son prénom" value={young.parent1FirstName} />
@@ -139,7 +139,7 @@ export default function StepConfirm() {
               <Details title="Son téléphone" value={concatPhoneNumberWithZone(young.parent1Phone, young.parent1PhoneZone)} />
               {young.parent2Status ? (
                 <>
-                  <hr className="my-2 mx-10 h-px bg-gray-200 border-0" />
+                  <hr className="my-2 mx-10 h-px border-0 bg-gray-200" />
                   <Details title="Votre lien" value={translate(young.parent2Status)} />
                   <Details title="Son prénom" value={young.parent2FirstName} />
                   <Details title="Son nom" value={young.parent2LastName} />
@@ -148,18 +148,18 @@ export default function StepConfirm() {
                 </>
               ) : null}
             </div>
-            <hr className="my-5 h-px bg-gray-200 border-0" />
-            <div className="flex flex-col items-end w-full">
+            <hr className="my-5 h-px border-0 bg-gray-200" />
+            <div className="flex w-full flex-col items-end">
               <div className="flex justify-end space-x-4">
                 <div
-                  className="flex items-center justify-center py-2 px-4 text-[#000091] border-[1px] border-[#000091] hover:text-white hover:bg-[#000091] "
+                  className="flex items-center justify-center border-[1px] border-[#000091] py-2 px-4 text-[#000091] hover:bg-[#000091] hover:text-white "
                   onClick={() => history.push("/inscription2023/documents")}>
                   Précédent
                 </div>
                 <div>
                   <div
                     disabled={loading}
-                    className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:!text-[#000091] hover:bg-white hover:border hover:border-[#000091]  disabled:bg-[#E5E5E5] disabled:!text-[#929292] disabled:border-0 disabled:cursor-default"
+                    className="flex cursor-pointer items-center justify-center bg-[#000091] px-3 py-2 text-white hover:border hover:border-[#000091] hover:bg-white hover:!text-[#000091]  disabled:cursor-default disabled:border-0 disabled:bg-[#E5E5E5] disabled:!text-[#929292]"
                     onClick={() => !loading && onSubmit()}>
                     Valider mon inscription au SNU
                   </div>
@@ -184,8 +184,8 @@ const Details = ({ title, value }) => {
   if (!value) return null;
   return (
     <div className="flex items-center justify-between">
-      <div className="text-base text-[#666666] min-w-[90px] mr-4">{`${title} :`}</div>
-      <div className="text-base text-[#161616] text-right">{value}</div>
+      <div className="mr-4 min-w-[90px] text-base text-[#666666]">{`${title} :`}</div>
+      <div className="text-right text-base text-[#161616]">{value}</div>
     </div>
   );
 };

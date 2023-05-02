@@ -7,7 +7,7 @@ function ViewStructureLink({ structureId, className = "" }) {
       target="_blank"
       rel="noreferrer"
       href={`${adminURL}/structure/${structureId}/edit`}
-      className={`inline-block w-full border-[1px] py-2 cursor-pointer text-blue-600 rounded border-blue-600 text-center mt-4 ${className}`}>
+      className={`mt-4 inline-block w-full cursor-pointer rounded border-[1px] border-blue-600 py-2 text-center text-blue-600 ${className}`}>
       Voir la structure
     </a>
   );

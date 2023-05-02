@@ -109,7 +109,7 @@ export default function Phase1(props) {
             <Phase1Header user={user} young={young} setYoung={setYoung} editing={editing} setEditing={setEditing} loading={loading} setLoading={setLoading} setValues={setValues} />
             <div className="grid grid-cols-2">
               <Phase1ConfirmationFormBlock
-                className="col-start-1 pr-11 border-r-[1px] border-gray-200"
+                className="col-start-1 border-r-[1px] border-gray-200 pr-11"
                 young={young}
                 setYoung={setYoung}
                 editing={editing}
@@ -207,8 +207,8 @@ export default function Phase1(props) {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col my-52 gap-4 items-center justify-center">
-                <div className="font-bold text-gray-900 text-base">Ce volontaire n&apos;est affecté à aucun centre</div>
+              <div className="my-52 flex flex-col items-center justify-center gap-4">
+                <div className="text-base font-bold text-gray-900">Ce volontaire n&apos;est affecté à aucun centre</div>
                 {isCohortOpenForAffectation && (
                   <div
                     className="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white"

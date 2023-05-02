@@ -48,15 +48,15 @@ renseigner le motif et la date de départ.`;
       <form className="w-full" onSubmit={handleSubmit}>
         {viewList ? (
           <>
-            <div className="flex mx-4 gap-4">
-              <div onClick={() => setViewList(false)} className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 cursor-pointer">
+            <div className="mx-4 flex gap-4">
+              <div onClick={() => setViewList(false)} className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gray-200">
                 <ArrowNarrowLeft className="text-gray-700" />
               </div>
-              <div className="flex items-center justify-center text-gray-900 text-xl font-medium">{getTitle()}</div>
+              <div className="flex items-center justify-center text-xl font-medium text-gray-900">{getTitle()}</div>
             </div>
             <div className="m-4">
               {values.map((volontaire) => (
-                <div key={volontaire._id} className="flex items-center justify-center text-gray-900 text-base font-normal">
+                <div key={volontaire._id} className="flex items-center justify-center text-base font-normal text-gray-900">
                   {volontaire.firstName} {volontaire.lastName}
                 </div>
               ))}
@@ -64,8 +64,8 @@ renseigner le motif et la date de départ.`;
           </>
         ) : (
           <>
-            <div className="flex mx-4 justify-end">
-              <div onClick={() => setViewList(true)} className="flex gap-1 items-center cursor-pointer hover:underline text-snu-purple-300">
+            <div className="mx-4 flex justify-end">
+              <div onClick={() => setViewList(true)} className="flex cursor-pointer items-center gap-1 text-snu-purple-300 hover:underline">
                 <ViewList />
                 Voir la liste
               </div>
@@ -74,14 +74,14 @@ renseigner le motif et la date de départ.`;
               <ArrowCircleRight width={36} height={36} />
             </div>
             <div className="m-4">
-              <div className="flex items-center justify-center text-gray-900 text-xl">{getTitle()}</div>
-              <div className="flex items-center justify-center text-gray-500 text-base font-normal text-center">{getMessage()}</div>
+              <div className="flex items-center justify-center text-xl text-gray-900">{getTitle()}</div>
+              <div className="flex items-center justify-center text-center text-base font-normal text-gray-500">{getMessage()}</div>
             </div>
-            <div className="flex gap-3 mx-4 mb-3">
-              <div className={`border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                <label className="text-left text-gray-500 w-full">Motif du départ</label>
+            <div className="mx-4 mb-3 flex gap-3">
+              <div className={`rounded-lg border-[1px]  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                <label className="w-full text-left text-gray-500">Motif du départ</label>
                 <select
-                  className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
+                  className="w-full cursor-pointer bg-inherit disabled:cursor-not-allowed"
                   value={departSejourMotif}
                   onChange={(e) => setDepartSejourMotif(e.target.value)}
                   disabled={isLoading}>
@@ -96,20 +96,20 @@ renseigner le motif et la date de départ.`;
                   ))}
                 </select>
               </div>
-              <div className={`border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                <label className="text-left text-gray-500 w-full">Date du départ</label>
+              <div className={`rounded-lg border-[1px]  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                <label className="w-full text-left text-gray-500">Date du départ</label>
                 <input
                   type="date"
-                  className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
+                  className="w-full cursor-pointer bg-inherit disabled:cursor-not-allowed"
                   value={departSejourAt}
                   onChange={(e) => setDepartSejourAt(e.target.value)}
                   disabled={isLoading}
                 />
               </div>
             </div>
-            <div className="flex mx-4">
-              <div className={`w-full border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                <label className="text-left text-gray-500 w-full">Commentaire</label>
+            <div className="mx-4 flex">
+              <div className={`w-full rounded-lg border-[1px]  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                <label className="w-full text-left text-gray-500">Commentaire</label>
                 <textarea
                   placeholder="Votre commentaire facultatif"
                   className="w-full bg-inherit disabled:cursor-not-allowed"
@@ -121,15 +121,15 @@ renseigner le motif et la date de départ.`;
             </div>
           </>
         )}
-        <div className="flex p-4 gap-2">
+        <div className="flex gap-2 p-4">
           <button
-            className="flex items-center justify-center flex-1 border-[1px] border-gray-300 text-gray-700 rounded-lg py-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+            className="flex flex-1 cursor-pointer items-center justify-center rounded-lg border-[1px] border-gray-300 py-2 text-gray-700 disabled:cursor-wait disabled:opacity-50"
             disabled={isLoading}
             onClick={onClickCancel}>
             Annuler
           </button>
           <button
-            className="flex items-center justify-center flex-1 bg-snu-purple-300 text-white rounded-lg py-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+            className="flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-snu-purple-300 py-2 text-white disabled:cursor-wait disabled:opacity-50"
             disabled={isLoading}
             type="submit">
             Confirmer

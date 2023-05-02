@@ -14,7 +14,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
   const [modalDispense, setModalDispense] = useState({ isOpen: false });
 
   const canUserDownloadConvocation = () => {
-      return young.hasMeetingInformation === "true" && ["AFFECTED", "DONE", "NOT_DONE", "EXEMPTED"].includes(young.statusPhase1);
+    return young.hasMeetingInformation === "true" && ["AFFECTED", "DONE", "NOT_DONE", "EXEMPTED"].includes(young.statusPhase1);
   };
 
   const handleSendAttestationByEmail = async () => {
@@ -68,16 +68,16 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
       <>
         {!editing ? (
           <button
-            className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-blue-100 text-blue-600 bg-blue-100 hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => setEditing(true)}
             disabled={loading}>
-            <Pencil stroke="#2563EB" className="w-[12px] h-[12px]" />
+            <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
             Modifier
           </button>
         ) : (
           <div className="flex items-center gap-2">
             <button
-              className="flex items-center gap-2 rounded-full text-xs font-medium leading-5 cursor-pointer px-3 py-2 border-[1px] border-gray-100 text-gray-700 bg-gray-100 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
               onClick={() => {
                 setEditing(false);
                 setValues(young);
@@ -93,14 +93,10 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
 
   return (
     <>
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center justify-center gap-2">
-          <div className="text-lg leading-4 font-medium">Séjour de cohésion</div>
-          <Badge
-            minify
-            text={translatePhase1(young.statusPhase1)}
-            color={YOUNG_STATUS_COLORS[young.statusPhase1]}
-          />
+          <div className="text-lg font-medium leading-4">Séjour de cohésion</div>
+          <Badge minify text={translatePhase1(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />
           {canUserDownloadConvocation() && (
             <DocumentSelect
               title="Convocation"
@@ -130,7 +126,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
             />
           )}
           {young.statusPhase1 === "NOT_DONE" && user.role !== ROLES.HEAD_CENTER && (
-            <div onClick={() => setModalDispense({ isOpen: true })} className="cursor-pointer rounded text-blue-700 border-[1px] border-blue-700 px-2.5 py-1.5 ml-2 font-medium">
+            <div onClick={() => setModalDispense({ isOpen: true })} className="ml-2 cursor-pointer rounded border-[1px] border-blue-700 px-2.5 py-1.5 font-medium text-blue-700">
               Dispenser le volontaire du séjour
             </div>
           )}

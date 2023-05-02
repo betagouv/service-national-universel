@@ -131,6 +131,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  sessionEditionOpenForTransporter: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Ouverture ou fermeture de l'édition des sessions pour les transporteurs",
+    },
+  },
+
   pdrEditionOpenForReferentRegion: {
     type: Boolean,
     default: false,
@@ -144,6 +152,14 @@ const Schema = new mongoose.Schema({
     default: false,
     documentation: {
       description: "Ouverture ou fermeture de l'édition des PDR pour les référents départementaux",
+    },
+  },
+
+  pdrEditionOpenForTransporter: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Ouverture ou fermeture de l'édition des PDR pour les transporteurs",
     },
   },
 

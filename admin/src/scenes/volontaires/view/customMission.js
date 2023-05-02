@@ -222,9 +222,9 @@ export default function CustomMission({ young, onChange }) {
       <>
         {" "}
         <YoungHeader young={young} tab="phase2" onChange={onChange} />
-        <div className="mx-8 my-7 py-6 px-8 bg-white">
+        <div className="mx-8 my-7 bg-white py-6 px-8">
           <div className="flex items-center">
-            <div className="rounded-full p-2 bg-gray-200 cursor-pointer hover:scale-105" onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
+            <div className="cursor-pointer rounded-full bg-gray-200 p-2 hover:scale-105" onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M5.83333 13.3334L2.5 10.0001M2.5 10.0001L5.83333 6.66675M2.5 10.0001L17.5 10.0001"
@@ -235,20 +235,20 @@ export default function CustomMission({ young, onChange }) {
                 />
               </svg>
             </div>
-            <div className="flex flex-1 justify-center text-3xl leading-8 font-bold tracking-tight">
+            <div className="flex flex-1 justify-center text-3xl font-bold leading-8 tracking-tight">
               Créer une mission personnalisée à {young.firstName} {young.lastName}
             </div>
           </div>
-          <div className="text-center mt-8">Le jeune n&apos;est pas éligible à la phase 2</div>
+          <div className="mt-8 text-center">Le jeune n&apos;est pas éligible à la phase 2</div>
         </div>
       </>
     );
   return (
     <>
       <YoungHeader young={young} tab="phase2" onChange={onChange} />
-      <div className="mx-8 my-7 py-6 px-8 bg-white">
+      <div className="mx-8 my-7 bg-white py-6 px-8">
         <div className="flex items-center">
-          <div className="rounded-full p-2 bg-gray-200 cursor-pointer hover:scale-105" onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
+          <div className="cursor-pointer rounded-full bg-gray-200 p-2 hover:scale-105" onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M5.83333 13.3334L2.5 10.0001M2.5 10.0001L5.83333 6.66675M2.5 10.0001L17.5 10.0001"
@@ -259,25 +259,25 @@ export default function CustomMission({ young, onChange }) {
               />
             </svg>
           </div>
-          <div className="flex flex-1 justify-center text-3xl leading-8 font-bold tracking-tight">
+          <div className="flex flex-1 justify-center text-3xl font-bold leading-8 tracking-tight">
             Créer une mission personnalisée à {young.firstName} {young.lastName}
           </div>
         </div>
-        <div className="border-b-[1px] border-[#F3F4F6] my-7" />
-        <div className="font-bold text-lg mb-8">Créer une mission personnalisée</div>
+        <div className="my-7 border-b-[1px] border-[#F3F4F6]" />
+        <div className="mb-8 text-lg font-bold">Créer une mission personnalisée</div>
 
         <div className="flex flex-col lg:flex-row">
           <div className="flex-1">
-            <div className="text-lg font-medium text-gray-900 mb-4">Détails de la mission</div>
+            <div className="mb-4 text-lg font-medium text-gray-900">Détails de la mission</div>
             <div>
-              <div className="text-xs font-medium mb-2">
+              <div className="mb-2 text-xs font-medium">
                 Donnez un nom à votre mission. Privilégiez une phrase précisant l&apos;action du volontaire. <br />
                 Exemple : « Je fais les courses de produits pour mes voisins les plus fragiles »
               </div>
               <Field name="name" errors={errors} handleChange={(e) => setValues({ ...values, name: e.target.value })} label="Nom de la mission" value={values.name} />
             </div>
             <div className="my-5">
-              <div className="text-xs font-medium mb-2">Structure rattachée</div>
+              <div className="mb-2 text-xs font-medium">Structure rattachée</div>
               <AsyncSelect
                 label="Structure"
                 loadOptions={fetchStructures}
@@ -286,9 +286,9 @@ export default function CustomMission({ young, onChange }) {
                 }}
                 noOptionsMessage={() => {
                   return (
-                    <a className="flex items-center gap-2 flex-col cursor-pointer no-underline" href={`${adminURL}/structure/create`} target="_blank" rel="noreferrer">
+                    <a className="flex cursor-pointer flex-col items-center gap-2 no-underline" href={`${adminURL}/structure/create`} target="_blank" rel="noreferrer">
                       <div className="text-sm text-gray-400">La structure recherchée n&apos;est pas dans la liste ?</div>
-                      <div className="font-medium text-blue-600 text-">Créer une nouvelle structure</div>
+                      <div className="text- font-medium text-blue-600">Créer une nouvelle structure</div>
                     </a>
                   );
                 }}
@@ -302,7 +302,7 @@ export default function CustomMission({ young, onChange }) {
               {values.structureId && <ViewStructureLink structureId={values.structureId} className="mt-3" />}
             </div>
             <div className="my-5">
-              <div className="text-xs font-medium mb-2">Domaine d&apos;action principal</div>
+              <div className="mb-2 text-xs font-medium">Domaine d&apos;action principal</div>
               <CustomSelect
                 noOptionsMessage={"Aucun domaine ne correspond à cette recherche"}
                 options={mainDomainsOption}
@@ -313,7 +313,7 @@ export default function CustomMission({ young, onChange }) {
                 }}
                 value={values.mainDomain}
               />
-              <div className="flex flex-row text-xs font-medium mb-2 mt-3">
+              <div className="mb-2 mt-3 flex flex-row text-xs font-medium">
                 <div>Domaine(s) d&apos;action secondaire(s)</div>
                 <div className="text-gray-400">&nbsp;(facultatif)</div>
               </div>
@@ -330,7 +330,7 @@ export default function CustomMission({ young, onChange }) {
               />
             </div>
             <div>
-              <div className="text-xs font-medium mb-2">Type de mission</div>
+              <div className="mb-2 text-xs font-medium">Type de mission</div>
               <CustomSelect
                 error={errors.format}
                 options={[
@@ -343,11 +343,11 @@ export default function CustomMission({ young, onChange }) {
               />
             </div>
             <div>
-              <div className="flex flex-row text-xs font-medium mt-3">
+              <div className="mt-3 flex flex-row text-xs font-medium">
                 <div>Durée de la mission</div>
                 <div className="text-gray-400">&nbsp;(facultatif)</div>
               </div>
-              <div className="text-xs font-medium mb-2">Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</div>
+              <div className="mb-2 text-xs font-medium">Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</div>
               <div className="w-1/2">
                 <Field
                   errors={errors}
@@ -360,7 +360,7 @@ export default function CustomMission({ young, onChange }) {
             </div>
             <div className="flex flex-col gap-4">
               <div className="mt-5">
-                <div className="flex flex-row text-xs font-medium my-2">Objectifs de la mission</div>
+                <div className="my-2 flex flex-row text-xs font-medium">Objectifs de la mission</div>
                 <Field
                   errors={errors}
                   name="description"
@@ -372,7 +372,7 @@ export default function CustomMission({ young, onChange }) {
                 />
               </div>
               <div>
-                <div className="flex flex-row text-xs font-medium my-2">Actions concrètes confiées au(x) volontaire(s)</div>
+                <div className="my-2 flex flex-row text-xs font-medium">Actions concrètes confiées au(x) volontaire(s)</div>
                 <Field
                   errors={errors}
                   type="textarea"
@@ -384,7 +384,7 @@ export default function CustomMission({ young, onChange }) {
                 />
               </div>
               <div>
-                <div className="flex flex-col text-xs font-medium my-2">
+                <div className="my-2 flex flex-col text-xs font-medium">
                   <div>
                     Contraintes spécifiques pour cette mission
                     <span className="text-gray-400">&nbsp;(facultatif).&nbsp;</span>
@@ -401,12 +401,12 @@ export default function CustomMission({ young, onChange }) {
               </div>
             </div>
           </div>
-          <div className="border-[1px] border-[#F3F4F6] my-[56px] lg:mx-[56px]" />
+          <div className="my-[56px] border-[1px] border-[#F3F4F6] lg:mx-[56px]" />
           <div className="flex-1">
-            <div className="text-lg font-medium text-gray-900 mb-4">Dates et places disponibles</div>
+            <div className="mb-4 text-lg font-medium text-gray-900">Dates et places disponibles</div>
 
             <div className="text-xs font-medium">Dates de la mission</div>
-            <div className="flex flex-row justify-between gap-3 my-2 mb-4">
+            <div className="my-2 mb-4 flex flex-row justify-between gap-3">
               <Field
                 errors={errors}
                 name="startAt"
@@ -428,7 +428,7 @@ export default function CustomMission({ young, onChange }) {
                 error={errors?.endAt}
               />
             </div>
-            <div className="flex flex-col text-xs font-medium my-2">
+            <div className="my-2 flex flex-col text-xs font-medium">
               <div>
                 Fréquence estimée de la mission
                 <span className="text-gray-400">&nbsp;(facultatif)&nbsp;</span>
@@ -445,7 +445,7 @@ export default function CustomMission({ young, onChange }) {
               value={values.frequence}
             />
             <div className="mt-4">
-              <div className="flex flex-row text-xs font-medium my-2">
+              <div className="my-2 flex flex-row text-xs font-medium">
                 <div>Période de réalisation de la mission</div>
                 <div className="text-gray-400">&nbsp;(facultatif)</div>
               </div>
@@ -477,7 +477,7 @@ export default function CustomMission({ young, onChange }) {
               )}
             </div>
             <div className="mt-4">
-              <div className="flex flex-col text-xs font-medium my-2">
+              <div className="my-2 flex flex-col text-xs font-medium">
                 Nombre de volontaire(s) recherché(s). Précisez ce nombre en fonction de vos contraintes logistiques et votre capacité à accompagner les volontaires.
               </div>
               <div className="w-1/2">
@@ -485,9 +485,9 @@ export default function CustomMission({ young, onChange }) {
               </div>
             </div>
 
-            <div className="text-lg font-medium text-gray-900 mb-4 mt-11">Tuteur de la mission</div>
+            <div className="mb-4 mt-11 text-lg font-medium text-gray-900">Tuteur de la mission</div>
 
-            <div className="text-xs font-medium mb-2">
+            <div className="mb-2 text-xs font-medium">
               Sélectionner le tuteur qui va s&apos;occuper de la mission.
               <br /> Vous pouvez également ajouter un nouveau tuteur à votre équipe.
             </div>
@@ -509,7 +509,7 @@ export default function CustomMission({ young, onChange }) {
                 if (values.structureId === "") return <div>Vous devez d&apos;abord sélectionner une structure</div>;
                 return (
                   <div
-                    className="flex items-center gap-2 flex-col cursor-pointer"
+                    className="flex cursor-pointer flex-col items-center gap-2"
                     onClick={() => {
                       setCreationTutor(true);
                     }}>
@@ -523,9 +523,9 @@ export default function CustomMission({ young, onChange }) {
             />
             {creationTutor && (
               <div>
-                <div className="text-lg font-medium text-gray-900 mt-8 mb-4">Créer un tuteur</div>
-                <div className="text-xs font-medium mb-2">Identité et contact</div>
-                <div className="flex flex-row justify-between gap-3 mb-4">
+                <div className="mt-8 mb-4 text-lg font-medium text-gray-900">Créer un tuteur</div>
+                <div className="mb-2 text-xs font-medium">Identité et contact</div>
+                <div className="mb-4 flex flex-row justify-between gap-3">
                   <Field
                     errors={errors}
                     label="Nom"
@@ -556,13 +556,13 @@ export default function CustomMission({ young, onChange }) {
                   error={errors}
                 />
                 <div className="flex w-full justify-end">
-                  <div className="bg-blue-600 rounded text-sm py-2.5 px-4 text-white font-medium inline-block cursor-pointer" onClick={sendInvitation}>
+                  <div className="inline-block cursor-pointer rounded bg-blue-600 py-2.5 px-4 text-sm font-medium text-white" onClick={sendInvitation}>
                     Envoyer l&apos;invitation
                   </div>
                 </div>
               </div>
             )}
-            <div className="text-lg font-medium text-gray-900 mb-4 mt-11">Statut de la candidature</div>
+            <div className="mb-4 mt-11 text-lg font-medium text-gray-900">Statut de la candidature</div>
             <CustomSelect
               error={errors.applicationStatus}
               options={[
@@ -575,8 +575,8 @@ export default function CustomMission({ young, onChange }) {
               value={values.applicationStatus}
             />
             <div>
-              <div className="text-lg font-medium text-gray-900 mt-11 mb-4">Lieu où se déroule la mission</div>
-              <div className="text-xs font-medium mb-2">Adresse</div>
+              <div className="mt-11 mb-4 text-lg font-medium text-gray-900">Lieu où se déroule la mission</div>
+              <div className="mb-2 text-xs font-medium">Adresse</div>
               <Field
                 errors={errors}
                 label="Adresse"
@@ -587,7 +587,7 @@ export default function CustomMission({ young, onChange }) {
                 value={values.address}
                 error={errors?.address}
               />
-              <div className="flex flex-row justify-between gap-3 my-4">
+              <div className="my-4 flex flex-row justify-between gap-3">
                 <Field
                   errors={errors}
                   label="Code postal"
@@ -625,9 +625,9 @@ export default function CustomMission({ young, onChange }) {
             </div>
             {ENABLE_PM && selectedStructure && selectedStructure?.isMilitaryPreparation === "true" ? (
               <>
-                <div className="text-lg font-medium text-gray-900 mt-11 mb-4">Prépartion Militaire</div>
-                <div className="flex flex-row justify-between items-center">
-                  <div className="text-gray-800 font-medium">Prépartion Militaire : {values?.isMilitaryPreparation === "true" ? "oui" : "non"}</div>
+                <div className="mt-11 mb-4 text-lg font-medium text-gray-900">Prépartion Militaire</div>
+                <div className="flex flex-row items-center justify-between">
+                  <div className="font-medium text-gray-800">Prépartion Militaire : {values?.isMilitaryPreparation === "true" ? "oui" : "non"}</div>
                   <Toggle
                     id="isMilitaryPreparation"
                     name="isMilitaryPreparation"
@@ -640,9 +640,9 @@ export default function CustomMission({ young, onChange }) {
               </>
             ) : null}
             <div>
-              <div className="text-lg font-medium text-gray-900 mt-11 mb-4">Hébergement</div>
-              <div className="flex flex-row justify-between items-center">
-                <div className="text-gray-800 font-medium">Hébergement proposé : {values?.hebergement === "true" ? "oui" : "non"}</div>
+              <div className="mt-11 mb-4 text-lg font-medium text-gray-900">Hébergement</div>
+              <div className="flex flex-row items-center justify-between">
+                <div className="font-medium text-gray-800">Hébergement proposé : {values?.hebergement === "true" ? "oui" : "non"}</div>
                 <Toggle
                   id="hebergement"
                   name="hebergement"
@@ -653,20 +653,20 @@ export default function CustomMission({ young, onChange }) {
                 />
               </div>
               {values?.hebergement === "true" && (
-                <div className="flex flex-row gap-8 mt-4">
-                  <div onClick={() => setValues({ ...values, hebergementPayant: "false" })} className={`flex flex-row justify-center items-center gap-2 cursor-pointer`}>
+                <div className="mt-4 flex flex-row gap-8">
+                  <div onClick={() => setValues({ ...values, hebergementPayant: "false" })} className={`flex cursor-pointer flex-row items-center justify-center gap-2`}>
                     <CheckBox value={values?.hebergementPayant === "false"} />
-                    <div className="text-gray-700 font-medium">Hébergement gratuit</div>
+                    <div className="font-medium text-gray-700">Hébergement gratuit</div>
                   </div>
-                  <div onClick={() => setValues({ ...values, hebergementPayant: "true" })} className={`flex flex-row justify-center items-center gap-2 cursor-pointer`}>
+                  <div onClick={() => setValues({ ...values, hebergementPayant: "true" })} className={`flex cursor-pointer flex-row items-center justify-center gap-2`}>
                     <CheckBox value={values.hebergementPayant === "true"} />
-                    <div className="text-gray-700 font-medium">Hébergement payant</div>
+                    <div className="font-medium text-gray-700">Hébergement payant</div>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="bg-blue-600 text-white font-medium text-center rounded mt-11 cursor-pointer flex justify-center items-center h-[40px]" onClick={onSubmit}>
+            <div className="mt-11 flex h-[40px] cursor-pointer items-center justify-center rounded bg-blue-600 text-center font-medium text-white" onClick={onSubmit}>
               {loading ? <ReactLoading type="spin" color="white" className="self-center" height={30} width={30} /> : "Enregistrer et rattacher la mission"}
             </div>
           </div>

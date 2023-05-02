@@ -125,32 +125,32 @@ export function FileField({ young, label, className = "", onChange, mode, status
 
   return (
     <>
-      <div ref={optionsRef} className={`p-[30px] bg-[#F9FAFB] rounded-[7px] mb-[15px] flex items-center justify-between ${className}`}>
+      <div ref={optionsRef} className={`mb-[15px] flex items-center justify-between rounded-[7px] bg-[#F9FAFB] p-[30px] ${className}`}>
         <div className="shrink-0">
           <Cni />
         </div>
         <MiniTitle className="grow text-left">{label}</MiniTitle>
-        <div className="flex items-center justify-end relative ml-[8px]">
+        <div className="relative ml-[8px] flex items-center justify-end">
           {file && <DownloadButton className="flex-[0_0_32px]" onClick={() => downloadFile()} />}
-          {mode === "edition" && <MoreButton className="flex-[0_0_32px] ml-[8px]" onClick={() => setOpened(!opened)} />}
+          {mode === "edition" && <MoreButton className="ml-[8px] flex-[0_0_32px]" onClick={() => setOpened(!opened)} />}
           {opened && (
-            <div className="absolute z-10 mt-[-1] right-[0px] top-[105%] border-[#E5E7EB] border-[1px] rounded-[6px] bg-white text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div className="absolute right-[0px] top-[105%] z-10 mt-[-1] overflow-hidden rounded-[6px] border-[1px] border-[#E5E7EB] bg-white text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
               {statusField && file && (
                 <div
-                  className="whitespace-nowrap py-[6px] px-[15px] text-[14px] text-[#374151] bg-[#FFFFFF] hover:text-[#000000] hover:bg-[#E5E7EB] cursor-pointer flex items-center"
+                  className="flex cursor-pointer items-center whitespace-nowrap bg-[#FFFFFF] py-[6px] px-[15px] text-[14px] text-[#374151] hover:bg-[#E5E7EB] hover:text-[#000000]"
                   onClick={changeImageRightFileStatus}>
                   <MiniSwitch value={young.imageRightFilesStatus === "VALIDATED"} className="mr-[6px]" />
                   Accord : {young.imageRightFilesStatus === "VALIDATED" ? "oui" : "non"}
                 </div>
               )}
               <div
-                className="whitespace-nowrap py-[6px] px-[15px] text-[14px] text-[#374151] bg-[#FFFFFF] hover:text-[#000000] hover:bg-[#E5E7EB] cursor-pointer"
+                className="cursor-pointer whitespace-nowrap bg-[#FFFFFF] py-[6px] px-[15px] text-[14px] text-[#374151] hover:bg-[#E5E7EB] hover:text-[#000000]"
                 onClick={startUploadFile}>
                 Téléverser le document
               </div>
               {file && (
                 <div
-                  className="whitespace-nowrap py-[6px] px-[15px] text-[14px] text-[#374151] bg-[#FFFFFF] hover:text-[#000000] hover:bg-[#E5E7EB] cursor-pointer"
+                  className="cursor-pointer whitespace-nowrap bg-[#FFFFFF] py-[6px] px-[15px] text-[14px] text-[#374151] hover:bg-[#E5E7EB] hover:text-[#000000]"
                   onClick={deleteFile}>
                   Supprimer le document
                 </div>
@@ -161,7 +161,7 @@ export function FileField({ young, label, className = "", onChange, mode, status
       </div>
       <ConfirmationModal
         isOpen={confirmDeleteModal}
-        icon={<Warning className="text-[#D1D5DB] w-[36px] h-[36px]" />}
+        icon={<Warning className="h-[36px] w-[36px] text-[#D1D5DB]" />}
         title={"Supprimer le fichier"}
         message={"Voulez-vous vraiment supprimer ce fichier ? Cette action est irréversible."}
         confirmText="Confirmer la suppression"

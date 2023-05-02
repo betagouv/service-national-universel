@@ -23,19 +23,19 @@ export default function CardDepartement({ servicesDep, department, getService })
   };
   if (!servicesDep) return null;
   return (
-    <div className="rounded-lg bg-white shadow-sm mr-4 hover:cursor-pointer hover:scale-105 min-w-[300px] max-w-[400px]" onClick={handleShowModal}>
+    <div className="mr-4 min-w-[300px] max-w-[400px] rounded-lg bg-white shadow-sm hover:scale-105 hover:cursor-pointer" onClick={handleShowModal}>
       <div className="flex flex-row justify-between">
-        <div className="flex flex-col pl-7 py-6">
-          <div className="font-bold text-sm mb-1">Service départemental</div>
-          <div className="text-gray-500 text-xs">{servicesDep.directionName}</div>
-          <div className="text-gray-500 text-xs">{servicesDep.address}</div>
-          <div className="text-gray-500 text-xs">{servicesDep.complementAddress}</div>
-          <div className="text-gray-500 text-xs">
+        <div className="flex flex-col py-6 pl-7">
+          <div className="mb-1 text-sm font-bold">Service départemental</div>
+          <div className="text-xs text-gray-500">{servicesDep.directionName}</div>
+          <div className="text-xs text-gray-500">{servicesDep.address}</div>
+          <div className="text-xs text-gray-500">{servicesDep.complementAddress}</div>
+          <div className="text-xs text-gray-500">
             {servicesDep.city}, {servicesDep.zip}
           </div>
         </div>
         <div className="flex flex-col">
-          <img src={timbre} alt="timbre" className="w-20 h-16" />
+          <img src={timbre} alt="timbre" className="h-16 w-20" />
         </div>
       </div>
       <ModalServiceDepartment isOpen={isOpen} setIsOpen={setIsOpen} onSubmit={(data) => handleSubmit(data)} servicesDep={servicesDep} />

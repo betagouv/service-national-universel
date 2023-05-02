@@ -78,9 +78,9 @@ export default function Verification({ step, parentId }) {
     <>
       <Navbar step={step} />
       <div className="bg-white p-3 text-[#161616]">
-        <h1 className="text-[24px] leading-[32px] font-bold leading-40 text-[#21213F] mb-2">Voici les informations transmises par {young.firstName}</h1>
+        <h1 className="leading-40 mb-2 text-[24px] font-bold leading-[32px] text-[#21213F]">Voici les informations transmises par {young.firstName}</h1>
 
-        <div className="text-[14px] leading-[20px] text-[#666666] mb-[32px] mt-2 space-y-2">
+        <div className="mb-[32px] mt-2 space-y-2 text-[14px] leading-[20px] text-[#666666]">
           {parentId === 2 ? (
             <p>
               La validité de ces informations a été vérifiée par {young.parent1FirstName} {young.parent1LastName}. Pour toute demande de correction, adressez-vous à{" "}
@@ -107,7 +107,7 @@ export default function Verification({ step, parentId }) {
 
         {parentId === 1 && (
           <>
-            <div className="flex items-center pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid">
+            <div className="border-t-solid flex items-center border-t-[1px] border-t-[#E5E5E5] pt-[32px]">
               <Check checked={certified} onChange={(e) => setCertified(e)}>
                 Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez{" "}
                 <a
@@ -120,7 +120,7 @@ export default function Verification({ step, parentId }) {
                 avant de valider.
               </Check>
             </div>
-            {error && <div className="text-[#CE0500] text-[14px] leading-[19px] my-2 ml-[40px]">{error}</div>}
+            {error && <div className="my-2 ml-[40px] text-[14px] leading-[19px] text-[#CE0500]">{error}</div>}
           </>
         )}
       </div>
@@ -141,7 +141,7 @@ function Section(section, idx) {
     <>
       <hr className="mt-8" />
       <div className="pt-[32px]" key={idx.toString()}>
-        <h2 className="mt-0 mb-[19px] font-semibold text-[18px] leading-[32px]">{section.title}</h2>
+        <h2 className="mt-0 mb-[19px] text-[18px] font-semibold leading-[32px]">{section.title}</h2>
         {fields}
       </div>
     </>
@@ -150,8 +150,8 @@ function Section(section, idx) {
 
 function SectionSubtitle(section, idx) {
   return (
-    <div className="pt-[32px] border-t-[1px] border-t-[#E5E5E5] border-t-solid" key={idx.toString()}>
-      <h2 className="mt-0 mb-[19px] font-400 text-[18px] leading-[32px]">
+    <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px]" key={idx.toString()}>
+      <h2 className="font-400 mt-0 mb-[19px] text-[18px] leading-[32px]">
         <b>{section.title} : </b> {section.subtitle}
       </h2>
     </div>
@@ -161,18 +161,18 @@ function SectionSubtitle(section, idx) {
 function SectionField(field, idx) {
   let content;
   if (field.subtitle) {
-    content = <div className="text-[16px] font-400 text-[#666666]">{field.subtitle}&nbsp;:</div>;
+    content = <div className="font-400 text-[16px] text-[#666666]">{field.subtitle}&nbsp;:</div>;
   } else {
     content = (
       <div className="flex w-full justify-between">
-        <p className="text-[16px] font-400 text-[#666666]">{field.label}&nbsp;:</p>
-        <p className="text-[16px] font-400 text-[#161616] text-right">{field.value ? field.value : "-"}</p>
+        <p className="font-400 text-[16px] text-[#666666]">{field.label}&nbsp;:</p>
+        <p className="font-400 text-right text-[16px] text-[#161616]">{field.value ? field.value : "-"}</p>
       </div>
     );
   }
 
   return (
-    <div className={"flex justify-content-between items-center mb-[15px]" + (field.separator ? " border-t-[1px] border-t-[#E5E5E5] border-t-solid m-t-2 pt-2" : "")} key={idx}>
+    <div className={"justify-content-between mb-[15px] flex items-center" + (field.separator ? " border-t-solid m-t-2 border-t-[1px] border-t-[#E5E5E5] pt-2" : "")} key={idx}>
       {content}
     </div>
   );

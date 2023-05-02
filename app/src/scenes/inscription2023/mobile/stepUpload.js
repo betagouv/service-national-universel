@@ -215,7 +215,7 @@ export default function StepUpload() {
               </ErrorMessage>
             ))}
         </div>
-        <div className="w-full flex items-center justify-center mb-4">
+        <div className="mb-4 flex w-full items-center justify-center">
           <img src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
         </div>
         <input
@@ -231,7 +231,7 @@ export default function StepUpload() {
           className="hidden"
         />
         <button className="flex w-full">
-          <label htmlFor="file-upload" className="flex items-center justify-center p-2 w-full bg-[#000091] text-white">
+          <label htmlFor="file-upload" className="flex w-full items-center justify-center bg-[#000091] p-2 text-white">
             {category === "passport" ? "Scannez le document" : "Scannez le recto du document"}
           </label>
         </button>
@@ -252,7 +252,7 @@ export default function StepUpload() {
               </ErrorMessage>
             ))}
         </div>
-        <div className="w-full flex items-center justify-center mb-4">
+        <div className="mb-4 flex w-full items-center justify-center">
           {ID[category].imgBack && <img src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />}
         </div>
         <input
@@ -268,7 +268,7 @@ export default function StepUpload() {
           className="hidden"
         />
         <button className="flex w-full">
-          <label htmlFor="file-upload" className="flex items-center justify-center p-2 w-full bg-[#000091] text-white">
+          <label htmlFor="file-upload" className="flex w-full items-center justify-center bg-[#000091] p-2 text-white">
             Scannez le verso du document
           </label>
         </button>
@@ -279,9 +279,9 @@ export default function StepUpload() {
   function Verify() {
     return (
       <>
-        <p className="text-lg text-gray-800 font-semibold my-4">Vérifiez les points suivants</p>
+        <p className="my-4 text-lg font-semibold text-gray-800">Vérifiez les points suivants</p>
         {Object.entries(checked).map(([key, value]) => (
-          <div className="flex items-center my-2" key={key}>
+          <div className="my-2 flex items-center" key={key}>
             <CheckBox type="checkbox" checked={value} onChange={() => setChecked({ ...checked, [key]: !checked[key] })} />
             <span className="ml-2 mr-2">{key}</span>
           </div>
@@ -309,11 +309,11 @@ export default function StepUpload() {
             ))}
         </div>
         <div className="text-xl font-medium">Renseignez la date d’expiration</div>
-        <div className="text-gray-600 my-2">
+        <div className="my-2 text-gray-600">
           Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
           ).
         </div>
-        <div className="w-3/4 mx-auto">
+        <div className="mx-auto w-3/4">
           <img className="mx-auto my-4" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
         </div>
         <DatePickerList value={date} onChange={(date) => handleChange(date)} />
@@ -324,7 +324,7 @@ export default function StepUpload() {
 
 function Gallery({ recto, verso }) {
   return (
-    <div className="w-full h-48 flex overflow-x-auto mb-4 space-x-2">
+    <div className="mb-4 flex h-48 w-full space-x-2 overflow-x-auto">
       {recto.length > 0 && <img src={URL.createObjectURL(recto[0])} className="w-3/4 object-contain" />}
       {verso.length > 0 && <img src={URL.createObjectURL(verso[0])} className="w-3/4 object-contain" />}
     </div>

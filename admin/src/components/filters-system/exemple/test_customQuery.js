@@ -116,8 +116,8 @@ export default function test_volontaire() {
   //extract dans utils ou logique du filtre ?
 
   return (
-    <div className="bg-white h-full">
-      <div className="flex flex-col gap-8 m-4">
+    <div className="h-full bg-white">
+      <div className="m-4 flex flex-col gap-8">
         <div>{paramData?.count} résultats aa</div>
         {/* display filtter button + currentfilters + searchbar */}
         <Filters
@@ -132,7 +132,7 @@ export default function test_volontaire() {
           paramData={paramData}
           setParamData={setParamData}
         />
-        <div className="mt-2 flex flex-row flex-wrap gap-2 items-center">
+        <div className="mt-2 flex flex-row flex-wrap items-center gap-2">
           <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
           <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
         </div>
@@ -141,14 +141,14 @@ export default function test_volontaire() {
           setParamData={setParamData}
           currentEntryOnPage={data?.length}
           render={
-            <div className="flex w-full flex-col mt-6 mb-2">
+            <div className="mt-6 mb-2 flex w-full flex-col">
               <hr />
-              <div className="flex py-3 items-center text-xs uppercase text-gray-400 px-4 w-full">
+              <div className="flex w-full items-center py-3 px-4 text-xs uppercase text-gray-400">
                 <div className="w-[30%]">Lignes</div>
                 <div className="w-[40%]">Points de rassemblements</div>
                 <div className="w-[15%]">Centres de destinations</div>
                 <div className="w-[10%]">Taux de remplissage</div>
-                <div className="w-[5%] h-1"></div>
+                <div className="h-1 w-[5%]"></div>
               </div>
               {data?.map((hit) => {
                 return <Line key={hit._id} hit={hit} currentTab={currentTab} />;
@@ -176,7 +176,7 @@ const Line = ({ hit, currentTab }) => {
   return (
     <>
       <hr />
-      <div className="flex py-6 items-center px-4 hover:bg-gray-50">
+      <div className="flex items-center py-6 px-4 hover:bg-gray-50">
         <div className="w-[30%] cursor-pointer" onClick={() => history.push(`/ligne-de-bus/${hit._id.toString()}`)}>
           <div className="flex flex-col">
             <div className="text-sm font-medium">{hit.busId}</div>
@@ -194,7 +194,7 @@ const Line = ({ hit, currentTab }) => {
                     href={`/point-de-rassemblement/${meetingPoint.meetingPointId}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="hover:scale-105 cursor-pointer gap-2 text-sm font-normal flex justify-center px-2 py-1 items-center bg-gray-100 rounded-3xl">
+                    className="flex cursor-pointer items-center justify-center gap-2 rounded-3xl bg-gray-100 px-2 py-1 text-sm font-normal hover:scale-105">
                     {meetingPoint.city}
                     <ArrowUp />
                   </a>
@@ -210,17 +210,17 @@ const Line = ({ hit, currentTab }) => {
                 href={`/centre/${hit.centerId}`}
                 target="_blank"
                 rel="noreferrer"
-                className="hover:scale-105 cursor-pointer gap-2 text-sm font-normal flex justify-center px-2 py-1 items-center">
+                className="flex cursor-pointer items-center justify-center gap-2 px-2 py-1 text-sm font-normal hover:scale-105">
                 {hit.centerCode}
                 <ArrowUp />
               </a>
             </TooltipCenter>
           </div>
         </div>
-        <div className="w-[10%] flex gap-4 items-center">
+        <div className="flex w-[10%] items-center gap-4">
           <div className="text-sm font-normal">{hit.lineFillingRate}%</div>
           <div className="flex flex-col items-center">
-            <svg className="-rotate-90 w-9 h-9" viewBox="0 0 120 120">
+            <svg className="h-9 w-9 -rotate-90" viewBox="0 0 120 120">
               <circle cx="60" cy="60" r="40" fill="none" stroke="#F0F0F0" strokeDashoffset={`calc(100 - 0)`} strokeWidth="15" />
               <circle
                 className="percent fifty"
@@ -238,9 +238,9 @@ const Line = ({ hit, currentTab }) => {
             </svg>
           </div>
         </div>
-        <div className="w-[5%] flex justify-center">
+        <div className="flex w-[5%] justify-center">
           {hit.modificationBuses?.length > 0 ? (
-            <div className={`flex p-2 rounded-full cursor-pointer ${hasPendingModification ? "bg-orange-500" : "bg-gray-200"}`}>
+            <div className={`flex cursor-pointer rounded-full p-2 ${hasPendingModification ? "bg-orange-500" : "bg-gray-200"}`}>
               <Comment stroke={hasPendingModification && "white"} />
             </div>
           ) : null}
@@ -254,19 +254,19 @@ const TooltipMeetingPoint = ({ children, meetingPoint, currentTab, ...props }) =
   if (!meetingPoint) return children;
 
   return (
-    <div className="relative flex flex-col items-center group " {...props}>
+    <div className="group relative flex flex-col items-center " {...props}>
       {children}
-      <div className="absolute hidden group-hover:flex !top-8 mb-3 items-center left-0">
-        <div className="relative p-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-lg z-[500] rounded-lg">
-          <div className="flex items-center justify-between w-[524px]">
+      <div className="absolute !top-8 left-0 mb-3 hidden items-center group-hover:flex">
+        <div className="leading-2 relative z-[500] whitespace-nowrap rounded-lg bg-white p-3 text-xs text-[#414458] shadow-lg">
+          <div className="flex w-[524px] items-center justify-between">
             <div className="flex items-center">
-              <div className="text-sm font-medium flex justify-center px-2 py-1 items-center bg-gray-100 rounded-lg">
+              <div className="flex items-center justify-center rounded-lg bg-gray-100 px-2 py-1 text-sm font-medium">
                 {currentTab === "aller" ? meetingPoint.meetingHour : meetingPoint.returnHour}
               </div>
               <svg id="triangle" viewBox="0 0 100 100" width={10} height={10} className="z-[600]">
                 <polygon points="0 0, 100 0, 50 55" transform="rotate(-90 50 50)" fill="#F5F5F5" />
               </svg>
-              <div className="flex flex-col ml-1">
+              <div className="ml-1 flex flex-col">
                 <div className="text-sm font-medium">{meetingPoint.name}</div>
                 <div className="text-xs text-gray-400">{`${meetingPoint.region} • ${meetingPoint.department}`}</div>
               </div>
@@ -281,10 +281,10 @@ const TooltipMeetingPoint = ({ children, meetingPoint, currentTab, ...props }) =
 
 const TooltipCenter = ({ children, name, region, department, ...props }) => {
   return (
-    <div className="relative flex flex-col items-center group" {...props}>
+    <div className="group relative flex flex-col items-center" {...props}>
       {children}
-      <div className="absolute flex-col hidden group-hover:flex !top-8 mb-3 items-center left-0">
-        <div className="relative py-3 px-3 text-xs leading-2 text-[#414458] whitespace-nowrap bg-white shadow-lg z-[500] rounded-lg">
+      <div className="absolute !top-8 left-0 mb-3 hidden flex-col items-center group-hover:flex">
+        <div className="leading-2 relative z-[500] whitespace-nowrap rounded-lg bg-white py-3 px-3 text-xs text-[#414458] shadow-lg">
           <div className="flex flex-col">
             <div className="text-sm font-medium">{`${name}`}</div>
             <div className="text-xs text-gray-400">{`${region} • ${department}`}</div>

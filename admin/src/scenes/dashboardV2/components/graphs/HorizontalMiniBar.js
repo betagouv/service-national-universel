@@ -39,10 +39,10 @@ export default function HorizontalMiniBar({ title, values, labels, legendUrls, c
 
   return (
     <div className={`relative px-8 py-6 ${className}`}>
-      <div className="bg-blue-100 rounded p-1.5 text-blue-600 text-xs font-bold absolute top-[16px] right-[16px]">{total} AU TOTAL</div>
-      <div className="text-base text-gray-900 font-bold">{title}</div>
-      <div className="bg-gray-100 rounded-full h-[6px] my-2.5">
-        <div className="bg-blue-700 rounded-full h-[6px] w-[0%]" style={barStyle} />
+      <div className="absolute top-[16px] right-[16px] rounded bg-blue-100 p-1.5 text-xs font-bold text-blue-600">{total} AU TOTAL</div>
+      <div className="text-base font-bold text-gray-900">{title}</div>
+      <div className="my-2.5 h-[6px] rounded-full bg-gray-100">
+        <div className="h-[6px] w-[0%] rounded-full bg-blue-700" style={barStyle} />
       </div>
       <div className="">
         <Legends className="" legendUrls={legendUrls} onLegendClicked={onLegendClicked} values={values} labels={formattedLabels} />

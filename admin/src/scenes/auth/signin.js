@@ -26,7 +26,7 @@ export default function Signin() {
   if (unauthorized === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
 
   return (
-    <div className="flex flex-1 flex-col min-h-screen">
+    <div className="flex min-h-screen flex-1 flex-col">
       <Header />
       <div className="flex flex-1 justify-center">
         <div className="hidden min-h-[400px] flex-[1] bg-[url('./assets/computer.jpeg')] bg-cover bg-center bg-no-repeat md:block" />
@@ -36,13 +36,13 @@ export default function Signin() {
             <h2 className="mb-8 text-base font-normal text-brand-grey">A destination des référents et des structures d’accueil</h2>
 
             {maintenance && !localStorage?.getItem("override_maintenance") ? (
-              <div className="flex items-center m-4">
-                <div className="bg-yellow-50 p-3 rounded-lg shadow-sm ">
-                  <div className="flex space-x-2 items-center ">
-                    <GoTools className="text-yellow-600 text-base" />
-                    <h5 className="text-yellow-600 text-base">MAINTENANCE</h5>
+              <div className="m-4 flex items-center">
+                <div className="rounded-lg bg-yellow-50 p-3 shadow-sm ">
+                  <div className="flex items-center space-x-2 ">
+                    <GoTools className="text-base text-yellow-600" />
+                    <h5 className="text-base text-yellow-600">MAINTENANCE</h5>
                   </div>
-                  <div className="text-yellow-900  pt-2 text-sm">
+                  <div className="pt-2  text-sm text-yellow-900">
                     Le site est actuellement en maintenance suite à un problème technique sur la plateforme. Nous faisons notre possible pour rétablir la situation.
                   </div>
                 </div>
@@ -73,9 +73,9 @@ export default function Signin() {
                 }}>
                 {({ values, isSubmitting, handleChange, handleSubmit }) => {
                   return (
-                    <form onSubmit={handleSubmit} className="mb-6 flex flex-col gap-4 items-start">
+                    <form onSubmit={handleSubmit} className="mb-6 flex flex-col items-start gap-4">
                       {!userIsValid && (
-                        <div className="block w-full rounded bg-red-50 py-2.5 px-4 text-sm text-red-500 border border-red-400">E-mail et/ou mot de passe incorrect(s)</div>
+                        <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">E-mail et/ou mot de passe incorrect(s)</div>
                       )}
                       {tooManyRequests?.status && (
                         <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">

@@ -69,33 +69,33 @@ export default function NonEligible() {
   }, [young]);
   return (
     <>
-      <div className="bg-[#f9f6f2] flex justify-center py-10">
-        <div className="bg-white basis-[60%] mx-auto my-0 px-[102px] py-[60px]">
+      <div className="flex justify-center bg-[#f9f6f2] py-10">
+        <div className="mx-auto my-0 basis-[60%] bg-white px-[102px] py-[60px]">
           <h1 className="text-[22px] font-bold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
           {msg && <div className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">{msg}</div>}
-          <div className="text-base font-bold my-4">Découvrez d’autres formes d’engagement</div>
-          <div className="overflow-x-auto flex flex-wrap justify-between">
+          <div className="my-4 text-base font-bold">Découvrez d’autres formes d’engagement</div>
+          <div className="flex flex-wrap justify-between overflow-x-auto">
             {engagementPrograms.map((program, index) => {
               const [isOpen, setIsOpen] = useState(false);
 
               return (
-                <div key={index} className="flex basis-[48%] mt-4 ">
-                  <div className="w-full h-min-[700px] ">
-                    <div className="w-full h-[155px] ">
+                <div key={index} className="mt-4 flex basis-[48%] ">
+                  <div className="h-min-[700px] w-full ">
+                    <div className="h-[155px] w-full ">
                       <a href={program.link} target="_blank" rel="noreferrer">
-                        <img src={program.picture} className="object-cover w-full h-full" />
+                        <img src={program.picture} className="h-full w-full object-cover" />
                       </a>
                     </div>
-                    <div className={`min-h-min pl-4 pr-1 pb-2 border border-[#E5E5E5] ${!isOpen && "h-[250px]"}`}>
-                      <div className="font-semibold my-4 min-h-[40px]">{program.title}</div>
-                      <div className={`text-[13px] leading-6 mb-4 ${!isOpen && "h-[70px] text-ellipsis overflow-hidden"}`}>
+                    <div className={`min-h-min border border-[#E5E5E5] pl-4 pr-1 pb-2 ${!isOpen && "h-[250px]"}`}>
+                      <div className="my-4 min-h-[40px] font-semibold">{program.title}</div>
+                      <div className={`mb-4 text-[13px] leading-6 ${!isOpen && "h-[70px] overflow-hidden text-ellipsis"}`}>
                         {" "}
                         <a href={program.link} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
                           {program.description}
                         </a>
                       </div>
                       <div
-                        className="text-[13px] flex justify-between pr-2 cursor-pointer"
+                        className="flex cursor-pointer justify-between pr-2 text-[13px]"
                         onClick={() => {
                           setIsOpen(!isOpen);
                         }}>
@@ -109,9 +109,9 @@ export default function NonEligible() {
               );
             })}
           </div>
-          <div className="flex justify-center my-8">
+          <div className="my-8 flex justify-center">
             <div
-              className="text-[#000091] text-center border-[1px] border-[#000091] w-[50%]  p-2 cursor-pointer"
+              className="w-[50%] cursor-pointer border-[1px] border-[#000091] p-2  text-center text-[#000091]"
               onClick={() => {
                 history.push("/public-engagements");
               }}>
@@ -119,9 +119,9 @@ export default function NonEligible() {
             </div>
           </div>
 
-          <div className="w-full border-t border-t-[#E5E5E5] flex justify-end">
+          <div className="flex w-full justify-end border-t border-t-[#E5E5E5]">
             <button
-              className="flex items-center justify-center px-3 py-2 cursor-pointer bg-[#000091] text-white hover:bg-white hover:!text-[#000091] hover:border hover:border-[#000091] mt-4"
+              className="mt-4 flex cursor-pointer items-center justify-center bg-[#000091] px-3 py-2 text-white hover:border hover:border-[#000091] hover:bg-white hover:!text-[#000091]"
               onClick={logout}
               disabled={loading}>
               Revenir à l&apos;accueil

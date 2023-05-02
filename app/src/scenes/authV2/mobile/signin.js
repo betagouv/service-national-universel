@@ -69,34 +69,34 @@ export default function Signin() {
     <>
       <div className="bg-white px-4 pt-4 pb-12">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <div className="text-[#161616] text-[22px] font-bold">Me connecter</div>
-        <div className="flex items-center py-4 gap-4">
+        <div className="text-[22px] font-bold text-[#161616]">Me connecter</div>
+        <div className="flex items-center gap-4 py-4">
           <RightArrow />
-          <div className="text-[#161616] text-[17px] font-bold">Mon espace volontaire</div>
+          <div className="text-[17px] font-bold text-[#161616]">Mon espace volontaire</div>
         </div>
         <div className="flex flex-col gap-1 py-4">
-          <label className="text-[#161616] text-base">E-mail</label>
+          <label className="text-base text-[#161616]">E-mail</label>
           <Input value={email} onChange={(e) => setEmail(e)} />
         </div>
         <div className="flex flex-col gap-1 pb-4">
-          <label className="text-[#161616] text-base">Mot de passe</label>
-          <div className="flex items-center w-full bg-[#EEEEEE] px-4 py-2 border-b-[2px] border-[#3A3A3A] rounded-t-[4px]">
+          <label className="text-base text-[#161616]">Mot de passe</label>
+          <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2">
             <input className="w-full bg-inherit" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} />
             {showPassword ? <EyeOff className="cursor-pointer" onClick={() => setShowPassword(false)} /> : <Eye className="cursor-pointer" onClick={() => setShowPassword(true)} />}
           </div>
         </div>
-        <div className="pb-4 text-[#000091] text-base font-normal" onClick={() => history.push("/auth/forgot")}>
+        <div className="pb-4 text-base font-normal text-[#000091]" onClick={() => history.push("/auth/forgot")}>
           Mot de passe perdu ?
         </div>
         <button
-          className={`flex items-center justify-center p-2 w-full cursor-pointer ${disabled || loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
+          className={`flex w-full cursor-pointer items-center justify-center p-2 ${disabled || loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
           onClick={onSubmit}>
           Connexion
         </button>
-        <hr className="text-[#E5E5E5] mt-5" />
-        <div className="text-[#161616] text-[17px] font-bold py-4 text-center mt-4">Vous n&apos;êtes pas encore inscrit(e) ?</div>
+        <hr className="mt-5 text-[#E5E5E5]" />
+        <div className="mt-4 py-4 text-center text-[17px] font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
         <button
-          className="flex items-center justify-center p-2 w-full cursor-pointer border-[1px] border-[#000091] text-[#000091]"
+          className="flex w-full cursor-pointer items-center justify-center border-[1px] border-[#000091] p-2 text-[#000091]"
           onClick={() => history.push("/preinscription/eligibilite")}>
           Commencer mon inscription
         </button>

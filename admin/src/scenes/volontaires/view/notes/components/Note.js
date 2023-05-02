@@ -7,12 +7,12 @@ import quotation from "../../../../../assets/quotation.svg";
 const Note = ({ note: { note, phase, createdAt, referent }, isAuthor, actions }) => {
   return (
     <div className="my-4">
-      <div className="uppercase text-[11px] text-[#7E858C] font-medium mb-2">{getPhaseLabel(phase)}</div>
-      <div className="bg-[#F3F4F6] rounded-lg py-3 px-4 flex justify-between items-center">
+      <div className="mb-2 text-[11px] font-medium uppercase text-[#7E858C]">{getPhaseLabel(phase)}</div>
+      <div className="flex items-center justify-between rounded-lg bg-[#F3F4F6] py-3 px-4">
         <div className="flex-1">
           <div className="text-[#374151]">
             <div className="flex whitespace-pre-wrap">
-              <div className="flex mr-3 mt-[6px] shrink-0 w-2 self-start">
+              <div className="mr-3 mt-[6px] flex w-2 shrink-0 self-start">
                 <img src={quotation} />
                 <img src={quotation} />
               </div>
@@ -26,7 +26,7 @@ const Note = ({ note: { note, phase, createdAt, referent }, isAuthor, actions })
           </div>
         </div>
 
-        {isAuthor && <MoreButton className="shrink-0 ml-3" actions={actions} />}
+        {isAuthor && <MoreButton className="ml-3 shrink-0" actions={actions} />}
       </div>
     </div>
   );

@@ -12,21 +12,21 @@ export default function Help() {
         </div>
         <img src={arrowRightBlue} className="mb-2" />
         <div>
-          <p className="text-lg font-bold my-2">Besoin d&apos;aide ?</p>
+          <p className="my-2 text-lg font-bold">Besoin d&apos;aide ?</p>
           <p className="text-sm">Consultez notre base de connaissance ou contactez notre équipe support</p>
         </div>
       </div>
 
-      <div className="w-[56rem] bg-white mx-auto my-8 p-4 shadow-sm hidden md:flex text-[#161616] justify-between items-center">
-        <img src={arrowRightBlue} className="w-4 h-4 md:hidden" />
+      <div className="mx-auto my-8 hidden w-[56rem] items-center justify-between bg-white p-4 text-[#161616] shadow-sm md:flex">
+        <img src={arrowRightBlue} className="h-4 w-4 md:hidden" />
         <div className="flex items-center gap-2">
-          <img src={humanCooperation} alt="" className="w-20 h-20 hidden md:block" />
+          <img src={humanCooperation} alt="" className="hidden h-20 w-20 md:block" />
           <div>
             <p className="text-lg font-bold">Besoin d&apos;aide ?</p>
             <p className="text-sm">Consultez notre base de connaissance ou contactez notre équipe support</p>
           </div>
         </div>
-        <img src={arrowRightBlue} className="w-6 h-6 mr-8" />
+        <img src={arrowRightBlue} className="mr-8 h-6 w-6" />
       </div>
     </a>
   );

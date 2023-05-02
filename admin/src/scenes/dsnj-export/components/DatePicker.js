@@ -7,7 +7,7 @@ registerLocale("fr", fr);
 function MyDatePicker({ value, onChange = () => {}, className = "", disabled = false, isOpen = false, setOpen = () => {}, label, minDate = undefined }) {
   return (
     <div className={`flex ${className}`}>
-      <label className="text-[#738297] mr-1">{`${label} :`}</label>
+      <label className="mr-1 text-[#738297]">{`${label} :`}</label>
       <div>
         <DatePicker
           minDate={minDate}
@@ -26,7 +26,7 @@ function MyDatePicker({ value, onChange = () => {}, className = "", disabled = f
           }}
           placeholderText={"jj/mm/aaaa"}
           disabled={disabled}
-          className="bg-[transparent] w-full"
+          className="w-full bg-[transparent]"
           dateFormat="dd/MM/yyyy"
         />
       </div>

@@ -253,7 +253,7 @@ const Home = () => {
 
 const limitedAccess = {
   [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil"], default: "/dsnj-export" },
-  [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus"], default: "/schema-repartition" },
+  [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement"], default: "/schema-repartition" },
 };
 
 const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) => {

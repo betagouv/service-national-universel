@@ -41,7 +41,7 @@ export default function SimpleSelect({ value, title, transformer, options, onCha
 
   return (
     <div ref={selectOptionsRef} className={`relative ${className}`}>
-      <div className={`flex items-center justify-between cursor-pointer p-2 border rounded-md relative`} onClick={toggleSelectOptions}>
+      <div className={`relative flex cursor-pointer items-center justify-between rounded-md border p-2`} onClick={toggleSelectOptions}>
         <div className="grow">
           {title && <div className="text-sm text-gray-500">{title}</div>}
           {value ? (
@@ -50,12 +50,12 @@ export default function SimpleSelect({ value, title, transformer, options, onCha
             <div className="text-sm leading-[20px] text-gray-300">{placeholder}</div>
           )}
         </div>
-        <ChevronDown className="text-[#1F2937] ml-[8px] shrink-0" />
+        <ChevronDown className="ml-[8px] shrink-0 text-[#1F2937]" />
       </div>
       {selectOptionsOpened && (
-        <div className="absolute z-10 mt-[-1] left-[0px] right-[0px] border-[#E5E7EB] border-[1px] rounded-[6px] bg-white text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)] max-h-[400px] overflow-auto">
+        <div className="absolute left-[0px] right-[0px] z-10 mt-[-1] max-h-[400px] overflow-auto rounded-[6px] border-[1px] border-[#E5E7EB] bg-white text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
           {options.map((opt) => (
-            <div className="px-[10px] py-[5px] hover:bg-[#E5E7EB] cursor-pointer" key={opt.value} onClick={() => selectOption(opt.value)}>
+            <div className="cursor-pointer px-[10px] py-[5px] hover:bg-[#E5E7EB]" key={opt.value} onClick={() => selectOption(opt.value)}>
               {opt.label}
             </div>
           ))}

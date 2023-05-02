@@ -66,11 +66,11 @@ const Item = ({ value, values, index, updateList, name }) => {
     <Draggable draggableId={value} index={index}>
       {(provided) => (
         <ItemContainer ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} index={index}>
-          <div className="flex items-center ml-2 mr-4">
+          <div className="ml-2 mr-4 flex items-center">
             <Badge>{index + 1}</Badge>
             <div className="mx-2">{translate(value)}</div>
           </div>
-          <div className="flex mr-2">
+          <div className="mr-2 flex">
             <RoundItem plus onClick={() => handleMove(index, -1)} className="mr-2" />
             <RoundItem minus onClick={() => handleMove(index, 1)} />
           </div>
@@ -96,7 +96,7 @@ const RoundItem = ({ value, plus, minus, onClick, className = "" }) => {
 function Badge({ onClick = () => {}, className = "", children }) {
   return (
     <div
-      className={`flex justify-center items-center rounded-full w-[1.75rem] h-[1.75rem] text-[#6b7280] text-[0.75rem] border-[#d2d6dc] border-[1px] cursor-pointer mx-[0.01rem] ${className}`}
+      className={`mx-[0.01rem] flex h-[1.75rem] w-[1.75rem] cursor-pointer items-center justify-center rounded-full border-[1px] border-[#d2d6dc] text-[0.75rem] text-[#6b7280] ${className}`}
       onClick={onClick}>
       {children}
     </div>
@@ -104,14 +104,14 @@ function Badge({ onClick = () => {}, className = "", children }) {
 }
 
 function Container({ className = "", children }) {
-  return <div className={`shadow border-[1px] border-[#d2d6dc] rounded-[0.5rem] flex flex-col w-[100%] md:w-fit ${className}`}>{children}</div>;
+  return <div className={`flex w-[100%] flex-col rounded-[0.5rem] border-[1px] border-[#d2d6dc] shadow md:w-fit ${className}`}>{children}</div>;
 }
 
 // eslint-disable-next-line react/display-name
 const ItemContainer = React.forwardRef((props, ref) => (
   <div
     ref={ref}
-    className={`${props.index === 0 ? "border-t-[0px]" : "border-t-[1px]"} border-t-[#d2d6dc] w-[100%] grow py-4 flex items-center justify-between ${props.className}`}
+    className={`${props.index === 0 ? "border-t-[0px]" : "border-t-[1px]"} flex w-[100%] grow items-center justify-between border-t-[#d2d6dc] py-4 ${props.className}`}
     {...props}>
     {props.children}
   </div>

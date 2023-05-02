@@ -79,7 +79,7 @@ export function CniField({
   return (
     <>
       <div
-        className={`p-[30px] bg-[#F9FAFB] rounded-[7px] mb-[15px] flex items-center justify-between ${className}`}
+        className={`mb-[15px] flex items-center justify-between rounded-[7px] bg-[#F9FAFB] p-[30px] ${className}`}
         onMouseEnter={() => setMouseIn(true)}
         onMouseLeave={() => setMouseIn(false)}>
         <div className="shrink-0">
@@ -89,10 +89,10 @@ export function CniField({
         <div className="flex items-center justify-end">
           {mode === "correction" && (
             <div className={requestButtonClass} onClick={startRequest}>
-              <PencilAlt className={`w-[14px] h-[14px]  ${hasValidRequest ? "text-white" : "text-[#F97316]"} group-hover:text-white`} />
+              <PencilAlt className={`h-[14px] w-[14px]  ${hasValidRequest ? "text-white" : "text-[#F97316]"} group-hover:text-white`} />
             </div>
           )}
-          <MoreButton className="flex-[0_0_32px] ml-[8px]" onClick={() => setCniModalOpened(true)} />
+          <MoreButton className="ml-[8px] flex-[0_0_32px]" onClick={() => setCniModalOpened(true)} />
         </div>
       </div>
       {correctionRequest && correctionRequest.status === "CORRECTED" && (
@@ -208,11 +208,11 @@ function CniModal({ young, onClose, mode, blockUpload }) {
 
   return (
     <Modal size="md" centered isOpen={true} toggle={() => onClose(changes)}>
-      <div className="bg-white rounded-[8px]">
+      <div className="rounded-[8px] bg-white">
         <div className="p-[24px]">
           {cniFiles.length > 0 || (blockUpload && filesToUpload?.length > 0) ? (
             cniFiles.map((file) => (
-              <div key={file._id} className="flex items-center justify-between text-[12px] mt-[8px] border-b-[#E5E7EB] border-b-[1px] last:border-b-[0px] py-[12px]">
+              <div key={file._id} className="mt-[8px] flex items-center justify-between border-b-[1px] border-b-[#E5E7EB] py-[12px] text-[12px] last:border-b-[0px]">
                 <div className="text-right">{file.name}</div>
                 <div className="flex items-center">
                   <DownloadButton className="ml-[8px] flex-[0_0_32px]" onClick={() => downloadCni(file)} />
@@ -221,9 +221,9 @@ function CniModal({ young, onClose, mode, blockUpload }) {
               </div>
             ))
           ) : (
-            <div className="text-[14px] text-[#6B7280] text-center">Aucune pièce d&apos;identité</div>
+            <div className="text-center text-[14px] text-[#6B7280]">Aucune pièce d&apos;identité</div>
           )}
-          {error && <div className="text-[#EF4444] text-[12px] leading-[1.4em] mt-[16px]">{error}</div>}
+          {error && <div className="mt-[16px] text-[12px] leading-[1.4em] text-[#EF4444]">{error}</div>}
           {mode === "edition" && (
             <>
               <input
@@ -252,15 +252,15 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                 }}
                 className="hidden"
               />
-              <div className="flex items-center justify-between mt-4">
-                <label htmlFor="file-upload" className="flex text-xs space-x-4 items-center">
+              <div className="mt-4 flex items-center justify-between">
+                <label htmlFor="file-upload" className="flex items-center space-x-4 text-xs">
                   <AddButton className="" />
                   <div className="cursor-pointer text-gray-500 hover:text-gray-800">Ajouter un document</div>
                 </label>
               </div>
               {filesToUpload && (
                 <>
-                  <div className="w-full flex space-x-2 justify-between mt-2 items-center">
+                  <div className="mt-2 flex w-full items-center justify-between space-x-2">
                     {!blockUpload ? (
                       <>
                         <div className="3/4">
@@ -277,9 +277,9 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                         </div>
                       </>
                     ) : (
-                      <div className="flex flex-column w-100">
+                      <div className="flex-column w-100 flex">
                         {Array.from(filesToUpload).map((file) => (
-                          <div key={file.name} className="text-[12px] flex flex-row justify-between">
+                          <div key={file.name} className="flex flex-row justify-between text-[12px]">
                             <div>{file.name}</div>
                             <div className="cursor-pointer" onClick={() => removeFileInscription(file)}>
                               X
@@ -289,9 +289,9 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                       </div>
                     )}
                   </div>
-                  <div className="flex mt-4 w-full space-x-2">
-                    <div className="relative bg-white py-[9px] px-[13px] border-[#D1D5DB] border-[1px] rounded-[6px] w-1/2">
-                      <label className="font-normal text-[12px] leading-[16px] text-[#6B7280]">Date d&apos;expiration</label>
+                  <div className="mt-4 flex w-full space-x-2">
+                    <div className="relative w-1/2 rounded-[6px] border-[1px] border-[#D1D5DB] bg-white py-[9px] px-[13px]">
+                      <label className="text-[12px] font-normal leading-[16px] text-[#6B7280]">Date d&apos;expiration</label>
                       <DatePickerList fromEdition={false} value={new Date(date)} onChange={(val) => setDate(val)} />
                     </div>
                     <Field
@@ -310,13 +310,13 @@ function CniModal({ young, onClose, mode, blockUpload }) {
             </>
           )}
         </div>
-        <div className="flex p-[24px] items-center justify-center">
+        <div className="flex items-center justify-center p-[24px]">
           <BorderButton onClick={() => onClose(changes)}>Fermer</BorderButton>
         </div>
       </div>
       <ConfirmationModal
         isOpen={confirmDeleteModal}
-        icon={<Warning className="text-[#D1D5DB] w-[36px] h-[36px]" />}
+        icon={<Warning className="h-[36px] w-[36px] text-[#D1D5DB]" />}
         title={"Supprimer la pièce"}
         message={"Voulez-vous vraiment supprimer ce fichier ? Cette action est irréversible."}
         confirmText="Confirmer la suppression"

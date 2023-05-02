@@ -26,6 +26,7 @@ function getNewCohortFixture(object = {}) {
     busListAvailability: faker.random.boolean(),
     sessionEditionOpenForReferentRegion: faker.random.boolean(),
     sessionEditionOpenForReferentDepartment: faker.random.boolean(),
+    sessionEditionOpenForTransporter: faker.random.boolean(),
     repartitionSchemaCreateAndEditGroupAvailability: faker.random.boolean(),
     repartitionSchemaDownloadAvailability: faker.random.boolean(),
     ...object,

@@ -7,7 +7,7 @@ const NoteIcon = ({ onClick, className, id = "info" }) => {
   return (
     <div>
       <ReactTooltip id={id} className="bg-white shadow-xl" arrowColor="white">
-        <div className="text-[#4B5563] cursor-pointer hover:text-[#2563EB]">Voir la note interne</div>
+        <div className="cursor-pointer text-[#4B5563] hover:text-[#2563EB]">Voir la note interne</div>
       </ReactTooltip>
       <img
         onClick={(e) => {

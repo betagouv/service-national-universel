@@ -6,7 +6,7 @@ const ContinueButton = ({ children, ...rest }) => {
   return (
     <button
       {...rest}
-      className="text-white bg-snu-primary-2 py-[10px] px-10 border-none outline-none rounded-md font-semibold text-sm block w-auto drop-shadow-md self-end hover:opacity-90 my-[1rem] md:my-0">
+      className="my-[1rem] block w-auto self-end rounded-md border-none bg-snu-primary-2 py-[10px] px-10 text-sm font-semibold text-white outline-none drop-shadow-md hover:opacity-90 md:my-0">
       {children}
     </button>
   );

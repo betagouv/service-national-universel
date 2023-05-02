@@ -13,48 +13,48 @@ export default function StepsAffected({ center }) {
   const nbvalid = numberOfStepsCompleted(young);
 
   return (
-    <section className={`flex flex-col mx-[1rem] md:mx-[4rem] my-[2rem] order-3 ${isStepMedicalFieldDone(young) ? "order-4" : "order-3"}`}>
+    <section className={`order-3 mx-[1rem] my-[2rem] flex flex-col md:mx-[4rem] ${isStepMedicalFieldDone(young) ? "order-4" : "order-3"}`}>
       <article className="mb-3">
-        <div className="flex md:hidden flex-row items-center">
+        <div className="flex flex-row items-center md:hidden">
           {nbvalid !== 4 && (
-            <div className="flex items-center justify-center bg-orange-500 h-11 w-11 rounded-full mr-3">
-              <HiBell className="flex md:hidden w-5 h-5 text-white rounded-full" />
+            <div className="mr-3 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500">
+              <HiBell className="flex h-5 w-5 rounded-full text-white md:hidden" />
             </div>
           )}
           <div className="flex flex-col">
-            <h1 className="text-xl md:text-base font-bold md:font-normal leading-7">{isStepMedicalFieldDone(young) ? "Bravo, vous avez fini !" : "4 étapes pour continuer"}</h1>
-            <p className="text-sm text-gray-500 leading-5">{nbvalid} de 4 tâches réalisées</p>
+            <h1 className="text-xl font-bold leading-7 md:text-base md:font-normal">{isStepMedicalFieldDone(young) ? "Bravo, vous avez fini !" : "4 étapes pour continuer"}</h1>
+            <p className="text-sm leading-5 text-gray-500">{nbvalid} de 4 tâches réalisées</p>
           </div>
         </div>
         <div className="hidden md:flex">
           {nbvalid !== 4 && (
-            <div className="flex items-center justify-center bg-orange-500 h-9 w-9 rounded-full mr-6">
-              <HiBell className="flex w-5 h-5 text-white rounded-full" />
+            <div className="mr-6 flex h-9 w-9 items-center justify-center rounded-full bg-orange-500">
+              <HiBell className="flex h-5 w-5 rounded-full text-white" />
             </div>
           )}
           <div className="flex flex-col">
             <h1 className="text-xl font-bold leading-7">{isStepMedicalFieldDone(young) ? "Bravo, vous avez fini !" : "4 étapes pour continuer"}</h1>
-            <p className="text-sm text-gray-500 leading-5">{nbvalid} de 4 tâches réalisées</p>
+            <p className="text-sm leading-5 text-gray-500">{nbvalid} de 4 tâches réalisées</p>
           </div>
         </div>
       </article>
-      <hr className="hidden md:flex text-gray-200 -mx-20" />
+      <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">
         <StepPDR young={young} center={center} />
       </div>
-      <hr className="hidden md:flex text-gray-200 -mx-20" />
+      <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">
         <StepAgreement young={young} />
       </div>
-      <hr className="hidden md:flex text-gray-200 -mx-20" />
+      <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">
         <StepConvocation young={young} />
       </div>
-      <hr className="hidden md:flex text-gray-200 -mx-20" />
+      <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">
         <StepMedicalField young={young} />
       </div>
-      <hr className="hidden md:flex text-gray-200 -mx-20" />
+      <hr className="-mx-20 hidden text-gray-200 md:flex" />
     </section>
   );
 }

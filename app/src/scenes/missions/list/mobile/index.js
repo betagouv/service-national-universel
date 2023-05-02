@@ -350,15 +350,15 @@ export default function List() {
 
   return (
     <div className="flex">
-      <div className="bg-white pb-12 rounded-lg w-full">
+      <div className="w-full rounded-lg bg-white pb-12">
         {/* BEGIN HEADER */}
         <div className="flex justify-between p-3">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-3">Trouvez une mission d&apos;intérêt général</h1>
+            <h1 className="mb-3 text-2xl font-bold text-gray-800">Trouvez une mission d&apos;intérêt général</h1>
             <div className="text-sm font-normal text-gray-700">
               Vous devez réaliser vos 84 heures de mission dans l&apos;année qui suit votre séjour de cohésion.{" "}
               <a
-                className="underline hover:underline font-medium hover:text-gray-700"
+                className="font-medium underline hover:text-gray-700 hover:underline"
                 href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"
                 target="_blank"
                 rel="noreferrer">
@@ -367,7 +367,7 @@ export default function List() {
               .
               <br />
               Astuce : si les missions proposées ne correspondent pas à votre zone géographique, pensez à{" "}
-              <a className="underline hover:underline font-medium hover:text-gray-700" href="/account" target="_blank" rel="noreferrer">
+              <a className="font-medium underline hover:text-gray-700 hover:underline" href="/account" target="_blank" rel="noreferrer">
                 vérifier votre adresse
               </a>
               .
@@ -376,28 +376,28 @@ export default function List() {
         </div>
         {/* END HEADER */}
 
-        <div className=" border flex rounded-full mx-4 items-center pl-2.5 pr-1 py-1  justify-between mb-3">
+        <div className=" mx-4 mb-3 flex items-center justify-between rounded-full border py-1  pl-2.5 pr-1">
           <input
             value={filter?.SEARCH}
             onChange={(e) => {
               e.persist();
               setFilter((prev) => ({ ...prev, SEARCH: e.target.value }));
             }}
-            className="text-[11px] w-11/12 "
+            className="w-11/12 text-[11px] "
             type="text"
             placeholder="Mot clé • N'importe quand • Distance max 100km..."
           />
-          <div className="h-10 w-10 bg-blue-600 rounded-full flex " onClick={() => setModalControl(true)}>
-            <HiOutlineAdjustments className="text-white m-auto" />
+          <div className="flex h-10 w-10 rounded-full bg-blue-600 " onClick={() => setModalControl(true)}>
+            <HiOutlineAdjustments className="m-auto text-white" />
           </div>
         </div>
 
         {/* BEGIN CONTROL */}
-        <div className="w-full bg-white rounded-lg space-y-6 mb-1">
+        <div className="mb-1 w-full space-y-6 rounded-lg bg-white">
           {/* BEGIN MODAL CONTROL*/}
           <Modal size={"20px"} isOpen={modalControl} toggle={setModalControl}>
-            <div className="p-2 bg-gray-50 rounded-xl">
-              <div className="flex justify-between mb-3 items-center ml-2">
+            <div className="rounded-xl bg-gray-50 p-2">
+              <div className="mb-3 ml-2 flex items-center justify-between">
                 <div
                   className="text-xs text-gray-500"
                   onClick={() => {
@@ -408,15 +408,15 @@ export default function List() {
                 </div>
                 <div>Filtrez</div>
                 <div
-                  className="h-10 w-10 bg-blue-600 rounded-full flex "
+                  className="flex h-10 w-10 rounded-full bg-blue-600 "
                   onClick={() => {
                     setModalControl(false);
                   }}>
-                  <Search className="text-white  m-auto " />
+                  <Search className="m-auto  text-white " />
                 </div>
               </div>
               <div className="flex flex-col space-y-5">
-                <div className=" border rounded-xl bg-white py-3.5 pl-4 pr-4">
+                <div className=" rounded-xl border bg-white py-3.5 pl-4 pr-4">
                   {!keyWordOpen && (
                     <div
                       className="flex justify-between "
@@ -426,24 +426,24 @@ export default function List() {
                         setKeyWordOpen(true);
                       }}>
                       <div className="font-bold">Mot clé</div>
-                      <div className="text-gray-500 text-md">{filter?.SEARCH || "Aucun"}</div>
+                      <div className="text-md text-gray-500">{filter?.SEARCH || "Aucun"}</div>
                     </div>
                   )}
                   {keyWordOpen && (
                     <div>
-                      <div className="font-bold text-center ">Mot clé</div>
+                      <div className="text-center font-bold ">Mot clé</div>
                       <input
                         value={keyWord}
                         onChange={(e) => {
                           setKeyWord(e.target.value);
                         }}
-                        className="flex-1 py-1.5 pl-3 w-full placeholder:text-gray-400 text-gray-700 text-sm  border-gray-300 border rounded-md my-3"
+                        className="my-3 w-full flex-1 rounded-md border border-gray-300 py-1.5  pl-3 text-sm text-gray-700 placeholder:text-gray-400"
                         type="text"
                         placeholder="Rechercher par mot clé..."
                       />
                       <div className="flex justify-end ">
                         <div
-                          className="bg-blue-600 text-white text-center w-2/5 rounded-md p-2 "
+                          className="w-2/5 rounded-md bg-blue-600 p-2 text-center text-white "
                           onClick={() => {
                             setKeyWordOpen(!keyWordOpen);
                             setFilter((prev) => ({ ...prev, SEARCH: keyWord }));
@@ -455,7 +455,7 @@ export default function List() {
                   )}
                 </div>
                 <div
-                  className=" border rounded-xl bg-white py-3.5 pl-4 pr-4"
+                  className=" rounded-xl border bg-white py-3.5 pl-4 pr-4"
                   onClick={() => {
                     setDropdownControlDistanceOpen(true);
                     setDropdownControlWhenOpen(false);
@@ -464,14 +464,14 @@ export default function List() {
                   {!dropdownControlDistanceOpen && (
                     <div className="flex justify-between">
                       <div className="font-bold">Distance maximum</div>
-                      <div className="text-gray-500 text-md">{filter?.DISTANCE || 100}km max</div>
+                      <div className="text-md text-gray-500">{filter?.DISTANCE || 100}km max</div>
                     </div>
                   )}
                   {dropdownControlDistanceOpen && (
                     <div>
-                      <div className="font-bold text-center mb-2 ">Distance maximum</div>
+                      <div className="mb-2 text-center font-bold ">Distance maximum</div>
 
-                      <div className="text-xs text-gray-500 text-center">
+                      <div className="text-center text-xs text-gray-500">
                         Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré.{" "}
                         {showMoreDetails === false ? (
                           <button
@@ -493,7 +493,7 @@ export default function List() {
                       </div>
 
                       <div className="flex w-full flex-col space-y-2 py-2 px-2">
-                        <div className="flex justify-around my-3">
+                        <div className="my-3 flex justify-around">
                           <div className="flex items-center gap-2">
                             <input
                               id="main-address"
@@ -507,7 +507,7 @@ export default function List() {
                               {focusedAddress?.address === young.address ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
                             </label>
                             <label htmlFor="main-address" className="cursor-pointer">
-                              <span className="text-xs text-gray-700 leading-[15px]">Autour de mon adresse principale</span>
+                              <span className="text-xs leading-[15px] text-gray-700">Autour de mon adresse principale</span>
                               <br />
                               <span className="text-[13px] text-gray-700">{young.city}</span>
                             </label>
@@ -544,7 +544,7 @@ export default function List() {
                             </div>
                           )}
                         </div>
-                        <div className="flex flex-row justify-start items-center mb-3">
+                        <div className="mb-3 flex flex-row items-center justify-start">
                           <Toggle toggled={hebergement} onClick={() => setHebergement((old) => !old)} />
                           <div className="ml-4">
                             <div className="text-[12px]">Mission avec hébergement</div>
@@ -556,7 +556,7 @@ export default function List() {
                             id="distanceKm"
                             list="distance-list"
                             type="range"
-                            className="w-full  appearance-none h-2 bg-gray-200 rounded-full cursor-pointer items-center"
+                            className="h-2  w-full cursor-pointer appearance-none items-center rounded-full bg-gray-200"
                             value={filter?.DISTANCE}
                             min="1"
                             max={DISTANCE_MAX}
@@ -566,11 +566,11 @@ export default function List() {
                               setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
                             }}
                           />
-                          <div className={`absolute  -mt-10 -ml-2 font-bold  w-full ${!marginDistance && " flex justify-center ml-1"} `} style={{ left: `${marginDistance}px` }}>
+                          <div className={`absolute  -mt-10 -ml-2 w-full  font-bold ${!marginDistance && " ml-1 flex justify-center"} `} style={{ left: `${marginDistance}px` }}>
                             {filter?.DISTANCE}km
                           </div>
                         </div>
-                        <div className="flex justify-between items-center w-full mt-2 px-[10px] text-gray-200">
+                        <div className="mt-2 flex w-full items-center justify-between px-[10px] text-gray-200">
                           <PietonSvg />
                           <VeloSvg />
                           <VoitureSvg />
@@ -581,7 +581,7 @@ export default function List() {
                     </div>
                   )}
                 </div>
-                <div className="border rounded-xl bg-white py-3.5 ">
+                <div className="rounded-xl border bg-white py-3.5 ">
                   {!dropdownControlWhenOpen && (
                     <div
                       className="flex justify-between px-4"
@@ -591,14 +591,14 @@ export default function List() {
                         setKeyWordOpen(false);
                       }}>
                       <div className="font-bold">Période</div>
-                      <div className="text-gray-500 text-md">N&apos;importe quand</div>
+                      <div className="text-md text-gray-500">N&apos;importe quand</div>
                     </div>
                   )}
                   {dropdownControlWhenOpen && (
                     <div>
-                      <div className="font-bold text-center ">Période</div>
+                      <div className="text-center font-bold ">Période</div>
                       <div>
-                        <div className="flex flex-wrap text-sm mt-3">
+                        <div className="mt-3 flex flex-wrap text-sm">
                           <PeriodeTab
                             label={getLabelWhen("")}
                             active={!filter?.PERIOD_PARENT}
@@ -644,14 +644,14 @@ export default function List() {
                           />
                         ) : null}
                         {filter?.PERIOD_PARENT === "CUSTOM" ? (
-                          <div className="flex flex-col gap-2 justify-center items-center mt-6">
-                            <div className="flex flex-wrap gap-2 justify-center items-center">
-                              <div className="flex items-center gap-2 border-[1px] rounded-lg  py-1 px-2">
-                                <label className="text-left text-gray-500 w-full m-0">Du</label>
+                          <div className="mt-6 flex flex-col items-center justify-center gap-2">
+                            <div className="flex flex-wrap items-center justify-center gap-2">
+                              <div className="flex items-center gap-2 rounded-lg border-[1px]  py-1 px-2">
+                                <label className="m-0 w-full text-left text-gray-500">Du</label>
                                 <input
                                   required
                                   type="date"
-                                  className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
+                                  className="w-full cursor-pointer bg-inherit disabled:cursor-not-allowed"
                                   value={filter?.FROM}
                                   onChange={(e) => {
                                     e.persist();
@@ -659,12 +659,12 @@ export default function List() {
                                   }}
                                 />
                               </div>
-                              <div className="flex items-center gap-2 border-[1px] rounded-lg  py-1 px-2">
-                                <label className="text-left text-gray-500 w-full m-0">Au</label>
+                              <div className="flex items-center gap-2 rounded-lg border-[1px]  py-1 px-2">
+                                <label className="m-0 w-full text-left text-gray-500">Au</label>
                                 <input
                                   required
                                   type="date"
-                                  className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
+                                  className="w-full cursor-pointer bg-inherit disabled:cursor-not-allowed"
                                   value={filter?.TO}
                                   onChange={(e) => {
                                     e.persist();
@@ -674,7 +674,7 @@ export default function List() {
                               </div>
                             </div>
                             {filter?.FROM || filter?.TO ? (
-                              <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, TO: "", FROM: "" }))}>
+                              <div className="cursor-pointer text-xs text-gray-600 hover:underline" onClick={() => setFilter((prev) => ({ ...prev, TO: "", FROM: "" }))}>
                                 Effacer
                               </div>
                             ) : null}
@@ -686,12 +686,12 @@ export default function List() {
                 </div>
               </div>
               <Link to="/preferences">
-                <div className="flex mx-3 justify-between mt-4 pb-20 items-center">
+                <div className="mx-3 mt-4 flex items-center justify-between pb-20">
                   <div>
                     <div className="font-bold">Gagnez du temps</div>
                     <div className="text-xs text-gray-600">Renseignez vos préférences pour les prochaines fois</div>
                   </div>
-                  <HiOutlineArrowNarrowRight className="text-gray-500 w-5" />
+                  <HiOutlineArrowNarrowRight className="w-5 text-gray-500" />
                 </div>
               </Link>
             </div>
@@ -699,7 +699,7 @@ export default function List() {
           {/* END MODAL CONTROL*/}
 
           <div className="relative">
-            <div className="flex gap-4 px-4 overflow-x-scroll">
+            <div className="flex gap-4 overflow-x-scroll px-4">
               <DomainFilter Icon={Sante} name="HEALTH" label="Santé" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("HEALTH")} />
               <DomainFilter Icon={Solidarite} name="SOLIDARITY" label="Solidarité" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SOLIDARITY")} />
               <DomainFilter Icon={Citoyennete} name="CITIZENSHIP" label="Citoyenneté" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("CITIZENSHIP")} />
@@ -747,7 +747,7 @@ export default function List() {
               innerClass={{ pagination: "pagination" }}
               dataField="created_at"
               renderResultStats={({ numberOfResults }) => {
-                return <div className="text-gray-700 my-3 text-sm w-28 basis-3/4">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
+                return <div className="my-3 w-28 basis-3/4 text-sm text-gray-700">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
               }}
               sortOptions={[
                 { label: "La plus récente", dataField: "createdAt.keyword", sortBy: "asc" },
@@ -760,9 +760,9 @@ export default function List() {
                 return data.map((e) => <CardMission key={e._id} mission={e} youngLocation={filter.LOCATION} />);
               }}
               renderNoResults={() => (
-                <div className="text-gray-700 my-3 p-2 text-sm">
+                <div className="my-3 p-2 text-sm text-gray-700">
                   Aucune mission ne correspond à votre recherche. Merci de{" "}
-                  <a className="underline hover:underline font-medium hover:text-gray-700" href="/account" target="_blank" rel="noreferrer">
+                  <a className="font-medium underline hover:text-gray-700 hover:underline" href="/account" target="_blank" rel="noreferrer">
                     vérifier votre adresse
                   </a>
                   .
@@ -778,11 +778,11 @@ export default function List() {
 
 const DomainFilter = ({ Icon, name, label, onClick, active }) => {
   return (
-    <div className="flex basis-20 flex-col items-center justify-start space-y-2 cursor-pointer" onClick={() => onClick(name)}>
-      <div className={`${active ? "bg-[#212B44]" : "bg-gray-200"} w-9 h-9 flex justify-center items-center rounded-xl transition duration-200 ease-in`}>
+    <div className="flex basis-20 cursor-pointer flex-col items-center justify-start space-y-2" onClick={() => onClick(name)}>
+      <div className={`${active ? "bg-[#212B44]" : "bg-gray-200"} flex h-9 w-9 items-center justify-center rounded-xl transition duration-200 ease-in`}>
         <Icon className="text-white" />
       </div>
-      <div className="text-xs text-gray-700 text-center">{label}</div>
+      <div className="text-center text-xs text-gray-700">{label}</div>
     </div>
   );
 };
@@ -791,14 +791,14 @@ const PeriodeTab = ({ Icon, name, label, onClick, active }) => {
   return (
     <div className="ml-2 mb-2" onClick={() => onClick(name)}>
       {active ? (
-        <div className="flex items-center justify-center cursor-pointer rounded-full py-1  px-2 border-[1px] text-blue-600 border-blue-600 hover:border-blue-500 font-medium ">
+        <div className="flex cursor-pointer items-center justify-center rounded-full border-[1px]  border-blue-600 py-1 px-2 font-medium text-blue-600 hover:border-blue-500 ">
           {label}
-          {Icon ? <Icon className="text-gray-500 ml-1" /> : null}
+          {Icon ? <Icon className="ml-1 text-gray-500" /> : null}
         </div>
       ) : (
-        <div className="group flex items-center justify-center cursor-pointer rounded-full py-1 px-2 border-[1px] text-gray-700 border-gray-200 hover:border-gray-300 font-medium">
+        <div className="group flex cursor-pointer items-center justify-center rounded-full border-[1px] border-gray-200 py-1 px-2 font-medium text-gray-700 hover:border-gray-300">
           {label}
-          {Icon ? <Icon className="text-gray-500 ml-1" /> : null}
+          {Icon ? <Icon className="ml-1 text-gray-500" /> : null}
         </div>
       )}
     </div>
@@ -823,22 +823,22 @@ const Select = ({ value, options, handleChangeValue, placeholder }) => {
       {/* select item */}
       <div>
         <button
-          className="flex justify-between items-center gap-3 border-[1px] px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-wait min-w-[250px]"
+          className="flex min-w-[250px] cursor-pointer items-center justify-between gap-3 rounded-lg border-[1px] px-3 py-2 disabled:cursor-wait disabled:opacity-50"
           style={{ fontFamily: "Marianne" }}
           onClick={() => setOpen((e) => !e)}>
           <div className="flex items-center gap-2">
-            <span className="text-gray-700 font-medium text-sm whitespace-nowrap ">{selected}</span>
+            <span className="whitespace-nowrap text-sm font-medium text-gray-700 ">{selected}</span>
           </div>
           <ChevronDown className="text-gray-400" />
         </button>
 
         {/* display options */}
-        <div className=" h-0 flex flex-col justify-end relative">
-          <div className={`${open ? "block" : "hidden"} left-0 right-0  rounded-lg bottom-11 bg-white transition absolute border-3 border-red-600 shadow overflow-hidden z-50 `}>
+        <div className=" relative flex h-0 flex-col justify-end">
+          <div className={`${open ? "block" : "hidden"} border-3 absolute  left-0 right-0 bottom-11 z-50 overflow-hidden rounded-lg border-red-600 bg-white shadow transition `}>
             {values.map((option, index) => (
-              <div key={index} className={`${(value || []).includes(option) && "font-bold bg-gray"}`}>
+              <div key={index} className={`${(value || []).includes(option) && "bg-gray font-bold"}`}>
                 <div
-                  className="group flex  items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer"
+                  className="group flex  cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50"
                   onClick={() => {
                     handleChangeValue(option);
                   }}>
@@ -855,15 +855,15 @@ const Select = ({ value, options, handleChangeValue, placeholder }) => {
 };
 const Toggle = ({ toggled, onClick }) => {
   return toggled ? (
-    <div onClick={onClick} name="visibility" className={`flex items-center w-10 h-6 rounded-full bg-blue-600 transition duration-100 ease-in cursor-pointer`}>
-      <div className="flex justify-center items-center h-6 w-6 rounded-full border-[1px] border-blue-600 bg-white translate-x-[16px] transition duration-100 ease-in shadow-nina"></div>
+    <div onClick={onClick} name="visibility" className={`flex h-6 w-10 cursor-pointer items-center rounded-full bg-blue-600 transition duration-100 ease-in`}>
+      <div className="flex h-6 w-6 translate-x-[16px] items-center justify-center rounded-full border-[1px] border-blue-600 bg-white shadow-nina transition duration-100 ease-in"></div>
     </div>
   ) : (
     <div
       onClick={onClick}
       name="visibility"
-      className={`flex items-center w-10 h-6 border-[1px] rounded-full border-blue-600 bg-white transition duration-100 ease-in cursor-pointer`}>
-      <div className="flex justify-center items-center h-6 w-6 rounded-full border-[1px] border-blue-600 bg-white translate-x-[-1px] transition duration-100 ease-in shadow-nina"></div>
+      className={`flex h-6 w-10 cursor-pointer items-center rounded-full border-[1px] border-blue-600 bg-white transition duration-100 ease-in`}>
+      <div className="flex h-6 w-6 translate-x-[-1px] items-center justify-center rounded-full border-[1px] border-blue-600 bg-white shadow-nina transition duration-100 ease-in"></div>
     </div>
   );
 };

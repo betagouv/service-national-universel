@@ -33,22 +33,22 @@ export default function ModalPM({ theme, open, setOpen, young }) {
           <div
             className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
               theme.text[young.statusMilitaryPreparationFiles]
-            } px-2 py-[2px] rounded-sm `}>
+            } rounded-sm px-2 py-[2px] `}>
             {translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}
           </div>
           <CloseSvg className="text-gray-500" height={12} width={12} onClick={() => setOpen(false)} />
         </div>
-        <div className="flex items-center gap-2 mt-4">
-          <Prepa className="w-6 h-6 mr-2 text-gray-500" />
-          <div className="text-lg leading-5 font-bold">Dossier d&apos;éligibilité aux Préparations militaires</div>
+        <div className="mt-4 flex items-center gap-2">
+          <Prepa className="mr-2 h-6 w-6 text-gray-500" />
+          <div className="text-lg font-bold leading-5">Dossier d&apos;éligibilité aux Préparations militaires</div>
         </div>
         {young.statusMilitaryPreparationFiles === "WAITING_CORRECTION" ? (
           <>
-            <div className="flex justify-between items-center px-2 py-3 rounded-lg bg-gray-50 mt-4 mb-4 gap-6">
-              <div className="flex flex-col flex-1">
+            <div className="mt-4 mb-4 flex items-center justify-between gap-6 rounded-lg bg-gray-50 px-2 py-3">
+              <div className="flex flex-1 flex-col">
                 <div className="text-base font-bold">Corrections demandées</div>
                 <div className="text-sm text-gray-500">{young.militaryPreparationCorrectionMessage}</div>
-                <button className="mt-4 border-[1px] border-blue-700 hover:bg-blue-700 text-blue-700 hover:text-white px-4 py-2 rounded-lg" onClick={onCorrection}>
+                <button className="mt-4 rounded-lg border-[1px] border-blue-700 px-4 py-2 text-blue-700 hover:bg-blue-700 hover:text-white" onClick={onCorrection}>
                   Envoyer ma correction
                 </button>
               </div>

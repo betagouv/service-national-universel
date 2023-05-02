@@ -82,74 +82,74 @@ export default function CardEquivalence({ young, equivalence }) {
 
   return (
     <>
-      <div className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md">
+      <div className="mb-4 flex w-full flex-col rounded-lg bg-white px-4 pt-3 shadow-md">
         <div className="mb-3">
           <div className="flex items-center justify-between px-4">
             <div className="flex items-center">
-              <div className="duration-150 flex rounded-full bg-[#FD7A02] p-2 items-center justify-center mr-2">
+              <div className="mr-2 flex items-center justify-center rounded-full bg-[#FD7A02] p-2 duration-150">
                 <Bell className="h-4 w-4 text-white" />
               </div>
               <div className="flex-col items-center">
-                <div className="text-xs font-normal text-gray-500 leading-4 uppercase">envoyée le {formatDateFR(equivalence.createdAt)}</div>
-                <div className="text-base leading-5 font-bold">Demande de reconnaissance d’engagement déjà réalisé</div>
+                <div className="text-xs font-normal uppercase leading-4 text-gray-500">envoyée le {formatDateFR(equivalence.createdAt)}</div>
+                <div className="text-base font-bold leading-5">Demande de reconnaissance d’engagement déjà réalisé</div>
               </div>
             </div>
             {!cardOpen ? (
               <div className="flex items-center gap-5">
-                <div className={`text-xs font-normal ${themeBadge.background[equivalence.status]} ${themeBadge.text[equivalence.status]} px-2 py-[2px] rounded-sm `}>
+                <div className={`text-xs font-normal ${themeBadge.background[equivalence.status]} ${themeBadge.text[equivalence.status]} rounded-sm px-2 py-[2px] `}>
                   {translateEquivalenceStatus(equivalence.status)}
                 </div>
-                <BsChevronDown className="text-gray-400 h-5 w-5 cursor-pointer" onClick={() => setCardOpen(true)} />
+                <BsChevronDown className="h-5 w-5 cursor-pointer text-gray-400" onClick={() => setCardOpen(true)} />
               </div>
             ) : (
               <>
                 {equivalence.status === "WAITING_VERIFICATION" ? (
                   <div className="flex items-center gap-5">
                     <button
-                      className="group flex items-center justify-center rounded-lg shadow-ninaButton px-4 py-2 hover:bg-indigo-400 transition duration-300 ease-in-out"
+                      className="group flex items-center justify-center rounded-lg px-4 py-2 shadow-ninaButton transition duration-300 ease-in-out hover:bg-indigo-400"
                       onClick={() => setModalStatus({ isOpen: true, status: "WAITING_CORRECTION", equivalenceId: equivalence._id })}>
-                      <ExclamationCircle className="text-indigo-400 mr-2 w-5 h-5 group-hover:text-white" />
-                      <span className="text-sm leading-5 font-medium text-gray-700 group-hover:text-white">Demander une correction</span>
+                      <ExclamationCircle className="mr-2 h-5 w-5 text-indigo-400 group-hover:text-white" />
+                      <span className="text-sm font-medium leading-5 text-gray-700 group-hover:text-white">Demander une correction</span>
                     </button>
                     <button
-                      className="flex items-center justify-center rounded-lg px-4 py-2 bg-green-500 hover:bg-green-400 transition duration-300 ease-in-ou"
+                      className="ease-in-ou flex items-center justify-center rounded-lg bg-green-500 px-4 py-2 transition duration-300 hover:bg-green-400"
                       onClick={() => setModalStatus({ isOpen: true, status: "VALIDATED", equivalenceId: equivalence._id })}>
-                      <CheckCircle className="text-green-500 mr-2 w-5 h-5 hover:bg-green-400" />
-                      <span className="text-sm leading-5 font-medium text-white">Valider</span>
+                      <CheckCircle className="mr-2 h-5 w-5 text-green-500 hover:bg-green-400" />
+                      <span className="text-sm font-medium leading-5 text-white">Valider</span>
                     </button>
                     <button
-                      className="flex items-center justify-center rounded-lg px-4 py-2 bg-red-500 hover:bg-red-400 transition duration-300 ease-in-ou"
+                      className="ease-in-ou flex items-center justify-center rounded-lg bg-red-500 px-4 py-2 transition duration-300 hover:bg-red-400"
                       onClick={() => setModalStatus({ isOpen: true, status: "REFUSED", equivalenceId: equivalence._id })}>
-                      <XCircle className="text-red-500 mr-2 w-5 h-5 hover:bg-red-400" />
-                      <span className="text-sm leading-5 font-medium text-white">Refuser</span>
+                      <XCircle className="mr-2 h-5 w-5 text-red-500 hover:bg-red-400" />
+                      <span className="text-sm font-medium leading-5 text-white">Refuser</span>
                     </button>
-                    <BsChevronDown className="text-gray-400 h-5 w-5 rotate-180 cursor-pointer" onClick={() => setCardOpen(false)} />
+                    <BsChevronDown className="h-5 w-5 rotate-180 cursor-pointer text-gray-400" onClick={() => setCardOpen(false)} />
                   </div>
                 ) : (
                   <div className="flex items-center gap-5 ">
-                    <div className="border-[1px] border-gray-300 rounded-lg px-3 py-2.5">
+                    <div className="rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
                       <div className="relative" ref={ref}>
                         <button
-                          className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait min-w-[200px]"
+                          className="flex min-w-[200px] cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50"
                           onClick={() => setOpen((e) => !e)}>
                           <div className="flex items-center gap-2">
                             <GoPrimitiveDot className={theme[equivalence.status]} />
-                            <span className="text-sm leading-5 font-normal">{translate(equivalence?.status)}</span>
+                            <span className="text-sm font-normal leading-5">{translate(equivalence?.status)}</span>
                           </div>
-                          <ChevronDown className="ml-2 text-gray-400 cursor-pointer" />
+                          <ChevronDown className="ml-2 cursor-pointer text-gray-400" />
                         </button>
                         {/* display options */}
-                        <div className={`${open ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[35px]`}>
+                        <div className={`${open ? "block" : "hidden"}  absolute left-0 top-[35px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
                           {optionsStatus.map((option) => (
                             <div
                               key={option}
-                              className={`${option === equivalence?.status && "font-bold bg-gray"}`}
+                              className={`${option === equivalence?.status && "bg-gray font-bold"}`}
                               // eslint-disable-next-line react/jsx-no-duplicate-props
                               onClick={() => {
                                 setModalStatus({ isOpen: true, status: option, equivalenceId: equivalence._id });
                                 setOpen(false);
                               }}>
-                              <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                              <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
                                 <div>{translate(option)}</div>
                                 {option === equivalence?.type ? <BsCheck2 /> : null}
                               </div>
@@ -158,7 +158,7 @@ export default function CardEquivalence({ young, equivalence }) {
                         </div>
                       </div>
                     </div>
-                    <BsChevronDown className="text-gray-400 h-5 w-5 rotate-180 cursor-pointer" onClick={() => setCardOpen(false)} />
+                    <BsChevronDown className="h-5 w-5 rotate-180 cursor-pointer text-gray-400" onClick={() => setCardOpen(false)} />
                   </div>
                 )}
               </>
@@ -168,9 +168,9 @@ export default function CardEquivalence({ young, equivalence }) {
         {cardOpen ? (
           <>
             <hr className="mb-3 text-gray-200" />
-            <div className="flex items-stretch mb-3 gap-4 justify-around">
+            <div className="mb-3 flex items-stretch justify-around gap-4">
               <div className="grid grid-cols-2 py-2">
-                <div className="flex flex-col gap-y-4 text-sm leading-none font-normal text-gray-400">
+                <div className="flex flex-col gap-y-4 text-sm font-normal leading-none text-gray-400">
                   <span>Type d’engagement :</span>
                   {equivalence.sousType ? <span>Catégorie :</span> : null}
                   <span>Structure d’accueil :</span>
@@ -180,7 +180,7 @@ export default function CardEquivalence({ young, equivalence }) {
                   <span>Code postal :</span>
                   <span>Ville :</span>
                 </div>
-                <div className="flex flex-col gap-y-4 text-sm leading-none font-medium">
+                <div className="flex flex-col gap-y-4 text-sm font-medium leading-none">
                   <span>{equivalence.type}</span>
                   {equivalence.sousType ? <span>{equivalence.sousType}</span> : null}
                   <span>{equivalence.structureName}</span>
@@ -197,31 +197,31 @@ export default function CardEquivalence({ young, equivalence }) {
                   <span>{equivalence.city}</span>
                 </div>
               </div>
-              <div className="flex flex-col justify-center bg-gray-50 rounded-lg gap-4">
-                <div className="flex flex-col justify-center items-center gap-2 mx-16">
+              <div className="flex flex-col justify-center gap-4 rounded-lg bg-gray-50">
+                <div className="mx-16 flex flex-col items-center justify-center gap-2">
                   <SimpleFileIcon />
-                  <div className="text-sm leading-5 font-bold text-center">
+                  <div className="text-center text-sm font-bold leading-5">
                     Document justificatif <br /> d’engagement
                   </div>
                 </div>
-                <div className="flex flex-col justify-end items-end px-7">
-                  <div className="transition duration-150 flex rounded-full bg-blue-600 p-2 items-center justify-center hover:scale-110 ease-out hover:ease-in cursor-pointer">
-                    <Download className=" text-indigo-100 bg-blue-600 " onClick={() => setModalFiles({ isOpen: true })} />
+                <div className="flex flex-col items-end justify-end px-7">
+                  <div className="flex cursor-pointer items-center justify-center rounded-full bg-blue-600 p-2 transition duration-150 ease-out hover:scale-110 hover:ease-in">
+                    <Download className=" bg-blue-600 text-indigo-100 " onClick={() => setModalFiles({ isOpen: true })} />
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col justify-center border-[1px] border-gray-200 rounded-lg py-4 px-8">
-                <div className="text-base leading-6 font-bold text-gray-900 mb-4">
+              <div className="flex flex-col justify-center rounded-lg border-[1px] border-gray-200 py-4 px-8">
+                <div className="mb-4 text-base font-bold leading-6 text-gray-900">
                   Personne contact au sein <br /> de la structure
                 </div>
-                <div className={`h-10 w-10 flex justify-center items-center rounded-full bg-gray-100 text-indigo-600 text-base font-semibold mb-3`}>
+                <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-base font-semibold text-indigo-600`}>
                   {getInitials(equivalence.contactFullName)}
                 </div>
-                <div className="text-sm leading-5 font-medium text-gray-900 mb-2">{equivalence.contactFullName}</div>
-                <div className="flex items-center mb-4">
-                  <div className="text-xs leading-none font-nornal text-fray-700 mr-2 ">{equivalence.contactEmail}</div>
+                <div className="mb-2 text-sm font-medium leading-5 text-gray-900">{equivalence.contactFullName}</div>
+                <div className="mb-4 flex items-center">
+                  <div className="font-nornal text-fray-700 mr-2 text-xs leading-none ">{equivalence.contactEmail}</div>
                   <div
-                    className="flex items-center justify-center cursor-pointer hover:scale-105"
+                    className="flex cursor-pointer items-center justify-center hover:scale-105"
                     onClick={() => {
                       copyToClipboard(equivalence.contactEmail);
                       setCopied(true);
