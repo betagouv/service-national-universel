@@ -23,7 +23,7 @@ router.post("/by-point-de-rassemblement", passport.authenticate(["referent"], { 
       track_total_hits: true,
     };
 
-    const response = await esClient.msearch({ index: "lignedebus", body: buildNdJson({ index: "lignedebus", type: "_doc" }, body) });
+    const response = await esClient.msearch({ index: "lignebus", body: buildNdJson({ index: "lignebus", type: "_doc" }, body) });
     return res.status(200).send(response.body);
   } catch (error) {
     capture(error);

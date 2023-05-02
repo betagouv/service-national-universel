@@ -253,7 +253,7 @@ const ListSessions = ({ user, firstSession }) => {
   };
 
   const getLinesByPdr = async (ids) => {
-    const { responses } = await api.post("/elasticsearch/lignedebus/by-point-de-rassemblement", { filters: { meetingPointIds: ids, cohort: [selectedCohort] } });
+    const { responses } = await api.post("/elasticsearch/lignebus/by-point-de-rassemblement", { filters: { meetingPointIds: ids, cohort: [selectedCohort] } });
     return responses[0]?.aggregations?.group_by_meetingPointId?.buckets || [];
   };
 

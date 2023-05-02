@@ -7,6 +7,6 @@ router.use("/sessionphase1", require("./sessionphase1"));
 router.use("/plandetransport", require("./plandetransport"));
 router.use("/modificationbus", require("./modificationbus"));
 router.use("/pointderassemblement", require("./pointderassemblement"));
-router.use("/lignedebus", require("./lignedebus"));
+router.use("/lignebus", require("./lignebus"));
 
 module.exports = router;
