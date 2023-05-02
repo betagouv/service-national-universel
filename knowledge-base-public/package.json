@@ -3,7 +3,7 @@
   "scripts": {
     "dev": "next dev -p 8084",
     "build": "next build",
-    "start": "next start",
+    "start": "next start"
   },
   "prettier": {
     "printWidth": 180
