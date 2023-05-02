@@ -1,7 +1,8 @@
 import StatusText from "../../moderator-ref/subscenes/sejour/components/StatusText";
 import React from "react";
+import { LoadingBar } from "./loading";
 
-export default function StatusTable({ statuses, className = "", onStatusClicked = () => {} }) {
+export default function StatusTable({ statuses, className = "", onStatusClicked = () => {}, loading = false }) {
   const columns = statuses
     ? {
         left: statuses.slice(0, Math.ceil(statuses.length / 2)),
@@ -15,17 +16,55 @@ export default function StatusTable({ statuses, className = "", onStatusClicked 
   return (
     <div className={`flex ${className}`}>
       <div className="flex w-[45%] flex-col gap-4">
-        {columns.left.map((column) => (
-          <StatusText status={column.status} nb={column.nb} percentage={column.percentage} key={column.status} infoPanel={column.info} url={column.url} onClick={onStatusClicked} />
-        ))}
+        {loading ? (
+          <>
+            <LoadingBar width="100%" />
+            <LoadingBar width="100%" />
+            <LoadingBar width="100%" />
+            <LoadingBar width="100%" />
+            <LoadingBar width="100%" />
+            <LoadingBar width="100%" />
+          </>
+        ) : (
+          columns.left.map((column, i) => (
+            <StatusText
+              status={column.status}
+              nb={column.nb}
+              percentage={column.percentage}
+              key={column.status + "-" + i}
+              infoPanel={column.info}
+              url={column.url}
+              onClick={onStatusClicked}
+            />
+          ))
+        )}
       </div>
       <div className="flex w-[10%] items-center justify-center">
         <div className="h-3/5 w-[1px] border-r-[1px] border-gray-300"></div>
       </div>
       <div className="flex w-[45%] flex-col gap-4">
-        {columns.right.map((column) => (
-          <StatusText status={column.status} nb={column.nb} percentage={column.percentage} key={column.status} infoPanel={column.info} url={column.url} onClick={onStatusClicked} />
-        ))}
+        {loading ? (
+          <>
+            <LoadingBar width="100%" />
+            <LoadingBar width="100%" />
+            <LoadingBar width="100%" />
+            <LoadingBar width="100%" />
+            <LoadingBar width="100%" />
+            <LoadingBar width="100%" />
+          </>
+        ) : (
+          columns.right.map((column, i) => (
+            <StatusText
+              status={column.status}
+              nb={column.nb}
+              percentage={column.percentage}
+              key={column.status + "-" + i}
+              infoPanel={column.info}
+              url={column.url}
+              onClick={onStatusClicked}
+            />
+          ))
+        )}
       </div>
     </div>
   );

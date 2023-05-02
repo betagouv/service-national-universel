@@ -4,8 +4,8 @@ import { FullDoughnut } from "../../../../components/graphs";
 import Section from "../../../../components/ui/Section";
 import api from "../../../../../../services/api";
 import { translate } from "snu-lib/translation";
-import Loader from "../../../../../../components/Loader";
 import StatusTable from "../../../../components/ui/StatusTable";
+import { LoadingDoughnut } from "../../../../components/ui/loading";
 
 export default function SectionStructures({ filters }) {
   const [loading, setLoading] = useState(true);
@@ -117,31 +117,33 @@ export default function SectionStructures({ filters }) {
     <Section title="Structures">
       {error ? (
         <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
-      ) : loading ? (
-        <div className="flex items-center justify-center">
-          <Loader />
-        </div>
       ) : (
         <div className="flex">
           <div className="mr-4 flex flex-[0_0_332px] flex-col">
             <DashboardBox title="Structures" className="grow" to="/structure">
-              <div className="text-2xl font-bold hover:text-gray-900">{totalStructures}</div>
+              {loading ? <LoadingDoughnut /> : <div className="text-2xl font-bold hover:text-gray-900">{totalStructures}</div>}
             </DashboardBox>
             <DashboardBox title="Affiliées à un réseau national" className="grow" to="/structure">
-              <div className="text-2xl font-bold">{nationalStructures}</div>
+              {loading ? <LoadingDoughnut /> : <div className="text-2xl font-bold">{nationalStructures}</div>}
             </DashboardBox>
           </div>
-          <DashboardBox title="Catégories" subtitle="Sélectionnez une catégorie pour voir ses sous-catégories." className="grow">
-            <FullDoughnut
-              legendSide="left"
-              maxLegends={2}
-              labels={structures.map((structure) => structure.label)}
-              values={structures.map((structure) => structure.total)}
-              legendUrls={structures.map((structure) => `/structure?LEGAL_STATUS=%5B"${structure._id}"%5D`)}
-              tooltipsPercent
-              className="justify-center"
-              legendInfoPanels={structures.map((structure) => structure.info)}
-            />
+          <DashboardBox title="Catégories" subtitle="Sélectionnez une catégorie pour voir ses sous-catégories." className="flex grow flex-col" childrenClassName="grow">
+            {loading ? (
+              <div className="h-100 flex items-center justify-center">
+                <LoadingDoughnut />
+              </div>
+            ) : (
+              <FullDoughnut
+                legendSide="left"
+                maxLegends={2}
+                labels={structures.map((structure) => structure.label)}
+                values={structures.map((structure) => structure.total)}
+                legendUrls={structures.map((structure) => `/structure?LEGAL_STATUS=%5B"${structure._id}"%5D`)}
+                tooltipsPercent
+                className="justify-center"
+                legendInfoPanels={structures.map((structure) => structure.info)}
+              />
+            )}
           </DashboardBox>
         </div>
       )}

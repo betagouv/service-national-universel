@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { FullDoughnut } from "../../../../components/graphs";
-import Loader from "../../../../../../components/Loader";
 import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
 import { translate } from "snu-lib";
+import { LoadingDoughnut } from "../../../../components/ui/loading";
 
 export default function VolontairesStatutsDePhase({ filters, className = "" }) {
   const [phase, setPhase] = useState(1);
@@ -53,12 +53,12 @@ export default function VolontairesStatutsDePhase({ filters, className = "" }) {
   );
 
   return (
-    <DashboardBox title="Statuts de phase" headerChildren={phaseSelector} className={className}>
+    <DashboardBox title="Statuts de phase" headerChildren={phaseSelector} className={`flex flex-col ${className}`} childrenClassName="grow">
       {error ? (
         <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : graph === null ? (
-        <div className="flex items-center justify-center">
-          <Loader />
+        <div className="h-100 flex items-center justify-center">
+          <LoadingDoughnut />
         </div>
       ) : (
         <FullDoughnut labels={graph.labels} values={graph.values} legendUrls={graph.legendUrls} legendSide="bottom" maxLegends={2} className="mt-8" tooltipsPercent />

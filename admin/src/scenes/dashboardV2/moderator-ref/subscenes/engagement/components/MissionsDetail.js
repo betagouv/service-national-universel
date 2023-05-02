@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import Loader from "../../../../../../components/Loader";
 import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
 import { translate } from "snu-lib";
 import Tabs from "../../../../../phase0/components/Tabs";
 import { BarChart, Legends } from "../../../../components/graphs";
 import { computeMissionUrl } from "../../../../components/common";
+import { LoadingBar } from "../../../../components/ui/loading";
 
 export default function MissionsDetail({ filters, missionFilters, className = "" }) {
   const [loading, setLoading] = useState(true);
@@ -36,7 +36,6 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
     try {
       const result = await api.post(`/dashboard/engagement/missions-detail`, { filters, missionFilters, sort, group: selectedTab });
       if (result.ok) {
-        console.log("Mission Details: ", result.data);
         let maxValue = 0;
         result.data.forEach((d) => {
           if (maxValue < d.validatedMission) {
@@ -107,8 +106,12 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
       {error ? (
         <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : loading ? (
-        <div className="flex items-center justify-center">
-          <Loader />
+        <div className="flex items-center justify-around">
+          <LoadingBar width="w-[15%]" />
+          <LoadingBar width="w-[15%]" />
+          <LoadingBar width="w-[15%]" />
+          <LoadingBar width="w-[15%]" />
+          <LoadingBar width="w-[15%]" />
         </div>
       ) : bars.length === 0 ? (
         <div className="text-center text-gray-500">Aucune données</div>

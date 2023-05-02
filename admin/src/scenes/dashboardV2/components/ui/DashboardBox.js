@@ -17,17 +17,17 @@ export default function DashboardBox(props) {
   }
 }
 
-function BoxContent({ title, children, className = "", headerChildren = null, subtitle = null }) {
+function BoxContent({ title, children, contentClassName = "", headerChildren = null, subtitle = null, childrenClassName = "", headerClassName = "" }) {
   return (
     <>
-      <div className={`flex items-start justify-between hover:text-gray-900 ${className}`}>
-        <div>
+      <div className={`flex items-start justify-between hover:text-gray-900 ${contentClassName}`}>
+        <div className={headerClassName}>
           <h2 className="mt-0 text-base font-bold text-gray-900 hover:text-gray-900">{title}</h2>
           {subtitle && <h3 className="text-sm text-gray-500 hover:text-gray-900">{subtitle}</h3>}
         </div>
         <div className="hover:text-gray-900">{headerChildren}</div>
       </div>
-      <div className="hover:text-gray-900">{children}</div>
+      <div className={`hover:text-gray-900 ${childrenClassName}`}>{children}</div>
     </>
   );
 }

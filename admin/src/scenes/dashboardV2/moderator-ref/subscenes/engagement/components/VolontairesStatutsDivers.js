@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Loader from "../../../../../../components/Loader";
 import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
 import { translate, translateApplication } from "snu-lib";
@@ -69,14 +68,10 @@ export default function VolontairesStatutsDivers({ filters, className = "" }) {
     <DashboardBox title="Statuts divers" className={className}>
       {error ? (
         <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
-      ) : loading ? (
-        <div className="flex items-center justify-center">
-          <Loader />
-        </div>
       ) : (
         <>
           <Tabs selected={selectedTab} tabs={tabs} onChange={setSelectedTab} className="my-6" />
-          <StatusTable className="" statuses={statuses[selectedTab]} />
+          <StatusTable className="" statuses={statuses[selectedTab]} loading={loading} />
         </>
       )}
     </DashboardBox>

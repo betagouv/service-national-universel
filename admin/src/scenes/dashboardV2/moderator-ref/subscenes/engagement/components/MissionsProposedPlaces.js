@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { DemiDoughnut } from "../../../../components/graphs";
-import Loader from "../../../../../../components/Loader";
 import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
 import { computeMissionUrl } from "../../../../components/common";
+import { LoadingDemiDoughnut } from "../../../../components/ui/loading";
 
 export default function MissionsProposedPlaces({ filters, missionFilters, className = "" }) {
   const [graph, setGraph] = useState(null);
@@ -21,7 +21,6 @@ export default function MissionsProposedPlaces({ filters, missionFilters, classN
     try {
       const result = await api.post(`/dashboard/engagement/mission-proposed-places`, { filters, missionFilters });
       if (result.ok) {
-        console.log("RESULT: ", result.data);
         const values = [result.data.occupied, result.data.left];
         const labels = ["Occupées", "Disponibles"];
         setGraph({ values, labels });
@@ -36,12 +35,12 @@ export default function MissionsProposedPlaces({ filters, missionFilters, classN
   }
 
   return (
-    <DashboardBox title="Places proposées" className={`!pb-0 ${className}`} to={url}>
+    <DashboardBox title="Places proposées" className={`flex flex-col !pb-0 ${className}`} childrenClassName="grow flex items-end" to={url}>
       {error ? (
         <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : graph === null ? (
-        <div className="flex items-center justify-center">
-          <Loader />
+        <div className="flex items-end justify-center">
+          <LoadingDemiDoughnut />
         </div>
       ) : (
         <DemiDoughnut labels={graph.labels} values={graph.values} className="mt-8" tooltipsPercent />
