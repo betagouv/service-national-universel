@@ -263,7 +263,6 @@ router.post("/by-school/:view(inscriptions|volontaires)", passport.authenticate(
       track_total_hits: true,
     };
 
-    console.log(JSON.stringify(body, null, 2));
 
     const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
     return res.status(200).send(response.body);
