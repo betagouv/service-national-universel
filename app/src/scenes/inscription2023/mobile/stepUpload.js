@@ -44,10 +44,10 @@ export default function StepUpload() {
   const [date, setDate] = useState(young.latestCNIFileExpirationDate ? new Date(young.latestCNIFileExpirationDate) : null);
 
   const corrections = getCorrectionsForStepUpload(young);
-  const isEnabled = getIsEnabled();
+  const isEnabled = validate();
   const expirationDate = dayjs(date).locale("fr").format("YYYY-MM-DD");
 
-  function getIsEnabled() {
+  function validate() {
     if (corrections?.length) {
       return hasChanged && !loading && !error.text;
     } else {

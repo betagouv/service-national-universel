@@ -35,7 +35,7 @@ export default function StepUpload() {
   const expirationDate = dayjs(date).locale("fr").format("YYYY-MM-DD");
   const corrections = getCorrectionsForStepUpload(young);
   const filesCount = getFilesCount();
-  const isEnabled = getIsEnabled();
+  const isEnabled = validate();
 
   function getFilesCount() {
     let count = young?.files?.cniFiles?.length || 0;
@@ -44,7 +44,7 @@ export default function StepUpload() {
     return count;
   }
 
-  function getIsEnabled() {
+  function validate() {
     if (corrections?.length) {
       return hasChanged && !loading && !error.text;
     } else {

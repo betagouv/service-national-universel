@@ -12,9 +12,9 @@ import { BorderButton, PlainButton } from "./Buttons";
 import ConfirmationModal from "./ConfirmationModal";
 import Warning from "../../../assets/icons/Warning";
 import { capture } from "../../../sentry";
-import dayjs from "dayjs";
 import Field from "./Field";
 import DatePickerList from "./DatePickerList";
+import { resizeImage } from "../../../services/file.service";
 
 export function CniField({
   young,
@@ -174,23 +174,24 @@ function CniModal({ young, onClose, mode, blockUpload }) {
   }
 
   async function upload(files) {
-    for (const file of files) {
-      if (file.size > 5000000) return setError(`Le fichier ${file.name} est trop volumineux.`);
-    }
     if (!category || !date) return setError("Veuillez sélectionner une catégorie et une date d'expiration.");
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), {}, category, date);
-    if (res.code === "FILE_CORRUPTED")
-      return setError(
-        "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-      );
-    if (!res.ok) {
-      capture(res.code);
-      setError("Une erreur s'est produite lors du téléversement de votre fichier.");
-      return;
+
+    for (const file of files) {
+      const res = await api.uploadID(young._id, file, { category, expirationDate: date });
+
+      if (res.code === "FILE_CORRUPTED")
+        return setError(
+          "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+        );
+      if (!res.ok) {
+        capture(res.code);
+        setError("Une erreur s'est produite lors du téléversement de votre fichier.");
+        return;
+      }
+      setCniFiles(res.data);
+      setChanges(true);
     }
     setError(null);
-    setCniFiles(res.data);
-    setChanges(true);
     setFilesToUpload(null);
   }
 
@@ -232,12 +233,13 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                 id="file-upload"
                 name="file-upload"
                 accept=".png, .jpg, .jpeg, .pdf"
-                onChange={(e) => {
+                onChange={async (e) => {
                   if (blockUpload) {
                     const array = [];
                     let error = "";
-                    for (const file of e.target.files) {
-                      if (file.size > 5000000) {
+                    for (let file of e.target.files) {
+                      file = await resizeImage(file);
+                      if (file.size > 1000000) {
                         error += `Le fichier ${file.name} est trop volumineux.`;
                       } else {
                         array.push(file);
