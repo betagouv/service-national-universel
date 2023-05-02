@@ -24,6 +24,7 @@ const youngPatches = require("./patch/young");
 const refreshMaterializedViews = require("./patch/refresh-materialized-views");
 const parentConsentementReminder = require("./parentConsentementReminder");
 const dsnjExport = require("./dsnjExport");
+const clotureMissionReminder = require("./clotureInscriptionReminder");
 
 // doubt ? -> https://crontab.guru/
 
@@ -146,5 +147,10 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule("0 5 * * *", () => {
     refreshMaterializedViews.handler();
+  });
+
+  // tous les jours à 14h00
+  cron.schedule("2 14 * * *", () => {
+    clotureMissionReminder.handler();
   });
 }
