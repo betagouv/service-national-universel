@@ -247,26 +247,29 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       await p.save({ fromUser: req.user });
     }
 
-    const referentTransport = await getTransporter();
-    if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts }, "repartitionSchemaDownloadAvailability");
 
-    let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
-    const mail = await sendTemplate(template, {
-      emailTo: referentTransport.map((referent) => ({
-        name: `${referent.firstName} ${referent.lastName}`,
-        email: referent.email,
-      })),
-      params: {
-        trigger: "point de rassemblement modifié",
-        pdr_id: name,
-      },
-    });
+    if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+      const referentTransport = await getTransporter();
+      if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+      const mail = await sendTemplate(template, {
+        emailTo: referentTransport.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        })),
+        params: {
+          trigger: "pdr_changed",
+          pdr_id: name,
+        },
+      });
+    }
 
     // * End update slave PlanTransport
 
     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
 
-    return res.status(200).send({ ok: true, data: pointDeRassemblement, mail: mail });
+    return res.status(200).send({ ok: true, data: pointDeRassemblement });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -303,24 +306,28 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
     pointDeRassemblement.set({ cohorts: cohortsToUpdate, complementAddress: complementAddressToUpdate });
     await pointDeRassemblement.save({ fromUser: req.user });
 
-    const referentTransport = await getTransporter();
-    if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts }, "repartitionSchemaDownloadAvailability");
 
-    let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
-    const mail = await sendTemplate(template, {
-      emailTo: referentTransport.map((referent) => ({
-        name: `${referent.firstName} ${referent.lastName}`,
-        email: referent.email,
-      })),
-      params: {
-        trigger: "point de rassemblement modifié",
-        pdr_id: pointDeRassemblement.name,
-      },
-    });
+    if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+      const referentTransport = await getTransporter();
+      if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+      const mail = await sendTemplate(template, {
+        emailTo: referentTransport.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        })),
+        params: {
+          trigger: "pdr_changed",
+          pdr_id: pointDeRassemblement.name,
+        },
+      });
+    }
 
     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
 
-    return res.status(200).send({ ok: true, data: pointDeRassemblement, mail: mail });
+    return res.status(200).send({ ok: true, data: pointDeRassemblement });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
