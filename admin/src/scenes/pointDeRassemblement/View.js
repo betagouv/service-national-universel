@@ -3,7 +3,16 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
-import { canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession, canUpdateMeetingPoint, isPdrEditionOpen, ROLES, START_DATE_SESSION_PHASE1 } from "snu-lib";
+import {
+  canCreateMeetingPoint,
+  canDeleteMeetingPoint,
+  canDeleteMeetingPointSession,
+  canUpdateMeetingPoint,
+  canViewMeetingPointId,
+  isPdrEditionOpen,
+  ROLES,
+  START_DATE_SESSION_PHASE1,
+} from "snu-lib";
 import Pencil from "../../assets/icons/Pencil";
 import Trash from "../../assets/icons/Trash";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -414,7 +423,6 @@ export default function View(props) {
                     </a>
                   ))}
               </nav>
-
               {canUpdateMeetingPoint(user, data) && isPdrEditionOpen(user, currentCohortDetails) ? (
                 <>
                   {!editSession ? (
@@ -447,7 +455,7 @@ export default function View(props) {
             </div>
             <div className="flex h-64 w-full px-8">
               <div className="relative flex w-1/3 items-center justify-center  border-r-[1px] border-gray-200 p-4">
-                <Field label="ID" value={data.code} copy={true} />
+                {canViewMeetingPointId(user) && <Field label="ID" value={data.code} copy={true} />}
                 {canDeleteMeetingPointSession(user) ? (
                   <button
                     className="absolute bottom-5 right-5 flex cursor-pointer items-center gap-2 px-2 py-1 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
