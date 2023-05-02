@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES } = require("snu-lib/roles");
+const { ROLES, canSearchInElasticSearch } = require("snu-lib/roles");
 const datesub = require("date-fns/sub");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
@@ -218,6 +218,52 @@ router.post("/moderator/sejour/", passport.authenticate(["referent"], { session:
     if (queryFilters.cohorts?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": queryFilters.cohorts } });
     if (queryFilters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": queryFilters.academy } });
     if (queryFilters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": queryFilters.status } });
+
+    const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
+    return res.status(200).send(response.body);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/by-school/:view(inscriptions|volontaires)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    if (!canSearchInElasticSearch(req.user, "young-by-school")) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const filterFields = ["schoolIds", "cohort", "academy"];
+    const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const body = {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [
+            { terms: { "schoolId.keyword": queryFilters.schoolIds } },
+            req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
+            req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": req.user.region } } : null,
+            req.params.view === "volontaires"
+              ? { terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } }
+              : null,
+            queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
+            queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
+          ].filter(Boolean),
+        },
+      },
+      aggs: {
+        school: {
+          terms: { field: "schoolId.keyword", size: ES_NO_LIMIT },
+          aggs: { departments: { terms: { field: "department.keyword" } }, firstUser: { top_hits: { size: 1 } } },
+        },
+      },
+      size: 0,
+      track_total_hits: true,
+    };
+
+    console.log(JSON.stringify(body, null, 2));
 
     const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
     return res.status(200).send(response.body);

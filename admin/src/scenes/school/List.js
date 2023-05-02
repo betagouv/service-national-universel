@@ -7,26 +7,11 @@ import { BsDownload } from "react-icons/bs";
 import { Title } from "../centersV2/components/commons";
 import API from "../../services/api";
 
-const getAggregSchool = async (schoolIds, filters, user) => {
-  const body = {
-    query: { bool: { must: { match_all: {} }, filter: [{ terms: { "schoolId.keyword": schoolIds } }] } },
-    aggs: {
-      school: {
-        terms: { field: "schoolId.keyword", size: ES_NO_LIMIT },
-        aggs: { departments: { terms: { field: "department.keyword" } }, firstUser: { top_hits: { size: 1 } } },
-      },
-    },
-    size: 0,
-    track_total_hits: true,
-  };
-  if (filters.cohort?.filter?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filters.cohort.filter } });
-  if (filters.academy?.filter?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filters.academy.filter } });
+const getAggregSchool = async (schoolIds, filters) => {
+  const { responses } = await API.post("/elasticsearch/young/by-school/inscriptions", {
+    filters: { schoolIds, ...Object.fromEntries(Object.entries(filters).map(([k, e]) => [k, e.filter])) },
+  });
 
-  let route = "young";
-  if (user.role === ROLES.REFERENT_DEPARTMENT) route = "young-having-school-in-department/inscriptions";
-  if (user.role === ROLES.REFERENT_REGION) route = "young-having-school-in-region/inscriptions";
-
-  const { responses } = await API.esQuery("young", body, route);
   let reducedSchool = responses[0]?.aggregations?.school?.buckets?.reduce((acc, school) => {
     if (school.key === "") return acc;
     const schoolInfo = school.firstUser?.hits?.hits[0]?._source;
@@ -73,7 +58,6 @@ export default function List() {
       ? {
           title: "Région",
           name: "region",
-          datafield: "region.keyword",
           missingLabel: "Non renseignée",
           defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
           parentGroup: "Établissement",
@@ -81,8 +65,7 @@ export default function List() {
       : null,
     {
       title: "Département",
-      name: "department",
-      datafield: "departmentName.keyword",
+      name: "departmentName",
       missingLabel: "Non renseignée",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
@@ -103,19 +86,6 @@ export default function List() {
       : null,
   ].filter((e) => e);
 
-  const searchBarObject = {
-    placeholder: "Rechercher par mots clés, ville, code postal...",
-    datafield: ["fullName", "departmentName", "city", "uai", "zip", "code2022"],
-  };
-
-  const getDefaultQuery = () => {
-    return {
-      query: { bool: { must: [{ match_all: {} }] } },
-      size: 0,
-      track_total_hits: true,
-    };
-  };
-
   //Get List of Cohesion Center Ids
   useEffect(() => {
     if (data) setSchoolIds(data.map((center) => center._id));
@@ -125,7 +95,7 @@ export default function List() {
   useEffect(() => {
     (async () => {
       setIsLoading(true);
-      const list = await getAggregSchool(schoolIds, selectedFilters, user);
+      const list = await getAggregSchool(schoolIds, selectedFilters);
       setYoungBySchool(list);
       setIsLoading(false);
     })();
@@ -139,12 +109,10 @@ export default function List() {
           <div className="flex w-full flex-row justify-between">
             <Filters
               pageId={pageId}
-              esId="schoolramses"
-              esRoute="schoolramses-limited-roles"
-              defaultQuery={getDefaultQuery()}
+              route="/elasticsearch/schoolramses/search"
               setData={(value) => setData(value)}
               filters={filterArray}
-              searchBarObject={searchBarObject}
+              searchPlaceholder="Rechercher par mots clés, ville, code postal..."
               selectedFilters={selectedFilters}
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
@@ -153,10 +121,9 @@ export default function List() {
             <div>
               <ExportComponent
                 title="Exporter"
-                defaultQuery={getDefaultQuery()}
                 filters={filterArray}
+                route="/elasticsearch/schoolramses/export"
                 exportTitle="Établissements"
-                index="schoolramses-limited-roles"
                 fieldsToExport={["uai", "fullName", "postcode", "type", "departmentName", "region", "city", "country", "adresse", "department", "codeCity", "codePays"]}
                 transform={async (all) => {
                   const ids = all?.map((school) => school._id.toString());
@@ -179,7 +146,6 @@ export default function List() {
                   });
                 }}
                 selectedFilters={selectedFilters}
-                searchBarObject={searchBarObject}
                 icon={<BsDownload className="text-gray-400" />}
                 css={{
                   override: true,
