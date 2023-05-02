@@ -65,13 +65,13 @@ export default function VolontairesStatutsDivers({ filters, className = "" }) {
   }
 
   return (
-    <DashboardBox title="Statuts divers" className={className}>
+    <DashboardBox title="Statuts divers" className={`flex flex-col ${className}`} childrenClassName="grow flex flex-col">
       {error ? (
         <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : (
         <>
           <Tabs selected={selectedTab} tabs={tabs} onChange={setSelectedTab} className="my-6" />
-          <StatusTable className="" statuses={statuses[selectedTab]} loading={loading} />
+          <StatusTable className="grow" statuses={statuses[selectedTab]} loading={loading} nocols={selectedTab !== "phase2"} />
         </>
       )}
     </DashboardBox>
