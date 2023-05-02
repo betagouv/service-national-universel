@@ -11,22 +11,29 @@ import { slugifyFileName, UNSS_TYPE } from "../../../utils";
 import { capture } from "../../../sentry";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES } from "snu-lib";
-import Select from "../../../components/forms/Select";
+// import Select from "../../../components/forms/Select";
+import Select from "../../../components/forms/SelectHookForm";
 import InputText from "../../../components/ui/forms/InputText";
+import { useForm, Controller } from "react-hook-form";
+
+const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
+const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
 
 export default function FormEquivalence({ young, onChange }) {
-  const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
-  const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
-  const keyList = ["type", "sousType", "structureName", "address", "zip", "city", "startDate", "endDate", "frequency", "contactFullName", "contactEmail", "files"];
-  const [data, setData] = React.useState({});
   const [clickStartDate, setClickStartDate] = React.useState(false);
   const [clickEndDate, setClickEndDate] = React.useState(false);
   const [frequence, setFrequence] = React.useState(false);
-  const [error, setError] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [filesList, setFilesList] = React.useState([]);
   const [uploading, setUploading] = React.useState(false);
-  const [errorMail, setErrorMail] = React.useState(false);
+
+  const {
+    handleSubmit,
+    watch,
+    formState: { errors },
+    control,
+    setValue,
+  } = useForm({ reValidateMode: "onSubmit" });
 
   const refStartDate = React.useRef(null);
   const refEndDate = React.useRef(null);
@@ -60,62 +67,22 @@ export default function FormEquivalence({ young, onChange }) {
     const res = await api.uploadFile("/referent/file/equivalenceFiles", files, { youngId: young._id });
     if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
     // We update it instant ( because the bucket is updated instant )
-    setData({ ...data, files: res.data });
+    setValue("files", res.data);
     toastr.success("Fichier téléversé");
     setUploading(false);
   };
 
-  const handleSubmit = async () => {
+  const sendData = async (data) => {
     setLoading(true);
-    let error = false;
-    for (const key of keyList) {
-      if (key === "files" && !data[key]?.length) {
-        error = true;
-      } else if (key === "frequency") {
-        if (
-          frequence &&
-          (data[key]?.nombre === "" ||
-            data[key]?.nombre === undefined ||
-            data[key]?.duree === "" ||
-            data[key]?.duree === undefined ||
-            data[key]?.frequence === "" ||
-            data[key]?.frequence === undefined)
-        ) {
-          error = true;
-        }
-      } else if (key === "sousType") {
-        if (["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(data.type) && (data?.sousType === undefined || data.sousType === "")) {
-          error = true;
-        }
-      } else if (data[key] === undefined || data[key] === "") {
-        error = true;
-      }
-
-      if (key === "contactEmail") {
-        if (data[key] && !validator.isEmail(data[key])) {
-          setErrorMail(true);
-          error = true;
-        } else {
-          setErrorMail(false);
-        }
-      }
-    }
-    setError(error);
-
     try {
-      if (!error) {
-        if (!["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(data.type) && (data?.sousType === "" || data?.sousType))
-          delete data.sousType;
-
-        const { ok } = await api.post(`/young/${young._id.toString()}/phase2/equivalence`, data);
-        if (!ok) {
-          toastr.error("Oups, une erreur est survenue");
-          setLoading(false);
-          return;
-        }
-        toastr.success("Votre demande d'équivalence a bien été envoyée");
-        history.push(`/volontaire/${young._id}/phase2`);
+      const { ok } = await api.post(`/young/${young._id.toString()}/phase2/equivalence`, data);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue");
+        setLoading(false);
+        return;
       }
+      toastr.success("Votre demande d'équivalence a bien été envoyée");
+      history.push(`/volontaire/${young._id}/phase2`);
       setLoading(false);
     } catch (error) {
       capture(error);
@@ -124,6 +91,13 @@ export default function FormEquivalence({ young, onChange }) {
       return;
     }
   };
+
+  const type = watch("type");
+  const startDate = watch("startDate");
+  const endDate = watch("endDate");
+  const files = watch("files");
+
+  const hasErrors = Object.keys(errors).length !== 0;
 
   return (
     <>
@@ -146,7 +120,7 @@ export default function FormEquivalence({ young, onChange }) {
               Déclarer une équivalence MIG pour {young.firstName} {young.lastName}
             </div>
           </div>
-          {error ? (
+          {hasErrors ? (
             <div className="rounded-lg border-[1px] border-red-400 bg-red-50">
               <div className="flex items-center justify-center px-4 py-3">
                 <InformationCircle className="text-red-400" />
@@ -154,77 +128,110 @@ export default function FormEquivalence({ young, onChange }) {
               </div>
             </div>
           ) : null}
-          <div className="flex items-stretch gap-6">
+          <form className="flex items-stretch gap-6" onSubmit={handleSubmit(sendData)}>
             <div className="flex basis-1/2 flex-col rounded-xl bg-white p-6">
               <div className="text-lg font-bold leading-7">Informations générales</div>
               <div className="mt-2 text-sm font-normal leading-5 text-gray-500">Veuillez compléter le formulaire ci-dessous.</div>
               <div className="mt-6 text-xs font-medium leading-4">Quoi ?</div>
 
               <div className="mt-3 space-y-4">
-                <Select label="Type d'engagement" options={ENGAGEMENT_TYPES} selected={data?.type} setSelected={(e) => setData({ ...data, type: e })} />
+                <Controller
+                  name="type"
+                  control={control}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    // <Select {...field} options={ENGAGEMENT_TYPES} selected={field.value} setSelected={field.onChange} />
+                    <Select {...field} options={ENGAGEMENT_TYPES} label="Type d'engagement" />
+                  )}
+                />
 
-                {data.type === "Certification Union Nationale du Sport scolaire (UNSS)" && (
-                  <Select label="Catégorie" options={UNSS_TYPE} selected={data?.sousType} setSelected={(e) => setData({ ...data, sousType: e })} />
+                {type === "Certification Union Nationale du Sport scolaire (UNSS)" && (
+                  <Controller rules={{ required: true }} name="sousType" control={control} render={({ field }) => <Select {...field} options={UNSS_TYPE} label="Catégorie" />} />
                 )}
 
-                {data.type === "Engagements lycéens" && (
-                  <Select label="Catégorie" options={ENGAGEMENT_LYCEEN_TYPES} selected={data?.sousType} setSelected={(e) => setData({ ...data, sousType: e })} />
+                {type === "Engagements lycéens" && (
+                  <Controller
+                    rules={{ required: true }}
+                    name="sousType"
+                    control={control}
+                    render={({ field }) => <Select {...field} options={ENGAGEMENT_LYCEEN_TYPES} label="Catégorie" />}
+                  />
                 )}
 
-                <InputText label="Nom de la structure d'accueil" value={data?.structureName} onChange={(e) => setData({ ...data, structureName: e.target.value })} />
+                <Controller
+                  name="structureName"
+                  rules={{ required: true }}
+                  control={control}
+                  render={({ field }) => <InputText {...field} label="Nom de la structure d'accueil" />}
+                />
               </div>
 
               <div className="mt-4 text-xs font-medium leading-4">Où ?</div>
 
               <div className="mt-3 space-y-4">
-                <InputText label="Adresse du lieu" value={data?.address} onChange={(e) => setData({ ...data, address: e.target.value })} />
+                <Controller name="address" control={control} rules={{ required: true }} render={({ field }) => <InputText {...field} label="Adresse du lieu" />} />
 
                 <div className="flex items-stretch gap-2">
-                  <InputText label="Code postal" value={data?.zip} onChange={(e) => setData({ ...data, zip: e.target.value })} />
-                  <InputText label="Ville" value={data?.city} onChange={(e) => setData({ ...data, city: e.target.value })} />
+                  <Controller name="zip" control={control} rules={{ required: true }} render={({ field }) => <InputText {...field} label="Code postal" />} />
+                  <Controller name="city" control={control} rules={{ required: true }} render={({ field }) => <InputText {...field} label="Ville" />} />
                 </div>
               </div>
 
               <div className="mt-4 text-xs font-medium leading-4">Quand ?</div>
               <div className="flex items-stretch gap-2 align-middle">
                 <div className="mt-3 flex w-full flex-col justify-center rounded-lg border-[1px] border-gray-300 px-3 py-2">
-                  {data?.startDate || clickStartDate ? <div className="text-xs font-normal leading-4 text-gray-500">Date de début</div> : null}
-
-                  <input
-                    className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
-                    placeholder="Date de début"
-                    type="text"
-                    max={formatDate(new Date())}
-                    ref={refStartDate}
-                    onFocus={(e) => {
-                      e.target.type = "date";
-                      setClickStartDate(true);
-                    }}
-                    onBlur={(e) => {
-                      data.startDate ? (e.target.type = "date") : (e.target.type = "text");
-                      setClickStartDate(false);
-                    }}
-                    onChange={(e) => setData({ ...data, startDate: e.target.value })}
+                  {startDate || clickStartDate ? <div className="text-xs font-normal leading-4 text-gray-500">Date de début</div> : null}
+                  <Controller
+                    name="startDate"
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field }) => (
+                      <input
+                        {...field}
+                        className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
+                        placeholder="Date de début"
+                        type="text"
+                        max={formatDate(new Date())}
+                        ref={refStartDate}
+                        onFocus={(e) => {
+                          e.target.type = "date";
+                          setClickStartDate(true);
+                        }}
+                        onBlur={(e) => {
+                          startDate ? (e.target.type = "date") : (e.target.type = "text");
+                          setClickStartDate(false);
+                          field.onBlur(e);
+                        }}
+                      />
+                    )}
                   />
                 </div>
                 <div className="mt-3 flex w-full flex-col justify-center rounded-lg border-[1px] border-gray-300 px-3 py-2">
-                  {data?.endDate || clickEndDate ? <div className="text-xs font-normal leading-4 text-gray-500">Date de fin</div> : null}
-                  <input
-                    className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
-                    placeholder="Date de fin"
-                    min={data?.startDate}
-                    max={formatDate(new Date())}
-                    type="text"
-                    ref={refEndDate}
-                    onFocus={(e) => {
-                      e.target.type = "date";
-                      setClickEndDate(true);
-                    }}
-                    onBlur={(e) => {
-                      data.endDate ? (e.target.type = "date") : (e.target.type = "text");
-                      setClickEndDate(false);
-                    }}
-                    onChange={(e) => setData({ ...data, endDate: e.target.value })}
+                  {endDate || clickEndDate ? <div className="text-xs font-normal leading-4 text-gray-500">Date de fin</div> : null}
+                  <Controller
+                    name="endDate"
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field }) => (
+                      <input
+                        {...field}
+                        className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
+                        placeholder="Date de fin"
+                        min={startDate}
+                        max={formatDate(new Date())}
+                        type="text"
+                        ref={refEndDate}
+                        onFocus={(e) => {
+                          e.target.type = "date";
+                          setClickEndDate(true);
+                        }}
+                        onBlur={(e) => {
+                          endDate ? (e.target.type = "date") : (e.target.type = "text");
+                          setClickEndDate(false);
+                          field.onBlur(e);
+                        }}
+                      />
+                    )}
                   />
                 </div>
               </div>
@@ -232,20 +239,18 @@ export default function FormEquivalence({ young, onChange }) {
               {frequence ? (
                 <>
                   <div className="mt-2 flex flex-wrap items-stretch gap-2 md:!flex-nowrap">
-                    <InputText label="Nombre" onChange={(e) => setData({ ...data, frequency: { ...data.frequency, nombre: e.target.value } })} value={data?.frequency?.nombre} />
-
-                    <Select
-                      label="Durée"
-                      options={optionsDuree}
-                      selected={data?.frequency?.duree}
-                      setSelected={(e) => setData({ ...data, frequency: { ...data.frequency, duree: e } })}
+                    <Controller rules={{ required: true }} name="frequency.nombre" control={control} render={({ field }) => <InputText {...field} label="Nombre" />} />
+                    <Controller
+                      rules={{ required: true }}
+                      name="frequency.duree"
+                      control={control}
+                      render={({ field }) => <Select {...field} options={optionsDuree} label="Durée" />}
                     />
-
-                    <Select
-                      label="Fréquence"
-                      options={optionsFrequence}
-                      selected={data?.frequency?.frequence}
-                      setSelected={(e) => setData({ ...data, frequency: { ...data.frequency, frequence: e } })}
+                    <Controller
+                      rules={{ required: true }}
+                      name="frequency.frequency"
+                      control={control}
+                      render={({ field }) => <Select {...field} options={optionsFrequence} label="Fréquence" />}
                     />
                   </div>
 
@@ -253,7 +258,6 @@ export default function FormEquivalence({ young, onChange }) {
                     className="mt-3 text-center text-sm font-normal leading-5 text-indigo-600 hover:underline"
                     onClick={() => {
                       setFrequence(false);
-                      setData({ ...data, frequency: undefined });
                     }}>
                     Supprimer la fréquence
                   </button>
@@ -273,15 +277,21 @@ export default function FormEquivalence({ young, onChange }) {
                 </div>
 
                 <div className="mt-4 space-y-4">
-                  <InputText label="Prénom et Nom" value={data?.contactFullName} onChange={(e) => setData({ ...data, contactFullName: e.target.value })} />
-                  <InputText label="Adresse email" value={data?.contactEmail} onChange={(e) => setData({ ...data, contactEmail: e.target.value })} error={errorMail} />
-                  {errorMail ? <div className="mt-2 text-center text-sm font-normal leading-5 text-red-500">L&apos;adresse email n&apos;est pas valide.</div> : null}
+                  <Controller name="contactFullName" control={control} render={({ field }) => <InputText {...field} label="Prénom et Nom" />} />
+                  <Controller
+                    rules={{ required: true, validate: validator.isEmail }}
+                    name="contactEmail"
+                    control={control}
+                    render={({ field }) => (
+                      <InputText {...field} label="Adresse email" error={errors.contactEmail?.type === "validate" ? "L'adresse email n'est pas valide." : ""} />
+                    )}
+                  />
                 </div>
               </div>
               <div className="rounded-xl bg-white p-6">
                 <div className="text-lg font-bold leading-7">Document justificatif d’engagement</div>
-                {data?.files?.length
-                  ? data.files.map((file, index) => (
+                {files?.length
+                  ? files.map((file, index) => (
                       <div key={index} className="mt-1 flex w-full flex-row items-center justify-between rounded-lg border-[1px] border-gray-300 py-2 px-3">
                         <div className="flex flex-row items-center">
                           <PaperClip className="mr-2 text-gray-400" />
@@ -289,7 +299,12 @@ export default function FormEquivalence({ young, onChange }) {
                         </div>
                         <div
                           className="cursor-pointer text-sm font-normal leading-5 text-gray-800 hover:underline"
-                          onClick={() => setData({ ...data, files: data?.files.filter((f) => file !== f) })}>
+                          onClick={() =>
+                            setValue(
+                              "files",
+                              files.filter((f) => file !== f),
+                            )
+                          }>
                           Retirer
                         </div>
                       </div>
@@ -300,19 +315,26 @@ export default function FormEquivalence({ young, onChange }) {
                   <div className="mt-2 cursor-pointer text-sm font-medium leading-5 text-blue-600 hover:underline" onClick={handleClickUpload}>
                     Téléversez le formulaire
                   </div>
-                  <input type="file" ref={hiddenFileInput} onChange={handleUpload} className="hidden" accept=".jpg, .jpeg, .png, .pdf" multiple />
+                  <Controller
+                    rules={{ required: true }}
+                    name="files"
+                    control={control}
+                    render={({ field }) => (
+                      <input {...field} type="file" ref={hiddenFileInput} value={undefined} onChange={handleUpload} className="hidden" accept=".jpg, .jpeg, .png, .pdf" multiple />
+                    )}
+                  />
                   <div className="mt-1 text-xs font-normal leading-4 text-gray-500">PDF, PNG, JPG jusqu’à 5Mo</div>
                 </div>
               </div>
               <button
+                type="submit"
                 className="w-full rounded-lg border-[1px] border-blue-600 bg-blue-600 py-2 text-sm font-medium leading-5 text-white hover:bg-white hover:!text-blue-600 disabled:border-blue-300 disabled:bg-blue-300 disabled:!text-white"
-                disabled={loading || uploading}
-                onClick={() => handleSubmit()}>
+                disabled={loading || uploading}>
                 {loading ? "Chargement" : "Valider ma demande"}
               </button>
             </div>
-          </div>
-          {error ? (
+          </form>
+          {hasErrors ? (
             <div className="rounded-lg border-[1px] border-red-400 bg-red-50">
               <div className="flex items-center justify-center px-4 py-3">
                 <InformationCircle className="text-red-400" />
