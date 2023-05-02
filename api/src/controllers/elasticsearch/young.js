@@ -227,7 +227,7 @@ router.post("/moderator/sejour/", passport.authenticate(["referent"], { session:
   }
 });
 
-router.post("/pointderassemblement/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/by-point-de-rassemblement/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { queryFilters, error } = joiElasticSearch({ filterFields: ["meetingPointIds", "cohort"], body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
