@@ -28,6 +28,7 @@ export default function FullDoughnut({
 
   useEffect(() => {
     if (values) {
+      let completeValues = [];
       const dataColors = getGraphColors(values.length);
       const totalValues = values.reduce((acc, val) => acc + val, 0);
       setDataIsZero(totalValues === 0);
@@ -78,9 +79,9 @@ export default function FullDoughnut({
 
               let value;
               if (tooltipsPercent) {
-                value = totalValues ? Math.round((values[elems[0].index] / totalValues) * 100) + "%" : "-";
+                value = totalValues ? Math.round((completeValues[elems[0].index].value / totalValues) * 100) + "%" : "-";
               } else {
-                value = tooltips[elems[0].index];
+                value = completeValues[elems[0].index].tooltip;
               }
 
               setTooltip({
@@ -100,12 +101,37 @@ export default function FullDoughnut({
           }
         },
       });
+
+      let legends = values.map((value, idx) => {
+        return {
+          value,
+          name: labels[idx],
+          color: dataColors[idx % dataColors.length],
+          info: legendInfoPanels && legendInfoPanels.length > idx ? legendInfoPanels[idx] : undefined,
+          url: legendUrls && legendUrls.length > idx ? legendUrls[idx] : undefined,
+        };
+      });
+
+      // filter values
+      if (totalValues !== 0) {
+        for (let i = 0, n = values.length; i < n; ++i) {
+          if (values[i] / totalValues >= 0.01) {
+            completeValues.push({
+              value: values[i],
+              legend: legends[i],
+              tooltip: tooltips ? tooltips[i] : null,
+            });
+          }
+        }
+      }
+
+      // graph data
       setGraphData({
         labels,
         title,
         datasets: [
           {
-            data: values,
+            data: completeValues.map((cv) => cv.value),
             backgroundColor: dataColors,
             hoverBackgroundColor: dataColors,
             hoverBorderWidth: 3,
@@ -118,17 +144,8 @@ export default function FullDoughnut({
         ],
       });
 
-      let legends = values.map((value, idx) => {
-        return {
-          value,
-          name: labels[idx],
-          color: dataColors[idx % dataColors.length],
-          info: legendInfoPanels && legendInfoPanels.length > idx ? legendInfoPanels[idx] : undefined,
-          url: legendUrls && legendUrls.length > idx ? legendUrls[idx] : undefined,
-        };
-      });
-
       // sort legends to be displayed by grid
+      legends = completeValues.map((cv) => cv.legend);
       let legendCols = maxLegends;
       switch (legendSide) {
         case "left": {
@@ -136,7 +153,7 @@ export default function FullDoughnut({
           let newLegends = [];
           for (let j = 0; j < maxLegends; ++j) {
             for (let i = legendCols - 1; i >= 0; --i) {
-              const idx = i * legendCols + j;
+              const idx = i * maxLegends + j;
               if (idx < legends.length) {
                 newLegends.push(legends[idx]);
               } else {
@@ -152,7 +169,7 @@ export default function FullDoughnut({
           let newLegends = [];
           for (let j = 0; j < maxLegends; ++j) {
             for (let i = 0; i < legendCols; ++i) {
-              const idx = i * legendCols + j;
+              const idx = i * maxLegends + j;
               if (idx < legends.length) {
                 newLegends.push(legends[idx]);
               } else {
@@ -277,6 +294,10 @@ export default function FullDoughnut({
     );
   };
 
+  function stopPropagation(event) {
+    event.stopPropagation();
+  }
+
   return (
     <div className={`${mainClass} ${className}`}>
       <div className={`relative ${graphClass}`}>
@@ -287,20 +308,20 @@ export default function FullDoughnut({
         </div>
         {tooltip && <GraphTooltip style={tooltip.style}>{tooltip.value}</GraphTooltip>}
       </div>
-      <div className={legendsClass}>
+      <div className={legendsClass} onClick={(event) => stopPropagation(event)}>
         {legends.map((legend, idx) => {
           return legend ? (
             legend?.url ? (
-              <Link to={legend.url} target={"_blank"} className="legendClass">
+              <Link to={legend.url} target={"_blank"} className="legendClass" key={legend.name + "-" + idx}>
                 <LegendContent name={legend.name} value={legend.value} color={legend.color} info={legend.info} />
               </Link>
             ) : (
-              <div className={legendClass} key={legend.name} onClick={() => onLegendClicked(idx, legend.name, legend.value, legend.color)}>
+              <div className={legendClass} key={legend.name + "-" + idx} onClick={() => onLegendClicked(idx, legend.name, legend.value, legend.color)}>
                 <LegendContent name={legend.name} value={legend.value} color={legend.color} info={legend.info} />
               </div>
             )
           ) : (
-            <div></div>
+            <div key={"nolegend-" + idx}></div>
           );
         })}
       </div>
