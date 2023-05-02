@@ -1,3 +1,19 @@
+# [1.264.0](https://github.com/betagouv/service-national-universel/compare/v1.263.0...v1.264.0) (2023-05-02)
+
+
+### Bug Fixes
+
+* **admin:** nav from pdr to bus ([18591aa](https://github.com/betagouv/service-national-universel/commit/18591aa750d602503b3e96bbd98bd22394f27e0a))
+* **api:** Correction du test sur la création des missions ([#2563](https://github.com/betagouv/service-national-universel/issues/2563)) ([442ab9b](https://github.com/betagouv/service-national-universel/commit/442ab9bc4c514acc9b631c7976b0a9d98dd35827))
+* young build context ([#2551](https://github.com/betagouv/service-national-universel/issues/2551)) ([ce69c81](https://github.com/betagouv/service-national-universel/commit/ce69c81f14870727da908c28cacd77d5c07352ca))
+
+
+### Features
+
+* **admin:** disabled head center option in invite modal for ref ([ceb4170](https://github.com/betagouv/service-national-universel/commit/ceb41708f595bc6de366508348e00fb2e2b1cf3b))
+* **admin:** Finalisation Dashboard Engagement Modérateur ([#2560](https://github.com/betagouv/service-national-universel/issues/2560)) ([cccda29](https://github.com/betagouv/service-national-universel/commit/cccda29a2e2aa4042d682b0d80b6e64abdf58cef))
+* **api:** CRON Envoi du rappel aux réferents la veille de la cloture des instructions ([#2548](https://github.com/betagouv/service-national-universel/issues/2548)) ([28baf46](https://github.com/betagouv/service-national-universel/commit/28baf468fb7cf93ba66eea2e81aac60de0bd0449))
+
 # [1.263.0](https://github.com/betagouv/service-national-universel/compare/v1.262.1...v1.263.0) (2023-05-01)
 
 
