@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { COHORTS, ES_NO_LIMIT, ROLES, academyList, departmentToAcademy, getDepartmentNumber, region2department } from "snu-lib";
-import { ExportComponentV2, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import { BsDownload } from "react-icons/bs";
 import { Title } from "../centersV2/components/commons";
 import API from "../../services/api";
@@ -66,10 +66,7 @@ export default function List() {
   const [data, setData] = React.useState([]);
   const pageId = "etablissementYoung";
   const [selectedFilters, setSelectedFilters] = React.useState({});
-  const [paramData, setParamData] = React.useState({
-    size: 20,
-    page: 0,
-  });
+  const [paramData, setParamData] = React.useState({ page: 0 });
 
   const filterArray = [
     ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
@@ -154,7 +151,7 @@ export default function List() {
               setParamData={setParamData}
             />
             <div>
-              <ExportComponentV2
+              <ExportComponent
                 title="Exporter"
                 defaultQuery={getDefaultQuery()}
                 filters={filterArray}
