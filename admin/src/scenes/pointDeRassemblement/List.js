@@ -91,7 +91,7 @@ const ListPoints = ({ user }) => {
   const [data, setData] = React.useState([]);
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const pageId = "pdrList";
-  const [paramData, setParamData] = React.useState({ size: 20 });
+  const [paramData, setParamData] = React.useState({ page: 0 });
   const filterArray = [
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée" },
     { title: "Région", name: "region", missingLabel: "Non renseignée" },
@@ -222,7 +222,7 @@ const ListSessions = ({ user, firstSession }) => {
   const [data, setData] = React.useState([]);
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const pageId = "pdrListSession";
-  const [paramData, setParamData] = React.useState({ size: 20 });
+  const [paramData, setParamData] = React.useState({ page: 0 });
   const filterArray = [
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", isSingle: true, defaultValue: [firstSession], allowEmpty: false },
     {

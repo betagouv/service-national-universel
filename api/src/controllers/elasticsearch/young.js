@@ -232,11 +232,16 @@ router.post("/pointderassemblement/", passport.authenticate(["referent"], { sess
     const { queryFilters, error } = joiElasticSearch({ filterFields: ["meetingPointIds", "cohort"], body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, true);
+    if (youngContextError) {
+      return res.status(youngContextError.status).send(youngContextError.body);
+    }
+
     const body = {
       query: {
         bool: {
           filter: [
-            ...(await buildYoungContext(req.user, true)),
+            ...youngContextFilters,
             { terms: { "meetingPointId.keyword": queryFilters.meetingPointIds } },
             { terms: { "status.keyword": ["VALIDATED"] } },
             { terms: { "cohort.keyword": queryFilters.cohort } },
