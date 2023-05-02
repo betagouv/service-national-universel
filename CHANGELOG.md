@@ -1,3 +1,29 @@
+# [1.263.0](https://github.com/betagouv/service-national-universel/compare/v1.262.1...v1.263.0) (2023-05-01)
+
+
+### Bug Fixes
+
+* Update link SNU 404 error ([#2559](https://github.com/betagouv/service-national-universel/issues/2559)) ([64d81e6](https://github.com/betagouv/service-national-universel/commit/64d81e6855c031efa11a51f8519da3e2dfd848f9))
+* **admin:** query search on volontaire and inscription page ([238ce34](https://github.com/betagouv/service-national-universel/commit/238ce346fd657b84cfecd1021dcd5b218750a822))
+* **api:** doublon account young ([a040dd3](https://github.com/betagouv/service-national-universel/commit/a040dd3d11746b5b6070f452c7386d7879282257))
+
+
+### Features
+
+* **admin/dashboard:** full redirection on dashboard sejour / inscription ([#2530](https://github.com/betagouv/service-national-universel/issues/2530)) ([48f77f5](https://github.com/betagouv/service-national-universel/commit/48f77f55bc43104e230953faf19403826c5e9ef9))
+* **api:** import correspondance aller et retour ([#2540](https://github.com/betagouv/service-national-universel/issues/2540)) ([3ba93ac](https://github.com/betagouv/service-national-universel/commit/3ba93ac0ee28cfc79f36fcc4d1d42639cdb6ac34))
+* **api, admin:** Update des droits des transporters sur les centres et les PDR ([#2552](https://github.com/betagouv/service-national-universel/issues/2552)) ([b77b6e3](https://github.com/betagouv/service-national-universel/commit/b77b6e3ffbd82e7804ef7d40af4381fccb261f37))
+
+## [1.262.1](https://github.com/betagouv/service-national-universel/compare/v1.262.0...v1.262.1) (2023-04-28)
+
+
+### Bug Fixes
+
+* **api:** update mission missing import and verif ([24d58fa](https://github.com/betagouv/service-national-universel/commit/24d58fad662f8270237c5892f1ccc21f89da957f))
+* **app:** waitingCorrection if no correctionRequest ([e1f4996](https://github.com/betagouv/service-national-universel/commit/e1f49960a11b0624f496ee03583692cd4822b431))
+* **lib:** Réparer la fonction d'autorisation de changement de session ([#2555](https://github.com/betagouv/service-national-universel/issues/2555)) ([f545a88](https://github.com/betagouv/service-national-universel/commit/f545a883551ad1c980dd83742c1bdbe42ca3b077))
+* **test:** fix mission put test probleme date ([#2553](https://github.com/betagouv/service-national-universel/issues/2553)) ([b468974](https://github.com/betagouv/service-national-universel/commit/b468974c197f02197f323232055163fe19245467))
+
 # [1.262.0](https://github.com/betagouv/service-national-universel/compare/v1.261.0...v1.262.0) (2023-04-27)
 
 
