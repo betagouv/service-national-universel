@@ -43,6 +43,7 @@ const youngModel = require("../../models/young");
 const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
 const tableRepartitionModel = require("../../models/PlanDeTransport/tableDeRepartition");
 const pointRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+const CohortModel = require("../../models/cohort")
 const cohesionCenterModel = require("../../models/cohesionCenter");
 const { getTransporter } = require("../../utils");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
@@ -944,23 +945,27 @@ router.post("", passport.authenticate("referent", { session: false, failWithErro
     // --- création
     const data = await schemaRepartitionModel.create(value);
 
-    const referentTransport = await getTransporter();
-    if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: data.cohort }, "repartitionSchemaDownloadAvailability");
 
-    let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
-    const mail = await sendTemplate(template, {
-      emailTo: referentTransport.map((referent) => ({
-        name: `${referent.firstName} ${referent.lastName}`,
-        email: referent.email,
-      })),
-      params: {
-        trigger: "ajout d'un groupe",
-        region: bodySchema.fromRegion
-      },
-    });
+    if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+      const referentTransport = await getTransporter();
+      if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+      const mail = await sendTemplate(template, {
+        emailTo: referentTransport.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        })),
+        params: {
+          trigger: "group_added",
+          region: data.fromRegion,
+        },
+      });
+    }
 
     // --- résultat
-    return res.status(200).send({ ok: true, data, mail: mail });
+    return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -986,6 +991,10 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     await schemaRepartitionModel.deleteOne({ _id: schema._id });
 
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: schema.cohort }, "repartitionSchemaDownloadAvailability");
+
+    if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+
     const referentTransport = await getTransporter();
     if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -996,13 +1005,14 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
         email: referent.email,
       })),
       params: {
-        trigger: "groupe supprimé",
-        region: schema.fromRegion
+        trigger: "group_deleted",
+        region: schema.fromRegion,
       },
     });
+  }
 
     // --- résultat
-    return res.status(200).send({ ok: true, mail: mail });
+    return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -1043,6 +1053,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     schema.set(value);
     await schema.save();
 
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: schema.cohort }, "repartitionSchemaDownloadAvailability");
+
+    if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+
     const referentTransport = await getTransporter();
     if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -1053,13 +1067,14 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         email: referent.email,
       })),
       params: {
-        trigger: "groupe modifié",
-        region: schema.fromRegion
+        trigger: "group_changed",
+        region: schema.fromRegion,
       },
     });
+  }
 
     // --- résultat
-    return res.status(200).send({ ok: true, data: schema, mail: mail });
+    return res.status(200).send({ ok: true, data: schema });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
