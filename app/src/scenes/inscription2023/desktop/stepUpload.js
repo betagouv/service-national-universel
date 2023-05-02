@@ -3,7 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
+import dayjs from "dayjs";
 import api from "../../../services/api";
+import plausibleEvent from "../../../services/plausible";
 import { ID } from "../utils";
 import { supportURL } from "../../../config";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
@@ -11,11 +13,10 @@ import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 import DatePickerList from "../../preinscription/components/DatePickerList";
 import DesktopPageContainer from "../components/DesktopPageContainer";
 import Error from "../../../components/error";
-import plausibleEvent from "../../../services/plausible";
 import ErrorMessage from "../components/ErrorMessage";
 import MyDocs from "../components/MyDocs";
-import dayjs from "dayjs";
-import { resizeImage } from "../../../services/image.service";
+import FileImport from "../components/FileImport";
+import { getCorrectionsForStepUpload } from "../../../utils/navigation";
 
 export default function StepUpload() {
   let { category } = useParams();
@@ -23,13 +24,16 @@ export default function StepUpload() {
   if (!category) category = young?.latestCNIFileCategory;
   const history = useHistory();
   const dispatch = useDispatch();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const [hasChanged, setHasChanged] = useState(false);
   const [recto, setRecto] = useState();
   const [verso, setVerso] = useState();
   const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
-  const corrections = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
+
+  const expirationDate = dayjs(date).locale("fr").format("YYYY-MM-DD");
+  const corrections = getCorrectionsForStepUpload(young);
   const filesCount = getFilesCount();
   const isEnabled = getIsEnabled();
 
@@ -66,10 +70,11 @@ export default function StepUpload() {
       return { ok: false };
     }
 
-    const formattedDate = dayjs(date).locale("fr").format("YYYY-MM-DD");
+    const oversizedFiles = [recto, verso].filter((e) => e && e.size > 1000000);
+    if (oversizedFiles.length) return setError({ text: `Fichier(s) trop volumineux : ${oversizedFiles.join(", ")}.` });
 
     if (recto) {
-      const res = await api.uploadID(`/young/${young._id}/documents/cniFiles`, recto, category, formattedDate);
+      const res = await api.uploadID(young._id, recto, { category, expirationDate });
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -79,7 +84,7 @@ export default function StepUpload() {
     }
 
     if (verso) {
-      const res = await api.uploadID(`/young/${young._id}/documents/cniFiles`, verso, category, formattedDate);
+      const res = await api.uploadID(young._id, verso, { category, expirationDate });
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -98,7 +103,7 @@ export default function StepUpload() {
       const { ok: uploadOk } = await uploadFiles();
       if (!uploadOk) return;
 
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: dayjs(date).locale("fr").format("YYYY-MM-DD") });
+      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: expirationDate });
 
       if (!ok) {
         capture(code);
@@ -180,14 +185,14 @@ export default function StepUpload() {
       <p className="my-4">
         Ajouter <strong>le recto</strong>
       </p>
-      <AddFile id="recto" file={recto} setFile={setRecto} setError={setError} setHasChanged={setHasChanged} />
+      <FileImport id="recto" file={recto} setFile={setRecto} setError={setError} onChange={() => setHasChanged(true)} />
 
       {category !== "passport" && (
         <>
           <p className="my-4">
             Ajouter <strong>le verso</strong>
           </p>
-          <AddFile id="verso" file={verso} setFile={setVerso} setError={setError} setHasChanged={setHasChanged} />
+          <FileImport id="verso" file={verso} setFile={setVerso} setError={setError} onChange={() => setHasChanged(true)} />
         </>
       )}
 
@@ -199,7 +204,7 @@ export default function StepUpload() {
         .
       </div>
 
-      {(recto || verso || date) && <AddDate date={date} setDate={setDate} setHasChanged={setHasChanged} corrections={corrections} category={category} />}
+      {(recto || verso || date) && <ExpirationDate date={date} setDate={setDate} onChange={() => setHasChanged(true)} corrections={corrections} category={category} />}
 
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
 
@@ -208,34 +213,7 @@ export default function StepUpload() {
   );
 }
 
-function AddFile({ id, file, setFile, setError, setHasChanged }) {
-  async function handleChange(e) {
-    const image = await resizeImage(e.target.files[0]);
-
-    if (image.size > 1000000) return setError({ text: `Le fichier ${e.target.files[0].name} est trop volumineux.` });
-
-    setFile(image);
-    setError({});
-    setHasChanged(true);
-  }
-
-  return (
-    <>
-      <div className="my-4 text-sm text-gray-500">Taille maximale : 1 Mo. Formats supportés : jpg, png, pdf.</div>
-      <input type="file" id={`file-upload-${id}`} name={`file-upload-${id}`} accept=".png, .jpg, .jpeg, .pdf" onChange={handleChange} className="hidden" />
-      <div className="my-4 flex w-full">
-        <div>
-          <label htmlFor={`file-upload-${id}`} className="cursor-pointer rounded bg-[#EEEEEE] py-2 px-3 text-sm text-gray-600">
-            Parcourir...
-          </label>
-        </div>
-        {file ? <p className="ml-4 mt-2 text-sm text-gray-800">{file.name}</p> : <p className="ml-4 mt-2 text-sm text-gray-800">Aucun fichier sélectionné.</p>}
-      </div>
-    </>
-  );
-}
-
-function AddDate({ date, setDate, setHasChanged, corrections, category }) {
+function ExpirationDate({ date, setDate, onChange, corrections, category }) {
   const young = useSelector((state) => state.Auth.young);
 
   return (
@@ -261,7 +239,7 @@ function AddDate({ date, setDate, setHasChanged, corrections, category }) {
             value={date}
             onChange={(date) => {
               setDate(date);
-              setHasChanged(true);
+              onChange && onChange();
             }}
           />
         </div>

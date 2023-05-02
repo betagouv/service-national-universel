@@ -3,9 +3,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
+import dayjs from "dayjs";
+
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
+import { resizeImage } from "../../../services/file.service";
 import { translate } from "../../../utils";
+import { getCorrectionsForStepUpload } from "../../../utils/navigation";
 import { ID } from "../utils";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 
@@ -19,14 +23,12 @@ import MyDocs from "../components/MyDocs";
 import Navbar from "../components/Navbar";
 import StickyButton from "../../../components/inscription/stickyButton";
 
-import dayjs from "dayjs";
 export default function StepUpload() {
   let { category } = useParams();
   const young = useSelector((state) => state.Auth.young);
   if (!category) category = young.latestCNIFileCategory;
   const history = useHistory();
   const dispatch = useDispatch();
-  const corrections = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
 
   const [step, setStep] = useState(getStep());
   const [loading, setLoading] = useState(false);
@@ -40,6 +42,18 @@ export default function StepUpload() {
     "La photo est nette": false,
   });
   const [date, setDate] = useState(young.latestCNIFileExpirationDate ? new Date(young.latestCNIFileExpirationDate) : null);
+
+  const corrections = getCorrectionsForStepUpload(young);
+  const isEnabled = getIsEnabled();
+  const expirationDate = dayjs(date).locale("fr").format("YYYY-MM-DD");
+
+  function getIsEnabled() {
+    if (corrections?.length) {
+      return hasChanged && !loading && !error.text;
+    } else {
+      return (young?.files?.cniFiles?.length || (recto && (verso || category === "passport"))) && date && !loading && !error.text;
+    }
+  }
 
   function getStep() {
     if (corrections?.some(({ reason }) => reason === "MISSING_BACK")) return "verso";
@@ -70,7 +84,7 @@ export default function StepUpload() {
 
   async function uploadFiles() {
     if (recto) {
-      const res = await api.uploadID(`/young/${young._id}/documents/cniFiles`, recto, category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
+      const res = await api.uploadID(young._id, recto, { category, expirationDate });
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -80,7 +94,7 @@ export default function StepUpload() {
     }
 
     if (verso) {
-      const res = await api.uploadID(`/young/${young._id}/documents/cniFiles`, verso, category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
+      const res = await api.uploadID(young._id, verso, { category, expirationDate });
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -99,7 +113,7 @@ export default function StepUpload() {
       const { ok: uploadOk } = await uploadFiles();
       if (!uploadOk) return;
 
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: dayjs(date).locale("fr").format("YYYY-MM-DD") });
+      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: expirationDate });
 
       if (!ok) {
         capture(code);
@@ -143,8 +157,6 @@ export default function StepUpload() {
       setLoading(false);
     }
   }
-
-  const isEnabled = corrections?.length ? hasChanged && !loading && !error.text : (young?.files?.cniFiles?.length || recto || verso) && date && !loading && !error.text;
 
   return (
     <>
@@ -190,12 +202,11 @@ export default function StepUpload() {
   );
 
   function Recto() {
-    function handleChange(e) {
-      if (e.target.files[0].size > 1000000) {
-        setError({ text: "Ce fichier est trop volumineux." });
-        return;
-      }
-      setRecto(e.target.files[0]);
+    async function handleChange(e) {
+      const image = await resizeImage(e.target.files[0]);
+      if (image.size > 1000000) return setError({ text: "Ce fichier est trop volumineux." });
+
+      setRecto(image);
       setHasChanged(true);
       setStep(corrections?.some(({ reason }) => reason === "MISSING_FRONT") || category === "passport" ? "verify" : "verso");
     }
@@ -226,14 +237,13 @@ export default function StepUpload() {
   }
 
   function Verso() {
-    function handleChange(e) {
-      if (e.target.files[0].size > 1000000) {
-        setError({ text: "Ce fichier est trop volumineux." });
-        return;
-      }
-      setVerso(e.target.files[0]);
+    async function handleChange(e) {
+      const image = await resizeImage(e.target.files[0]);
+      if (image.size > 1000000) return setError({ text: "Ce fichier est trop volumineux." });
+
+      setVerso(image);
       setHasChanged(true);
-      setStep(corrections?.some(({ reason }) => reason === "MISSING_FRONT") || category === "passport" ? "verify" : "verso");
+      setStep("verify");
     }
 
     return (
@@ -310,8 +320,8 @@ export default function StepUpload() {
 function Gallery({ recto, verso }) {
   return (
     <div className="mb-4 flex h-48 w-full space-x-2 overflow-x-auto">
-      {recto.length > 0 && <img src={URL.createObjectURL(recto[0])} className="w-3/4 object-contain" />}
-      {verso.length > 0 && <img src={URL.createObjectURL(verso[0])} className="w-3/4 object-contain" />}
+      {recto && <img src={URL.createObjectURL(recto)} className="w-3/4 object-contain" />}
+      {verso && <img src={URL.createObjectURL(verso)} className="w-3/4 object-contain" />}
     </div>
   );
 }
