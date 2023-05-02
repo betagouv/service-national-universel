@@ -253,17 +253,7 @@ const ListSessions = ({ user, firstSession }) => {
   };
 
   const getLinesByPdr = async (ids) => {
-    let body2 = {
-      query: { bool: { filter: [{ terms: { "meetingPointsIds.keyword": ids } }, { term: { "cohort.keyword": selectedCohort } }] } },
-      aggs: {
-        group_by_meetingPointId: {
-          terms: { field: "meetingPointsIds.keyword", size: ES_NO_LIMIT },
-        },
-      },
-      size: 0,
-    };
-
-    const { responses } = await api.esQuery("lignebus", body2);
+    const { responses } = await api.post("/elasticsearch/lignedebus/pointderassemblement", { filters: { meetingPointIds: ids, cohort: [selectedCohort] } });
     return responses[0]?.aggregations?.group_by_meetingPointId?.buckets || [];
   };
 
