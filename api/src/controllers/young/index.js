@@ -448,6 +448,56 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
     }
 
+    // TODO: diviser en 4 endpoints
+    const fieldsToKeep = [
+      //CGU
+      "acceptCGU",
+
+      // Infos générales
+      "gender",
+      "email",
+      "phone",
+      "phoneZone",
+
+      // Représentants légaux
+      "parent1Status",
+      "parent1FirstName",
+      "parent1LastName",
+      "parent1Email",
+      "parent1Phone",
+      "parent1PhoneZone",
+      "parent2Status",
+      "parent2FirstName",
+      "parent2LastName",
+      "parent2Email",
+      "parent2Phone",
+      "parent2PhoneZone",
+
+      // Préférences de MIG
+      "domains",
+      "missionFormat",
+      "period",
+      "periodRanking",
+      "mobilityTransport",
+      "mobilityTransportOther",
+      "professionnalProject",
+      "professionnalProjectPrecision",
+      "desiredLocation",
+      "engaged",
+      "engagedDescription",
+      "mobilityNearHome",
+      "mobilityNearSchool",
+      "mobilityNearRelative",
+      "mobilityNearRelativeName",
+      "mobilityNearRelativeAddress",
+      "mobilityNearRelativeZip",
+      "mobilityNearRelativeCity",
+    ];
+
+    for (const key in value) {
+      if (!fieldsToKeep.includes(key)) delete value[key];
+    }
+
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
