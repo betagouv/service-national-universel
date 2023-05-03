@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { HiOutlineLockClosed } from "react-icons/hi";
 import {
+  formatDateFR,
   formatLongDateUTC,
   getDepartmentNumber,
   missionCandidatureExportFields,
@@ -18,6 +19,9 @@ import { Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } 
 import api from "../../services/api";
 import { ES_NO_LIMIT, ROLES, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDateTimezoneUTC, translate, translateVisibilty } from "../../utils";
 import SelectStatusMissionV2 from "./components/SelectStatusMissionV2";
+import FromDate from "../../components/filters-system/components/customComponent/FromDate";
+import ToDate from "../../components/filters-system/components/customComponent/ToDate";
+import DateFilter from "../../components/filters-system-v2/components/customComponent/DateFilter";
 
 const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
@@ -475,6 +479,20 @@ export default function List() {
       missingLabel: "Aucune candidature ni proposition",
       translate: (value) => translateApplication(value),
     },
+    {
+      title: "Date de début",
+      name: "fromDate",
+      parentGroup: "Dates",
+      customComponent: (setFilter, filter) => <DateFilter setValue={setFilter} value={filter} />,
+      translate: formatDateFR,
+    },
+    {
+      title: "Date de fin",
+      name: "toDate",
+      parentGroup: "Dates",
+      customComponent: (setFilter, filter) => <DateFilter setValue={setFilter} value={filter} />,
+      translate: formatDateFR,
+    },
     user.role === ROLES.SUPERVISOR
       ? {
           title: "Structure",
@@ -483,7 +501,7 @@ export default function List() {
         }
       : null,
   ].filter(Boolean);
-
+  console.log(selectedFilters);
   return (
     <>
       <Breadcrumbs items={[{ label: "Missions" }]} />

@@ -102,8 +102,8 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: [] } });
   };
 
-  const handleCustomComponent = (query) => {
-    setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: query.value, customComponentQuery: query } });
+  const handleCustomComponent = (value) => {
+    setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: value } });
   };
   return (
     <Transition
@@ -147,6 +147,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                           }
                           a.key.toString().localeCompare(b.key.toString());
                         })
+
                         ?.map((option) => {
                           const optionSelected = selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.key);
                           return (

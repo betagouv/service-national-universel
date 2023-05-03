@@ -27,6 +27,8 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
       "hebergementPayant.keyword",
       "placesStatus.keyword",
       "applicationStatus.keyword",
+      "fromDate",
+      "toDate",
     ];
     const sortFields = ["createdAt", "placesLeft", "name.keyword"];
 
@@ -55,7 +57,28 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
     }
 
     // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields,
+      queryFilters,
+      customQueries: {
+        fromDate: (query, value) => {
+          const date = new Date(value);
+          date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+          query.bool.must.push({ range: { startAt: { gte: date } } }, { range: { endAt: { gte: null } } });
+          return query;
+        },
+        toDate: (query, value) => {
+          const date = new Date(value);
+          date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+          query.bool.must.push({ range: { startAt: { gte: null } } }, { range: { endAt: { lte: date } } });
+          return query;
+        },
+      },
+      page,
+      sort,
+      contextFilters,
+    });
 
     if (req.params.action === "export") {
       const response = await allRecords("mission", hitsRequestBody.query);
