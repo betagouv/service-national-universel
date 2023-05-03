@@ -84,7 +84,11 @@ export default function StepDocuments() {
         </div>
 
         {young.files.cniFiles.length > 0 && (
-          <MyDocs />
+          <div className="mb-4">
+            <hr className="my-2" />
+            <MyDocs />
+            <hr className="my-2" />
+          </div>
         )}
 
         {disabledUpload && (
