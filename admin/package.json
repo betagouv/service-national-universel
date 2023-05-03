@@ -53,6 +53,7 @@
     "@tailwindcss/line-clamp": "^0.4.2",
     "babel-loader": "8.3.0",
     "bootstrap": "4.6.1",
+    "browser-image-resizer": "^2.4.1",
     "chart.js": "^4.2.1",
     "core-js": "3.26.0",
     "dayjs": "1.11.6",
