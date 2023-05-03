@@ -138,7 +138,7 @@ class api {
     });
   }
 
-  uploadFile(path, arr, category, expirationDate) {
+  uploadFile(path, arr) {
     const names = arr.map((e) => e.name || e);
     const files = arr.filter((e) => typeof e === "object");
     let formData = new FormData();
@@ -146,11 +146,37 @@ class api {
       formData.append(files[i].name, files[i], files[i].name);
     }
     formData.append("body", JSON.stringify({ names }));
-    if (category) formData.set("category", category);
-    if (expirationDate) formData.set("expirationDate", expirationDate);
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
+          retries: 3,
+          retryDelay: 1000,
+          retryOn: [502, 503, 504],
+          mode: "cors",
+          method: "POST",
+          credentials: "include",
+          headers: { Authorization: `JWT ${this.token}` },
+          body: formData,
+        });
+        const res = await response.json();
+        resolve(res);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  uploadID(youngId, file, metadata = {}) {
+    let formData = new FormData();
+    const filename = file.name;
+    formData.append("file", file, filename);
+    for (const [key, value] of Object.entries(metadata)) {
+      formData.append(key, value);
+    }
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch(`${apiURL}/young/${youngId}/documents/cniFiles`, {
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],

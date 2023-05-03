@@ -188,7 +188,7 @@ router.post(
           }
           if (line[`ID PDR ${i}`]) {
             const isValidObjectId = mongoose.Types.ObjectId.isValid(line[`ID PDR ${i}`]);
-            const isValidCorrespondance = i > 1 && line[`ID PDR ${i}`].toLowerCase() === "correspondance";
+            const isValidCorrespondance = i > 1 && ["correspondance aller", "correspondance retour"].includes(line[`ID PDR ${i}`].toLowerCase());
             if (!(isValidObjectId || isValidCorrespondance)) {
               errors[`ID PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
             }
@@ -336,9 +336,13 @@ router.post(
       for (const [i, line] of lines.entries()) {
         const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-          if (line[`ID PDR ${pdrNumber}`] && mongoose.Types.ObjectId.isValid(line[`ID PDR ${pdrNumber}`])) {
-            const pdr = await PdrModel.find({ _id: line[`ID PDR ${pdrNumber}`], deletedAt: { $exists: false } });
-            if (!pdr) {
+          if (line[`ID PDR ${pdrNumber}`]) {
+            if (mongoose.Types.ObjectId.isValid(line[`ID PDR ${pdrNumber}`])) {
+              const pdr = await PdrModel.findOne({ _id: line[`ID PDR ${pdrNumber}`], deletedAt: { $exists: false } });
+              if (!pdr) {
+                errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
+              }
+            } else if (!["correspondance aller", "correspondance retour"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
               errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
             }
           }
@@ -349,7 +353,7 @@ router.post(
         const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
         const pdrIds = [];
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-          if (line[`ID PDR ${pdrNumber}`] && line[`ID PDR ${pdrNumber}`]?.toLowerCase() !== "correspondance") {
+          if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
             pdrIds.push(line[`ID PDR ${pdrNumber}`]);
           }
         }
@@ -435,7 +439,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
     for (const line of importData.lines) {
       const pdrIds = [];
       for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-        if (line[`ID PDR ${pdrNumber}`] && line[`ID PDR ${pdrNumber}`]?.toLowerCase() !== "correspondance") {
+        if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
           pdrIds.push(line[`ID PDR ${pdrNumber}`]);
         }
       }
@@ -464,7 +468,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
 
       const lineToPointWithCorrespondance = Array.from({ length: countPdr }, (_, i) => i + 1).reduce((acc, pdrNumber) => {
         if (pdrNumber > 1 && !line[`ID PDR ${pdrNumber}`]) return acc;
-        if (line[`ID PDR ${pdrNumber}`].toLowerCase() !== "correspondance") {
+        if (!["correspondance aller", "correspondance retour"].includes(line[`ID PDR ${pdrNumber}`].toLowerCase())) {
           acc.push({
             lineId: busLine._id.toString(),
             meetingPointId: line[`ID PDR ${pdrNumber}`],
@@ -477,6 +481,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           });
         } else {
           acc[acc.length - 1].stepPoints.push({
+            type: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? "aller" : "retour",
             address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
             departureHour: line[`HEURE DEPART DU PDR ${pdrNumber}`],
             returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`],

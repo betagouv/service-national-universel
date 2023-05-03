@@ -9,9 +9,7 @@
     "tailwind": "npx tailwindcss -i ./src/index.css -o ./src/tailwindcss.css --watch",
     "start": "node server/index.js",
     "install": "node src/build-only-on-clevercloud.js",
-    "build": "node --max-old-space-size=3000 node_modules/webpack/bin/webpack.js",
-    "lint": "eslint . --ext .js,.jsx",
-    "lint:fix": "eslint --ext .js,.jsx --fix"
+    "build": "node --max-old-space-size=3000 node_modules/webpack/bin/webpack.js"
   },
   "devDependencies": {
     "@babel/cli": "7.19.3",
@@ -61,6 +59,7 @@
     "@tailwindcss/line-clamp": "^0.4.2",
     "babel-loader": "8.3.0",
     "bootstrap": "4.6.1",
+    "browser-image-resizer": "^2.4.1",
     "chart.js": "^4.2.1",
     "core-js": "3.26.0",
     "dayjs": "1.11.6",

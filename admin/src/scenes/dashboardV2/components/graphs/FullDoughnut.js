@@ -3,6 +3,7 @@ import { Doughnut } from "react-chartjs-2";
 import { getGraphColors } from "./graph-commons";
 import GraphTooltip from "./GraphTooltip";
 import MoreInfoPanel from "../ui/MoreInformationPanel";
+import { Link } from "react-router-dom";
 
 export default function FullDoughnut({
   title,
@@ -27,6 +28,7 @@ export default function FullDoughnut({
 
   useEffect(() => {
     if (values) {
+      let completeValues = [];
       const dataColors = getGraphColors(values.length);
       const totalValues = values.reduce((acc, val) => acc + val, 0);
       setDataIsZero(totalValues === 0);
@@ -77,9 +79,9 @@ export default function FullDoughnut({
 
               let value;
               if (tooltipsPercent) {
-                value = totalValues ? Math.round((values[elems[0].index] / totalValues) * 100) + "%" : "-";
+                value = totalValues ? Math.round((completeValues[elems[0].index].value / totalValues) * 100) + "%" : "-";
               } else {
-                value = tooltips[elems[0].index];
+                value = completeValues[elems[0].index].tooltip;
               }
 
               setTooltip({
@@ -99,12 +101,37 @@ export default function FullDoughnut({
           }
         },
       });
+
+      let legends = values.map((value, idx) => {
+        return {
+          value,
+          name: labels[idx],
+          color: dataColors[idx % dataColors.length],
+          info: legendInfoPanels && legendInfoPanels.length > idx ? legendInfoPanels[idx] : undefined,
+          url: legendUrls && legendUrls.length > idx ? legendUrls[idx] : undefined,
+        };
+      });
+
+      // filter values
+      if (totalValues !== 0) {
+        for (let i = 0, n = values.length; i < n; ++i) {
+          if (values[i] / totalValues >= 0.01) {
+            completeValues.push({
+              value: values[i],
+              legend: legends[i],
+              tooltip: tooltips ? tooltips[i] : null,
+            });
+          }
+        }
+      }
+
+      // graph data
       setGraphData({
         labels,
         title,
         datasets: [
           {
-            data: values,
+            data: completeValues.map((cv) => cv.value),
             backgroundColor: dataColors,
             hoverBackgroundColor: dataColors,
             hoverBorderWidth: 3,
@@ -117,17 +144,8 @@ export default function FullDoughnut({
         ],
       });
 
-      let legends = values.map((value, idx) => {
-        return {
-          value,
-          name: labels[idx],
-          color: dataColors[idx % dataColors.length],
-          info: legendInfoPanels && legendInfoPanels.length > idx ? legendInfoPanels[idx] : undefined,
-          url: legendUrls && legendUrls.length > idx ? legendUrls[idx] : undefined,
-        };
-      });
-
       // sort legends to be displayed by grid
+      legends = completeValues.map((cv) => cv.legend);
       let legendCols = maxLegends;
       switch (legendSide) {
         case "left": {
@@ -135,7 +153,7 @@ export default function FullDoughnut({
           let newLegends = [];
           for (let j = 0; j < maxLegends; ++j) {
             for (let i = legendCols - 1; i >= 0; --i) {
-              const idx = i * legendCols + j;
+              const idx = i * maxLegends + j;
               if (idx < legends.length) {
                 newLegends.push(legends[idx]);
               } else {
@@ -151,7 +169,7 @@ export default function FullDoughnut({
           let newLegends = [];
           for (let j = 0; j < maxLegends; ++j) {
             for (let i = 0; i < legendCols; ++i) {
-              const idx = i * legendCols + j;
+              const idx = i * maxLegends + j;
               if (idx < legends.length) {
                 newLegends.push(legends[idx]);
               } else {
@@ -260,12 +278,24 @@ export default function FullDoughnut({
     },
   };
 
-  function clickOnLegend({ index, label, value, color, url }) {
-    if (url) {
-      window.open(url, "_blank");
-    } else {
-      onLegendClicked(index, label, value, color);
-    }
+  const LegendContent = ({ name, value, color, info }) => {
+    return (
+      <>
+        <div className={`mb-[4px] text-xs text-gray-600 ${textLegendClass}`}>{name}</div>
+        <div className={legendValueClass}>
+          <div className={`h-[10px] w-[10px] rounded-full ${legendDotClass}`} style={{ backgroundColor: color }}></div>
+          <div className="text-lg font-medium text-gray-900">
+            {value}
+            {valueSuffix}
+          </div>
+          {info && <MoreInfoPanel>{info}</MoreInfoPanel>}
+        </div>
+      </>
+    );
+  };
+
+  function stopPropagation(event) {
+    event.stopPropagation();
   }
 
   return (
@@ -278,25 +308,20 @@ export default function FullDoughnut({
         </div>
         {tooltip && <GraphTooltip style={tooltip.style}>{tooltip.value}</GraphTooltip>}
       </div>
-      <div className={legendsClass}>
+      <div className={legendsClass} onClick={(event) => stopPropagation(event)}>
         {legends.map((legend, idx) => {
           return legend ? (
-            <div
-              className={legendClass}
-              key={legend.name + idx}
-              onClick={() => clickOnLegend({ index: idx, label: legend.name, value: legend.value, color: legend.color, url: legend.url })}>
-              <div className={`mb-[4px] max-w-[250px] text-xs text-gray-600 ${textLegendClass}`}>{legend.name}</div>
-              <div className={legendValueClass}>
-                <div className={`h-[10px] w-[10px] rounded-full ${legendDotClass}`} style={{ backgroundColor: legend.color }}></div>
-                <div className="text-lg font-medium text-gray-900">
-                  {legend.value}
-                  {valueSuffix}
-                </div>
-                {legend.info && <MoreInfoPanel>{legend.info}</MoreInfoPanel>}
+            legend?.url ? (
+              <Link to={legend.url} target={"_blank"} className="legendClass" key={legend.name + "-" + idx}>
+                <LegendContent name={legend.name} value={legend.value} color={legend.color} info={legend.info} />
+              </Link>
+            ) : (
+              <div className={legendClass} key={legend.name + "-" + idx} onClick={() => onLegendClicked(idx, legend.name, legend.value, legend.color)}>
+                <LegendContent name={legend.name} value={legend.value} color={legend.color} info={legend.info} />
               </div>
-            </div>
+            )
           ) : (
-            <div></div>
+            <div key={"nolegend-" + idx}></div>
           );
         })}
       </div>

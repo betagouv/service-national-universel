@@ -165,6 +165,10 @@ export const getCorrectionByStep = (young, step) => {
   return corrections;
 };
 
+export const getCorrectionsForStepUpload = (young) => {
+  return young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
+};
+
 export const redirectToCorrection = (field) => {
   const correction = WAITING_CORRECTION_LINK.find((correction) => correction.field.includes(field));
   return correction ? correction.redirect : "/";

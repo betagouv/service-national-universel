@@ -71,7 +71,21 @@ function computeMissionFilter(filters) {
     matchs.startAt = { $lt: filters.end };
   }
   if (filters && filters.sources && filters.sources.length > 0) {
-    matchs.structureId = { $in: filters.sources };
+    if (filters.sources.includes("JVA")) {
+      if (filters.sources.includes("SNU")) {
+        // il y a les 2 on ne fait rien de plus.
+      } else {
+        matchs.isJvaMission = "true";
+      }
+    } else if (filters.sources.includes("SNU")) {
+      if (filters.sources.includes("JVA")) {
+        // il y a les 2 on ne fait rien de plus.
+      } else {
+        matchs.isJvaMission = "false";
+      }
+    } else {
+      // no filter
+    }
   }
   return matchs;
 }

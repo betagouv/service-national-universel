@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import Loader from "../../../../../../components/Loader";
 import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
 import { translate } from "snu-lib";
 import Tabs from "../../../../../phase0/components/Tabs";
 import { FullDoughnut } from "../../../../components/graphs";
+import { LoadingDoughnut } from "../../../../components/ui/loading";
 
 export default function MissionsYoungPreferences({ filters, missionFilters, className = "" }) {
   const [loading, setLoading] = useState(true);
@@ -28,7 +28,6 @@ export default function MissionsYoungPreferences({ filters, missionFilters, clas
     try {
       const result = await api.post(`/dashboard/engagement/missions-young-preferences`, { filters, missionFilters, group: selectedTab });
       if (result.ok) {
-        console.log("Mission Young Preferences: ", result.data);
         setGraphs(
           result.data.map((res) => {
             const labels = [];
@@ -36,7 +35,6 @@ export default function MissionsYoungPreferences({ filters, missionFilters, clas
             const tooltips = [];
             const infoPanels = [];
             const total = res.reduce((acc, val) => acc + val.count, 0);
-            console.log("total: ", total);
             for (let i = 0, n = res.length; i < n; ++i) {
               const data = res[i];
               labels.push(translate(data._id));
@@ -49,7 +47,6 @@ export default function MissionsYoungPreferences({ filters, missionFilters, clas
                 </div>,
               );
               if (data.extra) {
-                console.log("data.extra = ", data.extra);
                 const extraTotal = data.extra.reduce((acc, val) => acc + val.count, 0);
                 const extraTooltips = data.extra.map((e, idx) => (
                   <div key={"extratooltip-" + idx}>
@@ -75,7 +72,6 @@ export default function MissionsYoungPreferences({ filters, missionFilters, clas
                 infoPanels.push(null);
               }
             }
-            console.log("values= ", values);
             return { values, labels, tooltips, infoPanels };
           }),
         );
@@ -98,13 +94,13 @@ export default function MissionsYoungPreferences({ filters, missionFilters, clas
   }
 
   return (
-    <DashboardBox title="Selon les préférences volontaires" className={className}>
+    <DashboardBox title="Selon les préférences volontaires" className={`grow ${className}`} childrenClassName="grow">
       <Tabs selected={selectedTab} tabs={tabs} onChange={setSelectedTab} className="my-6" />
       {error ? (
         <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : loading ? (
         <div className="flex items-center justify-center">
-          <Loader />
+          <LoadingDoughnut />
         </div>
       ) : graphs.length === 0 ? (
         <div className="text-center text-gray-500">Aucune données</div>

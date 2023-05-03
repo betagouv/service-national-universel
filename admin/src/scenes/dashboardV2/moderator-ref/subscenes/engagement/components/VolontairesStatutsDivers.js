@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import Loader from "../../../../../../components/Loader";
 import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
-import { translate } from "snu-lib";
+import { translate, translateApplication } from "snu-lib";
 import Tabs from "../../../../../phase0/components/Tabs";
 import StatusTable from "../../../../components/ui/StatusTable";
 
@@ -34,7 +33,24 @@ export default function VolontairesStatutsDivers({ filters, className = "" }) {
           if (statuses[status.category] === undefined) {
             statuses[status.category] = [];
           }
-          statuses[status.category].push({ status: translate(status.status), nb: status.value, percentage: Math.round(status.percentage * 100) });
+          let url = '/volontaire?STATUS=%5B"VALIDATED"%5D';
+          switch (status.category) {
+            case "phase2":
+              url += `&APPLICATION_STATUS=%5B"${encodeURIComponent(status.status)}"%5D`;
+              break;
+            case "contract":
+              url += `&CONTRACT_STATUS=%5B"${encodeURIComponent(status.status)}"%5D`;
+              break;
+            case "equivalence":
+              url += `&EQUIVALENCE_STATUS=%5B"${encodeURIComponent(status.status)}"%5D`;
+          }
+
+          statuses[status.category].push({
+            status: status.category === "phase2" ? translateApplication(status.status) : translate(status.status),
+            nb: status.value,
+            percentage: Math.round(status.percentage * 100),
+            url,
+          });
         }
         setStatuses(statuses);
       } else {
@@ -49,17 +65,13 @@ export default function VolontairesStatutsDivers({ filters, className = "" }) {
   }
 
   return (
-    <DashboardBox title="Statuts divers" className={className}>
+    <DashboardBox title="Statuts divers" className={`flex flex-col ${className}`} childrenClassName="grow flex flex-col">
       {error ? (
         <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
-      ) : loading ? (
-        <div className="flex items-center justify-center">
-          <Loader />
-        </div>
       ) : (
         <>
           <Tabs selected={selectedTab} tabs={tabs} onChange={setSelectedTab} className="my-6" />
-          <StatusTable className="" statuses={statuses[selectedTab]} />
+          <StatusTable className="grow" statuses={statuses[selectedTab]} loading={loading} nocols={selectedTab !== "phase2"} />
         </>
       )}
     </DashboardBox>

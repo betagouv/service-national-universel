@@ -97,7 +97,7 @@ function joiElasticSearch({ filterFields, sortFields = [], body }) {
     exportFields: Joi.alternatives().try(Joi.array().items(Joi.string()).max(200).allow(null).default(null), Joi.string().valid("*")),
   });
 
-  const { error, value } = schema.validate(body);
+  const { error, value } = schema.validate({ ...body }, { stripUnknown: true });
   if (error) capture(error);
   return { queryFilters: value.filters, page: value.page, sort: value.sort, exportFields: value.exportFields, error };
 }

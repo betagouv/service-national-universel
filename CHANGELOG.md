@@ -1,3 +1,60 @@
+# [1.264.0](https://github.com/betagouv/service-national-universel/compare/v1.263.0...v1.264.0) (2023-05-02)
+
+
+### Bug Fixes
+
+* **admin:** nav from pdr to bus ([18591aa](https://github.com/betagouv/service-national-universel/commit/18591aa750d602503b3e96bbd98bd22394f27e0a))
+* **api:** Correction du test sur la création des missions ([#2563](https://github.com/betagouv/service-national-universel/issues/2563)) ([442ab9b](https://github.com/betagouv/service-national-universel/commit/442ab9bc4c514acc9b631c7976b0a9d98dd35827))
+* young build context ([#2551](https://github.com/betagouv/service-national-universel/issues/2551)) ([ce69c81](https://github.com/betagouv/service-national-universel/commit/ce69c81f14870727da908c28cacd77d5c07352ca))
+
+
+### Features
+
+* **admin:** disabled head center option in invite modal for ref ([ceb4170](https://github.com/betagouv/service-national-universel/commit/ceb41708f595bc6de366508348e00fb2e2b1cf3b))
+* **admin:** Finalisation Dashboard Engagement Modérateur ([#2560](https://github.com/betagouv/service-national-universel/issues/2560)) ([cccda29](https://github.com/betagouv/service-national-universel/commit/cccda29a2e2aa4042d682b0d80b6e64abdf58cef))
+* **api:** CRON Envoi du rappel aux réferents la veille de la cloture des instructions ([#2548](https://github.com/betagouv/service-national-universel/issues/2548)) ([28baf46](https://github.com/betagouv/service-national-universel/commit/28baf468fb7cf93ba66eea2e81aac60de0bd0449))
+
+# [1.263.0](https://github.com/betagouv/service-national-universel/compare/v1.262.1...v1.263.0) (2023-05-01)
+
+
+### Bug Fixes
+
+* Update link SNU 404 error ([#2559](https://github.com/betagouv/service-national-universel/issues/2559)) ([64d81e6](https://github.com/betagouv/service-national-universel/commit/64d81e6855c031efa11a51f8519da3e2dfd848f9))
+* **admin:** query search on volontaire and inscription page ([238ce34](https://github.com/betagouv/service-national-universel/commit/238ce346fd657b84cfecd1021dcd5b218750a822))
+* **api:** doublon account young ([a040dd3](https://github.com/betagouv/service-national-universel/commit/a040dd3d11746b5b6070f452c7386d7879282257))
+
+
+### Features
+
+* **admin/dashboard:** full redirection on dashboard sejour / inscription ([#2530](https://github.com/betagouv/service-national-universel/issues/2530)) ([48f77f5](https://github.com/betagouv/service-national-universel/commit/48f77f55bc43104e230953faf19403826c5e9ef9))
+* **api:** import correspondance aller et retour ([#2540](https://github.com/betagouv/service-national-universel/issues/2540)) ([3ba93ac](https://github.com/betagouv/service-national-universel/commit/3ba93ac0ee28cfc79f36fcc4d1d42639cdb6ac34))
+* **api, admin:** Update des droits des transporters sur les centres et les PDR ([#2552](https://github.com/betagouv/service-national-universel/issues/2552)) ([b77b6e3](https://github.com/betagouv/service-national-universel/commit/b77b6e3ffbd82e7804ef7d40af4381fccb261f37))
+
+## [1.262.1](https://github.com/betagouv/service-national-universel/compare/v1.262.0...v1.262.1) (2023-04-28)
+
+
+### Bug Fixes
+
+* **api:** update mission missing import and verif ([24d58fa](https://github.com/betagouv/service-national-universel/commit/24d58fad662f8270237c5892f1ccc21f89da957f))
+* **app:** waitingCorrection if no correctionRequest ([e1f4996](https://github.com/betagouv/service-national-universel/commit/e1f49960a11b0624f496ee03583692cd4822b431))
+* **lib:** Réparer la fonction d'autorisation de changement de session ([#2555](https://github.com/betagouv/service-national-universel/issues/2555)) ([f545a88](https://github.com/betagouv/service-national-universel/commit/f545a883551ad1c980dd83742c1bdbe42ca3b077))
+* **test:** fix mission put test probleme date ([#2553](https://github.com/betagouv/service-national-universel/issues/2553)) ([b468974](https://github.com/betagouv/service-national-universel/commit/b468974c197f02197f323232055163fe19245467))
+
+# [1.262.0](https://github.com/betagouv/service-national-universel/compare/v1.261.0...v1.262.0) (2023-04-27)
+
+
+### Bug Fixes
+
+* **api:** tutor name for missions ([#2547](https://github.com/betagouv/service-national-universel/issues/2547)) ([1f55c4d](https://github.com/betagouv/service-national-universel/commit/1f55c4d56a15f4b4e24dcb0f71c8160c2c60dd91))
+* **app:** display parent info on profil page ([ab2fb12](https://github.com/betagouv/service-national-universel/commit/ab2fb1262d3f4472ffff9a6e5dbe8483b6f170be))
+* **app:** parent form reset ([695fa5d](https://github.com/betagouv/service-national-universel/commit/695fa5d1831ef6501cb0c2bdba29bcc1bf3c0c74))
+* **app/api:** Amélio gestion d'erreur uploads ([#2545](https://github.com/betagouv/service-national-universel/issues/2545)) ([212a0be](https://github.com/betagouv/service-national-universel/commit/212a0bea1ea63939677d9bde264740efe8906c73))
+
+
+### Features
+
+* **app:** Inscription - Etape téléversement - Dissocier les uploads du recto et du verso de la CNI sur desktop ([#2544](https://github.com/betagouv/service-national-universel/issues/2544)) ([247b72d](https://github.com/betagouv/service-national-universel/commit/247b72d350f220e18eebe6cf34dfd4b2590777b4))
+
 # [1.261.0](https://github.com/betagouv/service-national-universel/compare/v1.260.0...v1.261.0) (2023-04-26)
 
 

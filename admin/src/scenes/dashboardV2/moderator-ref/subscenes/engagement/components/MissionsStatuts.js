@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Loader from "../../../../../../components/Loader";
 import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
 import { translate } from "snu-lib";
@@ -10,11 +9,12 @@ import ExportComponent from "../../../../../../components/ExportXlsx";
 import plausibleEvent from "../../../../../../services/plausible";
 import { ReactiveBase } from "@appbaseio/reactivesearch";
 import { ES_NO_LIMIT } from "../../../../../../utils";
+import { computeMissionUrl } from "../../../../components/common";
 
 export default function MissionsStatuts({ filters, missionFilters, className = "" }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [statuses, setStatuses] = useState({});
+  const [statuses, setStatuses] = useState([]);
   const [exportFilter, setExportFilter] = useState({});
 
   useEffect(() => {
@@ -40,6 +40,7 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
                   labels={["occupées", "disponibles"]}
                 />
               ),
+              url: computeMissionUrl(filters, missionFilters, { STATUS: status.status }),
             };
           }),
         );
@@ -174,12 +175,8 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
     <DashboardBox title="Statut des missions proposées" className={className} headerChildren={exportButton}>
       {error ? (
         <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
-      ) : loading ? (
-        <div className="flex items-center justify-center">
-          <Loader />
-        </div>
       ) : (
-        <StatusTable className="mt-8" statuses={statuses} />
+        <StatusTable className="mt-8" statuses={statuses} loading={loading} />
       )}
     </DashboardBox>
   );

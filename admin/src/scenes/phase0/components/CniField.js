@@ -12,9 +12,9 @@ import { BorderButton, PlainButton } from "./Buttons";
 import ConfirmationModal from "./ConfirmationModal";
 import Warning from "../../../assets/icons/Warning";
 import { capture } from "../../../sentry";
-import dayjs from "dayjs";
 import Field from "./Field";
 import DatePickerList from "./DatePickerList";
+import { resizeImage } from "../../../services/file.service";
 
 export function CniField({
   young,
@@ -46,8 +46,7 @@ export function CniField({
 
   useEffect(() => {
     setRequestButtonClass(
-      `flex items-center justify-center w-[32px] h-[32px] rounded-[100px] cursor-pointer group ${
-        hasValidRequest ? "bg-[#F97316]" : "bg-[#FFEDD5] " // + (mouseIn ? "visible" : "invisible")
+      `flex items-center justify-center w-[32px] h-[32px] rounded-[100px] cursor-pointer group ${hasValidRequest ? "bg-[#F97316]" : "bg-[#FFEDD5] " // + (mouseIn ? "visible" : "invisible")
       } hover:bg-[#F97316]`,
     );
   }, [mouseIn, hasValidRequest]);
@@ -68,11 +67,11 @@ export function CniField({
     reasons.push({ value: "MISSING_BACK", label: "Verso à fournir" });
   }
 
-  function cniModalClose(changes) {
+  function cniModalClose(changes, value) {
     setCniModalOpened(false);
     if (changes) {
       onInscriptionChange && onInscriptionChange(young);
-      onChange && onChange();
+      onChange && onChange("files", { cniFiles: value });
     }
   }
 
@@ -121,6 +120,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
   const [filesToUpload, setFilesToUpload] = useState();
   const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : new Date());
   const [category, setCategory] = useState(young?.latestCNIFileCategory || null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (filesToUpload) young.filesToUpload = filesToUpload;
@@ -174,24 +174,32 @@ function CniModal({ young, onClose, mode, blockUpload }) {
   }
 
   async function upload(files) {
-    for (const file of files) {
-      if (file.size > 5000000) return setError(`Le fichier ${file.name} est trop volumineux.`);
-    }
+    setLoading(true);
     if (!category || !date) return setError("Veuillez sélectionner une catégorie et une date d'expiration.");
-    const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), {}, category, date);
-    if (res.code === "FILE_CORRUPTED")
-      return setError(
-        "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-      );
-    if (!res.ok) {
-      capture(res.code);
-      setError("Une erreur s'est produite lors du téléversement de votre fichier.");
-      return;
+
+    for (const file of files) {
+      const res = await api.uploadID(young._id, file, { category, expirationDate: date });
+
+      if (res.code === "FILE_CORRUPTED") {
+        setError(
+          "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (!res.ok) {
+        capture(res.code);
+        setError("Une erreur s'est produite lors du téléversement de votre fichier.");
+        setLoading(false);
+        return;
+      }
+      setCniFiles(res.data);
+      setChanges(true);
     }
     setError(null);
-    setCniFiles(res.data);
-    setChanges(true);
     setFilesToUpload(null);
+    setLoading(false);
   }
 
   const removeFileInscription = (file) => {
@@ -206,14 +214,35 @@ function CniModal({ young, onClose, mode, blockUpload }) {
     });
   };
 
+  const handleChange = async (e) => {
+    const array = [];
+    let error = "";
+
+    for (let file of e.target.files) {
+      file = await resizeImage(file);
+      if (file.size > 1000000) {
+        error += `Le fichier ${file.name} est trop volumineux.`;
+      } else {
+        array.push(file);
+      }
+    }
+
+    setError(error);
+    setFilesToUpload(array);
+  };
+
   return (
-    <Modal size="md" centered isOpen={true} toggle={() => onClose(changes)}>
+    <Modal size="md" centered isOpen={true} toggle={() => onClose(changes, cniFiles)}>
       <div className="rounded-[8px] bg-white">
         <div className="p-[24px]">
           {cniFiles.length > 0 || (blockUpload && filesToUpload?.length > 0) ? (
             cniFiles.map((file) => (
               <div key={file._id} className="mt-[8px] flex items-center justify-between border-b-[1px] border-b-[#E5E7EB] py-[12px] text-[12px] last:border-b-[0px]">
-                <div className="text-right">{file.name}</div>
+                <div className=""><p>{file.name}</p>
+                  <p className="truncate text-xs text-gray-500">
+                    {translate(file.category)}
+                    {file.side && ` - ${file.side}`}
+                  </p></div>
                 <div className="flex items-center">
                   <DownloadButton className="ml-[8px] flex-[0_0_32px]" onClick={() => downloadCni(file)} />
                   <DeleteButton className="ml-[8px] flex-[0_0_32px]" onClick={() => deleteCni(file)} />
@@ -226,39 +255,17 @@ function CniModal({ young, onClose, mode, blockUpload }) {
           {error && <div className="mt-[16px] text-[12px] leading-[1.4em] text-[#EF4444]">{error}</div>}
           {mode === "edition" && (
             <>
-              <input
-                type="file"
-                multiple
-                id="file-upload"
-                name="file-upload"
-                accept=".png, .jpg, .jpeg, .pdf"
-                onChange={(e) => {
-                  if (blockUpload) {
-                    const array = [];
-                    let error = "";
-                    for (const file of e.target.files) {
-                      if (file.size > 5000000) {
-                        error += `Le fichier ${file.name} est trop volumineux.`;
-                      } else {
-                        array.push(file);
-                      }
-                    }
-                    setError(error);
-                    console.log(array);
-                    setFilesToUpload([...filesToUpload, ...array]);
-                  } else {
-                    setFilesToUpload(e.target.files);
-                  }
-                }}
-                className="hidden"
-              />
+              <input type="file" multiple id="file-upload" name="file-upload" accept=".png, .jpg, .jpeg, .pdf" onChange={handleChange} className="hidden" />
               <div className="mt-4 flex items-center justify-between">
-                <label htmlFor="file-upload" className="flex items-center space-x-4 text-xs">
-                  <AddButton className="" />
-                  <div className="cursor-pointer text-gray-500 hover:text-gray-800">Ajouter un document</div>
+                <label htmlFor="file-upload" className="flex items-center space-x-4 text-xs cursor-pointer text-gray-500 hover:text-gray-800">
+                  <AddButton />
+                  <div>
+                    <p>Ajouter un document</p>
+                    <p>Formats supportés : jpg, png, pdf. Pour les PDF, taille maximum  : 1 Mo.</p>
+                  </div>
                 </label>
               </div>
-              {filesToUpload && (
+              {filesToUpload && !error && (
                 <>
                   <div className="mt-2 flex w-full items-center justify-between space-x-2">
                     {!blockUpload ? (
@@ -271,8 +278,8 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                           ))}
                         </div>
                         <div className="1/4">
-                          <PlainButton onClick={() => upload(filesToUpload)} disabled={!category || !date}>
-                            Téléverser
+                          <PlainButton onClick={() => upload(filesToUpload)} disabled={!category || !date || loading}>
+                            {loading ? "Chargement" : "Téléverser"}
                           </PlainButton>
                         </div>
                       </>
@@ -311,7 +318,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
           )}
         </div>
         <div className="flex items-center justify-center p-[24px]">
-          <BorderButton onClick={() => onClose(changes)}>Fermer</BorderButton>
+          <BorderButton onClick={() => onClose(changes, cniFiles)}>Fermer</BorderButton>
         </div>
       </div>
       <ConfirmationModal

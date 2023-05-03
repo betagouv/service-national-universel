@@ -159,7 +159,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const oldTutorId = mission.tutorId;
 
-    if (checkedMission.tutorId !== oldTutorId) {
+    if (checkedMission.tutorId && checkedMission.tutorId !== oldTutorId) {
       const responsible = await ReferentObject.findById(checkedMission.tutorId);
       checkedMission.tutorName = await getTutorName(responsible);
     }

@@ -4,6 +4,8 @@ import { ES_NO_LIMIT, translate, YOUNG_SITUATIONS, YOUNG_STATUS } from "snu-lib"
 import api from "../../../../services/api";
 import { FilterComponent } from "../FilterDashBoard";
 import { BarChart, FullDoughnut, graphColors, Legend, Legends } from "../graphs";
+import { getLink as getOldLink } from "../../../../utils";
+import { Link } from "react-router-dom";
 
 export default function Details({ selectedFilters }) {
   const [age, setAge] = useState({});
@@ -24,6 +26,8 @@ export default function Details({ selectedFilters }) {
       options: Object.keys(YOUNG_STATUS).map((status) => ({ key: status, label: translate(status) })),
     },
   ];
+
+  console.log(qpv);
 
   async function fetchDetailInscriptions() {
     const res = await getDetailInscriptions({ ...selectedFilters, ...selectedFiltersBottom });
@@ -66,13 +70,13 @@ export default function Details({ selectedFilters }) {
         </div>
       </div>
       {/* Filter to chose displayed graphs */}
-      <div className="pb-10 pt-8">
+      <div className="py-8">
         <FilterDetail selectedDetail={selectedDetail} setSelectedDetail={setSelectedDetail} />
       </div>
 
       {/* Displayed graphs */}
       {selectedDetail === "age" ? (
-        <div className="flex w-full flex-col items-center justify-center gap-10">
+        <div className="flex h-full w-full flex-col items-center justify-center gap-10">
           <FullDoughnut
             title="Âge"
             legendSide="right"
@@ -80,8 +84,20 @@ export default function Details({ selectedFilters }) {
             values={[age["2005"] || 0, age["2006"] || 0, age["2007"] || 0, age["2008"] || 0]}
             maxLegends={2}
             tooltipsPercent={true}
+            graphClass="relative shrink-0 w-1/2"
           />
-          <FullDoughnut title="Sexe" legendSide="left" labels={["Garçons", "Filles"]} values={[sexe.male || 0, sexe.female || 0]} maxLegends={2} tooltipsPercent={true} />
+          <FullDoughnut
+            title="Sexe"
+            legendSide="left"
+            labels={["Garçons", "Filles"]}
+            values={[sexe.male || 0, sexe.female || 0]}
+            maxLegends={2}
+            tooltipsPercent={true}
+            legendUrls={[
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SEXE=%5B"male"%5D'] }),
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SEXE=%5B"female"%5D'] }),
+            ]}
+          />
         </div>
       ) : selectedDetail === "class" ? (
         <div className="flex w-full flex-col items-center justify-center gap-10">
@@ -92,6 +108,15 @@ export default function Details({ selectedFilters }) {
             values={[grade["2ndeGT"] || 0, grade["1ereGT"] || 0, grade["2ndePro"] || 0, grade["1erePro"] || 0, grade["3eme"] || 0, grade["Autre"] || 0, grade["CAP"] || 0]}
             maxLegends={3}
             tooltipsPercent={true}
+            legendUrls={[
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"2ndeGT"%5D'] }),
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"1ereGT"%5D'] }),
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"2ndePro"%5D'] }),
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"1erePro"%5D'] }),
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"3eme"%5D'] }),
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"Autre"%5D'] }),
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"CAP"%5D'] }),
+            ]}
           />
           <FullDoughnut
             title="Situation"
@@ -100,6 +125,11 @@ export default function Details({ selectedFilters }) {
             values={[situation[YOUNG_SITUATIONS.GENERAL_SCHOOL] || 0, situation[YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL] || 0, situation[YOUNG_SITUATIONS.SPECIALIZED_SCHOOL] || 0]}
             maxLegends={3}
             tooltipsPercent={true}
+            legendUrls={[
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SITUATION=%5B"GENERAL_SCHOOL"%5D'] }),
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SITUATION=%5B"PROFESSIONAL_SCHOOL"%5D'] }),
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SITUATION=%5B"SPECIALIZED_SCHOOL"%5D'] }),
+            ]}
           />
         </div>
       ) : selectedDetail === "situation" ? (
@@ -112,35 +142,47 @@ export default function Details({ selectedFilters }) {
               specificSituation?.allergies?.true || 0,
             ]}
             noValue
-            className="mt-8 h-[200px]"
+            className="h-[150px]"
           />
-          <Legends
-            className="flew-wrap"
-            values={[
-              specificSituation.handicap.true || 0,
-              specificSituation.ppsBeneficiary.true || 0,
-              specificSituation.paiBeneficiary.true || 0,
-              specificSituation.allergies.true || 0,
-            ]}
-            labels={["En situation de handicap", "Bénéficiaire d’un PPS", "Bénéficiaire d’un PAI", "Allergie / intolérance"]}
-          />
+          <div className="grid grid-cols-2 gap-10">
+            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['HANDICAP=%5B"true"%5D'] })} target="_blank">
+              <Legend className="!flex-col !items-start !justify-start" name="En situation de handicap" value={specificSituation.handicap.true || 0} color={graphColors[4][0]} />
+            </Link>
+            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['PPS=%5B"true"%5D'] })} target="_blank">
+              <Legend className="!flex-col !items-start !justify-start" name="Bénéficiaire d’un PPS" value={specificSituation.ppsBeneficiary.true || 0} color={graphColors[4][1]} />
+            </Link>
+            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['PAI=%5B"true"%5D'] })} target="_blank">
+              <Legend className="!flex-col !items-start !justify-start" name="Bénéficiaire d’un PAI" value={specificSituation.paiBeneficiary.true || 0} color={graphColors[4][2]} />
+            </Link>
+            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['ALLERGIES=%5B"true"%5D'] })} target="_blank">
+              <Legend className="!flex-col !items-start !justify-start" name="Allergie / intolérance" value={specificSituation.allergies.true || 0} color={graphColors[4][3]} />
+            </Link>
+          </div>
 
           <div className="h-[1px] w-3/5 border-b-[1px] border-gray-300" />
 
           <div className="flex w-full flex-row justify-between">
-            <Legend className="!flex-col text-center" name="Aménagement spécifique" value={specificSituation.specificAmenagment.true || 0} color={graphColors[1][0]} />
-            <Legend
-              className="!flex-col text-center"
-              name="Affectation dans le département de résidence"
-              value={specificSituation.handicapInSameDepartment.true || 0}
-              color={graphColors[1][0]}
-            />
-            <Legend
-              className="!flex-col text-center"
-              name="Aménagement pour mobilité réduite"
-              value={specificSituation.reducedMobilityAccess.true || 0}
-              color={graphColors[1][0]}
-            />
+            <Link
+              to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SPECIFIC_AMENAGEMENT=%5B"true"%5D'] })}
+              target="_blank">
+              <Legend className="!flex-col text-center" name="Aménagement spécifique" value={specificSituation.specificAmenagment.true || 0} color={graphColors[1][0]} />
+            </Link>
+            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SAME_DEPARTMENT=%5B"true"%5D'] })} target="_blank">
+              <Legend
+                className="!flex-col text-center"
+                name="Affectation dans le département de résidence"
+                value={specificSituation.handicapInSameDepartment.true || 0}
+                color={graphColors[1][0]}
+              />
+            </Link>
+            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['PMR=%5B"true"%5D'] })} target="_blank">
+              <Legend
+                className="!flex-col text-center"
+                name="Aménagement pour mobilité réduite"
+                value={specificSituation.reducedMobilityAccess.true || 0}
+                color={graphColors[1][0]}
+              />
+            </Link>
           </div>
         </div>
       ) : selectedDetail === "qpv" ? (
@@ -149,11 +191,27 @@ export default function Details({ selectedFilters }) {
             title="Quartier prioritaires"
             legendSide="right"
             labels={["Oui", "Non"]}
-            values={[qpv.true || 0, qpv[""] || 0 + qpv.false || 0]}
+            values={[qpv.true || 0, (qpv[""] || 0) + (qpv.false || 0)]}
             maxLegends={3}
             tooltipsPercent={true}
+            legendUrls={[
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['QPV=%5B"true"%5D'] }),
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['QPV=%5B""%2C"false"%5D'] }),
+            ]}
           />
-          <FullDoughnut title="Zone rurale" legendSide="left" labels={["Oui", "Non"]} values={[rural.true || 0, rural.false || 0]} maxLegends={3} tooltipsPercent={true} />
+
+          <FullDoughnut
+            title="Zone rurale"
+            legendSide="left"
+            labels={["Oui", "Non"]}
+            values={[rural.true || 0, rural.false || 0]}
+            maxLegends={3}
+            tooltipsPercent={true}
+            legendUrls={[
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['RURAL=%5B"true"%5D'] }),
+              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['RURAL=%5B"false"%5D'] }),
+            ]}
+          />
         </div>
       ) : null}
     </div>
