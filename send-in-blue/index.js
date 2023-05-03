@@ -16,9 +16,9 @@ function ipAllowListMiddleware(req, res, next) {
   // See: https://www.clever-cloud.com/doc/find-help/faq/#how-to-get-the-users-ip-address
   const ip = req.headers["x-forwarded-for"];
   // See: https://developers.sendinblue.com/docs/how-to-use-webhooks#securing-your-webhooks
-  const block = new Netmask("185.107.232.0/24");
+  const block = new Netmask("185.107.232.1/24");
   //New block since February 2022
-  const blockFebruary2022 = new Netmask("1.179.112.0/20");
+  const blockFebruary2022 = new Netmask("1.179.112.1/20");
   // See: https://developers.sendinblue.com/docs/additional-ips-to-be-whitelisted
   const allowedIpList = [
     "195.154.31.153",
@@ -61,40 +61,6 @@ function ipAllowListMiddleware(req, res, next) {
   return res.status(403).send({ ok: false, code: "INVALID_IP" });
 }
 
-// ! On ne fait pas le get. Il faudra remplacer par un ES à l'avenir
-// const passport = require("passport");
-// const { ERRORS } = require("../utils");
-// const { canViewEmailHistory } = require("snu-lib/roles");
-// const { serializeEmail } = require("../utils/serializer");
-// router.get(
-//   "/",
-//   passport.authenticate(["referent"], { session: false, failWithError: true }),
-//   async (req, res) => {
-//     try {
-//       const { error, value: email } = Joi.string()
-//         .lowercase()
-//         .trim()
-//         .email()
-//         .required()
-//         .validate(req.query.email);
-//       if (error)
-//         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-//       if (!canViewEmailHistory(req.user))
-//         return res
-//           .status(403)
-//           .send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-//       const data = await EmailObject.find({ email }).sort("-date");
-//       return res
-//         .status(200)
-//         .send({ ok: true, data: data.map((e) => serializeEmail(e)) });
-//     } catch (error) {
-//       capture(error);
-//     }
-//     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-//   }
-// );
-
 const app = express();
 
 const registerSentryErrorHandler = initSentry(app);
@@ -106,7 +72,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.post("/", async (req, res) => {
+app.post("/", ipAllowListMiddleware, async (req, res) => {
   try {
     const { error, value } = Joi.object()
       .keys({
