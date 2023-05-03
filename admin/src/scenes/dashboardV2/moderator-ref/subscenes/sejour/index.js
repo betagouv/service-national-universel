@@ -21,7 +21,6 @@ import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import BoxWithPercentage from "./components/BoxWithPercentage";
 import CardCenterCapacity from "./components/CardCenterCapacity";
-import Cardsession from "./components/Cardsession";
 import MoreInfo from "./components/MoreInfo";
 import OccupationCardHorizontal from "./components/OccupationCardHorizontal";
 import Presences from "./components/Presences";
@@ -70,19 +69,19 @@ export default function Index() {
       },
       ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
         ? {
-            id: "region",
-            name: "Région",
-            fullValue: "Toutes",
-            options: regionOptions,
-          }
+          id: "region",
+          name: "Région",
+          fullValue: "Toutes",
+          options: regionOptions,
+        }
         : null,
       ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
         ? {
-            id: "academy",
-            name: "Académie",
-            fullValue: "Toutes",
-            options: academyOptions,
-          }
+          id: "academy",
+          name: "Académie",
+          fullValue: "Toutes",
+          options: academyOptions,
+        }
         : null,
       {
         id: "department",
@@ -207,7 +206,6 @@ export default function Index() {
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">Centres</h1>
         <div className="grid grid-cols-3 gap-4">
           <CardCenterCapacity nbCenter={dataCenter?.totalCenter || 0} capacity={dataCenter?.capacity || 0} />
-          <Cardsession nbValidated={dataCenter?.status?.VALIDATED || 0} nbPending={dataCenter?.status?.WAITING_VALIDATION || 0} />
           <OccupationCardHorizontal total={dataCenter?.placesTotalSession || 0} taken={dataCenter?.placesTotalSession - dataCenter?.placesLeftSession || 0} />
           <BoxWithPercentage total={dataCenter?.totalSession || 0} number={dataCenter?.timeSchedule?.false || 0} title="Emplois du temps" subLabel="restants à renseigner" />
         </div>

@@ -27,11 +27,6 @@ const optionsDomain = [
   { label: "Autres", value: "AUTRE" },
 ];
 
-const optionsStatus = [
-  { label: "En attente de validation", value: "WAITING_VALIDATION" },
-  { label: "Validée", value: "VALIDATED" },
-];
-
 export default function Create() {
   const urlParams = new URLSearchParams(window.location.search);
   const user = useSelector((state) => state.Auth.user);
@@ -57,7 +52,7 @@ export default function Create() {
     centerDesignation: "",
     placesSession: "",
     cohort,
-    statusSession: optionsStatus[0].value,
+    statusSession: "WAITING_VALIDATION",
   });
 
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
@@ -195,18 +190,6 @@ export default function Create() {
                       onChange={(e) => setData({ ...data, placesSession: e.target.value })}
                       value={data.placesSession}
                       error={errors?.placesSession}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-3">
-                      <div className="text-xs font-medium leading-4 text-gray-900">Statut de la session</div>
-                      <div className="cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]">{cohort}</div>
-                    </div>
-                    <Select
-                      label="Statut de la session"
-                      options={optionsStatus}
-                      selected={optionsStatus.find((e) => e.value === data.statusSession)}
-                      setSelected={(e) => setData({ ...data, statusSession: e.value })}
                     />
                   </div>
                 </>

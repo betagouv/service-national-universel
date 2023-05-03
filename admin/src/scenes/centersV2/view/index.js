@@ -16,7 +16,6 @@ import Pencil from "../../../assets/icons/Pencil";
 import { COHESION_STAY_START, isSessionEditionOpen } from "snu-lib";
 
 import Field from "../components/Field";
-import Select from "../components/Select";
 
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
@@ -136,11 +135,6 @@ export default function Index({ ...props }) {
     }
   }
 
-  const statusOptions = [
-    { value: "VALIDATED", label: "Validée" },
-    { value: "WAITING_VALIDATION", label: "En attente de validation" },
-  ];
-
   const onSubmitBottom = async () => {
     setLoading(true);
     const errorsObject = {};
@@ -209,9 +203,8 @@ export default function Index({ ...props }) {
               {(sessions || []).map((item, index) => (
                 <div
                   key={index}
-                  className={`mx-3 flex cursor-pointer items-center justify-center gap-2 py-3 px-2  ${
-                    focusedSession?.cohort === item.cohort ? "border-b-2 border-blue-600  text-blue-600 " : null
-                  }`}
+                  className={`mx-3 flex cursor-pointer items-center justify-center gap-2 py-3 px-2  ${focusedSession?.cohort === item.cohort ? "border-b-2 border-blue-600  text-blue-600 " : null
+                    }`}
                   onClick={() => {
                     setFocusedSession(item);
                   }}>
@@ -286,17 +279,7 @@ export default function Index({ ...props }) {
                   </div>
 
                   {/* // équipe */}
-                  <div className="flex min-w-1/4 max-w-xl flex-1 flex-col items-center justify-between gap-4 bg-white p-4">
-                    <div className="w-64">
-                      <Select
-                        readOnly={!editingBottom || ROLES.ADMIN !== user.role}
-                        label="Statut"
-                        icon={focusedSession.status === "WAITING_VALIDATION" ? <ExclamationCircle className="mr-2 h-5 w-5" fill="#2563eb" color="white" /> : null}
-                        options={statusOptions}
-                        setSelected={(e) => setEditInfoSession({ ...editInfoSession, status: e.value })}
-                        selected={statusOptions.find((e) => e.value === editInfoSession.status)}
-                      />
-                    </div>
+                  <div className="flex min-w-1/4 max-w-xl flex-1 flex-col items-center justify-center gap-4 bg-white p-4">
                     <div className="w-64">
                       <Field
                         error={errors.placesTotal}
