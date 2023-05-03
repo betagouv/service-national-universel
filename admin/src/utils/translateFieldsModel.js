@@ -426,7 +426,7 @@ const translateFieldYoung = (f) => {
     case "autoTestPCRFilesStatus":
       return "Statut des documents de test PCR";
     case "youngPhase1Agreement":
-      return "Accord du volontaire pour la phase 1";
+      return "Confirmation de participation au séjour de cohésion";
     case "parentAllowSNU":
       return "Autorisation du représentant légal pour la phase 1";
     case "parent1AllowSNU":
@@ -465,6 +465,8 @@ const translateFieldYoung = (f) => {
       return "Même département (handicap)";
     case "notes":
       return "Notes";
+    case "cohesionStayPresence":
+      return "Présence au séjour de cohésion";
     default:
       return f;
   }
