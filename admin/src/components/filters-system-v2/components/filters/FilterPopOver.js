@@ -39,7 +39,11 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   const ref = React.useRef(null);
 
   React.useEffect(() => {
-    setOptionsVisible(data);
+    if (filter?.filter) {
+      setOptionsVisible(data.filter(filter.filter));
+    } else {
+      setOptionsVisible(data);
+    }
   }, [data]);
 
   React.useEffect(() => {
@@ -48,7 +52,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase();
-    const newData =
+    let newData =
       search !== ""
         ? data.filter((f) =>
             filter?.translate
@@ -65,6 +69,9 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                   .includes(normalizedSearch),
           )
         : data;
+      if (filter?.filter) {
+        newData = newData.filter(filter.filter);
+      }
     setOptionsVisible(newData);
   }, [search]);
 

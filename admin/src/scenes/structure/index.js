@@ -4,7 +4,7 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../sentry";
 
 import View from "./view";
-import ListV2 from "./listV2";
+import ListV3 from "./listV3";
 import Create from "./create";
 
 export default function Index() {
@@ -14,7 +14,7 @@ export default function Index() {
     <Switch>
       <SentryRoute path="/structure/create" component={Create} />
       <SentryRoute path="/structure/:id" component={View} />
-      <SentryRoute path="/structure" component={ListV2} />
+      <SentryRoute path="/structure" component={ListV3} />
     </Switch>
   );
 }
