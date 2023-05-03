@@ -165,13 +165,7 @@ export default function StepUpload() {
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         {young?.files?.cniFiles?.length + recto?.length + verso?.length > 3 && (
           <>
-            <Error
-              text={
-                young?.files?.cniFiles?.length
-                  ? `Vous ne pouvez téleverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.`
-                  : "Vous ne pouvez téleverser plus de 3 fichiers."
-              }
-            />
+            <Error text={`Vous ne pouvez téleverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles?.length} fichiers en ligne.`} />
             <MyDocs />
           </>
         )}

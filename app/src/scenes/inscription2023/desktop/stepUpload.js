@@ -61,17 +61,16 @@ export default function StepUpload() {
 
   async function uploadFiles() {
     if (filesCount > 3) {
-      setError(
-        young?.files?.cniFiles?.length
-          ? { text: `Vous ne pouvez téléverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.` }
-          : { text: "Vous ne pouvez téléverser plus de 3 fichiers." },
-      );
+      setError({ text: `Vous ne pouvez téléverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles?.length} fichiers en ligne.` });
       setLoading(false);
       return { ok: false };
     }
 
     const oversizedFiles = [recto, verso].filter((e) => e && e.size > 1000000);
-    if (oversizedFiles.length) return setError({ text: `Fichier(s) trop volumineux : ${oversizedFiles.join(", ")}.` });
+    if (oversizedFiles.length) {
+      setError({ text: `Fichier(s) trop volumineux : ${oversizedFiles.join(", ")}.` });
+      return { ok: false };
+    }
 
     if (recto) {
       const res = await api.uploadID(young._id, recto, { category, expirationDate });
@@ -169,10 +168,21 @@ export default function StepUpload() {
             {e.message && ` : ${e.message}`}
           </ErrorMessage>
         ))}
-      <div className="my-16 flex w-full justify-around">
-        <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
-        {ID[category].imgBack && <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />}
+
+      <div className="my-10 flex w-full justify-around">
+        <div>
+          <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
+          <div className="mt-4 text-center text-gray-800">Recto</div>
+        </div>
+
+        {ID[category].imgBack && (
+          <div>
+            <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />
+            <div className="mt-4 text-center text-gray-800">Verso</div>
+          </div>
+        )}
       </div>
+
       <div className="border-l-8 border-l-[#6A6AF4] pl-8 leading-loose">
         Toutes les informations doivent être <strong>lisibles</strong>, le document doit être visible <strong>entièrement</strong>, la photo doit être <strong>nette</strong>. Le
         document doit être téléversé en <strong>recto</strong> et <strong>verso</strong>.
@@ -189,6 +199,7 @@ export default function StepUpload() {
 
       {category !== "passport" && (
         <>
+          <hr className="my-8 h-px border-0 bg-gray-200" />
           <p className="my-4">
             Ajouter <strong>le verso</strong>
           </p>

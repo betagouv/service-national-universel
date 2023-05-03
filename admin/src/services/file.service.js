@@ -17,7 +17,7 @@ export async function resizeImage(file, config = {}) {
     image.name = file.name;
   }
 
-  if (image.size > 1000000) {
+  if (image.size > 1000000 && ["image/jpeg", "image/png"].includes(image.type)) {
     image = await resizeImage(image);
   }
 

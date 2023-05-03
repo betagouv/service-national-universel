@@ -121,6 +121,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
   const [filesToUpload, setFilesToUpload] = useState();
   const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : new Date());
   const [category, setCategory] = useState(young?.latestCNIFileCategory || null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (filesToUpload) young.filesToUpload = filesToUpload;
@@ -174,18 +175,24 @@ function CniModal({ young, onClose, mode, blockUpload }) {
   }
 
   async function upload(files) {
+    setLoading(true);
     if (!category || !date) return setError("Veuillez sélectionner une catégorie et une date d'expiration.");
 
     for (const file of files) {
       const res = await api.uploadID(young._id, file, { category, expirationDate: date });
 
-      if (res.code === "FILE_CORRUPTED")
-        return setError(
+      if (res.code === "FILE_CORRUPTED") {
+        setError(
           "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
         );
+        setLoading(false);
+        return;
+      }
+
       if (!res.ok) {
         capture(res.code);
         setError("Une erreur s'est produite lors du téléversement de votre fichier.");
+        setLoading(false);
         return;
       }
       setCniFiles(res.data);
@@ -193,6 +200,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
     }
     setError(null);
     setFilesToUpload(null);
+    setLoading(false);
   }
 
   const removeFileInscription = (file) => {
@@ -234,23 +242,18 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                 name="file-upload"
                 accept=".png, .jpg, .jpeg, .pdf"
                 onChange={async (e) => {
-                  if (blockUpload) {
-                    const array = [];
-                    let error = "";
-                    for (let file of e.target.files) {
-                      file = await resizeImage(file);
-                      if (file.size > 1000000) {
-                        error += `Le fichier ${file.name} est trop volumineux.`;
-                      } else {
-                        array.push(file);
-                      }
+                  const array = [];
+                  let error = "";
+                  for (let file of e.target.files) {
+                    file = await resizeImage(file);
+                    if (file.size > 1000000) {
+                      error += `Le fichier ${file.name} est trop volumineux.`;
+                    } else {
+                      array.push(file);
                     }
-                    setError(error);
-                    console.log(array);
-                    setFilesToUpload([...filesToUpload, ...array]);
-                  } else {
-                    setFilesToUpload(e.target.files);
                   }
+                  setError(error);
+                  setFilesToUpload(array);
                 }}
                 className="hidden"
               />
@@ -273,8 +276,8 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                           ))}
                         </div>
                         <div className="1/4">
-                          <PlainButton onClick={() => upload(filesToUpload)} disabled={!category || !date}>
-                            Téléverser
+                          <PlainButton onClick={() => upload(filesToUpload)} disabled={!category || !date || loading}>
+                            {loading ? "Chargement" : "Téléverser"}
                           </PlainButton>
                         </div>
                       </>
