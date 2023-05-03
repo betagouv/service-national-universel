@@ -226,7 +226,6 @@ export default function List() {
         track_total_hits: true,
         size: ES_NO_LIMIT,
       };
-      console.log(selectedFilters?.applicationStatus);
       if (selectedFilters?.applicationStatus?.filter?.length) {
         queryApplication.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.applicationStatus.filter } });
       }
@@ -236,7 +235,6 @@ export default function List() {
         fieldsToExport: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
       });
       if (resultApplications?.data?.length) {
-        console.log("🚀 ~ file: list.js:278 ~ transformCandidature ~ resultApplications:", resultApplications);
         all = all.map((item) => ({ ...item, candidatures: resultApplications?.data?.filter((e) => e.missionId === item._id.toString()) }));
       } else {
         all = all.map((item) => ({ ...item, candidatures: [] }));
@@ -509,12 +507,14 @@ export default function List() {
                   {
                     items: [
                       {
+                        key: "exportMission",
                         action: () => {
                           setIsExportOpen(true);
                         },
                         render: <div className="cursor-pointer p-2 px-3 text-sm text-gray-700 hover:bg-gray-50">Informations de missions</div>,
                       },
                       {
+                        key: "exportCandidature",
                         action: () => {
                           setIsExportCandidatureOpen(true);
                         },
