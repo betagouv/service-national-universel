@@ -8,8 +8,6 @@ const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 
-const corpsEnUniforme = ["SDIS (Service départemental d'Incendie et de Secours)", "Gendarmerie", "Police", "Armées"];
-
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
@@ -39,31 +37,54 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       contextFilters,
     });
 
+    let structures;
+    let response;
     if (req.params.action === "export") {
-      const structures = await allRecords("structure", hitsRequestBody.query);
+      response = await allRecords("structure", hitsRequestBody.query);
+      structures =  response.map((s) => ({ _id: s._id, _source: s }));
+    } else {
+      const esResponse = await esClient.msearch({ index: "structure", body: buildNdJson({ index: "structure", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      response = esResponse.body;
+      structures = response && response.responses && response.responses.length > 0 && response.responses[0].hits && response.responses[0].hits.hits ? response.responses[0].hits.hits : [];
+    }
 
+    const structureIds = [...new Set(structures.map((item) => item._id).filter((e) => e))];
+    if (structureIds.length > 0) {
       // --- fill team
-      const structureIds = [...new Set(structures.map((item) => item._id).filter((e) => e))];
-      if (structureIds.length > 0) {
-        const referents = await allRecords("referent", {
-          bool: {
-            must: {
-              match_all: {}
-            },
-            filter: [{ terms: { "structureId.keyword": structureIds } }]
-          }
-        });
-        if (referents.length > 0) {
-          for(let structure of structures) {
-            structure.team = referents.filter((r) => r.structureId === structure._id);
-          }
+      const referents = await allRecords("referent", {
+        bool: {
+          must: {
+            match_all: {}
+          },
+          filter: [{ terms: { "structureId.keyword": structureIds } }]
+        }
+      });
+      if (referents.length > 0) {
+        for(let structure of structures) {
+          structure._source.team = referents.filter((r) => r.structureId === structure._id);
         }
       }
 
-      return res.status(200).send({ ok: true, data: structures });
+      // --- fill missions
+      const missions = await allRecords("mission", {
+        bool: {
+          must: {
+            match_all: {}
+          },
+          filter: [{ terms: { "structureId.keyword": structureIds } }]
+        }
+      });
+      if (missions.length > 0) {
+        for(let structure of structures) {
+          structure._source.missions = missions.filter((m) => m.structureId === structure._id);
+        }
+      }
+    }
+
+    if (req.params.action === "export") {
+      return res.status(200).send({ ok: true, data: response });
     } else {
-      const response = await esClient.msearch({ index: "structure", body: buildNdJson({ index: "structure", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(response);
     }
   } catch (error) {
     capture(error);

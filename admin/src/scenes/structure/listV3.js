@@ -168,16 +168,13 @@ const ListStructure = () => {
     </div>
   );
 };
-const Hit = ({ hit, onClick, history }) => {
-  // tODO missions et responsibles
-  const missions = [];
-  const responsibles = [];
+const Hit = ({ hit, onClick }) => {
   const missionsInfo = {
-    count: missions.length || "0",
-    placesTotal: missions.reduce((acc, e) => acc + e._source.placesTotal, 0),
+    count: hit.missions ? hit.missions.length : 0,
+    placesTotal: hit.missions ? hit.missions.reduce((acc, e) => acc + e.placesTotal, 0) : 0,
   };
   const responsiblesInfo = {
-    count: responsibles.length || "0",
+    count: hit.team ? hit.team.length : 0,
   };
 
   return (
