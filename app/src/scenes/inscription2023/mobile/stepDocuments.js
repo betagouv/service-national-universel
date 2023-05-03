@@ -83,7 +83,7 @@ export default function StepDocuments() {
           ))}
         </div>
 
-        {young.files.cniFiles.length > 0 && (
+        {young.files.cniFiles?.length > 0 && (
           <div className="mb-4">
             <hr className="my-2" />
             <MyDocs />
