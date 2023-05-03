@@ -73,7 +73,7 @@ export default function StepUpload() {
     }
 
     if (recto) {
-      const res = await api.uploadID(young._id, recto, { category, expirationDate });
+      const res = await api.uploadID(young._id, recto, { category, expirationDate, side: "recto" });
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -83,7 +83,7 @@ export default function StepUpload() {
     }
 
     if (verso) {
-      const res = await api.uploadID(young._id, verso, { category, expirationDate });
+      const res = await api.uploadID(young._id, verso, { category, expirationDate, side: "verso" });
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -188,6 +188,13 @@ export default function StepUpload() {
         document doit être téléversé en <strong>recto</strong> et <strong>verso</strong>.
       </div>
 
+      {young.files.cniFiles?.length > 0 && (
+        <>
+          <hr className="my-8 h-px border-0 bg-gray-200" />
+          <MyDocs />
+        </>
+      )}
+
       <hr className="my-8 h-px border-0 bg-gray-200" />
 
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
@@ -218,8 +225,6 @@ export default function StepUpload() {
       {(recto || verso || date) && <ExpirationDate date={date} setDate={setDate} onChange={() => setHasChanged(true)} corrections={corrections} category={category} />}
 
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-
-      {error?.text && filesCount > 2 && <MyDocs />}
     </DesktopPageContainer>
   );
 }

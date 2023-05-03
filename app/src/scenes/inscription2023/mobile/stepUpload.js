@@ -29,6 +29,7 @@ export default function StepUpload() {
   if (!category) category = young.latestCNIFileCategory;
   const history = useHistory();
   const dispatch = useDispatch();
+  const corrections = getCorrectionsForStepUpload(young);
 
   const [step, setStep] = useState(getStep());
   const [loading, setLoading] = useState(false);
@@ -43,7 +44,6 @@ export default function StepUpload() {
   });
   const [date, setDate] = useState(young.latestCNIFileExpirationDate ? new Date(young.latestCNIFileExpirationDate) : null);
 
-  const corrections = getCorrectionsForStepUpload(young);
   const isEnabled = validate();
   const expirationDate = dayjs(date).locale("fr").format("YYYY-MM-DD");
 
@@ -84,7 +84,7 @@ export default function StepUpload() {
 
   async function uploadFiles() {
     if (recto) {
-      const res = await api.uploadID(young._id, recto, { category, expirationDate });
+      const res = await api.uploadID(young._id, recto, { category, expirationDate, side: category === "passport" ? "" : "recto" });
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -94,7 +94,7 @@ export default function StepUpload() {
     }
 
     if (verso) {
-      const res = await api.uploadID(young._id, verso, { category, expirationDate });
+      const res = await api.uploadID(young._id, verso, { category, expirationDate, side: "verso" });
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -163,7 +163,7 @@ export default function StepUpload() {
       <Navbar />
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        {young?.files?.cniFiles?.length + recto?.length + verso?.length > 3 && (
+        {young?.files?.cniFiles?.length + recto?.length + verso?.length > 2 && (
           <>
             <Error text={`Vous ne pouvez téleverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles?.length} fichiers en ligne.`} />
             <MyDocs />

@@ -46,8 +46,7 @@ export function CniField({
 
   useEffect(() => {
     setRequestButtonClass(
-      `flex items-center justify-center w-[32px] h-[32px] rounded-[100px] cursor-pointer group ${
-        hasValidRequest ? "bg-[#F97316]" : "bg-[#FFEDD5] " // + (mouseIn ? "visible" : "invisible")
+      `flex items-center justify-center w-[32px] h-[32px] rounded-[100px] cursor-pointer group ${hasValidRequest ? "bg-[#F97316]" : "bg-[#FFEDD5] " // + (mouseIn ? "visible" : "invisible")
       } hover:bg-[#F97316]`,
     );
   }, [mouseIn, hasValidRequest]);
@@ -68,11 +67,11 @@ export function CniField({
     reasons.push({ value: "MISSING_BACK", label: "Verso à fournir" });
   }
 
-  function cniModalClose(changes) {
+  function cniModalClose(changes, value) {
     setCniModalOpened(false);
     if (changes) {
       onInscriptionChange && onInscriptionChange(young);
-      onChange && onChange();
+      onChange && onChange("files", { cniFiles: value });
     }
   }
 
@@ -215,14 +214,35 @@ function CniModal({ young, onClose, mode, blockUpload }) {
     });
   };
 
+  const handleChange = async (e) => {
+    const array = [];
+    let error = "";
+
+    for (let file of e.target.files) {
+      file = await resizeImage(file);
+      if (file.size > 1000000) {
+        error += `Le fichier ${file.name} est trop volumineux.`;
+      } else {
+        array.push(file);
+      }
+    }
+
+    setError(error);
+    setFilesToUpload(array);
+  };
+
   return (
-    <Modal size="md" centered isOpen={true} toggle={() => onClose(changes)}>
+    <Modal size="md" centered isOpen={true} toggle={() => onClose(changes, cniFiles)}>
       <div className="rounded-[8px] bg-white">
         <div className="p-[24px]">
           {cniFiles.length > 0 || (blockUpload && filesToUpload?.length > 0) ? (
             cniFiles.map((file) => (
               <div key={file._id} className="mt-[8px] flex items-center justify-between border-b-[1px] border-b-[#E5E7EB] py-[12px] text-[12px] last:border-b-[0px]">
-                <div className="text-right">{file.name}</div>
+                <div className=""><p>{file.name}</p>
+                  <p className="truncate text-xs text-gray-500">
+                    {translate(file.category)}
+                    {file.side && ` - ${file.side}`}
+                  </p></div>
                 <div className="flex items-center">
                   <DownloadButton className="ml-[8px] flex-[0_0_32px]" onClick={() => downloadCni(file)} />
                   <DeleteButton className="ml-[8px] flex-[0_0_32px]" onClick={() => deleteCni(file)} />
@@ -235,35 +255,14 @@ function CniModal({ young, onClose, mode, blockUpload }) {
           {error && <div className="mt-[16px] text-[12px] leading-[1.4em] text-[#EF4444]">{error}</div>}
           {mode === "edition" && (
             <>
-              <input
-                type="file"
-                multiple
-                id="file-upload"
-                name="file-upload"
-                accept=".png, .jpg, .jpeg, .pdf"
-                onChange={async (e) => {
-                  const array = [];
-                  let error = "";
-                  for (let file of e.target.files) {
-                    file = await resizeImage(file);
-                    if (file.size > 1000000) {
-                      error += `Le fichier ${file.name} est trop volumineux.`;
-                    } else {
-                      array.push(file);
-                    }
-                  }
-                  setError(error);
-                  setFilesToUpload(array);
-                }}
-                className="hidden"
-              />
+              <input type="file" multiple id="file-upload" name="file-upload" accept=".png, .jpg, .jpeg, .pdf" onChange={handleChange} className="hidden" />
               <div className="mt-4 flex items-center justify-between">
                 <label htmlFor="file-upload" className="flex items-center space-x-4 text-xs">
                   <AddButton className="" />
                   <div className="cursor-pointer text-gray-500 hover:text-gray-800">Ajouter un document</div>
                 </label>
               </div>
-              {filesToUpload && (
+              {filesToUpload && !error && (
                 <>
                   <div className="mt-2 flex w-full items-center justify-between space-x-2">
                     {!blockUpload ? (
@@ -316,7 +315,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
           )}
         </div>
         <div className="flex items-center justify-center p-[24px]">
-          <BorderButton onClick={() => onClose(changes)}>Fermer</BorderButton>
+          <BorderButton onClick={() => onClose(changes, cniFiles)}>Fermer</BorderButton>
         </div>
       </div>
       <ConfirmationModal

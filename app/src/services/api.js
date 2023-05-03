@@ -168,7 +168,8 @@ class api {
 
   uploadID(youngId, file, metadata = {}) {
     let formData = new FormData();
-    formData.append(file.name, file, file.name);
+    const filename = file.name;
+    formData.append("file", file, filename);
     for (const [key, value] of Object.entries(metadata)) {
       formData.append(key, value);
     }
