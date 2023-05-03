@@ -2,6 +2,8 @@ import { readAndCompressImage } from "browser-image-resizer";
 import { environment } from "../config";
 
 export async function resizeImage(file, config = {}) {
+  if (!["image/jpeg", "image/png"].includes(file.type)) return file;
+
   const defaultConfig = {
     quality: 0.8,
     maxWidth: 1000,
@@ -12,12 +14,12 @@ export async function resizeImage(file, config = {}) {
 
   let image = file;
 
-  if (image.size > 1000000 && ["image/jpeg", "image/png"].includes(image.type)) {
+  if (image.size > 1000000) {
     image = await readAndCompressImage(file, config);
     image.name = file.name;
   }
 
-  if (image.size > 1000000 && ["image/jpeg", "image/png"].includes(image.type)) {
+  if (image.size > 1000000) {
     image = await resizeImage(image);
   }
 

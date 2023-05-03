@@ -66,7 +66,7 @@ export default function StepUpload() {
       return { ok: false };
     }
 
-    const oversizedFiles = [recto, verso].filter((e) => e && e.size > 1000000);
+    const oversizedFiles = [recto, verso].filter((e) => e && e.size > 1000000).map((e) => e.name);
     if (oversizedFiles.length) {
       setError({ text: `Fichier(s) trop volumineux : ${oversizedFiles.join(", ")}.` });
       return { ok: false };
