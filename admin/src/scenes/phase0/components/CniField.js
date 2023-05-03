@@ -257,9 +257,12 @@ function CniModal({ young, onClose, mode, blockUpload }) {
             <>
               <input type="file" multiple id="file-upload" name="file-upload" accept=".png, .jpg, .jpeg, .pdf" onChange={handleChange} className="hidden" />
               <div className="mt-4 flex items-center justify-between">
-                <label htmlFor="file-upload" className="flex items-center space-x-4 text-xs">
-                  <AddButton className="" />
-                  <div className="cursor-pointer text-gray-500 hover:text-gray-800">Ajouter un document</div>
+                <label htmlFor="file-upload" className="flex items-center space-x-4 text-xs cursor-pointer text-gray-500 hover:text-gray-800">
+                  <AddButton />
+                  <div>
+                    <p>Ajouter un document</p>
+                    <p>Formats supportés : jpg, png, pdf. Pour les PDF, taille maximum  : 1 Mo.</p>
+                  </div>
                 </label>
               </div>
               {filesToUpload && !error && (
