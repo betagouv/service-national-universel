@@ -82,6 +82,19 @@ export default function StepDocuments() {
             </ErrorMessage>
           ))}
         </div>
+
+        {young.files.cniFiles?.length > 0 && (
+          <div className="mb-4">
+            <hr className="my-2" />
+            <MyDocs />
+            <hr className="my-2" />
+          </div>
+        )}
+
+        {disabledUpload && (
+          <Info text="Vous ne pouvez téléverser que trois fichiers maximum." subText="Si vous devez en ajouter un, merci de supprimer d'abord un document ci-dessous." />
+        )}
+
         <div className="mt-2 text-sm text-gray-800">Choisissez le justificatif d’identité que vous souhaitez importer :</div>
         {IDs.map((doc) => (
           <div
@@ -97,10 +110,6 @@ export default function StepDocuments() {
             </div>
           </div>
         ))}
-        {disabledUpload && (
-          <Info text="Vous ne pouvez téléverser que trois fichiers maximum." subText="Si vous devez en ajouter un, merci de supprimer d'abord un document ci-dessous." />
-        )}
-        <MyDocs />
       </div>
       <Help />
       <Footer marginBottom="mb-[88px]" />
