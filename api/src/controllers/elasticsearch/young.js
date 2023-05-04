@@ -264,7 +264,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
     const contextFilters = [
       { terms: { "sessionPhase1Id.keyword": [String(req.params.sessionId)] } },
       { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
-      param.action === "exportBus" ? { bool: { must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }] } } : null,
+      req.params.action === "exportBus" ? { bool: { must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }] } } : null,
     ].filter(Boolean);
 
     if (user.role === ROLES.HEAD_CENTER) {

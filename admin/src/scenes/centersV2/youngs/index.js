@@ -34,23 +34,16 @@ import General from "./general";
 import Pointage from "./pointage";
 import Warning from "../../../assets/icons/Warning";
 import { capture } from "../../../sentry";
+import { currentFilterAsUrl } from "../../../components/filters-system-v2/components/filters/utils";
 
 export default function CenterYoungIndex() {
   const [modalExportMail, setModalExportMail] = useState({ isOpen: false });
-  const [filter, setFilter] = useState();
+  const [filter, setFilter] = useState({});
   const [urlParams, setUrlParams] = useState("");
   const user = useSelector((state) => state.Auth.user);
   const [loading, setLoading] = useState();
   const [isYoungCheckinOpen, setIsYoungCheckinOpen] = useState();
   const [focusedSession, setFocusedSession] = useState(null);
-
-  //List state
-  const [data, setData] = useState([]);
-  const pageId = "pointage-list";
-  const [selectedFilters, setSelectedFilters] = useState({});
-  const [paramData, setParamData] = useState({
-    page: 0,
-  });
 
   const filterArray = [
     {
@@ -58,6 +51,7 @@ export default function CenterYoungIndex() {
       name: "status",
       parentGroup: "Général",
       translate: translate,
+      defaultValue: ["VALIDATED"],
     },
     {
       title: "Statut phase 1",
@@ -113,6 +107,7 @@ export default function CenterYoungIndex() {
       name: "allergies",
       parentGroup: "Dossier",
       translate: translate,
+      missingLabel: "Non renseigné",
     },
     {
       title: "Aménagement spécifique",
@@ -131,42 +126,49 @@ export default function CenterYoungIndex() {
       name: "cohesionStayMedicalFileReceived",
       parentGroup: "Dossier",
       translate: translate,
+      missingLabel: "Non renseigné",
     },
     {
       title: "Droit à l'image",
       name: "imageRight",
       parentGroup: "Dossier",
       translate: translate,
+      missingLabel: "Non renseigné",
     },
     {
       title: "Utilisation d’autotest",
       name: "autoTestPCR",
       parentGroup: "Dossier",
       translate: translate,
+      missingLabel: "Non renseigné",
     },
     {
       title: "Présence à l'arrivée",
       name: "cohesionStayPresence",
       parentGroup: "Pointage",
       translate: translate,
+      missingLabel: "Non renseigné",
     },
     {
       title: "Présence à la JDM",
       name: "presenceJDM",
       parentGroup: "Pointage",
       translate: translate,
+      missingLabel: "Non renseigné",
     },
     {
       title: "Départ renseigné",
       name: "departInform",
       parentGroup: "Pointage",
       translate: translate,
+      missingLabel: "Non renseigné",
     },
     {
       title: "Motif du départ",
       name: "departSejourMotif",
       parentGroup: "Pointage",
       translate: translate,
+      missingLabel: "Non renseigné",
     },
   ];
 
@@ -180,6 +182,10 @@ export default function CenterYoungIndex() {
       setFocusedSession(data);
     })();
   }, [sessionId]);
+
+  useEffect(() => {
+    setUrlParams(currentFilterAsUrl(filter, 0, filterArray));
+  }, [filter]);
 
   function updateFilter(n) {
     setFilter({ ...filter, ...n });
@@ -642,9 +648,11 @@ export default function CenterYoungIndex() {
           </nav>
         </div>
         <div className="bg-white pt-4">
-          {currentTab === "general" && <General filter={filter} updateFilter={updateFilter} focusedSession={focusedSession} />}
-          {currentTab === "tableau-de-pointage" && <Pointage updateFilter={updateFilter} isYoungCheckinOpen={isYoungCheckinOpen} focusedSession={focusedSession} />}
-          {currentTab === "fiche-sanitaire" && <FicheSanitaire updateFilter={updateFilter} focusedSession={focusedSession} />}
+          {currentTab === "general" && <General filter={filter} updateFilter={updateFilter} focusedSession={focusedSession} filterArray={filterArray} />}
+          {currentTab === "tableau-de-pointage" && (
+            <Pointage updateFilter={updateFilter} isYoungCheckinOpen={isYoungCheckinOpen} focusedSession={focusedSession} filterArray={filterArray} />
+          )}
+          {currentTab === "fiche-sanitaire" && <FicheSanitaire updateFilter={updateFilter} focusedSession={focusedSession} filterArray={filterArray} />}
         </div>
       </div>
       <ModalExportMail isOpen={modalExportMail?.isOpen} onCancel={() => setModalExportMail({ isOpen: false, value: null })} onSubmit={modalExportMail?.onSubmit} />
