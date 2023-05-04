@@ -1,3 +1,19 @@
+# [1.265.0](https://github.com/betagouv/service-national-universel/compare/v1.264.1...v1.265.0) (2023-05-04)
+
+
+### Bug Fixes
+
+* **admin:** Breadcrumbs meeting points ([4e4c70f](https://github.com/betagouv/service-national-universel/commit/4e4c70f5e91af8d2df9d099de417ad3f0cbb2cdc))
+* **admin:** retour design dashboard engagement ([#2571](https://github.com/betagouv/service-national-universel/issues/2571)) ([f60a2ef](https://github.com/betagouv/service-national-universel/commit/f60a2efb1598fc8ad4d9ae1fd250271f780deb3a))
+* **api:** Serialize structure before response in /referent/young ([d24577f](https://github.com/betagouv/service-national-universel/commit/d24577ff9e6982a3880b3d9a2f375e1fd1337847))
+* **api:** Serialize structure before response in /referent/young ([f1c7b70](https://github.com/betagouv/service-national-universel/commit/f1c7b70ecf612170c13841c4d91fbd0e70560e67))
+* **app:** eligibility updates ([5ae24b7](https://github.com/betagouv/service-national-universel/commit/5ae24b7208dac6b56ac5a1930b8201c8b6b8f3f9))
+
+
+### Features
+
+* **admin/api:** new filters on mission list ([#2567](https://github.com/betagouv/service-national-universel/issues/2567)) ([c0691b3](https://github.com/betagouv/service-national-universel/commit/c0691b3f6792339f72cbe91e2b19d3aed077e75a))
+
 ## [1.264.1](https://github.com/betagouv/service-national-universel/compare/v1.264.0...v1.264.1) (2023-05-03)
 
 
