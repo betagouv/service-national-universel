@@ -203,7 +203,8 @@ export default function FullDoughnut({
   }, [values]);
 
   let mainClass = "flex items-center";
-  let graphClass = `relative w-[${CANVAS_SIZE}px] h-[${CANVAS_SIZE}px] shrink-0 grow-0`;
+  // let graphClass = `relative w-[${CANVAS_SIZE}px] h-[${CANVAS_SIZE}px] shrink-0 grow-0`;
+  let graphClass = `relative w-[208px] h-[208px] shrink-0 grow-0`;
   let legendsClass = "shrink-0";
   let legendClass = "";
   let legendValueClass = "flex items-center";
@@ -218,14 +219,16 @@ export default function FullDoughnut({
       legendValueClass += " flex-row-reverse";
       legendDotClass = "ml-2";
       legendsClass += ` grid grid-cols-${legendCols} gap-2`;
-      titleClass += `ml-10 py-[${TITTLE_OFFSET}px]`;
+      // titleClass += `ml-10 py-[${TITTLE_OFFSET}px]`;
+      titleClass += `ml-10 py-[44px]`;
       textLegendClass = "text-right";
       break;
     case "right":
       mainClass += " flex-row";
       legendClass += " mb-[16px] last:mb-0";
       legendsClass += ` grid grid-cols-${legendCols} gap-2`;
-      titleClass += `mr-10 py-[${TITTLE_OFFSET}px]`;
+      // titleClass += `mr-10 py-[${TITTLE_OFFSET}px]`;
+      titleClass += `mr-10 py-[44px]`;
       textLegendClass = "text-left";
       break;
     case "top":
@@ -236,7 +239,8 @@ export default function FullDoughnut({
         legendsClass += ` grid grid-cols-${legendCols} gap-2`;
       }
       legendClass += " mr-7 last:mr-0";
-      titleClass += `mt-10 px-[${TITTLE_OFFSET}px]`;
+      // titleClass += `mt-10 px-[${TITTLE_OFFSET}px]`;
+      titleClass += `mt-10 px-[44px]`;
       break;
     case "bottom":
     default:
@@ -247,7 +251,8 @@ export default function FullDoughnut({
         legendsClass += ` grid grid-cols-${legendCols} gap-2`;
       }
       legendClass += " mr-7 last:mr-0";
-      titleClass += `mb-10 px-[${TITTLE_OFFSET}px]`;
+      // titleClass += `mb-10 px-[${TITTLE_OFFSET}px]`;
+      titleClass += `mb-10 px-[44px]`;
   }
 
   const graphZeroData = {
