@@ -945,7 +945,7 @@ router.post("", passport.authenticate("referent", { session: false, failWithErro
     // --- création
     const data = await schemaRepartitionModel.create(value);
 
-    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: data.cohort }, "repartitionSchemaDownloadAvailability");
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: data.cohort, dateEnd: { $gt: new Date().getTime() } }, "repartitionSchemaDownloadAvailability");
 
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
       const referentTransport = await getTransporter();
@@ -991,7 +991,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     await schemaRepartitionModel.deleteOne({ _id: schema._id });
 
-    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: schema.cohort }, "repartitionSchemaDownloadAvailability");
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: schema.cohort, dateEnd: { $gt: new Date().getTime() } }, "repartitionSchemaDownloadAvailability");
 
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
 
@@ -1053,8 +1053,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     schema.set(value);
     await schema.save();
 
-    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: schema.cohort }, "repartitionSchemaDownloadAvailability");
-
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: schema.cohort, dateEnd: { $gt: new Date().getTime() } }, "repartitionSchemaDownloadAvailability");
+    
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
 
     const referentTransport = await getTransporter();
