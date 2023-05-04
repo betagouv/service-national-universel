@@ -445,9 +445,11 @@ export default function CenterYoungIndex() {
               rightIconClassNames="text-blue-300"
               optionsGroup={[
                 {
+                  key: "export",
                   title: "Télécharger",
                   items: [
                     {
+                      key: "exportData",
                       action: async () => {
                         await exportData();
                       },
@@ -459,6 +461,7 @@ export default function CenterYoungIndex() {
                       ),
                     },
                     {
+                      key: "exportDataTransport",
                       action: async () => {
                         await exportDataTransport();
                       },
@@ -472,9 +475,11 @@ export default function CenterYoungIndex() {
                   ],
                 },
                 {
+                  key: "exportMail",
                   title: "Envoyer par mail",
                   items: [
                     {
+                      key: "infoTransport",
                       action: async () => {
                         setModalExportMail({
                           isOpen: true,
