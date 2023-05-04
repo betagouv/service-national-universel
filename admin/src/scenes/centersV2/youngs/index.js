@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { NavLink, useHistory, useParams } from "react-router-dom";
-import { ES_NO_LIMIT } from "snu-lib";
+import { ES_NO_LIMIT, getDepartmentNumber } from "snu-lib";
 import * as XLSX from "xlsx";
 import Bus from "../../../assets/icons/Bus";
 import ClipboardList from "../../../assets/icons/ClipboardList";
@@ -52,37 +52,143 @@ export default function CenterYoungIndex() {
     page: 0,
   });
 
+  const filterArray = [
+    {
+      title: "Statut",
+      name: "status",
+      parentGroup: "Général",
+      translate: translate,
+    },
+    {
+      title: "Statut phase 1",
+      name: "statusPhase1",
+      parentGroup: "Général",
+      translate: translatePhase1,
+    },
+    { title: "Région", name: "region", parentGroup: "Général" },
+    {
+      title: "Département",
+      name: "department",
+      parentGroup: "Général",
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+    },
+    {
+      title: "Sexe",
+      name: "gender",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Classe",
+      name: "grade",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Handicap",
+      name: "handicap",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "PPS",
+      name: "ppsBeneficiary",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "PAI",
+      name: "paiBeneficiary",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "QPV",
+      name: "qpv",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Allergies ou intolérances",
+      name: "allergies",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Aménagement spécifique",
+      name: "specificAmenagment",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Aménagement PMR",
+      name: "reducedMobilityAccess",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Fiches sanitaires",
+      name: "cohesionStayMedicalFileReceived",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Droit à l'image",
+      name: "imageRight",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Utilisation d’autotest",
+      name: "autoTestPCR",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Présence à l'arrivée",
+      name: "cohesionStayPresence",
+      parentGroup: "Pointage",
+      translate: translate,
+    },
+    {
+      title: "Présence à la JDM",
+      name: "presenceJDM",
+      parentGroup: "Pointage",
+      translate: translate,
+    },
+    {
+      title: "Départ renseigné",
+      name: "departInform",
+      parentGroup: "Pointage",
+      translate: translate,
+    },
+    {
+      title: "Motif du départ",
+      name: "departSejourMotif",
+      parentGroup: "Pointage",
+      translate: translate,
+    },
+  ];
+
+  const history = useHistory();
+  const { id, sessionId, currentTab } = useParams();
+
   useEffect(() => {
     if (!sessionId) return;
     (async () => {
       const { data } = await api.get(`/session-phase1/${sessionId}`);
       setFocusedSession(data);
-      updateFilter({ SESSION: data._id.toString() });
     })();
   }, [sessionId]);
 
   function updateFilter(n) {
     setFilter({ ...filter, ...n });
   }
-  const history = useHistory();
-  const { id, sessionId, currentTab } = useParams();
 
   React.useEffect(() => {
     const listTab = ["general", "tableau-de-pointage", "fiche-sanitaire"];
     if (!listTab.includes(currentTab)) history.push(`/centre/${id}/${sessionId}/general`);
   }, [currentTab]);
-
-  React.useEffect(() => {
-    if (filter) {
-      const params = Object.keys(filter).reduce((acc, key) => {
-        if (filter[key] && !["SEARCH", "SESSION"].includes(key)) {
-          return `${acc}&${key}=%5B${filter[key].map((c) => `"${c}"`)?.join("%2C")}%5D`;
-        }
-        return acc;
-      }, "");
-      setUrlParams(params.substring(1));
-    }
-  }, [filter]);
 
   React.useEffect(() => {
     (async function () {
