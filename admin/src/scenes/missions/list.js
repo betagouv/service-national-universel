@@ -583,8 +583,8 @@ export default function List() {
                   { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
                   { label: "Nombre de place (croissant)", field: "placesLeft", order: "asc" },
                   { label: "Nombre de place (décroissant)", field: "placesLeft", order: "desc" },
-                  { label: "Nom de la mission (A > Z)", field: "name", order: "asc" },
-                  { label: "Nom de la mission (Z > A)", field: "name", order: "desc" },
+                  { label: "Nom de la mission (A > Z)", field: "name.keyword", order: "asc" },
+                  { label: "Nom de la mission (Z > A)", field: "name.keyword", order: "desc" },
                 ]}
                 paramData={paramData}
                 setParamData={setParamData}
