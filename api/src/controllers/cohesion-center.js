@@ -236,7 +236,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     await updateCenterDependencies(center, req.user);
 
-    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: center.cohorts }, "repartitionSchemaDownloadAvailability");
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: center.cohorts, dateEnd: { $gt: new Date().getTime() } }, "repartitionSchemaDownloadAvailability");
 
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
       const referentTransport = await getTransporter();
