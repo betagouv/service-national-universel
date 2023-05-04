@@ -311,7 +311,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       contextFilters,
     });
 
-    if ([("export", "exportBus")].includes(req.params.action)) {
+    if (["export", "exportBus"].includes(req.params.action)) {
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
       return res.status(200).send({ ok: true, data: serializeYoungs(response) });
     } else {
