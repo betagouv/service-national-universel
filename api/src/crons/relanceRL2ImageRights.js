@@ -2,6 +2,7 @@ require("dotenv").config({ path: "./../../.env-staging" });
 require("../mongo");
 const { capture } = require("../sentry");
 const YoungModel = require("../models/young");
+const CohortModel = require("../models/cohort");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, sessions2023, YOUNG_STATUS } = require("snu-lib");
@@ -12,16 +13,44 @@ exports.handler = async () => {
     let countNotice = 0;
     const now = Date.now();
 
-    const sejour = sessions2023.find((s) => diffDays(s.dateStart, now) === 12 || diffDays(s.dateStart, now) === 2);
+    const nowPlus2Days = new Date(new Date().setDate(new Date().getDate() + 2))
+    const nowPlus12Days = new Date(new Date().setDate(new Date().getDate() + 12))
+
+    const pipeline = [
+      {
+        $project: {
+          year: { $year: "$date" },
+          month: { $month: "$date" },
+          day: { $dayOfMonth: "$date" }
+        }
+      },
+      {
+        $match: {
+          $or: [
+            {
+              year: nowPlus12Days.getFullYear(),
+              month: nowPlus12Days.getMonth() + 1,
+              day: nowPlus12Days.getDate(),
+            },
+            {
+              year: nowPlus2Days.getFullYear(),
+              month: nowPlus2Days.getMonth() + 1,
+              day: nowPlus2Days.getDate(),
+            },
+          ]
+        }
+      },
+    ];
+
+    const sejour = await CohortModel.aggregate(pipeline);
     if (!sejour) return;
 
     const cursor = await YoungModel.find({
       cohort: sejour.name,
       status: YOUNG_STATUS.VALIDATED,
       parent1AllowImageRights: "true",
-      parent2Status: { $exists: true },
-      parent2AllowImageRights: { $exists: false },
       parent2Email: { $exists: true },
+      parent2AllowImageRights: { $exists: false },
     }).cursor();
 
     await cursor.eachAsync(async function (young) {
