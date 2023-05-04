@@ -134,7 +134,7 @@ export default function StepEligibilite() {
     };
 
     try {
-      const updatedYoung = { ...young, updates };
+      const updatedYoung = { ...young, ...updates };
       const res = await api.post("/cohort-session/eligibility/2023", updatedYoung);
       if (!res.ok) {
         capture(res.code);
