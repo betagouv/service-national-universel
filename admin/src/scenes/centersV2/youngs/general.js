@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { BiLoaderAlt } from "react-icons/bi";
 import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
 import None from "../../../assets/icons/None";
 import Badge from "../../../components/Badge";
-import Loader from "../../../components/Loader";
 import { Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
 import api from "../../../services/api";
 import { YOUNG_STATUS_COLORS, formatDateFR, getAge, translatePhase1 } from "../../../utils";
 import Panel from "../../volontaires/panel";
-import { BiLoaderAlt } from "react-icons/bi";
 
 export default function General({ updateFilter, focusedSession, filterArray }) {
   const [young, setYoung] = useState();

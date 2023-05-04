@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
+import { BiLoaderAlt } from "react-icons/bi";
 import { formatDateFR, getAge, translate } from "snu-lib";
 import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
 import BadgeCheck from "../../../assets/icons/BadgeCheck";
 import CursorClick from "../../../assets/icons/CursorClick";
 import SpeakerPhone from "../../../assets/icons/SpeakerPhone";
-import Loader from "../../../components/Loader";
 import SelectAction from "../../../components/SelectAction";
 import { Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
 import api from "../../../services/api";
@@ -18,7 +18,6 @@ import ModalMultiPointagePresenceJDM from "../components/modals/ModalMultiPointa
 import ModalPointageDepart from "../components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../components/modals/ModalPointagePresenceArrivee";
 import ModalPointagePresenceJDM from "../components/modals/ModalPointagePresenceJDM";
-import { BiLoaderAlt } from "react-icons/bi";
 
 export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSession, filterArray }) {
   const history = useHistory();

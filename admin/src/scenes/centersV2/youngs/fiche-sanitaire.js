@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { BiLoaderAlt } from "react-icons/bi";
 import { toastr } from "react-redux-toastr";
 import CursorClick from "../../../assets/icons/CursorClick";
 import ShieldCheck from "../../../assets/icons/ShieldCheck";
-import Loader from "../../../components/Loader";
 import SelectAction from "../../../components/SelectAction";
 import { Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
 import api from "../../../services/api";
@@ -10,7 +10,6 @@ import { getAge, translate } from "../../../utils";
 import Panel from "../../volontaires/panel";
 import ModalMultiPointageFicheSanitaire from "../components/modals/ModalMultiPointageFicheSanitaire";
 import ModalPointageFicheSanitaire from "../components/modals/ModalPointageFicheSanitaire";
-import { BiLoaderAlt } from "react-icons/bi";
 
 export default function FicheSanitaire({ updateFilter, focusedSession, filterArray }) {
   const [young, setYoung] = useState();
