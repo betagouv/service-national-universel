@@ -12,7 +12,7 @@ exports.handler = async () => {
     let countNotice = 0;
     const now = Date.now();
 
-    const sejour = sessions2023.find((s) => diffDays(s.dateStart, now) === 2 || diffDays(s.dateStart, now) === 2);
+    const sejour = sessions2023.find((s) => diffDays(s.dateStart, now) === 12 || diffDays(s.dateStart, now) === 2);
     if (!sejour) return;
 
     const cursor = await YoungModel.find({
@@ -35,10 +35,10 @@ exports.handler = async () => {
         },
       });
     });
-    slack.success({ title: `RL2 image right reminder - ${sejour.name}`, text: `${countNotice} parent have been noticed !` });
+    slack.success({ title: `Parent 2 image right reminder - ${sejour.name}`, text: `${countNotice} parents have been notified!` });
   } catch (e) {
     capture(e);
-    slack.error({ title: "RL2 image right reminder - ${sejour.name}", text: JSON.stringify(e) });
+    slack.error({ title: `Parent 2 image right reminder - ${sejour.name}`, text: JSON.stringify(e) });
   }
 };
 
