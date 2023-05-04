@@ -247,8 +247,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       await p.save({ fromUser: req.user });
     }
 
-    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts }, "repartitionSchemaDownloadAvailability");
-
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts,dateEnd: { $gt: new Date().getTime() } }, "repartitionSchemaDownloadAvailability");
+    
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
       const referentTransport = await getTransporter();
       if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
