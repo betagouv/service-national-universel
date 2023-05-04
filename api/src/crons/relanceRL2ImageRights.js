@@ -11,38 +11,28 @@ const { APP_URL } = require("../config");
 exports.handler = async () => {
   try {
     let countNotice = 0;
-    const now = Date.now();
 
-    const nowPlus2Days = new Date(new Date().setDate(new Date().getDate() + 2))
-    const nowPlus12Days = new Date(new Date().setDate(new Date().getDate() + 12))
-
-    const pipeline = [
+    const sejour = await CohortModel.findOne(
       {
-        $project: {
-          year: { $year: "$date" },
-          month: { $month: "$date" },
-          day: { $dayOfMonth: "$date" }
-        }
-      },
-      {
-        $match: {
+        dateStart: {
           $or: [
             {
-              year: nowPlus12Days.getFullYear(),
-              month: nowPlus12Days.getMonth() + 1,
-              day: nowPlus12Days.getDate(),
+              $gte: new Date(new Date().setDate(new Date().getDate() + 1)),
+              $lte: new Date(new Date().setDate(new Date().getDate() + 2))
             },
             {
-              year: nowPlus2Days.getFullYear(),
-              month: nowPlus2Days.getMonth() + 1,
-              day: nowPlus2Days.getDate(),
+              $gte: new Date(new Date().setDate(new Date().getDate() + 11)),
+              $lte: new Date(new Date().setDate(new Date().getDate() + 12))
             },
-          ]
+          ],
         }
       },
-    ];
+      {
+        name: 1,
+        dateStart: 1
+      }
+    );
 
-    const sejour = await CohortModel.aggregate(pipeline);
     if (!sejour) return;
 
     const cursor = await YoungModel.find({
@@ -69,10 +59,4 @@ exports.handler = async () => {
     capture(e);
     slack.error({ title: `Parent 2 image right reminder - ${sejour.name}`, text: JSON.stringify(e) });
   }
-};
-
-const diffDays = (date1, date2) => {
-  const diffTime = Math.abs(date2 - date1);
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays;
 };
