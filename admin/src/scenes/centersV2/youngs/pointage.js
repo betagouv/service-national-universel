@@ -48,10 +48,9 @@ const FILTERS = [
   "AUTOTEST",
 ];
 
-export default function Pointage({ updateFilter, isYoungCheckinOpen }) {
+export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSession }) {
   const history = useHistory();
   const [young, setYoung] = useState();
-  const [focusedSession, setFocusedSession] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
   const [youngSelected, setYoungSelected] = useState([]);
   const [youngsInPage, setYoungsInPage] = useState([]);
@@ -72,14 +71,6 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen }) {
     track_total_hits: true,
   });
 
-  useEffect(() => {
-    if (!sessionId) return;
-    (async () => {
-      const { data } = await api.get(`/session-phase1/${sessionId}`);
-      setFocusedSession(data);
-      updateFilter({ SESSION: data._id.toString() });
-    })();
-  }, [sessionId]);
 
   useEffect(() => {
     if (!checkboxRef.current) return;

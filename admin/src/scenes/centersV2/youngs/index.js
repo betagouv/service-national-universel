@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import * as FileSaver from "file-saver";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { NavLink, useHistory, useParams } from "react-router-dom";
@@ -36,12 +36,30 @@ import Warning from "../../../assets/icons/Warning";
 import { capture } from "../../../sentry";
 
 export default function CenterYoungIndex() {
-  const [modalExportMail, setModalExportMail] = React.useState({ isOpen: false });
-  const [filter, setFilter] = React.useState();
-  const [urlParams, setUrlParams] = React.useState("");
+  const [modalExportMail, setModalExportMail] = useState({ isOpen: false });
+  const [filter, setFilter] = useState();
+  const [urlParams, setUrlParams] = useState("");
   const user = useSelector((state) => state.Auth.user);
-  const [loading, setLoading] = React.useState();
-  const [isYoungCheckinOpen, setIsYoungCheckinOpen] = React.useState();
+  const [loading, setLoading] = useState();
+  const [isYoungCheckinOpen, setIsYoungCheckinOpen] = useState();
+  const [focusedSession, setFocusedSession] = useState(null);
+
+  //List state
+  const [data, setData] = useState([]);
+  const pageId = "pointage-list";
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [paramData, setParamData] = useState({
+    page: 0,
+  });
+
+  useEffect(() => {
+    if (!sessionId) return;
+    (async () => {
+      const { data } = await api.get(`/session-phase1/${sessionId}`);
+      setFocusedSession(data);
+      updateFilter({ SESSION: data._id.toString() });
+    })();
+  }, [sessionId]);
 
   function updateFilter(n) {
     setFilter({ ...filter, ...n });
@@ -518,9 +536,9 @@ export default function CenterYoungIndex() {
           </nav>
         </div>
         <div className="bg-white pt-4">
-          {currentTab === "general" && <General filter={filter} updateFilter={updateFilter} />}
-          {currentTab === "tableau-de-pointage" && <Pointage updateFilter={updateFilter} isYoungCheckinOpen={isYoungCheckinOpen} />}
-          {currentTab === "fiche-sanitaire" && <FicheSanitaire updateFilter={updateFilter} />}
+          {currentTab === "general" && <General filter={filter} updateFilter={updateFilter} focusedSession={focusedSession} />}
+          {currentTab === "tableau-de-pointage" && <Pointage updateFilter={updateFilter} isYoungCheckinOpen={isYoungCheckinOpen} focusedSession={focusedSession} />}
+          {currentTab === "fiche-sanitaire" && <FicheSanitaire updateFilter={updateFilter} focusedSession={focusedSession} />}
         </div>
       </div>
       <ModalExportMail isOpen={modalExportMail?.isOpen} onCancel={() => setModalExportMail({ isOpen: false, value: null })} onSubmit={modalExportMail?.onSubmit} />

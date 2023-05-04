@@ -40,9 +40,8 @@ const FILTERS = [
   "AUTOTEST",
 ];
 
-export default function FicheSanitaire({ updateFilter }) {
+export default function FicheSanitaire({ updateFilter, focusedSession }) {
   const [young, setYoung] = useState();
-  const [focusedSession, setFocusedSession] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
   const { sessionId } = useParams();
 
@@ -59,15 +58,6 @@ export default function FicheSanitaire({ updateFilter }) {
     sort: [{ "lastName.keyword": "asc" }],
     track_total_hits: true,
   });
-
-  useEffect(() => {
-    if (!sessionId) return;
-    (async () => {
-      const { data } = await api.get(`/session-phase1/${sessionId}`);
-      setFocusedSession(data);
-      updateFilter({ SESSION: data._id.toString() });
-    })();
-  }, [sessionId]);
 
   useEffect(() => {
     if (!checkboxRef.current) return;

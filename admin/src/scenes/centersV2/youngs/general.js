@@ -36,9 +36,8 @@ const FILTERS = [
   "IMAGE_RIGHT",
   "AUTOTEST",
 ];
-export default function General({ updateFilter }) {
+export default function General({ updateFilter, focusedSession }) {
   const [young, setYoung] = useState();
-  const [focusedSession, setFocusedSession] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
   const { sessionId } = useParams();
 
@@ -49,15 +48,6 @@ export default function General({ updateFilter }) {
     sort: [{ "lastName.keyword": "asc" }],
     track_total_hits: true,
   });
-
-  useEffect(() => {
-    if (!sessionId) return;
-    (async () => {
-      const { data } = await api.get(`/session-phase1/${sessionId}`);
-      setFocusedSession(data);
-      updateFilter({ SESSION: data._id.toString() });
-    })();
-  }, [sessionId]);
 
   const handleClick = async (young) => {
     const { ok, data } = await api.get(`/referent/young/${young._id}`);
