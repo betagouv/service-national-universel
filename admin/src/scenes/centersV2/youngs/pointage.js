@@ -18,6 +18,7 @@ import ModalMultiPointagePresenceJDM from "../components/modals/ModalMultiPointa
 import ModalPointageDepart from "../components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../components/modals/ModalPointagePresenceArrivee";
 import ModalPointagePresenceJDM from "../components/modals/ModalPointagePresenceJDM";
+import { BiLoaderAlt } from "react-icons/bi";
 
 export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSession, filterArray }) {
   const history = useHistory();
@@ -79,7 +80,14 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
     }
   };
 
-  if (!focusedSession) return <Loader />;
+  if (!focusedSession)
+    return (
+      <div className="flex h-[600px] w-full flex-col items-center">
+        <span className="m-auto animate-spin">
+          <BiLoaderAlt className="h-12 w-12 text-blue-600" />
+        </span>
+      </div>
+    );
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>

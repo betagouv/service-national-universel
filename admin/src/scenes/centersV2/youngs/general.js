@@ -7,6 +7,7 @@ import { Filters, ResultTable, Save, SelectedFilters } from "../../../components
 import api from "../../../services/api";
 import { YOUNG_STATUS_COLORS, formatDateFR, getAge, translatePhase1 } from "../../../utils";
 import Panel from "../../volontaires/panel";
+import { BiLoaderAlt } from "react-icons/bi";
 
 export default function General({ updateFilter, focusedSession, filterArray }) {
   const [young, setYoung] = useState();
@@ -28,7 +29,14 @@ export default function General({ updateFilter, focusedSession, filterArray }) {
     if (ok) setYoung(data);
   };
 
-  if (!focusedSession) return <Loader />;
+  if (!focusedSession)
+    return (
+      <div className="flex h-[600px] w-full flex-col items-center">
+        <span className="m-auto animate-spin">
+          <BiLoaderAlt className="h-12 w-12 text-blue-600" />
+        </span>
+      </div>
+    );
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>

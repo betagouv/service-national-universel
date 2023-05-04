@@ -11,19 +11,22 @@ import ClipboardList from "../../../assets/icons/ClipboardList";
 import Menu from "../../../assets/icons/Menu";
 import PencilAlt from "../../../assets/icons/PencilAlt";
 import ShieldCheck from "../../../assets/icons/ShieldCheck";
-import SelectAction from "../../../components/SelectAction";
-import api from "../../../services/api";
+import Warning from "../../../assets/icons/Warning";
 import Breadcrumbs from "../../../components/Breadcrumbs";
+import SelectAction from "../../../components/SelectAction";
+import { currentFilterAsUrl } from "../../../components/filters-system-v2/components/filters/utils";
+import { capture } from "../../../sentry";
+import api from "../../../services/api";
 import {
+  ROLES,
   departmentLookUp,
+  formatDateFR,
   formatDateFRTimezoneUTC,
   formatLongDateFR,
   getLabelWithdrawnReason,
   isInRuralArea,
-  ROLES,
   translate,
   translateFileStatusPhase1,
-  formatDateFR,
   translatePhase1,
   youngCheckinField,
 } from "../../../utils";
@@ -32,9 +35,6 @@ import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";
 import General from "./general";
 import Pointage from "./pointage";
-import Warning from "../../../assets/icons/Warning";
-import { capture } from "../../../sentry";
-import { currentFilterAsUrl } from "../../../components/filters-system-v2/components/filters/utils";
 
 export default function CenterYoungIndex() {
   const [modalExportMail, setModalExportMail] = useState({ isOpen: false });
@@ -231,8 +231,6 @@ export default function CenterYoungIndex() {
   };
 
   const exportData = async () => {
-    // const data = await esYoungBySession({ must_not: false });
-    // console.log(data);
     const data = await api.post(`/elasticsearch/young/by-session/${focusedSession._id}/export`, {
       filters: Object.entries(filter).reduce((e, [key, value]) => {
         if (value.filter.length === 1 && value.filter[0] === "") return e;
@@ -653,12 +651,6 @@ const transformData = async ({ data, centerId }) => {
 async function toArrayOfArray(data) {
   let columns = Object.keys(data[0] ?? []);
   return [columns, ...data.map((item) => Object.values(item))];
-}
-
-async function getAllResults(index, query) {
-  const result = await api.post(`/es/${index}/export`, query);
-  if (!result.data.length) return [];
-  return result.data;
 }
 
 async function toXLSX(fileName, csv) {

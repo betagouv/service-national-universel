@@ -10,6 +10,7 @@ import { getAge, translate } from "../../../utils";
 import Panel from "../../volontaires/panel";
 import ModalMultiPointageFicheSanitaire from "../components/modals/ModalMultiPointageFicheSanitaire";
 import ModalPointageFicheSanitaire from "../components/modals/ModalPointageFicheSanitaire";
+import { BiLoaderAlt } from "react-icons/bi";
 
 export default function FicheSanitaire({ updateFilter, focusedSession, filterArray }) {
   const [young, setYoung] = useState();
@@ -58,7 +59,14 @@ export default function FicheSanitaire({ updateFilter, focusedSession, filterArr
     if (ok) setYoung(data);
   };
 
-  if (!focusedSession) return <Loader />;
+  if (!focusedSession)
+    return (
+      <div className="flex h-[600px] w-full flex-col items-center">
+        <span className="m-auto animate-spin">
+          <BiLoaderAlt className="h-12 w-12 text-blue-600" />
+        </span>
+      </div>
+    );
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
