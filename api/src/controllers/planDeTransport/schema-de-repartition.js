@@ -26,6 +26,7 @@ const router = express.Router();
 const passport = require("passport");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
+const { ADMIN_URL, ENVIRONMENT } = require("../../config");
 const {
   canViewSchemaDeRepartition,
   YOUNG_STATUS,
@@ -43,7 +44,11 @@ const youngModel = require("../../models/young");
 const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
 const tableRepartitionModel = require("../../models/PlanDeTransport/tableDeRepartition");
 const pointRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+const CohortModel = require("../../models/cohort");
 const cohesionCenterModel = require("../../models/cohesionCenter");
+const { getTransporter } = require("../../utils");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { sendTemplate } = require("../../sendinblue");
 
 const schemaRepartitionBodySchema = Joi.object({
   cohort: Joi.string()
@@ -940,6 +945,31 @@ router.post("", passport.authenticate("referent", { session: false, failWithErro
     // --- création
     const data = await schemaRepartitionModel.create(value);
 
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: data.cohort, dateEnd: { $gt: new Date().getTime() } }, [
+      "name",
+      "repartitionSchemaDownloadAvailability",
+      "dateStart",
+    ]);
+
+    if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
+      const referentTransport = await getTransporter();
+      if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+      const mail = await sendTemplate(template, {
+        emailTo: referentTransport.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        })),
+        params: {
+          trigger: "group_added",
+          region: data.fromRegion,
+          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+        },
+      });
+    }
+
     // --- résultat
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -966,6 +996,31 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     if (!schema) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     await schemaRepartitionModel.deleteOne({ _id: schema._id });
+
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: schema.cohort, dateEnd: { $gt: new Date().getTime() } }, [
+      "name",
+      "repartitionSchemaDownloadAvailability",
+      "dateStart",
+    ]);
+
+    if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
+      const referentTransport = await getTransporter();
+      if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+      const mail = await sendTemplate(template, {
+        emailTo: referentTransport.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        })),
+        params: {
+          trigger: "group_deleted",
+          region: schema.fromRegion,
+          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+        },
+      });
+    }
 
     // --- résultat
     return res.status(200).send({ ok: true });
@@ -1008,6 +1063,31 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     schema.set(value);
     await schema.save();
+
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: schema.cohort, dateEnd: { $gt: new Date().getTime() } }, [
+      "name",
+      "repartitionSchemaDownloadAvailability",
+      "dateStart",
+    ]);
+
+    if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
+      const referentTransport = await getTransporter();
+      if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+      const mail = await sendTemplate(template, {
+        emailTo: referentTransport.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        })),
+        params: {
+          trigger: "group_changed",
+          region: schema.fromRegion,
+          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+        },
+      });
+    }
 
     // --- résultat
     return res.status(200).send({ ok: true, data: schema });
