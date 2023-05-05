@@ -3,7 +3,7 @@ import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { ES_NO_LIMIT, getDepartmentNumber, ROLES, translateInscriptionStatus, translatePhase1, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
-import { ExportComponentV2, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import api from "../../services/api";
 import { Loading, Title } from "./components/commons";
 
@@ -124,18 +124,14 @@ export default function ListPresence() {
   const [data, setData] = React.useState([]);
   const pageId = "centrePresence";
   const [selectedFilters, setSelectedFilters] = React.useState({});
-  const [paramData, setParamData] = React.useState({
-    size: 20,
-    page: 0,
-  });
+  const [paramData, setParamData] = React.useState({ page: 0 });
 
   const filterArray = [
-    { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée", parentGroup: "Centre" },
+    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", parentGroup: "Centre" },
     ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
       ? {
           title: "Région",
           name: "region",
-          datafield: "region.keyword",
           missingLabel: "Non renseignée",
           defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
           parentGroup: "Centre",
@@ -144,7 +140,6 @@ export default function ListPresence() {
     {
       title: "Département",
       name: "department",
-      datafield: "department.keyword",
       missingLabel: "Non renseignée",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
@@ -154,7 +149,6 @@ export default function ListPresence() {
       ? {
           title: "Académie",
           name: "academy",
-          datafield: "academy.keyword",
           missingLabel: "Non renseignée",
           parentGroup: "Centre",
         }
@@ -179,41 +173,8 @@ export default function ListPresence() {
       disabledBaseQuery: true,
       parentGroup: "Volontaire",
     },
-    user.role === ROLES.ADMIN ? { title: "Code", name: "code2022", datafield: "code2022.keyword", missingLabel: "Non renseignée", parentGroup: "Centre" } : null,
+    user.role === ROLES.ADMIN ? { title: "Code", name: "code2022", missingLabel: "Non renseignée", parentGroup: "Centre" } : null,
   ].filter((e) => e);
-
-  const searchBarObject = {
-    placeholder: "Rechercher par mots clés, ville, code postal...",
-    datafield: ["name", "city", "zip", "code2022"],
-  };
-
-  const getDefaultQuery = () => {
-    if (user.role === ROLES.ADMIN) {
-      return {
-        size: ES_NO_LIMIT,
-        query: {
-          bool: { must: [{ match_all: {} }] },
-        },
-        track_total_hits: true,
-      };
-    } else if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      return {
-        size: ES_NO_LIMIT,
-        query: {
-          bool: { must: [{ match_all: {} }, { terms: { "department.keyword": user.department } }] },
-        },
-        track_total_hits: true,
-      };
-    } else if (user.role === ROLES.REFERENT_REGION) {
-      return {
-        size: ES_NO_LIMIT,
-        query: {
-          bool: { must: [{ match_all: {} }, { term: { "region.keyword": user.region } }] },
-        },
-        track_total_hits: true,
-      };
-    }
-  };
 
   //Get List of Cohesion Center Ids
   useEffect(() => {
@@ -236,22 +197,20 @@ export default function ListPresence() {
           <div className="flex w-full flex-row justify-between">
             <Filters
               pageId={pageId}
-              esId="cohesioncenter"
-              defaultQuery={getDefaultQuery()}
+              route="/elasticsearch/cohesioncenter/presence/search"
               setData={(value) => setData(value)}
               filters={filterArray}
-              searchBarObject={searchBarObject}
+              searchPlaceholder="Rechercher par mots clés, ville, code postal..."
               selectedFilters={selectedFilters}
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
             />
-            <ExportComponentV2
+            <ExportComponent
               title="Exporter"
-              defaultQuery={getDefaultQuery()}
+              route="/elasticsearch/cohesioncenter/presence/export"
               filters={filterArray}
               exportTitle="Centres_de_cohesion"
-              index="cohesioncenter"
               transform={async (all) => {
                 const cohesionCenterIds = all?.map((center) => center._id.toString());
                 const dataCenter = await getAggregCenter(cohesionCenterIds, selectedFilters);
@@ -280,7 +239,6 @@ export default function ListPresence() {
                 });
               }}
               selectedFilters={selectedFilters}
-              searchBarObject={searchBarObject}
               icon={<BsDownload className="text-gray-400" />}
               css={{
                 override: true,
