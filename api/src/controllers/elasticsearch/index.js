@@ -8,5 +8,6 @@ router.use("/plandetransport", require("./plandetransport"));
 router.use("/modificationbus", require("./modificationbus"));
 router.use("/pointderassemblement", require("./pointderassemblement"));
 router.use("/lignebus", require("./lignebus"));
+router.use("/mission", require("./mission"));
 
 module.exports = router;

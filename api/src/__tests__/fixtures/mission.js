@@ -6,8 +6,8 @@ function getNewMissionFixture() {
   return {
     name: faker.name.findName(),
     domains: [],
-    startAt: faker.date.past(),
-    endAt: faker.date.past(),
+    startAt: faker.date.past().toISOString(),
+    endAt: faker.date.past().toISOString(),
     format: "CONTINUOUS",
     frequence: "",
     period: [],

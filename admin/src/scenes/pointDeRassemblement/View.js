@@ -267,7 +267,7 @@ export default function View(props) {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Point de rassemblement", to: "/point-de-rassemblement" }, { label: "Fiche point de rassemblement" }]} />
+      <Breadcrumbs items={[{ label: "Point de rassemblement", to: "/point-de-rassemblement/liste/liste-points" }, { label: "Fiche point de rassemblement" }]} />
       <div className="m-8 flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <Title>{data.name}</Title>
@@ -476,7 +476,7 @@ export default function View(props) {
                 </div>
                 <div
                   className="flex h-1/2 w-full cursor-pointer items-center justify-center border-b-[1px] border-gray-200 text-sm font-medium leading-4 text-gray-900 hover:underline"
-                  onClick={() => history.push(`/ligne-de-bus?cohort=${currentCohort}&CODE_PDR=%5B"${data.code}"%5D`)}>
+                  onClick={() => history.push(`/ligne-de-bus?cohort=${currentCohort}&centerCode=%5B"${data.code}"%5D`)}>
                   Liste des lignes de transports ({lines.find((l) => l.cohort === currentCohort)?.count || 0})
                 </div>
               </div>
