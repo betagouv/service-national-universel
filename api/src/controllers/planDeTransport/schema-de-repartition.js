@@ -49,7 +49,6 @@ const cohesionCenterModel = require("../../models/cohesionCenter");
 const { getTransporter } = require("../../utils");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { sendTemplate } = require("../../sendinblue");
-const { WorkMailMessageFlow } = require("aws-sdk");
 
 const schemaRepartitionBodySchema = Joi.object({
   cohort: Joi.string()
