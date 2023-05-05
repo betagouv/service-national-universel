@@ -241,6 +241,7 @@ router.post("/by-point-de-rassemblement/", passport.authenticate(["referent"], {
     const body = {
       query: {
         bool: {
+          must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
           filter: [
             ...youngContextFilters,
             { terms: { "meetingPointId.keyword": queryFilters.meetingPointIds } },
