@@ -339,6 +339,9 @@ export default function Consentement({ step, parentId }) {
             <Input value={data.lastName} label="Nom" onChange={(e) => setData({ ...data, lastName: e })} error={errors.lastName} />
             <Input value={data.email} label="Adresse email" onChange={(e) => setData({ ...data, email: e })} error={errors.email} type="email" />
             <Input value={data.phone} label="Votre téléphone" onChange={(e) => setData({ ...data, phone: e })} error={errors.phone} type="tel" />
+            {errors?.phone && young.department === "Polynésie française" && (
+              <p className="text-sm text-red-600 ml-10 mb-4">Ce numéro de téléphone doit commencer par +689</p>
+            )}
           </div>
 
           <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] py-[20px]">
