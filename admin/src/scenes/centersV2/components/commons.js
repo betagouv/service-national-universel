@@ -36,9 +36,7 @@ export const Badge = ({ cohort, onClick }) => {
     <div
       key={cohort}
       onClick={onClick}
-      className={`w-fit cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
-        cohort.status === "VALIDATED" ? "border-[#0C7CFF] bg-[#F9FCFF] text-[#0C7CFF] " : "border-gray-100 bg-gray-100 text-gray-500"
-      }`}>
+      className={`w-fit cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${"border-[#0C7CFF] bg-[#F9FCFF] text-[#0C7CFF] "}`}>
       {cohort.cohort}
     </div>
   );
