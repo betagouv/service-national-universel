@@ -910,7 +910,7 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
     let applications = [];
     for (let application of applicationsFromDb) {
       const structure = await StructureModel.findById(application.structureId);
-      applications.push({ ...application._doc, structure: serializeStructure(structure, req.user) });
+      applications.push({ ...application._doc, structure: structure ? serializeStructure(structure, req.user) : null });
     }
     return res.status(200).send({ ok: true, data: { ...data._doc, applications } });
   } catch (error) {
