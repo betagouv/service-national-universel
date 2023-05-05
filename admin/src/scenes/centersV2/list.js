@@ -265,7 +265,7 @@ const ListCenter = ({ firstSession }) => {
     page: 0,
   });
   const filterArray = [
-    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée" },
+    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => OrderCohort(e) },
     {
       title: "Région",
       name: "region",
@@ -293,6 +293,18 @@ const ListCenter = ({ firstSession }) => {
     },
   ];
   if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code2022", missingLabel: "Non renseignée" });
+
+  const OrderCohort = (array) => {
+    for (const session of array) {
+      if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session.key)) {
+        session.date = COHESION_STAY_START[session.key];
+      } else {
+        session.date = new Date(2000, 0, 1);
+      }
+    }
+    array.sort((a, b) => b.date - a.date);
+    return array;
+  };
 
   // List of sessionPhase1 IDS currently displayed in results
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
