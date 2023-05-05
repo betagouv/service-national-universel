@@ -1,3 +1,26 @@
+# [1.266.0](https://github.com/betagouv/service-national-universel/compare/v1.265.0...v1.266.0) (2023-05-05)
+
+
+### Bug Fixes
+
+* **admin:** coherence between youngs bus and pdr between screens ([#2577](https://github.com/betagouv/service-national-universel/issues/2577)) ([def091f](https://github.com/betagouv/service-national-universel/commit/def091fdff6222226d48c007311cac1fafbbab2c))
+* **admin:** fix parent phone validation ([#2574](https://github.com/betagouv/service-national-universel/issues/2574)) ([ddf47c7](https://github.com/betagouv/service-national-universel/commit/ddf47c769d0cb2b07465709bbfeaf8dc977189d8))
+* **api:** get young if structure no longer exists ([844f1af](https://github.com/betagouv/service-national-universel/commit/844f1aff2630240b17734c1cff0e828c329aa6b1))
+* **app, admin, api:** Remove apostrophe from file names and revert to 5 Mo limit ([#2576](https://github.com/betagouv/service-national-universel/issues/2576)) ([bc51014](https://github.com/betagouv/service-national-universel/commit/bc51014e97be7b20bcc05e7340485826b67aca41))
+* count young on pdr, filter by cohesion stay and depart inform ([3d2bfb7](https://github.com/betagouv/service-national-universel/commit/3d2bfb7074e48f741ab4211c4fe8c97e75a31cba))
+* fix bus search from PDR list ([e48a49e](https://github.com/betagouv/service-national-universel/commit/e48a49ed22d9817606877011071b95a6d8b7a717))
+
+
+### Features
+
+* **admin/api:** liste young-by-center new filters + clean ([#2573](https://github.com/betagouv/service-national-universel/issues/2573)) ([a4b88a5](https://github.com/betagouv/service-national-universel/commit/a4b88a56b3201c6f4cd2fbbe4b448b4660cdec89))
+* **api:** Cron - Relance automatique du droit à l’image du RL2 à J-12 et J-2 ([#2572](https://github.com/betagouv/service-national-universel/issues/2572)) ([f7fc1b2](https://github.com/betagouv/service-national-universel/commit/f7fc1b2338f45b13135ba558f94c365416d6c7e4))
+* **api:** notification au transporteur lors d'une modif de centre ([#2554](https://github.com/betagouv/service-national-universel/issues/2554)) ([c01d586](https://github.com/betagouv/service-national-universel/commit/c01d5869b8742ef7a5248b66dd6e33e4866207e6))
+* **api:** notification transporteur lors d'une modif d'un groupe (create/delete/update) ([#2580](https://github.com/betagouv/service-national-universel/issues/2580)) ([4576a8c](https://github.com/betagouv/service-national-universel/commit/4576a8c5a806d74cd1d2638e530280d57831acc7))
+* **api:** notification transporteur lors d'une modif PDR ([#2556](https://github.com/betagouv/service-national-universel/issues/2556)) ([53926a8](https://github.com/betagouv/service-national-universel/commit/53926a8cb359a702375132f74ae53043a18fa065))
+* **api/admin:** elasticsearch new system (points de rassemblement) ([#2561](https://github.com/betagouv/service-national-universel/issues/2561)) ([e43d760](https://github.com/betagouv/service-national-universel/commit/e43d760bda3affbcd571e44aeef3f8319aede3a4))
+* **api/admin:** elasticsearch new system (school) ([#2564](https://github.com/betagouv/service-national-universel/issues/2564)) ([d00ec82](https://github.com/betagouv/service-national-universel/commit/d00ec82b09619d1f7a2a444adabc693536c9b6cf))
+
 # [1.265.0](https://github.com/betagouv/service-national-universel/compare/v1.264.1...v1.265.0) (2023-05-04)
 
 
