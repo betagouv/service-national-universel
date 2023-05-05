@@ -19,6 +19,7 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import api from "../../services/api";
 import { Title } from "../pointDeRassemblement/components/common";
 import { Badge, TabItem } from "./components/commons";
+import { OrderCohort } from "../../components/filters-system-v2/components/filters/utils";
 
 import { useHistory, useParams } from "react-router-dom";
 
@@ -100,7 +101,7 @@ const ListSession = ({ firstSession }) => {
     page: 0,
   });
   const filterArray = [
-    { title: "Cohorte", name: "cohort", missingLabel: "Non renseignée", defaultValue: [firstSession] },
+    { title: "Cohorte", name: "cohort", missingLabel: "Non renseignée", defaultValue: [firstSession], sort: (e) => OrderCohort(e) },
     { title: "Région", name: "region", missingLabel: "Non renseignée" },
     {
       title: "Département",
@@ -293,18 +294,6 @@ const ListCenter = ({ firstSession }) => {
     },
   ];
   if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code2022", missingLabel: "Non renseignée" });
-
-  const OrderCohort = (array) => {
-    for (const session of array) {
-      if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session.key)) {
-        session.date = COHESION_STAY_START[session.key];
-      } else {
-        session.date = new Date(2000, 0, 1);
-      }
-    }
-    array.sort((a, b) => b.date - a.date);
-    return array;
-  };
 
   // List of sessionPhase1 IDS currently displayed in results
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);

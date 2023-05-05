@@ -1,4 +1,5 @@
 import api from "../../../../services/api";
+import { COHESION_STAY_START } from "snu-lib";
 
 export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort) => {
   const resAlternative = await api.post(route, {
@@ -93,4 +94,16 @@ export const saveTitle = (selectedFilters, filters) => {
     })
     .filter((item) => item !== undefined);
   return object;
+};
+
+export const OrderCohort = (cohorts) => {
+  for (const cohort of cohorts) {
+    if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, cohort.key)) {
+      cohort.date = COHESION_STAY_START[cohort.key];
+    } else {
+      cohort.date = new Date(2000, 0, 1);
+    }
+  }
+  cohorts.sort((a, b) => b.date - a.date);
+  return cohorts;
 };
