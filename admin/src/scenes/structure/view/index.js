@@ -11,31 +11,15 @@ import Breadcrumbs from "../../../components/Breadcrumbs";
 
 export const StructureContext = createContext(null);
 
-export default function Index({ ...props }) {
-  const setDocumentTitle = useDocumentTitle("Structures");
-  const [structure, setStructure] = useState(null);
-
-  useEffect(() => {
-    (async () => {
-      const id = props.match && props.match.params && props.match.params.id;
-      if (!id) return <div />;
-      const { data } = await api.get(`/structure/${id}`);
-      setDocumentTitle(`${data?.name}`);
-      setStructure(data);
-    })();
-  }, [props.match.params.id]);
-  console.log(structure);
-
+export default function Index() {
   return (
-    // <StructureContext.Provider value={{ structure, setStructure }}>
     <>
       <Breadcrumbs items={[{ label: "Structures", to: "/structure" }, { label: "Fiche de la structure" }]} />
       <Switch>
-        <SentryRoute path="/structure/:id/missions" component={() => <Missions structure={structure} />} />
+        <SentryRoute path="/structure/:id/missions" component={Missions} />
         <SentryRoute path="/structure/:id/historique" component={() => <HistoricV2 />} />
         <SentryRoute path="/structure/:id" component={() => <DetailsV2 />} />
       </Switch>
     </>
-    // </StructureContext.Provider>
   );
 }

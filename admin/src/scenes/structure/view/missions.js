@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Panel from "../../missions/panel";
 import StructureViewV2 from "./wrapperv2";
 
+import api from "../../../services/api";
 import { HiOutlineLockClosed } from "react-icons/hi";
 import { useHistory } from "react-router-dom";
 import { translate, translateMission, translateVisibilty } from "snu-lib";
@@ -9,9 +10,12 @@ import Loader from "../../../components/Loader";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../../components/filters-system-v2";
 import { formatStringDateTimezoneUTC } from "../../../utils";
 import SelectStatusMissionV2 from "../../missions/components/SelectStatusMissionV2";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
-export default function Mission({ structure }) {
+export default function Mission({ ...props }) {
+  const setDocumentTitle = useDocumentTitle("Structures");
   const [mission, setMission] = useState();
+  const [structure, setStructure] = useState(null);
 
   //List state
   const [data, setData] = useState([]);
@@ -20,6 +24,16 @@ export default function Mission({ structure }) {
   const [paramData, setParamData] = useState({
     page: 0,
   });
+
+  React.useEffect(() => {
+    (async () => {
+      const id = props.match && props.match.params && props.match.params.id;
+      if (!id) return <div />;
+      const { data } = await api.get(`/structure/${id}`);
+      setDocumentTitle(`${data?.name}`);
+      setStructure(data);
+    })();
+  }, [props.match.params.id]);
 
   //Filters
   const filterArray = [
@@ -49,6 +63,7 @@ export default function Mission({ structure }) {
     },
   ];
 
+  console.log("render");
   if (!structure) return <Loader />;
 
   return (
