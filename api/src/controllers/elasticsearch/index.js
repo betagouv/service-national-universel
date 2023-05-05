@@ -6,6 +6,7 @@ router.use("/young", require("./young"));
 router.use("/sessionphase1", require("./sessionphase1"));
 router.use("/plandetransport", require("./plandetransport"));
 router.use("/modificationbus", require("./modificationbus"));
+router.use("/schoolramses", require("./schoolramses"));
 router.use("/mission", require("./mission"));
 
 module.exports = router;

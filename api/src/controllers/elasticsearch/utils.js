@@ -87,7 +87,9 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
 
 function joiElasticSearch({ filterFields, sortFields = [], body }) {
   const schema = Joi.object({
-    filters: Joi.object(["searchbar", ...filterFields].reduce((acc, field) => ({ ...acc, [field.replace(".keyword", "")]: Joi.array().items(Joi.string()).max(200) }), {})),
+    filters: Joi.object(
+      ["searchbar", ...filterFields].reduce((acc, field) => ({ ...acc, [field.replace(".keyword", "")]: Joi.array().items(Joi.string().allow("")).max(200) }), {}),
+    ),
     page: Joi.number().integer().min(0).default(0),
     sort: Joi.object({
       field: Joi.string().valid(...sortFields),
