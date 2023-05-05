@@ -1,198 +1,121 @@
 import React, { useState } from "react";
-import api from "../../../services/api";
 import Panel from "../../missions/panel";
 import StructureViewV2 from "./wrapperv2";
 
-import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import { HiOutlineLockClosed } from "react-icons/hi";
 import { useHistory } from "react-router-dom";
-import { getFilterLabel, translate, translateMission, translateVisibilty } from "snu-lib";
-import FilterSvg from "../../../assets/icons/Filter";
-import DeleteFilters from "../../../components/buttons/DeleteFilters";
+import { translate, translateMission, translateVisibilty } from "snu-lib";
 import Loader from "../../../components/Loader";
-import ReactiveListComponent from "../../../components/ReactiveListComponent";
-import { apiURL } from "../../../config";
+import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../../components/filters-system-v2";
 import { formatStringDateTimezoneUTC } from "../../../utils";
 import SelectStatusMissionV2 from "../../missions/components/SelectStatusMissionV2";
 
-const FILTERS = [
-  "DOMAIN",
-  "SEARCH",
-  "STATUS",
-  "PLACES",
-  "LOCATION",
-  "TUTOR",
-  "REGION",
-  "DEPARTMENT",
-  "STRUCTURE",
-  "MILITARY_PREPARATION",
-  "DATE",
-  "SOURCE",
-  "VISIBILITY",
-  "HEBERGEMENT",
-  "HEBERGEMENT_PAYANT",
-  "PLACESTATUS",
-  "APPLICATIONSTATUS",
-];
-
 export default function Mission({ structure }) {
   const [mission, setMission] = useState();
-  const [filterVisible, setFilterVisible] = useState(false);
-  const handleShowFilter = () => setFilterVisible(!filterVisible);
+
+  //List state
+  const [data, setData] = useState([]);
+  const pageId = "missions-list-structure";
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [paramData, setParamData] = useState({
+    page: 0,
+  });
+
+  //Filters
+  const filterArray = [
+    {
+      title: "Statut",
+      name: "status",
+      translate: (e) => translate(e),
+    },
+    {
+      title: "Visibilité",
+      name: "visibility",
+      translate: (value) => translateVisibilty(value),
+    },
+    {
+      title: "Places restantes",
+      name: "placesLeft",
+    },
+    {
+      title: "Tuteur",
+      name: "tutorName",
+    },
+    {
+      title: "Place occupées",
+      name: "placesStatus",
+      translate: (value) => translateMission(value),
+      missingLabel: "Non renseigné",
+    },
+  ];
 
   if (!structure) return <Loader />;
 
-  const getDefaultQuery = () => {
-    return { query: { bool: { filter: { term: { "structureId.keyword": structure?._id } } } }, track_total_hits: true };
-  };
-
   return (
     <div className="flex w-full">
-      <StructureViewV2 tab="missions">
-        <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-          <div className="reactive-result">
-            <ReactiveListComponent
-              defaultQuery={getDefaultQuery}
-              paginationAt="bottom"
-              showTopResultStats={false}
+      <StructureViewV2 tab="missions" structure={structure}>
+        <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
+          <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
+            <Filters
+              pageId={pageId}
+              route="/elasticsearch/mission/search"
+              setData={(value) => setData(value)}
+              filters={filterArray}
+              searchPlaceholder="Rechercher par mots clés, ville, code postal..."
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+              paramData={paramData}
+              setParamData={setParamData}
+            />
+            <SortOption
               sortOptions={[
-                { label: "Date de création (récent > ancien)", dataField: "createdAt", sortBy: "desc" },
-                { label: "Date de création (ancien > récent)", dataField: "createdAt", sortBy: "asc" },
-                { label: "Nombre de place (croissant)", dataField: "placesLeft", sortBy: "asc" },
-                { label: "Nombre de place (décroissant)", dataField: "placesLeft", sortBy: "desc" },
-                { label: "Nom de la mission (A > Z)", dataField: "name.keyword", sortBy: "asc" },
-                { label: "Nom de la mission (Z > A)", dataField: "name.keyword", sortBy: "desc" },
+                { label: "Date de création (récent > ancien)", field: "createdAt", order: "desc" },
+                { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
+                { label: "Nombre de place (croissant)", field: "placesLeft", order: "asc" },
+                { label: "Nombre de place (décroissant)", field: "placesLeft", order: "desc" },
+                { label: "Nom de la mission (A > Z)", field: "name.keyword", order: "asc" },
+                { label: "Nom de la mission (Z > A)", field: "name.keyword", order: "desc" },
               ]}
-              render={({ data }) => (
-                <div className="flex flex-col gap-1 rounded-xl bg-white">
-                  <div className=" px-4 pt-4 pb-1 ">
-                    <div className="flex items-center gap-2 py-2">
-                      <DataSearch
-                        defaultQuery={getDefaultQuery}
-                        showIcon={false}
-                        placeholder="Rechercher par mots clés, ville, code postal..."
-                        componentId="SEARCH"
-                        dataField={["name.folded", "structureName.folded", "city.folded", "zip"]}
-                        react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                        // fuzziness={1}
-                        URLParams={true}
-                        queryFormat="and"
-                        autosuggest={false}
-                        className="datasearch-searchfield"
-                        innerClass={{ input: "searchbox" }}
-                      />
-                      <div
-                        className="flex cursor-pointer items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-[14px] font-medium text-gray-700 hover:underline"
-                        onClick={handleShowFilter}>
-                        <FilterSvg className="text-gray-400" />
-                        Filtres
-                      </div>
-                    </div>
-                    <div className={`flex items-center gap-2 py-2 ${!filterVisible ? "hidden" : ""}`}>
-                      <div className="flex items-center gap-x-2">
-                        <MultiDropdownList
-                          defaultQuery={getDefaultQuery}
-                          className="dropdown-filter"
-                          componentId="STATUS"
-                          dataField="status.keyword"
-                          react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-                          renderItem={(e, count) => {
-                            return `${translate(e)} (${count})`;
-                          }}
-                          title=""
-                          URLParams={true}
-                          showSearch={false}
-                          renderLabel={(items) => <div>{getFilterLabel(items, "Statut")} </div>}
-                        />
-                        <MultiDropdownList
-                          defaultQuery={getDefaultQuery}
-                          className="dropdown-filter"
-                          placeholder="Visibilité"
-                          componentId="VISIBILITY"
-                          dataField="visibility.keyword"
-                          react={{ and: FILTERS.filter((e) => e !== "VISIBILITY") }}
-                          renderItem={(e, count) => {
-                            return `${translateVisibilty(e)} (${count})`;
-                          }}
-                          title=""
-                          URLParams={true}
-                          renderLabel={(items) => <div>{getFilterLabel(items, "Visibilité", "Visibilité")} </div>}
-                        />
-                      </div>
-
-                      <MultiDropdownList
-                        defaultQuery={getDefaultQuery}
-                        className="dropdown-filter"
-                        placeholder="Places restantes"
-                        componentId="PLACES"
-                        dataField="placesLeft"
-                        react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
-                        title=""
-                        URLParams={true}
-                        showSearch={false}
-                        sortBy="asc"
-                        selectAllLabel="Tout sélectionner"
-                        renderLabel={(items) => <div>{getFilterLabel(items, "Places restantes", "Places restantes")} </div>}
-                      />
-                      <MultiDropdownList
-                        defaultQuery={getDefaultQuery}
-                        className="dropdown-filter"
-                        placeholder="Tuteur"
-                        componentId="TUTOR"
-                        dataField="tutorName.keyword"
-                        react={{ and: FILTERS.filter((e) => e !== "TUTOR") }}
-                        title=""
-                        URLParams={true}
-                        showSearch={true}
-                        searchPlaceholder="Rechercher..."
-                      />
-
-                      <MultiDropdownList
-                        defaultQuery={getDefaultQuery}
-                        className="dropdown-filter"
-                        placeholder="Place occupées"
-                        componentId="PLACESTATUS"
-                        dataField="placesStatus.keyword"
-                        react={{ and: FILTERS.filter((e) => e !== "PLACESTATUS") }}
-                        renderItem={(e, count) => {
-                          return `${translateMission(e)} (${count})`;
-                        }}
-                        title=""
-                        URLParams={true}
-                        showSearch={false}
-                        renderLabel={(items) => <div>{getFilterLabel(items, "Place occupées", "Place occupées")} </div>}
-                        showMissing
-                        missingLabel="Non renseigné"
-                      />
-
-                      <div className="flex items-center gap-x-2">
-                        <DeleteFilters />
-                      </div>
-                    </div>
-                    <div className="mt-6 mb-2 flex w-full flex-col divide-y divide-gray-100 border-y-[1px] border-gray-100">
-                      <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 ">
-                        <div className="w-[40%]">Mission</div>
-                        <div className="w-[5%]"></div>
-                        <div className="w-[15%]">Places</div>
-                        <div className="w-[20%]">Dates</div>
-                        <div className="w-[20%]">Statut</div>
-                      </div>
-                      {data.map((hit) => (
-                        <Hit
-                          key={hit._id}
-                          hit={hit}
-                          callback={(e) => {
-                            if (e._id === mission?._id) setMission(e);
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
+              paramData={paramData}
+              setParamData={setParamData}
             />
           </div>
-        </ReactiveBase>
+          <div className="mt-2 flex flex-row flex-wrap items-center px-4">
+            <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+            <SelectedFilters
+              filterArray={filterArray}
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+              paramData={paramData}
+              setParamData={setParamData}
+            />
+          </div>
+          <ResultTable
+            paramData={paramData}
+            setParamData={setParamData}
+            currentEntryOnPage={data?.length}
+            render={
+              <div className="mt-6 mb-2 flex w-full flex-col divide-y divide-gray-100 border-y-[1px] border-gray-100">
+                <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 ">
+                  <div className="w-[40%]">Mission</div>
+                  <div className="w-[5%]"></div>
+                  <div className="w-[15%]">Places</div>
+                  <div className="w-[20%]">Dates</div>
+                  <div className="w-[20%]">Statut</div>
+                </div>
+                {data.map((hit) => (
+                  <Hit
+                    key={hit._id}
+                    hit={hit}
+                    callback={(e) => {
+                      if (e._id === mission?._id) setMission(e);
+                    }}
+                  />
+                ))}
+              </div>
+            }
+          />
+        </div>
       </StructureViewV2>
       <Panel
         mission={mission}

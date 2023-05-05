@@ -4,9 +4,7 @@ import Badge from "../../../components/Badge";
 import HeaderButtons from "../components/HeaderButtons";
 import Menu from "../components/Menu";
 
-export default function Wrapper({ tab, children }) {
-  const { structure } = useContext(StructureContext);
-
+export default function Wrapper({ tab, structure, children }) {
   if (!structure) return null;
   return (
     <div className="block w-full">
@@ -16,7 +14,7 @@ export default function Wrapper({ tab, children }) {
             <h1 className="m-0 text-2xl font-bold leading-6">{structure.name}</h1>
             {structure.isMilitaryPreparation === "true" && <Badge text="Préparation Militaire" />}
           </div>
-          <Menu tab={tab} />
+          <Menu tab={tab} structure={structure} />
         </div>
         {tab === "details" && <HeaderButtons />}
       </div>

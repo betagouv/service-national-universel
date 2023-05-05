@@ -5,8 +5,7 @@ import { StructureContext } from "../view";
 import { useSelector } from "react-redux";
 import Clock from "../../../assets/Clock";
 
-export default function Menu({ tab }) {
-  const { structure } = useContext(StructureContext);
+export default function Menu({ tab, structure }) {
   const user = useSelector((state) => state.Auth.user);
 
   const tabs = [{ label: "Détails", id: "details", src: `/structure/${structure._id}` }];

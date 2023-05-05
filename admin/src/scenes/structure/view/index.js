@@ -13,7 +13,7 @@ export const StructureContext = createContext(null);
 
 export default function Index({ ...props }) {
   const setDocumentTitle = useDocumentTitle("Structures");
-  const [structure, setStructure] = useState();
+  const [structure, setStructure] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -24,16 +24,18 @@ export default function Index({ ...props }) {
       setStructure(data);
     })();
   }, [props.match.params.id]);
+  console.log(structure);
 
-  if (!structure) return <div />;
   return (
-    <StructureContext.Provider value={{ structure, setStructure }}>
+    // <StructureContext.Provider value={{ structure, setStructure }}>
+    <>
       <Breadcrumbs items={[{ label: "Structures", to: "/structure" }, { label: "Fiche de la structure" }]} />
       <Switch>
         <SentryRoute path="/structure/:id/missions" component={() => <Missions structure={structure} />} />
         <SentryRoute path="/structure/:id/historique" component={() => <HistoricV2 />} />
         <SentryRoute path="/structure/:id" component={() => <DetailsV2 />} />
       </Switch>
-    </StructureContext.Provider>
+    </>
+    // </StructureContext.Provider>
   );
 }
