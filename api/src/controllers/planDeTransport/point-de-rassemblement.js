@@ -21,7 +21,6 @@ const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { sendTemplate } = require("../../sendinblue");
 const { ADMIN_URL, ENVIRONMENT } = require("../../config");
 
-
 /**
  * Récupère les points de rassemblements (avec horaire de passage) pour un jeune affecté.
  */
@@ -249,11 +248,14 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       await p.save({ fromUser: req.user });
     }
 
-    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts,dateEnd: { $gt: new Date().getTime() } }, ["name","repartitionSchemaDownloadAvailability","dateStart"]);
-    
-    if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts, dateEnd: { $gt: new Date().getTime() } }, [
+      "name",
+      "repartitionSchemaDownloadAvailability",
+      "dateStart",
+    ]);
 
-      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a,b) => a.dateStart - b.dateStart);
+    if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
       const referentTransport = await getTransporter();
       if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
@@ -264,7 +266,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         })),
         params: {
           trigger: "pdr_changed",
-          pdr_id: name,
+          pdr_id: pointDeRassemblement.name,
           cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
         },
       });
@@ -311,9 +313,10 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
     pointDeRassemblement.set({ cohorts: cohortsToUpdate, complementAddress: complementAddressToUpdate });
     await pointDeRassemblement.save({ fromUser: req.user });
 
-    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts }, "repartitionSchemaDownloadAvailability");
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts }, ["name", "repartitionSchemaDownloadAvailability", "dateStart"]);
 
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
       const referentTransport = await getTransporter();
       if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -326,6 +329,7 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
         params: {
           trigger: "pdr_changed",
           pdr_id: pointDeRassemblement.name,
+          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
         },
       });
     }
