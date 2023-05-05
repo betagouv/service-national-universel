@@ -13,10 +13,20 @@ router.post("/by-point-de-rassemblement", passport.authenticate(["referent"], { 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const body = {
-      query: { bool: { filter: [{ terms: { "meetingPointsIds.keyword": queryFilters.meetingPointIds } }, { terms: { "cohort.keyword": queryFilters.cohort } }] } },
+      query: {
+        bool: {
+          filter: [
+            { terms: { "meetingPointsIds.keyword": queryFilters.meetingPointIds } },
+            queryFilters.cohort.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
+          ].filter(Boolean),
+        },
+      },
       aggs: {
         group_by_meetingPointId: {
           terms: { field: "meetingPointsIds.keyword", size: ES_NO_LIMIT },
+        },
+        group_by_cohort: {
+          terms: { field: "cohort.keyword", size: ES_NO_LIMIT },
         },
       },
       size: 0,
