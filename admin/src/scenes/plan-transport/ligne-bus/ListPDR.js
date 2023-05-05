@@ -9,6 +9,7 @@ import Loader from "../../../components/Loader";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { Title } from "../components/commons";
+import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 
 const contactTypes = {
   email: "Adresse e-mail",
@@ -96,7 +97,7 @@ export default function ListPDR(props) {
         },
         contact: {
           Email: data.email,
-          Téléphone: data.phone,
+          Téléphone: formatPhoneE164(data.phone, data.phoneZone),
         },
         location: {
           Département: data.department,
@@ -109,7 +110,7 @@ export default function ListPDR(props) {
           "Nom représentant légal 1": data.parent1LastName,
           "Contact du représentant légal 1": data.parent1ContactPreference ? contactTypes[data.parent1ContactPreference] : "",
           "Email représentant légal 1": data.parent1Email,
-          "Téléphone représentant légal 1": data.parent1Phone,
+          "Téléphone représentant légal 1": formatPhoneE164(data.parent1Phone, data.parent1PhoneZone),
         },
         representative2: {
           "Statut représentant légal 2": translate(data.parent2Status),
@@ -117,7 +118,7 @@ export default function ListPDR(props) {
           "Nom représentant légal 2": data.parent2LastName,
           "Contact du représentant légal 2": data.parent2ContactPreference ? contactTypes[data.parent2ContactPreference] : "",
           "Email représentant légal 2": data.parent2Email,
-          "Téléphone représentant légal 2": data.parent2Phone,
+          "Téléphone représentant légal 2": formatPhoneE164(data.parent2Phone, data.parent2PhoneZone),
         },
         phase1Affectation: {
           "ID centre": center?._id?.toString() || "",
