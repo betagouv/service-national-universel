@@ -1,26 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import { useSelector } from "react-redux";
 import queryString from "query-string";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 
-import api from "../../../services/api";
-import CenterInformations from "./CenterInformations";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
-import { translate, ROLES, canCreateOrUpdateCohesionCenter } from "../../../utils";
+import api from "../../../services/api";
+import { ROLES, canCreateOrUpdateCohesionCenter, translate } from "../../../utils";
+import CenterInformations from "./CenterInformations";
 
-import Trash from "../../../assets/icons/Trash.js";
-import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import Pencil from "../../../assets/icons/Pencil";
+import Trash from "../../../assets/icons/Trash.js";
 
 import { COHESION_STAY_START, isSessionEditionOpen } from "snu-lib";
 
 import Field from "../components/Field";
 
 import Breadcrumbs from "../../../components/Breadcrumbs";
+import Loader from "../../../components/Loader";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import TimeSchedule from "../components/TimeSchedule";
-import Loader from "../../../components/Loader";
 
 export default function Index({ ...props }) {
   const history = useHistory();
@@ -203,12 +202,12 @@ export default function Index({ ...props }) {
               {(sessions || []).map((item, index) => (
                 <div
                   key={index}
-                  className={`mx-3 flex cursor-pointer items-center justify-center gap-2 py-3 px-2  ${focusedSession?.cohort === item.cohort ? "border-b-2 border-blue-600  text-blue-600 " : null
-                    }`}
+                  className={`mx-3 flex cursor-pointer items-center justify-center gap-2 py-3 px-2  ${
+                    focusedSession?.cohort === item.cohort ? "border-b-2 border-blue-600  text-blue-600 " : null
+                  }`}
                   onClick={() => {
                     setFocusedSession(item);
                   }}>
-                  {sessions[index].status === "WAITING_VALIDATION" ? <ExclamationCircle className="h-5 w-5" fill="#2563eb" color="white" /> : null}
                   {item.cohort}
                 </div>
               ))}
