@@ -118,15 +118,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  // TODO: remove this field
-  status: {
-    type: String,
-    enum: ["VALIDATED", "WAITING_VALIDATION"],
-    documentation: {
-      description: "Statut",
-    },
-  },
-
   timeScheduleFiles: {
     type: [File],
     documentation: {
@@ -139,6 +130,16 @@ const Schema = new mongoose.Schema({
     default: "false",
     documentation: {
       description: "La session possède au moins 1 fichier d'emploi du temps.",
+    },
+  },
+
+  // TODO: remove this field
+  status: {
+    type: String,
+    default: "WAITING_VALIDATION",
+    enum: ["VALIDATED", "WAITING_VALIDATION"],
+    documentation: {
+      description: "Statut",
     },
   },
 
