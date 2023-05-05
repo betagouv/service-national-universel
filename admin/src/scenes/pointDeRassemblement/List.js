@@ -411,7 +411,7 @@ const HitSession = ({ hit, session, nbYoung, nbLines, loading }) => {
             <div className="flex items-center gap-2">
               <BusSvg className="-rotate-12 text-gray-400" />
               <div className="text-sm leading-5 text-gray-900">{nbLines || 0} </div>
-              <a href={`${adminURL}/ligne-de-bus?cohort=${session}&CODE_PDR=%5B"${hit.code}"%5D`} target="_blank" rel="noreferrer">
+              <a href={`${adminURL}/ligne-de-bus?cohort=${session}&pointDeRassemblements.code=${hit.code}`} target="_blank" rel="noreferrer">
                 <ExternalLink className="text-gray-400" />
               </a>
             </div>
