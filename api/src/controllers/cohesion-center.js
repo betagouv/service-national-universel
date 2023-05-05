@@ -8,6 +8,7 @@ const SessionPhase1 = require("../models/sessionPhase1");
 const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
+const CohortModel = require("../models/cohort");
 const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, isYoung, YOUNG_STATUS, updateCenterDependencies } = require("../utils");
 const { canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1, ROLES } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
@@ -16,6 +17,8 @@ const { ADMIN_URL, ENVIRONMENT } = require("../config");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateId } = require("../utils/validator");
+const { getReferentManagerPhase2 } = require("../utils");
+const { getTransporter } = require("../utils");
 
 //To update for new affectation
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -188,6 +191,32 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     await center.save({ fromUser: req.user });
 
     await updateCenterDependencies(center, req.user);
+
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: center.cohorts, dateEnd: { $gt: new Date().getTime() } }, [
+      "name",
+      "repartitionSchemaDownloadAvailability",
+      "dateStart",
+    ]);
+
+    if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
+      console.log(firstSession);
+      const referentTransport = await getTransporter();
+      if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+      const mail = await sendTemplate(template, {
+        emailTo: referentTransport.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        })),
+        params: {
+          trigger: "centre_changed",
+          centre_id: value.name,
+          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+        },
+      });
+    }
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
   } catch (error) {
     capture(error);
