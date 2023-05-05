@@ -19,7 +19,6 @@ export const buildQuery = async (route, selectedFilters, page = 0, filterArray, 
   filterArray.map((f) => {
     if (f.customComponent) return;
     if (f.disabledBaseQuery) return;
-    console.log(f.name);
     newFilters[f.name] = aggs[f.name].names.buckets.filter((b) => b.doc_count > 0).map((b) => ({ key: b.key, doc_count: b.doc_count }));
 
     // check for any transformData function

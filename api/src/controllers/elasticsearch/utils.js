@@ -55,7 +55,7 @@ function aggsSubQuery(keys, aggsSearchQuery, queryFilters, contextFilters, custo
 
 function buildSort(sort) {
   if (!sort) return [{ createdAt: { order: "desc" } }];
-  return [{ [sort.field.includes(".keyword") ? sort.field : sort.field + ".keyword"]: { order: sort.order } }];
+  return [{ [sort.field]: { order: sort.order } }];
 }
 
 function unsafeStrucuredClone(obj) {
@@ -91,9 +91,10 @@ function joiElasticSearch({ filterFields, sortFields = [], body }) {
       ["searchbar", ...filterFields].reduce((acc, field) => ({ ...acc, [field.replace(".keyword", "")]: Joi.array().items(Joi.string().allow("")).max(200) }), {}),
     ),
     page: Joi.number().integer().min(0).default(0),
-    sort: Joi.array()
-      .items(Joi.string().valid(...sortFields))
-      .max(200)
+    sort: Joi.object({
+      field: Joi.string().valid(...sortFields),
+      order: Joi.string().valid("asc", "desc"),
+    })
       .allow(null)
       .default(null),
     exportFields: Joi.alternatives().try(Joi.array().items(Joi.string()).max(200).allow(null).default(null), Joi.string().valid("*")),

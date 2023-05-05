@@ -7,7 +7,7 @@ export default function Section({ title, children, headerChildren = null }) {
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">{title}</h1>
         {headerChildren && <div>{headerChildren}</div>}
       </div>
-      <div className="mt-6">{children}</div>
+      <div className="">{children}</div>
     </div>
   );
 }

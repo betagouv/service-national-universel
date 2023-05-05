@@ -19,6 +19,7 @@ export default function MoreInfoPanel({ children, className = "" }) {
 
   function click(event) {
     event.stopPropagation();
+    event.preventDefault();
     setOpen(!open);
   }
 
