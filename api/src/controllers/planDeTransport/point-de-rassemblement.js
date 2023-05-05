@@ -247,9 +247,11 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       await p.save({ fromUser: req.user });
     }
 
-    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts,dateEnd: { $gt: new Date().getTime() } }, "repartitionSchemaDownloadAvailability");
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts,dateEnd: { $gt: new Date().getTime() } }, ["name","repartitionSchemaDownloadAvailability","dateStart"]);
     
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+
+      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a,b) => a.dateStart - b.dateStart);
       const referentTransport = await getTransporter();
       if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
@@ -261,6 +263,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         params: {
           trigger: "pdr_changed",
           pdr_id: name,
+          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
         },
       });
     }
