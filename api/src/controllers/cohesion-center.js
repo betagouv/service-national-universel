@@ -38,7 +38,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       centerDesignation: Joi.string().allow(null, ""),
       placesSession: Joi.string().required(),
       cohort: Joi.string().required(),
-      statusSession: Joi.string().trim().valid("VALIDATED", "WAITING_VALIDATION").allow(null, ""),
     }).validate(req.body, { stripUnknown: true });
 
     if (error) {
@@ -70,13 +69,11 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       complement: value.complement,
       centerDesignation: value.centerDesignation,
     });
-    const status = req.user.role === ROLES.ADMIN ? value.statusSession : "WAITING_VALIDATION";
     await SessionPhase1.create({
       cohesionCenterId: cohesionCenter._id,
       cohort: value.cohort,
       placesTotal: value.placesTotal,
       placesLeft: value.placesTotal,
-      status: status,
       department: value.department,
       region: value.region,
       codeCentre: value.code2022,
@@ -84,23 +81,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       cityCentre: value.city,
       zipCentre: value.zip,
     });
-
-    if (ENVIRONMENT === "production" && status === "WAITING_VALIDATION") {
-      let template = SENDINBLUE_TEMPLATES.SESSION_WAITING_VALIDATION;
-      let sentTo = [
-        { email: "edouard.vizcaino@jeunesse-sports.gouv.fr", name: "Edouard Vizcaino" },
-        { email: "gregoire.mercier@jeunesse-sports.gouv.fr", name: "Grégoire Mercier" },
-      ];
-
-      await sendTemplate(template, {
-        emailTo: sentTo,
-        params: {
-          cohort: value.cohort,
-          centre: value.name,
-          cta: `${ADMIN_URL}/centre/${cohesionCenter._id}?cohorte=${value.cohort}`,
-        },
-      });
-    }
 
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(cohesionCenter) });
   } catch (error) {
@@ -119,7 +99,6 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
       placesTotal: Joi.number().required(),
-      status: Joi.string(),
     }).validate({ ...req.body }, { stripUnknown: true });
 
     if (error) {
@@ -127,12 +106,6 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    let status;
-    if (req.user.role === ROLES.ADMIN) {
-      status = value.status;
-    } else {
-      status = "WAITING_VALIDATION";
-    }
     const center = await CohesionCenterModel.findById(cohesionCenterId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     // check if session doesnt already exist
@@ -148,7 +121,6 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
       cohort: value.cohort,
       placesTotal: value.placesTotal,
       placesLeft: value.placesTotal,
-      status: status,
       department: center.department,
       region: center.region,
       codeCentre: center.code2022,
@@ -158,22 +130,6 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     });
     center.set({ cohorts: newCohorts });
     await center.save({ fromUser: req.user });
-
-    if (ENVIRONMENT === "production" && status === "WAITING_VALIDATION") {
-      let template = SENDINBLUE_TEMPLATES.SESSION_WAITING_VALIDATION;
-      let sentTo = [
-        { email: "edouard.vizcaino@jeunesse-sports.gouv.fr", name: "Edouard Vizcaino" },
-        { email: "gregoire.mercier@jeunesse-sports.gouv.fr", name: "Grégoire Mercier" },
-      ];
-      await sendTemplate(template, {
-        emailTo: sentTo,
-        params: {
-          cohort: value.cohort,
-          centre: center.name,
-          cta: `${ADMIN_URL}/centre/${cohesionCenterId}?cohorte=${value.cohort}`,
-        },
-      });
-    }
 
     res.status(200).send({ ok: true });
   } catch (error) {

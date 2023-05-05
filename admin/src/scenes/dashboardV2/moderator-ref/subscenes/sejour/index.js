@@ -21,7 +21,6 @@ import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import BoxWithPercentage from "./components/BoxWithPercentage";
 import CardCenterCapacity from "./components/CardCenterCapacity";
-import Cardsession from "./components/Cardsession";
 import MoreInfo from "./components/MoreInfo";
 import OccupationCardHorizontal from "./components/OccupationCardHorizontal";
 import Presences from "./components/Presences";
@@ -72,19 +71,19 @@ export default function Index() {
       },
       ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
         ? {
-            id: "region",
-            name: "Région",
-            fullValue: "Toutes",
-            options: regionOptions,
-          }
+          id: "region",
+          name: "Région",
+          fullValue: "Toutes",
+          options: regionOptions,
+        }
         : null,
       ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
         ? {
-            id: "academy",
-            name: "Académie",
-            fullValue: "Toutes",
-            options: academyOptions,
-          }
+          id: "academy",
+          name: "Académie",
+          fullValue: "Toutes",
+          options: academyOptions,
+        }
         : null,
       {
         id: "department",
