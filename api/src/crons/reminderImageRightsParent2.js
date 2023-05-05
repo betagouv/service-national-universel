@@ -12,31 +12,20 @@ exports.handler = async () => {
   try {
     let countNotice = 0;
 
-    const sejour = await CohortModel.findOne(
-      {
-        dateStart: {
-          $or: [
-            {
-              $gte: new Date(new Date().setDate(new Date().getDate() + 1)),
-              $lte: new Date(new Date().setDate(new Date().getDate() + 2))
-            },
-            {
-              $gte: new Date(new Date().setDate(new Date().getDate() + 11)),
-              $lte: new Date(new Date().setDate(new Date().getDate() + 12))
-            },
-          ],
-        }
-      },
-      {
-        name: 1,
-        dateStart: 1
-      }
-    );
+    const now = new Date()
+    now.setHours(0, 0, 0, 0)
 
+    now.setDate(now.getDate() + 2)
+    const twoDaysFromNow = new Date(now)
+
+    now.setDate(now.getDate() + 10)
+    const twelveDaysFromNow = new Date(now)
+
+    const sejour = await CohortModel.find({ dateStart: { $in: [twelveDaysFromNow, twoDaysFromNow] } }, { name: 1, dateStart: 1 });
     if (!sejour) return;
 
     const cursor = await YoungModel.find({
-      cohort: sejour.name,
+      cohort: { $in: sejour.map((e) => e.name) },
       status: YOUNG_STATUS.VALIDATED,
       parent1AllowImageRights: "true",
       parent2Email: { $exists: true },
