@@ -345,6 +345,9 @@ export default function Create() {
       values.addressVerified = values.addressVerified.toString();
       // necessaire ?
       delete values.certifyData;
+      if (values.department === "Polynésie française") {
+        status = YOUNG_STATUS.WAITING_VALIDATION;
+      }
       const { ok, code, young } = await api.post("/young/invite", { ...values, status });
       if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
       const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate);
@@ -842,16 +845,14 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
         <div className="text-xs font-medium leading-snug text-[#242526]">Adresse</div>
         <div className="inline-flex">
           <div
-            className={`rounded-[100px_0_0_100px] border-[1px] border-[#3B82F6] px-[10px] py-[3px] text-[14px] ${
-              liveInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "cursor-pointer bg-[#FFFFFF] text-[#3B82F6]"
-            }`}
+            className={`rounded-[100px_0_0_100px] border-[1px] border-[#3B82F6] px-[10px] py-[3px] text-[14px] ${liveInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "cursor-pointer bg-[#FFFFFF] text-[#3B82F6]"
+              }`}
             onClick={() => handleCountryChange(true)}>
             en France
           </div>
           <div
-            className={`ml-[-1px] rounded-[0_100px_100px_0] border-[1px] border-[#3B82F6] px-[10px] py-[3px] text-[14px] ${
-              !liveInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "cursor-pointer bg-[#FFFFFF] text-[#3B82F6]"
-            }`}
+            className={`ml-[-1px] rounded-[0_100px_100px_0] border-[1px] border-[#3B82F6] px-[10px] py-[3px] text-[14px] ${!liveInFrance ? "bg-[#3B82F6] text-[#FFFFFF]" : "cursor-pointer bg-[#FFFFFF] text-[#3B82F6]"
+              }`}
             onClick={() => handleCountryChange(false)}>
             à l&apos;étranger
           </div>
@@ -1307,9 +1308,8 @@ function CheckRead({ name, errors, value, children, onClick }) {
   return (
     <div onClick={onClick} className="mt-[16px] flex cursor-pointer items-center">
       <div
-        className={`mr-[24px]  flex h-[14px] w-[14px] flex-[0_0_14px] items-center justify-center rounded-[4px] bg-[#E5E5E5] text-[#666666] ${
-          errors[name] && !value ? "border-2 border-red-500" : ""
-        } `}>
+        className={`mr-[24px]  flex h-[14px] w-[14px] flex-[0_0_14px] items-center justify-center rounded-[4px] bg-[#E5E5E5] text-[#666666] ${errors[name] && !value ? "border-2 border-red-500" : ""
+          } `}>
         {value && <Check className="h-[8px] w-[11px]" />}
       </div>
       <div className="grow text-[14px] leading-[19px] text-[#3A3A3A]">{children}</div>
