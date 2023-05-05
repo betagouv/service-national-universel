@@ -727,7 +727,6 @@ const getTransporter = async () => {
   return toReferent;
 }
 
-
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
