@@ -19,6 +19,8 @@ const { getCohesionCenterFromSession } = require("./commons");
 const { getTransporter } = require("../../utils");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { sendTemplate } = require("../../sendinblue");
+const { ADMIN_URL, ENVIRONMENT } = require("../../config");
+
 
 /**
  * Récupère les points de rassemblements (avec horaire de passage) pour un jeune affecté.
