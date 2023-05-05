@@ -1,27 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import { useSelector } from "react-redux";
 import queryString from "query-string";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 
-import api from "../../../services/api";
-import CenterInformations from "./CenterInformations";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
-import { translate, ROLES, canCreateOrUpdateCohesionCenter } from "../../../utils";
+import api from "../../../services/api";
+import { ROLES, canCreateOrUpdateCohesionCenter, translate } from "../../../utils";
+import CenterInformations from "./CenterInformations";
 
-import Trash from "../../../assets/icons/Trash.js";
-import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import Pencil from "../../../assets/icons/Pencil";
+import Trash from "../../../assets/icons/Trash.js";
 
 import { COHESION_STAY_START, isSessionEditionOpen } from "snu-lib";
 
 import Field from "../components/Field";
-import Select from "../components/Select";
 
 import Breadcrumbs from "../../../components/Breadcrumbs";
+import Loader from "../../../components/Loader";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import TimeSchedule from "../components/TimeSchedule";
-import Loader from "../../../components/Loader";
 
 export default function Index({ ...props }) {
   const history = useHistory();
@@ -103,7 +101,7 @@ export default function Index({ ...props }) {
       }
       if (allSessions.data.length === 0) setSessions([]);
       const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[0]?.cohort;
-      if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
+      if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)) {
         allSessions.data.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
         setSessions(allSessions.data);
         if (!blockFocus) setFocusedSession(allSessions.data.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
@@ -135,11 +133,6 @@ export default function Index({ ...props }) {
       return null;
     }
   }
-
-  const statusOptions = [
-    { value: "VALIDATED", label: "Validée" },
-    { value: "WAITING_VALIDATION", label: "En attente de validation" },
-  ];
 
   const onSubmitBottom = async () => {
     setLoading(true);
@@ -215,7 +208,6 @@ export default function Index({ ...props }) {
                   onClick={() => {
                     setFocusedSession(item);
                   }}>
-                  {sessions[index].status === "WAITING_VALIDATION" ? <ExclamationCircle className="h-5 w-5" fill="#2563eb" color="white" /> : null}
                   {item.cohort}
                 </div>
               ))}
@@ -286,17 +278,7 @@ export default function Index({ ...props }) {
                   </div>
 
                   {/* // équipe */}
-                  <div className="flex min-w-1/4 max-w-xl flex-1 flex-col items-center justify-between gap-4 bg-white p-4">
-                    <div className="w-64">
-                      <Select
-                        readOnly={!editingBottom || ROLES.ADMIN !== user.role}
-                        label="Statut"
-                        icon={focusedSession.status === "WAITING_VALIDATION" ? <ExclamationCircle className="mr-2 h-5 w-5" fill="#2563eb" color="white" /> : null}
-                        options={statusOptions}
-                        setSelected={(e) => setEditInfoSession({ ...editInfoSession, status: e.value })}
-                        selected={statusOptions.find((e) => e.value === editInfoSession.status)}
-                      />
-                    </div>
+                  <div className="flex min-w-1/4 max-w-xl flex-1 flex-col items-center justify-center gap-4 bg-white p-4">
                     <div className="w-64">
                       <Field
                         error={errors.placesTotal}

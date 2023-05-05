@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import Loader from "../../../../../../components/Loader";
 import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
 import { translate } from "snu-lib";
 import Tabs from "../../../../../phase0/components/Tabs";
 import { BarChart, Legends } from "../../../../components/graphs";
+import { computeMissionUrl } from "../../../../components/common";
+import { LoadingBar } from "../../../../components/ui/loading";
 
 export default function MissionsDetail({ filters, missionFilters, className = "" }) {
   const [loading, setLoading] = useState(true);
@@ -35,7 +36,6 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
     try {
       const result = await api.post(`/dashboard/engagement/missions-detail`, { filters, missionFilters, sort, group: selectedTab });
       if (result.ok) {
-        console.log("Mission Details: ", result.data);
         let maxValue = 0;
         result.data.forEach((d) => {
           if (maxValue < d.validatedMission) {
@@ -51,6 +51,7 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
             .filter((d) => d.validatedMission >= 0.005 || d.youngPreferences >= 0.005)
             .map((d, idx) => {
               return {
+                id: d.key,
                 title: idx + 1 + ". " + translate(d.key),
                 values: [Math.round(d.validatedMission * 100), Math.round(d.youngPreferences * 100)],
                 tooltips: [
@@ -84,6 +85,12 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
     setSort(e.target.value);
   }
 
+  function onBarClick(bar) {
+    if (selectedTab === "domain") {
+      window.open(computeMissionUrl(filters, missionFilters, { DOMAIN: bar.id }), "_blank");
+    }
+  }
+
   return (
     <DashboardBox title="Détail des missions : préférences vs réalité" className={className}>
       <Tabs selected={selectedTab} tabs={tabs} onChange={setSelectedTab} className="my-6" />
@@ -99,8 +106,12 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
       {error ? (
         <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : loading ? (
-        <div className="flex items-center justify-center">
-          <Loader />
+        <div className="flex items-center justify-around">
+          <LoadingBar width="w-[15%]" />
+          <LoadingBar width="w-[15%]" />
+          <LoadingBar width="w-[15%]" />
+          <LoadingBar width="w-[15%]" />
+          <LoadingBar width="w-[15%]" />
         </div>
       ) : bars.length === 0 ? (
         <div className="text-center text-gray-500">Aucune données</div>
@@ -108,7 +119,16 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
         <>
           <div className="mb-8 flex items-center justify-around">
             {bars.map((bar) => (
-              <BarChart key={bar.title} title={bar.title} values={bar.values} tooltips={bar.tooltips} max={maxValue} unit="%" className="h-[140px]" />
+              <BarChart
+                key={bar.title}
+                title={bar.title}
+                values={bar.values}
+                tooltips={bar.tooltips}
+                max={maxValue}
+                unit="%"
+                className="h-[140px]"
+                onClick={() => onBarClick(bar)}
+              />
             ))}
           </div>
           <div className="flex justify-center">

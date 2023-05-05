@@ -3,9 +3,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
+import dayjs from "dayjs";
+
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
+import { resizeImage } from "../../../services/file.service";
 import { translate } from "../../../utils";
+import { getCorrectionsForStepUpload } from "../../../utils/navigation";
 import { ID } from "../utils";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 
@@ -19,27 +23,37 @@ import MyDocs from "../components/MyDocs";
 import Navbar from "../components/Navbar";
 import StickyButton from "../../../components/inscription/stickyButton";
 
-import dayjs from "dayjs";
 export default function StepUpload() {
   let { category } = useParams();
   const young = useSelector((state) => state.Auth.young);
   if (!category) category = young.latestCNIFileCategory;
   const history = useHistory();
   const dispatch = useDispatch();
-  const corrections = young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
+  const corrections = getCorrectionsForStepUpload(young);
 
   const [step, setStep] = useState(getStep());
   const [loading, setLoading] = useState(false);
   const [hasChanged, setHasChanged] = useState(false);
   const [error, setError] = useState({});
-  const [recto, setRecto] = useState([]);
-  const [verso, setVerso] = useState([]);
+  const [recto, setRecto] = useState();
+  const [verso, setVerso] = useState();
   const [checked, setChecked] = useState({
     "Toutes les informations sont lisibles": false,
     "Le document n'est pas coupé": false,
     "La photo est nette": false,
   });
   const [date, setDate] = useState(young.latestCNIFileExpirationDate ? new Date(young.latestCNIFileExpirationDate) : null);
+
+  const isEnabled = validate();
+  const expirationDate = dayjs(date).locale("fr").format("YYYY-MM-DD");
+
+  function validate() {
+    if (corrections?.length) {
+      return hasChanged && !loading && !error.text;
+    } else {
+      return (young?.files?.cniFiles?.length || (recto && (verso || category === "passport"))) && date && !loading && !error.text;
+    }
+  }
 
   function getStep() {
     if (corrections?.some(({ reason }) => reason === "MISSING_BACK")) return "verso";
@@ -62,38 +76,44 @@ export default function StepUpload() {
   }
 
   function resetState() {
-    setRecto([]);
-    setVerso([]);
+    setRecto();
+    setVerso();
     setStep(getStep());
     setLoading(false);
+  }
+
+  async function uploadFiles() {
+    if (recto) {
+      const res = await api.uploadID(young._id, recto, { category, expirationDate, side: "recto" });
+      if (!res.ok) {
+        capture(res.code);
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+        resetState();
+        return { ok: false };
+      }
+    }
+
+    if (verso) {
+      const res = await api.uploadID(young._id, verso, { category, expirationDate, side: "verso" });
+      if (!res.ok) {
+        capture(res.code);
+        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
+        resetState();
+        return { ok: false };
+      }
+    }
+
+    return { ok: true };
   }
 
   async function onSubmit() {
     try {
       setLoading(true);
 
-      let files = [];
-      if (recto) files = [...files, ...recto];
-      if (verso) files = [...files, ...verso];
+      const { ok: uploadOk } = await uploadFiles();
+      if (!uploadOk) return;
 
-      for (const file of files) {
-        if (file.size > 5000000) {
-          setLoading(false);
-          setError({ text: `Ce fichier ${files.name} est trop volumineux.` });
-          return;
-        }
-      }
-
-      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
-
-      if (!res.ok) {
-        capture(res.code);
-        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code });
-        resetState();
-        return;
-      }
-
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: dayjs(date).locale("fr").format("YYYY-MM-DD") });
+      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: expirationDate });
 
       if (!ok) {
         capture(code);
@@ -116,26 +136,8 @@ export default function StepUpload() {
     try {
       setLoading(true);
 
-      let files = [];
-      if (recto) files = [...files, ...recto];
-      if (verso) files = [...files, ...verso];
-
-      for (const file of files) {
-        if (file.size > 5000000) {
-          setLoading(false);
-          setError({ text: `Ce fichier ${files.name} est trop volumineux.` });
-          return;
-        }
-      }
-
-      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, files, ID[category].category, dayjs(date).locale("fr").format("YYYY-MM-DD"));
-
-      if (!res.ok) {
-        capture(res.code);
-        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier.", subText: res.code });
-        resetState();
-        return;
-      }
+      const { ok: uploadOk } = await uploadFiles();
+      if (!uploadOk) return;
 
       const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
@@ -145,6 +147,7 @@ export default function StepUpload() {
         setLoading(false);
         return;
       }
+
       plausibleEvent("Phase0/CTA demande correction - Corriger ID");
       dispatch(setYoung(responseData));
       history.push("/");
@@ -155,24 +158,14 @@ export default function StepUpload() {
     }
   }
 
-  const isEnabled = corrections?.length
-    ? hasChanged && !loading && !error.text
-    : (young?.files?.cniFiles?.length || [...recto, ...verso].length) && date && !loading && !error.text;
-
   return (
     <>
       <Navbar />
       <div className="bg-white p-4">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        {young?.files?.cniFiles?.length + recto?.length + verso?.length > 3 && (
+        {young?.files?.cniFiles?.length + recto?.length + verso?.length > 2 && (
           <>
-            <Error
-              text={
-                young?.files?.cniFiles?.length
-                  ? `Vous ne pouvez téleverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles.length} fichiers en ligne.`
-                  : "Vous ne pouvez téleverser plus de 3 fichiers."
-              }
-            />
+            <Error text={`Vous ne pouvez téleverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles?.length} fichiers en ligne.`} />
             <MyDocs />
           </>
         )}
@@ -203,6 +196,15 @@ export default function StepUpload() {
   );
 
   function Recto() {
+    async function handleChange(e) {
+      const image = await resizeImage(e.target.files[0]);
+      if (image.size > 5000000) return setError({ text: "Ce fichier est trop volumineux." });
+
+      setRecto(image);
+      setHasChanged(true);
+      setStep(corrections?.some(({ reason }) => reason === "MISSING_FRONT") || category === "passport" ? "verify" : "verso");
+    }
+
     return (
       <>
         <div className="mb-4">
@@ -218,18 +220,7 @@ export default function StepUpload() {
         <div className="mb-4 flex w-full items-center justify-center">
           <img src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
         </div>
-        <input
-          type="file"
-          id="file-upload"
-          name="file-upload"
-          accept="image/*"
-          onChange={(e) => {
-            setRecto(e.target.files);
-            setHasChanged(true);
-            setStep(corrections?.some(({ reason }) => reason === "MISSING_FRONT") || category === "passport" ? "verify" : "verso");
-          }}
-          className="hidden"
-        />
+        <input type="file" id="file-upload" name="file-upload" accept="image/*" onChange={handleChange} className="hidden" />
         <button className="flex w-full">
           <label htmlFor="file-upload" className="flex w-full items-center justify-center bg-[#000091] p-2 text-white">
             {category === "passport" ? "Scannez le document" : "Scannez le recto du document"}
@@ -240,6 +231,15 @@ export default function StepUpload() {
   }
 
   function Verso() {
+    async function handleChange(e) {
+      const image = await resizeImage(e.target.files[0]);
+      if (image.size > 5000000) return setError({ text: "Ce fichier est trop volumineux." });
+
+      setVerso(image);
+      setHasChanged(true);
+      setStep("verify");
+    }
+
     return (
       <>
         <div className="mb-4">
@@ -255,18 +255,7 @@ export default function StepUpload() {
         <div className="mb-4 flex w-full items-center justify-center">
           {ID[category].imgBack && <img src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />}
         </div>
-        <input
-          type="file"
-          id="file-upload"
-          name="file-upload"
-          accept="image/*"
-          onChange={(e) => {
-            setVerso(e.target.files);
-            setHasChanged(true);
-            setStep("verify");
-          }}
-          className="hidden"
-        />
+        <input type="file" id="file-upload" name="file-upload" accept="image/*" onChange={handleChange} className="hidden" />
         <button className="flex w-full">
           <label htmlFor="file-upload" className="flex w-full items-center justify-center bg-[#000091] p-2 text-white">
             Scannez le verso du document
@@ -325,8 +314,8 @@ export default function StepUpload() {
 function Gallery({ recto, verso }) {
   return (
     <div className="mb-4 flex h-48 w-full space-x-2 overflow-x-auto">
-      {recto.length > 0 && <img src={URL.createObjectURL(recto[0])} className="w-3/4 object-contain" />}
-      {verso.length > 0 && <img src={URL.createObjectURL(verso[0])} className="w-3/4 object-contain" />}
+      {recto && <img src={URL.createObjectURL(recto)} className="w-3/4 object-contain" />}
+      {verso && <img src={URL.createObjectURL(verso)} className="w-3/4 object-contain" />}
     </div>
   );
 }

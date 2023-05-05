@@ -246,6 +246,7 @@ router.post(
       const { error: bodyError, value: body } = Joi.object({
         category: Joi.string(),
         expirationDate: Joi.date(),
+        side: Joi.string().valid("recto", "verso"),
       }).validate(req.body, { stripUnknown: true });
       if (bodyError) {
         capture(bodyError);
@@ -301,12 +302,13 @@ router.post(
         // Create document
         const newFile = {
           _id: mongoose.Types.ObjectId(),
-          name,
+          name: decodeURIComponent(name),
           size,
           uploadedAt: Date.now(),
           mimetype,
           category: body.category,
           expirationDate: body.expirationDate,
+          side: body.side,
         };
 
         // Upload file using ObjectId as file name

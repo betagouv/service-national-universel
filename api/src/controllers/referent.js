@@ -44,7 +44,7 @@ const {
   updateSeatsTakenInBusLine,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
-const { serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
+const { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } = require("../utils/serializer");
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
 const { department2region } = require("snu-lib/region-and-departments");
 const { translateCohort } = require("snu-lib/translation");
@@ -910,7 +910,7 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
     let applications = [];
     for (let application of applicationsFromDb) {
       const structure = await StructureModel.findById(application.structureId);
-      applications.push({ ...application._doc, structure });
+      applications.push({ ...application._doc, structure: structure ? serializeStructure(structure, req.user) : null });
     }
     return res.status(200).send({ ok: true, data: { ...data._doc, applications } });
   } catch (error) {

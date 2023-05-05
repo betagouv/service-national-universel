@@ -29,7 +29,10 @@ export default function MyDocs({ category = "" }) {
         <div key={e._id} className="my-4 flex w-full justify-between">
           <div className="w-2/3">
             <p className="truncate text-sm text-gray-800">{e.name}</p>
-            <p className="truncate text-xs text-gray-500">{translate(e.category)}</p>
+            <p className="truncate text-xs text-gray-500">
+              {translate(e.category)}
+              {e.side && ` - ${e.side}`}
+            </p>
           </div>
           <div className="flex cursor-pointer text-blue-600 hover:text-blue-400">
             <div className="mt-1 mr-1">

@@ -55,7 +55,7 @@ function aggsSubQuery(keys, aggsSearchQuery, queryFilters, contextFilters, custo
 
 function buildSort(sort) {
   if (!sort) return [{ createdAt: { order: "desc" } }];
-  return [{ [sort.field.includes(".keyword") ? sort.field : sort.field + ".keyword"]: { order: sort.order } }];
+  return [{ [sort.field]: { order: sort.order } }];
 }
 
 function unsafeStrucuredClone(obj) {
@@ -87,17 +87,20 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
 
 function joiElasticSearch({ filterFields, sortFields = [], body }) {
   const schema = Joi.object({
-    filters: Joi.object(["searchbar", ...filterFields].reduce((acc, field) => ({ ...acc, [field.replace(".keyword", "")]: Joi.array().items(Joi.string()).max(200) }), {})),
+    filters: Joi.object(
+      ["searchbar", ...filterFields].reduce((acc, field) => ({ ...acc, [field.replace(".keyword", "")]: Joi.array().items(Joi.string().allow("")).max(200) }), {}),
+    ),
     page: Joi.number().integer().min(0).default(0),
-    sort: Joi.array()
-      .items(Joi.string().valid(...sortFields))
-      .max(200)
+    sort: Joi.object({
+      field: Joi.string().valid(...sortFields),
+      order: Joi.string().valid("asc", "desc"),
+    })
       .allow(null)
       .default(null),
     exportFields: Joi.alternatives().try(Joi.array().items(Joi.string()).max(200).allow(null).default(null), Joi.string().valid("*")),
   });
 
-  const { error, value } = schema.validate(body);
+  const { error, value } = schema.validate({ ...body }, { stripUnknown: true });
   if (error) capture(error);
   return { queryFilters: value.filters, page: value.page, sort: value.sort, exportFields: value.exportFields, error };
 }

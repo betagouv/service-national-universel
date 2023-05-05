@@ -8,6 +8,7 @@ const SessionPhase1 = require("../models/sessionPhase1");
 const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
+const CohortModel = require("../models/cohort");
 const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, isYoung, YOUNG_STATUS, updateCenterDependencies } = require("../utils");
 const { canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1, ROLES } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
@@ -16,6 +17,8 @@ const { ADMIN_URL, ENVIRONMENT } = require("../config");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateId } = require("../utils/validator");
+const { getReferentManagerPhase2 } = require("../utils");
+const { getTransporter } = require("../utils");
 
 //To update for new affectation
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -38,7 +41,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       centerDesignation: Joi.string().allow(null, ""),
       placesSession: Joi.string().required(),
       cohort: Joi.string().required(),
-      statusSession: Joi.string().trim().valid("VALIDATED", "WAITING_VALIDATION").allow(null, ""),
     }).validate(req.body, { stripUnknown: true });
 
     if (error) {
@@ -70,13 +72,11 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       complement: value.complement,
       centerDesignation: value.centerDesignation,
     });
-    const status = req.user.role === ROLES.ADMIN ? value.statusSession : "WAITING_VALIDATION";
     await SessionPhase1.create({
       cohesionCenterId: cohesionCenter._id,
       cohort: value.cohort,
       placesTotal: value.placesTotal,
       placesLeft: value.placesTotal,
-      status: status,
       department: value.department,
       region: value.region,
       codeCentre: value.code2022,
@@ -84,23 +84,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       cityCentre: value.city,
       zipCentre: value.zip,
     });
-
-    if (ENVIRONMENT === "production" && status === "WAITING_VALIDATION") {
-      let template = SENDINBLUE_TEMPLATES.SESSION_WAITING_VALIDATION;
-      let sentTo = [
-        { email: "edouard.vizcaino@jeunesse-sports.gouv.fr", name: "Edouard Vizcaino" },
-        { email: "gregoire.mercier@jeunesse-sports.gouv.fr", name: "Grégoire Mercier" },
-      ];
-
-      await sendTemplate(template, {
-        emailTo: sentTo,
-        params: {
-          cohort: value.cohort,
-          centre: value.name,
-          cta: `${ADMIN_URL}/centre/${cohesionCenter._id}?cohorte=${value.cohort}`,
-        },
-      });
-    }
 
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(cohesionCenter) });
   } catch (error) {
@@ -119,7 +102,6 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
       placesTotal: Joi.number().required(),
-      status: Joi.string(),
     }).validate({ ...req.body }, { stripUnknown: true });
 
     if (error) {
@@ -127,12 +109,6 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    let status;
-    if (req.user.role === ROLES.ADMIN) {
-      status = value.status;
-    } else {
-      status = "WAITING_VALIDATION";
-    }
     const center = await CohesionCenterModel.findById(cohesionCenterId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     // check if session doesnt already exist
@@ -148,7 +124,6 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
       cohort: value.cohort,
       placesTotal: value.placesTotal,
       placesLeft: value.placesTotal,
-      status: status,
       department: center.department,
       region: center.region,
       codeCentre: center.code2022,
@@ -158,22 +133,6 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     });
     center.set({ cohorts: newCohorts });
     await center.save({ fromUser: req.user });
-
-    if (ENVIRONMENT === "production" && status === "WAITING_VALIDATION") {
-      let template = SENDINBLUE_TEMPLATES.SESSION_WAITING_VALIDATION;
-      let sentTo = [
-        { email: "edouard.vizcaino@jeunesse-sports.gouv.fr", name: "Edouard Vizcaino" },
-        { email: "gregoire.mercier@jeunesse-sports.gouv.fr", name: "Grégoire Mercier" },
-      ];
-      await sendTemplate(template, {
-        emailTo: sentTo,
-        params: {
-          cohort: value.cohort,
-          centre: center.name,
-          cta: `${ADMIN_URL}/centre/${cohesionCenterId}?cohorte=${value.cohort}`,
-        },
-      });
-    }
 
     res.status(200).send({ ok: true });
   } catch (error) {
@@ -232,6 +191,32 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     await center.save({ fromUser: req.user });
 
     await updateCenterDependencies(center, req.user);
+
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: center.cohorts, dateEnd: { $gt: new Date().getTime() } }, [
+      "name",
+      "repartitionSchemaDownloadAvailability",
+      "dateStart",
+    ]);
+
+    if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
+      console.log(firstSession);
+      const referentTransport = await getTransporter();
+      if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+      const mail = await sendTemplate(template, {
+        emailTo: referentTransport.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        })),
+        params: {
+          trigger: "centre_changed",
+          centre_id: value.name,
+          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+        },
+      });
+    }
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
   } catch (error) {
     capture(error);

@@ -139,8 +139,8 @@ export default function Index() {
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
                   <Inscription />
-                  <div className="text-sm font-bold leading-5 text-gray-900">Inscription</div>
-                  <div className=" text-medium rounded-full bg-blue-50 px-2.5 py-0.5 text-sm leading-none text-blue-600">4</div>
+                  <div className="text-sm font-bold leading-5 text-gray-900">Inscriptions</div>
+                  <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">4</div>
                 </div>
                 {Array.from(Array(4).keys())
                   .slice(0, fullNote ? 4 : 3)
@@ -151,8 +151,8 @@ export default function Index() {
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
                   <Sejour />
-                  <div className="text-sm font-bold leading-5 text-gray-900">Séjour</div>
-                  <div className=" text-medium rounded-full bg-blue-50 px-2.5 py-0.5 text-sm leading-none text-blue-600">7</div>
+                  <div className="text-sm font-bold leading-5 text-gray-900">Séjours</div>
+                  <div className=" rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">7</div>
                 </div>
                 {Array.from(Array(7).keys())
                   .slice(0, fullNote ? 7 : 3)
@@ -164,12 +164,19 @@ export default function Index() {
                 <div className="flex items-center gap-3">
                   <Engagement />
                   <div className="text-sm font-bold leading-5 text-gray-900">Engagement</div>
-                  <div className=" text-medium rounded-full bg-blue-50 px-2.5 py-0.5 text-sm leading-none text-blue-600">9</div>
+                  <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">9</div>
                 </div>
                 {Array.from(Array(9).keys())
                   .slice(0, fullNote ? 9 : 3)
                   .map((i) => (
-                    <NoteContainer key={`engagement` + i} title="Dossier" number={2} content="dossier d’inscriptions sont en attente de validation." btnLabel="À instruire" />
+                    <NoteContainer
+                      key={`engagement` + i}
+                      title="Dossier"
+                      number={2}
+                      content="dossier d’inscriptions sont en attente de validation.
+                    dossier d’inscriptions sont en attente de validation. "
+                      btnLabel="À instruire"
+                    />
                   ))}
               </div>
             </div>
@@ -228,9 +235,9 @@ export default function Index() {
             legendUrls={[
               getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] }),
               getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_LIST"%5D'] }),
-              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_VALIDATION"%5D'] }),
-              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_CORRECTION"%5D'] }),
-              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] }),
+              getOldLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_VALIDATION"%5D'] }),
+              getOldLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_CORRECTION"%5D'] }),
+              getOldLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] }),
             ]}
           />
         </div>
@@ -242,7 +249,7 @@ export default function Index() {
 
 const NoteContainer = ({ title, number, content, btnLabel }) => {
   return (
-    <div className="flex h-36 w-full flex-col justify-between rounded-lg bg-blue-50 py-4 px-3">
+    <div className="flex h-36 w-full flex-col justify-between rounded-lg bg-blue-50 py-3.5 px-3">
       <div className="flex flex-col gap-2">
         <span className="text-sm font-bold leading-5 text-gray-900">{title}</span>
         <p className="text-xs font-normal leading-4 text-gray-900">
@@ -251,7 +258,7 @@ const NoteContainer = ({ title, number, content, btnLabel }) => {
         </p>
       </div>
       <div className="flex justify-end">
-        <button className="flex items-center gap-2 rounded-full bg-blue-600 px-2 py-1 text-xs font-medium text-white">
+        <button className="flex items-center gap-2 rounded-full bg-blue-600 py-1 pr-2 pl-3 text-xs font-medium text-white">
           <span>{btnLabel}</span>
           <HiChevronRight className="h-4 w-4" />
         </button>

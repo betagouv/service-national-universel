@@ -469,9 +469,9 @@ function FooterNoRequest({ processing, onProcess, young }) {
       confirmModal.type,
       confirmModal.type === "REFUSED"
         ? {
-            reason: rejectionReason,
-            message: rejectionMessage,
-          }
+          reason: rejectionReason,
+          message: rejectionMessage,
+        }
         : null,
     );
     setConfirmModal(null);
@@ -1169,7 +1169,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
       }
 
       if (
-        (data[`parent${parent}ContactPreference`] === "phone" || trimmedPhones[parent] !== "") &&
+        (data[`parent${parent}ContactPreference`] === "phone" || (trimmedPhones[parent] && trimmedPhones[parent] !== "")) &&
         !isPhoneNumberWellFormated(data[`parent${parent}Phone`], data[`parent${parent}PhoneZone`] || "AUTRE")
       ) {
         errors[`parent${parent}Phone`] = PHONE_ZONES[data[`parent${parent}PhoneZone`] || "AUTRE"].errorMessage;
@@ -1739,38 +1739,38 @@ function SectionConsentements({ young, onChange, readonly = false }) {
         {
           /* lien et relance du droit à l'image du parent 1 si parent1AllowImageRights n'a pas de valeur */
           (young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false") &&
-            young.parent1AllowImageRights !== "true" &&
-            young.parent1AllowImageRights !== "false" &&
-            !readonly && (
-              <div className="mt-2 flex items-center justify-between">
-                <div
-                  className="cursor-pointer italic text-[#1D4ED8]"
-                  onClick={() => {
-                    copyToClipboard(`${appURL}/representants-legaux/droits-image?token=${young.parent1Inscription2023Token}&parent=1`);
-                    toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-                  }}>
-                  Copier le lien du formulaire
-                </div>
-                {young.parent1Email && (
-                  <BorderButton
-                    mode="blue"
-                    onClick={async () => {
-                      try {
-                        const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 1 });
-                        if (response.ok) {
-                          toastr.success(translate("REMINDER_SENT"), "");
-                        } else {
-                          toastr.error(translate(response.code), "");
-                        }
-                      } catch (error) {
-                        toastr.error(translate(error.code), "");
-                      }
-                    }}>
-                    Relancer
-                  </BorderButton>
-                )}
+          young.parent1AllowImageRights !== "true" &&
+          young.parent1AllowImageRights !== "false" &&
+          !readonly && (
+            <div className="mt-2 flex items-center justify-between">
+              <div
+                className="cursor-pointer italic text-[#1D4ED8]"
+                onClick={() => {
+                  copyToClipboard(`${appURL}/representants-legaux/droits-image?token=${young.parent1Inscription2023Token}&parent=1`);
+                  toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+                }}>
+                Copier le lien du formulaire
               </div>
-            )
+              {young.parent1Email && (
+                <BorderButton
+                  mode="blue"
+                  onClick={async () => {
+                    try {
+                      const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 1 });
+                      if (response.ok) {
+                        toastr.success(translate("REMINDER_SENT"), "");
+                      } else {
+                        toastr.error(translate(response.code), "");
+                      }
+                    } catch (error) {
+                      toastr.error(translate(error.code), "");
+                    }
+                  }}>
+                  Relancer
+                </BorderButton>
+              )}
+            </div>
+          )
         }
 
         {young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false" ? (
@@ -1883,40 +1883,40 @@ function SectionConsentements({ young, onChange, readonly = false }) {
               /* lien et relance du consentement (droit à l'image) du parent 2 si parent2AllowImageRights n'a jamais eu de valeur (première demande)
                * on envoit alors vers le formulaire complet de consentement du parent 2 */
               young.parent1AllowSNU === "true" &&
-                young.parent1AllowImageRights === "true" &&
-                young.parent2AllowSNU !== "false" &&
-                !young.parent2AllowImageRights &&
-                young.parent2AllowImageRightsReset !== "true" &&
-                !readonly && (
-                  <div className="mt-2 flex items-center justify-between">
-                    <div
-                      className="cursor-pointer italic text-[#1D4ED8]"
-                      onClick={() => {
-                        copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
-                        toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-                      }}>
-                      Copier le lien du formulaire
-                    </div>
-                    {young.parent2Email && (
-                      <BorderButton
-                        mode="blue"
-                        onClick={async () => {
-                          try {
-                            const response = await api.get(`/young-edition/${young._id}/remider/2`);
-                            if (response.ok) {
-                              toastr.success(translate("REMINDER_SENT"), "");
-                            } else {
-                              toastr.error(translate(response.code), "");
-                            }
-                          } catch (error) {
-                            toastr.error(translate(error.code), "");
-                          }
-                        }}>
-                        Relancer
-                      </BorderButton>
-                    )}
+              young.parent1AllowImageRights === "true" &&
+              young.parent2AllowSNU !== "false" &&
+              !young.parent2AllowImageRights &&
+              young.parent2AllowImageRightsReset !== "true" &&
+              !readonly && (
+                <div className="mt-2 flex items-center justify-between">
+                  <div
+                    className="cursor-pointer italic text-[#1D4ED8]"
+                    onClick={() => {
+                      copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
+                      toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
+                    }}>
+                    Copier le lien du formulaire
                   </div>
-                )
+                  {young.parent2Email && (
+                    <BorderButton
+                      mode="blue"
+                      onClick={async () => {
+                        try {
+                          const response = await api.get(`/young-edition/${young._id}/remider/2`);
+                          if (response.ok) {
+                            toastr.success(translate("REMINDER_SENT"), "");
+                          } else {
+                            toastr.error(translate(response.code), "");
+                          }
+                        } catch (error) {
+                          toastr.error(translate(error.code), "");
+                        }
+                      }}>
+                      Relancer
+                    </BorderButton>
+                  )}
+                </div>
+              )
             }
             {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.NOT_AUTORISED].includes(
               young.status,
