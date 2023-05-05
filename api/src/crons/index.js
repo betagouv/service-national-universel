@@ -23,6 +23,7 @@ const structurePatches = require("./patch/structure");
 const youngPatches = require("./patch/young");
 const refreshMaterializedViews = require("./patch/refresh-materialized-views");
 const parentConsentementReminder = require("./parentConsentementReminder");
+const reminderImageRightsParent2 = require("./reminderImageRightsParent2");
 const dsnjExport = require("./dsnjExport");
 const clotureMissionReminder = require("./clotureInscriptionReminder");
 
@@ -143,6 +144,11 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule("27 8 * * *", () => {
     parentConsentementReminder.handler();
+  });
+
+  // Every day at 10:00
+  cron.schedule("0 10 * * *", () => {
+    reminderImageRightsParent2.handler();
   });
 
   cron.schedule("0 5 * * *", () => {

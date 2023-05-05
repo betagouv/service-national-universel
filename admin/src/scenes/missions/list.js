@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { HiOutlineLockClosed } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { HiOutlineLockClosed } from "react-icons/hi";
 import {
   formatDateFR,
   formatLongDateUTC,
@@ -16,12 +16,10 @@ import {
 import Breadcrumbs from "../../components/Breadcrumbs";
 import SelectAction from "../../components/SelectAction";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
+import DateFilter from "../../components/filters-system-v2/components/customComponent/DateFilter";
 import api from "../../services/api";
 import { ES_NO_LIMIT, ROLES, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDateTimezoneUTC, translate, translateVisibilty } from "../../utils";
 import SelectStatusMissionV2 from "./components/SelectStatusMissionV2";
-import FromDate from "../../components/filters-system/components/customComponent/FromDate";
-import ToDate from "../../components/filters-system/components/customComponent/ToDate";
-import DateFilter from "../../components/filters-system-v2/components/customComponent/DateFilter";
 
 const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
