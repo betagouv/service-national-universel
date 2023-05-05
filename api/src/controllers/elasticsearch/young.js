@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES } = require("snu-lib/roles");
+const { ROLES, canSearchInElasticSearch } = require("snu-lib/roles");
 const datesub = require("date-fns/sub");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
