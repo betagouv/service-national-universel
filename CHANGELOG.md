@@ -1,3 +1,35 @@
+# [1.265.0](https://github.com/betagouv/service-national-universel/compare/v1.264.1...v1.265.0) (2023-05-04)
+
+
+### Bug Fixes
+
+* **admin:** Breadcrumbs meeting points ([4e4c70f](https://github.com/betagouv/service-national-universel/commit/4e4c70f5e91af8d2df9d099de417ad3f0cbb2cdc))
+* **admin:** retour design dashboard engagement ([#2571](https://github.com/betagouv/service-national-universel/issues/2571)) ([f60a2ef](https://github.com/betagouv/service-national-universel/commit/f60a2efb1598fc8ad4d9ae1fd250271f780deb3a))
+* **api:** Serialize structure before response in /referent/young ([d24577f](https://github.com/betagouv/service-national-universel/commit/d24577ff9e6982a3880b3d9a2f375e1fd1337847))
+* **api:** Serialize structure before response in /referent/young ([f1c7b70](https://github.com/betagouv/service-national-universel/commit/f1c7b70ecf612170c13841c4d91fbd0e70560e67))
+* **app:** eligibility updates ([5ae24b7](https://github.com/betagouv/service-national-universel/commit/5ae24b7208dac6b56ac5a1930b8201c8b6b8f3f9))
+
+
+### Features
+
+* **admin/api:** new filters on mission list ([#2567](https://github.com/betagouv/service-national-universel/issues/2567)) ([c0691b3](https://github.com/betagouv/service-national-universel/commit/c0691b3f6792339f72cbe91e2b19d3aed077e75a))
+
+## [1.264.1](https://github.com/betagouv/service-national-universel/compare/v1.264.0...v1.264.1) (2023-05-03)
+
+
+### Bug Fixes
+
+* **admin:** retour maquette dashboard general ([f35ff96](https://github.com/betagouv/service-national-universel/commit/f35ff96f3b97ea38776d983dceff28b16878f082))
+* **api:** Supprimer les champs superflus lors de la modification de son profil par un volontaire ([#2541](https://github.com/betagouv/service-national-universel/issues/2541)) ([93b353d](https://github.com/betagouv/service-national-universel/commit/93b353d5fe1260e9a5a5a05de9be662a1d64b1f2))
+* **app:** fix passport upload ([9135a4c](https://github.com/betagouv/service-national-universel/commit/9135a4cfe8cfb492a3e8e9000ec50deb0cee533f))
+* **app/admin:** Improve ID upload ([#2558](https://github.com/betagouv/service-national-universel/issues/2558)) ([b9b2363](https://github.com/betagouv/service-national-universel/commit/b9b236380dd5272869a7113bd933139f33c15c8f))
+* **sib:** Put back ip restrictions ([#2566](https://github.com/betagouv/service-national-universel/issues/2566)) ([0c0c22c](https://github.com/betagouv/service-national-universel/commit/0c0c22cd0e09e4623371b188ab4503608bf71d0f))
+
+
+### Reverts
+
+* Revert "feat(app): add question probleme transport form (#2495)" (#2568) ([4843c73](https://github.com/betagouv/service-national-universel/commit/4843c73b987c9ff353c1a9d80316d5b286c33ca2)), closes [#2495](https://github.com/betagouv/service-national-universel/issues/2495) [#2568](https://github.com/betagouv/service-national-universel/issues/2568)
+
 # [1.264.0](https://github.com/betagouv/service-national-universel/compare/v1.263.0...v1.264.0) (2023-05-02)
 
 
