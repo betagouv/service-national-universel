@@ -58,25 +58,13 @@ export default function View(props) {
   }, [currentCohort]);
 
   const setYoungsFromES = async (id) => {
-    let body = {
-      query: { bool: { filter: [{ terms: { "meetingPointId.keyword": [id] } }, { terms: { "status.keyword": ["VALIDATED"] } }] } },
-      aggs: { cohort: { terms: { field: "cohort.keyword" } } },
-      size: 0,
-    };
-
-    const { responses } = await api.esQuery("young", body, null, "?showAffectedToRegionOrDep=1");
-    setNbYoung(responses[0].aggregations.cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
+    const { responses } = await api.post("/elasticsearch/young/by-point-de-rassemblement", { filters: { meetingPointIds: [id], cohort: [] } });
+    setNbYoung(responses[0].aggregations.group_by_cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
   };
 
   const setLinesFromES = async (id) => {
-    let body = {
-      query: { bool: { filter: [{ terms: { "meetingPointsIds.keyword": [id] } }] } },
-      aggs: { cohort: { terms: { field: "cohort.keyword" } } },
-      size: 0,
-    };
-
-    const { responses } = await api.esQuery("lignebus", body);
-    setLines(responses[0].aggregations.cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
+    const { responses } = await api.post("/elasticsearch/lignebus/by-point-de-rassemblement", { filters: { meetingPointIds: [id], cohort: [] } });
+    setLines(responses[0].aggregations.group_by_cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
   };
 
   const getPDR = async () => {

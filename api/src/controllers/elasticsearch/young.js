@@ -246,13 +246,16 @@ router.post("/by-point-de-rassemblement/", passport.authenticate(["referent"], {
             ...youngContextFilters,
             { terms: { "meetingPointId.keyword": queryFilters.meetingPointIds } },
             { terms: { "status.keyword": ["VALIDATED"] } },
-            { terms: { "cohort.keyword": queryFilters.cohort } },
-          ],
+            queryFilters.cohort.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
+          ].filter(Boolean),
         },
       },
       aggs: {
         group_by_meetingPointId: {
           terms: { field: "meetingPointId.keyword", size: ES_NO_LIMIT },
+        },
+        group_by_cohort: {
+          terms: { field: "cohort.keyword", size: ES_NO_LIMIT },
         },
       },
       size: 0,
