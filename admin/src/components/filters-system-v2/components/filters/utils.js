@@ -96,7 +96,7 @@ export const saveTitle = (selectedFilters, filters) => {
   return object;
 };
 
-export const OrderCohort = (cohorts) => {
+export const orderCohort = (cohorts) => {
   for (const cohort of cohorts) {
     if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, cohort.key)) {
       cohort.date = COHESION_STAY_START[cohort.key];
