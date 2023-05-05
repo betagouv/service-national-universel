@@ -14,7 +14,7 @@ import DoubleProfil from "../plan-transport/ligne-bus/components/Icons/DoublePro
 import ExternalLink from "../../assets/icons/ExternalLink";
 import BusSvg from "../../assets/icons/Bus";
 
-import { Filters, ResultTable, getDefaultQuery, Save, SelectedFilters, ExportComponentV2 } from "../../components/filters-system";
+import { Filters, ResultTable, Save, SelectedFilters, ExportComponent } from "../../components/filters-system-v2";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -91,25 +91,18 @@ const ListPoints = ({ user }) => {
   const [data, setData] = React.useState([]);
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const pageId = "pdrList";
-  const [paramData, setParamData] = React.useState({
-    size: 20,
-    page: 0,
-  });
+  const [paramData, setParamData] = React.useState({ page: 0 });
   const filterArray = [
-    { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée" },
-    { title: "Région", name: "region", datafield: "region.keyword", missingLabel: "Non renseignée" },
+    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée" },
+    { title: "Région", name: "region", missingLabel: "Non renseignée" },
     {
       title: "Département",
       name: "department",
-      datafield: "department.keyword",
+
       missingLabel: "Non renseignée",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
   ];
-  const searchBarObject = {
-    placeholder: "Rechercher un point de rassemblement",
-    datafield: ["name", "address", "region", "department", "code", "city", "zip"],
-  };
 
   return (
     <div className="flex flex-col rounded-lg bg-white">
@@ -117,22 +110,20 @@ const ListPoints = ({ user }) => {
         <div className="flex w-full flex-row justify-between">
           <Filters
             pageId={pageId}
-            esId="pointderassemblement"
-            defaultQuery={getDefaultQuery()}
+            route="/elasticsearch/pointderassemblement/search"
             setData={(value) => setData(value)}
             filters={filterArray}
-            searchBarObject={searchBarObject}
+            searchPlaceholder="Rechercher un point de rassemblement"
             selectedFilters={selectedFilters}
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
           />
-          <ExportComponentV2
+          <ExportComponent
             title="Exporter"
-            defaultQuery={getDefaultQuery()}
             filters={filterArray}
             exportTitle="point_de_rassemblement"
-            index="pointderassemblement"
+            route="/elasticsearch/pointderassemblement/export"
             transform={async (data) => {
               let res = [];
               for (const item of data) {
@@ -154,7 +145,6 @@ const ListPoints = ({ user }) => {
               return res;
             }}
             selectedFilters={selectedFilters}
-            searchBarObject={searchBarObject}
             icon={<BsDownload className="text-gray-400" />}
             css={{
               override: true,
@@ -232,32 +222,23 @@ const ListSessions = ({ user, firstSession }) => {
   const [data, setData] = React.useState([]);
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const pageId = "pdrListSession";
-  const [paramData, setParamData] = React.useState({
-    size: 20,
-    page: 0,
-  });
+  const [paramData, setParamData] = React.useState({ page: 0 });
   const filterArray = [
-    { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée", isSingle: true, defaultValue: [firstSession], allowEmpty: false },
+    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", isSingle: true, defaultValue: [firstSession], allowEmpty: false },
     {
       title: "Région",
       name: "region",
-      datafield: "region.keyword",
       missingLabel: "Non renseignée",
       defaultValue: user.role === ROLES.REGION ? [user.region] : [],
     },
     {
       title: "Département",
       name: "department",
-      datafield: "department.keyword",
       missingLabel: "Non renseignée",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : [],
     },
   ];
-  const searchBarObject = {
-    placeholder: "Rechercher un point de rassemblement",
-    datafield: ["name", "address", "region", "department", "code", "city", "zip"],
-  };
 
   const [pdrIds, setPdrIds] = React.useState([]);
   const [nbYoungByPdr, setNbYoungByPdr] = React.useState([]);
@@ -267,36 +248,12 @@ const ListSessions = ({ user, firstSession }) => {
   const selectedCohort = selectedFilters?.cohorts?.filter ? selectedFilters.cohorts.filter[0] : firstSession;
 
   const getYoungsByPdr = async (ids) => {
-    let body1 = {
-      query: {
-        bool: {
-          filter: [{ terms: { "meetingPointId.keyword": ids } }, { terms: { "status.keyword": ["VALIDATED"] } }, { term: { "cohort.keyword": selectedCohort } }],
-        },
-      },
-      aggs: {
-        group_by_meetingPointId: {
-          terms: { field: "meetingPointId.keyword", size: ES_NO_LIMIT },
-        },
-      },
-      size: 0,
-    };
-
-    const { responses } = await api.esQuery("young", body1);
+    const { responses } = await api.post("/elasticsearch/young/by-point-de-rassemblement", { filters: { meetingPointIds: ids, cohort: [selectedCohort] } });
     return responses[0]?.aggregations?.group_by_meetingPointId?.buckets || [];
   };
 
   const getLinesByPdr = async (ids) => {
-    let body2 = {
-      query: { bool: { filter: [{ terms: { "meetingPointsIds.keyword": ids } }, { term: { "cohort.keyword": selectedCohort } }] } },
-      aggs: {
-        group_by_meetingPointId: {
-          terms: { field: "meetingPointsIds.keyword", size: ES_NO_LIMIT },
-        },
-      },
-      size: 0,
-    };
-
-    const { responses } = await api.esQuery("lignebus", body2);
+    const { responses } = await api.post("/elasticsearch/lignebus/by-point-de-rassemblement", { filters: { meetingPointIds: ids, cohort: [selectedCohort] } });
     return responses[0]?.aggregations?.group_by_meetingPointId?.buckets || [];
   };
 
@@ -326,22 +283,20 @@ const ListSessions = ({ user, firstSession }) => {
         <div className="flex w-full flex-row justify-between">
           <Filters
             pageId={pageId}
-            esId="pointderassemblement"
-            defaultQuery={getDefaultQuery()}
+            route="/elasticsearch/pointderassemblement/search"
             setData={(value) => setData(value)}
             filters={filterArray}
-            searchBarObject={searchBarObject}
+            searchPalceholder="Rechercher un point de rassemblement"
             selectedFilters={selectedFilters}
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
           />
-          <ExportComponentV2
+          <ExportComponent
             title="Exporter"
-            defaultQuery={getDefaultQuery()}
             filters={filterArray}
             exportTitle="point_de_rassemblement"
-            index="pointderassemblement"
+            route="/elasticsearch/pointderassemblement/export"
             transform={async (data) => {
               const youngsByMettingPoints = await getYoungsByPdr(data.map((d) => d._id));
               const linesByMettingPoints = await getLinesByPdr(data.map((d) => d._id));
@@ -366,7 +321,6 @@ const ListSessions = ({ user, firstSession }) => {
               return res;
             }}
             selectedFilters={selectedFilters}
-            searchBarObject={searchBarObject}
             icon={<BsDownload className="text-gray-400" />}
             css={{
               override: true,

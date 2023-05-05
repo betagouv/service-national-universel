@@ -228,6 +228,44 @@ router.post("/moderator/sejour/", passport.authenticate(["referent"], { session:
   }
 });
 
+router.post("/by-point-de-rassemblement/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { queryFilters, error } = joiElasticSearch({ filterFields: ["meetingPointIds", "cohort"], body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, true);
+    if (youngContextError) {
+      return res.status(youngContextError.status).send(youngContextError.body);
+    }
+
+    const body = {
+      query: {
+        bool: {
+          filter: [
+            ...youngContextFilters,
+            { terms: { "meetingPointId.keyword": queryFilters.meetingPointIds } },
+            { terms: { "status.keyword": ["VALIDATED"] } },
+            { terms: { "cohort.keyword": queryFilters.cohort } },
+          ],
+        },
+      },
+      aggs: {
+        group_by_meetingPointId: {
+          terms: { field: "meetingPointId.keyword", size: ES_NO_LIMIT },
+        },
+      },
+      size: 0,
+      track_total_hits: true,
+    };
+
+    const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
+    return res.status(200).send(response.body);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user, body } = req;
