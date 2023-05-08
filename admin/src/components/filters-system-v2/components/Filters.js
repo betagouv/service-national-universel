@@ -27,18 +27,6 @@ export default function Filters({
   setParamData,
   defaultUrlParam = false,
 }) {
-  console.log({
-    route,
-    pageId,
-    filters,
-    searchPlaceholder,
-    setData,
-    selectedFilters,
-    setSelectedFilters,
-    paramData,
-    setParamData,
-    defaultUrlParam,
-  });
   // search for filters
   const [search, setSearch] = React.useState("");
   // searchBar
