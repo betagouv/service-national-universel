@@ -93,13 +93,13 @@ export default function Signin() {
           onClick={onSubmit}>
           Connexion
         </button>
-        <hr className="mt-5 text-[#E5E5E5]" />
+        {/* <hr className="mt-5 text-[#E5E5E5]" />
         <div className="mt-4 py-4 text-center text-[17px] font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
         <button
           className="flex w-full cursor-pointer items-center justify-center border-[1px] border-[#000091] p-2 text-[#000091]"
           onClick={() => history.push("/preinscription/eligibilite")}>
           Commencer mon inscription
-        </button>
+        </button> */}
       </div>
       <Footer />
     </>

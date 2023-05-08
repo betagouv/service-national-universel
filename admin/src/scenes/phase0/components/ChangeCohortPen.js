@@ -3,7 +3,7 @@ import { IoWarningOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { DropdownItem, DropdownMenu, DropdownToggle, Modal, UncontrolledDropdown } from "reactstrap";
-import { ROLES, translate, translateCohort, YOUNG_STATUS } from "snu-lib";
+import { ROLES, translate, translateCohort, YOUNG_STATUS, calculateAge } from "snu-lib";
 import IconChangementCohorte from "../../../assets/IconChangementCohorte";
 import Pencil from "../../../assets/icons/Pencil";
 import Badge from "../../../components/Badge";
@@ -24,8 +24,10 @@ export function ChangeCohortPen({ young, onChange }) {
     if (young) {
       (async function getSessions() {
         const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
+        const isEligibleForCohortToCome = calculateAge(young.birthdateAt, new Date("2023-10-01")) < 18;
         if (Array.isArray(data)) {
           const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible })).filter((c) => c.name !== young.cohort);
+          if (young.cohort !== "à venir" && (user.role === ROLES.ADMIN || isEligibleForCohortToCome)) cohorts.push({ name: "à venir", isEligible: isEligibleForCohortToCome });
           if (!unmounted) setOptions(cohorts);
         } else if (!unmounted) setOptions([]);
       })();
@@ -58,6 +60,7 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
   const [fillingRateMet, setFillingRateMet] = useState(false);
 
   const verifyFillingRate = async () => {
+    if (newCohort?.name === "à venir") return setModalConfirmWithMessage(true);
     const res = await api.get(`/inscription-goal/${newCohort?.name}/department/${young.department}`);
     if (!res.ok) throw new Error(res);
     const fillingRate = res.data;

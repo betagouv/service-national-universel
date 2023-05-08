@@ -609,18 +609,20 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
 
     const sessions = await getFilteredSessions(young);
     const session = sessions.find(({ name }) => name === cohort);
-    if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (!session && cohort !== "à venir") return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     young.set({ cohort, cohortChangeReason, cohortDetailedChangeReason, cohesionStayPresence: undefined, cohesionStayMedicalFileReceived: undefined });
 
-    const fillingRate = await getFillingRate(young.department, cohort);
+    if (cohort !== "à venir") {
+      const fillingRate = await getFillingRate(young.department, cohort);
 
-    if (fillingRate >= FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.VALIDATED) {
-      young.set({ status: YOUNG_STATUS.WAITING_LIST });
-    }
+      if (fillingRate >= FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.VALIDATED) {
+        young.set({ status: YOUNG_STATUS.WAITING_LIST });
+      }
 
-    if (fillingRate < FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.WAITING_LIST) {
-      young.set({ status: YOUNG_STATUS.VALIDATED });
+      if (fillingRate < FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.WAITING_LIST) {
+        young.set({ status: YOUNG_STATUS.VALIDATED });
+      }
     }
 
     await young.save({ fromUser: req.user });
