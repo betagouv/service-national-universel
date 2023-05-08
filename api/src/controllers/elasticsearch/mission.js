@@ -13,7 +13,7 @@ async function buildMissionContext(user) {
 
   // A young can only see validated missions.
   if (isYoung(user)) contextFilters.push({ term: { "status.keyword": "VALIDATED" } });
-  if (isReferent(user) && !canSearchInElasticSearch(user, "mission")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+  if (isReferent(user) && !canSearchInElasticSearch(user, "mission")) return { missionContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
 
   // A responsible cans only see their structure's missions.
   if (user.role === ROLES.RESPONSIBLE) {
