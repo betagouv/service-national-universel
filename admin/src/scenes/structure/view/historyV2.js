@@ -14,7 +14,6 @@ export default function History({ ...props }) {
   React.useEffect(() => {
     (async () => {
       const id = props.match && props.match.params && props.match.params.id;
-      console.log(id);
       if (!id) return <div />;
       const { data } = await api.get(`/structure/${id}`);
       setStructure(data);

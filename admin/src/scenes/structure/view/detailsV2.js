@@ -22,7 +22,6 @@ export default function DetailsView({ ...props }) {
   React.useEffect(() => {
     (async () => {
       const id = props.match && props.match.params && props.match.params.id;
-      console.log(id);
       if (!id) return <div />;
       const { data } = await API.get(`/structure/${id}`);
       setStructure(data);
