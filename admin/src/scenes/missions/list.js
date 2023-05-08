@@ -499,7 +499,7 @@ export default function List() {
         }
       : null,
   ].filter(Boolean);
-  console.log(selectedFilters);
+
   return (
     <>
       <Breadcrumbs items={[{ label: "Missions" }]} />

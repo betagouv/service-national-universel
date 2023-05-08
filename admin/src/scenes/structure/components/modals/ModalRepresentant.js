@@ -1,17 +1,14 @@
-import React, { useContext, useState } from "react";
-import { StructureContext } from "../../view";
+import React, { useState } from "react";
 import validator from "validator";
-
+import { AiOutlineClose } from "react-icons/ai";
 import { HiOutlineTrash } from "react-icons/hi";
 import Warning from "../../../../assets/icons/Warning";
 import ModalTailwind from "../../../../components/modals/ModalTailwind";
-import Button from "../Button";
-import Field from "../../../missions/components/Field";
 import ModalConfirmDelete from "../../../centersV2/components/ModalConfirmDelete";
-import { AiOutlineClose } from "react-icons/ai";
+import Field from "../../../missions/components/Field";
+import Button from "../Button";
 
-export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelete }) {
-  const { structure } = useContext(StructureContext);
+export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelete, structure }) {
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState(structure.structureManager || {});
   const [modalDelete, setModalDelete] = useState({ isOpen: false });
