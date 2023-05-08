@@ -1,37 +1,49 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { canCreateStructure, translate } from "snu-lib";
 import API from "../../../services/api";
-import { getNetworkOptions, legalStatus, typesStructure, ROLES } from "../../../utils";
-import { StructureContext } from "../view";
+import { ROLES, getNetworkOptions, legalStatus, typesStructure } from "../../../utils";
 
-import EditButton from "../../../components/buttons/EditButton";
-import MultiSelect from "../../../components/forms/MultiSelect";
 import AsyncSelect from "react-select/async";
-import VerifyAddress from "../../phase0/components/VerifyAddress";
-import Field from "../../../components/forms/Field";
-import Select from "../../../components/forms/Select";
+import Loader from "../../../components/Loader";
 import Toggle from "../../../components/Toggle";
-import StructureView from "./wrapperv2";
-import TeamCard from "../components/cards/TeamCard";
+import EditButton from "../../../components/buttons/EditButton";
+import Field from "../../../components/forms/Field";
+import MultiSelect from "../../../components/forms/MultiSelect";
+import Select from "../../../components/forms/Select";
+import VerifyAddress from "../../phase0/components/VerifyAddress";
 import CardRepresentant from "../components/cards/CardRepresentant";
+import TeamCard from "../components/cards/TeamCard";
+import StructureView from "./wrapperv2";
 
-export default function DetailsView() {
+export default function DetailsView({ ...props }) {
+  const [structure, setStructure] = useState(null);
+  React.useEffect(() => {
+    (async () => {
+      const id = props.match && props.match.params && props.match.params.id;
+      console.log(id);
+      if (!id) return <div />;
+      const { data } = await API.get(`/structure/${id}`);
+      setStructure(data);
+    })();
+  }, [props.match.params.id]);
+
+  if (!structure) return <Loader />;
+
   return (
-    <StructureView tab="details">
+    <StructureView tab="details" structure={structure}>
       <div className="my-4 flex gap-6">
-        <CardRepresentant />
-        <TeamCard />
+        <CardRepresentant structure={structure} setStructure={setStructure} />
+        <TeamCard structure={structure} />
       </div>
-      <StructureForm />
+      <StructureForm structure={structure} setStructure={setStructure} />
     </StructureView>
   );
 }
 
-function StructureForm() {
+function StructureForm({ structure, setStructure }) {
   const user = useSelector((state) => state.Auth.user);
-  const { structure, setStructure } = useContext(StructureContext);
   const [data, setData] = useState(structure);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

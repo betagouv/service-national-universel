@@ -1,16 +1,14 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 
-import { ROLES } from "../../../utils";
-import { StructureContext } from "../view";
-import { canDeleteStructure, translate } from "snu-lib";
-import ModalConfirmDelete from "../../centersV2/components/ModalConfirmDelete";
 import { toastr } from "react-redux-toastr";
-import API from "../../../services/api";
+import { canDeleteStructure, translate } from "snu-lib";
 import Bin from "../../../assets/Bin";
+import API from "../../../services/api";
+import { ROLES } from "../../../utils";
+import ModalConfirmDelete from "../../centersV2/components/ModalConfirmDelete";
 
-export default function Actions() {
-  const { structure } = useContext(StructureContext);
+export default function Actions({ structure }) {
   const user = useSelector((state) => state.Auth.user);
   const [isOpen, setIsOpen] = useState(false);
 

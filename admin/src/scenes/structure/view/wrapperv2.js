@@ -1,5 +1,4 @@
-import React, { useContext } from "react";
-import { StructureContext } from ".";
+import React from "react";
 import Badge from "../../../components/Badge";
 import HeaderButtons from "../components/HeaderButtons";
 import Menu from "../components/Menu";
@@ -16,7 +15,7 @@ export default function Wrapper({ tab, structure, children }) {
           </div>
           <Menu tab={tab} structure={structure} />
         </div>
-        {tab === "details" && <HeaderButtons />}
+        {tab === "details" && <HeaderButtons structure={structure} />}
       </div>
       <main className="mx-8 mt-6 mb-16">{children}</main>
     </div>

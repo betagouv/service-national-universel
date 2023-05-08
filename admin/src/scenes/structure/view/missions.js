@@ -1,19 +1,16 @@
 import React, { useState } from "react";
 import Panel from "../../missions/panel";
 import StructureViewV2 from "./wrapperv2";
-
-import api from "../../../services/api";
 import { HiOutlineLockClosed } from "react-icons/hi";
 import { useHistory } from "react-router-dom";
 import { translate, translateMission, translateVisibilty } from "snu-lib";
 import Loader from "../../../components/Loader";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../../components/filters-system-v2";
+import api from "../../../services/api";
 import { formatStringDateTimezoneUTC } from "../../../utils";
 import SelectStatusMissionV2 from "../../missions/components/SelectStatusMissionV2";
-import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 export default function Mission({ ...props }) {
-  const setDocumentTitle = useDocumentTitle("Structures");
   const [mission, setMission] = useState();
   const [structure, setStructure] = useState(null);
 
@@ -28,9 +25,9 @@ export default function Mission({ ...props }) {
   React.useEffect(() => {
     (async () => {
       const id = props.match && props.match.params && props.match.params.id;
+      console.log(id);
       if (!id) return <div />;
       const { data } = await api.get(`/structure/${id}`);
-      setDocumentTitle(`${data?.name}`);
       setStructure(data);
     })();
   }, [props.match.params.id]);
@@ -63,7 +60,6 @@ export default function Mission({ ...props }) {
     },
   ];
 
-  console.log("render");
   if (!structure) return <Loader />;
 
   return (
@@ -73,7 +69,7 @@ export default function Mission({ ...props }) {
           <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
             <Filters
               pageId={pageId}
-              route="/elasticsearch/mission/search"
+              route={`/elasticsearch/mission/by-structure/${structure._id}/search`}
               setData={(value) => setData(value)}
               filters={filterArray}
               searchPlaceholder="Rechercher par mots clés, ville, code postal..."

@@ -1,14 +1,12 @@
-import React, { useContext, useEffect, useState } from "react";
-import { StructureContext } from "../../view";
-import API from "../../../../services/api";
+import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { ES_NO_LIMIT } from "snu-lib";
-import TeamModal from "../modals/TeamModal";
+import API from "../../../../services/api";
 import { getInitials } from "../../../../utils";
 import Card from "../Card";
+import TeamModal from "../modals/TeamModal";
 
-export default function TeamCard() {
-  const { structure } = useContext(StructureContext);
+export default function TeamCard({ structure }) {
   const [isOpen, setIsOpen] = useState(false);
   const [team, setTeam] = useState([]);
 
@@ -54,7 +52,7 @@ export default function TeamCard() {
           </div>
         </div>
       </Card>
-      <TeamModal isOpen={isOpen} onCancel={() => setIsOpen(false)} team={team} setTeam={setTeam} />
+      <TeamModal isOpen={isOpen} onCancel={() => setIsOpen(false)} team={team} setTeam={setTeam} structure={structure} />
     </>
   );
 }

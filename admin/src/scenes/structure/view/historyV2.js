@@ -1,21 +1,29 @@
-import React, { useContext, useEffect, useState } from "react";
-import { formatHistory } from "../../../utils";
-import API from "../../../services/api";
-import { StructureContext } from ".";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-
-import WrapperHistoryV2 from "./wrapperv2";
+import api from "../../../services/api";
+import { formatHistory } from "../../../utils";
 import HistoricComponent2 from "../../../components/views/Historic2";
+import WrapperHistoryV2 from "./wrapperv2";
 
-export default function History() {
+export default function History({ ...props }) {
   const user = useSelector((state) => state.Auth.user);
-  const { structure } = useContext(StructureContext);
   const [data, setData] = useState([]);
   const formattedData = formatHistory(data, user.role);
+  const [structure, setStructure] = useState(null);
+
+  React.useEffect(() => {
+    (async () => {
+      const id = props.match && props.match.params && props.match.params.id;
+      console.log(id);
+      if (!id) return <div />;
+      const { data } = await api.get(`/structure/${id}`);
+      setStructure(data);
+    })();
+  }, [props.match.params.id]);
 
   const getPatches = async () => {
     try {
-      const { ok, data } = await API.get(`/structure/${structure._id}/patches`);
+      const { ok, data } = await api.get(`/structure/${structure._id}/patches`);
       if (!ok) return;
       return data;
     } catch (error) {
@@ -28,7 +36,7 @@ export default function History() {
   }, [structure]);
 
   return (
-    <WrapperHistoryV2 tab="historique">
+    <WrapperHistoryV2 tab="historique" structure={structure}>
       {formattedData?.length ? <HistoricComponent2 model="structure" data={formattedData} /> : <div className="animate-pulse text-center">Chargement des données</div>}
     </WrapperHistoryV2>
   );
