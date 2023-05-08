@@ -475,7 +475,7 @@ const checkStatusContract = (contract) => {
   const tokenKeys = ["projectManagerToken", "structureManagerToken"];
   const validateKeys = ["projectManagerStatus", "structureManagerStatus"];
 
-  const isYoungAdult = getAge(contract.youngBirthdate) >= 18;
+  const isYoungAdult = contract.isYoungAdult === "true";
   if (isYoungAdult) {
     tokenKeys.push("youngContractToken");
     validateKeys.push("youngContractStatus");
@@ -722,10 +722,10 @@ const updateHeadCenter = async (headCenterId, user) => {
 
 const getTransporter = async () => {
   let toReferent = await ReferentModel.find({
-    role: ROLES.TRANSPORTER
+    role: ROLES.TRANSPORTER,
   });
   return toReferent;
-}
+};
 
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
