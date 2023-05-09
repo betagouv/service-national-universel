@@ -1,40 +1,42 @@
-import React, { useState, useEffect } from "react";
-import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import { useHistory } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
+import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
+import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 import DeleteFilters from "../../../components/buttons/DeleteFilters";
 
-import { apiURL, environment } from "../../../config";
-import { SelectStatusApplicationPhase2 } from "../../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
+import { applicationExportFields } from "snu-lib/excelExports";
+import CursorClick from "../../../assets/icons/CursorClick";
+import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
+import Eye from "../../../assets/icons/Eye";
+import Loader from "../../../components/Loader";
+import ReactiveListComponent from "../../../components/ReactiveListComponent";
+import SelectAction from "../../../components/SelectAction";
+import { DepartmentFilter } from "../../../components/filters";
+import { MultiLine, Table } from "../../../components/list";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
+import ModalExport from "../../../components/modals/ModalExport";
+import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import MissionView from "./wrapper";
-import Panel from "../../volontaires/panel";
 import {
+  APPLICATION_STATUS,
+  ES_NO_LIMIT,
+  ROLES,
   formatDateFRTimezoneUTC,
   formatLongDateUTC,
   formatLongDateUTCWithoutTime,
+  getAge,
   getFilterLabel,
   translate,
-  translateApplicationFileType,
-  getAge,
-  ES_NO_LIMIT,
-  ROLES,
   translateApplication,
-  APPLICATION_STATUS,
+  translateApplicationFileType,
 } from "../../../utils";
-import Loader from "../../../components/Loader";
-import { DepartmentFilter } from "../../../components/filters";
-import { Table, MultiLine } from "../../../components/list";
-import ReactiveListComponent from "../../../components/ReactiveListComponent";
-import { applicationExportFields } from "snu-lib/excelExports";
-import Eye from "../../../assets/icons/Eye";
-import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
-import ModalExport from "../../../components/modals/ModalExport";
-import SelectAction from "../../../components/SelectAction";
-import CursorClick from "../../../assets/icons/CursorClick";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
+import Panel from "../../volontaires/panel";
+import { SelectStatusApplicationPhase2 } from "../../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
+import MissionView from "./wrapper";
+import { getDepartmentNumber } from "snu-lib";
+import { Filters } from "../../../components/filters-system-v2";
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT", "CONTRACT_STATUS", "FILES_TYPE"];
 
@@ -59,6 +61,40 @@ export default function Youngs({ mission, applications, updateMission }) {
   const [optionsFilteredRole, setOptionsFilteredRole] = useState([]);
   const history = useHistory();
 
+  //List state
+  const [data, setData] = useState([]);
+  const pageId = "missions-list-applications";
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [paramData, setParamData] = useState({
+    page: 0,
+  });
+
+  //Filters
+  const filterArray = [
+    {
+      title: "Statut",
+      name: "status",
+      translate: (e) => translateApplication(e),
+    },
+    {
+      title: "Département",
+      name: "youngDepartment",
+      parentGroup: "Général",
+      missingLabel: "Non renseigné",
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+    },
+    {
+      title: "Statut contrat",
+      name: "contractStatus",
+      translate: (value) => translate(value),
+    },
+    {
+      title: "Pièces jointes",
+      name: "filesType",
+      translate: (value) => translateApplicationFileType(value),
+    },
+  ];
+
   const onClickMainCheckBox = () => {
     if (youngSelected.length === 0) {
       setYoungSelected(youngsInPage);
@@ -67,11 +103,11 @@ export default function Youngs({ mission, applications, updateMission }) {
     }
   };
 
-  useEffect(() => {
-    if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
-      history.push(`/volontaire/list/all?MISSION_NAME=%5B"${mission?.name}"%5D`);
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
+  //     history.push(`/volontaire/list/all?MISSION_NAME=%5B"${mission?.name}"%5D`);
+  //   }
+  // }, [user]);
 
   useEffect(() => {
     if (!checkboxRef.current) return;
@@ -266,6 +302,7 @@ export default function Youngs({ mission, applications, updateMission }) {
       </div>
     );
   };
+
   const optionsActions = [
     {
       id: APPLICATION_STATUS.WAITING_ACCEPTATION,
@@ -324,15 +361,18 @@ export default function Youngs({ mission, applications, updateMission }) {
       render: RenderText("Mission effectuée"),
     },
   ];
+
   useEffect(() => {
-    if (currentTab === "all") return;
     setYoungSelected([]);
+    if (currentTab === "all") return;
     filteredRoleActions();
   }, [currentTab]);
+
   useEffect(() => {
     if (youngSelected.length === 0) return;
     filteredRoleActions();
   }, [youngSelected]);
+
   const filteredRoleActions = () => {
     if ([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
       return setOptionsFilteredRole(optionsActions);
@@ -341,11 +381,13 @@ export default function Youngs({ mission, applications, updateMission }) {
       else return setOptionsFilteredRole(optionsActions.filter((e) => [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON].includes(e.id)));
     }
   };
-  if (!applications) return <Loader />;
+
+  if (!user || !mission || !applications) return <div>Chargement...</div>;
+
   return (
     <div>
       <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-        <MissionView mission={mission} tab="youngs">
+        <MissionView mission={mission} tab="youngs" user={user}>
           <ModalConfirm
             isOpen={modalMultiAction?.isOpen}
             title={modalMultiAction?.title}
@@ -373,12 +415,23 @@ export default function Youngs({ mission, applications, updateMission }) {
             />
             <TabItem count={countFollow} title="À suivre" onClick={() => setCurrentTab("follow")} active={currentTab === "follow"} />
           </div>
-          <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-            <div className={`relative mb-4 items-start`}>
-              <div className="flex-column flex-1 flex-wrap rounded-b-lg rounded-tr-lg bg-white">
-                <div className="flex flex-row items-center justify-between px-8 pt-4">
-                  <div className="flex flex-row">
-                    <DataSearch
+          {/* <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}> */}
+          <div className={`relative mb-4 items-start`}>
+            <div className="flex-column flex-1 flex-wrap rounded-b-lg rounded-tr-lg bg-white">
+              <div className="flex flex-row items-center justify-between px-8 pt-4">
+                <div className="flex flex-row">
+                  <Filters
+                    pageId={pageId}
+                    route={`/elasticsearch/application/search?tab=${currentTab}`}
+                    setData={(value) => setData(value)}
+                    filters={filterArray}
+                    searchPlaceholder="Rechercher par mots clés, ville, code postal..."
+                    selectedFilters={selectedFilters}
+                    setSelectedFilters={setSelectedFilters}
+                    paramData={paramData}
+                    setParamData={setParamData}
+                  />
+                  {/* <DataSearch
                       defaultQuery={getDefaultQuery}
                       showIcon={false}
                       placeholder="Rechercher par prénom, nom, email"
@@ -389,33 +442,30 @@ export default function Youngs({ mission, applications, updateMission }) {
                       innerClass={{ input: "searchbox" }}
                       className="datasearch-searchfield"
                       URLParams={true}
-                      autosuggest={false}
-                    />
-                    <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
-                  </div>
-                  {currentTab !== "all" ? (
-                    <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={[{ items: optionsFilteredRole }]} />
-                  ) : (
-                    <button
-                      className="rounded-md bg-snu-purple-300 py-2 px-4 text-sm font-semibold text-white hover:bg-snu-purple-600 hover:drop-shadow"
-                      onClick={() => setIsExportOpen(true)}>
-                      Exporter les candidatures
-                    </button>
-                  )}
-
-                  <ModalExport
-                    isOpen={isExportOpen}
-                    setIsOpen={setIsExportOpen}
-                    index="application"
-                    transform={transform}
-                    exportFields={getExportFields()}
-                    filters={FILTERS}
-                    getExportQuery={getExportQuery}
-                  />
+                      autosuggest={false} 
+                  />*/}
+                  <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
                 </div>
+                {currentTab !== "all" ? (
+                  <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={[{ items: optionsFilteredRole }]} />
+                ) : (
+                  <button className="rounded-md bg-blue-600 py-2 px-4 text-sm font-semibold text-white hover:bg-blue-600 hover:drop-shadow" onClick={() => setIsExportOpen(true)}>
+                    Exporter les candidatures
+                  </button>
+                )}
+                {/* <ModalExport
+                  isOpen={isExportOpen}
+                  setIsOpen={setIsExportOpen}
+                  index="application"
+                  transform={transform}
+                  exportFields={getExportFields()}
+                  filters={FILTERS}
+                  getExportQuery={getExportQuery} */}
+                />
+              </div>
 
-                <div className={`mx-8 mt-3 flex flex-wrap items-center gap-2 ${!filterVisible ? "hidden" : ""}`}>
-                  <MultiDropdownList
+              <div className={`mx-8 mt-3 flex flex-wrap items-center gap-2 ${!filterVisible ? "hidden" : ""}`}>
+                {/* <MultiDropdownList
                     defaultQuery={getDefaultQuery}
                     className="dropdown-filter"
                     componentId="STATUS"
@@ -461,11 +511,11 @@ export default function Youngs({ mission, applications, updateMission }) {
                     missingLabel="Aucune pièce jointe"
                   />
                   {/*filesType */}
-                  <DeleteFilters />
-                </div>
+                {/* <DeleteFilters />  */}
+              </div>
 
-                <div className="reactive-result mt-2">
-                  <ReactiveListComponent
+              <div className="reactive-result mt-2">
+                {/* <ReactiveListComponent
                     defaultQuery={getDefaultQuery}
                     react={{ and: FILTERS }}
                     dataField="youngLastName.keyword"
@@ -523,11 +573,11 @@ export default function Youngs({ mission, applications, updateMission }) {
                         </tbody>
                       </Table>
                     )}
-                  />
-                </div>
+                  /> */}
               </div>
             </div>
-          </ReactiveBase>
+          </div>
+          {/* </ReactiveBase> */}
         </MissionView>
         {![ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role) && (
           <Panel

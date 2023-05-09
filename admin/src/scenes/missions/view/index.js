@@ -1,27 +1,28 @@
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useCallback, useEffect, useState } from "react";
 import { Switch, useHistory } from "react-router-dom";
 import { SentryRoute } from "../../../sentry";
 
+import { toastr } from "react-redux-toastr";
+import Breadcrumbs from "../../../components/Breadcrumbs";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import api from "../../../services/api";
+import { translate } from "../../../utils";
 import Details from "./details";
-import Youngs from "./youngs";
 import Historic from "./history";
 import ProposeMission from "./propose-mission";
-import { toastr } from "react-redux-toastr";
-import { translate, ROLES } from "../../../utils";
-import useDocumentTitle from "../../../hooks/useDocumentTitle";
-import Breadcrumbs from "../../../components/Breadcrumbs";
-import { environment } from "../../../config";
+import Youngs from "./youngs";
+
+const MemorizeYoungs = React.memo(Youngs);
 
 export default function Index({ ...props }) {
   const setDocumentTitle = useDocumentTitle("Missions");
-  const [mission, setMission] = useState();
-  const [tutor, setTutor] = useState();
-  const [structure, setStructure] = useState();
-  const [applications, setApplications] = useState();
+  const [mission, setMission] = useState(null);
+  const [tutor, setTutor] = useState(null);
+  const [structure, setStructure] = useState(null);
+  const [applications, setApplications] = useState(null);
   const history = useHistory();
-  const user = useSelector((state) => state.Auth.user);
+
+  const id = props.match && props.match.params && props.match.params.id;
 
   useEffect(() => {
     (async () => {
@@ -51,23 +52,11 @@ export default function Index({ ...props }) {
         setTutor(tutorResponse.data);
       }
     })();
-  }, [props.match.params.id]);
+  }, [id]);
 
   useEffect(() => {
     if (mission) fetchApplication();
   }, [mission]);
-
-  async function fetchMission() {
-    const id = props.match && props.match.params && props.match.params.id;
-    if (!id) return <div />;
-    const missionResponse = await api.get(`/mission/${id}`);
-    if (!missionResponse.ok) {
-      toastr.error("Oups, une erreur est survenue lors de la récupération de la mission", translate(missionResponse.code));
-      return history.push("/mission");
-    }
-    setDocumentTitle(`${missionResponse.data?.name}`);
-    setMission(missionResponse.data);
-  }
 
   async function fetchApplication() {
     const applicationResponse = await api.get(`/mission/${mission._id}/application`);
@@ -78,16 +67,30 @@ export default function Index({ ...props }) {
     setApplications(applicationResponse.data);
   }
 
-  if (!mission) return <div />;
+  const handleFetchMission = useCallback(async () => {
+    const missionResponse = await api.get(`/mission/${id}`);
+    if (!missionResponse.ok) {
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la mission", translate(missionResponse.code));
+      return history.push("/mission");
+    }
+    // setDocumentTitle(`${missionResponse.data?.name}`);
+    setMission(missionResponse.data);
+  }, []);
+
+  if (!mission || !applications) return <div />;
+
   return (
-    <>
+    <div>
       <Breadcrumbs items={[{ label: "Missions", to: "/mission" }, { label: "Fiche de la mission" }]} />
       <Switch>
-        <SentryRoute path="/mission/:id/youngs" component={() => <Youngs mission={mission} updateMission={fetchMission} applications={applications} />} />
+        <SentryRoute path="/mission/:id/youngs" component={() => <MemorizeYoungs mission={mission} updateMission={handleFetchMission} applications={applications} />} />
         <SentryRoute path="/mission/:id/historique" component={() => <Historic mission={mission} />} />
-        <SentryRoute path="/mission/:id/propose-mission" component={() => <ProposeMission mission={mission} updateMission={fetchMission} />} />
-        <SentryRoute path="/mission/:id" component={() => <Details getMission={fetchMission} mission={mission} setMission={setMission} structure={structure} tutor={tutor} />} />
+        <SentryRoute path="/mission/:id/propose-mission" component={() => <ProposeMission mission={mission} updateMission={handleFetchMission} />} />
+        <SentryRoute
+          path="/mission/:id"
+          component={() => <Details getMission={handleFetchMission} mission={mission} setMission={setMission} structure={structure} tutor={tutor} />}
+        />
       </Switch>
-    </>
+    </div>
   );
 }

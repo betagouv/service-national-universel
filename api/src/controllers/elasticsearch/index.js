@@ -10,5 +10,6 @@ router.use("/pointderassemblement", require("./pointderassemblement"));
 router.use("/lignebus", require("./lignebus"));
 router.use("/schoolramses", require("./schoolramses"));
 router.use("/mission", require("./mission"));
+router.use("/application", require("./application"));
 
 module.exports = router;
