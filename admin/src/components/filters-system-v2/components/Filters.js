@@ -3,7 +3,7 @@ import React, { Fragment } from "react";
 import FilterSvg from "../../../assets/icons/Filter";
 import FilterPopOver from "./filters/FilterPopOver";
 
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 
 import { toastr } from "react-redux-toastr";
 import ViewPopOver from "./filters/SavedViewPopOver";
@@ -36,8 +36,7 @@ export default function Filters({
   const [categories, setCategories] = React.useState([]);
 
   const [savedView, setSavedView] = React.useState([]);
-
-  const urlParams = new URLSearchParams(window.location.search);
+  const location = useLocation();
   const history = useHistory();
 
   const [isShowing, setIsShowing] = React.useState(false);
@@ -122,7 +121,7 @@ export default function Filters({
   const init = async () => {
     // load des defaults value des filtres
     const defaultFilters = getDefaultFilters();
-    const initialFilters = getURLParam(urlParams, setParamData, filters);
+    const initialFilters = getURLParam(new URLSearchParams(location.search), setParamData, filters);
     setSelectedFilters({ ...defaultFilters, ...initialFilters });
   };
 
@@ -153,10 +152,9 @@ export default function Filters({
   };
 
   const setURL = () => {
-    history.replace({ search: `?${currentFilterAsUrl(selectedFilters, paramData?.page, filters, defaultUrlParam)}` });
+    const search = `?${currentFilterAsUrl(selectedFilters, paramData?.page, filters, defaultUrlParam)}`;
+    if (location.search !== search) history.replace({ search });
   };
-
-  // text for tooltip save
 
   const getDBFilters = async () => {
     try {
