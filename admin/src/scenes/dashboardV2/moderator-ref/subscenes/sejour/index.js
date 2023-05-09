@@ -28,6 +28,7 @@ import StatusPhase1 from "./components/StatusPhase1";
 import TabSession from "./components/TabSession";
 import { getLink as getOldLink } from "../../../../../utils";
 import { getNewLink } from "../../../../../utils";
+import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -96,6 +97,7 @@ export default function Index() {
         name: "Cohorte",
         fullValue: "Toutes",
         options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
+        sort: (e) => orderCohort(e),
       },
     ].filter((e) => e);
     setFilterArray(filters);

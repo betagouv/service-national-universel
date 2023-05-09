@@ -17,6 +17,7 @@ import Inscription from "../../../components/ui/icons/Inscription";
 import Sejour from "../../../components/ui/icons/Sejour";
 import CustomFilter from "./components/CustomFilter";
 import VolontaireSection from "./components/VolontaireSection";
+import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -68,6 +69,7 @@ export default function Index() {
         name: "Cohorte",
         fullValue: "Toutes",
         options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
+        sort: (e)=> orderCohort(e),
       },
     ].filter((e) => e);
     setFilterArray(filters);
