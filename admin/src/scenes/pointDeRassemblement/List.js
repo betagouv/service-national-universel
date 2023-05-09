@@ -13,6 +13,8 @@ import Calendar from "../../assets/icons/Calendar";
 import DoubleProfil from "../plan-transport/ligne-bus/components/Icons/DoubleProfil";
 import ExternalLink from "../../assets/icons/ExternalLink";
 import BusSvg from "../../assets/icons/Bus";
+import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
+
 
 import { Filters, ResultTable, Save, SelectedFilters, ExportComponent } from "../../components/filters-system-v2";
 
@@ -93,7 +95,7 @@ const ListPoints = ({ user }) => {
   const pageId = "pdrList";
   const [paramData, setParamData] = React.useState({ page: 0 });
   const filterArray = [
-    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée" },
+    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
     { title: "Région", name: "region", missingLabel: "Non renseignée" },
     {
       title: "Département",
@@ -224,7 +226,7 @@ const ListSessions = ({ user, firstSession }) => {
   const pageId = "pdrListSession";
   const [paramData, setParamData] = React.useState({ page: 0 });
   const filterArray = [
-    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", isSingle: true, defaultValue: [firstSession], allowEmpty: false },
+    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", isSingle: true, defaultValue: [firstSession], allowEmpty: false, sort: (e) => orderCohort(e) },
     {
       title: "Région",
       name: "region",

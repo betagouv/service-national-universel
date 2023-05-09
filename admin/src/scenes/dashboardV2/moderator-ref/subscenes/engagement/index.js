@@ -13,6 +13,7 @@ import VolontairesStatutsDivers from "./components/VolontairesStatutsDivers";
 import SectionStructures from "./components/SectionStructures";
 import SectionMissions from "./components/SectionMissions";
 import plausibleEvent from "../../../../../services/plausible";
+import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -62,6 +63,7 @@ export default function Index() {
         name: "Cohorte",
         fullValue: "Toutes",
         options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
+        sort: (e)=> orderCohort(e),
       },
     ].filter((e) => e);
     setFilterArray(filters);

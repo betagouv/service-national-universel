@@ -93,7 +93,11 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
   const ref = React.useRef(null);
 
   React.useEffect(() => {
-    setOptionsVisible(data);
+    if (filter?.sort) {
+      setOptionsVisible(filter.sort(data));
+    } else {
+      setOptionsVisible(data);
+    }
   }, [data]);
 
   React.useEffect(() => {
