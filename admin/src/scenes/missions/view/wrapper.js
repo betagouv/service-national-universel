@@ -15,9 +15,9 @@ import Bin from "../../../assets/Bin";
 import Duplicate from "../../../assets/Duplicate";
 import Clock from "../../../assets/Clock";
 
-export default function Wrapper({ mission, tab, children, getMission }) {
+export default function Wrapper({ mission, tab, children, getMission, user }) {
   const history = useHistory();
-  const user = useSelector((state) => state.Auth.user);
+  // const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const onClickDelete = () => {
@@ -54,7 +54,7 @@ export default function Wrapper({ mission, tab, children, getMission }) {
     return history.push(`/mission/${data._id}`);
   };
 
-  if (!mission) return null;
+  if (!mission || !user) return null;
   return (
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative" }}>
       <div className=" my-7 flex flex-row flex-wrap-reverse justify-between gap-4 border-b border-gray-200 px-8">
