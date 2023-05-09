@@ -1,19 +1,22 @@
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { PHONE_ZONES } from "../../../lib/phone-number";
 import { concatPhoneNumberWithZone } from "snu-lib/phone-number";
+import { capture } from "../sentry";
+
+// ! Delete capture if no errors in months
 
 export const formatPhoneE164 = (phone, phoneZone) => {
-  if (phoneZone) {
-    if (phoneZone === "AUTRE") {
-      concatPhoneNumberWithZone(phone, phoneZone);
-    } else {
-      const zone = PHONE_ZONES[phoneZone].shortcut;
-      if (typeof phone === "string") {
-        const phoneNumber = parsePhoneNumberFromString(phone, zone);
-        return phoneNumber ? phoneNumber.format("E.164") : concatPhoneNumberWithZone(phone, phoneZone);
-      }
-    }
-  } else {
-    return phone;
+  if (typeof phone !== "string") {
+    capture("Pb with phone format" + JSON.stringify(phone));
+    return;
   }
+
+  if (!phoneZone || phoneZone === "AUTRE") return phone;
+
+  const zone = PHONE_ZONES[phoneZone].shortcut;
+
+  const phoneNumber = parsePhoneNumberFromString(phone, zone);
+  if (!phoneNumber) capture("Failed to parse phoneNumber : " + JSON.stringify(phone));
+
+  return phoneNumber ? phoneNumber.format("E.164") : concatPhoneNumberWithZone(phone, phoneZone);
 };
