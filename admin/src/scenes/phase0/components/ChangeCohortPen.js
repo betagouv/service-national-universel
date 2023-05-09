@@ -23,11 +23,16 @@ export function ChangeCohortPen({ young, onChange }) {
   useEffect(() => {
     if (young) {
       (async function getSessions() {
-        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
         const isEligibleForCohortToCome = calculateAge(young.birthdateAt, new Date("2023-10-01")) < 18;
+        const cohortToCome = { name: "à venir", isEligible: isEligibleForCohortToCome };
+        if (user.role !== ROLES.ADMIN) {
+          setOptions(isEligibleForCohortToCome && young.cohort !== "à venir" ? [cohortToCome] : []);
+          return;
+        }
+        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
         if (Array.isArray(data)) {
           const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible })).filter((c) => c.name !== young.cohort);
-          if (young.cohort !== "à venir" && (user.role === ROLES.ADMIN || isEligibleForCohortToCome)) cohorts.push({ name: "à venir", isEligible: isEligibleForCohortToCome });
+          cohorts.push(cohortToCome);
           if (!unmounted) setOptions(cohorts);
         } else if (!unmounted) setOptions([]);
       })();
