@@ -7,6 +7,7 @@ const esClient = require("../../es");
 const { ERRORS, isYoung, isReferent } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
+const StructureObject = require("../../models/structure");
 
 async function buildMissionContext(user) {
   const contextFilters = [];
@@ -50,6 +51,7 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
       "hebergementPayant.keyword",
       "placesStatus.keyword",
       "applicationStatus.keyword",
+      "structureName.keyword",
       "fromDate",
       "toDate",
     ];
