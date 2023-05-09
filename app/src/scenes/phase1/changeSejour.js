@@ -40,19 +40,24 @@ export default function changeSejour() {
   useEffect(() => {
     (async function getInfo() {
       try {
-        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
-        const isArray = Array.isArray(data);
-        if (isArray) {
-          const availableCohorts = data.map((cohort) => cohort.name).filter((cohort) => (young.status === YOUNG_STATUS.WITHDRAWN ? cohort : cohort !== young.cohort));
-          if (young.cohort !== "à venir" && availableCohorts.length === 0 && calculateAge(young.birthdateAt, new Date("2023-10-01")) < 18) {
-            availableCohorts.push("à venir");
-          }
-          setSejours(availableCohorts);
-          setIsElegible(availableCohorts.length > 0);
+        if (young.cohort !== "à venir" && calculateAge(young.birthdateAt, new Date("2023-10-01")) < 18) {
+          setSejours(["à venir"]);
+          setIsElegible(true);
         } else {
           setIsElegible(false);
           setSejours([]);
         }
+
+        // const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
+        // const isArray = Array.isArray(data);
+        // if (isArray) {
+        //   const availableCohorts = data.map((cohort) => cohort.name).filter((cohort) => (young.status === YOUNG_STATUS.WITHDRAWN ? cohort : cohort !== young.cohort));
+        //   setSejours(availableCohorts);
+        //   setIsElegible(availableCohorts.length > 0);
+        // } else {
+        //   setIsElegible(false);
+        //   setSejours([]);
+        // }
       } catch (e) {
         capture(e);
         toastr.error("Oups, une erreur est survenue", translate(e.code));
