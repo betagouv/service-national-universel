@@ -1,4 +1,5 @@
 import api from "../../../../services/api";
+import { COHESION_STAY_START } from "snu-lib";
 
 export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort) => {
   const resAlternative = await api.post(route, {
@@ -19,7 +20,6 @@ export const buildQuery = async (route, selectedFilters, page = 0, filterArray, 
   filterArray.map((f) => {
     if (f.customComponent) return;
     if (f.disabledBaseQuery) return;
-    console.log(f.name);
     newFilters[f.name] = aggs[f.name].names.buckets.filter((b) => b.doc_count > 0).map((b) => ({ key: b.key, doc_count: b.doc_count }));
 
     // check for any transformData function
@@ -94,4 +94,16 @@ export const saveTitle = (selectedFilters, filters) => {
     })
     .filter((item) => item !== undefined);
   return object;
+};
+
+export const orderCohort = (cohorts) => {
+  for (const cohort of cohorts) {
+    if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, cohort.key)) {
+      cohort.date = COHESION_STAY_START[cohort.key];
+    } else {
+      cohort.date = new Date(2000, 0, 1);
+    }
+  }
+  cohorts.sort((a, b) => b.date - a.date);
+  return cohorts;
 };

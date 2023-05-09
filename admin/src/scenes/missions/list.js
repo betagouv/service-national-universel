@@ -1,81 +1,45 @@
-import { DataSearch, MultiDropdownList, ReactiveBase, ReactiveComponent } from "@appbaseio/reactivesearch";
 import React, { useEffect, useState } from "react";
+import { HiOutlineLockClosed } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-
-import { HiOutlineLockClosed } from "react-icons/hi";
-import { formatLongDateUTC, missionCandidatureExportFields, missionExportFields, translateApplication, translateMission, translatePhase2 } from "snu-lib";
-import FilterSvg from "../../assets/icons/Filter";
-import UnlockedSvg from "../../assets/lock-open.svg";
-import LockedSvg from "../../assets/lock.svg";
+import {
+  formatDateFR,
+  formatLongDateUTC,
+  getDepartmentNumber,
+  missionCandidatureExportFields,
+  missionExportFields,
+  translateApplication,
+  translateMission,
+  translatePhase2,
+  translateSource,
+} from "snu-lib";
 import Breadcrumbs from "../../components/Breadcrumbs";
-import DeleteFilters from "../../components/buttons/DeleteFilters";
-import { DepartmentFilter, RegionFilter } from "../../components/filters";
-import DatePickerWrapper from "../../components/filters/DatePickerWrapper";
-import Loader from "../../components/Loader";
-import ModalExport from "../../components/modals/ModalExport";
-import ReactiveListComponent from "../../components/ReactiveListComponent";
 import SelectAction from "../../components/SelectAction";
-import { apiURL, supportURL } from "../../config";
+import { Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
+import DateFilter from "../../components/filters-system-v2/components/customComponent/DateFilter";
 import api from "../../services/api";
-import { ES_NO_LIMIT, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDateTimezoneUTC, getFilterLabel, ROLES, translate, translateVisibilty } from "../../utils";
+import { ES_NO_LIMIT, ROLES, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDateTimezoneUTC, translate, translateVisibilty } from "../../utils";
 import SelectStatusMissionV2 from "./components/SelectStatusMissionV2";
-
-const FILTERS = [
-  "DOMAIN",
-  "SEARCH",
-  "STATUS",
-  "PLACES",
-  "LOCATION",
-  "TUTOR",
-  "REGION",
-  "DEPARTMENT",
-  "STRUCTURE",
-  "MILITARY_PREPARATION",
-  "DATE",
-  "SOURCE",
-  "VISIBILITY",
-  "HEBERGEMENT",
-  "HEBERGEMENT_PAYANT",
-  "PLACESTATUS",
-  "APPLICATIONSTATUS",
-];
 
 const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
 export default function List() {
   const [mission, setMission] = useState(null);
   const [structure, setStructure] = useState();
-  const [structureIds, setStructureIds] = useState();
-  const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
-  const [infosHover, setInfosHover] = useState(false);
-  const [infosClick, setInfosClick] = useState(false);
-  const toggleInfos = () => {
-    setInfosClick(!infosClick);
-  };
+
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isExportCandidatureOpen, setIsExportCandidatureOpen] = useState(false);
-  const [applicationStatusFilter, setApplicationStatusFilter] = useState([]);
   const history = useHistory();
 
-  const handleShowFilter = () => setFilterVisible(!filterVisible);
-  const getDefaultQuery = () => {
-    if (user.role === ROLES.SUPERVISOR) return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } }, track_total_hits: true };
-    return { query: { match_all: {} }, track_total_hits: true };
-  };
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
+  //List state
+  const [data, setData] = useState([]);
+  const pageId = "missions-list";
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [paramData, setParamData] = useState({
+    page: 0,
+  });
 
-  useEffect(() => {
-    if (user.role !== ROLES.SUPERVISOR) return;
-    (async () => {
-      if (!user.structureId) return;
-      const { data } = await api.get(`/structure/${user.structureId}/children`);
-      const ids = data.map((s) => s._id);
-      setStructureIds([...ids, user.structureId]);
-    })();
-    return;
-  }, []);
   useEffect(() => {
     (async () => {
       if (!user.structureId) return;
@@ -84,7 +48,6 @@ export default function List() {
     })();
     return;
   }, []);
-  if (user.role === ROLES.SUPERVISOR && !structureIds) return <Loader />;
 
   const getExportsFields = () => {
     let filtered = missionCandidatureExportFields;
@@ -265,9 +228,8 @@ export default function List() {
         track_total_hits: true,
         size: ES_NO_LIMIT,
       };
-
-      if (applicationStatusFilter?.length) {
-        queryApplication.query.bool.filter.push({ terms: { "status.keyword": applicationStatusFilter } });
+      if (selectedFilters?.applicationStatus?.filter?.length) {
+        queryApplication.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.applicationStatus.filter } });
       }
 
       const resultApplications = await api.post(`/es/application/export`, {
@@ -275,7 +237,6 @@ export default function List() {
         fieldsToExport: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
       });
       if (resultApplications?.data?.length) {
-        console.log("🚀 ~ file: list.js:278 ~ transformCandidature ~ resultApplications:", resultApplications);
         all = all.map((item) => ({ ...item, candidatures: resultApplications?.data?.filter((e) => e.missionId === item._id.toString()) }));
       } else {
         all = all.map((item) => ({ ...item, candidatures: [] }));
@@ -437,378 +398,235 @@ export default function List() {
     return result;
   }
 
+  //Filters
+  const filterArray = [
+    { title: "Région", name: "region", parentGroup: "Général" },
+    {
+      title: "Département",
+      name: "department",
+      parentGroup: "Général",
+      missingLabel: "Non renseigné",
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+    },
+    {
+      title: "Statut",
+      name: "status",
+      parentGroup: "Général",
+      translate: (e) => translate(e),
+    },
+    {
+      title: "Source",
+      name: "isJvaMission",
+      parentGroup: "Général",
+      translate: (value) => translateSource(value),
+    },
+    {
+      title: "Visibilité",
+      name: "visibility",
+      parentGroup: "Général",
+      translate: (value) => translateVisibilty(value),
+    },
+    {
+      title: "Domaine d'action principal",
+      name: "mainDomain",
+      parentGroup: "Modalités",
+      translate: (value) => translate(value),
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Places restantes",
+      name: "placesLeft",
+      parentGroup: "Modalités",
+    },
+    {
+      title: "Tuteur",
+      name: "tutorName",
+      parentGroup: "Modalités",
+    },
+    {
+      title: "Préparation Militaire",
+      name: "isMilitaryPreparation",
+      parentGroup: "Modalités",
+      translate: (value) => translate(value),
+    },
+    {
+      title: "Hébergement",
+      name: "hebergement",
+      parentGroup: "Modalités",
+      translate: (value) => translate(value),
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Hébergement Payant",
+      name: "hebergementPayant",
+      parentGroup: "Modalités",
+      translate: (value) => translate(value),
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Place occupées",
+      name: "placesStatus",
+      parentGroup: "Modalités",
+      translate: (value) => translateMission(value),
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Statut de candidature",
+      name: "applicationStatus",
+      parentGroup: "Modalités",
+      missingLabel: "Aucune candidature ni proposition",
+      translate: (value) => translateApplication(value),
+    },
+    {
+      title: "Date de début",
+      name: "fromDate",
+      parentGroup: "Dates",
+      customComponent: (setFilter, filter) => <DateFilter setValue={setFilter} value={filter} />,
+      translate: formatDateFR,
+    },
+    {
+      title: "Date de fin",
+      name: "toDate",
+      parentGroup: "Dates",
+      customComponent: (setFilter, filter) => <DateFilter setValue={setFilter} value={filter} />,
+      translate: formatDateFR,
+    },
+    user.role === ROLES.SUPERVISOR
+      ? {
+          title: "Structure",
+          name: "structureName",
+          parentGroup: "Structure",
+        }
+      : null,
+  ].filter(Boolean);
+
   return (
     <>
       <Breadcrumbs items={[{ label: "Missions" }]} />
-      <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div className="mb-8 flex w-full flex-row" style={{ fontFamily: "Marianne" }}>
-          <div className="flex w-full flex-1 flex-col px-8">
-            <div className="flex items-center justify-between py-8">
-              <div className="text-2xl font-bold leading-7 text-[#242526]">Missions</div>
-              <div className="flex flex-row items-center gap-3 text-sm">
-                {user.role === ROLES.RESPONSIBLE && user.structureId && structure && structure.status !== "DRAFT" ? (
-                  <button className="cursor-pointer rounded-lg bg-blue-600 px-3 py-2 text-white" onClick={() => history.push(`/mission/create/${user.structureId}`)}>
-                    Nouvelle mission
-                  </button>
-                ) : null}
-                <SelectAction
-                  title="Exporter"
-                  alignItems="right"
-                  buttonClassNames="cursor-pointer text-white bg-blue-600"
-                  textClassNames="text-sm"
-                  rightIconClassNames="text-white opacity-70"
-                  optionsGroup={[
-                    {
-                      items: [
-                        {
-                          action: () => {
-                            setIsExportOpen(true);
-                          },
-                          render: <div className="cursor-pointer p-2 px-3 text-sm text-gray-700 hover:bg-gray-50">Informations de missions</div>,
+      <div className="mb-8 flex w-full flex-row" style={{ fontFamily: "Marianne" }}>
+        <div className="flex w-full flex-1 flex-col px-8">
+          <div className="flex items-center justify-between py-8">
+            <div className="text-2xl font-bold leading-7 text-[#242526]">Missions</div>
+            <div className="flex flex-row items-center gap-3 text-sm">
+              {user.role === ROLES.RESPONSIBLE && user.structureId && structure && structure.status !== "DRAFT" ? (
+                <button className="cursor-pointer rounded-lg bg-blue-600 px-3 py-2 text-white" onClick={() => history.push(`/mission/create/${user.structureId}`)}>
+                  Nouvelle mission
+                </button>
+              ) : null}
+              <SelectAction
+                title="Exporter"
+                alignItems="right"
+                buttonClassNames="cursor-pointer text-white bg-blue-600"
+                textClassNames="text-sm"
+                rightIconClassNames="text-white opacity-70"
+                optionsGroup={[
+                  {
+                    items: [
+                      {
+                        key: "exportMission",
+                        action: () => {
+                          setIsExportOpen(true);
                         },
-                        {
-                          action: () => {
-                            setIsExportCandidatureOpen(true);
-                          },
-                          render: <div className="cursor-pointer p-2 px-3 text-sm text-gray-700 hover:bg-gray-50">Informations de candidatures</div>,
+                        render: <div className="cursor-pointer p-2 px-3 text-sm text-gray-700 hover:bg-gray-50">Informations de missions</div>,
+                      },
+                      {
+                        key: "exportCandidature",
+                        action: () => {
+                          setIsExportCandidatureOpen(true);
                         },
-                      ],
-                    },
-                  ]}
-                />
-              </div>
-              <ModalExport
-                isOpen={isExportCandidatureOpen}
-                setIsOpen={setIsExportCandidatureOpen}
-                index="mission"
-                transform={transformCandidature}
-                exportFields={getExportsFields()}
-                filters={FILTERS}
-                getExportQuery={getExportQuery}
-                exportTitle="candidatures"
-                showTotalHits={false}
+                        render: <div className="cursor-pointer p-2 px-3 text-sm text-gray-700 hover:bg-gray-50">Informations de candidatures</div>,
+                      },
+                    ],
+                  },
+                ]}
               />
-              <ModalExport
-                isOpen={isExportOpen}
-                setIsOpen={setIsExportOpen}
-                index="mission"
-                transform={transform}
-                exportFields={user.role === ROLES.RESPONSIBLE ? missionExportFields.filter((e) => !e.title.includes("structure")) : missionExportFields}
-                filters={FILTERS}
-                getExportQuery={getExportQuery}
+            </div>
+            <ModalExport
+              isOpen={isExportCandidatureOpen}
+              setIsOpen={setIsExportCandidatureOpen}
+              route="/elasticsearch/mission/export"
+              transform={transformCandidature}
+              exportFields={getExportsFields()}
+              exportTitle="candidatures"
+              showTotalHits={false}
+              selectedFilters={selectedFilters}
+            />
+            <ModalExport
+              isOpen={isExportOpen}
+              setIsOpen={setIsExportOpen}
+              route="/elasticsearch/mission/export"
+              transform={transform}
+              exportFields={user.role === ROLES.RESPONSIBLE ? missionExportFields.filter((e) => !e.title.includes("structure")) : missionExportFields}
+              exportTitle="missions"
+              showTotalHits={true}
+              selectedFilters={selectedFilters}
+            />
+          </div>
+          <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
+            <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
+              <Filters
+                pageId={pageId}
+                route="/elasticsearch/mission/search"
+                setData={(value) => setData(value)}
+                filters={filterArray}
+                searchPlaceholder="Rechercher par mots clés, ville, code postal..."
+                selectedFilters={selectedFilters}
+                setSelectedFilters={setSelectedFilters}
+                paramData={paramData}
+                setParamData={setParamData}
+              />
+              <SortOption
+                sortOptions={[
+                  { label: "Date de création (récent > ancien)", field: "createdAt", order: "desc" },
+                  { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
+                  { label: "Nombre de place (croissant)", field: "placesLeft", order: "asc" },
+                  { label: "Nombre de place (décroissant)", field: "placesLeft", order: "desc" },
+                  { label: "Nom de la mission (A > Z)", field: "name.keyword", order: "asc" },
+                  { label: "Nom de la mission (Z > A)", field: "name.keyword", order: "desc" },
+                ]}
+                paramData={paramData}
+                setParamData={setParamData}
+              />
+            </div>
+            <div className="mt-2 flex flex-row flex-wrap items-center px-4">
+              <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+              <SelectedFilters
+                filterArray={filterArray}
+                selectedFilters={selectedFilters}
+                setSelectedFilters={setSelectedFilters}
+                paramData={paramData}
+                setParamData={setParamData}
               />
             </div>
 
-            <div className="reactive-result">
-              <ReactiveListComponent
-                defaultQuery={getDefaultQuery}
-                react={{ and: FILTERS }}
-                paginationAt="bottom"
-                showTopResultStats={false}
-                sortOptions={[
-                  { label: "Date de création (récent > ancien)", dataField: "createdAt", sortBy: "desc" },
-                  { label: "Date de création (ancien > récent)", dataField: "createdAt", sortBy: "asc" },
-                  { label: "Nombre de place (croissant)", dataField: "placesLeft", sortBy: "asc" },
-                  { label: "Nombre de place (décroissant)", dataField: "placesLeft", sortBy: "desc" },
-                  { label: "Nom de la mission (A > Z)", dataField: "name.keyword", sortBy: "asc" },
-                  { label: "Nom de la mission (Z > A)", dataField: "name.keyword", sortBy: "desc" },
-                ]}
-                render={({ data }) => (
-                  <div className="flex w-full flex-col gap-1 rounded-xl bg-white">
-                    <div className=" px-4 pt-4 pb-1 ">
-                      <div className="flex items-center gap-2 py-2">
-                        <DataSearch
-                          defaultQuery={getDefaultQuery}
-                          showIcon={false}
-                          placeholder="Rechercher par mots clés, ville, code postal..."
-                          componentId="SEARCH"
-                          dataField={["name.folded", "structureName.folded", "city.folded", "zip"]}
-                          react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                          // fuzziness={1}
-                          URLParams={true}
-                          queryFormat="and"
-                          autosuggest={false}
-                          className="datasearch-searchfield"
-                          innerClass={{ input: "searchbox" }}
-                        />
-                        <div
-                          className="flex cursor-pointer items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-[14px] font-medium text-gray-700 hover:underline"
-                          onClick={handleShowFilter}>
-                          <FilterSvg className="text-gray-400" />
-                          Filtres
-                        </div>
-                      </div>
-                      <div className={`flex items-center gap-2 py-2 ${!filterVisible ? "hidden" : ""}`}>
-                        <div className="flex flex-col gap-2">
-                          <div className="flex items-center gap-x-2">
-                            <div className="mr-2 text-xs uppercase text-snu-purple-800">Général</div>
-                            <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-                            <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
-                            <MultiDropdownList
-                              defaultQuery={getDefaultQuery}
-                              className="dropdown-filter"
-                              componentId="STATUS"
-                              dataField="status.keyword"
-                              react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-                              renderItem={(e, count) => {
-                                return `${translate(e)} (${count})`;
-                              }}
-                              title=""
-                              URLParams={true}
-                              showSearch={false}
-                              renderLabel={(items) => <div>{getFilterLabel(items, "Statut")} </div>}
-                            />
-                            <MultiDropdownList
-                              defaultQuery={getDefaultQuery}
-                              className="dropdown-filter"
-                              placeholder="Source"
-                              componentId="SOURCE"
-                              dataField="isJvaMission.keyword"
-                              react={{ and: FILTERS.filter((e) => e !== "SOURCE") }}
-                              renderItem={(e, count) => {
-                                const text = e === "true" ? "JVA" : "SNU";
-                                return `${text} (${count})`;
-                              }}
-                              title=""
-                              URLParams={true}
-                              renderLabel={(items) => {
-                                if (Object.keys(items).length === 0) return "Source";
-                                const translated = Object.keys(items).map((item) => {
-                                  return item === "true" ? "JVA" : "SNU";
-                                });
-                                let value = translated.join(", ");
-                                return value;
-                              }}
-                            />
-                            <MultiDropdownList
-                              defaultQuery={getDefaultQuery}
-                              className="dropdown-filter"
-                              placeholder="Visibilité"
-                              componentId="VISIBILITY"
-                              dataField="visibility.keyword"
-                              react={{ and: FILTERS.filter((e) => e !== "VISIBILITY") }}
-                              renderItem={(e, count) => {
-                                return `${translateVisibilty(e)} (${count})`;
-                              }}
-                              title=""
-                              URLParams={true}
-                              renderLabel={(items) => <div>{getFilterLabel(items, "Visibilité", "Visibilité")} </div>}
-                            />
-                          </div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <div className="mr-2 text-xs uppercase text-snu-purple-800">Modalités</div>
-                            <MultiDropdownList
-                              defaultQuery={getDefaultQuery}
-                              className="dropdown-filter"
-                              placeholder="Domaine"
-                              componentId="DOMAIN"
-                              dataField="mainDomain.keyword"
-                              react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
-                              renderItem={(e, count) => {
-                                return `${translate(e)} (${count})`;
-                              }}
-                              title=""
-                              URLParams={true}
-                              showSearch={false}
-                              renderLabel={(items) => <div>{getFilterLabel(items, "Domaine d'action principal", "Domaine d'action principal")} </div>}
-                              showMissing
-                              missingLabel="Non renseigné"
-                            />
-                            <MultiDropdownList
-                              defaultQuery={getDefaultQuery}
-                              className="dropdown-filter"
-                              placeholder="Places restantes"
-                              componentId="PLACES"
-                              dataField="placesLeft"
-                              react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
-                              title=""
-                              URLParams={true}
-                              showSearch={false}
-                              sortBy="asc"
-                              selectAllLabel="Tout sélectionner"
-                              renderLabel={(items) => <div>{getFilterLabel(items, "Places restantes", "Places restantes")} </div>}
-                            />
-                            <MultiDropdownList
-                              defaultQuery={getDefaultQuery}
-                              className="dropdown-filter"
-                              placeholder="Tuteur"
-                              componentId="TUTOR"
-                              dataField="tutorName.keyword"
-                              react={{ and: FILTERS.filter((e) => e !== "TUTOR") }}
-                              title=""
-                              URLParams={true}
-                              showSearch={true}
-                              searchPlaceholder="Rechercher..."
-                            />
-                            <MultiDropdownList
-                              defaultQuery={getDefaultQuery}
-                              className="dropdown-filter"
-                              placeholder="Préparation Militaire"
-                              componentId="MILITARY_PREPARATION"
-                              dataField="isMilitaryPreparation.keyword"
-                              react={{ and: FILTERS.filter((e) => e !== "MILITARY_PREPARATION") }}
-                              renderItem={(e, count) => {
-                                return `${translate(e)} (${count})`;
-                              }}
-                              title=""
-                              URLParams={true}
-                              renderLabel={(items) => <div>{getFilterLabel(items, "Préparation Militaire")} </div>}
-                            />
-                            <MultiDropdownList
-                              defaultQuery={getDefaultQuery}
-                              className="dropdown-filter"
-                              placeholder="Préparation Militaire"
-                              componentId="HEBERGEMENT"
-                              dataField="hebergement.keyword"
-                              react={{ and: FILTERS.filter((e) => e !== "HEBERGEMENT") }}
-                              renderItem={(e, count) => {
-                                return `${translate(e)} (${count})`;
-                              }}
-                              title=""
-                              URLParams={true}
-                              renderLabel={(items) => <div>{getFilterLabel(items, "Hébergement")} </div>}
-                            />
-                            <MultiDropdownList
-                              defaultQuery={getDefaultQuery}
-                              className="dropdown-filter"
-                              placeholder="Préparation Militaire"
-                              componentId="HEBERGEMENT_PAYANT"
-                              dataField="hebergementPayant.keyword"
-                              react={{ and: FILTERS.filter((e) => e !== "HEBERGEMENT_PAYANT") }}
-                              renderItem={(e, count) => {
-                                return `${translate(e)} (${count})`;
-                              }}
-                              title=""
-                              URLParams={true}
-                              renderLabel={(items) => <div>{getFilterLabel(items, "Hébergement Payant")} </div>}
-                            />
-                            <MultiDropdownList
-                              defaultQuery={getDefaultQuery}
-                              className="dropdown-filter"
-                              placeholder="Place occupées"
-                              componentId="PLACESTATUS"
-                              dataField="placesStatus.keyword"
-                              react={{ and: FILTERS.filter((e) => e !== "PLACESTATUS") }}
-                              renderItem={(e, count) => {
-                                return `${translateMission(e)} (${count})`;
-                              }}
-                              title=""
-                              URLParams={true}
-                              showSearch={false}
-                              renderLabel={(items) => <div>{getFilterLabel(items, "Place occupées", "Place occupées")} </div>}
-                              showMissing
-                              missingLabel="Non renseigné"
-                            />
-                            <MultiDropdownList
-                              defaultQuery={getDefaultQuery}
-                              className="dropdown-filter"
-                              componentId="APPLICATIONSTATUS"
-                              dataField="applicationStatus.keyword"
-                              react={{ and: FILTERS.filter((e) => e !== "APPLICATIONSTATUS") }}
-                              renderItem={(e, count) => {
-                                return `${translateApplication(e)} (${count})`;
-                              }}
-                              title=""
-                              URLParams={true}
-                              showSearch={false}
-                              renderLabel={(items) => <div>{getFilterLabel(items, "Statut de candidature", "Statut de candidature")}</div>}
-                              showMissing
-                              missingLabel="Aucune candidature ni proposition"
-                              onValueChange={(e) => {
-                                setApplicationStatusFilter(e.filter((e) => e !== "Aucune candidature ni proposition"));
-                              }}
-                            />
-                          </div>
-                          <div className="flex items-center gap-x-2">
-                            <div className="mr-2 text-xs uppercase text-snu-purple-800">Dates</div>
-                            <ReactiveComponent
-                              componentId="DATE"
-                              URLParams={true}
-                              defaultValue={[]}
-                              render={(props) => {
-                                return <DatePickerWrapper setQuery={props.setQuery} value={props.value} />;
-                              }}
-                            />
-                          </div>
-                          <div className="flex items-center gap-x-2">
-                            {user.role === ROLES.SUPERVISOR ? (
-                              <>
-                                <div className="mr-2 text-xs uppercase text-snu-purple-800">Structure</div>
-                                <MultiDropdownList
-                                  defaultQuery={getDefaultQuery}
-                                  className="dropdown-filter"
-                                  placeholder="Structure"
-                                  componentId="STRUCTURE"
-                                  dataField="structureName.keyword"
-                                  react={{ and: FILTERS.filter((e) => e !== "STRUCTURE") }}
-                                  title=""
-                                  URLParams={true}
-                                  showSearch={false}
-                                  sortBy="asc"
-                                />
-                              </>
-                            ) : null}
-                            <DeleteFilters />
-                            <div
-                              className="ml-auto flex cursor-pointer items-center gap-1 text-sm hover:underline"
-                              onClick={toggleInfos}
-                              onMouseEnter={() => setInfosHover(true)}
-                              onMouseLeave={() => setInfosHover(false)}>
-                              {infosClick ? <img className="h-3 opacity-70" src={LockedSvg} /> : <img className="h-3 opacity-70" src={UnlockedSvg} />}
-                              Aide
-                            </div>
-                          </div>
-                          {infosHover || infosClick ? (
-                            <div className="grid space-y-1 text-xs text-gray-500">
-                              <div>
-                                <span className="mr-1 text-gray-900 underline">Général :</span>concerne toutes les informations générales de la mission .{" "}
-                                <strong>La source </strong>
-                                correspond à la plateforme sur laquelle a été déposée la mission{" "}
-                                <a
-                                  href={`${supportURL}/base-de-connaissance/missions-de-la-plateforme-jeveuxaidergouvfr`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="hover:underline">
-                                  JVA & SNU
-                                </a>
-                              </div>
-                              <div>
-                                <span className="mr-1 text-gray-900 underline">Modalités :</span>concerne toutes les condtions de réalisation de la mission.
-                              </div>
-                              <div>
-                                <span className="mr-1 text-gray-900 underline">Dates :</span>permettent de filtrer les missions dont les dates de début et de fin sont inclues dans
-                                la borne temporelle. Attention les missions dont seulement 1 jour est inclus seront également affichées.
-                              </div>
-                            </div>
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mt-6 mb-2 flex w-full flex-col divide-y divide-gray-100 border-y-[1px] border-gray-100">
-                      <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 ">
-                        <div className="w-[40%]">Mission</div>
-                        <div className="w-[5%]"></div>
-                        <div className="w-[15%]">Places</div>
-                        <div className="w-[20%]">Dates</div>
-                        <div className="w-[20%]">Statut</div>
-                      </div>
-                      {data.map((hit) => (
-                        <Hit
-                          key={hit._id}
-                          hit={hit}
-                          callback={(e) => {
-                            if (e._id === mission?._id) setMission(e);
-                          }}
-                        />
-                      ))}
-                    </div>
+            <ResultTable
+              paramData={paramData}
+              setParamData={setParamData}
+              currentEntryOnPage={data?.length}
+              render={
+                <div className="mt-6 mb-2 flex w-full flex-col divide-y divide-gray-100 border-y-[1px] border-gray-100">
+                  <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 ">
+                    <div className="w-[40%]">Mission</div>
+                    <div className="w-[5%]"></div>
+                    <div className="w-[15%]">Places</div>
+                    <div className="w-[20%]">Dates</div>
+                    <div className="w-[20%]">Statut</div>
                   </div>
-                )}
-              />
-            </div>
+                  {data.map((hit) => (
+                    <Hit
+                      key={hit._id}
+                      hit={hit}
+                      callback={(e) => {
+                        if (e._id === mission?._id) setMission(e);
+                      }}
+                    />
+                  ))}
+                </div>
+              }
+            />
           </div>
         </div>
-      </ReactiveBase>
+      </div>
     </>
   );
 }

@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES } = require("snu-lib/roles");
+const { ROLES, canSearchInElasticSearch } = require("snu-lib/roles");
 const datesub = require("date-fns/sub");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
@@ -13,6 +13,7 @@ const { serializeYoungs } = require("../../utils/es-serializer");
 const StructureObject = require("../../models/structure");
 const ApplicationObject = require("../../models/application");
 const SessionPhase1Object = require("../../models/sessionPhase1");
+const CohesionCenterObject = require("../../models/cohesionCenter");
 const { getCohortNamesEndAfter } = require("../../utils/cohort");
 
 async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
@@ -221,6 +222,144 @@ router.post("/moderator/sejour/", passport.authenticate(["referent"], { session:
 
     const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
     return res.status(200).send(response.body);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/by-point-de-rassemblement/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { queryFilters, error } = joiElasticSearch({ filterFields: ["meetingPointIds", "cohort"], body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, true);
+    if (youngContextError) {
+      return res.status(youngContextError.status).send(youngContextError.body);
+    }
+
+    const body = {
+      query: {
+        bool: {
+          must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
+          filter: [
+            ...youngContextFilters,
+            { terms: { "meetingPointId.keyword": queryFilters.meetingPointIds } },
+            { terms: { "status.keyword": ["VALIDATED"] } },
+            queryFilters.cohort.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
+          ].filter(Boolean),
+        },
+      },
+      aggs: {
+        group_by_meetingPointId: {
+          terms: { field: "meetingPointId.keyword", size: ES_NO_LIMIT },
+        },
+        group_by_cohort: {
+          terms: { field: "cohort.keyword", size: ES_NO_LIMIT },
+        },
+      },
+      size: 0,
+      track_total_hits: true,
+    };
+
+    const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
+    return res.status(200).send(response.body);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+
+    // Configuration
+    const searchFields = ["email", "firstName", "lastName", "city", "zip"];
+    const filterFields = [
+      "status.keyword",
+      "statusPhase1.keyword",
+      "region.keyword",
+      "department.keyword",
+      "gender.keyword",
+      "grade.keyword",
+      "handicap.keyword",
+      "ppsBeneficiary.keyword",
+      "paiBeneficiary.keyword",
+      "qpv.keyword",
+      "allergies.keyword",
+      "specificAmenagment.keyword",
+      "reducedMobilityAccess.keyword",
+      "cohesionStayMedicalFileReceived.keyword",
+      "imageRight.keyword",
+      "autoTestPCR.keyword",
+      "cohesionStayPresence.keyword",
+      "presenceJDM.keyword",
+      "departInform.keyword",
+      "departSejourMotif.keyword",
+    ];
+    const sortFields = [];
+
+    if (!canSearchInElasticSearch(user, "sessionphase1young")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // Context filters
+    const contextFilters = [
+      { terms: { "sessionPhase1Id.keyword": [String(req.params.sessionId)] } },
+      { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
+      req.params.action === "exportBus" ? { bool: { must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }] } } : null,
+    ].filter(Boolean);
+
+    if (user.role === ROLES.HEAD_CENTER) {
+      const sessionsPhase1 = await SessionPhase1Object.find({ headCenterId: user._id });
+      if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const visibleCohorts = await getCohortNamesEndAfter(datesub(new Date(), { months: 3 }));
+      if (visibleCohorts.length > 0) {
+        contextFilters.push({ terms: { "cohort.keyword": visibleCohorts } });
+      } else {
+        // Tried that to specify when there's just no data or when the head center has no longer access
+        return res.status(200).send({ ok: true, data: "no cohort available" });
+      }
+      if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+    if (user.role === ROLES.REFERENT_REGION) {
+      const centers = await CohesionCenterObject.find({ region: user.region });
+      const sessionsPhase1 = await SessionPhase1Object.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
+      if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+
+    if (user.role === ROLES.REFERENT_DEPARTMENT) {
+      const centers = await CohesionCenterObject.find({ department: user.department });
+      const sessionsPhase1 = await SessionPhase1Object.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
+      if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+
+    // Body params validation
+    const { queryFilters, page, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // Build request body
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields,
+      queryFilters,
+      page,
+      sort: { field: "lastName.keyword", order: "asc" },
+      contextFilters,
+    });
+
+    if (["export", "exportBus"].includes(req.params.action)) {
+      const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+    } else {
+      const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      return res.status(200).send(response.body);
+    }
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

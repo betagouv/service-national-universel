@@ -14,7 +14,7 @@ import { setYoung } from "../../redux/auth/actions";
 
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { capture } from "../../sentry";
-import { YOUNG_STATUS } from "snu-lib";
+import { YOUNG_STATUS, calculateAge } from "snu-lib";
 
 export default function changeSejour() {
   const young = useSelector((state) => state.Auth.young);
@@ -37,21 +37,27 @@ export default function changeSejour() {
     "Autre",
   ];
 
-  console.log;
-
   useEffect(() => {
     (async function getInfo() {
       try {
-        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
-        const isArray = Array.isArray(data);
-        if (isArray) {
-          const availableCohorts = data.map((cohort) => cohort.name).filter((cohort) => (young.status === YOUNG_STATUS.WITHDRAWN ? cohort : cohort !== young.cohort));
-          setSejours(availableCohorts);
-          setIsElegible(availableCohorts.length > 0);
+        if (young.cohort !== "à venir" && calculateAge(young.birthdateAt, new Date("2023-10-01")) < 18) {
+          setSejours(["à venir"]);
+          setIsElegible(true);
         } else {
           setIsElegible(false);
           setSejours([]);
         }
+
+        // const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
+        // const isArray = Array.isArray(data);
+        // if (isArray) {
+        //   const availableCohorts = data.map((cohort) => cohort.name).filter((cohort) => (young.status === YOUNG_STATUS.WITHDRAWN ? cohort : cohort !== young.cohort));
+        //   setSejours(availableCohorts);
+        //   setIsElegible(availableCohorts.length > 0);
+        // } else {
+        //   setIsElegible(false);
+        //   setSejours([]);
+        // }
       } catch (e) {
         capture(e);
         toastr.error("Oups, une erreur est survenue", translate(e.code));
@@ -63,6 +69,10 @@ export default function changeSejour() {
   const onConfirmer = async () => {
     try {
       if (newSejour && motif && messageTextArea) {
+        if (newSejour === "à venir") {
+          setmodalConfirmControlOk(true);
+          return;
+        }
         const res = await api.get(`/inscription-goal/${newSejour}/department/${young.department}/reached`);
         if (!res.ok) throw new Error(res);
         let isGoalReached = res.data;

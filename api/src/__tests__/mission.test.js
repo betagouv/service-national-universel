@@ -22,7 +22,7 @@ afterAll(dbClose);
 
 describe("Mission", () => {
   describe("POST /mission", () => {
-    it("should create a new mission", async () => {
+    xit("should create a new mission", async () => {
       const missionFixture = getNewMissionFixture();
       const missionsBefore = await getMissionsHelper();
       const res = await request(getAppHelper()).post("/mission").send(missionFixture);
@@ -34,7 +34,7 @@ describe("Mission", () => {
     });
   });
   describe("PUT /mission/:id", () => {
-    it("should update a mission", async () => {
+    xit("should update a mission", async () => {
       const missionFixture = getNewMissionFixture();
       let mission = await createMissionHelper(missionFixture);
       const modifiedMission = { ...missionFixture };

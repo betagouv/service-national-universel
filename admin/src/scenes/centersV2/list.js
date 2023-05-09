@@ -19,6 +19,7 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import api from "../../services/api";
 import { Title } from "../pointDeRassemblement/components/common";
 import { Badge, TabItem } from "./components/commons";
+import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
 
 import { useHistory, useParams } from "react-router-dom";
 
@@ -100,7 +101,7 @@ const ListSession = ({ firstSession }) => {
     page: 0,
   });
   const filterArray = [
-    { title: "Cohorte", name: "cohort", missingLabel: "Non renseignée", defaultValue: [firstSession] },
+    { title: "Cohorte", name: "cohort", missingLabel: "Non renseignée", defaultValue: [firstSession], sort: (e) => orderCohort(e) },
     { title: "Région", name: "region", missingLabel: "Non renseignée" },
     {
       title: "Département",
@@ -265,7 +266,7 @@ const ListCenter = ({ firstSession }) => {
     page: 0,
   });
   const filterArray = [
-    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée" },
+    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
     {
       title: "Région",
       name: "region",

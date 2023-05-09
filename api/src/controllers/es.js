@@ -262,7 +262,6 @@ router.post("/young-having-school-in-department/:view/:action(_msearch|export)",
       const response = await allRecords("young", applyFilterOnQuery(body.query, filter));
       return res.status(200).send({ ok: true, data: serializeYoungs(response) });
     } else {
-      console.log(withFilterForMSearch(body, filter));
       const response = await esClient.msearch({ index: "young", body: withFilterForMSearch(body, filter) });
       return res.status(200).send(serializeYoungs(response.body));
     }
@@ -271,6 +270,7 @@ router.post("/young-having-school-in-department/:view/:action(_msearch|export)",
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
 // young-having-school-in-region is a special index (that uses a young index)
 // used by REFERENT_REGION to get youngs having a school in their region.
 router.post("/young-having-school-in-region/:view/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {

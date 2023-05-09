@@ -448,6 +448,56 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
     }
 
+    // TODO: diviser en 4 endpoints
+    const fieldsToKeep = [
+      //CGU
+      "acceptCGU",
+
+      // Infos générales
+      "gender",
+      "email",
+      "phone",
+      "phoneZone",
+
+      // Représentants légaux
+      "parent1Status",
+      "parent1FirstName",
+      "parent1LastName",
+      "parent1Email",
+      "parent1Phone",
+      "parent1PhoneZone",
+      "parent2Status",
+      "parent2FirstName",
+      "parent2LastName",
+      "parent2Email",
+      "parent2Phone",
+      "parent2PhoneZone",
+
+      // Préférences de MIG
+      "domains",
+      "missionFormat",
+      "period",
+      "periodRanking",
+      "mobilityTransport",
+      "mobilityTransportOther",
+      "professionnalProject",
+      "professionnalProjectPrecision",
+      "desiredLocation",
+      "engaged",
+      "engagedDescription",
+      "mobilityNearHome",
+      "mobilityNearSchool",
+      "mobilityNearRelative",
+      "mobilityNearRelativeName",
+      "mobilityNearRelativeAddress",
+      "mobilityNearRelativeZip",
+      "mobilityNearRelativeCity",
+    ];
+
+    for (const key in value) {
+      if (!fieldsToKeep.includes(key)) delete value[key];
+    }
+
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -559,18 +609,20 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
 
     const sessions = await getFilteredSessions(young);
     const session = sessions.find(({ name }) => name === cohort);
-    if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (!session && cohort !== "à venir") return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     young.set({ cohort, cohortChangeReason, cohortDetailedChangeReason, cohesionStayPresence: undefined, cohesionStayMedicalFileReceived: undefined });
 
-    const fillingRate = await getFillingRate(young.department, cohort);
+    if (cohort !== "à venir") {
+      const fillingRate = await getFillingRate(young.department, cohort);
 
-    if (fillingRate >= FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.VALIDATED) {
-      young.set({ status: YOUNG_STATUS.WAITING_LIST });
-    }
+      if (fillingRate >= FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.VALIDATED) {
+        young.set({ status: YOUNG_STATUS.WAITING_LIST });
+      }
 
-    if (fillingRate < FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.WAITING_LIST) {
-      young.set({ status: YOUNG_STATUS.VALIDATED });
+      if (fillingRate < FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.WAITING_LIST) {
+        young.set({ status: YOUNG_STATUS.VALIDATED });
+      }
     }
 
     await young.save({ fromUser: req.user });

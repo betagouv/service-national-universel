@@ -10,7 +10,7 @@ import api from "../../../services/api";
 import { HeroContainer } from "../../../components/Content";
 import FileUpload, { useFileUpload } from "../../../components/FileUpload";
 import ErrorMessage, { requiredMessage } from "../../inscription2023/components/ErrorMessageOld";
-import { SelectTag, step0, step1, step2Transport, step2Technical, step2Question } from "./worflow";
+import { SelectTag, step0, step1, step2Technical, step2Question } from "./worflow";
 import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import Unlock from "../../../assets/icons/Unlock";
@@ -127,19 +127,6 @@ export default function TicketCreate(props) {
                 errors={errors}
                 touched={touched}
               />
-              {values.step1?.id === "TRANSPORT" ? (
-                <SelectTag
-                  name="step2"
-                  options={Object.values(step2Transport)}
-                  title={"Sujet"}
-                  selectPlaceholder={"Choisir le sujet"}
-                  handleChange={handleChange}
-                  value={values.step2?.id}
-                  values={values}
-                  errors={errors}
-                  touched={touched}
-                />
-              ) : null}
               {values.step1?.id === "TECHNICAL" ? (
                 <SelectTag
                   name="step2"

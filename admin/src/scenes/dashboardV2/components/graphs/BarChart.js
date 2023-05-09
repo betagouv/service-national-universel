@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { graphColors } from "./graph-commons";
 import GraphTooltip from "./GraphTooltip";
 
-export default function BarChart({ values, tooltips, title, noValue = false, unit = "", className = "", max }) {
+export default function BarChart({ values, tooltips, title, noValue = false, unit = "", className = "", max, onClick = () => {} }) {
   const [bars, setBars] = useState([]);
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function BarChart({ values, tooltips, title, noValue = false, uni
   }, [values]);
 
   return (
-    <div className={` ${className}`}>
+    <div className={` ${className}`} onClick={onClick}>
       <div className="flex h-[100%] flex-col items-center">
         <div className="flex-grow-1 flex">
           {bars.map((bar, idx) => (

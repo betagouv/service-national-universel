@@ -16,6 +16,7 @@ import { getDepartmentOptions, getFilteredDepartment } from "../../../components
 import Details from "../../../components/inscription/Details";
 import TabSchool from "../../../components/inscription/TabSchool";
 import ExportReport from "./ExportReport";
+import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -60,6 +61,7 @@ export default function Index() {
         name: "Cohorte",
         fullValue: "Toutes",
         options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
+        sort: (e) => orderCohort(e),
       },
     ].filter((e) => e);
     setFilterArray(filters);

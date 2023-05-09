@@ -16,6 +16,7 @@ const File = new mongoose.Schema({
   mimetype: String,
   category: String,
   expirationDate: Date,
+  side: String,
 });
 
 const CorrectionRequest = new mongoose.Schema({

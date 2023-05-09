@@ -3,9 +3,7 @@
   "scripts": {
     "dev": "next dev -p 8084",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint . --ext .js,.jsx",
-    "lint:fix": "eslint . --ext .js,.jsx --fix"
+    "start": "next start"
   },
   "prettier": {
     "printWidth": 180
@@ -38,12 +36,6 @@
   },
   "devDependencies": {
     "autoprefixer": "10.4.13",
-    "eslint": "8.27.0",
-    "eslint-config-prettier": "8.5.0",
-    "eslint-plugin-import": "2.26.0",
-    "eslint-plugin-prettier": "4.2.1",
-    "eslint-plugin-react": "7.31.10",
-    "eslint-plugin-react-hooks": "4.6.0",
     "postcss": "8.4.18",
     "prettier": "2.7.1",
     "prettier-plugin-tailwindcss": "0.1.13",
