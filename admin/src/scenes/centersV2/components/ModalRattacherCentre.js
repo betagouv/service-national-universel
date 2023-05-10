@@ -161,8 +161,9 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
                   <div
                     key={cohort}
                     onClick={() => setSelectedCohort(cohort)}
-                    className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${selectedCohort === cohort ? "border-blue-600 bg-blue-600 text-white" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF] "
-                      }`}>
+                    className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
+                      selectedCohort === cohort ? "border-blue-600 bg-blue-600 text-white" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF] "
+                    }`}>
                     {cohort}
                   </div>
                 ) : null}
@@ -170,8 +171,9 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
                   <div
                     key={cohort}
                     onClick={() => setSelectedCohort(cohort)}
-                    className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${selectedCohort === cohort ? "border-blue-600 bg-blue-600 text-white" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF] "
-                      }`}>
+                    className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
+                      selectedCohort === cohort ? "border-blue-600 bg-blue-600 text-white" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF] "
+                    }`}>
                     {cohort}
                   </div>
                 ) : null}
@@ -194,8 +196,9 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
 
                 <div
                   ref={refSelect}
-                  className={`${!open ? "hidden" : ""} ${listCentre.length > 3 ? "h-[300px] overflow-y-auto" : ""
-                    } absolute left-0 z-50 w-full rounded-lg border border-gray-300 bg-white px-3 shadow-lg`}>
+                  className={`${!open ? "hidden" : ""} ${
+                    listCentre.length > 3 ? "h-[300px] overflow-y-auto" : ""
+                  } absolute left-0 z-50 w-full rounded-lg border border-gray-300 bg-white px-3 shadow-lg`}>
                   <div className="sticky top-0 z-10 bg-white pt-3">
                     <div className="flex flex-row items-center gap-2">
                       <BsSearch className="text-gray-400" />
@@ -241,7 +244,14 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
               </div>
               {selectedCentre && (
                 <div className="mt-4 text-sm font-medium leading-6">
-                  <Field label="Nombre de places ouvertes" onChange={(e) => setPlacesTotal(e.target.value)} value={placesTotal} />
+                  <Field
+                    label={`Nombre de places ouvertes pour le sejour ${selectedCohort}`}
+                    onChange={(e) => setPlacesTotal(e.target.value)}
+                    value={placesTotal}
+                    tooltips={
+                      "C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
+                    }
+                  />
                 </div>
               )}
             </>

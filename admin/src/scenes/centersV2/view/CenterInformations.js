@@ -357,6 +357,9 @@ export default function Details({ center, setCenter, sessions }) {
                   onChange={(e) => setData({ ...data, placesTotal: e.target.value })}
                   value={data.placesTotal}
                   error={errors?.placesTotal}
+                  tooltips={
+                    "C’est la capacité d’hébergement maximale du centre, qui dépend du bâti. Elle doit être supérieure ou égale au nombre de places ouvertes sur un séjour donné"
+                  }
                 />
               </div>
               <div className="flex flex-col gap-2">
