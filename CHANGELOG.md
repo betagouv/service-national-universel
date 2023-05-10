@@ -1,3 +1,17 @@
+# [1.269.0](https://github.com/betagouv/service-national-universel/compare/v1.268.0...v1.269.0) (2023-05-10)
+
+
+### Bug Fixes
+
+* **admin:** filter reload + special character  ([#2591](https://github.com/betagouv/service-national-universel/issues/2591)) ([f65b777](https://github.com/betagouv/service-national-universel/commit/f65b7777407b1fcd18b147d867c2038923b307cf))
+* **admin:** notif save filter pageId ([9251a57](https://github.com/betagouv/service-national-universel/commit/9251a57d4b765c68b4e599182863bcae32956bb0))
+
+
+### Features
+
+* **api/admin:** liste candidature mod / ref / resp / surperviseur new filters ([#2584](https://github.com/betagouv/service-national-universel/issues/2584)) ([03066cd](https://github.com/betagouv/service-national-universel/commit/03066cdc39e00f4f2cc49b9220de37dfd12d640d))
+* **api/admin:** young email new filters ([#2586](https://github.com/betagouv/service-national-universel/issues/2586)) ([aad0c32](https://github.com/betagouv/service-national-universel/commit/aad0c3282986f640c0e176ba133249e39f508af4))
+
 # [1.268.0](https://github.com/betagouv/service-national-universel/compare/v1.267.0...v1.268.0) (2023-05-09)
 
 
