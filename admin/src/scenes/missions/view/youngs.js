@@ -29,6 +29,7 @@ import {
 import Panel from "../../volontaires/panel";
 import { SelectStatusApplicationPhase2 } from "../../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
 import MissionView from "./wrapper";
+import { currentFilterAsUrl } from "../../../components/filters-system-v2/components/filters/utils";
 
 const genderTranslation = {
   male: "Masculin",
@@ -366,7 +367,7 @@ export default function Youngs({ mission, applications, updateMission }) {
               count={countAll}
               title="Toutes les candidatures"
               onClick={() => {
-                history.replace(`/mission/${mission._id}/youngs/all`);
+                history.replace(`/mission/${mission._id}/youngs/all?${currentFilterAsUrl(selectedFilters, paramData?.page, filterArray)}`);
               }}
               active={currentTab === "all"}
             />
@@ -381,7 +382,7 @@ export default function Youngs({ mission, applications, updateMission }) {
               }
               title="À traiter"
               onClick={() => {
-                history.replace(`/mission/${mission._id}/youngs/pending`);
+                history.replace(`/mission/${mission._id}/youngs/pending?${currentFilterAsUrl(selectedFilters, paramData?.page, filterArray)}`);
               }}
               active={currentTab === "pending"}
             />
@@ -389,7 +390,7 @@ export default function Youngs({ mission, applications, updateMission }) {
               count={countFollow}
               title="À suivre"
               onClick={() => {
-                history.replace(`/mission/${mission._id}/youngs/follow`);
+                history.replace(`/mission/${mission._id}/youngs/follow?${currentFilterAsUrl(selectedFilters, paramData?.page, filterArray)}`);
               }}
               active={currentTab === "follow"}
             />
@@ -593,8 +594,9 @@ const PaperClip = () => {
 const TabItem = ({ active, title, count, onClick, icon }) => (
   <div
     onClick={onClick}
-    className={`mr-2 cursor-pointer rounded-t-lg px-3 py-2 text-[13px] text-gray-600 hover:text-blue-600 ${active ? "border-none bg-white !text-blue-600" : "border-x border-t border-gray-200 bg-gray-100"
-      }`}>
+    className={`mr-2 cursor-pointer rounded-t-lg px-3 py-2 text-[13px] text-gray-600 hover:text-blue-600 ${
+      active ? "border-none bg-white !text-blue-600" : "border-x border-t border-gray-200 bg-gray-100"
+    }`}>
     <div className={"flex items-center gap-2"}>
       <div className="flex flex-row items-center gap-2">
         {icon && <div>{icon}</div>}
