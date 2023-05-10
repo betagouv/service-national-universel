@@ -493,11 +493,9 @@ router.put("/account/parents", passport.authenticate("young", { session: false, 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const young = await YoungObject.findById(req.user._id);
-    console.log("🚀 ~ file: index.js:496 ~ router.put ~ young:", young.parent1FirstName)
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     young.set(value);
-    console.log("🚀 ~ file: index.js:499 ~ router.put ~ young:", young.parent1FirstName)
     await young.save({ fromUser: req.user });
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });
