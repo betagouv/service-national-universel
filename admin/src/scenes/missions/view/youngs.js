@@ -92,7 +92,7 @@ export default function Youngs({ mission, applications, updateMission }) {
     }
   };
 
-  if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) history.push(`/volontaire/list/all?MISSION_NAME=%5B"${mission?.name}"%5D`);
+  if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) history.push(`/volontaire/list/all?missionName=${mission?.name}`);
 
   useEffect(() => {
     if (!checkboxRef.current) return;

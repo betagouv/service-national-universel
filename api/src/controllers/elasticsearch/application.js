@@ -7,6 +7,7 @@ const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
+const StructureObject = require("../../models/structure");
 const Joi = require("joi");
 
 async function buildApplicationContext(user) {
