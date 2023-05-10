@@ -30,7 +30,7 @@ import ShieldCheck from "../../assets/icons/ShieldCheck";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
-import { countryOptions, SPECIFIC_SITUATIONS_KEY, youngEmployedSituationOptions, youngSchooledSituationOptions } from "./commons";
+import { countryOptions, SPECIFIC_SITUATIONS_KEY, youngEmployedSituationOptions,youngSchooled, youngSchooledSituationOptions } from "./commons";
 import Check from "../../assets/icons/Check";
 import RadioButton from "./components/RadioButton";
 import MiniSwitch from "./components/MiniSwitch";
@@ -1113,10 +1113,14 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
 
   function onLocalChange(field, value) {
     const newData = { ...data, [field]: value };
+    console.log(newData.situation);
     if (field === "situation") {
       newData.employed = youngEmployedSituationOptions.includes(value) ? "true" : "false";
-      newData.schooled = youngSchooledSituationOptions.includes(value) ? "true" : "false";
+      newData.schooled = youngSchooled.includes(value) ? "true" : "false";
     }
+    console.log(newData.schooled);
+    console.log(newData.employed);
+
     setData(newData);
   }
 

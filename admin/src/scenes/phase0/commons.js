@@ -50,6 +50,13 @@ export const youngSchooledSituationOptions = Object.keys(YOUNG_SCHOOLED_SITUATIO
   label: translation.translate(situation),
 }));
 
+export const youngSchooled = [
+  constants.YOUNG_SCHOOLED_SITUATIONS.GENERAL_SCHOOL,
+  constants.YOUNG_SCHOOLED_SITUATIONS.PROFESSIONAL_SCHOOL,
+  constants.YOUNG_SCHOOLED_SITUATIONS.SPECIALIZED_SCHOOL,
+  constants.YOUNG_SCHOOLED_SITUATIONS.APPRENTICESHIP,
+];
+
 export const youngActiveSituationOptions = Object.keys(YOUNG_ACTIVE_SITUATIONS).map((situation) => ({
   value: YOUNG_ACTIVE_SITUATIONS[situation],
   label: translation.translate(situation),
