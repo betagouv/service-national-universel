@@ -49,6 +49,7 @@ export default function Actions({ structure }) {
         onDelete={onConfirmDelete}
         title="Êtes-vous sûr(e) de vouloir supprimer cette structure ?"
         message="Cette action est irréversible."
+        mention={"Attention, tous les responsables associés à cette structure seront définitivement supprimés."}
       />
     </div>
   );
