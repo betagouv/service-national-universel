@@ -1,23 +1,18 @@
-import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
-import DeleteFilters from "../../../components/buttons/DeleteFilters";
 
+import { getDepartmentNumber } from "snu-lib";
 import { applicationExportFields } from "snu-lib/excelExports";
 import CursorClick from "../../../assets/icons/CursorClick";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import Eye from "../../../assets/icons/Eye";
-import Loader from "../../../components/Loader";
-import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import SelectAction from "../../../components/SelectAction";
-import { DepartmentFilter } from "../../../components/filters";
+import { Filters, ModalExport, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
 import { MultiLine, Table } from "../../../components/list";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
-import ModalExport from "../../../components/modals/ModalExport";
-import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import {
   APPLICATION_STATUS,
@@ -27,7 +22,6 @@ import {
   formatLongDateUTC,
   formatLongDateUTCWithoutTime,
   getAge,
-  getFilterLabel,
   translate,
   translateApplication,
   translateApplicationFileType,
@@ -35,10 +29,6 @@ import {
 import Panel from "../../volontaires/panel";
 import { SelectStatusApplicationPhase2 } from "../../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
 import MissionView from "./wrapper";
-import { getDepartmentNumber } from "snu-lib";
-import { Filters } from "../../../components/filters-system-v2";
-
-const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT", "CONTRACT_STATUS", "FILES_TYPE"];
 
 const genderTranslation = {
   male: "Masculin",
@@ -48,11 +38,10 @@ const genderTranslation = {
 export default function Youngs({ mission, applications, updateMission }) {
   const user = useSelector((state) => state.Auth.user);
   const [young, setYoung] = useState();
-  const [filterVisible, setFilterVisible] = useState(false);
   const checkboxRef = React.useRef();
   const [youngSelected, setYoungSelected] = useState([]);
   const [youngsInPage, setYoungsInPage] = useState([]);
-  const [currentTab, setCurrentTab] = useState("all");
+  const [currentTab, setCurrentTab] = useState();
   const [isExportOpen, setIsExportOpen] = useState(false);
   const countAll = applications?.length;
   const countPending = applications?.filter((a) => ["WAITING_VALIDATION"].includes(a.status)).length;
@@ -60,6 +49,7 @@ export default function Youngs({ mission, applications, updateMission }) {
   const [modalMultiAction, setModalMultiAction] = useState({ isOpen: false });
   const [optionsFilteredRole, setOptionsFilteredRole] = useState([]);
   const history = useHistory();
+  const { tab } = useParams();
 
   //List state
   const [data, setData] = useState([]);
@@ -79,7 +69,6 @@ export default function Youngs({ mission, applications, updateMission }) {
     {
       title: "Département",
       name: "youngDepartment",
-      parentGroup: "Général",
       missingLabel: "Non renseigné",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
@@ -103,11 +92,16 @@ export default function Youngs({ mission, applications, updateMission }) {
     }
   };
 
-  // useEffect(() => {
-  //   if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
-  //     history.push(`/volontaire/list/all?MISSION_NAME=%5B"${mission?.name}"%5D`);
-  //   }
-  // }, [user]);
+  useEffect(() => {
+    if (tab && ["all", "pending", "follow"].includes(tab)) setCurrentTab(tab);
+    else history.replace(`/mission/${mission._id}/youngs/all`);
+  }, []);
+
+  useEffect(() => {
+    if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
+      history.push(`/volontaire/list/all?MISSION_NAME=%5B"${mission?.name}"%5D`);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!checkboxRef.current) return;
@@ -122,22 +116,13 @@ export default function Youngs({ mission, applications, updateMission }) {
       checkboxRef.current.indeterminate = false;
     }
   }, [youngSelected]);
+
   const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
   const handleClick = async (application) => {
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
     if (ok) setYoung(data);
   };
-  const getDefaultQuery = () => {
-    const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "missionId.keyword": mission._id } }] } }, size: ES_NO_LIMIT };
-    if (currentTab === "pending") {
-      body.query.bool.filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION"] } });
-    } else if (currentTab === "follow") {
-      body.query.bool.filter.push({ terms: { "status.keyword": ["IN_PROGRESS", "VALIDATED"] } });
-    }
-    return body;
-  };
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   async function transform(data, values) {
     let all = data;
@@ -382,12 +367,12 @@ export default function Youngs({ mission, applications, updateMission }) {
     }
   };
 
-  if (!user || !mission || !applications) return <div>Chargement...</div>;
+  if (!user || !tab) return <div>Chargement...</div>;
 
   return (
     <div>
       <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-        <MissionView mission={mission} tab="youngs" user={user}>
+        <MissionView mission={mission} tab="youngs">
           <ModalConfirm
             isOpen={modalMultiAction?.isOpen}
             title={modalMultiAction?.title}
@@ -399,7 +384,14 @@ export default function Youngs({ mission, applications, updateMission }) {
             }}
           />
           <div className="flex flex-1">
-            <TabItem count={countAll} title="Toutes les candidatures" onClick={() => setCurrentTab("all")} active={currentTab === "all"} />
+            <TabItem
+              count={countAll}
+              title="Toutes les candidatures"
+              onClick={() => {
+                history.replace(`/mission/${mission._id}/youngs/all`);
+              }}
+              active={currentTab === "all"}
+            />
             <TabItem
               count={countPending}
               icon={
@@ -410,42 +402,38 @@ export default function Youngs({ mission, applications, updateMission }) {
                 ) : null
               }
               title="À traiter"
-              onClick={() => setCurrentTab("pending")}
+              onClick={() => {
+                history.replace(`/mission/${mission._id}/youngs/pending`);
+              }}
               active={currentTab === "pending"}
             />
-            <TabItem count={countFollow} title="À suivre" onClick={() => setCurrentTab("follow")} active={currentTab === "follow"} />
+            <TabItem
+              count={countFollow}
+              title="À suivre"
+              onClick={() => {
+                history.replace(`/mission/${mission._id}/youngs/follow`);
+              }}
+              active={currentTab === "follow"}
+            />
           </div>
           {/* <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}> */}
           <div className={`relative mb-4 items-start`}>
-            <div className="flex-column flex-1 flex-wrap rounded-b-lg rounded-tr-lg bg-white">
-              <div className="flex flex-row items-center justify-between px-8 pt-4">
-                <div className="flex flex-row">
-                  <Filters
-                    pageId={pageId}
-                    route={`/elasticsearch/application/search?tab=${currentTab}`}
-                    setData={(value) => setData(value)}
-                    filters={filterArray}
-                    searchPlaceholder="Rechercher par mots clés, ville, code postal..."
-                    selectedFilters={selectedFilters}
-                    setSelectedFilters={setSelectedFilters}
-                    paramData={paramData}
-                    setParamData={setParamData}
-                  />
-                  {/* <DataSearch
-                      defaultQuery={getDefaultQuery}
-                      showIcon={false}
-                      placeholder="Rechercher par prénom, nom, email"
-                      componentId="SEARCH"
-                      dataField={["youngEmail.keyword", "youngFirstName", "youngLastName"]}
-                      react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                      style={{ marginRight: "1rem", flex: 1 }}
-                      innerClass={{ input: "searchbox" }}
-                      className="datasearch-searchfield"
-                      URLParams={true}
-                      autosuggest={false} 
-                  />*/}
-                  <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
-                </div>
+            <div className="mb-8 flex flex-col rounded-tr-xl bg-white py-4">
+              <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
+                <Filters
+                  pageId={pageId}
+                  route={`/elasticsearch/application/by-mission/${mission._id}/search?tab=${currentTab}`}
+                  setData={(value) => {
+                    if (value) setYoungsInPage(value.map((h) => ({ _id: h._id, firstName: h.youngFirstName, lastName: h.youngLastName })));
+                    setData(value);
+                  }}
+                  filters={filterArray}
+                  searchPlaceholder="Rechercher par mots clés, ville, code postal..."
+                  selectedFilters={selectedFilters}
+                  setSelectedFilters={setSelectedFilters}
+                  paramData={paramData}
+                  setParamData={setParamData}
+                />
                 {currentTab !== "all" ? (
                   <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={[{ items: optionsFilteredRole }]} />
                 ) : (
@@ -453,128 +441,79 @@ export default function Youngs({ mission, applications, updateMission }) {
                     Exporter les candidatures
                   </button>
                 )}
-                {/* <ModalExport
+                <ModalExport
                   isOpen={isExportOpen}
                   setIsOpen={setIsExportOpen}
-                  index="application"
+                  route={`/elasticsearch/application/by-mission/${mission._id}/export?tab=${currentTab}`}
                   transform={transform}
                   exportFields={getExportFields()}
-                  filters={FILTERS}
-                  getExportQuery={getExportQuery} */}
+                  exportTitle="candidatures"
+                  selectedFilters={selectedFilters}
+                />
+              </div>
+              <div className="mt-2 flex flex-row flex-wrap items-center px-4">
+                <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+                <SelectedFilters
+                  filterArray={filterArray}
+                  selectedFilters={selectedFilters}
+                  setSelectedFilters={setSelectedFilters}
+                  paramData={paramData}
+                  setParamData={setParamData}
                 />
               </div>
 
-              <div className={`mx-8 mt-3 flex flex-wrap items-center gap-2 ${!filterVisible ? "hidden" : ""}`}>
-                {/* <MultiDropdownList
-                    defaultQuery={getDefaultQuery}
-                    className="dropdown-filter"
-                    componentId="STATUS"
-                    dataField="status.keyword"
-                    react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-                    renderItem={(e, count) => {
-                      return `${translateApplication(e)} (${count})`;
-                    }}
-                    title=""
-                    URLParams={true}
-                    showSearch={false}
-                    renderLabel={(items) => getFilterLabel(items, "Statut")}
-                  />
-                  <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} dataField="youngDepartment.keyword" />
-                  <MultiDropdownList
-                    defaultQuery={getDefaultQuery}
-                    className="dropdown-filter"
-                    componentId="CONTRACT_STATUS"
-                    dataField="contractStatus.keyword"
-                    react={{ and: FILTERS.filter((e) => e !== "CONTRACT_STATUS") }}
-                    renderItem={(e, count) => {
-                      return `${translate(e)} (${count})`;
-                    }}
-                    title=""
-                    URLParams={true}
-                    showSearch={false}
-                    renderLabel={(items) => getFilterLabel(items, "Statut contrat")}
-                  />
-                  <MultiDropdownList
-                    defaultQuery={getDefaultQuery}
-                    className="dropdown-filter"
-                    componentId="FILES_TYPE"
-                    dataField="filesType.keyword"
-                    react={{ and: FILTERS.filter((e) => e !== "FILES_TYPE") }}
-                    renderItem={(e, count) => {
-                      return `${translateApplicationFileType(e)} (${count})`;
-                    }}
-                    title=""
-                    URLParams={true}
-                    showSearch={false}
-                    renderLabel={(items) => getFilterLabel(items, "Pièces jointes")}
-                    showMissing={true}
-                    missingLabel="Aucune pièce jointe"
-                  />
-                  {/*filesType */}
-                {/* <DeleteFilters />  */}
-              </div>
+              <ResultTable
+                paramData={paramData}
+                setParamData={setParamData}
+                currentEntryOnPage={data?.length}
+                render={
+                  <Table>
+                    <thead>
+                      <tr className="mt-6 mb-2 border-y-[1px] border-gray-100 text-start text-xs uppercase text-gray-400">
+                        {currentTab !== "all" && (
+                          <th className="w-1/12">
+                            <input ref={checkboxRef} className="cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
+                          </th>
+                        )}
 
-              <div className="reactive-result mt-2">
-                {/* <ReactiveListComponent
-                    defaultQuery={getDefaultQuery}
-                    react={{ and: FILTERS }}
-                    dataField="youngLastName.keyword"
-                    sortBy="asc"
-                    size={30}
-                    showTopResultStats={false}
-                    paginationAt="bottom"
-                    onData={async ({ rawData }) => {
-                      if (rawData?.hits?.hits) setYoungsInPage(rawData.hits.hits.map((h) => ({ _id: h._id, firstName: h._source.firstName, lastName: h._source.lastName })));
-                    }}
-                    render={({ data }) => (
-                      <Table>
-                        <thead>
-                          <tr className="mt-6 mb-2 border-y-[1px] border-gray-100 text-start text-xs uppercase text-gray-400">
-                            {currentTab !== "all" && (
-                              <th className="w-1/12">
-                                <input ref={checkboxRef} className="cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
-                              </th>
-                            )}
+                        <th className="w-3/12">Volontaire</th>
+                        <th className="w-2/12">A candidaté le</th>
+                        {currentTab !== "pending" && (
+                          <>
+                            <th className="w-1/12">Contrat</th>
+                            <th className="w-1/12">Documents</th>
+                          </>
+                        )}
 
-                            <th className="w-3/12">Volontaire</th>
-                            <th className="w-2/12">A candidaté le</th>
-                            {currentTab !== "pending" && (
-                              <>
-                                <th className="w-1/12">Contrat</th>
-                                <th className="w-1/12">Documents</th>
-                              </>
-                            )}
-
-                            <th className="w-3/12">Statut candidature</th>
-                            <th className="w-1/12">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {data.map((hit) => (
-                            <Hit
-                              key={hit._id}
-                              hit={hit}
-                              history={history}
-                              currentTab={currentTab}
-                              onClick={() => handleClick(hit)}
-                              opened={young?._id === hit.youngId}
-                              selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
-                              onChangeApplication={updateMission}
-                              onSelect={(newItem) =>
-                                setYoungSelected((prev) => {
-                                  if (prev.find((e) => e._id.toString() === newItem._id.toString())) {
-                                    return prev.filter((e) => e._id.toString() !== newItem._id.toString());
-                                  }
-                                  return [...prev, { _id: newItem._id, firstName: newItem.firstName, lastName: newItem.lastName }];
-                                })
+                        <th className="w-3/12">Statut candidature</th>
+                        <th className="w-1/12">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.map((hit) => (
+                        <Hit
+                          key={hit._id}
+                          hit={hit}
+                          history={history}
+                          currentTab={currentTab}
+                          onClick={() => handleClick(hit)}
+                          opened={young?._id === hit.youngId}
+                          selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
+                          onChangeApplication={updateMission}
+                          onSelect={(newItem) =>
+                            setYoungSelected((prev) => {
+                              if (prev.find((e) => e._id.toString() === newItem._id.toString())) {
+                                return prev.filter((e) => e._id.toString() !== newItem._id.toString());
                               }
-                            />
-                          ))}
-                        </tbody>
-                      </Table>
-                    )}
-                  /> */}
-              </div>
+                              return [...prev, { _id: newItem._id, firstName: newItem.firstName, lastName: newItem.lastName }];
+                            })
+                          }
+                        />
+                      ))}
+                    </tbody>
+                  </Table>
+                }
+              />
             </div>
           </div>
           {/* </ReactiveBase> */}

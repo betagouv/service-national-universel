@@ -15,9 +15,9 @@ import Bin from "../../../assets/Bin";
 import Duplicate from "../../../assets/Duplicate";
 import Clock from "../../../assets/Clock";
 
-export default function Wrapper({ mission, tab, children, getMission, user }) {
+export default function Wrapper({ mission, tab, children, getMission }) {
   const history = useHistory();
-  // const user = useSelector((state) => state.Auth.user);
+  const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const onClickDelete = () => {
@@ -70,7 +70,7 @@ export default function Wrapper({ mission, tab, children, getMission, user }) {
             </div>
             <div
               className={`flex cursor-pointer flex-row items-center gap-2 pb-4 text-sm text-gray-400 ${tab === "youngs" && "border-b-2 border-blue-600 text-blue-600"}`}
-              onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
+              onClick={() => history.push(`/mission/${mission._id}/youngs/all`)}>
               {mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5 ? (
                 <ExclamationCircle className="text-white" fill="red" />
               ) : mission.pendingApplications > 0 ? (

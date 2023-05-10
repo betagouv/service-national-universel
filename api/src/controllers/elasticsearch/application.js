@@ -32,7 +32,7 @@ async function buildApplicationContext(user) {
   return { applicationContextFilters: contextFilters };
 }
 
-router.post("/:action(search|export)", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/by-mission/:id/:action(search|export)", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user, body } = req;
     // Configuration
@@ -57,6 +57,7 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
     // Context filters
     const contextFilters = [
       ...applicationContextFilters,
+      { term: { "missionId.keyword": req.params.id } },
       query.tab === "pending" ? { terms: { "status.keyword": ["WAITING_VALIDATION"] } } : null,
       query.tab === "follow" ? { terms: { "status.keyword": ["IN_PROGRESS", "VALIDATED"] } } : null,
     ].filter(Boolean);
