@@ -43,9 +43,9 @@ export const getURLParam = (urlParams, setParamData, filters) => {
       // on check si c'est un custom component
       const customComponent = filters.find((f) => f.name === key);
       if (customComponent?.getQuery) {
-        localFilters[key] = { filter: value.split(","), customComponentQuery: customComponent.getQuery(value.split(",")[0]) };
+        localFilters[key] = { filter: value.split("~"), customComponentQuery: customComponent.getQuery(value.split("+")[0]) };
       } else {
-        localFilters[key] = { filter: value.split(",") };
+        localFilters[key] = { filter: value.split("~") };
       }
     }
   });
@@ -62,10 +62,10 @@ export const currentFilterAsUrl = (filters, page, filterArray, defaultUrlParam) 
   let url = Object.keys(selectedFilters)?.reduce((acc, curr) => {
     if (curr === "searchbar" && selectedFilters[curr]?.filter?.length > 0 && selectedFilters[curr]?.filter[0].trim() === "") return acc;
     if (selectedFilters[curr]?.filter?.length > 0) {
-      acc += `${curr}=${selectedFilters[curr]?.filter.join(",")}${index < length - 1 ? "&" : ""}`;
+      acc += `${curr}=${selectedFilters[curr]?.filter.join("~")}${index < length - 1 ? "&" : ""}`;
       // check if custom component
     } else if (selectedFilters[curr]?.filter?.value?.length > 0 && selectedFilters[curr]?.filter?.value[0]?.trim() !== "") {
-      acc += `${curr}=${selectedFilters[curr]?.filter?.value.join(",")}${index < length - 1 ? "&" : ""}`;
+      acc += `${curr}=${selectedFilters[curr]?.filter?.value.join("~")}${index < length - 1 ? "&" : ""}`;
     } else return acc;
 
     index++;
