@@ -30,7 +30,14 @@ import ShieldCheck from "../../assets/icons/ShieldCheck";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
-import { countryOptions, SPECIFIC_SITUATIONS_KEY, youngEmployedSituationOptions,youngSchooled, youngSchooledSituationOptions } from "./commons";
+import {
+  countryOptions,
+  SPECIFIC_SITUATIONS_KEY,
+  youngEmployedSituationOptions,
+  YOUNG_SCHOOLED_SITUATIONS,
+  YOUNG_ACTIVE_SITUATIONS,
+  youngSchooledSituationOptions,
+} from "./commons";
 import Check from "../../assets/icons/Check";
 import RadioButton from "./components/RadioButton";
 import MiniSwitch from "./components/MiniSwitch";
@@ -469,9 +476,9 @@ function FooterNoRequest({ processing, onProcess, young }) {
       confirmModal.type,
       confirmModal.type === "REFUSED"
         ? {
-          reason: rejectionReason,
-          message: rejectionMessage,
-        }
+            reason: rejectionReason,
+            message: rejectionMessage,
+          }
         : null,
     );
     setConfirmModal(null);
@@ -1090,8 +1097,17 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [youngAge, setYoungAge] = useState(0);
+  const [situationOptions, setSituationOptions] = useState([]);
+  const gradeOptions = Object.keys(GRADES).map((g) => ({ value: g, label: translateGrade(g) }));
 
   useEffect(() => {
+    if (data) {
+      if (data.grade === GRADES.NOT_SCOLARISE || GRADES.Autre) {
+        setSituationOptions(Object.keys(YOUNG_ACTIVE_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
+      } else {
+        setSituationOptions(Object.keys(YOUNG_SCHOOLED_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
+      }
+    }
     if (young) {
       setData({ ...young });
       setHasSpecificSituation(SPECIFIC_SITUATIONS_KEY.findIndex((key) => young[key] === "true") >= 0);
@@ -1113,14 +1129,19 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
 
   function onLocalChange(field, value) {
     const newData = { ...data, [field]: value };
-    console.log(newData.situation);
-    if (field === "situation") {
-      newData.employed = youngEmployedSituationOptions.includes(value) ? "true" : "false";
-      newData.schooled = youngSchooled.includes(value) ? "true" : "false";
+    if (field === "grade") {
+      if (value === GRADES.NOT_SCOLARISE || value === GRADES.Autre) {
+        if (!YOUNG_ACTIVE_SITUATIONS[data.situation]) {
+          newData.situation = "";
+        }
+        setSituationOptions(Object.keys(YOUNG_ACTIVE_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
+      } else {
+        if (!YOUNG_SCHOOLED_SITUATIONS[data.situation]) {
+          newData.situation = "";
+        }
+        setSituationOptions(Object.keys(YOUNG_SCHOOLED_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
+      }
     }
-    console.log(newData.schooled);
-    console.log(newData.employed);
-
     setData(newData);
   }
 
@@ -1213,12 +1234,12 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     onStartRequest("");
   }
 
-  const situationOptions = Object.keys(YOUNG_SITUATIONS)
+  /*   const situationOptions = Object.keys(YOUNG_SITUATIONS)
     .map((s) => ({ value: s, label: translate(s) }))
     .filter((s) => s.value !== YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL);
   const gradeOptions = Object.keys(GRADES)
-    .filter((g) => g !== GRADES.NOT_SCOLARISE)
-    .map((g) => ({ value: g, label: translateGrade(g) }));
+    //.filter((g) => g !== GRADES.NOT_SCOLARISE)
+    .map((g) => ({ value: g, label: translateGrade(g) })); */
 
   return (
     <SectionContext.Provider value={{ errors }}>
@@ -1236,6 +1257,21 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
           <div className="flex-[1_0_50%] pr-[56px]">
             <div>
               <MiniTitle>Situation</MiniTitle>
+              <Field
+                name="grade"
+                label="Classe"
+                value={data.grade}
+                transformer={translateGrade}
+                mode={sectionMode}
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "grade")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                type="select"
+                options={gradeOptions}
+                onChange={(value) => onLocalChange("grade", value)}
+                young={young}
+              />
               <Field
                 name="situation"
                 label="Statut"
@@ -1286,7 +1322,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                       />
                     </>
                   )}
-                  <Field
+                  {/* <Field
                     name="grade"
                     label="Classe"
                     value={data.grade}
@@ -1300,7 +1336,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                     options={gradeOptions}
                     onChange={(value) => onLocalChange("grade", value)}
                     young={young}
-                  />
+                  /> */}
                 </>
               )}
             </div>
@@ -1743,38 +1779,38 @@ function SectionConsentements({ young, onChange, readonly = false }) {
         {
           /* lien et relance du droit à l'image du parent 1 si parent1AllowImageRights n'a pas de valeur */
           (young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false") &&
-          young.parent1AllowImageRights !== "true" &&
-          young.parent1AllowImageRights !== "false" &&
-          !readonly && (
-            <div className="mt-2 flex items-center justify-between">
-              <div
-                className="cursor-pointer italic text-[#1D4ED8]"
-                onClick={() => {
-                  copyToClipboard(`${appURL}/representants-legaux/droits-image?token=${young.parent1Inscription2023Token}&parent=1`);
-                  toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-                }}>
-                Copier le lien du formulaire
-              </div>
-              {young.parent1Email && (
-                <BorderButton
-                  mode="blue"
-                  onClick={async () => {
-                    try {
-                      const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 1 });
-                      if (response.ok) {
-                        toastr.success(translate("REMINDER_SENT"), "");
-                      } else {
-                        toastr.error(translate(response.code), "");
-                      }
-                    } catch (error) {
-                      toastr.error(translate(error.code), "");
-                    }
+            young.parent1AllowImageRights !== "true" &&
+            young.parent1AllowImageRights !== "false" &&
+            !readonly && (
+              <div className="mt-2 flex items-center justify-between">
+                <div
+                  className="cursor-pointer italic text-[#1D4ED8]"
+                  onClick={() => {
+                    copyToClipboard(`${appURL}/representants-legaux/droits-image?token=${young.parent1Inscription2023Token}&parent=1`);
+                    toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
                   }}>
-                  Relancer
-                </BorderButton>
-              )}
-            </div>
-          )
+                  Copier le lien du formulaire
+                </div>
+                {young.parent1Email && (
+                  <BorderButton
+                    mode="blue"
+                    onClick={async () => {
+                      try {
+                        const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 1 });
+                        if (response.ok) {
+                          toastr.success(translate("REMINDER_SENT"), "");
+                        } else {
+                          toastr.error(translate(response.code), "");
+                        }
+                      } catch (error) {
+                        toastr.error(translate(error.code), "");
+                      }
+                    }}>
+                    Relancer
+                  </BorderButton>
+                )}
+              </div>
+            )
         }
 
         {young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false" ? (
@@ -1887,40 +1923,40 @@ function SectionConsentements({ young, onChange, readonly = false }) {
               /* lien et relance du consentement (droit à l'image) du parent 2 si parent2AllowImageRights n'a jamais eu de valeur (première demande)
                * on envoit alors vers le formulaire complet de consentement du parent 2 */
               young.parent1AllowSNU === "true" &&
-              young.parent1AllowImageRights === "true" &&
-              young.parent2AllowSNU !== "false" &&
-              !young.parent2AllowImageRights &&
-              young.parent2AllowImageRightsReset !== "true" &&
-              !readonly && (
-                <div className="mt-2 flex items-center justify-between">
-                  <div
-                    className="cursor-pointer italic text-[#1D4ED8]"
-                    onClick={() => {
-                      copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
-                      toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-                    }}>
-                    Copier le lien du formulaire
-                  </div>
-                  {young.parent2Email && (
-                    <BorderButton
-                      mode="blue"
-                      onClick={async () => {
-                        try {
-                          const response = await api.get(`/young-edition/${young._id}/remider/2`);
-                          if (response.ok) {
-                            toastr.success(translate("REMINDER_SENT"), "");
-                          } else {
-                            toastr.error(translate(response.code), "");
-                          }
-                        } catch (error) {
-                          toastr.error(translate(error.code), "");
-                        }
+                young.parent1AllowImageRights === "true" &&
+                young.parent2AllowSNU !== "false" &&
+                !young.parent2AllowImageRights &&
+                young.parent2AllowImageRightsReset !== "true" &&
+                !readonly && (
+                  <div className="mt-2 flex items-center justify-between">
+                    <div
+                      className="cursor-pointer italic text-[#1D4ED8]"
+                      onClick={() => {
+                        copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
+                        toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
                       }}>
-                      Relancer
-                    </BorderButton>
-                  )}
-                </div>
-              )
+                      Copier le lien du formulaire
+                    </div>
+                    {young.parent2Email && (
+                      <BorderButton
+                        mode="blue"
+                        onClick={async () => {
+                          try {
+                            const response = await api.get(`/young-edition/${young._id}/remider/2`);
+                            if (response.ok) {
+                              toastr.success(translate("REMINDER_SENT"), "");
+                            } else {
+                              toastr.error(translate(response.code), "");
+                            }
+                          } catch (error) {
+                            toastr.error(translate(error.code), "");
+                          }
+                        }}>
+                        Relancer
+                      </BorderButton>
+                    )}
+                  </div>
+                )
             }
             {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.NOT_AUTORISED].includes(
               young.status,

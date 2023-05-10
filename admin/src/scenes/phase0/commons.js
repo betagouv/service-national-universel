@@ -19,7 +19,7 @@ export const countryOptions = Object.values(countriesList)
   .sort((a, b) => a.localeCompare(b))
   .map((countryName) => ({ value: countryName, label: countryName }));
 
-const YOUNG_SCHOOLED_SITUATIONS = {
+export const YOUNG_SCHOOLED_SITUATIONS = {
   GENERAL_SCHOOL: constants.YOUNG_SITUATIONS.GENERAL_SCHOOL,
   PROFESSIONAL_SCHOOL: constants.YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL,
   // AGRICULTURAL_SCHOOL: constants.YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL,
@@ -27,7 +27,7 @@ const YOUNG_SCHOOLED_SITUATIONS = {
   APPRENTICESHIP: constants.YOUNG_SITUATIONS.APPRENTICESHIP,
 };
 
-const YOUNG_ACTIVE_SITUATIONS = {
+export const YOUNG_ACTIVE_SITUATIONS = {
   EMPLOYEE: constants.YOUNG_SITUATIONS.EMPLOYEE,
   INDEPENDANT: constants.YOUNG_SITUATIONS.INDEPENDANT,
   SELF_EMPLOYED: constants.YOUNG_SITUATIONS.SELF_EMPLOYED,
@@ -38,7 +38,7 @@ const YOUNG_ACTIVE_SITUATIONS = {
   NOTHING: constants.YOUNG_SITUATIONS.NOTHING,
 };
 
-export const youngEmployedSituationOptions = [
+/* export const youngEmployedSituationOptions = [
   constants.YOUNG_SITUATIONS.EMPLOYEE,
   constants.YOUNG_SITUATIONS.INDEPENDANT,
   constants.YOUNG_SITUATIONS.SELF_EMPLOYED,
@@ -48,14 +48,9 @@ export const youngEmployedSituationOptions = [
 export const youngSchooledSituationOptions = Object.keys(YOUNG_SCHOOLED_SITUATIONS).map((situation) => ({
   value: YOUNG_SCHOOLED_SITUATIONS[situation],
   label: translation.translate(situation),
-}));
+})); */
 
-export const youngSchooled = [
-  constants.YOUNG_SCHOOLED_SITUATIONS.GENERAL_SCHOOL,
-  constants.YOUNG_SCHOOLED_SITUATIONS.PROFESSIONAL_SCHOOL,
-  constants.YOUNG_SCHOOLED_SITUATIONS.SPECIALIZED_SCHOOL,
-  constants.YOUNG_SCHOOLED_SITUATIONS.APPRENTICESHIP,
-];
+
 
 export const youngActiveSituationOptions = Object.keys(YOUNG_ACTIVE_SITUATIONS).map((situation) => ({
   value: YOUNG_ACTIVE_SITUATIONS[situation],
