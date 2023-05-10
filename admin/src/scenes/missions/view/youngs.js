@@ -37,19 +37,18 @@ const genderTranslation = {
 
 export default function Youngs({ mission, applications, updateMission }) {
   const user = useSelector((state) => state.Auth.user);
+  const history = useHistory();
   const [young, setYoung] = useState();
   const checkboxRef = React.useRef();
   const [youngSelected, setYoungSelected] = useState([]);
   const [youngsInPage, setYoungsInPage] = useState([]);
-  const [currentTab, setCurrentTab] = useState();
+  const { tab: currentTab } = useParams();
+  if (!currentTab || !["all", "pending", "follow"].includes(currentTab)) history.replace(`/mission/${mission._id}/youngs/all`);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const countAll = applications?.length;
   const countPending = applications?.filter((a) => ["WAITING_VALIDATION"].includes(a.status)).length;
   const countFollow = applications?.filter((a) => ["IN_PROGRESS", "VALIDATED"].includes(a.status)).length;
   const [modalMultiAction, setModalMultiAction] = useState({ isOpen: false });
-  const [optionsFilteredRole, setOptionsFilteredRole] = useState([]);
-  const history = useHistory();
-  const { tab } = useParams();
 
   //List state
   const [data, setData] = useState([]);
@@ -92,16 +91,7 @@ export default function Youngs({ mission, applications, updateMission }) {
     }
   };
 
-  useEffect(() => {
-    if (tab && ["all", "pending", "follow"].includes(tab)) setCurrentTab(tab);
-    else history.replace(`/mission/${mission._id}/youngs/all`);
-  }, []);
-
-  useEffect(() => {
-    if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
-      history.push(`/volontaire/list/all?MISSION_NAME=%5B"${mission?.name}"%5D`);
-    }
-  }, [user]);
+  if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) history.push(`/volontaire/list/all?MISSION_NAME=%5B"${mission?.name}"%5D`);
 
   useEffect(() => {
     if (!checkboxRef.current) return;
@@ -347,27 +337,15 @@ export default function Youngs({ mission, applications, updateMission }) {
     },
   ];
 
-  useEffect(() => {
-    setYoungSelected([]);
-    if (currentTab === "all") return;
-    filteredRoleActions();
-  }, [currentTab]);
+  function filterActionsByRole(actions, role) {
+    if ([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(role)) return actions;
+    if (currentTab === "pending") return optionsActions.filter((e) => [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED].includes(e.id));
+    return optionsActions.filter((e) => [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON].includes(e.id));
+  }
 
-  useEffect(() => {
-    if (youngSelected.length === 0) return;
-    filteredRoleActions();
-  }, [youngSelected]);
+  if (!user || !currentTab) return <div>Chargement...</div>;
 
-  const filteredRoleActions = () => {
-    if ([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
-      return setOptionsFilteredRole(optionsActions);
-    } else {
-      if (currentTab === "pending") return setOptionsFilteredRole(optionsActions.filter((e) => [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED].includes(e.id)));
-      else return setOptionsFilteredRole(optionsActions.filter((e) => [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON].includes(e.id)));
-    }
-  };
-
-  if (!user || !tab) return <div>Chargement...</div>;
+  const actionsFilteredByRole = filterActionsByRole(optionsActions, user.role);
 
   return (
     <div>
@@ -435,7 +413,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                   setParamData={setParamData}
                 />
                 {currentTab !== "all" ? (
-                  <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={[{ items: optionsFilteredRole }]} />
+                  <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={[{ items: actionsFilteredByRole }]} />
                 ) : (
                   <button className="rounded-md bg-blue-600 py-2 px-4 text-sm font-semibold text-white hover:bg-blue-600 hover:drop-shadow" onClick={() => setIsExportOpen(true)}>
                     Exporter les candidatures
@@ -611,25 +589,12 @@ const PaperClip = () => {
     </svg>
   );
 };
-function FilterButton({ onClick }) {
-  return (
-    <div onClick={onClick} className="flex h-10 w-24 cursor-pointer flex-row items-center justify-center rounded-md bg-[#F3F4F6]">
-      <svg width={12} height={11} viewBox="0 0 12 11" fill="#9CA3AF" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M0 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1.252a1 1 0 0 1-.293.708l-4.08 4.08a1 1 0 0 0-.294.708v1.171a1 1 0 0 1-.293.707l-.666.667c-.63.63-1.707.184-1.707-.707V7.748a1 1 0 0 0-.293-.708L.293 2.96A1 1 0 0 1 0 2.252V1Z"
-          fill="#9CA3AF"
-        />
-      </svg>
-      <div className="text-grey-700 ml-2">Filtres</div>
-    </div>
-  );
-}
+
 const TabItem = ({ active, title, count, onClick, icon }) => (
   <div
     onClick={onClick}
-    className={`mr-2 cursor-pointer rounded-t-lg px-3 py-2 text-[13px] text-gray-600 hover:text-blue-600 ${
-      active ? "border-none bg-white !text-blue-600" : "border-x border-t border-gray-200 bg-gray-100"
-    }`}>
+    className={`mr-2 cursor-pointer rounded-t-lg px-3 py-2 text-[13px] text-gray-600 hover:text-blue-600 ${active ? "border-none bg-white !text-blue-600" : "border-x border-t border-gray-200 bg-gray-100"
+      }`}>
     <div className={"flex items-center gap-2"}>
       <div className="flex flex-row items-center gap-2">
         {icon && <div>{icon}</div>}
