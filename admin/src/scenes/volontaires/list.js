@@ -48,8 +48,8 @@ import DeletedVolontairePanel from "./deletedPanel";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { translateApplicationFileType, youngExportFields } from "snu-lib";
+import { formatPhoneE164 } from "../../utils/formatPhoneE164";
 import ModalExport from "../../components/modals/ModalExport";
-import { concatPhoneNumberWithZone } from "snu-lib/phone-number";
 
 const FILTERS = [
   "SEARCH",
@@ -158,7 +158,7 @@ export default function VolontaireList() {
         },
         contact: {
           Email: data.email,
-          Téléphone: concatPhoneNumberWithZone(data.phone, data.phoneZone),
+          Téléphone: formatPhoneE164(data.phone, data.phoneZone),
         },
         birth: {
           "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
@@ -221,7 +221,7 @@ export default function VolontaireList() {
           "Prénom représentant légal 1": data.parent1FirstName,
           "Nom représentant légal 1": data.parent1LastName,
           "Email représentant légal 1": data.parent1Email,
-          "Téléphone représentant légal 1": concatPhoneNumberWithZone(data.parent1Phone, data.parent1PhoneZone),
+          "Téléphone représentant légal 1": formatPhoneE164(data.parent1Phone, data.parent1PhoneZone),
           "Adresse représentant légal 1": data.parent1Address,
           "Code postal représentant légal 1": data.parent1Zip,
           "Ville représentant légal 1": data.parent1City,
@@ -233,7 +233,7 @@ export default function VolontaireList() {
           "Prénom représentant légal 2": data.parent2FirstName,
           "Nom représentant légal 2": data.parent2LastName,
           "Email représentant légal 2": data.parent2Email,
-          "Téléphone représentant légal 2": concatPhoneNumberWithZone(data.parent2Phone, data.parent2PhoneZone),
+          "Téléphone représentant légal 2": formatPhoneE164(data.parent2Phone, data.parent2PhoneZone),
           "Adresse représentant légal 2": data.parent2Address,
           "Code postal représentant légal 2": data.parent2Zip,
           "Ville représentant légal 2": data.parent2City,

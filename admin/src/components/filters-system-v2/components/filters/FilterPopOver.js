@@ -39,7 +39,11 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   const ref = React.useRef(null);
 
   React.useEffect(() => {
-    setOptionsVisible(data);
+    if (filter?.sort) {
+      setOptionsVisible(filter.sort(data));
+    } else {
+      setOptionsVisible(data);
+    }
   }, [data]);
 
   React.useEffect(() => {
