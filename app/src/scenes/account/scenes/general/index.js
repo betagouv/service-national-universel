@@ -72,7 +72,7 @@ const AccountGeneralPage = () => {
         phoneZone: formValues.phone.phoneZone,
         email: formValues.email.trim(),
       };
-      const { title, message, data: updatedYoung } = await updateYoung({ _id: young._id, ...youngDataToUpdate });
+      const { title, message, data: updatedYoung } = await updateYoung("profile", { _id: young._id, ...youngDataToUpdate });
       toastr.success(title, message);
       dispatch(setYoung(updatedYoung));
     } catch (error) {

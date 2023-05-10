@@ -110,7 +110,7 @@ const AccountRepresentantsPage = () => {
         parent2PhoneZone: (hasParent2 && formValues.parent2Phone.phoneZone) || PHONE_ZONES_NAMES.FRANCE,
         parent2Email: (hasParent2 && formValues.parent2Email.trim()) || "",
       };
-      const { title, message, data: updatedYoung } = await updateYoung({ _id: young._id, ...youngDataToUpdate });
+      const { title, message, data: updatedYoung } = await updateYoung("parents", { _id: young._id, ...youngDataToUpdate });
       toastr.success(title, message);
       dispatch(setYoung(updatedYoung));
     } catch (error) {
