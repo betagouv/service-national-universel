@@ -1,6 +1,5 @@
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { PHONE_ZONES } from "../../../lib/phone-number";
-import { concatPhoneNumberWithZone } from "snu-lib/phone-number";
+import { concatPhoneNumberWithZone, PHONE_ZONES } from "snu-lib/phone-number";
 import { capture } from "../sentry";
 
 // ! Delete capture if no errors in months
