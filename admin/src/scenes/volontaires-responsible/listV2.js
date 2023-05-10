@@ -1,48 +1,39 @@
-import React, { useState, useEffect } from "react";
-import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useHistory, useParams } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
+import { useHistory, useParams } from "react-router-dom";
 
-import { SelectStatusApplicationPhase2 } from "../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
-import api from "../../services/api";
-import { apiURL } from "../../config";
-import Panel from "./panel";
 import Loader from "../../components/Loader";
-import { Table, MultiLine } from "../../components/list";
+import { MultiLine, Table } from "../../components/list";
+import api from "../../services/api";
 import {
-  translate,
-  translateApplication,
-  getFilterLabel,
-  getAge,
+  APPLICATION_STATUS,
   ES_NO_LIMIT,
   ROLES,
-  formatLongDateUTCWithoutTime,
-  department2region,
-  region2department,
-  formatLongDateUTC,
   formatDateFRTimezoneUTC,
-  APPLICATION_STATUS,
+  formatLongDateUTC,
+  formatLongDateUTCWithoutTime,
+  getAge,
+  translate,
+  translateApplication,
   translateApplicationFileType,
 } from "../../utils";
-import ReactiveListComponent from "../../components/ReactiveListComponent";
+import { SelectStatusApplicationPhase2 } from "../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
+import Panel from "./panel";
 
 import { applicationExportFieldsStructure } from "snu-lib/excelExports";
 
-import ModalConfirm from "../../components/modals/ModalConfirm";
-import SelectAction from "../../components/SelectAction";
+import { getDepartmentNumber } from "snu-lib";
 import CursorClick from "../../assets/icons/CursorClick";
-import ModalExport from "../../components/modals/ModalExport";
-import { DepartmentFilter, RegionFilter } from "../../components/filters";
-import DeleteFilters from "../../components/buttons/DeleteFilters";
 import ExclamationCircle from "../../assets/icons/ExclamationCircle";
-
-const FILTERS = ["SEARCH", "MISSION_NAME", "STATUS", "TUTOR", "DEPARTMENT", "REGION", "FILES_TYPE"];
+import SelectAction from "../../components/SelectAction";
+import { Filters, ModalExport, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
+import { currentFilterAsUrl } from "../../components/filters-system-v2/components/filters/utils";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
   const [missions, setMissions] = useState();
-  const [filterVisible, setFilterVisible] = useState(false);
   const [panel, setPanel] = useState(null);
 
   const [countPending, setCountPending] = useState(0);
@@ -61,13 +52,57 @@ export default function List() {
   //currenTab is the tab selected in the url
   // tab is the tab selected in the component --> to avoid refresh
   const { currentTab } = useParams();
-  const [tab, setTab] = useState("all");
+  const [tab, setTab] = useState();
+
+  //List state
+  const [data, setData] = useState([]);
+  const pageId = "missions-list-applications-resp";
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [paramData, setParamData] = useState({
+    page: 0,
+  });
+
+  //Filters
+  const filterArray = [
+    {
+      title: "Mission",
+      name: "missionName",
+      translate: translate,
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Tuteur",
+      name: "tutorName",
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Statut",
+      name: "status",
+      missingLabel: "Non renseigné",
+      translate: (e) => translateApplication(e),
+    },
+
+    {
+      title: "Pièces jointes",
+      name: "filesType",
+      missingLabel: "Non renseigné",
+      translate: (value) => translateApplicationFileType(value),
+    },
+    {
+      title: "Département",
+      name: "youngDepartment",
+      missingLabel: "Non renseigné",
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+    },
+  ];
 
   useEffect(() => {
     const listTab = ["all", "pending", "follow"];
     if (!listTab.includes(currentTab)) return history.push(`/volontaire/list/all`);
     setTab(currentTab);
-  }, [currentTab]);
+    initMissions(user.structureId);
+    filteredRoleActions();
+  }, []);
 
   useEffect(() => {
     if (!missions) return;
@@ -94,21 +129,6 @@ export default function List() {
       checkboxRef.current.indeterminate = false;
     }
   }, [youngSelected]);
-
-  const getDefaultQuery = () => {
-    const body = {
-      query: { bool: { must: { match_all: {} }, filter: [{ terms: { "missionId.keyword": missions.map((e) => e._id) } }] } },
-      sort: [{ "youngLastName.keyword": "asc" }],
-      track_total_hits: true,
-    };
-    if (tab === "pending") {
-      body.query.bool.filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION"] } });
-    } else if (tab === "follow") {
-      body.query.bool.filter.push({ terms: { "status.keyword": ["IN_PROGRESS", "VALIDATED"] } });
-    }
-    return body;
-  };
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   const getApplicationCount = async () => {
     try {
@@ -168,13 +188,6 @@ export default function List() {
     setMissions(m);
   }
 
-  // Get all missions from structure then get all applications int order to display the volontaires' list.
-  useEffect(() => {
-    initMissions(user.structureId);
-    const urlParams = new URLSearchParams(window.location.search);
-    const mission_name = urlParams.get("MISSION_NAME");
-    if (mission_name) setFilterVisible(true);
-  }, []);
   const RenderText = (text) => {
     return (
       <div key={text} className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
@@ -185,6 +198,7 @@ export default function List() {
       </div>
     );
   };
+
   const updateApplicationStatus = (status) => {
     if (youngSelected.length === 0) return;
     const isPlural = youngSelected.length > 1;
@@ -210,6 +224,7 @@ export default function List() {
       },
     });
   };
+
   const optionsActions = [
     {
       id: APPLICATION_STATUS.VALIDATED,
@@ -247,6 +262,7 @@ export default function List() {
       render: RenderText("Mission effectuée"),
     },
   ];
+
   const filteredRoleActions = () => {
     if (tab === "pending") return setOptionsFilteredRole(optionsActions.filter((e) => [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED].includes(e.id)));
     else return setOptionsFilteredRole(optionsActions.filter((e) => [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON].includes(e.id)));
@@ -447,17 +463,13 @@ export default function List() {
       return fields;
     });
   }
-  useEffect(() => {
-    filteredRoleActions();
-    if (currentTab === "all") return;
-    setYoungSelected([]);
-  }, [tab]);
+
   useEffect(() => {
     if (youngSelected.length === 0) return;
     filteredRoleActions();
   }, [youngSelected]);
-
   if (!missions) return <Loader />;
+
   return (
     <div className="flex w-full px-8">
       <div className="flex w-full flex-col">
@@ -477,16 +489,14 @@ export default function List() {
           <TabItem
             count={countAll}
             onClick={() => {
-              setTab("all");
-              window.history.replaceState(null, null, "/volontaire/list/all");
+              history.push(`/volontaire/list/all?${currentFilterAsUrl(selectedFilters, paramData?.page, filterArray)}`);
             }}
             title="Toutes les candidatures"
             active={tab === "all"}
           />
           <TabItem
             onClick={() => {
-              setTab("pending");
-              window.history.replaceState(null, null, "/volontaire/list/pending");
+              history.push(`/volontaire/list/pending?${currentFilterAsUrl(selectedFilters, paramData?.page, filterArray)}`);
             }}
             count={countPending}
             icon={
@@ -501,215 +511,104 @@ export default function List() {
           />
           <TabItem
             onClick={() => {
-              setTab("follow");
-              window.history.replaceState(null, null, "/volontaire/list/follow");
+              history.push(`/volontaire/list/follow?${currentFilterAsUrl(selectedFilters, paramData?.page, filterArray)}`);
             }}
             count={countFollow}
             title="À suivre"
             active={tab === "follow"}
           />
         </div>
-        <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-          <div className={`relative mb-4 items-start`}>
-            <div className="flex-column flex-1 flex-wrap rounded-b-lg rounded-tr-lg bg-white">
-              <div className="flex flex-row items-center justify-between px-8 pt-4">
-                <div className="flex flex-row">
-                  <DataSearch
-                    defaultQuery={getDefaultQuery}
-                    showIcon={false}
-                    placeholder="Rechercher par prénom, nom, email"
-                    componentId="SEARCH"
-                    dataField={["youngEmail.keyword", "youngFirstName", "youngLastName"]}
-                    react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                    style={{ marginRight: "1rem", flex: 1 }}
-                    innerClass={{ input: "searchbox" }}
-                    className="datasearch-searchfield"
-                    URLParams={true}
-                    autosuggest={false}
-                  />
-                  <FilterButton onClick={() => setFilterVisible((filterVisible) => !filterVisible)} />
-                </div>
-                {tab !== "all" ? (
-                  <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={[{ items: optionsFilteredRole }]} />
-                ) : (
-                  <button
-                    className="rounded-md bg-snu-purple-300 py-2 px-4 text-sm font-semibold text-white hover:bg-snu-purple-600 hover:drop-shadow"
-                    onClick={() => setIsExportOpen(true)}>
-                    Exporter les candidatures
-                  </button>
-                )}
+        <div className={`relative mb-4 items-start`}>
+          <div className="mb-8 flex flex-col rounded-tr-xl bg-white py-4">
+            <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
+              <Filters
+                pageId={pageId}
+                route={`/elasticsearch/application/search?tab=${tab}`}
+                setData={(value) => {
+                  if (value) setYoungsInPage(value.map((h) => ({ _id: h._id, firstName: h.youngFirstName, lastName: h.youngLastName })));
+                  setData(value);
+                }}
+                filters={filterArray}
+                searchPlaceholder="Rechercher par mots clés, ville, code postal..."
+                selectedFilters={selectedFilters}
+                setSelectedFilters={setSelectedFilters}
+                paramData={paramData}
+                setParamData={setParamData}
+              />
+              {tab !== "all" ? (
+                <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={[{ items: optionsFilteredRole }]} />
+              ) : (
+                <button className="rounded-md bg-blue-600 py-2 px-4 text-sm font-semibold text-white hover:bg-blue-600 hover:drop-shadow" onClick={() => setIsExportOpen(true)}>
+                  Exporter les candidatures
+                </button>
+              )}
 
-                <ModalExport
-                  isOpen={isExportOpen}
-                  setIsOpen={setIsExportOpen}
-                  index="application"
-                  transform={transform}
-                  exportFields={applicationExportFieldsStructure}
-                  filters={FILTERS}
-                  getExportQuery={getExportQuery}
-                />
-              </div>
-
-              <div className={`mx-8 mt-3 flex flex-wrap items-center gap-2 ${!filterVisible ? "hidden" : ""}`}>
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="MISSION_NAME"
-                  dataField="missionName.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "MISSION_NAME") }}
-                  renderItem={(e, count) => {
-                    return `${e} (${count})`;
-                  }}
-                  title=""
-                  aggregationSize={ES_NO_LIMIT}
-                  size={ES_NO_LIMIT}
-                  URLParams={true}
-                  showSearch={true}
-                  searchPlaceholder="Rechercher..."
-                  renderLabel={(items) => <div>{getFilterLabel(items, "Mission", "Mission")}</div>}
-                />
-
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="TUTOR"
-                  dataField="tutorName.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "TUTOR") }}
-                  renderItem={(e, count) => {
-                    return `${e} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => <div>{getFilterLabel(items, "Tuteur", "Tuteur")}</div>}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="STATUS"
-                  dataField="status.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-                  renderItem={(e, count) => {
-                    return `${translateApplication(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => <div>{getFilterLabel(items, "Statut", "Statut")}</div>}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="FILES_TYPE"
-                  dataField="filesType.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "FILES_TYPE") }}
-                  renderItem={(e, count) => {
-                    return `${translateApplicationFileType(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => <div>{getFilterLabel(items, "Pièces jointes", "Pièces jointes")}</div>}
-                  showMissing={true}
-                  missingLabel="Aucune pièce jointe"
-                />
-                <DepartmentFilter
-                  defaultQuery={getDefaultQuery}
-                  filters={FILTERS}
-                  dataField="youngDepartment.keyword"
-                  placeholder="Département du volontaire"
-                  renderLabel={(items) => <div>{getFilterLabel(items, "Département", "Département")}</div>}
-                />
-                <RegionFilter
-                  customQuery={function (value) {
-                    let departmentArray = [];
-                    if (Array.isArray(value)) {
-                      value?.map((e) => {
-                        departmentArray = departmentArray.concat(region2department[e]);
-                      });
-                    }
-                    const body = getDefaultQuery();
-                    if (departmentArray.length > 0) body.query.bool.filter.push({ terms: { "youngDepartment.keyword": departmentArray } });
-                    return body;
-                  }}
-                  transformData={(data) => {
-                    const newData = [];
-                    data.map((d) => {
-                      const region = department2region[d.key];
-                      const val = newData.find((e) => e.key === region);
-                      if (val) {
-                        newData[newData.indexOf(val)].doc_count += d.doc_count;
-                      } else {
-                        newData.push({ key: region, doc_count: d.doc_count });
-                      }
-                    });
-                    return newData;
-                  }}
-                  defaultQuery={getDefaultQuery}
-                  filters={FILTERS}
-                  dataField="youngDepartment.keyword"
-                  placeholder="Région du volontaire"
-                  renderLabel={(items) => <div>{getFilterLabel(items, "Région", "Région")}</div>}
-                />
-                <DeleteFilters />
-              </div>
-
-              <div className="reactive-result mt-2">
-                <ReactiveListComponent
-                  defaultQuery={getDefaultQuery}
-                  react={{ and: FILTERS }}
-                  dataField="youngLastName.keyword"
-                  sortBy="asc"
-                  size={30}
-                  showTopResultStats={false}
-                  paginationAt="bottom"
-                  onData={async ({ rawData }) => {
-                    if (rawData?.hits?.hits) setYoungsInPage(rawData.hits.hits.map((h) => ({ _id: h._id, firstName: h._source.firstName, lastName: h._source.lastName })));
-                  }}
-                  render={({ data }) => (
-                    <Table>
-                      <thead>
-                        <tr className="mt-6 mb-2 border-y-[1px] border-gray-100 text-start text-xs uppercase text-gray-400">
-                          {tab !== "all" && (
-                            <th className="w-1/12">
-                              <input ref={checkboxRef} className="cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
-                            </th>
-                          )}
-
-                          <th className="w-3/12">Volontaire</th>
-                          <th className="w-4/12">Mission</th>
-                          {tab !== "pending" && <th className="w-1/12">Contrat et Documents</th>}
-                          <th className="w-3/12">Statut candidature</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.map((hit) => (
-                          <Hit
-                            key={hit._id}
-                            hit={hit}
-                            currentTab={tab}
-                            mission={missions.find((m) => m._id.toString() === hit.missionId.toString())}
-                            onClick={() => handleClick(hit)}
-                            opened={panel?.application?._id === hit._id}
-                            selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
-                            onSelect={(newItem) =>
-                              setYoungSelected((prev) => {
-                                if (prev.find((e) => e._id.toString() === newItem._id.toString())) {
-                                  return prev.filter((e) => e._id.toString() !== newItem._id.toString());
-                                }
-                                return [...prev, { _id: newItem._id, firstName: newItem.firstName, lastName: newItem.lastName }];
-                              })
-                            }
-                          />
-                        ))}
-                      </tbody>
-                    </Table>
-                  )}
-                />
-              </div>
+              <ModalExport
+                isOpen={isExportOpen}
+                setIsOpen={setIsExportOpen}
+                route={`/elasticsearch/application/export?tab=${tab}`}
+                transform={transform}
+                exportFields={applicationExportFieldsStructure}
+                exportTitle="candidatures"
+                selectedFilters={selectedFilters}
+              />
             </div>
+            <div className="mt-2 flex flex-row flex-wrap items-center px-4">
+              <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+              <SelectedFilters
+                filterArray={filterArray}
+                selectedFilters={selectedFilters}
+                setSelectedFilters={setSelectedFilters}
+                paramData={paramData}
+                setParamData={setParamData}
+              />
+            </div>
+            <ResultTable
+              paramData={paramData}
+              setParamData={setParamData}
+              currentEntryOnPage={data?.length}
+              render={
+                <Table>
+                  <thead>
+                    <tr className="mt-6 mb-2 border-y-[1px] border-gray-100 text-start text-xs uppercase text-gray-400">
+                      {tab !== "all" && (
+                        <th className="w-1/12">
+                          <input ref={checkboxRef} className="cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
+                        </th>
+                      )}
+
+                      <th className="w-3/12">Volontaire</th>
+                      <th className="w-4/12">Mission</th>
+                      {tab !== "pending" && <th className="w-1/12">Contrat et Documents</th>}
+                      <th className="w-3/12">Statut candidature</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.map((hit) => (
+                      <Hit
+                        key={hit._id}
+                        hit={hit}
+                        currentTab={tab}
+                        mission={missions.find((m) => m._id.toString() === hit.missionId.toString())}
+                        onClick={() => handleClick(hit)}
+                        opened={panel?.application?._id === hit._id}
+                        selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
+                        onSelect={(newItem) =>
+                          setYoungSelected((prev) => {
+                            if (prev.find((e) => e._id.toString() === newItem._id.toString())) {
+                              return prev.filter((e) => e._id.toString() !== newItem._id.toString());
+                            }
+                            return [...prev, { _id: newItem._id, firstName: newItem.firstName, lastName: newItem.lastName }];
+                          })
+                        }
+                      />
+                    ))}
+                  </tbody>
+                </Table>
+              }
+            />
           </div>
-        </ReactiveBase>
+        </div>
       </div>
       <Panel
         value={panel?.young}
@@ -821,17 +720,3 @@ const TabItem = ({ active, title, count, onClick, icon }) => (
     </div>
   </div>
 );
-
-function FilterButton({ onClick }) {
-  return (
-    <div onClick={onClick} className="flex h-10 w-24 cursor-pointer flex-row items-center justify-center rounded-md bg-[#F3F4F6]">
-      <svg width={12} height={11} viewBox="0 0 12 11" fill="#9CA3AF" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M0 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1.252a1 1 0 0 1-.293.708l-4.08 4.08a1 1 0 0 0-.294.708v1.171a1 1 0 0 1-.293.707l-.666.667c-.63.63-1.707.184-1.707-.707V7.748a1 1 0 0 0-.293-.708L.293 2.96A1 1 0 0 1 0 2.252V1Z"
-          fill="#9CA3AF"
-        />
-      </svg>
-      <div className="text-grey-700 ml-2">Filtres</div>
-    </div>
-  );
-}

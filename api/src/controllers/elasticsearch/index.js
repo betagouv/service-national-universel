@@ -11,5 +11,6 @@ router.use("/lignebus", require("./lignebus"));
 router.use("/schoolramses", require("./schoolramses"));
 router.use("/mission", require("./mission"));
 router.use("/email", require("./email"));
+router.use("/application", require("./application"));
 
 module.exports = router;

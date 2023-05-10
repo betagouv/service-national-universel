@@ -153,7 +153,11 @@ export default function Filters({
 
   const setURL = () => {
     const search = `?${currentFilterAsUrl(selectedFilters, paramData?.page, filters, defaultUrlParam)}`;
-    if (location.search !== search) history.replace({ search });
+    const { pathname } = history.location;
+
+    if (location.search !== search) window.history.pushState({ path: pathname + search }, "", pathname + search);
+
+    // history.replace({ pathname, search });
   };
 
   const getDBFilters = async () => {
