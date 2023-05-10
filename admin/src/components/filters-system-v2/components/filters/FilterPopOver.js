@@ -154,6 +154,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
 
                         ?.map((option) => {
                           const optionSelected = selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.key);
+                          const showCount = filter?.showCount === false ? false : true;
                           return (
                             <div
                               className="flex cursor-pointer items-center justify-between py-2 px-3 hover:bg-gray-50"
@@ -165,7 +166,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                                   {option.key === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.key) : option?.key}
                                 </div>
                               </div>
-                              <div className="text-xs leading-5 text-gray-500">{option.doc_count}</div>
+                              {showCount && <div className="text-xs leading-5 text-gray-500">{option.doc_count}</div>}
                             </div>
                           );
                         })}
