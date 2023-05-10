@@ -5,12 +5,12 @@ import { translateEmails } from "../../utils";
 import { Filters, ResultTable, Save, SelectedFilters } from "../filters-system-v2";
 import EmailPanel from "../panels/EmailPanel";
 
-export default function Emails({ email }) {
+export default function Emails({ email, userType }) {
   const { user } = useSelector((state) => state.Auth);
 
   //List state
   const [data, setData] = useState([]);
-  const pageId = "emails-young-list";
+  const pageId = `emails-${userType}-list`;
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({
     page: 0,
