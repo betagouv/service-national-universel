@@ -48,7 +48,7 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
   try {
     // Configuration
     const searchFields = ["name", "city", "zip", "code2022"];
-    const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "academy.keyword", "status"];
+    const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "academy.keyword", "status", "statusPhase1"];
     const sortFields = [];
 
     // Authorization
@@ -68,27 +68,21 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
 
     async function getAdditionalData(centerIds) {
-      const responseSessions = await esClient.msearch({
+      const sessionQuery = {
+        bool: {
+          must: { match_all: {} },
+          filter: [{ terms: { "cohesionCenterId.keyword": centerIds } }, queryFilters.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null].filter(
+            Boolean,
+          ),
+        },
+      };
+      const {
+        body: { responses },
+      } = await esClient.msearch({
         index: "sessionphase1",
-        body: buildNdJson(
-          { index: "sessionphase1", type: "_doc" },
-          {
-            body: {
-              query: {
-                bool: {
-                  must: { match_all: {} },
-                  filter: [{ terms: { "cohesionCenterId.keyword": centerIds } }, queryFilters.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null].filter(
-                    Boolean,
-                  ),
-                },
-              },
-              size: ES_NO_LIMIT,
-            },
-          },
-        ),
+        body: buildNdJson({ index: "sessionphase1", type: "_doc" }, { query: sessionQuery, size: ES_NO_LIMIT }),
       });
-      const sessionsPhase1 = responseSessions.length ? responses[0]?.hits?.hits?.map((e) => ({ ...e._source, _id: e._id })) : [];
-
+      const sessionsPhase1 = responses.length ? responses[0]?.hits?.hits?.map((e) => ({ ...e._source, _id: e._id })) : [];
       if (sessionsPhase1?.length) {
         const body = {
           query: { bool: { must: { match_all: {} }, filter: [] } },
@@ -105,13 +99,19 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
           },
           size: 0,
         };
-        if (queryFilters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.status?.filter } });
-        if (selectedFilters.statusPhase1?.filter?.length) body.query.bool.filter.push({ terms: { "statusPhase1.keyword": selectedFilters.statusPhase1?.filter } });
+        if (queryFilters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": queryFilters.status } });
+        if (queryFilters.statusPhase1?.length) body.query.bool.filter.push({ terms: { "statusPhase1.keyword": queryFilters.statusPhase1 } });
 
         let sessionPhase1Id = sessionsPhase1.map((session) => session._id).filter((id) => id);
         if (sessionPhase1Id.length) body.query.bool.filter.push({ terms: { "sessionPhase1Id.keyword": sessionPhase1Id } });
 
-        const { responses } = await api.esQuery("young", body);
+        const {
+          body: { responses },
+        } = await esClient.msearch({
+          index: "young",
+          body: buildNdJson({ index: "young", type: "_doc" }, body),
+        });
+
         if (!responses?.length) return;
         const sessionAggreg = responses[0].aggregations.session.buckets.reduce((acc, session) => {
           acc[session.key] = {
@@ -136,7 +136,7 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
           return acc;
         }, {});
 
-        sessionByCenter = sessionsPhase1.reduce((acc, session) => {
+        const sessionByCenter = sessionsPhase1.reduce((acc, session) => {
           if (!acc[session.cohesionCenterId]) {
             acc[session.cohesionCenterId] = {
               centerId: session.cohesionCenterId,
@@ -167,33 +167,28 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
           }
           return acc;
         }, {});
+        return sessionByCenter;
       }
-
-      const reducedSchool = responseYoungs.body.responses[0].aggregations.school.buckets.reduce((acc, school) => {
-        if (school.key === "") return acc;
-        const schoolInfo = school.firstUser?.hits?.hits[0]?._source;
-        const total = school.doc_count;
-        const isThereDep = school.departments?.buckets?.find((f) => f.key === schoolInfo.schoolDepartment) || {};
-        const inDepartment = isThereDep.doc_count || 0;
-        const outDepartment = total - inDepartment;
-        if (!acc[school.key]) {
-          acc[school.key] = {
-            schoolId: school.key,
-            total,
-            inDepartment,
-            outDepartment,
-          };
-        }
-        return acc;
-      }, {});
-      return reducedSchool;
+      return {};
     }
 
     if (req.params.action === "export") {
-      const response = await allRecords("cohesioncenter", hitsRequestBody.query);
+      let response = await allRecords("cohesioncenter", hitsRequestBody.query);
+      const reducedAdditionalData = await getAdditionalData(response.map((h) => h._id));
+      response = response.map((h) => {
+        const additionalData = reducedAdditionalData[h._id];
+        if (!additionalData) return h;
+        return { ...h, ...additionalData };
+      });
       return res.status(200).send({ ok: true, data: response });
     } else {
       const response = await esClient.msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const reducedAdditionalData = await getAdditionalData(response.body.responses[0].hits.hits.map((h) => h._id));
+      response.body.responses[0].hits.hits = response.body.responses[0].hits.hits.map((h) => {
+        const additionalData = reducedAdditionalData[h._id];
+        if (!additionalData) return h;
+        return { ...h, _source: { ...h._source, ...additionalData } };
+      });
       return res.status(200).send(response.body);
     }
   } catch (error) {
