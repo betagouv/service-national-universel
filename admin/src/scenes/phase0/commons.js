@@ -38,7 +38,7 @@ export const YOUNG_ACTIVE_SITUATIONS = {
   NOTHING: constants.YOUNG_SITUATIONS.NOTHING,
 };
 
-/* export const youngEmployedSituationOptions = [
+export const youngEmployedSituationOptions = [
   constants.YOUNG_SITUATIONS.EMPLOYEE,
   constants.YOUNG_SITUATIONS.INDEPENDANT,
   constants.YOUNG_SITUATIONS.SELF_EMPLOYED,
@@ -48,9 +48,7 @@ export const YOUNG_ACTIVE_SITUATIONS = {
 export const youngSchooledSituationOptions = Object.keys(YOUNG_SCHOOLED_SITUATIONS).map((situation) => ({
   value: YOUNG_SCHOOLED_SITUATIONS[situation],
   label: translation.translate(situation),
-})); */
-
-
+}));
 
 export const youngActiveSituationOptions = Object.keys(YOUNG_ACTIVE_SITUATIONS).map((situation) => ({
   value: YOUNG_ACTIVE_SITUATIONS[situation],

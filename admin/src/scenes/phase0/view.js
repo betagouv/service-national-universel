@@ -14,7 +14,6 @@ import {
   translate,
   translateGrade,
   YOUNG_STATUS,
-  YOUNG_SITUATIONS,
   GRADES,
   getAge,
   ROLES,
@@ -30,14 +29,7 @@ import ShieldCheck from "../../assets/icons/ShieldCheck";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
-import {
-  countryOptions,
-  SPECIFIC_SITUATIONS_KEY,
-  youngEmployedSituationOptions,
-  YOUNG_SCHOOLED_SITUATIONS,
-  YOUNG_ACTIVE_SITUATIONS,
-  youngSchooledSituationOptions,
-} from "./commons";
+import { countryOptions, SPECIFIC_SITUATIONS_KEY, YOUNG_SCHOOLED_SITUATIONS, YOUNG_ACTIVE_SITUATIONS } from "./commons";
 import Check from "../../assets/icons/Check";
 import RadioButton from "./components/RadioButton";
 import MiniSwitch from "./components/MiniSwitch";
@@ -1102,7 +1094,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
 
   useEffect(() => {
     if (data) {
-      if (data.grade === GRADES.NOT_SCOLARISE || GRADES.Autre) {
+      if (data.grade === GRADES.NOT_SCOLARISE) {
         setSituationOptions(Object.keys(YOUNG_ACTIVE_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
       } else {
         setSituationOptions(Object.keys(YOUNG_SCHOOLED_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
@@ -1130,12 +1122,14 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   function onLocalChange(field, value) {
     const newData = { ...data, [field]: value };
     if (field === "grade") {
-      if (value === GRADES.NOT_SCOLARISE || value === GRADES.Autre) {
+      if (value === GRADES.NOT_SCOLARISE) {
+        newData.schooled = "false";
         if (!YOUNG_ACTIVE_SITUATIONS[data.situation]) {
           newData.situation = "";
         }
         setSituationOptions(Object.keys(YOUNG_ACTIVE_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
       } else {
+        newData.schooled = "true";
         if (!YOUNG_SCHOOLED_SITUATIONS[data.situation]) {
           newData.situation = "";
         }
@@ -1234,13 +1228,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     onStartRequest("");
   }
 
-  /*   const situationOptions = Object.keys(YOUNG_SITUATIONS)
-    .map((s) => ({ value: s, label: translate(s) }))
-    .filter((s) => s.value !== YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL);
-  const gradeOptions = Object.keys(GRADES)
-    //.filter((g) => g !== GRADES.NOT_SCOLARISE)
-    .map((g) => ({ value: g, label: translateGrade(g) })); */
-
   return (
     <SectionContext.Provider value={{ errors }}>
       <Section
@@ -1271,6 +1258,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 options={gradeOptions}
                 onChange={(value) => onLocalChange("grade", value)}
                 young={young}
+                className="flex-[1_1_50%]"
               />
               <Field
                 name="situation"
@@ -1278,7 +1266,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 value={data.situation}
                 transformer={translate}
                 mode={sectionMode}
-                className="mb-[16px]"
+                className="mt-4 mb-4 flex-[1_1_50%]"
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
                 correctionRequest={getCorrectionRequest(requests, "situation")}
@@ -1322,21 +1310,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                       />
                     </>
                   )}
-                  {/* <Field
-                    name="grade"
-                    label="Classe"
-                    value={data.grade}
-                    transformer={translateGrade}
-                    mode={sectionMode}
-                    onStartRequest={onStartRequest}
-                    currentRequest={currentRequest}
-                    correctionRequest={getCorrectionRequest(requests, "grade")}
-                    onCorrectionRequestChange={onCorrectionRequestChange}
-                    type="select"
-                    options={gradeOptions}
-                    onChange={(value) => onLocalChange("grade", value)}
-                    young={young}
-                  /> */}
                 </>
               )}
             </div>
