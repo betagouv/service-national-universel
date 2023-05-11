@@ -40,7 +40,7 @@ export default function changeSejour() {
   useEffect(() => {
     (async function getInfo() {
       try {
-        if (young.cohort !== "à venir" && calculateAge(young.birthdateAt, new Date("2023-10-01")) < 18) {
+        if (young.cohort !== "à venir" && calculateAge(young.birthdateAt, new Date("2023-09-30")) < 18) {
           setSejours(["à venir"]);
           setIsElegible(true);
         } else {

@@ -23,7 +23,7 @@ export function ChangeCohortPen({ young, onChange }) {
   useEffect(() => {
     if (young) {
       (async function getSessions() {
-        const isEligibleForCohortToCome = calculateAge(young.birthdateAt, new Date("2023-10-01")) < 18;
+        const isEligibleForCohortToCome = calculateAge(young.birthdateAt, new Date("2023-09-30")) < 18;
         const cohortToCome = { name: "à venir", isEligible: isEligibleForCohortToCome };
         if (user.role !== ROLES.ADMIN) {
           setOptions(isEligibleForCohortToCome && young.cohort !== "à venir" ? [cohortToCome] : []);
