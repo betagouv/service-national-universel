@@ -1,141 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { ES_NO_LIMIT, getDepartmentNumber, ROLES, translateInscriptionStatus, translatePhase1, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
-import { ExportComponentV2, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system";
-import api from "../../services/api";
-import { Loading, Title } from "./components/commons";
-
-const getAggregCenter = async (cohesionCenterIds, selectedFilters) => {
-  let sessionByCenter = {};
-  let sessionsPhase1 = {};
-  //Fetch Sessiom
-  if (cohesionCenterIds?.length) {
-    let body = {
-      size: ES_NO_LIMIT,
-      query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohesionCenterId.keyword": cohesionCenterIds } }] } },
-    };
-
-    if (selectedFilters?.cohorts?.filter?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohorts.filter } });
-    const { responses } = await api.esQuery("sessionphase1", body);
-    if (responses.length) {
-      sessionsPhase1 = responses[0]?.hits?.hits?.map((e) => ({ ...e._source, _id: e._id })) || [];
-    }
-  }
-
-  //aggrrgation young
-  if (sessionsPhase1?.length) {
-    const body = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
-      aggs: {
-        session: {
-          terms: { field: "sessionPhase1Id.keyword", size: ES_NO_LIMIT },
-          aggs: {
-            presence: { terms: { field: "cohesionStayPresence.keyword", missing: "NR" } },
-            presenceJDM: { terms: { field: "presenceJDM.keyword", missing: "NR" } },
-            depart: { terms: { field: "departInform.keyword", missing: "NR" } },
-            sanitaryField: { terms: { field: "cohesionStayMedicalFileReceived.keyword", missing: "NR" } },
-          },
-        },
-      },
-      size: 0,
-    };
-    if (selectedFilters.status?.filter?.length) body.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.status?.filter } });
-    if (selectedFilters.statusPhase1?.filter?.length) body.query.bool.filter.push({ terms: { "statusPhase1.keyword": selectedFilters.statusPhase1?.filter } });
-
-    let sessionPhase1Id = sessionsPhase1.map((session) => session._id).filter((id) => id);
-    if (sessionPhase1Id.length) body.query.bool.filter.push({ terms: { "sessionPhase1Id.keyword": sessionPhase1Id } });
-
-    const { responses } = await api.esQuery("young", body);
-    if (!responses?.length) return;
-    const sessionAggreg = responses[0].aggregations.session.buckets.reduce((acc, session) => {
-      acc[session.key] = {
-        total: session.doc_count,
-        presence: session.presence.buckets.reduce((acc, presence) => {
-          acc[presence.key] = presence.doc_count;
-          return acc;
-        }, {}),
-        presenceJDM: session.presenceJDM.buckets.reduce((acc, presenceJDM) => {
-          acc[presenceJDM.key] = presenceJDM.doc_count;
-          return acc;
-        }, {}),
-        depart: session.depart.buckets.reduce((acc, depart) => {
-          acc[depart.key] = depart.doc_count;
-          return acc;
-        }, {}),
-        sanitaryField: session.sanitaryField.buckets.reduce((acc, sanitaryField) => {
-          acc[sanitaryField.key] = sanitaryField.doc_count;
-          return acc;
-        }, {}),
-      };
-      return acc;
-    }, {});
-
-    sessionByCenter = sessionsPhase1.reduce((acc, session) => {
-      if (!acc[session.cohesionCenterId]) {
-        acc[session.cohesionCenterId] = {
-          centerId: session.cohesionCenterId,
-          total: sessionAggreg[session._id]?.total || 0,
-          presenceOui: sessionAggreg[session._id]?.presence?.true || 0,
-          presenceNon: sessionAggreg[session._id]?.presence?.false || 0,
-          presenceNR: sessionAggreg[session._id]?.presence?.NR || 0,
-          presenceJDMOui: sessionAggreg[session._id]?.presenceJDM?.true || 0,
-          presenceJDMNon: sessionAggreg[session._id]?.presenceJDM?.false || 0,
-          presenceJDMNR: sessionAggreg[session._id]?.presenceJDM?.NR || 0,
-          departOui: sessionAggreg[session._id]?.depart?.true || 0,
-          sanitaryFieldOui: sessionAggreg[session._id]?.sanitaryField?.true || 0,
-          sanitaryFieldNon: sessionAggreg[session._id]?.sanitaryField?.false || 0,
-          sanitaryFieldNR: sessionAggreg[session._id]?.sanitaryField?.NR || 0,
-        };
-      } else {
-        acc[session.cohesionCenterId].total += sessionAggreg[session._id]?.total || 0;
-        acc[session.cohesionCenterId].presenceOui += sessionAggreg[session._id]?.presence?.true || 0;
-        acc[session.cohesionCenterId].presenceNon += sessionAggreg[session._id]?.presence?.false || 0;
-        acc[session.cohesionCenterId].presenceNR += sessionAggreg[session._id]?.presence?.NR || 0;
-        acc[session.cohesionCenterId].presenceJDMOui += sessionAggreg[session._id]?.presenceJDM?.true || 0;
-        acc[session.cohesionCenterId].presenceJDMNon += sessionAggreg[session._id]?.presenceJDM?.false || 0;
-        acc[session.cohesionCenterId].presenceJDMNR += sessionAggreg[session._id]?.presenceJDM?.NR || 0;
-        acc[session.cohesionCenterId].departOui += sessionAggreg[session._id]?.depart?.true || 0;
-        acc[session.cohesionCenterId].sanitaryFieldOui += sessionAggreg[session._id]?.sanitaryField?.true || 0;
-        acc[session.cohesionCenterId].sanitaryFieldNon += sessionAggreg[session._id]?.sanitaryField?.false || 0;
-        acc[session.cohesionCenterId].sanitaryFieldNR += sessionAggreg[session._id]?.sanitaryField?.NR || 0;
-      }
-      return acc;
-    }, {});
-  }
-
-  for (const id of cohesionCenterIds) {
-    if (!sessionByCenter[id]) {
-      sessionByCenter[id] = {
-        centerId: id,
-      };
-    }
-  }
-  return Object.values(sessionByCenter);
-};
+import { getDepartmentNumber, ROLES, translateInscriptionStatus, translatePhase1, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
+import { Title } from "./components/commons";
 
 export default function ListPresence() {
   const user = useSelector((state) => state.Auth.user);
-  const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
-  const [youngByCenter, setYoungByCenter] = useState([]);
   const history = useHistory();
 
   const [data, setData] = React.useState([]);
-  const pageId = "centrePresence";
   const [selectedFilters, setSelectedFilters] = React.useState({});
-  const [paramData, setParamData] = React.useState({
-    size: 20,
-    page: 0,
-  });
+  const [paramData, setParamData] = React.useState({ page: 0 });
+
+  const pageId = "centrePresence";
 
   const filterArray = [
-    { title: "Cohorte", name: "cohorts", datafield: "cohorts.keyword", missingLabel: "Non renseignée", parentGroup: "Centre" },
+    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", parentGroup: "Centre" },
     ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
       ? {
           title: "Région",
           name: "region",
-          datafield: "region.keyword",
           missingLabel: "Non renseignée",
           defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
           parentGroup: "Centre",
@@ -144,7 +30,6 @@ export default function ListPresence() {
     {
       title: "Département",
       name: "department",
-      datafield: "department.keyword",
       missingLabel: "Non renseignée",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
@@ -154,7 +39,6 @@ export default function ListPresence() {
       ? {
           title: "Académie",
           name: "academy",
-          datafield: "academy.keyword",
           missingLabel: "Non renseignée",
           parentGroup: "Centre",
         }
@@ -179,54 +63,8 @@ export default function ListPresence() {
       disabledBaseQuery: true,
       parentGroup: "Volontaire",
     },
-    user.role === ROLES.ADMIN ? { title: "Code", name: "code2022", datafield: "code2022.keyword", missingLabel: "Non renseignée", parentGroup: "Centre" } : null,
+    user.role === ROLES.ADMIN ? { title: "Code", name: "code2022", missingLabel: "Non renseignée", parentGroup: "Centre" } : null,
   ].filter((e) => e);
-
-  const searchBarObject = {
-    placeholder: "Rechercher par mots clés, ville, code postal...",
-    datafield: ["name", "city", "zip", "code2022"],
-  };
-
-  const getDefaultQuery = () => {
-    if (user.role === ROLES.ADMIN) {
-      return {
-        size: ES_NO_LIMIT,
-        query: {
-          bool: { must: [{ match_all: {} }] },
-        },
-        track_total_hits: true,
-      };
-    } else if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      return {
-        size: ES_NO_LIMIT,
-        query: {
-          bool: { must: [{ match_all: {} }, { terms: { "department.keyword": user.department } }] },
-        },
-        track_total_hits: true,
-      };
-    } else if (user.role === ROLES.REFERENT_REGION) {
-      return {
-        size: ES_NO_LIMIT,
-        query: {
-          bool: { must: [{ match_all: {} }, { term: { "region.keyword": user.region } }] },
-        },
-        track_total_hits: true,
-      };
-    }
-  };
-
-  //Get List of Cohesion Center Ids
-  useEffect(() => {
-    if (data) setCohesionCenterIds(data.map((center) => center._id));
-  }, [data]);
-
-  //fetch list young by session phase 1
-  useEffect(() => {
-    (async () => {
-      const list = await getAggregCenter(cohesionCenterIds, selectedFilters);
-      setYoungByCenter(list);
-    })();
-  }, [cohesionCenterIds]);
 
   return (
     <div className="flex w-full flex-1 flex-col gap-8 p-8">
@@ -236,51 +74,43 @@ export default function ListPresence() {
           <div className="flex w-full flex-row justify-between">
             <Filters
               pageId={pageId}
-              esId="cohesioncenter"
-              defaultQuery={getDefaultQuery()}
+              route="/elasticsearch/cohesioncenter/presence/search"
               setData={(value) => setData(value)}
               filters={filterArray}
-              searchBarObject={searchBarObject}
+              searchPlaceholder="Rechercher par mots clés, ville, code postal..."
               selectedFilters={selectedFilters}
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
             />
-            <ExportComponentV2
+            <ExportComponent
               title="Exporter"
-              defaultQuery={getDefaultQuery()}
+              route="/elasticsearch/cohesioncenter/presence/export"
               filters={filterArray}
               exportTitle="Centres_de_cohesion"
-              index="cohesioncenter"
               transform={async (all) => {
-                const cohesionCenterIds = all?.map((center) => center._id.toString());
-                const dataCenter = await getAggregCenter(cohesionCenterIds, selectedFilters);
-
                 return all?.map((data) => {
-                  const sessionsPhase1 = dataCenter.find((e) => e.centerId === data._id);
                   return {
                     Id: data._id.toString(),
-                    "Code du centre": data?.code2022,
-                    Nom: data?.name,
-                    "Présence JDM - Présent": sessionsPhase1?.presenceJDMOui || 0,
-                    "Présence JDM - Absent": sessionsPhase1?.presenceJDMNon || 0,
-                    "Présence JDM - Non renseigné": sessionsPhase1?.presenceJDMNR || 0,
-                    "Présence JDM - Non renseigné (%)": (Math.round((sessionsPhase1?.presenceJDMNR / sessionsPhase1?.total) * 100) || 0) + "%",
-                    "Présence à l’arrivée - Présent": sessionsPhase1?.presenceOui || 0,
-                    "Présence à l’arrivée - Absent": sessionsPhase1?.presenceNon || 0,
-                    "Présence à l’arrivée - Non renseigné": sessionsPhase1?.presenceNR || 0,
-                    "Présence à l’arrivée - Non renseigné (%)": (Math.round((sessionsPhase1?.presenceNR / sessionsPhase1?.total) * 100) || 0) + "%",
-                    Départ: sessionsPhase1?.departOui || 0,
-                    "Fiche sanitaire - Renseignée": sessionsPhase1?.sanitaryFieldOui || 0,
-                    "Fiche sanitaire - Non renseignée": sessionsPhase1?.sanitaryFieldNon + sessionsPhase1?.sanitaryFieldNR || 0,
-                    "Fiche sanitaire - Non renseignée (%)":
-                      (Math.round(((sessionsPhase1?.sanitaryFieldNon + sessionsPhase1?.sanitaryFieldNR) / sessionsPhase1?.total) * 100) || 0) + "%",
-                    "Total des jeunes": sessionsPhase1?.total || 0,
+                    "Code du centre": data.code2022,
+                    Nom: data.name,
+                    "Présence JDM - Présent": data.presenceJDMOui || 0,
+                    "Présence JDM - Absent": data.presenceJDMNon || 0,
+                    "Présence JDM - Non renseigné": data.presenceJDMNR || 0,
+                    "Présence JDM - Non renseigné (%)": (Math.round((data.presenceJDMNR / data.total) * 100) || 0) + "%",
+                    "Présence à l’arrivée - Présent": data.presenceOui || 0,
+                    "Présence à l’arrivée - Absent": data.presenceNon || 0,
+                    "Présence à l’arrivée - Non renseigné": data.presenceNR || 0,
+                    "Présence à l’arrivée - Non renseigné (%)": (Math.round((data.presenceNR / data.total) * 100) || 0) + "%",
+                    Départ: data.departOui || 0,
+                    "Fiche sanitaire - Renseignée": data.sanitaryFieldOui || 0,
+                    "Fiche sanitaire - Non renseignée": data.sanitaryFieldNon + data.sanitaryFieldNR || 0,
+                    "Fiche sanitaire - Non renseignée (%)": (Math.round(((data.sanitaryFieldNon + data.sanitaryFieldNR) / data.total) * 100) || 0) + "%",
+                    "Total des jeunes": data.total || 0,
                   };
                 });
               }}
               selectedFilters={selectedFilters}
-              searchBarObject={searchBarObject}
               icon={<BsDownload className="text-gray-400" />}
               css={{
                 override: true,
@@ -314,13 +144,7 @@ export default function ListPresence() {
                 <div className="w-[20%] uppercase">FICHE SANITAIRE</div>
               </div>
               {data.map((hit) => (
-                <Hit
-                  key={hit._id}
-                  hit={hit}
-                  history={history}
-                  onClick={() => history.push(`/centre/${hit._id}`)}
-                  sessionsPhase1={youngByCenter.find((e) => e.centerId === hit._id)}
-                />
+                <Hit key={hit._id} hit={hit} onClick={() => history.push(`/centre/${hit._id}`)} />
               ))}
             </div>
           }
@@ -330,64 +154,47 @@ export default function ListPresence() {
   );
 }
 
-const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (sessionsPhase1) setIsLoading(false);
-  }, [sessionsPhase1]);
-
+const Hit = ({ hit, onClick }) => {
+  if (!hit) return <div></div>;
   return (
     <div onClick={onClick} className="flex cursor-pointer items-center border-t-[1px] border-gray-100 py-3 px-4 hover:bg-gray-50">
       <div className="flex w-[30%] flex-col gap-1">
-        <div className="truncate font-bold leading-6 text-gray-900">{hit?.name}</div>
-        <div className="text-xs font-normal leading-4 text-gray-500">{`${hit?.city || ""} • ${hit?.department || ""}`}</div>
+        <div className="truncate font-bold leading-6 text-gray-900">{hit.name}</div>
+        <div className="text-xs font-normal leading-4 text-gray-500">{`${hit.city || ""} • ${hit.department || ""}`}</div>
       </div>
       <div className="flex w-[20%] flex-col gap-2">
-        {isLoading ? (
-          <Loading width="w-[50%]" />
-        ) : (
-          <>
-            <span className="text-sm font-normal leading-none text-gray-900">
-              <strong>{sessionsPhase1?.presenceJDMOui || 0}</strong> Présents <strong>{sessionsPhase1?.presenceJDMNon || 0}</strong> Absents
-            </span>
-            <span className="text-xs font-normal uppercase leading-none text-gray-500">
-              <strong>{sessionsPhase1?.presenceJDMNR || 0}</strong> non renseignés ({Math.round((sessionsPhase1?.presenceJDMNR / sessionsPhase1?.total) * 100) || 0}%)
-            </span>
-          </>
-        )}
+        <>
+          <span className="text-sm font-normal leading-none text-gray-900">
+            <strong>{hit.presenceJDMOui || 0}</strong> Présents <strong>{hit.presenceJDMNon || 0}</strong> Absents
+          </span>
+          <span className="text-xs font-normal uppercase leading-none text-gray-500">
+            <strong>{hit.presenceJDMNR || 0}</strong> non renseignés ({Math.round((hit.presenceJDMNR / hit.total) * 100) || 0}%)
+          </span>
+        </>
       </div>
       <div className="flex w-[20%] flex-col gap-2">
-        {isLoading ? (
-          <Loading width="w-[50%]" />
-        ) : (
-          <>
-            <span className="text-sm font-normal leading-none text-gray-900">
-              <strong>{sessionsPhase1?.presenceOui || 0}</strong> Présents <strong>{sessionsPhase1?.presenceNon || 0}</strong> Absents
-            </span>
-            <span className="text-xs font-normal uppercase leading-none text-gray-500">
-              <strong>{sessionsPhase1?.presenceNR || 0}</strong> non renseignés ({Math.round((sessionsPhase1?.presenceNR / sessionsPhase1?.total) * 100) || 0}%)
-            </span>
-          </>
-        )}
+        <>
+          <span className="text-sm font-normal leading-none text-gray-900">
+            <strong>{hit.presenceOui || 0}</strong> Présents <strong>{hit.presenceNon || 0}</strong> Absents
+          </span>
+          <span className="text-xs font-normal uppercase leading-none text-gray-500">
+            <strong>{hit.presenceNR || 0}</strong> non renseignés ({Math.round((hit.presenceNR / hit.total) * 100) || 0}%)
+          </span>
+        </>
       </div>
       <div className="flex w-[10%] items-center text-sm font-normal leading-none text-gray-900">
-        {isLoading ? <Loading width="w-[50%]" /> : <strong>{sessionsPhase1?.departOui || 0}</strong>}
+        <strong>{hit.departOui || 0}</strong>
       </div>
       <div className="flex w-[20%] flex-col gap-2">
-        {isLoading ? (
-          <Loading width="w-[50%]" />
-        ) : (
-          <>
-            <span className="text-sm font-normal leading-none text-gray-900">
-              <strong>{sessionsPhase1?.sanitaryFieldOui || 0}</strong> Renseignées ({Math.round((sessionsPhase1?.sanitaryFieldOui / sessionsPhase1?.total) * 100) || 0}%)
-            </span>
-            <span className="text-sm font-normal leading-none text-gray-900">
-              <strong>{sessionsPhase1?.sanitaryFieldNR + sessionsPhase1?.sanitaryFieldNon || 0}</strong> Non renseignées (
-              {Math.round(((sessionsPhase1?.sanitaryFieldNR + sessionsPhase1?.sanitaryFieldNon) / sessionsPhase1?.total) * 100) || 0}%)
-            </span>
-          </>
-        )}
+        <>
+          <span className="text-sm font-normal leading-none text-gray-900">
+            <strong>{hit.sanitaryFieldOui || 0}</strong> Renseignées ({Math.round((hit.sanitaryFieldOui / hit.total) * 100) || 0}%)
+          </span>
+          <span className="text-sm font-normal leading-none text-gray-900">
+            <strong>{hit.sanitaryFieldNR + hit.sanitaryFieldNon || 0}</strong> Non renseignées ({Math.round(((hit.sanitaryFieldNR + hit.sanitaryFieldNon) / hit.total) * 100) || 0}
+            %)
+          </span>
+        </>
       </div>
     </div>
   );
