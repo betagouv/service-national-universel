@@ -96,6 +96,13 @@ export const saveTitle = (selectedFilters, filters) => {
   return object;
 };
 
+export function normalizeString(s) {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
 export const orderCohort = (cohorts) => {
   for (const cohort of cohorts) {
     if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, cohort.key)) {

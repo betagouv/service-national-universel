@@ -2,6 +2,7 @@ import { Popover, Transition } from "@headlessui/react";
 import React, { Fragment } from "react";
 import { BsChevronRight } from "react-icons/bs";
 import Trash from "../../../../assets/icons/Trash";
+import { normalizeString } from "./utils";
 
 // file used to show the popover for the all the possible values of a filter
 
@@ -48,26 +49,10 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
 
   React.useEffect(() => {
     // normalize search
-    const normalizedSearch = search
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
+    const normalizedSearch = normalizeString(search);
     const newData =
       search !== ""
-        ? data.filter((f) =>
-            filter?.translate
-              ? filter
-                  .translate(f.key)
-                  .normalize("NFD")
-                  .replace(/[\u0300-\u036f]/g, "")
-                  .toLowerCase()
-                  .includes(normalizedSearch)
-              : f.key
-                  .normalize("NFD")
-                  .replace(/[\u0300-\u036f]/g, "")
-                  .toLowerCase()
-                  .includes(normalizedSearch),
-          )
+        ? data.filter((f) => (filter?.translate ? normalizeString(filter.translate(f.key)).includes(normalizedSearch) : normalizeString(f.key).includes(normalizedSearch)))
         : data;
     setOptionsVisible(newData);
   }, [search]);
@@ -156,10 +141,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                           const optionSelected = selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.key);
                           const showCount = filter?.showCount === false ? false : true;
                           return (
-                            <div
-                              className="flex cursor-pointer items-center justify-between py-2 px-3 hover:bg-gray-50"
-                              key={option?.key}
-                              onClick={() => handleSelect(option?.key)}>
+                            <div className="flex cursor-pointer items-center justify-between py-2 px-3 hover:bg-gray-50" key={option.key} onClick={() => handleSelect(option.key)}>
                               <div className="flex items-center gap-2 text-sm leading-5 text-gray-700">
                                 <input type="checkbox" checked={optionSelected} />
                                 <div className={`${optionSelected && "font-bold"}`}>
