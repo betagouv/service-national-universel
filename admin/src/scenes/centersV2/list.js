@@ -102,11 +102,12 @@ const ListSession = ({ firstSession }) => {
   });
   const filterArray = [
     { title: "Cohorte", name: "cohort", missingLabel: "Non renseignée", defaultValue: [firstSession], sort: (e) => orderCohort(e) },
-    { title: "Région", name: "region", missingLabel: "Non renseignée" },
+    { title: "Région", name: "region", missingLabel: "Non renseignée", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
     {
       title: "Département",
       name: "department",
       missingLabel: "Non renseignée",
+      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
     { title: "Places restantes", name: "placesLeft", missingLabel: "Non renseignée" },

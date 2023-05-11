@@ -400,12 +400,13 @@ export default function List() {
 
   //Filters
   const filterArray = [
-    { title: "Région", name: "region", parentGroup: "Général" },
+    { title: "Région", name: "region", parentGroup: "Général", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
     {
       title: "Département",
       name: "department",
       parentGroup: "Général",
       missingLabel: "Non renseigné",
+      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
     {

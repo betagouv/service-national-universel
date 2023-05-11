@@ -8,14 +8,13 @@ import Calendar from "../../assets/icons/Calendar";
 import ExternalLink from "../../assets/icons/ExternalLink";
 import Menu from "../../assets/icons/Menu";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
 import { adminURL } from "../../config";
 import api from "../../services/api";
 import DoubleProfil from "../plan-transport/ligne-bus/components/Icons/DoubleProfil";
-import ModalCreation from "./components/ModalCreation";
 import { Loading, TabItem, Title } from "./components/common";
-
-import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
+import ModalCreation from "./components/ModalCreation";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -95,12 +94,12 @@ const ListPoints = ({ user }) => {
   const [paramData, setParamData] = React.useState({ page: 0 });
   const filterArray = [
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
-    { title: "Région", name: "region", missingLabel: "Non renseignée" },
+    { title: "Région", name: "region", missingLabel: "Non renseignée", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
     {
       title: "Département",
       name: "department",
-
       missingLabel: "Non renseignée",
+      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
   ];
