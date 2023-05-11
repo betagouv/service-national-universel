@@ -224,7 +224,7 @@ export default function List() {
   const getLabelWhen = (when) => {
     switch (when) {
       case "SCOLAIRE":
-        return "Période extra-scolaire";
+        return "Période scolaire";
       case "VACANCES":
         return "Pendant les vacances";
       case "CUSTOM":

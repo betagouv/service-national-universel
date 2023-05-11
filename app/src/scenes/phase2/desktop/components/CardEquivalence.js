@@ -42,7 +42,7 @@ export default function CardEquivalence({ equivalence, young }) {
         <div className="flex items-center justify-between">
           <div className="flex-col items-center ">
             <div className="text-xs font-normal uppercase leading-4 text-gray-500">envoyée le {formatDateFR(equivalence.createdAt)}</div>
-            <div className="text-base font-bold leading-5">Ma demande de reconnaissance d’engagement déjà réalisé</div>
+            <div className="text-base font-bold leading-5">Ma demande de reconnaissance d’engagement externe</div>
           </div>
           <div className="flex items-center gap-5">
             <div className={`text-xs font-normal ${theme.background[equivalence.status]} ${theme.text[equivalence.status]} rounded-sm px-2 py-[2px] `}>

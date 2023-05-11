@@ -41,7 +41,7 @@ export default function CardEquivalence({ equivalence, young }) {
           </div>
           <div className="flex items-center justify-between">
             <div className="flex-col items-center ">
-              <div className="text-base font-bold leading-5">Ma demande de reconnaissance d’engagement déjà réalisé</div>
+              <div className="text-base font-bold leading-5">Ma demande de reconnaissance d’engagement externe</div>
               <div className="mt-2 text-xs font-normal uppercase leading-4 text-gray-500">envoyée le {formatDateFR(equivalence.createdAt)}</div>
             </div>
           </div>

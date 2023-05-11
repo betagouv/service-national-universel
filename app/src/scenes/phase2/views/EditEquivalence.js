@@ -179,7 +179,7 @@ export default function EditEquivalence() {
     <div className="align-center my-4 flex justify-center ">
       <div className="p-4 lg:w-1/2">
         <div className="text-center text-2xl font-extrabold leading-10 tracking-tight md:text-4xl ">
-          {mode === "create" ? "Je demande la reconnaissance d'un engagement déjà réalisé" : "Je modifie ma demande de reconnaissance d'engagement"}
+          {mode === "create" ? "Je demande la reconnaissance d'un engagement déjà réalisé" : "Je modifie ma demande d'équivalence"}
         </div>
         <div className="mt-4 rounded-lg border-[1px] border-blue-400 bg-blue-50">
           <div className="flex items-center px-4 py-3">
@@ -540,18 +540,18 @@ export default function EditEquivalence() {
           </div> */}
           {data?.files?.length
             ? data.files.map((file, index) => (
-              <div key={index} className="mt-1 flex w-full flex-row items-center justify-between rounded-lg border-[1px] border-gray-300 py-2 px-3">
-                <div className="flex flex-row items-center">
-                  <PaperClip className="mr-2 text-gray-400" />
-                  <div className="text-sm font-normal leading-5 text-gray-800">{file}</div>
+                <div key={index} className="mt-1 flex w-full flex-row items-center justify-between rounded-lg border-[1px] border-gray-300 py-2 px-3">
+                  <div className="flex flex-row items-center">
+                    <PaperClip className="mr-2 text-gray-400" />
+                    <div className="text-sm font-normal leading-5 text-gray-800">{file}</div>
+                  </div>
+                  <div
+                    className="cursor-pointer text-sm font-normal leading-5 text-gray-800 hover:underline"
+                    onClick={() => setData({ ...data, files: data?.files.filter((f) => file !== f) })}>
+                    Retirer
+                  </div>
                 </div>
-                <div
-                  className="cursor-pointer text-sm font-normal leading-5 text-gray-800 hover:underline"
-                  onClick={() => setData({ ...data, files: data?.files.filter((f) => file !== f) })}>
-                  Retirer
-                </div>
-              </div>
-            ))
+              ))
             : null}
           <div className="mt-3 flex w-full flex-col items-center rounded-lg border-[1px] border-dashed border-gray-300 py-4">
             <AddImage className="text-gray-400" />
