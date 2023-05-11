@@ -17,23 +17,17 @@ import { supportURL } from "../../../config";
 export default function Verification({ step, parentId }) {
   const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
-  const [certified, setCertified] = React.useState(false);
+  const [certified, setCertified] = React.useState(young?.parent1DataVerified);
   const [error, setError] = React.useState(null);
   const [saving, setSaving] = React.useState(false);
 
-  useEffect(() => {
-    if (young) {
-      if (isReturningParent(young, parentId)) {
-        const route = parentId === 2 ? "done-parent2" : "done";
-        history.push(`/representants-legaux/${route}?token=${token}`);
-        return;
-      }
-
-      setCertified(young.parent1DataVerified);
-    }
-  }, [young]);
-
   if (!young) return <Loader />;
+
+  if (isReturningParent(young, parentId)) {
+    const route = parentId === 2 ? "done-parent2" : "done";
+    history.push(`/representants-legaux/${route}?token=${token}`);
+  }
+
 
   const sections = sectionsData(young).map(Section);
 
@@ -143,7 +137,7 @@ function Section(section, idx) {
     return SectionSubtitle(section, idx);
   }
 
-  const fields = section.fields.map(SectionField);
+  const fields = section.fields?.map(SectionField);
 
   return (
     <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px]" key={idx.toString()}>
@@ -303,18 +297,18 @@ function sectionsData(young) {
         young.status === "REINSCRIPTION"
           ? situation
           : [
-              { label: "Pays de naissance", value: young.birthCountry },
-              { label: "Département de naissance", value: getDepartmentByZip(young.birthCityZip) },
-              { label: "Ville de naissance", value: young.birthCity },
-              { label: "Sexe", value: translate(young.gender) },
-              { label: "Téléphone", value: young.phone },
-              ...titleAddress,
-              { label: "Adresse de résidence", value: young.address ? young.address + (young.complementAddress ? "<br/>" + young.complementAddress : "") : undefined },
-              { label: "Code postal", value: young.zip },
-              { label: "Ville", value: young.city },
-              ...foreignAddress,
-              ...situation,
-            ],
+            { label: "Pays de naissance", value: young.birthCountry },
+            { label: "Département de naissance", value: getDepartmentByZip(young.birthCityZip) },
+            { label: "Ville de naissance", value: young.birthCity },
+            { label: "Sexe", value: translate(young.gender) },
+            { label: "Téléphone", value: young.phone },
+            ...titleAddress,
+            { label: "Adresse de résidence", value: young.address ? young.address + (young.complementAddress ? "<br/>" + young.complementAddress : "") : undefined },
+            { label: "Code postal", value: young.zip },
+            { label: "Ville", value: young.city },
+            ...foreignAddress,
+            ...situation,
+          ],
     },
     {
       title: young.firstName + " " + young.lastName + " a déclaré les représentants légaux suivants détenteurs de l'autorité parentale\u00A0:",
