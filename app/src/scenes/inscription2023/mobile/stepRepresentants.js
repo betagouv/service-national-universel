@@ -49,13 +49,13 @@ export default function StepRepresentants() {
     parent1LastName: young.parent1LastName || "",
     parent1Email: young.parent1Email || "",
     parent1Phone: young.parent1Phone || "",
-    parent1PhoneZone: young.parent1PhoneZone || "FRANCE",
+    parent1PhoneZone: young.parent1PhoneZone || "",
     parent2Status: young.parent2Status || "",
     parent2FirstName: young.parent2FirstName || "",
     parent2LastName: young.parent2LastName || "",
     parent2Email: young.parent2Email || "",
     parent2Phone: young.parent2Phone || "",
-    parent2PhoneZone: young.parent2PhoneZone || "FRANCE",
+    parent2PhoneZone: young.parent2PhoneZone || "",
   });
 
   const trimmedParent1Phone = data.parent1Phone && data.parent1Phone.replace(/\s/g, "");
@@ -66,13 +66,13 @@ export default function StepRepresentants() {
   const getErrors = () => {
     let errors = {};
     if (data.parent1Phone && !isPhoneNumberWellFormated(trimmedParent1Phone, data.parent1PhoneZone)) {
-      errors.parent1Phone = PHONE_ZONES[data.parent1PhoneZone].errorMessage;
+      errors.parent1Phone = PHONE_ZONES[data.parent1PhoneZone]?.errorMessage;
     } else errors.parent1Phone = undefined;
     if (data.parent1Email && !validator.isEmail(trimmedParent1Email)) {
       errors.parent1Email = "L'adresse email n'est pas valide";
     } else errors.parent1Email = undefined;
     if (data.parent2Phone && !isPhoneNumberWellFormated(trimmedParent2Phone, data.parent2PhoneZone)) {
-      errors.parent2Phone = PHONE_ZONES[data.parent2PhoneZone].errorMessage;
+      errors.parent2Phone = PHONE_ZONES[data.parent2PhoneZone]?.errorMessage;
     } else errors.parent2Phone = undefined;
     if (data.parent2Email && !validator.isEmail(trimmedParent2Email)) {
       errors.parent2Email = "L'adresse email n'est pas valide";
@@ -89,8 +89,10 @@ export default function StepRepresentants() {
     let error = getErrors();
 
     parent1Keys.push("parent1Phone");
+    parent1Keys.push("parent1PhoneZone");
     parent1Keys.push("parent1Email");
     parent2Keys.push("parent2Phone");
+    parent2Keys.push("parent2PhoneZone");
     parent2Keys.push("parent2Email");
 
     for (const key of parent1Keys) {
@@ -320,8 +322,8 @@ const FormRepresentant = ({ i, data, setData, errors, corrections }) => {
         onChangeZone={(value) => setData({ ...data, [`parent${i}PhoneZone`]: value })}
         value={data[`parent${i}Phone`]}
         zoneValue={data[`parent${i}PhoneZone`]}
-        placeholder={PHONE_ZONES[data[`parent${i}PhoneZone`]].example}
-        error={errors[`parent${i}Phone`]}
+        placeholder={PHONE_ZONES[data[`parent${i}PhoneZone`]]?.example}
+        error={errors[`parent${i}Phone`] || errors[`parent${i}PhoneZone`]}
         correction={corrections[`parent${i}Phone`]}
       />
     </div>

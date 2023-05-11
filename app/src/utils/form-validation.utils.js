@@ -19,7 +19,7 @@ export const validateEmail = ({ value }) => {
 };
 
 export const validatePhoneNumber = ({ value }) => {
-  if (!value.phoneNumber) return requiredErrorMessage;
+  if (!value.phoneNumber || !value.phoneZone) return requiredErrorMessage;
   return !isPhoneNumberWellFormated(value.phoneNumber, value.phoneZone) && PHONE_ZONES[value.phoneZone].errorMessage;
 };
 

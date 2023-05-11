@@ -21,7 +21,7 @@ const getInitialFormValues = (young) => ({
   parent1Email: young?.parent1Email || "",
   parent1Phone: {
     phoneNumber: young?.parent1Phone || "",
-    phoneZone: young?.parent1PhoneZone || PHONE_ZONES_NAMES.FRANCE,
+    phoneZone: young?.parent1PhoneZone || "",
   },
   parent2Status: young?.parent2Status || "representant",
   parent2LastName: young?.parent2LastName || "",
@@ -29,7 +29,7 @@ const getInitialFormValues = (young) => ({
   parent2Email: young?.parent2Email || "",
   parent2Phone: {
     phoneNumber: young?.parent2Phone || "",
-    phoneZone: young?.parent2PhoneZone || PHONE_ZONES_NAMES.FRANCE,
+    phoneZone: young?.parent2PhoneZone || "",
   },
 });
 
@@ -179,7 +179,7 @@ const AccountRepresentantsPage = () => {
                 value={formValues.parent1Phone}
                 error={errors?.parent1Phone}
                 onChange={handleChangeValue("parent1Phone")}
-                placeholder={PHONE_ZONES[formValues.parent1Phone.phoneZone].example}
+                placeholder={PHONE_ZONES[formValues.parent1Phone.phoneZone]?.example}
               />
             </section>
             <Checkbox label="Je ne possède pas de second(e) représentant(e) légal(e)" onChange={(value) => setHasParent2(!value)} value={!hasParent2} useCheckedAsValue />
@@ -222,7 +222,7 @@ const AccountRepresentantsPage = () => {
                   value={formValues.parent2Phone}
                   error={errors?.parent2Phone}
                   onChange={handleChangeValue("parent2Phone")}
-                  placeholder={PHONE_ZONES[formValues.parent2Phone.phoneZone].example}
+                  placeholder={PHONE_ZONES[formValues.parent2Phone.phoneZone]?.example}
                 />
               </section>
             )}
