@@ -10,6 +10,7 @@ import ModalRattacherCentre from "../components/ModalRattacherCentre";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import ReactTooltip from "react-tooltip";
 import { useHistory } from "react-router-dom";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 import api from "../../../services/api";
 
@@ -47,6 +48,8 @@ export default function Details({ center, setCenter, sessions }) {
   const [editInfo, setEditInfo] = React.useState(false);
   const [errors, setErrors] = React.useState({});
   const [data, setData] = useState(null);
+  useDocumentTitle(`Fiche du centre - ${center?.name}`);
+
   useEffect(() => {
     setData({ ...center, pmr: center?.pmr ? center.pmr : "false" });
   }, [center]);
