@@ -70,6 +70,7 @@ export default function Youngs({ mission, applications, updateMission }) {
       title: "Département",
       name: "youngDepartment",
       missingLabel: "Non renseigné",
+      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
     {

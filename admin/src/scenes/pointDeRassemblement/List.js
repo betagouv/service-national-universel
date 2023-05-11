@@ -2,7 +2,7 @@ import React from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
-import { canCreateMeetingPoint, ES_NO_LIMIT, ROLES, START_DATE_SESSION_PHASE1, COHORTS, COHESION_STAY_START, getDepartmentNumber } from "snu-lib";
+import { canCreateMeetingPoint, ROLES, START_DATE_SESSION_PHASE1, COHORTS, COHESION_STAY_START, getDepartmentNumber } from "snu-lib";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { adminURL } from "../../config";
 import api from "../../services/api";
@@ -14,7 +14,6 @@ import DoubleProfil from "../plan-transport/ligne-bus/components/Icons/DoublePro
 import ExternalLink from "../../assets/icons/ExternalLink";
 import BusSvg from "../../assets/icons/Bus";
 import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
-
 
 import { Filters, ResultTable, Save, SelectedFilters, ExportComponent } from "../../components/filters-system-v2";
 
@@ -96,12 +95,12 @@ const ListPoints = ({ user }) => {
   const [paramData, setParamData] = React.useState({ page: 0 });
   const filterArray = [
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
-    { title: "Région", name: "region", missingLabel: "Non renseignée" },
+    { title: "Région", name: "region", missingLabel: "Non renseignée", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
     {
       title: "Département",
       name: "department",
-
       missingLabel: "Non renseignée",
+      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
   ];
