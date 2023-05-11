@@ -2,21 +2,20 @@ import React from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
-import { canCreateMeetingPoint, ES_NO_LIMIT, ROLES, START_DATE_SESSION_PHASE1, COHORTS, COHESION_STAY_START, getDepartmentNumber } from "snu-lib";
+import { COHESION_STAY_START, COHORTS, ROLES, START_DATE_SESSION_PHASE1, canCreateMeetingPoint, getDepartmentNumber } from "snu-lib";
+import BusSvg from "../../assets/icons/Bus";
+import Calendar from "../../assets/icons/Calendar";
+import ExternalLink from "../../assets/icons/ExternalLink";
+import Menu from "../../assets/icons/Menu";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
 import { adminURL } from "../../config";
 import api from "../../services/api";
-import { Loading, TabItem, Title } from "./components/common";
-import ModalCreation from "./components/ModalCreation";
-import Menu from "../../assets/icons/Menu";
-import Calendar from "../../assets/icons/Calendar";
 import DoubleProfil from "../plan-transport/ligne-bus/components/Icons/DoubleProfil";
-import ExternalLink from "../../assets/icons/ExternalLink";
-import BusSvg from "../../assets/icons/Bus";
-import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
+import ModalCreation from "./components/ModalCreation";
+import { Loading, TabItem, Title } from "./components/common";
 
-
-import { Filters, ResultTable, Save, SelectedFilters, ExportComponent } from "../../components/filters-system-v2";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
