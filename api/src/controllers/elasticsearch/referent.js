@@ -88,7 +88,6 @@ router.post("/team/:action(search|export)", passport.authenticate(["referent"], 
         .allow(null)
         .valid("region", "department", ...departmentList),
     }).validate(req.query, { stripUnknown: true });
-    console.log(errorQuery);
     if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters
