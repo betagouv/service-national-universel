@@ -197,6 +197,7 @@ describe("Young", () => {
         birthCity: "Paris",
         birthCityZip: "75008",
         phone: "0600010203",
+        phoneZone: "FRANCE",
         situation: YOUNG_SITUATIONS.GENERAL_SCHOOL,
         livesInFrance: "true",
         addressVerified: "true",
@@ -366,6 +367,7 @@ describe("Young", () => {
         parent1LastName: "Doe",
         parent1Email: "jane@doe.com",
         parent1Phone: "0600020305",
+        parent1PhoneZone: "FRANCE",
         parent2: false,
       };
 
@@ -391,6 +393,7 @@ describe("Young", () => {
         parent1LastName: "Doe",
         parent1Email: "jane@doe.com",
         parent1Phone: "0600020305",
+        parent1PhoneZone: "FRANCE",
         parent2: false,
       };
 
