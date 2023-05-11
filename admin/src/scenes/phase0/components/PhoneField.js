@@ -16,7 +16,7 @@ const PhoneField = ({
   mode = "readonly",
   value = "",
   onChange = () => {},
-  zoneValue = "FRANCE",
+  zoneValue = "",
   onChangeZone = () => {},
   placeholder = "",
   className = "",
@@ -71,15 +71,7 @@ const PhoneField = ({
       {label && <label className="text-[12px] font-normal leading-[16px] text-[#6B7280]">{label}</label>}
       {mode === "edition" && (
         <>
-          <InputPhone
-            className="bg-gray-50"
-            value={value}
-            onChange={onChange}
-            zoneValue={zoneValue || "AUTRE"}
-            onChangeZone={onChangeZone}
-            placeholder={placeholder}
-            error={error}
-          />
+          <InputPhone className="bg-gray-50" value={value} onChange={onChange} zoneValue={zoneValue} onChangeZone={onChangeZone} placeholder={placeholder} error={error} />
           {error && <div className="mt-[8px] text-[#EF4444]">{error}</div>}
         </>
       )}
