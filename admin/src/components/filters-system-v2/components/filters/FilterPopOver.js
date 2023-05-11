@@ -143,6 +143,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                           return (
                             <div className="flex cursor-pointer items-center justify-between py-2 px-3 hover:bg-gray-50" key={option.key} onClick={() => handleSelect(option.key)}>
                               <div className="flex items-center gap-2 text-sm leading-5 text-gray-700">
+                                {/* Avoid react alert by using onChange even if empty */}
                                 <input type="checkbox" checked={optionSelected} onChange={() => {}} />
                                 <div className={`${optionSelected && "font-bold"}`}>
                                   {option.key === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.key) : option?.key}
