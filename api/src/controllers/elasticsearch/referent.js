@@ -104,7 +104,6 @@ router.post("/team/:action(search|export)", passport.authenticate(["referent"], 
       }
     }
 
-    console.log("contextFilters", JSON.stringify(contextFilters));
 
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
 
