@@ -14,5 +14,6 @@ router.use("/mission", require("./mission"));
 router.use("/email", require("./email"));
 router.use("/application", require("./application"));
 router.use("/referent", require("./referent"));
+router.use("/dashboard", require("./dashboard"));
 
 module.exports = router;
