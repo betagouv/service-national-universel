@@ -57,7 +57,6 @@ jobs:
           rm -rf .git
 
       - name: Push
-        working-directory: ${{ env.SUBFOLDER_NAME }}
         run: |
           git init
           git config user.email "github.deployer@gmail.com"
