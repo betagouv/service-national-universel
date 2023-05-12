@@ -20,7 +20,7 @@ export default function Field({ onChange, value, label, disabled = false, error,
         <div className="mb-1.5 flex items-center gap-2">
           <label className="my-0 text-xs text-gray-500">{label}</label>
 
-          <MdInfoOutline data-tip data-for={tooltips} className="h-5 w-5 cursor-pointer text-gray-400" />
+          <MdInfoOutline data-tip data-for={tooltips} className="h-4 w-4 cursor-pointer text-gray-400" />
           <ReactTooltip id={tooltips} type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
             <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">{tooltips}</p>
           </ReactTooltip>
