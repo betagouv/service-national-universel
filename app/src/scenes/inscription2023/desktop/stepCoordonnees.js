@@ -75,6 +75,7 @@ const commonRequiredFields = [
   ...birthPlaceFields,
   "gender",
   "phone",
+  "phoneZone",
   "situation",
   "livesInFrance",
   "address",
@@ -97,7 +98,7 @@ const defaultState = {
   birthCityZip: "",
   birthCity: "",
   gender: genderOptions[0].value,
-  phoneZone: "FRANCE",
+  phoneZone: "",
   phone: "",
   livesInFrance: inFranceOrAbroadOptions[0].value,
   addressVerified: "false",
@@ -589,7 +590,7 @@ export default function StepCoordonnees() {
         value={phone}
         zoneValue={phoneZone}
         placeholder={PHONE_ZONES[phoneZone]?.example}
-        error={errors.phone}
+        error={errors.phone || errors.phoneZone}
         correction={corrections.phone}
       />
       <RadioButton

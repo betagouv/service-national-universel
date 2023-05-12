@@ -323,7 +323,7 @@ function validateYoung(young, user) {
     phoneZone: Joi.string()
       .trim()
       .valid(...PHONE_ZONES_NAMES_ARR)
-      .default(PHONE_ZONES_NAMES.FRANCE),
+      .allow("", null),
     gender: Joi.string().allow(null, ""),
     birthdateAt: Joi.string().allow(null, ""),
     cohort: Joi.string().allow(null, ""),
@@ -448,7 +448,7 @@ function validateYoung(young, user) {
     parent1PhoneZone: Joi.string()
       .trim()
       .valid(...PHONE_ZONES_NAMES_ARR)
-      .default(PHONE_ZONES_NAMES.FRANCE),
+      .allow(null, ""),
     parent1OwnAddress: Joi.string().allow(null, ""),
     parent1Address: Joi.string().allow(null, ""),
     parent1ComplementAddress: Joi.string().allow(null, ""),
@@ -474,7 +474,7 @@ function validateYoung(young, user) {
     parent2PhoneZone: Joi.string()
       .trim()
       .valid(...PHONE_ZONES_NAMES_ARR)
-      .default(PHONE_ZONES_NAMES.FRANCE),
+      .allow(null, ""),
     parent2OwnAddress: Joi.string().allow(null, ""),
     parent2Address: Joi.string().allow(null, ""),
     parent2ComplementAddress: Joi.string().allow(null, ""),

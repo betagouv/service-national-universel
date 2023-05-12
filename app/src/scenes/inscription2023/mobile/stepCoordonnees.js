@@ -79,6 +79,7 @@ const commonRequiredFields = [
   ...birthPlaceFields,
   "gender",
   "phone",
+  "phoneZone",
   "situation",
   "livesInFrance",
   "address",
@@ -102,7 +103,7 @@ const defaultState = {
   birthCity: "",
   gender: genderOptions[0].value,
   phone: "",
-  phoneZone: "FRANCE",
+  phoneZone: "",
   livesInFrance: inFranceOrAbroadOptions[0].value,
   addressVerified: "false",
   address: "",
@@ -204,6 +205,7 @@ export default function StepCoordonnees() {
         birthCityZip: young.birthCityZip || data.birthCityZip,
         gender: young.gender || data.gender,
         phone: young.phone || data.phone,
+        phoneZone: young.phoneZone || data.phoneZone,
         livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
         addressVerified: young.addressVerified || data.addressVerified,
         address: young.address || data.address,
@@ -247,7 +249,7 @@ export default function StepCoordonnees() {
     let errors = {};
 
     if (phone && !isPhoneNumberWellFormated(trimmedPhone, phoneZone)) {
-      errors.phone = PHONE_ZONES[phoneZone].errorMessage;
+      errors.phone = PHONE_ZONES[phoneZone]?.errorMessage;
     }
 
     if (wasBornInFranceBool && birthCityZip && !validator.isPostalCode(birthCityZip, "FR")) {
@@ -580,8 +582,8 @@ export default function StepCoordonnees() {
           onChangeZone={updateData("phoneZone")}
           value={phone}
           zoneValue={phoneZone}
-          placeholder={PHONE_ZONES[phoneZone].example}
-          error={errors.phone}
+          placeholder={PHONE_ZONES[phoneZone]?.example}
+          error={errors.phone || errors.phoneZone}
           correction={corrections.phone}
         />
         <RadioButton
