@@ -239,10 +239,12 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
       <div className="my-4 flex w-full">
         <div className="w-1/2">
           <div className="text-xl font-medium">Renseignez la date d’expiration</div>
-          <div className="mt-2 mb-8 leading-loose text-gray-600">
-            Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
-            ).
-          </div>
+          {young.cohort !== "à venir" && (
+            <div className="mt-2 mb-8 leading-loose text-gray-600">
+              Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
+              ).
+            </div>
+          )}
           {corrections
             ?.filter(({ field }) => field === "latestCNIFileExpirationDate")
             .map((e) => (

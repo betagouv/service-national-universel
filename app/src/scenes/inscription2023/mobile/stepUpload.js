@@ -298,10 +298,12 @@ export default function StepUpload() {
             ))}
         </div>
         <div className="text-xl font-medium">Renseignez la date d’expiration</div>
-        <div className="my-2 text-gray-600">
-          Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
-          ).
-        </div>
+        {young.cohort !== "à venir" && (
+          <div className="my-2 text-gray-600">
+            Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
+            ).
+          </div>
+        )}
         <div className="mx-auto w-3/4">
           <img className="mx-auto my-4" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
         </div>
