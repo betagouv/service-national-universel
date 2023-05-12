@@ -180,7 +180,6 @@ const Schema = new mongoose.Schema({
   phoneZone: {
     type: String,
     enum: PHONE_ZONES_NAMES_ARR,
-    default: PHONE_ZONES_NAMES.FRANCE,
     documentation: {
       description: "Zone géographique de provenance du numéro du volontaire",
     },
@@ -1013,7 +1012,6 @@ const Schema = new mongoose.Schema({
   parent1PhoneZone: {
     type: String,
     enum: PHONE_ZONES_NAMES_ARR,
-    default: PHONE_ZONES_NAMES.FRANCE,
     documentation: {
       description: "Zone géographique de provenance du numéro du parent 1",
     },
@@ -1161,7 +1159,6 @@ const Schema = new mongoose.Schema({
   parent2PhoneZone: {
     type: String,
     enum: PHONE_ZONES_NAMES_ARR,
-    default: PHONE_ZONES_NAMES.FRANCE,
     documentation: {
       description: "Zone géographique de provenance du numéro du parent 1",
     },

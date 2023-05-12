@@ -48,6 +48,8 @@ const Step = () => {
 };
 
 export default function Index() {
+  return <Redirect to="/auth" />;
+
   const young = useSelector((state) => state.Auth.young);
 
   if (young) return <Redirect to="/" />;

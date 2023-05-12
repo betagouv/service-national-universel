@@ -1,29 +1,32 @@
 import dayjs from "dayjs";
 import * as FileSaver from "file-saver";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { NavLink, useHistory, useParams } from "react-router-dom";
-import { ES_NO_LIMIT } from "snu-lib";
+import { ES_NO_LIMIT, getDepartmentNumber } from "snu-lib";
 import * as XLSX from "xlsx";
 import Bus from "../../../assets/icons/Bus";
 import ClipboardList from "../../../assets/icons/ClipboardList";
 import Menu from "../../../assets/icons/Menu";
 import PencilAlt from "../../../assets/icons/PencilAlt";
 import ShieldCheck from "../../../assets/icons/ShieldCheck";
-import SelectAction from "../../../components/SelectAction";
-import api from "../../../services/api";
+import Warning from "../../../assets/icons/Warning";
 import Breadcrumbs from "../../../components/Breadcrumbs";
+import SelectAction from "../../../components/SelectAction";
+import { currentFilterAsUrl } from "../../../components/filters-system-v2/components/filters/utils";
+import { capture } from "../../../sentry";
+import api from "../../../services/api";
 import {
+  ROLES,
   departmentLookUp,
+  formatDateFR,
   formatDateFRTimezoneUTC,
   formatLongDateFR,
   getLabelWithdrawnReason,
   isInRuralArea,
-  ROLES,
   translate,
   translateFileStatusPhase1,
-  formatDateFR,
   translatePhase1,
   youngCheckinField,
 } from "../../../utils";
@@ -32,39 +35,167 @@ import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";
 import General from "./general";
 import Pointage from "./pointage";
-import Warning from "../../../assets/icons/Warning";
-import { capture } from "../../../sentry";
 
 export default function CenterYoungIndex() {
-  const [modalExportMail, setModalExportMail] = React.useState({ isOpen: false });
-  const [filter, setFilter] = React.useState();
-  const [urlParams, setUrlParams] = React.useState("");
+  const [modalExportMail, setModalExportMail] = useState({ isOpen: false });
+  const [filter, setFilter] = useState({});
+  const [urlParams, setUrlParams] = useState("");
   const user = useSelector((state) => state.Auth.user);
-  const [loading, setLoading] = React.useState();
-  const [isYoungCheckinOpen, setIsYoungCheckinOpen] = React.useState();
+  const [loading, setLoading] = useState();
+  const [isYoungCheckinOpen, setIsYoungCheckinOpen] = useState();
+  const [focusedSession, setFocusedSession] = useState(null);
+
+  const filterArray = [
+    {
+      title: "Statut",
+      name: "status",
+      parentGroup: "Général",
+      translate: translate,
+      defaultValue: ["VALIDATED"],
+    },
+    {
+      title: "Statut phase 1",
+      name: "statusPhase1",
+      parentGroup: "Général",
+      translate: translatePhase1,
+    },
+    { title: "Région", name: "region", parentGroup: "Général", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
+    {
+      title: "Département",
+      name: "department",
+      parentGroup: "Général",
+      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+    },
+    {
+      title: "Sexe",
+      name: "gender",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Classe",
+      name: "grade",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Handicap",
+      name: "handicap",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "PPS",
+      name: "ppsBeneficiary",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "PAI",
+      name: "paiBeneficiary",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "QPV",
+      name: "qpv",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Allergies ou intolérances",
+      name: "allergies",
+      parentGroup: "Dossier",
+      translate: translate,
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Aménagement spécifique",
+      name: "specificAmenagment",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Aménagement PMR",
+      name: "reducedMobilityAccess",
+      parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Fiches sanitaires",
+      name: "cohesionStayMedicalFileReceived",
+      parentGroup: "Dossier",
+      translate: translate,
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Droit à l'image",
+      name: "imageRight",
+      parentGroup: "Dossier",
+      translate: translate,
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Utilisation d’autotest",
+      name: "autoTestPCR",
+      parentGroup: "Dossier",
+      translate: translate,
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Présence à l'arrivée",
+      name: "cohesionStayPresence",
+      parentGroup: "Pointage",
+      translate: translate,
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Présence à la JDM",
+      name: "presenceJDM",
+      parentGroup: "Pointage",
+      translate: translate,
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Départ renseigné",
+      name: "departInform",
+      parentGroup: "Pointage",
+      translate: translate,
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Motif du départ",
+      name: "departSejourMotif",
+      parentGroup: "Pointage",
+      translate: translate,
+      missingLabel: "Non renseigné",
+    },
+  ];
+
+  const history = useHistory();
+  const { id, sessionId, currentTab } = useParams();
+
+  useEffect(() => {
+    if (!sessionId) return;
+    (async () => {
+      const { data } = await api.get(`/session-phase1/${sessionId}`);
+      setFocusedSession(data);
+    })();
+  }, [sessionId]);
+
+  useEffect(() => {
+    setUrlParams(currentFilterAsUrl(filter, 0, filterArray));
+  }, [filter]);
 
   function updateFilter(n) {
     setFilter({ ...filter, ...n });
   }
-  const history = useHistory();
-  const { id, sessionId, currentTab } = useParams();
 
   React.useEffect(() => {
     const listTab = ["general", "tableau-de-pointage", "fiche-sanitaire"];
     if (!listTab.includes(currentTab)) history.push(`/centre/${id}/${sessionId}/general`);
   }, [currentTab]);
-
-  React.useEffect(() => {
-    if (filter) {
-      const params = Object.keys(filter).reduce((acc, key) => {
-        if (filter[key] && !["SEARCH", "SESSION"].includes(key)) {
-          return `${acc}&${key}=%5B${filter[key].map((c) => `"${c}"`)?.join("%2C")}%5D`;
-        }
-        return acc;
-      }, "");
-      setUrlParams(params.substring(1));
-    }
-  }, [filter]);
 
   React.useEffect(() => {
     (async function () {
@@ -100,189 +231,14 @@ export default function CenterYoungIndex() {
     setLoading(false);
   };
 
-  const esYoungBySession = async ({ must_not = false }) => {
-    let body = {
-      query: {
-        bool: {
-          must: [{ match_all: {} }, { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } }, { term: { "sessionPhase1Id.keyword": sessionId } }],
-          must_not: must_not ? must_not : [],
-          filter: [],
-        },
-      },
-      sort: [
-        {
-          "lastName.keyword": "asc",
-        },
-      ],
-      track_total_hits: true,
-      size: ES_NO_LIMIT,
-    };
-
-    if (filter?.SEARCH) {
-      body.query.bool.must.push({
-        bool: {
-          should: [
-            {
-              multi_match: {
-                query: filter?.SEARCH,
-                fields: ["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"],
-                type: "cross_fields",
-                operator: "and",
-              },
-            },
-            {
-              multi_match: {
-                query: filter?.SEARCH,
-                fields: ["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"],
-                type: "phrase",
-                operator: "and",
-              },
-            },
-            {
-              multi_match: {
-                query: filter?.SEARCH,
-                fields: ["firstName.folded", "lastName.folded", "city.folded", "zip"],
-                type: "phrase_prefix",
-                operator: "and",
-              },
-            },
-          ],
-          minimum_should_match: "1",
-        },
-      });
-    }
-
-    if (filter?.STATUS?.length) body.query.bool.filter.push({ terms: { "status.keyword": filter.STATUS } });
-    if (filter?.STATUS_PHASE_1?.length) body.query.bool.filter.push({ terms: { "statusPhase1.keyword": filter.STATUS_PHASE_1 } });
-    if (filter?.REGION?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.REGION } });
-    if (filter?.DEPARTMENT?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.DEPARTMENT } });
-    if (filter?.GRADE?.length) body.query.bool.filter.push({ terms: { "grade.keyword": filter.GRADE } });
-    if (filter?.HANDICAP?.length) body.query.bool.filter.push({ terms: { "handicap.keyword": filter.HANDICAP } });
-    if (filter?.PPS?.length) body.query.bool.filter.push({ terms: { "ppsBeneficiary.keyword": filter.PPS } });
-    if (filter?.PAI?.length) body.query.bool.filter.push({ terms: { "paiBeneficiary.keyword": filter.PAI } });
-    if (filter?.SPECIFIC_AMENAGEMENT?.length) body.query.bool.filter.push({ terms: { "specificAmenagment.keyword": filter.SPECIFIC_AMENAGEMENT } });
-    if (filter?.PMR?.length) body.query.bool.filter.push({ terms: { "reducedMobilityAccess.keyword": filter.PMR } });
-    if (filter?.SEXE?.length) body.query.bool.filter.push({ terms: { "gender.keyword": filter.SEXE } });
-
-    //Field with non renseigné value
-    if (filter?.ALLERGIES?.length) {
-      if (filter.ALLERGIES.includes("Non renseigné")) {
-        const filterWithoutNR = filter.ALLERGIES.filter((f) => f !== "Non renseigné");
-        body.query.bool.filter.push({
-          bool: {
-            should: [{ bool: { must_not: { exists: { field: "allergies.keyword" } } } }, { terms: { "allergies.keyword": filterWithoutNR } }],
-          },
-        });
-      } else {
-        body.query.bool.filter.push({ terms: { "allergies.keyword": filter.ALLERGIES } });
-      }
-    }
-    if (filter?.MEDICAL_FILE_RECEIVED?.length) {
-      if (filter.MEDICAL_FILE_RECEIVED.includes("Non renseigné")) {
-        const filterWithoutNR = filter.MEDICAL_FILE_RECEIVED.filter((f) => f !== "Non renseigné");
-        body.query.bool.filter.push({
-          bool: {
-            should: [
-              { bool: { must_not: { exists: { field: "cohesionStayMedicalFileReceived.keyword" } } } },
-              { terms: { "cohesionStayMedicalFileReceived.keyword": filterWithoutNR } },
-            ],
-          },
-        });
-      } else {
-        body.query.bool.filter.push({ terms: { "cohesionStayMedicalFileReceived.keyword": filter.MEDICAL_FILE_RECEIVED } });
-      }
-    }
-    if (filter?.QPV?.length) {
-      if (filter.QPV.includes("Non renseigné")) {
-        const filterWithoutNR = filter.QPV.filter((f) => f !== "Non renseigné");
-        body.query.bool.filter.push({
-          bool: {
-            should: [{ bool: { must_not: { exists: { field: "qpv.keyword" } } } }, { terms: { "qpv.keyword": filterWithoutNR } }],
-          },
-        });
-      } else {
-        body.query.bool.filter.push({ terms: { "qpv.keyword": filter.QPV } });
-      }
-    }
-    if (filter?.COHESION_JDM?.length) {
-      if (filter.COHESION_JDM.includes("Non renseigné")) {
-        const filterWithoutNR = filter.COHESION_JDM.filter((f) => f !== "Non renseigné");
-        body.query.bool.filter.push({
-          bool: {
-            should: [{ bool: { must_not: { exists: { field: "presenceJDM.keyword" } } } }, { terms: { "presenceJDM.keyword": filterWithoutNR } }],
-          },
-        });
-      } else {
-        body.query.bool.filter.push({ terms: { "presenceJDM.keyword": filter.COHESION_JDM } });
-      }
-    }
-    if (filter?.COHESION_PRESENCE?.length) {
-      if (filter.COHESION_PRESENCE.includes("Non renseigné")) {
-        const filterWithoutNR = filter.COHESION_PRESENCE.filter((f) => f !== "Non renseigné");
-        body.query.bool.filter.push({
-          bool: {
-            should: [{ bool: { must_not: { exists: { field: "cohesionStayPresence.keyword" } } } }, { terms: { "cohesionStayPresence.keyword": filterWithoutNR } }],
-          },
-        });
-      } else {
-        body.query.bool.filter.push({ terms: { "cohesionStayPresence.keyword": filter.COHESION_PRESENCE } });
-      }
-    }
-    if (filter?.DEPART?.length) {
-      if (filter.DEPART.includes("Non renseigné")) {
-        const filterWithoutNR = filter.DEPART.filter((f) => f !== "Non renseigné");
-        body.query.bool.filter.push({
-          bool: {
-            should: [{ bool: { must_not: { exists: { field: "departInform.keyword" } } } }, { terms: { "departInform.keyword": filterWithoutNR } }],
-          },
-        });
-      } else {
-        body.query.bool.filter.push({ terms: { "departInform.keyword": filter.DEPART } });
-      }
-    }
-    if (filter?.DEPART_MOTIF?.length) {
-      if (filter.DEPART_MOTIF.includes("Non renseigné")) {
-        const filterWithoutNR = filter.DEPART_MOTIF.filter((f) => f !== "Non renseigné");
-        body.query.bool.filter.push({
-          bool: {
-            should: [{ bool: { must_not: { exists: { field: "departSejourMotif.keyword" } } } }, { terms: { "departSejourMotif.keyword": filterWithoutNR } }],
-          },
-        });
-      } else {
-        body.query.bool.filter.push({ terms: { "departSejourMotif.keyword": filter.DEPART_MOTIF } });
-      }
-    }
-    if (filter?.IMAGE_RIGHT?.length) {
-      if (filter.IMAGE_RIGHT.includes("Non renseigné")) {
-        const filterWithoutNR = filter.IMAGE_RIGHT.filter((f) => f !== "Non renseigné");
-        body.query.bool.filter.push({
-          bool: {
-            should: [{ bool: { must_not: { exists: { field: "imageRight.keyword" } } } }, { terms: { "imageRight.keyword": filterWithoutNR } }],
-          },
-        });
-      } else {
-        body.query.bool.filter.push({ terms: { "imageRight.keyword": filter.IMAGE_RIGHT } });
-      }
-    }
-    if (filter?.AUTOTEST?.length) {
-      if (filter.AUTOTEST.includes("Non renseigné")) {
-        const filterWithoutNR = filter.AUTOTEST.filter((f) => f !== "Non renseigné");
-        body.query.bool.filter.push({
-          bool: {
-            should: [{ bool: { must_not: { exists: { field: "autoTestPCR.keyword" } } } }, { terms: { "autoTestPCR.keyword": filterWithoutNR } }],
-          },
-        });
-      } else {
-        body.query.bool.filter.push({ terms: { "autoTestPCR.keyword": filter.AUTOTEST } });
-      }
-    }
-
-    return await getAllResults(`sessionphase1young/${filter.SESSION}`, body);
-  };
-
   const exportData = async () => {
-    const data = await esYoungBySession({ must_not: false });
-    const result = await transformData({ data, centerId: id });
+    const data = await api.post(`/elasticsearch/young/by-session/${focusedSession._id}/export`, {
+      filters: Object.entries(filter).reduce((e, [key, value]) => {
+        if (value.filter.length === 1 && value.filter[0] === "") return e;
+        return { ...e, [key]: value.filter.map((e) => String(e)) };
+      }, {}),
+    });
+    const result = await transformData({ data: data.data, centerId: id });
     const csv = await toArrayOfArray(result);
     await toXLSX(`volontaires_pointage_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`, csv);
   };
@@ -301,8 +257,14 @@ export default function CenterYoungIndex() {
       };
 
       //exclude some youngs form export ligne
-      const must_not_query = [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }];
-      const youngs = await esYoungBySession({ must_not: must_not_query });
+      const data = await api.post(`/elasticsearch/young/by-session/${focusedSession._id}/export`, {
+        filters: Object.entries(filter).reduce((e, [key, value]) => {
+          if (value.filter.length === 1 && value.filter[0] === "") return e;
+          return { ...e, [key]: value.filter.map((e) => String(e)) };
+        }, {}),
+      });
+
+      const youngs = data.data;
 
       let response = await api.get(`/point-de-rassemblement/center/${id}/cohort/${youngs[0].cohort}`);
       const meetingPoints = response ? response.data.meetingPoints : [];
@@ -445,9 +407,11 @@ export default function CenterYoungIndex() {
               rightIconClassNames="text-blue-300"
               optionsGroup={[
                 {
+                  key: "export",
                   title: "Télécharger",
                   items: [
                     {
+                      key: "exportData",
                       action: async () => {
                         await exportData();
                       },
@@ -459,6 +423,7 @@ export default function CenterYoungIndex() {
                       ),
                     },
                     {
+                      key: "exportDataTransport",
                       action: async () => {
                         await exportDataTransport();
                       },
@@ -472,9 +437,11 @@ export default function CenterYoungIndex() {
                   ],
                 },
                 {
+                  key: "exportMail",
                   title: "Envoyer par mail",
                   items: [
                     {
+                      key: "infoTransport",
                       action: async () => {
                         setModalExportMail({
                           isOpen: true,
@@ -513,9 +480,11 @@ export default function CenterYoungIndex() {
           </nav>
         </div>
         <div className="bg-white pt-4">
-          {currentTab === "general" && <General filter={filter} updateFilter={updateFilter} />}
-          {currentTab === "tableau-de-pointage" && <Pointage updateFilter={updateFilter} isYoungCheckinOpen={isYoungCheckinOpen} />}
-          {currentTab === "fiche-sanitaire" && <FicheSanitaire updateFilter={updateFilter} />}
+          {currentTab === "general" && <General filter={filter} updateFilter={updateFilter} focusedSession={focusedSession} filterArray={filterArray} />}
+          {currentTab === "tableau-de-pointage" && (
+            <Pointage updateFilter={updateFilter} isYoungCheckinOpen={isYoungCheckinOpen} focusedSession={focusedSession} filterArray={filterArray} />
+          )}
+          {currentTab === "fiche-sanitaire" && <FicheSanitaire updateFilter={updateFilter} focusedSession={focusedSession} filterArray={filterArray} />}
         </div>
       </div>
       <ModalExportMail isOpen={modalExportMail?.isOpen} onCancel={() => setModalExportMail({ isOpen: false, value: null })} onSubmit={modalExportMail?.onSubmit} />
@@ -683,12 +652,6 @@ const transformData = async ({ data, centerId }) => {
 async function toArrayOfArray(data) {
   let columns = Object.keys(data[0] ?? []);
   return [columns, ...data.map((item) => Object.values(item))];
-}
-
-async function getAllResults(index, query) {
-  const result = await api.post(`/es/${index}/export`, query);
-  if (!result.data.length) return [];
-  return result.data;
 }
 
 async function toXLSX(fileName, csv) {

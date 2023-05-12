@@ -1,12 +1,12 @@
 import React from "react";
-import { isPhoneZoneKnown, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
+import { isPhoneZoneKnown, PHONE_ZONES } from "snu-lib/phone-number";
 import Label from "../layout/Label";
 import ErrorMessage from "../ErrorMessage";
 
 const InputPhone = ({
   value = {
     phoneNumber: "",
-    phoneZone: PHONE_ZONES_NAMES.FRANCE,
+    phoneZone: "",
   },
   label = "",
   onChange = () => null,
@@ -14,7 +14,9 @@ const InputPhone = ({
   error = null,
   className = "",
 }) => {
-  isPhoneZoneKnown({ zoneKey: value.phoneZone });
+  if (value.phoneZone) {
+    isPhoneZoneKnown({ zoneKey: value.phoneZone });
+  }
 
   const handleChange = (fieldName) => (event) => {
     onChange({
@@ -33,6 +35,7 @@ const InputPhone = ({
                 {phoneZone.code} {phoneZone.name}
               </option>
             ))}
+            {!value.phoneZone && <option value="" className="flex gap-1"></option>}
           </select>
           <div className="h-5 w-[1px] bg-[#C5C5C5]" />
           <input

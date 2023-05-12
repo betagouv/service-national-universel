@@ -21,7 +21,6 @@ import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import BoxWithPercentage from "./components/BoxWithPercentage";
 import CardCenterCapacity from "./components/CardCenterCapacity";
-import Cardsession from "./components/Cardsession";
 import MoreInfo from "./components/MoreInfo";
 import OccupationCardHorizontal from "./components/OccupationCardHorizontal";
 import Presences from "./components/Presences";
@@ -29,6 +28,7 @@ import StatusPhase1 from "./components/StatusPhase1";
 import TabSession from "./components/TabSession";
 import { getLink as getOldLink } from "../../../../../utils";
 import { getNewLink } from "../../../../../utils";
+import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -72,19 +72,19 @@ export default function Index() {
       },
       ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
         ? {
-            id: "region",
-            name: "Région",
-            fullValue: "Toutes",
-            options: regionOptions,
-          }
+          id: "region",
+          name: "Région",
+          fullValue: "Toutes",
+          options: regionOptions,
+        }
         : null,
       ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
         ? {
-            id: "academy",
-            name: "Académie",
-            fullValue: "Toutes",
-            options: academyOptions,
-          }
+          id: "academy",
+          name: "Académie",
+          fullValue: "Toutes",
+          options: academyOptions,
+        }
         : null,
       {
         id: "department",
@@ -97,6 +97,7 @@ export default function Index() {
         name: "Cohorte",
         fullValue: "Toutes",
         options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
+        sort: (e) => orderCohort(e),
       },
     ].filter((e) => e);
     setFilterArray(filters);

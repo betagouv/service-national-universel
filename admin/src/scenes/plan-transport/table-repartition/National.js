@@ -10,8 +10,10 @@ import { Loading, regionList, SubTitle, Title } from "../components/commons";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { cohortList, parseQuery } from "../util";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 export default function National() {
+  useDocumentTitle("Table de répartition");
   const user = useSelector((state) => state.Auth.user);
   const [cohort, setCohort] = React.useState(getDefaultCohort());
   const [youngsByRegion, setYoungsByRegion] = React.useState([]);

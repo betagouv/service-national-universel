@@ -198,7 +198,7 @@ export default function StepUpload() {
   function Recto() {
     async function handleChange(e) {
       const image = await resizeImage(e.target.files[0]);
-      if (image.size > 1000000) return setError({ text: "Ce fichier est trop volumineux." });
+      if (image.size > 5000000) return setError({ text: "Ce fichier est trop volumineux." });
 
       setRecto(image);
       setHasChanged(true);
@@ -233,7 +233,7 @@ export default function StepUpload() {
   function Verso() {
     async function handleChange(e) {
       const image = await resizeImage(e.target.files[0]);
-      if (image.size > 1000000) return setError({ text: "Ce fichier est trop volumineux." });
+      if (image.size > 5000000) return setError({ text: "Ce fichier est trop volumineux." });
 
       setVerso(image);
       setHasChanged(true);

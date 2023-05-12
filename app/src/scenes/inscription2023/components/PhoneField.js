@@ -6,7 +6,7 @@ const PhoneField = ({
   value = "",
   label = "Téléphone",
   onChange = () => {},
-  zoneValue = "FRANCE",
+  zoneValue = "",
   onChangeZone = () => {},
   placeholder = "",
   className = "",
@@ -30,6 +30,7 @@ const PhoneField = ({
               {phoneZone.code} {phoneZone.name}
             </option>
           ))}
+          {!zoneValue && <option value="" className="flex gap-1"></option>}
         </select>
         <div className="h-6 w-[1px] bg-[#C5C5C5]" />
         <input

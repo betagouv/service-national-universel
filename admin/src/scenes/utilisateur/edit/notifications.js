@@ -7,7 +7,7 @@ export default function Edit({ user, currentUser }) {
     <>
       <UserHeader user={user} currentUser={currentUser} tab="notifications" />
       <div className="m-8">
-        <Emails email={user.email} />
+        <Emails email={user.email} userType={"referent"} />
       </div>
     </>
   );

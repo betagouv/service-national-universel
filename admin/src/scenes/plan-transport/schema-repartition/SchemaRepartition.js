@@ -23,6 +23,7 @@ import { useSelector } from "react-redux";
 import ButtonPrimary from "../../../components/ui/buttons/ButtonPrimary";
 import { getCohortByName } from "../../../services/cohort.service";
 import ReactTooltip from "react-tooltip";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 const ExcelFileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
 
@@ -44,6 +45,9 @@ export default function SchemaRepartition({ region, department }) {
     toRegions: [],
   });
   const [data, setData] = useState({ rows: getDefaultRows() });
+  if (region) useDocumentTitle(`Schéma de répartition - ${region}`);
+  if (department) useDocumentTitle(`Schéma de répartition - ${department}`);
+  if (!department && !region) useDocumentTitle("Schéma de répartition");
 
   const departementsList =
     user.role === ROLES.REFERENT_DEPARTMENT && user.department.length > 1

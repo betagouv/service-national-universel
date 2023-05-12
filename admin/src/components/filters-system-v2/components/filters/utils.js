@@ -1,4 +1,5 @@
 import api from "../../../../services/api";
+import { COHESION_STAY_START } from "snu-lib";
 
 export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort) => {
   const resAlternative = await api.post(route, {
@@ -19,7 +20,6 @@ export const buildQuery = async (route, selectedFilters, page = 0, filterArray, 
   filterArray.map((f) => {
     if (f.customComponent) return;
     if (f.disabledBaseQuery) return;
-    console.log(f.name);
     newFilters[f.name] = aggs[f.name].names.buckets.filter((b) => b.doc_count > 0).map((b) => ({ key: b.key, doc_count: b.doc_count }));
 
     // check for any transformData function
@@ -43,9 +43,9 @@ export const getURLParam = (urlParams, setParamData, filters) => {
       // on check si c'est un custom component
       const customComponent = filters.find((f) => f.name === key);
       if (customComponent?.getQuery) {
-        localFilters[key] = { filter: value.split(","), customComponentQuery: customComponent.getQuery(value.split(",")[0]) };
+        localFilters[key] = { filter: value.split("~"), customComponentQuery: customComponent.getQuery(value.split("+")[0]) };
       } else {
-        localFilters[key] = { filter: value.split(",") };
+        localFilters[key] = { filter: value.split("~") };
       }
     }
   });
@@ -62,10 +62,10 @@ export const currentFilterAsUrl = (filters, page, filterArray, defaultUrlParam) 
   let url = Object.keys(selectedFilters)?.reduce((acc, curr) => {
     if (curr === "searchbar" && selectedFilters[curr]?.filter?.length > 0 && selectedFilters[curr]?.filter[0].trim() === "") return acc;
     if (selectedFilters[curr]?.filter?.length > 0) {
-      acc += `${curr}=${selectedFilters[curr]?.filter.join(",")}${index < length - 1 ? "&" : ""}`;
+      acc += `${curr}=${selectedFilters[curr]?.filter.join("~")}${index < length - 1 ? "&" : ""}`;
       // check if custom component
     } else if (selectedFilters[curr]?.filter?.value?.length > 0 && selectedFilters[curr]?.filter?.value[0]?.trim() !== "") {
-      acc += `${curr}=${selectedFilters[curr]?.filter?.value.join(",")}${index < length - 1 ? "&" : ""}`;
+      acc += `${curr}=${selectedFilters[curr]?.filter?.value.join("~")}${index < length - 1 ? "&" : ""}`;
     } else return acc;
 
     index++;
@@ -94,4 +94,23 @@ export const saveTitle = (selectedFilters, filters) => {
     })
     .filter((item) => item !== undefined);
   return object;
+};
+
+export function normalizeString(s) {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+export const orderCohort = (cohorts) => {
+  for (const cohort of cohorts) {
+    if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, cohort.key)) {
+      cohort.date = COHESION_STAY_START[cohort.key];
+    } else {
+      cohort.date = new Date(2000, 0, 1);
+    }
+  }
+  cohorts.sort((a, b) => b.date - a.date);
+  return cohorts;
 };

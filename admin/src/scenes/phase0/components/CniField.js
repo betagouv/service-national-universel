@@ -261,7 +261,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                   <AddButton />
                   <div>
                     <p>Ajouter un document</p>
-                    <p>Formats supportés : jpg, png, pdf. Pour les PDF, taille maximum  : 1 Mo.</p>
+                    <p>Formats supportés : jpg, png, pdf. Pour les PDF, taille maximum  : 5 Mo.</p>
                   </div>
                 </label>
               </div>

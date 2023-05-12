@@ -95,7 +95,7 @@ export default function Signin() {
           </button>
         </div>
 
-        <hr className="mt-4 text-[#E5E5E5]" />
+        {/* <hr className="mt-4 text-[#E5E5E5]" />
         <div className="mt-4 mb-4 text-center text-[17px] font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
         <div className="flex justify-center">
           <button
@@ -103,7 +103,7 @@ export default function Signin() {
             onClick={() => history.push("/preinscription")}>
             Commencer mon inscription
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

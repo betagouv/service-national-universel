@@ -32,7 +32,7 @@ const config = require("../config");
 const YoungObject = require("../models/young");
 const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../models/sessionPhase1");
-const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR, formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
+const { PHONE_ZONES_NAMES_ARR, formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [
@@ -61,7 +61,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       phoneZone: Joi.string()
         .trim()
         .valid(...PHONE_ZONES_NAMES_ARR)
-        .default(PHONE_ZONES_NAMES.FRANCE),
+        .allow("", null),
       latestCNIFileExpirationDate: Joi.date(),
       latestCNIFileCategory: Joi.string().trim(),
       birthdateAt: Joi.date(),
@@ -169,7 +169,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       parent1PhoneZone: Joi.string()
         .trim()
         .valid(...PHONE_ZONES_NAMES_ARR)
-        .default(PHONE_ZONES_NAMES.FRANCE),
+        .allow("", null),
       parent1OwnAddress: Joi.string().trim().valid("true", "false").allow(""),
       parent1Address: Joi.string().trim().allow(""),
       parent1Zip: Joi.string().trim().allow(""),
@@ -184,7 +184,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       parent2PhoneZone: Joi.string()
         .trim()
         .valid(...PHONE_ZONES_NAMES_ARR)
-        .default(PHONE_ZONES_NAMES.FRANCE),
+        .allow("", null),
       parent2OwnAddress: Joi.string().trim().valid("true", "false").allow(""),
       parent2Address: Joi.string().trim().allow(""),
       parent2Zip: Joi.string().trim().allow(""),

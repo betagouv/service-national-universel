@@ -58,25 +58,13 @@ export default function View(props) {
   }, [currentCohort]);
 
   const setYoungsFromES = async (id) => {
-    let body = {
-      query: { bool: { filter: [{ terms: { "meetingPointId.keyword": [id] } }, { terms: { "status.keyword": ["VALIDATED"] } }] } },
-      aggs: { cohort: { terms: { field: "cohort.keyword" } } },
-      size: 0,
-    };
-
-    const { responses } = await api.esQuery("young", body, null, "?showAffectedToRegionOrDep=1");
-    setNbYoung(responses[0].aggregations.cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
+    const { responses } = await api.post("/elasticsearch/young/by-point-de-rassemblement/aggs", { filters: { meetingPointIds: [id], cohort: [] } });
+    setNbYoung(responses[0].aggregations.group_by_cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
   };
 
   const setLinesFromES = async (id) => {
-    let body = {
-      query: { bool: { filter: [{ terms: { "meetingPointsIds.keyword": [id] } }] } },
-      aggs: { cohort: { terms: { field: "cohort.keyword" } } },
-      size: 0,
-    };
-
-    const { responses } = await api.esQuery("lignebus", body);
-    setLines(responses[0].aggregations.cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
+    const { responses } = await api.post("/elasticsearch/lignebus/by-point-de-rassemblement/aggs", { filters: { meetingPointIds: [id], cohort: [] } });
+    setLines(responses[0].aggregations.group_by_cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
   };
 
   const getPDR = async () => {
@@ -267,7 +255,7 @@ export default function View(props) {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Point de rassemblement", to: "/point-de-rassemblement" }, { label: "Fiche point de rassemblement" }]} />
+      <Breadcrumbs items={[{ label: "Point de rassemblement", to: "/point-de-rassemblement/liste/liste-points" }, { label: "Fiche point de rassemblement" }]} />
       <div className="m-8 flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <Title>{data.name}</Title>

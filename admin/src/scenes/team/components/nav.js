@@ -4,21 +4,18 @@ import FilterDepartment from "./filter/FilterDepartment";
 import { useSelector } from "react-redux";
 import { ROLES, getDepartmentNumber, department2region } from "../../../utils";
 
-export default function Nav({ filter, updateFilter }) {
+export default function Nav({ filter, updateFilter, currentTab, setCurrentTab }) {
   const user = useSelector((state) => state.Auth.user);
-  const [currentTab, setCurrentTab] = useState();
   const [userInTheSameRegion, setUserInTheSameRegion] = useState();
 
   useEffect(() => {
     if (currentTab === "region") {
-      updateFilter({ department: [], role: [ROLES.REFERENT_REGION, ROLES.VISITOR] });
+      updateFilter({ department: [] });
     } else if (user.department.map((department) => department2region[department]).includes(currentTab)) {
-      updateFilter({ department: [], role: [ROLES.REFERENT_REGION, ROLES.VISITOR], region: [currentTab] });
+      updateFilter({ department: [], region: [currentTab] });
     } else if (user.department.includes(currentTab) || currentTab === "department") {
       if (user.role === ROLES.REFERENT_DEPARTMENT) {
-        updateFilter({ department: [currentTab], role: [ROLES.REFERENT_DEPARTMENT], region: [] });
-      } else {
-        updateFilter({ role: [ROLES.REFERENT_DEPARTMENT] });
+        updateFilter({ department: [currentTab], region: [] });
       }
     }
   }, [currentTab]);
@@ -85,8 +82,8 @@ export default function Nav({ filter, updateFilter }) {
 const TabItem = ({ name, active, setCurrentTab, children }) => (
   <div
     onClick={() => setCurrentTab(name)}
-    className={`cursor-pointer px-3 py-2 text-coolGray-500  hover:border-b-[3px] hover:border-snu-purple-800 hover:text-snu-purple-800
-      ${active && "border-b-[3px] border-snu-purple-800 font-bold text-snu-purple-800"}`}>
+    className={`cursor-pointer px-3 py-2 text-coolGray-500  hover:border-b-[3px] hover:border-blue-600 hover:text-blue-600
+      ${active && "border-b-[3px] border-blue-600 font-bold text-blue-600"}`}>
     {children}
   </div>
 );

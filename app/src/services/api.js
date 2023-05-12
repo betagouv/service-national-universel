@@ -143,7 +143,8 @@ class api {
     const files = arr.filter((e) => typeof e === "object");
     let formData = new FormData();
     for (let i = 0; i < files.length; i++) {
-      formData.append(files[i].name, files[i], files[i].name);
+      const safeFilename = encodeURIComponent(files[i].name.replace(/'/g, ""));
+      formData.append(files[i].name, files[i], safeFilename);
     }
     formData.append("body", JSON.stringify({ names }));
     return new Promise(async (resolve, reject) => {
@@ -168,8 +169,8 @@ class api {
 
   uploadID(youngId, file, metadata = {}) {
     let formData = new FormData();
-    const filename = file.name;
-    formData.append("file", file, filename);
+    const safeFilename = encodeURIComponent(file.name.replace(/'/g, ""));
+    formData.append("file", file, safeFilename);
     for (const [key, value] of Object.entries(metadata)) {
       formData.append(key, value);
     }

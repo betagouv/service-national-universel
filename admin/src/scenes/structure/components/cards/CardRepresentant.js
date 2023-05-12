@@ -1,20 +1,17 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle, HiPhone } from "react-icons/hi";
-import { copyToClipboard, translate, formatPhoneNumberFR } from "../../../../utils";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../services/api";
-import { StructureContext } from "../../view";
-
-import Card from "../Card";
-import Button from "../Button";
+import { copyToClipboard, formatPhoneNumberFR, translate } from "../../../../utils";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import ReactTooltip from "react-tooltip";
-import ModalRepresentant from "../modals/ModalRepresentant";
 import { capture } from "../../../../sentry";
+import Button from "../Button";
+import Card from "../Card";
+import ModalRepresentant from "../modals/ModalRepresentant";
 
-export default function CardRepresentant() {
-  const { structure, setStructure } = useContext(StructureContext);
+export default function CardRepresentant({ structure, setStructure }) {
   const representant = structure?.structureManager || null;
   const [isOpen, setIsOpen] = useState(false);
   const handleShowModal = () => setIsOpen(true);
@@ -49,7 +46,7 @@ export default function CardRepresentant() {
       <Card className="h-36 w-96">
         {representant ? <Representative representant={representant} handleShowModal={handleShowModal} /> : <CreateRepresentative handleShowModal={handleShowModal} />}
       </Card>
-      <ModalRepresentant isOpen={isOpen} setIsOpen={setIsOpen} onSubmit={onSubmit} onDelete={onDelete} />
+      <ModalRepresentant isOpen={isOpen} setIsOpen={setIsOpen} onSubmit={onSubmit} onDelete={onDelete} structure={structure} />
     </>
   );
 }

@@ -1,3 +1,123 @@
+# [1.270.0](https://github.com/betagouv/service-national-universel/compare/v1.269.0...v1.270.0) (2023-05-11)
+
+
+### Bug Fixes
+
+* **admin:** filter stability ([#2592](https://github.com/betagouv/service-national-universel/issues/2592)) ([42275f3](https://github.com/betagouv/service-national-universel/commit/42275f3117fdb5928bfd9c3788b528cc135b0619))
+* **admin:** missions filter default value ([#2597](https://github.com/betagouv/service-national-universel/issues/2597)) ([ca55884](https://github.com/betagouv/service-national-universel/commit/ca558849a675e085b38515ab829b62594e0075ee))
+* **app:** Representants legaux - Etape verification - variable non définie ([#2595](https://github.com/betagouv/service-national-universel/issues/2595)) ([89dee01](https://github.com/betagouv/service-national-universel/commit/89dee01ce7e50e61b8b83f4dd16128ade193adf4))
+* **lib:** inscriptionModificationOpenForYoungs condition ([d90e5f2](https://github.com/betagouv/service-national-universel/commit/d90e5f286f2b61e73598b9a59000f89629d4262c))
+* **lib:** isSessionEditionOpen fix ([4281f92](https://github.com/betagouv/service-national-universel/commit/4281f92f35bebc09453003497f06dd2cf6efb537))
+* **lib:** modification date ([915976f](https://github.com/betagouv/service-national-universel/commit/915976fb827a1fb5e559f21420b966b89eddd667))
+
+
+### Features
+
+* **api/admin:** list presence new filters ([#2575](https://github.com/betagouv/service-national-universel/issues/2575)) ([aab9141](https://github.com/betagouv/service-national-universel/commit/aab9141f7c77c7dbfd061ccfea1e8f6f6467a1f3))
+* **api/admin:** team new filters ([#2596](https://github.com/betagouv/service-national-universel/issues/2596)) ([60731d5](https://github.com/betagouv/service-national-universel/commit/60731d56f478398308aeb2c61e7c31288459d4e9))
+* **app/lib:** block inscription modification access for metropolitan france ([#2598](https://github.com/betagouv/service-national-universel/issues/2598)) ([2f0afe0](https://github.com/betagouv/service-national-universel/commit/2f0afe0c88a8bd25b00bce166b6ab050f282b03e))
+
+# [1.269.0](https://github.com/betagouv/service-national-universel/compare/v1.268.0...v1.269.0) (2023-05-10)
+
+
+### Bug Fixes
+
+* **admin:** filter reload + special character  ([#2591](https://github.com/betagouv/service-national-universel/issues/2591)) ([f65b777](https://github.com/betagouv/service-national-universel/commit/f65b7777407b1fcd18b147d867c2038923b307cf))
+* **admin:** notif save filter pageId ([9251a57](https://github.com/betagouv/service-national-universel/commit/9251a57d4b765c68b4e599182863bcae32956bb0))
+
+
+### Features
+
+* **api/admin:** liste candidature mod / ref / resp / surperviseur new filters ([#2584](https://github.com/betagouv/service-national-universel/issues/2584)) ([03066cd](https://github.com/betagouv/service-national-universel/commit/03066cdc39e00f4f2cc49b9220de37dfd12d640d))
+* **api/admin:** young email new filters ([#2586](https://github.com/betagouv/service-national-universel/issues/2586)) ([aad0c32](https://github.com/betagouv/service-national-universel/commit/aad0c3282986f640c0e176ba133249e39f508af4))
+
+# [1.268.0](https://github.com/betagouv/service-national-universel/compare/v1.267.0...v1.268.0) (2023-05-09)
+
+
+### Bug Fixes
+
+* **admin:** change sejour ([326383a](https://github.com/betagouv/service-national-universel/commit/326383a5db3f65bbbd2684192ac2de9eb8e11346))
+* **admin:** fix filters step 1 ([#2587](https://github.com/betagouv/service-national-universel/issues/2587)) ([1c0fcfa](https://github.com/betagouv/service-national-universel/commit/1c0fcfa310b3f7db92a3a32b6625e23810c4a127))
+* **api:** es mission fix ([0813a30](https://github.com/betagouv/service-national-universel/commit/0813a308002eaf6e670544fbc823eddcc7b81b87))
+* **app:** change sejour ([b7f52ec](https://github.com/betagouv/service-national-universel/commit/b7f52ec9ed632e8b0213a0ca35c6f38ceb8475c9))
+
+
+### Features
+
+* **admin:** trie des cohort par date dans centerV2 ([#2579](https://github.com/betagouv/service-national-universel/issues/2579)) ([8e4b854](https://github.com/betagouv/service-national-universel/commit/8e4b854439f338ede0c6bf35c8098fb6a727667e))
+* **admin:** trie des cohorts/date dans les filtres [#2585](https://github.com/betagouv/service-national-universel/issues/2585) ([b48fe8f](https://github.com/betagouv/service-national-universel/commit/b48fe8f595bdb2c358b3ba1b01bfb5e6e39483a6))
+* **admin/lib:** export phonenumber formatE164 ([#2581](https://github.com/betagouv/service-national-universel/issues/2581)) ([79b64c4](https://github.com/betagouv/service-national-universel/commit/79b64c413951c0606a8fe12222ed53e35b82acb0))
+
+# [1.267.0](https://github.com/betagouv/service-national-universel/compare/v1.266.0...v1.267.0) (2023-05-08)
+
+
+### Bug Fixes
+
+* **api:** contract validation ([70c789a](https://github.com/betagouv/service-national-universel/commit/70c789a5a8b29767779b0f45f2c785e599b2dc76))
+* **api:** mission es context error ([32d1401](https://github.com/betagouv/service-national-universel/commit/32d14012e39d671e7cb2fd0be1c76bd1f7cbaae6))
+* **lib:** inscription end date ([0d7e91d](https://github.com/betagouv/service-national-universel/commit/0d7e91df77bee7032f985620f3ffe8ec9ed1782c))
+
+
+### Features
+
+* **api/admin:** mission list by structure + clean contexte infinite loop ([#2578](https://github.com/betagouv/service-national-universel/issues/2578)) ([134bbd6](https://github.com/betagouv/service-national-universel/commit/134bbd60e1cb4214c6e852d39fc8d2c7cad1cb41))
+* **api/app/admin:** cohort a venir ([#2583](https://github.com/betagouv/service-national-universel/issues/2583)) ([54ffdfe](https://github.com/betagouv/service-national-universel/commit/54ffdfe3c2061e4ad6a7d8dc2ad89f5a5500149d))
+
+# [1.266.0](https://github.com/betagouv/service-national-universel/compare/v1.265.0...v1.266.0) (2023-05-05)
+
+
+### Bug Fixes
+
+* **admin:** coherence between youngs bus and pdr between screens ([#2577](https://github.com/betagouv/service-national-universel/issues/2577)) ([def091f](https://github.com/betagouv/service-national-universel/commit/def091fdff6222226d48c007311cac1fafbbab2c))
+* **admin:** fix parent phone validation ([#2574](https://github.com/betagouv/service-national-universel/issues/2574)) ([ddf47c7](https://github.com/betagouv/service-national-universel/commit/ddf47c769d0cb2b07465709bbfeaf8dc977189d8))
+* **api:** get young if structure no longer exists ([844f1af](https://github.com/betagouv/service-national-universel/commit/844f1aff2630240b17734c1cff0e828c329aa6b1))
+* **app, admin, api:** Remove apostrophe from file names and revert to 5 Mo limit ([#2576](https://github.com/betagouv/service-national-universel/issues/2576)) ([bc51014](https://github.com/betagouv/service-national-universel/commit/bc51014e97be7b20bcc05e7340485826b67aca41))
+* count young on pdr, filter by cohesion stay and depart inform ([3d2bfb7](https://github.com/betagouv/service-national-universel/commit/3d2bfb7074e48f741ab4211c4fe8c97e75a31cba))
+* fix bus search from PDR list ([e48a49e](https://github.com/betagouv/service-national-universel/commit/e48a49ed22d9817606877011071b95a6d8b7a717))
+
+
+### Features
+
+* **admin/api:** liste young-by-center new filters + clean ([#2573](https://github.com/betagouv/service-national-universel/issues/2573)) ([a4b88a5](https://github.com/betagouv/service-national-universel/commit/a4b88a56b3201c6f4cd2fbbe4b448b4660cdec89))
+* **api:** Cron - Relance automatique du droit à l’image du RL2 à J-12 et J-2 ([#2572](https://github.com/betagouv/service-national-universel/issues/2572)) ([f7fc1b2](https://github.com/betagouv/service-national-universel/commit/f7fc1b2338f45b13135ba558f94c365416d6c7e4))
+* **api:** notification au transporteur lors d'une modif de centre ([#2554](https://github.com/betagouv/service-national-universel/issues/2554)) ([c01d586](https://github.com/betagouv/service-national-universel/commit/c01d5869b8742ef7a5248b66dd6e33e4866207e6))
+* **api:** notification transporteur lors d'une modif d'un groupe (create/delete/update) ([#2580](https://github.com/betagouv/service-national-universel/issues/2580)) ([4576a8c](https://github.com/betagouv/service-national-universel/commit/4576a8c5a806d74cd1d2638e530280d57831acc7))
+* **api:** notification transporteur lors d'une modif PDR ([#2556](https://github.com/betagouv/service-national-universel/issues/2556)) ([53926a8](https://github.com/betagouv/service-national-universel/commit/53926a8cb359a702375132f74ae53043a18fa065))
+* **api/admin:** elasticsearch new system (points de rassemblement) ([#2561](https://github.com/betagouv/service-national-universel/issues/2561)) ([e43d760](https://github.com/betagouv/service-national-universel/commit/e43d760bda3affbcd571e44aeef3f8319aede3a4))
+* **api/admin:** elasticsearch new system (school) ([#2564](https://github.com/betagouv/service-national-universel/issues/2564)) ([d00ec82](https://github.com/betagouv/service-national-universel/commit/d00ec82b09619d1f7a2a444adabc693536c9b6cf))
+
+# [1.265.0](https://github.com/betagouv/service-national-universel/compare/v1.264.1...v1.265.0) (2023-05-04)
+
+
+### Bug Fixes
+
+* **admin:** Breadcrumbs meeting points ([4e4c70f](https://github.com/betagouv/service-national-universel/commit/4e4c70f5e91af8d2df9d099de417ad3f0cbb2cdc))
+* **admin:** retour design dashboard engagement ([#2571](https://github.com/betagouv/service-national-universel/issues/2571)) ([f60a2ef](https://github.com/betagouv/service-national-universel/commit/f60a2efb1598fc8ad4d9ae1fd250271f780deb3a))
+* **api:** Serialize structure before response in /referent/young ([d24577f](https://github.com/betagouv/service-national-universel/commit/d24577ff9e6982a3880b3d9a2f375e1fd1337847))
+* **api:** Serialize structure before response in /referent/young ([f1c7b70](https://github.com/betagouv/service-national-universel/commit/f1c7b70ecf612170c13841c4d91fbd0e70560e67))
+* **app:** eligibility updates ([5ae24b7](https://github.com/betagouv/service-national-universel/commit/5ae24b7208dac6b56ac5a1930b8201c8b6b8f3f9))
+
+
+### Features
+
+* **admin/api:** new filters on mission list ([#2567](https://github.com/betagouv/service-national-universel/issues/2567)) ([c0691b3](https://github.com/betagouv/service-national-universel/commit/c0691b3f6792339f72cbe91e2b19d3aed077e75a))
+
+## [1.264.1](https://github.com/betagouv/service-national-universel/compare/v1.264.0...v1.264.1) (2023-05-03)
+
+
+### Bug Fixes
+
+* **admin:** retour maquette dashboard general ([f35ff96](https://github.com/betagouv/service-national-universel/commit/f35ff96f3b97ea38776d983dceff28b16878f082))
+* **api:** Supprimer les champs superflus lors de la modification de son profil par un volontaire ([#2541](https://github.com/betagouv/service-national-universel/issues/2541)) ([93b353d](https://github.com/betagouv/service-national-universel/commit/93b353d5fe1260e9a5a5a05de9be662a1d64b1f2))
+* **app:** fix passport upload ([9135a4c](https://github.com/betagouv/service-national-universel/commit/9135a4cfe8cfb492a3e8e9000ec50deb0cee533f))
+* **app/admin:** Improve ID upload ([#2558](https://github.com/betagouv/service-national-universel/issues/2558)) ([b9b2363](https://github.com/betagouv/service-national-universel/commit/b9b236380dd5272869a7113bd933139f33c15c8f))
+* **sib:** Put back ip restrictions ([#2566](https://github.com/betagouv/service-national-universel/issues/2566)) ([0c0c22c](https://github.com/betagouv/service-national-universel/commit/0c0c22cd0e09e4623371b188ab4503608bf71d0f))
+
+
+### Reverts
+
+* Revert "feat(app): add question probleme transport form (#2495)" (#2568) ([4843c73](https://github.com/betagouv/service-national-universel/commit/4843c73b987c9ff353c1a9d80316d5b286c33ca2)), closes [#2495](https://github.com/betagouv/service-national-universel/issues/2495) [#2568](https://github.com/betagouv/service-national-universel/issues/2568)
+
 # [1.264.0](https://github.com/betagouv/service-national-universel/compare/v1.263.0...v1.264.0) (2023-05-02)
 
 

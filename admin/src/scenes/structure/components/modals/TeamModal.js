@@ -1,26 +1,23 @@
-import React, { useContext, useState } from "react";
-import validator from "validator";
+import React, { useState } from "react";
 import { ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
-import { copyToClipboard, translate, formatPhoneNumberFR, regexPhoneFrenchCountries, getInitials } from "../../../../utils";
-
+import validator from "validator";
+import { copyToClipboard, formatPhoneNumberFR, getInitials, regexPhoneFrenchCountries, translate } from "../../../../utils";
+import { AiOutlineClose } from "react-icons/ai";
 import { BiCopy } from "react-icons/bi";
-import { HiCheckCircle, HiPhone, HiPlus, HiPencil, HiOutlineTrash } from "react-icons/hi";
-import { toastr } from "react-redux-toastr";
-import ModalReferentDeleted from "../../../../components/modals/ModalReferentDeleted";
-import ModalConfirm from "../../../../components/modals/ModalConfirm";
-import API from "../../../../services/api";
-import ModalChangeTutor from "../../../../components/modals/ModalChangeTutor";
-import { StructureContext } from "../../view";
-import ModalTailwind from "../../../../components/modals/ModalTailwind";
-import Select from "../../../centersV2/components/Select";
+import { HiCheckCircle, HiOutlineTrash, HiPencil, HiPhone, HiPlus } from "react-icons/hi";
 import { useSelector } from "react-redux";
-import Button from "../Button";
+import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
 import Field from "../../../../components/forms/Field";
-import { AiOutlineClose } from "react-icons/ai";
+import ModalChangeTutor from "../../../../components/modals/ModalChangeTutor";
+import ModalConfirm from "../../../../components/modals/ModalConfirm";
+import ModalReferentDeleted from "../../../../components/modals/ModalReferentDeleted";
+import ModalTailwind from "../../../../components/modals/ModalTailwind";
+import API from "../../../../services/api";
+import Select from "../../../centersV2/components/Select";
+import Button from "../Button";
 
-export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
-  const { structure } = useContext(StructureContext);
+export default function TeamModal({ isOpen, onCancel, team, setTeam, structure }) {
   const user = useSelector((state) => state.Auth.user);
   const isSupervisor = user.role === ROLES.SUPERVISOR && user.structureId === structure._id;
   const [responsible, setResponsible] = useState(null);
@@ -144,6 +141,7 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam }) {
           handleDelete={handleDelete}
           onChange={resetState}
           errors={errors}
+          structure={structure}
         />
       ) : (
         <div className="space-y-8">
@@ -249,9 +247,8 @@ const AddContact = ({ setResponsible, isSupervisor = false }) => {
   );
 };
 
-const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmit, handleChange, handleDelete, onChange, errors }) => {
+const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmit, handleChange, handleDelete, onChange, errors, structure }) => {
   const user = useSelector((state) => state.Auth.user);
-  const { structure } = useContext(StructureContext);
 
   const disabled = isLoading || !responsible.firstName || !responsible.lastName || !responsible.email;
 

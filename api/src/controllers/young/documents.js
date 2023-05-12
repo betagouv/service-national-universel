@@ -302,7 +302,7 @@ router.post(
         // Create document
         const newFile = {
           _id: mongoose.Types.ObjectId(),
-          name,
+          name: decodeURIComponent(name),
           size,
           uploadedAt: Date.now(),
           mimetype,

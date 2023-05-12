@@ -4,6 +4,7 @@ import ReactTooltip from "react-tooltip";
 import FilterSvg from "../../../assets/icons/Filter";
 import { Popover, Transition } from "@headlessui/react";
 import Trash from "../../../assets/icons/Trash";
+import { normalizeString } from "../../../components/filters-system-v2/components/filters/utils";
 
 export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArray }) => {
   return (
@@ -93,25 +94,17 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
   const ref = React.useRef(null);
 
   React.useEffect(() => {
-    setOptionsVisible(data);
+    if (filter?.sort) {
+      setOptionsVisible(filter.sort(data));
+    } else {
+      setOptionsVisible(data);
+    }
   }, [data]);
 
   React.useEffect(() => {
     // normalize search
-    const normalizedSearch = search
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
-    const newData =
-      search !== ""
-        ? data.filter((f) =>
-            f.key
-              .normalize("NFD")
-              .replace(/[\u0300-\u036f]/g, "")
-              .toLowerCase()
-              .includes(normalizedSearch),
-          )
-        : data;
+    const normalizedSearch = normalizeString(search);
+    const newData = search !== "" ? data.filter((f) => normalizeString(f.key).includes(normalizedSearch)) : data;
     setOptionsVisible(newData);
   }, [search]);
 

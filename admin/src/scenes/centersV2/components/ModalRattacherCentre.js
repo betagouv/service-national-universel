@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { BsChevronDown, BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { ES_NO_LIMIT, ROLES, translate, isSessionEditionOpen } from "snu-lib";
+import { ES_NO_LIMIT, translate, isSessionEditionOpen } from "snu-lib";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -30,19 +30,12 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
   const refInput = React.useRef(null);
   const refContainer = React.useRef(null);
 
-  const refStatus = React.useRef(null);
-  const refStatusSelect = React.useRef(null);
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (refContainer.current && refContainer.current.contains(event.target)) {
         editable && setOpen((open) => !open);
       } else if (refSelect.current && !refSelect.current.contains(event.target)) {
         setOpen(false);
-      }
-      if (refStatus.current && refStatus.current.contains(event.target)) {
-        editable && setStatusOpen((open) => !open);
-      } else if (refStatus.current && !refStatus.current.contains(event.target)) {
-        setStatusOpen(false);
       }
     };
     document.addEventListener("click", handleClickOutside, true);
@@ -55,10 +48,8 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
   const [selectedCohort, setSelectedCohort] = React.useState();
   const [selectedCentre, setSelectedCentre] = React.useState(defaultCentre);
   const [placesTotal, setPlacesTotal] = React.useState("");
-  const [status, setStatus] = React.useState("WAITING_VALIDATION");
   const [search, setSearch] = React.useState("");
   const [open, setOpen] = React.useState(false);
-  const [statusOpen, setStatusOpen] = React.useState(false);
   const [disabled, setDisabled] = React.useState(true);
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -156,11 +147,6 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
     }
   };
 
-  const statusOptions = [
-    { value: "VALIDATED", label: "Validée" },
-    { value: "WAITING_VALIDATION", label: "En attente de validation" },
-  ];
-
   return (
     <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[600px] rounded-lg bg-white shadow-xl">
       <div className="flex h-[650px] w-full flex-col justify-between p-8">
@@ -170,7 +156,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
           <div className="text-sm font-medium leading-6 text-gray-800">Choisissez un séjour</div>
           <div className="flex flex-row flex-wrap gap-2 py-2">
             {availableCohorts.map((cohort) => (
-              <>
+              <React.Fragment key={cohort}>
                 {defaultCentre && !selectedCentre?.cohorts?.includes(cohort) ? (
                   <div
                     key={cohort}
@@ -191,7 +177,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
                     {cohort}
                   </div>
                 ) : null}
-              </>
+              </React.Fragment>
             ))}
           </div>
           {selectedCohort ? (
@@ -258,42 +244,14 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
               </div>
               {selectedCentre && (
                 <div className="mt-4 text-sm font-medium leading-6">
-                  <Field label="Nombre de places ouvertes" onChange={(e) => setPlacesTotal(e.target.value)} value={placesTotal} />
-                </div>
-              )}
-
-              {user.role === ROLES.ADMIN && selectedCentre && (
-                <div className="relative">
-                  <div
-                    ref={refStatus}
-                    className={`mt-6 flex items-center justify-between rounded-lg bg-white py-2 pl-2 pr-4 ${
-                      statusOpen ? "border-2 border-blue-500" : "border-[1px] border-gray-300"
-                    }`}>
-                    <div className="flex flex-col justify-center">
-                      <div className="text-xs font-normal leading-6 text-gray-500 ">Statut de la session</div>
-                      {status === "" ? (
-                        <div className="h-5 text-sm leading-6 text-gray-800" />
-                      ) : (
-                        <div className="text-sm leading-6 text-gray-800">{statusOptions.find((e) => e.value === status).label}</div>
-                      )}
-                    </div>
-                    <BsChevronDown className={`text-gray-500 ${open ? "rotate-180 transform" : ""}`} />
-                  </div>
-                  <div ref={refStatusSelect} className={`${!statusOpen ? "hidden" : ""} absolute z-50 w-full rounded-lg border border-gray-300 bg-white px-3 shadow-lg`}>
-                    {statusOptions.map((item) => {
-                      return (
-                        <div
-                          key={item.value}
-                          onClick={() => {
-                            setStatus(item.value);
-                            setStatusOpen(false);
-                          }}
-                          className="flex cursor-pointer flex-col rounded-lg py-1 px-2 hover:bg-gray-50">
-                          <div className="text-sm leading-5 text-gray-900">{item.label}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <Field
+                    label={`Nombre de places ouvertes pour le sejour ${selectedCohort}`}
+                    onChange={(e) => setPlacesTotal(e.target.value)}
+                    value={placesTotal}
+                    tooltips={
+                      "C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
+                    }
+                  />
                 </div>
               )}
             </>

@@ -54,7 +54,7 @@ export default function Wrapper({ mission, tab, children, getMission }) {
     return history.push(`/mission/${data._id}`);
   };
 
-  if (!mission) return null;
+  if (!mission || !user) return null;
   return (
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative" }}>
       <div className=" my-7 flex flex-row flex-wrap-reverse justify-between gap-4 border-b border-gray-200 px-8">
@@ -70,7 +70,7 @@ export default function Wrapper({ mission, tab, children, getMission }) {
             </div>
             <div
               className={`flex cursor-pointer flex-row items-center gap-2 pb-4 text-sm text-gray-400 ${tab === "youngs" && "border-b-2 border-blue-600 text-blue-600"}`}
-              onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
+              onClick={() => history.push(`/mission/${mission._id}/youngs/all`)}>
               {mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5 ? (
                 <ExclamationCircle className="text-white" fill="red" />
               ) : mission.pendingApplications > 0 ? (

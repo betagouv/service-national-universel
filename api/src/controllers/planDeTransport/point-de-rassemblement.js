@@ -16,6 +16,10 @@ const { validateId } = require("../../utils/validator");
 const nanoid = require("nanoid");
 const { COHORTS } = require("snu-lib");
 const { getCohesionCenterFromSession } = require("./commons");
+const { getTransporter } = require("../../utils");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { sendTemplate } = require("../../sendinblue");
+const { ADMIN_URL, ENVIRONMENT } = require("../../config");
 
 /**
  * Récupère les points de rassemblements (avec horaire de passage) pour un jeune affecté.
@@ -243,6 +247,31 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       meetingPoint.set({ ...meetingPoint, name, address, city, zip, department, region, location });
       await p.save({ fromUser: req.user });
     }
+
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts, dateEnd: { $gt: new Date().getTime() } }, [
+      "name",
+      "repartitionSchemaDownloadAvailability",
+      "dateStart",
+    ]);
+
+    if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
+      const referentTransport = await getTransporter();
+      if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+      const mail = await sendTemplate(template, {
+        emailTo: referentTransport.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        })),
+        params: {
+          trigger: "pdr_changed",
+          pdr_id: pointDeRassemblement.name,
+          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+        },
+      });
+    }
+
     // * End update slave PlanTransport
 
     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
@@ -283,6 +312,27 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
 
     pointDeRassemblement.set({ cohorts: cohortsToUpdate, complementAddress: complementAddressToUpdate });
     await pointDeRassemblement.save({ fromUser: req.user });
+
+    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts }, ["name", "repartitionSchemaDownloadAvailability", "dateStart"]);
+
+    if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
+      const referentTransport = await getTransporter();
+      if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
+      const mail = await sendTemplate(template, {
+        emailTo: referentTransport.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        })),
+        params: {
+          trigger: "pdr_changed",
+          pdr_id: pointDeRassemblement.name,
+          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+        },
+      });
+    }
 
     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
 

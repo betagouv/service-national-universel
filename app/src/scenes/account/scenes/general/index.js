@@ -26,7 +26,7 @@ const getInitialFormValues = (young) => ({
   email: young.email || "",
   phone: {
     phoneNumber: young.phone || "",
-    phoneZone: young.phoneZone || PHONE_ZONES_NAMES.FRANCE,
+    phoneZone: young.phoneZone || "",
   },
   address: young.address || "",
   zip: young.zip || "",
@@ -130,7 +130,7 @@ const AccountGeneralPage = () => {
                   value={formValues.phone}
                   error={errors?.phone}
                   onChange={handleChangeValue("phone")}
-                  placeholder={PHONE_ZONES[formValues.phone.phoneZone].example}
+                  placeholder={PHONE_ZONES[formValues.phone.phoneZone]?.example}
                 />
               </section>
               <section className="mb-4">

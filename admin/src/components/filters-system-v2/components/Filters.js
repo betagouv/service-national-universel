@@ -1,15 +1,14 @@
 import { Popover, Transition } from "@headlessui/react";
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
+import { useHistory, useLocation } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
+
 import FilterSvg from "../../../assets/icons/Filter";
 import FilterPopOver from "./filters/FilterPopOver";
-
-import { useHistory } from "react-router-dom";
-
-import { toastr } from "react-redux-toastr";
 import ViewPopOver from "./filters/SavedViewPopOver";
 
 import api from "../../../services/api";
-import { buildQuery, getURLParam, currentFilterAsUrl } from "./filters/utils";
+import { buildQuery, getURLParam, currentFilterAsUrl, normalizeString } from "./filters/utils";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -27,22 +26,19 @@ export default function Filters({
   setParamData,
   defaultUrlParam = false,
 }) {
-  // search for filters
-  const [search, setSearch] = React.useState("");
-  // searchBar
-  // data correspond to filters
-  const [dataFilter, setDataFilter] = React.useState([]);
-  const [filtersVisible, setFiltersVisible] = React.useState(filters);
-  const [categories, setCategories] = React.useState([]);
+  const [search, setSearch] = useState("");
+  const [dataFilter, setDataFilter] = useState([]);
+  const [filtersVisible, setFiltersVisible] = useState(filters);
+  const [categories, setCategories] = useState([]);
+  const [savedView, setSavedView] = useState([]);
+  const [firstLoad, setFirstLoad] = useState(true);
+  const [isShowing, setIsShowing] = useState(false);
 
-  const [savedView, setSavedView] = React.useState([]);
-
-  const urlParams = new URLSearchParams(window.location.search);
+  const location = useLocation();
   const history = useHistory();
 
-  const [isShowing, setIsShowing] = React.useState(false);
-  const ref = React.useRef(null);
-  const refFilter = React.useRef(null);
+  const ref = useRef(null);
+  const refFilter = useRef(null);
 
   const hasSomeFilterSelected =
     selectedFilters &&
@@ -50,13 +46,15 @@ export default function Filters({
       (key) => selectedFilters[key]?.filter?.length > 0 && selectedFilters[key]?.filter[0]?.toString().trim() !== "" && filters.find((f) => f.name === key),
     );
 
-  const [firstLoad, setFirstLoad] = React.useState(true);
+  // Initialization
+  useEffect(() => {
+    // Initialize selected filters based on URL params.
+    updateFiltersFromParams(location.search);
 
-  const mounted = React.useRef(false);
+    // Load saved view (i.e. saved filters)
+    updateSavedViewFromDbFilters();
 
-  React.useEffect(() => {
-    init();
-    getDBFilters();
+    // Click outside handler (close popover)
     const handleClickOutside = (event) => {
       if (ref.current && !ref.current.contains(event.target) && refFilter.current && !refFilter.current.contains(event.target)) {
         setIsShowing(false);
@@ -68,29 +66,17 @@ export default function Filters({
     };
   }, []);
 
-  React.useEffect(
+  useEffect(
     function updateSearchSelectedFilter() {
       // normalize search
-      const normalizedSearch = search
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase();
-      const newFilters =
-        search !== ""
-          ? filters.filter((f) =>
-              f.title
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .toLowerCase()
-                .includes(normalizedSearch),
-            )
-          : filters;
+      const normalizedSearch = normalizeString(search);
+      const newFilters = search !== "" ? filters.filter((f) => normalizeString(f.title).includes(normalizedSearch)) : filters;
       setFiltersVisible(newFilters);
     },
     [search],
   );
 
-  React.useEffect(
+  useEffect(
     function updateCategories() {
       if (filtersVisible.length === 0) {
         setCategories([]);
@@ -107,24 +93,30 @@ export default function Filters({
     [filtersVisible],
   );
 
-  React.useEffect(
+  useEffect(
     function updateOnParamChange() {
-      if (Object.keys(selectedFilters).length === 0) mounted.current = true;
-      else {
-        if (!selectedFilters || !mounted.current) return;
-        getData();
-        setURL();
-      }
-    },
-    [selectedFilters, paramData.page, paramData.sort],
-  );
+      if (Object.keys(selectedFilters).length === 0) return;
 
-  const init = async () => {
-    // load des defaults value des filtres
-    const defaultFilters = getDefaultFilters();
-    const initialFilters = getURLParam(urlParams, setParamData, filters);
-    setSelectedFilters({ ...defaultFilters, ...initialFilters });
-  };
+      buildQuery(route, selectedFilters, paramData?.page, filters, paramData?.sort).then((res) => {
+        if (!res) return;
+        setDataFilter({ ...dataFilter, ...res.newFilters });
+        const newParamData = {
+          count: res.count,
+          filters: { ...dataFilter, ...res.newFilters },
+        };
+        if (paramData.count !== res.count && !firstLoad) newParamData.page = 0;
+        setParamData((paramData) => ({ ...paramData, ...newParamData }));
+        setData(res.data);
+        if (firstLoad) setFirstLoad(false);
+
+        // Hack: avoid unwanted refresh: https://stackoverflow.com/a/61596862/978690
+        const search = `?${currentFilterAsUrl(selectedFilters, paramData?.page, filters, defaultUrlParam)}`;
+        const { pathname } = history.location;
+        if (location.search !== search) window.history.replaceState({ path: pathname + search }, "", pathname + search);
+      });
+    },
+    [selectedFilters, paramData.page, paramData.sort, location.search],
+  );
 
   const getDefaultFilters = () => {
     const newFilters = {};
@@ -138,27 +130,7 @@ export default function Filters({
     return newFilters;
   };
 
-  const getData = async () => {
-    const res = await buildQuery(route, selectedFilters, paramData?.page, filters, paramData?.sort);
-    if (!res) return;
-    setDataFilter({ ...dataFilter, ...res.newFilters });
-    const newParamData = {
-      count: res.count,
-      filters: { ...dataFilter, ...res.newFilters },
-    };
-    if (paramData.count !== res.count && !firstLoad) newParamData.page = 0;
-    setParamData((paramData) => ({ ...paramData, ...newParamData }));
-    setData(res.data);
-    if (firstLoad) setFirstLoad(false);
-  };
-
-  const setURL = () => {
-    history.replace({ search: `?${currentFilterAsUrl(selectedFilters, paramData?.page, filters, defaultUrlParam)}` });
-  };
-
-  // text for tooltip save
-
-  const getDBFilters = async () => {
+  const updateSavedViewFromDbFilters = async () => {
     try {
       const res = await api.get("/filters/" + pageId);
       if (!res.ok) return toastr.error("Oops, une erreur est survenue lors du chargement des filtres");
@@ -174,20 +146,22 @@ export default function Filters({
       const res = await api.remove("/filters/" + id);
       if (!res.ok) return toastr.error("Oops, une erreur est survenue");
       toastr.success("Filtre supprimé avec succès");
-      getDBFilters();
+      updateSavedViewFromDbFilters();
       return;
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleSelectUrl = (url) => {
-    history.push({ search: url });
-    return history.go(0);
-  };
+  function updateFiltersFromParams(params) {
+    const defaultFilters = getDefaultFilters();
+    const initialFilters = getURLParam(new URLSearchParams(params), setParamData, filters);
+    setSelectedFilters({ ...defaultFilters, ...initialFilters });
+  }
 
-  const handleFilterShowing = (value) => {
-    setIsShowing(value);
+  const handleSelectUrl = (params) => {
+    updateFiltersFromParams(params);
+    setIsShowing(false);
   };
 
   return (
@@ -211,7 +185,7 @@ export default function Filters({
               <>
                 <Popover.Button
                   ref={ref}
-                  onClick={() => handleFilterShowing(!isShowing)}
+                  onClick={() => setIsShowing(!isShowing)}
                   className={classNames(
                     open ? "bg-gray-200 ring-2 ring-blue-500 ring-offset-2" : "",
                     "flex h-[38px] cursor-pointer items-center gap-2 rounded-lg bg-gray-100  px-3 text-[14px] font-medium text-gray-700 outline-none hover:bg-gray-200",
@@ -235,7 +209,7 @@ export default function Filters({
                       <div className="relative grid rounded-lg border-[1px] border-gray-100 bg-white py-2">
                         {savedView.length > 0 && (
                           <ViewPopOver
-                            setIsShowing={handleFilterShowing}
+                            setIsShowing={(value) => setIsShowing(value)}
                             isShowing={isShowing === "view"}
                             savedView={savedView}
                             handleSelect={handleSelectUrl}
@@ -251,7 +225,7 @@ export default function Filters({
                         />
                         <div className="flex flex-col overflow-y-auto">
                           {categories.map((category, index) => (
-                            <div key={category}>
+                            <div key={category || "default"}>
                               {index !== 0 && <hr className="my-2 border-gray-100" />}
                               <div className="px-4 text-xs font-light leading-5 text-gray-500">{category}</div>
                               {filtersVisible
@@ -264,7 +238,7 @@ export default function Filters({
                                     setSelectedFilters={setSelectedFilters}
                                     data={item?.disabledBaseQuery ? item.options : dataFilter[item?.name] || []}
                                     isShowing={isShowing === item.name}
-                                    setIsShowing={handleFilterShowing}
+                                    setIsShowing={(value) => setIsShowing(value)}
                                     setParamData={setParamData}
                                   />
                                 ))}

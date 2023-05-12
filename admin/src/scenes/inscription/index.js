@@ -40,7 +40,7 @@ import DeleteFilters from "../../components/buttons/DeleteFilters";
 import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";
 import DeletedInscriptionPanel from "./deletedPanel";
-import { concatPhoneNumberWithZone } from "snu-lib/phone-number";
+import { formatPhoneE164 } from "../../utils/formatPhoneE164";
 
 const FILTERS = [
   "SEARCH",
@@ -130,7 +130,7 @@ export default function Inscription() {
                         "Date de fin de validité de la pièce d'identité": formatDateFRTimezoneUTC(data?.latestCNIFileExpirationDate),
                         Sexe: translate(data.gender),
                         Email: data.email,
-                        Téléphone: concatPhoneNumberWithZone(data.phone, data.phoneZone),
+                        Téléphone: formatPhoneE164(data.phone, data.phoneZone),
                         "Adresse postale": data.address,
                         "Code postal": data.zip,
                         Ville: data.city,
@@ -181,7 +181,7 @@ export default function Inscription() {
                         "Prénom représentant légal 1": data.parent1FirstName,
                         "Nom représentant légal 1": data.parent1LastName,
                         "Email représentant légal 1": data.parent1Email,
-                        "Téléphone représentant légal 1": concatPhoneNumberWithZone(data.parent1Phone, data.parent1PhoneZone),
+                        "Téléphone représentant légal 1": formatPhoneE164(data.parent1Phone, data.parent1PhoneZone),
                         "Adresse représentant légal 1": data.parent1Address,
                         "Code postal représentant légal 1": data.parent1Zip,
                         "Ville représentant légal 1": data.parent1City,
@@ -191,7 +191,7 @@ export default function Inscription() {
                         "Prénom représentant légal 2": data.parent2FirstName,
                         "Nom représentant légal 2": data.parent2LastName,
                         "Email représentant légal 2": data.parent2Email,
-                        "Téléphone représentant légal 2": concatPhoneNumberWithZone(data.parent2Phone, data.parent2PhoneZone),
+                        "Téléphone représentant légal 2": formatPhoneE164(data.parent2Phone, data.parent2PhoneZone),
                         "Adresse représentant légal 2": data.parent2Address,
                         "Code postal représentant légal 2": data.parent2Zip,
                         "Ville représentant légal 2": data.parent2City,
