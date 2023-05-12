@@ -40,20 +40,26 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   const ref = React.useRef(null);
 
   React.useEffect(() => {
-    if (filter?.sort) {
-      setOptionsVisible(filter.sort(data));
-    } else {
-      setOptionsVisible(data);
+    let temp = data;
+    if (filter?.filter) {
+      temp.filter(filter.filter);
     }
+    if (filter?.sort) {
+      filter.sort(temp);
+    }
+    setOptionsVisible(temp);
   }, [data]);
 
   React.useEffect(() => {
     // normalize search
     const normalizedSearch = normalizeString(search);
-    const newData =
+    let newData =
       search !== ""
         ? data.filter((f) => (filter?.translate ? normalizeString(filter.translate(f.key)).includes(normalizedSearch) : normalizeString(f.key).includes(normalizedSearch)))
         : data;
+    if (filter?.filter) {
+      newData = newData.filter(filter.filter);
+    }
     setOptionsVisible(newData);
   }, [search]);
 
