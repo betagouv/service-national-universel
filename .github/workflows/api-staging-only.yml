@@ -32,11 +32,6 @@ jobs:
         with:
           node-version: 18.x
 
-      - name: Add lib into current folder
-        run: |
-          cp -Rf ./lib ./api/snu-lib
-          sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./api/package.json
-
       - name: Install packages
         working-directory: ${{ env.SUBFOLDER_NAME }}
         run: npm install
@@ -67,8 +62,7 @@ jobs:
           git config user.email "github.deployer@gmail.com"
           git config user.name "Github Deployer"
           git remote add cloudstaging "$CLEVER_CLOUD_GIT_REMOTE_STAGING"
-          git add packages ${{ env.SUBFOLDER_NAME }}
-          git add --no-directories *
+          git add packages ${{ env.SUBFOLDER_NAME }} *
           git commit -m "For deploy"
           git push -f -u cloudstaging master
         env:

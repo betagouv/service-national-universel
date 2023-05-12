@@ -3,7 +3,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "start": "turbo run start"
+    "start": "turbo run start --filter=$APP_FOLDER"
   },
   "dependencies": {
     "turbo": "1.2.5"
