@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import Loader from "../../../components/Loader";
@@ -10,7 +10,7 @@ import Toggle from "../../../components/inscription/toggle";
 import { COHESION_STAY_LIMIT_DATE, getAge, translate } from "snu-lib";
 import RadioButton from "../components/RadioButton";
 import Check from "../components/Check";
-import { FRANCE, ABROAD, translateError, API_CONSENT, stringToBoolean, isReturningParent, CDN_BASE_URL } from "../commons";
+import { FRANCE, ABROAD, translateError, API_CONSENT, isReturningParent, CDN_BASE_URL } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";
 import ErrorMessage from "../../inscription2023/components/ErrorMessage";
@@ -18,100 +18,21 @@ import api from "../../../services/api";
 import { BorderButton, PlainButton } from "../components/Buttons";
 import plausibleEvent from "../../../services/plausible";
 import AuthorizeBlock from "../components/AuthorizeBlock";
-import { regexPhoneFrenchCountries } from "../../../utils/";
+import PhoneField from "../../inscription2023/components/PhoneField";
+import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib/phone-number";
+import { getDataForConsentStep } from "../utils";
 
 export default function Consentement({ step, parentId }) {
   const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
+  if (!young) return <Loader />;
+
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = React.useState(false);
-  const [data, setData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    confirmAddress: false,
-    addressType: FRANCE,
-    addressVerified: false,
-    address: "",
-    addressComplement: "",
-    zip: "",
-    city: "",
-    country: "",
-    cityCode: null,
-    region: null,
-    department: null,
-    location: null,
-    allowSNU: null,
-    rightOlder: false,
-    personalData: false,
-    healthForm: false,
-    vaccination: false,
-    internalRules: false,
-    allowCovidAutotest: null,
-    allowImageRights: null,
-  });
-  // const [covidAutoTestExplanationShown, setCovidAutoTestExplanationShown] = useState(false);
   const [imageRightsExplanationShown, setImageRightsExplanationShown] = useState(false);
+  const [data, setData] = useState(getDataForConsentStep(young, parentId));
 
-  useEffect(() => {
-    if (young) {
-      if (isReturningParent(young, parentId)) {
-        return done();
-      }
-
-      let address;
-      if (young[`parent${parentId}OwnAddress`] === "true") {
-        address = {
-          address: young[`parent${parentId}Address`] ? young[`parent${parentId}Address`] : "",
-          addressComplement: young[`parent${parentId}ComplementAddress`] ? young[`parent${parentId}ComplementAddress`] : "",
-          zip: young[`parent${parentId}Zip`] ? young[`parent${parentId}Zip`] : "",
-          city: young[`parent${parentId}City`] ? young[`parent${parentId}City`] : "",
-          country: young[`parent${parentId}Country`] ? young[`parent${parentId}Country`] : "",
-          cityCode: young[`parent${parentId}CityCode`] ? young[`parent${parentId}CityCode`] : "",
-          department: young[`parent${parentId}Department`] ? young[`parent${parentId}Department`] : null,
-          region: young[`parent${parentId}Region`] ? young[`parent${parentId}Region`] : null,
-          location: young[`parent${parentId}Location`] ? young[`parent${parentId}Location`] : null,
-        };
-      } else {
-        address = {
-          address: young.address ? young.address : "",
-          addressComplement: young.complementAddress ? young.complementAddress : "",
-          zip: young.zip ? young.zip : "",
-          city: young.city ? young.city : "",
-          country: young.country ? young.country : "",
-          cityCode: young.cityCode ? young.cityCode : "",
-          department: young.department ? young.department : null,
-          region: young.region ? young.region : null,
-          location: young.location ? young.location : null,
-        };
-      }
-
-      const confirmAddress = !validator.isEmpty(address.address, { ignore_whitespace: true }) && !validator.isEmpty(address.city, { ignore_whitespace: true });
-
-      const internalRules = stringToBoolean(young[`rulesParent${parentId}`]);
-      setData({
-        firstName: young[`parent${parentId}FirstName`] ? young[`parent${parentId}FirstName`] : "",
-        lastName: young[`parent${parentId}LastName`] ? young[`parent${parentId}LastName`] : "",
-        email: young[`parent${parentId}Email`] ? young[`parent${parentId}Email`] : "",
-        phone: young[`parent${parentId}Phone`] ? young[`parent${parentId}Phone`] : "",
-        confirmAddress,
-        addressType: address.country && address.country !== FRANCE ? ABROAD : FRANCE,
-        addressVerified: young.addressParent1Verified === "true",
-        ...address,
-        allowSNU: stringToBoolean(young.parentAllowSNU),
-        rightOlder: internalRules,
-        personalData: internalRules,
-        healthForm: internalRules,
-        vaccination: internalRules,
-        internalRules,
-        // allowCovidAutotest: stringToBoolean(young[`parent${parentId}AllowCovidAutotest`]),
-        allowImageRights: stringToBoolean(young[`parent${parentId}AllowImageRights`]),
-      });
-    }
-  }, [young]);
-
-  if (!young) return <Loader />;
+  if (isReturningParent(young, parentId)) return done();
 
   // --- young
   const youngFullname = young.firstName + " " + young.lastName;
@@ -146,12 +67,6 @@ export default function Consentement({ step, parentId }) {
     });
     setErrors({ addressVerified: undefined });
   };
-
-  // --- ui
-  // function toggleCovidAutoTestExplanationShown(e) {
-  //   e.preventDefault();
-  //   setCovidAutoTestExplanationShown(!covidAutoTestExplanationShown);
-  // }
 
   function toggleImageRightsExplanationShown(e) {
     e.preventDefault();
@@ -196,8 +111,9 @@ export default function Consentement({ step, parentId }) {
     if (validate("email", "empty", validator.isEmpty(data.email, { ignore_whitespace: true }))) {
       validate("email", "invalid", !validator.isEmail(data.email));
     }
-    if (validate("phone", "empty", validator.isEmpty(data.phone, { ignore_whitespace: true }))) {
-      validate("phone", "invalid", !validator.matches(data.phone, regexPhoneFrenchCountries));
+    if (validate("phone", "empty", validator.isEmpty(data.phone, { ignore_whitespace: true }))
+      || validate("phoneZone", "empty", validator.isEmpty(data.phoneZone, { ignore_whitespace: true }))) {
+      validate("phone", "invalid", !isPhoneNumberWellFormated(data.phone, data.phoneZone));
     }
 
     // --- address
@@ -339,10 +255,15 @@ export default function Consentement({ step, parentId }) {
               <Input className="ml-2 flex-[1_0_0]" value={data.lastName} label="Nom" onChange={(e) => setData({ ...data, lastName: e })} error={errors.lastName} />
             </div>
             <Input className="" value={data.email} label="Adresse email" onChange={(e) => setData({ ...data, email: e })} error={errors.email} type="email" />
-            <Input className="" value={data.phone} label="Votre téléphone" onChange={(e) => setData({ ...data, phone: e })} error={errors.phone} type="tel" />
-            {errors?.phone && young.department === "Polynésie française" && (
-              <p className="text-sm text-red-600 ml-10 mb-4">Ce numéro de téléphone doit commencer par +689</p>
-            )}
+            <PhoneField
+              label="Votre téléphone"
+              onChange={(e) => setData({ ...data, phone: e })}
+              onChangeZone={(e) => setData({ ...data, phoneZone: e })}
+              value={data.phone}
+              zoneValue={data.phoneZone}
+              placeholder={PHONE_ZONES[data.phoneZone]?.example}
+              error={errors.phone || errors.phoneZone}
+            />
           </div>
 
           <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] py-[32px]">
