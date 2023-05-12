@@ -3,7 +3,7 @@ import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import { toastr } from "react-redux-toastr";
 
-import { departmentLookUp, department2region, departmentToAcademy, translate, translateModelFields } from "../../../utils";
+import { departmentLookUp, department2region, departmentToAcademy, translate, translateModelFields, region2department } from "../../../utils";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import api from "../../../services/api";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
@@ -38,7 +38,7 @@ export default function ExportAll({ filter }) {
         filter.region = [user.region];
       }
       if (!filter?.department?.length) {
-        filter.department = user.department.map((s) => s);
+        filter.department = region2department[user.region];
       }
     }
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {

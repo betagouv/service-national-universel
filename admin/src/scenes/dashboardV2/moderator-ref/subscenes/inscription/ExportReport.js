@@ -4,7 +4,7 @@ import * as XLSX from "xlsx";
 import { toastr } from "react-redux-toastr";
 import plausibleEvent from "../../../../../services/plausible";
 import api from "../../../../../services/api";
-import { YOUNG_STATUS, department2region, departmentLookUp, departmentToAcademy, translate, translateInscriptionStatus } from "snu-lib";
+import { YOUNG_STATUS, department2region, departmentLookUp, departmentToAcademy, region2department, translate, translateInscriptionStatus } from "snu-lib";
 import { translateModelFields } from "../../../../../utils";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import ModalConfirm from "../../../../../components/modals/ModalConfirm";
@@ -35,7 +35,7 @@ export default function ExportReport({ filter }) {
         filter.region = [user.region];
       }
       if (!filter?.department?.length) {
-        filter.department = user.department.map((s) => s);
+        filter.department = region2department[user.region];
       }
     }
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
@@ -43,6 +43,8 @@ export default function ExportReport({ filter }) {
         filter.department = user.department.map((s) => s);
       }
     }
+
+    console.log(filter);
 
     // starting the process...
     setLoading(true);
