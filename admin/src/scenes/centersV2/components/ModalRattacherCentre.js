@@ -244,7 +244,14 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
               </div>
               {selectedCentre && (
                 <div className="mt-4 text-sm font-medium leading-6">
-                  <Field label="Nombre de places ouvertes" onChange={(e) => setPlacesTotal(e.target.value)} value={placesTotal} />
+                  <Field
+                    label={`Nombre de places ouvertes pour le sejour ${selectedCohort}`}
+                    onChange={(e) => setPlacesTotal(e.target.value)}
+                    value={placesTotal}
+                    tooltips={
+                      "C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
+                    }
+                  />
                 </div>
               )}
             </>

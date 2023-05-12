@@ -190,6 +190,9 @@ export default function Create() {
                       onChange={(e) => setData({ ...data, placesSession: e.target.value })}
                       value={data.placesSession}
                       error={errors?.placesSession}
+                      tooltips={
+                        "C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
+                      }
                     />
                   </div>
                 </>
@@ -235,6 +238,9 @@ export default function Create() {
                   onChange={(e) => setData({ ...data, placesTotal: e.target.value })}
                   value={data.placesTotal}
                   error={errors?.placesTotal}
+                  tooltips={
+                    "C’est la capacité d’hébergement maximale du centre, qui dépend du bâti. Elle doit être supérieure ou égale au nombre de places ouvertes sur un séjour donné."
+                  }
                 />
               </div>
               {user.role !== ROLES.ADMIN && (
@@ -248,6 +254,9 @@ export default function Create() {
                     onChange={(e) => setData({ ...data, placesSession: e.target.value })}
                     value={data.placesSession}
                     error={errors?.placesSession}
+                    tooltips={
+                      "C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
+                    }
                   />
                 </div>
               )}
