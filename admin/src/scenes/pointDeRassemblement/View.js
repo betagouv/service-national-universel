@@ -58,12 +58,12 @@ export default function View(props) {
   }, [currentCohort]);
 
   const setYoungsFromES = async (id) => {
-    const { responses } = await api.post("/elasticsearch/young/by-point-de-rassemblement", { filters: { meetingPointIds: [id], cohort: [] } });
+    const { responses } = await api.post("/elasticsearch/young/by-point-de-rassemblement/aggs", { filters: { meetingPointIds: [id], cohort: [] } });
     setNbYoung(responses[0].aggregations.group_by_cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
   };
 
   const setLinesFromES = async (id) => {
-    const { responses } = await api.post("/elasticsearch/lignebus/by-point-de-rassemblement", { filters: { meetingPointIds: [id], cohort: [] } });
+    const { responses } = await api.post("/elasticsearch/lignebus/by-point-de-rassemblement/aggs", { filters: { meetingPointIds: [id], cohort: [] } });
     setLines(responses[0].aggregations.group_by_cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
   };
 

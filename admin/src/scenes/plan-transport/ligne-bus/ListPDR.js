@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 import { ROLES, formatDateFR, getDepartmentNumber, translate, translatePhase1, youngPlanDeTranportExportFields } from "snu-lib";
 import ExternalLink from "../../../assets/icons/ExternalLink";
-import { Filters, ModalExportV2, ResultTable, Save, SelectedFilters } from "../../../components/filters-system";
+import { Filters, ModalExport, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
 import Loader from "../../../components/Loader";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -33,10 +33,7 @@ export default function ListPDR(props) {
   const [data, setData] = React.useState([]);
   const pageId = "listYoungPDR";
   const [selectedFilters, setSelectedFilters] = React.useState({});
-  const [paramData, setParamData] = React.useState({
-    size: 20,
-    page: 0,
-  });
+  const [paramData, setParamData] = React.useState({ page: 0 });
 
   const fetchData = async () => {
     try {
@@ -73,17 +70,6 @@ export default function ListPDR(props) {
   React.useEffect(() => {
     fetchData();
   }, []);
-
-  const getDefaultQuery = () => ({
-    query: {
-      bool: {
-        must: [{ match_all: {} }, { terms: { "meetingPointId.keyword": [PDR?._id?.toString()] } }, { terms: { "status.keyword": ["VALIDATED"] } }],
-        must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
-      },
-    },
-    sort: [{ "lastName.keyword": "asc" }],
-    track_total_hits: true,
-  });
 
   function transformVolontaires(data, values) {
     let all = data;
@@ -163,8 +149,7 @@ export default function ListPDR(props) {
   const filterArray = [
     {
       title: "Ligne",
-      name: "LIGNE",
-      datafield: "ligneId.keyword",
+      name: "ligneId",
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A") return item;
@@ -173,8 +158,7 @@ export default function ListPDR(props) {
     },
     {
       title: "ID du centre de destination",
-      name: "CENTERID",
-      datafield: "sessionPhase1Id.keyword",
+      name: "sessionPhase1Id",
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A") return item;
@@ -183,8 +167,7 @@ export default function ListPDR(props) {
     },
     {
       title: "Nom du centre de destination",
-      name: "CENTERNAME",
-      datafield: "sessionPhase1Id.keyword",
+      name: "sessionPhase1Name",
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A") return item;
@@ -194,8 +177,7 @@ export default function ListPDR(props) {
     },
     {
       title: "Ville du centre de destination",
-      name: "CENTERCITY",
-      datafield: "sessionPhase1Id.keyword",
+      name: "sessionPhase1City",
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A") return item;
@@ -206,25 +188,18 @@ export default function ListPDR(props) {
 
     {
       title: "Région du volontaire",
-      name: "REGION",
-      datafield: "region.keyword",
+      name: "region",
       missingLabel: "Non renseigné",
       defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
     },
     {
       title: "Département du volontaire",
-      name: "DEPARTMENT",
-      datafield: "department.keyword",
+      name: "department",
       missingLabel: "Non renseigné",
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
   ];
-
-  const searchBarObject = {
-    placeholder: "Rechercher par prénom, nom, email, ville, code postal...",
-    datafield: ["email", "firstName", "lastName", "city", "zip"],
-  };
 
   return (
     <div className="flex w-full flex-col px-8 pb-8 pt-4">
@@ -246,34 +221,29 @@ export default function ListPDR(props) {
             <Filters
               defaultUrlParam={`cohort=${cohort}`}
               pageId={pageId}
-              esId="young"
-              defaultQuery={getDefaultQuery()}
+              route={"/elasticsearch/young/by-point-de-rassemblement/search?meetingPointId=" + PDR._id}
               setData={(value) => setData(value)}
               filters={filterArray}
-              searchBarObject={searchBarObject}
+              searchPlaceholder="Rechercher par prénom, nom, email, ville, code postal..."
               selectedFilters={selectedFilters}
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
-              esRouteQueryParams="?showAffectedToRegionOrDep=1"
             />
           </div>
           <button className="text-grey-700 flex h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium" onClick={() => setIsExportOpen(true)}>
             <BsDownload className="text-gray-400" />
             Exporter
           </button>
-          <ModalExportV2
+          <ModalExport
             isOpen={isExportOpen}
             setIsOpen={setIsExportOpen}
-            index="young"
+            route={"/elasticsearch/young/by-point-de-rassemblement/export?meetingPointId=" + PDR._id}
             transform={transformVolontaires}
             exportFields={youngPlanDeTranportExportFields}
-            defaultQuery={getDefaultQuery()}
-            searchBarObject={searchBarObject}
             selectedFilters={selectedFilters}
             filters={filterArray}
             exportTitle="volontaires"
-            esRouteQueryParams="?showAffectedToRegionOrDep=1"
           />
         </div>
         <div className="mt-2 flex flex-row flex-wrap items-center px-4">
