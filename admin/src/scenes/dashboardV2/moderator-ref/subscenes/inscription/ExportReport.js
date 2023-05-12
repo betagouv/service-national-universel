@@ -8,11 +8,14 @@ import { YOUNG_STATUS, department2region, departmentLookUp, departmentToAcademy,
 import { translateModelFields } from "../../../../../utils";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import ModalConfirm from "../../../../../components/modals/ModalConfirm";
+import { REFERENT_ROLES } from "snu-lib";
+import { useSelector } from "react-redux";
 
-export default function ExportReport({ filter }) {
+export default function ExportReport({ filter, filterArray }) {
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loadingText, setLoadingText] = useState("0 %");
+  const user = useSelector((state) => state.Auth.user);
 
   const onClick = () => {
     plausibleEvent("Dashboard/CTA - Exporter rapport");
@@ -27,6 +30,22 @@ export default function ExportReport({ filter }) {
 
   async function run() {
     if (!filter?.cohort?.length) return toastr.error("Merci de selectionner au moins une cohorte ");
+    if (user.role === REFERENT_ROLES.REFERENT_REGION) {
+      if (!filter?.academy?.length) {
+        filter.academy = filterArray.filter((s) => s.name === "Académie")[0].options.map((v) => v.key);
+      }
+      if (!filter?.region?.length) {
+        filter.region = filterArray.filter((s) => s.name === "Région")[0].options.map((v) => v.key);
+      }
+      if (!filter?.department?.length) {
+        filter.department = filterArray.filter((s) => s.name === "Département")[0].options.map((v) => v.key);
+      }
+    }
+    if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
+      if (!filter?.department?.length) {
+        filter.department = filterArray.filter((s) => s.name === "Département")[0].options.map((v) => v.key);
+      }
+    }
 
     // starting the process...
     setLoading(true);
