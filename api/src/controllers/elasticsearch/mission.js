@@ -8,6 +8,7 @@ const { ERRORS, isYoung, isReferent } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 const StructureObject = require("../../models/structure");
+const { serializeMissions } = require("../../utils/es-serializer");
 
 async function buildMissionContext(user) {
   const contextFilters = [];
@@ -95,10 +96,10 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
 
     if (req.params.action === "export") {
       const response = await allRecords("mission", hitsRequestBody.query);
-      return res.status(200).send({ ok: true, data: response });
+      return res.status(200).send({ ok: true, data: serializeMissions(response) });
     } else {
       const response = await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(serializeMissions(response.body));
     }
   } catch (error) {
     capture(error);
@@ -168,10 +169,10 @@ router.post("/by-structure/:id/:action(search|export)", passport.authenticate(["
 
     if (req.params.action === "export") {
       const response = await allRecords("mission", hitsRequestBody.query);
-      return res.status(200).send({ ok: true, data: response });
+      return res.status(200).send({ ok: true, data: serializeMissions(response) });
     } else {
       const response = await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(serializeMissions(response.body));
     }
   } catch (error) {
     capture(error);
