@@ -14,7 +14,6 @@ import {
   translate,
   translateGrade,
   YOUNG_STATUS,
-  YOUNG_SITUATIONS,
   GRADES,
   getAge,
   ROLES,
@@ -30,7 +29,7 @@ import ShieldCheck from "../../assets/icons/ShieldCheck";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
-import { countryOptions, SPECIFIC_SITUATIONS_KEY, youngEmployedSituationOptions, youngSchooledSituationOptions } from "./commons";
+import { countryOptions, SPECIFIC_SITUATIONS_KEY, YOUNG_SCHOOLED_SITUATIONS, YOUNG_ACTIVE_SITUATIONS } from "./commons";
 import Check from "../../assets/icons/Check";
 import RadioButton from "./components/RadioButton";
 import MiniSwitch from "./components/MiniSwitch";
@@ -469,9 +468,9 @@ function FooterNoRequest({ processing, onProcess, young }) {
       confirmModal.type,
       confirmModal.type === "REFUSED"
         ? {
-          reason: rejectionReason,
-          message: rejectionMessage,
-        }
+            reason: rejectionReason,
+            message: rejectionMessage,
+          }
         : null,
     );
     setConfirmModal(null);
@@ -1090,8 +1089,17 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [youngAge, setYoungAge] = useState(0);
+  const [situationOptions, setSituationOptions] = useState([]);
+  const gradeOptions = Object.keys(GRADES).map((g) => ({ value: g, label: translateGrade(g) }));
 
   useEffect(() => {
+    if (data) {
+      if (data.grade === GRADES.NOT_SCOLARISE) {
+        setSituationOptions(Object.keys(YOUNG_ACTIVE_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
+      } else {
+        setSituationOptions(Object.keys(YOUNG_SCHOOLED_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
+      }
+    }
     if (young) {
       setData({ ...young });
       setHasSpecificSituation(SPECIFIC_SITUATIONS_KEY.findIndex((key) => young[key] === "true") >= 0);
@@ -1113,9 +1121,20 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
 
   function onLocalChange(field, value) {
     const newData = { ...data, [field]: value };
-    if (field === "situation") {
-      newData.employed = youngEmployedSituationOptions.includes(value) ? "true" : "false";
-      newData.schooled = youngSchooledSituationOptions.includes(value) ? "true" : "false";
+    if (field === "grade") {
+      if (value === GRADES.NOT_SCOLARISE) {
+        newData.schooled = "false";
+        if (!YOUNG_ACTIVE_SITUATIONS[data.situation]) {
+          newData.situation = "";
+        }
+        setSituationOptions(Object.keys(YOUNG_ACTIVE_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
+      } else {
+        newData.schooled = "true";
+        if (!YOUNG_SCHOOLED_SITUATIONS[data.situation]) {
+          newData.situation = "";
+        }
+        setSituationOptions(Object.keys(YOUNG_SCHOOLED_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
+      }
     }
     setData(newData);
   }
@@ -1139,6 +1158,40 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
       try {
         if (data.parent1Phone) data.parent1Phone = trimmedPhones[1];
         if (data.parent2Phone) data.parent2Phone = trimmedPhones[2];
+
+        if (data.grade === GRADES.NOT_SCOLARISE) {
+          const request = await api.put(`/young-edition/${young._id}/situationparents`, {
+            schooled: "false",
+            schoolName: "",
+            schoolType: "",
+            schoolAddress: "",
+            schoolComplementAdresse: "",
+            schoolZip: "",
+            schoolCity: "",
+            schoolDepartment: "",
+            schoolRegion: "",
+            schoolCountry: "",
+            schoolLocation: null,
+            schoolId: "",
+            academy: "",
+          });
+          data.schoolName = "";
+          data.schoolType = "";
+          data.schoolAddress = "";
+          data.schoolComplementAdresse = "";
+          data.schoolZip = "";
+          data.schoolCity = "";
+          data.schoolDepartment = "";
+          data.schoolRegion = "";
+          data.schoolCountry = "";
+          data.schoolLocation = null;
+          data.schoolId = "";
+          data.academy = "";
+
+          if (!request.ok) {
+            toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
+          }
+        }
 
         const result = await api.put(`/young-edition/${young._id}/situationparents`, data);
         if (result.ok) {
@@ -1184,6 +1237,14 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
         result = validateEmpty(data, `parent${parent}City`, errors) && result;
         result = validateEmpty(data, `parent${parent}Country`, errors) && result;
       }
+      if (!data.situation || data.situation === "") {
+        errors["situation"] = "Ce champ ne peut pas être vide";
+        result = false;
+      }
+      if (!data.grade || data.grade === "") {
+        errors["grade"] = "Ce champ ne peut pas être vide";
+        result = false;
+      }
     }
 
     setErrors(errors);
@@ -1209,13 +1270,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     onStartRequest("");
   }
 
-  const situationOptions = Object.keys(YOUNG_SITUATIONS)
-    .map((s) => ({ value: s, label: translate(s) }))
-    .filter((s) => s.value !== YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL);
-  const gradeOptions = Object.keys(GRADES)
-    .filter((g) => g !== GRADES.NOT_SCOLARISE)
-    .map((g) => ({ value: g, label: translateGrade(g) }));
-
   return (
     <SectionContext.Provider value={{ errors }}>
       <Section
@@ -1233,12 +1287,28 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             <div>
               <MiniTitle>Situation</MiniTitle>
               <Field
+                name="grade"
+                label="Classe"
+                value={data.grade}
+                transformer={translateGrade}
+                mode={sectionMode}
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "grade")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                type="select"
+                options={gradeOptions}
+                onChange={(value) => onLocalChange("grade", value)}
+                young={young}
+                className="flex-[1_1_50%]"
+              />
+              <Field
                 name="situation"
                 label="Statut"
                 value={data.situation}
                 transformer={translate}
                 mode={sectionMode}
-                className="mb-[16px]"
+                className="mt-4 mb-4 flex-[1_1_50%]"
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
                 correctionRequest={getCorrectionRequest(requests, "situation")}
@@ -1282,21 +1352,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                       />
                     </>
                   )}
-                  <Field
-                    name="grade"
-                    label="Classe"
-                    value={data.grade}
-                    transformer={translateGrade}
-                    mode={sectionMode}
-                    onStartRequest={onStartRequest}
-                    currentRequest={currentRequest}
-                    correctionRequest={getCorrectionRequest(requests, "grade")}
-                    onCorrectionRequestChange={onCorrectionRequestChange}
-                    type="select"
-                    options={gradeOptions}
-                    onChange={(value) => onLocalChange("grade", value)}
-                    young={young}
-                  />
                 </>
               )}
             </div>
@@ -1739,38 +1794,38 @@ function SectionConsentements({ young, onChange, readonly = false }) {
         {
           /* lien et relance du droit à l'image du parent 1 si parent1AllowImageRights n'a pas de valeur */
           (young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false") &&
-          young.parent1AllowImageRights !== "true" &&
-          young.parent1AllowImageRights !== "false" &&
-          !readonly && (
-            <div className="mt-2 flex items-center justify-between">
-              <div
-                className="cursor-pointer italic text-[#1D4ED8]"
-                onClick={() => {
-                  copyToClipboard(`${appURL}/representants-legaux/droits-image?token=${young.parent1Inscription2023Token}&parent=1`);
-                  toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-                }}>
-                Copier le lien du formulaire
-              </div>
-              {young.parent1Email && (
-                <BorderButton
-                  mode="blue"
-                  onClick={async () => {
-                    try {
-                      const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 1 });
-                      if (response.ok) {
-                        toastr.success(translate("REMINDER_SENT"), "");
-                      } else {
-                        toastr.error(translate(response.code), "");
-                      }
-                    } catch (error) {
-                      toastr.error(translate(error.code), "");
-                    }
+            young.parent1AllowImageRights !== "true" &&
+            young.parent1AllowImageRights !== "false" &&
+            !readonly && (
+              <div className="mt-2 flex items-center justify-between">
+                <div
+                  className="cursor-pointer italic text-[#1D4ED8]"
+                  onClick={() => {
+                    copyToClipboard(`${appURL}/representants-legaux/droits-image?token=${young.parent1Inscription2023Token}&parent=1`);
+                    toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
                   }}>
-                  Relancer
-                </BorderButton>
-              )}
-            </div>
-          )
+                  Copier le lien du formulaire
+                </div>
+                {young.parent1Email && (
+                  <BorderButton
+                    mode="blue"
+                    onClick={async () => {
+                      try {
+                        const response = await api.put(`/young-edition/${young._id}/reminder-parent-image-rights`, { parentId: 1 });
+                        if (response.ok) {
+                          toastr.success(translate("REMINDER_SENT"), "");
+                        } else {
+                          toastr.error(translate(response.code), "");
+                        }
+                      } catch (error) {
+                        toastr.error(translate(error.code), "");
+                      }
+                    }}>
+                    Relancer
+                  </BorderButton>
+                )}
+              </div>
+            )
         }
 
         {young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false" ? (
@@ -1883,40 +1938,40 @@ function SectionConsentements({ young, onChange, readonly = false }) {
               /* lien et relance du consentement (droit à l'image) du parent 2 si parent2AllowImageRights n'a jamais eu de valeur (première demande)
                * on envoit alors vers le formulaire complet de consentement du parent 2 */
               young.parent1AllowSNU === "true" &&
-              young.parent1AllowImageRights === "true" &&
-              young.parent2AllowSNU !== "false" &&
-              !young.parent2AllowImageRights &&
-              young.parent2AllowImageRightsReset !== "true" &&
-              !readonly && (
-                <div className="mt-2 flex items-center justify-between">
-                  <div
-                    className="cursor-pointer italic text-[#1D4ED8]"
-                    onClick={() => {
-                      copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
-                      toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
-                    }}>
-                    Copier le lien du formulaire
-                  </div>
-                  {young.parent2Email && (
-                    <BorderButton
-                      mode="blue"
-                      onClick={async () => {
-                        try {
-                          const response = await api.get(`/young-edition/${young._id}/remider/2`);
-                          if (response.ok) {
-                            toastr.success(translate("REMINDER_SENT"), "");
-                          } else {
-                            toastr.error(translate(response.code), "");
-                          }
-                        } catch (error) {
-                          toastr.error(translate(error.code), "");
-                        }
+                young.parent1AllowImageRights === "true" &&
+                young.parent2AllowSNU !== "false" &&
+                !young.parent2AllowImageRights &&
+                young.parent2AllowImageRightsReset !== "true" &&
+                !readonly && (
+                  <div className="mt-2 flex items-center justify-between">
+                    <div
+                      className="cursor-pointer italic text-[#1D4ED8]"
+                      onClick={() => {
+                        copyToClipboard(`${appURL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`);
+                        toastr.info(translate("COPIED_TO_CLIPBOARD"), "");
                       }}>
-                      Relancer
-                    </BorderButton>
-                  )}
-                </div>
-              )
+                      Copier le lien du formulaire
+                    </div>
+                    {young.parent2Email && (
+                      <BorderButton
+                        mode="blue"
+                        onClick={async () => {
+                          try {
+                            const response = await api.get(`/young-edition/${young._id}/remider/2`);
+                            if (response.ok) {
+                              toastr.success(translate("REMINDER_SENT"), "");
+                            } else {
+                              toastr.error(translate(response.code), "");
+                            }
+                          } catch (error) {
+                            toastr.error(translate(error.code), "");
+                          }
+                        }}>
+                        Relancer
+                      </BorderButton>
+                    )}
+                  </div>
+                )
             }
             {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.NOT_AUTORISED].includes(
               young.status,
