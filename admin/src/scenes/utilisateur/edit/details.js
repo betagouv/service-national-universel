@@ -182,6 +182,9 @@ export default function Details({ user, setUser, currentUser }) {
     setErrors({});
   };
 
+  const trimmedPhone = data.phone?.replace(/\s/g, "");
+  const trimmedMobile = data.mobile?.replace(/\s/g, "");
+
   const validate = () => {
     let isValid = true;
     const errors = {};
@@ -198,13 +201,13 @@ export default function Details({ user, setUser, currentUser }) {
       isValid = false;
     }
 
-    if (data.phone && !data.phone.match(/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/gim)) {
+    if (trimmedPhone && !trimmedPhone.match(/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/gim)) {
       errors.phone = "Le téléphone doit être un numéro de téléphone valide";
       isValid = false;
     }
 
-    if (data.mobile && !validator.isMobilePhone(data.mobile, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
-      errors.mobile = "Le téléphone doit être un numéro de téléphone mobile valide. (exemple : (+33)(0)642424242)";
+    if (trimmedMobile && !validator.isMobilePhone(trimmedMobile, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
+      errors.mobile = "Le téléphone doit être un numéro de téléphone mobile valide. Exemple : +33 6 42 42 42 42.";
       isValid = false;
     }
 
@@ -226,6 +229,9 @@ export default function Details({ user, setUser, currentUser }) {
           }
         }
         const updatedData = { ...data };
+        if (trimmedPhone) updatedData.phone = trimmedPhone;
+        if (trimmedMobile) updatedData.mobile = trimmedMobile;
+
         if ((user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) && !(data.role === ROLES.RESPONSIBLE || data.role === ROLES.SUPERVISOR)) {
           updatedData.structureId = null;
         }
