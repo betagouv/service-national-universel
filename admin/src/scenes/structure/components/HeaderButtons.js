@@ -7,10 +7,13 @@ import Bin from "../../../assets/Bin";
 import API from "../../../services/api";
 import { ROLES } from "../../../utils";
 import ModalConfirmDelete from "../../centersV2/components/ModalConfirmDelete";
+import { useHistory } from "react-router-dom";
+
 
 export default function Actions({ structure }) {
   const user = useSelector((state) => state.Auth.user);
   const [isOpen, setIsOpen] = useState(false);
+  const history = useHistory();
 
   const onConfirmDelete = async () => {
     try {
@@ -49,6 +52,7 @@ export default function Actions({ structure }) {
         onDelete={onConfirmDelete}
         title="Êtes-vous sûr(e) de vouloir supprimer cette structure ?"
         message="Cette action est irréversible."
+        mention={"Attention, tous les responsables associés à cette structure seront définitivement supprimés."}
       />
     </div>
   );

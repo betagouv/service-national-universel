@@ -212,18 +212,22 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     if (!canDeleteStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const missionsLinkedToReferent = await MissionObject.find({ structureId: checkedId });
-    // ? Supprimer les missions et responsables par la même occasion ?
+
     const applicationsLinkedToReferent = await ApplicationObject.find({ missionId: { $in: missionsLinkedToReferent.map((mission) => mission._id) } });
+    
     if (applicationsLinkedToReferent.length) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
 
     const referentsLinkedToStructure = await ReferentObject.find({ structureId: checkedId });
 
     for (const referent of referentsLinkedToStructure) {
-      referent.set({ structureId: undefined });
-      await referent.save({ fromUser: req.user });
+      await referent.remove();
     }
 
-    await structure.remove();
+    for (const mission of missionsLinkedToReferent) {
+      await mission.remove();
+    }
+
+    await structure.remove(); 
     console.log(`Structure ${req.params.id} has been deleted by ${req.user._id}`);
     res.status(200).send({ ok: true });
   } catch (error) {
