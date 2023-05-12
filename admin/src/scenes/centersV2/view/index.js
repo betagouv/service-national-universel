@@ -286,6 +286,9 @@ export default function Index({ ...props }) {
                         label="Places ouvertes"
                         value={editInfoSession.placesTotal}
                         onChange={(e) => setEditInfoSession({ ...editInfoSession, placesTotal: e.target.value })}
+                        tooltips={
+                          "C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
+                        }
                       />
                     </div>
                   </div>

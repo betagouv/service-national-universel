@@ -271,7 +271,7 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
   }
 });
 
-router.post("/by-point-de-rassemblement/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/by-point-de-rassemblement/:meetingPointId/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
     const searchFields = ["email", "firstName", "lastName", "city", "zip"];
@@ -286,15 +286,14 @@ router.post("/by-point-de-rassemblement/:action(search|export)", passport.authen
     // Context filters
     const contextFilters = [
       ...youngContextFilters,
-      { terms: { "meetingPointId.keyword": [req.query.meetingPointId] } },
+      { terms: { "meetingPointId.keyword": [String(req.params.meetingPointId)] } },
       { terms: { "status.keyword": ["VALIDATED"] } },
       { bool: { must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }] } },
     ];
 
     // Body params validation
     const { queryFilters, page, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
-    const { error: meetingPointIdError } = Joi.object({ meetingPointId: Joi.string().required() }).validate({ meetingPointId: req.query.meetingPointId });
-    if (error || meetingPointIdError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
