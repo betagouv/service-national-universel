@@ -1153,7 +1153,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   if (data.parent2Phone) trimmedPhones[2] = data.parent2Phone.replace(/\s/g, "");
 
   async function onSave() {
-    console.log(data);
     setSaving(true);
     if (validate()) {
       try {
@@ -1176,6 +1175,19 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
             schoolId: "",
             academy: "",
           });
+          data.schoolName = "";
+          data.schoolType = "";
+          data.schoolAddress = "";
+          data.schoolComplementAdresse = "";
+          data.schoolZip = "";
+          data.schoolCity = "";
+          data.schoolDepartment = "";
+          data.schoolRegion = "";
+          data.schoolCountry = "";
+          data.schoolLocation = null;
+          data.schoolId = "";
+          data.academy = "";
+
           if (!request.ok) {
             toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
           }
