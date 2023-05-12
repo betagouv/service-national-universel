@@ -63,6 +63,7 @@ jobs:
           git config user.name "Github Deployer"
           git remote add cloud "$CLEVER_CLOUD_GIT_REMOTE"
           git add packages ${{ env.SUBFOLDER_NAME }}
+          git add --no-directories *
           git commit -m "For deploy"
           git push -f -u cloud master
         env:
