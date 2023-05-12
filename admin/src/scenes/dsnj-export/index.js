@@ -7,6 +7,7 @@ import dayjs from "dayjs";
 import { Title } from "../plan-transport/components/commons";
 import Select from "../plan-transport/components/Select";
 import api from "../../services/api";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import ExportBox from "./components/ExportBox";
 import { useSelector } from "react-redux";
@@ -32,6 +33,7 @@ const DSNJExport = () => {
   const [cohorts, setCohorts] = useState([]);
   const [isLDownloadingByKey, setDownloadingByKey] = useState({});
   const user = useSelector((state) => state.Auth.user);
+  useDocumentTitle("Export DSNJ");
 
   useEffect(() => {
     getCohorts();

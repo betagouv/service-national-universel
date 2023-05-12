@@ -7,11 +7,13 @@ import { SubTitle, Title } from "../components/commons";
 import Select from "../components/Select";
 import { InTable } from "./components/InTable";
 import { OutTable } from "./components/OutTable";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 export default function Regional() {
   const user = useSelector((state) => state.Auth.user);
   const urlParams = new URLSearchParams(window.location.search);
   const region = urlParams.get("region");
+  useDocumentTitle(`Table de répartition - ${region}`);
   const [cohort, setCohort] = React.useState(urlParams.get("cohort"));
   const cohortList = [
     { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
