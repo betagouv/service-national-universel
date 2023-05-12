@@ -45,7 +45,7 @@ export default function WaitingCorrectionV2() {
                         </button>
                       </div>
                       {!inscriptionModificationOpenForYoungs(young.cohort, young) && (
-                        <span className="text-sm leading-5 text-[#6B7280]">La date de limite pour modifier votre dossier d'inscription a été dépassée.</span>
+                        <span className="text-sm leading-5 text-[#6B7280]">La date limite pour modifier votre dossier d'inscription a été dépassée.</span>
                       )}
                       <hr className="border-gray-200" />
                     </>
@@ -96,7 +96,7 @@ export default function WaitingCorrectionV2() {
                       </button>
                     </div>
                     {!inscriptionModificationOpenForYoungs(young.cohort, young) && (
-                      <span className="text-sm leading-5 text-[#6B7280]">La date de limite pour modifier votre dossier d'inscription a été dépassée.</span>
+                      <span className="text-sm leading-5 text-[#6B7280]">La date limite pour modifier votre dossier d'inscription a été dépassée.</span>
                     )}
                     <hr className="border-gray-200" />
                   </>
