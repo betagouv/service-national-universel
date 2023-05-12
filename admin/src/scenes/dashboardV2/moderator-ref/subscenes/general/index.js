@@ -28,9 +28,12 @@ export default function Index() {
   const [volontairesData, setVolontairesData] = useState();
   const [inAndOutCohort, setInAndOutCohort] = useState();
 
+  // eslint-disable-next-line no-unused-vars
   const [notesFromDate, setNotesFromDate] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [notesToDate, setNotesToDate] = useState(null);
   const [notesPhase, setNotesPhase] = useState("all");
+  const [stats, setStats] = useState({});
 
   const [filterArray, setFilterArray] = useState([]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
@@ -69,7 +72,7 @@ export default function Index() {
         name: "Cohorte",
         fullValue: "Toutes",
         options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
-        sort: (e)=> orderCohort(e),
+        sort: (e) => orderCohort(e),
       },
     ].filter((e) => e);
     setFilterArray(filters);
@@ -116,6 +119,18 @@ export default function Index() {
     [inscriptionGoals, selectedFilters.cohort, selectedFilters.department, selectedFilters.region, selectedFilters.academy],
   );
 
+  React.useEffect(() => {
+    const updateStats = async (id) => {
+      const { responses } = await api.post("/elasticsearch/dashboard/default", { filters: { meetingPointIds: [id], cohort: [] } });
+      setStats({
+        inscription_en_attente_de_validation: responses[0].hits.total.value,
+        inscription_corrigé_à_instruire_de_nouveau: responses[1].hits.total.value,
+        inscription_en_attente_de_correction: responses[2].hits.total.value,
+      });
+    };
+    updateStats();
+  }, []);
+
   return (
     <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}>
       <div className="flex flex-col gap-8">
@@ -144,11 +159,25 @@ export default function Index() {
                   <div className="text-sm font-bold leading-5 text-gray-900">Inscriptions</div>
                   <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">4</div>
                 </div>
-                {Array.from(Array(4).keys())
-                  .slice(0, fullNote ? 4 : 3)
-                  .map((i) => (
-                    <NoteContainer key={`inscriptions` + i} title="Dossier" number={2} content="dossier d’inscriptions sont en attente de validation." btnLabel="À instruire" />
-                  ))}
+                <NoteContainer
+                  title="Dossier"
+                  number={stats.inscription_en_attente_de_validation}
+                  content="dossier d’inscriptions sont en attente de validation."
+                  btnLabel="À instruire"
+                />
+                <NoteContainer
+                  title="Dossier"
+                  number={stats.inscription_corrigé_à_instruire_de_nouveau}
+                  content="dossiers d’inscription corrigés sont à instruire de nouveau."
+                  btnLabel="À instruire"
+                />
+                <NoteContainer
+                  title="Dossier"
+                  number={stats.inscription_en_attente_de_correction}
+                  content="dossiers d’inscription en attente de correction."
+                  btnLabel="À instruire"
+                />
+                {fullNote && <NoteContainer title="Dossier" number={2} content="dossier d’inscriptions sont en attente de validation." btnLabel="À instruire" />}
               </div>
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">

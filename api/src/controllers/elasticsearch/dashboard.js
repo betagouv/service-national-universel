@@ -23,6 +23,8 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
         queryFromFilter([{ terms: { "status.keyword": ["WAITING_VALIDATION"] } }, { bool: { must_not: { exists: { field: "correctionRequests.keyword" } } } }]),
         { index: "young", type: "_doc" },
         queryFromFilter([{ terms: { "status.keyword": ["WAITING_VALIDATION"] } }, { bool: { must: { exists: { field: "correctionRequests.keyword" } } } }]),
+        { index: "young", type: "_doc" },
+        queryFromFilter([{ terms: { "status.keyword": ["WAITING_CORRECTION"] } }]),
       ),
     });
     return res.status(200).send(response.body);

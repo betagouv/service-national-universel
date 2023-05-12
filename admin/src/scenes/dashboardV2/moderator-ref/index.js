@@ -8,7 +8,6 @@ import Analytics from "./subscenes/analytics";
 import General from "./subscenes/general";
 import Inscription from "./subscenes/inscription";
 import Sejour from "./subscenes/sejour";
-import api from "../../../services/api";
 
 export default function Index() {
   useDocumentTitle("Tableau de bord");
@@ -20,14 +19,6 @@ export default function Index() {
       history.push("/dashboard");
     }
   }, [location]);
-
-  React.useEffect(() => {
-    const x = async (id) => {
-      const { responses } = await api.post("/elasticsearch/dashboard/default", { filters: { meetingPointIds: [id], cohort: [] } });
-      console.log(responses[0].aggregations);
-    };
-    x();
-  }, []);
 
   return (
     <Switch>
