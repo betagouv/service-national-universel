@@ -248,12 +248,12 @@ const ListSessions = ({ user, firstSession }) => {
   const selectedCohort = selectedFilters?.cohorts?.filter ? selectedFilters.cohorts.filter[0] : firstSession;
 
   const getYoungsByPdr = async (ids) => {
-    const { responses } = await api.post("/elasticsearch/young/by-point-de-rassemblement", { filters: { meetingPointIds: ids, cohort: [selectedCohort] } });
+    const { responses } = await api.post("/elasticsearch/young/by-point-de-rassemblement/aggs", { filters: { meetingPointIds: ids, cohort: [selectedCohort] } });
     return responses[0]?.aggregations?.group_by_meetingPointId?.buckets || [];
   };
 
   const getLinesByPdr = async (ids) => {
-    const { responses } = await api.post("/elasticsearch/lignebus/by-point-de-rassemblement", { filters: { meetingPointIds: ids, cohort: [selectedCohort] } });
+    const { responses } = await api.post("/elasticsearch/lignebus/by-point-de-rassemblement/aggs", { filters: { meetingPointIds: ids, cohort: [selectedCohort] } });
     return responses[0]?.aggregations?.group_by_meetingPointId?.buckets || [];
   };
 

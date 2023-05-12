@@ -1,5 +1,6 @@
 const passport = require("passport");
 const express = require("express");
+const Joi = require("joi");
 const router = express.Router();
 const { ROLES, canSearchInElasticSearch } = require("snu-lib/roles");
 const datesub = require("date-fns/sub");
@@ -228,7 +229,7 @@ router.post("/moderator/sejour/", passport.authenticate(["referent"], { session:
   }
 });
 
-router.post("/by-point-de-rassemblement/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { queryFilters, error } = joiElasticSearch({ filterFields: ["meetingPointIds", "cohort"], body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -264,6 +265,68 @@ router.post("/by-point-de-rassemblement/", passport.authenticate(["referent"], {
 
     const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
     return res.status(200).send(response.body);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/by-point-de-rassemblement/:meetingPointId/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // Configuration
+    const searchFields = ["email", "firstName", "lastName", "city", "zip"];
+    const filterFields = ["cohort.keyword", "region.keyword", "sessionPhase1Id.keyword", "sessionPhase1Name", "sessionPhase1City", "department.keyword", "ligneId.keyword"];
+    const sortFields = [];
+
+    const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, true);
+    if (youngContextError) {
+      return res.status(youngContextError.status).send(youngContextError.body);
+    }
+
+    // Context filters
+    const contextFilters = [
+      ...youngContextFilters,
+      { terms: { "meetingPointId.keyword": [String(req.params.meetingPointId)] } },
+      { terms: { "status.keyword": ["VALIDATED"] } },
+      { bool: { must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }] } },
+    ];
+
+    // Body params validation
+    const { queryFilters, page, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // Build request body
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields,
+      queryFilters,
+      page,
+      sort: { field: "lastName.keyword", order: "asc" },
+      contextFilters,
+      customQueries: {
+        sessionPhase1Name: (query, value) => {
+          query.bool.must.push({ terms: { "sessionPhase1Id.keyword": value } });
+          return query;
+        },
+        sessionPhase1City: (query, value) => {
+          query.bool.must.push({ terms: { "sessionPhase1Id.keyword": value } });
+          return query;
+        },
+        sessionPhase1NameAggs: () => {
+          return { terms: { field: "sessionPhase1Id.keyword", missing: "N/A", size: ES_NO_LIMIT } };
+        },
+        sessionPhase1CityAggs: () => {
+          return { terms: { field: "sessionPhase1Id.keyword", missing: "N/A", size: ES_NO_LIMIT } };
+        },
+      },
+    });
+    if (req.params.action === "export") {
+      const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+    } else {
+      const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      return res.status(200).send(response.body);
+    }
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
