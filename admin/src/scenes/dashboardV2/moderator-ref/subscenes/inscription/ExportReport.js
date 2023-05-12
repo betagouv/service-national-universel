@@ -11,7 +11,7 @@ import ModalConfirm from "../../../../../components/modals/ModalConfirm";
 import { REFERENT_ROLES } from "snu-lib";
 import { useSelector } from "react-redux";
 
-export default function ExportReport({ filter, filterArray }) {
+export default function ExportReport({ filter }) {
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loadingText, setLoadingText] = useState("0 %");
@@ -31,19 +31,16 @@ export default function ExportReport({ filter, filterArray }) {
   async function run() {
     if (!filter?.cohort?.length) return toastr.error("Merci de selectionner au moins une cohorte ");
     if (user.role === REFERENT_ROLES.REFERENT_REGION) {
-      if (!filter?.academy?.length) {
-        filter.academy = filterArray.filter((s) => s.name === "Académie")[0].options.map((v) => v.key);
-      }
       if (!filter?.region?.length) {
-        filter.region = filterArray.filter((s) => s.name === "Région")[0].options.map((v) => v.key);
+        filter.region = [user.region];
       }
       if (!filter?.department?.length) {
-        filter.department = filterArray.filter((s) => s.name === "Département")[0].options.map((v) => v.key);
+        filter.department = user.department.map((s) => s);
       }
     }
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
       if (!filter?.department?.length) {
-        filter.department = filterArray.filter((s) => s.name === "Département")[0].options.map((v) => v.key);
+        filter.department = user.department.map((s) => s);
       }
     }
 
@@ -72,6 +69,7 @@ export default function ExportReport({ filter, filterArray }) {
       // get all the department if there is no filter specified, else get only the department filtered
       ?.filter((number) => !filter?.department?.length || filter?.department?.includes(departmentLookUp[number]))
       ?.sort((a, b) => a - b);
+    console.log(keys);
     for (let i = 0; i < keys.length; i++) {
       const dptCode = keys[i];
       const dptName = departmentLookUp[dptCode];
