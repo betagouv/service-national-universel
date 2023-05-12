@@ -2,7 +2,6 @@ import React from "react";
 import { BiMailSend } from "react-icons/bi";
 import { formatStringDateTimezoneUTC, translate } from "snu-lib";
 import IconDomain from "../../../components/IconDomain";
-
 import Tag from "../../../components/Tag";
 
 export default function CardMission({ mission, onSend, sent = false }) {
