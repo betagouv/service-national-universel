@@ -6,8 +6,10 @@ import { Col, Row } from "reactstrap";
 import api from "../../services/api";
 import { translate, formatStringDate, urlWithScheme } from "../../utils";
 import plausibleEvent from "../../services/plausible";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function Index() {
+  useDocumentTitle("Diagoriente");
   const [diagorienteUrl, setDiagorienteUrl] = useState();
   const [diagorienteCardData, setDiagorienteCardData] = useState();
   const [skills, setSkills] = useState([]);

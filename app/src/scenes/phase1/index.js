@@ -11,8 +11,11 @@ import { YOUNG_STATUS_PHASE1, permissionPhase1 } from "../../utils";
 import { HeroContainer, Hero } from "../../components/Content";
 import { useHistory } from "react-router-dom";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default () => {
+  useDocumentTitle("Phase 1 - Séjour");
+
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
 

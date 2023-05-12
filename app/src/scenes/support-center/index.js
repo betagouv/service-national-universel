@@ -5,8 +5,10 @@ import { useSelector } from "react-redux";
 import Dashboard from "./dashboard";
 import Ticket from "./ticket";
 import { SentryRoute } from "../../sentry";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function Index() {
+  useDocumentTitle("Besoin d'aide");
   const young = useSelector((state) => state.Auth.young);
 
   if (!young) {
