@@ -7,25 +7,65 @@ const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
+const StructureObject = require("../../models/structure");
+
+async function buildStructureContext(user) {
+  const contextFilters = [];
+
+  // A responsible can only see their structure and parent structure (not sure why we need ES though).
+  if (user.role === ROLES.RESPONSIBLE) {
+    if (!user.structureId) return { structureContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    const structure = await StructureObject.findById(user.structureId);
+    if (!structure) return { structureContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    let idsArray = [structure._id.toString()];
+    if (structure.networkId !== "") {
+      const parent = await StructureObject.findById(structure.networkId);
+      idsArray.push(parent?._id?.toString());
+    }
+    contextFilters.push({ terms: { _id: idsArray.filter((e) => e) } });
+  }
+
+  // A supervisor can only see their structures (all network).
+  if (user.role === ROLES.SUPERVISOR) {
+    if (!user.structureId) return { structureContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+    contextFilters.push({ terms: { _id: data.map((e) => e._id.toString()) } });
+  }
+
+  return { structureContextFilters: contextFilters };
+}
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { user, body } = req;
     // Configuration
     const searchFields = ["name", "city", "zip", "siret", "networkName"];
-    const filterFields = ["department.keyword", "region.keyword", "legalStatus.keyword", "types.keyword", "sousType.keyword", "networkName.keyword", "isMilitaryPreparation.keyword", "structurePubliqueEtatType.keyword"];
+    const filterFields = [
+      "department.keyword",
+      "region.keyword",
+      "legalStatus.keyword",
+      "types.keyword",
+      "sousType.keyword",
+      "networkName.keyword",
+      "isMilitaryPreparation.keyword",
+      "structurePubliqueEtatType.keyword",
+    ];
     const sortFields = [];
 
     // Authorization
     if (!canSearchInElasticSearch(req.user, "structure")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    const { structureContextFilters, structureContextError } = await buildStructureContext(user);
+    if (structureContextError) {
+      return res.status(missionContextError.status).send(missionContextError.body);
+    }
+
     // Context filters
-    let contextFilters = [];
-    if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
-    if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
+    let contextFilters = [...structureContextFilters];
 
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
@@ -41,11 +81,12 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     let response;
     if (req.params.action === "export") {
       response = await allRecords("structure", hitsRequestBody.query);
-      structures =  response.map((s) => ({ _id: s._id, _source: s }));
+      structures = response.map((s) => ({ _id: s._id, _source: s }));
     } else {
       const esResponse = await esClient.msearch({ index: "structure", body: buildNdJson({ index: "structure", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       response = esResponse.body;
-      structures = response && response.responses && response.responses.length > 0 && response.responses[0].hits && response.responses[0].hits.hits ? response.responses[0].hits.hits : [];
+      structures =
+        response && response.responses && response.responses.length > 0 && response.responses[0].hits && response.responses[0].hits.hits ? response.responses[0].hits.hits : [];
     }
 
     const structureIds = [...new Set(structures.map((item) => item._id).filter((e) => e))];
@@ -54,13 +95,13 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       const referents = await allRecords("referent", {
         bool: {
           must: {
-            match_all: {}
+            match_all: {},
           },
-          filter: [{ terms: { "structureId.keyword": structureIds } }]
-        }
+          filter: [{ terms: { "structureId.keyword": structureIds } }],
+        },
       });
       if (referents.length > 0) {
-        for(let structure of structures) {
+        for (let structure of structures) {
           structure._source.team = referents.filter((r) => r.structureId === structure._id);
         }
       }
@@ -69,13 +110,13 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       const missions = await allRecords("mission", {
         bool: {
           must: {
-            match_all: {}
+            match_all: {},
           },
-          filter: [{ terms: { "structureId.keyword": structureIds } }]
-        }
+          filter: [{ terms: { "structureId.keyword": structureIds } }],
+        },
       });
       if (missions.length > 0) {
-        for(let structure of structures) {
+        for (let structure of structures) {
           structure._source.missions = missions.filter((m) => m.structureId === structure._id);
         }
       }

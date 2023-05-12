@@ -53,7 +53,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   React.useEffect(() => {
     // normalize search
     const normalizedSearch = normalizeString(search);
-    const newData =
+    let newData =
       search !== ""
         ? data.filter((f) => (filter?.translate ? normalizeString(filter.translate(f.key)).includes(normalizedSearch) : normalizeString(f.key).includes(normalizedSearch)))
         : data;
