@@ -2,7 +2,7 @@ import React from "react";
 import { BsDownload } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import { formatDateFR, getDepartmentNumber, translate, translatePhase1, youngPlanDeTranportExportFields } from "snu-lib";
+import { ROLES, formatDateFR, getDepartmentNumber, translate, translatePhase1, youngPlanDeTranportExportFields } from "snu-lib";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import { Filters, ModalExportV2, ResultTable, Save, SelectedFilters } from "../../../components/filters-system";
 import Loader from "../../../components/Loader";
@@ -10,6 +10,7 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { Title } from "../components/commons";
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
+import { useSelector } from "react-redux";
 
 const contactTypes = {
   email: "Adresse e-mail",
@@ -17,6 +18,7 @@ const contactTypes = {
 };
 
 export default function ListPDR(props) {
+  const user = useSelector((state) => state.Auth.user);
   const id = props.match && props.match.params && props.match.params.id;
   if (!id) return <div />;
   const cohort = new URLSearchParams(props.location.search).get("cohort");
@@ -202,12 +204,19 @@ export default function ListPDR(props) {
       },
     },
 
-    { title: "Région du volontaire", name: "REGION", datafield: "region.keyword", missingLabel: "Non renseigné" },
+    {
+      title: "Région du volontaire",
+      name: "REGION",
+      datafield: "region.keyword",
+      missingLabel: "Non renseigné",
+      defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
+    },
     {
       title: "Département du volontaire",
       name: "DEPARTMENT",
       datafield: "department.keyword",
       missingLabel: "Non renseigné",
+      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
   ];

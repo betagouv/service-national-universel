@@ -8,7 +8,7 @@ export default function Notifications({ young, onChange }) {
     <>
       <YoungHeader young={young} tab="notifications" onChange={onChange} />
       <div className="m-8">
-        <Emails email={young.email} />
+        <Emails email={young.email} userType={"young"} />
       </div>
     </>
   );

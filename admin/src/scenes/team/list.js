@@ -1,50 +1,62 @@
-import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import React, { useEffect, useState } from "react";
 import { HiLogin, HiUserAdd } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import Badge from "../../components/Badge";
-import DeleteFilters from "../../components/buttons/DeleteFilters";
-import ExportComponent from "../../components/ExportXlsx";
-import Invite from "../../components/header/invite";
-import { Filter, FilterRow, MultiLine, ResultTable, Table } from "../../components/list";
-import ModalConfirm from "../../components/modals/ModalConfirm";
-import ReactiveListComponent from "../../components/ReactiveListComponent";
-import { apiURL } from "../../config";
-import api from "../../services/api";
-import plausibleEvent from "../../services/plausible";
-import { canUpdateReferent, ES_NO_LIMIT, formatLongDateFR, formatStringLongDate, getFilterLabel, ROLES, translate, canDeleteReferent } from "../../utils";
-import Nav from "./components/nav";
-import Panel from "./panel";
+import { formatLongDateFR } from "snu-lib";
 import Eye from "../../assets/icons/Eye";
 import Pencil from "../../assets/icons/Pencil";
 import Trash from "../../assets/icons/Trash";
+import Badge from "../../components/Badge";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
+import Invite from "../../components/header/invite";
+import { MultiLine, Table } from "../../components/list";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
+import api from "../../services/api";
+import { ROLES, canDeleteReferent, canUpdateReferent, formatStringLongDate, translate } from "../../utils";
+import Nav from "./components/nav";
+import Panel from "./panel";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
-  const FILTERS = ["SEARCH", "ROLE", "SUBROLE"];
   const [structures, setStructures] = useState();
   const [responsable, setResponsable] = useState(null);
   const [NewUserOpen, setNewUserOpen] = useState(false);
   const [filter, setFilter] = useState({});
+  const [currentTab, setCurrentTab] = useState();
+
+  //List state
+  const [data, setData] = useState([]);
+  const pageId = "team-list";
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [paramData, setParamData] = useState({
+    page: 0,
+  });
+
+  //Filters
+  const filterArray = [
+    {
+      title: "Rôle",
+      name: "role",
+      missingLabel: "Non renseigné",
+      translate: (e) => translate(e),
+    },
+    {
+      title: "Fonction",
+      name: "subRole",
+      missingLabel: "Non renseigné",
+      translate: (e) => translate(e),
+    },
+  ];
 
   function updateFilter(n) {
     setFilter((f) => ({ ...f, ...n }));
+    const newFilter = Object.entries(n).reduce((e, [key, value]) => {
+      return { ...e, [key]: { filter: value } };
+    }, {});
+    setSelectedFilters((f) => ({ ...f, ...newFilter }));
   }
-
-  const getDefaultQuery = () => {
-    let body = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
-      track_total_hits: true,
-    };
-    if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
-    if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
-    if (filter.role?.length) body.query.bool.filter.push({ terms: { "role.keyword": filter.role } });
-    return body;
-  };
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   const getStructures = async () => {
     const { data, ok } = await api.get("/structure");
@@ -69,135 +81,116 @@ export default function List() {
 
   return (
     <div>
-      <ReactiveBase url={`${apiURL}/es`} app="team" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
-          <div style={{ flex: 1, position: "relative" }}>
-            <div className="mt-6 flex flex-wrap items-start justify-between px-6">
-              <div className="text-2xl font-bold text-black">Mon équipe - {user.role === ROLES.REFERENT_REGION ? `Région ${user.region}` : `Département ${user.department}`}</div>
-              <div className="flex items-center ">
-                <div className="mr-2">
-                  <ExportComponent
-                    handleClick={() => plausibleEvent("Utilisateurs/CTA - Exporter mon équipe")}
-                    title="Exporter mon équipe"
-                    exportTitle="Mon équipe"
-                    index="team"
-                    defaultQuery={getExportQuery}
-                    react={{ and: FILTERS }}
-                    transform={async (all) => {
-                      const services = await getService();
-                      return all.map((data) => {
-                        let structure = {};
-                        let department = Array.isArray(data.department) ? data.department : [data.department];
-                        department = department.find((d) => filter.department[0] === d);
+      <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
+        <div style={{ flex: 1, position: "relative" }}>
+          <div className="mt-6 flex flex-wrap items-start justify-between px-6">
+            <div className="text-2xl font-bold text-black">Mon équipe - {user.role === ROLES.REFERENT_REGION ? `Région ${user.region}` : `Département ${user.department}`}</div>
+            <div className="flex items-center ">
+              <div className="flex items-stretch mr-2">
+                <ExportComponent
+                  title="Exporter"
+                  filters={filterArray}
+                  exportTitle="Mon équipe"
+                  route={`/elasticsearch/referent/team/export?tab=${currentTab}`}
+                  selectedFilters={selectedFilters}
+                  css={{
+                    override: true,
+                    button: `text-blue-600 border-[1px] border-blue-600 rounded-md px-7 py-1  text-sm hover:shadow-button`,
+                    loadingButton: `text-blue-600  border border-blue-600 rounded-md px-7 py-1  text-sm`,
+                  }}
+                  transform={async (all) => {
+                    const services = await getService();
+                    return all.map((data) => {
+                      let structure = {};
+                      let department = Array.isArray(data.department) ? data.department : [data.department];
+                      department = department.find((d) => filter.department[0] === d);
 
-                        if (data.structureId && structures) {
-                          structure = structures.find((s) => s._id === data.structureId);
-                          if (!structure) structure = {};
-                        }
-                        let service = {};
-                        if (data.role === ROLES.REFERENT_DEPARTMENT && services) {
-                          service = services.find((s) => s.department === department);
-                          if (!service) service = {};
-                        }
+                      if (data.structureId && structures) {
+                        structure = structures.find((s) => s._id === data.structureId);
+                        if (!structure) structure = {};
+                      }
+                      let service = {};
+                      if (data.role === ROLES.REFERENT_DEPARTMENT && services) {
+                        service = services.find((s) => s.department === department);
+                        if (!service) service = {};
+                      }
 
-                        return {
-                          _id: data._id,
-                          Prénom: data.firstName,
-                          Nom: data.lastName,
-                          Email: data.email,
-                          Rôle: translate(data.role),
-                          Fonction: translate(data.subRole),
-                          Téléphone: data.phone,
-                          Portable: data.mobile,
-                          Département: department,
-                          Région: data.region,
-                          Structure: structure?.name,
-                          "Nom de la direction du service départemental": service?.directionName,
-                          "Adresse du service départemental": service?.address ? service?.address + service?.complementAddress : "",
-                          "Code Postal du service départemental": service?.zip,
-                          "Ville du service départemental": service?.city,
-                          "Créé lé": formatLongDateFR(data.createdAt),
-                          "Mis à jour le": formatLongDateFR(data.updatedAt),
-                          "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-                        };
-                      });
-                    }}
-                  />
-                </div>
-                <button
-                  className=" ml-2 box-border rounded-lg border-[1px] border-brand-purple  px-7 py-1 text-brand-purple hover:shadow-button"
-                  onClick={() => setNewUserOpen(true)}>
-                  Inviter&nbsp;un&nbsp;nouvel&nbsp;utilisateur
-                </button>
+                      return {
+                        _id: data._id,
+                        Prénom: data.firstName,
+                        Nom: data.lastName,
+                        Email: data.email,
+                        Rôle: translate(data.role),
+                        Fonction: translate(data.subRole),
+                        Téléphone: data.phone,
+                        Portable: data.mobile,
+                        Département: department,
+                        Région: data.region,
+                        Structure: structure?.name,
+                        "Nom de la direction du service départemental": service?.directionName,
+                        "Adresse du service départemental": service?.address ? service?.address + service?.complementAddress : "",
+                        "Code Postal du service départemental": service?.zip,
+                        "Ville du service départemental": service?.city,
+                        "Créé lé": formatLongDateFR(data.createdAt),
+                        "Mis à jour le": formatLongDateFR(data.updatedAt),
+                        "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
+                      };
+                    });
+                  }}
+                />
               </div>
+              <button className="ml-2 box-border rounded-lg border-[1px] border-blue-600 px-7 py-1 text-blue-600 hover:shadow-button" onClick={() => setNewUserOpen(true)}>
+                Inviter&nbsp;un&nbsp;nouvel&nbsp;utilisateur
+              </button>
             </div>
-            <div className="mb-3 mr-4 flex items-center px-6">
-              <Nav filter={filter} updateFilter={updateFilter} />
-            </div>
-            <div className="mb-3 mr-4 flex items-center px-6">{/* Card */}</div>
-            <Filter>
-              <FilterRow visible>
-                <DataSearch
-                  showIcon={false}
-                  placeholder="Rechercher par prénom, nom, email..."
-                  componentId="SEARCH"
-                  dataField={["email.keyword", "firstName.folded", "lastName.folded"]}
-                  react={{ and: FILTERS }}
-                  // fuzziness={2}
-                  style={{ flex: 1, marginRight: "1rem" }}
-                  innerClass={{ input: "searchbox" }}
-                  autosuggest={false}
-                  URLParams={true}
-                  queryFormat="and"
+          </div>
+          <div className="mb-3 mr-4 flex items-center px-6">
+            <Nav filter={filter} updateFilter={updateFilter} currentTab={currentTab} setCurrentTab={setCurrentTab} />
+          </div>
+          <div className="relative mb-4 items-start mx-4">
+            <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
+              <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
+                <Filters
+                  pageId={pageId}
+                  route={`/elasticsearch/referent/team/search?tab=${currentTab}`}
+                  setData={(value) => setData(value)}
+                  filters={filterArray}
+                  searchPlaceholder="Rechercher par mots clés, ville, code postal..."
+                  selectedFilters={selectedFilters}
+                  setSelectedFilters={setSelectedFilters}
+                  paramData={paramData}
+                  setParamData={setParamData}
                 />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="ROLE"
-                  dataField="role.keyword"
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  react={{ and: FILTERS.filter((e) => e !== "ROLE") }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Rôle")}
+                <SortOption
+                  sortOptions={[
+                    { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
+                    { label: "Nom (Z > A)", field: "lastName.keyword", order: "desc" },
+                    { label: "Prénom (A > Z)", field: "firstName.keyword", order: "asc" },
+                    { label: "Prénom (Z > A)", field: "firstName.keyword", order: "desc" },
+                    { label: "Date de création (récent > ancien)", field: "createdAt", order: "desc" },
+                    { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
+                  ]}
+                  paramData={paramData}
+                  setParamData={setParamData}
                 />
+              </div>
 
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="SUBROLE"
-                  dataField="subRole.keyword"
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  react={{ and: FILTERS.filter((e) => e !== "SUBROLE") }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Fonction")}
+              <div className="mt-2 flex flex-row flex-wrap items-center px-4">
+                <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+                <SelectedFilters
+                  filterArray={filterArray}
+                  selectedFilters={selectedFilters}
+                  setSelectedFilters={setSelectedFilters}
+                  paramData={paramData}
+                  setParamData={setParamData}
                 />
-              </FilterRow>
-              <FilterRow visible className="flex justify-center">
-                <DeleteFilters />
-              </FilterRow>
-            </Filter>
-            <ResultTable>
-              <ReactiveListComponent
-                defaultQuery={getDefaultQuery}
-                react={{ and: FILTERS }}
-                sortOptions={[
-                  { label: "Nom (A > Z)", dataField: "lastName.keyword", sortBy: "asc" },
-                  { label: "Nom (Z > A)", dataField: "lastName.keyword", sortBy: "desc" },
-                  { label: "Prénom (A > Z)", dataField: "firstName.keyword", sortBy: "asc" },
-                  { label: "Prénom (Z > A)", dataField: "firstName.keyword", sortBy: "desc" },
-                  { label: "Date de création (récent > ancien)", dataField: "createdAt", sortBy: "desc" },
-                  { label: "Date de création (ancien > récent)", dataField: "createdAt", sortBy: "asc" },
-                ]}
-                defaultSortOption="Nom (A > Z)"
-                render={({ data }) => (
+              </div>
+
+              <ResultTable
+                paramData={paramData}
+                setParamData={setParamData}
+                currentEntryOnPage={data?.length}
+                render={
                   <Table>
                     <thead>
                       <tr>
@@ -221,13 +214,13 @@ export default function List() {
                       ))}
                     </tbody>
                   </Table>
-                )}
+                }
               />
-            </ResultTable>
+            </div>
           </div>
-          <Panel value={responsable} onChange={() => setResponsable(null)} />
         </div>
-      </ReactiveBase>
+        <Panel value={responsable} onChange={() => setResponsable(null)} />
+      </div>
       <Invite setOpen={setNewUserOpen} open={NewUserOpen} label="Inviter un nouvel utilisateur"></Invite>
     </div>
   );

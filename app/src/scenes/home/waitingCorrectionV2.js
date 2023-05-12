@@ -3,7 +3,7 @@ import { AiOutlineExclamationCircle } from "react-icons/ai";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
-import { translateField, translateCorrectionReason, formatDateFR, PHASE1_YOUNG_ACCESS_LIMIT, translate, YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
+import { translateField, translateCorrectionReason, translate, YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
 import plausibleEvent from "../../services/plausible";
 import { redirectToCorrection } from "../../utils/navigation";
 
@@ -22,9 +22,6 @@ export default function WaitingCorrectionV2() {
                 <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
               </div>
               <div className="mt-3 text-xl font-bold text-[#242526]">Votre dossier d’inscription est en attente de correction.</div>
-              {/* <div className="text-[#738297] text-sm mt-2">
-                Merci d’effectuer <b>avant le {formatDateFR(PHASE1_YOUNG_ACCESS_LIMIT[young.cohort])} inclus</b> les modifications demandées par votre référent :
-              </div> */}
               <div className="mt-3 flex max-h-[250px] flex-col gap-5 overflow-auto">
                 <hr className="border-gray-200" />
                 {young.correctionRequests?.map((correction, i) => {
@@ -41,12 +38,15 @@ export default function WaitingCorrectionV2() {
                           {correction?.message ? <div className="text-sm font-normal text-gray-600">{correction.message}</div> : null}
                         </div>
                         <button
-                          className="rounded-lg border-[1px] border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:bg-blue-600 hover:text-white disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-50"
+                          className="rounded-lg border-[1px] border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:!disabled:bg-blue-600 hover:!disabled:text-white disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-50"
                           onClick={() => history.push(redirectToCorrection(correction.field))}
-                          disabled={young.status === YOUNG_STATUS.WAITING_CORRECTION && !inscriptionModificationOpenForYoungs(young.cohort)}>
+                          disabled={young.status === YOUNG_STATUS.WAITING_CORRECTION && !inscriptionModificationOpenForYoungs(young.cohort, young)}>
                           Corriger
                         </button>
                       </div>
+                      {!inscriptionModificationOpenForYoungs(young.cohort, young) && (
+                        <span className="text-sm leading-5 text-[#6B7280]">La date limite pour modifier votre dossier d'inscription a été dépassée.</span>
+                      )}
                       <hr className="border-gray-200" />
                     </>
                   );
@@ -73,9 +73,6 @@ export default function WaitingCorrectionV2() {
               <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
             </div>
             <div className="mt-3 text-base font-bold text-[#242526]">Votre dossier d’inscription est en attente de correction.</div>
-            {/* <div className="mt-2 text-sm text-[#738297]">
-              Merci d’effectuer avant le <b>{formatDateFR(PHASE1_YOUNG_ACCESS_LIMIT[young.cohort])} inclus</b> les modifications demandées par votre référent :
-            </div> */}
             <div className="mt-3 flex flex-col gap-5">
               <hr className="border-gray-200" />
               {young.correctionRequests?.map((correction, i) => {
@@ -92,11 +89,15 @@ export default function WaitingCorrectionV2() {
                         {correction?.message ? <div className="text-sm font-normal text-gray-600">{correction.message}</div> : null}
                       </div>
                       <button
-                        className="rounded-lg border-[1px] border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:bg-blue-600 hover:text-white"
+                        disabled={young.status === YOUNG_STATUS.WAITING_CORRECTION && !inscriptionModificationOpenForYoungs(young.cohort, young)}
+                        className="rounded-lg border-[1px] border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:!disabled:bg-blue-600 hover:!disabled:text-white disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-50"
                         onClick={() => history.push(redirectToCorrection(correction.field))}>
                         Corriger
                       </button>
                     </div>
+                    {!inscriptionModificationOpenForYoungs(young.cohort, young) && (
+                      <span className="text-sm leading-5 text-[#6B7280]">La date limite pour modifier votre dossier d'inscription a été dépassée.</span>
+                    )}
                     <hr className="border-gray-200" />
                   </>
                 );

@@ -156,13 +156,14 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
           <div className="text-sm font-medium leading-6 text-gray-800">Choisissez un séjour</div>
           <div className="flex flex-row flex-wrap gap-2 py-2">
             {availableCohorts.map((cohort) => (
-              <>
+              <React.Fragment key={cohort}>
                 {defaultCentre && !selectedCentre?.cohorts?.includes(cohort) ? (
                   <div
                     key={cohort}
                     onClick={() => setSelectedCohort(cohort)}
-                    className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${selectedCohort === cohort ? "border-blue-600 bg-blue-600 text-white" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF] "
-                      }`}>
+                    className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
+                      selectedCohort === cohort ? "border-blue-600 bg-blue-600 text-white" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF] "
+                    }`}>
                     {cohort}
                   </div>
                 ) : null}
@@ -170,12 +171,13 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
                   <div
                     key={cohort}
                     onClick={() => setSelectedCohort(cohort)}
-                    className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${selectedCohort === cohort ? "border-blue-600 bg-blue-600 text-white" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF] "
-                      }`}>
+                    className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
+                      selectedCohort === cohort ? "border-blue-600 bg-blue-600 text-white" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF] "
+                    }`}>
                     {cohort}
                   </div>
                 ) : null}
-              </>
+              </React.Fragment>
             ))}
           </div>
           {selectedCohort ? (
@@ -194,8 +196,9 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
 
                 <div
                   ref={refSelect}
-                  className={`${!open ? "hidden" : ""} ${listCentre.length > 3 ? "h-[300px] overflow-y-auto" : ""
-                    } absolute left-0 z-50 w-full rounded-lg border border-gray-300 bg-white px-3 shadow-lg`}>
+                  className={`${!open ? "hidden" : ""} ${
+                    listCentre.length > 3 ? "h-[300px] overflow-y-auto" : ""
+                  } absolute left-0 z-50 w-full rounded-lg border border-gray-300 bg-white px-3 shadow-lg`}>
                   <div className="sticky top-0 z-10 bg-white pt-3">
                     <div className="flex flex-row items-center gap-2">
                       <BsSearch className="text-gray-400" />

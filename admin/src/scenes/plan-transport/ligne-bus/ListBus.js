@@ -2,7 +2,7 @@ import React from "react";
 import { BsDownload } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import { formatDateFR, getDepartmentNumber, translate, translatePhase1, youngPlanDeTranportExportFields } from "snu-lib";
+import { ROLES, formatDateFR, getDepartmentNumber, translate, translatePhase1, youngPlanDeTranportExportFields } from "snu-lib";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
 import Loader from "../../../components/Loader";
@@ -10,6 +10,7 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { Title } from "../components/commons";
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
+import { useSelector } from "react-redux";
 
 const contactTypes = {
   email: "Adresse e-mail",
@@ -17,6 +18,7 @@ const contactTypes = {
 };
 
 export default function ListBus(props) {
+  const user = useSelector((state) => state.Auth.user);
   const id = props.match && props.match.params && props.match.params.id;
   if (!id) return <div />;
   const [bus, setBus] = React.useState();
@@ -152,8 +154,14 @@ export default function ListBus(props) {
         return bus.meetingsPointsDetail.find((option) => option.meetingPointId === item)?.city;
       },
     },
-    { title: "Région", name: "region", missingLabel: "Non renseigné" },
-    { title: "Département", name: "department", missingLabel: "Non renseigné", translate: (e) => getDepartmentNumber(e) + " - " + e },
+    { title: "Région", name: "region", missingLabel: "Non renseigné", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
+    {
+      title: "Département",
+      name: "department",
+      missingLabel: "Non renseigné",
+      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+    },
   ];
 
   if (loading) return <Loader />;

@@ -1,3 +1,36 @@
+# [1.270.0](https://github.com/betagouv/service-national-universel/compare/v1.269.0...v1.270.0) (2023-05-11)
+
+
+### Bug Fixes
+
+* **admin:** filter stability ([#2592](https://github.com/betagouv/service-national-universel/issues/2592)) ([42275f3](https://github.com/betagouv/service-national-universel/commit/42275f3117fdb5928bfd9c3788b528cc135b0619))
+* **admin:** missions filter default value ([#2597](https://github.com/betagouv/service-national-universel/issues/2597)) ([ca55884](https://github.com/betagouv/service-national-universel/commit/ca558849a675e085b38515ab829b62594e0075ee))
+* **app:** Representants legaux - Etape verification - variable non définie ([#2595](https://github.com/betagouv/service-national-universel/issues/2595)) ([89dee01](https://github.com/betagouv/service-national-universel/commit/89dee01ce7e50e61b8b83f4dd16128ade193adf4))
+* **lib:** inscriptionModificationOpenForYoungs condition ([d90e5f2](https://github.com/betagouv/service-national-universel/commit/d90e5f286f2b61e73598b9a59000f89629d4262c))
+* **lib:** isSessionEditionOpen fix ([4281f92](https://github.com/betagouv/service-national-universel/commit/4281f92f35bebc09453003497f06dd2cf6efb537))
+* **lib:** modification date ([915976f](https://github.com/betagouv/service-national-universel/commit/915976fb827a1fb5e559f21420b966b89eddd667))
+
+
+### Features
+
+* **api/admin:** list presence new filters ([#2575](https://github.com/betagouv/service-national-universel/issues/2575)) ([aab9141](https://github.com/betagouv/service-national-universel/commit/aab9141f7c77c7dbfd061ccfea1e8f6f6467a1f3))
+* **api/admin:** team new filters ([#2596](https://github.com/betagouv/service-national-universel/issues/2596)) ([60731d5](https://github.com/betagouv/service-national-universel/commit/60731d56f478398308aeb2c61e7c31288459d4e9))
+* **app/lib:** block inscription modification access for metropolitan france ([#2598](https://github.com/betagouv/service-national-universel/issues/2598)) ([2f0afe0](https://github.com/betagouv/service-national-universel/commit/2f0afe0c88a8bd25b00bce166b6ab050f282b03e))
+
+# [1.269.0](https://github.com/betagouv/service-national-universel/compare/v1.268.0...v1.269.0) (2023-05-10)
+
+
+### Bug Fixes
+
+* **admin:** filter reload + special character  ([#2591](https://github.com/betagouv/service-national-universel/issues/2591)) ([f65b777](https://github.com/betagouv/service-national-universel/commit/f65b7777407b1fcd18b147d867c2038923b307cf))
+* **admin:** notif save filter pageId ([9251a57](https://github.com/betagouv/service-national-universel/commit/9251a57d4b765c68b4e599182863bcae32956bb0))
+
+
+### Features
+
+* **api/admin:** liste candidature mod / ref / resp / surperviseur new filters ([#2584](https://github.com/betagouv/service-national-universel/issues/2584)) ([03066cd](https://github.com/betagouv/service-national-universel/commit/03066cdc39e00f4f2cc49b9220de37dfd12d640d))
+* **api/admin:** young email new filters ([#2586](https://github.com/betagouv/service-national-universel/issues/2586)) ([aad0c32](https://github.com/betagouv/service-national-universel/commit/aad0c3282986f640c0e176ba133249e39f508af4))
+
 # [1.268.0](https://github.com/betagouv/service-national-universel/compare/v1.267.0...v1.268.0) (2023-05-09)
 
 
