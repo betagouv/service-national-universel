@@ -1153,11 +1153,33 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   if (data.parent2Phone) trimmedPhones[2] = data.parent2Phone.replace(/\s/g, "");
 
   async function onSave() {
+    console.log(data);
     setSaving(true);
     if (validate()) {
       try {
         if (data.parent1Phone) data.parent1Phone = trimmedPhones[1];
         if (data.parent2Phone) data.parent2Phone = trimmedPhones[2];
+
+        if (data.grade === GRADES.NOT_SCOLARISE) {
+          const request = await api.put(`/young-edition/${young._id}/situationparents`, {
+            schooled: "false",
+            schoolName: "",
+            schoolType: "",
+            schoolAddress: "",
+            schoolComplementAdresse: "",
+            schoolZip: "",
+            schoolCity: "",
+            schoolDepartment: "",
+            schoolRegion: "",
+            schoolCountry: "",
+            schoolLocation: null,
+            schoolId: "",
+            academy: "",
+          });
+          if (!request.ok) {
+            toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
+          }
+        }
 
         const result = await api.put(`/young-edition/${young._id}/situationparents`, data);
         if (result.ok) {
@@ -1202,6 +1224,14 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
         result = validateEmpty(data, `parent${parent}Zip`, errors) && result;
         result = validateEmpty(data, `parent${parent}City`, errors) && result;
         result = validateEmpty(data, `parent${parent}Country`, errors) && result;
+      }
+      if (!data.situation || data.situation === "") {
+        errors["situation"] = "Ce champ ne peut pas être vide";
+        result = false;
+      }
+      if (!data.grade || data.grade === "") {
+        errors["grade"] = "Ce champ ne peut pas être vide";
+        result = false;
       }
     }
 
