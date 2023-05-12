@@ -12,6 +12,7 @@ import AccountRepresentantsPage from "./scenes/representants";
 import AccountSchoolSituationPage from "./scenes/school-situation";
 import AccountSpecialSituationsPage from "./scenes/special-situations";
 import Tabs from "../../components/nav/Tabs";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const ACCOUNT_PAGES = {
   general: {
@@ -37,6 +38,8 @@ const ACCOUNT_PAGES = {
 };
 
 const Account = () => {
+  useDocumentTitle("Mon profil");
+
   const device = useDevice();
   const { pathname } = useLocation();
   const [, pagePath] = pathname.split("/").filter((path) => path);

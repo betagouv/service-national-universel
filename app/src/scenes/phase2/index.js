@@ -7,8 +7,11 @@ import EditEquivalence from "./views/EditEquivalence";
 import ValidatedDesktop from "./desktop/Validated";
 import ValidatedMobile from "./mobile/Validated";
 import { SentryRoute } from "../../sentry";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function Index() {
+  useDocumentTitle("Phase 2 - MIG");
+
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
 

@@ -15,8 +15,10 @@ import WaitingReinscription from "./WaitingReinscription";
 import WaitingValidation from "./waitingValidation";
 import Withdrawn from "./withdrawn";
 import Phase1NotDone from "./Phase1NotDone";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default () => {
+  useDocumentTitle("Accueil");
   const young = useSelector((state) => state.Auth.young) || {};
 
   const renderStep = () => {
