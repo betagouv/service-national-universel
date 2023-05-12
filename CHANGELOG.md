@@ -1,3 +1,24 @@
+# [1.271.0](https://github.com/betagouv/service-national-universel/compare/v1.270.0...v1.271.0) (2023-05-12)
+
+
+### Bug Fixes
+
+* **admin:** bugfix sur les filtres des exports d'inscription ([#2602](https://github.com/betagouv/service-national-universel/issues/2602)) ([389ad1e](https://github.com/betagouv/service-national-universel/commit/389ad1e6d1f3a0f8dc41a89a4bee895865c875f5))
+* **admin:** Trim phone numbers on user info edition ([af71249](https://github.com/betagouv/service-national-universel/commit/af71249202e968dd95058a93eb0e81fef02b21c9))
+* **app:** StepUpload for cohort "a venir" ([da8ace0](https://github.com/betagouv/service-national-universel/commit/da8ace0a927c2c7bd25e40157e1e2c226109b63b))
+
+
+### Features
+
+* **admin:** accessibilité onglet admin ([#2599](https://github.com/betagouv/service-national-universel/issues/2599)) ([9c2f111](https://github.com/betagouv/service-national-universel/commit/9c2f11123f9db5a7b211a49f3152c7e41f6248df))
+* **admin:** ajout d'infobulle sur les places totales/places libres des centres ([#2588](https://github.com/betagouv/service-national-universel/issues/2588)) ([930568e](https://github.com/betagouv/service-national-universel/commit/930568efdc9058f0b813b6e1c606f32122e9f3ce))
+* **admin:** ajout de la modif de classe dans l'edition du volontaire ([#2594](https://github.com/betagouv/service-national-universel/issues/2594)) ([e50051c](https://github.com/betagouv/service-national-universel/commit/e50051c5e19a662da1dbc6b890181da9143fb72d))
+* **admin/lib:** add young travel by plane filter / export ([0db4515](https://github.com/betagouv/service-national-universel/commit/0db451581f82adaaf0f19418f27b110e96929b9f))
+* **api:** delete structure === delete referent & missions vides ([#2590](https://github.com/betagouv/service-national-universel/issues/2590)) ([1681740](https://github.com/betagouv/service-national-universel/commit/16817405f4aaeeb4a93f34277acf0ab4cab9e277))
+* **api/admin:** new filters for pdr youngs ([#2600](https://github.com/betagouv/service-national-universel/issues/2600)) ([f07f762](https://github.com/betagouv/service-national-universel/commit/f07f762809ea64c0fcd90ccfe099001cfc49c4a4))
+* **api/admin:** Nouveaux filtres et exports de la liste des structures ([#2570](https://github.com/betagouv/service-national-universel/issues/2570)) ([bd681ad](https://github.com/betagouv/service-national-universel/commit/bd681ad4b1ea12b5604d35a906803b55e4c110d1))
+* **app:** accessibilité moncompte ([#2607](https://github.com/betagouv/service-national-universel/issues/2607)) ([6819bcc](https://github.com/betagouv/service-national-universel/commit/6819bcc8e05ce1fd206adbf3c990a9f61f124fe8))
+
 # [1.270.0](https://github.com/betagouv/service-national-universel/compare/v1.269.0...v1.270.0) (2023-05-11)
 
 
