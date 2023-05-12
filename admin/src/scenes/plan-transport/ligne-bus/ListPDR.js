@@ -221,7 +221,7 @@ export default function ListPDR(props) {
             <Filters
               defaultUrlParam={`cohort=${cohort}`}
               pageId={pageId}
-              route={"/elasticsearch/young/by-point-de-rassemblement/search?meetingPointId=" + PDR._id}
+              route={`/elasticsearch/young/by-point-de-rassemblement/${PDR._id}/search`}
               setData={(value) => setData(value)}
               filters={filterArray}
               searchPlaceholder="Rechercher par prénom, nom, email, ville, code postal..."
@@ -238,7 +238,7 @@ export default function ListPDR(props) {
           <ModalExport
             isOpen={isExportOpen}
             setIsOpen={setIsExportOpen}
-            route={"/elasticsearch/young/by-point-de-rassemblement/export?meetingPointId=" + PDR._id}
+            route={`/elasticsearch/young/by-point-de-rassemblement/${PDR._id}/export`}
             transform={transformVolontaires}
             exportFields={youngPlanDeTranportExportFields}
             selectedFilters={selectedFilters}
