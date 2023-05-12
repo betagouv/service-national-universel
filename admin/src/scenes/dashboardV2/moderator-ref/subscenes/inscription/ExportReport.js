@@ -4,15 +4,18 @@ import * as XLSX from "xlsx";
 import { toastr } from "react-redux-toastr";
 import plausibleEvent from "../../../../../services/plausible";
 import api from "../../../../../services/api";
-import { YOUNG_STATUS, department2region, departmentLookUp, departmentToAcademy, translate, translateInscriptionStatus } from "snu-lib";
+import { YOUNG_STATUS, department2region, departmentLookUp, departmentToAcademy, region2department, translate, translateInscriptionStatus } from "snu-lib";
 import { translateModelFields } from "../../../../../utils";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import ModalConfirm from "../../../../../components/modals/ModalConfirm";
+import { REFERENT_ROLES } from "snu-lib";
+import { useSelector } from "react-redux";
 
 export default function ExportReport({ filter }) {
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loadingText, setLoadingText] = useState("0 %");
+  const user = useSelector((state) => state.Auth.user);
 
   const onClick = () => {
     plausibleEvent("Dashboard/CTA - Exporter rapport");
@@ -27,6 +30,21 @@ export default function ExportReport({ filter }) {
 
   async function run() {
     if (!filter?.cohort?.length) return toastr.error("Merci de selectionner au moins une cohorte ");
+    if (user.role === REFERENT_ROLES.REFERENT_REGION) {
+      if (!filter?.region?.length) {
+        filter.region = [user.region];
+      }
+      if (!filter?.department?.length) {
+        filter.department = region2department[user.region];
+      }
+    }
+    if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
+      if (!filter?.department?.length) {
+        filter.department = user.department.map((s) => s);
+      }
+    }
+
+    console.log(filter);
 
     // starting the process...
     setLoading(true);
@@ -53,6 +71,7 @@ export default function ExportReport({ filter }) {
       // get all the department if there is no filter specified, else get only the department filtered
       ?.filter((number) => !filter?.department?.length || filter?.department?.includes(departmentLookUp[number]))
       ?.sort((a, b) => a - b);
+    console.log(keys);
     for (let i = 0; i < keys.length; i++) {
       const dptCode = keys[i];
       const dptName = departmentLookUp[dptCode];

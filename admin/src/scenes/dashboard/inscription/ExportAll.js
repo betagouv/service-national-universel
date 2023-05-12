@@ -3,17 +3,20 @@ import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import { toastr } from "react-redux-toastr";
 
-import { departmentLookUp, department2region, departmentToAcademy, translate, translateModelFields } from "../../../utils";
+import { departmentLookUp, department2region, departmentToAcademy, translate, translateModelFields, region2department } from "../../../utils";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import api from "../../../services/api";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import plausibleEvent from "../../../services/plausible";
+import { REFERENT_ROLES } from "snu-lib";
+import { useSelector } from "react-redux";
 
 // TODO (fix): Export not only for 2021.
 export default function ExportAll({ filter }) {
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loadingText, setLoadingText] = useState();
+  const user = useSelector((state) => state.Auth.user);
 
   const onClick = () => {
     plausibleEvent("Dashboard/CTA - Exporter rapport");
@@ -29,6 +32,20 @@ export default function ExportAll({ filter }) {
   async function run() {
     if (!filter?.cohort?.length) return toastr.error("Merci de selectionner au moins une cohorte ");
     if (!filter?.status?.length) return toastr.error("Merci de selectionner au moins un statut");
+
+    if (user.role === REFERENT_ROLES.REFERENT_REGION) {
+      if (!filter?.region?.length) {
+        filter.region = [user.region];
+      }
+      if (!filter?.department?.length) {
+        filter.department = region2department[user.region];
+      }
+    }
+    if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
+      if (!filter?.department?.length) {
+        filter.department = user.department.map((s) => s);
+      }
+    }
 
     // starting the process...
     setLoading(true);
