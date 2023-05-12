@@ -93,6 +93,7 @@ const FILTERS = [
   "APPLICATION_FILES_TYPE",
   "NOTES",
   "MEETING_INFO",
+  "PLANE",
 ];
 
 export default function VolontaireList() {
@@ -272,6 +273,7 @@ export default function VolontaireList() {
           "Heure de convocation": ligneToPoint?.meetingHour,
           "Date retour": formatDateFR(bus?.returnDate),
           "Heure de retour": ligneToPoint?.returnHour,
+          "Voyage en avion": translate(data?.isTravelingByPlane),
         },
         phase1DocumentStatus: {
           "Droit à l'image - Statut": translateFileStatusPhase1(data.imageRightFilesStatus) || "Non Renseigné",
@@ -938,6 +940,20 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Ligne", "Ligne")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="PLANE"
+                  dataField="isTravelingByPlane.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "LINE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Voyage en avion", "Voyage en avion")}
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
