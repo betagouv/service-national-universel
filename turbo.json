@@ -2,13 +2,23 @@
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
     "build": {
-      "outputs": [".build/**", "!.build/cache/**"]
+      "outputs": [
+        ".build/**",
+        "!.build/cache/**"
+      ]
     },
     "start": {
-      "outputs": [".launch/**", "!.launch/cache/**"]
+      "outputs": [
+        ".launch/**",
+        "!.launch/cache/**"
+      ]
     },
     "dev": {
-      "persistent": true
+      "persistent": true,
+      "outputs": [
+        "dist/**",
+        "build/**"
+      ]
     }
   }
 }

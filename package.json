@@ -6,7 +6,7 @@
     "start": "turbo run start --filter=$APP_NAME"
   },
   "dependencies": {
-    "turbo": "1.2.5"
+    "turbo": "^1.9.4"
   },
   "workspaces": [
     "packages/*",
