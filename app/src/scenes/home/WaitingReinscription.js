@@ -17,8 +17,8 @@ export default function WaitingReinscription() {
   const [loading, setLoading] = useState(false);
 
   let textPrecision;
-  if (young.status === YOUNG_STATUS.WAITING_LIST) textPrecision = "Vous étiez sur liste complémentaire sur un séjour en 2022.";
-  else if (young.cohort === "à venir") textPrecision = "Vous êtes inscrit sur un séjour “à venir”.";
+  if (young.status === YOUNG_STATUS.WAITING_LIST) textPrecision = "Vous étiez sur liste complémentaire sur un séjour précédent.";
+  else if (young.cohort === "à venir") textPrecision = "Nous vous tiendrons informé par mail lors de l’ouverture des inscriptions pour les séjours à venir de l’année scolaire 2023-2024";
   else if ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED)
     textPrecision = "En 2022, vous n'avez pas pu participer au séjour de cohésion.";
   else return;
@@ -47,7 +47,7 @@ export default function WaitingReinscription() {
           <div className="flex items-center justify-between rounded-lg bg-white ">
             <div className="w-1/2 py-12 pl-10">
               <div className="text-[48px] font-medium leading-tight tracking-tight text-gray-800">
-                <strong>{young.firstName},</strong> vous souhaitez vous réinscrire sur un séjour en 2023 ?
+                <strong>{young.firstName},</strong> vous souhaitez vous réinscrire sur un séjour l'année prochaine ?
               </div>
               <div className="left-7 mt-5 text-base text-gray-800">{textPrecision}</div>
               <div className="flex w-fit flex-col items-stretch">
