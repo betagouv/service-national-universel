@@ -316,7 +316,7 @@ export default function SchemaRepartition({ region, department }) {
             <Select
               options={cohortList.filter(
                 (c) =>
-                  ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && !["Juin 2023", "Juillet 2023"].includes(c.value)) ||
+                  ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && !["Juillet 2023"].includes(c.value)) ||
                   [ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role),
               )}
               value={cohort}
