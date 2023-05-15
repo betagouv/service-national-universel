@@ -1,8 +1,8 @@
 {
   "name": "service-national-universel",
   "scripts": {
-    "build": "turbo run build",
     "dev": "turbo run dev",
+    "build": "turbo run build --filter=$APP_NAME",
     "start": "turbo run start --filter=$APP_NAME"
   },
   "dependencies": {
