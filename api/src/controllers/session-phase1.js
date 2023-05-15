@@ -209,6 +209,44 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
+router.put("/:id/team", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
+    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const { error, value } = Joi.object({
+      headCenterId: Joi.string().allow(null, ""),
+      team: Joi.array().items(Joi.any().allow(null, "")),
+    }).validate(req.body, { stripUnknown: true });
+
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    let oldHeadCenterId = sessionPhase1.headCenterId;
+    const hasHeadCenterChanged = oldHeadCenterId !== value.oldHeadCenterId;
+
+    sessionPhase1.set({ ...value });
+    await sessionPhase1.save({ fromUser: req.user });
+    await updateHeadCenter(sessionPhase1.headCenterId, req.user);
+    if (hasHeadCenterChanged) {
+      await updateHeadCenter(oldHeadCenterId, req.user);
+    }
+    res.status(200).send({ ok: true, data: serializeSessionPhase1(sessionPhase1) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
