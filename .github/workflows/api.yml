@@ -42,7 +42,6 @@ jobs:
           mongodb-version: "4.0"
 
       - name: Install packages
-        working-directory: ${{ env.SUBFOLDER_NAME }}
         run: npm install
 
       - name: Test and Send coverage

@@ -10,7 +10,7 @@ env:
   MSG_MINIMAL: true
   SLACK_FOOTER: ""
 
-name: Test & Deploy API
+name: Deploy API (Staging)
 
 on:
   push:
