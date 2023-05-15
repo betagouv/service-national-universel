@@ -7,7 +7,6 @@ import { Fragment } from "react";
 import { BsDownload } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
 import { youngExportFields } from "snu-lib";
-import IconChangementCohorte from "../../assets/IconChangementCohorte.js";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { ExportComponent, Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
