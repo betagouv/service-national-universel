@@ -45,7 +45,6 @@ module.exports = (env) => {
           test: /\.js$/,
           loader: "babel-loader",
           include: path.resolve("src"),
-          exclude: /node_modules(?!\/snu-lib)/,
           options: {
             babelrc: true,
             plugins: [require.resolve("react-refresh/babel")].filter(Boolean),

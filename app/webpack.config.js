@@ -67,7 +67,6 @@ module.exports = () => {
           test: /\.js$/,
           loader: "babel-loader",
           include: path.resolve("src"),
-          exclude: /node_modules(?!\/snu-lib)/,
           options: { babelrc: true },
         },
         {
