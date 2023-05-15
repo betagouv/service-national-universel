@@ -3,9 +3,9 @@ import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
 import StatusTable from "../../../../components/ui/StatusTable";
 import HorizontalMiniBar from "../../../../components/graphs/HorizontalMiniBar";
-import { ES_NO_LIMIT } from "../../../../../../utils";
 import { computeMissionUrl } from "../../../../components/common";
-import ExportEngagementReport from "./ExportEngagementReport";
+import ExportMissionStatusReport from "./ExportMissionStatusReport";
+import { translate } from "snu-lib";
 
 export default function MissionsStatuts({ filters, missionFilters, className = "" }) {
   const [loading, setLoading] = useState(true);
@@ -43,6 +43,12 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
 
         // --- compute export filter
         const exportFilter = {};
+        if(filters.department) {
+          exportFilter.department = filters.department;
+        }
+        if(filters.region) {
+          exportFilter.region = filters.region;
+        }
         if (missionFilters.start) {
           exportFilter.fromDate = missionFilters.start;
         }
@@ -79,45 +85,8 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
     setLoading(false);
   }
 
-  function getExportQuery() {
-    return {
-      query: {
-        query: { bool: { must: { match_all: {} }, filter: [] } },
-        aggs: {
-          filtered: {
-            filter: {
-              bool: {
-                must: exportFilter,
-              },
-            },
-            aggs: {
-              regions: {
-                terms: { field: "region.keyword", size: ES_NO_LIMIT },
-                aggs: {
-                  departments: {
-                    terms: { field: "department.keyword", size: ES_NO_LIMIT },
-                    aggs: {
-                      status: {
-                        terms: { field: "status.keyword" },
-                        aggs: {
-                          placesTotal: { sum: { field: "placesTotal" } },
-                          placesLeft: { sum: { field: "placesLeft" } },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        size: 0,
-      },
-    };
-  }
-
   const exportButton = (
-    <ExportEngagementReport filter={exportFilter} />
+    <ExportMissionStatusReport filter={exportFilter} />
   );
 
   return (
