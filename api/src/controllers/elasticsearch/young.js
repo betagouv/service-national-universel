@@ -548,8 +548,6 @@ router.post("/young-having-school-in-dep-or-region/:action(_msearch|export)", pa
       user.role === ROLES.REFERENT_REGION ? { terms: { "schoolRegion.keyword": [user.region] } } : null,
     ].filter(Boolean);
 
-    console.log(JSON.stringify(contextFilters, null, 2));
-
     // Body params validation
     const { queryFilters, page, sort, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body: body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
