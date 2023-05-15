@@ -188,14 +188,7 @@ const Hit = ({ hit, onClick }) => {
         </p>
       </td>
       <td className="text-center">
-        <Badge
-          color="#0C7CFF"
-          backgroundColor="#F9FCFF"
-          text={hit.cohort}
-          tooltipText={hit.originalCohort ? `Anciennement ${hit.originalCohort}` : null}
-          style={{ cursor: "default" }}
-          icon={hit.originalCohort ? <IconChangementCohorte /> : null}
-        />
+        <Badge color="#3B82F6" backgroundColor="#EFF6FF" text={hit.cohort} style={{ cursor: "default" }} />
       </td>
       <td className="text-center">
         {hit.status === "WITHDRAWN" && <Badge minify text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} />}
