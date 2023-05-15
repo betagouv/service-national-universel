@@ -315,7 +315,9 @@ export default function SchemaRepartition({ region, department }) {
             {user.role === ROLES.REFERENT_DEPARTMENT && user.department.length > 1 && <Select options={departementsList} value={department} onChange={handleChangeDepartment} />}
             <Select
               options={cohortList.filter(
-                (c) => ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && c.value !== "Juin 2023") || [ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role),
+                (c) =>
+                  ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && !["Juin 2023", "Juillet 2023"].includes(c.value)) ||
+                  [ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role),
               )}
               value={cohort}
               onChange={handleChangeCohort}
