@@ -57,7 +57,7 @@ export default function Emails({ email, userType }) {
           render={
             <table className="mt-6 mb-2 w-full table-auto font-marianne">
               <thead>
-                <tr className="border-t border-t-slate-100 uppercase">
+                <tr className="border-t border-t-gray-200 uppercase">
                   <th className="w-1/2 px-4 py-3 text-xs font-normal text-gray-500">Objet de l&apos;email</th>
                   <th className="w-1/6 px-4 py-3 text-xs font-normal text-gray-500">Template ID</th>
                   {user.role === ROLES.ADMIN && <th className="w-1/6 px-4 py-3 text-xs font-normal text-gray-500">Dernier statut</th>}
