@@ -1,3 +1,20 @@
+# [1.272.0](https://github.com/betagouv/service-national-universel/compare/v1.271.0...v1.272.0) (2023-05-15)
+
+
+### Bug Fixes
+
+* **admin/app:** team new logique / split from dynamique parameter ([#2608](https://github.com/betagouv/service-national-universel/issues/2608)) ([a277b5e](https://github.com/betagouv/service-national-universel/commit/a277b5ea9a6884b8504142c5d245034d21f4661b))
+* **api:** comment out changeCohort test ([243121e](https://github.com/betagouv/service-national-universel/commit/243121ed20b2eea94443f22e35656700c045a8c4))
+* **lib:** add access to inscription modification for cohort to come ([cea241a](https://github.com/betagouv/service-national-universel/commit/cea241a891dc4da64686f10d46a349043ae8934f))
+* **lib:** export format e164 phoneZone ([#2610](https://github.com/betagouv/service-national-universel/issues/2610)) ([87c653a](https://github.com/betagouv/service-national-universel/commit/87c653afda75fc16e05f87ee290fd5a49f2a9a2d))
+* **monorepo:** Redeploy/rebuild on changes in lib ([c608faa](https://github.com/betagouv/service-national-universel/commit/c608faa86ca95bd0efb252faabff9e3fada051f5))
+* lib path in workspace config ([cb53eb8](https://github.com/betagouv/service-national-universel/commit/cb53eb8b250bfe931a80c9525bca3f181d2a1d56))
+
+
+### Features
+
+* **admin:** add structure name on mission list ([df3c603](https://github.com/betagouv/service-national-universel/commit/df3c60362e1d606fa1e55c12fbe8799e665237cc))
+
 # [1.271.0](https://github.com/betagouv/service-national-universel/compare/v1.270.0...v1.271.0) (2023-05-12)
 
 
