@@ -51,12 +51,12 @@ export default function WaitingReinscription() {
               </div>
               <div className="left-7 mt-5 text-base text-gray-800">{textPrecision}</div>
               <div className="flex w-fit flex-col items-stretch">
-                <button
+                {/* <button
                   className="mt-5 rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
                   disabled={loading}
                   onClick={onClickEligibilte}>
                   Vérifier mon éligibilité
-                </button>
+                </button> */}
               </div>
             </div>
             <img className="w-1/2 object-fill" src={require("../../assets/homePhase2Desktop.png")} />
@@ -71,13 +71,13 @@ export default function WaitingReinscription() {
               <strong>{young.firstName},</strong> vous souhaitez vous réinscrire sur un séjour en 2023 ?
             </div>
             <div className="left-7 mt-3 text-[#738297]">{textPrecision}</div>
-            <div className="left-7 mt-4 font-bold text-gray-800">Vérifiez dès maintenant votre éligibilité</div>
+            {/* <div className="left-7 mt-4 font-bold text-gray-800">Vérifiez dès maintenant votre éligibilité</div>
             <button
               className="mt-3 w-full rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
               disabled={loading}
               onClick={onClickEligibilte}>
               Vérifier mon éligibilité
-            </button>
+            </button> */}
           </div>
           <img src={require("../../assets/homePhase2Mobile.png")} />
         </div>
