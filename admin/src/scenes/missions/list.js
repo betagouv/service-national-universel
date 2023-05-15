@@ -642,18 +642,21 @@ const Hit = ({ hit, callback }) => {
       <div className="flex items-center py-3 px-4 hover:bg-gray-50">
         <div className="flex w-[40%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mission/${hit._id}`)}>
           {hit.isJvaMission === "true" ? (
-            <img src={require("../../assets/JVA_round.png")} className="mx-auto h-7 w-7 group-hover:scale-105" />
+            <img src={require("../../assets/JVA_round.png")} className="mx-auto h-8 w-8 group-hover:scale-105" />
           ) : (
-            <img src={require("../../assets/logo-snu.png")} className="mx-auto h-7 w-7 group-hover:scale-105" />
+            <img src={require("../../assets/logo-snu.png")} className="mx-auto h-8 w-8 group-hover:scale-105" />
           )}
-          <div className="flex w-full flex-col justify-center  gap-1">
+          <div className="flex w-full flex-col justify-center">
             <div className="m-0 table w-full table-fixed border-collapse">
               <div className="table-cell truncate font-bold text-gray-900">{hit.name}</div>
             </div>
-            <div className="m-0 table w-full table-fixed border-collapse">
-              <div className="table-cel truncate text-sm font-normal leading-4 text-gray-500 ">
+            <div className="m-0 mt-1 table w-full table-fixed border-collapse">
+              <div className="table-cel truncate text-sm font-normal leading-4 text-gray-600 ">
                 {hit.address} • {hit.city} ({hit.department})
               </div>
+            </div>
+            <div className="m-0 mt-1 table w-full table-fixed border-collapse">
+              <div className="table-cel truncate text-sm leading-4 text-gray-500 font-bold">{hit.structureName}</div>
             </div>
           </div>
         </div>
