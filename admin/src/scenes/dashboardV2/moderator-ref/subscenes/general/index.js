@@ -122,10 +122,38 @@ export default function Index() {
   React.useEffect(() => {
     const updateStats = async (id) => {
       const { responses } = await api.post("/elasticsearch/dashboard/default", { filters: { meetingPointIds: [id], cohort: [] } });
+      const totals = responses.map((e) => e.hits.total.value);
+      const [
+        inscription_en_attente_de_validation,
+        inscription_corrigé_à_instruire_de_nouveau,
+        inscription_en_attente_de_correction,
+        inscription_sans_accord_renseigné,
+        sejour_rassemblement_non_confirmé,
+        sejour_participation_non_confirmée,
+        sejour_emploi_du_temps,
+        sejour_cas_particulier,
+        sejour_chef_de_centre,
+        engagement_contrat_à_éditer,
+        engagement_contrat_en_attente_de_signature,
+        engagement_dossier_militaire_en_attente_de_validation,
+        engagement_mission_en_attente_de_validation,
+        engagement_phase3_en_attente_de_validation,
+      ] = totals;
       setStats({
-        inscription_en_attente_de_validation: responses[0].hits.total.value,
-        inscription_corrigé_à_instruire_de_nouveau: responses[1].hits.total.value,
-        inscription_en_attente_de_correction: responses[2].hits.total.value,
+        inscription_en_attente_de_validation,
+        inscription_corrigé_à_instruire_de_nouveau,
+        inscription_en_attente_de_correction,
+        inscription_sans_accord_renseigné,
+        sejour_rassemblement_non_confirmé,
+        sejour_participation_non_confirmée,
+        sejour_emploi_du_temps,
+        sejour_cas_particulier,
+        sejour_chef_de_centre,
+        engagement_contrat_à_éditer,
+        engagement_contrat_en_attente_de_signature,
+        engagement_dossier_militaire_en_attente_de_validation,
+        engagement_mission_en_attente_de_validation,
+        engagement_phase3_en_attente_de_validation,
       });
     };
     updateStats();
@@ -175,9 +203,11 @@ export default function Index() {
                   title="Dossier"
                   number={stats.inscription_en_attente_de_correction}
                   content="dossiers d’inscription en attente de correction."
-                  btnLabel="À instruire"
+                  btnLabel="À relancer"
                 />
-                {fullNote && <NoteContainer title="Dossier" number={2} content="dossier d’inscriptions sont en attente de validation." btnLabel="À instruire" />}
+                {fullNote && (
+                  <NoteContainer title="Droit à l'image" number={stats.inscription_sans_accord_renseigné} content="volontaires sans accord renseigné." btnLabel="À relancer" />
+                )}
               </div>
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
@@ -185,11 +215,32 @@ export default function Index() {
                   <div className="text-sm font-bold leading-5 text-gray-900">Séjours</div>
                   <div className=" rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">7</div>
                 </div>
-                {Array.from(Array(7).keys())
-                  .slice(0, fullNote ? 7 : 3)
-                  .map((i) => (
-                    <NoteContainer key={`sejour` + i} title="Dossier" number={2} content="dossier d’inscriptions sont en attente de validation." btnLabel="À instruire" />
-                  ))}
+                <NoteContainer
+                  title="Point de rassemblement"
+                  number={stats.sejour_rassemblement_non_confirmé}
+                  content="volontaires n’ont pas confirmé leur point de rassemblement."
+                  btnLabel="À déclarer"
+                />
+                <NoteContainer
+                  title="Participation"
+                  number={stats.sejour_participation_non_confirmée}
+                  content="volontaires n’ont pas confirmé leur participation."
+                  btnLabel="À déclarer"
+                />
+                <NoteContainer title="Emploi du temps" number={stats.sejour_emploi_du_temps} content="emplois du temps n’ont pas été déposés." btnLabel="À relancer" />
+
+                {fullNote && (
+                  <>
+                    <NoteContainer
+                      title="Cas particuliers"
+                      number={stats.sejour_cas_particulier}
+                      content="volontaires à contacter pour préparer leur accueil."
+                      btnLabel="À contacter"
+                    />
+
+                    <NoteContainer title="Chef de centre" number={stats.sejour_cas_particulier} content="chefs de centre sont à renseigner" btnLabel="À renseigner" />
+                  </>
+                )}
               </div>
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
@@ -197,18 +248,41 @@ export default function Index() {
                   <div className="text-sm font-bold leading-5 text-gray-900">Engagement</div>
                   <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">9</div>
                 </div>
-                {Array.from(Array(9).keys())
-                  .slice(0, fullNote ? 9 : 3)
-                  .map((i) => (
+                <NoteContainer
+                  title="Contrat"
+                  number={stats.engagement_contrat_à_éditer}
+                  content="contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature."
+                  btnLabel="À suivre"
+                />
+                <NoteContainer
+                  title="Contrat"
+                  number={stats.engagement_contrat_en_attente_de_signature}
+                  content="contrats d’engagement sont en attente de signature."
+                  btnLabel="À suivre"
+                />
+                <NoteContainer
+                  title="Dossier d’éligibilité"
+                  number={stats.engagement_dossier_militaire_en_attente_de_validation}
+                  content="dossiers d’éligibilité en préparation militaire sont en attente de vérification."
+                  btnLabel="À vérifier"
+                />
+
+                {fullNote && (
+                  <>
                     <NoteContainer
-                      key={`engagement` + i}
-                      title="Dossier"
-                      number={2}
-                      content="dossier d’inscriptions sont en attente de validation.
-                    dossier d’inscriptions sont en attente de validation. "
+                      title="Phase 3"
+                      number={stats.engagement_phase3_en_attente_de_validation}
+                      content="demandes de validation de phase 3 à suivre."
+                      btnLabel="À suivre"
+                    />
+                    <NoteContainer
+                      title="Mission"
+                      number={stats.engagement_mission_en_attente_de_validation}
+                      content="missions sont en attente de validation."
                       btnLabel="À instruire"
                     />
-                  ))}
+                  </>
+                )}
               </div>
             </div>
             <div className="flex justify-center">
@@ -284,7 +358,7 @@ const NoteContainer = ({ title, number, content, btnLabel }) => {
       <div className="flex flex-col gap-2">
         <span className="text-sm font-bold leading-5 text-gray-900">{title}</span>
         <p className="text-xs font-normal leading-4 text-gray-900">
-          <span className="font-bold text-blue-600">{number} </span>
+          <span className="font-bold text-blue-600">{Number(number) >= 1000 ? "1000+" : number} </span>
           {content}
         </p>
       </div>
