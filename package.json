@@ -1,0 +1,22 @@
+{
+  "name": "service-national-universel",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build --filter=$APP_NAME",
+    "start": "turbo run start --filter=$APP_NAME"
+  },
+  "dependencies": {
+    "turbo": "^1.9.4"
+  },
+  "workspaces": [
+    "packages/*",
+    "app",
+    "admin",
+    "api"
+  ],
+  "engines": {
+    "node": "^18.16.0",
+    "npm": "^9.5.1",
+    "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
+  }
+}

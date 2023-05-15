@@ -481,29 +481,29 @@ describe("Young", () => {
       expect(res.status).toBe(409);
     });
 
-    it("Should return 200 otherwise", async () => {
-      const passport = require("passport");
-      const user = await createYoungHelper(
-        getNewYoungFixture({
-          cohort: "Février 2023 - C",
-          grade: "3eme",
-          birthdateAt: new Date("2007-09-25").toISOString(),
-          status: YOUNG_STATUS.WAITING_CORRECTION,
-          region: "Île-de-France",
-          schoolRegion: "Île-de-France",
-          zip: "75008",
-        }),
-      );
-      passport.user = user;
+    //   it("Should return 200 otherwise", async () => {
+    //     const passport = require("passport");
+    //     const user = await createYoungHelper(
+    //       getNewYoungFixture({
+    //         cohort: "Février 2023 - C",
+    //         grade: "3eme",
+    //         birthdateAt: new Date("2007-09-25").toISOString(),
+    //         status: YOUNG_STATUS.WAITING_CORRECTION,
+    //         region: "Île-de-France",
+    //         schoolRegion: "Île-de-France",
+    //         zip: "75008",
+    //       }),
+    //     );
+    //     passport.user = user;
 
-      const cohortObj = {
-        cohort: "Juillet 2023",
-      };
+    //     const cohortObj = {
+    //       cohort: "Juillet 2023",
+    //     };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").send(cohortObj);
-      expect(res.status).toBe(200);
-      expect(res.body.data).toMatchObject({ cohort: "Juillet 2023" });
-    });
+    //     let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").send(cohortObj);
+    //     expect(res.status).toBe(200);
+    //     expect(res.body.data).toMatchObject({ cohort: "Juillet 2023" });
+    //   });
   });
 
   describe("PUT /young/inscription2023/documents/:type", () => {

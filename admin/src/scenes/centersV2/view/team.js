@@ -29,7 +29,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
     if (!Object.keys(obj).length) return;
 
     try {
-      const { ok, data } = await api.put(`/session-phase1/${focusedSession._id}`, obj);
+      const { ok, data } = await api.put(`/session-phase1/${focusedSession._id}/team`, obj);
       if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du membre", translate(data.code));
       setFocusedSession(data);
       toastr.success("Succès", "Le membre a été ajouté à l'équipe");
@@ -49,7 +49,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
           title: `Inviter ${teamate.firstName} ${teamate.lastName}`,
           message: (
             <div>
-              Aucun compte n'a été trouvé pour l'email&nbsp;:
+              Aucun compte n&apos;a été trouvé pour l&apos;email&nbsp;:
               <br />
               <span className="text-snu-purple-300 underline">{teamate.email}</span>
               <br />
@@ -76,7 +76,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
         cohorts: [focusedSession?.cohort],
       });
       if (!responseInvitation?.ok) return toastr.error("Erreur !", translate(responseInvitation?.code));
-      const responseSession = await api.put(`/session-phase1/${focusedSession._id}`, { headCenterId: responseInvitation?.data?._id });
+      const responseSession = await api.put(`/session-phase1/${focusedSession._id}/team`, { headCenterId: responseInvitation?.data?._id });
       if (!responseSession?.ok) return toastr.error("Erreur !", translate(responseInvitation?.code));
       setFocusedSession(responseSession?.data);
       toastr.success("Succès", `${user.firstName} ${user.lastName} a reçu une invitation pour rejoindre l'équipe`);
@@ -287,7 +287,7 @@ const AddBlock = ({ addTeamate }) => {
               name="role"
               value={values.role}
               onChange={handleChange}
-              style={{ width: "100%", height: "auto", padding: "1rem", marginTop: "1rem", border: "none", borderRadius: "7px", border: "solid 1px #ccc" }}>
+              style={{ width: "100%", height: "auto", padding: "1rem", marginTop: "1rem", borderRadius: "7px", border: "solid 1px #ccc" }}>
               <option disabled value="" label="Rôle" />
               {listRoles.map((e) => (
                 <option value={e} key={e} label={e} />

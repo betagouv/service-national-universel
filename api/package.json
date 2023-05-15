@@ -9,7 +9,7 @@
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   },
   "scripts": {
-    "dev": "nodemon --watch ../lib --watch .env-staging --watch ./src ./src/index.js",
+    "dev": "nodemon --watch ../packages --watch .env-staging --watch ./src ./src/index.js",
     "debug": "DEBUG=express:* nodemon ./src/index.js",
     "start": "pm2 install pm2-slack && pm2 set pm2-slack:slack_url $PM2_SLACK_URL &&  pm2 set pm2-slack:servername PM2-ERROR-API && pm2 start ./src/index.js --no-daemon",
     "test": "jest --silent --runInBand",
@@ -62,7 +62,7 @@
     "redis": "^4.6.5",
     "sanitize-html": "^2.7.3",
     "slugify": "^1.6.5",
-    "snu-lib": "file:../lib",
+    "snu-lib": "*",
     "uuid": "^9.0.0",
     "validator": "^13.7.0"
   },

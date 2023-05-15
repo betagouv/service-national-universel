@@ -53,7 +53,7 @@ function inscriptionModificationOpenForYoungs(cohort, young) {
       }
       return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023
     default:
-      return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023
+      return new Date() < new Date(2023, 6, 11, 23, 59); // before 11 juillet 2023
   }
 }
 

@@ -26,6 +26,7 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
   return (
     <Form>
       <img src={close} onClick={() => setOpen(false)} />
+
       <Formik
         initialValues={{ step1: null, step2: null, message: "", subject: "", email: "", name: "", department: "" }}
         validateOnChange={false}
