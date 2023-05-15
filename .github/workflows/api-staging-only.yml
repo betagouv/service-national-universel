@@ -57,7 +57,8 @@ jobs:
           git config user.email "github.deployer@gmail.com"
           git config user.name "Github Deployer"
           git remote add cloudstaging "$CLEVER_CLOUD_GIT_REMOTE_STAGING"
-          git add packages ${{ env.SUBFOLDER_NAME }} *
+          git add packages ${{ env.SUBFOLDER_NAME }}
+          find . -maxdepth 1 -type f -exec git add {} +  # Add first level files
           git commit -m "For deploy"
           git push -f -u cloudstaging master
         env:
