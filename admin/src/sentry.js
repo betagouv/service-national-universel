@@ -6,6 +6,7 @@ import { Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
 
 // Create Custom Sentry Route component
+
 const SentryRoute = withSentryRouting(Route);
 const history = createBrowserHistory();
 
