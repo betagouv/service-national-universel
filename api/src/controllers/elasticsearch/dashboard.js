@@ -16,8 +16,8 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
         track_total_hits: 1000, // We don't need the exact number of hits when more than 1000.
         query: { bool: { must: { match_all: {} }, filter } },
       };
-      if (req.user.role === ROLES.REFERENT_REGION) body.query.filter.push({ term: { [regionField]: req.user.region } });
-      if (req.user.role === ROLES.REFERENT_DEPARTMENT) body.query.filter.push({ terms: { [departmentField]: req.user.department } });
+      if (req.user.role === ROLES.REFERENT_REGION) body.query.bool.filter.push({ term: { [regionField]: req.user.region } });
+      if (req.user.role === ROLES.REFERENT_DEPARTMENT) body.query.bool.filter.push({ terms: { [departmentField]: req.user.department } });
       return body;
     }
 

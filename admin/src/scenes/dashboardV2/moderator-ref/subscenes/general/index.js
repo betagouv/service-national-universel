@@ -225,7 +225,7 @@ export default function Index() {
                   title="Participation"
                   number={stats.sejour_participation_non_confirmée}
                   content="volontaires n’ont pas confirmé leur participation."
-                  btnLabel="À déclarer"
+                  btnLabel="À suivre"
                 />
                 <NoteContainer title="Emploi du temps" number={stats.sejour_emploi_du_temps} content="emplois du temps n’ont pas été déposés." btnLabel="À relancer" />
 
