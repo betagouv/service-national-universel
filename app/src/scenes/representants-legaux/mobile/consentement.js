@@ -186,6 +186,7 @@ export default function Consentement({ step, parentId }) {
       [`parent${parentId}FirstName`]: data.firstName.trim(),
       [`parent${parentId}LastName`]: data.lastName.trim(),
       [`parent${parentId}Email`]: validator.normalizeEmail(data.email.trim()),
+      [`parent${parentId}PhoneZone`]: data.phoneZone.trim(),
       [`parent${parentId}Phone`]: data.phone.trim(),
       ...address,
     };
@@ -193,7 +194,6 @@ export default function Consentement({ step, parentId }) {
     if (parentId === 1) {
       body.parentAllowSNU = data.allowSNU ? "true" : "false";
       if (data.allowSNU) {
-        // body.parent1AllowCovidAutotest = data.allowCovidAutotest ? "true" : "false";
         body.parent1AllowImageRights = data.allowImageRights ? "true" : "false";
         body.rulesParent1 = "true";
       }
