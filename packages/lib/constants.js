@@ -309,6 +309,10 @@ const SENDINBLUE_TEMPLATES = {
     INSCRIPTION_REMIND_CORRECTION: "169",
     INSCRIPTION_WAITING_LIST: "171",
     INSCRIPTION_REFUSED: "172",
+    INSTRUCTION_END_WAITING_VALIDATION_ELIGIBLE: "935",
+    INSTRUCTION_END_WAITING_VALIDATION_NOT_ELIGIBLE: "656",
+    INSTRUCTION_END_WAITING_CORRECTION_ELIGIBLE: "936",
+    INSTRUCTION_END_WAITING_CORRECTION_NOT_ELIGIBLE: "658",
     PARENT_CONSENTED: "612",
     PARENT_DID_NOT_CONSENT: "613",
     PARENT2_DID_NOT_CONSENT: "634",
@@ -461,6 +465,7 @@ const COHESION_STAY_LIMIT_DATE = {
   "Avril 2023 - A": "du 9 au 21 Avril 2023",
   "Juin 2023": "du 11 au 23 Juin 2023",
   "Juillet 2023": "du 4 au 16 Juillet 2023",
+  "à venir": "à venir",
 };
 
 const COHESION_STAY_START = {
@@ -767,10 +772,10 @@ const TEMPLATE_DESCRIPTIONS = {
   637: "La création d’une session sur un centre pour demander la validation de la session, à destination des modérateurs suivants",
   650: "Clôture des instructions - dossier non finalisé - basculement autre cohorte",
   651: "Clôture instruction - dossier non finalisé - plus éligible au SNU",
-  655: "Jeunes restés en waiting correction après clôture instruction + encore éligibles SNU",
-  656: "Jeunes restés en waiting correction après clôture instruction + encore éligibles SNU",
+  655: "Jeunes restés en waiting validation après clôture instruction + encore éligibles SNU",
+  656: "Jeunes restés en waiting validation après clôture instruction + non éligibles SNU",
   657: "Jeunes restés en waiting correction après clôture instruction + encore éligibles SNU",
-  658: "Jeunes restés en waiting correction après clôture instruction + plus éligibles SNU",
+  658: "Jeunes restés en waiting correction après clôture instruction + non éligibles SNU",
   662: "Invitation mail de création de compte",
   663: "Changement manuel ou automatique de l’affectation et / ou du PDR",
   665: "Quand un volontaire ou un référent change de séjour - A ne pas envoyer si le représentant légal n’a pas encore donné son consentement",
@@ -779,6 +784,8 @@ const TEMPLATE_DESCRIPTIONS = {
   673: "La demande de modification de la ligne a été refusée",
   674: "La demande de modification de la ligne a été validée",
   697: "Quand un référent / modérateur clique sur le bouton “relance” pour demander au chef de centre de téléverser l’EDT de son séjour",
+  935: "Jeunes restés en waiting validation après clôture instruction + encore éligibles SNU",
+  936: "Jeunes restés en waiting correction après clôture instruction + encore éligibles SNU",
 };
 
 const MIME_TYPES = {
