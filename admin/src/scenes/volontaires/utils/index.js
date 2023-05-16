@@ -283,48 +283,6 @@ export const getFilterArray = (user) =>
   ].filter(Boolean);
 
 /*
-listes des filtres :
-"cohort.keyword",
-"originalCohort.keyword",
-"status.keyword",
-"country.keyword",
-"academy.keyword",
-"region.keyword",
-"department.keyword",
-"hasNotes.keyword",
-"grade.keyword",
-"gender.keyword",
-"schoolName.keyword",
-"situation.keyword",
-"ppsBeneficiary.keyword",
-"paiBeneficiary.keyword",
-"isRegionRural.keyword",
-"qpv.keyword",
-"handicap.keyword",
-"allergies.keyword",
-"specificAmenagment.keyword",
-"reducedMobilityAccess.keyword",
-"imageRight.keyword",
-"CNIFileNotValidOnStart.keyword",
-"statusPhase1.keyword",
-"hasMeetingInformation.keyword",
-"handicapInSameDepartment.keyword",
-"youngPhase1Agreement.keyword",
-"cohesionStayPresence.keyword",
-"presenceJDM.keyword",
-"departInform.keyword",
-"departSejourMotif.keyword",
-"cohesionStayMedicalFileReceived.keyword",
-"ligneId.keyword",
-"isTravelingByPlane.keyword",
-"statusPhase2.keyword",
-"phase2ApplicationStatus.keyword",
-"statusPhase2Contract.keyword",
-"statusMilitaryPreparationFiles.keyword",
-"phase2ApplicationFilesType.keyword",
-"status_equivalence.keyword",
-"statusPhase3.keyword"
-*/
 
 export async function transformVolontaires(data, values, centers, sessionsPhase1) {
   let all = data;
