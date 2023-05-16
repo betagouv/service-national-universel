@@ -104,13 +104,14 @@ const AccountRepresentantsPage = () => {
         parent1Phone: formValues.parent1Phone.phoneNumber.trim(),
         parent1PhoneZone: formValues.parent1Phone.phoneZone,
         parent1Email: formValues.parent1Email.trim(),
+        parent2Status: hasParent2 ? formValues.parent2Status : "",
         parent2LastName: (hasParent2 && formValues.parent2LastName.trim()) || "",
         parent2FirstName: (hasParent2 && formValues.parent2FirstName.trim()) || "",
         parent2Phone: (hasParent2 && formValues.parent2Phone.phoneNumber.trim()) || "",
-        parent2PhoneZone: (hasParent2 && formValues.parent2Phone.phoneZone) || PHONE_ZONES_NAMES.FRANCE,
+        parent2PhoneZone: (hasParent2 && formValues.parent2Phone.phoneZone) || "",
         parent2Email: (hasParent2 && formValues.parent2Email.trim()) || "",
       };
-      const { title, message, data: updatedYoung } = await updateYoung("parents", { _id: young._id, ...youngDataToUpdate });
+      const { title, message, data: updatedYoung } = await updateYoung("parents", youngDataToUpdate);
       toastr.success(title, message);
       dispatch(setYoung(updatedYoung));
     } catch (error) {
