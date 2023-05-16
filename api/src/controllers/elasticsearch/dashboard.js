@@ -58,7 +58,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
         queryFromFilter([
           { terms: { "cohort.keyword": cohortsNotFinished } },
           { term: { isAssignmentAnnouncementsOpenForYoung: true } },
-          { range: { dateEnd: { lt: "now" } } },
+          // { range: { dateEnd: { lt: "now" } } },
           { bool: { should: [{ term: { status: "VALIDATED" } }, { term: { status: "WAITING_LIST" } }], minimum_should_match: 1 } },
           { bool: { should: [{ term: { parentAllowSNU: "N/A" } }, { bool: { must_not: { exists: { field: "parentAllowSNU" } } } }], minimum_should_match: 1 } },
         ]),
@@ -88,9 +88,9 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           },
         ]),
         // Point de rassemblement (À déclarer) Au moins 1 point de rassemblement est à déclarer.
-        // TODO!
+        // TODO! Je ne comprends pas.
         // Centre (À déclarer) Au moins 1 centre est en attente de déclaration.
-        // TODO!
+        // TODO! Je ne comprends pas.
         // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
         // sejour_emploi_du_temps
         { index: "sessionphase1", type: "_doc" },
