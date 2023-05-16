@@ -395,8 +395,8 @@ router.get("/department-detail/:department/:cohort", passport.authenticate("refe
       {
         $lookup: {
           from: "schemaderepartitions",
-          localField: "cohesionCenterId",
-          foreignField: "centerId",
+          let: { local_cohesionCenterId: "$cohesionCenterId" },
+          pipeline: [{ $match: { $expr: { $and: [{ $eq: ["$centerId", "$$local_cohesionCenterId"] }, { $eq: ["$cohort", cohort] }] } } }],
           as: "groups",
         },
       },
