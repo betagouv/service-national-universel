@@ -282,8 +282,6 @@ export const getFilterArray = (user) =>
     },
   ].filter(Boolean);
 
-/*
-
 export async function transformVolontaires(data, values, centers, sessionsPhase1) {
   let all = data;
   if (values.includes("schoolSituation")) {
