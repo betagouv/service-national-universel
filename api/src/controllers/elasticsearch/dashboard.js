@@ -5,11 +5,22 @@ const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { buildArbitratyNdJson } = require("./utils");
-const { ROLES } = require("snu-lib");
+const { sessions2023, ROLES } = require("snu-lib");
 const CohortModel = require("../../models/cohort");
 
 router.post("/default", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const cohorts = await CohortModel.find({});
+    const cohortsNotFinished = cohorts.filter((c) => new Date(c.dateEnd) > Date.now()).map((e) => e.name);
+    const cohortsNotStarted = cohorts.filter((c) => new Date(c.dateStart) > Date.now()).map((e) => e.name);
+    const cohortsAssignementOpen = cohorts.filter((c) => Boolean(c.isAssignmentAnnouncementsOpenForYoung) && cohortsNotFinished.includes(c)).map((e) => e.name);
+    const cohorts5daysBeforeInscriptionEnd = sessions2023
+      .filter((c) => new Date(c.eligibility.instructionEndDate) - Date.now() < 5 * 24 * 60 * 60 * 1000 && new Date(c.eligibility.instructionEndDate) - Date.now() > 0)
+      .map((e) => e.name);
+    const cohorts5dayBeforepdrChoiceLimitDate = cohorts
+      .filter((c) => new Date(c.pdrChoiceLimitDate) - Date.now() < 5 * 24 * 60 * 60 * 1000 && new Date(c.pdrChoiceLimitDate) - Date.now() > 0)
+      .map((e) => e.name);
+
     function queryFromFilter(filter, { regionField = "region.keyword", departmentField = "department.keyword" } = {}) {
       const body = {
         size: 0,
@@ -21,61 +32,177 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
       return body;
     }
 
-    const cohorts = await CohortModel.find({});
-    const cohortsNotFinished = cohorts.filter((c) => new Date(c.dateEnd) > Date.now()).map((e) => e.name);
-    const cohortsNotStarted = cohorts.filter((c) => new Date(c.dateStart) > Date.now()).map((e) => e.name);
+    function withAggs(body, fieldName = "cohort.keyword") {
+      return {
+        ...body,
+        aggs: { cohort: { terms: { field: fieldName, size: 1000 } } },
+      };
+    }
 
+    // Dossier. X dossiers d’inscription en attente de validation pour le séjour de [Février 2023 C] (A instruire)
+    // inscription_en_attente_de_validation_cohorte
+    async function inscriptionAttenteValidationParCohorte() {
+      const cohorts = cohorts5daysBeforeInscriptionEnd;
+      if (!cohorts.length) return { inscription_en_attente_de_validation_cohorte: [] };
+
+      const response = await esClient.msearch({
+        index: "young",
+        body: buildArbitratyNdJson(
+          { index: "young", type: "_doc" },
+          withAggs(queryFromFilter([{ terms: { "cohort.keyword": cohorts } }, { terms: { "status.keyword": ["WAITING_VALIDATION"] } }]), "cohort.keyword"),
+        ),
+      });
+
+      return {
+        inscription_en_attente_de_validation_cohorte: response.body.responses[0].aggregations.cohort.buckets.map((e) => {
+          return {
+            cohort: e.key,
+            count: e.doc_count,
+          };
+        }),
+      };
+    }
+
+    // Droit à l’image (À relancer) X volontaires sans accord renseigné
+    // inscription_sans_accord_renseigné
+    async function droitImageParCohorte() {
+      const cohorts = cohortsAssignementOpen;
+      if (!cohorts.length) return { inscription_sans_accord_renseigné: [] };
+
+      const response = await esClient.msearch({
+        index: "young",
+        body: buildArbitratyNdJson(
+          { index: "young", type: "_doc" },
+          withAggs(
+            queryFromFilter([
+              { terms: { "cohort.keyword": cohorts } },
+              { terms: { "status.keyword": ["VALIDATED", "WAITING_LIST"] } },
+              { bool: { should: [{ term: { parentAllowSNU: "N/A" } }, { bool: { must_not: { exists: { field: "parentAllowSNU" } } } }], minimum_should_match: 1 } },
+            ]),
+            "cohort.keyword",
+          ),
+        ),
+      });
+
+      return {
+        inscription_sans_accord_renseigné: response.body.responses[0].aggregations.cohort.buckets.map((e) => {
+          return {
+            cohort: e.key,
+            count: e.doc_count,
+          };
+        }),
+      };
+    }
+
+    // Point de rassemblement (À suivre) X volontaires n’ont pas confirmé leur point de rassemblement
+    // sejour_rassemblement_non_confirmé
+    async function sejourRassemblementNonConfirmé() {
+      const cohorts = cohorts5dayBeforepdrChoiceLimitDate;
+      if (!cohorts.length) return { sejour_rassemblement_non_confirmé: [] };
+
+      const response = await esClient.msearch({
+        index: "young",
+        body: buildArbitratyNdJson(
+          { index: "young", type: "_doc" },
+          withAggs(
+            queryFromFilter([
+              { terms: { "cohort.keyword": cohorts } },
+              { exists: { field: "sessionId" } },
+              { exists: { field: "lineId" } },
+              { bool: { should: [{ term: { mettingPointId: "N/A" } }, { bool: { must_not: { exists: { field: "mettingPointId" } } } }], minimum_should_match: 1 } },
+            ]),
+            "cohort.keyword",
+          ),
+        ),
+      });
+
+      return {
+        sejour_rassemblement_non_confirmé: response.body.responses[0].aggregations.cohort.buckets.map((e) => {
+          return {
+            cohort: e.key,
+            count: e.doc_count,
+          };
+        }),
+      };
+    }
+
+    // Participation (À suivre) X volontaires n’ont pas confirmé leur participation au séjour de [Février 2023-C]
+    // sejour_participation_non_confirmée
+    async function sejourParticipationNonConfirmée() {
+      const cohorts = cohortsNotStarted.filter((e) => cohortsAssignementOpen.includes(e));
+      if (!cohorts.length) return { sejour_participation_non_confirmée: [] };
+
+      const response = await esClient.msearch({
+        index: "young",
+        body: buildArbitratyNdJson(
+          { index: "young", type: "_doc" },
+          withAggs(
+            queryFromFilter([
+              {
+                bool: {
+                  should: [{ term: { youngPhase1Agreement: "false" } }, { bool: { must_not: { exists: { field: "youngPhase1Agreement" } } } }],
+                  minimum_should_match: 1,
+                },
+              },
+              { terms: { "cohort.keyword": cohorts } },
+              { terms: { "status.keyword": ["VALIDATED"] } },
+              { terms: { "statusPhase1.keyword": ["AFFECTED"] } },
+            ]),
+          ),
+        ),
+      });
+
+      return {
+        sejour_participation_non_confirmée: response.body.responses[0].aggregations.cohort.buckets.map((e) => {
+          return {
+            cohort: e.key,
+            count: e.doc_count,
+          };
+        }),
+      };
+    }
+
+    async function basicInscriptions() {
+      const response = await esClient.msearch({
+        index: "young",
+        body: buildArbitratyNdJson(
+          // Dossier (À instruire) X dossiers d’inscriptions sont en attente de validation.
+          // inscription_en_attente_de_validation
+          { index: "young", type: "_doc" },
+          queryFromFilter([
+            { terms: { "cohort.keyword": cohortsNotFinished } },
+            { terms: { "status.keyword": ["WAITING_VALIDATION"] } },
+            { bool: { must_not: { exists: { field: "correctionRequests.keyword" } } } },
+          ]),
+          // Dossier (À instruire) X dossiers d’inscription corrigés sont à instruire de nouveau.
+          // inscription_corrigé_à_instruire_de_nouveau
+          { index: "young", type: "_doc" },
+          queryFromFilter([
+            { terms: { "cohort.keyword": cohortsNotFinished } },
+            { terms: { "status.keyword": ["WAITING_VALIDATION"] } },
+            { bool: { must: { exists: { field: "correctionRequests.keyword" } } } },
+          ]),
+          // Dossier (À relancer) X dossiers d’inscription en attente de correction
+          // inscription_en_attente_de_correction
+          { index: "young", type: "_doc" },
+          queryFromFilter([{ terms: { "cohort.keyword": cohortsNotFinished } }, { terms: { "status.keyword": ["WAITING_CORRECTION"] } }]),
+        ),
+      });
+      const results = response.body.responses;
+      return {
+        inscription_en_attente_de_validation: results[0].hits.total.value,
+        inscription_corrigé_à_instruire_de_nouveau: results[1].hits.total.value,
+        inscription_en_attente_de_correction: results[2].hits.total.value,
+      };
+    }
+    /*
     const response = await esClient.msearch({
       index: "young",
       body: buildArbitratyNdJson(
-        //
-        // Inscriptions (5/5 done)
-        //
-
-        // Dossier (À instruire) X dossiers d’inscriptions sont en attente de validation.
-        // inscription_en_attente_de_validation
-        { index: "young", type: "_doc" },
-        queryFromFilter([
-          { terms: { "cohort.keyword": cohortsNotFinished } },
-          { terms: { "status.keyword": ["WAITING_VALIDATION"] } },
-          { bool: { must_not: { exists: { field: "correctionRequests.keyword" } } } },
-        ]),
-        // Dossier (À instruire) X dossiers d’inscription corrigés sont à instruire de nouveau.
-        // inscription_corrigé_à_instruire_de_nouveau
-        { index: "young", type: "_doc" },
-        queryFromFilter([
-          { terms: { "cohort.keyword": cohortsNotFinished } },
-          { terms: { "status.keyword": ["WAITING_VALIDATION"] } },
-          { bool: { must: { exists: { field: "correctionRequests.keyword" } } } },
-        ]),
-        // Dossier (À relancer) X dossiers d’inscription en attente de correction
-        // inscription_en_attente_de_correction
-        { index: "young", type: "_doc" },
-        queryFromFilter([{ terms: { "cohort.keyword": cohortsNotFinished } }, { terms: { "status.keyword": ["WAITING_CORRECTION"] } }]),
-        // Droit à l’image (À relancer) X volontaires sans accord renseigné
-        // inscription_sans_accord_renseigné
-        { index: "young", type: "_doc" },
-        queryFromFilter([
-          { terms: { "cohort.keyword": cohortsNotFinished } },
-          { term: { isAssignmentAnnouncementsOpenForYoung: true } },
-          // { range: { dateEnd: { lt: "now" } } },
-          { bool: { should: [{ term: { status: "VALIDATED" } }, { term: { status: "WAITING_LIST" } }], minimum_should_match: 1 } },
-          { bool: { should: [{ term: { parentAllowSNU: "N/A" } }, { bool: { must_not: { exists: { field: "parentAllowSNU" } } } }], minimum_should_match: 1 } },
-        ]),
 
         //
         // Séjours
         //
-
-        // Point de rassemblement (À suivre) X volontaires n’ont pas confirmé leur point de rassemblement
-        // sejour_rassemblement_non_confirmé
-        { index: "young", type: "_doc" },
-        queryFromFilter([
-          { terms: { "cohort.keyword": cohortsNotFinished } },
-          { exists: { field: "sessionId" } },
-          { exists: { field: "lineId" } },
-          { bool: { should: [{ term: { mettingPointId: "N/A" } }, { bool: { must_not: { exists: { field: "mettingPointId" } } } }], minimum_should_match: 1 } },
-        ]),
         // Participation (À suivre) X volontaires n’ont pas confirmé leur participation au séjour de [Février 2023-C]
         // sejour_participation_non_confirmée
         { index: "young", type: "_doc" },
@@ -166,7 +293,21 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
         queryFromFilter([{ terms: { "statusPhase3.keyword": ["WAITING_VALIDATION"] } }]),
       ),
     });
-    return res.status(200).send(response.body);
+    */
+    return res.status(200).send({
+      ok: true,
+      data: {
+        inscription: {
+          ...(await basicInscriptions()),
+          ...(await droitImageParCohorte()),
+          ...(await inscriptionAttenteValidationParCohorte()),
+        },
+        sejour: {
+          ...(await sejourRassemblementNonConfirmé()),
+          ...(await sejourParticipationNonConfirmée()),
+        },
+      },
+    });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
