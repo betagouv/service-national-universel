@@ -55,7 +55,6 @@
     "@sentry/integrations": "^7.17.4",
     "@sentry/react": "^7.17.4",
     "@sentry/tracing": "^7.17.4",
-    "@tailwindcss/line-clamp": "^0.4.2",
     "babel-loader": "8.3.0",
     "bootstrap": "4.6.1",
     "browser-image-resizer": "^2.4.1",
