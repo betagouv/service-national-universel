@@ -7,13 +7,12 @@ import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
 import validator from "validator";
 import InformationCircle from "../../../assets/icons/InformationCircle";
-import { slugifyFileName, UNSS_TYPE } from "../../../utils";
+import { slugifyFileName } from "../../../utils";
 import { capture } from "../../../sentry";
 import YoungHeader from "../../phase0/components/YoungHeader";
-import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES } from "snu-lib";
-// import Select from "../../../components/forms/Select";
+import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES, UNSS_TYPE } from "snu-lib";
 import Select from "../../../components/forms/SelectHookForm";
-import InputText from "../../../components/ui/forms/InputText";
+import InputText from "../../../components/ui/forms/InputTextHookForm";
 import { useForm, Controller } from "react-hook-form";
 
 const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
@@ -28,6 +27,7 @@ export default function FormEquivalence({ young, onChange }) {
   const [uploading, setUploading] = React.useState(false);
 
   const {
+    register,
     handleSubmit,
     watch,
     formState: { errors },
@@ -139,14 +139,16 @@ export default function FormEquivalence({ young, onChange }) {
                   name="type"
                   control={control}
                   rules={{ required: true }}
-                  render={({ field }) => (
-                    // <Select {...field} options={ENGAGEMENT_TYPES} selected={field.value} setSelected={field.onChange} />
-                    <Select {...field} options={ENGAGEMENT_TYPES} label="Type d'engagement" />
-                  )}
+                  render={({ field: { ref, ...rest } }) => <Select {...rest} options={ENGAGEMENT_TYPES} label="Type d'engagement" />}
                 />
 
                 {type === "Certification Union Nationale du Sport scolaire (UNSS)" && (
-                  <Controller rules={{ required: true }} name="sousType" control={control} render={({ field }) => <Select {...field} options={UNSS_TYPE} label="Catégorie" />} />
+                  <Controller
+                    rules={{ required: true }}
+                    name="sousType"
+                    control={control}
+                    render={({ field: { ref, ...rest } }) => <Select {...rest} options={UNSS_TYPE} label="Catégorie" />}
+                  />
                 )}
 
                 {type === "Engagements lycéens" && (
@@ -154,26 +156,20 @@ export default function FormEquivalence({ young, onChange }) {
                     rules={{ required: true }}
                     name="sousType"
                     control={control}
-                    render={({ field }) => <Select {...field} options={ENGAGEMENT_LYCEEN_TYPES} label="Catégorie" />}
+                    render={({ field: { ref, ...rest } }) => <Select {...rest} options={ENGAGEMENT_LYCEEN_TYPES} label="Catégorie" />}
                   />
                 )}
 
-                <Controller
-                  name="structureName"
-                  rules={{ required: true }}
-                  control={control}
-                  render={({ field }) => <InputText {...field} label="Nom de la structure d'accueil" />}
-                />
+                <InputText register={register} name="structureName" label="Nom de la structure d'accueil" validation={{ required: true }} />
               </div>
 
               <div className="mt-4 text-xs font-medium leading-4">Où ?</div>
 
               <div className="mt-3 space-y-4">
-                <Controller name="address" control={control} rules={{ required: true }} render={({ field }) => <InputText {...field} label="Adresse du lieu" />} />
-
+                <InputText register={register} name="address" label="Adresse du lieu" validation={{ required: true }} />
                 <div className="flex items-stretch gap-2">
-                  <Controller name="zip" control={control} rules={{ required: true }} render={({ field }) => <InputText {...field} label="Code postal" />} />
-                  <Controller name="city" control={control} rules={{ required: true }} render={({ field }) => <InputText {...field} label="Ville" />} />
+                  <InputText register={register} name="zip" label="Code postal" validation={{ required: true }} />
+                  <InputText register={register} name="city" label="Ville" validation={{ required: true }} />
                 </div>
               </div>
 
@@ -239,18 +235,18 @@ export default function FormEquivalence({ young, onChange }) {
               {frequence ? (
                 <>
                   <div className="mt-2 flex flex-wrap items-stretch gap-2 md:!flex-nowrap">
-                    <Controller rules={{ required: true }} name="frequency.nombre" control={control} render={({ field }) => <InputText {...field} label="Nombre" />} />
+                    <InputText register={register} name="frequency.nombre" label="Nombre" validation={{ required: true }} />
                     <Controller
                       rules={{ required: true }}
                       name="frequency.duree"
                       control={control}
-                      render={({ field }) => <Select {...field} options={optionsDuree} label="Durée" />}
+                      render={({ field: { ref, ...rest } }) => <Select {...rest} options={optionsDuree} label="Durée" />}
                     />
                     <Controller
                       rules={{ required: true }}
                       name="frequency.frequency"
                       control={control}
-                      render={({ field }) => <Select {...field} options={optionsFrequence} label="Fréquence" />}
+                      render={({ field: { ref, ...rest } }) => <Select {...rest} options={optionsFrequence} label="Fréquence" />}
                     />
                   </div>
 
@@ -277,14 +273,13 @@ export default function FormEquivalence({ young, onChange }) {
                 </div>
 
                 <div className="mt-4 space-y-4">
-                  <Controller name="contactFullName" control={control} render={({ field }) => <InputText {...field} label="Prénom et Nom" />} />
-                  <Controller
-                    rules={{ required: true, validate: validator.isEmail }}
+                  <InputText register={register} name="contactFullName" label="Prénom et Nom" validation={{ required: true }} />
+                  <InputText
+                    register={register}
                     name="contactEmail"
-                    control={control}
-                    render={({ field }) => (
-                      <InputText {...field} label="Adresse email" error={errors.contactEmail?.type === "validate" ? "L'adresse email n'est pas valide." : ""} />
-                    )}
+                    label="Adresse email"
+                    validation={{ validate: validator.isEmail, required: true }}
+                    error={errors.contactEmail?.type === "validate" ? "L'adresse email n'est pas valide." : ""}
                   />
                 </div>
               </div>
