@@ -259,7 +259,7 @@ export default function StatusIndex({ filter }) {
             <StatusMap
               title="Statut des contrats d'engagement"
               obj={CONTRACT_STATUS}
-              filterName="CONTRACT_STATUS"
+              filterName="statusPhase2Contract"
               colors={CONTRACT_STATUS_COLORS}
               data={statusPhase2Contract}
               filter={filter}
@@ -268,7 +268,7 @@ export default function StatusIndex({ filter }) {
             <StatusMap
               title="Statut sur une mission de phase 2"
               obj={APPLICATION_STATUS}
-              filterName="APPLICATION_STATUS"
+              filterName="phase2ApplicationStatus"
               colors={APPLICATION_STATUS_COLORS}
               data={statusApplication}
               filter={filter}
@@ -277,7 +277,7 @@ export default function StatusIndex({ filter }) {
             <StatusMap
               title="Statut sur des demandes d'équivalence de MIG"
               obj={EQUIVALENCE_STATUS}
-              filterName="EQUIVALENCE_STATUS"
+              filterName="status_equivalence"
               colors={EQUIVALENCE_STATUS_COLORS}
               data={statusEquivalence}
               filter={filter}

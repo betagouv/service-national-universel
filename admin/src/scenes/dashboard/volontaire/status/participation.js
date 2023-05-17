@@ -38,7 +38,7 @@ export default function Participation({ cohesionStayPresence, youngPhase1Agreeme
           </Link>
         </Col>
         <Col md={6} xl={3} k="cohesionStayPresence_NR">
-          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ["status=VALIDATED&cohesionStayPresence=Non renseigné"] })}>
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ["status=VALIDATED&cohesionStayPresence=N/A"] })}>
             <Card borderBottomColor="#d7d7d7">
               <CardTitle>Non renseigné</CardTitle>
               <CardValueWrapper>
@@ -156,8 +156,8 @@ export default function Participation({ cohesionStayPresence, youngPhase1Agreeme
       </Row>
       <Subtitle>Confirmation de participation au séjour de cohésion</Subtitle>
       <Row>
-        <Col md={6} xl={4} k="cohesionStayPresence_true">
-          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ["status=VALIDATED&cohesionStayPresence=true"] })}>
+        <Col md={6} xl={4} k="youngPhase1Agreement_true">
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ["status=VALIDATED&youngPhase1Agreement=true"] })}>
             <Card borderBottomColor="#6BC663">
               <CardTitle>Participation confirmée</CardTitle>
               <CardValueWrapper>
@@ -170,8 +170,8 @@ export default function Participation({ cohesionStayPresence, youngPhase1Agreeme
             </Card>
           </Link>
         </Col>
-        <Col md={6} xl={4} k="cohesionStayPresence_false">
-          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ["status=VALIDATED&cohesionStayPresence=false~Non+renseigné"] })}>
+        <Col md={6} xl={4} k="youngPhase1Agreement_false">
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ["status=VALIDATED&youngPhase1Agreement=false~Non+renseigné"] })}>
             <Card borderBottomColor="#EF4036">
               <CardTitle>Participation non renseignée</CardTitle>
               <CardValueWrapper>
@@ -187,7 +187,7 @@ export default function Participation({ cohesionStayPresence, youngPhase1Agreeme
       </Row>
       <Subtitle>Confirmation du point de rassemblement</Subtitle>
       <Row>
-        <Col md={6} xl={4} k="cohesionStayPresence_true">
+        <Col md={6} xl={4} k="hasMeetingInformation_true">
           <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ["status=VALIDATED&hasMeetingInformation=true"] })}>
             <Card borderBottomColor="#6BC663">
               <CardTitle>Point de rassemblement confirmé</CardTitle>
@@ -201,7 +201,7 @@ export default function Participation({ cohesionStayPresence, youngPhase1Agreeme
             </Card>
           </Link>
         </Col>
-        <Col md={6} xl={4} k="cohesionStayPresence_false">
+        <Col md={6} xl={4} k="hasMeetingInformation_false">
           <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ["status=VALIDATED&hasMeetingInformation=false~Non+renseigné"] })}>
             <Card borderBottomColor="#EF4036">
               <CardTitle>Point de rassemblement non confirmé</CardTitle>
