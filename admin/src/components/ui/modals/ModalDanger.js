@@ -19,7 +19,7 @@ const ModalDanger = ({
   cancelButtonText = "Annuler",
   isLoading = false,
   children = null,
-  icon = <DangerTriangle />,
+  icon = null,
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={handleClose} className={className}>
