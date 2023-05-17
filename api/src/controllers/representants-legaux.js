@@ -117,6 +117,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
       [`parent${id}LastName`]: Joi.string().uppercase().required(),
       [`parent${id}Email`]: Joi.string().lowercase().required(),
       [`parent${id}Phone`]: Joi.string().required(),
+      [`parent${id}PhoneZone`]: Joi.string().required(),
       [`parent${id}OwnAddress`]: Joi.string().valid("true", "false").required(),
       [`parent${id}Address`]: Joi.string().allow(""),
       [`parent${id}ComplementAddress`]: Joi.string().allow(""),
