@@ -200,7 +200,7 @@ describe("Young", () => {
   let storedState;
   let storedNonce;
 
-  describe.only("POST /young/france-connect/authorization-url", () => {
+  describe("POST /young/france-connect/authorization-url", () => {
     it("should return 200", async () => {
       const res = await request(getAppHelper()).post("/young/france-connect/authorization-url").send({
         callback: "foo",
@@ -212,7 +212,7 @@ describe("Young", () => {
     });
   });
 
-  describe.only("POST /young/france-connect/user-info", () => {
+  describe("POST /young/france-connect/user-info", () => {
     it("should return 200", async () => {
       const secretKey = "mysecretkey";
       const jwtPayload = {
@@ -361,22 +361,20 @@ describe("Young", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
-      const response = await request(getAppHelper())
-        .put("/young/parents")
-        .send({
-          parent1Status: "bar",
-          parent1FirstName: "foo",
-          parent1LastName: "bar",
-          parent1Email: "foo@bar.com",
-          parent1Phone: "bar",
-          parent1PhoneZone: "FRANCE",
-          parent2Status: "bar",
-          parent2FirstName: "foo",
-          parent2LastName: "bar",
-          parent2Email: "",
-          parent2Phone: "bar",
-          parent2PhoneZone: "FRANCE",
-        });
+      const response = await request(getAppHelper()).put("/young/parents").send({
+        parent1Status: "bar",
+        parent1FirstName: "foo",
+        parent1LastName: "bar",
+        parent1Email: "foo@bar.com",
+        parent1Phone: "bar",
+        parent1PhoneZone: "FRANCE",
+        parent2Status: "bar",
+        parent2FirstName: "foo",
+        parent2LastName: "bar",
+        parent2Email: "",
+        parent2Phone: "bar",
+        parent2PhoneZone: "FRANCE",
+      });
       const updatedYoung = response.body.data;
       expect(response.statusCode).toEqual(200);
       expect(updatedYoung.parent1Status).toEqual("bar");
