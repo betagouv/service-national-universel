@@ -3,6 +3,7 @@ const { MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib/constants");
 const { deletePatches } = require("../controllers/patches");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
+const YoungModel = require("../models/young");
 const { sendTemplate } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const { getCcOfYoung } = require("../utils");
