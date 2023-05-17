@@ -12,7 +12,7 @@ export default function Status({ status, statusPhase1, statusPhase2, statusPhase
     <React.Fragment>
       <Row>
         <Col md={6} xl={4}>
-          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] })}>
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ["status=VALIDATED"] })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
               <CardTitle>Volontaires</CardTitle>
               <CardValueWrapper>

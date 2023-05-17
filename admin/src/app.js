@@ -226,11 +226,11 @@ const Home = () => {
             {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
 
             {/* DASHBOARD */}
-            {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
-            {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
-            {environment === "production" && <RestrictedRoute path="/" component={renderDashboard} />}
-            {environment !== "production" && <RestrictedRoute path="/dashboard" component={renderDashboardV2} />}
-            {environment !== "production" && <RestrictedRoute path="/" component={renderDashboardV2} />}
+            {environment !== "production" && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
+            {environment !== "production" && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
+            {environment !== "production" && <RestrictedRoute path="/" component={renderDashboard} />}
+            {/* {environment !== "production" && <RestrictedRoute path="/dashboard" component={renderDashboardV2} />}
+            {environment !== "production" && <RestrictedRoute path="/" component={renderDashboardV2} />} */}
           </Switch>
         </div>
       </div>
