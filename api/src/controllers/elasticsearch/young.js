@@ -60,6 +60,7 @@ function getYoungsFilters(user) {
     "status_equivalence.keyword",
     "statusPhase3.keyword",
     "schoolDepartment.keyword",
+    "parentAllowSNU.keyword",
   ].filter(Boolean);
 }
 

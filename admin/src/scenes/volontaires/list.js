@@ -79,7 +79,7 @@ export default function VolontaireList() {
                 exportTitle="Volontaires"
                 route="/elasticsearch/young/young-having-school-in-dep-or-region/export?tab=volontaire"
                 filters={filterArray}
-                selectedFilters={{ ...selectedFilters, schoolDepartment: { filter: user.department } }}
+                selectedFilters={selectedFilters}
                 setIsOpen={() => true}
                 icon={<BsDownload className="text-white h-4 w-4 group-hover:!text-blue-600" />}
                 css={{
