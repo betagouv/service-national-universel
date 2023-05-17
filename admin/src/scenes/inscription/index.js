@@ -114,7 +114,13 @@ export default function Inscription() {
       missingLabel: "Non renseigné",
       translate: translate,
     },
-
+    {
+      title: "Qpv",
+      name: "qpv",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
     {
       title: "Région rurale",
       name: "isRegionRural",

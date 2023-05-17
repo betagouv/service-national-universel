@@ -163,12 +163,13 @@ export const copyToClipboard = (text) => {
 
 export const replaceSpaces = (v) => v?.replace(/\s+/g, "+");
 export const getLink = ({ base = "/", filter, filtersUrl = [] }) => {
+  // console.log("filter: ", filter);
   if (filter?.region?.length) filtersUrl.push(`region=${replaceSpaces(filter?.region?.map((c) => c)?.join("~"))}`);
   if (filter?.cohort?.length) filtersUrl.push(`cohort=${replaceSpaces(filter?.cohort?.map((c) => c)?.join("~"))}`);
   if (filter?.cohorts?.length) filtersUrl.push(`cohort=${replaceSpaces(filter?.cohorts?.map((c) => c)?.join("~"))}`);
   if (filter?.department?.length) filtersUrl.push(`department=${replaceSpaces(filter?.department?.map((c) => c)?.join("~"))}`);
   if (filter?.academy?.length) filtersUrl.push(`academy=${replaceSpaces(filter?.academy?.map((c) => c)?.join("~"))}`);
-  if (filter?.source?.length) filtersUrl.push(`source=${replaceSpaces(filter?.source?.map((c) => c)?.join("~"))}`);
+  if (filter?.source?.length) filtersUrl.push(`isJvaMission=${replaceSpaces(filter?.source?.map((c) => c)?.join("~"))}`);
   if (filter?.status?.length) filtersUrl.push(`status=${replaceSpaces(filter?.status?.map((c) => c)?.join("~"))}`);
   if (filter?.statusPhase1?.length) filtersUrl.push(`statusPhase1=${replaceSpaces(filter?.statusPhase1?.map((c) => c)?.join("~"))}`);
   let res = base;

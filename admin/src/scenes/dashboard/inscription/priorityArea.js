@@ -55,10 +55,10 @@ export default function PriorityArea({ filter }) {
 
     return (
       <Content>
-        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: ['QPV=%5B"false"%5D'] })}>
+        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: ["qpv=false"] })}>
           <CircularProgress circleProgressColor="#1B7BBF" percentage={noPercent} title={no} subtitle="Non" />
         </Link>
-        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: ['QPV=%5B"true"%5D'] })}>
+        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: ["qpv=true"] })}>
           <CircularProgress circleProgressColor="#1B7BBF" percentage={yesPercent} title={yes} subtitle="Oui" />
         </Link>
       </Content>
