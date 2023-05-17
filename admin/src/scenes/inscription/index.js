@@ -1,774 +1,371 @@
-import React, { useState } from "react";
-import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import relativeTime from "dayjs/plugin/relativeTime";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
-import { Link } from "react-router-dom";
+import relativeTime from "dayjs/plugin/relativeTime";
+import React, { Fragment, useState } from "react";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { HiAdjustments } from "react-icons/hi";
 
-import VioletButton from "../../components/buttons/VioletButton";
-import ExportComponent from "../../components/ExportXlsx";
-import SelectStatus from "../../components/selectStatus";
-import api from "../../services/api";
-import { apiURL, appURL, supportURL } from "../../config";
-import Panel from "./panel";
-import {
-  translate,
-  translateInscriptionStatus,
-  getFilterLabel,
-  formatStringLongDate,
-  YOUNG_STATUS,
-  isInRuralArea,
-  formatDateFRTimezoneUTC,
-  formatLongDateFR,
-  ES_NO_LIMIT,
-  ROLES,
-  colors,
-  departmentLookUp,
-  department2region,
-} from "../../utils";
-import { RegionFilter, DepartmentFilter, AcademyFilter } from "../../components/filters";
-import Chevron from "../../components/Chevron";
-import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
-import ReactiveListComponent from "../../components/ReactiveListComponent";
+import { Listbox, Transition } from "@headlessui/react";
+import { AiOutlinePlus } from "react-icons/ai";
+import { BsDownload } from "react-icons/bs";
+import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
+import { getDepartmentNumber, translateCniExpired } from "snu-lib";
 import Badge from "../../components/Badge";
+import Breadcrumbs from "../../components/Breadcrumbs";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
+import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
+import SelectStatus from "../../components/selectStatus";
+import { appURL } from "../../config";
+import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
-import DeleteFilters from "../../components/buttons/DeleteFilters";
-import LockedSvg from "../../assets/lock.svg";
-import UnlockedSvg from "../../assets/lock-open.svg";
+import { ROLES, YOUNG_STATUS, formatStringLongDate, translate, translateInscriptionStatus } from "../../utils";
+import { Title } from "../pointDeRassemblement/components/common";
+import { transformInscription, transformVolontairesSchool } from "../volontaires/utils";
 import DeletedInscriptionPanel from "./deletedPanel";
-import { formatPhoneE164 } from "../../utils/formatPhoneE164";
-
-const FILTERS = [
-  "SEARCH",
-  "STATUS",
-  "SITUATION",
-  "SEXE",
-  "PARENT_ALLOW_SNU",
-  "REGION",
-  "DEPARTMENT",
-  "SCHOOL",
-  "COHORT",
-  "PPS",
-  "PAI",
-  "RURAL",
-  "QPV",
-  "HANDICAP",
-  "ZRR",
-  "GRADE",
-  "ACADEMY",
-  "COUNTRY",
-  "CNI_EXPIRED",
-  "SPECIFIC_AMENAGEMENT",
-  "SAME_DEPARTMENT",
-  "PMR",
-  "ALLERGIES",
-  "NOTES",
-];
+import Panel from "./panel";
 
 export default function Inscription() {
   useDocumentTitle("Inscriptions");
   const user = useSelector((state) => state.Auth.user);
   const [young, setYoung] = useState(null);
-  const getDefaultQuery = () => ({ query: { bool: { filter: [] } }, track_total_hits: true });
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
-  const [filterVisible, setFilterVisible] = useState(false);
-  const handleShowFilter = () => setFilterVisible(!filterVisible);
-  const [infosHover, setInfosHover] = useState(false);
-  const [infosClick, setInfosClick] = useState(false);
-  const toggleInfos = () => {
-    setInfosClick(!infosClick);
-  };
+
+  //List state
+  const [data, setData] = useState([]);
+  const pageId = "inscription-list";
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [paramData, setParamData] = useState({
+    page: 0,
+    sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
+  });
+  //parentAllowSNU
+  const filterArray = [
+    { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
+    { title: "Autorisation de participation", name: "parentAllowSNU", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
+    { title: "Statut", name: "status", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateInscriptionStatus },
+    { title: "Pays de résidence", name: "country", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
+    { title: "Académie", name: "academy", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
+    {
+      title: "Région",
+      name: "region",
+      parentGroup: "Général",
+      missingLabel: "Non renseigné",
+      defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
+      translate: translate,
+    },
+    {
+      title: "Département",
+      name: "department",
+      parentGroup: "Général",
+      missingLabel: "Non renseigné",
+      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+    },
+    {
+      title: "Note interne",
+      name: "hasNotes",
+      parentGroup: "Général",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
+      title: "Classe",
+      name: "grade",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    user.role === ROLES.REFERENT_DEPARTMENT
+      ? {
+          title: "Etablissement",
+          name: "schoolName",
+          parentGroup: "Dossier",
+          missingLabel: "Non renseigné",
+          translate: translate,
+        }
+      : null,
+
+    {
+      title: "Situation",
+      name: "situation",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
+      title: "Sexe",
+      name: "gender",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+
+    {
+      title: "Bénéficiaire PPS",
+      name: "ppsBeneficiary",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
+      title: "Bénéficiaire PAI",
+      name: "paiBeneficiary",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+
+    {
+      title: "Région rurale",
+      name: "isRegionRural",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+
+    {
+      title: "Handicap",
+      name: "handicap",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
+      title: "Aménagement spécifique",
+      name: "specificAmenagment",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
+      title: "Accès mobilité réduite",
+      name: "reducedMobilityAccess",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
+      title: "Affectation dans son département",
+      name: "handicapInSameDepartment",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
+      title: "Allergies",
+      name: "allergies",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
+      title: "Pièce d'identité périmée",
+      name: "CNIFileNotValidOnStart",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translateCniExpired,
+    },
+  ].filter(Boolean);
 
   return (
-    <div>
-      <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
-          <div style={{ flex: 1, position: "relative" }}>
-            <Header>
-              <Title>Inscriptions</Title>
-              <div className="flex gap-2">
-                <Link to="/volontaire/create">
-                  <VioletButton onClick={() => plausibleEvent("Inscriptions/CTA - Nouvelle inscription")}>
-                    <p>Nouvelle inscription</p>
-                  </VioletButton>
-                </Link>
-                <ExportComponent
-                  handleClick={() => plausibleEvent("Inscriptions/CTA - Exporter inscriptions")}
-                  title="Exporter les inscriptions"
-                  defaultQuery={getExportQuery}
-                  exportTitle="Inscriptions"
-                  index="young"
-                  react={{ and: FILTERS }}
-                  transform={async (data) => {
-                    let all = data;
-                    const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-                    if (schoolsId?.length) {
-                      const { responses } = await api.esQuery("schoolramses", {
-                        query: { bool: { must: { ids: { values: schoolsId } } } },
-                        size: ES_NO_LIMIT,
-                      });
-                      if (responses.length) {
-                        const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                        all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-                      }
-                    }
-                    return all.map((data) => {
-                      return {
-                        _id: data._id,
-                        Cohorte: data.cohort,
-                        Prénom: data.firstName,
-
-                        Nom: data.lastName,
-                        "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
-                        "Pays de naissance": data.birthCountry || "France",
-                        "Ville de naissance": data.birthCity,
-                        "Code postal de naissance": data.birthCityZip,
-                        "Date de fin de validité de la pièce d'identité": formatDateFRTimezoneUTC(data?.latestCNIFileExpirationDate),
-                        Sexe: translate(data.gender),
-                        Email: data.email,
-                        Téléphone: formatPhoneE164(data.phone, data.phoneZone),
-                        "Adresse postale": data.address,
-                        "Code postal": data.zip,
-                        Ville: data.city,
-                        Département: data.department,
-                        Région: data.region,
-                        Académie: data.academy,
-                        Pays: data.country,
-                        "Nom de l'hébergeur": data.hostLastName,
-                        "Prénom de l'hébergeur": data.hostFirstName,
-                        "Lien avec l'hébergeur": data.hostRelationship,
-                        "Adresse - étranger": data.foreignAddress,
-                        "Code postal - étranger": data.foreignZip,
-                        "Ville - étranger": data.foreignCity,
-                        "Pays - étranger": data.foreignCountry,
-                        Situation: translate(data.situation),
-                        Niveau: data.grade,
-                        "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-                        "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-                        "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-                        "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-                        "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-                        "UAI de l'établissement": data.esSchool?.uai,
-                        "Quartier Prioritaire de la ville": translate(data.qpv),
-                        "Zone Rurale": translate(isInRuralArea(data)),
-                        Handicap: translate(data.handicap),
-                        "Bénéficiaire d'un PPS": translate(data.ppsBeneficiary),
-                        "Bénéficiaire d'un PAI": translate(data.paiBeneficiary),
-                        "Structure médico-sociale": translate(data.medicosocialStructure),
-                        "Nom de la structure médico-sociale": data.medicosocialStructureName,
-                        "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
-                        "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
-                        "Ville de la structure médico-sociale": data.medicosocialStructureCity,
-                        "Aménagement spécifique": translate(data.specificAmenagment),
-                        "Nature de l'aménagement spécifique": data.specificAmenagmentType,
-                        "Aménagement pour mobilité réduite": translate(data.reducedMobilityAccess),
-                        "Besoin d'être affecté(e) dans le département de résidence": translate(data.handicapInSameDepartment),
-                        "Allergies ou intolérances alimentaires": translate(data.allergies),
-                        "Activité de haut-niveau": translate(data.highSkilledActivity),
-                        "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
-                        "Activités de haut niveau nécessitant d'être affecté dans le département de résidence": translate(data.highSkilledActivityInSameDepartment),
-                        "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
-                        "Consentement des représentants légaux": translate(data.parentConsentment),
-                        "Droit à l'image": translate(data.imageRight),
-                        "Autotest PCR": translate(data.autoTestPCR),
-                        "Règlement intérieur": translate(data.rulesYoung),
-                        "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived) || "Non Renseigné",
-                        "Statut représentant légal 1": translate(data.parent1Status),
-                        "Prénom représentant légal 1": data.parent1FirstName,
-                        "Nom représentant légal 1": data.parent1LastName,
-                        "Email représentant légal 1": data.parent1Email,
-                        "Téléphone représentant légal 1": formatPhoneE164(data.parent1Phone, data.parent1PhoneZone),
-                        "Adresse représentant légal 1": data.parent1Address,
-                        "Code postal représentant légal 1": data.parent1Zip,
-                        "Ville représentant légal 1": data.parent1City,
-                        "Département représentant légal 1": data.parent1Department,
-                        "Région représentant légal 1": data.parent1Region,
-                        "Statut représentant légal 2": translate(data.parent2Status),
-                        "Prénom représentant légal 2": data.parent2FirstName,
-                        "Nom représentant légal 2": data.parent2LastName,
-                        "Email représentant légal 2": data.parent2Email,
-                        "Téléphone représentant légal 2": formatPhoneE164(data.parent2Phone, data.parent2PhoneZone),
-                        "Adresse représentant légal 2": data.parent2Address,
-                        "Code postal représentant légal 2": data.parent2Zip,
-                        "Ville représentant légal 2": data.parent2City,
-                        "Département représentant légal 2": data.parent2Department,
-                        "Région représentant légal 2": data.parent2Region,
-                        Motivation: data.motivations,
-                        Phase: translate(data.phase),
-                        "Créé lé": formatLongDateFR(data.createdAt),
-                        "Mis à jour le": formatLongDateFR(data.updatedAt),
-                        "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-                        "Statut général": translate(data.status),
-                        "Dernier statut le": formatLongDateFR(data.lastStatusAt),
-                      };
-                    });
-                  }}
-                />
-                {user.role === ROLES.REFERENT_DEPARTMENT && (
-                  <ExportComponent
-                    title="Exporter les inscrits scolarisés dans le département"
-                    defaultQuery={getExportQuery}
-                    exportTitle="Incriptions"
-                    index="young-having-school-in-department/inscriptions"
-                    react={{ and: FILTERS }}
-                    transform={async (data) => {
-                      let all = data;
-                      const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-                      if (schoolsId?.length) {
-                        const { responses } = await api.esQuery("schoolramses", {
-                          query: { bool: { must: { ids: { values: schoolsId } } } },
-                          size: ES_NO_LIMIT,
-                        });
-                        if (responses.length) {
-                          const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                          all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-                        }
-                      }
-                      return all.map((data) => {
-                        return {
-                          _id: data._id,
-                          Cohorte: data.cohort,
-                          Prénom: data.firstName,
-                          Nom: data.lastName,
-                          Département: data.department,
-                          Situation: translate(data.situation),
-                          Niveau: translate(data.grade),
-                          "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-                          "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-                          "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-                          "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-                          "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-                          "UAI de l'établissement": data.esSchool?.uai,
-                          "Statut général": translate(data.status),
-                          "Statut Phase 1": translate(data.statusPhase1),
-                        };
-                      });
-                    }}
-                  />
-                )}
-                {user.role === ROLES.REFERENT_REGION && (
-                  <ExportComponent
-                    title="Exporter les volontaires inscrits scolarisés dans la région"
-                    defaultQuery={getExportQuery}
-                    exportTitle="Incriptions"
-                    index="young-having-school-in-region/inscriptions"
-                    react={{ and: FILTERS }}
-                    transform={async (data) => {
-                      let all = data;
-                      const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-                      if (schoolsId?.length) {
-                        const { responses } = await api.esQuery("schoolramses", {
-                          query: { bool: { must: { ids: { values: schoolsId } } } },
-                          size: ES_NO_LIMIT,
-                        });
-                        if (responses.length) {
-                          const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                          all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-                        }
-                      }
-                      return all.map((data) => {
-                        return {
-                          _id: data._id,
-                          Cohorte: data.cohort,
-                          Prénom: data.firstName,
-                          Nom: data.lastName,
-                          Département: data.department,
-                          Situation: translate(data.situation),
-                          Niveau: translate(data.grade),
-                          "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-                          "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-                          "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-                          "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-                          "Région de l'établissement": department2region[departmentLookUp[data.esSchool?.region]] || department2region[data.schoolDepartment],
-                          "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-                          "UAI de l'établissement": data.esSchool?.uai,
-                          "Statut général": translate(data.status),
-                          "Statut Phase 1": translate(data.statusPhase1),
-                        };
-                      });
-                    }}
-                  />
-                )}
-              </div>
-            </Header>
-            <Filter>
-              <FilterRow visible>
-                <DataSearch
-                  showIcon={false}
-                  placeholder="Rechercher une inscription..."
-                  componentId="SEARCH"
-                  dataField={["email.keyword", "firstName.folded", "lastName.folded", "phone"]}
-                  react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                  // fuzziness={2}
-                  style={{ flex: 1, marginRight: "1rem" }}
-                  innerClass={{ input: "searchbox" }}
-                  URLParams={true}
-                  autosuggest={false}
-                  queryFormat="and"
-                />
-                <HiAdjustments onClick={handleShowFilter} className="cursor-pointer text-xl text-coolGray-700 hover:scale-105" />
-              </FilterRow>
-              <FilterRow visible={filterVisible}>
-                <div className="text-xs uppercase text-snu-purple-800">Général</div>
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Cohorte"
-                  componentId="COHORT"
-                  dataField="cohort.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={true}
-                  searchPlaceholder="Rechercher..."
-                  renderLabel={(items) => getFilterLabel(items, "Cohorte", "Cohorte")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Autorisation de la participation"
-                  componentId="PARENT_ALLOW_SNU"
-                  dataField="parentAllowSNU.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "PARENT_ALLOW_SNU") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  missingLabel="En attente de consentement"
-                  showMissing
-                  renderLabel={(items) => getFilterLabel(items, "Autorisation de la participation", "Autorisation de la participation")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="STATUS"
-                  dataField="status.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-                  renderItem={(e, count) => {
-                    return `${translateInscriptionStatus(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut", "Statut")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Pays de résidence"
-                  componentId="COUNTRY"
-                  dataField="country.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "COUNTRY") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Pays de résidence", "Pays de résidence")}
-                />
-                <AcademyFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Académie", "Académie")} />
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Région", "Région")} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Département", "Département")} />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Note interne"
-                  componentId="NOTES"
-                  dataField="hasNotes.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "NOTES") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Note interne", "Note interne")}
-                />
-              </FilterRow>
-              <FilterRow visible={filterVisible}>
-                <div className="text-xs uppercase text-snu-purple-800">Dossier</div>
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Classe"
-                  componentId="GRADE"
-                  dataField="grade.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "GRADE") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Classe", "Classe")}
-                  showMissing
-                  missingLabel="Non renseigné"
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="SCHOOL"
-                  dataField="schoolName.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "SCHOOL") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={true}
-                  searchPlaceholder="Rechercher..."
-                  renderLabel={(items) => getFilterLabel(items, "Établissement")}
-                  showMissing
-                  missingLabel="Non renseigné"
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Situation"
-                  componentId="SITUATION"
-                  dataField="situation.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "SITUATION") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Situation", "Situation")}
-                  showMissing
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Sexe"
-                  componentId="SEXE"
-                  dataField="gender.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "SEXE") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Sexe", "Sexe")}
-                  showMissing
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="PPS"
-                  componentId="PPS"
-                  dataField="ppsBeneficiary.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "PPS") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "PPS", "PPS")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="PAI"
-                  componentId="PAI"
-                  dataField="paiBeneficiary.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "PAI") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "PAI", "PAI")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Région rurale"
-                  componentId="RURAL"
-                  dataField="isRegionRural.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "RURAL") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Région rurale", "Région rurale")}
-                  showMissing
-                  missingLabel="Non renseigné"
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="QPV"
-                  componentId="QPV"
-                  dataField="qpv.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "QPV") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "QPV", "QPV")}
-                  showMissing
-                  missingLabel="Non renseigné"
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="HANDICAP"
-                  componentId="HANDICAP"
-                  dataField="handicap.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "HANDICAP") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Handicap", "Handicap")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Aménagement spécifique"
-                  componentId="SPECIFIC_AMENAGEMENT"
-                  dataField="specificAmenagment.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "SPECIFIC_AMENAGEMENT") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Aménagement spécifique", "Aménagement spécifique")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="PMR"
-                  componentId="PMR"
-                  dataField="reducedMobilityAccess.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "PMR") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Aménagement PMR", "Aménagement PMR")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Affectation dans son département"
-                  componentId="SAME_DEPARTMENT"
-                  dataField="handicapInSameDepartment.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "SAME_DEPARTMENT") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Affectation dans son département", "Affectation dans son département")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder=""
-                  componentId="ALLERGIES"
-                  dataField="allergies.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "ALLERGIES") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Allergies ou intolérances", "Allergies ou intolérances")}
-                  showMissing
-                  missingLabel="Non renseigné"
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Attestation - Pièce d’identité périmée"
-                  componentId="CNI_EXPIRED"
-                  dataField="CNIFileNotValidOnStart.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "CNI_EXPIRED") }}
-                  renderItem={(e, count) => {
-                    if (e === "true") return `En attente (${count})`;
-                    return `Validée (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Attestation - Pièce d’identité périmée", "Attestation - Pièce d’identité périmée")}
-                />
-                <Help onClick={toggleInfos} onMouseEnter={() => setInfosHover(true)} onMouseLeave={() => setInfosHover(false)}>
-                  {infosClick ? <LockIcon src={LockedSvg} /> : <LockIcon src={UnlockedSvg} />}
-                  Aide
-                </Help>
-              </FilterRow>
-              <FilterRow className="flex justify-center" visible={filterVisible}>
-                <DeleteFilters />
-              </FilterRow>
-            </Filter>
-            {infosHover || infosClick ? (
-              <HelpText>
-                <div>
-                  Pour filtrer les volontaires, cliquez sur les éléments ci-dessus. Pour en savoir plus sur les différents filtres{" "}
-                  <a href={`${supportURL}/base-de-connaissance/je-filtre-les-volontaires`} target="_blank" rel="noreferrer">
-                    consultez notre article
-                  </a>
-                  <div style={{ height: "0.5rem" }} />
-                  <div>
-                    <span className="title">Général :</span>concerne toutes les informations liées au parcours SNU du volontaire. Le statut général Validée est toujours activé.
-                  </div>
-                  <div>
-                    <span className="title">Dossier :</span>concerne toutes les informations et documents transmis au moment de son inscription
-                  </div>
-                </div>
-              </HelpText>
-            ) : null}
-            <ResultTable>
-              <ReactiveListComponent
-                defaultQuery={getDefaultQuery}
-                react={{ and: FILTERS }}
-                sortOptions={[
-                  { label: "Nom (A > Z)", dataField: "lastName.keyword", sortBy: "asc" },
-                  { label: "Nom (Z > A)", dataField: "lastName.keyword", sortBy: "desc" },
-                  { label: "Prénom (A > Z)", dataField: "firstName.keyword", sortBy: "asc" },
-                  { label: "Prénom (Z > A)", dataField: "firstName.keyword", sortBy: "desc" },
-                  { label: "Date de création (récent > ancien)", dataField: "createdAt", sortBy: "desc" },
-                  { label: "Date de création (ancien > récent)", dataField: "createdAt", sortBy: "asc" },
-                  { label: "Date de mise à jour (récent > ancien)", dataField: "updatedAt", sortBy: "desc" },
-                  { label: "Date de mise à jour (ancien > récent)", dataField: "updatedAt", sortBy: "asc" },
-                ]}
-                render={({ data, resultStats }) => {
-                  return (
-                    <Table>
-                      <thead>
-                        <tr>
-                          <th width="10%" style={{ fontSize: 18 }}>
-                            #
-                          </th>
-                          <th width="50%">Volontaire</th>
-                          <th style={{ textAlign: "center" }}>Statut</th>
-                          <th style={{ textAlign: "center" }}>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.map((hit, i) => (
-                          <Hit
-                            key={hit._id}
-                            hit={hit}
-                            index={i + resultStats.currentPage * resultStats.displayedResults}
-                            onClick={() => setYoung(hit)}
-                            selected={young?._id === hit._id}
-                          />
-                        ))}
-                      </tbody>
-                    </Table>
-                  );
+    <>
+      <Breadcrumbs items={[{ label: "Inscriptions" }]} />
+      <div className="flex w-full flex-col px-8">
+        <div className="flex items-center justify-between py-8">
+          <Title>Inscriptions</Title>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/volontaire/create"
+              onClick={() => plausibleEvent("Inscriptions/CTA - Nouvelle inscription")}
+              className="ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out">
+              <AiOutlinePlus className="text-white h-4 w-4 group-hover:!text-blue-600" />
+              <p>Nouvelle inscription</p>
+            </Link>
+            <ExportComponent
+              title="Exporter les inscriptions"
+              exportTitle="Volontaires"
+              route="/elasticsearch/young/export"
+              filters={filterArray}
+              selectedFilters={selectedFilters}
+              setIsOpen={() => true}
+              icon={<BsDownload className="text-white h-4 w-4 group-hover:!text-blue-600" />}
+              css={{
+                override: true,
+                button: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
+                loadingButton: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
+              }}
+              transform={async (data) => transformInscription(data)}
+            />
+            {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
+              <ExportComponent
+                title={user.role === ROLES.REFERENT_DEPARTMENT ? "Exporter les volontaires scolarisés dans le département" : "Exporter les volontaires scolarisés dans la région"}
+                exportTitle="Volontaires"
+                route="/elasticsearch/young/young-having-school-in-dep-or-region/export"
+                filters={filterArray}
+                selectedFilters={selectedFilters}
+                setIsOpen={() => true}
+                icon={<BsDownload className="text-white h-4 w-4 group-hover:!text-blue-600" />}
+                css={{
+                  override: true,
+                  button: `group flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
+                  loadingButton: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
                 }}
+                transform={async (data) => transformVolontairesSchool(data)}
               />
-            </ResultTable>
+            )}
           </div>
-          {young !== null && young.status === YOUNG_STATUS.DELETED ? (
-            <DeletedInscriptionPanel value={young} onChange={() => setYoung(null)} />
-          ) : (
-            <Panel value={young} onChange={() => setYoung(null)} />
-          )}
         </div>
-      </ReactiveBase>
-    </div>
+        <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
+          <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
+            <Filters
+              pageId={pageId}
+              route="/elasticsearch/young/search"
+              setData={(value) => setData(value)}
+              filters={filterArray}
+              searchPlaceholder="Rechercher par prénom, nom, email, ville, code postal..."
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+              paramData={paramData}
+              setParamData={setParamData}
+            />
+            <SortOption
+              sortOptions={[
+                { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
+                { label: "Nom (Z > A)", field: "lastName.keyword", order: "desc" },
+                { label: "Prénom (A > Z)", field: "firstName.keyword", order: "asc" },
+                { label: "Prénom (Z > A)", field: "firstName.keyword", order: "desc" },
+                { label: "Date de création (récent > ancien)", field: "createdAt", order: "desc" },
+                { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
+              ]}
+              paramData={paramData}
+              setParamData={setParamData}
+            />
+          </div>
+          <div className="mt-2 flex flex-row flex-wrap items-center px-4">
+            <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+            <SelectedFilters
+              filterArray={filterArray}
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+              paramData={paramData}
+              setParamData={setParamData}
+            />
+          </div>
+
+          <ResultTable
+            paramData={paramData}
+            setParamData={setParamData}
+            currentEntryOnPage={data?.length}
+            render={
+              <table className="mt-4 mb-2 w-full table-auto font-marianne">
+                <thead>
+                  <tr className="border-y-[1px] border-y-gray-100 uppercase text-gray-400 text-sm">
+                    <th width="5%" className="pl-4 py-3">
+                      #
+                    </th>
+                    <th width="35%" className="py-3">
+                      Volontaire
+                    </th>
+                    <th className="text-center px-4 py-3">Cohorte</th>
+                    <th className="text-center px-4 py-3">Statut</th>
+                    <th width="20%" className="text-center pr-4 py-3">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.map((hit, i) => (
+                    <Hit key={hit._id} hit={hit} index={i + paramData.page * 20} onClick={() => setYoung(hit)} selected={young?._id === hit._id} />
+                  ))}
+                </tbody>
+              </table>
+            }
+          />
+        </div>
+      </div>
+      {young !== null && young.status === YOUNG_STATUS.DELETED ? (
+        <DeletedInscriptionPanel value={young} onChange={() => setYoung(null)} />
+      ) : (
+        <Panel value={young} onChange={() => setYoung(null)} />
+      )}
+    </>
   );
 }
 
-const Hit = ({ hit, index, onClick, selected }) => {
+const Hit = ({ hit, index, onClick }) => {
   dayjs.extend(relativeTime).locale("fr");
   const diff = dayjs(new Date(hit.updatedAt)).fromNow();
-  const user = useSelector((state) => state.Auth.user);
 
-  let STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WAITING_LIST];
-  if (user.role === ROLES.ADMIN) STATUS.push(YOUNG_STATUS.WAITING_VALIDATION);
-  const getBackgroundColor = () => {
-    if (selected) return colors.lightBlueGrey;
-    if (hit.status === "WITHDRAWN" || hit.status === YOUNG_STATUS.DELETED) return colors.extraLightGrey;
-  };
-  if (hit.status === YOUNG_STATUS.DELETED) {
-    return (
-      <tr style={{ backgroundColor: getBackgroundColor() }} onClick={onClick}>
-        <td>{index + 1}</td>
-
-        <td>
-          <MultiLine>
-            <span className="font-bold text-black">Compte supprimé</span>
-            <p>{`Mis à jour ${diff} • ${formatStringLongDate(hit.updatedAt)}`}</p>
-          </MultiLine>
-        </td>
-        <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-          <SelectStatus hit={hit} options={STATUS} />
-        </td>
-        <td onClick={(e) => e.stopPropagation()}>
-          <Action hit={hit} />
-        </td>
-      </tr>
-    );
-  } else {
-    return (
-      <tr style={{ backgroundColor: getBackgroundColor() }} onClick={onClick} key={hit._id}>
-        <td>{index + 1}</td>
-        <td>
-          <MultiLine>
-            <span className="font-bold text-black">
-              {hit.firstName} {hit.lastName} <Badge text={hit.cohort} />
-            </span>
-            <p>{`Mis à jour ${diff} • ${formatStringLongDate(hit.updatedAt)}`}</p>
-          </MultiLine>
-        </td>
-        <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-          <SelectStatus hit={hit} options={STATUS} disabled />
-        </td>
-        <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-          <Action hit={hit} />
-        </td>
-      </tr>
-    );
-  }
+  return (
+    <tr onClick={onClick} className="border-b-[1px] border-y-gray-100 hover:bg-gray-50">
+      <td className="pl-4 py-3 w-[5%] tesxt-gray-900 text-base">{index + 1}</td>
+      <td className="py-3 w-[35%]">
+        <span className="font-bold text-gray-900 leading-6">{hit.status !== "DELETED" ? `${hit.firstName} ${hit.lastName}` : "Compte supprimé"}</span>
+        <p className="text-sm text-gray-600 leading-5">{`Mis à jour ${diff} • ${formatStringLongDate(hit.updatedAt)}`}</p>
+      </td>
+      <td className="text-center">
+        <Badge color="#3B82F6" backgroundColor="#EFF6FF" text={hit.cohort} className={hit.status === "DELETED" ? "opacity-50" : ""} />
+      </td>
+      <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
+        <SelectStatus hit={hit} options={[]} disabled />
+      </td>
+      <td className="w-[20%] pr-4 py-3" onClick={(e) => e.stopPropagation()}>
+        <Action hit={hit} />
+      </td>
+    </tr>
+  );
 };
+function classNames(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
 
 const Action = ({ hit }) => {
+  const user = useSelector((state) => state.Auth.user);
+
   return (
-    <ActionBox color={"#444"}>
-      <UncontrolledDropdown setActiveFromChild>
-        <DropdownToggle tag="button">
-          Choisissez une action
-          <Chevron color="#444" />
-        </DropdownToggle>
-        <DropdownMenu>
-          <DropdownItem className="dropdown-item">
-            <Link to={`/volontaire/${hit._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Consulter profil jeune")}>
-              Consulter le profil
-            </Link>
-          </DropdownItem>
-          {hit.status !== YOUNG_STATUS.DELETED ? (
-            <>
-              <DropdownItem className="dropdown-item">
-                <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
-                  Prendre sa place
-                </a>
-              </DropdownItem>
-            </>
-          ) : null}
-        </DropdownMenu>
-      </UncontrolledDropdown>
-    </ActionBox>
+    <Listbox>
+      {({ open }) => (
+        <>
+          <div className="relative w-4/5 mx-auto">
+            <Listbox.Button className="relative w-full text-left">
+              <div className={`${open ? "border-blue-500" : ""} flex items-center gap-0 space-y-0 rounded-lg border-[1px] bg-white py-2 px-2.5`}>
+                <div className="flex w-full items-center justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-gray-900">Choisissez une action</p>
+                  </div>
+                  <div className="pointer-events-none flex items-center pr-2">
+                    {open && <HiOutlineChevronUp className="h-5 w-5 text-gray-400" aria-hidden="true" />}
+                    {!open && <HiOutlineChevronDown className="h-5 w-5 text-gray-400" aria-hidden="true" />}
+                  </div>
+                </div>
+              </div>
+            </Listbox.Button>
+
+            <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+              <Listbox.Options className="max-h-60 absolute z-10 mt-1 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                <Link className="!cursor-pointer" to={`/volontaire/${hit._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")} target="_blank">
+                  <Listbox.Option className={("text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9 hover:text-white hover:bg-blue-600")}>
+                    <span className={"block truncate font-normal text-xs"}>Consulter le profil</span>
+                  </Listbox.Option>
+                </Link>
+                {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && hit.status !== YOUNG_STATUS.DELETED ? (
+                  <a
+                    className="!cursor-pointer"
+                    href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
+                    <Listbox.Option
+                      className={({ active }) => classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9")}>
+                      <div className={"block truncate font-normal text-xs"}>Prendre sa place</div>
+                    </Listbox.Option>
+                  </a>
+                ) : null}
+              </Listbox.Options>
+            </Transition>
+          </div>
+        </>
+      )}
+    </Listbox>
   );
 };
