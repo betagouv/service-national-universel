@@ -19,7 +19,7 @@ on:
       - staging
     paths:
       - app/**
-      - lib/**
+      - packages/**
   workflow_dispatch:
 
 jobs:

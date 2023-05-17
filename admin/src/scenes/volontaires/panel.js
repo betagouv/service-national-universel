@@ -19,12 +19,13 @@ import {
 import { appURL } from "../../config";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
-import Panel, { Info, Details } from "../../components/Panel";
+import { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
 import plausibleEvent from "../../services/plausible";
 import { ImQuotesLeft } from "react-icons/im";
 import ModalConfirmDeleteYoung from "../../components/modals/young/ModalConfirmDeleteYoung";
+import PanelV2 from "../../components/PanelV2";
 
 export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
@@ -56,6 +57,7 @@ export default function VolontairePanel({ onChange, value }) {
       setYoung(data);
     })();
   }, [value]);
+
   useEffect(() => {
     if (!young) return;
     (async () => {
@@ -69,13 +71,9 @@ export default function VolontairePanel({ onChange, value }) {
   if (!value || !young) return <div />;
 
   return (
-    <>
+    <PanelV2 open={value && young ? true : false} onClose={onChange} title={young.firstName ? `${young.firstName} ${young.lastName}` : "Compte supprimé"}>
       <Panel>
         <div className="info">
-          <div style={{ display: "flex" }}>
-            <div className="close" onClick={onChange} />
-            <div className="title">{young.firstName ? `${young.firstName} ${young.lastName}` : "Compte supprimé"}</div>
-          </div>
           <div>{t(young.gender)}</div>
           {young.birthdateAt && (
             <div>
@@ -177,7 +175,6 @@ export default function VolontairePanel({ onChange, value }) {
           <Details title="Ville" value={young.schoolCity && young.schoolZip && `${young.schoolCity} (${young.schoolZip})`} />
           <Details title="Adresse" value={young.schoolAddress} />
         </Info>
-
         {![ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role) && (
           <Info title="Situations particulières" id={young._id}>
             <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
@@ -192,7 +189,6 @@ export default function VolontairePanel({ onChange, value }) {
             <Details title="Affecté dans son département de résidence" value={t(young.handicapInSameDepartment) || "Non"} />
           </Info>
         )}
-
         {young.parent1Status && (
           <Info title="Représentant légal n°1" id={young._id}>
             <Details title="Statut" value={t(young.parent1Status)} />
@@ -219,18 +215,16 @@ export default function VolontairePanel({ onChange, value }) {
             <Details title="Région" value={young.parent2Region} />
           </Info>
         )}
-
         {![ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role) && <div className="info">{young?.historic?.length > 0 && <Historic value={young.historic} />}</div>}
-
         {young.motivations && (
           <div className="info">
             <div className="info-title">Motivations</div>
             <div className="quote">{`« ${young.motivations} »`}</div>
           </div>
         )}
+        <ModalConfirmDeleteYoung isOpen={isConfirmDeleteModalOpen} young={young} onCancel={handleCancelDeleteYoung} onConfirm={handleDeleteYoungSuccess} />
       </Panel>
-      <ModalConfirmDeleteYoung isOpen={isConfirmDeleteModalOpen} young={young} onCancel={handleCancelDeleteYoung} onConfirm={handleDeleteYoungSuccess} />
-    </>
+    </PanelV2>
   );
 }
 
@@ -277,5 +271,115 @@ const TextButton = styled.div`
     cursor: pointer;
     color: ${colors.purple};
     text-decoration: underline;
+  }
+`;
+
+const Panel = styled.div`
+  .close {
+    color: #000;
+    font-weight: 400;
+    width: 45px;
+    height: 45px;
+    background: url(${require("../../assets/close_icon.png")}) center no-repeat;
+    background-size: 12px;
+    padding: 15px;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    cursor: pointer;
+  }
+  .title {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 2px;
+  }
+  hr {
+    margin: 20px 0 30px;
+  }
+  .info {
+    padding: 2rem 0;
+    border-bottom: 1px solid #f2f1f1;
+    &-title {
+      font-weight: 500;
+      font-size: 18px;
+      padding-right: 35px;
+    }
+    &-edit {
+      width: 30px;
+      height: 26px;
+      background: url(${require("../../assets/pencil.svg")}) center no-repeat;
+      background-size: 16px;
+      position: absolute;
+      right: 0;
+      top: 0;
+      cursor: pointer;
+    }
+  }
+  .detail {
+    border-bottom: 0.5px solid rgba(244, 245, 247, 0.5);
+    padding: 5px 0;
+    display: flex;
+    font-size: 14px;
+    text-align: left;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-top: 10px;
+    &-title {
+      font-weight: bold;
+      min-width: 100px;
+      margin-right: 0.5rem;
+    }
+    &-text {
+      text-align: left;
+      color: rgba(26, 32, 44);
+      a {
+        color: #5245cc;
+        :hover {
+          text-decoration: underline;
+        }
+      }
+    }
+    .description {
+      font-weight: 400;
+      color: #aaa;
+      font-size: 0.8rem;
+    }
+    .quote {
+      font-size: 0.9rem;
+      font-weight: 400;
+      font-style: italic;
+    }
+  }
+  .icon {
+    cursor: pointer;
+    margin: 0 0.5rem;
+  }
+  .application-detail {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 20px;
+    margin-bottom: 0.5rem;
+    text-align: left;
+    :hover {
+      box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;
+      background: #f9f9f9;
+    }
+    &-priority {
+      font-size: 0.75rem;
+      color: #5245cc;
+      margin-right: 0.5rem;
+    }
+    &-text {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      display: block;
+      text-overflow: ellipsis;
+    }
+  }
+  .quote {
+    font-size: 0.9rem;
+    font-weight: 400;
+    font-style: italic;
   }
 `;

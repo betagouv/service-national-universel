@@ -1057,6 +1057,15 @@ const translateMission = (mission) => {
   }
 };
 
+const translateCniExpired = (cniExpired) => {
+  switch (cniExpired) {
+    case "true":
+      return "En attente";
+    default:
+      return "Validée";
+  }
+};
+
 // --------------------------------------------------------------
 // Utilisé pour traduire l'historique des plans de transport
 
@@ -1154,4 +1163,5 @@ module.exports = {
   translateMission,
   translateBusPatchesField,
   translateInscriptionStatus,
+  translateCniExpired,
 };
