@@ -76,7 +76,7 @@ export default function Status({ filter }) {
           return (
             <div className="flex" key={k}>
               <Col md={6} xl={3}>
-                <Link to={getLink({ base: `/structure`, filter, filtersUrl: [`LEGAL_STATUS=%5B"${l}"%5D&`] })}>
+                <Link to={getLink({ base: `/structure`, filter, filtersUrl: [`legalStatus=${l}`] })}>
                   <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} style={{ marginBottom: 0 }}>
                     <CardTitle>{`${translate(l)}s`}</CardTitle>
                     <CardValueWrapper>
@@ -92,7 +92,7 @@ export default function Status({ filter }) {
               <div className="flex flex-row flex-wrap items-start gap-2">
                 {(typesStructure[l] || []).map((type, tk) => {
                   return (
-                    <Link key={tk} to={getLink({ base: `/structure`, filter, filtersUrl: [`LEGAL_STATUS=%5B"${l}"%5D&`, `TYPE=%5B"${type}"%5D`] })}>
+                    <Link key={tk} to={getLink({ base: `/structure`, filter, filtersUrl: [`legalStatus=${l}`, `types=${type}`] })}>
                       <div className="flex cursor-pointer flex-col rounded-md bg-white p-3 shadow-sm hover:scale-105">
                         <div>{translate(type)}</div>
                         <div className="flex justify-between text-xl">

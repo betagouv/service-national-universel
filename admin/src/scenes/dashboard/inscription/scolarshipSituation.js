@@ -42,7 +42,7 @@ export default function scholarshipSituation({ filter }) {
         {Object.keys(value).map((e, i) => {
           return (
             <Col style={{ marginTop: "15px" }} key={i}>
-              <Link to={getLink({ base: `/inscription`, filter, filtersUrl: [`SITUATION=%5B"${e}"%5D`] })}>
+              <Link to={getLink({ base: `/inscription`, filter, filtersUrl: [`situation=${e}`] })}>
                 <CircularProgress circleProgressColor="#1B7BBF" percentage={((value[e] * 100) / total).toFixed(1)} title={value[e]} subtitle={translate(e)} />
               </Link>
             </Col>

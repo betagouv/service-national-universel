@@ -44,10 +44,10 @@ export default function Gender({ filter }) {
 
     return (
       <Content>
-        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: [`SEXE=%5B"male"%5D`] })}>
+        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: [`gender=male`] })}>
           <CircularProgress circleProgressColor="#1B7BBF" percentage={malePercent} title={male} subtitle="Garçons" />
         </Link>
-        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: [`SEXE=%"female"%5D`] })}>
+        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: [`gender=female`] })}>
           <CircularProgress circleProgressColor="#1B7BBF" percentage={femalePercent} title={female} subtitle="Filles" />
         </Link>
       </Content>
