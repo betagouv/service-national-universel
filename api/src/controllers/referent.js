@@ -226,10 +226,6 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (value.role === ROLES.RESPONSIBLE || value.role === ROLES.SUPERVISOR) {
-      if (!value.phone) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
     if (!canInviteUser(req.user.role, value.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId, phone, cohorts } = value;
