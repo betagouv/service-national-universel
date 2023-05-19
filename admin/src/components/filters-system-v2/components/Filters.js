@@ -1,5 +1,5 @@
 import { Popover, Transition } from "@headlessui/react";
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
@@ -9,6 +9,7 @@ import ViewPopOver from "./filters/SavedViewPopOver";
 
 import api from "../../../services/api";
 import { buildQuery, getURLParam, currentFilterAsUrl, normalizeString } from "./filters/utils";
+import { debounce } from "../../../utils";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -93,10 +94,8 @@ export default function Filters({
     [filtersVisible],
   );
 
-  useEffect(
-    function updateOnParamChange() {
-      if (Object.keys(selectedFilters).length === 0) return;
-
+  const updateOnParamChange = useCallback(
+    debounce(async (selectedFilters, paramData, location) => {
       buildQuery(route, selectedFilters, paramData?.page, filters, paramData?.sort).then((res) => {
         if (!res) return;
         setDataFilter({ ...dataFilter, ...res.newFilters });
@@ -114,9 +113,14 @@ export default function Filters({
         const { pathname } = history.location;
         if (location.search !== search) window.history.replaceState({ path: pathname + search }, "", pathname + search);
       });
-    },
-    [selectedFilters, paramData.page, paramData.sort, location.search],
+    }, 250),
+    [],
   );
+
+  useEffect(() => {
+    if (Object.keys(selectedFilters).length === 0) return;
+    updateOnParamChange(selectedFilters, paramData, location);
+  }, [selectedFilters, paramData.page, paramData.sort, location.search]);
 
   const getDefaultFilters = () => {
     const newFilters = {};
