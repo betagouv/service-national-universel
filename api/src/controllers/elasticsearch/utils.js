@@ -9,7 +9,7 @@ function searchSubQuery([value], fields) {
       should: [
         { multi_match: { query: value, fields, type: "cross_fields", operator: "and" } },
         { multi_match: { query: value, fields, type: "phrase", operator: "and" } },
-        { multi_match: { query: value, fields, type: "phrase_prefix", operator: "and" } },
+        { multi_match: { query: value, fields: fields.map((e) => e.replace(".keyword", "")), type: "phrase_prefix", operator: "and" } },
       ],
       minimum_should_match: 1,
     },
