@@ -1,3 +1,14 @@
+## [1.274.1](https://github.com/betagouv/service-national-universel/compare/v1.274.0...v1.274.1) (2023-05-19)
+
+
+### Bug Fixes
+
+* search in volontaires allow accent and diacritics ([de2566c](https://github.com/betagouv/service-national-universel/commit/de2566cc4127c09db3ba331c2060483510418979))
+* **admin:** debounce search to avoid race ([114c158](https://github.com/betagouv/service-national-universel/commit/114c158c7cb84d42e80d6645ed4cad3dde1a8acc))
+* **api:** error in services/application ([0e73a3d](https://github.com/betagouv/service-national-universel/commit/0e73a3dde82617bd5ed03ac6640ae232f9624772))
+* **api:** limit items to 10000 for elasticsearch to improve performance ([0575418](https://github.com/betagouv/service-national-universel/commit/05754187b0b589863094b4e851726910d1f60301))
+* **api:** Remove double import of YoungModel ([e860423](https://github.com/betagouv/service-national-universel/commit/e860423c83c87b043ceaa8d46b958d06752aad4f))
+
 # [1.274.0](https://github.com/betagouv/service-national-universel/compare/v1.273.0...v1.274.0) (2023-05-17)
 
 
