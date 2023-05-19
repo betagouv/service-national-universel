@@ -20,6 +20,10 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     const cohorts5dayBeforepdrChoiceLimitDate = cohorts
       .filter((c) => new Date(c.pdrChoiceLimitDate) - Date.now() < 5 * 24 * 60 * 60 * 1000 && new Date(c.pdrChoiceLimitDate) - Date.now() > 0)
       .map((e) => e.name);
+    // // entre 2 semaines avant le 1er jour du séjour et le dernier jour du séjour, alors alerte (1 alerte par session)
+    const cohorts2weeksBeforeSessionStart = cohorts
+      .filter((c) => new Date(c.dateStart) - Date.now() < 14 * 24 * 60 * 60 * 1000 && new Date(c.dateEnd) - Date.now() > 0)
+      .map((e) => e.name);
 
     function queryFromFilter(filter, { regionField = "region.keyword", departmentField = "department.keyword" } = {}) {
       const body = {
@@ -223,7 +227,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
     // sejour_emploi_du_temps_non_déposé
     async function sejourEmploiDuTempsNonDéposé() {
-      const cohorts = cohortsNotStarted.filter((e) => cohortsAssignementOpen.includes(e));
+      const cohorts = cohorts2weeksBeforeSessionStart;
       if (!cohorts.length) return { sejour_emploi_du_temps_non_déposé: [] };
 
       const response = await esClient.msearch({
@@ -374,7 +378,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           ...(await sejourParticipationNonConfirmée()),
           ...(await pointDeRassemblementADéclarer()),
           ...(await centreADéclarer()),
-          // ...(await sejourEmploiDuTempsNonDéposé()),
+          ...(await sejourEmploiDuTempsNonDéposé()),
         },
       },
     });

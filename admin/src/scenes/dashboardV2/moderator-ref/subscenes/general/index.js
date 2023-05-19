@@ -265,7 +265,15 @@ export default function Index() {
                   />
                 ))}
 
-                <NoteContainer title="Emploi du temps" number={stats.sejour_emploi_du_temps} content="emplois du temps n’ont pas été déposés." btnLabel="À relancer" />
+                {stats.sejour.sejour_emploi_du_temps_non_déposé.map((item) => (
+                  <NoteContainer
+                    title="Emploi du temps"
+                    key={item.cohort}
+                    number={item.count}
+                    content={`emplois du temps n’ont pas été déposés. ${item.cohort}`}
+                    btnLabel="À relancer"
+                  />
+                ))}
 
                 {fullNote && (
                   <>
