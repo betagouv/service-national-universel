@@ -16,7 +16,7 @@ const {
   canEditLigneBusPointDeRassemblement,
   ROLES,
   canViewPatchesHistory,
-} = require("snu-lib/roles");
+} = require("snu-lib");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");

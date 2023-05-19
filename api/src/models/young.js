@@ -6,7 +6,7 @@ const { ROLES_LIST } = require("snu-lib");
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
-const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR } = require("snu-lib/phone-number");
+const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR } = require("snu-lib");
 const MODELNAME = "young";
 
 const File = new mongoose.Schema({

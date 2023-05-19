@@ -9,7 +9,7 @@ const YoungModel = require("../../models/young");
 const MissionModel = require("../../models/mission");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const StructureModel = require("../../models/structure");
-const { MISSION_STATUS } = require("snu-lib/constants");
+const { MISSION_STATUS } = require("snu-lib");
 
 const filtersJoi = Joi.object({
   status: Joi.array().items(Joi.string().valid(...Object.values(YOUNG_STATUS))),

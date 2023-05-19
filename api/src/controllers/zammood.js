@@ -7,7 +7,7 @@ const fs = require("fs");
 const Joi = require("joi");
 const { v4: uuid } = require("uuid");
 
-const { ROLES } = require("snu-lib/roles");
+const { ROLES } = require("snu-lib");
 
 const slack = require("../slack");
 const { cookieOptions } = require("../cookie-options");

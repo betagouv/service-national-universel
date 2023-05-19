@@ -46,8 +46,8 @@ const {
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } = require("../utils/serializer");
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
-const { department2region } = require("snu-lib/region-and-departments");
-const { translateCohort } = require("snu-lib/translation");
+const { department2region } = require("snu-lib");
+const { translateCohort } = require("snu-lib");
 const {
   ROLES_LIST,
   canInviteUser,
@@ -73,7 +73,7 @@ const {
   MILITARY_FILE_KEYS,
 } = require("snu-lib");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
-const { formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
+const { formatPhoneNumberFromPhoneZone } = require("snu-lib");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;

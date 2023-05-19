@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { canViewTableDeRepartition, canEditTableDeRepartitionDepartment, canEditTableDeRepartitionRegion } = require("snu-lib/roles");
+const { canViewTableDeRepartition, canEditTableDeRepartitionDepartment, canEditTableDeRepartitionRegion } = require("snu-lib");
 const { ERRORS } = require("../../utils");
 const tableDeRepartition = require("../../models/PlanDeTransport/tableDeRepartition");
 const { capture } = require("../../sentry");

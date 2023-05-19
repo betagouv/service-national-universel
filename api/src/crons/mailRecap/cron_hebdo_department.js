@@ -5,7 +5,7 @@ const { ENVIRONMENT } = require("../../config");
 const ReferentModel = require("../../models/referent");
 const { departmentList, getDataInscriptions } = require("../utils");
 const { capture } = require("../../sentry");
-const { ROLES } = require("snu-lib/roles");
+const { ROLES } = require("snu-lib");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 const debug = (...e) => {

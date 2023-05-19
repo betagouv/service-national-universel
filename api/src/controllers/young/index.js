@@ -55,12 +55,12 @@ const {
   canViewYoungApplications,
   canEditPresenceYoung,
   canDeletePatchesHistory,
-} = require("snu-lib/roles");
-const { translateCohort } = require("snu-lib/translation");
-const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES, YOUNG_STATUS_PHASE2 } = require("snu-lib/constants");
+} = require("snu-lib");
+const { translateCohort } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES, YOUNG_STATUS_PHASE2 } = require("snu-lib");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
 const { getFilteredSessions } = require("../../utils/cohort");
-const { formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
+const { formatPhoneNumberFromPhoneZone } = require("snu-lib");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
 const { anonymizeContractsFromYoungId } = require("../../services/contract");
 const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");

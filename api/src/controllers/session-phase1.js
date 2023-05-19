@@ -14,7 +14,7 @@ const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
 const { ERRORS, updatePlacesSessionPhase1, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter } = require("../utils");
-const { SENDINBLUE_TEMPLATES, MINISTRES, COHESION_STAY_LIMIT_DATE, END_DATE_PHASE1, PHASE1_YOUNG_ACCESS_LIMIT } = require("snu-lib/constants");
+const { SENDINBLUE_TEMPLATES, MINISTRES, COHESION_STAY_LIMIT_DATE, END_DATE_PHASE1, PHASE1_YOUNG_ACCESS_LIMIT } = require("snu-lib");
 
 const {
   canCreateOrUpdateSessionPhase1,
@@ -27,7 +27,7 @@ const {
   isReferentOrAdmin,
   ROLES,
   isSessionEditionOpen,
-} = require("snu-lib/roles");
+} = require("snu-lib");
 const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");

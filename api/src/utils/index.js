@@ -31,9 +31,9 @@ const {
 } = require("../config");
 const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES } = require("snu-lib");
 
-const { translateFileStatusPhase1 } = require("snu-lib/translation");
-const { SUB_ROLES } = require("snu-lib/roles");
-const { getAge } = require("snu-lib/date");
+const { translateFileStatusPhase1 } = require("snu-lib");
+const { SUB_ROLES } = require("snu-lib");
+const { getAge } = require("snu-lib");
 const { capture } = require("../sentry");
 const { getCohortValidationDate } = require("./cohort");
 

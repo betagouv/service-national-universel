@@ -35,7 +35,7 @@ const {
   getReferentManagerPhase2,
   updateYoungApplicationFilesType,
 } = require("../utils");
-const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib/translation");
+const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib");
 const mime = require("mime-types");
 const patches = require("./patches");
 
