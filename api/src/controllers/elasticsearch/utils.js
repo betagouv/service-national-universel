@@ -73,7 +73,7 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
   // Search query
   const search = (queryFilters.searchbar || []).filter((e) => e.trim()).length ? searchSubQuery(queryFilters.searchbar, searchFields) : null;
   // Hits request body
-  const hitsRequestBody = { query: getMainQuery(), size: 20, from: page * 20, sort: buildSort(sort), track_total_hits: true };
+  const hitsRequestBody = { query: getMainQuery(), size: 20, from: page * 20, sort: buildSort(sort) };
   if (search) hitsRequestBody.query.bool.must.push(search);
   for (const key of filterFields) {
     const keyWithoutKeyword = key.replace(".keyword", "");
