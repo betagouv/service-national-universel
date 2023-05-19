@@ -1,12 +1,23 @@
 require("dotenv").config({ path: "./.env-testing" });
 const mongoose = require("mongoose");
 const { MONGO_URL } = require("../../config");
+console.log("🚀 ~ file: db.js:4 ~ MONGO_URL:", MONGO_URL);
 jest.setTimeout(10_000);
 
-global.db = null;
+let db = null;
 
 const dbConnect = async () => {
-  await mongoose.connect(MONGO_URL, { useCreateIndex: true, useNewUrlParser: true, useUnifiedTopology: true });
+  await mongoose.connect(MONGO_URL, {
+    useCreateIndex: true,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false, // * https://stackoverflow.com/a/52572958
+    poolSize: 500,
+    maxPoolSize: 500,
+    minPoolSize: 200,
+    waitQueueTimeoutMS: 30_000,
+  });
+
   mongoose.Promise = global.Promise; //Get the default connection
   db = mongoose.connection;
   db.on("error", console.error.bind(console, "MongoDB connection error:"));
