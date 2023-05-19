@@ -28,12 +28,11 @@ const {
   CELLAR_KEYID_SUPPORT,
   CELLAR_KEYSECRET_SUPPORT,
   PUBLIC_BUCKET_NAME_SUPPORT,
+  translateFileStatusPhase1,
+  SUB_ROLES,
+  getAge,
 } = require("../config");
 const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES } = require("snu-lib");
-
-const { translateFileStatusPhase1 } = require("snu-lib");
-const { SUB_ROLES } = require("snu-lib");
-const { getAge } = require("snu-lib");
 const { capture } = require("../sentry");
 const { getCohortValidationDate } = require("./cohort");
 

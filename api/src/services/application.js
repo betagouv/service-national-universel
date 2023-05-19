@@ -1,5 +1,4 @@
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib");
 const { deletePatches } = require("../controllers/patches");
 const ApplicationModel = require("../models/application");
 const YoungModel = require("../models/young");

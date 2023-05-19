@@ -18,12 +18,12 @@ const {
   canViewStructureChildren,
   isSupervisor,
   isAdmin,
+  SENDINBLUE_TEMPLATES,
 } = require("snu-lib");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
 const { validateId, validateStructure, validateStructureManager } = require("../utils/validator");
 const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 const setAndSave = async (data, keys, fromUser) => {
   data.set({ ...keys });
