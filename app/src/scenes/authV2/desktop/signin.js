@@ -104,6 +104,21 @@ export default function Signin() {
             Commencer mon inscription
           </button>
         </div> */}
+        <hr className="mt-4 border-b-1 text-[#E5E5E5]" />
+        <div className="mt-4 text-[#E5E5E5]">
+          <div className="mt-4 mb-2 text-center text-[17px] font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
+          <p className="text-center text-[12px] text-[#161616]">
+            Les inscriptions sont clôturées pour le premier semestre 2023. Soyez informé(e) lors de l’ouverture des prochaines inscriptions.
+          </p>
+          <div className="flex justify-center mt-3">
+            <a
+              className="flex cursor-pointer text-[15px] items-center justify-center border-[1px] border-[#000091] p-2 text-[#000091] hover:bg-[#000091] hover:text-white"
+              // onClick={() => history.push("/")}
+              href="https://www.snu.gouv.fr/#formulaire">
+              Recevoir une alerte par email
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   );

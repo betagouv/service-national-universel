@@ -32,7 +32,9 @@ const Header = () => {
           <img src={SNU} alt="Logo du SNU" className="w-16" />
           <div className="hidden lg:block">
             <h1 className="text-xl font-bold">Service National Universel</h1>
-            <div className="text-sm ">Inscription du volontaire</div>
+            {/* <div className="text-sm ">Inscription du volontaire</div> */}
+            {/* {pathname !== "/auth" && !pathname.startsWith("/auth/") && <div className="text-sm">Inscription du volontaire</div>} */}
+            {pathname === "/auth" && !pathname.startsWith("/auth/") ? null : <div className="text-sm">Inscription du volontaire</div>}
           </div>
         </div>
         <div
