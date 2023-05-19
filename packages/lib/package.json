@@ -5,8 +5,9 @@
   "main": "common-js/index.cjs",
   "module": "index.js",
   "scripts": {
-    "build": "babel src --out-dir common-js --extensions '.js'",
-    "dev": "rollup -c --watch",
+    // "build": "babel src --out-dir common-js --extensions '.js'",
+    "build": "rollup -c --bundleConfigAsCjs",
+    "dev": "rollup -c --watch --bundleConfigAsCjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
