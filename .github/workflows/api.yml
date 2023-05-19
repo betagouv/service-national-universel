@@ -50,8 +50,7 @@ jobs:
         run: npm run lint
 
       - name: Build lib before test
-        working-directory: ${{ env.SUBFOLDER_NAME }}
-        continue-on-error: true
+        continue-on-error: false
         run: npm run build -w packages/lib
 
       - name: Test and Send coverage
