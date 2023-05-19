@@ -121,8 +121,10 @@ export default function Index() {
 
   React.useEffect(() => {
     const updateStats = async (id) => {
-      const { responses } = await api.post("/elasticsearch/dashboard/default", { filters: { meetingPointIds: [id], cohort: [] } });
-      const totals = responses.map((e) => e.hits.total.value);
+      const response = await api.post("/elasticsearch/dashboard/default", { filters: { meetingPointIds: [id], cohort: [] } });
+      setStats(response.data);
+
+      /*
       const [
         inscription_en_attente_de_validation,
         inscription_corrigé_à_instruire_de_nouveau,
@@ -155,9 +157,12 @@ export default function Index() {
         engagement_mission_en_attente_de_validation,
         engagement_phase3_en_attente_de_validation,
       });
+      */
     };
     updateStats();
   }, []);
+
+  if (!stats.inscription) return <div></div>;
 
   return (
     <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}>
@@ -189,25 +194,42 @@ export default function Index() {
                 </div>
                 <NoteContainer
                   title="Dossier"
-                  number={stats.inscription_en_attente_de_validation}
+                  number={stats.inscription.inscription_en_attente_de_validation}
                   content="dossier d’inscriptions sont en attente de validation."
                   btnLabel="À instruire"
                 />
                 <NoteContainer
                   title="Dossier"
-                  number={stats.inscription_corrigé_à_instruire_de_nouveau}
+                  number={stats.inscription.inscription_corrigé_à_instruire_de_nouveau}
                   content="dossiers d’inscription corrigés sont à instruire de nouveau."
                   btnLabel="À instruire"
                 />
                 <NoteContainer
                   title="Dossier"
-                  number={stats.inscription_en_attente_de_correction}
+                  number={stats.inscription.inscription_en_attente_de_correction}
                   content="dossiers d’inscription en attente de correction."
                   btnLabel="À relancer"
                 />
-                {fullNote && (
-                  <NoteContainer title="Droit à l'image" number={stats.inscription_sans_accord_renseigné} content="volontaires sans accord renseigné." btnLabel="À relancer" />
-                )}
+                {fullNote &&
+                  stats.inscription.inscription_en_attente_de_validation_cohorte.map((item) => (
+                    <NoteContainer
+                      key={item.cohort}
+                      title="Droit à l'image"
+                      number={item.count}
+                      content={`dossiers d’inscription en attente de validation pour le séjour de ${item.cohort}`}
+                      btnLabel="À relancer"
+                    />
+                  ))}
+                {fullNote &&
+                  stats.inscription.inscription_sans_accord_renseigné.map((item) => (
+                    <NoteContainer
+                      key={item.cohort}
+                      title="Droit à l'image"
+                      number={item.count}
+                      content={`volontaires sans accord renseigné pour le séjour de ${item.cohort}`}
+                      btnLabel="À relancer"
+                    />
+                  ))}
               </div>
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
@@ -215,18 +237,34 @@ export default function Index() {
                   <div className="text-sm font-bold leading-5 text-gray-900">Séjours</div>
                   <div className=" rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">7</div>
                 </div>
-                <NoteContainer
-                  title="Point de rassemblement"
-                  number={stats.sejour_rassemblement_non_confirmé}
-                  content="volontaires n’ont pas confirmé leur point de rassemblement."
-                  btnLabel="À déclarer"
-                />
-                <NoteContainer
-                  title="Participation"
-                  number={stats.sejour_participation_non_confirmée}
-                  content="volontaires n’ont pas confirmé leur participation."
-                  btnLabel="À suivre"
-                />
+                {stats.sejour.sejour_rassemblement_non_confirmé.map((item) => (
+                  <NoteContainer
+                    title="Point de rassemblement"
+                    key={item.cohort}
+                    number={item.count}
+                    content={`volontaires n’ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                    btnLabel="À déclarer"
+                  />
+                ))}
+                {stats.sejour.sejour_participation_non_confirmée.map((item) => (
+                  <NoteContainer
+                    title="Point de rassemblement"
+                    key={item.cohort}
+                    number={item.count}
+                    content={`volontaires n’ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                    btnLabel="À déclarer"
+                  />
+                ))}
+                {stats.sejour.sejour_point_de_rassemblement_à_déclarer.map((item) => (
+                  <NoteContainer
+                    title="Point de rassemblement"
+                    key={item.cohort}
+                    number=""
+                    content={`Au moins 1 point de rassemblement est à déclarer pour le séjour de ${item.cohort} (${item.department})`}
+                    btnLabel="À déclarer"
+                  />
+                ))}
+
                 <NoteContainer title="Emploi du temps" number={stats.sejour_emploi_du_temps} content="emplois du temps n’ont pas été déposés." btnLabel="À relancer" />
 
                 {fullNote && (

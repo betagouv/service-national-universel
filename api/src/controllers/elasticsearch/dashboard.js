@@ -5,7 +5,7 @@ const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { buildArbitratyNdJson } = require("./utils");
-const { sessions2023, ROLES } = require("snu-lib");
+const { sessions2023, ROLES, ES_NO_LIMIT } = require("snu-lib");
 const CohortModel = require("../../models/cohort");
 
 router.post("/default", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -35,7 +35,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     function withAggs(body, fieldName = "cohort.keyword") {
       return {
         ...body,
-        aggs: { cohort: { terms: { field: fieldName, size: 1000 } } },
+        aggs: { [fieldName.replace(".keyword", "")]: { terms: { field: fieldName, size: 1000 } } },
       };
     }
 
@@ -162,6 +162,88 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
       };
     }
 
+    async function pointDeRassemblementADéclarer() {
+      const cohorts = cohortsNotStarted;
+      if (!cohorts.length) return { sejour_point_de_rassemblement_à_déclarer: [] };
+
+      // Liste des départements de la table de répartition pour la personne qui regarde et les cohortes concernées
+      const q = queryFromFilter([{ terms: { "cohort.keyword": cohorts } }, { bool: { must: { exists: { field: "fromDepartment" } } } }], {
+        regionField: "fromRegion",
+        departmentField: "fromDepartment",
+      });
+      q.size = ES_NO_LIMIT;
+      const responseRepartition = await esClient.msearch({
+        index: "tablederepartition",
+        body: buildArbitratyNdJson({ index: "tablederepartition", type: "_doc" }, q),
+      });
+      // On récupère les points de rassemblement pour chaque cohorte groupés par département
+      // Si un département de la cohorte n'a pas de point de rassemblement on l'ajoute dans la liste à signaler.
+      const departmentsCohorts = responseRepartition.body.responses[0].hits.hits.map((e) => e._source);
+      const response = await esClient.msearch({
+        index: "pointderassemblement",
+        body: buildArbitratyNdJson(
+          ...cohorts.flatMap((cohort) => {
+            return [
+              { index: "pointderassemblement", type: "_doc" },
+              withAggs(
+                queryFromFilter([
+                  { terms: { "cohort.keyword": [cohort] } },
+                  { terms: { "department.keyword": departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
+                ]),
+                "department.keyword",
+              ),
+            ];
+          }),
+        ),
+      });
+      const sejour_point_de_rassemblement_à_déclarer = [];
+      for (const cohort of cohorts) {
+        const cohortDepartments = departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment);
+        // Chaque département doit avoir un point de rassemblement
+        for (const department of cohortDepartments) {
+          const cohortDepartmentsWithPdr = response.body.responses.filter((e) => e.aggregations).find((e) => e.aggregations.department.buckets.find((e) => e.key === department));
+          // Si le département n'a pas de point de rassemblement on l'ajoute dans la liste à signaler.
+          if (!cohortDepartmentsWithPdr) {
+            if (!sejour_point_de_rassemblement_à_déclarer.find((e) => e.cohort === cohort && e.department === department))
+              sejour_point_de_rassemblement_à_déclarer.push({
+                cohort,
+                department,
+              });
+          }
+        }
+      }
+      return { sejour_point_de_rassemblement_à_déclarer };
+    }
+
+    async function centreADéclarer() {
+      return { sejour_centre_à_déclarer: [] };
+      // Todo en s'inspirant de pointDeRassemblementADéclarer
+    }
+
+    // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
+    // sejour_emploi_du_temps_non_déposé
+    async function sejourEmploiDuTempsNonDéposé() {
+      const cohorts = cohortsNotStarted.filter((e) => cohortsAssignementOpen.includes(e));
+      if (!cohorts.length) return { sejour_emploi_du_temps_non_déposé: [] };
+
+      const response = await esClient.msearch({
+        index: "sessionphase1",
+        body: buildArbitratyNdJson(
+          { index: "sessionphase1", type: "_doc" },
+          withAggs(queryFromFilter([{ terms: { "cohort.keyword": cohorts } }, { terms: { "hasTimeSchedule.keyword": ["false"] } }])),
+        ),
+      });
+
+      return {
+        sejour_emploi_du_temps_non_déposé: response.body.responses[0].aggregations.cohort.buckets.map((e) => {
+          return {
+            cohort: e.key,
+            count: e.doc_count,
+          };
+        }),
+      };
+    }
+
     async function basicInscriptions() {
       const response = await esClient.msearch({
         index: "young",
@@ -203,21 +285,6 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
         //
         // Séjours
         //
-        // Participation (À suivre) X volontaires n’ont pas confirmé leur participation au séjour de [Février 2023-C]
-        // sejour_participation_non_confirmée
-        { index: "young", type: "_doc" },
-        queryFromFilter([
-          {
-            bool: {
-              should: [{ term: { youngPhase1Agreement: "false" } }, { bool: { must_not: { exists: { field: "youngPhase1Agreement" } } } }],
-              minimum_should_match: 1,
-            },
-          },
-        ]),
-        // Point de rassemblement (À déclarer) Au moins 1 point de rassemblement est à déclarer.
-        // TODO! Je ne comprends pas.
-        // Centre (À déclarer) Au moins 1 centre est en attente de déclaration.
-        // TODO! Je ne comprends pas.
         // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
         // sejour_emploi_du_temps
         { index: "sessionphase1", type: "_doc" },
@@ -305,6 +372,9 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
         sejour: {
           ...(await sejourRassemblementNonConfirmé()),
           ...(await sejourParticipationNonConfirmée()),
+          ...(await pointDeRassemblementADéclarer()),
+          ...(await centreADéclarer()),
+          // ...(await sejourEmploiDuTempsNonDéposé()),
         },
       },
     });
