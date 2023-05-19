@@ -235,3 +235,4 @@ export * from "./translation";
 export * from "./excelExports";
 export * from "./sessions";
 export * from "./plan-de-transport";
+export * from "./phone-number";
