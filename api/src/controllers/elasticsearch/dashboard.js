@@ -248,6 +248,131 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
       };
     }
 
+    // Contact (À renseigner) Au moins 1 contact de convocation doit être renseigné pour le séjour de [Février 2023-C].
+    // sejour_contact_à_renseigner
+    async function sejourContactÀRenseigner() {
+      const cohorts = cohortsNotStarted; // FIXME
+      if (!cohorts.length) return { sejour_contact_à_renseigner: [] };
+
+      // Liste des départements de la table de répartition pour la personne qui regarde et les cohortes concernées
+      const q = queryFromFilter([{ terms: { "cohort.keyword": cohorts } }, { bool: { must: { exists: { field: "fromDepartment" } } } }], {
+        regionField: "fromRegion",
+        departmentField: "fromDepartment",
+      });
+      q.size = ES_NO_LIMIT;
+      const responseRepartition = await esClient.msearch({
+        index: "tablederepartition",
+        body: buildArbitratyNdJson({ index: "tablederepartition", type: "_doc" }, q),
+      });
+      // On récupère les entrées de département service pour chaque cohorte groupés par département
+      // Si un département de la cohorte n'a pas de contact on l'ajoute dans la liste à signaler.
+      const departmentsCohorts = responseRepartition.body.responses[0].hits.hits.map((e) => e._source);
+      const response = await esClient.msearch({
+        index: "departmentservice",
+        body: buildArbitratyNdJson(
+          ...cohorts.flatMap((cohort) => {
+            return [
+              { index: "departmentservice", type: "_doc" },
+              withAggs(
+                queryFromFilter([
+                  {
+                    nested: {
+                      path: "contacts",
+                      query: {
+                        bool: {
+                          must: [{ terms: { "contacts.cohort.keyword": [cohort] } }],
+                        },
+                      },
+                    },
+                  },
+                  { terms: { "department.keyword": departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
+                ]),
+                "department.keyword",
+              ),
+            ];
+          }),
+        ),
+      });
+      const sejour_contact_à_renseigner = [];
+      for (const cohort of cohorts) {
+        const cohortDepartments = departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment);
+        // Chaque département doit avoir un contact pour la cohorte
+        for (const department of cohortDepartments) {
+          const cohortDepartmentsWithContact = response.body.responses
+            .filter((e) => e.aggregations)
+            .find((e) => e.aggregations.department.buckets.find((e) => e.key === department));
+          // Si le département n'a pas de contact pour la cohorte on l'ajoute dans la liste à signaler.
+          if (!cohortDepartmentsWithContact) {
+            if (!sejour_contact_à_renseigner.find((e) => e.cohort === cohort && e.department === department))
+              sejour_contact_à_renseigner.push({
+                cohort,
+                department,
+              });
+          }
+        }
+      }
+      return { sejour_contact_à_renseigner };
+    }
+
+    // Cas particuliers (À contacter) X volontaires à contacter pour préparer leur accueil pour le séjour de [Février 2023 - C]
+    // sejour_volontaires_à_contacter
+    async function sejourVolontairesÀContacter() {
+      const cohorts = cohortsNotStarted; // FIXME
+      if (!cohorts.length) return { sejour_volontaires_à_contacter: [] };
+
+      const response = await esClient.msearch({
+        index: "young",
+        body: buildArbitratyNdJson(
+          { index: "young", type: "_doc" },
+          withAggs(
+            queryFromFilter([
+              { terms: { "cohort.keyword": cohorts } },
+              {
+                bool: {
+                  should: [{ term: { ppsBeneficiary: "true" } }, { term: { paiBeneficiary: "true" } }, { term: { allergies: "true" } }, { term: { handicap: "true" } }],
+                  minimum_should_match: 1,
+                },
+              },
+            ]),
+            "cohort.keyword",
+          ),
+        ),
+      });
+
+      return {
+        sejour_volontaires_à_contacter: response.body.responses[0].aggregations.cohort.buckets.map((e) => {
+          return {
+            cohort: e.key,
+            count: e.doc_count,
+          };
+        }),
+      };
+    }
+
+    // Chef de centre (A renseigner) X chefs de centre sont à renseigner pour le séjour de [Février 2023 - C]
+    // sejour_chef_de_centre
+    async function sejourChefDeCentre() {
+      const cohorts = cohortsNotStarted; // FIXME
+      if (!cohorts.length) return { sejour_chef_de_centre: [] };
+
+      const response = await esClient.msearch({
+        index: "sessionphase1",
+        body: buildArbitratyNdJson(
+          { index: "sessionphase1", type: "_doc" },
+          withAggs(queryFromFilter([{ terms: { "cohort.keyword": cohorts } }, { exists: { field: "headCenterId" } }]), "cohort.keyword"),
+        ),
+      });
+
+      return {
+        sejour_chef_de_centre: response.body.responses[0].aggregations.cohort.buckets.map((e) => {
+          return {
+            cohort: e.key,
+            count: e.doc_count,
+          };
+        }),
+      };
+    }
+
     async function basicInscriptions() {
       const response = await esClient.msearch({
         index: "young",
@@ -288,28 +413,6 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
 
         //
         // Séjours
-        //
-        // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
-        // sejour_emploi_du_temps
-        { index: "sessionphase1", type: "_doc" },
-        queryFromFilter([{ terms: { "hasTimeSchedule.keyword": ["true"] } }]),
-        // Contact (À renseigner) Au moins 1 contact de convocation doit être renseigné.
-        // TODO!
-        // Cas particuliers (À contacter) X volontaires à contacter pour préparer leur accueil pour le séjour de [Février 2023 - C]
-        // sejour_cas_particulier
-        { index: "young", type: "_doc" },
-        queryFromFilter([
-          {
-            bool: {
-              should: [{ term: { ppsBeneficiary: "true" } }, { term: { paiBeneficiary: "true" } }, { term: { allergies: "true" } }, { term: { handicap: "true" } }],
-              minimum_should_match: 1,
-            },
-          },
-        ]),
-        // Chef de centre (A renseigner) X chefs de centre sont à renseigner pour le séjour de [Février 2023 - C]
-        // sejour_chef_de_centre
-        { index: "sessionphase1", type: "_doc" },
-        queryFromFilter([{ terms: { "cohort.keyword": cohortsNotStarted } }, { exists: { field: "headCenterId" } }]),
         // Pointage. X centres n’ont pas pointés tous leurs volontaires à l’arrivée au séjour de [Février 2023-C] (A renseigner)
         // TODO. cohortsFinishedInLessThan2Weeks,
         // Pointage. X centres n’ont pas pointés tous leurs volontaires à la JDM sur le séjour de [Février 2023-C] (A renseigner)
@@ -379,6 +482,9 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           ...(await pointDeRassemblementADéclarer()),
           ...(await centreADéclarer()),
           ...(await sejourEmploiDuTempsNonDéposé()),
+          ...(await sejourContactÀRenseigner()),
+          ...(await sejourVolontairesÀContacter()),
+          ...(await sejourChefDeCentre()),
         },
       },
     });
