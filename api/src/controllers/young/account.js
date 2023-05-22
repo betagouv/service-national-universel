@@ -8,6 +8,7 @@ const { serializeYoung } = require("../../utils/serializer");
 const { capture } = require("../../sentry");
 const { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated } = require("snu-lib");
 const validator = require("validator");
+const { validateParents } = require("../../utils/validator");
 
 router.put("/profile", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -42,20 +43,7 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
 
 router.put("/parents", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { value, error } = Joi.object({
-      parent1Status: Joi.string().required(),
-      parent1FirstName: Joi.string().required(),
-      parent1LastName: Joi.string().required(),
-      parent1Email: Joi.string().trim().email().required(),
-      parent1Phone: Joi.string().required(),
-      parent1PhoneZone: Joi.string().required(),
-      parent2Status: Joi.string().allow(null, ""),
-      parent2FirstName: Joi.string().allow(null, ""),
-      parent2LastName: Joi.string().allow(null, ""),
-      parent2Email: Joi.string().trim().email().allow(null, ""),
-      parent2Phone: Joi.string().allow(null, ""),
-      parent2PhoneZone: Joi.string().allow(null, ""),
-    }).validate(req.body, { stripUnknown: true });
+    const { value, error } = validateParents(req.body, true);
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
