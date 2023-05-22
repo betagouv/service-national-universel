@@ -77,12 +77,12 @@ jobs:
         with:
           node-version: 18.x
 
-      - name: Install packages
-        run: npm install
-
       - name: Build lib
         continue-on-error: false
-        run: npm run build -w packages/lib
+        run: |
+          npm install -w packages/lib
+          npm run build -w packages/lib
+          rm packages/lib/.gitignore
 
       - name: Create SSH key
         run: |
