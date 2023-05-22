@@ -94,16 +94,20 @@ export default function Signin() {
             Connexion
           </button>
         </div>
-
-        {/* <hr className="mt-4 text-[#E5E5E5]" />
-        <div className="mt-4 mb-4 text-center text-[17px] font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
-        <div className="flex justify-center">
-          <button
-            className="flex cursor-pointer items-center justify-center border-[1px] border-[#000091] p-2 text-[#000091] hover:bg-[#000091] hover:text-white"
-            onClick={() => history.push("/preinscription")}>
-            Commencer mon inscription
-          </button>
-        </div> */}
+        <hr className="mt-4 border-b-1 text-[#E5E5E5]" />
+        <div className="mt-4 text-[#E5E5E5]">
+          <div className="mt-4 mb-2 text-center text-xl font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
+          <p className="text-center text-base text-[#161616]">
+            Les inscriptions sont clôturées pour le premier semestre 2023. Soyez informé(e) lors de l’ouverture des prochaines inscriptions.
+          </p>
+          <div className="flex justify-center mt-3">
+            <a
+              className="plausible-event-name=Clic+LP+Inscription flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-[#000091] px-3 py-2 text-[#000091] hover:bg-[#000091] hover:text-white"
+              href="https://www.snu.gouv.fr/?utm_source=moncompte&utm_medium=website&utm_campaign=fin+inscriptions+2023&utm_content=cta+notifier#formulaire">
+              Recevoir une alerte par email
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   );
