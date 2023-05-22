@@ -2,7 +2,7 @@ require("dotenv").config({ path: "./.env-testing" });
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
-const { ROLES } = require("snu-lib");
+const { ROLES } = require("snu-lib/roles");
 
 jest.setTimeout(10_000);
 

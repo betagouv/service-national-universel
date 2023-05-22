@@ -47,7 +47,7 @@ const pointRassemblementModel = require("../../models/PlanDeTransport/pointDeRas
 const CohortModel = require("../../models/cohort");
 const cohesionCenterModel = require("../../models/cohesionCenter");
 const { getTransporter } = require("../../utils");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { sendTemplate } = require("../../sendinblue");
 
 const schemaRepartitionBodySchema = Joi.object({

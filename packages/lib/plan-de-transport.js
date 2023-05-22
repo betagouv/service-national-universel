@@ -31,7 +31,7 @@ const PDT_IMPORT_ERRORS_TRANSLATION = {
   MISSING_COLUMN: { text: "Colonne manquante ou mal orthographiée", tooltip: "Veuillez vérifier que la colonne est présente / bien orthographiée dans le fichier." },
 };
 
-export {
+module.exports = {
   PDT_IMPORT_ERRORS,
   PDT_IMPORT_ERRORS_TRANSLATION,
 };

@@ -1,13 +1,14 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch, department2region, departmentList, regionList } = require("snu-lib");
+const { ROLES, canSearchInElasticSearch } = require("snu-lib/roles");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 const StructureObject = require("../../models/structure");
+const { department2region, departmentList, regionList } = require("snu-lib");
 const Joi = require("joi");
 
 async function buildReferentContext(user) {
@@ -102,6 +103,7 @@ router.post("/team/:action(search|export)", passport.authenticate(["referent"], 
         contextFilters.push({ terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT] } });
       }
     }
+
 
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
 

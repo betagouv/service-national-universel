@@ -10,9 +10,8 @@ const {
   canViewBus,
   canSearchLigneBus,
   canViewEmailHistory,
-  region2department,
-  department2region,
-} = require("snu-lib");
+} = require("snu-lib/roles");
+const { region2department, department2region } = require("snu-lib/region-and-departments");
 const { capture } = require("../sentry");
 const esClient = require("../es");
 const { ERRORS, isYoung, getSignedUrlForApiAssociation, isReferent } = require("../utils");

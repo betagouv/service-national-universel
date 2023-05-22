@@ -1,8 +1,18 @@
-import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants";
-import translation from "./translation";
-import regionAndDepartments from "./region-and-departments";
-import { ROLES } from "./roles";
+const colors = require("./colors");
+const date = require("./date");
+const constants = require("./constants");
+const file = require("./file");
+const translation = require("./translation");
+const regionAndDepartments = require("./region-and-departments");
+const academy = require("./academy");
+const roles = require("./roles");
+const zammood = require("./zammood");
 
+const excelExports = require("./excelExports");
+const sessions = require("./sessions");
+const pdt = require("./plan-de-transport");
+
+const { YOUNG_STATUS, YOUNG_STATUS_PHASE1, COHESION_STAY_START } = require("./constants");
 const isInRuralArea = (v) => {
   if (!v.populationDensity) return null;
   return ["PEU DENSE", "TRES PEU DENSE"].includes(v.populationDensity) ? "true" : "false";
@@ -154,7 +164,7 @@ const getSelectedFilterLabel = (selected, prelabel) => {
 
 const getResultLabel = (e, pageSize) => `${pageSize * e.currentPage + 1}-${pageSize * e.currentPage + e.displayedResults} sur ${e.numberOfResults}`;
 
-const getLabelWithdrawnReason = (value) => WITHRAWN_REASONS.find((e) => e.value === value)?.label || value;
+const getLabelWithdrawnReason = (value) => constants.WITHRAWN_REASONS.find((e) => e.value === value)?.label || value;
 
 function canUpdateYoungStatus({ body, current }) {
   if (!body || !current) return true;
@@ -175,7 +185,7 @@ function canUpdateYoungStatus({ body, current }) {
 
 function canUserUpdateYoungStatus(actor) {
   if (actor) {
-    return [ROLES.ADMIN].includes(actor.role);
+    return [roles.ROLES.ADMIN].includes(actor.role);
   } else {
     return false;
   }
@@ -196,6 +206,7 @@ const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id }) => {
   if (statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return true;
   return false;
 };
+
 const formatPhoneNumberFR = (tel) => {
   if (!tel) return "";
   const regex = /^((?:(?:\+|00)33|0)\s*[1-9])((?:[\s.-]*\d{2}){4})$/;
@@ -208,7 +219,7 @@ const formatPhoneNumberFR = (tel) => {
   return formatted;
 };
 
-export {
+module.exports = {
   isEndOfInscriptionManagement2021,
   inscriptionModificationOpenForYoungs,
   inscriptionCreationOpenForYoungs,
@@ -222,17 +233,16 @@ export {
   canUserUpdateYoungStatus,
   youngCanChangeSession,
   formatPhoneNumberFR,
+  ...colors,
+  ...regionAndDepartments,
+  ...academy,
+  ...date,
+  ...constants,
+  ...file,
+  ...roles,
+  ...zammood,
+  ...translation,
+  ...excelExports,
+  ...sessions,
+  ...pdt,
 };
-export * from "./colors";
-export * from "./region-and-departments";
-export * from "./academy";
-export * from "./date";
-export * from "./constants";
-export * from "./file";
-export * from "./roles";
-export * from "./zammood";
-export * from "./translation";
-export * from "./excelExports";
-export * from "./sessions";
-export * from "./plan-de-transport";
-export * from "./phone-number";

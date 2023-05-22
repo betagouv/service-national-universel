@@ -2,7 +2,7 @@ const ReferentObject = require("../models/referent");
 const zammood = require("../zammood");
 const { capture } = require("../sentry");
 const slack = require("../slack");
-const { ROLES } = require("snu-lib");
+const { ROLES } = require("snu-lib/roles");
 
 exports.handler = async () => {
   try {

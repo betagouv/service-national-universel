@@ -16,14 +16,12 @@ const {
   canEditLigneBusPointDeRassemblement,
   ROLES,
   canViewPatchesHistory,
-  formatStringLongDate,
-  isIsoDate,
-  translateBusPatchesField,
-} = require("snu-lib");
+} = require("snu-lib/roles");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 const { ObjectId } = require("mongodb");
+const { formatStringLongDate, isIsoDate, translateBusPatchesField } = require("snu-lib");
 const mongoose = require("mongoose");
 
 /**

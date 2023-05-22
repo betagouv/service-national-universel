@@ -24,17 +24,7 @@ const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
-const {
-  PHONE_ZONES_NAMES_ARR,
-  formatPhoneNumberFromPhoneZone,
-  YOUNG_SITUATIONS,
-  GRADES,
-  isInRuralArea,
-  SENDINBLUE_TEMPLATES,
-  canUserUpdateYoungStatus,
-  YOUNG_STATUS,
-  canEditYoung,
-} = require("snu-lib");
+const { YOUNG_SITUATIONS, GRADES, isInRuralArea, SENDINBLUE_TEMPLATES, canUserUpdateYoungStatus, YOUNG_STATUS, canEditYoung } = require("snu-lib");
 const { getDensity, getQPV } = require("../geo");
 const { sendTemplate } = require("../sendinblue");
 const { format } = require("date-fns");
@@ -42,6 +32,7 @@ const config = require("../config");
 const YoungObject = require("../models/young");
 const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../models/sessionPhase1");
+const { PHONE_ZONES_NAMES_ARR, formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [

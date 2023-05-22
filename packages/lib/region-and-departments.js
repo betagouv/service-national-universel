@@ -366,30 +366,14 @@ const isFromDOMTOM = (young) => {
 const isFromFrenchPolynesia = (young) => {
   const region = getRegionForEligibility(young);
   return region2zone[region] === "PF";
-};
+}
 
 const isFromNouvelleCaledonie = (young) => {
   const region = getRegionForEligibility(young);
   return region2zone[region] === "NC";
-};
+}
 
-export {
-  departmentLookUp,
-  departmentList,
-  getDepartmentNumber,
-  regionList,
-  department2region,
-  region2department,
-  getDepartmentByZip,
-  getRegionByZip,
-  region2zone,
-  getRegionForEligibility,
-  isFromMetropole,
-  isFromDOMTOM,
-  isFromFrenchPolynesia,
-  isFromNouvelleCaledonie,
-};
-export default {
+module.exports = {
   departmentLookUp,
   departmentList,
   getDepartmentNumber,

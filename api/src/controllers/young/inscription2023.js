@@ -9,20 +9,13 @@ const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateFirstName } = require("../../utils/validator");
 const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
-const {
-  canUpdateYoungStatus,
-  START_DATE_SESSION_PHASE1,
-  YOUNG_STATUS,
-  SENDINBLUE_TEMPLATES,
-  isInRuralArea,
-  PHONE_ZONES_NAMES,
-  PHONE_ZONES_NAMES_ARR,
-  formatPhoneNumberFromPhoneZone,
-} = require("snu-lib");
+const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, YOUNG_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
 const { getFilteredSessions } = require("../../utils/cohort");
+const { isInRuralArea } = require("snu-lib");
+const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR, formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,

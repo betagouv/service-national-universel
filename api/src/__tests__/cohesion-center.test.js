@@ -14,7 +14,7 @@ const { notExistingCohesionCenterId, createCohesionCenter, getCohesionCenterById
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createMeetingPointHelper, getMeetingPointByIdHelper } = require("./helpers/meetingPoint");
 const { createYoungHelper, getYoungByIdHelper } = require("./helpers/young");
-const { ROLES } = require("snu-lib");
+const { ROLES } = require("snu-lib/roles");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),

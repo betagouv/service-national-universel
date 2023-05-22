@@ -14,6 +14,7 @@ const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
 const { ERRORS, updatePlacesSessionPhase1, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter } = require("../utils");
+const { SENDINBLUE_TEMPLATES, MINISTRES, COHESION_STAY_LIMIT_DATE, END_DATE_PHASE1, PHASE1_YOUNG_ACCESS_LIMIT } = require("snu-lib/constants");
 
 const {
   canCreateOrUpdateSessionPhase1,
@@ -25,21 +26,14 @@ const {
   canCreateOrUpdateCohesionCenter,
   isReferentOrAdmin,
   ROLES,
-  SENDINBLUE_TEMPLATES,
-  MINISTRES,
-  COHESION_STAY_LIMIT_DATE,
-  END_DATE_PHASE1,
-  PHASE1_YOUNG_ACCESS_LIMIT,
   isSessionEditionOpen,
-  COHESION_STAY_END,
-  canSendTimeScheduleReminderForSessionPhase1,
-  START_DATE_SESSION_PHASE1,
-} = require("snu-lib");
+} = require("snu-lib/roles");
 const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
 const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
+const { COHESION_STAY_END, canSendTimeScheduleReminderForSessionPhase1, START_DATE_SESSION_PHASE1 } = require("snu-lib");
 
 const datefns = require("date-fns");
 const { fr } = require("date-fns/locale");

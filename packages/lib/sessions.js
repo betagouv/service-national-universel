@@ -83,7 +83,7 @@ const sessions2023 = [
   },
 ];
 
-export {
+module.exports = {
   sessions2023,
   oldSessions,
 };

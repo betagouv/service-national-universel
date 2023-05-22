@@ -3,7 +3,7 @@ const queryString = require("querystring");
 
 const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
-const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib/constants");
 
 const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";

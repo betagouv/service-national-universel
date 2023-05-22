@@ -36,6 +36,6 @@ const ERRORS = {
 	YOUNG_NOT_FOUND: "YOUNG_NOT_FOUND",
 };
 
-export {
+module.exports = {
 	ERRORS,
 };

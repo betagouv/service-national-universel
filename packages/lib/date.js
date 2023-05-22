@@ -153,7 +153,7 @@ function calculateAge(birthDate, otherDate) {
   return years;
 }
 
-export {
+module.exports = {
   formatDay,
   formatDateFR,
   formatToActualTime,

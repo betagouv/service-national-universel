@@ -1,6 +1,6 @@
 const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
-const { ROLES } = require("snu-lib");
+const { ROLES } = require("snu-lib/roles");
 const { ADMIN_URL } = require("../config.js");
 const { isYoung } = require("../utils");
 

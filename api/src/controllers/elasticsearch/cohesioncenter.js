@@ -1,12 +1,13 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, ES_NO_LIMIT, canSearchInElasticSearch, canSearchSessionPhase1 } = require("snu-lib");
+const { ROLES, canSearchInElasticSearch, canSearchSessionPhase1 } = require("snu-lib/roles");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
+const { ES_NO_LIMIT } = require("snu-lib");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {

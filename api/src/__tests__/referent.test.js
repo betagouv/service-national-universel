@@ -15,7 +15,7 @@ const { getNewApplicationFixture } = require("./fixtures/application");
 const { createApplication, getApplicationsHelper } = require("./helpers/application");
 const { createMissionHelper, getMissionsHelper } = require("./helpers/mission");
 const getNewMissionFixture = require("./fixtures/mission");
-const { ROLES } = require("snu-lib");
+const { ROLES } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 jest.mock("../utils", () => ({

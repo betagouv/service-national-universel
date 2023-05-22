@@ -14,10 +14,12 @@ const { ERRORS, isYoung } = require("../utils/index.js");
 const { updateApplicationStatus, updateApplicationTutor } = require("../services/application");
 const { getTutorName } = require("../services/mission");
 const { validateId, validateMission } = require("../utils/validator");
-const { SENDINBLUE_TEMPLATES, MISSION_STATUS, ROLES, canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib");
+const { ROLES, canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib/roles");
+const { MISSION_STATUS } = require("snu-lib/constants");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
 const { putLocation } = require("../services/api-adresse");
 

@@ -44,14 +44,11 @@ jobs:
       - name: Install packages
         run: npm install
 
+
       - name: Lint code
         working-directory: ${{ env.SUBFOLDER_NAME }}
         continue-on-error: true
         run: npm run lint
-
-      - name: Build lib before test
-        continue-on-error: false
-        run: npm run build -w packages/lib
 
       - name: Test and Send coverage
         uses: paambaati/codeclimate-action@v2.7.5

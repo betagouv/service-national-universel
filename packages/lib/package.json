@@ -2,20 +2,10 @@
   "name": "snu-lib",
   "version": "1.0.0",
   "description": "",
-  "main": "common-js/index.cjs",
-  "module": "index.js",
+  "main": "index.js",
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "MIT",
-  "devDependencies": {
-    "@babel/core": "^7.21.8",
-    "@babel/preset-env": "^7.21.5",
-    "@rollup/plugin-babel": "^6.0.3",
-    "@rollup/plugin-node-resolve": "^15.0.2",
-    "rollup": "^2.79.1"
-  }
+  "license": "MIT"
 }

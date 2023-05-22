@@ -873,7 +873,7 @@ const missionCandidatureExportFields = [
   },
 ];
 
-export {
+module.exports = {
   translateIndexes,
   youngExportFields,
   missionExportFields,
