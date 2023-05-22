@@ -19,7 +19,16 @@ const fileUpload = require("express-fileupload");
 const { sendTemplate } = require("../sendinblue");
 const { validateUpdateApplication, validateNewApplication, validateId } = require("../utils/validator");
 const { ADMIN_URL, APP_URL } = require("../config");
-const { ROLES, SENDINBLUE_TEMPLATES, canCreateYoungApplication, canViewYoungApplications, canApplyToPhase2, canViewContract } = require("snu-lib");
+const {
+  ROLES,
+  SENDINBLUE_TEMPLATES,
+  canCreateYoungApplication,
+  canViewYoungApplications,
+  canApplyToPhase2,
+  canViewContract,
+  translateAddFilePhase2,
+  translateAddFilesPhase2,
+} = require("snu-lib");
 const { serializeApplication, serializeYoung, serializeContract } = require("../utils/serializer");
 const { config } = require("dotenv");
 const {
@@ -35,7 +44,6 @@ const {
   getReferentManagerPhase2,
   updateYoungApplicationFilesType,
 } = require("../utils");
-const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib/translation");
 const mime = require("mime-types");
 const patches = require("./patches");
 

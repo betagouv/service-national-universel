@@ -67,6 +67,10 @@ function buildNdJson(header, hitsQuery, aggsQuery = null) {
   return [JSON.stringify(header), JSON.stringify(hitsQuery), JSON.stringify(header), JSON.stringify(aggsQuery)].join("\n") + "\n";
 }
 
+function buildArbitratyNdJson(...args) {
+  return args.map((e) => JSON.stringify(e)).join("\n") + "\n";
+}
+
 function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, customQueries }) {
   // We always need a fresh query to avoid side effects.
   const getMainQuery = () => unsafeStrucuredClone({ bool: { must: [{ match_all: {} }], filter: contextFilters } });
@@ -107,6 +111,7 @@ function joiElasticSearch({ filterFields, sortFields = [], body }) {
 
 module.exports = {
   buildNdJson,
+  buildArbitratyNdJson,
   buildRequestBody,
   joiElasticSearch,
 };

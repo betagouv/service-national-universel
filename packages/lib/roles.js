@@ -1,5 +1,5 @@
-const { COHESION_STAY_END } = require("./date");
-const { region2department } = require("./region-and-departments");
+import { COHESION_STAY_END } from "./date";
+import { region2department } from "./region-and-departments";
 
 const ROLES = {
   ADMIN: "admin",
@@ -741,7 +741,7 @@ function isSuperAdmin(actor) {
   return [ROLES.ADMIN].includes(actor.role) && actor.subRole === "god";
 }
 
-module.exports = {
+export {
   ROLES,
   SUB_ROLES,
   ROLES_LIST,

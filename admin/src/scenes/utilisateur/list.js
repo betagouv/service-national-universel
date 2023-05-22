@@ -1,64 +1,78 @@
-import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
-import React, { useEffect, useState } from "react";
-import { HiLogin, HiUserAdd } from "react-icons/hi";
+import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 
+import { Listbox, Transition } from "@headlessui/react";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { BsDownload } from "react-icons/bs";
+import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
+import { formatLongDateFR, getDepartmentNumber } from "snu-lib";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
-import DeleteFilters from "../../components/buttons/DeleteFilters";
-import Chevron from "../../components/Chevron";
-import ExportComponent from "../../components/ExportXlsx";
-import { DepartmentFilter, RegionFilter } from "../../components/filters";
-import { ActionBox, Filter, FilterRow, Header, MultiLine, ResultTable, Table, Title } from "../../components/list";
 import Loader from "../../components/Loader";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
-import ReactiveListComponent from "../../components/ReactiveListComponent";
-import { apiURL } from "../../config";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
-import { canDeleteReferent, canUpdateReferent, ES_NO_LIMIT, formatLongDateFR, formatStringLongDate, getFilterLabel, ROLES, translate } from "../../utils";
+import { ROLES, canDeleteReferent, canUpdateReferent, translate } from "../../utils";
+import { Title } from "../pointDeRassemblement/components/common";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import Panel from "./panel";
-
-const FILTERS = ["SEARCH", "ROLE", "SUBROLE", "REGION", "DEPARTMENT", "COHORT"];
 
 export default function List() {
   const [responsable, setResponsable] = useState(null);
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
-  const [structureIds, setStructureIds] = useState();
   const [structures, setStructures] = useState();
   const [services, setServices] = useState();
-  const [filterVisible, setFilterVisible] = useState(false);
-  const handleShowFilter = () => setFilterVisible(!filterVisible);
-  const getDefaultQuery = () => {
-    if (user.role === ROLES.SUPERVISOR) return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } }, track_total_hits: true };
-    if (user.role === ROLES.HEAD_CENTER)
-      return {
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }] } },
-                    { bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { terms: { "cohorts.keyword": [sessionPhase1?.cohort] } }] } },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-        track_total_hits: true,
-      };
-    else return { query: { match_all: {} }, track_total_hits: true };
-  };
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
+
+  //List params
+  const [data, setData] = useState([]);
+  const pageId = "referent-list";
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [paramData, setParamData] = useState({
+    page: 0,
+    sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
+  });
+
+  const filterArray = [
+    {
+      title: "Rôle",
+      name: "role",
+      translate: translate,
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Région",
+      name: "region",
+      missingLabel: "Non renseignée",
+      defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
+    },
+    {
+      title: "Département",
+      name: "department",
+      missingLabel: "Non renseignée",
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
+    },
+    {
+      title: "Fonction",
+      name: "subRole",
+      missingLabel: "Non renseignée",
+      translate: translate,
+    },
+    {
+      title: "Cohorte",
+      name: "cohorts",
+      missingLabel: "Non renseignée",
+      translate: translate,
+    },
+  ];
+
   useEffect(() => {
     (async () => {
       const { data, ok } = await api.get("/structure");
@@ -70,217 +84,156 @@ export default function List() {
       if (!ok) return;
       setServices(data);
     })();
-    if (user.role !== ROLES.SUPERVISOR) return;
-    (async () => {
-      const { data } = await api.get(`/structure/${user.structureId}/children`);
-      const ids = data.map((s) => s._id);
-      setStructureIds(ids);
-    })();
   }, []);
-  if (user.role === ROLES.SUPERVISOR && !structureIds) return <Loader />;
+
   if (user.role === ROLES.HEAD_CENTER && !sessionPhase1) return <Loader />;
 
   return (
-    <div>
+    <>
       <Breadcrumbs items={[{ label: "Utilisateurs" }]} />
-      <ReactiveBase url={`${apiURL}/es`} app="referent" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
-          <div style={{ flex: 1, position: "relative" }}>
-            <Header>
-              <div>
-                <Title>Utilisateurs</Title>
-              </div>
-              <ExportComponent
-                handleClick={() => plausibleEvent("Utilisateurs/CTA - Exporter utilisateurs")}
-                title="Exporter les utilisateurs"
-                exportTitle="Utilisateurs"
-                index="referent"
-                defaultQuery={getExportQuery}
-                react={{ and: FILTERS }}
-                transform={(all) => {
-                  return all.map((data) => {
-                    let structure = {};
-                    if (data.structureId && structures) {
-                      structure = structures.find((s) => s._id === data.structureId);
-                      if (!structure) structure = {};
-                    }
-                    let service = {};
-                    if (data.role === ROLES.REFERENT_DEPARTMENT && services) {
-                      service = services.find((s) => s.department === data.department);
-                      if (!service) service = {};
-                    }
-                    return {
-                      _id: data._id,
-                      Prénom: data.firstName,
-                      Nom: data.lastName,
-                      Email: data.email,
-                      Rôle: data.role,
-                      Fonction: data.subRole,
-                      Téléphone: data.phone,
-                      Portable: data.mobile,
-                      Département: data.department,
-                      Région: data.region,
-                      Structure: structure?.name,
-                      "Nom de la direction du service départemental": service?.directionName,
-                      "Adresse du service départemental": service?.address + service?.complementAddress,
-                      "Code Postal du service départemental": service?.zip,
-                      "Ville du service départemental": service?.city,
-                      "Créé lé": formatLongDateFR(data.createdAt),
-                      "Mis à jour le": formatLongDateFR(data.updatedAt),
-                      "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-                    };
-                  });
-                }}
-              />
-            </Header>
-            <Filter>
-              <FilterRow visible>
-                <DataSearch
-                  showIcon={false}
-                  placeholder="Rechercher par prénom, nom, email..."
-                  componentId="SEARCH"
-                  dataField={["email.keyword", "firstName.folded", "lastName.folded"]}
-                  react={{ and: FILTERS }}
-                  // fuzziness={2}
-                  style={{ flex: 1, marginRight: "1rem" }}
-                  innerClass={{ input: "searchbox" }}
-                  autosuggest={false}
-                  URLParams={true}
-                  queryFormat="and"
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="ROLE"
-                  dataField="role.keyword"
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  react={{ and: FILTERS.filter((e) => e !== "ROLE") }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Rôle")}
-                />
-                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
-              </FilterRow>
-              <FilterRow visible={filterVisible}>
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="SUBROLE"
-                  dataField="subRole.keyword"
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  react={{ and: FILTERS.filter((e) => e !== "SUBROLE") }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Fonction")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Cohorte"
-                  componentId="COHORT"
-                  dataField="cohorts.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={true}
-                  searchPlaceholder="Rechercher..."
-                  renderLabel={(items) => getFilterLabel(items, "Cohorte", "Cohorte")}
-                />
-                <DeleteFilters />
-              </FilterRow>
-            </Filter>
-            <ResultTable>
-              <ReactiveListComponent
-                defaultQuery={getDefaultQuery}
-                react={{ and: FILTERS }}
-                sortOptions={[
-                  { label: "Nom (A > Z)", dataField: "lastName.keyword", sortBy: "asc" },
-                  { label: "Nom (Z > A)", dataField: "lastName.keyword", sortBy: "desc" },
-                  { label: "Prénom (A > Z)", dataField: "firstName.keyword", sortBy: "asc" },
-                  { label: "Prénom (Z > A)", dataField: "firstName.keyword", sortBy: "desc" },
-                  { label: "Date de création (récent > ancien)", dataField: "createdAt", sortBy: "desc" },
-                  { label: "Date de création (ancien > récent)", dataField: "createdAt", sortBy: "asc" },
-                  { label: "Dernière connexion (récent > ancien)", dataField: "lastLoginAt", sortBy: "desc" },
-                  { label: "Dernière connexion (ancien > récent)", dataField: "lastLoginAt", sortBy: "asc" },
-                ]}
-                defaultSortOption="Nom (A > Z)"
-                render={({ data }) => (
-                  <Table>
-                    <thead>
-                      <tr>
-                        <th width="30%">Email</th>
-                        <th>Rôle</th>
-                        <th>Dates</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data.map((hit) => (
-                        <Hit
-                          structure={structures?.find((s) => s._id === hit.structureId)}
-                          key={hit._id}
-                          hit={hit}
-                          user={user}
-                          onClick={() => setResponsable(hit)}
-                          selected={responsable?._id === hit._id}
-                        />
-                      ))}
-                    </tbody>
-                  </Table>
-                )}
-              />
-            </ResultTable>
-          </div>
-          <Panel value={responsable} onChange={() => setResponsable(null)} />
+      <div className="flex w-full flex-col px-8">
+        <div className="flex items-center justify-between py-8">
+          <Title>Utilisateurs</Title>
+          <ExportComponent
+            title="Exporter les utilisateurs"
+            exportTitle="Utilisateurs"
+            route={`/elasticsearch/referent/export${user.role === ROLES.HEAD_CENTER ? "?cohort=" + sessionPhase1?.cohort : ""}`}
+            filters={filterArray}
+            selectedFilters={selectedFilters}
+            setIsOpen={() => true}
+            icon={<BsDownload className="text-white h-4 w-4 group-hover:!text-blue-600" />}
+            css={{
+              override: true,
+              button: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
+              loadingButton: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
+            }}
+            transform={(all) => {
+              return all.map((data) => {
+                let structure = {};
+                if (data.structureId && structures) {
+                  structure = structures.find((s) => s._id === data.structureId);
+                  if (!structure) structure = {};
+                }
+                let service = {};
+                if (data.role === ROLES.REFERENT_DEPARTMENT && services) {
+                  service = services.find((s) => s.department === data.department);
+                  if (!service) service = {};
+                }
+                return {
+                  _id: data._id,
+                  Prénom: data.firstName,
+                  Nom: data.lastName,
+                  Email: data.email,
+                  Rôle: data.role,
+                  Fonction: data.subRole,
+                  Téléphone: data.phone,
+                  Portable: data.mobile,
+                  Département: data.department,
+                  Région: data.region,
+                  Structure: structure?.name || "",
+                  "Nom de la direction du service départemental": service?.directionName || "",
+                  "Adresse du service départemental": service?.address + service?.complementAddress || "",
+                  "Code Postal du service départemental": service?.zip || "",
+                  "Ville du service départemental": service?.city || "",
+                  "Créé lé": formatLongDateFR(data.createdAt),
+                  "Mis à jour le": formatLongDateFR(data.updatedAt),
+                  "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
+                };
+              });
+            }}
+          />
         </div>
-      </ReactiveBase>
-    </div>
+        <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
+          <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
+            <Filters
+              pageId={pageId}
+              route={`/elasticsearch/referent/search${user.role === ROLES.HEAD_CENTER ? "?cohort=" + sessionPhase1?.cohort : ""}`}
+              setData={(value) => setData(value)}
+              filters={filterArray}
+              searchPlaceholder="Rechercher par prénom, nom, email..."
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+              paramData={paramData}
+              setParamData={setParamData}
+            />
+            <SortOption
+              sortOptions={[
+                { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
+                { label: "Nom (Z > A)", field: "lastName.keyword", order: "desc" },
+                { label: "Prénom (A > Z)", field: "firstName.keyword", order: "asc" },
+                { label: "Prénom (Z > A)", field: "firstName.keyword", order: "desc" },
+                { label: "Date de création (récent > ancien)", field: "createdAt", order: "desc" },
+                { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
+              ]}
+              paramData={paramData}
+              setParamData={setParamData}
+            />
+          </div>
+          <div className="mt-2 flex flex-row flex-wrap items-center px-4">
+            <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+            <SelectedFilters
+              filterArray={filterArray}
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+              paramData={paramData}
+              setParamData={setParamData}
+            />
+          </div>
+          <ResultTable
+            paramData={paramData}
+            setParamData={setParamData}
+            currentEntryOnPage={data?.length}
+            render={
+              <table className="mt-4 mb-2 w-full table-auto font-marianne">
+                <thead>
+                  <tr className="border-y-[1px] border-y-gray-100 uppercase text-gray-400 text-sm">
+                    <th className="pl-4 py-3">Email</th>
+                    <th className="text-center px-4 py-3">Rôle</th>
+                    <th className="text-center px-4 py-3">Création</th>
+                    <th className="text-center px-4 py-3">Dernière connexion</th>
+                    <th className="text-center pr-4 py-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.map((hit) => (
+                    <Hit structure={structures?.find((s) => s._id === hit.structureId)} key={hit._id} hit={hit} user={user} onClick={() => setResponsable(hit)} />
+                  ))}
+                </tbody>
+              </table>
+            }
+          />
+        </div>
+      </div>
+      <Panel value={responsable} onChange={() => setResponsable(null)} />
+    </>
   );
 }
 
-const Hit = ({ hit, onClick, user, selected, structure }) => {
+const Hit = ({ hit, onClick, user, structure }) => {
   const displayActionButton = canUpdateReferent({ actor: user, originalTarget: hit, structure });
+  dayjs.extend(relativeTime).locale("fr");
 
   return (
-    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
-      <td>
-        <MultiLine>
-          <span className="font-bold text-black">{`${hit.firstName} ${hit.lastName}`}</span>
-          <p>{hit.email}</p>
-        </MultiLine>
+    <tr onClick={onClick} className="border-b-[1px] border-y-gray-100 hover:bg-gray-50">
+      <td className="pl-4 py-3">
+        <span className="font-bold text-gray-900 leading-6">{`${hit.firstName} ${hit.lastName}`}</span>
+        <p className="text-sm text-gray-600 leading-5">{hit.email}</p>
       </td>
-      <td>
+      <td className="flex flex-col items-center py-3">
         {hit.role && (
-          <div className="flex flex-col items-start">
-            <Badge text={translate(hit.role)} className="!border-[#302B94] !bg-[#DAE3FD] !text-[#302B94]" />
-            {hit.subRole && hit.subRole !== "god" ? <Badge text={translate(hit.subRole)} /> : null}
-          </div>
+          <>
+            <Badge text={translate(hit.role)} className="!border-blue-500 !bg-blue-50 !text-blue-500" />
+            {hit.subRole && hit.subRole !== "god" ? <Badge text={translate(hit.subRole)} className="!border-gray-500 !bg-gray-50 !text-gray-500" /> : null}
+          </>
         )}
       </td>
-      <td>
-        <div className="flex flex-col items-start">
-          <div className="flex items-center gap-1">
-            <HiUserAdd className="text-coolGray-600" />
-            {formatStringLongDate(hit.createdAt)}
-          </div>
-          {hit.lastLoginAt ? (
-            <div className="flex items-center gap-1">
-              <HiLogin className="text-coolGray-600" />
-              {formatStringLongDate(hit.lastLoginAt)}
-            </div>
-          ) : null}
-        </div>
+      <td className="text-center">
+        <p className="text-sm leading-none text-gray-900">{dayjs(hit.createdAt).format("DD/MM/YYYY")}</p>
+        <p className="text-sm leading-none text-gray-500 mt-2">{dayjs(hit.createdAt).format("hh:mm")}</p>
+      </td>
+      <td className="text-center">
+        <p className="text-sm leading-none text-gray-900">{dayjs(hit.lastLoginAt).format("DD/MM/YYYY")}</p>
+        <p className="text-sm leading-none text-gray-500 mt-2">{dayjs(hit.lastLoginAt).format("hh:mm")}</p>
       </td>
       {displayActionButton ? (
         <td onClick={(e) => e.stopPropagation()}>
@@ -360,29 +313,51 @@ const Action = ({ hit, structure }) => {
   };
   return (
     <>
-      <ActionBox color={"#444"}>
-        <UncontrolledDropdown setActiveFromChild>
-          <DropdownToggle tag="button">
-            Choisissez une action
-            <Chevron color="#444" />
-          </DropdownToggle>
-          <DropdownMenu>
-            <Link to={`/user/${hit._id}`}>
-              <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
-            </Link>
-            {user.role === ROLES.ADMIN ? (
-              <DropdownItem className="dropdown-item" onClick={handleImpersonate}>
-                Prendre sa place
-              </DropdownItem>
-            ) : null}
-            {canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? (
-              <DropdownItem className="dropdown-item" onClick={onClickDelete}>
-                Supprimer le profil
-              </DropdownItem>
-            ) : null}
-          </DropdownMenu>
-        </UncontrolledDropdown>
-      </ActionBox>
+      <Listbox>
+        {({ open }) => (
+          <>
+            <div className="relative w-4/5 mx-auto">
+              <Listbox.Button className="relative w-full text-left">
+                <div className={`${open ? "border-blue-500" : ""} flex items-center gap-0 space-y-0 rounded-lg border-[1px] bg-white py-2 px-2.5`}>
+                  <div className="flex w-full items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-gray-900">Choisissez une action</p>
+                    </div>
+                    <div className="pointer-events-none flex items-center pr-2">
+                      {open && <HiOutlineChevronUp className="h-5 w-5 text-gray-400" aria-hidden="true" />}
+                      {!open && <HiOutlineChevronDown className="h-5 w-5 text-gray-400" aria-hidden="true" />}
+                    </div>
+                  </div>
+                </div>
+              </Listbox.Button>
+
+              <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+                <Listbox.Options className="max-h-60 absolute z-10 mt-1 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                  <Link className="!cursor-pointer" to={`/user/${hit._id}`} target="_blank">
+                    <Listbox.Option className={("text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9 hover:text-white hover:bg-blue-600")}>
+                      <span className={"block truncate font-normal text-xs"}>Consulter le profil</span>
+                    </Listbox.Option>
+                  </Link>
+                  {user.role === ROLES.ADMIN ? (
+                    <Listbox.Option
+                      className={("text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9 hover:text-white hover:bg-blue-600")}
+                      onClick={handleImpersonate}>
+                      <span className={"block truncate font-normal text-xs"}>Prendre sa place</span>
+                    </Listbox.Option>
+                  ) : null}
+                  {canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? (
+                    <Listbox.Option
+                      className={("text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9 hover:text-white hover:bg-blue-600")}
+                      onClick={onClickDelete}>
+                      <div className={"block truncate font-normal text-xs"}>Supprimer le profil</div>
+                    </Listbox.Option>
+                  ) : null}
+                </Listbox.Options>
+              </Transition>
+            </div>
+          </>
+        )}
+      </Listbox>
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}

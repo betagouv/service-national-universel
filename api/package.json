@@ -12,7 +12,7 @@
     "dev": "nodemon --watch ../packages --watch .env-staging --watch ./src ./src/index.js",
     "debug": "DEBUG=express:* nodemon ./src/index.js",
     "start": "pm2 install pm2-slack && pm2 set pm2-slack:slack_url $PM2_SLACK_URL &&  pm2 set pm2-slack:servername PM2-ERROR-API && pm2 start ./src/index.js --no-daemon",
-    "test": "jest --silent --runInBand",
+    "test": "jest --silent --runInBand --detectOpenHandles",
     "coverage": "jest --runInBand --coverage --silent",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint --ext .js --fix src",
