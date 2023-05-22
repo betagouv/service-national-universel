@@ -34,7 +34,7 @@ module.exports = () => {
       inline: true,
       hot: true,
     },
-    resolve: { fallback: { fs: false } },
+    resolve: { extensions: [".js", ".jsx"] },
     module: {
       rules: [
         {

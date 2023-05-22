@@ -56,7 +56,7 @@ module.exports = () => {
       sourceMapFilename: "[contenthash].index.js.map",
       publicPath: "/",
     },
-    resolve: { fallback: { fs: false } },
+    resolve: { extensions: [".js", ".jsx"] },
     module: {
       rules: [
         {
@@ -64,7 +64,7 @@ module.exports = () => {
           use: ["style-loader", "css-loader", "postcss-loader"],
         },
         {
-          test: /\.js$/,
+          test: /\.(js|jsx)$/,
           loader: "babel-loader",
           include: path.resolve("src"),
           options: { babelrc: true },
