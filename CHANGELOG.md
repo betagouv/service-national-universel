@@ -1,3 +1,20 @@
+# [1.275.0](https://github.com/betagouv/service-national-universel/compare/v1.274.1...v1.275.0) (2023-05-22)
+
+
+### Bug Fixes
+
+* **admin:** application status for responsible ans supervisor ([f2fe6d0](https://github.com/betagouv/service-national-universel/commit/f2fe6d0f9d15ed3af72e99c3b059fae35f657bc8))
+* **admin:** open edit head center session for ref ([e64e4d0](https://github.com/betagouv/service-national-universel/commit/e64e4d0b48eae13858d515597e40b561eafd06b3))
+* **api:** ajustement des fichiers utilisés pour les logos du PDF de droit à l'image ([#2626](https://github.com/betagouv/service-national-universel/issues/2626)) ([aef92d5](https://github.com/betagouv/service-national-universel/commit/aef92d525c4fb407afe9c26d93309df0a5e12d64))
+
+
+### Features
+
+* **admin,api:** Téléchargement massif et individuel du droit à l’image ([#2616](https://github.com/betagouv/service-national-universel/issues/2616)) ([6a7fbe1](https://github.com/betagouv/service-national-universel/commit/6a7fbe1e46407bd9893b0149e1cba894f26d4c74))
+* **admin/api:** new filters user list ([#2623](https://github.com/betagouv/service-national-universel/issues/2623)) ([791206e](https://github.com/betagouv/service-national-universel/commit/791206e9c47b2f0fc36076823e25b098c6d8c75f))
+* **api/admin:** new dashboard queries ([#2605](https://github.com/betagouv/service-national-universel/issues/2605)) ([ac008fc](https://github.com/betagouv/service-national-universel/commit/ac008fc1d1c5e764458c26691c5095e1e0231386))
+* **lib:** Transform lib into ES module ([#2622](https://github.com/betagouv/service-national-universel/issues/2622)) ([da22031](https://github.com/betagouv/service-national-universel/commit/da220318cabbee5e34ff16173ba503284a9723b8))
+
 ## [1.274.1](https://github.com/betagouv/service-national-universel/compare/v1.274.0...v1.274.1) (2023-05-19)
 
 
