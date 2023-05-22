@@ -7,13 +7,7 @@ import plausibleEvent from "../../services/plausible";
 import { colors, ROLES } from "snu-lib";
 import { getDepartmentNumber } from "snu-lib/region-and-departments";
 import { translate } from "snu-lib/translation";
-import {
-  Filters,
-  ModalExport,
-  ResultTable,
-  Save,
-  SelectedFilters
-} from "../../components/filters-system-v2";
+import { Filters, ModalExport, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import { formatLongDateFR, formatStringLongDate } from "snu-lib/date";
 import { BsDownload } from "react-icons/bs";
 import { corpsEnUniforme } from "../../utils";
@@ -145,12 +139,7 @@ const ListStructure = () => {
               <div className="w-[30%]">Contexte</div>
             </div>
             {data.map((hit) => (
-              <Hit
-                key={hit._id}
-                hit={hit}
-                history={history}
-                onClick={() => history.push(`/structure/${hit._id}`)}
-              />
+              <Hit key={hit._id} hit={hit} history={history} onClick={() => history.push(`/structure/${hit._id}`)} />
             ))}
             <hr />
           </div>
@@ -183,14 +172,22 @@ const Hit = ({ hit, onClick }) => {
       <div onClick={onClick} className="flex cursor-pointer items-center py-3 px-4 hover:bg-gray-50">
         <div className="flex w-[40%] flex-col gap-1">
           <div className="font-bold leading-6 text-gray-900">{hit.name}</div>
-          <div className="text-sm font-normal leading-4 text-gray-500">{translate(hit.legalStatus)} • Créée le {formatStringLongDate(hit.createdAt)}</div>
+          <div className="text-sm font-normal leading-4 text-gray-500">
+            {translate(hit.legalStatus)} • Créée le {formatStringLongDate(hit.createdAt)}
+          </div>
         </div>
         <div className="w-[15%]">
-          <div className="text-sm font-normal leading-4 text-gray-500">{responsiblesInfo.count} responsable{responsiblesInfo.count > 1 && "s"}</div>
+          <div className="text-sm font-normal leading-4 text-gray-500">
+            {responsiblesInfo.count} responsable{responsiblesInfo.count > 1 && "s"}
+          </div>
         </div>
         <div className="flex w-[15%] flex-col gap-1">
-          <div className="text-sm font-normal leading-4 text-gray-500">{missionsInfo.count} mission{missionsInfo.count > 1 && "s"}</div>
-          <div className="text-sm font-normal leading-4 text-gray-500">{missionsInfo.placesTotal} place{missionsInfo.placesTotal > 1 && "s"}</div>
+          <div className="text-sm font-normal leading-4 text-gray-500">
+            {missionsInfo.count} mission{missionsInfo.count > 1 && "s"}
+          </div>
+          <div className="text-sm font-normal leading-4 text-gray-500">
+            {missionsInfo.placesTotal} place{missionsInfo.placesTotal > 1 && "s"}
+          </div>
         </div>
         <div className="w-[30%]">
           {hit.status === "DRAFT" ? <Badge text={translate(hit.status)} color={colors.lightGold} minTooltipText={translate(hit.status)} /> : null}

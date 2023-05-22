@@ -424,7 +424,7 @@ export default function Details({ user, setUser, currentUser }) {
                       {sessionsWhereUserIsHeadCenter?.length > 0 &&
                         sessionsWhereUserIsHeadCenter.map((session) => (
                           <Session
-                            mode={currentUser.role === ROLES.ADMIN ? mode : MODE_DEFAULT}
+                            mode={[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) ? mode : MODE_DEFAULT}
                             session={session}
                             key={session._id}
                             onClickView={session?.center?._id ? () => window.open(`/centre/${session.center._id}?cohorte=${session.cohort}`) : undefined}
@@ -466,7 +466,7 @@ export default function Details({ user, setUser, currentUser }) {
                           )}
                         </div>
                       )}
-                      {roleMode === MODE_EDITION && currentUser.role === ROLES.ADMIN && !newCenter && (
+                      {roleMode === MODE_EDITION && [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && !newCenter && (
                         <AddButton onClick={addNewCenter} className={`mt-4 self-end ${sessionsWhereUserIsHeadCenter?.length > 0 ? "" : "mt-4"}`}>
                           Ajouter un centre
                         </AddButton>
