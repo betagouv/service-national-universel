@@ -338,27 +338,21 @@ export default function Index() {
                     btnLabel="À suivre"
                   />
                 )}
-                <NoteContainer
-                  title="Dossier d’éligibilité"
-                  number={stats.engagement_dossier_militaire_en_attente_de_validation}
-                  content="dossiers d’éligibilité en préparation militaire sont en attente de vérification."
-                  btnLabel="À vérifier"
-                />
-                {fullNote && (
-                  <>
-                    <NoteContainer
-                      title="Phase 3"
-                      number={stats.engagement_phase3_en_attente_de_validation}
-                      content="demandes de validation de phase 3 à suivre."
-                      btnLabel="À suivre"
-                    />
-                    <NoteContainer
-                      title="Mission"
-                      number={stats.engagement_mission_en_attente_de_validation}
-                      content="missions sont en attente de validation."
-                      btnLabel="À instruire"
-                    />
-                  </>
+                {shouldShow(stats.engagement, "engagement_dossier_militaire_en_attente_de_validation") && (
+                  <NoteContainer
+                    title="Dossier d’éligibilité"
+                    number={stats.engagement.engagement_dossier_militaire_en_attente_de_validation}
+                    content="dossiers d’éligibilité en préparation militaire sont en attente de vérification."
+                    btnLabel="À vérifier"
+                  />
+                )}
+                {shouldShow(stats.engagement, "engagement_mission_en_attente_de_validation") && (
+                  <NoteContainer
+                    title="Mission"
+                    number={stats.engagement.engagement_mission_en_attente_de_validation}
+                    content="missions sont en attente de validation."
+                    btnLabel="À instruire"
+                  />
                 )}
               </div>
             </div>

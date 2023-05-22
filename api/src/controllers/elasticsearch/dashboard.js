@@ -436,6 +436,10 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           // engagement_dossier_militaire_en_attente_de_validation
           { index: "young", type: "_doc" },
           queryFromFilter([{ terms: { "statusMilitaryPreparationFiles.keyword": ["WAITING_VERIFICATION"] } }]),
+          // Mission (À instruire) X missions sont en attente de validation
+          // engagement_mission_en_attente_de_validation
+          { index: "mission", type: "_doc" },
+          queryFromFilter([{ terms: { "status.keyword": ["WAITING_VALIDATION"] } }]),
         ),
       });
       const results = response.body.responses;
@@ -443,39 +447,9 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
         engagement_contrat_à_éditer: results[0].hits.total.value,
         engagement_contrat_en_attente_de_signature: results[1].hits.total.value,
         engagement_dossier_militaire_en_attente_de_validation: results[2].hits.total.value,
+        engagement_mission_en_attente_de_validation: results[3].hits.total.value,
       };
     }
-    /*
-    const response = await esClient.msearch({
-      index: "young",
-      body: buildArbitratyNdJson(
-        //
-        // Engagement
-        //
-
-       
-        // Contrat (À renseigner) 1 représentant de l’État est à renseigner.
-        // TODO.
-
-        // Mission (À instruire) X missions sont en attente de validation
-        // engagement_mission_en_attente_de_validation
-        { index: "mission", type: "_doc" },
-        queryFromFilter([{ terms: { "status.keyword": ["WAITING_VALIDATION"] } }]),
-        // Équivalence (À vérifier) X demandes d’équivalence MIG sont en attente de vérification
-        // TODO
-        // Volontaires (À suivre) X volontaires ayant commencé leur mission sans contrat signé
-        // TODO (trop lourd)
-        // Volontaires (À suivre) X volontaires ayant commencé leur mission sans statut à jour
-        // TODO (trop lourd)
-        // Volontaires (À suivre) X volontaires ayant achevé leur mission sans statut à jour
-        // TODO (trop lourd)
-        // Phase 3 (À suivre) X demandes de validation de phase 3 à suivre
-        // engagement_phase3_en_attente_de_validation
-        { index: "young", type: "_doc" },
-        queryFromFilter([{ terms: { "statusPhase3.keyword": ["WAITING_VALIDATION"] } }]),
-      ),
-    });
-    */
     return res.status(200).send({
       ok: true,
       data: {
