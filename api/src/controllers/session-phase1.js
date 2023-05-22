@@ -297,7 +297,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       <link rel="stylesheet" href="{{BASE_URL}}/css/style.css" />
     </head>
 
-    <body style="margin: 0; font-family: Marianne">
+    <body style="margin: 0; font-family: Marianne, Helvetica, Arial, sans-serif">
       {{BODY}}
     </body>
 </html>`;
