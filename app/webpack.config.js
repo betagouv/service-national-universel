@@ -48,7 +48,7 @@ module.exports = () => {
 
   return {
     mode,
-    entry: ["./src/index.js"],
+    entry: ["./src/index.jsx"],
     devtool: "source-map",
     output: {
       path: path.resolve("build"),

@@ -21,7 +21,7 @@ module.exports = () => {
   return {
     mode: "development",
     target: "web",
-    entry: ["./src/index.js"],
+    entry: ["./src/index.jsx"],
     devtool: "source-map",
     output: {
       path: path.resolve("build"),
@@ -42,7 +42,7 @@ module.exports = () => {
           use: ["style-loader", "css-loader", "postcss-loader"],
         },
         {
-          test: /\.js$/,
+          test: /\.(js|jsx)$/,
           loader: "babel-loader",
           include: path.resolve("src"),
           options: {

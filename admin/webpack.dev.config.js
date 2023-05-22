@@ -34,7 +34,7 @@ module.exports = (env) => {
       inline: true,
       hot: true,
     },
-    resolve: { fallback: { fs: false } },
+    resolve: { extensions: [".js", ".jsx"] },
     module: {
       rules: [
         {
@@ -42,7 +42,7 @@ module.exports = (env) => {
           use: ["style-loader", "css-loader", "postcss-loader"],
         },
         {
-          test: /\.js$/,
+          test: /\.(js|jsx)$/,
           loader: "babel-loader",
           include: path.resolve("src"),
           options: {

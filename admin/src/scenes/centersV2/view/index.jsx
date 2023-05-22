@@ -10,7 +10,7 @@ import { ROLES, canCreateOrUpdateCohesionCenter, translate } from "../../../util
 import CenterInformations from "./CenterInformations";
 
 import Pencil from "../../../assets/icons/Pencil";
-import Trash from "../../../assets/icons/Trash.js";
+import Trash from "../../../assets/icons/Trash";
 
 import { COHESION_STAY_START, isSessionEditionOpen } from "snu-lib";
 
