@@ -57,7 +57,9 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
       parent2PhoneZone: Joi.string().allow(null, ""),
     }).validate(req.body, { stripUnknown: true });
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -66,12 +68,15 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
-    if (!validator.isEmail(value.parent1Email)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
+    if (!validator.isEmail(value.parent1Email)) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     if (value.parent2Phone && !isPhoneNumberWellFormated(value.parent2Phone, value.parent2PhoneZone)) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    if (value.parent2Phone && value.parent2PhoneZone) value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
+    if (value.parent2Phone && value.parent2PhoneZone) {
+      value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
+    }
     if (value.parent2Email && !validator.isEmail(value.parent2Email)) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
@@ -107,7 +112,7 @@ router.put("/mission-preferences", passport.authenticate("young", { session: fal
       mobilityNearSchool: Joi.string().valid("true", "false").required(),
       mobilityNearRelative: Joi.string().valid("true", "false").required(),
       mobilityNearRelativeName: Joi.string().allow(null, ""),
-      mobilityNearRelativAddress: Joi.string().allow(null, ""),
+      mobilityNearRelativeAddress: Joi.string().allow(null, ""),
       mobilityNearRelativeZip: Joi.string().allow(null, ""),
       mobilityNearRelativeCity: Joi.string().allow(null, ""),
     }).validate(req.body, { stripUnknown: true });

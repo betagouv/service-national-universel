@@ -1934,6 +1934,7 @@ Schema.methods.comparePassword = async function (p) {
 
 //Sync with sendinblue
 Schema.post("save", function (doc) {
+  if (ENVIRONMENT === "testing") return;
   sendinblue.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
