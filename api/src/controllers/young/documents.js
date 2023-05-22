@@ -9,8 +9,7 @@ const ContractObject = require("../../models/contract");
 const ApplicationObject = require("../../models/application");
 const { ERRORS, isYoung, isReferent, getCcOfYoung, timeout, uploadFile, deleteFile, getFile } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
-const { canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib/roles");
-const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, START_DATE_SESSION_PHASE1 } = require("snu-lib/constants");
+const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, START_DATE_SESSION_PHASE1, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
 const config = require("../../config");
 const NodeClam = require("clamscan");
 const fs = require("fs");
@@ -85,7 +84,6 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
-
     // Create html
     const html = await getHtmlTemplate(type, template, young);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -481,10 +479,8 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
 
     // * Recalculate mimetype for reupload
     const decryptedBuffer = decrypt(downloaded.Body);
-    let mimeFromFile = null;
     try {
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
-      mimeFromFile = mime;
     } catch (e) {
       capture(e);
     }

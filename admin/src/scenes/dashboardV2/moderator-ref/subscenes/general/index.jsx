@@ -28,9 +28,12 @@ export default function Index() {
   const [volontairesData, setVolontairesData] = useState();
   const [inAndOutCohort, setInAndOutCohort] = useState();
 
+  // eslint-disable-next-line no-unused-vars
   const [notesFromDate, setNotesFromDate] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [notesToDate, setNotesToDate] = useState(null);
   const [notesPhase, setNotesPhase] = useState("all");
+  const [stats, setStats] = useState({});
 
   const [filterArray, setFilterArray] = useState([]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
@@ -69,7 +72,7 @@ export default function Index() {
         name: "Cohorte",
         fullValue: "Toutes",
         options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
-        sort: (e)=> orderCohort(e),
+        sort: (e) => orderCohort(e),
       },
     ].filter((e) => e);
     setFilterArray(filters);
@@ -116,6 +119,35 @@ export default function Index() {
     [inscriptionGoals, selectedFilters.cohort, selectedFilters.department, selectedFilters.region, selectedFilters.academy],
   );
 
+  React.useEffect(() => {
+    const updateStats = async (id) => {
+      const response = await api.post("/elasticsearch/dashboard/default", { filters: { meetingPointIds: [id], cohort: [] } });
+      const s = response.data;
+      setStats(s);
+    };
+    updateStats();
+  }, []);
+
+  function shouldShow(parent, key, index = null) {
+    if (fullNote) return true;
+
+    const entries = Object.entries(parent);
+    for (let i = 0, limit = 0; i < entries.length && limit < 3; i++) {
+      if (Array.isArray(entries[i][1])) {
+        for (let j = 0; j < entries[i][1].length && limit < 3; j++) {
+          if (entries[i][0] === key && index === j) return true;
+          limit++;
+        }
+      } else {
+        if (entries[i][0] === key) return true;
+        limit++;
+      }
+    }
+    return false;
+  }
+
+  if (!stats.inscription) return <div></div>;
+
   return (
     <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}>
       <div className="flex flex-col gap-8">
@@ -144,11 +176,54 @@ export default function Index() {
                   <div className="text-sm font-bold leading-5 text-gray-900">Inscriptions</div>
                   <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">4</div>
                 </div>
-                {Array.from(Array(4).keys())
-                  .slice(0, fullNote ? 4 : 3)
-                  .map((i) => (
-                    <NoteContainer key={`inscriptions` + i} title="Dossier" number={2} content="dossier d’inscriptions sont en attente de validation." btnLabel="À instruire" />
-                  ))}
+                {shouldShow(stats.inscription, "inscription_en_attente_de_validation") && (
+                  <NoteContainer
+                    title="Dossier"
+                    number={stats.inscription.inscription_en_attente_de_validation}
+                    content="dossier d’inscriptions sont en attente de validation."
+                    btnLabel="À instruire"
+                  />
+                )}
+                {shouldShow(stats.inscription, "inscription_corrigé_à_instruire_de_nouveau") && (
+                  <NoteContainer
+                    title="Dossier"
+                    number={stats.inscription.inscription_corrigé_à_instruire_de_nouveau}
+                    content="dossiers d’inscription corrigés sont à instruire de nouveau."
+                    btnLabel="À instruire"
+                  />
+                )}
+                {shouldShow(stats.inscription, "inscription_en_attente_de_correction") && (
+                  <NoteContainer
+                    title="Dossier"
+                    number={stats.inscription.inscription_en_attente_de_correction}
+                    content="dossiers d’inscription en attente de correction."
+                    btnLabel="À relancer"
+                  />
+                )}
+                {stats.inscription.inscription_en_attente_de_validation_cohorte.map(
+                  (item, key) =>
+                    shouldShow(stats.inscription, "inscription_en_attente_de_validation_cohorte", key) && (
+                      <NoteContainer
+                        key={"inscription_en_attente_de_validation_cohorte" + item.cohort}
+                        title="Droit à l'image"
+                        number={item.count}
+                        content={`dossiers d’inscription en attente de validation pour le séjour de ${item.cohort}`}
+                        btnLabel="À relancer"
+                      />
+                    ),
+                )}
+                {stats.inscription.inscription_sans_accord_renseigné.map(
+                  (item, key) =>
+                    shouldShow(stats.inscription, "inscription_sans_accord_renseigné", key) && (
+                      <NoteContainer
+                        key={"inscription_sans_accord_renseigné" + item.cohort}
+                        title="Droit à l'image"
+                        number={item.count}
+                        content={`volontaires sans accord renseigné pour le séjour de ${item.cohort}`}
+                        btnLabel="À relancer"
+                      />
+                    ),
+                )}
               </div>
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
@@ -156,11 +231,90 @@ export default function Index() {
                   <div className="text-sm font-bold leading-5 text-gray-900">Séjours</div>
                   <div className=" rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">7</div>
                 </div>
-                {Array.from(Array(7).keys())
-                  .slice(0, fullNote ? 7 : 3)
-                  .map((i) => (
-                    <NoteContainer key={`sejour` + i} title="Dossier" number={2} content="dossier d’inscriptions sont en attente de validation." btnLabel="À instruire" />
-                  ))}
+                {stats.sejour.sejour_rassemblement_non_confirmé.map(
+                  (item, key) =>
+                    shouldShow(stats.sejour, "sejour_rassemblement_non_confirmé", key) && (
+                      <NoteContainer
+                        title="Point de rassemblement"
+                        key={"sejour_rassemblement_non_confirmé" + item.cohort}
+                        number={item.count}
+                        content={`volontaires n’ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                        btnLabel="À déclarer"
+                      />
+                    ),
+                )}
+                {stats.sejour.sejour_participation_non_confirmée.map(
+                  (item, key) =>
+                    shouldShow(stats.sejour, "sejour_participation_non_confirmée", key) && (
+                      <NoteContainer
+                        title="Point de rassemblement"
+                        key={"sejour_participation_non_confirmée" + item.cohort}
+                        number={item.count}
+                        content={`volontaires n’ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                        btnLabel="À déclarer"
+                      />
+                    ),
+                )}
+                {stats.sejour.sejour_point_de_rassemblement_à_déclarer.map(
+                  (item, key) =>
+                    shouldShow(stats.sejour, "sejour_point_de_rassemblement_à_déclarer", key) && (
+                      <NoteContainer
+                        title="Point de rassemblement"
+                        key={"sejour_point_de_rassemblement_à_déclarer" + item.cohort + item.department}
+                        number=""
+                        content={`Au moins 1 point de rassemblement est à déclarer pour le séjour de ${item.cohort} (${item.department})`}
+                        btnLabel="À déclarer"
+                      />
+                    ),
+                )}
+                {stats.sejour.sejour_emploi_du_temps_non_déposé.map(
+                  (item, key) =>
+                    shouldShow(stats.sejour, "sejour_emploi_du_temps_non_déposé", key) && (
+                      <NoteContainer
+                        title="Emploi du temps"
+                        key={"sejour_emploi_du_temps_non_déposé" + item.cohort}
+                        number={item.count}
+                        content={`emplois du temps n’ont pas été déposés. ${item.cohort}`}
+                        btnLabel="À relancer"
+                      />
+                    ),
+                )}
+                {stats.sejour.sejour_contact_à_renseigner.map(
+                  (item, key) =>
+                    shouldShow(stats.sejour, "sejour_contact_à_renseigner", key) && (
+                      <NoteContainer
+                        title="Contact"
+                        key={"sejour_contact_à_renseigner" + item.cohort + item.department}
+                        number=""
+                        content={`Au moins 1 contact de convocation doit être renseigné pour le séjour de ${item.cohort} (${item.department})`}
+                        btnLabel="À renseigner"
+                      />
+                    ),
+                )}
+                {stats.sejour.sejour_volontaires_à_contacter.map(
+                  (item, key) =>
+                    shouldShow(stats.sejour, "sejour_volontaires_à_contacter", key) && (
+                      <NoteContainer
+                        title="Cas particuliers"
+                        key={"sejour_volontaires_à_contacter" + item.cohort}
+                        number={item.count}
+                        content={`volontaires à contacter pour préparer leur accueil pour le séjour de ${item.cohort}`}
+                        btnLabel="À contacter"
+                      />
+                    ),
+                )}
+                {stats.sejour.sejour_chef_de_centre.map(
+                  (item, key) =>
+                    shouldShow(stats.sejour, "sejour_chef_de_centre", key) && (
+                      <NoteContainer
+                        title="Chef de centre"
+                        key={"sejour_chef_de_centre" + item.cohort}
+                        number={item.count}
+                        content={`chefs de centre sont à renseigner pour le séjour de  ${item.cohort}`}
+                        btnLabel="À renseigner"
+                      />
+                    ),
+                )}
               </div>
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
@@ -168,18 +322,38 @@ export default function Index() {
                   <div className="text-sm font-bold leading-5 text-gray-900">Engagement</div>
                   <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">9</div>
                 </div>
-                {Array.from(Array(9).keys())
-                  .slice(0, fullNote ? 9 : 3)
-                  .map((i) => (
-                    <NoteContainer
-                      key={`engagement` + i}
-                      title="Dossier"
-                      number={2}
-                      content="dossier d’inscriptions sont en attente de validation.
-                    dossier d’inscriptions sont en attente de validation. "
-                      btnLabel="À instruire"
-                    />
-                  ))}
+                {shouldShow(stats.engagement, "engagement_contrat_à_éditer") && (
+                  <NoteContainer
+                    title="Contrat"
+                    number={stats.engagement.engagement_contrat_à_éditer}
+                    content="contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature."
+                    btnLabel="À suivre"
+                  />
+                )}
+                {shouldShow(stats.engagement, "engagement_contrat_en_attente_de_signature") && (
+                  <NoteContainer
+                    title="Contrat"
+                    number={stats.engagement.engagement_contrat_en_attente_de_signature}
+                    content="contrats d’engagement sont en attente de signature."
+                    btnLabel="À suivre"
+                  />
+                )}
+                {shouldShow(stats.engagement, "engagement_dossier_militaire_en_attente_de_validation") && (
+                  <NoteContainer
+                    title="Dossier d’éligibilité"
+                    number={stats.engagement.engagement_dossier_militaire_en_attente_de_validation}
+                    content="dossiers d’éligibilité en préparation militaire sont en attente de vérification."
+                    btnLabel="À vérifier"
+                  />
+                )}
+                {shouldShow(stats.engagement, "engagement_mission_en_attente_de_validation") && (
+                  <NoteContainer
+                    title="Mission"
+                    number={stats.engagement.engagement_mission_en_attente_de_validation}
+                    content="missions sont en attente de validation."
+                    btnLabel="À instruire"
+                  />
+                )}
               </div>
             </div>
             <div className="flex justify-center">
@@ -255,7 +429,7 @@ const NoteContainer = ({ title, number, content, btnLabel }) => {
       <div className="flex flex-col gap-2">
         <span className="text-sm font-bold leading-5 text-gray-900">{title}</span>
         <p className="text-xs font-normal leading-4 text-gray-900">
-          <span className="font-bold text-blue-600">{number} </span>
+          <span className="font-bold text-blue-600">{Number(number) >= 1000 ? "1000+" : number} </span>
           {content}
         </p>
       </div>

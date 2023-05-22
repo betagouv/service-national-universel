@@ -144,7 +144,7 @@ const academyToDepartments = {
 
 const academyList = [...new Set(Object.values(departmentToAcademy))];
 
-module.exports = {
+export {
   departmentToAcademy,
   academyList,
   academyToDepartments,

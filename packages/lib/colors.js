@@ -94,7 +94,7 @@ const CONTRACT_STATUS_COLORS = {
   VALIDATED: colors.green,
 };
 
-module.exports = {
+export {
   PHASE_STATUS_COLOR,
   APPLICATION_STATUS_COLORS,
   EQUIVALENCE_STATUS_COLORS,

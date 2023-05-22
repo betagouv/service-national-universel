@@ -177,7 +177,7 @@ const concatPhoneNumberWithZone = (phoneNumber, zoneKey) => {
   return `(${phoneZone.code}) ${phoneNumber}`;
 };
 
-module.exports = {
+export {
   PHONE_ZONES,
   PHONE_ZONES_NAMES,
   PHONE_ZONES_NAMES_ARR,

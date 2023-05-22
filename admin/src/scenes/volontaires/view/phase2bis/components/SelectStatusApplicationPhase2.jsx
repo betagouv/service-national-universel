@@ -116,7 +116,7 @@ export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback, dro
         <div className="inline-block" onClick={() => setDropDownOpen((dropDownOpen) => !dropDownOpen)}>
           <div className={`bg-${theme.background[application.status]} text-${theme.text[application.status]} flex flex-row items-center rounded`}>
             <div className="p-1 text-xs font-normal">{translateApplication(application.status)}</div>
-            {options.length > 1 && <BiChevronDown size={20} />}
+            {options.length >= 1 && <BiChevronDown size={20} />}
           </div>
         </div>
         {dropDownOpen && (
@@ -190,12 +190,13 @@ const lookUpAuthorizedStatus = ({ status, role }) => {
       case APPLICATION_STATUS.WAITING_VALIDATION:
         return [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED];
       case APPLICATION_STATUS.VALIDATED:
-        return [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON];
+        return [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON, APPLICATION_STATUS.REFUSED];
       case APPLICATION_STATUS.IN_PROGRESS:
         return [APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON];
       case APPLICATION_STATUS.WAITING_VERIFICATION:
         return [APPLICATION_STATUS.REFUSED, APPLICATION_STATUS.VALIDATED];
       case APPLICATION_STATUS.REFUSED:
+        return [APPLICATION_STATUS.VALIDATED];
       case APPLICATION_STATUS.CANCEL:
       case APPLICATION_STATUS.DONE:
       case APPLICATION_STATUS.ABANDON:
