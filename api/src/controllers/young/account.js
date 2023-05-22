@@ -6,7 +6,7 @@ const router = express.Router({ mergeParams: true });
 const YoungObject = require("../../models/young");
 const { serializeYoung } = require("../../utils/serializer");
 const { capture } = require("../../sentry");
-const { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated } = require("snu-lib/phone-number");
+const { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated } = require("snu-lib");
 const validator = require("validator");
 
 router.put("/profile", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
