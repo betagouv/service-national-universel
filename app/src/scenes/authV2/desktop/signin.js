@@ -102,7 +102,7 @@ export default function Signin() {
           </p>
           <div className="flex justify-center mt-3">
             <a
-              className="plausible-event-name=Clic+LP+Inscription flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-[#000091] p-2 text-[#000091] hover:bg-[#000091] hover:text-white"
+              className="plausible-event-name=Clic+LP+Inscription flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-[#000091] px-3 py-2 text-[#000091] hover:bg-[#000091] hover:text-white"
               href="https://www.snu.gouv.fr/?utm_source=moncompte&utm_medium=website&utm_campaign=fin+inscriptions+2023&utm_content=cta+notifier#formulaire">
               Recevoir une alerte par email
             </a>
