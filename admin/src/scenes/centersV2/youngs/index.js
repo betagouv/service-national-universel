@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { NavLink, useHistory, useParams } from "react-router-dom";
-import { ES_NO_LIMIT, getDepartmentNumber } from "snu-lib";
+import { ES_NO_LIMIT, getDepartmentNumber, download } from "snu-lib";
 import * as XLSX from "xlsx";
 import Bus from "../../../assets/icons/Bus";
 import ClipboardList from "../../../assets/icons/ClipboardList";
@@ -35,6 +35,9 @@ import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";
 import General from "./general";
 import Pointage from "./pointage";
+import Profil from "../../../assets/icons/Profil";
+import * as Sentry from "@sentry/react";
+import { environment } from "../../../config";
 
 export default function CenterYoungIndex() {
   const [modalExportMail, setModalExportMail] = useState({ isOpen: false });
@@ -384,6 +387,63 @@ export default function CenterYoungIndex() {
     }
   };
 
+  const exportImageRights = async () => {
+    try {
+      const file = await api.openpdf(`/session-phase1/${focusedSession._id}/image-rights`, {});
+      download(file, "droits-a-l-image.zip");
+    } catch (e) {
+      // We don't capture unauthorized. Just redirect.
+      if (e?.message === "unauthorized") {
+        return (window.location.href = "/auth/login?disconnected=1");
+      }
+      // We need more info to understand download issues.
+      Sentry.captureException(e);
+      toastr.error("Téléchargement impossible", e?.message, { timeOut: 10000 });
+    }
+  };
+
+  let exportItems = [
+    {
+      key: "exportData",
+      action: async () => {
+        await exportData();
+      },
+      render: (
+        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+          <ClipboardList className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+          <div className="text-sm text-gray-700">Informations complètes</div>
+        </div>
+      ),
+    },
+    {
+      key: "exportDataTransport",
+      action: async () => {
+        await exportDataTransport();
+      },
+      render: (
+        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+          <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+          <div className="text-sm text-gray-700">Informations transports</div>
+        </div>
+      ),
+    },
+  ];
+
+  if (environment !== "production") {
+    exportItems.push({
+      key: "exportImageRights",
+      action: async () => {
+        await exportImageRights();
+      },
+      render: (
+        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+          <Profil className="text-gray-400 group-hover:scale-105 group-hover:text-green-500 mx-[3px]" />
+          <div className="text-sm text-gray-700">Droits à l&apos;image</div>
+        </div>
+      ),
+    });
+  }
+
   return (
     <>
       {user.role !== ROLES.HEAD_CENTER ? (
@@ -409,32 +469,7 @@ export default function CenterYoungIndex() {
                 {
                   key: "export",
                   title: "Télécharger",
-                  items: [
-                    {
-                      key: "exportData",
-                      action: async () => {
-                        await exportData();
-                      },
-                      render: (
-                        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-                          <ClipboardList className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                          <div className="text-sm text-gray-700">Informations complètes</div>
-                        </div>
-                      ),
-                    },
-                    {
-                      key: "exportDataTransport",
-                      action: async () => {
-                        await exportDataTransport();
-                      },
-                      render: (
-                        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-                          <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                          <div className="text-sm text-gray-700">Informations transports</div>
-                        </div>
-                      ),
-                    },
-                  ],
+                  items: exportItems,
                 },
                 {
                   key: "exportMail",

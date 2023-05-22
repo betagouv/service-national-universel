@@ -84,7 +84,6 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
-
     // Create html
     const html = await getHtmlTemplate(type, template, young);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -480,10 +479,8 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
 
     // * Recalculate mimetype for reupload
     const decryptedBuffer = decrypt(downloaded.Body);
-    let mimeFromFile = null;
     try {
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
-      mimeFromFile = mime;
     } catch (e) {
       capture(e);
     }
