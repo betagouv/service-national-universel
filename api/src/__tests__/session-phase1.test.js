@@ -8,7 +8,7 @@ const { createSessionPhase1, notExistingSessionPhase1Id } = require("./helpers/s
 const { createSessionWithCohesionCenter } = require("./helpers/cohesionCenter");
 
 const { dbConnect, dbClose } = require("./helpers/db");
-const { ROLES } = require("snu-lib/roles");
+const { ROLES } = require("snu-lib");
 const getNewReferentFixture = require("./fixtures/referent");
 const { createReferentHelper } = require("./helpers/referent");
 const getNewCohortFixture = require("./fixtures/cohort");

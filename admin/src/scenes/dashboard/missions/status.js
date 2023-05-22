@@ -101,7 +101,7 @@ export default function Status({ data, filter, getLink, getExportQuery }) {
         {Object.values(MISSION_STATUS).map((l, k) => {
           return (
             <Col md={6} xl={3} key={k}>
-              <Link to={getLink({ base: `/mission`, filter, filtersUrl: [`STATUS=%5B"${l}"%5D`] })}>
+              <Link to={getLink({ base: `/mission`, filter: { ...filter, status: [l] } })}>
                 <Card borderBottomColor={MISSION_STATUS_COLORS[l]}>
                   <CardTitle>{translate(l)}</CardTitle>
                   <CardValueWrapper>

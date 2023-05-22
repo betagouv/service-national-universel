@@ -1,5 +1,5 @@
 import { Popover, Transition } from "@headlessui/react";
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
@@ -9,6 +9,7 @@ import ViewPopOver from "./filters/SavedViewPopOver";
 
 import api from "../../../services/api";
 import { buildQuery, getURLParam, currentFilterAsUrl, normalizeString } from "./filters/utils";
+import { debounce } from "../../../utils";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -93,10 +94,8 @@ export default function Filters({
     [filtersVisible],
   );
 
-  useEffect(
-    function updateOnParamChange() {
-      if (Object.keys(selectedFilters).length === 0) return;
-
+  const updateOnParamChange = useCallback(
+    debounce(async (selectedFilters, paramData, location) => {
       buildQuery(route, selectedFilters, paramData?.page, filters, paramData?.sort).then((res) => {
         if (!res) return;
         setDataFilter({ ...dataFilter, ...res.newFilters });
@@ -114,9 +113,14 @@ export default function Filters({
         const { pathname } = history.location;
         if (location.search !== search) window.history.replaceState({ path: pathname + search }, "", pathname + search);
       });
-    },
-    [selectedFilters, paramData.page, paramData.sort, location.search],
+    }, 250),
+    [],
   );
+
+  useEffect(() => {
+    if (Object.keys(selectedFilters).length === 0) return;
+    updateOnParamChange(selectedFilters, paramData, location);
+  }, [selectedFilters, paramData.page, paramData.sort, location.search]);
 
   const getDefaultFilters = () => {
     const newFilters = {};
@@ -187,9 +191,9 @@ export default function Filters({
                   ref={ref}
                   onClick={() => setIsShowing(!isShowing)}
                   className={classNames(
-                    open ? "bg-gray-200 ring-2 ring-blue-500 ring-offset-2" : "",
-                    "flex h-[38px] cursor-pointer items-center gap-2 rounded-lg bg-gray-100  px-3 text-[14px] font-medium text-gray-700 outline-none hover:bg-gray-200",
-                    hasSomeFilterSelected ? "bg-[#2563EB] text-white hover:bg-blue-700" : "",
+                    open ? "ring-2 ring-blue-500 ring-offset-2" : "",
+                    "flex h-[38px] cursor-pointer items-center gap-2 rounded-lg px-3 text-[14px] font-medium  outline-none",
+                    hasSomeFilterSelected ? "bg-[#2563EB] text-white hover:bg-blue-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200",
                   )}>
                   <FilterSvg className={`${hasSomeFilterSelected ? "text-white" : "text-gray-400"} h-4 w-4`} />
                   <span>Filtres</span>

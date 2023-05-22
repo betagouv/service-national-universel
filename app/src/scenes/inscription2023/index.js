@@ -32,6 +32,7 @@ import Footer from "./../../components/footerV2";
 import Header from "./../../components/header";
 import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import { YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
+import FutureCohort from "./FutureCohort";
 
 function renderStep(step, device) {
   if (step === STEPS.COORDONNEES) return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;
@@ -114,6 +115,10 @@ export default function Index() {
   const young = useSelector((state) => state.Auth.young);
 
   if (!young) return <Redirect to="/preinscription" />;
+
+  if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && young.cohort === "à venir") {
+    return <FutureCohort />
+  }
 
   //il n'a pas acces a l'inscription
   if (young?.status && ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.WAITING_CORRECTION].includes(young?.status)) {

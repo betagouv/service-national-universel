@@ -173,13 +173,13 @@ export default function StepUpload() {
       <div className="my-10 flex w-full justify-around">
         <div>
           <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
-          <div className="mt-4 text-lg text-center text-gray-500">Recto</div>
+          <div className="mt-4 text-sm text-center text-gray-500">Recto</div>
         </div>
 
         {ID[category].imgBack && (
           <div>
             <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />
-            <div className="mt-4 text-lg text-center text-gray-500">Verso</div>
+            <div className="mt-4 text-sm text-center text-gray-500">Verso</div>
           </div>
         )}
       </div>

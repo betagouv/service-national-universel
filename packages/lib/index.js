@@ -1,18 +1,8 @@
-const colors = require("./colors");
-const date = require("./date");
-const constants = require("./constants");
-const file = require("./file");
-const translation = require("./translation");
-const regionAndDepartments = require("./region-and-departments");
-const academy = require("./academy");
-const roles = require("./roles");
-const zammood = require("./zammood");
+import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants";
+import translation from "./translation";
+import regionAndDepartments from "./region-and-departments";
+import { ROLES } from "./roles";
 
-const excelExports = require("./excelExports");
-const sessions = require("./sessions");
-const pdt = require("./plan-de-transport");
-
-const { YOUNG_STATUS, YOUNG_STATUS_PHASE1, COHESION_STAY_START } = require("./constants");
 const isInRuralArea = (v) => {
   if (!v.populationDensity) return null;
   return ["PEU DENSE", "TRES PEU DENSE"].includes(v.populationDensity) ? "true" : "false";
@@ -48,12 +38,17 @@ function inscriptionModificationOpenForYoungs(cohort, young) {
     case "Juin 2023":
       return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023 - A modifier quand on connaitra la date.
     case "Juillet 2023":
-      if (young && (regionAndDepartments.isFromDOMTOM(young) || regionAndDepartments.isFromFrenchPolynesia(young))) {
+      if (young && regionAndDepartments.isFromFrenchPolynesia(young)) {
         return new Date() < new Date(2023, 5, 1, 23, 59); // before 1 june 2023
       }
+      if (young && regionAndDepartments.isFromDOMTOM(young)) {
+        return new Date() < new Date(2023, 4, 21, 23, 59); // before 22 mai 2023
+      }
       return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023
+    case "à venir":
+      return false;
     default:
-      return new Date() < new Date(2023, 6, 11, 23, 59); // before 11 juillet 2023
+      return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023
   }
 }
 
@@ -162,7 +157,7 @@ const getSelectedFilterLabel = (selected, prelabel) => {
 
 const getResultLabel = (e, pageSize) => `${pageSize * e.currentPage + 1}-${pageSize * e.currentPage + e.displayedResults} sur ${e.numberOfResults}`;
 
-const getLabelWithdrawnReason = (value) => constants.WITHRAWN_REASONS.find((e) => e.value === value)?.label || value;
+const getLabelWithdrawnReason = (value) => WITHRAWN_REASONS.find((e) => e.value === value)?.label || value;
 
 function canUpdateYoungStatus({ body, current }) {
   if (!body || !current) return true;
@@ -183,7 +178,7 @@ function canUpdateYoungStatus({ body, current }) {
 
 function canUserUpdateYoungStatus(actor) {
   if (actor) {
-    return [roles.ROLES.ADMIN].includes(actor.role);
+    return [ROLES.ADMIN].includes(actor.role);
   } else {
     return false;
   }
@@ -204,7 +199,6 @@ const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id }) => {
   if (statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return true;
   return false;
 };
-
 const formatPhoneNumberFR = (tel) => {
   if (!tel) return "";
   const regex = /^((?:(?:\+|00)33|0)\s*[1-9])((?:[\s.-]*\d{2}){4})$/;
@@ -217,7 +211,7 @@ const formatPhoneNumberFR = (tel) => {
   return formatted;
 };
 
-module.exports = {
+export {
   isEndOfInscriptionManagement2021,
   inscriptionModificationOpenForYoungs,
   inscriptionCreationOpenForYoungs,
@@ -231,16 +225,17 @@ module.exports = {
   canUserUpdateYoungStatus,
   youngCanChangeSession,
   formatPhoneNumberFR,
-  ...colors,
-  ...regionAndDepartments,
-  ...academy,
-  ...date,
-  ...constants,
-  ...file,
-  ...roles,
-  ...zammood,
-  ...translation,
-  ...excelExports,
-  ...sessions,
-  ...pdt,
 };
+export * from "./academy";
+export * from "./colors";
+export * from "./constants";
+export * from "./date";
+export * from "./excelExports";
+export * from "./file";
+export * from "./phone-number";
+export * from "./plan-de-transport";
+export * from "./region-and-departments";
+export * from "./roles";
+export * from "./sessions";
+export * from "./translation";
+export * from "./zammood";

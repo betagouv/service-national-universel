@@ -3,18 +3,12 @@ const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
 const getNewStructureFixture = require("./fixtures/structure");
-const {
-  createStructureHelper,
-  getStructureByIdHelper,
-  notExistingStructureId,
-  expectStructureToEqual,
-  deleteStructureByIdHelper,
-} = require("./helpers/structure");
+const { createStructureHelper, getStructureByIdHelper, notExistingStructureId, expectStructureToEqual, deleteStructureByIdHelper } = require("./helpers/structure");
 const { createMissionHelper, getMissionByIdHelper, deleteMissionByIdHelper } = require("./helpers/mission");
 const getNewMissionFixture = require("./fixtures/mission");
 const getNewReferentFixture = require("./fixtures/referent");
 const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
-const { ROLES } = require("snu-lib/roles");
+const { ROLES } = require("snu-lib");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -150,7 +144,7 @@ describe("Structure", () => {
           expect.objectContaining({
             ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/name", value: "MY NEW NAME" })]),
           }),
-        ])
+        ]),
       );
     });
   });

@@ -58,7 +58,7 @@ export default function Status({ filter }) {
     <>
       <Row className=" flex items-center">
         <Col md={4}>
-          <Link to={getLink({ base: `/centre`, filter })}>
+          <Link to={getLink({ base: `/centre/liste/liste-centre`, filter })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
               <CardTitle>Centres</CardTitle>
               <CardValueWrapper>
@@ -68,7 +68,7 @@ export default function Status({ filter }) {
           </Link>
         </Col>
         <Col md={4}>
-          <Link to={getLink({ base: `/centre`, filter, filtersUrl: [`STATUS=%5B"DRAFT"%5D`] })}>
+          <Link to={getLink({ base: `/centre/liste/liste-centre`, filter, filtersUrl: ["sessionsStatus=DRAFT"] })}>
             <Card borderBottomColor="#8CA1A4">
               <CardTitle>Brouillon</CardTitle>
               <CardValueWrapper>
@@ -78,7 +78,7 @@ export default function Status({ filter }) {
           </Link>
         </Col>
         <Col md={4}>
-          <Link to={getLink({ base: `/centre`, filter, filtersUrl: [`STATUS=%5B"VALIDATED"%5D`] })}>
+          <Link to={getLink({ base: `/centre/liste/liste-centre`, filter, filtersUrl: ["sessionStatus=VALIDATED"] })}>
             <Card borderBottomColor="#6C9269">
               <CardTitle>Validés</CardTitle>
               <CardValueWrapper>

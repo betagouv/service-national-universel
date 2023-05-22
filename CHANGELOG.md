@@ -1,3 +1,62 @@
+## [1.274.1](https://github.com/betagouv/service-national-universel/compare/v1.274.0...v1.274.1) (2023-05-19)
+
+
+### Bug Fixes
+
+* search in volontaires allow accent and diacritics ([de2566c](https://github.com/betagouv/service-national-universel/commit/de2566cc4127c09db3ba331c2060483510418979))
+* **admin:** debounce search to avoid race ([114c158](https://github.com/betagouv/service-national-universel/commit/114c158c7cb84d42e80d6645ed4cad3dde1a8acc))
+* **api:** error in services/application ([0e73a3d](https://github.com/betagouv/service-national-universel/commit/0e73a3dde82617bd5ed03ac6640ae232f9624772))
+* **api:** limit items to 10000 for elasticsearch to improve performance ([0575418](https://github.com/betagouv/service-national-universel/commit/05754187b0b589863094b4e851726910d1f60301))
+* **api:** Remove double import of YoungModel ([e860423](https://github.com/betagouv/service-national-universel/commit/e860423c83c87b043ceaa8d46b958d06752aad4f))
+
+# [1.274.0](https://github.com/betagouv/service-national-universel/compare/v1.273.0...v1.274.0) (2023-05-17)
+
+
+### Bug Fixes
+
+* **admin:** dashboard ([6fd47fa](https://github.com/betagouv/service-national-universel/commit/6fd47faeb01c571d384be9cd35d36775cd2693ee))
+* **admin:** old dashboard redirection ([#2617](https://github.com/betagouv/service-national-universel/issues/2617)) ([a27d012](https://github.com/betagouv/service-national-universel/commit/a27d01235b3cacf2190c085368fa3156224d355c))
+* **api:** mission young model require ([70d3f09](https://github.com/betagouv/service-national-universel/commit/70d3f0927e921838571ebad1768294b4fce3621a))
+* **github:** Update nodeJS actions ([dfa6612](https://github.com/betagouv/service-national-universel/commit/dfa661260403fca2c9c27c4eb22fed602547ca16))
+
+
+### Features
+
+* **admin/api:** list inscription new filters ([#2615](https://github.com/betagouv/service-national-universel/issues/2615)) ([0d72371](https://github.com/betagouv/service-national-universel/commit/0d723716b341a60ec5adc067aca16f894e33d147))
+* **app:** Ajouter le sélecteur de préfixe à la page des consentements ([#2604](https://github.com/betagouv/service-national-universel/issues/2604)) ([451d8d0](https://github.com/betagouv/service-national-universel/commit/451d8d00470d92aa14a2bbe9872e544438cc0800))
+
+# [1.273.0](https://github.com/betagouv/service-national-universel/compare/v1.272.0...v1.273.0) (2023-05-16)
+
+
+### Bug Fixes
+
+* **admin:** Filters css ([766e3e1](https://github.com/betagouv/service-national-universel/commit/766e3e167d5ba9159539c1aeeacafd5890e48b9d))
+* **api:** Fix pipeline schema de repartition par cohorte ([665e2d3](https://github.com/betagouv/service-national-universel/commit/665e2d3f60c4d67bcb92bc468df6d2ac2d1b8755))
+* **api:** Put minimalist eslint on api ([5b87710](https://github.com/betagouv/service-national-universel/commit/5b877102c6ac4d4760775b44144f8aefbb9629a3))
+
+
+### Features
+
+* **admin:** new filters young List ([#2611](https://github.com/betagouv/service-national-universel/issues/2611)) ([dd1ddcc](https://github.com/betagouv/service-national-universel/commit/dd1ddccd9e81f38587b520c9d88214c5e80339ae))
+* **app:** Ajout d'un écran pour les "à venir" en cours d'inscription ([#2613](https://github.com/betagouv/service-national-universel/issues/2613)) ([0b3727c](https://github.com/betagouv/service-national-universel/commit/0b3727c6a01abee976bd835ca55d75c9c71a998f))
+
+# [1.272.0](https://github.com/betagouv/service-national-universel/compare/v1.271.0...v1.272.0) (2023-05-15)
+
+
+### Bug Fixes
+
+* **admin/app:** team new logique / split from dynamique parameter ([#2608](https://github.com/betagouv/service-national-universel/issues/2608)) ([a277b5e](https://github.com/betagouv/service-national-universel/commit/a277b5ea9a6884b8504142c5d245034d21f4661b))
+* **api:** comment out changeCohort test ([243121e](https://github.com/betagouv/service-national-universel/commit/243121ed20b2eea94443f22e35656700c045a8c4))
+* **lib:** add access to inscription modification for cohort to come ([cea241a](https://github.com/betagouv/service-national-universel/commit/cea241a891dc4da64686f10d46a349043ae8934f))
+* **lib:** export format e164 phoneZone ([#2610](https://github.com/betagouv/service-national-universel/issues/2610)) ([87c653a](https://github.com/betagouv/service-national-universel/commit/87c653afda75fc16e05f87ee290fd5a49f2a9a2d))
+* **monorepo:** Redeploy/rebuild on changes in lib ([c608faa](https://github.com/betagouv/service-national-universel/commit/c608faa86ca95bd0efb252faabff9e3fada051f5))
+* lib path in workspace config ([cb53eb8](https://github.com/betagouv/service-national-universel/commit/cb53eb8b250bfe931a80c9525bca3f181d2a1d56))
+
+
+### Features
+
+* **admin:** add structure name on mission list ([df3c603](https://github.com/betagouv/service-national-universel/commit/df3c60362e1d606fa1e55c12fbe8799e665237cc))
+
 # [1.271.0](https://github.com/betagouv/service-national-universel/compare/v1.270.0...v1.271.0) (2023-05-12)
 
 

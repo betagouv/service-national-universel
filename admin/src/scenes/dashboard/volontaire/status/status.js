@@ -12,7 +12,7 @@ export default function Status({ status, statusPhase1, statusPhase2, statusPhase
     <React.Fragment>
       <Row>
         <Col md={6} xl={4}>
-          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] })}>
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ["status=VALIDATED"] })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
               <CardTitle>Volontaires</CardTitle>
               <CardValueWrapper>
@@ -28,7 +28,7 @@ export default function Status({ status, statusPhase1, statusPhase2, statusPhase
       </Row>
       <Row>
         <Col md={6} xl={4}>
-          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D&STATUS_PHASE_1=%5B"DONE"%5D'] })}>
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ["status=VALIDATED&statusPhase1=DONE"] })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.VALIDATED}>
               <CardTitle>Ayant validé la Phase 1</CardTitle>
               <CardValueWrapper>
@@ -42,7 +42,7 @@ export default function Status({ status, statusPhase1, statusPhase2, statusPhase
           </Link>
         </Col>
         <Col md={6} xl={4}>
-          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D&STATUS_PHASE_2=%5B"VALIDATED"%5D'] })}>
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ["status=VALIDATED&statusPhase2=VALIDATED"] })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.VALIDATED}>
               <CardTitle>Ayant validé la Phase 2</CardTitle>
               <CardValueWrapper>

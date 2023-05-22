@@ -47,7 +47,7 @@ const pointRassemblementModel = require("../../models/PlanDeTransport/pointDeRas
 const CohortModel = require("../../models/cohort");
 const cohesionCenterModel = require("../../models/cohesionCenter");
 const { getTransporter } = require("../../utils");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
 
 const schemaRepartitionBodySchema = Joi.object({
@@ -395,8 +395,8 @@ router.get("/department-detail/:department/:cohort", passport.authenticate("refe
       {
         $lookup: {
           from: "schemaderepartitions",
-          localField: "cohesionCenterId",
-          foreignField: "centerId",
+          let: { local_cohesionCenterId: "$cohesionCenterId" },
+          pipeline: [{ $match: { $expr: { $and: [{ $eq: ["$centerId", "$$local_cohesionCenterId"] }, { $eq: ["$cohort", cohort] }] } } }],
           as: "groups",
         },
       },

@@ -335,7 +335,7 @@ const region2zone = {
   "Terres australes et antarctiques françaises": "DOM",
   "Wallis-et-Futuna": "DOM",
   "Polynésie française": "PF",
-  "Nouvelle-Calédonie": "DOM",
+  "Nouvelle-Calédonie": "NC",
   Etranger: "Etranger",
 };
 
@@ -353,17 +353,27 @@ const getRegionForEligibility = (young) => {
   return region;
 };
 
+const isFromMetropole = (young) => {
+  const region = getRegionForEligibility(young);
+  return region2zone[region] === "A" || region2zone[region] === "B" || region2zone[region] === "C";
+};
+
 const isFromDOMTOM = (young) => {
   const region = getRegionForEligibility(young);
   return region2zone[region] === "DOM";
 };
 
-const isFromFrenchPolynesia = (young) => { 
+const isFromFrenchPolynesia = (young) => {
   const region = getRegionForEligibility(young);
   return region2zone[region] === "PF";
-}
+};
 
-module.exports = {
+const isFromNouvelleCaledonie = (young) => {
+  const region = getRegionForEligibility(young);
+  return region2zone[region] === "NC";
+};
+
+export {
   departmentLookUp,
   departmentList,
   getDepartmentNumber,
@@ -374,6 +384,24 @@ module.exports = {
   getRegionByZip,
   region2zone,
   getRegionForEligibility,
+  isFromMetropole,
   isFromDOMTOM,
   isFromFrenchPolynesia,
+  isFromNouvelleCaledonie,
+};
+export default {
+  departmentLookUp,
+  departmentList,
+  getDepartmentNumber,
+  regionList,
+  department2region,
+  region2department,
+  getDepartmentByZip,
+  getRegionByZip,
+  region2zone,
+  getRegionForEligibility,
+  isFromMetropole,
+  isFromDOMTOM,
+  isFromFrenchPolynesia,
+  isFromNouvelleCaledonie,
 };
