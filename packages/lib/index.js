@@ -48,8 +48,11 @@ function inscriptionModificationOpenForYoungs(cohort, young) {
     case "Juin 2023":
       return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023 - A modifier quand on connaitra la date.
     case "Juillet 2023":
-      if (young && (regionAndDepartments.isFromDOMTOM(young) || regionAndDepartments.isFromFrenchPolynesia(young))) {
+      if (young && regionAndDepartments.isFromFrenchPolynesia(young)) {
         return new Date() < new Date(2023, 5, 1, 23, 59); // before 1 june 2023
+      }
+      if (young && regionAndDepartments.isFromDOMTOM(young)) {
+        return new Date() < new Date(2023, 4, 21, 23, 59); // before 22 mai 2023
       }
       return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023
     case "à venir":
