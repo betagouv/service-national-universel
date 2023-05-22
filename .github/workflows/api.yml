@@ -49,7 +49,7 @@ jobs:
         continue-on-error: true
         run: npm run lint
 
-      - name: Build lib before test
+      - name: Build lib
         continue-on-error: false
         run: npm run build -w packages/lib
 
@@ -76,6 +76,10 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 18.x
+
+      - name: Build lib
+        continue-on-error: false
+        run: npm run build -w packages/lib
 
       - name: Create SSH key
         run: |

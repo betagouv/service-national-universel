@@ -32,6 +32,10 @@ jobs:
         with:
           node-version: 18.x
 
+      - name: Build lib
+        continue-on-error: false
+        run: npm run build -w packages/lib
+
       - name: Create SSH key
         run: |
           mkdir -p ~/.ssh/

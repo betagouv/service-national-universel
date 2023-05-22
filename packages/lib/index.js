@@ -223,16 +223,16 @@ export {
   youngCanChangeSession,
   formatPhoneNumberFR,
 };
-export * from "./colors";
-export * from "./region-and-departments";
 export * from "./academy";
-export * from "./date";
+export * from "./colors";
 export * from "./constants";
-export * from "./file";
-export * from "./roles";
-export * from "./zammood";
-export * from "./translation";
+export * from "./date";
 export * from "./excelExports";
-export * from "./sessions";
-export * from "./plan-de-transport";
+export * from "./file";
 export * from "./phone-number";
+export * from "./plan-de-transport";
+export * from "./region-and-departments";
+export * from "./roles";
+export * from "./sessions";
+export * from "./translation";
+export * from "./zammood";
