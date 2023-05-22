@@ -70,14 +70,14 @@ export default function ParticularSituation({ filter }) {
     return (
       <Row>
         {handicap ? (
-          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ['HANDICAP=%5B"true"%5D'] })} disabled={user.role === ROLES.VISITOR}>
+          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ["handicap=true"] })} disabled={user.role === ROLES.VISITOR}>
             <CircularProgress circleProgressColor="#1B7BBF" percentage={((handicap.true * 100) / total).toFixed(1)} title={handicap.true} subtitle="En situation de handicap" />
           </LinkItem>
         ) : (
           <Loader />
         )}
         {ppsBeneficiary ? (
-          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ['PPS=%5B"true"%5D'] })} disabled={user.role === ROLES.VISITOR}>
+          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ["ppsBeneficiary=true"] })} disabled={user.role === ROLES.VISITOR}>
             <CircularProgress
               circleProgressColor="#1B7BBF"
               percentage={((ppsBeneficiary.true * 100) / total).toFixed(1)}
@@ -89,7 +89,7 @@ export default function ParticularSituation({ filter }) {
           <Loader />
         )}
         {paiBeneficiary ? (
-          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ['PAI=%5B"true"%5D'] })} disabled={user.role === ROLES.VISITOR}>
+          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ["paiBeneficiary=true"] })} disabled={user.role === ROLES.VISITOR}>
             <CircularProgress
               circleProgressColor="#1B7BBF"
               percentage={((paiBeneficiary.true * 100) / total).toFixed(1)}
@@ -101,7 +101,7 @@ export default function ParticularSituation({ filter }) {
           <Loader />
         )}
         {specificAmenagment ? (
-          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ['SPECIFIC_AMENAGEMENT=%5B"true"%5D'] })} disabled={user.role === ROLES.VISITOR}>
+          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ["specificAmenagment=true"] })} disabled={user.role === ROLES.VISITOR}>
             <CircularProgress
               circleProgressColor="#1B7BBF"
               percentage={((specificAmenagment.true * 100) / total).toFixed(1)}
@@ -113,14 +113,14 @@ export default function ParticularSituation({ filter }) {
           <Loader />
         )}
         {allergies ? (
-          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ['ALLERGIES=%5B"true"%5D'] })} disabled={user.role === ROLES.VISITOR}>
+          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ["allergies=true"] })} disabled={user.role === ROLES.VISITOR}>
             <CircularProgress circleProgressColor="#1B7BBF" percentage={((allergies.true * 100) / total).toFixed(1)} title={allergies.true} subtitle="Allergie/intolérance" />
           </LinkItem>
         ) : (
           <Loader />
         )}
         {handicapInSameDepartment ? (
-          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ['SAME_DEPARTMENT=%5B"true"%5D'] })} disabled={user.role === ROLES.VISITOR}>
+          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ["handicapInSameDepartment=true"] })} disabled={user.role === ROLES.VISITOR}>
             <CircularProgress
               circleProgressColor="#1B7BBF"
               percentage={((handicapInSameDepartment.true * 100) / total).toFixed(1)}
@@ -132,7 +132,7 @@ export default function ParticularSituation({ filter }) {
           <Loader />
         )}
         {reducedMobilityAccess ? (
-          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ['PMR=%5B"true"%5D'] })} disabled={user.role === ROLES.VISITOR}>
+          <LinkItem link={getLink({ base: `/inscription`, filter, filtersUrl: ["reducedMobilityAccess=true"] })} disabled={user.role === ROLES.VISITOR}>
             <CircularProgress
               circleProgressColor="#1B7BBF"
               percentage={((reducedMobilityAccess.true * 100) / total).toFixed(1)}

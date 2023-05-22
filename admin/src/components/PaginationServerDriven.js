@@ -33,7 +33,7 @@ export default function PaginationServerDriven({ pageCount, currentPage, count, 
   return (
     <div className={`flex items-center justify-end gap-2 ${className}`}>
       <div className="text-[12px] text-[#242526]">
-        {currentPage * itemsPerPage + 1} - {currentPage * itemsPerPage + itemsCount} sur {count}
+        {currentPage * itemsPerPage + 1} - {currentPage * itemsPerPage + itemsCount} sur {count === 10000 ? "plus de 10000" : count}
       </div>
       <a
         href="#"

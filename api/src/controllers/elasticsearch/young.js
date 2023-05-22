@@ -480,7 +480,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   try {
     const { user, body } = req;
     // Configuration
-    const searchFields = ["email", "firstName", "lastName", "city", "zip", "parent1Email", "parent2Email"];
+    const searchFields = ["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip", "parent1Email.keyword", "parent2Email.keyword"];
     const filterFields = getYoungsFilters(user);
 
     const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt"];
@@ -532,7 +532,7 @@ router.post("/young-having-school-in-dep-or-region/:action(_msearch|export)", pa
   try {
     const { user, body } = req;
     // Configuration
-    const searchFields = ["email", "firstName", "lastName", "city", "zip", "parent1Email", "parent2Email"];
+    const searchFields = ["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip", "parent1Email.keyword", "parent2Email.keyword"];
     const filterFields = getYoungsFilters(user);
 
     const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt"];
