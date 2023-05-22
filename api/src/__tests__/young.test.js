@@ -18,7 +18,7 @@ const { createCohesionCenter, getCohesionCenterById } = require("./helpers/cohes
 const { createSessionPhase1, getSessionPhase1ById } = require("./helpers/sessionPhase1");
 const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
 
-const { ROLES } = require("snu-lib/roles");
+const { ROLES } = require("snu-lib");
 
 const jwt = require("jsonwebtoken");
 const { default: faker } = require("@faker-js/faker");

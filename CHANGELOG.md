@@ -1,3 +1,30 @@
+## [1.274.1](https://github.com/betagouv/service-national-universel/compare/v1.274.0...v1.274.1) (2023-05-19)
+
+
+### Bug Fixes
+
+* search in volontaires allow accent and diacritics ([de2566c](https://github.com/betagouv/service-national-universel/commit/de2566cc4127c09db3ba331c2060483510418979))
+* **admin:** debounce search to avoid race ([114c158](https://github.com/betagouv/service-national-universel/commit/114c158c7cb84d42e80d6645ed4cad3dde1a8acc))
+* **api:** error in services/application ([0e73a3d](https://github.com/betagouv/service-national-universel/commit/0e73a3dde82617bd5ed03ac6640ae232f9624772))
+* **api:** limit items to 10000 for elasticsearch to improve performance ([0575418](https://github.com/betagouv/service-national-universel/commit/05754187b0b589863094b4e851726910d1f60301))
+* **api:** Remove double import of YoungModel ([e860423](https://github.com/betagouv/service-national-universel/commit/e860423c83c87b043ceaa8d46b958d06752aad4f))
+
+# [1.274.0](https://github.com/betagouv/service-national-universel/compare/v1.273.0...v1.274.0) (2023-05-17)
+
+
+### Bug Fixes
+
+* **admin:** dashboard ([6fd47fa](https://github.com/betagouv/service-national-universel/commit/6fd47faeb01c571d384be9cd35d36775cd2693ee))
+* **admin:** old dashboard redirection ([#2617](https://github.com/betagouv/service-national-universel/issues/2617)) ([a27d012](https://github.com/betagouv/service-national-universel/commit/a27d01235b3cacf2190c085368fa3156224d355c))
+* **api:** mission young model require ([70d3f09](https://github.com/betagouv/service-national-universel/commit/70d3f0927e921838571ebad1768294b4fce3621a))
+* **github:** Update nodeJS actions ([dfa6612](https://github.com/betagouv/service-national-universel/commit/dfa661260403fca2c9c27c4eb22fed602547ca16))
+
+
+### Features
+
+* **admin/api:** list inscription new filters ([#2615](https://github.com/betagouv/service-national-universel/issues/2615)) ([0d72371](https://github.com/betagouv/service-national-universel/commit/0d723716b341a60ec5adc067aca16f894e33d147))
+* **app:** Ajouter le sélecteur de préfixe à la page des consentements ([#2604](https://github.com/betagouv/service-national-universel/issues/2604)) ([451d8d0](https://github.com/betagouv/service-national-universel/commit/451d8d00470d92aa14a2bbe9872e544438cc0800))
+
 # [1.273.0](https://github.com/betagouv/service-national-universel/compare/v1.272.0...v1.273.0) (2023-05-16)
 
 

@@ -2,14 +2,13 @@ const passport = require("passport");
 const express = require("express");
 const Joi = require("joi");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch } = require("snu-lib/roles");
+const { ROLES, canSearchInElasticSearch, YOUNG_STATUS_PHASE1, ES_NO_LIMIT } = require("snu-lib");
 const datesub = require("date-fns/sub");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
-const { YOUNG_STATUS_PHASE1, ES_NO_LIMIT } = require("snu-lib");
 const { serializeYoungs } = require("../../utils/es-serializer");
 const StructureObject = require("../../models/structure");
 const ApplicationObject = require("../../models/application");
@@ -60,6 +59,7 @@ function getYoungsFilters(user) {
     "status_equivalence.keyword",
     "statusPhase3.keyword",
     "schoolDepartment.keyword",
+    "parentAllowSNU.keyword",
   ].filter(Boolean);
 }
 
@@ -479,7 +479,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   try {
     const { user, body } = req;
     // Configuration
-    const searchFields = ["email", "firstName", "lastName", "city", "zip", "parent1Email", "parent2Email"];
+    const searchFields = ["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip", "parent1Email.keyword", "parent2Email.keyword"];
     const filterFields = getYoungsFilters(user);
 
     const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt"];
@@ -531,7 +531,7 @@ router.post("/young-having-school-in-dep-or-region/:action(_msearch|export)", pa
   try {
     const { user, body } = req;
     // Configuration
-    const searchFields = ["email", "firstName", "lastName", "city", "zip", "parent1Email", "parent2Email"];
+    const searchFields = ["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip", "parent1Email.keyword", "parent2Email.keyword"];
     const filterFields = getYoungsFilters(user);
 
     const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt"];

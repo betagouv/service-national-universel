@@ -52,10 +52,14 @@ const {
   canViewYoungApplications,
   canEditPresenceYoung,
   canDeletePatchesHistory,
-} = require("snu-lib/roles");
-const { translateCohort } = require("snu-lib/translation");
-const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES, YOUNG_STATUS_PHASE2 } = require("snu-lib/constants");
-const { youngCanChangeSession } = require("snu-lib");
+  translateCohort,
+  SENDINBLUE_TEMPLATES,
+  YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS,
+  ROLES,
+  YOUNG_STATUS_PHASE2,
+  youngCanChangeSession,
+} = require("snu-lib");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
 const { anonymizeContractsFromYoungId } = require("../../services/contract");

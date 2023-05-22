@@ -12,6 +12,4 @@ function download(file, fileName) {
   }
 }
 
-module.exports = {
-  download,
-};
+export { download };

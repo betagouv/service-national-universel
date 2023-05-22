@@ -225,7 +225,7 @@ export default function StatusIndex({ filter }) {
               sectionTitle="Phase 1"
               title="Statut"
               obj={YOUNG_STATUS_PHASE1}
-              filterName="STATUS_PHASE_1"
+              filterName="statusPhase1"
               colors={YOUNG_STATUS_COLORS}
               data={statusPhase1}
               filter={filter}
@@ -250,7 +250,7 @@ export default function StatusIndex({ filter }) {
               sectionTitle="Phase 2"
               title="Statut"
               obj={YOUNG_STATUS_PHASE2}
-              filterName="STATUS_PHASE_2"
+              filterName="statusPhase2"
               colors={YOUNG_STATUS_COLORS}
               data={statusPhase2}
               filter={filter}
@@ -259,7 +259,7 @@ export default function StatusIndex({ filter }) {
             <StatusMap
               title="Statut des contrats d'engagement"
               obj={CONTRACT_STATUS}
-              filterName="CONTRACT_STATUS"
+              filterName="statusPhase2Contract"
               colors={CONTRACT_STATUS_COLORS}
               data={statusPhase2Contract}
               filter={filter}
@@ -268,7 +268,7 @@ export default function StatusIndex({ filter }) {
             <StatusMap
               title="Statut sur une mission de phase 2"
               obj={APPLICATION_STATUS}
-              filterName="APPLICATION_STATUS"
+              filterName="phase2ApplicationStatus"
               colors={APPLICATION_STATUS_COLORS}
               data={statusApplication}
               filter={filter}
@@ -277,7 +277,7 @@ export default function StatusIndex({ filter }) {
             <StatusMap
               title="Statut sur des demandes d'équivalence de MIG"
               obj={EQUIVALENCE_STATUS}
-              filterName="EQUIVALENCE_STATUS"
+              filterName="status_equivalence"
               colors={EQUIVALENCE_STATUS_COLORS}
               data={statusEquivalence}
               filter={filter}
@@ -291,7 +291,7 @@ export default function StatusIndex({ filter }) {
               sectionTitle="Phase 3"
               title="Statut"
               obj={YOUNG_STATUS_PHASE3}
-              filterName="STATUS_PHASE_3"
+              filterName="statusPhase3"
               colors={YOUNG_STATUS_COLORS}
               data={statusPhase3}
               filter={filter}

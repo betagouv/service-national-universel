@@ -16,6 +16,7 @@ import WaitingValidation from "./waitingValidation";
 import Withdrawn from "./withdrawn";
 import Phase1NotDone from "./Phase1NotDone";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
+import FutureCohort from "./FutureCohort";
 
 export default () => {
   useDocumentTitle("Accueil");
@@ -84,6 +85,10 @@ export default () => {
           return <ValidatedV2 />;
         }
       }
+    }
+
+    if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
+      return <FutureCohort />;
     }
 
     return <Default />;

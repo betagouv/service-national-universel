@@ -50,7 +50,7 @@ export default function ScholarshipsGrade({ filter }) {
             );
           }
           return (
-            <Link key={i} to={getLink({ base: `/inscription`, filter, filtersUrl: [`GRADE=%5B"${e}"%5D`] })}>
+            <Link key={i} to={getLink({ base: `/inscription`, filter, filtersUrl: [`grade=${e}`] })}>
               <Col style={{ marginTop: "15px" }} key={i}>
                 <CircularProgress circleProgressColor="#1B7BBF" percentage={((value[e] * 100) / total).toFixed(1)} title={value[e]} subtitle={translate(e)} />
               </Col>
