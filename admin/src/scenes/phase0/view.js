@@ -50,7 +50,6 @@ import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
 import PhoneField from "./components/PhoneField";
 import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 import downloadPDF from "app/src/utils/download-pdf";
-import { environment } from "../../config";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -1800,7 +1799,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                 </a>
               )}
             </div>
-            {environment !== "production" && (young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && <ButtonLight className="mt-2" onClick={downloadImageRightDocument}>Télécharger le droit à l&apos;image {pdfDownloading}</ButtonLight>}
+            {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && <ButtonLight className="mt-2" onClick={downloadImageRightDocument}>Télécharger le droit à l&apos;image {pdfDownloading}</ButtonLight>}
           </div>
           {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && <MiniSwitch value={young.parent1AllowImageRights === "true"} />}
         </div>
