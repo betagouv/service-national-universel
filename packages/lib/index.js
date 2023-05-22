@@ -223,6 +223,7 @@ export {
   youngCanChangeSession,
   formatPhoneNumberFR,
 };
+
 export * from "./academy";
 export * from "./colors";
 export * from "./constants";
