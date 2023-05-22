@@ -8,16 +8,23 @@ const YoungModel = require("../../models/young");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const CohortModel = require("../../models/cohort");
-const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession, isPdrEditionOpen } = require("snu-lib/roles");
+const {
+  COHORTS,
+  SENDINBLUE_TEMPLATES,
+  canViewMeetingPoints,
+  canUpdateMeetingPoint,
+  canCreateMeetingPoint,
+  canDeleteMeetingPoint,
+  canDeleteMeetingPointSession,
+  isPdrEditionOpen,
+} = require("snu-lib");
 const { ERRORS, isYoung } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 const { validateId } = require("../../utils/validator");
 const nanoid = require("nanoid");
-const { COHORTS } = require("snu-lib");
 const { getCohesionCenterFromSession } = require("./commons");
 const { getTransporter } = require("../../utils");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { sendTemplate } = require("../../sendinblue");
 const { ADMIN_URL, ENVIRONMENT } = require("../../config");
 
