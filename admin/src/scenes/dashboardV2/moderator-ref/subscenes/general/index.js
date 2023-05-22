@@ -132,7 +132,6 @@ export default function Index() {
     if (fullNote) return true;
 
     const entries = Object.entries(parent);
-    console.log(parent, key, index, entries);
     for (let i = 0, limit = 0; i < entries.length && limit < 3; i++) {
       if (Array.isArray(entries[i][1])) {
         for (let j = 0; j < entries[i][1].length && limit < 3; j++) {
@@ -323,25 +322,28 @@ export default function Index() {
                   <div className="text-sm font-bold leading-5 text-gray-900">Engagement</div>
                   <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">9</div>
                 </div>
-                <NoteContainer
-                  title="Contrat"
-                  number={stats.engagement_contrat_à_éditer}
-                  content="contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature."
-                  btnLabel="À suivre"
-                />
-                <NoteContainer
-                  title="Contrat"
-                  number={stats.engagement_contrat_en_attente_de_signature}
-                  content="contrats d’engagement sont en attente de signature."
-                  btnLabel="À suivre"
-                />
+                {shouldShow(stats.engagement, "engagement_contrat_à_éditer") && (
+                  <NoteContainer
+                    title="Contrat"
+                    number={stats.engagement.engagement_contrat_à_éditer}
+                    content="contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature."
+                    btnLabel="À suivre"
+                  />
+                )}
+                {shouldShow(stats.engagement, "engagement_contrat_en_attente_de_signature") && (
+                  <NoteContainer
+                    title="Contrat"
+                    number={stats.engagement.engagement_contrat_en_attente_de_signature}
+                    content="contrats d’engagement sont en attente de signature."
+                    btnLabel="À suivre"
+                  />
+                )}
                 <NoteContainer
                   title="Dossier d’éligibilité"
                   number={stats.engagement_dossier_militaire_en_attente_de_validation}
                   content="dossiers d’éligibilité en préparation militaire sont en attente de vérification."
                   btnLabel="À vérifier"
                 />
-
                 {fullNote && (
                   <>
                     <NoteContainer

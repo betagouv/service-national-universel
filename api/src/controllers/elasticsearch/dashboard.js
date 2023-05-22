@@ -406,49 +406,57 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
         inscription_en_attente_de_correction: results[2].hits.total.value,
       };
     }
+
+    async function basicEngagement() {
+      const response = await esClient.msearch({
+        index: "application",
+        body: buildArbitratyNdJson(
+          // Contrat (À suivre) X contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature
+          // engagement_contrat_à_éditer
+          { index: "application", type: "_doc" },
+          queryFromFilter(
+            [
+              // { terms: { "youngCohort.keyword": cohortsNotFinished } },
+              { terms: { "contractStatus.keyword": ["WAITING_VALIDATION"] } },
+              { terms: { "status.keyword": ["VALIDATED", "IN_PROGRESS"] } },
+            ],
+            {
+              regionField: "youngRegion",
+              departmentField: "youngDepartment",
+            },
+          ),
+          // Contrat (À suivre) X contrats d’engagement sont en attente de signature.
+          // engagement_contrat_en_attente_de_signature
+          { index: "application", type: "_doc" },
+          queryFromFilter([{ terms: { "contractStatus.keyword": ["SENT"] } }, { terms: { "status.keyword": ["VALIDATED", "IN_PROGRESS"] } }], {
+            regionField: "youngRegion",
+            departmentField: "youngDepartment",
+          }),
+          // Dossier d’éligibilité (À vérifier)  X dossiers d’éligibilité en préparation militaire sont en attente de vérification.
+          // engagement_dossier_militaire_en_attente_de_validation
+          { index: "young", type: "_doc" },
+          queryFromFilter([{ terms: { "statusMilitaryPreparationFiles.keyword": ["WAITING_VERIFICATION"] } }]),
+        ),
+      });
+      const results = response.body.responses;
+      return {
+        engagement_contrat_à_éditer: results[0].hits.total.value,
+        engagement_contrat_en_attente_de_signature: results[1].hits.total.value,
+        engagement_dossier_militaire_en_attente_de_validation: results[2].hits.total.value,
+      };
+    }
     /*
     const response = await esClient.msearch({
       index: "young",
       body: buildArbitratyNdJson(
-
-        //
-        // Séjours
-        // Pointage. X centres n’ont pas pointés tous leurs volontaires à l’arrivée au séjour de [Février 2023-C] (A renseigner)
-        // TODO. cohortsFinishedInLessThan2Weeks,
-        // Pointage. X centres n’ont pas pointés tous leurs volontaires à la JDM sur le séjour de [Février 2023-C] (A renseigner)
-        // TODO. cohortsFinishedInLessThan2Weeks,
-
         //
         // Engagement
         //
 
-        // Contrat (À suivre) X contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature
-        // engagement_contrat_à_éditer
-        { index: "application", type: "_doc" },
-        queryFromFilter(
-          [
-            // { terms: { "youngCohort.keyword": cohortsNotFinished } },
-            { terms: { "contractStatus.keyword": ["WAITING_VALIDATION"] } },
-            { terms: { "status.keyword": ["VALIDATED", "IN_PROGRESS"] } },
-          ],
-          {
-            regionField: "youngRegion",
-            departmentField: "youngDepartment",
-          },
-        ),
-        // Contrat (À suivre) X contrats d’engagement sont en attente de signature.
-        // engagement_contrat_en_attente_de_signature
-        { index: "application", type: "_doc" },
-        queryFromFilter([{ terms: { "contractStatus.keyword": ["SENT"] } }, { terms: { "status.keyword": ["VALIDATED", "IN_PROGRESS"] } }], {
-          regionField: "youngRegion",
-          departmentField: "youngDepartment",
-        }),
+       
         // Contrat (À renseigner) 1 représentant de l’État est à renseigner.
         // TODO.
-        // Dossier d’éligibilité (À vérifier)  X dossiers d’éligibilité en préparation militaire sont en attente de vérification.
-        // engagement_dossier_militaire_en_attente_de_validation
-        { index: "young", type: "_doc" },
-        queryFromFilter([{ terms: { "statusMilitaryPreparationFiles.keyword": ["WAITING_VERIFICATION"] } }]),
+
         // Mission (À instruire) X missions sont en attente de validation
         // engagement_mission_en_attente_de_validation
         { index: "mission", type: "_doc" },
@@ -485,6 +493,9 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           ...(await sejourContactÀRenseigner()),
           ...(await sejourVolontairesÀContacter()),
           ...(await sejourChefDeCentre()),
+        },
+        engagement: {
+          ...(await basicEngagement()),
         },
       },
     });
