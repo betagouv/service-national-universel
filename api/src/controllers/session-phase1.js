@@ -16,12 +16,16 @@ const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepart
 const { ERRORS, updatePlacesSessionPhase1, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter,
   timeout
 } = require("../utils");
-const { SENDINBLUE_TEMPLATES, MINISTRES, COHESION_STAY_LIMIT_DATE, END_DATE_PHASE1, PHASE1_YOUNG_ACCESS_LIMIT } = require("snu-lib/constants");
 const Zip = require("adm-zip");
-
-const TIMEOUT_PDF_SERVICE = 15000;
-
 const {
+  ROLES,
+  SENDINBLUE_TEMPLATES,
+  MINISTRES,
+  COHESION_STAY_LIMIT_DATE,
+  COHESION_STAY_END,
+  END_DATE_PHASE1,
+  PHASE1_YOUNG_ACCESS_LIMIT,
+  START_DATE_SESSION_PHASE1,
   canCreateOrUpdateSessionPhase1,
   canViewCohesionCenter,
   canSearchSessionPhase1,
@@ -30,19 +34,10 @@ const {
   canShareSessionPhase1,
   canCreateOrUpdateCohesionCenter,
   isReferentOrAdmin,
-  ROLES,
-  SENDINBLUE_TEMPLATES,
-  MINISTRES,
-  COHESION_STAY_LIMIT_DATE,
-  END_DATE_PHASE1,
-  PHASE1_YOUNG_ACCESS_LIMIT,
   isSessionEditionOpen,
-  COHESION_STAY_END,
   canSendTimeScheduleReminderForSessionPhase1,
-  START_DATE_SESSION_PHASE1,
-} = require("snu-lib");
   canSendImageRightsForSessionPhase1,
-} = require("snu-lib/roles");
+} = require("snu-lib");
 const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
@@ -61,6 +56,9 @@ const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { readTemplate, renderWithTemplate } = require("../templates/droitImage");
 const fetch = require("node-fetch");
+
+const TIMEOUT_PDF_SERVICE = 15000;
+
 
 const getCohesionCenterLocation = (cohesionCenter) => {
   let t = "";
@@ -856,9 +854,7 @@ router.post("/:sessionId/image-rights", passport.authenticate(["referent"], { se
 
     // --- build PDFS and zip'em
     const template = readTemplate();
-    console.log("YOUNG TO Export: ", youngs.length);
     for (const young of youngs) {
-      console.log("YOUNG: " + young.lastName + " " + young.firstName);
       const html = renderWithTemplate(young, template);
       const body = await timeout(getPDF(html, { format: "A4", margin: 0 }), TIMEOUT_PDF_SERVICE);
       zip.addFile(young.lastName + " " + young.firstName + " - Droits à l'image.pdf", body);
@@ -889,19 +885,6 @@ async function getPDF(html, options) {
   }
 
   return stream2buffer(response.body);
-
-  // res.set({
-  //   "content-length": response.headers.get("content-length"),
-  //   "content-disposition": `inline; filename="test.pdf"`,
-  //   "content-type": "application/pdf",
-  //   "cache-control": "public, max-age=1",
-  // });
-  // response.body.pipe(res);
-  // if (res.statusCode !== 200) throw new Error("Error with PDF service");
-  // response.body.on("error", (e) => {
-  //   capture(e);
-  //   res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  // });
 }
 
 function stream2buffer(stream) {

@@ -400,15 +400,6 @@ export default function CenterYoungIndex() {
       Sentry.captureException(e);
       toastr.error("Téléchargement impossible", e?.message, { timeOut: 10000 });
     }
-    // const data = await api.post(`/elasticsearch/young/by-session/${focusedSession._id}/export`, {
-    //   filters: Object.entries(filter).reduce((e, [key, value]) => {
-    //     if (value.filter.length === 1 && value.filter[0] === "") return e;
-    //     return { ...e, [key]: value.filter.map((e) => String(e)) };
-    //   }, {}),
-    // });
-    // const result = await transformData({ data: data.data, centerId: id });
-    // const csv = await toArrayOfArray(result);
-    // await toXLSX(`volontaires_pointage_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`, csv);
   };
 
   let exportItems = [
