@@ -21,7 +21,7 @@ module.exports = (env) => {
   return {
     mode: "development",
     target: "web",
-    entry: ["./src/index.js"],
+    entry: ["./src/index"],
     devtool: "source-map",
     output: {
       path: path.resolve("build"),
