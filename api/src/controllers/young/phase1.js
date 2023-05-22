@@ -9,8 +9,7 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
-const { canEditPresenceYoung, ROLES, canAssignManually } = require("snu-lib/roles");
-const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib/constants");
+const { canEditPresenceYoung, ROLES, canAssignManually, SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
 
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");

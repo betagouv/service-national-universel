@@ -44,11 +44,14 @@ jobs:
       - name: Install packages
         run: npm install
 
-
       - name: Lint code
         working-directory: ${{ env.SUBFOLDER_NAME }}
         continue-on-error: true
         run: npm run lint
+
+      - name: Build lib
+        continue-on-error: false
+        run: npm run build -w packages/lib
 
       - name: Test and Send coverage
         uses: paambaati/codeclimate-action@v2.7.5
@@ -73,6 +76,13 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 18.x
+
+      - name: Build lib
+        continue-on-error: false
+        run: |
+          npm install -w packages/lib
+          npm run build -w packages/lib
+          rm packages/lib/.gitignore
 
       - name: Create SSH key
         run: |
