@@ -10,6 +10,8 @@ const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 const StructureObject = require("../../models/structure");
 const Joi = require("joi");
 
+const { serializeApplications } = require("../../utils/es-serializer");
+
 async function buildApplicationContext(user) {
   const contextFilters = [];
 
@@ -75,10 +77,10 @@ router.post("/by-mission/:id/:action(search|export)", passport.authenticate(["yo
 
     if (req.params.action === "export") {
       const response = await allRecords("application", hitsRequestBody.query);
-      return res.status(200).send({ ok: true, data: response });
+      return res.status(200).send({ ok: true, data: serializeApplications(response) });
     } else {
       const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(serializeApplications(response.body));
     }
   } catch (error) {
     capture(error);
@@ -136,10 +138,53 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
 
     if (req.params.action === "export") {
       const response = await allRecords("application", hitsRequestBody.query);
-      return res.status(200).send({ ok: true, data: response });
+      return res.status(200).send({ ok: true, data: serializeApplications(response) });
     } else {
       const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(serializeApplications(response.body));
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/by-young/:id/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    // Configuration
+    const searchFields = [];
+    const filterFields = [];
+    const sortFields = ["priority.keyword"];
+
+    // Body params validation
+    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { applicationContextFilters, applicationContextError } = await buildApplicationContext(user);
+    if (applicationContextError) {
+      return res.status(applicationContextError.status).send(applicationContextError.body);
+    }
+
+    // Context filters
+    const contextFilters = [...applicationContextFilters, { term: { "youngId.keyword": req.params.id } }].filter(Boolean);
+
+    // Build request body
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields,
+      queryFilters,
+      page,
+      sort,
+      contextFilters,
+    });
+
+    if (req.params.action === "export") {
+      const response = await allRecords("application", hitsRequestBody.query);
+      return res.status(200).send({ ok: true, data: serializeApplications(response) });
+    } else {
+      const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      return res.status(200).send(serializeApplications(response.body));
     }
   } catch (error) {
     capture(error);
