@@ -8,9 +8,9 @@ export const deleteYoungAccount = (youngId) => api.put(`/young/${youngId}/soft-d
 export const withdrawYoungAccount = ({ withdrawnMessage, withdrawnReason }) => api.put(`/young/withdraw`, { withdrawnMessage, withdrawnReason });
 export const abandonYoungAccount = ({ withdrawnMessage, withdrawnReason }) => api.put(`/young/abandon`, { withdrawnMessage, withdrawnReason });
 
-export const updateYoung = async (path, youngDataToUpdate) => {
+export const updateYoung = async (youngDataToUpdate) => {
   try {
-    const { ok, code, data } = await api.put(`/young/account/${path}`, youngDataToUpdate);
+    const { ok, code, data } = await api.put("/young", youngDataToUpdate);
     if (!ok && code === ERRORS.OPERATION_UNAUTHORIZED) {
       throw {
         title: `${translate(code)} :`,
