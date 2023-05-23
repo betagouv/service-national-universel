@@ -1,24 +1,22 @@
-import { DataSearch, ReactiveBase } from "@appbaseio/reactivesearch";
-import React, { useEffect, useState } from "react";
-import { MultiLine } from "../../../components/list";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
-import ReactiveListComponent from "../../../components/ReactiveListComponent";
-import { apiURL } from "../../../config";
-import api from "../../../services/api";
-import { translate, formatStringDateWithDayTimezoneUTC, sessions2023 } from "../../../utils";
-import { toastr } from "react-redux-toastr";
-import ModalTailwind from "../../../components/modals/ModalTailwind";
-import ChevronRight from "../../../assets/icons/ChevronRight";
+import dayjs from "dayjs";
+import React, { useCallback, useEffect, useState } from "react";
 import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
+import { toastr } from "react-redux-toastr";
+import ReactTooltip from "react-tooltip";
 import LinearIceBerg from "../../../assets/Linear-IceBerg";
 import LinearMap from "../../../assets/Linear-Map";
-import dayjs from "dayjs";
-import ReactTooltip from "react-tooltip";
+import ChevronRight from "../../../assets/icons/ChevronRight";
+import { ResultTable } from "../../../components/filters-system-v2";
+import { buildQuery } from "../../../components/filters-system-v2/components/filters/utils";
+import { MultiLine } from "../../../components/list";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
+import ModalTailwind from "../../../components/modals/ModalTailwind";
+import api from "../../../services/api";
+import { debounce, formatStringDateWithDayTimezoneUTC, translate } from "../../../utils";
 
 const LIST_PAGE_LIMIT = 3;
 
 export default function ModalAffectations({ isOpen, onCancel, young, center = null, sessionId = null, cohort }) {
-  const FILTERS = ["SEARCH"];
   const [modal, setModal] = useState({ isOpen: false, message: "", onConfirm: () => {} });
   const [session, setSession] = useState(null);
   const [step, setStep] = useState(1);
@@ -32,7 +30,29 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
   const [dataPdr, setDataPdr] = useState([]);
   const [dataLigneToPoint, setDataLigneToPoint] = useState([]);
   const [selectedPdr, setSelectedPdr] = useState(null);
-  const [sessionSearch, setSessionSearch] = useState("");
+
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [paramData, setParamData] = useState({ page: 0, size: 3 });
+  const [data, setData] = useState([]);
+
+  const updateOnParamChange = useCallback(
+    debounce(async (selectedFilters, paramData) => {
+      buildQuery(`/elasticsearch/sessionPhase1/young-affectation/${young.cohort}/search`, selectedFilters, paramData?.page, [], paramData?.sort, paramData?.size).then((res) => {
+        if (!res) return;
+        const newParamData = {
+          count: res.count,
+        };
+        if (paramData.count !== res.count) newParamData.page = 0;
+        setParamData((paramData) => ({ ...paramData, ...newParamData }));
+        setData(res.data);
+      });
+    }, 250),
+    [],
+  );
+
+  useEffect(() => {
+    updateOnParamChange(selectedFilters, paramData);
+  }, [selectedFilters, paramData.page]);
 
   // true à J - 12 du départ
   const youngSelectDisabled = !dayjs(cohort?.pdrChoiceLimitDate).isAfter(dayjs());
@@ -41,7 +61,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
     setInputPdr("");
     setPdrOption("");
     setStep(1);
-    setSessionSearch("");
+    setSelectedFilters({});
     onCancel();
   };
 
@@ -69,18 +89,6 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
     })();
   }, [center]);
 
-  const getDefaultQuery = () => {
-    return {
-      // query sur les sessions qui ont des places dispos
-      query: {
-        bool: {
-          must: { match_all: {} },
-          filter: [{ term: { "cohort.keyword": young.cohort } }, { term: { "status.keyword": "VALIDATED" } }, { range: { placesLeft: { gt: 0 } } }],
-        },
-      },
-      track_total_hits: true,
-    };
-  };
   const handleAffectation = async () => {
     try {
       setLoading(true);
@@ -158,49 +166,38 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
         {step === 1 && (
           <>
             <div className="my-4 text-center text-xl font-medium text-gray-900">Sélectionnez votre centre</div>
-            <ReactiveBase url={`${apiURL}/es`} app="sessionphase1" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-              <DataSearch
-                defaultQuery={getDefaultQuery}
-                showIcon={false}
-                value={sessionSearch}
-                onChange={(value, triggerQuery, event) => {
-                  setSessionSearch(value);
-                }}
+            <div className="h-[38px] w-2/3 mx-auto overflow-hidden rounded-md border-[1px] border-gray-300 px-2.5">
+              <input
+                name={"searchbar"}
                 placeholder="Rechercher par mots clés, ville, code postal..."
-                componentId="SEARCH"
-                dataField={["nameCentre", "cityCentre", "zipCentre", "codeCentre", "department", "region"]}
-                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                style={{ marginRight: "1rem", flex: 1 }}
-                innerClass={{ input: "searchbox" }}
-                className="datasearch-searchfield mx-auto w-2/3 self-center shadow-sm"
-                URLParams={true}
-                autosuggest={false}
+                value={selectedFilters?.searchbar?.filter[0] || ""}
+                onChange={(e) => {
+                  setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value] } });
+                }}
+                className={`h-full w-full text-xs text-gray-600`}
               />
-              <div className="reactive-result w-full">
-                <ReactiveListComponent
-                  defaultQuery={getDefaultQuery}
-                  scrollOnChange={false}
-                  react={{ and: FILTERS }}
-                  paginationAt="bottom"
-                  showTopResultStats={false}
-                  pageSize={3}
-                  render={({ data }) => (
-                    <div className="flex w-full flex-col items-center justify-center gap-4">
-                      {data.map((hit) => (
-                        <HitCenter
-                          key={hit._id}
-                          hit={hit}
-                          onSend={() => {
-                            setStep(2);
-                            setSession(hit);
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
-                />
-              </div>
-            </ReactiveBase>
+            </div>
+
+            <ResultTable
+              paramData={paramData}
+              setParamData={setParamData}
+              currentEntryOnPage={data?.length}
+              size={paramData.size}
+              render={
+                <div className="flex w-full flex-col items-center justify-center gap-4">
+                  {data.map((hit) => (
+                    <HitCenter
+                      key={hit._id}
+                      hit={hit}
+                      onSend={() => {
+                        setStep(2);
+                        setSession(hit);
+                      }}
+                    />
+                  ))}
+                </div>
+              }
+            />
           </>
         )}
 
@@ -444,6 +441,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
 }
 
 const HitCenter = ({ hit, onSend }) => {
+  console.log(hit);
   return (
     <>
       <hr />
