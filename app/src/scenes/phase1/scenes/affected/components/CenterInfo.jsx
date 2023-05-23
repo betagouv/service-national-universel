@@ -1,5 +1,5 @@
 import React from "react";
-import Iceberg from "../../../../../assets/Iceberg.js";
+import Iceberg from "../../../../../assets/Iceberg";
 
 export default function CenterInfo({ center }) {
   return (

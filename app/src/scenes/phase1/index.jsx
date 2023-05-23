@@ -2,11 +2,11 @@ import React from "react";
 import { useSelector } from "react-redux";
 
 import Done from "./scenes/done";
-import Affected from "./scenes/affected/index.js";
-import Cancel from "./cancel.js";
-import NotDone from "./notDone.js";
-import WaitingAffectation from "./waitingAffectation.js";
-import WaitingList from "./waitingList.js";
+import Affected from "./scenes/affected/index";
+import Cancel from "./cancel";
+import NotDone from "./notDone";
+import WaitingAffectation from "./waitingAffectation";
+import WaitingList from "./waitingList";
 import { YOUNG_STATUS_PHASE1, permissionPhase1 } from "../../utils";
 import { HeroContainer, Hero } from "../../components/Content";
 import { useHistory } from "react-router-dom";

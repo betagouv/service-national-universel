@@ -10,8 +10,8 @@ import { CENTER_ROLES, ROLES, translate, SENDINBLUE_TEMPLATES } from "../../../u
 import { Box } from "../../../components/box";
 import api from "../../../services/api";
 import Trash from "../../../assets/icons/Trash";
-import ChevronRight from "../../../assets/icons/ChevronRight.js";
-import Template from "../../../assets/icons/Template.js";
+import ChevronRight from "../../../assets/icons/ChevronRight";
+import Template from "../../../assets/icons/Template";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import { capture } from "../../../sentry";
 

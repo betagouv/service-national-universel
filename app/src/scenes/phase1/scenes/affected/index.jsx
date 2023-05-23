@@ -2,19 +2,19 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { translate, translateCohort, youngCanChangeSession } from "snu-lib";
-import { getCohortDetail } from "../../../../utils/cohorts.js";
-import { isStepMedicalFieldDone } from "./utils/steps.utils.js";
+import { getCohortDetail } from "../../../../utils/cohorts";
+import { isStepMedicalFieldDone } from "./utils/steps.utils";
 import api from "../../../../services/api";
 
 import { AlertBoxInformation } from "../../../../components/Content";
-import ChangeStayLink from "../../components/ChangeStayLink.js";
+import ChangeStayLink from "../../components/ChangeStayLink";
 import CenterInfo from "./components/CenterInfo";
-import FaqAffected from "./components/FaqAffected.js";
-import JDMA from "../../../../components/JDMA.js";
+import FaqAffected from "./components/FaqAffected";
+import JDMA from "../../../../components/JDMA";
 import Loader from "../../../../components/Loader";
 import Problem from "./components/Problem";
 import StepsAffected from "./components/StepsAffected";
-import TravelInfo from "./components/TravelInfo.js";
+import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
 
 export default function Affected() {

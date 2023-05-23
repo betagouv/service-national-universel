@@ -67,12 +67,12 @@ const AccountGeneralPage = () => {
     setIsSubmitting(true);
     try {
       const youngDataToUpdate = {
-        ...formValues,
+        gender: formValues.gender,
         phone: formValues.phone.phoneNumber.trim(),
         phoneZone: formValues.phone.phoneZone,
         email: formValues.email.trim(),
       };
-      const { title, message, data: updatedYoung } = await updateYoung({ _id: young._id, ...youngDataToUpdate });
+      const { title, message, data: updatedYoung } = await updateYoung("profile", youngDataToUpdate);
       toastr.success(title, message);
       dispatch(setYoung(updatedYoung));
     } catch (error) {
