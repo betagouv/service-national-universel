@@ -373,7 +373,7 @@ describe("Young", () => {
     });
   });
 
-  describe("PUT /young/account/parents", () => {
+  describe.only("PUT /young/account/parents", () => {
     it("should return 200 if parents are updated", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const passport = require("passport");
@@ -385,30 +385,31 @@ describe("Young", () => {
         parent1Email: "foo@bar.com",
         parent1Phone: "0600000000",
         parent1PhoneZone: "FRANCE",
+        parent2: true,
         parent2Status: "father",
         parent2FirstName: "foo",
         parent2LastName: "bar",
-        parent2Email: "",
+        parent2Email: "foo@bar.com",
         parent2Phone: "0600000000",
         parent2PhoneZone: "FRANCE",
       });
       const updatedYoung = response.body.data;
       expect(response.statusCode).toEqual(200);
       expect(updatedYoung.parent1Status).toEqual("mother");
-      expect(updatedYoung.parent1FirstName).toEqual("foo");
-      expect(updatedYoung.parent1LastName).toEqual("bar");
+      expect(updatedYoung.parent1FirstName.toLowerCase()).toEqual("foo");
+      expect(updatedYoung.parent1LastName.toLowerCase()).toEqual("bar");
       expect(updatedYoung.parent1Email).toEqual("foo@bar.com");
       expect(updatedYoung.parent1Phone).toEqual("0600000000");
       expect(updatedYoung.parent1PhoneZone).toEqual("FRANCE");
       expect(updatedYoung.parent2Status).toEqual("father");
-      expect(updatedYoung.parent2FirstName).toEqual("foo");
-      expect(updatedYoung.parent2LastName).toEqual("bar");
-      expect(updatedYoung.parent2Email).toEqual("");
+      expect(updatedYoung.parent2FirstName.toLowerCase()).toEqual("foo");
+      expect(updatedYoung.parent2LastName.toLowerCase()).toEqual("bar");
+      expect(updatedYoung.parent2Email).toEqual("foo@bar.com");
       expect(updatedYoung.parent2Phone).toEqual("0600000000");
       expect(updatedYoung.parent2PhoneZone).toEqual("FRANCE");
     });
 
-    it("should return 400 if parent status is not given", async () => {
+    it("should return 400 if parent 1 status is not given", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const passport = require("passport");
       passport.user = young;

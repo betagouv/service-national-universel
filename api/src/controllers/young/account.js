@@ -43,9 +43,10 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
 
 router.put("/parents", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { value, error } = validateParents(req.body, false);
+    const { value, error } = validateParents(req.body, true);
 
     if (error) {
+      console.log("🚀 ~ file: account.js:49 ~ router.put ~ error:", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
@@ -56,7 +57,7 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
-    if (!validator.isEmail(value.parent1Email)) {
+    if (value.parent1Email && !validator.isEmail(value.parent1Email)) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     if (value.parent2Phone && !isPhoneNumberWellFormated(value.parent2Phone, value.parent2PhoneZone)) {
@@ -77,6 +78,7 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });
   } catch (error) {
+    console.log("🚀 ~ file: account.js:81 ~ router.put ~ error:", error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
