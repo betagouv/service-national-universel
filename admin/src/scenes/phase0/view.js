@@ -1912,7 +1912,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                         </a>
                       )}
                     </div>
-                    {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && (
+                    {environment !== "production" && (young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && (
                       <ButtonLight className="mt-2" onClick={downloadImageRightDocument}>
                         Télécharger le droit à l&apos;image {pdfDownloading}
                       </ButtonLight>
