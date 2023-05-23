@@ -3,7 +3,7 @@ import { BiLoaderAlt } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { youngCanChangeSession } from "snu-lib";
-import { PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
+import { PHONE_ZONES } from "snu-lib/phone-number";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../../redux/auth/actions";
 import { validateEmail, validatePhoneNumber } from "../../../../utils/form-validation.utils";
@@ -17,6 +17,9 @@ import SectionTitle from "../../components/SectionTitle";
 import Withdrawal from "./components/Withdrawal";
 import FormRow from "../../../../components/forms/layout/FormRow";
 import ButtonLight from "../../../../components/ui/buttons/ButtonLight";
+import ChangeAddressButton from "./components/ChangeAddressButton";
+import ChangeAddressModal from "./components/ChangeAddressModal";
+import { environment } from "../../../../config";
 
 const getInitialFormValues = (young) => ({
   lastName: young.lastName || "",
@@ -28,9 +31,6 @@ const getInitialFormValues = (young) => ({
     phoneNumber: young.phone || "",
     phoneZone: young.phoneZone || "",
   },
-  address: young.address || "",
-  zip: young.zip || "",
-  city: young.city || "",
 });
 
 const AccountGeneralPage = () => {
@@ -41,6 +41,7 @@ const AccountGeneralPage = () => {
 
   const [errors, setErrors] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isChangeAddressModalOpen, setChangeAddressModalOpen] = useState(false);
 
   const validateForm = () => {
     const foundErrors = {};
@@ -98,6 +99,7 @@ const AccountGeneralPage = () => {
   return (
     <>
       <div className="overflow-hidden bg-white shadow-sm lg:rounded-lg">
+        {environment !== "production" && <ChangeAddressModal isOpen={isChangeAddressModalOpen} onClose={() => setChangeAddressModalOpen(false)} young={young} />}
         <form onSubmit={handleSubmitGeneralForm}>
           <div className="grid grid-cols-1 lg:grid-cols-3">
             <div className="hidden py-6 pl-6 lg:col-start-1 lg:block">
@@ -114,7 +116,13 @@ const AccountGeneralPage = () => {
                   <option value="male">Homme</option>
                   <option value="female">Femme</option>
                 </Select>
-                <Input label="Date de naissance" name="birthdateAt" placeholder="JJ/MM/AAAA" value={formValues.birthdateAt.toLocaleDateString("fr-fr")} disabled />
+                <Input
+                  label="Date de naissance"
+                  name="birthdateAt"
+                  placeholder="JJ/MM/AAAA"
+                  value={formValues.birthdateAt ? formValues.birthdateAt.toLocaleDateString("fr-fr") : null}
+                  disabled
+                />
                 <Input
                   type="email"
                   label="Adresse email"
@@ -135,11 +143,12 @@ const AccountGeneralPage = () => {
               </section>
               <section className="mb-4">
                 <SectionTitle>Adresse</SectionTitle>
-                <Input label="Adresse" name="address" value={formValues.address} disabled />
+                <Input label="Adresse" name="address" value={young.address} disabled />
                 <FormRow>
-                  <Input label="Code Postal" name="zip" value={formValues.zip} className="basis-1/2" disabled />
-                  <Input label="Ville" name="city" value={formValues.city} className="basis-1/2" disabled />
+                  <Input label="Code Postal" name="zip" value={young.zip} className="basis-1/2" disabled />
+                  <Input label="Ville" name="city" value={young.city} className="basis-1/2" disabled />
                 </FormRow>
+                {environment !== "production" && <ChangeAddressButton onClick={() => setChangeAddressModalOpen(true)} className="mb-2" />}
               </section>
               <section>
                 <SectionTitle>Pièce d&apos;identité</SectionTitle>
