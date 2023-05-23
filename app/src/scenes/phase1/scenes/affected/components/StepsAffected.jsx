@@ -1,10 +1,10 @@
 import React from "react";
 import { HiBell } from "react-icons/hi";
 import { useSelector } from "react-redux";
-import { isStepMedicalFieldDone, numberOfStepsCompleted } from "../utils/steps.utils.js";
-import StepAgreement from "./step/stepAgreement.js";
-import StepConvocation from "./step/stepConvocation.js";
-import StepMedicalField from "./step/stepMedicalFile.js";
+import { isStepMedicalFieldDone, numberOfStepsCompleted } from "../utils/steps.utils";
+import StepAgreement from "./step/stepAgreement";
+import StepConvocation from "./step/stepConvocation";
+import StepMedicalField from "./step/stepMedicalFile";
 import StepPDR from "./step/StepPDR";
 
 export default function StepsAffected({ center }) {

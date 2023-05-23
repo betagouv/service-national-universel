@@ -3,8 +3,8 @@ import useDevice from "../../hooks/useDevice";
 
 import Footer from "../../components/footerV2";
 import Header from "../../components/header";
-import DesktopView from "./desktop/EngagementsProgramDesktop.js";
-import MobileView from "./mobile/EngagementsProgramMobile.js";
+import DesktopView from "./desktop/EngagementsProgramDesktop";
+import MobileView from "./mobile/EngagementsProgramMobile";
 
 const Index = () => {
   const device = useDevice();

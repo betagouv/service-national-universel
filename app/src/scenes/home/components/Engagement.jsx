@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import ArrowRightBlue from "../../../assets/icons/ArrowRightBlue.js";
+import ArrowRightBlue from "../../../assets/icons/ArrowRightBlue";
 import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";

@@ -9,7 +9,7 @@ import queryString from "query-string";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Loader from "../../components/Loader";
-import Done from "./done.js";
+import Done from "./done";
 import { colors } from "../../utils";
 
 export default function Index() {

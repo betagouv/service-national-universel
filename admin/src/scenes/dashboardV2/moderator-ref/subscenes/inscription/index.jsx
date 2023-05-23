@@ -8,7 +8,7 @@ import { toastr } from "react-redux-toastr";
 import { academyList, COHORTS, departmentToAcademy, ES_NO_LIMIT, REFERENT_ROLES, region2department, regionList, ROLES } from "snu-lib";
 import api from "../../../../../services/api";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
-import StatutPhase from "../../../components/inscription/StatutPhase.js";
+import StatutPhase from "../../../components/inscription/StatutPhase";
 
 import plausibleEvent from "../../../../../services/plausible";
 import { getLink as getOldLink } from "../../../../../utils";
