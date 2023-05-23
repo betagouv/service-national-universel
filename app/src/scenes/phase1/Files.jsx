@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { YOUNG_STATUS_PHASE1 } from "../../utils";
 import FileCard from "./components/FileCard";
-import MedicalFileModal from "./components/MedicalFileModal.js";
+import MedicalFileModal from "./components/MedicalFileModal";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 
 export default function DocumentsPhase1({ young }) {

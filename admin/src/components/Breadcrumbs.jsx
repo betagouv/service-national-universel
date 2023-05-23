@@ -1,6 +1,6 @@
 import React from "react";
-import ChevronRight from "../assets/icons/ChevronRight.js";
-import Template from "../assets/icons/Template.js";
+import ChevronRight from "../assets/icons/ChevronRight";
+import Template from "../assets/icons/Template";
 import { Link } from "react-router-dom";
 
 export default function Breadcrumbs({ items }) {

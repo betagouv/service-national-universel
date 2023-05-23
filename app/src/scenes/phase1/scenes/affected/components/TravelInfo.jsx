@@ -1,6 +1,6 @@
 import React from "react";
 import dayjs from "dayjs";
-import LongArrow from "../../../../../assets/icons/LongArrow.js";
+import LongArrow from "../../../../../assets/icons/LongArrow";
 import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR } from "../utils/steps.utils.js";
 
 export default function TravelInfo({ location, cohortDetails }) {

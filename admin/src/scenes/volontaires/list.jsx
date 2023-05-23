@@ -14,7 +14,7 @@ import { appURL } from "../../config";
 import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 import { ROLES, YOUNG_STATUS, YOUNG_STATUS_COLORS, getAge, translate, translatePhase1, translatePhase2 } from "../../utils";
-import { Title } from "../pointDeRassemblement/components/common.js";
+import { Title } from "../pointDeRassemblement/components/common";
 import DeletedVolontairePanel from "./deletedPanel";
 import Panel from "./panel";
 import { getFilterArray, transformVolontaires, transformVolontairesSchool } from "./utils";

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import plausibleEvent from "../../../../../services/plausible.js";
-import MedicalFileModal from "../../../components/MedicalFileModal.js";
-import Arrow from "../assets/Arrow.js";
-import DontForget from "../assets/DontForget.js";
-import SnuBackPack from "../assets/SnuBackPack.js";
-import { ModalConvocation } from "./ModalConvocation.js";
+import plausibleEvent from "../../../../../services/plausible";
+import MedicalFileModal from "../../../components/MedicalFileModal";
+import Arrow from "../assets/Arrow";
+import DontForget from "../assets/DontForget";
+import SnuBackPack from "../assets/SnuBackPack";
+import { ModalConvocation } from "./ModalConvocation";
 
 export default function TodoBackpack({ lunchBreak }) {
   const [modalConvocationOpen, setModalConvocationOpen] = useState(false);
