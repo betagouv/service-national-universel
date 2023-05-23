@@ -1,26 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
-import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
-import ReactiveListComponent from "../../../components/ReactiveListComponent";
-
-import { apiURL } from "../../../config";
-import api from "../../../services/api";
-import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES } from "../../../utils";
 import { Link } from "react-router-dom";
-import YoungHeader from "../../phase0/components/YoungHeader";
-import { capture } from "../../../sentry";
-import CardMission from "../components/CardMission";
 import { canApplyToPhase2 } from "snu-lib";
+import { ResultTable } from "../../../components/filters-system-v2";
+import { buildQuery } from "../../../components/filters-system-v2/components/filters/utils";
+import { capture } from "../../../sentry";
+import api from "../../../services/api";
+import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, debounce } from "../../../utils";
+import YoungHeader from "../../phase0/components/YoungHeader";
+import CardMission from "../components/CardMission";
 
 export default function ProposeMission({ young, onSend }) {
-  const FILTERS = ["SEARCH"];
-  const [searchedValue, setSearchedValue] = useState("");
   const [missionIds, setMissionIds] = useState([]);
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [paramData, setParamData] = useState({ page: 0 });
+  const [data, setData] = useState([]);
 
   useEffect(() => {
     getApplications().then((applications) => {
       setMissionIds(applications.map((a) => a.missionId));
     });
+    updateOnParamChange(selectedFilters, paramData);
   }, []);
 
   const getApplications = async () => {
@@ -33,40 +33,24 @@ export default function ProposeMission({ young, onSend }) {
     return data;
   };
 
-  const getDefaultQuery = () => {
-    return {
-      query: {
-        bool: {
-          must: [
-            {
-              script: {
-                script: "doc['pendingApplications'].value < doc['placesLeft'].value * 5",
-              },
-            },
-          ],
-          filter: [
-            {
-              range: {
-                endAt: {
-                  gt: "now",
-                },
-              },
-            },
-            { term: { "status.keyword": "VALIDATED" } },
-            { term: { "visibility.keyword": "VISIBLE" } },
-            {
-              range: {
-                placesLeft: {
-                  gt: 0,
-                },
-              },
-            },
-          ],
-        },
-      },
-      track_total_hits: true,
-    };
-  };
+  const updateOnParamChange = useCallback(
+    debounce(async (selectedFilters, paramData) => {
+      buildQuery("/elasticsearch/mission/propose/search", selectedFilters, paramData?.page, [], paramData?.sort).then((res) => {
+        if (!res) return;
+        const newParamData = {
+          count: res.count,
+        };
+        if (paramData.count !== res.count) newParamData.page = 0;
+        setParamData((paramData) => ({ ...paramData, ...newParamData }));
+        setData(res.data);
+      });
+    }, 250),
+    [],
+  );
+
+  useEffect(() => {
+    updateOnParamChange(selectedFilters, paramData);
+  }, [selectedFilters, paramData.page]);
 
   const handleProposal = async (mission) => {
     const application = {
@@ -128,31 +112,27 @@ export default function ProposeMission({ young, onSend }) {
         </div>
 
         {canApplyToPhase2(young) ? (
-          <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-            <DataSearch
-              showIcon={false}
-              placeholder="Rechercher une mission par mots clés..."
-              componentId="SEARCH"
-              dataField={["name.folded^10", "description", "justifications", "contraintes", "frequence", "period"]}
-              fuzziness={1}
-              autosuggest={false}
-              onValueChange={setSearchedValue}
-              queryFormat="and"
-              innerClass={{ input: "searchbox" }}
-              className="datasearch-searchfield mx-auto w-1/3"
-            />
-            {searchedValue && (
-              <ReactiveListComponent
-                defaultQuery={getDefaultQuery}
-                scrollOnChange={false}
-                react={{ and: FILTERS }}
-                paginationAt="bottom"
-                showTopResultStats={false}
-                render={({ data }) => data.map((hit, i) => <CardMission key={i} mission={hit} onSend={() => handleProposal(hit)} sent={missionIds.includes(hit._id)} />)}
-                className="reactive-result"
+          <>
+            <div className="h-[38px] w-1/3 mx-auto overflow-hidden rounded-md border-[1px] border-gray-300 px-2.5">
+              <input
+                name={"searchbar"}
+                placeholder="Rechercher une mission par mots clés..."
+                value={selectedFilters?.searchbar?.filter[0] || ""}
+                onChange={(e) => {
+                  setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value] } });
+                }}
+                className={`h-full w-full text-xs text-gray-600`}
               />
-            )}
-          </ReactiveBase>
+            </div>
+            <ResultTable
+              paramData={paramData}
+              setParamData={setParamData}
+              currentEntryOnPage={data?.length}
+              render={data.map((hit, i) => (
+                <CardMission key={i} mission={hit} onSend={() => handleProposal(hit)} sent={missionIds.includes(hit._id)} />
+              ))}
+            />
+          </>
         ) : (
           <p className="text-center ">Ce volontaire n&apos;est pas éligible à la phase 2.</p>
         )}
