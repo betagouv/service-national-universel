@@ -1,27 +1,25 @@
 import React, { useState } from "react";
+import { HiOutlineAdjustments } from "react-icons/hi";
+import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 import { Col, Row } from "reactstrap";
+import { ROLES, applicationExportFields, formatDateFRTimezoneUTC, formatLongDateUTC } from "snu-lib";
+import Menu from "../../../../assets/icons/Menu";
+import Pencil from "../../../../assets/icons/Pencil";
 import { Box, BoxTitle } from "../../../../components/box";
 import DownloadAttestationButton from "../../../../components/buttons/DownloadAttestationButton";
 import MailAttestationButton from "../../../../components/buttons/MailAttestationButton";
+import { ModalExport } from "../../../../components/filters-system-v2";
 import SelectStatus from "../../../../components/selectStatus";
+import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
-import { ENABLE_PM, ES_NO_LIMIT, translate, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../../utils";
+import { ENABLE_PM, ES_NO_LIMIT, YOUNG_PHASE, YOUNG_STATUS_PHASE2, translate } from "../../../../utils";
+import YoungHeader from "../../../phase0/components/YoungHeader";
 import CardEquivalence from "../../components/Equivalence";
 import Toolbox from "../../components/Toolbox";
 import Phase2militaryPrepartionV2 from "../phase2MilitaryPreparationV2";
 import ApplicationList2 from "./applicationList2";
 import Preferences from "./preferences";
-import { ReactiveBase } from "@appbaseio/reactivesearch";
-import { HiOutlineAdjustments } from "react-icons/hi";
-import Menu from "../../../../assets/icons/Menu";
-import Pencil from "../../../../assets/icons/Pencil";
-import { apiURL } from "../../../../config";
-import { toastr } from "react-redux-toastr";
-import { capture } from "../../../../sentry";
-import YoungHeader from "../../../phase0/components/YoungHeader";
-import ModalExport from "../../../../components/modals/ModalExport";
-import { ROLES, formatLongDateUTC, applicationExportFields, formatDateFRTimezoneUTC } from "snu-lib";
-import { useSelector } from "react-redux";
 
 export default function Phase2({ young, onChange }) {
   const [equivalences, setEquivalences] = React.useState([]);
@@ -159,7 +157,6 @@ export default function Phase2({ young, onChange }) {
     }
   };
 
-  const getExportQuery = () => ({ query: { bool: { filter: { term: { "youngId.keyword": young._id } } } }, sort: [{ "priority.keyword": "asc" }], size: ES_NO_LIMIT });
   const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
   async function transform(data, values) {
@@ -435,25 +432,26 @@ export default function Phase2({ young, onChange }) {
 
             {blocOpened === "missions" ? (
               <div className="flex">
-                <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-                  <div className="py-2">
-                    <button
-                      className="items-center justify-center rounded-md border-[1px] border-blue-600 py-1.5 px-2.5 text-sm text-blue-600 hover:bg-blue-600 hover:text-white"
-                      onClick={() => {
-                        setIsExportOpen(true);
-                      }}>
-                      Exporter les candidatures
-                    </button>
-                    <ModalExport
-                      isOpen={isExportOpen}
-                      setIsOpen={setIsExportOpen}
-                      index="application"
-                      transform={transform}
-                      exportFields={getExportFields()}
-                      getExportQuery={getExportQuery}
-                    />
-                  </div>
-                </ReactiveBase>
+                <div className="py-2">
+                  <button
+                    className="items-center justify-center rounded-md border-[1px] border-blue-600 py-1.5 px-2.5 text-sm text-blue-600 hover:bg-blue-600 hover:text-white"
+                    onClick={() => {
+                      setIsExportOpen(true);
+                    }}>
+                    Exporter les candidatures
+                  </button>
+
+                  <ModalExport
+                    isOpen={isExportOpen}
+                    setIsOpen={setIsExportOpen}
+                    route={`/elasticsearch/application/by-young/${young._id.toString()}/export`}
+                    transform={transform}
+                    exportFields={getExportFields()}
+                    exportTitle={`candiatures de ${young.firstName} ${young.lastName}`}
+                    showTotalHits={true}
+                    selectedFilters={{}}
+                  />
+                </div>
               </div>
             ) : null}
           </div>
