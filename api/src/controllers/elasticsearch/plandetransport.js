@@ -7,10 +7,13 @@ const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
+const { ROLES } = require("snu-lib");
+const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
+    const { user, body } = req;
     const searchFields = ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"];
     const filterFields = [
       "busId.keyword",
@@ -32,7 +35,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "lineFillingRate",
     ];
     const sortFields = [];
-
     // Authorization
     if (!canSearchLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -42,6 +44,13 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     // Context filters
     let contextFilters = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }];
+
+    // A head center can only see bus line rattached to his center.
+    if (user.role === ROLES.HEAD_CENTER) {
+      const lignebus = await LigneBusModel.find({ centerId: user.cohesionCenterId });
+      if (!lignebus.length) return { error: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+      contextFilters.push({ terms: { _id: lignebus.map((e) => e._id) } });
+    }
 
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
