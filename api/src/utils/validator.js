@@ -743,8 +743,8 @@ function validateHeadOfCenterCohortChange(values) {
     .validate(values, { stripUnknown: true });
 }
 
-function validateParents(values, isRequired) {
-  const representantSchema = {
+const representantSchema = (isRequired) => {
+  return {
     parent1Status: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
     parent1FirstName: needRequired(validateFirstName().trim(), isRequired),
     parent1LastName: needRequired(Joi.string().trim(), isRequired),
@@ -790,8 +790,10 @@ function validateParents(values, isRequired) {
       otherwise: Joi.isError(new Error()),
     }),
   };
+};
 
-  return Joi.object(representantSchema).validate(values, { stripUnknown: true });
+function validateParents(values, isRequired) {
+  return Joi.object(representantSchema(isRequired)).validate(values, { stripUnknown: true });
 }
 
 const needRequired = (joi, isRequired) => {
@@ -825,4 +827,5 @@ module.exports = {
   validateStructureManager,
   validateHeadOfCenterCohortChange,
   validateParents,
+  representantSchema,
 };

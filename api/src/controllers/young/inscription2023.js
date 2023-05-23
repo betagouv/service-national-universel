@@ -7,7 +7,7 @@ const crypto = require("crypto");
 const YoungObject = require("../../models/young");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
-const { validateFirstName, validateParents } = require("../../utils/validator");
+const { validateFirstName, validateParents, representantSchema } = require("../../utils/validator");
 const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
 const {
   canUpdateYoungStatus,
@@ -348,7 +348,8 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       if (!young?.parent2Inscription2023Token && value.parent2) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
     }
     if (type === "correction") {
-      const keyList = Object.keys(representantSchema);
+
+      const keyList = Object.keys(representantSchema(false));
       value = { ...value, ...validateCorrectionRequest(young, keyList) };
     }
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

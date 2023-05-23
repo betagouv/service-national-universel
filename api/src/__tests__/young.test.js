@@ -373,7 +373,7 @@ describe("Young", () => {
     });
   });
 
-  describe.only("PUT /young/account/parents", () => {
+  describe("PUT /young/account/parents", () => {
     it("should return 200 if parents are updated", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const passport = require("passport");

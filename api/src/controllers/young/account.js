@@ -46,7 +46,6 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
     const { value, error } = validateParents(req.body, true);
 
     if (error) {
-      console.log("🚀 ~ file: account.js:49 ~ router.put ~ error:", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
@@ -78,7 +77,6 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });
   } catch (error) {
-    console.log("🚀 ~ file: account.js:81 ~ router.put ~ error:", error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
