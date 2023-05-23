@@ -138,7 +138,7 @@ const Espace = () => {
 
   const handleModalCGUConfirm = async () => {
     setIsModalCGUOpen(false);
-    const { ok, code } = await api.put(`/young`, { acceptCGU: "true" });
+    const { ok, code } = await api.put(`/young/accept-cgu`);
     if (!ok) {
       setIsModalCGUOpen(true);
       return toastr.error(`Une erreur est survenue : ${code}`);

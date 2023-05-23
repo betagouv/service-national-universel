@@ -9,7 +9,8 @@
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   },
   "scripts": {
-    "dev": "nodemon --watch ../packages --watch .env-staging --watch ./src ./src/index.js",
+    "//": "dev sleep 2 seconds to let lib compile",
+    "dev": "sleep 2 && nodemon --watch ../packages/lib/common-js/index.cjs --watch .env-staging --watch ./src ./src/index.js",
     "debug": "DEBUG=express:* nodemon ./src/index.js",
     "start": "pm2 install pm2-slack && pm2 set pm2-slack:slack_url $PM2_SLACK_URL &&  pm2 set pm2-slack:servername PM2-ERROR-API && pm2 start ./src/index.js --no-daemon",
     "test": "jest --silent --runInBand --detectOpenHandles",
@@ -37,6 +38,7 @@
     "date-fns": "^2.29.3",
     "dotenv": "^10.0.0",
     "elasticsearch": "^15.5.0",
+    "eslint-plugin-jest": "^27.2.1",
     "express": "^4.18.2",
     "express-fileupload": "^1.4.0",
     "express-session": "^1.17.3",
