@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, COHORTS, PHONE_ZONES_NAMES_ARR } = require("snu-lib");
+const { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, COHORTS, PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR } = require("snu-lib");
 const { isYoung } = require("../utils");
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
@@ -743,62 +743,6 @@ function validateHeadOfCenterCohortChange(values) {
     .validate(values, { stripUnknown: true });
 }
 
-function validateParents(values, isRequired) {
-  const representantSchema = {
-    parent1Status: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
-    parent1FirstName: needRequired(validateFirstName().trim(), isRequired),
-    parent1LastName: needRequired(Joi.string().trim(), isRequired),
-    parent1Email: needRequired(Joi.string().trim().email(), isRequired),
-    parent1Phone: needRequired(Joi.string().trim(), isRequired),
-    parent1PhoneZone: needRequired(
-      Joi.string()
-        .trim()
-        .valid(...PHONE_ZONES_NAMES_ARR),
-      isRequired,
-    ),
-    parent2: needRequired(Joi.string().trim().valid(true, false), isRequired),
-    parent2Status: Joi.alternatives().conditional("parent2", {
-      is: true,
-      then: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
-      otherwise: Joi.isError(new Error()),
-    }),
-    parent2FirstName: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(validateFirstName().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-    parent2LastName: Joi.alternatives().conditional("parent2", {
-      is: true,
-      then: needRequired(Joi.string().uppercase().trim(), isRequired),
-      otherwise: Joi.isError(new Error()),
-    }),
-    parent2Email: Joi.alternatives().conditional("parent2", {
-      is: true,
-      then: needRequired(Joi.string().trim().email(), isRequired),
-      otherwise: Joi.isError(new Error()),
-    }),
-    parent2Phone: Joi.alternatives().conditional("parent2", {
-      is: true,
-      then: needRequired(Joi.string().trim(), isRequired),
-      otherwise: Joi.isError(new Error()),
-    }),
-
-    parent2PhoneZone: Joi.alternatives().conditional("parent2", {
-      is: true,
-      then: needRequired(
-        Joi.string()
-          .trim()
-          .valid(...PHONE_ZONES_NAMES_ARR),
-        isRequired,
-      ),
-      otherwise: Joi.isError(new Error()),
-    }),
-  };
-
-  return Joi.object(representantSchema).validate(values, { stripUnknown: true });
-}
-
-const needRequired = (joi, isRequired) => {
-  if (isRequired) return joi.required();
-  else return joi.allow(null, "");
-};
-
 module.exports = {
   validateId,
   validateString,
@@ -824,5 +768,4 @@ module.exports = {
   validatePhase2Preference,
   validateStructureManager,
   validateHeadOfCenterCohortChange,
-  validateParents,
 };

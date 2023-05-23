@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { PHONE_ZONES } from "snu-lib/phone-number";
+import { PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
 import { setYoung } from "../../../../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
@@ -99,26 +99,18 @@ const AccountRepresentantsPage = () => {
     }
     try {
       setIsSubmitting(true);
-
       const youngDataToUpdate = {
-        parent1Status: formValues.parent1Status,
-        parent1LastName: formValues.parent1LastName.trim(),
-        parent1FirstName: formValues.parent1FirstName.trim(),
+        ...formValues,
         parent1Phone: formValues.parent1Phone.phoneNumber.trim(),
         parent1PhoneZone: formValues.parent1Phone.phoneZone,
         parent1Email: formValues.parent1Email.trim(),
-        parent2: hasParent2,
+        parent2LastName: (hasParent2 && formValues.parent2LastName.trim()) || "",
+        parent2FirstName: (hasParent2 && formValues.parent2FirstName.trim()) || "",
+        parent2Phone: (hasParent2 && formValues.parent2Phone.phoneNumber.trim()) || "",
+        parent2PhoneZone: (hasParent2 && formValues.parent2Phone.phoneZone) || PHONE_ZONES_NAMES.FRANCE,
+        parent2Email: (hasParent2 && formValues.parent2Email.trim()) || "",
       };
-      if (hasParent2) {
-        youngDataToUpdate.parent2Status = formValues.parent2Status;
-        youngDataToUpdate.parent2LastName = formValues.parent2LastName.trim();
-        youngDataToUpdate.parent2FirstName = formValues.parent2FirstName.trim();
-        youngDataToUpdate.parent2Phone = formValues.parent2Phone.phoneNumber.trim();
-        youngDataToUpdate.parent2PhoneZone = formValues.parent2Phone.phoneZone;
-        youngDataToUpdate.parent2Email = formValues.parent2Email.trim();
-      }
-
-      const { title, message, data: updatedYoung } = await updateYoung("parents", youngDataToUpdate);
+      const { title, message, data: updatedYoung } = await updateYoung({ _id: young._id, ...youngDataToUpdate });
       toastr.success(title, message);
       dispatch(setYoung(updatedYoung));
     } catch (error) {
