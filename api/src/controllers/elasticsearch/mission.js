@@ -179,4 +179,111 @@ router.post("/by-structure/:id/:action(search|export)", passport.authenticate(["
   }
 });
 
+router.post("/propose/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    // Configuration
+    const searchFields = ["name.folded^10", "description", "justifications", "contraintes", "frequence", "period"];
+    const filterFields = [];
+    const sortFields = [];
+
+    // Body params validation
+    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { missionContextFilters, missionContextError } = await buildMissionContext(user);
+    if (missionContextError) {
+      return res.status(missionContextError.status).send(missionContextError.body);
+    }
+
+    // Context filters
+    const contextFilters = [
+      ...missionContextFilters,
+      {
+        bool: {
+          must: [
+            {
+              script: {
+                script: "doc['pendingApplications'].value < doc['placesLeft'].value * 5",
+              },
+            },
+            {
+              range: {
+                endAt: {
+                  gt: "now",
+                },
+              },
+            },
+            { term: { "status.keyword": "VALIDATED" } },
+            { term: { "visibility.keyword": "VISIBLE" } },
+            {
+              range: {
+                placesLeft: {
+                  gt: 0,
+                },
+              },
+            },
+          ],
+        },
+      },
+    ];
+
+    // Build request body
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields,
+      queryFilters,
+      page,
+      sort,
+      contextFilters,
+    });
+
+    if (req.params.action === "export") {
+      const response = await allRecords("mission", hitsRequestBody.query);
+      return res.status(200).send({ ok: true, data: response });
+    } else {
+      const response = await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      return res.status(200).send(response.body);
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+// const getDefaultQuery = () => {
+//   return {
+//     query: {
+//       bool: {
+//         must: [
+//           {
+//             script: {
+//               script: "doc['pendingApplications'].value < doc['placesLeft'].value * 5",
+//             },
+//           },
+//         ],
+//         filter: [
+//           {
+//             range: {
+//               endAt: {
+//                 gt: "now",
+//               },
+//             },
+//           },
+//           { term: { "status.keyword": "VALIDATED" } },
+//           { term: { "visibility.keyword": "VISIBLE" } },
+//           {
+//             range: {
+//               placesLeft: {
+//                 gt: 0,
+//               },
+//             },
+//           },
+//         ],
+//       },
+//     },
+//     track_total_hits: true,
+//   };
+// };
+
 module.exports = router;
