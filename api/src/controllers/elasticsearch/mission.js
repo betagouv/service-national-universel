@@ -251,39 +251,4 @@ router.post("/propose/:action(search|export)", passport.authenticate(["referent"
   }
 });
 
-// const getDefaultQuery = () => {
-//   return {
-//     query: {
-//       bool: {
-//         must: [
-//           {
-//             script: {
-//               script: "doc['pendingApplications'].value < doc['placesLeft'].value * 5",
-//             },
-//           },
-//         ],
-//         filter: [
-//           {
-//             range: {
-//               endAt: {
-//                 gt: "now",
-//               },
-//             },
-//           },
-//           { term: { "status.keyword": "VALIDATED" } },
-//           { term: { "visibility.keyword": "VISIBLE" } },
-//           {
-//             range: {
-//               placesLeft: {
-//                 gt: 0,
-//               },
-//             },
-//           },
-//         ],
-//       },
-//     },
-//     track_total_hits: true,
-//   };
-// };
-
 module.exports = router;
