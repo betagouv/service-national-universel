@@ -6,6 +6,8 @@ import Download from "../assets/icons/Download";
 import { requiredMessage } from "../scenes/inscription2023/components/ErrorMessageOld";
 import api from "../services/api";
 import ModalConfirm from "./modals/ModalConfirm";
+import image from "../assets/image.svg";
+import attachment from "../assets/attachment.svg";
 
 export default function DndFileInput({ optional, value, name, errorMessage = requiredMessage, placeholder = "votre fichier", download, path, onChange, ...props }) {
   const [filesList, setFilesList] = useState(value);
@@ -110,7 +112,7 @@ export default function DndFileInput({ optional, value, name, errorMessage = req
             handleUpload(e.target.files);
           }}
         />
-        <img src={require("../assets/image.svg")} />
+        <img src={image} />
         <>
           <span style={{ color: "#5850ec" }}>Téléversez {placeholder}</span> ou glissez-déposez
           <span style={{ display: "block", fontSize: 13 }}>PDF, PNG ou JPG jusqu&apos;à 5 Mo</span>
@@ -181,7 +183,7 @@ const File = styled.div`
   margin-bottom: 10px;
   display: flex;
   align-items: center;
-  background: url(${require("../assets/attachment.svg")}) left 8px center no-repeat;
+  background: url(${attachment}) left 8px center no-repeat;
   background-size: 16px;
   span {
     margin-left: auto;
