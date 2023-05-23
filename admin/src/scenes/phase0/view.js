@@ -49,8 +49,8 @@ import ButtonLight from "../../components/ui/buttons/ButtonLight";
 import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
 import PhoneField from "./components/PhoneField";
 import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
-import downloadPDF from "app/src/utils/download-pdf";
 import { environment } from "../../config";
+import downloadPDF from "../../utils/download-pdf";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -1800,7 +1800,11 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                 </a>
               )}
             </div>
-            {environment !== "production" && (young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && <ButtonLight className="mt-2" onClick={downloadImageRightDocument}>Télécharger le droit à l&apos;image {pdfDownloading}</ButtonLight>}
+            {environment !== "production" && (young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && (
+              <ButtonLight className="mt-2" onClick={downloadImageRightDocument}>
+                Télécharger le droit à l&apos;image {pdfDownloading}
+              </ButtonLight>
+            )}
           </div>
           {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && <MiniSwitch value={young.parent1AllowImageRights === "true"} />}
         </div>
@@ -1908,7 +1912,11 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                         </a>
                       )}
                     </div>
-                    {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <ButtonLight className="mt-2" onClick={downloadImageRightDocument}>Télécharger le droit à l&apos;image {pdfDownloading}</ButtonLight>}
+                    {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && (
+                      <ButtonLight className="mt-2" onClick={downloadImageRightDocument}>
+                        Télécharger le droit à l&apos;image {pdfDownloading}
+                      </ButtonLight>
+                    )}
                   </div>
                   {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
                 </div>
