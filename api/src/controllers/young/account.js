@@ -43,7 +43,7 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
 
 router.put("/parents", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { value, error } = validateParents(req.body, true);
+    const { value, error } = validateParents(req.body, false);
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
