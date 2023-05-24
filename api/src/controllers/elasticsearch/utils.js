@@ -71,13 +71,13 @@ function buildArbitratyNdJson(...args) {
   return args.map((e) => JSON.stringify(e)).join("\n") + "\n";
 }
 
-function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, customQueries }) {
+function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, customQueries, size = 20 }) {
   // We always need a fresh query to avoid side effects.
   const getMainQuery = () => unsafeStrucuredClone({ bool: { must: [{ match_all: {} }], filter: contextFilters } });
   // Search query
   const search = (queryFilters.searchbar || []).filter((e) => e.trim()).length ? searchSubQuery(queryFilters.searchbar, searchFields) : null;
   // Hits request body
-  const hitsRequestBody = { query: getMainQuery(), size: 20, from: page * 20, sort: buildSort(sort) };
+  const hitsRequestBody = { query: getMainQuery(), size, from: page * size, sort: buildSort(sort) };
   if (search) hitsRequestBody.query.bool.must.push(search);
   for (const key of filterFields) {
     const keyWithoutKeyword = key.replace(".keyword", "");
