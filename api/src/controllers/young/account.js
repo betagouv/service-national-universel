@@ -41,6 +41,44 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
   }
 });
 
+router.put("/address", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { value, error } = Joi.object({
+      addressVerified: Joi.string().trim().valid("true").required(),
+      country: Joi.string().trim().required(),
+      city: Joi.string().trim().required(),
+      zip: Joi.string().trim().required(),
+      address: Joi.string().trim().required(),
+      location: Joi.object()
+        .keys({
+          lat: Joi.number().required(),
+          lon: Joi.number().required(),
+        })
+        .default({
+          lat: undefined,
+          lon: undefined,
+        })
+        .allow({}, null),
+      department: Joi.string().trim().required(),
+      region: Joi.string().trim().required(),
+      cityCode: Joi.string().trim().default("").allow("", null),
+    }).validate(req.body, { stripUnknown: true });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    young.set(value);
+    await young.save({ fromUser: req.user });
+
+    res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.put("/parents", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { value, error } = validateParents(req.body, true);
