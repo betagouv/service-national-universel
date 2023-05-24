@@ -36,7 +36,6 @@ export const getFilterArray = (user) =>
       name: "region",
       parentGroup: "Général",
       missingLabel: "Non renseigné",
-      defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
       translate: translate,
     },
     {
@@ -44,7 +43,6 @@ export const getFilterArray = (user) =>
       name: "department",
       parentGroup: "Général",
       missingLabel: "Non renseigné",
-      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
     {
