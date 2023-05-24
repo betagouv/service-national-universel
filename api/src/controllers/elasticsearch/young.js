@@ -14,6 +14,7 @@ const StructureObject = require("../../models/structure");
 const ApplicationObject = require("../../models/application");
 const SessionPhase1Object = require("../../models/sessionPhase1");
 const CohesionCenterObject = require("../../models/cohesionCenter");
+const MissionObject = require("../../models/mission");
 const { getCohortNamesEndAfter } = require("../../utils/cohort");
 
 function getYoungsFilters(user) {
@@ -562,6 +563,62 @@ router.post("/young-having-school-in-dep-or-region/:action(_msearch|export)", pa
       contextFilters,
     });
 
+    if (req.params.action === "export") {
+      const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+    } else {
+      const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      return res.status(200).send(response.body);
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/propose-mission/:id/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    // Configuration
+    const searchFields = ["email.keyword", "firstName.folded", "lastName.folded"];
+    const filterFields = ["cohort.keyword", "statusPhase2.keyword", "phase2ApplicationStatus.keyword"];
+
+    const sortFields = [];
+
+    const { youngContextFilters, youngContextError } = await buildYoungContext(user);
+    if (youngContextError) {
+      return res.status(youngContextError.status).send(youngContextError.body);
+    }
+
+    const mission = await MissionObject.findById(req.params.id);
+    if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // Context filters
+    const contextFilters = [
+      ...youngContextFilters,
+      { terms: { "status.keyword": ["VALIDATED"] } },
+      { terms: { "statusPhase1.keyword": ["DONE", "EXEMPTED"] } },
+      { terms: { "statusPhase2.keyword": ["IN_PROGRESS", "WAITING_REALISATION"] } },
+    ];
+
+    // Body params validation
+    const { queryFilters, page, sort, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body: body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // Build request body
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields,
+      queryFilters,
+      page,
+      sort,
+      contextFilters,
+      size: 12,
+    });
+
+    if (mission.location?.lat && mission.location?.lon) {
+      hitsRequestBody.sort = { _geo_distance: { location: [mission.location?.lon, mission.location?.lat], order: "asc", unit: "km" } };
+    }
     if (req.params.action === "export") {
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
       return res.status(200).send({ ok: true, data: serializeYoungs(response) });
