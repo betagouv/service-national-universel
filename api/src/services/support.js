@@ -37,7 +37,7 @@ const getUserAttributes = async (user) => {
     userAttributes.push({ name: "lien vers candidatures", value: `${ADMIN_URL}/volontaire/${user._id}/phase2` });
     userAttributes.push({
       name: "lien vers équipe départementale",
-      value: `${ADMIN_URL}/user?DEPARTMENT=%5B%22${user.department}%22%5D&ROLE=%5B%22referent_department%22%5D`,
+      value: `${ADMIN_URL}/user?department=%5B%22${user.department}%22%5D&role=%5B%22referent_department%22%5D`,
     });
     userAttributes.push({ name: "classe", value: user.grade });
   } else {
@@ -64,16 +64,18 @@ const getUserAttributes = async (user) => {
       userAttributes.push({ name: "lien vers le centre de cohésion", value: centerLink });
     }
     if (user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) {
-      userAttributes.push({
-        name: "lien vers équipe départementale",
-        value: `${ADMIN_URL}/user?DEPARTMENT=%5B%22${user.department}%22%5D&ROLE=%5B%22referent_department%22%5D`,
-      });
       if (user.subRole) userAttributes.push({ name: "fonction", value: user.subRole });
     }
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
       userAttributes.push({
+        name: "lien vers équipe départementale",
+        value: `${ADMIN_URL}/user?department=${user.department.join("~")}&role=referent_department`,
+      });
+    }
+    if (user.role === ROLES.REFERENT_REGION) {
+      userAttributes.push({
         name: "lien vers équipe régionale",
-        value: `${ADMIN_URL}/user?REGION=%5B%22${user.region}%22%5D&ROLE=%5B%22referent_region%22%5D`,
+        value: `${ADMIN_URL}/user?region=${user.region}&role=referent_region`,
       });
     }
   }
