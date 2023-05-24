@@ -211,8 +211,8 @@ export default function Index() {
                 <p>Les horaires du volontaire pour la présente mission sont :</p>
                 <ContractField name="missionFrequence" placeholder="Du lundi au vendredi" as="textarea" context={context} />
                 Le volontaire bénéficie, pour assurer l’accomplissement de sa mission, de l’accompagnement d’un tuteur de mission
-                <ContractField name="structureManagerFirstName" placeholder="Prénom" context={context} />
-                <ContractField name="structureManagerLastName" placeholder="Nom" context={context} />
+                <ContractField name="tutorFirstName" placeholder="Prénom" context={context} />
+                <ContractField name="tutorLastName" placeholder="Nom" context={context} />
                 de la structure d’accueil. Le volontaire bénéficie, par son tuteur, d’entretiens réguliers permettant un suivi de la réalisation des missions ainsi que, le cas
                 échéant, d’un accompagnement renforcé.
               </div>
