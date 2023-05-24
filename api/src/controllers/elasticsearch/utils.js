@@ -106,7 +106,7 @@ function joiElasticSearch({ filterFields, sortFields = [], body }) {
 
   const { error, value } = schema.validate({ ...body }, { stripUnknown: true });
   if (error) capture(error);
-  return { queryFilters: value.filters, page: value.page, sort: value.sort, exportFields: value.exportFields, error, size: value.size };
+  return { queryFilters: value.filters, page: value.page, sort: value.sort, exportFields: value.exportFields, error };
 }
 
 module.exports = {
