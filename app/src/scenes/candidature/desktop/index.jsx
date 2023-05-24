@@ -1,3 +1,4 @@
+import Img2 from "../../../assets/phase2Header.png";
 import React from "react";
 import { useSelector } from "react-redux";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
@@ -66,7 +67,7 @@ export default function IndexDesktop() {
             <ToggleVisibility value={toggleButtonDisplayHidden} onClick={() => setToggleButtonDisplayHidden((e) => !e)} />
           </div>
         </div>
-        <img className="rounded-t-lg" src={require("../../../assets/phase2Header.png")} />
+        <img className="rounded-t-lg" src={Img2} />
       </div>
       {/* END HEADER */}
 

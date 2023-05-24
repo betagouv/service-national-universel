@@ -1,3 +1,4 @@
+import Img2 from "../../assets/militaryPrepMobile.png";
 import React from "react";
 import { HiOutlineSearch } from "react-icons/hi";
 import { useSelector } from "react-redux";
@@ -40,7 +41,7 @@ export default function HomeMobile() {
             )}
           </div>
           <div className="flex items-start">
-            <img className="object-scale-down" src={require("../../assets/militaryPrepMobile.png")} />
+            <img className="object-scale-down" src={Img2} />
           </div>
         </div>
         <div className="mt-4 flex flex-col gap-4">

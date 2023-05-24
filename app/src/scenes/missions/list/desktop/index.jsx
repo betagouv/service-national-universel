@@ -1,3 +1,5 @@
+import Img3 from "../../../../assets/left.svg";
+import Img2 from "../../../../assets/right.svg";
 import React, { useEffect, useState } from "react";
 import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
@@ -416,8 +418,9 @@ export default function List() {
             {/* BEGIN MODAL CONTROL DISTANCE */}
             <div
               ref={refDropdownControlDistance}
-              className={`${dropdownControlDistanceOpen ? "block" : "hidden"
-                } absolute top-[calc(100%+8px)] left-0 z-20 w-full overflow-hidden rounded-lg bg-white p-3 shadow transition`}>
+              className={`${
+                dropdownControlDistanceOpen ? "block" : "hidden"
+              } absolute top-[calc(100%+8px)] left-0 z-20 w-full overflow-hidden rounded-lg bg-white p-3 shadow transition`}>
               <div className="flex items-center justify-center">
                 <div className="text-gray-00 mr-1 text-sm font-bold"> Distance maximum </div>
                 <div>
@@ -531,8 +534,9 @@ export default function List() {
             {/* BEGIN MODAL CONTROL WHEN */}
             <div
               ref={refDropdownControlWhen}
-              className={`${dropdownControlWhenOpen ? "block" : "hidden"
-                } absolute top-[calc(100%+8px)] left-0 z-20 w-full overflow-hidden rounded-lg bg-white p-3 shadow transition`}>
+              className={`${
+                dropdownControlWhenOpen ? "block" : "hidden"
+              } absolute top-[calc(100%+8px)] left-0 z-20 w-full overflow-hidden rounded-lg bg-white p-3 shadow transition`}>
               <div className="text-gray-00 text-center text-sm font-bold">Période de réalisation de la mission</div>
               <div className="flex w-full flex-col py-2 px-4">
                 <div className="mt-4 flex w-full justify-between gap-2 px-[10px] text-sm font-medium text-gray-700">
@@ -827,10 +831,10 @@ const Missions = styled.div`
       color: #fff; */
     }
     a:first-child {
-      background-image: url(${require("../../../../assets/left.svg")});
+      background-image: url(${Img3});
     }
     a:last-child {
-      background-image: url(${require("../../../../assets/right.svg")});
+      background-image: url(${Img2});
     }
     a:first-child,
     a:last-child {

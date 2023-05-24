@@ -1,3 +1,6 @@
+import Img4 from "../../assets/observe.svg";
+import Img3 from "../../assets/left.svg";
+import Img2 from "../../assets/right.svg";
 import React from "react";
 import { Col, Container, CustomInput, Row } from "reactstrap";
 import { ReactiveBase, ReactiveList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
@@ -81,7 +84,7 @@ export default function MissionsComponent() {
               // return <div className="results">{`${numberOfResults} résultats trouvés en ${time}ms`}</div>;
             }}
             render={({ data }) => {
-              return data.map((e, i) => <MissionCard mission={e} key={i} image={require("../../assets/observe.svg")} />);
+              return data.map((e, i) => <MissionCard mission={e} key={i} image={Img4} />);
             }}
           />
         </ReactiveBase>
@@ -131,10 +134,10 @@ const Missions = styled(Container)`
       color: #fff; */
     }
     a:first-child {
-      background-image: url(${require("../../assets/left.svg")});
+      background-image: url(${Img3});
     }
     a:last-child {
-      background-image: url(${require("../../assets/right.svg")});
+      background-image: url(${Img2});
     }
     a:first-child,
     a:last-child {

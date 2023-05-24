@@ -1,3 +1,4 @@
+import Img2 from "../../../assets/mission-domains/default.svg";
 import React from "react";
 import Sante from "../../../assets/mission-domaines/sante";
 import Solidarite from "../../../assets/mission-domaines/solidarite";
@@ -52,7 +53,7 @@ export default function IconDomain({ domain, bgStyle = null, iconStyle = "text-w
     <div className={`flex items-center rounded-xl py-3 px-1.5  ${bgStyle ? bgStyle : "bg-[#212B44]"}`}>{icon}</div>
   ) : (
     <div className={`flex items-center rounded-xl py-3 px-1.5  ${bgStyle ? bgStyle : "bg-[#212B44]"} `}>
-      <img className="h-8 w-8" src={require("../../../assets/mission-domains/default.svg")} style={{}} />
+      <img className="h-8 w-8" src={Img2} style={{}} />
     </div>
   );
 }

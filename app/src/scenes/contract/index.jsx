@@ -1,3 +1,4 @@
+import Img2 from "../../assets/logo-snu.png";
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
@@ -38,7 +39,7 @@ export default function Index() {
           <ContractContainer>
             <div style={{ display: "flex", marginBottom: "3rem" }}>
               <div style={{ marginRight: "2rem" }}>
-                <img src={require("../../assets/logo-snu.png")} height={96} width={96} />
+                <img src={Img2} height={96} width={96} />
               </div>
               <div style={{ marginRight: "2rem", textAlign: "center", marginTop: "-1rem" }}>
                 <h2>Contrat d’engagement en mission d’intérêt général (MIG) du service national universel (SNU)</h2>

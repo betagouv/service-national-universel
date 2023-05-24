@@ -1,3 +1,5 @@
+import Img3 from "../../../../assets/left.svg";
+import Img2 from "../../../../assets/right.svg";
 import React, { useEffect, useState } from "react";
 import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
@@ -889,10 +891,10 @@ const Missions = styled.div`
       color: #fff; */
     }
     a:first-child {
-      background-image: url(${require("../../../../assets/left.svg")});
+      background-image: url(${Img3});
     }
     a:last-child {
-      background-image: url(${require("../../../../assets/right.svg")});
+      background-image: url(${Img2});
     }
     a:first-child,
     a:last-child {

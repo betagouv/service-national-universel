@@ -1,3 +1,4 @@
+import Img2 from "../../../assets/external-link.svg";
 import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
@@ -31,7 +32,7 @@ export default function MissionCard({ mission, image }) {
       <Col md={6} xl={4}>
         <Button onClick={handleClick} target="_blank" href={urlWithScheme(mission.applicationUrl)} rel="noreferrer">
           Voir&nbsp;sur&nbsp;<b>{mission.publisherName}</b>
-          <img src={require("../../../assets/external-link.svg")} height={15} width={15} color="white" />
+          <img src={Img2} height={15} width={15} color="white" />
         </Button>
       </Col>
     </Card>

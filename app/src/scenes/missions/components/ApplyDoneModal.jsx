@@ -1,3 +1,4 @@
+import Img2 from "../../../assets/close.svg";
 import React from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
@@ -22,7 +23,7 @@ export default function ApplyDoneModal({ value, onChange }) {
   return (
     <Modal centered isOpen={true} toggle={onChange} style={{}}>
       <ModalContainer>
-        <img src={require("../../../assets/close.svg")} height={10} width={10} onClick={onChange} />
+        <img src={Img2} height={10} width={10} onClick={onChange} />
         <h1>Félicitations, votre candidature a bien été enregistrée.</h1>
         <h3>{renderText()}</h3>
         {renderRedirect()}

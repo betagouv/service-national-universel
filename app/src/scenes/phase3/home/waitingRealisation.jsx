@@ -1,3 +1,4 @@
+import Img2 from "../../../assets/observe.svg";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Row, Col } from "reactstrap";
@@ -70,7 +71,7 @@ export default function WaitingRealisation() {
               dataField="created_at"
               renderResultStats={() => <div />}
               render={({ data }) => {
-                return data.map((e, i) => <MissionCard mission={e} key={i} image={require("../../../assets/observe.svg")} />);
+                return data.map((e, i) => <MissionCard mission={e} key={i} image={Img2} />);
               }}
             />
           </ReactiveBase>

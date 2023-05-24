@@ -1,3 +1,4 @@
+import Img2 from "../../../assets/close.svg";
 import React, { useState } from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
@@ -70,7 +71,7 @@ export default function ApplyModal({ value, onChange, onSend, onCancel }) {
   return (
     <Modal centered isOpen={true} toggle={onChange} style={{}}>
       <ModalContainer>
-        <img src={require("../../../assets/close.svg")} height={10} width={10} onClick={onChange} />
+        <img src={Img2} height={10} width={10} onClick={onChange} />
         <h1>Je souhaite proposer ma candidature pour cette mission</h1>
         <h3>Votre profil sera proposé à la structure, elle disposera de vos coordonnées pour valider votre participation.</h3>
         {sending ? (
