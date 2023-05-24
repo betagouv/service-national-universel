@@ -1,3 +1,4 @@
+import Img from "../../../assets/copy.svg";
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
@@ -201,7 +202,7 @@ export const HeroContainer = styled.div`
       margin: 0 0.5rem;
       width: 15px;
       height: 15px;
-      background: ${`url(${require("../../../assets/copy.svg")})`};
+      background: ${`url(${Img})`};
       background-repeat: no-repeat;
       background-position: center;
       background-size: 15px 15px;

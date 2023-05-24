@@ -1,3 +1,5 @@
+import Img3 from "../../assets/link.svg";
+import Img from "../../assets/copy.svg";
 import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -259,7 +261,7 @@ const IconLink = styled.div`
   margin: 0 0.5rem;
   width: 18px;
   height: 18px;
-  background: ${`url(${require("../../assets/link.svg")})`};
+  background: ${`url(${Img3})`};
   background-repeat: no-repeat;
   background-position: center;
   background-size: 15px 15px;
@@ -270,7 +272,7 @@ const IconCopy = styled.div`
   margin: 0 0.5rem;
   width: 15px;
   height: 15px;
-  background: ${`url(${require("../../assets/copy.svg")})`};
+  background: ${`url(${Img})`};
   background-repeat: no-repeat;
   background-position: center;
   background-size: 15px 15px;

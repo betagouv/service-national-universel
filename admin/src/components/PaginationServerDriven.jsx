@@ -1,3 +1,5 @@
+import Img3 from "../assets/left.svg";
+import Img2 from "../assets/right.svg";
 /**
  * Ce composant va avec le HistoricServerDriven.
  * Il gère les données de pagination en provenance du serveur.
@@ -41,7 +43,7 @@ export default function PaginationServerDriven({ pageCount, currentPage, count, 
         className={`ml-[5px] flex min-h-[30px] items-center justify-center rounded-[3px] border-[1px] border-[transparent] bg-[#f7fafc] py-[3px] px-[10px] text-[12px] font-bold text-[#242526] ${
           currentPage > 0 ? "cursor-pointer" : "cursor-not-allowed"
         }`}>
-        <img src={require("../assets/left.svg")} alt="icon left" />
+        <img src={Img3} alt="icon left" />
       </a>
       <PageButton page={0} changePage={changePage} active={currentPage === 0} />
       {pages}
@@ -51,7 +53,7 @@ export default function PaginationServerDriven({ pageCount, currentPage, count, 
         className={`ml-[5px] flex min-h-[30px] items-center justify-center rounded-[3px] border-[1px] border-[transparent] bg-[#f7fafc] py-[3px] px-[10px] text-[12px] font-bold text-[#242526] ${
           lastItem < count ? "cursor-pointer" : "cursor-not-allowed"
         }`}>
-        <img src={require("../assets/right.svg")} alt="icon right" />
+        <img src={Img2} alt="icon right" />
       </a>
     </div>
   );
