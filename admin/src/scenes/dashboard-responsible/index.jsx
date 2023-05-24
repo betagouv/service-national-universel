@@ -1,5 +1,4 @@
 import Img3 from "../../assets/information.svg";
-import Img2 from "../../assets/close.svg";
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useHistory, useParams, Link } from "react-router-dom";
