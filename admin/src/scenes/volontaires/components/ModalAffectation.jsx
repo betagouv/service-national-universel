@@ -37,7 +37,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
 
   const updateOnParamChange = useCallback(
     debounce(async (selectedFilters, paramData) => {
-      buildQuery(`/elasticsearch/sessionPhase1/young-affectation/${young.cohort}/search`, selectedFilters, paramData?.page, [], paramData?.sort, paramData?.size).then((res) => {
+      buildQuery(`/elasticsearch/sessionPhase1/young-affectation/${young.cohort}/search`, selectedFilters, paramData?.page, [], paramData?.sort).then((res) => {
         if (!res) return;
         const newParamData = {
           count: res.count,
@@ -182,7 +182,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
               paramData={paramData}
               setParamData={setParamData}
               currentEntryOnPage={data?.length}
-              size={paramData.size}
+              size={data?.length}
               render={
                 <div className="flex w-full flex-col items-center justify-center gap-4">
                   {data.map((hit) => (

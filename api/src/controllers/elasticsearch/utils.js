@@ -101,7 +101,6 @@ function joiElasticSearch({ filterFields, sortFields = [], body }) {
     })
       .allow(null)
       .default(null),
-    size: Joi.number().integer().min(0).default(20),
     exportFields: Joi.alternatives().try(Joi.array().items(Joi.string()).max(200).allow(null).default(null), Joi.string().valid("*")),
   });
 
