@@ -24,7 +24,7 @@ export default function List() {
   const [responsable, setResponsable] = useState(null);
   const [NewUserOpen, setNewUserOpen] = useState(false);
   const [filter, setFilter] = useState({});
-  const [currentTab, setCurrentTab] = useState();
+  const [currentTab, setCurrentTab] = useState(user.role === ROLES.REFERENT_REGION ? "region" : user.department[0]);
 
   //List state
   const [data, setData] = useState([]);
@@ -78,6 +78,11 @@ export default function List() {
       updateFilter({ department: user.department });
     }
   }, []);
+
+  const onChangeCurrentTab = async (tab) => {
+    setCurrentTab(tab);
+    setData([]);
+  };
 
   return (
     <div>
@@ -145,7 +150,7 @@ export default function List() {
             </div>
           </div>
           <div className="mb-3 mr-4 flex items-center px-6">
-            <Nav filter={filter} updateFilter={updateFilter} currentTab={currentTab} setCurrentTab={setCurrentTab} />
+            <Nav filter={filter} updateFilter={updateFilter} currentTab={currentTab} setCurrentTab={onChangeCurrentTab} />
           </div>
           <div className="relative mb-4 items-start mx-4">
             <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
