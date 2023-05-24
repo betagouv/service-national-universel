@@ -161,22 +161,28 @@ const ResultBox = ({ mission, updateMission, data, paramData, setParamData, sele
 
   return (
     <ResultStyle>
-      {hasSearch ? <p className="suggested">Recommandation de volontaires disponibles autour de la mission :</p> : <p className="suggested">Résultat de la recherche :</p>}
-      <div className="bg-[#f4f5f7] mt-4">
-        <ResultTable
-          paramData={paramData}
-          setParamData={setParamData}
-          currentEntryOnPage={data?.length}
-          size={data?.length}
-          render={
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gridGap: "1rem" }}>
-              {data.map((hit) => (
-                <Hit key={hit._id} hit={hit} applicationsToTheMission={applicationsToTheMission} mission={mission} onClick={async () => await handleProposal(hit)} />
-              ))}
-            </div>
-          }
-        />
-      </div>
+      {data.length ? (
+        <>
+          {hasSearch ? <p className="suggested">Recommandation de volontaires disponibles autour de la mission :</p> : <p className="suggested">Résultat de la recherche :</p>}
+          <div className="bg-[#f4f5f7] mt-4">
+            <ResultTable
+              paramData={paramData}
+              setParamData={setParamData}
+              currentEntryOnPage={data?.length}
+              size={data?.length}
+              render={
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gridGap: "1rem" }}>
+                  {data.map((hit) => (
+                    <Hit key={hit._id} hit={hit} applicationsToTheMission={applicationsToTheMission} mission={mission} onClick={async () => await handleProposal(hit)} />
+                  ))}
+                </div>
+              }
+            />
+          </div>
+        </>
+      ) : (
+        <p className="suggested text-center w-full">Aucun Résultat</p>
+      )}
     </ResultStyle>
   );
 };
