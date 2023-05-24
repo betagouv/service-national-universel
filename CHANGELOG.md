@@ -1,3 +1,23 @@
+# [1.276.0](https://github.com/betagouv/service-national-universel/compare/v1.275.0...v1.276.0) (2023-05-23)
+
+
+### Bug Fixes
+
+* **admin:** correction d'un mauvais require dans la vue du jeune ([#2633](https://github.com/betagouv/service-national-universel/issues/2633)) ([57fe001](https://github.com/betagouv/service-national-universel/commit/57fe0013d91e159fe171f004f452b9dbcc349eec))
+* **api/lib:** Meilleure prise en compte de lib en temps réel pendant le dev ([5318845](https://github.com/betagouv/service-national-universel/commit/5318845317354c385c0e1f0f14435a6cd4d35d43))
+
+
+### Features
+
+* **admin/api:** clean Reactive Base export candidature ([#2629](https://github.com/betagouv/service-national-universel/issues/2629)) ([c90bfb9](https://github.com/betagouv/service-national-universel/commit/c90bfb9d4379f89d635900a74d1ef7283a855c67))
+* **admin/api:** clean reactive base propose mission young view ([#2632](https://github.com/betagouv/service-national-universel/issues/2632)) ([0477a88](https://github.com/betagouv/service-national-universel/commit/0477a884bd0a74fa0963166412dad58369e1a180))
+
+
+### Reverts
+
+* Revert "refactor(app, admin): Split young edit endpoint (#2631)" (#2634) ([683f4a2](https://github.com/betagouv/service-national-universel/commit/683f4a2fe65552a5187367ae9a98a6a75d84b00e)), closes [#2631](https://github.com/betagouv/service-national-universel/issues/2631) [#2634](https://github.com/betagouv/service-national-universel/issues/2634)
+* Revert "refactor(app/api): Split young edition endpoints (#2589)" (#2628) ([9354853](https://github.com/betagouv/service-national-universel/commit/9354853c8118ff0efd5e824ab848f7ebc708706c)), closes [#2589](https://github.com/betagouv/service-national-universel/issues/2589) [#2628](https://github.com/betagouv/service-national-universel/issues/2628)
+
 # [1.275.0](https://github.com/betagouv/service-national-universel/compare/v1.274.1...v1.275.0) (2023-05-22)
 
 

@@ -13,8 +13,19 @@ const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRass
 const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
-const { ERRORS, updatePlacesSessionPhase1, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter,
-  timeout
+const {
+  ERRORS,
+  updatePlacesSessionPhase1,
+  getSignedUrl,
+  getBaseUrl,
+  sanitizeAll,
+  isYoung,
+  YOUNG_STATUS,
+  uploadFile,
+  deleteFile,
+  getFile,
+  updateHeadCenter,
+  timeout,
 } = require("../utils");
 const Zip = require("adm-zip");
 const {
@@ -58,7 +69,6 @@ const { readTemplate, renderWithTemplate } = require("../templates/droitImage");
 const fetch = require("node-fetch");
 
 const TIMEOUT_PDF_SERVICE = 15000;
-
 
 const getCohesionCenterLocation = (cohesionCenter) => {
   let t = "";
@@ -231,7 +241,7 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
     const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(req.user.role)) {
+    if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.HEAD_CENTER].includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -847,7 +857,7 @@ router.post("/:sessionId/image-rights", passport.authenticate(["referent"], { se
     }
 
     // --- found youngs
-    const youngs = await YoungModel.find({sessionPhase1Id: session._id}).sort({ lastName: 1, firstName: 1 });
+    const youngs = await YoungModel.find({ sessionPhase1Id: session._id }).sort({ lastName: 1, firstName: 1 });
 
     // --- start zip file
     let zip = new Zip();

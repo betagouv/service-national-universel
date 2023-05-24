@@ -62,12 +62,11 @@ export default function CenterYoungIndex() {
       parentGroup: "Général",
       translate: translatePhase1,
     },
-    { title: "Région", name: "region", parentGroup: "Général", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
+    { title: "Région", name: "region", parentGroup: "Général" },
     {
       title: "Département",
       name: "department",
       parentGroup: "Général",
-      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
     {

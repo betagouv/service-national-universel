@@ -95,7 +95,7 @@ export default function Filters({
   );
 
   const updateOnParamChange = useCallback(
-    debounce(async (selectedFilters, paramData, location) => {
+    debounce(async (selectedFilters, paramData, location, route) => {
       buildQuery(route, selectedFilters, paramData?.page, filters, paramData?.sort).then((res) => {
         if (!res) return;
         setDataFilter({ ...dataFilter, ...res.newFilters });
@@ -119,8 +119,8 @@ export default function Filters({
 
   useEffect(() => {
     if (Object.keys(selectedFilters).length === 0) return;
-    updateOnParamChange(selectedFilters, paramData, location);
-  }, [selectedFilters, paramData.page, paramData.sort, location.search]);
+    updateOnParamChange(selectedFilters, paramData, location, route);
+  }, [selectedFilters, paramData.page, paramData.sort, location.search, route]);
 
   const getDefaultFilters = () => {
     const newFilters = {};

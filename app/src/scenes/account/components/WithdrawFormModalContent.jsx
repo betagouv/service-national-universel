@@ -4,7 +4,7 @@ import { CancelButton } from "../../../components/buttons/SimpleButtons";
 import { PlainButton } from "../../phase1/components/Buttons";
 import Field from "./Field";
 import ArrowLeft from "../../../assets/icons/ArrowLeft";
-import { Title, SubTitle } from "./elements";
+import Modal from "../../../components/ui/modals/Modal";
 
 const WithdrawFormModalContent = ({
   withdrawnReasons,
@@ -28,8 +28,8 @@ const WithdrawFormModalContent = ({
         <Danger />
       </div>
 
-      <Title className="mt-6 md:mt-8">{title}</Title>
-      <SubTitle>{subTitle}</SubTitle>
+      <Modal.Title className="mt-6 md:mt-8">{title}</Modal.Title>
+      <Modal.Subtitle>{subTitle}</Modal.Subtitle>
       <div className="w-full md:px-3">
         <Field
           className="w-full"

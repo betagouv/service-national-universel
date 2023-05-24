@@ -1,7 +1,9 @@
 import { Dialog, Transition } from "@headlessui/react";
 import React, { Fragment } from "react";
+import ButtonPrimary from "../buttons/ButtonPrimary";
+import ButtonLight from "../buttons/ButtonLight";
 
-const Modal = ({ isOpen = false, onClose: handleClose = () => {}, children = null, className = "" }) => {
+const Modal = ({ isOpen = false, onClose: handleClose = () => {}, children = null, className = "w-full bg-white p-4 md:w-[512px] md:p-6" }) => {
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-20" onClose={handleClose}>
@@ -58,8 +60,33 @@ const ModalFooter = ({ className, children, ...rest }) => {
   );
 };
 
+const ModalTitel = ({ children, className = "" }) => <h1 className={`mb-6 text-xl font-medium text-gray-900 md:text-center ${className}`}>{children}</h1>;
+
+const ModalSubtitle = ({ children, className = "" }) => <span className={`mb-7 text-sm text-gray-500 md:text-center ${className}`}>{children}</span>;
+
+const ModalButtonContainer = ({ children, className = "" }) => <div className={`mt-3 flex w-full flex-col gap-3 md:flex-row ${className}`}>{children}</div>;
+
+const ModalButtons = ({ className = "", onCancel, onConfirm, confirmText = "Confirmer", cancelText = "Annuler", disabled }) => (
+  <ModalButtonContainer className={className}>
+    {onConfirm && (
+      <ButtonPrimary disabled={disabled} className="flex-1 md:order-last" onClick={onConfirm}>
+        {confirmText}
+      </ButtonPrimary>
+    )}
+    {onCancel && (
+      <ButtonLight className="flex-1" onClick={onCancel}>
+        {cancelText}
+      </ButtonLight>
+    )}
+  </ModalButtonContainer>
+);
+
 Modal.Header = ModalHeader;
 Modal.Content = ModalContent;
 Modal.Footer = ModalFooter;
+Modal.Title = ModalTitel;
+Modal.Subtitle = ModalSubtitle;
+Modal.ButtonContainer = ModalButtonContainer;
+Modal.Buttons = ModalButtons;
 
 export default Modal;

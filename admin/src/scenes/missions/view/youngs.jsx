@@ -396,7 +396,6 @@ export default function Youngs({ mission, applications, updateMission }) {
               active={currentTab === "follow"}
             />
           </div>
-          {/* <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}> */}
           <div className={`relative mb-4 items-start`}>
             <div className="mb-8 flex flex-col rounded-tr-xl bg-white py-4">
               <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
@@ -496,7 +495,6 @@ export default function Youngs({ mission, applications, updateMission }) {
               />
             </div>
           </div>
-          {/* </ReactiveBase> */}
         </MissionView>
         {![ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role) && (
           <Panel

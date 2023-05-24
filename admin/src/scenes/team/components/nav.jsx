@@ -22,14 +22,13 @@ export default function Nav({ filter, updateFilter, currentTab, setCurrentTab })
 
   useEffect(() => {
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      setCurrentTab(user.department[0]);
       const region = department2region[user.department[0]];
       if (user.department.every((depart) => department2region[depart] === region)) {
         setUserInTheSameRegion(true);
       } else {
         setUserInTheSameRegion(false);
       }
-    } else setCurrentTab("region");
+    }
   }, [user]);
 
   return (

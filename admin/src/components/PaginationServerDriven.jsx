@@ -37,37 +37,37 @@ export default function PaginationServerDriven({ pageCount, currentPage, count, 
       <div className="text-[12px] text-[#242526]">
         {currentPage * itemsPerPage + 1} - {currentPage * itemsPerPage + itemsCount} sur {count === 10000 ? "plus de 10000" : count}
       </div>
-      <a
+      <div
         href="#"
         onClick={goToPrevious}
         className={`ml-[5px] flex min-h-[30px] items-center justify-center rounded-[3px] border-[1px] border-[transparent] bg-[#f7fafc] py-[3px] px-[10px] text-[12px] font-bold text-[#242526] ${
           currentPage > 0 ? "cursor-pointer" : "cursor-not-allowed"
         }`}>
         <img src={Img3} alt="icon left" />
-      </a>
+      </div>
       <PageButton page={0} changePage={changePage} active={currentPage === 0} />
       {pages}
-      <a
+      <div
         href="#"
         onClick={goToNext}
         className={`ml-[5px] flex min-h-[30px] items-center justify-center rounded-[3px] border-[1px] border-[transparent] bg-[#f7fafc] py-[3px] px-[10px] text-[12px] font-bold text-[#242526] ${
           lastItem < count ? "cursor-pointer" : "cursor-not-allowed"
         }`}>
         <img src={Img2} alt="icon right" />
-      </a>
+      </div>
     </div>
   );
 }
 
 function PageButton({ page, changePage, active }) {
   return (
-    <a
+    <div
       href="#"
       onClick={() => changePage(page)}
       className={`ml-[5px] flex min-h-[30px] cursor-pointer items-center justify-center rounded-[3px] border-[1px] border-[transparent] bg-[#f7fafc] py-[3px] px-[10px] text-[12px] text-[#242526] ${
         active ? "font-bold" : "font-regular"
       }`}>
       {page + 1}
-    </a>
+    </div>
   );
 }
