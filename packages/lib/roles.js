@@ -667,7 +667,7 @@ function canDeleteSchemaDeRepartition(actor) {
 }
 
 function canViewLigneBus(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER, ROLES.HEAD_CENTER].includes(actor.role);
 }
 function canUpdateLigneBus(actor) {
   return [
@@ -694,7 +694,7 @@ function canDeleteLigneBus(actor) {
 }
 
 function canSearchLigneBus(actor) {
-  return [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
 function canEditLigneBusGeneralInfo(actor) {
@@ -714,7 +714,7 @@ function ligneBusCanCreateDemandeDeModification(actor) {
 }
 
 function ligneBusCanViewDemandeDeModification(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
 function ligneBusCanSendMessageDemandeDeModification(actor) {
