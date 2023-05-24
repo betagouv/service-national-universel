@@ -37,7 +37,7 @@ const getUserAttributes = async (user) => {
     userAttributes.push({ name: "lien vers candidatures", value: `${ADMIN_URL}/volontaire/${user._id}/phase2` });
     userAttributes.push({
       name: "lien vers équipe départementale",
-      value: `${ADMIN_URL}/user?department=${user.department.join("~")}&role=referent_department`,
+      value: `${ADMIN_URL}/user?department=${user.department}&role=referent_department`,
     });
     userAttributes.push({ name: "classe", value: user.grade });
   } else {
