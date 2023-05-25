@@ -211,13 +211,13 @@ router.post(
           if (line[`HEURE ALLER ARRIVÉE AU PDR ${i}`] && !isValidTime(line[`HEURE ALLER ARRIVÉE AU PDR ${i}`])) {
             errors[`HEURE ALLER ARRIVÉE AU PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
           }
-          if (!line[`HEURE DEPART DU PDR ${i}`]) {
+          if (!line[`HEURE DEPART DU PDR ${i}`] && (line[`ID PDR ${i}`] || "").toLowerCase() !== "correspondance retour") {
             errors[`HEURE DEPART DU PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
           }
           if (line[`HEURE DEPART DU PDR ${i}`] && !isValidTime(line[`HEURE DEPART DU PDR ${i}`])) {
             errors[`HEURE DEPART DU PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
           }
-          if (!line[`HEURE DE RETOUR ARRIVÉE AU PDR ${i}`]) {
+          if (!line[`HEURE DE RETOUR ARRIVÉE AU PDR ${i}`] && (line[`ID PDR ${i}`] || "").toLowerCase() !== "correspondance aller") {
             errors[`HEURE DE RETOUR ARRIVÉE AU PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
           }
           if (line[`HEURE DE RETOUR ARRIVÉE AU PDR ${i}`] && !isValidTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${i}`])) {
