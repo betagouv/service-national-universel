@@ -1,3 +1,10 @@
+# [1.278.0](https://github.com/betagouv/service-national-universel/compare/v1.277.0...v1.278.0) (2023-05-25)
+
+
+### Features
+
+* **api:** allow correspondance aller retour in one ([#2645](https://github.com/betagouv/service-national-universel/issues/2645)) ([82dab50](https://github.com/betagouv/service-national-universel/commit/82dab505c9df8b3a7810c9922bc5171681aa35c4))
+
 # [1.277.0](https://github.com/betagouv/service-national-universel/compare/v1.276.0...v1.277.0) (2023-05-24)
 
 
