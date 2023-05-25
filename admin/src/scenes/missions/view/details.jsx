@@ -5,6 +5,8 @@ import ReactSelect from "react-select";
 import AsyncSelect from "react-select/async";
 import CreatableSelect from "react-select/creatable";
 import validator from "validator";
+import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
+import InfoCircleMission from "../../../assets/icons/InfoCircleMission";
 
 import {
   translate,
@@ -258,6 +260,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
       toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(e));
     }
   };
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <ModalConfirm
@@ -282,7 +285,14 @@ export default function DetailsView({ mission, setMission, getMission }) {
             </a>
           </div>
         ) : null}
-        <div className="mb-8 rounded-xl bg-white pt-2">
+        {mission.status === MISSION_STATUS.WAITING_VALIDATION ? (
+          <InfoMessage
+            bg="bg-blue-700"
+            Icon={InfoCircleMission}
+            message="La mission est en attente de validation. Son contenu va être vérifié par un référent SNU du département dans lequel se déroulera la mission dans les jours à venir."
+          />
+        ) : null}
+        <div className="mb-8 rounded-xl bg-white pt-2 mt-8">
           <div className="flex flex-col rounded-xl bg-white px-8 pb-12">
             <div className="my-4 flex items-center justify-between">
               <div className="flex w-full flex-1 flex-row items-center justify-start gap-4">
