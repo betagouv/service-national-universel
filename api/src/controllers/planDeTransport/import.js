@@ -487,13 +487,13 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
               type: "aller",
               address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
               departureHour: line[`HEURE DEPART DU PDR ${pdrNumber}`],
-              returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`],
+              returnHour: "",
               transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
             });
             acc[acc.length - 1].stepPoints.push({
               type: "retour",
               address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
-              departureHour: line[`HEURE DEPART DU PDR ${pdrNumber}`],
+              departureHour: "",
               returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`],
               transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
             });
@@ -501,8 +501,8 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
             acc[acc.length - 1].stepPoints.push({
               type: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? "aller" : "retour",
               address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
-              departureHour: line[`HEURE DEPART DU PDR ${pdrNumber}`],
-              returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`],
+              departureHour: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? line[`HEURE DEPART DU PDR ${pdrNumber}`] : "",
+              returnHour: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? "" : line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`],
               transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
             });
           }
