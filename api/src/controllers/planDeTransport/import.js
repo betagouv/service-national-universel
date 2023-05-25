@@ -188,7 +188,7 @@ router.post(
           }
           if (line[`ID PDR ${i}`]) {
             const isValidObjectId = mongoose.Types.ObjectId.isValid(line[`ID PDR ${i}`]);
-            const isValidCorrespondance = i > 1 && ["correspondance aller", "correspondance retour"].includes(line[`ID PDR ${i}`].toLowerCase());
+            const isValidCorrespondance = i > 1 && ["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${i}`].toLowerCase());
             if (!(isValidObjectId || isValidCorrespondance)) {
               errors[`ID PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
             }
@@ -342,7 +342,7 @@ router.post(
               if (!pdr) {
                 errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
               }
-            } else if (!["correspondance aller", "correspondance retour"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
+            } else if (!["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
               errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
             }
           }
@@ -353,7 +353,7 @@ router.post(
         const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
         const pdrIds = [];
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-          if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
+          if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
             pdrIds.push(line[`ID PDR ${pdrNumber}`]);
           }
         }
@@ -439,7 +439,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
     for (const line of importData.lines) {
       const pdrIds = [];
       for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-        if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
+        if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
           pdrIds.push(line[`ID PDR ${pdrNumber}`]);
         }
       }
@@ -468,7 +468,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
 
       const lineToPointWithCorrespondance = Array.from({ length: countPdr }, (_, i) => i + 1).reduce((acc, pdrNumber) => {
         if (pdrNumber > 1 && !line[`ID PDR ${pdrNumber}`]) return acc;
-        if (!["correspondance aller", "correspondance retour"].includes(line[`ID PDR ${pdrNumber}`].toLowerCase())) {
+        if (!["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`].toLowerCase())) {
           acc.push({
             lineId: busLine._id.toString(),
             meetingPointId: line[`ID PDR ${pdrNumber}`],
@@ -480,13 +480,32 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
             stepPoints: [],
           });
         } else {
-          acc[acc.length - 1].stepPoints.push({
-            type: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? "aller" : "retour",
-            address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
-            departureHour: line[`HEURE DEPART DU PDR ${pdrNumber}`],
-            returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`],
-            transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
-          });
+          if (line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance") {
+            // Special case: when correspondance is not aller or retour
+            // We create 2 step points (aller and retour).
+            acc[acc.length - 1].stepPoints.push({
+              type: "aller",
+              address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
+              departureHour: line[`HEURE DEPART DU PDR ${pdrNumber}`],
+              returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`],
+              transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
+            });
+            acc[acc.length - 1].stepPoints.push({
+              type: "retour",
+              address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
+              departureHour: line[`HEURE DEPART DU PDR ${pdrNumber}`],
+              returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`],
+              transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
+            });
+          } else {
+            acc[acc.length - 1].stepPoints.push({
+              type: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? "aller" : "retour",
+              address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
+              departureHour: line[`HEURE DEPART DU PDR ${pdrNumber}`],
+              returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`],
+              transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
+            });
+          }
         }
         return acc;
       }, []);
