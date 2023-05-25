@@ -18,6 +18,7 @@ import { Title } from "../pointDeRassemblement/components/common";
 import DeletedVolontairePanel from "./deletedPanel";
 import Panel from "./panel";
 import { getFilterArray, transformVolontaires, transformVolontairesSchool } from "./utils";
+import { toastr } from "react-redux-toastr";
 
 export default function VolontaireList() {
   const user = useSelector((state) => state.Auth.user);
@@ -25,6 +26,7 @@ export default function VolontaireList() {
   const [volontaire, setVolontaire] = useState(null);
   const [centers, setCenters] = useState(null);
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
+  const [bus, setBus] = useState(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
 
   //List state
@@ -36,16 +38,20 @@ export default function VolontaireList() {
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
 
-  const filterArray = getFilterArray(user);
+  const filterArray = getFilterArray(user, bus);
 
   useEffect(() => {
     (async () => {
-      const { data } = await api.get("/cohesion-center");
-      setCenters(data);
-    })();
-    (async () => {
-      const { data } = await api.get("/session-phase1/");
-      setSessionsPhase1(data);
+      try {
+        const { data: centers } = await api.get("/cohesion-center");
+        const { data: sessions } = await api.get("/session-phase1/");
+        const { data: bus } = await api.get("/ligne-de-bus/all");
+        setCenters(centers);
+        setSessionsPhase1(sessions);
+        setBus(bus);
+      } catch (e) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+      }
     })();
   }, []);
 

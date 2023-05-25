@@ -24,8 +24,9 @@ import { orderCohort } from "../../../components/filters-system-v2/components/fi
 import api from "../../../services/api";
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 
-export const getFilterArray = (user) =>
-  [
+export const getFilterArray = (user, bus) => {
+  console.log("🚀 ~ file: index.js:28 ~ bus:", bus);
+  return [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
     { title: "Cohorte d'origine", name: "originalCohort", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
     { title: "Statut", name: "status", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateInscriptionStatus, defaultValue: ["VALIDATED"] },
@@ -68,12 +69,12 @@ export const getFilterArray = (user) =>
     },
     user.role === ROLES.REFERENT_DEPARTMENT
       ? {
-          title: "Etablissement",
-          name: "schoolName",
-          parentGroup: "Dossier",
-          missingLabel: "Non renseigné",
-          translate: translate,
-        }
+        title: "Etablissement",
+        name: "schoolName",
+        parentGroup: "Dossier",
+        missingLabel: "Non renseigné",
+        translate: translate,
+      }
       : null,
     {
       title: "Situation",
@@ -220,7 +221,10 @@ export const getFilterArray = (user) =>
       name: "ligneId",
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
-      translate: translate,
+      translate: (item) => {
+        if (item === "N/A" || !bus?.ligneBus) return item;
+        return bus.ligneBus.find((option) => option._id.toString() === item)?.busId;
+      },
     },
     {
       title: "Voyage en avion",
@@ -279,6 +283,7 @@ export const getFilterArray = (user) =>
       translate: translate,
     },
   ].filter(Boolean);
+};
 
 export async function transformVolontaires(data, values, centers, sessionsPhase1) {
   let all = data;
