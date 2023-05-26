@@ -9,7 +9,9 @@
     "tailwind": "npx tailwindcss -i ./src/index.css -o ./src/tailwindcss.css --watch",
     "start": "node server/index.js",
     "install": "node src/build-only-on-clevercloud.js",
-    "build": "node --max-old-space-size=3000 ../node_modules/webpack/bin/webpack.js"
+    "build": "node --max-old-space-size=3000 ../node_modules/webpack/bin/webpack.js",
+    "lint": "eslint src --ext .js,.jsx",
+    "lint:fix": "eslint --ext .js --fix src"
   },
   "devDependencies": {
     "@babel/cli": "7.19.3",

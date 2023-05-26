@@ -1,49 +1,40 @@
-import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import React, { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { Spinner } from "reactstrap";
 
-import { getFilterLabel, translateApplication, translatePhase2 } from "snu-lib";
+import { translateApplication, translatePhase2 } from "snu-lib";
 import styled from "styled-components";
 import PinLocation from "../../../assets/PinLocation";
-import { FilterRow, ResultTable } from "../../../components/list";
+import { Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
+import { orderCohort } from "../../../components/filters-system-v2/components/filters/utils";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
-import ReactiveListComponent from "../../../components/ReactiveListComponent";
-import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import { APPLICATION_STATUS, getResultLabel, isInRuralArea, ROLES, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
+import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, isInRuralArea, translate } from "../../../utils";
 import MissionView from "./wrapper";
 
-const FILTERS = ["SEARCH", "COHORT", "STATUS_PHASE_2", "APPLICATION_STATUS"];
-
 export default function ProposeMission({ mission, updateMission }) {
-  const user = useSelector((state) => state.Auth.user);
+  const [data, setData] = React.useState([]);
+  const pageId = "propose-mission";
+  const [selectedFilters, setSelectedFilters] = React.useState({});
+  const [paramData, setParamData] = React.useState({ page: 0 });
 
-  const [search, setSearch] = useState(undefined);
-
-  const getDefaultQuery = () => {
-    let defaultQuery = {
-      query: {
-        bool: {
-          filter: [
-            { terms: { "status.keyword": ["VALIDATED"] } },
-            { terms: { "statusPhase1.keyword": ["DONE", "EXEMPTED"] } },
-            { terms: { "statusPhase2.keyword": ["IN_PROGRESS", "WAITING_REALISATION"] } },
-          ],
-        },
-      },
-      track_total_hits: true,
-    };
-    if (user.role === ROLES.REFERENT_DEPARTMENT) defaultQuery.query.bool.filter.push({ terms: { "department.keyword": user.department } });
-    if (user.role === ROLES.REFERENT_REGION) defaultQuery.query.bool.filter.push({ term: { "region.keyword": user.region } });
-
-    if (mission.location?.lat && mission.location?.lon) {
-      defaultQuery["sort"] = { _geo_distance: { location: [mission.location?.lon, mission.location?.lat], order: "asc", unit: "km" } };
-    }
-    return defaultQuery;
-  };
+  //Filters
+  const filterArray = [
+    { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
+    {
+      title: "Statut phase 2",
+      name: "statusPhase2",
+      missingLabel: "Non renseigné",
+      translate: translatePhase2,
+    },
+    {
+      title: "Statut mission (candidature)",
+      name: "phase2ApplicationStatus",
+      missingLabel: "Non renseigné",
+      translate: translateApplication,
+    },
+  ];
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -54,10 +45,19 @@ export default function ProposeMission({ mission, updateMission }) {
               Cette mission est <strong>fermée</strong> aux candidatures.
             </div>
           ) : (
-            <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-              <SearchBox getDefaultQuery={getDefaultQuery} setSearch={setSearch} />
-              <ResultBox getDefaultQuery={getDefaultQuery} search={search} mission={mission} updateMission={updateMission} />
-            </ReactiveBase>
+            <>
+              <SearchBox
+                pageId={pageId}
+                setData={setData}
+                filterArray={filterArray}
+                selectedFilters={selectedFilters}
+                setSelectedFilters={setSelectedFilters}
+                paramData={paramData}
+                setParamData={setParamData}
+                mission={mission}
+              />
+              <ResultBox mission={mission} updateMission={updateMission} data={data} paramData={paramData} setParamData={setParamData} selectedFilters={selectedFilters} />
+            </>
           )}
         </div>
       </MissionView>
@@ -65,87 +65,40 @@ export default function ProposeMission({ mission, updateMission }) {
   );
 }
 
-const SearchBox = ({ getDefaultQuery, setSearch }) => {
+const SearchBox = ({ pageId, setData, filterArray, selectedFilters, setSelectedFilters, paramData, setParamData, mission }) => {
   return (
     <div className="flex flex-col bg-white px-12 pt-12 pb-4">
       <div className="flex items-center justify-between rounded-lg">
+        <Filters
+          pageId={pageId}
+          route={`/elasticsearch/young/propose-mission/${mission._id.toString()}/search`}
+          setData={(value) => setData(value)}
+          filters={filterArray}
+          searchPlaceholder="Rechercher par prénom, nom, email, ville, code postal..."
+          selectedFilters={selectedFilters}
+          setSelectedFilters={setSelectedFilters}
+          paramData={paramData}
+          setParamData={setParamData}
+        />
+
         <div>
           <h3 style={{ color: "#111827", fontWeight: "bold" }}>Suggérez la mission à un volontaire</h3>
           <p style={{ color: "#6B7280" }}>Un e-mail lui sera envoyé avec la présentation de la mission ainsi qu’un lien pour candidater.</p>
         </div>
-        <SearchStyle>
-          <DataSearch
-            defaultQuery={getDefaultQuery}
-            showIcon={false}
-            placeholder="Rechercher un volontaire..."
-            react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-            componentId="SEARCH"
-            dataField={["email.keyword", "firstName.folded", "lastName.folded"]}
-            style={{ flex: 1, marginRight: "1rem" }}
-            innerClass={{ input: "searchbox" }}
-            autosuggest={false}
-            queryFormat="and"
-            onValueChange={setSearch}
-          />
-          <p>Nom, prénom ou bien e-mail</p>
-        </SearchStyle>
       </div>
-      <div className="mt-4 flex items-center rounded-xl bg-gray-50 p-4">
-        <FilterRow visible>
-          <div className="text-sm uppercase text-gray-500">Filtres :</div>
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            placeholder="Cohorte"
-            componentId="COHORT"
-            dataField="cohort.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-            renderItem={(e, count) => {
-              return `${translate(e)} (${count})`;
-            }}
-            title=""
-            URLParams={true}
-            showSearch={false}
-            renderLabel={(items) => getFilterLabel(items, "Cohorte", "Cohorte")}
-          />
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            componentId="STATUS_PHASE_2"
-            dataField="statusPhase2.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_2") }}
-            renderItem={(e, count) => {
-              return `${translatePhase2(e)} (${count})`;
-            }}
-            title=""
-            URLParams={true}
-            showSearch={false}
-            renderLabel={(items) => getFilterLabel(items, "Statut phase 2", "Statut phase 2")}
-          />
-          <MultiDropdownList
-            defaultQuery={getDefaultQuery}
-            className="dropdown-filter"
-            componentId="APPLICATION_STATUS"
-            dataField="phase2ApplicationStatus.keyword"
-            react={{ and: FILTERS.filter((e) => e !== "APPLICATION_STATUS") }}
-            renderItem={(e, count) => {
-              return `${translateApplication(e)} (${count})`;
-            }}
-            title=""
-            URLParams={true}
-            showSearch={false}
-            renderLabel={(items) => getFilterLabel(items, "Statut mission (candidature)", "Statut mission (candidature)")}
-            showMissing={true}
-          />
-        </FilterRow>
+      <div className="mt-2 flex flex-row flex-wrap items-center">
+        <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+        <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
       </div>
     </div>
   );
 };
 
-const ResultBox = ({ getDefaultQuery, search, mission, updateMission }) => {
+const ResultBox = ({ mission, updateMission, data, paramData, setParamData, selectedFilters }) => {
   const [applicationsToTheMission, setApplicationsToTheMission] = useState([]);
   const history = useHistory();
+
+  const hasSearch = selectedFilters?.searchbar?.filter[0]?.trim() === "" || !selectedFilters?.searchbar?.filter?.length;
 
   useEffect(() => {
     getApplicationsToTheMission();
@@ -208,23 +161,28 @@ const ResultBox = ({ getDefaultQuery, search, mission, updateMission }) => {
 
   return (
     <ResultStyle>
-      {!search ? <p className="suggested">Recommandation de volontaires disponibles autour de la mission :</p> : <p className="suggested">Résultat de la recherche :</p>}
-      <ResultTable backgroundColor="#f4f5f7">
-        <ReactiveListComponent
-          paginationAt="bottom"
-          defaultQuery={getDefaultQuery}
-          react={{ and: FILTERS }}
-          size={12}
-          renderResultStats={(e) => <BottomResultStats>{getResultLabel(e, 12)}</BottomResultStats>}
-          render={({ data }) => (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gridGap: "1rem" }}>
-              {data.map((hit) => (
-                <Hit key={hit._id} hit={hit} applicationsToTheMission={applicationsToTheMission} mission={mission} onClick={async () => await handleProposal(hit)} />
-              ))}
-            </div>
-          )}
-        />
-      </ResultTable>
+      {data.length ? (
+        <>
+          {hasSearch ? <p className="suggested">Recommandation de volontaires disponibles autour de la mission :</p> : <p className="suggested">Résultat de la recherche :</p>}
+          <div className="bg-[#f4f5f7] mt-4">
+            <ResultTable
+              paramData={paramData}
+              setParamData={setParamData}
+              currentEntryOnPage={data?.length}
+              size={data?.length}
+              render={
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gridGap: "1rem" }}>
+                  {data.map((hit) => (
+                    <Hit key={hit._id} hit={hit} applicationsToTheMission={applicationsToTheMission} mission={mission} onClick={async () => await handleProposal(hit)} />
+                  ))}
+                </div>
+              }
+            />
+          </div>
+        </>
+      ) : (
+        <p className="suggested text-center w-full">Aucun Résultat</p>
+      )}
     </ResultStyle>
   );
 };
@@ -323,20 +281,6 @@ const Hit = ({ hit, mission, applicationsToTheMission, onClick }) => {
   );
 };
 
-const SearchStyle = styled.div`
-  width: 33%;
-  .searchbox {
-    background-color: #ffffff;
-    border-radius: 10px;
-    min-width: 20rem;
-  }
-  p {
-    color: #6b7280;
-    font-size: 0.8rem;
-    margin-block: 5px 0;
-  }
-`;
-
 const ResultStyle = styled.div`
   .suggested {
     margin-block: 1rem 0;
@@ -351,15 +295,6 @@ const ResultStyle = styled.div`
   p {
     margin-block: 5px;
   }
-`;
-
-const BottomResultStats = styled.div`
-  color: #242526;
-  font-size: 12px;
-  padding-left: 25px;
-  position: absolute;
-  top: calc(100% - 50px);
-  left: 0;
 `;
 
 const YoungCard = styled.div`

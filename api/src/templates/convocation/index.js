@@ -234,7 +234,7 @@ const renderDOMTOM = async (young) => {
 };
 
 const cohesion = async (young) => {
-  if (isFromDOMTOM(young)) return renderDOMTOM(young);
+  // if (isFromDOMTOM(young)) return renderDOMTOM(young);
   if (young?.transportInfoGivenByLocal === "true") return renderLocalTransport(young);
   return render(young);
 };

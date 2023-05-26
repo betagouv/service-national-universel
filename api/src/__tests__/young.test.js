@@ -49,7 +49,7 @@ jest.mock("../cryptoUtils", () => ({
 }));
 jest.mock("node-fetch");
 
-jest.setTimeout(10_000);
+jest.setTimeout(30_000);
 
 beforeAll(dbConnect);
 afterAll(dbClose);

@@ -2,7 +2,7 @@ import React from "react";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { ROLES, getDepartmentNumber, translate } from "snu-lib";
 import ArrowUp from "../../../assets/ArrowUp";
 import Comment from "../../../assets/comment";
@@ -29,9 +29,10 @@ const cohortList = [
 ];
 
 export default function List() {
-  const { user } = useSelector((state) => state.Auth);
+  const { user, sessionPhase1 } = useSelector((state) => state.Auth);
   const urlParams = new URLSearchParams(window.location.search);
-  const [cohort, setCohort] = React.useState(urlParams.get("cohort") || "Février 2023 - C");
+  const defaultCohort = user.role === ROLES.HEAD_CENTER && sessionPhase1 ? sessionPhase1.cohort : "Février 2023 - C";
+  const [cohort, setCohort] = React.useState(urlParams.get("cohort") || defaultCohort);
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasValue, setHasValue] = React.useState(false);
   const history = useHistory();
@@ -51,6 +52,10 @@ export default function List() {
   };
 
   React.useEffect(() => {
+    if (user.role === ROLES.HEAD_CENTER && sessionPhase1) {
+      history.push(`/ligne-de-bus?cohort=${sessionPhase1.cohort}`);
+      setCohort(sessionPhase1.cohort);
+    }
     setIsLoading(true);
     getPlanDetransport();
   }, [cohort]);
@@ -66,6 +71,7 @@ export default function List() {
           <Select
             options={cohortList}
             value={cohort}
+            disabled={user.role === ROLES.HEAD_CENTER}
             onChange={(e) => {
               setCohort(e);
               history.replace({ search: `?cohort=${e}` });
@@ -106,6 +112,7 @@ const ReactiveList = ({ cohort, history }) => {
   const [paramData, setParamData] = React.useState({
     page: 0,
   });
+
   const filterArray = [
     { title: "Numéro de la ligne", name: "busId", parentGroup: "Bus", missingLabel: "Non renseigné" },
     { title: "Date aller", name: "departureString", parentGroup: "Bus", missingLabel: "Non renseigné" },
@@ -196,17 +203,21 @@ const ReactiveList = ({ cohort, history }) => {
             />
           </div>
           <div className="flex items-center gap-2">
-            <button
-              className="text-grey-700 flex h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium"
-              onClick={() => history.push(`/ligne-de-bus/historique?cohort=${cohort}`)}>
-              <History className="text-gray-400" />
-              Historique
-            </button>
-            <button
-              className="h-10 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700"
-              onClick={() => history.push(`/ligne-de-bus/demande-de-modification?cohort=${cohort}`)}>
-              Demande de modification
-            </button>
+            {user.role !== ROLES.HEAD_CENTER ? (
+              <>
+                <button
+                  className="text-grey-700 flex h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium"
+                  onClick={() => history.push(`/ligne-de-bus/historique?cohort=${cohort}`)}>
+                  <History className="text-gray-400" />
+                  Historique
+                </button>
+                <button
+                  className="h-10 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700"
+                  onClick={() => history.push(`/ligne-de-bus/demande-de-modification?cohort=${cohort}`)}>
+                  Demande de modification
+                </button>
+              </>
+            ) : null}
             <SelectAction
               title="Exporter"
               alignItems="right"
@@ -328,8 +339,6 @@ const ReactiveList = ({ cohort, history }) => {
 };
 
 const Line = ({ hit, currentTab, setPanel }) => {
-  const history = useHistory();
-
   const meetingPoints =
     currentTab === "aller"
       ? //sort meetingPoints by departureHour
@@ -342,14 +351,14 @@ const Line = ({ hit, currentTab, setPanel }) => {
     <>
       <hr />
       <div className="flex items-center py-6 px-4 hover:bg-gray-50">
-        <div className="w-[30%] cursor-pointer" onClick={() => history.push(`/ligne-de-bus/${hit._id.toString()}`)}>
+        <Link className="w-[30%] cursor-pointer" to={`/ligne-de-bus/${hit._id.toString()}`} target="_blank" rel="noreferrer">
           <div className="flex flex-col">
             <div className="text-sm font-medium">{hit.busId}</div>
             <div className="text-xs text-gray-400">
               {currentTab === "aller" ? `${hit.pointDeRassemblements[0]?.region} > ${hit.centerRegion}` : `${hit.centerRegion} > ${hit.pointDeRassemblements[0]?.region}`}
             </div>
           </div>
-        </div>
+        </Link>
         <div className="w-[40%]">
           <div className="flex gap-2">
             {meetingPoints.map((meetingPoint) => {
