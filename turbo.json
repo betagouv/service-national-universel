@@ -16,6 +16,7 @@
       "cache": false,
       "persistent": true,
       "outputs": ["dist/**", "build/**"]
-    }
+    },
+    "lint": {}
   }
 }
