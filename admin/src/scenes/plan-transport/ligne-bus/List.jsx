@@ -71,7 +71,7 @@ export default function List() {
           <Select
             options={cohortList}
             value={cohort}
-            disabled={user.role === ROLES.HEAD_CENTER ? true : false}
+            disabled={user.role === ROLES.HEAD_CENTER}
             onChange={(e) => {
               setCohort(e);
               history.replace({ search: `?cohort=${e}` });
@@ -204,19 +204,19 @@ const ReactiveList = ({ cohort, history }) => {
           </div>
           <div className="flex items-center gap-2">
             {user.role !== ROLES.HEAD_CENTER ? (
-              <button
-                className="text-grey-700 flex h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium"
-                onClick={() => history.push(`/ligne-de-bus/historique?cohort=${cohort}`)}>
-                <History className="text-gray-400" />
-                Historique
-              </button>
-            ) : null}
-            {user.role !== ROLES.HEAD_CENTER ? (
-              <button
-                className="h-10 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700"
-                onClick={() => history.push(`/ligne-de-bus/demande-de-modification?cohort=${cohort}`)}>
-                Demande de modification
-              </button>
+              <>
+                <button
+                  className="text-grey-700 flex h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium"
+                  onClick={() => history.push(`/ligne-de-bus/historique?cohort=${cohort}`)}>
+                  <History className="text-gray-400" />
+                  Historique
+                </button>
+                <button
+                  className="h-10 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700"
+                  onClick={() => history.push(`/ligne-de-bus/demande-de-modification?cohort=${cohort}`)}>
+                  Demande de modification
+                </button>
+              </>
             ) : null}
             <SelectAction
               title="Exporter"
