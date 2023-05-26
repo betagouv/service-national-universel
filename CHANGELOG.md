@@ -1,3 +1,22 @@
+# [1.279.0](https://github.com/betagouv/service-national-universel/compare/v1.278.0...v1.279.0) (2023-05-26)
+
+
+### Bug Fixes
+
+* **admin:** accesibilité ([4181a55](https://github.com/betagouv/service-national-universel/commit/4181a55fce8174857ccfc9449a15a1c741aeaee0))
+* **api:** Allow more memory for api ([e6197f1](https://github.com/betagouv/service-national-universel/commit/e6197f1f7bc665fb2ad1aa401c22ed5105cc00f2))
+* **app:** cohort screen for waitin list young ([#2644](https://github.com/betagouv/service-national-universel/issues/2644)) ([812be64](https://github.com/betagouv/service-national-universel/commit/812be6480c31a37c7e907f1dd5b797d0f704963c))
+
+
+### Features
+
+* **api/admin:** Ouverture au chef de centre du plan de transport ([#2643](https://github.com/betagouv/service-national-universel/issues/2643)) ([f9e453b](https://github.com/betagouv/service-national-universel/commit/f9e453b315139ffbfba5e19af5e0cc049b84f627))
+
+
+### Reverts
+
+* Revert "feat(api/admin): Ouverture au chef de centre du plan de transport (#2643)" (#2650) ([f074886](https://github.com/betagouv/service-national-universel/commit/f0748861b675899b9926b8834ce0ca05b410bd81)), closes [#2643](https://github.com/betagouv/service-national-universel/issues/2643) [#2650](https://github.com/betagouv/service-national-universel/issues/2650)
+
 # [1.278.0](https://github.com/betagouv/service-national-universel/compare/v1.277.0...v1.278.0) (2023-05-25)
 
 
