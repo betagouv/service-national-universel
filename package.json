@@ -1,7 +1,7 @@
 {
   "name": "service-national-universel",
   "scripts": {
-    "lint": "turbo run lint",
+    "lint": "turbo run lint --continue",
     "dev": "turbo run dev",
     "build": "turbo run build --filter=$APP_NAME",
     "start": "turbo run start --filter=$APP_NAME",
