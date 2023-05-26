@@ -111,23 +111,35 @@ app.use("/dashboard/engagement", require("./controllers/dashboard/engagement"));
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));
 
-app.get("/memory_stats", async (req, res) => {
+app.get("/memory-stats", async (req, res) => {
   // ! Memory usage
   const formatMemoryUsage = (data) => `${Math.round((data / 1024 / 1024) * 100) / 100} MB`;
 
   const memoryData = process.memoryUsage();
 
   const memoryUsage = {
-    rss: `${formatMemoryUsage(memoryData.rss)} -> Resident Set Size - total memory allocated for the process execution`,
-    heapTotal: `${formatMemoryUsage(memoryData.heapTotal)} -> total size of the allocated heap`,
-    heapUsed: `${formatMemoryUsage(memoryData.heapUsed)} -> actual memory used during the execution`,
-    external: `${formatMemoryUsage(memoryData.external)} -> V8 external memory`,
+    rss: `Resident Set Size (rss): ${formatMemoryUsage(memoryData.rss)}`,
+    heapTotal: `Total Heap Size (heapTotal): ${formatMemoryUsage(memoryData.heapTotal)}`,
+    heapUsed: `Used Heap Size (heapUsed): ${formatMemoryUsage(memoryData.heapUsed)}`,
+    external: `External Memory (external): ${formatMemoryUsage(memoryData.external)}`,
   };
 
-  console.log("Memory usage: ", JSON.stringify(memoryUsage));
+  let response = "Memory usage:<br>";
+  Object.entries(memoryUsage).forEach(([, value]) => {
+    response += `${value}<br>`;
+  });
 
-  // const d = new Date();
-  res.status(200).send("Memory usage: ", JSON.stringify(memoryUsage));
+  response += "<br>Explications :<br>";
+  response +=
+    "La taille du jeu de résidence (rss) représente la taille totale de la mémoire allouée pour l'exécution du processus. Cela inclut la mémoire utilisée par le code du programme, les variables et les bibliothèques chargées en mémoire.<br>";
+  response +=
+    "La taille totale du tas (heapTotal) indique la taille totale de la mémoire allouée pour le tas (heap). Le tas est une zone de mémoire utilisée pour stocker les objets et les données dynamiques du programme.<br>";
+  response +=
+    "La taille du tas utilisée (heapUsed) représente la quantité réelle de mémoire utilisée dans le tas (heap) pendant l'exécution du programme. Cela inclut la mémoire allouée pour les objets et les données utilisées par le programme.<br>";
+  response +=
+    "La mémoire externe (external) correspond à la quantité de mémoire utilisée par des ressources externes au moteur JavaScript, telles que les liaisons avec des bibliothèques natives ou des objets créés en dehors de l'environnement JavaScript.<br>";
+
+  res.status(200).send(response);
 });
 
 app.get("/", async (req, res) => {
