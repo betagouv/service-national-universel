@@ -1,3 +1,4 @@
+import Img2 from "../../assets/image-diagorente.png";
 import React, { useState, useEffect } from "react";
 
 import styled from "styled-components";
@@ -506,7 +507,7 @@ const HeroStyle = styled.div`
 
   .diagorente {
     min-height: 400px;
-    background: url(${require("../../assets/image-diagorente.png")}) no-repeat center;
+    background: url(${Img2}) no-repeat center;
     background-size: cover;
     flex: 1;
     -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);

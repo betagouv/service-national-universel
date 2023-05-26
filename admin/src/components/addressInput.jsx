@@ -1,3 +1,4 @@
+import Img from "i18n-iso-countries/langs/fr.json";
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Row, Col, Spinner } from "reactstrap";
@@ -8,7 +9,7 @@ import InfoIcon from "./InfoIcon";
 import countries from "i18n-iso-countries";
 import { toastr } from "react-redux-toastr";
 import { apiAdress } from "../services/api-adresse";
-countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
+countries.registerLocale(Img);
 const countriesList = countries.getNames("fr", { select: "official" });
 
 // eslint-disable-next-line prettier/prettier

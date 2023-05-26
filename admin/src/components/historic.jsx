@@ -1,3 +1,4 @@
+import Img2 from "../assets/pencil.svg";
 import React, { useState } from "react";
 import styled from "styled-components";
 import { translate, formatStringLongDate, YOUNG_STATUS_COLORS, colors } from "../utils";
@@ -113,7 +114,7 @@ const Historic = styled.ul`
     &-edit {
       width: 30px;
       height: 26px;
-      background: url(${require("../assets/pencil.svg")}) center no-repeat;
+      background: url(${Img2}) center no-repeat;
       background-size: 16px;
       position: absolute;
       right: 0;

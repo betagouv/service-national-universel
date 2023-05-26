@@ -1,3 +1,4 @@
+import Img2 from "../../../assets/validatedPhase2Mobile.png";
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -96,7 +97,7 @@ export default function ValidatedMobile() {
           </div>
         </div>
         <div className="flex">
-          <img className="object-scale-down" src={require("../../../assets/validatedPhase2Mobile.png")} />
+          <img className="object-scale-down" src={Img2} />
         </div>
       </div>
       <div className="mx-4 my-5">

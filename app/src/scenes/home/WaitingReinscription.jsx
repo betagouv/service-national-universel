@@ -1,3 +1,5 @@
+import Img3 from "../../assets/homePhase2Desktop.png";
+import Img2 from "../../assets/homePhase2Mobile.png";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -60,7 +62,7 @@ export default function WaitingReinscription() {
                 </button> */}
               </div>
             </div>
-            <img className="w-1/2 object-fill" src={require("../../assets/homePhase2Desktop.png")} />
+            <img className="w-1/2 object-fill" src={Img3} />
           </div>
         </div>
       </div>
@@ -80,7 +82,7 @@ export default function WaitingReinscription() {
               Vérifier mon éligibilité
             </button> */}
           </div>
-          <img src={require("../../assets/homePhase2Mobile.png")} />
+          <img src={Img2} />
         </div>
       </div>
     </>

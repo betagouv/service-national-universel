@@ -1,3 +1,4 @@
+import Img2 from "../../assets/logo-diagoriente-blue.png";
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { HeroContainer, Hero } from "../../components/Content";
@@ -68,7 +69,7 @@ export default function Index() {
       <HeroContainer>
         <Hero>
           <div className="content">
-            <img src={require("../../assets/logo-diagoriente-blue.png")} />
+            <img src={Img2} />
             <h1>Identifiez vos compétences et explorez vos intérêts</h1>
             <p>Complétez vos expériences, qu&apos;elles soient professionnelles ou personnelles, puis évaluez vos compétences.</p>
 

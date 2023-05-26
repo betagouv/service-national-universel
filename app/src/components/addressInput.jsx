@@ -8,7 +8,8 @@ import InfoIcon from "./InfoIcon";
 import countries from "i18n-iso-countries";
 import validator from "validator";
 import { apiAdress } from "../services/api-adresse";
-countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
+import * as fr from "i18n-iso-countries/langs/fr.json";
+countries.registerLocale(fr);
 const countriesList = countries.getNames("fr", { select: "official" });
 
 export default function AddressInput({ keys, values, handleChange, errors, touched, validateField, countryVisible = false, onChangeCountry = () => {}, countryByDefault = "" }) {

@@ -1,3 +1,5 @@
+import Img3 from "../../assets/homePhase2Desktop.png";
+import Img2 from "../../assets/homePhase2Mobile.png";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
@@ -104,7 +106,7 @@ export default function Phase1NotDone() {
               )}
             </div>
             <div className="hidden flex-none xl:block">
-              <img className="object-" src={require("../../assets/homePhase2Desktop.png")} alt="" />
+              <img className="object-" src={Img3} alt="" />
             </div>
           </>
         )}
@@ -155,7 +157,7 @@ export default function Phase1NotDone() {
                 </button>
               )}
             </div>
-            <img src={require("../../assets/homePhase2Mobile.png")} alt="" />
+            <img src={Img2} alt="" />
           </>
         )}
       </div>

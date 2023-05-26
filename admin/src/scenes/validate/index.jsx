@@ -1,3 +1,4 @@
+import Img from "../../assets/logo-snu.png";
 import React, { useState, useEffect } from "react";
 import { FormGroup } from "reactstrap";
 import { Formik, Field } from "formik";
@@ -53,7 +54,7 @@ export default function Index() {
           {({ values, isSubmitting, handleChange, handleSubmit }) => {
             return (
               <Form onSubmit={handleSubmit}>
-                <img src={require("../../assets/logo-snu.png")} height={70} />
+                <img src={Img} height={70} />
                 <Title>Validation de la mission SNU du volontaire</Title>
                 <Text>
                   Je soussigné(e),{" "}

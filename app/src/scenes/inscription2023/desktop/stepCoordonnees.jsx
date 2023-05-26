@@ -1,3 +1,4 @@
+import Img2 from "../../../assets/infoSquared.svg";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -642,7 +643,7 @@ export default function StepCoordonnees() {
           <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
           <div className="my-3 flex">
             <div className="flex w-[40px] min-w-[40px] items-center justify-center bg-[#0063CB]">
-              <img src={require("../../../assets/infoSquared.svg")} height={20} width={20} />
+              <img src={Img2} height={20} width={20} />
             </div>
             <div className="border-2 border-[#0063CB] p-3 text-justify  text-[#3A3A3A] shadow-sm">
               Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).

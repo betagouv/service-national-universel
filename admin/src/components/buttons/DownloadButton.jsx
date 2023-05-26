@@ -1,3 +1,5 @@
+import Img2 from "../../assets/download.svg";
+import Img from "../../assets/download.svg";
 import React, { useState } from "react";
 import styled from "styled-components";
 import * as FileSaver from "file-saver";
@@ -50,7 +52,7 @@ export default function DownloadButton({ source, title, ...rest }) {
 
 const DownloadBtn = styled(LoadingButton)`
   color: #555 !important;
-  background: url(${require("../../assets/download.svg")}) left 15px center no-repeat;
+  background: url(${Img2}) left 15px center no-repeat;
   background-color: #fff;
   border: 1px solid #eee;
   outline: 0;
@@ -63,7 +65,7 @@ const DownloadBtn = styled(LoadingButton)`
   margin-top: 1rem;
   width: fit-content;
   :hover {
-    background: url(${require("../../assets/download.svg")}) left 15px center no-repeat;
+    background: url(${Img}) left 15px center no-repeat;
     box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
   }
 `;

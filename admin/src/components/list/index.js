@@ -1,3 +1,5 @@
+import Img2 from "../../assets/left.svg";
+import Img from "../../assets/right.svg";
 import styled from "styled-components";
 import { colors } from "../../utils";
 
@@ -93,10 +95,10 @@ export const ResultTable = styled.div`
       font-weight: 700;
     }
     a:first-child {
-      background-image: url(${require("../../assets/left.svg")});
+      background-image: url(${Img2});
     }
     a:last-child {
-      background-image: url(${require("../../assets/right.svg")});
+      background-image: url(${Img});
     }
     a:first-child,
     a:last-child {

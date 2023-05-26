@@ -1,3 +1,7 @@
+import Img6 from "../../assets/link.svg";
+import Img5 from "../../assets/copy.svg";
+import Img4 from "../../assets/close_icon.png";
+import Img3 from "../../assets/pencil.svg";
 import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -295,7 +299,7 @@ const IconLink = styled.div`
   margin: 0 0.5rem;
   width: 18px;
   height: 18px;
-  background: ${`url(${require("../../assets/link.svg")})`};
+  background: ${`url(${Img6})`};
   background-repeat: no-repeat;
   background-position: center;
   background-size: 15px 15px;
@@ -306,7 +310,7 @@ const IconCopy = styled.div`
   margin: 0 0.5rem;
   width: 15px;
   height: 15px;
-  background: ${`url(${require("../../assets/copy.svg")})`};
+  background: ${`url(${Img5})`};
   background-repeat: no-repeat;
   background-position: center;
   background-size: 15px 15px;
@@ -353,7 +357,7 @@ const Panel = styled.div`
     font-weight: 400;
     width: 45px;
     height: 45px;
-    background: url(${require("../../assets/close_icon.png")}) center no-repeat;
+    background: url(${Img4}) center no-repeat;
     background-size: 12px;
     padding: 15px;
     position: absolute;
@@ -380,7 +384,7 @@ const Panel = styled.div`
     &-edit {
       width: 30px;
       height: 26px;
-      background: url(${require("../../assets/pencil.svg")}) center no-repeat;
+      background: url(${Img3}) center no-repeat;
       background-size: 16px;
       position: absolute;
       right: 0;
