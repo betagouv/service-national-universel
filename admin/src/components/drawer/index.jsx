@@ -240,7 +240,6 @@ function headCenter({ onClick, sessionPhase1, from }) {
       {sessionPhase1 && <DrawerTab to={`/centre/${sessionPhase1.cohesionCenterId}`} title="Mon Centre" onClick={onClick} exact />}
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       {sessionPhase1 && <DrawerTab to={`/centre/${sessionPhase1.cohesionCenterId}/${sessionPhase1._id}/general`} title="Volontaires" onClick={onClick} />}
-      <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <BlankSeparator />
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />

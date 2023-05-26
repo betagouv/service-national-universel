@@ -29,10 +29,9 @@ const cohortList = [
 ];
 
 export default function List() {
-  const { user, sessionPhase1 } = useSelector((state) => state.Auth);
+  const { user } = useSelector((state) => state.Auth);
   const urlParams = new URLSearchParams(window.location.search);
-  const defaultCohort = user.role === ROLES.HEAD_CENTER && sessionPhase1 ? sessionPhase1.cohort : "Février 2023 - C";
-  const [cohort, setCohort] = React.useState(urlParams.get("cohort") || defaultCohort);
+  const [cohort, setCohort] = React.useState(urlParams.get("cohort") || "Février 2023 - C");
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasValue, setHasValue] = React.useState(false);
   const history = useHistory();
@@ -52,10 +51,6 @@ export default function List() {
   };
 
   React.useEffect(() => {
-    if (user.role === ROLES.HEAD_CENTER && sessionPhase1) {
-      history.push(`/ligne-de-bus?cohort=${sessionPhase1.cohort}`);
-      setCohort(sessionPhase1.cohort);
-    }
     setIsLoading(true);
     getPlanDetransport();
   }, [cohort]);
@@ -71,7 +66,6 @@ export default function List() {
           <Select
             options={cohortList}
             value={cohort}
-            disabled={user.role === ROLES.HEAD_CENTER}
             onChange={(e) => {
               setCohort(e);
               history.replace({ search: `?cohort=${e}` });
@@ -112,7 +106,6 @@ const ReactiveList = ({ cohort, history }) => {
   const [paramData, setParamData] = React.useState({
     page: 0,
   });
-
   const filterArray = [
     { title: "Numéro de la ligne", name: "busId", parentGroup: "Bus", missingLabel: "Non renseigné" },
     { title: "Date aller", name: "departureString", parentGroup: "Bus", missingLabel: "Non renseigné" },
@@ -203,21 +196,17 @@ const ReactiveList = ({ cohort, history }) => {
             />
           </div>
           <div className="flex items-center gap-2">
-            {user.role !== ROLES.HEAD_CENTER ? (
-              <>
-                <button
-                  className="text-grey-700 flex h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium"
-                  onClick={() => history.push(`/ligne-de-bus/historique?cohort=${cohort}`)}>
-                  <History className="text-gray-400" />
-                  Historique
-                </button>
-                <button
-                  className="h-10 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700"
-                  onClick={() => history.push(`/ligne-de-bus/demande-de-modification?cohort=${cohort}`)}>
-                  Demande de modification
-                </button>
-              </>
-            ) : null}
+            <button
+              className="text-grey-700 flex h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium"
+              onClick={() => history.push(`/ligne-de-bus/historique?cohort=${cohort}`)}>
+              <History className="text-gray-400" />
+              Historique
+            </button>
+            <button
+              className="h-10 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700"
+              onClick={() => history.push(`/ligne-de-bus/demande-de-modification?cohort=${cohort}`)}>
+              Demande de modification
+            </button>
             <SelectAction
               title="Exporter"
               alignItems="right"
