@@ -111,19 +111,26 @@ app.use("/dashboard/engagement", require("./controllers/dashboard/engagement"));
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));
 
-app.get("/", async (req, res) => {
+app.get("/memory_stats", async (req, res) => {
   // ! Memory usage
-  // const formatMemoryUsage = (data) => `${Math.round((data / 1024 / 1024) * 100) / 100} MB`;
+  const formatMemoryUsage = (data) => `${Math.round((data / 1024 / 1024) * 100) / 100} MB`;
 
-  // const memoryData = process.memoryUsage();
+  const memoryData = process.memoryUsage();
 
-  // const memoryUsage = {
-  //   rss: `${formatMemoryUsage(memoryData.rss)} -> Resident Set Size - total memory allocated for the process execution`,
-  //   heapTotal: `${formatMemoryUsage(memoryData.heapTotal)} -> total size of the allocated heap`,
-  //   heapUsed: `${formatMemoryUsage(memoryData.heapUsed)} -> actual memory used during the execution`,
-  //   external: `${formatMemoryUsage(memoryData.external)} -> V8 external memory`,
-  // };
+  const memoryUsage = {
+    rss: `${formatMemoryUsage(memoryData.rss)} -> Resident Set Size - total memory allocated for the process execution`,
+    heapTotal: `${formatMemoryUsage(memoryData.heapTotal)} -> total size of the allocated heap`,
+    heapUsed: `${formatMemoryUsage(memoryData.heapUsed)} -> actual memory used during the execution`,
+    external: `${formatMemoryUsage(memoryData.external)} -> V8 external memory`,
+  };
 
+  console.log("Memory usage: ", JSON.stringify(memoryUsage));
+
+  // const d = new Date();
+  res.status(200).send("Memory usage: ", JSON.stringify(memoryUsage));
+});
+
+app.get("/", async (req, res) => {
   const d = new Date();
   res.status(200).send("SNU " + d.toLocaleString());
 });
