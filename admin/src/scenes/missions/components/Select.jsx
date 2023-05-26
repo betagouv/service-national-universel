@@ -13,9 +13,12 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
+function design(statusToColors, selected, type) {
+  return statusToColors[selected.value][type];
+}
+
 export default function Select({ options, selected, setSelected, label, readOnly = false, icon }) {
   const statusToColors = GetColor(options, selected);
-  console.log(statusToColors);
 
   return (
     <div className="w-full">
@@ -25,10 +28,12 @@ export default function Select({ options, selected, setSelected, label, readOnly
             <div className="relative">
               <Listbox.Button className="relative w-full text-left">
                 <div
-                  className={`flex flex-row ${!readOnly ? "cursor-default" : "cursor-pointer"} items-center rounded-lg border py-2 px-2.5  ${
-                    statusToColors[selected.value].style
-                  }`}>
-                  {statusToColors[selected.value].icon}
+                  className={`flex flex-row ${!readOnly ? "cursor-default" : "cursor-pointer"} items-center rounded-lg border py-2 px-2.5 ${design(
+                    statusToColors,
+                    selected,
+                    "style",
+                  )}`}>
+                  {design(statusToColors, selected, "icon")}
                   <div className={`flex w-full flex-col `}>
                     {label && <label className="text-xs leading-4 text-gray-500">{label}</label>}
                     <div className="flex w-full items-center justify-between">
@@ -37,9 +42,9 @@ export default function Select({ options, selected, setSelected, label, readOnly
                         {!readOnly && (
                           <>
                             {open ? (
-                              <BsChevronUp className={`h-4 w-4 ${statusToColors[selected.value].arrowColor}`} aria-hidden="true" />
+                              <BsChevronUp className={`h-4 w-4 ${design(statusToColors, selected, "arrowColor")}`} aria-hidden="true" />
                             ) : (
-                              <BsChevronDown className={`h-5 w-5 font-bold ${statusToColors[selected.value].arrowColor}`} aria-hidden="true" />
+                              <BsChevronDown className={`h-5 w-5 font-bold ${design(statusToColors, selected, "arrowColor")}`} aria-hidden="true" />
                             )}
                           </>
                         )}
