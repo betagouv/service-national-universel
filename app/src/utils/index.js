@@ -168,3 +168,10 @@ export const debounce = (fn, delay) => {
     }, delay);
   };
 };
+
+export const desktopBreakpoint = 768;
+
+export const getImgUrl = (path) => {
+  const imgUrl = new URL(path, import.meta.url).href;
+  return imgUrl;
+};

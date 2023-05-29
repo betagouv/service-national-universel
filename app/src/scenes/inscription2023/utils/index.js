@@ -1,7 +1,8 @@
 import constants from "snu-lib/constants";
 import translation from "snu-lib/translation";
 import countries from "i18n-iso-countries";
-countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
+import * as fr from "i18n-iso-countries/langs/fr.json";
+countries.registerLocale(fr);
 const countriesList = countries.getNames("fr", { select: "official" });
 
 const YOUNG_SCHOOLED_SITUATIONS = {

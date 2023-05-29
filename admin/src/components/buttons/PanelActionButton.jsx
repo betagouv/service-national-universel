@@ -1,15 +1,11 @@
 import React from "react";
 import styled from "styled-components";
 import LoadingButton from "./LoadingButton";
+import { getImgUrl } from "../../utils";
 
 export default function PanelActionButton({ icon, title, ...rest }) {
-  function getIconUrl(fileName) {
-    const imgUrl = new URL(`../../assets/${fileName}.svg`, import.meta.url).href;
-    return imgUrl;
-  }
-
   return (
-    <Button icon={icon ? getIconUrl(icon) : null} color="#fff" {...rest}>
+    <Button icon={icon ? getImgUrl(`../assets/${icon}.svg`) : null} color="#fff" {...rest}>
       {title}
     </Button>
   );

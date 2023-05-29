@@ -458,3 +458,9 @@ export const CDN_BASE_URL =
   environment === "production" ? "https://cellar-c2.services.clever-cloud.com/cni-bucket-prod" : "https://cellar-c2.services.clever-cloud.com/cni-bucket-staging";
 
 export const getRandomId = () => `${Math.floor(Math.random() * 100000)}-${Date.now()}`;
+
+export const getImgUrl = (path) => {
+  const imgUrl = new URL(path, import.meta.url).href;
+  console.log("🚀 ~ file: index.jsx:464 ~ getImgUrl ~ imgUrl:", imgUrl);
+  return imgUrl;
+};

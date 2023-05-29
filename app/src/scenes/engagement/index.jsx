@@ -9,6 +9,11 @@ import api from "../../services/api";
 import Loader from "../../components/Loader";
 import { useSelector } from "react-redux";
 
+function getImgUrl(fileName) {
+  const imgUrl = new URL(`../../assets/programmes-engagement/${fileName}`, import.meta.url).href;
+  return imgUrl;
+}
+
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
   const [programs, setPrograms] = useState();
@@ -37,7 +42,7 @@ export default function Index() {
           })
           .map((p, i) => (
             <Col key={i} md={4}>
-              <ProgramCard program={p} image={p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${p.imageString}`)} />
+              <ProgramCard program={p} image={p.imageFile ? p.imageFile : getImgUrl(p.imageString)} />
             </Col>
           ))}
       </Row>

@@ -8,6 +8,7 @@ import Loader from "../../../components/Loader";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import StickyButton from "../../../components/inscription/stickyButton";
 import Footer from "../../../components/footerV2";
+import { getImgUrl } from "../../../utils";
 
 const EngagementsProgramMobile = () => {
   const [program, setProgram] = useState();
@@ -46,7 +47,7 @@ const EngagementsProgramMobile = () => {
           return (
             <div key={item._id} className="mb-4">
               <div className="h-[195px] w-full">
-                <img src={require(`../../../assets/programmes-engagement/${item.imageString}`)} className="h-full w-full object-cover" />
+                <img src={getImgUrl(`../../../assets/programmes-engagement/${item.imageString}`)} className="h-full w-full object-cover" />
               </div>
 
               <div className={`min-h-min border border-[#E5E5E5] pl-4 pr-1 pb-2 ${!isOpen[clickId] && "h-[250px]"}`}>

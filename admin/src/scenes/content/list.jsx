@@ -8,16 +8,11 @@ import ProgramCard from "./components/programCard";
 import api from "../../services/api";
 import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
-import { translate, ROLES } from "../../utils";
+import { translate, ROLES, getImgUrl } from "../../utils";
 
 export default function List() {
   const [programs, setPrograms] = useState();
   const user = useSelector((state) => state.Auth.user);
-
-  function getImgUrl(fileName) {
-    const imgUrl = new URL(`../../assets/programmes-engagement/${fileName}`, import.meta.url).href;
-    return imgUrl;
-  }
 
   const getPrograms = async () => {
     const { data, ok, code } = await api.get("/program");
@@ -56,7 +51,7 @@ export default function List() {
           })
           .map((p, i) => (
             <div key={i} style={{ marginBottom: "1.5rem" }}>
-              <ProgramCard onDelete={getPrograms} program={p} image={p.imageFile ? p.imageFile : getImgUrl(p.imageString)} />
+              <ProgramCard onDelete={getPrograms} program={p} image={p.imageFile ? p.imageFile : getImgUrl(`../assets/programmes-engagement/${p.imageString}`)} />
             </div>
           ))}
       </Wrapper>

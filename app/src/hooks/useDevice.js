@@ -1,6 +1,6 @@
-import tailwind from "../../tailwind.config";
+import { desktopBreakpoint } from "../utils";
 
-export default function useDevice(breakpoint = "md") {
-  if (window.innerWidth <= parseInt(tailwind.theme.screens[breakpoint])) return "mobile";
+export default function useDevice() {
+  if (window.innerWidth <= desktopBreakpoint) return "mobile";
   else return "desktop";
 }
