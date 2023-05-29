@@ -101,13 +101,6 @@ export default function Invite({ structure, onSent }) {
   );
 }
 
-const Wrapper = styled.div`
-  padding: 40px;
-  ${FormGroup} {
-    max-width: 750px;
-  }
-`;
-
 const FormGroup = styled.div`
   margin-top: 1.5rem;
   label {
@@ -140,6 +133,12 @@ const FormGroup = styled.div`
     :focus {
       border: 1px solid #aaa;
     }
+  }
+`;
+const Wrapper = styled.div`
+  padding: 40px;
+  ${FormGroup} {
+    max-width: 750px;
   }
 `;
 const Subtitle = styled.div`
