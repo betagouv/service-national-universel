@@ -32,7 +32,7 @@ export default function Settings() {
   const urlParams = new URLSearchParams(window.location.search);
   const [cohort, setCohort] = React.useState(urlParams.get("cohort") || "Février 2023 - C");
   const [isLoading, setIsLoading] = React.useState(true);
-  const readOnly = isSuperAdmin(user) ? false : true;
+  const readOnly = !isSuperAdmin(user);
   const [noChange, setNoChange] = React.useState(true);
   const history = useHistory();
   const [mounted, setMounted] = React.useState(false);
