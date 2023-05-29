@@ -461,6 +461,5 @@ export const getRandomId = () => `${Math.floor(Math.random() * 100000)}-${Date.n
 
 export const getImgUrl = (path) => {
   const imgUrl = new URL(path, import.meta.url).href;
-  console.log("🚀 ~ file: index.jsx:464 ~ getImgUrl ~ imgUrl:", imgUrl);
   return imgUrl;
 };

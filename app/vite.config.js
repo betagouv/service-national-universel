@@ -8,12 +8,9 @@ export default defineConfig(({ command, mode }) => {
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), "");
   return {
-
     port: 8081,
     plugins: [
-      react({
-        include: "**/*.{jsx,tsx}",
-      }),
+      react(),
       // Put the Sentry vite plugin after all other plugins
       sentryVitePlugin({
         org: "sentry",
