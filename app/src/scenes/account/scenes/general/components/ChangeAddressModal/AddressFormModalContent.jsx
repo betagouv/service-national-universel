@@ -1,25 +1,17 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { toastr } from "react-redux-toastr";
 import Modal from "../../../../../../components/ui/modals/Modal";
 import Input from "../../../../../../components/forms/inputs/Input";
 import LocationMarker from "../../../../../../assets/icons/LocationMarker";
 import ButtonPrimary from "../../../../../../components/ui/buttons/ButtonPrimary";
 import ButtonLight from "../../../../../../components/ui/buttons/ButtonLight";
 import { formatResult, getSuggestions } from "../../../../../../services/api-adresse";
-import { capture } from "../../../../../../sentry";
-import { updateYoung } from "../../../../../../services/young.service";
-import { setYoung } from "../../../../../../redux/auth/actions";
 
 const emptyAddress = { address: "", zip: "", city: "" };
 
-const AddressFormModalContent = ({ onClose }) => {
+const AddressFormModalContent = ({ onClose, onConfirm, isLoading }) => {
   const [formValues, setFormValues] = useState(emptyAddress);
   const [suggestion, setSuggestion] = useState();
   const [errors, setErrors] = useState({});
-  const [isSubmitting, setSubmitting] = useState(false);
-
-  const dispatch = useDispatch();
 
   const handleChangeValue = (inputName) => (value) => {
     setSuggestion(undefined);
@@ -58,35 +50,19 @@ const AddressFormModalContent = ({ onClose }) => {
 
   const onAddressVerified = (isConfirmed) => async () => {
     const formattedSuggestion = formatResult(suggestion);
-    try {
-      setSubmitting(true);
-      const updates = {
-        addressVerified: "true",
-        cityCode: formattedSuggestion.cityCode,
-        region: formattedSuggestion.region,
-        department: formattedSuggestion.department,
-        location: formattedSuggestion.location,
-        // if the suggestion is not confirmed we keep the address typed by the user
-        address: isConfirmed ? formattedSuggestion.address : formValues.address,
-        zip: isConfirmed ? formattedSuggestion.zip : formValues.zip,
-        city: isConfirmed ? formattedSuggestion.city : formValues.city,
-        // @todo: foreing addresse
-        country: "France",
-      };
-      const { title, message, data: updatedYoung } = await updateYoung("address", updates);
-      toastr.success(title, message);
-      dispatch(setYoung(updatedYoung));
-      setFormValues(emptyAddress);
-      setSuggestion(undefined);
-      setErrors({});
-      onClose();
-    } catch (error) {
-      const { title, message } = error;
-      toastr.error(title, message);
-      capture(error);
-    } finally {
-      setSubmitting(false);
-    }
+    const updates = {
+      addressVerified: "true",
+      cityCode: formattedSuggestion.cityCode,
+      region: formattedSuggestion.region,
+      department: formattedSuggestion.department,
+      location: formattedSuggestion.location,
+      // if the suggestion is not confirmed we keep the address typed by the user
+      address: isConfirmed ? formattedSuggestion.address : formValues.address,
+      zip: isConfirmed ? formattedSuggestion.zip : formValues.zip,
+      city: isConfirmed ? formattedSuggestion.city : formValues.city,
+      country: "France",
+    };
+    onConfirm(updates);
   };
 
   return (
@@ -101,6 +77,7 @@ const AddressFormModalContent = ({ onClose }) => {
         <Input label="Ville" name="city" value={formValues.city} onChange={handleChangeValue("city")} error={errors.city} />
         {!suggestion && (
           <Modal.Buttons
+            isLoading={isLoading}
             onCancel={onClose}
             onConfirm={onAddressVerify}
             cancelText="Annuler"
@@ -125,8 +102,10 @@ const AddressFormModalContent = ({ onClose }) => {
               {suggestion.properties.name}, {`${suggestion.properties.postcode} ${suggestion.properties.city}`}
             </strong>
             <Modal.ButtonContainer className="md:flex-col">
-              <ButtonPrimary onClick={onAddressVerified(true)}>Oui</ButtonPrimary>
-              <ButtonLight onClick={onAddressVerified()}>{`Non, garder "${formValues.address}, ${formValues.zip} ${formValues.city}"`}</ButtonLight>
+              <ButtonPrimary onClick={onAddressVerified(true)} disabled={isLoading}>
+                Oui
+              </ButtonPrimary>
+              <ButtonLight disabled={isLoading} onClick={onAddressVerified()}>{`Non, garder "${formValues.address}, ${formValues.zip} ${formValues.city}"`}</ButtonLight>
             </Modal.ButtonContainer>
           </>
         )}
