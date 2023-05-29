@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "vite --port 8082",
-    "dev:open": "webpack serve --port 8082 --mode development --config webpack.dev.config.js --progress --liveReload --open --hot --inline",
+    "dev:open": "vite --port 8082 --open",
     "mobile": "vite --host 0.0.0.0",
-    "mobile:open": "webpack serve --port 8082 --mode development --config webpack.dev.config.js --progress --liveReload --hot --inline --host 0.0.0.0",
+    "mobile:open": "vite --host 0.0.0.0 --open",
     "tailwind": "npx tailwindcss -i ./src/index.css -o ./src/tailwindcss.css --watch",
     "start": "node server/index.js",
     "install": "node src/build-only-on-clevercloud.js",

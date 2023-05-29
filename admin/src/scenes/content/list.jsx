@@ -14,6 +14,11 @@ export default function List() {
   const [programs, setPrograms] = useState();
   const user = useSelector((state) => state.Auth.user);
 
+  function getImgUrl(fileName) {
+    const imgUrl = new URL(`../../assets/programmes-engagement/${fileName}`, import.meta.url).href;
+    return imgUrl;
+  }
+
   const getPrograms = async () => {
     const { data, ok, code } = await api.get("/program");
     if (!ok) return toastr.error("Une erreur est survenue.", translate(code));
@@ -51,7 +56,7 @@ export default function List() {
           })
           .map((p, i) => (
             <div key={i} style={{ marginBottom: "1.5rem" }}>
-              <ProgramCard onDelete={getPrograms} program={p} image={p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${p.imageString || "default.png"}`)} />
+              <ProgramCard onDelete={getPrograms} program={p} image={p.imageFile ? p.imageFile : getImgUrl(p.imageString)} />
             </div>
           ))}
       </Wrapper>
