@@ -195,7 +195,8 @@ const Espace = () => {
           <SentryRoute path="/candidature" component={Candidature} />
           {environment === "development" && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
           <SentryRoute path="/diagoriente" component={Diagoriente} />
-          {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
+          <SentryRoute path="/changer-de-sejour" component={changeSejour} />
+          {/* {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null} */}
           {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
           <SentryRoute path="/" component={Home} />
         </Switch>

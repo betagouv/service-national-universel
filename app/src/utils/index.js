@@ -173,5 +173,6 @@ export const desktopBreakpoint = 768;
 
 export const getImgUrl = (path) => {
   const imgUrl = new URL(path, import.meta.url).href;
+  console.log("🚀 ~ file: index.js:176 ~ getImgUrl ~ imgUrl:", imgUrl);
   return imgUrl;
 };

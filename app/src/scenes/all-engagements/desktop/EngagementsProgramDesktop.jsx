@@ -49,7 +49,7 @@ const EngagementsProgramMobile = () => {
                 <div key={item._id} className="mb-4 w-[48%]">
                   <div className="h-[195px] w-full cursor-pointer">
                     <a href={item.url} target="_blank" rel="noreferrer"></a>
-                    <img src={getImgUrl(`../../../assets/programmes-engagement/${item.imageString}`)} className="h-full w-full object-cover" />
+                    <img src={getImgUrl(`../assets/programmes-engagement/${item.imageString}`)} className="h-full w-full object-cover" />
                   </div>
 
                   <div className={`min-h-min border border-[#E5E5E5] pl-4 pr-1 pb-2 ${!isOpen[clickId] && "h-[250px]"}`}>
