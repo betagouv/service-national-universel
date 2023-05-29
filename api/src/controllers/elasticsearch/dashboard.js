@@ -1,3 +1,4 @@
+/* eslint-disable no-inner-declarations */
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
@@ -373,6 +374,64 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
       };
     }
 
+    // Contrat (À renseigner) 1 représentant de l’État est à renseigner
+    // engagement_contrat_à_renseigner
+    async function contratÀRenseigner() {
+      const cohorts = cohortsNotStarted; // FIXME
+      if (!cohorts.length) return { engagement_contrat_à_renseigner: [] };
+
+      // Liste des départements de la table de répartition pour la personne qui regarde et les cohortes concernées
+      const q = queryFromFilter([{ terms: { "cohort.keyword": cohorts } }, { bool: { must: { exists: { field: "fromDepartment" } } } }], {
+        regionField: "fromRegion",
+        departmentField: "fromDepartment",
+      });
+      q.size = ES_NO_LIMIT;
+      const responseRepartition = await esClient.msearch({
+        index: "tablederepartition",
+        body: buildArbitratyNdJson({ index: "tablederepartition", type: "_doc" }, q),
+      });
+      // On récupère les entrées de département service pour chaque cohorte groupés par département
+      // Si un département de la cohorte n'a pas de contact on l'ajoute dans la liste à signaler.
+      const departmentsCohorts = responseRepartition.body.responses[0].hits.hits.map((e) => e._source);
+      const response = await esClient.msearch({
+        index: "departmentservice",
+        body: buildArbitratyNdJson(
+          ...cohorts.flatMap((cohort) => {
+            return [
+              { index: "departmentservice", type: "_doc" },
+              withAggs(
+                queryFromFilter([
+                  { terms: { "cohort.keyword": [cohort] } },
+                  { bool: { must: { exists: { field: "contacts" } } } },
+                  { terms: { "department.keyword": departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
+                ]),
+                "department.keyword",
+              ),
+            ];
+          }),
+        ),
+      });
+      const engagement_contrat_à_renseigner = [];
+      for (const cohort of cohorts) {
+        const cohortDepartments = departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment);
+        // Chaque département doit avoir un contact pour la cohorte
+        for (const department of cohortDepartments) {
+          const cohortDepartmentsWithContact = response.body.responses
+            .filter((e) => e.aggregations)
+            .find((e) => e.aggregations.department.buckets.find((e) => e.key === department));
+          // Si le département n'a pas de contact pour la cohorte on l'ajoute dans la liste à signaler.
+          if (!cohortDepartmentsWithContact) {
+            if (!engagement_contrat_à_renseigner.find((e) => e.cohort === cohort && e.department === department))
+              engagement_contrat_à_renseigner.push({
+                cohort,
+                department,
+              });
+          }
+        }
+      }
+      return { engagement_contrat_à_renseigner };
+    }
+
     async function basicInscriptions() {
       const response = await esClient.msearch({
         index: "young",
@@ -440,6 +499,10 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           // engagement_mission_en_attente_de_validation
           { index: "mission", type: "_doc" },
           queryFromFilter([{ terms: { "status.keyword": ["WAITING_VALIDATION"] } }]),
+          // Phase 3 (À suivre) X demandes de validation de phase 3 à suivre
+          // engagement_phase3_en_attente_de_validation
+          { index: "young", type: "_doc" },
+          queryFromFilter([{ terms: { "statusPhase3.keyword": ["WAITING_VALIDATION"] } }]),
         ),
       });
       const results = response.body.responses;
@@ -448,6 +511,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
         engagement_contrat_en_attente_de_signature: results[1].hits.total.value,
         engagement_dossier_militaire_en_attente_de_validation: results[2].hits.total.value,
         engagement_mission_en_attente_de_validation: results[3].hits.total.value,
+        engagement_phase3_en_attente_de_validation: results[4].hits.total.value,
       };
     }
     return res.status(200).send({
@@ -470,6 +534,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
         },
         engagement: {
           ...(await basicEngagement()),
+          ...(await contratÀRenseigner()),
         },
       },
     });

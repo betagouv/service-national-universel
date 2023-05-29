@@ -146,6 +146,17 @@ export default function Index() {
     return false;
   }
 
+  function total(parent) {
+    const entries = Object.entries(parent);
+    let limit = 0;
+    for (let i = 0; i < entries.length; i++) {
+      if (Array.isArray(entries[i][1])) {
+        for (let j = 0; j < entries[i][1].length; j++) limit++;
+      } else limit++;
+    }
+    return limit;
+  }
+
   if (!stats.inscription) return <div></div>;
 
   return (
@@ -174,7 +185,7 @@ export default function Index() {
                 <div className="flex items-center gap-3">
                   <Inscription />
                   <div className="text-sm font-bold leading-5 text-gray-900">Inscriptions</div>
-                  <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">4</div>
+                  <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.inscription)}</div>
                 </div>
                 {shouldShow(stats.inscription, "inscription_en_attente_de_validation") && (
                   <NoteContainer
@@ -229,7 +240,7 @@ export default function Index() {
                 <div className="flex items-center gap-3">
                   <Sejour />
                   <div className="text-sm font-bold leading-5 text-gray-900">Séjours</div>
-                  <div className=" rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">7</div>
+                  <div className=" rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.sejour)}</div>
                 </div>
                 {stats.sejour.sejour_rassemblement_non_confirmé.map(
                   (item, key) =>
@@ -320,7 +331,7 @@ export default function Index() {
                 <div className="flex items-center gap-3">
                   <Engagement />
                   <div className="text-sm font-bold leading-5 text-gray-900">Engagement</div>
-                  <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">9</div>
+                  <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.engagement)}</div>
                 </div>
                 {shouldShow(stats.engagement, "engagement_contrat_à_éditer") && (
                   <NoteContainer
@@ -353,6 +364,26 @@ export default function Index() {
                     content="missions sont en attente de validation."
                     btnLabel="À instruire"
                   />
+                )}
+                {shouldShow(stats.engagement, "engagement_phase3_en_attente_de_validation") && (
+                  <NoteContainer
+                    title="Phase 3"
+                    number={stats.engagement.engagement_phase3_en_attente_de_validation}
+                    content="demandes de validation de phase 3 à suivre."
+                    btnLabel="À suivre"
+                  />
+                )}
+                {stats.engagement.engagement_contrat_à_renseigner.map(
+                  (item, key) =>
+                    shouldShow(stats.engagement, "engagement_contrat_à_renseigner", key) && (
+                      <NoteContainer
+                        title="Contact"
+                        key={"engagement_contrat_à_renseigner" + item.cohort + item.department}
+                        number=""
+                        content={`Au moins 1 représentant de l’État est à renseigner pour le séjour de ${item.cohort} (${item.department})`}
+                        btnLabel="À renseigner"
+                      />
+                    ),
                 )}
               </div>
             </div>
