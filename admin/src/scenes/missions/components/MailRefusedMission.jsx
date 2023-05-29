@@ -1,3 +1,4 @@
+import Img3 from "../../../assets/close.svg";
 import React, { useEffect, useState } from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
@@ -32,7 +33,7 @@ export default function MailRefusedMission({ value, onChange, onSend }) {
   return (
     <Modal isOpen={true} toggle={onChange}>
       <ModalContainer>
-        <img src={require("../../../assets/close.svg")} height={10} width={10} onClick={onChange} />
+        <img src={Img3} height={10} width={10} onClick={onChange} />
         <h1>Veuillez éditer le message ci-dessous pour préciser les motifs de refus avant de l&apos;envoyer</h1>
         <h3>votre message</h3>
         <textarea rows="15" value={message} onChange={(e) => setMessage(e.target.value)} />

@@ -1,3 +1,5 @@
+import Img4 from "../../assets/JVA_round.png";
+import Img3 from "../../assets/logo-snu.png";
 import React, { useEffect, useState } from "react";
 import { HiOutlineLockClosed } from "react-icons/hi";
 import { useSelector } from "react-redux";
@@ -642,9 +644,9 @@ const Hit = ({ hit, callback }) => {
       <div className="flex items-center py-3 px-4 hover:bg-gray-50">
         <div className="flex w-[40%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mission/${hit._id}`)}>
           {hit.isJvaMission === "true" ? (
-            <img src={require("../../assets/JVA_round.png")} className="mx-auto h-8 w-8 group-hover:scale-105" />
+            <img src={Img4} className="mx-auto h-8 w-8 group-hover:scale-105" />
           ) : (
-            <img src={require("../../assets/logo-snu.png")} className="mx-auto h-8 w-8 group-hover:scale-105" />
+            <img src={Img3} className="mx-auto h-8 w-8 group-hover:scale-105" />
           )}
           <div className="flex w-full flex-col justify-center">
             <div className="m-0 table w-full table-fixed border-collapse">

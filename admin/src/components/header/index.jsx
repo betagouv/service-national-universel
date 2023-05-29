@@ -1,3 +1,5 @@
+import Img2 from "../../assets/logo-snu.png";
+import Img from "../../assets/logo-snu.png";
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
@@ -59,7 +61,7 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
         <>
           <div className="mx-3 flex items-center gap-2 ">
             <Link to="/">
-              <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 hover:scale-105" />
+              <img src={Img2} className="h-9 w-9 hover:scale-105" />
             </Link>
             <div className="group mx-3 flex cursor-pointer items-center gap-2 hover:text-black" onClick={() => setSelectSessionOpen((e) => !e)}>
               <div>
@@ -101,7 +103,7 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
     }
     return (
       <Link to="/" className="group mx-3 flex items-center gap-2 hover:text-black">
-        <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 group-hover:scale-105" />
+        <img src={Img} className="h-9 w-9 group-hover:scale-105" />
         <span className="justify-center text-base font-bold group-hover:underline">{getName()}</span>
       </Link>
     );

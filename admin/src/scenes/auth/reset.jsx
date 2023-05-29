@@ -1,3 +1,5 @@
+import Img3 from "../../assets/logo-snu.png";
+import Img2 from "../../assets/auth.png";
 import React, { useState } from "react";
 import { Formik } from "formik";
 import queryString from "query-string";
@@ -17,7 +19,7 @@ export default function ResetPassword({ location }) {
       <div className="flex flex-1 flex-col p-8">
         <div className="mx-auto max-w-lg">
           <div className="mb-10">
-            <img src={require("../../assets/logo-snu.png")} className="h-10 py-1 px-4 md:h-20" />
+            <img src={Img3} className="h-10 py-1 px-4 md:h-20" />
           </div>
           <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">Créer un nouveau mot de passe</h1>
           <Formik
@@ -64,7 +66,7 @@ export default function ResetPassword({ location }) {
       <div className="flex-1 bg-blue-50">
         <div className="flex h-full flex-col items-center justify-center">
           <h1 className="mb-4 text-xl font-bold text-brand-black text-blue-600 md:text-3xl">Plateforme du Service National Universel</h1>
-          <img className="max-w-[280px]" src={require("../../assets/auth.png")} />
+          <img className="max-w-[280px]" src={Img2} />
         </div>
       </div>
     </div>

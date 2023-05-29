@@ -1,3 +1,4 @@
+import Img2 from "../../../../assets/validatedPhase2.png";
 import React from "react";
 import { FiMail } from "react-icons/fi";
 import { useSelector } from "react-redux";
@@ -132,7 +133,7 @@ export default function Done() {
               </div>
             </div>
             <div className="flex w-full flex-shrink-0 items-start justify-center lg:w-1/3 lg:items-start">
-              <img className="h-80 object-scale-down" src={require("../../../../assets/validatedPhase2.png")} alt="" />
+              <img className="h-80 object-scale-down" src={Img2} alt="" />
             </div>
           </div>
           <div className="mb-12 grid grid-cols-1 grid-rows-2 gap-8 px-8 pt-8 lg:grid-cols-2 lg:grid-rows-1 lg:gap-0 lg:divide-x-[1px]">

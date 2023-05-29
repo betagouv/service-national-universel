@@ -1,3 +1,5 @@
+import Img2 from "../../assets/JVA_round.png";
+import Img from "../../assets/logo-snu.png";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -655,9 +657,9 @@ const Hit = ({ hit, onClick, selected, onSelect, currentTab, opened, mission }) 
         <div className="flex flex-row items-center gap-4">
           <div>
             {mission.isJvaMission === "true" ? (
-              <img src={require("../../assets/JVA_round.png")} width="36" height="36" className="mx-auto min-w-[36px] group-hover:scale-105" />
+              <img src={Img2} width="36" height="36" className="mx-auto min-w-[36px] group-hover:scale-105" />
             ) : (
-              <img src={require("../../assets/logo-snu.png")} width="36" height="36" className="mx-auto min-w-[36px] group-hover:scale-105" />
+              <img src={Img} width="36" height="36" className="mx-auto min-w-[36px] group-hover:scale-105" />
             )}
           </div>
           <div className="flex flex-col items-start">

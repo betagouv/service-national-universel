@@ -1,3 +1,4 @@
+import Img2 from "../../../assets/validatedPhase2.png";
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -101,7 +102,7 @@ export default function ValidatedDesktop() {
           </div>
         </div>
         <div className="flex w-full flex-shrink-0 items-start justify-center lg:w-1/3 lg:items-start">
-          <img className="h-80 object-scale-down" src={require("../../../assets/validatedPhase2.png")} />
+          <img className="h-80 object-scale-down" src={Img2} />
         </div>
       </div>
       <div className="mx-10 mb-14">

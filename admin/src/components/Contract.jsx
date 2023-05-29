@@ -1,3 +1,4 @@
+import Img from "../assets/logo-snu.png";
 import React, { useEffect, useState } from "react";
 import { Row } from "reactstrap";
 import styled from "styled-components";
@@ -342,7 +343,7 @@ export default function Contract({ young }) {
                     <ContractContainer>
                       <div style={{ display: "flex", marginBottom: "3rem" }}>
                         <div style={{ marginRight: "2rem" }}>
-                          <img src={require("../assets/logo-snu.png")} height={96} />
+                          <img src={Img} height={96} />
                         </div>
                         <div style={{ marginRight: "2rem", textAlign: "center", marginTop: "-1rem" }}>
                           <h2>Contrat d’engagement en mission d’intérêt général (MIG) du service national universel (SNU)</h2>

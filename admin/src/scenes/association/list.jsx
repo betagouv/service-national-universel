@@ -1,3 +1,5 @@
+import Img3 from "../../assets/left.svg";
+import Img2 from "../../assets/right.svg";
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 
@@ -256,10 +258,10 @@ const ResultWrapper = styled.div`
       font-weight: 700;
     }
     a:first-child {
-      background-image: url(${require("../../assets/left.svg")});
+      background-image: url(${Img3});
     }
     a:last-child {
-      background-image: url(${require("../../assets/right.svg")});
+      background-image: url(${Img2});
     }
     a:first-child,
     a:last-child {

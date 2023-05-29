@@ -1,3 +1,4 @@
+import Img2 from "../../assets/homePhase2Mobile.png";
 import React from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -41,7 +42,7 @@ export default function RefusedV2() {
       {/* MOBILE */}
       <div className="flex w-full flex-col lg:hidden">
         <div className="flex w-full flex-col">
-          <img src={require("../../assets/homePhase2Mobile.png")} />
+          <img src={Img2} />
           <div className="w-full flex-col px-4 pb-4">
             <div className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
               <strong>{young.firstName},</strong> nous sommes désolés.

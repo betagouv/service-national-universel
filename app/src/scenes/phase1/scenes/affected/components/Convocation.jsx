@@ -23,12 +23,15 @@ export default function Convocation() {
   const [cohort, setCohort] = useState();
 
   const isFromDOMTOM = () => {
-    return (
-      ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
-        young.department,
-      ) && young.grade !== "Terminale"
-    );
+    return false;
   };
+
+  //   return (
+  //     ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
+  //       young.department,
+  //     ) && young.grade !== "Terminale"
+  //   );
+  // };
 
   const getMeetingPoint = async () => {
     const { data, code, ok } = await api.get(`/point-de-rassemblement/fullInfo/${young.meetingPointId}/${young.ligneId}`);
