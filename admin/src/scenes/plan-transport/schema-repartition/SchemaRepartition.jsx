@@ -24,6 +24,7 @@ import ButtonPrimary from "../../../components/ui/buttons/ButtonPrimary";
 import { getCohortByName, getCohorts } from "../../../services/cohort.service";
 import ReactTooltip from "react-tooltip";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
+import Puzzle from "../../../assets/icons/Puzzle";
 
 const ExcelFileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
 
@@ -67,10 +68,10 @@ export default function SchemaRepartition({ region, department }) {
 
   function getDefaultCohort() {
     const { cohort } = parseQuery(location.search);
-    if (cohort && cohortList && cohortList.find((c) => c.name === cohort)) {
+    if (cohort && cohortList && cohortOptions.find((c) => c.value === cohort)) {
       return cohort;
     } else {
-      return cohortList && cohortList.length > 0 ? cohortList[0].name : null;
+      return cohortOptions && cohortOptions.length > 0 ? cohortOptions[0].value : null;
     }
   }
 
@@ -79,27 +80,30 @@ export default function SchemaRepartition({ region, department }) {
   }, []);
 
   useEffect(() => {
-    if (cohort === null && cohortList !== null) {
-      setCohort(getDefaultCohort());
-    }
-  }, [cohortList]);
-
-  useEffect(() => {
-    if (cohort) {
-      loadData();
+    if (cohortList !== null) {
       setCohortOptions(
         cohortList
           .filter((c) => {
             return (
               [ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role) ||
-              (user.role === ROLES.REFERENT_DEPARTMENT && c.schemaAccessForReferentDepartment === "true") ||
-              (user.role === ROLES.REFERENT_REGION && c.schemaAccessForReferentRegion === "true")
+              (user.role === ROLES.REFERENT_DEPARTMENT && c.schemaAccessForReferentDepartment) ||
+              (user.role === ROLES.REFERENT_REGION && c.schemaAccessForReferentRegion)
             );
           })
           .map((c) => ({ label: c.name, value: c.name })),
       );
     } else {
       setCohortOptions([]);
+    }
+  }, [cohortList]);
+
+  useEffect(() => {
+    setCohort(getDefaultCohort());
+  }, [cohortOptions]);
+
+  useEffect(() => {
+    if (cohort) {
+      loadData();
     }
   }, [cohort]);
 
@@ -350,35 +354,49 @@ export default function SchemaRepartition({ region, department }) {
             onGoToNational={goToNational}
             onGoToRegion={goToRegion}
           />
-          <div className="flex gap-4">
-            {user.role === ROLES.REFERENT_DEPARTMENT && user.department.length > 1 && <Select options={departementsList} value={department} onChange={handleChangeDepartment} />}
-            <Select options={cohortOptions} value={cohort} onChange={handleChangeCohort} />
-          </div>
+          {cohortOptions.length > 0 && (
+            <div className="flex gap-4">
+              {user.role === ROLES.REFERENT_DEPARTMENT && user.department.length > 1 && <Select options={departementsList} value={department} onChange={handleChangeDepartment} />}
+              <Select options={cohortOptions} value={cohort} onChange={handleChangeCohort} />
+            </div>
+          )}
         </div>
-        <div className="my-[40px] flex">
-          <div className="flex grow flex-col">
-            <BoxVolontaires className="mb-[8px] grow" summary={summary} loading={loading} />
-            <BoxAffectation className="mt-[8px] grow" summary={summary} loading={loading} />
+        {cohortOptions.length === 0 ? (
+          <div className="flex justify-center items-center mt-[120px]">
+            <div className="text-gray-900 flex flex-col items-center">
+              <Puzzle />
+              <div className="text-2xl font-bold text-center mb-8 mt-9">Ooops...</div>
+              <div className="text-xl text-center">Aucun schéma de répartition n’est disponible pour le moment.</div>
+            </div>
           </div>
-          <BoxDisponibilite className="mx-[16px] grow" summary={summary} loading={loading} isNational={isNational} />
-          <BoxCentres className="grow" summary={summary} loading={loading} isDepartmental={isDepartmental} user={user} />
-        </div>
-        {isDepartmental ? (
-          <>
-            <SchemaEditor
-              onExportDetail={exportDetail}
-              region={region}
-              department={department}
-              cohort={cohort}
-              groups={data && data.groups ? data.groups : { intra: [], extra: [] }}
-              summary={summary}
-              onChange={loadData}
-              user={user}
-            />
-            <SchemaDepartmentDetail department={department} cohort={cohort} departmentData={data} />
-          </>
         ) : (
-          <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={exportDetail} cohort={cohort} user={user} />
+          <>
+            <div className="my-[40px] flex">
+              <div className="flex grow flex-col">
+                <BoxVolontaires className="mb-[8px] grow" summary={summary} loading={loading} />
+                <BoxAffectation className="mt-[8px] grow" summary={summary} loading={loading} />
+              </div>
+              <BoxDisponibilite className="mx-[16px] grow" summary={summary} loading={loading} isNational={isNational} />
+              <BoxCentres className="grow" summary={summary} loading={loading} isDepartmental={isDepartmental} user={user} />
+            </div>
+            {isDepartmental ? (
+              <>
+                <SchemaEditor
+                  onExportDetail={exportDetail}
+                  region={region}
+                  department={department}
+                  cohort={cohort}
+                  groups={data && data.groups ? data.groups : { intra: [], extra: [] }}
+                  summary={summary}
+                  onChange={loadData}
+                  user={user}
+                />
+                <SchemaDepartmentDetail department={department} cohort={cohort} departmentData={data} />
+              </>
+            ) : (
+              <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={exportDetail} cohort={cohort} user={user} />
+            )}
+          </>
         )}
       </div>
     </div>
