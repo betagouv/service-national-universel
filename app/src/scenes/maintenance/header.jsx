@@ -1,3 +1,5 @@
+import Img3 from "../../assets/fr.png";
+import Img2 from "../../assets/logo-snu.png";
 import React from "react";
 import { GoTools } from "react-icons/go";
 
@@ -8,11 +10,11 @@ export default function HeaderComponent() {
       <div className="flex items-center	">
         <div className="hidden md:block">
           <a href="https://www.snu.gouv.fr/">
-            <img className="mr-20	h-20	align-top" src={require("../../assets/fr.png")} />
+            <img className="mr-20	h-20	align-top" src={Img3} />
           </a>
         </div>
         <a href="https://www.snu.gouv.fr/">
-          <img className="mr-20	h-10 align-top sm:h-10 md:h-20" src={require("../../assets/logo-snu.png")} />
+          <img className="mr-20	h-10 align-top sm:h-10 md:h-20" src={Img2} />
         </a>
       </div>
       <div className="rounded-lg bg-yellow-50 p-3 shadow-sm ">

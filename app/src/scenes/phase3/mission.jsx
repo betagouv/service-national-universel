@@ -1,3 +1,7 @@
+import Img5 from "../../assets/observe.svg";
+import Img4 from "../../assets/observe.svg";
+import Img3 from "../../assets/observe.svg";
+import Img2 from "../../assets/tick.svg";
 import React from "react";
 import { Link } from "react-router-dom";
 import { Container } from "reactstrap";
@@ -52,21 +56,21 @@ export default function Mission() {
         <div className="title">AUTRES MISSIONS DISPONIBLES DANS LE DÉPARTEMENT</div>
         <MissionCard
           title={"Défense et sécurité"}
-          image={require("../../assets/observe.svg")}
+          image={Img5}
           subtitle={"J'assiste les policiers dans leurs missions de médiations et gestions des conflits"}
           location={"Noisy-le-Grand (93) - Commissariat de Police"}
           places={7}
         />
         <MissionCard
           title={"Défense et sécurité"}
-          image={require("../../assets/observe.svg")}
+          image={Img4}
           subtitle={"J'assiste les policiers dans leurs missions de médiations et gestions des conflits"}
           location={"Noisy-le-Grand (93) - Commissariat de Police"}
           places={7}
         />
         <MissionCard
           title={"Défense et sécurité"}
-          image={require("../../assets/observe.svg")}
+          image={Img3}
           subtitle={"J'assiste les policiers dans leurs missions de médiations et gestions des conflits"}
           location={"Noisy-le-Grand (93) - Commissariat de Police"}
           places={7}
@@ -136,7 +140,7 @@ const LeftBox = styled.div`
 
   .domain {
     color: rgb(55, 65, 81);
-    background: url(${require("../../assets/tick.svg")}) left center no-repeat;
+    background: url(${Img2}) left center no-repeat;
     background-size: 22px;
     font-weight: 400;
     letter-spacing: 0.02em;

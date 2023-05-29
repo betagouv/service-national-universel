@@ -1,3 +1,5 @@
+import Img3 from "../../../assets/phase2MobileHeader.png";
+import Img2 from "../../../assets/phase2MobileReconnaissance.png";
 import React from "react";
 import { HiOutlineAdjustments, HiOutlineSearch } from "react-icons/hi";
 import { Link } from "react-router-dom";
@@ -72,7 +74,7 @@ export default function IndexPhase2Mobile({ young }) {
             </Link>
           )}
         </div>
-        <img className="w-full rounded-t-lg " src={require("../../../assets/phase2MobileHeader.png")} />
+        <img className="w-full rounded-t-lg " src={Img3} />
       </div>
       {/* END HEADER */}
       <div className="mx-3">
@@ -157,7 +159,7 @@ export default function IndexPhase2Mobile({ young }) {
         {/* <div className="mt-4 mb-2 text-base">Vous avez déjà fait preuve de solidarité ?</div> */}
         {equivalences.length < 3 && equivalences.filter((equivalence) => equivalence.status !== "REFUSED").length === 0 ? (
           <div className="items-center rounded-lg border-0 shadow-lg">
-            <img src={require("../../../assets/phase2MobileReconnaissance.png")} className="w-full rounded-lg" />
+            <img src={Img2} className="w-full rounded-lg" />
             <div className="px-3 pb-4">
               <div className="text-lg font-bold text-gray-900 ">Demandez la reconnaissance d&apos;un engagement déjà réalisé</div>
               <div className="mt-2 mb-3 text-sm text-gray-600">Faîtes reconnaitre comme mission d&apos;intérêt général un engagement déjà réalisé au service de la société</div>

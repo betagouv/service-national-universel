@@ -1,3 +1,4 @@
+import Img2 from "../../../assets/phase2MobileHeader.png";
 import React from "react";
 import { useSelector } from "react-redux";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
@@ -66,7 +67,7 @@ export default function IndexPhase2Mobile() {
             <ToggleVisibility value={toggleButtonDisplayHidden} onClick={() => setToggleButtonDisplayHidden((e) => !e)} />
           </div>
         </div>
-        <img className="w-full rounded-t-lg " src={require("../../../assets/phase2MobileHeader.png")} />
+        <img className="w-full rounded-t-lg " src={Img2} />
       </div>
       {/* END HEADER */}
 

@@ -1,3 +1,4 @@
+import Img2 from "../../../assets/observe.svg";
 import React from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
@@ -26,7 +27,7 @@ export default function YoungMissionCard() {
           <div className="info">
             <div className="inner">
               <div className="thumb">
-                <img src={require("../../../assets/observe.svg")} />
+                <img src={Img2} />
               </div>
               <div>
                 <h4>{young.phase3StructureName}</h4>

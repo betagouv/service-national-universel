@@ -1,3 +1,4 @@
+import Img3 from "../../assets/information.svg";
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useHistory, useParams, Link } from "react-router-dom";
@@ -66,12 +67,12 @@ const AlertBox = () => {
   return (
     <Link to={`/structure/${user.structureId}/edit`}>
       <Alert>
-        <img src={require("../../assets/information.svg")} height={15} width={15} />
+        <img src={Img3} height={15} width={15} />
         <div className="text">
           <strong>Vous n&apos;avez pas terminé l&apos;inscription de votre structure !</strong>
           <p>Cliquez ici pour renseigner toutes ses informations.</p>
         </div>
-        {/* <img src={require("../../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }}/> */}
+        {/* <img src={Img2} height={15} onClick={onClose} style={{ cursor: "pointer" }}/> */}
       </Alert>
     </Link>
   );

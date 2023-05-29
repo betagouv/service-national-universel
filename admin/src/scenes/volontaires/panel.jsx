@@ -1,3 +1,5 @@
+import Img3 from "../../assets/close_icon.png";
+import Img from "../../assets/pencil.svg";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
@@ -285,7 +287,7 @@ const Panel = styled.div`
     font-weight: 400;
     width: 45px;
     height: 45px;
-    background: url(${require("../../assets/close_icon.png")}) center no-repeat;
+    background: url(${Img3}) center no-repeat;
     background-size: 12px;
     padding: 15px;
     position: absolute;
@@ -312,7 +314,7 @@ const Panel = styled.div`
     &-edit {
       width: 30px;
       height: 26px;
-      background: url(${require("../../assets/pencil.svg")}) center no-repeat;
+      background: url(${Img}) center no-repeat;
       background-size: 16px;
       position: absolute;
       right: 0;

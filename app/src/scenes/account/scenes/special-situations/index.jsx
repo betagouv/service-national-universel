@@ -36,9 +36,9 @@ const AccountSpecialSituationsPage = () => {
             {values.specificAmenagmentType !== "Contenu supprimé" && (
               <Textarea label="Nature de cet aménagement spécifique" name="specificAmenagmentType" value={values.specificAmenagmentType} disabled />
             )}
-            <Checkbox label="Jai besoin dun aménagement pour mobilité réduite" name="reducedMobilityAccess" value={values.reducedMobilityAccess} disabled useCheckedAsValue />
+            <Checkbox label="J'ai besoin d'un aménagement pour mobilité réduite" name="reducedMobilityAccess" value={values.reducedMobilityAccess} disabled useCheckedAsValue />
             <Checkbox
-              label="Jai besoin dêtre affecté(e) dans un centre de mon département de résidence"
+              label="J'ai besoin dêtre affecté(e) dans un centre de mon département de résidence"
               name="handicapInSameDepartment"
               value={values.handicapInSameDepartment}
               disabled

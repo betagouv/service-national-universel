@@ -1,3 +1,4 @@
+import Img2 from "../../assets/militaryPrep.png";
 import React from "react";
 import { HiOutlineSearch } from "react-icons/hi";
 import { useSelector } from "react-redux";
@@ -90,7 +91,7 @@ export default function HomeDesktop() {
           </div>
         </div>
         <div className="flex w-1/3 flex-shrink-0">
-          <img className="object-contain" src={require("../../assets/militaryPrep.png")} />
+          <img className="object-contain" src={Img2} />
         </div>
       </div>
       <DocumentsPM />

@@ -1,5 +1,7 @@
 import React from "react";
 import styled from "styled-components";
+import fr from "../../assets/fr.png";
+import logo from "../../assets/logo-snu.png";
 
 export default function Index() {
   return (
@@ -7,10 +9,10 @@ export default function Index() {
       <Header>
         <Logos>
           <a href="https://www.snu.gouv.fr/">
-            <img src={require("../../assets/fr.png")} />
+            <img src={fr} />
           </a>
           <a href="https://www.snu.gouv.fr/">
-            <img src={require("../../assets/logo-snu.png")} />
+            <img src={logo} />
           </a>
         </Logos>
         <h1>CONDITIONS GÉNÉRALES D&apos;UTILISATION (CGU)</h1>

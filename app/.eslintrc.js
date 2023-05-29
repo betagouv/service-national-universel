@@ -15,6 +15,9 @@ module.exports = {
   rules: {
     "react/prop-types": 0,
     "prettier/prettier": ["warn"],
+    "no-unused-vars": "warn",
+    "no-async-promise-executor": "warn",
+    "react/no-unescaped-entities": "off",
   },
   settings: {
     react: {

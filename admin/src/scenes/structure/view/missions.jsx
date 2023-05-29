@@ -1,3 +1,5 @@
+import Img2 from "../../../assets/JVA_round.png";
+import Img from "../../../assets/logo-snu.png";
 import React, { useState } from "react";
 import Panel from "../../missions/panel";
 import StructureViewV2 from "./wrapperv2";
@@ -146,11 +148,7 @@ const Hit = ({ hit, callback }) => {
     <>
       <div className="flex items-center py-3 px-4 hover:bg-gray-50">
         <div className="flex w-[40%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mission/${hit._id}`)}>
-          {hit.isJvaMission === "true" ? (
-            <img src={require("../../../assets/JVA_round.png")} className="mx-auto h-7 w-7 group-hover:scale-105" />
-          ) : (
-            <img src={require("../../../assets/logo-snu.png")} className="mx-auto h-7 w-7 group-hover:scale-105" />
-          )}
+          {hit.isJvaMission === "true" ? <img src={Img2} className="mx-auto h-7 w-7 group-hover:scale-105" /> : <img src={Img} className="mx-auto h-7 w-7 group-hover:scale-105" />}
           <div className="flex w-full flex-col gap-1">
             <p className="w-10/12 truncate font-bold leading-6 text-gray-900">{hit.name}</p>
             <p className="text-sm font-normal leading-4 text-gray-500">

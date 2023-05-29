@@ -3,14 +3,24 @@ import styled from "styled-components";
 import { Container } from "reactstrap";
 import { HERO_IMAGES_LIST } from "../utils";
 
+import information from "../assets/information.svg";
+import close from "../assets/close.svg";
+import diagorienteLogo from "../assets/image-diagorente.png";
+import login from "../assets/login.jpg";
+import phase3 from "../assets/phase3.jpg";
+import rang from "../assets/rang.jpeg";
+
+const thumbImageNumber = [Math.floor(Math.random() * HERO_IMAGES_LIST.length)];
+const thumbImage = [login, phase3, rang][thumbImageNumber];
+
 export const AlertBoxInformation = ({ title, message, onClose }) => (
   <AlertBoxStyle>
-    <img src={require("../assets/information.svg")} height={15} width={15} />
+    <img src={information} height={15} width={15} />
     <div className="text">
       <strong>{title}</strong>
       <p>{message}</p>
     </div>
-    <img src={require("../assets/close.svg")} height={15} width={15} onClick={onClose} style={{ cursor: "pointer" }} />
+    <img src={close} height={15} width={15} onClick={onClose} style={{ cursor: "pointer" }} />
   </AlertBoxStyle>
 );
 
@@ -112,7 +122,7 @@ const HeroStyle = styled.div`
     @media (max-width: 768px) {
       min-height: 0;
     }
-    ${({ thumbImage = HERO_IMAGES_LIST[Math.floor(Math.random() * HERO_IMAGES_LIST.length)] }) => `background: url(${require(`../assets/${thumbImage}`)}) no-repeat center;`}
+    ${`background: url(${thumbImage}) no-repeat center;`}
     background-size: cover;
     flex: 1;
     -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
@@ -121,7 +131,7 @@ const HeroStyle = styled.div`
 
   .diagorente {
     min-height: 400px;
-    background: url(${require("../assets/image-diagorente.png")}) no-repeat center;
+    background: url(${diagorienteLogo}) no-repeat center;
     background-size: cover;
     flex: 1;
     -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);

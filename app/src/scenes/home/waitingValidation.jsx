@@ -1,3 +1,5 @@
+import Img3 from "../../assets/homePhase2Desktop.png";
+import Img2 from "../../assets/homePhase2Mobile.png";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -61,7 +63,7 @@ export default function WaitingValidation() {
                 )}
               </div>
             </div>
-            <img className="w-1/2 object-fill" src={require("../../assets/homePhase2Desktop.png")} />
+            <img className="w-1/2 object-fill" src={Img3} />
           </div>
           <div className="mt-10 flex justify-end">
             <a
@@ -108,7 +110,7 @@ export default function WaitingValidation() {
               </a>
             </div>
           </div>
-          <img className="object-contain" src={require("../../assets/homePhase2Mobile.png")} />
+          <img className="object-contain" src={Img2} />
         </div>
       </div>
     </>

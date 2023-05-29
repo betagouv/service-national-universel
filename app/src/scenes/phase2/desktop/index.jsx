@@ -1,3 +1,5 @@
+import Img3 from "../../../assets/phase2Header.png";
+import Img2 from "../../../assets/phase2Reconnaissance.png";
 import React, { useEffect, useState } from "react";
 import { HiOutlineAdjustments, HiOutlineSearch } from "react-icons/hi";
 import { Link } from "react-router-dom";
@@ -76,7 +78,7 @@ export default function IndexDesktop({ young }) {
             )}
           </div>
         </div>
-        <img className="rounded-t-lg" src={require("../../../assets/phase2Header.png")} />
+        <img className="rounded-t-lg" src={Img3} />
       </div>
       {/* END HEADER */}
 
@@ -164,7 +166,7 @@ export default function IndexDesktop({ young }) {
         {/* <div className="mt-12 mb-4 text-lg">Vous avez déjà fait preuve de solidarité ?</div> */}
         {equivalences.length < 3 && equivalences.filter((equivalence) => equivalence.status !== "REFUSED").length === 0 ? (
           <div className="mt-4 flex max-h-[300px] w-full overflow-hidden rounded-lg border-0 shadow-lg xl:w-1/2">
-            <img src={require("../../../assets/phase2Reconnaissance.png")} className="w-[300px] overflow-hidden rounded-lg object-cover object-right-bottom" />
+            <img src={Img2} className="w-[300px] overflow-hidden rounded-lg object-cover object-right-bottom" />
             <div className="pr-8 pt-[20px] pb-6">
               <div className="flex items-end">
                 <div className="mb-1 text-lg font-bold leading-6">Demandez la reconnaissance d&apos;un engagement déjà réalisé</div>

@@ -58,6 +58,8 @@ import ModalCGU from "./components/modals/ModalCGU";
 import Team from "./scenes/team";
 import * as Sentry from "@sentry/react";
 
+import useDocumentTitle from "./hooks/useDocumentTitle";
+
 initSentry();
 initApi();
 
@@ -121,6 +123,8 @@ const Home = () => {
   const [sessionPhase1List, setSessionPhase1List] = useState(null);
 
   const renderDashboard = () => {
+    useDocumentTitle("Tableau de bord");
+
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <DashboardResponsible />;
     if (user?.role === ROLES.HEAD_CENTER) return <DashboardHeadCenter />;
     if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <Dashboard />;

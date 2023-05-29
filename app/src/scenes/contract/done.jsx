@@ -1,3 +1,4 @@
+import Img2 from "../../assets/logo-snu.png";
 import React from "react";
 import styled from "styled-components";
 
@@ -7,7 +8,7 @@ export default function Validated() {
   return (
     <div>
       <div style={{ display: "flex" }}>
-        <img style={{ margin: "auto", paddingTop: "2rem" }} src={require("../../assets/logo-snu.png")} height={96} width={96} />
+        <img style={{ margin: "auto", paddingTop: "2rem" }} src={Img2} height={96} width={96} />
       </div>
       <div style={{ display: "flex", margin: "2rem" }}>
         <Box style={{ margin: "auto", maxWidth: "600px" }}>

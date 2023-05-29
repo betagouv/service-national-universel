@@ -1,3 +1,4 @@
+import Img from "../../assets/arrow.png";
 import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
@@ -6,7 +7,7 @@ import { colors } from "../../utils";
 export const CardArrow = styled.span`
   width: 15px;
   height: 15px;
-  background-image: url(${require("../../assets/arrow.png")});
+  background-image: url(${Img});
 `;
 
 const CardStyle = styled.div`
