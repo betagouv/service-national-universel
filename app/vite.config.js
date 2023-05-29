@@ -1,5 +1,5 @@
 import { defineConfig, loadEnv } from "vite";
-import react from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react-swc";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 // eslint-disable-next-line no-unused-vars
@@ -14,7 +14,7 @@ export default defineConfig(({ command, mode }) => {
       // Put the Sentry vite plugin after all other plugins
       sentryVitePlugin({
         org: "sentry",
-        project: env.MODE !== "staging" ? "snu-production" : "snu-staging",
+        project: env.MODE === "production" ? "snu-production" : "snu-staging",
         authToken: env.SENTRY_AUTH_TOKEN,
         url: "https://sentry.selego.co/",
         environment: "app",

@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@sentry/vite-plugin": "^2.2.0",
-    "@vitejs/plugin-react": "^4.0.0",
+    "@vitejs/plugin-react-swc": "^3.3.1",
     "autoprefixer": "^10.4.13",
     "eslint": "8.27.0",
     "eslint-config-prettier": "^8.8.0",

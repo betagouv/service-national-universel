@@ -14,7 +14,7 @@
     "lint:fix": "eslint --ext .js --fix src"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.0.0",
+    "@vitejs/plugin-react-swc": "^3.3.1",
     "copy-webpack-plugin": "10.2.4",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
