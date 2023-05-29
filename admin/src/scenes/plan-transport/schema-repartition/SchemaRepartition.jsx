@@ -4,7 +4,7 @@ import PlanTransportBreadcrumb from "../components/PlanTransportBreadcrumb";
 import { Box, BoxHeader, MiniTitle, Badge, AlertPoint, BigDigits, Loading, regionList } from "../components/commons";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import ChevronRight from "../../../assets/icons/ChevronRight";
-import { cohortList, formatRate, parseQuery } from "../util";
+import { formatRate, parseQuery } from "../util";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import People from "../../../assets/icons/People";
 import ProgressBar from "../components/ProgressBar";
@@ -21,7 +21,7 @@ import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { useSelector } from "react-redux";
 import ButtonPrimary from "../../../components/ui/buttons/ButtonPrimary";
-import { getCohortByName } from "../../../services/cohort.service";
+import { getCohortByName, getCohorts } from "../../../services/cohort.service";
 import ReactTooltip from "react-tooltip";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
@@ -33,7 +33,7 @@ export default function SchemaRepartition({ region, department }) {
   const { user } = useSelector((state) => state.Auth);
   const [isNational, setIsNational] = useState(!region && !department);
   const [isDepartmental, setIsDepartmental] = useState(!!(region && department));
-  const [cohort, setCohort] = useState(getDefaultCohort());
+  const [cohort, setCohort] = useState(null);
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState({
     capacity: 0,
@@ -45,6 +45,9 @@ export default function SchemaRepartition({ region, department }) {
     toRegions: [],
   });
   const [data, setData] = useState({ rows: getDefaultRows() });
+  const [cohortList, setCohortList] = useState(null);
+  const [cohortOptions, setCohortOptions] = useState([]);
+
   if (region) useDocumentTitle(`Schéma de répartition - ${region}`);
   if (department) useDocumentTitle(`Schéma de répartition - ${department}`);
   if (!department && !region) useDocumentTitle("Schéma de répartition");
@@ -64,15 +67,40 @@ export default function SchemaRepartition({ region, department }) {
 
   function getDefaultCohort() {
     const { cohort } = parseQuery(location.search);
-    if (cohort) {
+    if (cohort && cohortList && cohortList.find((c) => c.name === cohort)) {
       return cohort;
     } else {
-      return cohortList[0].value;
+      return cohortList && cohortList.length > 0 ? cohortList[0].name : null;
     }
   }
 
   useEffect(() => {
-    loadData();
+    loadCohorts();
+  }, []);
+
+  useEffect(() => {
+    if (cohort === null && cohortList !== null) {
+      setCohort(getDefaultCohort());
+    }
+  }, [cohortList]);
+
+  useEffect(() => {
+    if (cohort) {
+      loadData();
+      setCohortOptions(
+        cohortList
+          .filter((c) => {
+            return (
+              [ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role) ||
+              (user.role === ROLES.REFERENT_DEPARTMENT && c.schemaAccessForReferentDepartment === "true") ||
+              (user.role === ROLES.REFERENT_REGION && c.schemaAccessForReferentRegion === "true")
+            );
+          })
+          .map((c) => ({ label: c.name, value: c.name })),
+      );
+    } else {
+      setCohortOptions([]);
+    }
   }, [cohort]);
 
   useEffect(() => {
@@ -130,6 +158,18 @@ export default function SchemaRepartition({ region, department }) {
       intradepartmental: 0,
       intradepartmentalAssigned: 0,
     };
+  }
+
+  async function loadCohorts() {
+    try {
+      setLoading(true);
+      const cohorts = await getCohorts();
+      setCohortList(cohorts);
+      setLoading(false);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+    }
   }
 
   async function loadData() {
@@ -255,7 +295,6 @@ export default function SchemaRepartition({ region, department }) {
       }
     });
 
-    // console.log("sheetData: ", sheetData);
     let sheet = XLSX.utils.json_to_sheet(sheetData);
 
     // --- fix header names
@@ -313,7 +352,7 @@ export default function SchemaRepartition({ region, department }) {
           />
           <div className="flex gap-4">
             {user.role === ROLES.REFERENT_DEPARTMENT && user.department.length > 1 && <Select options={departementsList} value={department} onChange={handleChangeDepartment} />}
-            <Select options={cohortList} value={cohort} onChange={handleChangeCohort} />
+            <Select options={cohortOptions} value={cohort} onChange={handleChangeCohort} />
           </div>
         </div>
         <div className="my-[40px] flex">
