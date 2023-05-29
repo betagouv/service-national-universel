@@ -326,6 +326,18 @@ export default function Index() {
                       />
                     ),
                 )}
+                {stats.sejour.sejour_centre_à_déclarer.map(
+                  (item, key) =>
+                    shouldShow(stats.sejour, "sejour_centre_à_déclarer", key) && (
+                      <NoteContainer
+                        title="Centre"
+                        key={"sejour_centre_à_déclarer" + item.cohort + item.department}
+                        number=""
+                        content={`Au moins 1 centre est en attente de déclaration pour le séjour de ${item.cohort} (${item.department})`}
+                        btnLabel="À déclarer"
+                      />
+                    ),
+                )}
               </div>
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">

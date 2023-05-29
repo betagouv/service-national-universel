@@ -26,6 +26,8 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
       .filter((c) => new Date(c.dateStart) - Date.now() < 14 * 24 * 60 * 60 * 1000 && new Date(c.dateEnd) - Date.now() > 0)
       .map((e) => e.name);
 
+    const cohortsSessionEditionOpen = cohorts.filter((c) => c.sessionEditionOpenForReferentRegion && c.sessionEditionOpenForReferentDepartment).map((e) => e.name);
+
     function queryFromFilter(filter, { regionField = "region.keyword", departmentField = "department.keyword" } = {}) {
       const body = {
         size: 0,
@@ -42,6 +44,43 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
         ...body,
         aggs: { [fieldName.replace(".keyword", "")]: { terms: { field: fieldName, size: 1000 } } },
       };
+    }
+
+    async function departmentsFromTableRepartition(cohorts) {
+      // Liste des départements de la table de répartition pour la personne qui regarde et les cohortes concernées
+      const q = queryFromFilter([{ terms: { "cohort.keyword": cohorts } }, { bool: { must: { exists: { field: "fromDepartment" } } } }], {
+        regionField: "fromRegion",
+        departmentField: "fromDepartment",
+      });
+      q.size = ES_NO_LIMIT;
+      const responseRepartition = await esClient.msearch({
+        index: "tablederepartition",
+        body: buildArbitratyNdJson({ index: "tablederepartition", type: "_doc" }, q),
+      });
+      const departmentsCohortsFromRepartition = responseRepartition.body.responses[0].hits.hits.map((e) => e._source);
+      return departmentsCohortsFromRepartition;
+    }
+
+    function missingElementsByCohortDepartment(response, departmentsCohortsFromRepartition, cohorts) {
+      const data = [];
+      for (const cohort of cohorts) {
+        const cohortDepartments = departmentsCohortsFromRepartition.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment);
+        // Chaque département doit avoir un contact pour la cohorte
+        for (const department of cohortDepartments) {
+          const cohortDepartmentsWithContact = response.body.responses
+            .filter((e) => e.aggregations)
+            .find((e) => e.aggregations.department.buckets.find((e) => e.key === department));
+          // Si le département n'a pas de session phase 1 pour la cohorte on l'ajoute dans la liste à signaler.
+          if (!cohortDepartmentsWithContact) {
+            if (!data.find((e) => e.cohort === cohort && e.department === department))
+              data.push({
+                cohort,
+                department,
+              });
+          }
+        }
+      }
+      return data;
     }
 
     // Dossier. X dossiers d’inscription en attente de validation pour le séjour de [Février 2023 C] (A instruire)
@@ -170,20 +209,9 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     async function pointDeRassemblementADéclarer() {
       const cohorts = cohortsNotStarted;
       if (!cohorts.length) return { sejour_point_de_rassemblement_à_déclarer: [] };
-
-      // Liste des départements de la table de répartition pour la personne qui regarde et les cohortes concernées
-      const q = queryFromFilter([{ terms: { "cohort.keyword": cohorts } }, { bool: { must: { exists: { field: "fromDepartment" } } } }], {
-        regionField: "fromRegion",
-        departmentField: "fromDepartment",
-      });
-      q.size = ES_NO_LIMIT;
-      const responseRepartition = await esClient.msearch({
-        index: "tablederepartition",
-        body: buildArbitratyNdJson({ index: "tablederepartition", type: "_doc" }, q),
-      });
+      const departmentsCohortsFromRepartition = await departmentsFromTableRepartition(cohorts);
       // On récupère les points de rassemblement pour chaque cohorte groupés par département
       // Si un département de la cohorte n'a pas de point de rassemblement on l'ajoute dans la liste à signaler.
-      const departmentsCohorts = responseRepartition.body.responses[0].hits.hits.map((e) => e._source);
       const response = await esClient.msearch({
         index: "pointderassemblement",
         body: buildArbitratyNdJson(
@@ -193,7 +221,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
               withAggs(
                 queryFromFilter([
                   { terms: { "cohort.keyword": [cohort] } },
-                  { terms: { "department.keyword": departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
+                  { terms: { "department.keyword": departmentsCohortsFromRepartition.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
                 ]),
                 "department.keyword",
               ),
@@ -201,28 +229,10 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           }),
         ),
       });
-      const sejour_point_de_rassemblement_à_déclarer = [];
-      for (const cohort of cohorts) {
-        const cohortDepartments = departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment);
-        // Chaque département doit avoir un point de rassemblement
-        for (const department of cohortDepartments) {
-          const cohortDepartmentsWithPdr = response.body.responses.filter((e) => e.aggregations).find((e) => e.aggregations.department.buckets.find((e) => e.key === department));
-          // Si le département n'a pas de point de rassemblement on l'ajoute dans la liste à signaler.
-          if (!cohortDepartmentsWithPdr) {
-            if (!sejour_point_de_rassemblement_à_déclarer.find((e) => e.cohort === cohort && e.department === department))
-              sejour_point_de_rassemblement_à_déclarer.push({
-                cohort,
-                department,
-              });
-          }
-        }
-      }
-      return { sejour_point_de_rassemblement_à_déclarer };
-    }
 
-    async function centreADéclarer() {
-      return { sejour_centre_à_déclarer: [] };
-      // Todo en s'inspirant de pointDeRassemblementADéclarer
+      // Pour chaque département, si le département n'a pas de point de rassemblement on l'ajoute dans la liste à signaler.
+      const sejour_point_de_rassemblement_à_déclarer = missingElementsByCohortDepartment(response, departmentsCohortsFromRepartition, cohorts);
+      return { sejour_point_de_rassemblement_à_déclarer };
     }
 
     // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
@@ -254,20 +264,9 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     async function sejourContactÀRenseigner() {
       const cohorts = cohortsNotStarted; // FIXME
       if (!cohorts.length) return { sejour_contact_à_renseigner: [] };
-
-      // Liste des départements de la table de répartition pour la personne qui regarde et les cohortes concernées
-      const q = queryFromFilter([{ terms: { "cohort.keyword": cohorts } }, { bool: { must: { exists: { field: "fromDepartment" } } } }], {
-        regionField: "fromRegion",
-        departmentField: "fromDepartment",
-      });
-      q.size = ES_NO_LIMIT;
-      const responseRepartition = await esClient.msearch({
-        index: "tablederepartition",
-        body: buildArbitratyNdJson({ index: "tablederepartition", type: "_doc" }, q),
-      });
+      const departmentsCohortsFromRepartition = await departmentsFromTableRepartition(cohorts);
       // On récupère les entrées de département service pour chaque cohorte groupés par département
       // Si un département de la cohorte n'a pas de contact on l'ajoute dans la liste à signaler.
-      const departmentsCohorts = responseRepartition.body.responses[0].hits.hits.map((e) => e._source);
       const response = await esClient.msearch({
         index: "departmentservice",
         body: buildArbitratyNdJson(
@@ -286,7 +285,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
                       },
                     },
                   },
-                  { terms: { "department.keyword": departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
+                  { terms: { "department.keyword": departmentsCohortsFromRepartition.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
                 ]),
                 "department.keyword",
               ),
@@ -294,24 +293,9 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           }),
         ),
       });
-      const sejour_contact_à_renseigner = [];
-      for (const cohort of cohorts) {
-        const cohortDepartments = departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment);
-        // Chaque département doit avoir un contact pour la cohorte
-        for (const department of cohortDepartments) {
-          const cohortDepartmentsWithContact = response.body.responses
-            .filter((e) => e.aggregations)
-            .find((e) => e.aggregations.department.buckets.find((e) => e.key === department));
-          // Si le département n'a pas de contact pour la cohorte on l'ajoute dans la liste à signaler.
-          if (!cohortDepartmentsWithContact) {
-            if (!sejour_contact_à_renseigner.find((e) => e.cohort === cohort && e.department === department))
-              sejour_contact_à_renseigner.push({
-                cohort,
-                department,
-              });
-          }
-        }
-      }
+
+      // Pour chaque département, si le département n'a pas de contact pour la cohorte on l'ajoute dans la liste à signaler
+      const sejour_contact_à_renseigner = missingElementsByCohortDepartment(response, departmentsCohortsFromRepartition, cohorts);
       return { sejour_contact_à_renseigner };
     }
 
@@ -379,20 +363,9 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     async function contratÀRenseigner() {
       const cohorts = cohortsNotStarted; // FIXME
       if (!cohorts.length) return { engagement_contrat_à_renseigner: [] };
-
-      // Liste des départements de la table de répartition pour la personne qui regarde et les cohortes concernées
-      const q = queryFromFilter([{ terms: { "cohort.keyword": cohorts } }, { bool: { must: { exists: { field: "fromDepartment" } } } }], {
-        regionField: "fromRegion",
-        departmentField: "fromDepartment",
-      });
-      q.size = ES_NO_LIMIT;
-      const responseRepartition = await esClient.msearch({
-        index: "tablederepartition",
-        body: buildArbitratyNdJson({ index: "tablederepartition", type: "_doc" }, q),
-      });
+      const departmentsCohortsFromRepartition = await departmentsFromTableRepartition(cohorts);
       // On récupère les entrées de département service pour chaque cohorte groupés par département
       // Si un département de la cohorte n'a pas de contact on l'ajoute dans la liste à signaler.
-      const departmentsCohorts = responseRepartition.body.responses[0].hits.hits.map((e) => e._source);
       const response = await esClient.msearch({
         index: "departmentservice",
         body: buildArbitratyNdJson(
@@ -403,7 +376,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
                 queryFromFilter([
                   { terms: { "cohort.keyword": [cohort] } },
                   { bool: { must: { exists: { field: "contacts" } } } },
-                  { terms: { "department.keyword": departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
+                  { terms: { "department.keyword": departmentsCohortsFromRepartition.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
                 ]),
                 "department.keyword",
               ),
@@ -411,25 +384,38 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           }),
         ),
       });
-      const engagement_contrat_à_renseigner = [];
-      for (const cohort of cohorts) {
-        const cohortDepartments = departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment);
-        // Chaque département doit avoir un contact pour la cohorte
-        for (const department of cohortDepartments) {
-          const cohortDepartmentsWithContact = response.body.responses
-            .filter((e) => e.aggregations)
-            .find((e) => e.aggregations.department.buckets.find((e) => e.key === department));
-          // Si le département n'a pas de contact pour la cohorte on l'ajoute dans la liste à signaler.
-          if (!cohortDepartmentsWithContact) {
-            if (!engagement_contrat_à_renseigner.find((e) => e.cohort === cohort && e.department === department))
-              engagement_contrat_à_renseigner.push({
-                cohort,
-                department,
-              });
-          }
-        }
-      }
+      // Pour chaque département, si le département n'a pas de contact pour la cohorte on l'ajoute dans la liste à signaler
+      const engagement_contrat_à_renseigner = missingElementsByCohortDepartment(response, departmentsCohortsFromRepartition, cohorts);
       return { engagement_contrat_à_renseigner };
+    }
+
+    // Centre (À déclarer) Au moins 1 centre est en attente de déclaration pour le séjour de [Février 2023-C].
+    // sejour_centre_à_déclarer
+    async function sejourCentreÀDéclarer() {
+      const cohorts = cohortsSessionEditionOpen;
+      if (!cohorts.length) return { sejour_centre_à_déclarer: [] };
+      const departmentsCohortsFromRepartition = await departmentsFromTableRepartition(cohorts);
+      // On récupère les entrées de session phase 1 pour chaque cohorte groupés par département
+      const response = await esClient.msearch({
+        index: "sessionphase1",
+        body: buildArbitratyNdJson(
+          ...cohorts.flatMap((cohort) => {
+            return [
+              { index: "sessionphase1", type: "_doc" },
+              withAggs(
+                queryFromFilter([
+                  { terms: { "cohort.keyword": [cohort] } },
+                  { terms: { "department.keyword": departmentsCohortsFromRepartition.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
+                ]),
+                "department.keyword",
+              ),
+            ];
+          }),
+        ),
+      });
+      // Pour chaque département, si le département n'a pas de session phase 1 pour la cohorte on l'ajoute dans la liste à signaler
+      const sejour_centre_à_déclarer = missingElementsByCohortDepartment(response, departmentsCohortsFromRepartition, cohorts);
+      return { sejour_centre_à_déclarer };
     }
 
     async function basicInscriptions() {
@@ -514,6 +500,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
         engagement_phase3_en_attente_de_validation: results[4].hits.total.value,
       };
     }
+    // TODO: Optimize async/await and run all queries in parallel.
     return res.status(200).send({
       ok: true,
       data: {
@@ -526,7 +513,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           ...(await sejourRassemblementNonConfirmé()),
           ...(await sejourParticipationNonConfirmée()),
           ...(await pointDeRassemblementADéclarer()),
-          ...(await centreADéclarer()),
+          ...(await sejourCentreÀDéclarer()),
           ...(await sejourEmploiDuTempsNonDéposé()),
           ...(await sejourContactÀRenseigner()),
           ...(await sejourVolontairesÀContacter()),
