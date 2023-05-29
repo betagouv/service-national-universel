@@ -8,6 +8,7 @@ const { ERRORS } = require("../../utils");
 const { buildArbitratyNdJson } = require("./utils");
 const { sessions2023, ROLES, ES_NO_LIMIT } = require("snu-lib");
 const CohortModel = require("../../models/cohort");
+const ApplicationModel = require("../../models/application");
 
 router.post("/default", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -418,6 +419,268 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
       return { sejour_centre_à_déclarer };
     }
 
+    // Pointage. X centres n’ont pas pointés tous leurs volontaires à l’arrivée au séjour de [Février 2023-C] (A renseigner)
+    // sejour_pointage
+    async function sejourPointage() {
+      const cohorts = cohortsNotStarted; // FIXME
+      if (!cohorts.length) return { sejourPointage: [] };
+
+      const response = await esClient.msearch({
+        index: "young",
+        body: buildArbitratyNdJson(
+          ...cohorts.flatMap((cohort) => {
+            return [
+              { index: "young", type: "_doc" },
+              withAggs(
+                queryFromFilter([
+                  { terms: { "cohort.keyword": [cohort] } },
+                  { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
+                  { bool: { must_not: { exists: { field: "cohesionStayPresence.keyword" } } } },
+                ]),
+                "sessionPhase1Id.keyword",
+              ),
+            ];
+          }),
+        ),
+      });
+
+      const sejourPointage = [];
+      for (let i = 0; i < response.body.responses.length; i++) {
+        const r = response.body.responses[i];
+        const cohort = cohorts[i];
+        const sessionCount = r.aggregations.sessionPhase1Id.buckets.reduce((acc, e) => {
+          if (e.doc_count > 0) acc++;
+          return acc;
+        }, 0);
+        if (sessionCount > 0) {
+          sejourPointage.push({ cohort, count: sessionCount });
+        }
+      }
+      return { sejourPointage };
+    }
+
+    // Pointage. X centres n’ont pas pointés tous leurs volontaires à la JDM sur le séjour de [Février 2023-C] (A renseigner)
+    // sejour_pointage_jdm
+    async function sejourPointageJDM() {
+      const cohorts = cohortsNotStarted; // FIXME
+      if (!cohorts.length) return { sejour_pointage_jdm: [] };
+
+      const response = await esClient.msearch({
+        index: "young",
+        body: buildArbitratyNdJson(
+          ...cohorts.flatMap((cohort) => {
+            return [
+              { index: "young", type: "_doc" },
+              withAggs(
+                queryFromFilter([
+                  { terms: { "cohort.keyword": [cohort] } },
+                  { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
+                  { bool: { must_not: { exists: { field: "presenceJDM.keyword" } } } },
+                ]),
+                "sessionPhase1Id.keyword",
+              ),
+            ];
+          }),
+        ),
+      });
+
+      const sejour_pointage_jdm = [];
+      for (let i = 0; i < response.body.responses.length; i++) {
+        const r = response.body.responses[i];
+        const cohort = cohorts[i];
+        const sessionCount = r.aggregations.sessionPhase1Id.buckets.reduce((acc, e) => {
+          if (e.doc_count > 0) acc++;
+          return acc;
+        }, 0);
+        if (sessionCount > 0) {
+          sejour_pointage_jdm.push({ cohort, count: sessionCount });
+        }
+      }
+      return { sejour_pointage_jdm };
+    }
+
+    // Volontaires (À suivre) X volontaires ayant commencé leur mission sans contrat signé
+    // volontaires_à_suivre_sans_contrat
+    async function volontairesÀSuivreSansContrat() {
+      const match = { "youngInfo.statusPhase2": "IN_PROGRESS" };
+      if (req.user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = req.user.region;
+      if (req.user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: req.user.department };
+      const query = [
+        {
+          $match: {
+            status: { $in: ["VALIDATED", "IN_PROGRESS"] },
+            contractStatus: { $in: ["DRAFT", "SENT"] },
+            youngId: { $exists: true, $ne: "N/A" },
+            missionId: { $exists: true },
+          },
+        },
+        {
+          $addFields: {
+            youngObjectId: {
+              $toObjectId: "$youngId",
+            },
+            missionObjectId: {
+              $toObjectId: "$missionId",
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "youngs",
+            localField: "youngObjectId",
+            foreignField: "_id",
+            as: "youngInfo",
+          },
+        },
+        {
+          $unwind: "$youngInfo",
+        },
+        {
+          $match: match,
+        },
+        {
+          $lookup: {
+            from: "missions",
+            localField: "missionObjectId",
+            foreignField: "_id",
+            as: "missionInfo",
+          },
+        },
+        {
+          $unwind: "$missionInfo",
+        },
+        {
+          $match: {
+            "missionInfo.startAt": { $gt: new Date() },
+          },
+        },
+      ];
+      const result = await ApplicationModel.aggregate(query);
+      return { volontaires_à_suivre_sans_contrat: result.length };
+    }
+
+    // Volontaires (À suivre) X volontaires ayant commencé leur mission sans statut à jour
+    // volontaires_à_suivre_sans_statut
+    async function volontairesÀSuivreSansStatut() {
+      const match = { "youngInfo.statusPhase2": "IN_PROGRESS" };
+      if (req.user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = req.user.region;
+      if (req.user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: req.user.department };
+      const query = [
+        {
+          $match: {
+            status: { $in: ["VALIDATED"] },
+            youngId: { $exists: true, $ne: "N/A" },
+            missionId: { $exists: true },
+          },
+        },
+        {
+          $addFields: {
+            youngObjectId: {
+              $toObjectId: "$youngId",
+            },
+            missionObjectId: {
+              $toObjectId: "$missionId",
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "youngs",
+            localField: "youngObjectId",
+            foreignField: "_id",
+            as: "youngInfo",
+          },
+        },
+        {
+          $unwind: "$youngInfo",
+        },
+        {
+          $match: match,
+        },
+        {
+          $lookup: {
+            from: "missions",
+            localField: "missionObjectId",
+            foreignField: "_id",
+            as: "missionInfo",
+          },
+        },
+        {
+          $unwind: "$missionInfo",
+        },
+        {
+          $match: {
+            "missionInfo.startAt": { $gt: new Date() },
+            "missionInfo.endAt": { $lt: new Date() },
+          },
+        },
+      ];
+      const result = await ApplicationModel.aggregate(query);
+      return { volontaires_à_suivre_sans_statut: result.length };
+    }
+
+    // Volontaires (À suivre) X volontaires ayant achevé leur mission sans statut à jour
+    // volontaires_à_suivre_achevé_sans_statut
+    async function volontairesÀSuivreAchevéSansStatut() {
+      const match = { "youngInfo.statusPhase2": "IN_PROGRESS" };
+      if (req.user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = req.user.region;
+      if (req.user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: req.user.department };
+      const query = [
+        {
+          $match: {
+            status: { $in: ["VALIDATED", "IN_PROGRESS"] },
+            youngId: { $exists: true, $ne: "N/A" },
+            missionId: { $exists: true },
+          },
+        },
+        {
+          $addFields: {
+            youngObjectId: {
+              $toObjectId: "$youngId",
+            },
+            missionObjectId: {
+              $toObjectId: "$missionId",
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "youngs",
+            localField: "youngObjectId",
+            foreignField: "_id",
+            as: "youngInfo",
+          },
+        },
+        {
+          $unwind: "$youngInfo",
+        },
+        {
+          $match: match,
+        },
+        {
+          $lookup: {
+            from: "missions",
+            localField: "missionObjectId",
+            foreignField: "_id",
+            as: "missionInfo",
+          },
+        },
+        {
+          $unwind: "$missionInfo",
+        },
+        {
+          $match: {
+            "missionInfo.endAt": { $lt: new Date() },
+          },
+        },
+        {
+          $limit: 1000,
+        },
+      ];
+      const result = await ApplicationModel.aggregate(query);
+      return { volontaires_à_suivre_achevé_sans_statut: result.length };
+    }
+
     async function basicInscriptions() {
       const response = await esClient.msearch({
         index: "young",
@@ -518,10 +781,15 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           ...(await sejourContactÀRenseigner()),
           ...(await sejourVolontairesÀContacter()),
           ...(await sejourChefDeCentre()),
+          ...(await sejourPointage()),
+          ...(await sejourPointageJDM()),
         },
         engagement: {
           ...(await basicEngagement()),
           ...(await contratÀRenseigner()),
+          ...(await volontairesÀSuivreSansContrat()),
+          ...(await volontairesÀSuivreSansStatut()),
+          ...(await volontairesÀSuivreAchevéSansStatut()),
         },
       },
     });
