@@ -9,7 +9,7 @@ const { getMissionsHelper, getMissionByIdHelper, deleteMissionByIdHelper, create
 const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
 const { deleteStructureByIdHelper, createStructureHelper, expectStructureToEqual, notExistingStructureId } = require("./helpers/structure");
 const getNewReferentFixture = require("./fixtures/referent");
-const { ROLES } = require("snu-lib/roles");
+const { ROLES } = require("snu-lib");
 const { createYoungHelper } = require("./helpers/young");
 const getNewYoungFixture = require("./fixtures/young");
 const { createApplication, getApplicationByIdHelper } = require("./helpers/application");

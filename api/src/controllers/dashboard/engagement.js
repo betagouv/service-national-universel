@@ -3,13 +3,12 @@ const passport = require("passport");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const Joi = require("joi");
-const { YOUNG_STATUS } = require("snu-lib");
+const { YOUNG_STATUS, MISSION_STATUS } = require("snu-lib");
 const router = express.Router();
 const YoungModel = require("../../models/young");
 const MissionModel = require("../../models/mission");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const StructureModel = require("../../models/structure");
-const { MISSION_STATUS } = require("snu-lib/constants");
 
 const filtersJoi = Joi.object({
   status: Joi.array().items(Joi.string().valid(...Object.values(YOUNG_STATUS))),

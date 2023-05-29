@@ -1057,6 +1057,15 @@ const translateMission = (mission) => {
   }
 };
 
+const translateCniExpired = (cniExpired) => {
+  switch (cniExpired) {
+    case "true":
+      return "En attente";
+    default:
+      return "Validée";
+  }
+};
+
 // --------------------------------------------------------------
 // Utilisé pour traduire l'historique des plans de transport
 
@@ -1124,7 +1133,7 @@ function translateBusPatchesField(path) {
   return allBusPatchesFields[path] ? allBusPatchesFields[path] : path;
 }
 
-module.exports = {
+export {
   translate,
   translateState,
   translateCohort,
@@ -1154,4 +1163,37 @@ module.exports = {
   translateMission,
   translateBusPatchesField,
   translateInscriptionStatus,
+  translateCniExpired,
+};
+export default {
+  translate,
+  translateState,
+  translateCohort,
+  translateSessionStatus,
+  translatePhase1,
+  translateContractStatus,
+  translatePhase2,
+  translateApplication,
+  translateApplicationForYoungs,
+  translateEngagement,
+  translateFileStatusPhase1,
+  translateStatusMilitaryPreparationFiles,
+  translateEquivalenceStatus,
+  translateAddFilePhase2,
+  translateAddFilesPhase2,
+  translateAddFilePhase2WithoutPreposition,
+  translateVisibilty,
+  translateFilter,
+  translateSource,
+  translateGrade,
+  translateField,
+  translateCorrectionReason,
+  translateApplicationFileType,
+  translateAction,
+  translateTypologieCenter,
+  translateDomainCenter,
+  translateMission,
+  translateBusPatchesField,
+  translateInscriptionStatus,
+  translateCniExpired,
 };

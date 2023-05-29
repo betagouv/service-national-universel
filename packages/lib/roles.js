@@ -1,5 +1,5 @@
-const { COHESION_STAY_END } = require("./date");
-const { region2department } = require("./region-and-departments");
+import { COHESION_STAY_END } from "./date";
+import { region2department } from "./region-and-departments";
 
 const ROLES = {
   ADMIN: "admin",
@@ -357,6 +357,10 @@ function canSendTimeScheduleReminderForSessionPhase1(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
+function canSendImageRightsForSessionPhase1(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+}
+
 function canCreateOrModifyMission(user, mission, structure) {
   if (user.role === ROLES.SUPERVISOR) {
     return user.structureId === mission.structureId || user.structureId === structure?.networkId;
@@ -665,7 +669,7 @@ function canDeleteSchemaDeRepartition(actor) {
 }
 
 function canViewLigneBus(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER, ROLES.HEAD_CENTER].includes(actor.role);
 }
 function canUpdateLigneBus(actor) {
   return [
@@ -692,7 +696,7 @@ function canDeleteLigneBus(actor) {
 }
 
 function canSearchLigneBus(actor) {
-  return [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
 function canEditLigneBusGeneralInfo(actor) {
@@ -712,7 +716,7 @@ function ligneBusCanCreateDemandeDeModification(actor) {
 }
 
 function ligneBusCanViewDemandeDeModification(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
 function ligneBusCanSendMessageDemandeDeModification(actor) {
@@ -739,7 +743,7 @@ function isSuperAdmin(actor) {
   return [ROLES.ADMIN].includes(actor.role) && actor.subRole === "god";
 }
 
-module.exports = {
+export {
   ROLES,
   SUB_ROLES,
   ROLES_LIST,
@@ -846,6 +850,7 @@ module.exports = {
   isSuperAdmin,
   canSendTimeScheduleReminderForSessionPhase1,
   canSendPlanDeTransport,
+  canSendImageRightsForSessionPhase1,
   isSupervisor,
   isAdmin,
 };

@@ -25,7 +25,7 @@ const totalClosedTickets = (tickets) => {
   return (tickets || []).filter((ticket) => (ticket || {}).status.toLowerCase() === "closed").length;
 };
 
-module.exports = {
+export {
   ticketStateIdByName,
   totalOpenedTickets,
   totalNewTickets,

@@ -73,27 +73,21 @@ class api {
     this.token = token;
   }
 
-  openpdf(path, body) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const response = await fetch(`${apiURL}${path}`, {
-          retries: 3,
-          retryDelay: 1000,
-          retryOn: [502, 503, 504],
-          mode: "cors",
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
-          body: typeof body === "string" ? body : JSON.stringify(body),
-        });
-        if (response.status !== 200) return reject(await response.json());
-        const file = await response.blob();
-        resolve(file);
-      } catch (e) {
-        console.log(e);
-        reject(e);
-      }
+  async openpdf(path, body) {
+    const response = await fetch(`${apiURL}${path}`, {
+      retries: 3,
+      retryDelay: 1000,
+      retryOn: [502, 503, 504],
+      mode: "cors",
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+      body: typeof body === "string" ? body : JSON.stringify(body),
     });
+    if (response.status !== 200) {
+      throw await response.json();
+    }
+    return response.blob();
   }
 
   get(path) {

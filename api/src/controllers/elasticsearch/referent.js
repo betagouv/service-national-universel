@@ -1,14 +1,13 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch } = require("snu-lib/roles");
+const { ROLES, canSearchInElasticSearch, department2region, departmentList, COHORTS } = require("snu-lib");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 const StructureObject = require("../../models/structure");
-const { department2region, departmentList, regionList } = require("snu-lib");
 const Joi = require("joi");
 
 async function buildReferentContext(user) {
@@ -104,6 +103,64 @@ router.post("/team/:action(search|export)", passport.authenticate(["referent"], 
       }
     }
 
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
+
+    if (req.params.action === "export") {
+      const response = await allRecords("referent", hitsRequestBody.query);
+      return res.status(200).send({ ok: true, data: response });
+    } else {
+      const response = await esClient.msearch({ index: "referent", body: buildNdJson({ index: "referent", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      return res.status(200).send(response.body);
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    // Configuration
+    const searchFields = ["email.keyword", "firstName.folded", "lastName.folded"];
+    const filterFields = ["role.keyword", "subRole.keyword", "region.keyword", "department.keyword", "cohorts.keyword"];
+    const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt", "lastLoginAt"];
+
+    // Authorization
+    if (!canSearchInElasticSearch(user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // Body params validation
+    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    //Query params validation
+    const { error: errorQuery, value: query } = Joi.object({
+      cohort: Joi.string()
+        .trim()
+        .allow(null)
+        .valid(...COHORTS),
+    }).validate(req.query, { stripUnknown: true });
+    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { referentContextFilters, referentContextError } = await buildReferentContext(user);
+    if (referentContextError) {
+      return res.status(referentContextError.status).send(referentContextError.body);
+    }
+
+    // Context filters
+    const contextFilters = [
+      ...referentContextFilters,
+      query.cohort
+        ? {
+            bool: {
+              should: [
+                { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }] } },
+                { bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { terms: { "cohorts.keyword": [query.cohort] } }] } },
+              ],
+            },
+          }
+        : null,
+    ].filter(Boolean);
 
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
 
