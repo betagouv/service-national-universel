@@ -19,12 +19,21 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     const cohorts5daysBeforeInscriptionEnd = sessions2023
       .filter((c) => new Date(c.eligibility.instructionEndDate) - Date.now() < 5 * 24 * 60 * 60 * 1000 && new Date(c.eligibility.instructionEndDate) - Date.now() > 0)
       .map((e) => e.name);
-    const cohorts5dayBeforepdrChoiceLimitDate = cohorts
-      .filter((c) => new Date(c.pdrChoiceLimitDate) - Date.now() < 5 * 24 * 60 * 60 * 1000 && new Date(c.pdrChoiceLimitDate) - Date.now() > 0)
+    const cohortsOneWeekBeforepdrChoiceLimitDate = cohorts
+      .filter((c) => new Date(c.pdrChoiceLimitDate) - Date.now() < 7 * 24 * 60 * 60 * 1000 && new Date(c.pdrChoiceLimitDate) - Date.now() > 0)
       .map((e) => e.name);
-    // // entre 2 semaines avant le 1er jour du séjour et le dernier jour du séjour, alors alerte (1 alerte par session)
+    // entre 2 semaines avant le 1er jour du séjour et le dernier jour du séjour, alors alerte (1 alerte par session)
     const cohorts2weeksBeforeSessionStart = cohorts
       .filter((c) => new Date(c.dateStart) - Date.now() < 14 * 24 * 60 * 60 * 1000 && new Date(c.dateEnd) - Date.now() > 0)
+      .map((e) => e.name);
+    // dateStart - 7 weeks > now && dateStart ≤ now
+    const cohorts7weeksBeforeSessionStart = cohorts
+      .filter((c) => new Date(c.dateStart) - Date.now() < 7 * 7 * 24 * 60 * 60 * 1000 && new Date(c.dateStart) - Date.now() > 0)
+      .map((e) => e.name);
+    const cohorts2daysAfterSessionStart = cohorts.filter((c) => new Date(c.dateStart) + 2 * 24 * 60 * 60 * 1000 < Date.now()).map((e) => e.name);
+    // dateStart > now && dateEnd + 2 weeks < now
+    const cohorts2weeksAfterSessionEnd = cohorts
+      .filter((c) => new Date(c.dateStart) > Date.now() && new Date(c.dateEnd) + 2 * 7 * 24 * 60 * 60 * 1000 < Date.now())
       .map((e) => e.name);
 
     const cohortsSessionEditionOpen = cohorts.filter((c) => c.sessionEditionOpenForReferentRegion && c.sessionEditionOpenForReferentDepartment).map((e) => e.name);
@@ -142,7 +151,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     // Point de rassemblement (À suivre) X volontaires n’ont pas confirmé leur point de rassemblement
     // sejour_rassemblement_non_confirmé
     async function sejourRassemblementNonConfirmé() {
-      const cohorts = cohorts5dayBeforepdrChoiceLimitDate;
+      const cohorts = cohortsOneWeekBeforepdrChoiceLimitDate;
       if (!cohorts.length) return { sejour_rassemblement_non_confirmé: [] };
 
       const response = await esClient.msearch({
@@ -207,6 +216,8 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
       };
     }
 
+    // Point de rassemblement (À déclarer) Au moins 1 point de rassemblement est à déclarer pour le séjour de [Février 2023-C].
+    // sejour_point_de_rassemblement_à_déclarer
     async function pointDeRassemblementADéclarer() {
       const cohorts = cohortsNotStarted;
       if (!cohorts.length) return { sejour_point_de_rassemblement_à_déclarer: [] };
@@ -263,7 +274,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     // Contact (À renseigner) Au moins 1 contact de convocation doit être renseigné pour le séjour de [Février 2023-C].
     // sejour_contact_à_renseigner
     async function sejourContactÀRenseigner() {
-      const cohorts = cohortsNotStarted; // FIXME
+      const cohorts = cohorts7weeksBeforeSessionStart;
       if (!cohorts.length) return { sejour_contact_à_renseigner: [] };
       const departmentsCohortsFromRepartition = await departmentsFromTableRepartition(cohorts);
       // On récupère les entrées de département service pour chaque cohorte groupés par département
@@ -303,7 +314,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     // Cas particuliers (À contacter) X volontaires à contacter pour préparer leur accueil pour le séjour de [Février 2023 - C]
     // sejour_volontaires_à_contacter
     async function sejourVolontairesÀContacter() {
-      const cohorts = cohortsNotStarted; // FIXME
+      const cohorts = cohorts2daysAfterSessionStart; // 2 jours après le début de la session
       if (!cohorts.length) return { sejour_volontaires_à_contacter: [] };
 
       const response = await esClient.msearch({
@@ -338,7 +349,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     // Chef de centre (A renseigner) X chefs de centre sont à renseigner pour le séjour de [Février 2023 - C]
     // sejour_chef_de_centre
     async function sejourChefDeCentre() {
-      const cohorts = cohortsNotStarted; // FIXME
+      const cohorts = cohortsNotStarted;
       if (!cohorts.length) return { sejour_chef_de_centre: [] };
 
       const response = await esClient.msearch({
@@ -362,7 +373,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     // Contrat (À renseigner) 1 représentant de l’État est à renseigner
     // engagement_contrat_à_renseigner
     async function contratÀRenseigner() {
-      const cohorts = cohortsNotStarted; // FIXME
+      const cohorts = cohorts;
       if (!cohorts.length) return { engagement_contrat_à_renseigner: [] };
       const departmentsCohortsFromRepartition = await departmentsFromTableRepartition(cohorts);
       // On récupère les entrées de département service pour chaque cohorte groupés par département
@@ -422,7 +433,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     // Pointage. X centres n’ont pas pointés tous leurs volontaires à l’arrivée au séjour de [Février 2023-C] (A renseigner)
     // sejour_pointage
     async function sejourPointage() {
-      const cohorts = cohortsNotStarted; // FIXME
+      const cohorts = cohorts2weeksAfterSessionEnd;
       if (!cohorts.length) return { sejourPointage: [] };
 
       const response = await esClient.msearch({
@@ -462,7 +473,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     // Pointage. X centres n’ont pas pointés tous leurs volontaires à la JDM sur le séjour de [Février 2023-C] (A renseigner)
     // sejour_pointage_jdm
     async function sejourPointageJDM() {
-      const cohorts = cohortsNotStarted; // FIXME
+      const cohorts = cohorts2weeksAfterSessionEnd;
       if (!cohorts.length) return { sejour_pointage_jdm: [] };
 
       const response = await esClient.msearch({
