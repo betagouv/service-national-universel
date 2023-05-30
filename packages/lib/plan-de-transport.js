@@ -3,6 +3,7 @@ const PDT_IMPORT_ERRORS = {
   DOUBLON_BUSNUM: "DOUBLON_BUSNUM",
   BAD_CENTER_ID: "BAD_CENTER_ID",
   BAD_PDR_ID: "BAD_PDR_ID",
+  BAD_PDR_DEPARTEMENT: "BAD_PDR_DEPARTEMENT",
   SAME_PDR_ON_LINE: "SAME_PDR_ON_LINE",
   LACKING_YOUNG_CAPACITY: "LACKING_YOUNG_CAPACITY",
   MISSING_DATA: "MISSING_DATA",
@@ -18,6 +19,7 @@ const PDT_IMPORT_ERRORS_TRANSLATION = {
   DOUBLON_BUSNUM: { text: "Le numéro de ligne %s est en doublon.", tooltip: "Veuillez vérifier que chaque numéro de ligne n’apparait qu’une seule fois dans le fichier." },
   BAD_CENTER_ID: { text: "ID du centre %s non existant.", tooltip: "Les ID des centres sont transmis dans le schéma de répartition." },
   BAD_PDR_ID: { text: "ID du PDR %s non existant.", tooltip: "Les ID des PDR sont transmis dans le schéma de répartition." },
+  BAD_PDR_DEPARTEMENT: { text: "Erreur sur le département du PDR %s.", tooltip: "Le département du fichier ne correspond pas au département du PDR en base de données." },
   SAME_PDR_ON_LINE: { text: "Un même PDR %s apparaît plusieurs fois sur la ligne.", tooltip: "Un PDR ne peut appraître qu'une seule fois sur une même ligne." },
   LACKING_YOUNG_CAPACITY: {
     text: "La somme de la capacité volontaires des lignes est inférieure à la somme des volontaires du schéma de répartition affecté dans le centre",
@@ -31,7 +33,4 @@ const PDT_IMPORT_ERRORS_TRANSLATION = {
   MISSING_COLUMN: { text: "Colonne manquante ou mal orthographiée", tooltip: "Veuillez vérifier que la colonne est présente / bien orthographiée dans le fichier." },
 };
 
-export {
-  PDT_IMPORT_ERRORS,
-  PDT_IMPORT_ERRORS_TRANSLATION,
-};
+export { PDT_IMPORT_ERRORS, PDT_IMPORT_ERRORS_TRANSLATION };
