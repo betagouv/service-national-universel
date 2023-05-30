@@ -327,7 +327,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
             ) : filesToUpload?.length > 0 ? (
               <BorderButton onClick={() => onClose(changes, cniFiles, toastr.success("Ce document a bien été ajouté."))}>Ajouter le document</BorderButton>
             ) : (
-              <BorderButton>Fermer</BorderButton>
+              <BorderButton onClick={() => onClose(changes, cniFiles)}>Fermer</BorderButton>
             )
           ) : (
             <BorderButton onClick={() => onClose(changes, cniFiles)}>Fermer</BorderButton>
