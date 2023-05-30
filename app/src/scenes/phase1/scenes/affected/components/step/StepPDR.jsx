@@ -189,7 +189,7 @@ export default function StepPDR({ young, center }) {
             </p>
           </div>
         </div>
-        {openedDesktop && <CohortDateSummary cohortName={young.cohort} className="ml-4" />}
+        {openedDesktop && <CohortDateSummary cohortName={young.cohort} choosenMeetingPoint={choosenMeetingPoint} className="ml-4" />}
         {enabled && young.transportInfoGivenByLocal !== "true" ? (
           <div className="ml-4 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 hover:scale-110">
             {openedDesktop ? <HiOutlineChevronUp className="h-5 w-5" /> : <HiOutlineChevronDown className="h-5 w-5" />}

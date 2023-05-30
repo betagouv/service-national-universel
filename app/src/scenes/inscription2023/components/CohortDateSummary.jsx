@@ -3,7 +3,7 @@ import { getCohortDetail } from "../../../utils/cohorts";
 import dayjs from "dayjs";
 import Loader from "../../../components/Loader";
 
-export default function CohortDateSummary({ cohortName, className = "" }) {
+export default function CohortDateSummary({ cohortName, className = "", choosenMeetingPoint }) {
   const [cohort, setCohort] = useState();
 
   useEffect(() => {
@@ -13,11 +13,10 @@ export default function CohortDateSummary({ cohortName, className = "" }) {
   if (!cohort) {
     return <Loader />;
   }
-
   return (
     <div className={`flex flex-col items-center rounded-xl bg-gray-50 py-2 px-3 md:flex-row ${className}`}>
-      <DateSummary type="Aller" date={cohort.dateStart} className="mb-8 md:mb-0 md:mr-8" />
-      <DateSummary type="Retour" date={cohort.dateEnd} />
+      <DateSummary type="Aller" date={choosenMeetingPoint?.departuredDate ? choosenMeetingPoint?.departuredDate : cohort.dateStart} className="mb-8 md:mb-0 md:mr-8" />
+      <DateSummary type="Retour" date={choosenMeetingPoint?.returnDate ? choosenMeetingPoint?.returnDate : cohort.dateEnd} />
     </div>
   );
 }

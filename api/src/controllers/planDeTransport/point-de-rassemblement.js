@@ -105,6 +105,8 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
                 busLineName: "$lignebus.busId",
                 youngSeatsTaken: "$lignebus.youngSeatsTaken",
                 youngCapacity: "$lignebus.youngCapacity",
+                departuredDate: "$lignebus.departuredDate",
+                returnDate: "$lignebus.returnDate",
               },
             ],
           },
