@@ -57,12 +57,6 @@ export default function CenterYoungIndex() {
       defaultValue: ["VALIDATED"],
     },
     {
-      title: "Participation",
-      name: "youngPhase1Agreement",
-      parentGroup: "Général",
-      translate: translate,
-    },
-    {
       title: "Statut phase 1",
       name: "statusPhase1",
       parentGroup: "Général",
@@ -150,6 +144,12 @@ export default function CenterYoungIndex() {
       parentGroup: "Dossier",
       translate: translate,
       missingLabel: "Non renseigné",
+    },
+    {
+      title: "Confirmation de participation",
+      name: "youngPhase1Agreement",
+      parentGroup: "Dossier",
+      translate: translate,
     },
     {
       title: "Présence à l'arrivée",
