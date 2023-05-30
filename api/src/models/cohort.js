@@ -183,6 +183,22 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  schemaAccessForReferentRegion: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Autoriser ou bloquer l’accès à la consultation du schéma de répartition pour les référents régionaux",
+    },
+  },
+
+  schemaAccessForReferentDepartment: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Autoriser ou bloquer l’accès à la consultation du schéma de répartition pour les référents départemts",
+    },
+  },
+
   //information n'impactant le fonctionnement de l'application
   uselessInformation: {
     type: mongoose.Schema.Types.Mixed,
