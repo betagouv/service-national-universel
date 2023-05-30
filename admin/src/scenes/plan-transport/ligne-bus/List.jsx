@@ -259,6 +259,7 @@ const ReactiveList = ({ cohort, history }) => {
                                 pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
                                 pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
                                 pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr?.busArrivalHour || "";
+                                pdrs[`HEURE DE CONVOCATION AU PDR ${num}`] = pdr?.meetingHour || "";
                                 pdrs[`HEURE DE DEPART DU PDR ${num}`] = pdr?.departureHour || "";
                                 pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${num}`] = pdr?.returnHour || "";
                               }
