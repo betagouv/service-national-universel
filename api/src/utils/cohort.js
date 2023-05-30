@@ -11,7 +11,8 @@ async function getFilteredSessions(young) {
       session.eligibility.schoolLevels.includes(young.grade) &&
       session.eligibility.bornAfter <= young.birthdateAt &&
       session.eligibility.bornBefore >= young.birthdateAt &&
-      session.eligibility.inscriptionEndDate > Date.now(),
+      (session.eligibility.inscriptionEndDate > Date.now() ||
+        ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && session.eligibility.instructionEndDate > Date.now())),
   );
 
   for (let session of sessions) {
