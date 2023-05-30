@@ -132,6 +132,9 @@ export default function View(props) {
             <Modification demandeDeModification={demandeDeModification} getModification={getDemandeDeModification} />
           </div>
           <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
+          <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
+          <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
+
           <div className="flex items-start gap-4">
             <div className="flex w-1/2 flex-col gap-4">
               {data.meetingsPointsDetail.map((pdr, index) => (

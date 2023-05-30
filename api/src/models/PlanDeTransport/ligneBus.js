@@ -5,6 +5,110 @@ const patchHistory = require("mongoose-patch-history").default;
 const { COHORTS } = require("snu-lib");
 const MODELNAME = "lignebus";
 
+const Leader = new mongoose.Schema({
+  lastName: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Nom du chef de file",
+    },
+  },
+  firstName: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Prenom du chef de file",
+    },
+  },
+  birthdate: {
+    type: Date,
+    required: true,
+    documentation: {
+      description: "Date de naissance du chef de file",
+    },
+  },
+  mail: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Email du chef de file",
+    },
+  },
+  phone: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Numéro de téléphone du chef de file",
+    },
+  },
+  forth: {
+    type: Boolean,
+    required: true,
+    documentation: {
+      description: "Concerné par l'aller",
+    },
+  },
+  back: {
+    type: Boolean,
+    required: true,
+    documentation: {
+      description: "Concerné par le retour",
+    },
+  },
+});
+
+const BusSupervisor = new mongoose.Schema({
+  lastName: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Nom de l'encadrant",
+    },
+  },
+  firstName: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Prenom de l'encadrant",
+    },
+  },
+  birthdate: {
+    type: Date,
+    required: true,
+    documentation: {
+      description: "Date de naissance de l'encadrant",
+    },
+  },
+  mail: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Email de l'encadrant",
+    },
+  },
+  phone: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Numéro de téléphone de l'encadrant",
+    },
+  },
+  forth: {
+    type: Boolean,
+    required: true,
+    documentation: {
+      description: "Concerné par l'aller",
+    },
+  },
+  back: {
+    type: Boolean,
+    required: true,
+    documentation: {
+      description: "Concerné par le retour",
+    },
+  },
+});
+
 const Schema = new mongoose.Schema({
   cohort: {
     type: String,
@@ -131,6 +235,20 @@ const Schema = new mongoose.Schema({
     required: true,
     documentation: {
       description: "Liste des points de rassemblement",
+    },
+  },
+
+  leader: {
+    type: [Leader],
+    documentation: {
+      description: "Informations du Chef de File",
+    },
+  },
+
+  BusSupervisor: {
+    type: [BusSupervisor],
+    documentation: {
+      description: "Informations des encadrants",
     },
   },
 
