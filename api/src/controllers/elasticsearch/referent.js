@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch, department2region, departmentList, COHORTS } = require("snu-lib");
+const { ROLES, canSearchInElasticSearch, department2region, departmentList, COHORTS, ES_NO_LIMIT } = require("snu-lib");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
@@ -171,6 +171,27 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       const response = await esClient.msearch({ index: "referent", body: buildNdJson({ index: "referent", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(response.body);
     }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/structure/:structure", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    if (!canSearchInElasticSearch(req.user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const response = await esClient.msearch({
+      index: "referent",
+      body: buildNdJson(
+        { index: "referent", type: "_doc" },
+        {
+          query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": req.params.structure } }] } },
+          size: ES_NO_LIMIT,
+        },
+      ),
+    });
+    return res.status(200).send(response.body);
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

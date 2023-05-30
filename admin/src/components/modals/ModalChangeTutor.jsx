@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Modal } from "reactstrap";
-import { ES_NO_LIMIT, translate } from "../../utils";
+import { translate } from "../../utils";
 
 import { toastr } from "react-redux-toastr";
 import { formatStringDateTimezoneUTC } from "snu-lib/date";
@@ -30,12 +30,7 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
 
   useEffect(() => {
     (async () => {
-      const { responses } = await api.esQuery("referent", {
-        query: {
-          bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": tutor.structureId } }] },
-        },
-        size: ES_NO_LIMIT,
-      });
+      const { responses } = await api.post("/elasticsearch/referent/structure/" + tutor.structureId);
       if (responses.length) {
         setResponsables(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })).filter((e) => e._id.toString() !== tutor._id.toString()));
       }
