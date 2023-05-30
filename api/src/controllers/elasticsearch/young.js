@@ -407,7 +407,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       "presenceJDM.keyword",
       "departInform.keyword",
       "departSejourMotif.keyword",
-      "youngPhase1Agreement.keyword",
+      //"youngPhase1Agreement.keyword",
     ];
     const sortFields = [];
 
