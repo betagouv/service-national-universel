@@ -14,10 +14,12 @@ import { appURL } from "../../config";
 import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 import { ROLES, YOUNG_STATUS, YOUNG_STATUS_COLORS, getAge, translate, translatePhase1, translatePhase2 } from "../../utils";
-import { Title } from "../pointDeRassemblement/components/common";
+import { Loading, Title } from "../pointDeRassemblement/components/common";
 import DeletedVolontairePanel from "./deletedPanel";
 import Panel from "./panel";
 import { getFilterArray, transformVolontaires, transformVolontairesSchool } from "./utils";
+import { toastr } from "react-redux-toastr";
+import Loader from "../../components/Loader";
 
 export default function VolontaireList() {
   const user = useSelector((state) => state.Auth.user);
@@ -25,6 +27,7 @@ export default function VolontaireList() {
   const [volontaire, setVolontaire] = useState(null);
   const [centers, setCenters] = useState(null);
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
+  const [bus, setBus] = useState(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
 
   //List state
@@ -36,18 +39,24 @@ export default function VolontaireList() {
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
 
-  const filterArray = getFilterArray(user);
+  const filterArray = getFilterArray(user, bus);
 
   useEffect(() => {
     (async () => {
-      const { data } = await api.get("/cohesion-center");
-      setCenters(data);
-    })();
-    (async () => {
-      const { data } = await api.get("/session-phase1/");
-      setSessionsPhase1(data);
+      try {
+        const { data: centers } = await api.get("/cohesion-center");
+        const { data: sessions } = await api.get("/session-phase1/");
+        const { data: bus } = await api.get("/ligne-de-bus/all");
+        setCenters(centers);
+        setSessionsPhase1(sessions);
+        setBus(bus);
+      } catch (e) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+      }
     })();
   }, []);
+
+  if (!centers || !sessionsPhase1 || !bus) return <Loader />;
 
   return (
     <>
@@ -66,7 +75,7 @@ export default function VolontaireList() {
               isOpen={isExportOpen}
               setIsOpen={setIsExportOpen}
               route="/elasticsearch/young/export?tab=volontaire"
-              transform={(data, values) => transformVolontaires(data, values, centers, sessionsPhase1)}
+              transform={(data, values) => transformVolontaires(data, values, centers, sessionsPhase1, bus)}
               exportFields={youngExportFields}
               exportTitle="volontaires"
               showTotalHits={true}
