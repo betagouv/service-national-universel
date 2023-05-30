@@ -68,12 +68,12 @@ export const getFilterArray = (user, bus) => {
     },
     user.role === ROLES.REFERENT_DEPARTMENT
       ? {
-        title: "Etablissement",
-        name: "schoolName",
-        parentGroup: "Dossier",
-        missingLabel: "Non renseigné",
-        translate: translate,
-      }
+          title: "Etablissement",
+          name: "schoolName",
+          parentGroup: "Dossier",
+          missingLabel: "Non renseigné",
+          translate: translate,
+        }
       : null,
     {
       title: "Situation",
@@ -299,10 +299,9 @@ export async function transformVolontaires(data, values, centers, sessionsPhase1
       }
     }
   }
-
-  const meetingPoints = busLines.data.meetingPoints || [];
-  const ligneBus = busLines.data.ligneBus || [];
-  const ligneToPoints = busLines.data.ligneToPoints || [];
+  const meetingPoints = busLines.meetingPoints || [];
+  const ligneBus = busLines.ligneBus || [];
+  const ligneToPoints = busLines.ligneToPoints || [];
 
   return all.map((data) => {
     let center = {};

@@ -6,20 +6,20 @@ import { Listbox, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { BsDownload } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
+import { toastr } from "react-redux-toastr";
 import { youngExportFields } from "snu-lib";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import Loader from "../../components/Loader";
 import { ExportComponent, Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 import { ROLES, YOUNG_STATUS, YOUNG_STATUS_COLORS, getAge, translate, translatePhase1, translatePhase2 } from "../../utils";
-import { Loading, Title } from "../pointDeRassemblement/components/common";
+import { Title } from "../pointDeRassemblement/components/common";
 import DeletedVolontairePanel from "./deletedPanel";
 import Panel from "./panel";
 import { getFilterArray, transformVolontaires, transformVolontairesSchool } from "./utils";
-import { toastr } from "react-redux-toastr";
-import Loader from "../../components/Loader";
 
 export default function VolontaireList() {
   const user = useSelector((state) => state.Auth.user);
