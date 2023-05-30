@@ -27,7 +27,7 @@ export default function Association({ hit, missionsInfo }) {
   }
 
   return (
-    <AssociationWrapper>
+    <div>
       <AssociationHeader style={{ borderRadius: !show ? "10px" : "10px 10px 0 0" }}>
         {association.logo && (
           <div style={{ minWidth: "165px" }}>
@@ -234,7 +234,7 @@ export default function Association({ hit, missionsInfo }) {
           </TabContainer>
         </AssociationBody>
       )}
-    </AssociationWrapper>
+    </div>
   );
 }
 
@@ -291,9 +291,6 @@ const MissionInfo = styled.div`
   }
 `;
 
-const AssociationWrapper = styled.div`
-  margin-bottom: 2rem;
-`;
 const AssociationHeader = styled.div`
   border-radius: 10px 10px 10px 10px;
   box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.1);

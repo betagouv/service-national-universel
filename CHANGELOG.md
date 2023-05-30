@@ -1,3 +1,11 @@
+# [1.280.0](https://github.com/betagouv/service-national-universel/compare/v1.279.0...v1.280.0) (2023-05-29)
+
+
+### Features
+
+* **api/admin:** modal change tutor without reactive base ([#2646](https://github.com/betagouv/service-national-universel/issues/2646)) ([c8a638d](https://github.com/betagouv/service-national-universel/commit/c8a638d2d3f989ab07bcb76ce047ea313e515317))
+* **app:** Profil/Situations particulières : hide specificAmenagementType ([#2655](https://github.com/betagouv/service-national-universel/issues/2655)) ([5745f93](https://github.com/betagouv/service-national-universel/commit/5745f93b81b098363838af7ff7884b2842f59650))
+
 # [1.279.0](https://github.com/betagouv/service-national-universel/compare/v1.278.0...v1.279.0) (2023-05-26)
 
 
