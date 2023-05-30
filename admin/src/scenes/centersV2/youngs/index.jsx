@@ -672,6 +672,7 @@ const transformData = async ({ data, centerId }) => {
       "Ville du centre": center.city || "",
       "Département du centre": center.department || "",
       "Région du centre": center.region || "",
+      "Participation au séjour": data.youngPhase1Agreement === "true" ? "Oui" : "Non",
       "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
       "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
       "Informations de transport sont transmises par les services locaux": translate(data.transportInfoGivenByLocal),
