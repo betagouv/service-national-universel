@@ -19,6 +19,7 @@ import DeletedVolontairePanel from "./deletedPanel";
 import Panel from "./panel";
 import { getFilterArray, transformVolontaires, transformVolontairesSchool } from "./utils";
 import { toastr } from "react-redux-toastr";
+import Loader from "../../components/Loader";
 
 export default function VolontaireList() {
   const user = useSelector((state) => state.Auth.user);
@@ -55,7 +56,7 @@ export default function VolontaireList() {
     })();
   }, []);
 
-  if (!centers || !sessionsPhase1 || !bus) return <Loading />;
+  if (!centers || !sessionsPhase1 || !bus) return <Loader />;
 
   return (
     <>
