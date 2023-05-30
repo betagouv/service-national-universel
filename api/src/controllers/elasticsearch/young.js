@@ -465,6 +465,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
 
     if (["export", "exportBus"].includes(req.params.action)) {
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+      console.log("HAAAAAAAAAAAAAAAAAAAAA", response[0].status);
       return res.status(200).send({ ok: true, data: serializeYoungs(response) });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
