@@ -66,7 +66,6 @@ const { anonymizeContractsFromYoungId } = require("../../services/contract");
 const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
-router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {

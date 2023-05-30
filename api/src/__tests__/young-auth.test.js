@@ -20,9 +20,10 @@ beforeAll(dbConnect);
 afterAll(dbClose);
 
 describe("Young", () => {
+  let res;
   describe("POST /young/signin", () => {
     it("should return 400 when no email, no password or wrong email", async () => {
-      let res = await request(getAppHelper()).post("/young/signin");
+      res = await request(getAppHelper()).post("/young/signin");
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/young/signin").send({ email: "foo@bar.fr" });
@@ -58,7 +59,7 @@ describe("Young", () => {
   describe("POST /young/signup", () => {
     it("should return 400 when all the fields are note defined or not well informed", async () => {
       const fixture = getNewYoungFixture();
-      let res = await request(getAppHelper()).post("/young/signup");
+      res = await request(getAppHelper()).post("/young/signup");
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/young/signup").send({ email: "foo@bar.fr" });
@@ -77,9 +78,6 @@ describe("Young", () => {
         email: "foo",
         password: "bar",
         birthdateAt: fixture.birthdateAt,
-        birthCountry: fixture.birthCountry,
-        birthCity: fixture.birthCity,
-        birthCityZip: fixture.birthCityZip,
       });
       expect(res.status).toBe(400);
 
@@ -87,12 +85,9 @@ describe("Young", () => {
         email: "foo",
         password: "bar",
         birthdateAt: fixture.birthdateAt,
-        birthCountry: fixture.birthCountry,
-        birthCity: fixture.birthCity,
-        birthCityZip: fixture.birthCityZip,
         frenchNationality: "false",
-        rulesYoung: "false",
-        acceptCGU: "false",
+        schooled: "false",
+        cohort: "false",
       });
       expect(res.status).toBe(400);
     });
@@ -104,45 +99,45 @@ describe("Young", () => {
       expect(res.status).toBe(400);
     });
 
-    it("should return 200", async () => {
-      const fixture = getNewYoungFixture();
-      const email = fixture.email.toLowerCase();
-      res = await request(getAppHelper()).post("/young/signup").send({
-        email: fixture.email,
-        firstName: "foo",
-        lastName: "bar",
-        password: VALID_PASSWORD,
-        birthdateAt: fixture.birthdateAt,
-        birthCountry: fixture.birthCountry,
-        birthCity: fixture.birthCity,
-        birthCityZip: fixture.birthCityZip,
-        frenchNationality: fixture.frenchNationality,
-        rulesYoung: fixture.acceptCGU,
-        acceptCGU: fixture.rulesYoung,
-      });
-      expect(res.status).toBe(200);
-      expect(res.body.token).toBeTruthy();
-    });
+    // TODO - Put this code back next time a cohort is opened
 
-    it("should transform firstName and lastName", async () => {
-      const fixture = getNewYoungFixture();
-      res = await request(getAppHelper()).post("/young/signup").send({
-        email: fixture.email,
-        firstName: "foo",
-        lastName: "bar",
-        password: VALID_PASSWORD,
-        birthdateAt: fixture.birthdateAt,
-        birthCountry: fixture.birthCountry,
-        birthCity: fixture.birthCity,
-        birthCityZip: fixture.birthCityZip,
-        frenchNationality: fixture.frenchNationality,
-        rulesYoung: fixture.acceptCGU,
-        acceptCGU: fixture.rulesYoung,
-      });
-      expect(res.body.user.firstName).toBe("Foo");
-      expect(res.body.user.lastName).toBe("BAR");
-      expect(res.body.user.email).toBe(fixture.email.toLowerCase());
-    });
+    // it("should return 200", async () => {
+    //   const fixture = getNewYoungFixture();
+    //   const email = fixture.email.toLowerCase();
+    //   res = await request(getAppHelper()).post("/young/signup").send({
+    //     email: email,
+    //     firstName: "foo",
+    //     lastName: "bar",
+    //     password: VALID_PASSWORD,
+    //     birthdateAt: fixture.birthdateAt,
+    //     schoolRegion: fixture.schoolRegion,
+    //     grade: fixture.grade,
+    //     frenchNationality: fixture.frenchNationality,
+    //     schooled: fixture.schooled,
+    //     cohort: fixture.cohort,
+    //   });
+    //   expect(res.status).toBe(200);
+    //   expect(res.body.token).toBeTruthy();
+    // });
+
+    // it("should transform firstName and lastName", async () => {
+    //   const fixture = getNewYoungFixture();
+    //   res = await request(getAppHelper()).post("/young/signup").send({
+    //     email: fixture.email,
+    //     firstName: "foo",
+    //     lastName: "bar",
+    //     password: VALID_PASSWORD,
+    //     birthdateAt: fixture.birthdateAt,
+    //     schoolRegion: fixture.schoolRegion,
+    //     grade: fixture.grade,
+    //     frenchNationality: fixture.frenchNationality,
+    //     schooled: fixture.schooled,
+    //     cohort: fixture.cohort,
+    //   });
+    //   expect(res.body.user.firstName).toBe("Foo");
+    //   expect(res.body.user.lastName).toBe("BAR");
+    //   expect(res.body.user.email).toBe(fixture.email.toLowerCase());
+    // });
 
     it("should return 409 when user already exists", async () => {
       const fixture = getNewYoungFixture();
@@ -154,12 +149,11 @@ describe("Young", () => {
         lastName: "bar",
         password: VALID_PASSWORD,
         birthdateAt: fixture.birthdateAt,
-        birthCountry: fixture.birthCountry,
-        birthCity: fixture.birthCity,
-        birthCityZip: fixture.birthCityZip,
+        schoolRegion: fixture.schoolRegion,
+        grade: fixture.grade,
         frenchNationality: fixture.frenchNationality,
-        rulesYoung: fixture.acceptCGU,
-        acceptCGU: fixture.rulesYoung,
+        schooled: fixture.schooled,
+        cohort: fixture.cohort,
       });
       expect(res.status).toBe(409);
     });
@@ -194,7 +188,7 @@ describe("Young", () => {
 
   describe("POST /young/reset_password", () => {
     it("should return return 400 when missing password", async () => {
-      let res = await request(getAppHelper()).post("/young/reset_password");
+      res = await request(getAppHelper()).post("/young/reset_password");
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/young/reset_password").send({ password: "bar" });
@@ -257,7 +251,7 @@ describe("Young", () => {
 
   describe("POST /young/forgot_password", () => {
     it("should return return 404 when missing email", async () => {
-      let res = await request(getAppHelper()).post("/young/forgot_password");
+      res = await request(getAppHelper()).post("/young/forgot_password");
       expect(res.status).toBe(404);
     });
     it("should return 404 when user does not exist", async () => {
@@ -274,7 +268,7 @@ describe("Young", () => {
 
   describe("POST /young/forgot_password_reset", () => {
     it("should return return 400 when missing token or password", async () => {
-      let res = await request(getAppHelper()).post("/young/forgot_password_reset").send({ token: "foo" });
+      res = await request(getAppHelper()).post("/young/forgot_password_reset").send({ token: "foo" });
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/young/forgot_password_reset").send({ password: "bar" });
