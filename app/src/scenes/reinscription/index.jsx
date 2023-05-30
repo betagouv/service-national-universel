@@ -26,6 +26,7 @@ import HeaderMenu from "../../components/headerMenu";
 import Footer from "./../../components/footerV2";
 import Header from "./../../components/header";
 import { getStepFromUrlParam, STEPS, STEP_LIST } from "./utils/navigation";
+import FutureCohort from "../inscription2023/FutureCohort";
 
 const getStepUrl = (name) => {
   return STEP_LIST.find((step) => step.name === name)?.url;
@@ -84,6 +85,10 @@ export default function Index() {
   //Il a fini son inscription
   if (young.reinscriptionStep2023 === "DONE" && young.status === "VALIDATED") {
     return <Redirect to={{ pathname: "/" }} />;
+  }
+
+  if (young.cohort === "à venir") {
+    return <FutureCohort />;
   }
 
   //si la periode de modification est finie
