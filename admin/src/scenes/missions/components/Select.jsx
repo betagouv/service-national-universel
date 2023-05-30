@@ -93,7 +93,7 @@ function GetColor(options, selected) {
   const icons = [
     <Archive key="archive" />,
     <None key="none" />,
-    <Pencil key="pencil" />,
+    <Pencil key="pencil" width="16" height="16" />,
     <XCircleFull key="x-circle" />,
     <CheckCircleFull key="check-circle" />,
     <Clock key="clock1" />,
