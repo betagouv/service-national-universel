@@ -285,7 +285,7 @@ export const getFilterArray = (user, bus) => {
   ].filter(Boolean);
 };
 
-export async function transformVolontaires(data, values, centers, sessionsPhase1) {
+export async function transformVolontaires(data, values, centers, sessionsPhase1, busLines) {
   let all = data;
   if (values.includes("schoolSituation")) {
     const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
@@ -301,10 +301,9 @@ export async function transformVolontaires(data, values, centers, sessionsPhase1
     }
   }
 
-  const response = await api.get("/ligne-de-bus/all");
-  const meetingPoints = response ? response.data.meetingPoints : [];
-  const ligneBus = response ? response.data.ligneBus : [];
-  const ligneToPoints = response ? response.data.ligneToPoints : [];
+  const meetingPoints = busLines.data.meetingPoints || [];
+  const ligneBus = busLines.data.ligneBus || [];
+  const ligneToPoints = busLines.data.ligneToPoints || [];
 
   return all.map((data) => {
     let center = {};
