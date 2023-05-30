@@ -50,6 +50,12 @@ export default function CenterYoungIndex() {
 
   const filterArray = [
     {
+      title: "Participation",
+      name: "agreement",
+      parentGroup: "Général",
+      translate: translate,
+    },
+    {
       title: "Statut",
       name: "status",
       parentGroup: "Général",
