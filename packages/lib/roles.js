@@ -202,7 +202,7 @@ function canViewReferent(actor, target) {
 }
 
 function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, structure }) {
-  const isMe = actor.id === originalTarget.id;
+  const isMe = actor._id === originalTarget._id;
   const isAdmin = actor.role === ROLES.ADMIN;
   const withoutChangingRole = modifiedTarget === null || !("role" in modifiedTarget) || modifiedTarget.role === originalTarget.role;
   const isResponsibleModifyingResponsibleWithoutChangingRole =
@@ -261,7 +261,23 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
       isReferentModifyingReferentWithoutChangingRole ||
       isReferentModifyingHeadCenterWithoutChangingRole) &&
     (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion || isReferentModifyingHeadCenterWithoutChangingRole : true) &&
-    (actor.role === ROLES.REFERENT_DEPARTMENT ? isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole : true);
+    (actor.role === ROLES.REFERENT_DEPARTMENT ? [ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) && (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole) : true);
+
+  if (authorized === true) {
+    console.log("🚀 ~ file: roles.js:197 ~ canViewReferent ~ actor:", actor._id)
+    console.log("🚀 ~ file: roles.js:197 ~ canViewReferent ~ target:", originalTarget._id)
+    console.log("🚀 ~ file: roles.js:206 ~ canUpdateReferent ~ isMe:", isMe)
+    console.log("🚀 ~ file: roles.js:208 ~ canUpdateReferent ~ isAdmin:", isAdmin)
+    console.log("🚀 ~ file: roles.js:210 ~ canUpdateReferent ~ withoutChangingRole:", withoutChangingRole)
+    console.log("🚀 ~ file: roles.js:212 ~ canUpdateReferent ~ isResponsibleModifyingResponsibleWithoutChangingRole:", isResponsibleModifyingResponsibleWithoutChangingRole)
+    console.log("🚀 ~ file: roles.js:220 ~ canUpdateReferent ~ isSupervisorModifyingTeamMember:", isSupervisorModifyingTeamMember)
+    console.log("🚀 ~ file: roles.js:228 ~ canUpdateReferent ~ isMeWithoutChangingRole:", isMeWithoutChangingRole)
+    console.log("🚀 ~ file: roles.js:237 ~ canUpdateReferent ~ isReferentModifyingReferentWithoutChangingRole:", isReferentModifyingReferentWithoutChangingRole)
+    console.log("🚀 ~ file: roles.js:245 ~ canUpdateReferent ~ isReferentModifyingHeadCenterWithoutChangingRole:", isReferentModifyingHeadCenterWithoutChangingRole)
+    console.log("🚀 ~ file: roles.js:261 ~ canUpdateReferent ~ isActorAndTargetInTheSameRegion:", isActorAndTargetInTheSameRegion)
+    console.log("🚀 ~ file: roles.js:264 ~ canUpdateReferent ~ isActorAndTargetInTheSameDepartment:", isActorAndTargetInTheSameDepartment)
+    console.log("🚀 ~ file: roles.js:267 ~ canUpdateReferent ~ authorized:", authorized)
+  }
   return authorized;
 }
 
