@@ -1,4 +1,14 @@
 const { faker } = require("@faker-js/faker");
+const { departmentList, regionList } = require("snu-lib");
+
+function randomDepartment() {
+  const index = Math.floor(Math.random() * departmentList.length);
+  return departmentList[index];
+}
+function randomRegion() {
+  const index = Math.floor(Math.random() * regionList.length);
+  return regionList[index];
+}
 
 faker.locale = "fr";
 
@@ -13,8 +23,8 @@ function getNewYoungFixture(fields = {}) {
     email: faker.internet.email().toLowerCase(),
     phone: faker.phone.phoneNumber(),
     gender: faker.name.gender(),
-    birthdateAt: faker.date.past().toISOString(),
-    cohort: "2019",
+    birthdateAt: faker.date.past(1, "01/01/2007").toISOString(),
+    cohort: "Juillet 2023",
     acceptCGU: "true",
     phase: "CONTINUE",
     status: "REFUSED",
@@ -61,8 +71,8 @@ function getNewYoungFixture(fields = {}) {
     zip: faker.address.zipCode(),
     city: faker.address.city(),
     cityCode: faker.address.zipCode(),
-    department: faker.address.state(),
-    region: faker.address.country(),
+    department: randomDepartment(),
+    region: randomRegion(),
     country: "France",
     location: {
       lat: Number(faker.address.latitude()),
@@ -78,17 +88,17 @@ function getNewYoungFixture(fields = {}) {
     populationDensity: "DENSE",
     qpv: "false",
     situation: "Etudiant",
-    grade: "",
+    grade: "2ndeGT",
     schoolCertification: "false",
     schooled: "true",
-    schoolName: faker.address.state(),
+    schoolName: faker.address.cityName(),
     schoolType: "Lycée",
     schoolAddress: faker.address.streetName(),
     schoolComplementAdresse: "",
     schoolZip: faker.address.zipCode(),
     schoolCity: faker.address.city(),
-    schoolDepartment: faker.address.state(),
-    schoolRegion: faker.address.state(),
+    schoolDepartment: randomDepartment(),
+    schoolRegion: randomRegion(),
     schoolLocation: {
       lat: Number(faker.address.latitude()),
       lon: Number(faker.address.longitude()),
@@ -105,8 +115,8 @@ function getNewYoungFixture(fields = {}) {
     parent1ComplementAddress: "",
     parent1Zip: faker.address.zipCode(),
     parent1City: faker.address.city(),
-    parent1Department: faker.address.state(),
-    parent1Region: faker.address.country(),
+    parent1Department: randomDepartment(),
+    parent1Region: randomRegion(),
     parent1Location: {
       lat: Number(faker.address.latitude()),
       lon: Number(faker.address.longitude()),
@@ -122,8 +132,8 @@ function getNewYoungFixture(fields = {}) {
     parent2ComplementAddress: "",
     parent2Zip: faker.address.zipCode(),
     parent2City: faker.address.city(),
-    parent2Department: faker.address.state(),
-    parent2Region: faker.address.country(),
+    parent2Department: randomDepartment(),
+    parent2Region: randomRegion(),
     parent2Location: {
       lat: Number(faker.address.latitude()),
       lon: Number(faker.address.longitude()),
@@ -138,8 +148,8 @@ function getNewYoungFixture(fields = {}) {
     medicosocialStructureComplementAddress: "",
     medicosocialStructureZip: faker.address.zipCode(),
     medicosocialStructureCity: faker.address.city(),
-    medicosocialStructureDepartment: faker.address.state(),
-    medicosocialStructureRegion: faker.address.country(),
+    medicosocialStructureDepartment: randomDepartment(),
+    medicosocialStructureRegion: randomRegion(),
     medicosocialStructureLocation: {
       lat: Number(faker.address.latitude()),
       lon: Number(faker.address.longitude()),

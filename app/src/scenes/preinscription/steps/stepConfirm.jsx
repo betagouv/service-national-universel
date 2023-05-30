@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import DSFRContainer from "../../../components/inscription/DSFRContainer";
 import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
 
-export default function StepDone() {
+export default function StepConfirm() {
   const [error, setError] = useState({});
   const [data, setData, removePersistedData] = React.useContext(PreInscriptionContext);
 
@@ -55,7 +55,7 @@ export default function StepDone() {
 
     try {
       // eslint-disable-next-line no-unused-vars
-      const { user, code, ok } = await api.post("/young/signup2023", values);
+      const { user, code, ok } = await api.post("/young/signup", values);
       if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
       plausibleEvent("Phase0/CTA preinscription - inscription");
       setData({ ...data, step: PREINSCRIPTION_STEPS.DONE });
