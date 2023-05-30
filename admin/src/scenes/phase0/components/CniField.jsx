@@ -46,7 +46,8 @@ export function CniField({
 
   useEffect(() => {
     setRequestButtonClass(
-      `flex items-center justify-center w-[32px] h-[32px] rounded-[100px] cursor-pointer group ${hasValidRequest ? "bg-[#F97316]" : "bg-[#FFEDD5] " // + (mouseIn ? "visible" : "invisible")
+      `flex items-center justify-center w-[32px] h-[32px] rounded-[100px] cursor-pointer group ${
+        hasValidRequest ? "bg-[#F97316]" : "bg-[#FFEDD5] " // + (mouseIn ? "visible" : "invisible")
       } hover:bg-[#F97316]`,
     );
   }, [mouseIn, hasValidRequest]);
@@ -238,11 +239,13 @@ function CniModal({ young, onClose, mode, blockUpload }) {
           {cniFiles.length > 0 || (blockUpload && filesToUpload?.length > 0) ? (
             cniFiles.map((file) => (
               <div key={file._id} className="mt-[8px] flex items-center justify-between border-b-[1px] border-b-[#E5E7EB] py-[12px] text-[12px] last:border-b-[0px]">
-                <div className=""><p>{file.name}</p>
+                <div className="">
+                  <p>{file.name}</p>
                   <p className="truncate text-xs text-gray-500">
                     {translate(file.category)}
                     {file.side && ` - ${file.side}`}
-                  </p></div>
+                  </p>
+                </div>
                 <div className="flex items-center">
                   <DownloadButton className="ml-[8px] flex-[0_0_32px]" onClick={() => downloadCni(file)} />
                   <DeleteButton className="ml-[8px] flex-[0_0_32px]" onClick={() => deleteCni(file)} />
@@ -261,11 +264,11 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                   <AddButton />
                   <div>
                     <p>Ajouter un document</p>
-                    <p>Formats supportés : jpg, png, pdf. Pour les PDF, taille maximum  : 5 Mo.</p>
+                    <p>Formats supportés : jpg, png, pdf. Pour les PDF, taille maximum : 5 Mo.</p>
                   </div>
                 </label>
               </div>
-              {filesToUpload && !error && (
+              {filesToUpload?.length > 0 && !error && (
                 <>
                   <div className="mt-2 flex w-full items-center justify-between space-x-2">
                     {!blockUpload ? (
@@ -318,7 +321,17 @@ function CniModal({ young, onClose, mode, blockUpload }) {
           )}
         </div>
         <div className="flex items-center justify-center p-[24px]">
-          <BorderButton onClick={() => onClose(changes, cniFiles)}>Fermer</BorderButton>
+          {blockUpload ? (
+            !category && filesToUpload?.length > 0 ? (
+              <PlainButton disabled={true}>Selectionnez une catégorie pour ajouter ce document</PlainButton>
+            ) : filesToUpload?.length > 0 ? (
+              <BorderButton onClick={() => onClose(changes, cniFiles, toastr.success("Ce document a bien été ajouté."))}>Ajouter le document</BorderButton>
+            ) : (
+              <BorderButton onClick={() => onClose(changes, cniFiles)}>Fermer</BorderButton>
+            )
+          ) : (
+            <BorderButton onClick={() => onClose(changes, cniFiles)}>Fermer</BorderButton>
+          )}
         </div>
       </div>
       <ConfirmationModal
