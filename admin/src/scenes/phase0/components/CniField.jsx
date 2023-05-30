@@ -231,9 +231,6 @@ function CniModal({ young, onClose, mode, blockUpload }) {
     setError(error);
     setFilesToUpload(array);
   };
-  console.log(1, changes);
-  console.log(2, cniFiles);
-  
 
   return (
     <Modal size="md" centered isOpen={true} toggle={() => onClose(changes, cniFiles)}>
