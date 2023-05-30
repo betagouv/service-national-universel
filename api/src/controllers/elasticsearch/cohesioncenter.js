@@ -12,7 +12,7 @@ const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
-    const searchFields = ["name", "city", "zip", "code2022", "typology", "domain", "centerDesignation"];
+    const searchFields = ["name", "city", "zip", "code2022", "typology", "domain"];
     const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "typology.keyword", "domain.keyword"];
     const sortFields = [];
 
