@@ -25,6 +25,9 @@ import { getCohortByName, getCohorts } from "../../../services/cohort.service";
 import ReactTooltip from "react-tooltip";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import Puzzle from "../../../assets/icons/Puzzle";
+import dayjs from "dayjs";
+import advancedFormat from "dayjs/plugin/advancedFormat";
+dayjs.extend(advancedFormat);
 
 const ExcelFileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
 
@@ -90,7 +93,7 @@ export default function SchemaRepartition({ region, department }) {
               (user.role === ROLES.REFERENT_REGION && c.schemaAccessForReferentRegion)
             );
           })
-          .map((c) => ({ label: c.name, value: c.name })),
+          .map((c) => ({ value: c.name, label: formatCohortName(c) })),
       );
     } else {
       setCohortOptions([]);
@@ -143,6 +146,28 @@ export default function SchemaRepartition({ region, department }) {
     setSummary({ capacity, total, assigned, intradepartmental, intradepartmentalAssigned, centers, toRegions });
   }, [data]);
 
+  function formatCohortName(cohort) {
+    let from;
+
+    if (cohort) {
+      const start = dayjs(cohort.dateStart).locale("fr");
+      const end = dayjs(cohort.dateEnd).locale("fr");
+
+      if (start.year() === end.year()) {
+        if (start.month() === end.month()) {
+          from = start.format("Do");
+        } else {
+          from = start.format("Do MMMM");
+        }
+      } else {
+        from = start.format("Do MMMM YYYY");
+      }
+      const to = end.format("Do MMMM YYYY");
+      return `Séjour du ${from} au ${to}`;
+    } else {
+      return "";
+    }
+  }
   function getDefaultRows() {
     if (department) {
       return [];
