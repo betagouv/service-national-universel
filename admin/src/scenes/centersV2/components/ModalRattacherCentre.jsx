@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { BsChevronDown, BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { ES_NO_LIMIT, translate, isSessionEditionOpen } from "snu-lib";
+import { translate, isSessionEditionOpen } from "snu-lib";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -71,45 +71,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
   React.useEffect(() => {
     if (selectedCohort) {
       (async () => {
-        const body = {
-          query: { bool: { must: [], must_not: { term: { "cohorts.keyword": selectedCohort } } } },
-          size: ES_NO_LIMIT,
-          track_total_hits: true,
-        };
-        if (search) {
-          body.query.bool.must.push({
-            bool: {
-              should: [
-                {
-                  multi_match: {
-                    query: search,
-                    fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
-                    type: "cross_fields",
-                    operator: "and",
-                  },
-                },
-                {
-                  multi_match: {
-                    query: search,
-                    fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
-                    type: "phrase",
-                    operator: "and",
-                  },
-                },
-                {
-                  multi_match: {
-                    query: search,
-                    fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
-                    type: "phrase_prefix",
-                    operator: "and",
-                  },
-                },
-              ],
-              minimum_should_match: "1",
-            },
-          });
-        }
-        const { responses } = await api.esQuery("cohesioncenter", body);
+        const { responses } = await api.post("/elasticsearch/cohesioncenter/not-in-cohort/" + selectedCohort, { filters: { searchbar: [search] } });
         setListCentre(
           responses[0].hits.hits.map((hit) => {
             return { ...hit._source, _id: hit._id };
