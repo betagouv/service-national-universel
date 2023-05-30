@@ -19,6 +19,7 @@ import {
   translate,
   translateApplication,
   translateApplicationFileType,
+  formatStringDateTimezoneUTC,
 } from "../../utils";
 import { SelectStatusApplicationPhase2 } from "../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
 import Panel from "./panel";
@@ -582,8 +583,9 @@ export default function List() {
 
                       <th className="w-3/12">Volontaire</th>
                       <th className="w-4/12">Mission</th>
+                      <th className="w-2/12">Dates</th>
                       {tab !== "pending" && <th className="w-1/12">Contrat et Documents</th>}
-                      <th className="w-3/12">Statut candidature</th>
+                      <th className="w-2/12">Statut candidature</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -667,6 +669,14 @@ const Hit = ({ hit, onClick, selected, onSelect, currentTab, opened, mission }) 
             <div className={`text-xs ${selected ? "text-white" : "text-[#718096]"}`}>A candidaté le {formatDateFRTimezoneUTC(hit.createdAt)}</div>
           </div>
         </div>
+      </td>
+      <td className={`${bgColor} leading-none text-gray-500`}>
+        <p>
+          Du <span className="text-gray-900 font-normal text-sm">{formatStringDateTimezoneUTC(mission.startAt)}</span>
+        </p>
+        <p>
+          Au <span className="text-gray-900 font-normal text-sm">{formatStringDateTimezoneUTC(mission.endAt)}</span>
+        </p>
       </td>
       {currentTab !== "pending" && (
         <td className={`${bgColor}`}>
