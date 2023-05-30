@@ -25,7 +25,6 @@ import api from "../../../services/api";
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 
 export const getFilterArray = (user, bus) => {
-  console.log("🚀 ~ file: index.js:28 ~ bus:", bus);
   return [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
     { title: "Cohorte d'origine", name: "originalCohort", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
