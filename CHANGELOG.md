@@ -1,3 +1,29 @@
+# [1.281.0](https://github.com/betagouv/service-national-universel/compare/v1.280.0...v1.281.0) (2023-05-30)
+
+
+### Bug Fixes
+
+* **admin:** export young ([52dee57](https://github.com/betagouv/service-national-universel/commit/52dee57047c43f625be1b09d8124396e9049d696))
+* **admin:** Liste des volontaires - Filtres et Export : Afficher le nom de la ligne de bus au lieu de l'ID de la ressource ([#2649](https://github.com/betagouv/service-national-universel/issues/2649)) ([01a8d1f](https://github.com/betagouv/service-national-universel/commit/01a8d1f7000cdd5486aa7dd15b8e5ffbbfc2ecdb))
+* **admin:** modif centre -> adresse doit être vérifiée [#2648](https://github.com/betagouv/service-national-universel/issues/2648) ([def92c2](https://github.com/betagouv/service-national-universel/commit/def92c266e8e20adaaf9ba677638ab55944bdb13))
+* **api:** bug redirection support ([#2641](https://github.com/betagouv/service-national-universel/issues/2641)) ([1c60e10](https://github.com/betagouv/service-national-universel/commit/1c60e10a7f7d4e461be948e9766e12918e36567a))
+* **api:** Fix a la con pour que les tests passent plus souvent ([84f64ff](https://github.com/betagouv/service-national-universel/commit/84f64ffceadc6cf134f5595a201b0edf9730d295))
+* **api/app:** date cohort dynamique ([89a1114](https://github.com/betagouv/service-national-universel/commit/89a1114f4c1bff419c523f883b4e550b8cc14cd8))
+* **app:** Rediriger les volontaires en statut "Réinscription" cohorte "à venir" vers l'écran d'inscription "En cours" cohorte "à venir" [#2665](https://github.com/betagouv/service-national-universel/issues/2665) ([5da6147](https://github.com/betagouv/service-national-universel/commit/5da6147e3f944616c962ab8fdfd1029c8ba920b9))
+
+
+### Features
+
+* **admin:** add meetingHours to export plan de transport ([3dc3299](https://github.com/betagouv/service-national-universel/commit/3dc3299b11374cc84f0a844b29cedd011bc71b92))
+* **admin:** Ajout colonne "Participation au sejour" export volontaires d'un centre  ([#2662](https://github.com/betagouv/service-national-universel/issues/2662)) ([87736ee](https://github.com/betagouv/service-national-universel/commit/87736eed5a792348d032fb38464ab829088c5740))
+* **admin:** ajout colonne date onglet 'Mes candidatures' [#2653](https://github.com/betagouv/service-national-universel/issues/2653) ([d2b057a](https://github.com/betagouv/service-national-universel/commit/d2b057a7d0cd6a2a4c214ae56e6c64c136afd58a))
+* **admin:** design page mission (couleur du statut et bandeau) ([#2647](https://github.com/betagouv/service-national-universel/issues/2647)) ([0377e8e](https://github.com/betagouv/service-national-universel/commit/0377e8e2a92fb652cbb0cda6fcdf40e5a6a1936c))
+* **admin:** Inscription manuelle -> televersement plus lisible ([#2660](https://github.com/betagouv/service-national-universel/issues/2660)) ([6c13f45](https://github.com/betagouv/service-national-universel/commit/6c13f45607a2192bfcb67ec9184e44d6f01b45cc))
+* **admin,api:** esquery modal rattacher centre ([#2667](https://github.com/betagouv/service-national-universel/issues/2667)) ([a79a223](https://github.com/betagouv/service-national-universel/commit/a79a22315c85baf14acc2866b9f8e8901314dbc6))
+* **admin,api:** settings - ajout du bloquage/ouverture de l'accès des référents au schéma de répartition ([#2658](https://github.com/betagouv/service-national-universel/issues/2658)) ([2bf02e2](https://github.com/betagouv/service-national-universel/commit/2bf02e214aecd653961e89f501e12113d3a8d813))
+* **api:** check PDR department on plan de transport import ([#2663](https://github.com/betagouv/service-national-universel/issues/2663)) ([1c0069d](https://github.com/betagouv/service-national-universel/commit/1c0069dfaca58f59b0cf6fa1ef6fc5de4ab3f81d))
+* **api/admin:** listes associations without reactiveBase ([#2657](https://github.com/betagouv/service-national-universel/issues/2657)) ([e882cc4](https://github.com/betagouv/service-national-universel/commit/e882cc481f4c5b445617d6a19eb0670c9533a15e))
+
 # [1.280.0](https://github.com/betagouv/service-national-universel/compare/v1.279.0...v1.280.0) (2023-05-29)
 
 
