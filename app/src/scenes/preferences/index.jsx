@@ -151,7 +151,6 @@ export default function Index() {
       }
     }
 
-    console.log("Errors : ", errors);
     setErrors(errors);
     return validated;
   }
