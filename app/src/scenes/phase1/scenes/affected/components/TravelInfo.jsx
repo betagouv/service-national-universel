@@ -8,9 +8,9 @@ export default function TravelInfo({ location, cohortDetails }) {
     return <></>;
   }
 
-  const goDate = location?.ligneToPoint?.departuredDate || cohortDetails.dateStart;
+  const goDate = location?.bus?.departuredDate || cohortDetails.dateStart;
   const goHour = location?.ligneToPoint?.meetingHour || ALONE_ARRIVAL_HOUR;
-  const returnDate = location?.ligneToPoint?.returnDate || cohortDetails.dateEnd;
+  const returnDate = location?.bus?.returnDate || cohortDetails.dateEnd;
   const returnHour = location?.ligneToPoint?.returnHour || ALONE_DEPARTURE_HOUR;
 
   return (
