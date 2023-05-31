@@ -1,3 +1,18 @@
+# [1.282.0](https://github.com/betagouv/service-national-universel/compare/v1.281.0...v1.282.0) (2023-05-31)
+
+
+### Bug Fixes
+
+* **admin:** Centers/List: Improve cohorts fetching and error handling in modal ([c6dc50f](https://github.com/betagouv/service-national-universel/commit/c6dc50f6edf1ae4c307c2b0cf2a9afe365d3a00f))
+* **api:** import PDT ([c4fef88](https://github.com/betagouv/service-national-universel/commit/c4fef88c9bc41fd1e93f379873af5383b742d296))
+* **app:** travel info date ([4745dd8](https://github.com/betagouv/service-national-universel/commit/4745dd8d59e7d84987dd0e626feb13a7480de013))
+* **app:** trip dates on travel info ([84d8f0c](https://github.com/betagouv/service-national-universel/commit/84d8f0cfd5aef3749a8b4243d9f80ddf19f4c58d))
+
+
+### Features
+
+* **api:** Disable password check on pre-prod ([5865a37](https://github.com/betagouv/service-national-universel/commit/5865a371bc661d444ecf46c4e6124b1752668b7a))
+
 # [1.281.0](https://github.com/betagouv/service-national-universel/compare/v1.280.0...v1.281.0) (2023-05-30)
 
 
