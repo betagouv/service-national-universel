@@ -100,7 +100,7 @@ router.post(
       const worksheet = workbook.Sheets["ALLER-RETOUR"];
       const lines = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: null });
 
-      if (lines.length <= 1) {
+      if (lines.length < 1) {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
 
@@ -339,9 +339,12 @@ router.post(
           if (line[`ID PDR ${pdrNumber}`]) {
             if (mongoose.Types.ObjectId.isValid(line[`ID PDR ${pdrNumber}`])) {
               const pdr = await PdrModel.findOne({ _id: line[`ID PDR ${pdrNumber}`], deletedAt: { $exists: false } });
+              console.log(pdr);
+              console.log(pdr?.department);
+              console.log(departmentLookUp[line[`N° DE DEPARTEMENT PDR ${pdrNumber}`]]);
               if (!pdr) {
                 errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
-              } else if ((pdr?.departement || "").toLowerCase() !== departmentLookUp[line[`N° DE DEPARTEMENT PDR ${pdrNumber}`]]?.toLowerCase()) {
+              } else if ((pdr?.department || "").toLowerCase() !== departmentLookUp[line[`N° DE DEPARTEMENT PDR ${pdrNumber}`]]?.toLowerCase()) {
                 errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_DEPARTEMENT, extra: line[`ID PDR ${pdrNumber}`] });
               }
             } else if (!["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
