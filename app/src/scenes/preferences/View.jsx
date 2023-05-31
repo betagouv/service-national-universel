@@ -26,6 +26,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
             Enregistrer
           </PlainButton>
         </div>
+        {Object.values(errors).length ? <div className="text-center mt-6 text-sm text-[#F71701]">Il y a des erreurs ou des données manquantes dans le formulaire.</div> : null}
         <Section>
           <Title noBorder>Sélectionnez les 3 thématiques qui vous intéressent le plus</Title>
           <div className="grid grid-cols-4 gap-2 md:mx-8 md:grid-cols-2 md:gap-4">
