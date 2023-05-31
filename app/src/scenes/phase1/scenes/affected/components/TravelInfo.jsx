@@ -8,6 +8,11 @@ export default function TravelInfo({ location, cohortDetails }) {
     return <></>;
   }
 
+  const goDate = location?.ligneToPoint?.departuredDate || cohortDetails.dateStart;
+  const goHour = location?.ligneToPoint?.meetingHour || ALONE_ARRIVAL_HOUR;
+  const returnDate = location?.ligneToPoint?.returnDate || cohortDetails.dateEnd;
+  const returnHour = location?.ligneToPoint?.returnHour || ALONE_DEPARTURE_HOUR;
+
   return (
     <div className="p-4 md:ml-10">
       <h1 className="mb-6 text-xl font-bold">Résumé du voyage</h1>
@@ -22,8 +27,7 @@ export default function TravelInfo({ location, cohortDetails }) {
             </span>
           </p>
           <p className="text-sm">
-            <span className="capitalize">{dayjs(cohortDetails.dateStart).locale("fr").format("dddd")}</span>{" "}
-            <span>{dayjs(cohortDetails.dateStart).locale("fr").format("D MMMM")}</span> à {location?.ligneToPoint?.meetingHour || ALONE_ARRIVAL_HOUR}
+            <span className="capitalize">{dayjs(goDate).locale("fr").format("dddd")}</span> <span>{dayjs(goDate).locale("fr").format("D MMMM")}</span> à {goHour}
           </p>
           <p className="my-2 rounded-xl bg-gray-100 py-2 px-3 text-sm">
             {location.name},
@@ -42,8 +46,7 @@ export default function TravelInfo({ location, cohortDetails }) {
             </span>
           </p>
           <p className="max-w-md text-sm leading-relaxed">
-            <span className="capitalize">{dayjs(cohortDetails.dateEnd).locale("fr").format("dddd")}</span> <span>{dayjs(cohortDetails.dateEnd).locale("fr").format("D MMMM")}</span>{" "}
-            à {location?.ligneToPoint?.returnHour || ALONE_DEPARTURE_HOUR}
+            <span className="capitalize">{dayjs(returnDate).locale("fr").format("dddd")}</span> <span>{dayjs(returnDate).locale("fr").format("D MMMM")}</span> à {returnHour}
           </p>
           <p className="my-2 rounded-xl bg-gray-100 py-2 px-3 text-sm">
             {location.name},
