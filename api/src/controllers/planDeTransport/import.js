@@ -339,9 +339,6 @@ router.post(
           if (line[`ID PDR ${pdrNumber}`]) {
             if (mongoose.Types.ObjectId.isValid(line[`ID PDR ${pdrNumber}`])) {
               const pdr = await PdrModel.findOne({ _id: line[`ID PDR ${pdrNumber}`], deletedAt: { $exists: false } });
-              console.log(pdr);
-              console.log(pdr?.department);
-              console.log(departmentLookUp[line[`N° DE DEPARTEMENT PDR ${pdrNumber}`]]);
               if (!pdr) {
                 errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
               } else if ((pdr?.department || "").toLowerCase() !== departmentLookUp[line[`N° DE DEPARTEMENT PDR ${pdrNumber}`]]?.toLowerCase()) {
