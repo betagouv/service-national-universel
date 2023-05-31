@@ -13,18 +13,21 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
   const [availableCohorts, setAvailableCohorts] = React.useState([]);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await api.get("/cohort");
-        const filteredCohorts = data.filter((cohort) => isSessionEditionOpen(user, cohort) === true);
-        const availableCohorts = filteredCohorts.map((cohort) => cohort.name);
-        setAvailableCohorts(availableCohorts);
-      } catch (err) {
-        capture(err);
-        toastr.error("Erreur", translate("Une erreur est survenue"));
-      }
-    })();
-  }, []);
+    if (isOpen && !availableCohorts.length) {
+      (async () => {
+        try {
+          const { data, ok, code } = await api.get("/cohort");
+          if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des séjours", translate(code));
+          const filteredCohorts = data.filter((cohort) => isSessionEditionOpen(user, cohort) === true);
+          const availableCohorts = filteredCohorts.map((cohort) => cohort.name);
+          setAvailableCohorts(availableCohorts);
+        } catch (err) {
+          capture(err);
+          toastr.error("Erreur", translate("Une erreur est survenue"));
+        }
+      })();
+    }
+  }, [isOpen]);
 
   const refSelect = React.useRef(null);
   const refInput = React.useRef(null);
