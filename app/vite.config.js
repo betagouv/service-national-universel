@@ -7,14 +7,12 @@ export default defineConfig(({ command, mode }) => {
   // Load env file based on `mode` in the current working directory.
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), "");
-  return {
-    port: 8081,
-    plugins: [
-      react(),
-      // Put the Sentry vite plugin after all other plugins
+  const plugins = [react({ plugins: [["@swc/plugin-styled-components", {}]] })];
+  if (mode !== "development") {
+    plugins.push(
       sentryVitePlugin({
         org: "sentry",
-        project: env.MODE === "production" ? "snu-production" : "snu-staging",
+        project: mode === "production" ? "snu-production" : "snu-staging",
         authToken: env.SENTRY_AUTH_TOKEN,
         url: "https://sentry.selego.co/",
         environment: "app",
@@ -32,6 +30,10 @@ export default defineConfig(({ command, mode }) => {
         // Helps troubleshooting - set to false to make plugin less noisy
         debug: true,
       }),
-    ],
+    );
+  }
+  return {
+    port: 8081,
+    plugins: plugins,
   };
 });

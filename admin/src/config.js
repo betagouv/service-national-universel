@@ -1,6 +1,7 @@
 const forceProd = false;
 
 const environment = getEnvironment();
+console.log("🚀 ~ file: config.js:4 ~ environment:", environment);
 let apiURL = "http://localhost:8080";
 let appURL = "http://localhost:8081";
 let adminURL = "http://localhost:8082";
@@ -28,9 +29,10 @@ if (environment === "production") {
 const S3PREFIX = "";
 
 function getEnvironment() {
-  if (window.location.href.indexOf("localhost") !== -1 || window.location.href.indexOf("127.0.0.1") !== -1) return "development";
-  if (window.location.href.indexOf("admin.beta-snu.dev") !== -1) return "staging";
-  return "production";
+  return import.meta.mode;
+  // if (window.location.href.indexOf("localhost") !== -1 || window.location.href.indexOf("127.0.0.1") !== -1) return "development";
+  // if (window.location.href.indexOf("admin.beta-snu.dev") !== -1) return "staging";
+  // return "production";
 }
 
 export { apiURL, appURL, S3PREFIX, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, environment, adminURL, supportURL, maintenance };
