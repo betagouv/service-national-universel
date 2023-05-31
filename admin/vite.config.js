@@ -40,6 +40,9 @@ export default defineConfig(({ command, mode }) => {
   return {
     build: {
       sourcemap: true,
+      nodeOptions: {
+        "--max-old-space-size": "8192", // Allocate 8GB of memory
+      },
     },
     server: {
       port: 8082,
