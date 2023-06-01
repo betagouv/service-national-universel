@@ -2,15 +2,13 @@ import Img3 from "../../assets/homePhase2Desktop.png";
 import Img2 from "../../assets/homePhase2Mobile.png";
 import React from "react";
 import { useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
-import { translate } from "snu-lib";
+import { translate, translateCohortTemp } from "snu-lib";
 import Check from "../../assets/icons/Check";
 import plausibleEvent from "../../services/plausible";
-import { COHESION_STAY_LIMIT_DATE } from "../../utils";
+import { CgDanger } from "react-icons/cg";
 
 export default function WaitingList() {
   const young = useSelector((state) => state.Auth.young);
-  const history = useHistory();
 
   return (
     <>
@@ -23,8 +21,19 @@ export default function WaitingList() {
                 <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
               </div>
               <div className="mt-2 text-xl font-bold text-[#242526]">
-                Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {COHESION_STAY_LIMIT_DATE[young.cohort]}.
+                Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {translateCohortTemp(young.cohort)}.
               </div>
+
+              {young.cohort === "Juillet 2023" ? (
+                <div className="flex max-w-2xl items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-6 mb-6 drop-shadow">
+                  <div className="bg-red-500 text-white p-2 rounded-full">
+                    <CgDanger />
+                  </div>
+                  <p className="text-sm">
+                    Si vous résidez <strong>en Outre-mer</strong>, vos dates de séjour sont maintenues <strong>du 4 au 16 juillet</strong>.
+                  </p>
+                </div>
+              ) : null}
 
               <hr className="text-gray-200" />
               <div className="flex items-center gap-5">
@@ -57,8 +66,19 @@ export default function WaitingList() {
               <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
             </div>
             <div className="mt-3 text-lg font-bold text-[#242526]">
-              Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {COHESION_STAY_LIMIT_DATE[young.cohort]}.
+              Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {translateCohortTemp(young.cohort)}.
             </div>
+
+            {young.cohort === "Juillet 2023" ? (
+              <div className="flex max-w-2xl items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-6 mb-6 drop-shadow">
+                <div className="bg-red-500 text-white p-2 rounded-full">
+                  <CgDanger />
+                </div>
+                <p className="text-sm">
+                  Si vous résidez <strong>en Outre-mer</strong>, vos dates de séjour sont maintenues <strong>du 4 au 16 juillet</strong>.
+                </p>
+              </div>
+            ) : null}
 
             <hr className="mt-3 text-gray-200" />
             <div className="flex items-center gap-2">
