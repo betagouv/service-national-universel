@@ -72,9 +72,9 @@ export function isCohortDone(cohortName) {
   return false;
 }
 
-export function getCohortPeriod(cohort) {
-  const startDate = new Date(cohort.dateStart);
-  const endDate = new Date(cohort.dateEnd);
+export function getCohortPeriod(cohort, meetingPoint = null) {
+  const startDate = new Date(meetingPoint?.bus?.departuredDate || cohort.dateStart);
+  const endDate = new Date(meetingPoint?.bus?.returnDate || cohort.dateEnd);
   const endDateformatOptions = { year: "numeric", month: "long", day: "numeric" };
   const startDateformatOptions = { day: "numeric" };
   if (startDate.getMonth() !== endDate.getMonth()) {

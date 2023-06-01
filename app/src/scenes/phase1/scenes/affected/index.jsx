@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { translate, translateCohort, youngCanChangeSession } from "snu-lib";
-import { getCohort } from "../../../../utils/cohorts";
+import { youngCanChangeSession } from "snu-lib";
+import { getCohort, getCohortPeriod } from "../../../../utils/cohorts";
 import { isStepMedicalFieldDone } from "./utils/steps.utils";
 import api from "../../../../services/api";
 
@@ -16,7 +16,6 @@ import Problem from "./components/Problem";
 import StepsAffected from "./components/StepsAffected";
 import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
-import dayjs from "dayjs";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -30,37 +29,23 @@ export default function Affected() {
     window.scrollTo(0, 0);
   }
 
-  const getMeetingPoint = async () => {
-    const { data, ok } = await api.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
-    if (!ok) setMeetingPoint(null);
-    setMeetingPoint(data);
-  };
-
   useEffect(() => {
-    if (!young.sessionPhase1Id) return;
     (async () => {
-      setLoading(true);
-      const { data, code, ok } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
-      if (!ok) return toastr.error("error", translate(code));
-      setCenter(data);
-      getMeetingPoint();
-      setLoading(false);
+      if (young?.sessionPhase1Id) {
+        try {
+          setLoading(true);
+          const { data: center } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
+          const { data: meetingPoint } = await api.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
+          setCenter(center);
+          setMeetingPoint(meetingPoint);
+          setLoading(false);
+        } catch (e) {
+          toastr.error("Une erreur est survenue lors de la récupération des données.");
+          setLoading(false);
+        }
+      }
     })();
   }, [young]);
-
-  // If the user has a meeting point, get the dates from there. If not, get the dates from global cohort data.
-  const goDate = meetingPoint?.bus?.departuredDate || cohortDetails.dateStart;
-  const returnDate = meetingPoint?.bus?.returnDate || cohortDetails.dateEnd;
-
-  const cohesionStayDates = () => {
-    // Display the month name for departure date only if it is different from the return date.
-    const goDateFormatString = new Date(goDate).getMonth() === new Date(returnDate).getMonth() ? "D" : "D MMMM";
-
-    if (goDate && returnDate) {
-      return `du ${dayjs(goDate).locale("fr").format(goDateFormatString)} au ${dayjs(returnDate).locale("fr").format("D MMMM YYYY")}`;
-    }
-    return translateCohort(young.cohort);
-  };
 
   if (loading) {
     return (
@@ -90,7 +75,7 @@ export default function Affected() {
             <h1 className="text-2xl md:space-y-4 md:text-5xl">
               Mon séjour de cohésion
               <br />
-              <strong className="flex items-center">{cohesionStayDates()}</strong>
+              <strong className="flex items-center">{getCohortPeriod(cohortDetails, meetingPoint)}</strong>
             </h1>
             {youngCanChangeSession(young) ? <ChangeStayLink className="my-4 md:my-8" /> : null}
           </div>
@@ -100,7 +85,7 @@ export default function Affected() {
 
         {isStepMedicalFieldDone(young) && (
           <div className="order-2 flex flex-none flex-col gap-4 md:flex-row">
-            <TravelInfo location={young?.meetingPointId ? meetingPoint : center} goDate={goDate} returnDate={returnDate} />
+            <TravelInfo location={young?.meetingPointId ? meetingPoint : center} cohortDetails={cohortDetails} />
             <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
           </div>
         )}
