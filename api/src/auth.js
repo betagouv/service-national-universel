@@ -230,7 +230,7 @@ class Auth {
 
       const user = await this.model.findById(req.user._id);
       const passwordChangedAt = Date.now();
-      user.set({ password: newPassword, passwordChangedAt });
+      user.set({ password: newPassword, passwordChangedAt, loginAttempts: 0 });
       await user.save();
 
       const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
