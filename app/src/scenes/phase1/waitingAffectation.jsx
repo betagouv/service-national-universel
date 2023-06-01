@@ -5,6 +5,7 @@ import heroBanner from "../../assets/hero-banner.png";
 import CurvedArrowLeft from "../../assets/icons/CurvedArrowLeft";
 import DiscoverStay from "../../assets/icons/DiscoverStay";
 import WaitFor from "../../assets/icons/WaitFor";
+import Danger from "../../assets/icons/Danger";
 import { translateCohort } from "../../utils";
 import ChangeStayLink from "./components/ChangeStayLink";
 import CheckYourSpamSection from "./components/CheckYourSpamSection";
@@ -27,7 +28,25 @@ export default function WaitingAffectation({ young }) {
               <span>Mon séjour de cohésion</span>
               <strong className="flex items-center">{translateCohort(young.cohort)}</strong>
             </h1>
+            <div className="flex max-w-[688px] items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-[22px] drop-shadow mb-6">
+              <div className="hidden h-[42px] w-[42px] md:block rounded-full bg-red-500">
+                <Danger />
+              </div>
+              <div>
+                <div className="mb-[1rem] flex items-center gap-4 md:mb-1">
+                  <div className="md:hidden">
+                    <Danger />
+                  </div>
+                </div>
+                <p className="text-sm">
+                  Pour des raisons d’organisation, vous êtes susceptibles d’être convoqué pour un{" "}
+                  <strong className="font-bold">départ anticipé le 4 juillet et un retour anticipé le 16 juillet.</strong> Vous serez tenu informé par mail lors de la réception de
+                  votre convocation.
+                </p>
+              </div>
+            </div>
             {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null}
+
             <div className="flex max-w-[688px] items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-[22px] drop-shadow">
               <div className="hidden h-[42px] w-[42px] md:block">
                 <WaitFor />
