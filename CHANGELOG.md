@@ -1,3 +1,19 @@
+# [1.283.0](https://github.com/betagouv/service-national-universel/compare/v1.282.0...v1.283.0) (2023-06-01)
+
+
+### Bug Fixes
+
+* **api:** dashboard v2 ([9d14b21](https://github.com/betagouv/service-national-universel/commit/9d14b21d091eef69eb9770014438b91f87286c9a))
+* **app:** Préférences: Amélioration de l'affichage des erreurs dans le formulaire ([#2669](https://github.com/betagouv/service-national-universel/issues/2669)) ([751c3ba](https://github.com/betagouv/service-national-universel/commit/751c3badda671b847f1a7b0999831e87267f3f12))
+* **lib:** Interdire aux refs dep d'éditer et supprimer les autres refs dep ([#2664](https://github.com/betagouv/service-national-universel/issues/2664)) ([d9bb5aa](https://github.com/betagouv/service-national-universel/commit/d9bb5aa34216a546da8a81d4b402f3b17cf82911))
+
+
+### Features
+
+* **admi/lib:** add comment on motif depart in export young ([a4da1ee](https://github.com/betagouv/service-national-universel/commit/a4da1ee270f04a885812df4048f39b2d695d34d6))
+* **api, admin:** new dashboard step 2 ([#2656](https://github.com/betagouv/service-national-universel/issues/2656)) ([367cbc9](https://github.com/betagouv/service-national-universel/commit/367cbc9d6d5f591ca3531e83f179017be11cc474))
+* **app/lib:** temporarily display new date and banner for july ([#2674](https://github.com/betagouv/service-national-universel/issues/2674)) ([54b1ffa](https://github.com/betagouv/service-national-universel/commit/54b1ffa6e734bff40cac44a6320a1ca581b12bb8))
+
 # [1.282.0](https://github.com/betagouv/service-national-universel/compare/v1.281.0...v1.282.0) (2023-05-31)
 
 
