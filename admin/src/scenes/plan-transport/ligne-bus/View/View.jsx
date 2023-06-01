@@ -104,11 +104,21 @@ export default function View(props) {
     getDemandeDeModification();
   }, []);
   React.useEffect(() => {
+    console.log("reset");
     setAddOpen(false);
   }, [data]);
-
   if (!data) return <Loader />;
 
+  console.log(
+    "leadValue",
+    data.team.filter((item) => item.role === "leader").map((value) => console.log(value)),
+  );
+  console.log("leadlength", data.team.filter((item) => item.role === "leader").length);
+  console.log("teamlength", data.team.length);
+  console.log(
+    "leadArray",
+    data.team.filter((item) => item.role === "leader"),
+  );
   return (
     <>
       <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
@@ -137,25 +147,53 @@ export default function View(props) {
             <Modification demandeDeModification={demandeDeModification} getModification={getDemandeDeModification} />
           </div>
           <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
-          <BusTeam bus={data} setBus={setData} title="Chef de file" role={"leader"} />
-          {data.team.length > 1 ? (
-            data.team
-              .filter((item) => item.role === "supervisor")
-              .map((value, number = 0) => <BusTeam key={value.idTeam} bus={data} setBus={setData} title="Encadrant" role={"supervisor"} number={number++} />)
-          ) : (
-            <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} />
-          )}
 
-          {addOpen ? (
-            <BusTeam
-              bus={data}
-              setBus={setData}
-              title="Encadrant"
-              role={"supervisor"}
-              setAddOpen={setAddOpen}
-              number={data.team.filter((item) => item.role === "leader").length ? data.team.length - 1 : data.team.length}
-            />
-          ) : null}
+          {data.team.length > 0 ? (
+            //check si on a une data
+            data.team.filter((item) => item.role === "leader").length > 0 && data.team.filter((item) => item.role === "supervisor").length > 0 ? (
+              //cas 1 : on a un chef et des encadrant
+              <>
+                {data.team
+                  .filter((item) => item.role === "leader")
+                  .map((value) => (
+                    <BusTeam key={value._id} bus={data} setBus={setData} title="Chef de file" role={"leader"} idTeam={value._id} />
+                  ))}
+                {data.team
+                  .filter((item) => item.role === "supervisor")
+                  .map((value) => (
+                    <BusTeam key={value._id} bus={data} setBus={setData} title="Encadrant" role={"supervisor"} idTeam={value._id} />
+                  ))}
+              </>
+            ) : data.team.filter((item) => item.role === "supervisor").length > 0 ? (
+              //cas 2 : on a des encadrant mais pas de chef
+              <>
+                <BusTeam bus={data} setBus={setData} title="Chef de file" role={"leader"} />
+
+                {data.team
+                  .filter((item) => item.role === "supervisor")
+                  .map((value) => (
+                    <BusTeam key={value._id} bus={data} setBus={setData} title="Encadrant" role={"supervisor"} idTeam={value._id} />
+                  ))}
+              </>
+            ) : (
+              //cas 3 : on a un chef mais pas d'encadrant
+              <>
+                {data.team
+                  .filter((item) => item.role === "leader")
+                  .map((value) => (
+                    <BusTeam key={value._id} bus={data} setBus={setData} title="Chef de file" role={"leader"} idTeam={value._id} />
+                  ))}
+                <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} />
+              </>
+            )
+          ) : (
+            //cas 4 : on n'a pas de data
+            <>
+              <BusTeam bus={data} setBus={setData} title="Chef de file" role={"leader"} />
+              <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} />
+            </>
+          )}
+          {addOpen ? <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} setAddOpen={setAddOpen} /> : null}
           {canEditLigneBusTeam && data.team.filter((item) => item.role === "supervisor").length > 0 && data.team.length < 5 && !addOpen ? (
             <button
               className="flex cursor-pointer border-[1px] border-gray-200 justify-center rounded-lg bg-gray-200 py-2.5 text-sm text-gray-800 w-[30%] m-auto hover:border-gray-400"
@@ -163,7 +201,6 @@ export default function View(props) {
               + Ajouter un encadrant
             </button>
           ) : null}
-
           <div className="flex items-start gap-4">
             <div className="flex w-1/2 flex-col gap-4">
               {data.meetingsPointsDetail.map((pdr, index) => (

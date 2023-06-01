@@ -11,21 +11,37 @@ import Toggle from "../../../../../components/Toggle";
 import Bin from "../../../../../assets/Bin";
 import validator from "validator";
 
-export default function BusTeam({ bus, setBus, title, role, number = 0, setAddOpen }) {
+export default function BusTeam({ bus, setBus, title, role, setAddOpen, idTeam }) {
   const user = useSelector((state) => state.Auth.user);
   const [editInfo, setEditInfo] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [errors, setErrors] = React.useState({});
   const [data, setData] = React.useState({
+    idTeam: "create",
     role: role,
     forth: false,
     back: false,
   });
 
   React.useEffect(() => {
-    const leader = bus.team.filter((item) => item.role === "leader");
-    const supervisor = bus.team.filter((item) => item.role === "supervisor");
     if (setAddOpen) setEditInfo(true);
+    console.log(idTeam);
+    if (idTeam) {
+      const member = bus.team.filter((item) => item._id === idTeam);
+      setData({
+        role: role,
+        idTeam: member[0]._id,
+        firstname: member[0].firstName,
+        lastname: member[0].lastName,
+        birthdate: member[0].birthdate,
+        mail: member[0].mail,
+        phone: member[0].phone,
+        forth: member[0].forth,
+        back: member[0].back,
+      });
+    }
+    /*     const leader = bus.team.filter((item) => item.role === "leader");
+    const supervisor = bus.team.filter((item) => item.role === "supervisor");
     if (role === "leader") {
       setData({
         role: role,
@@ -50,7 +66,7 @@ export default function BusTeam({ bus, setBus, title, role, number = 0, setAddOp
         forth: supervisor[number]?.forth || false,
         back: supervisor[number]?.back || false,
       });
-    }
+    } */
     setErrors({});
   }, [editInfo]);
 
@@ -75,7 +91,7 @@ export default function BusTeam({ bus, setBus, title, role, number = 0, setAddOp
       if (!data.birthdate) errors.birthdate = "Ce champ est obligatoire";
       if (!data.mail) errors.mail = "Ce champ est obligatoire";
       if (!data.phone) errors.phone = "Ce champ est obligatoire";
-      if (data.forth === false && data.back === false) errors.travel = "Un de ces deux champs doit être coché";
+      if (data.forth === false && data.back === false) errors.travel = "Vous devez valider un aller ou un retour";
 
       if (Object.keys(errors).length > 0) {
         setErrors(errors);
