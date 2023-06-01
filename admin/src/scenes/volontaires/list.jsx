@@ -39,7 +39,7 @@ export default function VolontaireList() {
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
 
-  const filterArray = getFilterArray(user, bus);
+  const filterArray = getFilterArray(user, bus, sessionsPhase1);
 
   useEffect(() => {
     (async () => {

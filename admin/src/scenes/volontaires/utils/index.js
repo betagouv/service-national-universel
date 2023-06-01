@@ -24,7 +24,7 @@ import { orderCohort } from "../../../components/filters-system-v2/components/fi
 import api from "../../../services/api";
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 
-export const getFilterArray = (user, bus) => {
+export const getFilterArray = (user, bus, session) => {
   return [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
     { title: "Cohorte d'origine", name: "originalCohort", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
@@ -158,6 +158,18 @@ export const getFilterArray = (user, bus) => {
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
       translate: translatePhase1,
+    },
+    {
+      title: "Centre",
+      name: "sessionPhase1Id",
+      parentGroup: "Phase 1",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A" || !session.length) return item;
+        const res = session.find((option) => option._id.toString() === item);
+        if (!res) return "N/A - Supprimé";
+        return (res?.codeCentre || "N/A") + " - " + res?.cohesionCenterId;
+      },
     },
     {
       title: "Confirmation PDR",

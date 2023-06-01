@@ -61,6 +61,7 @@ function getYoungsFilters(user) {
     "statusPhase3.keyword",
     "schoolDepartment.keyword",
     "parentAllowSNU.keyword",
+    "sessionPhase1Id.keyword",
   ].filter(Boolean);
 }
 
