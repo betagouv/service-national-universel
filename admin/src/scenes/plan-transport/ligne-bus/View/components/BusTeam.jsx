@@ -25,7 +25,6 @@ export default function BusTeam({ bus, setBus, title, role, setAddOpen, idTeam }
 
   React.useEffect(() => {
     if (setAddOpen) setEditInfo(true);
-    console.log(idTeam);
     if (idTeam) {
       const member = bus.team.filter((item) => item._id === idTeam);
       setData({
@@ -40,33 +39,6 @@ export default function BusTeam({ bus, setBus, title, role, setAddOpen, idTeam }
         back: member[0].back,
       });
     }
-    /*     const leader = bus.team.filter((item) => item.role === "leader");
-    const supervisor = bus.team.filter((item) => item.role === "supervisor");
-    if (role === "leader") {
-      setData({
-        role: role,
-        idTeam: leader[0]?._id || "",
-        firstname: leader[0]?.firstName || "",
-        lastname: leader[0]?.lastName || "",
-        birthdate: leader[0]?.birthdate || "",
-        mail: leader[0]?.mail || "",
-        phone: leader[0]?.phone || "",
-        forth: leader[0]?.forth || "",
-        back: leader[0]?.back || "",
-      });
-    } else {
-      setData({
-        role: role,
-        idTeam: supervisor[number]?._id || "create",
-        firstname: supervisor[number]?.firstName || "",
-        lastname: supervisor[number]?.lastName || "",
-        birthdate: supervisor[number]?.birthdate || "",
-        mail: supervisor[number]?.mail || "",
-        phone: supervisor[number]?.phone || "",
-        forth: supervisor[number]?.forth || false,
-        back: supervisor[number]?.back || false,
-      });
-    } */
     setErrors({});
   }, [editInfo]);
 

@@ -108,17 +108,6 @@ export default function View(props) {
     setAddOpen(false);
   }, [data]);
   if (!data) return <Loader />;
-
-  console.log(
-    "leadValue",
-    data.team.filter((item) => item.role === "leader").map((value) => console.log(value)),
-  );
-  console.log("leadlength", data.team.filter((item) => item.role === "leader").length);
-  console.log("teamlength", data.team.length);
-  console.log(
-    "leadArray",
-    data.team.filter((item) => item.role === "leader"),
-  );
   return (
     <>
       <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
