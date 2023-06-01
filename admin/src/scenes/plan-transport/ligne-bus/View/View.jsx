@@ -105,7 +105,6 @@ export default function View(props) {
     getDemandeDeModification();
   }, []);
   React.useEffect(() => {
-    console.log("fermer");
     setAddOpen(false);
   }, [data]);
   if (!data) return <Loader />;
