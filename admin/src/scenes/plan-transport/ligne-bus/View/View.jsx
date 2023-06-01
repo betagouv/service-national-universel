@@ -14,6 +14,7 @@ import BusTeam from "./components/BusTeam";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
+import validator from "validator";
 
 export default function View(props) {
   const [data, setData] = React.useState(null);
@@ -104,10 +105,11 @@ export default function View(props) {
     getDemandeDeModification();
   }, []);
   React.useEffect(() => {
-    console.log("reset");
+    console.log("fermer");
     setAddOpen(false);
   }, [data]);
   if (!data) return <Loader />;
+  const leader = data.team.filter((item) => item.role === "leader")[0]?._id || null;
   return (
     <>
       <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
@@ -137,59 +139,16 @@ export default function View(props) {
           </div>
           <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
 
-          {data.team.length > 0 ? (
-            //check si on a une data
-            data.team.filter((item) => item.role === "leader").length > 0 && data.team.filter((item) => item.role === "supervisor").length > 0 ? (
-              //cas 1 : on a un chef et des encadrant
-              <>
-                {data.team
-                  .filter((item) => item.role === "leader")
-                  .map((value) => (
-                    <BusTeam key={value._id} bus={data} setBus={setData} title="Chef de file" role={"leader"} idTeam={value._id} />
-                  ))}
-                {data.team
-                  .filter((item) => item.role === "supervisor")
-                  .map((value) => (
-                    <BusTeam key={value._id} bus={data} setBus={setData} title="Encadrant" role={"supervisor"} idTeam={value._id} />
-                  ))}
-              </>
-            ) : data.team.filter((item) => item.role === "supervisor").length > 0 ? (
-              //cas 2 : on a des encadrant mais pas de chef
-              <>
-                <BusTeam bus={data} setBus={setData} title="Chef de file" role={"leader"} />
-
-                {data.team
-                  .filter((item) => item.role === "supervisor")
-                  .map((value) => (
-                    <BusTeam key={value._id} bus={data} setBus={setData} title="Encadrant" role={"supervisor"} idTeam={value._id} />
-                  ))}
-              </>
-            ) : (
-              //cas 3 : on a un chef mais pas d'encadrant
-              <>
-                {data.team
-                  .filter((item) => item.role === "leader")
-                  .map((value) => (
-                    <BusTeam key={value._id} bus={data} setBus={setData} title="Chef de file" role={"leader"} idTeam={value._id} />
-                  ))}
-                <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} />
-              </>
-            )
+          <BusTeam bus={data} setBus={setData} title={"Chef de file"} role={"leader"} idTeam={leader} />
+          {data.team.filter((item) => item.role === "supervisor").length > 0 ? (
+            data.team
+              .filter((item) => item.role === "supervisor")
+              .map((value) => <BusTeam key={value._id} bus={data} setBus={setData} title="Encadrant" role={"supervisor"} idTeam={value._id} setAddOpen={setAddOpen} />)
           ) : (
-            //cas 4 : on n'a pas de data
-            <>
-              <BusTeam bus={data} setBus={setData} title="Chef de file" role={"leader"} />
-              <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} />
-            </>
+            <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} />
           )}
           {addOpen ? <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} setAddOpen={setAddOpen} /> : null}
-          {canEditLigneBusTeam && data.team.filter((item) => item.role === "supervisor").length > 0 && data.team.length < 5 && !addOpen ? (
-            <button
-              className="flex cursor-pointer border-[1px] border-gray-200 justify-center rounded-lg bg-gray-200 py-2.5 text-sm text-gray-800 w-[30%] m-auto hover:border-gray-400"
-              onClick={() => setAddOpen(true)}>
-              + Ajouter un encadrant
-            </button>
-          ) : null}
+
           <div className="flex items-start gap-4">
             <div className="flex w-1/2 flex-col gap-4">
               {data.meetingsPointsDetail.map((pdr, index) => (

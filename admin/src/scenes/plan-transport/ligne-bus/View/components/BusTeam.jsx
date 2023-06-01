@@ -22,9 +22,8 @@ export default function BusTeam({ bus, setBus, title, role, setAddOpen, idTeam }
     forth: false,
     back: false,
   });
-
   React.useEffect(() => {
-    if (setAddOpen) setEditInfo(true);
+    if (!idTeam && setAddOpen) setEditInfo(true);
     if (idTeam) {
       const member = bus.team.filter((item) => item._id === idTeam);
       setData({
@@ -51,10 +50,11 @@ export default function BusTeam({ bus, setBus, title, role, setAddOpen, idTeam }
       const errorEmail = "Adresse email invalide";
       const errorPhone = "Numéro de téléphone invalide";
 
-      if (!validator.isEmail(data.mail)) {
+      if (data.mail && !validator.isEmail(data.mail)) {
         errors.mail = errorEmail;
       }
-      if (!validator.isMobilePhone(data.phone)) {
+
+      if (data.mail && !validator.isMobilePhone(data.phone)) {
         errors.phone = errorPhone;
       }
 
@@ -116,6 +116,11 @@ export default function BusTeam({ bus, setBus, title, role, setAddOpen, idTeam }
           <>
             {!editInfo ? (
               <>
+                {role === "supervisor" && bus.team.filter((item) => item.role === "supervisor").length && bus.team.length < 5 ? (
+                  <button className="flex text-blue-600 mr-[44rem] mt-1 cursor-pointer text-sm hover:underline" onClick={() => setAddOpen(true)}>
+                    + Ajouter un encadrant
+                  </button>
+                ) : null}
                 <button
                   className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => setEditInfo(true)}
