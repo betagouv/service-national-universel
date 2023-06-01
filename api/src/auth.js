@@ -295,6 +295,7 @@ class Auth {
       user.forgotPasswordResetToken = "";
       user.forgotPasswordResetExpires = "";
       user.passwordChangedAt = Date.now();
+      user.loginAttempts = 0;
       await user.save();
       return res.status(200).send({ ok: true });
     } catch (error) {
