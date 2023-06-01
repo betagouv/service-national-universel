@@ -21,7 +21,6 @@ import { orderCohort } from "../../../../../components/filters-system-v2/compone
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
-  const [fullNote, setFullNote] = useState(false);
   const [fullKeyNumber, setFullKeyNumber] = useState(false);
 
   const [inscriptionGoals, setInscriptionGoals] = useState();
@@ -128,26 +127,6 @@ export default function Index() {
     updateStats();
   }, []);
 
-  function shouldShow(parent, key, index = null) {
-    if (fullNote) return true;
-
-    const entries = Object.entries(parent);
-    for (let i = 0, limit = 0; i < entries.length && limit < 3; i++) {
-      if (Array.isArray(entries[i][1])) {
-        for (let j = 0; j < entries[i][1].length && limit < 3; j++) {
-          if (entries[i][0] === key && index === j) return true;
-          limit++;
-        }
-      } else {
-        if (entries[i][0] === key) return true;
-        limit++;
-      }
-    }
-    return false;
-  }
-
-  if (!stats.inscription) return <div></div>;
-
   return (
     <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}>
       <div className="flex flex-col gap-8">
@@ -168,201 +147,7 @@ export default function Index() {
         />
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
         <div className="flex gap-4">
-          <div className={`flex w-[70%] flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!fullNote ? "h-[584px]" : "h-fit"}`}>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-3">
-                  <Inscription />
-                  <div className="text-sm font-bold leading-5 text-gray-900">Inscriptions</div>
-                  <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">4</div>
-                </div>
-                {shouldShow(stats.inscription, "inscription_en_attente_de_validation") && (
-                  <NoteContainer
-                    title="Dossier"
-                    number={stats.inscription.inscription_en_attente_de_validation}
-                    content="dossier d’inscriptions sont en attente de validation."
-                    btnLabel="À instruire"
-                  />
-                )}
-                {shouldShow(stats.inscription, "inscription_corrigé_à_instruire_de_nouveau") && (
-                  <NoteContainer
-                    title="Dossier"
-                    number={stats.inscription.inscription_corrigé_à_instruire_de_nouveau}
-                    content="dossiers d’inscription corrigés sont à instruire de nouveau."
-                    btnLabel="À instruire"
-                  />
-                )}
-                {shouldShow(stats.inscription, "inscription_en_attente_de_correction") && (
-                  <NoteContainer
-                    title="Dossier"
-                    number={stats.inscription.inscription_en_attente_de_correction}
-                    content="dossiers d’inscription en attente de correction."
-                    btnLabel="À relancer"
-                  />
-                )}
-                {stats.inscription.inscription_en_attente_de_validation_cohorte.map(
-                  (item, key) =>
-                    shouldShow(stats.inscription, "inscription_en_attente_de_validation_cohorte", key) && (
-                      <NoteContainer
-                        key={"inscription_en_attente_de_validation_cohorte" + item.cohort}
-                        title="Droit à l'image"
-                        number={item.count}
-                        content={`dossiers d’inscription en attente de validation pour le séjour de ${item.cohort}`}
-                        btnLabel="À relancer"
-                      />
-                    ),
-                )}
-                {stats.inscription.inscription_sans_accord_renseigné.map(
-                  (item, key) =>
-                    shouldShow(stats.inscription, "inscription_sans_accord_renseigné", key) && (
-                      <NoteContainer
-                        key={"inscription_sans_accord_renseigné" + item.cohort}
-                        title="Droit à l'image"
-                        number={item.count}
-                        content={`volontaires sans accord renseigné pour le séjour de ${item.cohort}`}
-                        btnLabel="À relancer"
-                      />
-                    ),
-                )}
-              </div>
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-3">
-                  <Sejour />
-                  <div className="text-sm font-bold leading-5 text-gray-900">Séjours</div>
-                  <div className=" rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">7</div>
-                </div>
-                {stats.sejour.sejour_rassemblement_non_confirmé.map(
-                  (item, key) =>
-                    shouldShow(stats.sejour, "sejour_rassemblement_non_confirmé", key) && (
-                      <NoteContainer
-                        title="Point de rassemblement"
-                        key={"sejour_rassemblement_non_confirmé" + item.cohort}
-                        number={item.count}
-                        content={`volontaires n’ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
-                        btnLabel="À déclarer"
-                      />
-                    ),
-                )}
-                {stats.sejour.sejour_participation_non_confirmée.map(
-                  (item, key) =>
-                    shouldShow(stats.sejour, "sejour_participation_non_confirmée", key) && (
-                      <NoteContainer
-                        title="Point de rassemblement"
-                        key={"sejour_participation_non_confirmée" + item.cohort}
-                        number={item.count}
-                        content={`volontaires n’ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
-                        btnLabel="À déclarer"
-                      />
-                    ),
-                )}
-                {stats.sejour.sejour_point_de_rassemblement_à_déclarer.map(
-                  (item, key) =>
-                    shouldShow(stats.sejour, "sejour_point_de_rassemblement_à_déclarer", key) && (
-                      <NoteContainer
-                        title="Point de rassemblement"
-                        key={"sejour_point_de_rassemblement_à_déclarer" + item.cohort + item.department}
-                        number=""
-                        content={`Au moins 1 point de rassemblement est à déclarer pour le séjour de ${item.cohort} (${item.department})`}
-                        btnLabel="À déclarer"
-                      />
-                    ),
-                )}
-                {stats.sejour.sejour_emploi_du_temps_non_déposé.map(
-                  (item, key) =>
-                    shouldShow(stats.sejour, "sejour_emploi_du_temps_non_déposé", key) && (
-                      <NoteContainer
-                        title="Emploi du temps"
-                        key={"sejour_emploi_du_temps_non_déposé" + item.cohort}
-                        number={item.count}
-                        content={`emplois du temps n’ont pas été déposés. ${item.cohort}`}
-                        btnLabel="À relancer"
-                      />
-                    ),
-                )}
-                {stats.sejour.sejour_contact_à_renseigner.map(
-                  (item, key) =>
-                    shouldShow(stats.sejour, "sejour_contact_à_renseigner", key) && (
-                      <NoteContainer
-                        title="Contact"
-                        key={"sejour_contact_à_renseigner" + item.cohort + item.department}
-                        number=""
-                        content={`Au moins 1 contact de convocation doit être renseigné pour le séjour de ${item.cohort} (${item.department})`}
-                        btnLabel="À renseigner"
-                      />
-                    ),
-                )}
-                {stats.sejour.sejour_volontaires_à_contacter.map(
-                  (item, key) =>
-                    shouldShow(stats.sejour, "sejour_volontaires_à_contacter", key) && (
-                      <NoteContainer
-                        title="Cas particuliers"
-                        key={"sejour_volontaires_à_contacter" + item.cohort}
-                        number={item.count}
-                        content={`volontaires à contacter pour préparer leur accueil pour le séjour de ${item.cohort}`}
-                        btnLabel="À contacter"
-                      />
-                    ),
-                )}
-                {stats.sejour.sejour_chef_de_centre.map(
-                  (item, key) =>
-                    shouldShow(stats.sejour, "sejour_chef_de_centre", key) && (
-                      <NoteContainer
-                        title="Chef de centre"
-                        key={"sejour_chef_de_centre" + item.cohort}
-                        number={item.count}
-                        content={`chefs de centre sont à renseigner pour le séjour de  ${item.cohort}`}
-                        btnLabel="À renseigner"
-                      />
-                    ),
-                )}
-              </div>
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-3">
-                  <Engagement />
-                  <div className="text-sm font-bold leading-5 text-gray-900">Engagement</div>
-                  <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">9</div>
-                </div>
-                {shouldShow(stats.engagement, "engagement_contrat_à_éditer") && (
-                  <NoteContainer
-                    title="Contrat"
-                    number={stats.engagement.engagement_contrat_à_éditer}
-                    content="contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature."
-                    btnLabel="À suivre"
-                  />
-                )}
-                {shouldShow(stats.engagement, "engagement_contrat_en_attente_de_signature") && (
-                  <NoteContainer
-                    title="Contrat"
-                    number={stats.engagement.engagement_contrat_en_attente_de_signature}
-                    content="contrats d’engagement sont en attente de signature."
-                    btnLabel="À suivre"
-                  />
-                )}
-                {shouldShow(stats.engagement, "engagement_dossier_militaire_en_attente_de_validation") && (
-                  <NoteContainer
-                    title="Dossier d’éligibilité"
-                    number={stats.engagement.engagement_dossier_militaire_en_attente_de_validation}
-                    content="dossiers d’éligibilité en préparation militaire sont en attente de vérification."
-                    btnLabel="À vérifier"
-                  />
-                )}
-                {shouldShow(stats.engagement, "engagement_mission_en_attente_de_validation") && (
-                  <NoteContainer
-                    title="Mission"
-                    number={stats.engagement.engagement_mission_en_attente_de_validation}
-                    content="missions sont en attente de validation."
-                    btnLabel="À instruire"
-                  />
-                )}
-              </div>
-            </div>
-            <div className="flex justify-center">
-              <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setFullNote(!fullNote)}>
-                <span>{fullNote ? "Voir moins" : "Voir plus"}</span>
-                {fullNote ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
-              </button>
-            </div>
-          </div>
+          <Actus stats={stats} />
           <div className={`flex w-[30%]  flex-col rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!fullKeyNumber ? "h-[584px]" : "h-fit"}`}>
             <div className="flex items-center justify-between pb-4">
               <div className="flex items-center gap-3">
@@ -442,6 +227,324 @@ const NoteContainer = ({ title, number, content, btnLabel }) => {
     </div>
   );
 };
+
+function Actus({ stats }) {
+  const [fullNote, setFullNote] = useState(false);
+
+  function shouldShow(parent, key, index = null) {
+    if (fullNote) return true;
+
+    const entries = Object.entries(parent);
+    for (let i = 0, limit = 0; i < entries.length && limit < 3; i++) {
+      if (Array.isArray(entries[i][1])) {
+        for (let j = 0; j < entries[i][1].length && limit < 3; j++) {
+          if (entries[i][0] === key && index === j) return true;
+          limit++;
+        }
+      } else {
+        if (entries[i][0] === key) return true;
+        limit++;
+      }
+    }
+    return false;
+  }
+
+  function total(parent) {
+    const entries = Object.entries(parent);
+    let limit = 0;
+    for (let i = 0; i < entries.length; i++) {
+      if (Array.isArray(entries[i][1])) {
+        for (let j = 0; j < entries[i][1].length; j++) limit++;
+      } else limit++;
+    }
+    return limit;
+  }
+
+  if (!stats.inscription)
+    return (
+      <div className={`flex w-[70%] flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] h-[584px]"}`}>
+        <div className="text-slate-300 py-8 m-auto text-center animate-pulse text-xl">Chargement des actualités</div>
+      </div>
+    );
+
+  return (
+    <div className={`flex w-[70%] flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!fullNote ? "h-[584px]" : "h-fit"}`}>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <Inscription />
+            <div className="text-sm font-bold leading-5 text-gray-900">Inscriptions</div>
+            <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.inscription)}</div>
+          </div>
+          {shouldShow(stats.inscription, "inscription_en_attente_de_validation") && (
+            <NoteContainer
+              title="Dossier"
+              number={stats.inscription.inscription_en_attente_de_validation}
+              content="dossier d’inscriptions sont en attente de validation."
+              btnLabel="À instruire"
+            />
+          )}
+          {shouldShow(stats.inscription, "inscription_corrigé_à_instruire_de_nouveau") && (
+            <NoteContainer
+              title="Dossier"
+              number={stats.inscription.inscription_corrigé_à_instruire_de_nouveau}
+              content="dossiers d’inscription corrigés sont à instruire de nouveau."
+              btnLabel="À instruire"
+            />
+          )}
+          {shouldShow(stats.inscription, "inscription_en_attente_de_correction") && (
+            <NoteContainer
+              title="Dossier"
+              number={stats.inscription.inscription_en_attente_de_correction}
+              content="dossiers d’inscription en attente de correction."
+              btnLabel="À relancer"
+            />
+          )}
+          {stats.inscription.inscription_en_attente_de_validation_cohorte.map(
+            (item, key) =>
+              shouldShow(stats.inscription, "inscription_en_attente_de_validation_cohorte", key) && (
+                <NoteContainer
+                  key={"inscription_en_attente_de_validation_cohorte" + item.cohort}
+                  title="Droit à l'image"
+                  number={item.count}
+                  content={`dossiers d’inscription en attente de validation pour le séjour de ${item.cohort}`}
+                  btnLabel="À relancer"
+                />
+              ),
+          )}
+          {stats.inscription.inscription_sans_accord_renseigné.map(
+            (item, key) =>
+              shouldShow(stats.inscription, "inscription_sans_accord_renseigné", key) && (
+                <NoteContainer
+                  key={"inscription_sans_accord_renseigné" + item.cohort}
+                  title="Droit à l'image"
+                  number={item.count}
+                  content={`volontaires sans accord renseigné pour le séjour de ${item.cohort}`}
+                  btnLabel="À relancer"
+                />
+              ),
+          )}
+        </div>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <Sejour />
+            <div className="text-sm font-bold leading-5 text-gray-900">Séjours</div>
+            <div className=" rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.sejour)}</div>
+          </div>
+          {stats.sejour.sejour_rassemblement_non_confirmé.map(
+            (item, key) =>
+              shouldShow(stats.sejour, "sejour_rassemblement_non_confirmé", key) && (
+                <NoteContainer
+                  title="Point de rassemblement"
+                  key={"sejour_rassemblement_non_confirmé" + item.cohort}
+                  number={item.count}
+                  content={`volontaires n’ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                  btnLabel="À déclarer"
+                />
+              ),
+          )}
+          {stats.sejour.sejour_participation_non_confirmée.map(
+            (item, key) =>
+              shouldShow(stats.sejour, "sejour_participation_non_confirmée", key) && (
+                <NoteContainer
+                  title="Point de rassemblement"
+                  key={"sejour_participation_non_confirmée" + item.cohort}
+                  number={item.count}
+                  content={`volontaires n’ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                  btnLabel="À déclarer"
+                />
+              ),
+          )}
+          {stats.sejour.sejour_point_de_rassemblement_à_déclarer.map(
+            (item, key) =>
+              shouldShow(stats.sejour, "sejour_point_de_rassemblement_à_déclarer", key) && (
+                <NoteContainer
+                  title="Point de rassemblement"
+                  key={"sejour_point_de_rassemblement_à_déclarer" + item.cohort + item.department}
+                  number=""
+                  content={`Au moins 1 point de rassemblement est à déclarer pour le séjour de ${item.cohort} (${item.department})`}
+                  btnLabel="À déclarer"
+                />
+              ),
+          )}
+          {stats.sejour.sejour_emploi_du_temps_non_déposé.map(
+            (item, key) =>
+              shouldShow(stats.sejour, "sejour_emploi_du_temps_non_déposé", key) && (
+                <NoteContainer
+                  title="Emploi du temps"
+                  key={"sejour_emploi_du_temps_non_déposé" + item.cohort}
+                  number={item.count}
+                  content={`emplois du temps n’ont pas été déposés. ${item.cohort}`}
+                  btnLabel="À relancer"
+                />
+              ),
+          )}
+          {stats.sejour.sejour_contact_à_renseigner.map(
+            (item, key) =>
+              shouldShow(stats.sejour, "sejour_contact_à_renseigner", key) && (
+                <NoteContainer
+                  title="Contact"
+                  key={"sejour_contact_à_renseigner" + item.cohort + item.department}
+                  number=""
+                  content={`Au moins 1 contact de convocation doit être renseigné pour le séjour de ${item.cohort} (${item.department})`}
+                  btnLabel="À renseigner"
+                />
+              ),
+          )}
+          {stats.sejour.sejour_volontaires_à_contacter.map(
+            (item, key) =>
+              shouldShow(stats.sejour, "sejour_volontaires_à_contacter", key) && (
+                <NoteContainer
+                  title="Cas particuliers"
+                  key={"sejour_volontaires_à_contacter" + item.cohort}
+                  number={item.count}
+                  content={`volontaires à contacter pour préparer leur accueil pour le séjour de ${item.cohort}`}
+                  btnLabel="À contacter"
+                />
+              ),
+          )}
+          {stats.sejour.sejour_chef_de_centre.map(
+            (item, key) =>
+              shouldShow(stats.sejour, "sejour_chef_de_centre", key) && (
+                <NoteContainer
+                  title="Chef de centre"
+                  key={"sejour_chef_de_centre" + item.cohort}
+                  number={item.count}
+                  content={`chefs de centre sont à renseigner pour le séjour de  ${item.cohort}`}
+                  btnLabel="À renseigner"
+                />
+              ),
+          )}
+          {stats.sejour.sejour_centre_à_déclarer.map(
+            (item, key) =>
+              shouldShow(stats.sejour, "sejour_centre_à_déclarer", key) && (
+                <NoteContainer
+                  title="Centre"
+                  key={"sejour_centre_à_déclarer" + item.cohort + item.department}
+                  number=""
+                  content={`Au moins 1 centre est en attente de déclaration pour le séjour de ${item.cohort} (${item.department})`}
+                  btnLabel="À déclarer"
+                />
+              ),
+          )}
+          {stats.sejour.sejourPointage.map(
+            (item, key) =>
+              shouldShow(stats.sejour, "sejourPointage", key) && (
+                <NoteContainer
+                  title="Pointage"
+                  key={"sejourPointage" + item.cohort}
+                  number={item.count}
+                  content={`centres n’ont pas pointés tous leurs volontaires à l’arrivée au séjour de ${item.cohort}`}
+                  btnLabel="À renseigner"
+                />
+              ),
+          )}
+          {stats.sejour.sejour_pointage_jdm.map(
+            (item, key) =>
+              shouldShow(stats.sejour, "sejour_pointage_jdm", key) && (
+                <NoteContainer
+                  title="Pointage"
+                  key={"sejour_pointage_jdm" + item.cohort}
+                  number={item.count}
+                  content={`centres n’ont pas pointés tous leurs volontaires à la JDM sur le séjour de ${item.cohort}`}
+                  btnLabel="À renseigner"
+                />
+              ),
+          )}
+        </div>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <Engagement />
+            <div className="text-sm font-bold leading-5 text-gray-900">Engagement</div>
+            <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.engagement)}</div>
+          </div>
+          {shouldShow(stats.engagement, "engagement_contrat_à_éditer") && (
+            <NoteContainer
+              title="Contrat"
+              number={stats.engagement.engagement_contrat_à_éditer}
+              content="contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature."
+              btnLabel="À suivre"
+            />
+          )}
+          {shouldShow(stats.engagement, "engagement_contrat_en_attente_de_signature") && (
+            <NoteContainer
+              title="Contrat"
+              number={stats.engagement.engagement_contrat_en_attente_de_signature}
+              content="contrats d’engagement sont en attente de signature."
+              btnLabel="À suivre"
+            />
+          )}
+          {shouldShow(stats.engagement, "engagement_dossier_militaire_en_attente_de_validation") && (
+            <NoteContainer
+              title="Dossier d’éligibilité"
+              number={stats.engagement.engagement_dossier_militaire_en_attente_de_validation}
+              content="dossiers d’éligibilité en préparation militaire sont en attente de vérification."
+              btnLabel="À vérifier"
+            />
+          )}
+          {shouldShow(stats.engagement, "engagement_mission_en_attente_de_validation") && (
+            <NoteContainer
+              title="Mission"
+              number={stats.engagement.engagement_mission_en_attente_de_validation}
+              content="missions sont en attente de validation."
+              btnLabel="À instruire"
+            />
+          )}
+          {shouldShow(stats.engagement, "engagement_phase3_en_attente_de_validation") && (
+            <NoteContainer
+              title="Phase 3"
+              number={stats.engagement.engagement_phase3_en_attente_de_validation}
+              content="demandes de validation de phase 3 à suivre."
+              btnLabel="À suivre"
+            />
+          )}
+          {stats.engagement.engagement_contrat_à_renseigner.map(
+            (item, key) =>
+              shouldShow(stats.engagement, "engagement_contrat_à_renseigner", key) && (
+                <NoteContainer
+                  title="Contact"
+                  key={"engagement_contrat_à_renseigner" + item.cohort + item.department}
+                  number=""
+                  content={`Au moins 1 représentant de l’État est à renseigner pour le séjour de ${item.cohort} (${item.department})`}
+                  btnLabel="À renseigner"
+                />
+              ),
+          )}
+          {shouldShow(stats.engagement, "volontaires_à_suivre_sans_contrat") && (
+            <NoteContainer
+              title="Volontaires"
+              number={stats.engagement.volontaires_à_suivre_sans_contrat}
+              content="volontaires ayant commencé leur mission sans contrat signé"
+              btnLabel="À suivre"
+            />
+          )}
+          {shouldShow(stats.engagement, "volontaires_à_suivre_sans_statut") && (
+            <NoteContainer
+              title="Volontaires"
+              number={stats.engagement.volontaires_à_suivre_sans_statut}
+              content="volontaires ayant commencé leur mission sans statut à jour"
+              btnLabel="À suivre"
+            />
+          )}
+          {shouldShow(stats.engagement, "volontaires_à_suivre_achevé_sans_statut") && (
+            <NoteContainer
+              title="Volontaires"
+              number={stats.engagement.volontaires_à_suivre_achevé_sans_statut}
+              content="volontaires ayant achevé leur mission sans statut à jour"
+              btnLabel="À suivre"
+            />
+          )}
+        </div>
+      </div>
+      <div className="flex justify-center">
+        <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setFullNote(!fullNote)}>
+          <span>{fullNote ? "Voir moins" : "Voir plus"}</span>
+          {fullNote ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function filterByRegionAndDepartement(e, filters, user) {
   if (filters?.department?.length) return filters.department.includes(e.department);
