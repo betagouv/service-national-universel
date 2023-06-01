@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate } from "snu-lib";
+import { isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate, canEditLigneBusTeam } from "snu-lib";
 import Breadcrumbs from "../../../../components/Breadcrumbs";
 import Loader from "../../../../components/Loader";
 import { capture } from "../../../../sentry";
@@ -10,6 +10,7 @@ import { Title } from "../../components/commons";
 import Creation from "../modificationPanel/Creation";
 import Centre from "./components/Centre";
 import Info from "./components/Info";
+import BusTeam from "./components/BusTeam";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
@@ -21,6 +22,7 @@ export default function View(props) {
   const [panelOpen, setPanelOpen] = React.useState(false);
   const [nbYoung, setNbYoung] = React.useState();
   const [cohort, setCohort] = React.useState();
+  const [addOpen, setAddOpen] = React.useState(false);
   const user = useSelector((state) => state.Auth.user);
 
   const getBus = async () => {
@@ -101,6 +103,9 @@ export default function View(props) {
     getDataForCheck();
     getDemandeDeModification();
   }, []);
+  React.useEffect(() => {
+    setAddOpen(false);
+  }, [data]);
 
   if (!data) return <Loader />;
 
@@ -132,8 +137,20 @@ export default function View(props) {
             <Modification demandeDeModification={demandeDeModification} getModification={getDemandeDeModification} />
           </div>
           <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
-          <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
-          <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
+          <BusTeam bus={data} setBus={setData} title="Chef de file" role={"leader"} />
+          {data.team
+            .filter((item) => item.role === "supervisor")
+            .map((value, number = 0) => (
+              <BusTeam key={value.idTeam} bus={data} setBus={setData} title="Encadrant" role={"supervisor"} number={number++} />
+            ))}
+          {addOpen ? <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} number={data.team.length - 1} /> : null}
+          {canEditLigneBusTeam && data.team.length && data.team.length < 5 && !addOpen ? (
+            <button
+              className="flex cursor-pointer items-center gap-2 px-3 py-2 text-xs leading-5 text-blue-600 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => setAddOpen(true)}>
+              + Ajouter un encadrant
+            </button>
+          ) : null}
 
           <div className="flex items-start gap-4">
             <div className="flex w-1/2 flex-col gap-4">

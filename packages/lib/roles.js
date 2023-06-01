@@ -697,6 +697,10 @@ function canSearchLigneBus(actor) {
   return [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
+function canEditLigneBusTeam(actor) {
+  return [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+}
+
 function canEditLigneBusGeneralInfo(actor) {
   return [ROLES.ADMIN, ROLES.TRANSPORTER].includes(actor.role);
 }
@@ -838,6 +842,7 @@ export {
   canEditLigneBusGeneralInfo,
   canEditLigneBusCenter,
   canEditLigneBusPointDeRassemblement,
+  canEditLigneBusTeam,
   ligneBusCanCreateDemandeDeModification,
   ligneBusCanViewDemandeDeModification,
   ligneBusCanSendMessageDemandeDeModification,

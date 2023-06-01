@@ -5,92 +5,54 @@ const patchHistory = require("mongoose-patch-history").default;
 const { COHORTS } = require("snu-lib");
 const MODELNAME = "lignebus";
 
-const Leader = new mongoose.Schema({
+const BusTeam = new mongoose.Schema({
+  busId: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Numero de bus",
+    },
+  },
+  role: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Role de l'accompagnant",
+    },
+  },
   lastName: {
     type: String,
     required: true,
     documentation: {
-      description: "Nom du chef de file",
+      description: "Nom de l'accompagnant",
     },
   },
   firstName: {
     type: String,
     required: true,
     documentation: {
-      description: "Prenom du chef de file",
+      description: "Prenom de l'accompagnant",
     },
   },
   birthdate: {
     type: Date,
     required: true,
     documentation: {
-      description: "Date de naissance du chef de file",
+      description: "Date de naissance de l'accompagnant",
     },
   },
   mail: {
     type: String,
     required: true,
     documentation: {
-      description: "Email du chef de file",
+      description: "Email de l'accompagnant",
     },
   },
   phone: {
     type: String,
     required: true,
     documentation: {
-      description: "Numéro de téléphone du chef de file",
-    },
-  },
-  forth: {
-    type: Boolean,
-    required: true,
-    documentation: {
-      description: "Concerné par l'aller",
-    },
-  },
-  back: {
-    type: Boolean,
-    required: true,
-    documentation: {
-      description: "Concerné par le retour",
-    },
-  },
-});
-
-const BusSupervisor = new mongoose.Schema({
-  lastName: {
-    type: String,
-    required: true,
-    documentation: {
-      description: "Nom de l'encadrant",
-    },
-  },
-  firstName: {
-    type: String,
-    required: true,
-    documentation: {
-      description: "Prenom de l'encadrant",
-    },
-  },
-  birthdate: {
-    type: Date,
-    required: true,
-    documentation: {
-      description: "Date de naissance de l'encadrant",
-    },
-  },
-  mail: {
-    type: String,
-    required: true,
-    documentation: {
-      description: "Email de l'encadrant",
-    },
-  },
-  phone: {
-    type: String,
-    required: true,
-    documentation: {
-      description: "Numéro de téléphone de l'encadrant",
+      description: "Numéro de téléphone de l'accompagnant",
     },
   },
   forth: {
@@ -238,17 +200,10 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  leader: {
-    type: [Leader],
+  team: {
+    type: [BusTeam],
     documentation: {
-      description: "Informations du Chef de File",
-    },
-  },
-
-  BusSupervisor: {
-    type: [BusSupervisor],
-    documentation: {
-      description: "Informations des encadrants",
+      description: "Liste des accompagnateurs du bus",
     },
   },
 

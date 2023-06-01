@@ -11,6 +11,7 @@ const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRep
 const {
   canViewLigneBus,
   canCreateLigneBus,
+  canEditLigneBusTeam,
   canEditLigneBusGeneralInfo,
   canEditLigneBusCenter,
   canEditLigneBusPointDeRassemblement,
@@ -57,7 +58,6 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
       lunchBreak: Joi.boolean().required(),
       lunchBreakReturn: Joi.boolean().required(),
     }).validate({ ...req.params, ...req.body });
-
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!canEditLigneBusGeneralInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -109,6 +109,95 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
     const infoBus = await getInfoBus(ligne);
 
     return res.status(200).send({ ok: true, data: infoBus });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/team", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      busId: Joi.string().required(),
+      role: Joi.string().required(),
+      idTeam: Joi.string(),
+      lastname: Joi.string().required(),
+      firstname: Joi.string().required(),
+      birthdate: Joi.date().required(),
+      phone: Joi.string().required(),
+      mail: Joi.string().required(),
+      forth: Joi.boolean().required(),
+      back: Joi.boolean().required(),
+    }).validate({ ...req.params, ...req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!canEditLigneBusTeam(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const ligne = await LigneBusModel.findById(value.id);
+    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const NewMember = {
+      busId: value.busId,
+      role: value.role,
+      lastName: value.lastname,
+      firstName: value.firstname,
+      birthdate: value.birthdate,
+      phone: value.phone,
+      mail: value.mail,
+      forth: value.forth,
+      back: value.back,
+    };
+
+    const memberToDelete = ligne.team.id(value.idTeam);
+    if (!memberToDelete) {
+      ligne.team.push(NewMember);
+      await ligne.save({ fromUser: req.user });
+    } else {
+      memberToDelete.remove();
+      ligne.team.push(NewMember);
+      await ligne.save({ fromUser: req.user });
+    }
+
+    const infoBus = await getInfoBus(ligne);
+
+    return res.status(200).send({ ok: true, data: infoBus });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/teamDelete", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      busId: Joi.string().required(),
+      role: Joi.string().required(),
+      idTeam: Joi.string(),
+      lastname: Joi.string().required(),
+      firstname: Joi.string().required(),
+      birthdate: Joi.date().required(),
+      phone: Joi.string().required(),
+      mail: Joi.string().required(),
+      forth: Joi.boolean().required(),
+      back: Joi.boolean().required(),
+    }).validate({ ...req.params, ...req.body });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const ligne = await LigneBusModel.findById(value.id);
+    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const memberToDelete = ligne.team.id(value.idTeam);
+    if (!memberToDelete) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    await memberToDelete.remove();
+    await ligne.save({ fromUser: req.user });
+
+    const infoBus = await getInfoBus(ligne);
+
+    res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
