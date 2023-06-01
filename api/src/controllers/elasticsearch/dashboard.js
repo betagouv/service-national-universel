@@ -373,7 +373,6 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     // Contrat (À renseigner) 1 représentant de l’État est à renseigner
     // engagement_contrat_à_renseigner
     async function contratÀRenseigner() {
-      const cohorts = cohorts;
       if (!cohorts.length) return { engagement_contrat_à_renseigner: [] };
       const departmentsCohortsFromRepartition = await departmentsFromTableRepartition(cohorts);
       // On récupère les entrées de département service pour chaque cohorte groupés par département
