@@ -6,13 +6,6 @@ const { COHORTS } = require("snu-lib");
 const MODELNAME = "lignebus";
 
 const BusTeam = new mongoose.Schema({
-  busId: {
-    type: String,
-    required: true,
-    documentation: {
-      description: "Numero de bus",
-    },
-  },
   role: {
     type: String,
     required: true,

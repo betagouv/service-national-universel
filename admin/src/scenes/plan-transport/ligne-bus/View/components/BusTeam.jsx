@@ -9,14 +9,14 @@ import { toastr } from "react-redux-toastr";
 import api from "../../../../../services/api";
 import Toggle from "../../../../../components/Toggle";
 import Bin from "../../../../../assets/Bin";
+import validator from "validator";
 
-export default function BusTeam({ bus, setBus, title, role, number = 0 }) {
+export default function BusTeam({ bus, setBus, title, role, number = 0, setAddOpen }) {
   const user = useSelector((state) => state.Auth.user);
   const [editInfo, setEditInfo] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [errors, setErrors] = React.useState({});
   const [data, setData] = React.useState({
-    busId: bus.busId || "",
     role: role,
     forth: false,
     back: false,
@@ -25,35 +25,31 @@ export default function BusTeam({ bus, setBus, title, role, number = 0 }) {
   React.useEffect(() => {
     const leader = bus.team.filter((item) => item.role === "leader");
     const supervisor = bus.team.filter((item) => item.role === "supervisor");
-
+    if (setAddOpen) setEditInfo(true);
     if (role === "leader") {
-      if (leader.length)
-        setData({
-          busId: bus.busId || "",
-          role: role,
-          idTeam: leader[0]._id,
-          firstname: leader[0].firstName,
-          lastname: leader[0].lastName,
-          birthdate: leader[0].birthdate,
-          mail: leader[0].mail,
-          phone: leader[0].phone,
-          forth: leader[0].forth,
-          back: leader[0].back,
-        });
+      setData({
+        role: role,
+        idTeam: leader[0]?._id || "",
+        firstname: leader[0]?.firstName || "",
+        lastname: leader[0]?.lastName || "",
+        birthdate: leader[0]?.birthdate || "",
+        mail: leader[0]?.mail || "",
+        phone: leader[0]?.phone || "",
+        forth: leader[0]?.forth || "",
+        back: leader[0]?.back || "",
+      });
     } else {
-      if (supervisor.length)
-        setData({
-          busId: bus.busId || "",
-          role: role,
-          idTeam: supervisor[number]?._id || "create",
-          firstname: supervisor[number]?.firstName || "",
-          lastname: supervisor[number]?.lastName || "",
-          birthdate: supervisor[number]?.birthdate || "",
-          mail: supervisor[number]?.mail || "",
-          phone: supervisor[number]?.phone || "",
-          forth: supervisor[number]?.forth || false,
-          back: supervisor[number]?.back || false,
-        });
+      setData({
+        role: role,
+        idTeam: supervisor[number]?._id || "create",
+        firstname: supervisor[number]?.firstName || "",
+        lastname: supervisor[number]?.lastName || "",
+        birthdate: supervisor[number]?.birthdate || "",
+        mail: supervisor[number]?.mail || "",
+        phone: supervisor[number]?.phone || "",
+        forth: supervisor[number]?.forth || false,
+        back: supervisor[number]?.back || false,
+      });
     }
     setErrors({});
   }, [editInfo]);
@@ -63,6 +59,17 @@ export default function BusTeam({ bus, setBus, title, role, number = 0 }) {
       setIsLoading(true);
       setErrors({});
       let errors = {};
+
+      const errorEmail = "Adresse email invalide";
+      const errorPhone = "Numéro de téléphone invalide";
+
+      if (!validator.isEmail(data.mail)) {
+        errors.mail = errorEmail;
+      }
+      if (!validator.isMobilePhone(data.phone)) {
+        errors.phone = errorPhone;
+      }
+
       if (!data.firstname) errors.firstname = "Ce champ est obligatoire";
       if (!data.lastname) errors.lastname = "Ce champ est obligatoire";
       if (!data.birthdate) errors.birthdate = "Ce champ est obligatoire";
@@ -94,9 +101,9 @@ export default function BusTeam({ bus, setBus, title, role, number = 0 }) {
   };
 
   const DeleteInfo = async () => {
+    if (data.idTeam === "create") return setAddOpen(false);
     try {
       setIsLoading(true);
-
       //delete data
       const { ok, code, data: ligneInfo } = await api.put(`/ligne-de-bus/${bus._id}/teamDelete`, data);
       if (!ok) {
@@ -183,7 +190,7 @@ export default function BusTeam({ bus, setBus, title, role, number = 0 }) {
           <div className="my-2 h-full w-[1px] border-r-[1px] border-gray-300"></div>
         </div>
         <div className="flex w-[45%] flex-col gap-4 ">
-          <Field label="Numéro de ligne" value={data.busId} readOnly={true} />
+          <Field label="Numéro de ligne" value={bus.busId} readOnly={true} />
           <div className="flex items-center gap-4 rounded-lg bg-gray-100 p-3 text-sm text-gray-800 justify-between">
             <div className="font-medium text-gray-800">Concerné par l'aller : </div>
             <Toggle

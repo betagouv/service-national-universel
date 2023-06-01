@@ -138,15 +138,27 @@ export default function View(props) {
           </div>
           <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
           <BusTeam bus={data} setBus={setData} title="Chef de file" role={"leader"} />
-          {data.team
-            .filter((item) => item.role === "supervisor")
-            .map((value, number = 0) => (
-              <BusTeam key={value.idTeam} bus={data} setBus={setData} title="Encadrant" role={"supervisor"} number={number++} />
-            ))}
-          {addOpen ? <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} number={data.team.length - 1} /> : null}
-          {canEditLigneBusTeam && data.team.length && data.team.length < 5 && !addOpen ? (
+          {data.team.length > 1 ? (
+            data.team
+              .filter((item) => item.role === "supervisor")
+              .map((value, number = 0) => <BusTeam key={value.idTeam} bus={data} setBus={setData} title="Encadrant" role={"supervisor"} number={number++} />)
+          ) : (
+            <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} />
+          )}
+
+          {addOpen ? (
+            <BusTeam
+              bus={data}
+              setBus={setData}
+              title="Encadrant"
+              role={"supervisor"}
+              setAddOpen={setAddOpen}
+              number={data.team.filter((item) => item.role === "leader").length ? data.team.length - 1 : data.team.length}
+            />
+          ) : null}
+          {canEditLigneBusTeam && data.team.filter((item) => item.role === "supervisor").length > 0 && data.team.length < 5 && !addOpen ? (
             <button
-              className="flex cursor-pointer items-center gap-2 px-3 py-2 text-xs leading-5 text-blue-600 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex cursor-pointer border-[1px] border-gray-200 justify-center rounded-lg bg-gray-200 py-2.5 text-sm text-gray-800 w-[30%] m-auto hover:border-gray-400"
               onClick={() => setAddOpen(true)}>
               + Ajouter un encadrant
             </button>

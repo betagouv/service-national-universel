@@ -119,7 +119,6 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
-      busId: Joi.string().required(),
       role: Joi.string().required(),
       idTeam: Joi.string(),
       lastname: Joi.string().required(),
@@ -137,7 +136,6 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
     const ligne = await LigneBusModel.findById(value.id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const NewMember = {
-      busId: value.busId,
       role: value.role,
       lastName: value.lastname,
       firstName: value.firstname,
@@ -151,12 +149,11 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
     const memberToDelete = ligne.team.id(value.idTeam);
     if (!memberToDelete) {
       ligne.team.push(NewMember);
-      await ligne.save({ fromUser: req.user });
     } else {
       memberToDelete.remove();
       ligne.team.push(NewMember);
-      await ligne.save({ fromUser: req.user });
     }
+    await ligne.save({ fromUser: req.user });
 
     const infoBus = await getInfoBus(ligne);
 
@@ -171,9 +168,8 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
-      busId: Joi.string().required(),
+      idTeam: Joi.string().required(),
       role: Joi.string().required(),
-      idTeam: Joi.string(),
       lastname: Joi.string().required(),
       firstname: Joi.string().required(),
       birthdate: Joi.date().required(),
