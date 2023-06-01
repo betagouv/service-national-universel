@@ -201,8 +201,8 @@ const youngExportFields = [
   {
     id: "phase1Attendance",
     title: "Phase 1 - Présence",
-    desc: ["Présence à l'arrivé", "Présence à la JDM", "Date de départ", "Motif de départ"],
-    fields: ["cohesionStayPresence", "presenceJDM", "departSejourAt", "departSejourMotif"],
+    desc: ["Présence à l'arrivé", "Présence à la JDM", "Date de départ", "Motif de départ", "Commentaire du départ"],
+    fields: ["cohesionStayPresence", "presenceJDM", "departSejourAt", "departSejourMotif", "departSejourMotifComment"],
   },
   {
     id: "phase2",

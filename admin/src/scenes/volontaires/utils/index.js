@@ -473,6 +473,7 @@ export async function transformVolontaires(data, values, centers, sessionsPhase1
         "Présence à la JDM": !data.presenceJDM ? "Non renseignée" : data.presenceJDM === "true" ? "Présent" : "Absent",
         "Date de départ": !data.departSejourAt ? "Non renseignée" : formatDateFRTimezoneUTC(data.departSejourAt),
         "Motif du départ": data?.departSejourMotif,
+        "Commentaire du départ": data?.departSejourMotifComment,
       },
       phase2: {
         "Domaine de MIG 1": data.domains[0],
