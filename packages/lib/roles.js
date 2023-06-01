@@ -202,7 +202,7 @@ function canViewReferent(actor, target) {
 }
 
 function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, structure }) {
-  const isMe = actor.id === originalTarget.id;
+  const isMe = actor._id === originalTarget._id;
   const isAdmin = actor.role === ROLES.ADMIN;
   const withoutChangingRole = modifiedTarget === null || !("role" in modifiedTarget) || modifiedTarget.role === originalTarget.role;
   const isResponsibleModifyingResponsibleWithoutChangingRole =
@@ -261,7 +261,8 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
       isReferentModifyingReferentWithoutChangingRole ||
       isReferentModifyingHeadCenterWithoutChangingRole) &&
     (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion || isReferentModifyingHeadCenterWithoutChangingRole : true) &&
-    (actor.role === ROLES.REFERENT_DEPARTMENT ? isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole : true);
+    (actor.role === ROLES.REFERENT_DEPARTMENT ? ([ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) || isMe) &&
+      (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole) : true);
   return authorized;
 }
 
