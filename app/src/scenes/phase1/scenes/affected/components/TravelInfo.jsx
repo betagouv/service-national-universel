@@ -3,14 +3,12 @@ import dayjs from "dayjs";
 import LongArrow from "../../../../../assets/icons/LongArrow";
 import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR } from "../utils/steps.utils.js";
 
-export default function TravelInfo({ location, cohortDetails }) {
-  if (!location || !cohortDetails) {
+export default function TravelInfo({ location, goDate, returnDate }) {
+  if (!location) {
     return <></>;
   }
 
-  const goDate = location?.bus?.departuredDate || cohortDetails.dateStart;
   const goHour = location?.ligneToPoint?.meetingHour || ALONE_ARRIVAL_HOUR;
-  const returnDate = location?.bus?.returnDate || cohortDetails.dateEnd;
   const returnHour = location?.ligneToPoint?.returnHour || ALONE_DEPARTURE_HOUR;
 
   return (

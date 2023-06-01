@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { translate, translateCohort, youngCanChangeSession } from "snu-lib";
-import { getCohortDetail } from "../../../../utils/cohorts";
+import { getCohort } from "../../../../utils/cohorts";
 import { isStepMedicalFieldDone } from "./utils/steps.utils";
 import api from "../../../../services/api";
 
@@ -16,6 +16,7 @@ import Problem from "./components/Problem";
 import StepsAffected from "./components/StepsAffected";
 import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
+import dayjs from "dayjs";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -23,7 +24,7 @@ export default function Affected() {
   const [meetingPoint, setMeetingPoint] = useState();
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const [loading, setLoading] = useState(true);
-  const cohortDetails = getCohortDetail(young.cohort);
+  const cohortDetails = getCohort(young.cohort);
 
   if (isStepMedicalFieldDone(young)) {
     window.scrollTo(0, 0);
@@ -46,6 +47,20 @@ export default function Affected() {
       setLoading(false);
     })();
   }, [young]);
+
+  // If the user has a meeting point, get the dates from there. If not, get the dates from global cohort data.
+  const goDate = meetingPoint?.bus?.departuredDate || cohortDetails.dateStart;
+  const returnDate = meetingPoint?.bus?.returnDate || cohortDetails.dateEnd;
+
+  const cohesionStayDates = () => {
+    // Display the month name for departure date only if it is different from the return date.
+    const goDateFormatString = new Date(goDate).getMonth() === new Date(returnDate).getMonth() ? "D" : "D MMMM";
+
+    if (goDate && returnDate) {
+      return `du ${dayjs(goDate).locale("fr").format(goDateFormatString)} au ${dayjs(returnDate).locale("fr").format("D MMMM YYYY")}`;
+    }
+    return translateCohort(young.cohort);
+  };
 
   if (loading) {
     return (
@@ -75,7 +90,7 @@ export default function Affected() {
             <h1 className="text-2xl md:space-y-4 md:text-5xl">
               Mon séjour de cohésion
               <br />
-              <strong className="flex items-center">{translateCohort(young.cohort)}</strong>
+              <strong className="flex items-center">{cohesionStayDates()}</strong>
             </h1>
             {youngCanChangeSession(young) ? <ChangeStayLink className="my-4 md:my-8" /> : null}
           </div>
@@ -85,7 +100,7 @@ export default function Affected() {
 
         {isStepMedicalFieldDone(young) && (
           <div className="order-2 flex flex-none flex-col gap-4 md:flex-row">
-            <TravelInfo location={young?.meetingPointId ? meetingPoint : center} cohortDetails={cohortDetails} />
+            <TravelInfo location={young?.meetingPointId ? meetingPoint : center} goDate={goDate} returnDate={returnDate} />
             <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
           </div>
         )}
