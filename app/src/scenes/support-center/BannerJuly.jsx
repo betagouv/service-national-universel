@@ -3,7 +3,7 @@ import { CgDanger } from "react-icons/cg";
 
 function BannerJuly() {
   return (
-    <div className="bg-yellow-50 border-yellow-400 border-2 text-gray-800 p-4 rounded-md flex flex-col md:flex-row gap-4 my-8 max-w-6xl mx-auto">
+    <div className="bg-yellow-50 border-yellow-400 border-2 text-gray-800 p-4 rounded-md flex flex-col md:flex-row gap-4 my-8 max-w-6xl mx-[0.5rem] md:mx-auto">
       <CgDanger className="text-yellow-400 mx-auto" size={24} />
       <div className="flex-1 text-left space-y-4 leading-relaxed text-sm">
         <p>
