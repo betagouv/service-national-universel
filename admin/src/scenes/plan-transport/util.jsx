@@ -255,3 +255,136 @@ async function getAllResults(index, query) {
   if (!result.data.length) return [];
   return result.data;
 }
+
+export async function exportLigneBusJeune(user, cohort, ligne, travel) {
+  try {
+    const filter = {
+      busId: [ligne],
+    };
+
+    const resultat = await API.post("/elasticsearch/plandetransport/export", {
+      filters: filter,
+      exportFields: "*",
+    });
+    const data = resultat.data[0];
+    console.log(data);
+    if (!data) return toastr.error("Aucune ligne de bus n'a été trouvée");
+
+    const bodyYoung = {
+      query: {
+        bool: {
+          must: [{ match_all: {} }, { term: { "cohort.keyword": cohort } }, { term: { "status.keyword": "VALIDATED" } }, { terms: { "ligneId.keyword": [data._id] } }],
+          must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
+        },
+      },
+      aggs: {
+        group_by_bus: {
+          terms: {
+            field: "ligneId.keyword",
+            size: ES_NO_LIMIT,
+          },
+        },
+      },
+      track_total_hits: true,
+    };
+
+    const youngs = await getAllResults("young-having-meeting-point-in-geography", bodyYoung);
+    if (!youngs || !youngs.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
+    console.log(youngs);
+
+    const mappy = (value) => {
+      return data.pointDeRassemblements.filter((point) => point.meetingPointId === value.meetingPointId)[0];
+    };
+    let excel = youngs.map((item) =>
+      excel.push({
+        "Numéro de ligne": data.busId,
+        "Adresse du point de RDV": data.pointDeRassemblements.filter((point) => point.meetingPointId === item.meetingPointId)[0].address,
+        "Heure de convocation": data.pointDeRassemblements.filter((point) => point.meetingPointId === item.meetingPointId)[0].meetingHour,
+      }),
+    );
+
+    /* for (const young of youngs) {
+      const tempYoung = young;
+      const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint.meetingPointId === young.meetingPointId);
+      const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
+
+      if (youngMeetingPoint) {
+        if (!result[youngLigneBus.busId]) {
+          result[youngLigneBus.busId] = {};
+          result[youngLigneBus.busId]["youngs"] = [];
+          result[youngLigneBus.busId]["ligneBus"] = [];
+          result[youngLigneBus.busId]["meetingPoint"] = [];
+        }
+        if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint.meetingPointId === youngMeetingPoint.meetingPointId)) {
+          result[youngLigneBus.busId]["meetingPoint"].push(youngMeetingPoint);
+        }
+        if (!result[youngLigneBus.busId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
+          result[youngLigneBus.busId]["ligneBus"].push(youngLigneBus);
+        }
+        result[youngLigneBus.busId]["youngs"].push(tempYoung);
+      }
+    } */
+    // Transform data into array of objects before excel converts
+    /* const formatedRep = Object.keys(result).map((key) => {
+      return {
+        name: key,
+        data: result[key].youngs.map((young) => {
+          const meetingPoint = young.meetingPointId && result[key].meetingPoint.find((mp) => mp.meetingPointId === young.meetingPointId);
+          const ligneBus = young.ligneId && result[key].ligneBus.find((lb) => lb._id === young.ligneId);
+
+          return {
+            _id: young._id,
+            Cohorte: young.cohort,
+            Prénom: young.firstName,
+            Nom: young.lastName,
+            Email: young.email,
+            Téléphone: young.phone,
+            Département: young.department,
+            Académie: translate(young.academie),
+            Région: young.region,
+
+            "Statut représentant légal 1": translate(young.parent1Status),
+            "Prénom représentant légal 1": young.parent1FirstName,
+            "Nom représentant légal 1": young.parent1LastName,
+            "Email représentant légal 1": young.parent1Email,
+            "Téléphone représentant légal 1": young.parent1Phone,
+
+            "Statut représentant légal 2": translate(young.parent2Status),
+            "Prénom représentant légal 2": young.parent2FirstName,
+            "Nom représentant légal 2": young.parent2LastName,
+            "Email représentant légal 2": young.parent2Email,
+            "Téléphone représentant légal 2": young.parent2Phone,
+
+            "ID centre": ligneBus.centerId,
+            "Code centre": ligneBus.centerCode,
+            "Nom du centre": ligneBus.centerName,
+            "Adresse du centre": ligneBus.centerAddress,
+            "Ville du centre": ligneBus.centerCity,
+            "Département du centre": ligneBus.centerDepartment,
+            "Région du centre": ligneBus.centerRegion,
+
+            "Id du point de rassemblement": meetingPoint.meetingPointId,
+            "Nom point de rassemblement": meetingPoint.name,
+            "Adresse point de rassemblement": meetingPoint.address,
+            "Ville point de rassemblement": meetingPoint.city,
+            "Département point de rassemblement": meetingPoint.department,
+            "Région point de rassemblement": meetingPoint.region,
+
+            "Date aller": ligneBus.departureString,
+            "Date retour": ligneBus.returnString,
+
+            "Statut général": translate(young.status),
+            "Statut phase 1": translate(young.statusPhase1),
+            "Droit à l'image": translate(young.imageRight),
+            "Confirmation de participation au séjour de cohésion": translate(young.youngPhase1Agreement),
+          };
+        }),
+      };
+    });
+
+    generateExcelWorkbook(formatedRep, "Listes_volontaires_par_ligne"); */
+  } catch (e) {
+    console.log(e);
+    toastr.error("Erreur !", translate(e.code));
+  }
+}

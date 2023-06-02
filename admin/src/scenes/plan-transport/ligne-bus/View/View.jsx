@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate } from "snu-lib";
+import { isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate, canExportLigneBus } from "snu-lib";
 import Breadcrumbs from "../../../../components/Breadcrumbs";
 import Loader from "../../../../components/Loader";
 import { capture } from "../../../../sentry";
@@ -13,6 +13,9 @@ import Info from "./components/Info";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
+import SelectAction from "../../../../components/SelectAction";
+import { exportLigneBusJeune } from "../../util";
+import Bus from "../../../../assets/icons/Bus";
 
 export default function View(props) {
   const [data, setData] = React.useState(null);
@@ -104,6 +107,45 @@ export default function View(props) {
 
   if (!data) return <Loader />;
 
+  let exportItems = [
+    {
+      key: "exportData",
+      action: async () => {
+        await exportLigneBusJeune(user, cohort.name, data.busId, "total");
+      },
+      render: (
+        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+          <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+          <div className="text-sm text-gray-700">Informations complètes</div>
+        </div>
+      ),
+    },
+    {
+      key: "exportDataAller",
+      action: async () => {
+        await exportLigneBusJeune(user, cohort.name, data.busId, "aller");
+      },
+      render: (
+        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+          <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+          <div className="text-sm text-gray-700">Informations Aller</div>
+        </div>
+      ),
+    },
+    {
+      key: "exportDataRetour",
+      action: async () => {
+        await exportLigneBusJeune(user, cohort.name, data.BusId, "retour");
+      },
+      render: (
+        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+          <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+          <div className="text-sm text-gray-700">Informations Retour</div>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <>
       <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
@@ -113,13 +155,31 @@ export default function View(props) {
             <Title>{data.busId}</Title>
             <div className="cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]">{data.cohort}</div>
           </div>
-          {ligneBusCanCreateDemandeDeModification(user) && isLigneBusDemandeDeModificationOpen(user, cohort) && (
-            <button
-              className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
-              onClick={() => setPanelOpen(true)}>
-              Demander une modification
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {ligneBusCanCreateDemandeDeModification(user) && isLigneBusDemandeDeModificationOpen(user, cohort) && (
+              <button
+                className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
+                onClick={() => setPanelOpen(true)}>
+                Demander une modification
+              </button>
+            )}
+            {canExportLigneBus(user) && (
+              <SelectAction
+                title="Exporter la ligne"
+                alignItems="right"
+                buttonClassNames="bg-blue-600"
+                textClassNames="text-white font-medium text-sm"
+                rightIconClassNames="text-blue-300"
+                optionsGroup={[
+                  {
+                    key: "export",
+                    title: "Télécharger",
+                    items: exportItems,
+                  },
+                ]}
+              />
+            )}
+          </div>
         </div>
         <div className="flex flex-col gap-8">
           <div className="flex gap-4">
