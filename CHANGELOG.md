@@ -1,3 +1,18 @@
+# [1.284.0](https://github.com/betagouv/service-national-universel/compare/v1.283.0...v1.284.0) (2023-06-02)
+
+
+### Bug Fixes
+
+* **api:** login attempts on reset mdp ([#2673](https://github.com/betagouv/service-national-universel/issues/2673)) ([9a4c310](https://github.com/betagouv/service-national-universel/commit/9a4c3101d089034f3e65426df2763c6b7adcb862))
+* **api:** modal affectation bus on good cohort ([2cc3639](https://github.com/betagouv/service-national-universel/commit/2cc363984eb31f5e0408dbadfa37c2bee0aa2504))
+* **api:** Password change At ([2360a4b](https://github.com/betagouv/service-national-universel/commit/2360a4b584c2608bb2f4447debcbf77d97224264))
+
+
+### Features
+
+* **app:** Mon compte/Home - Statut "Sur liste d'attente" : Ajouter liens vers changement de séjour et désistement ([#2672](https://github.com/betagouv/service-national-universel/issues/2672)) ([8ab85fc](https://github.com/betagouv/service-national-universel/commit/8ab85fc92bbdab59f4474c0e3efda18309fab600))
+* **dmin/api:** Ajouter une équipe d'accompagnant sur les lignes de bus ([#2670](https://github.com/betagouv/service-national-universel/issues/2670)) ([2f76017](https://github.com/betagouv/service-national-universel/commit/2f760179c9db13f3c6d6720e9b1a3fdd8b2548e2))
+
 # [1.283.0](https://github.com/betagouv/service-national-universel/compare/v1.282.0...v1.283.0) (2023-06-01)
 
 
