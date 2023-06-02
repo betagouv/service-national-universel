@@ -142,7 +142,7 @@ export default function View(props) {
           </div>
           <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
 
-          <BusTeam bus={data} setBus={setData} title={"Chef de file"} role={"leader"} idTeam={leader} />
+          <BusTeam bus={data} setBus={setData} title={"Chef de file"} role={"leader"} idTeam={leader} addOpen={addOpen}/>
           {data.team.filter((item) => item.role === "supervisor").length > 0 ? (
             data.team
               .filter((item) => item.role === "supervisor")
