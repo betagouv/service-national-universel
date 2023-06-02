@@ -1,8 +1,8 @@
 import LinkInline from "../../../components/ui/links/LinkInline";
 import React from "react";
 
-function WaitingListContent(showLinks) {
-  if (showLinks) {
+function WaitingListContent({ showLinks }) {
+  if (showLinks == true) {
     return (
       <>
         <p>
