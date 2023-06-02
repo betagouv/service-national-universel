@@ -90,6 +90,16 @@
                 font-style: italic;
                 margin-top: 1cm;
             }
+
+            .authorization {
+                display: flex;
+                align-items: flex-start;
+            }
+
+            .authorization p {
+                margin-left: 0.5cm;
+                margin-top: 0;
+            }
         </style>
     </head>
     <body>
@@ -103,13 +113,17 @@
             <p class="block2Parents"><b>Je, soussign&eacute;(e), repr&eacute;sentant l&eacute;gal n&deg;2 : </b><i>{{PARENT2}}</i></p>
             <p><b>Représentant<span class="span2Parents">s</span> <span class="span1Parent">légal</span><span class="span2Parents">légaux</span> de </b><i>{{YOUNG_NAME}}</i></p>
 
-            <div class="allow">
+            <div class="authorization">
+                <div class="allow">&#9745;</div>
+                <div class="disallow">&#9744;</div>
                 <p><span class="span1Parent">autorise</span><span class="span2Parents">autorisons</span> le Ministère de l’Education Nationale et de la Jeunesse (MENJ), ses partenaires et
                     les journalistes dûment accrédités par les services communication du ministère et/ou des préfectures à
                     enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en
                     intégralité, ensemble ou séparément, sur leurs publications respectives.</p>
             </div>
-            <div class="disallow">
+            <div class="authorization">
+                <div class="disallow">&#9745;</div>
+                <div class="allow">&#9744;</div>
                 <p>n&apos;<span class="span1Parent">autorise</span><span class="span2Parents">autorisons</span> pas le MENJ et les journalistes à enregistrer, reproduire et représenter l’image
                     et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou séparément, sur les
                     supports détaillés ci-dessous.</p>
