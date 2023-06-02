@@ -7,7 +7,7 @@ import plausibleEvent from "../../services/plausible";
 import { COHESION_STAY_LIMIT_DATE } from "../../utils";
 import { getCohort } from "../../utils/cohorts";
 import Clock from "../../assets/icons/Clock";
-import LinkInline from "../../components/ui/links/LinkInline";
+import WaitingListContent from "./components/WaitingListContent";
 
 export default function WaitingList() {
   const young = useSelector((state) => state.Auth.young);
@@ -31,7 +31,7 @@ export default function WaitingList() {
               <div className="flex gap-5">
                 <Clock className="text-gray-600 flex-1 rounded-full bg-gray-100 p-2" />
                 <div className="flex-1 text-sm leading-5 text-gray-500 space-y-6">
-                  <Content showLinks={cohort?.uselessInformation?.showChangeCohortButtonOnHomeWaitingList} />
+                  <WaitingListContent showLinks={cohort?.uselessInformation?.showChangeCohortButtonOnHomeWaitingList} />
                 </div>
               </div>
               <hr className="text-gray-200" />
@@ -63,7 +63,7 @@ export default function WaitingList() {
             <div className="flex gap-2 my-2">
               <Clock className="text-gray-600 rounded-full bg-gray-100 p-2" />
               <div className="flex-1 text-sm leading-5 text-gray-500 space-y-4">
-                <Content showLinks={cohort?.uselessInformation?.showChangeCohortButtonOnHomeWaitingList} />
+                <WaitingListContent showLinks={cohort?.uselessInformation?.showChangeCohortButtonOnHomeWaitingList} />
               </div>
             </div>
             <hr className="text-gray-200" />
@@ -82,23 +82,4 @@ export default function WaitingList() {
       </div>
     </>
   );
-}
-
-function Content(showLinks) {
-  if (showLinks) {
-    return (
-      <>
-        <p>
-          Des places peuvent se libérer à tout moment. Si vous le souhaitez, vous pouvez donc être convoqué(e) dans les prochains jours et jusqu’à l’avant-veille du départ en
-          séjour. Pour cela, vous n’avez rien à faire : restez inscrit à ce séjour.
-        </p>
-        <p>
-          Par contre, si vous ne souhaitez pas recevoir une convocation tardive, vous pouvez choisir de vous{" "}
-          <LinkInline to="/changer-de-sejour">positionner sur un séjour à venir</LinkInline> ou bien{" "}
-          <LinkInline to="account/general?desistement=1">retirer votre candidature</LinkInline>.
-        </p>
-      </>
-    );
-  }
-  return <p>Votre inscription au SNU est bien validée. Nous vous recontacterons dès qu’une place se libère dans les prochains jours.</p>;
 }
