@@ -142,12 +142,14 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
                     <Bin /> Supprimer
                   </button>
                 ) : null}
-                <button
-                  className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={() => setEditInfo(false)}
-                  disabled={isLoading}>
-                  Annuler
-                </button>
+                {addOpen === false ? (
+                  <button
+                    className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={() => setEditInfo(false)}
+                    disabled={isLoading}>
+                    Annuler
+                  </button>
+                ) : null}
                 <button
                   className="flex cursor-pointer items-center gap-2 rounded-full  border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={onSubmitInfo}
