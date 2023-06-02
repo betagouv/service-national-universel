@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate, canEditLigneBusTeam } from "snu-lib";
+import { isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate, canExportLigneBus } from "snu-lib";
 import Breadcrumbs from "../../../../components/Breadcrumbs";
 import Loader from "../../../../components/Loader";
 import { capture } from "../../../../sentry";
@@ -14,7 +14,8 @@ import BusTeam from "./components/BusTeam";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
-import validator from "validator";
+import SelectAction from "../../../../components/SelectAction";
+import Bus from "../../../../assets/icons/Bus";
 
 export default function View(props) {
   const [data, setData] = React.useState(null);
@@ -38,7 +39,6 @@ export default function View(props) {
       };
 
       const { responses } = await api.esQuery("young", body, null, "?showAffectedToRegionOrDep=1");
-
       setNbYoung(responses[0].hits.total.value);
 
       if (!ok) {
@@ -108,7 +108,9 @@ export default function View(props) {
     setAddOpen(false);
   }, [data]);
   if (!data) return <Loader />;
+
   const leader = data.team.filter((item) => item.role === "leader")[0]?._id || null;
+
   return (
     <>
       <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
@@ -118,13 +120,15 @@ export default function View(props) {
             <Title>{data.busId}</Title>
             <div className="cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]">{data.cohort}</div>
           </div>
-          {ligneBusCanCreateDemandeDeModification(user) && isLigneBusDemandeDeModificationOpen(user, cohort) && (
-            <button
-              className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
-              onClick={() => setPanelOpen(true)}>
-              Demander une modification
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {ligneBusCanCreateDemandeDeModification(user) && isLigneBusDemandeDeModificationOpen(user, cohort) && (
+              <button
+                className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
+                onClick={() => setPanelOpen(true)}>
+                Demander une modification
+              </button>
+            )}
+          </div>
         </div>
         <div className="flex flex-col gap-8">
           <div className="flex gap-4">
@@ -142,7 +146,9 @@ export default function View(props) {
           {data.team.filter((item) => item.role === "supervisor").length > 0 ? (
             data.team
               .filter((item) => item.role === "supervisor")
-              .map((value) => <BusTeam key={value._id} bus={data} setBus={setData} title="Encadrant" role={"supervisor"} idTeam={value._id} setAddOpen={setAddOpen} />)
+              .map((value) => (
+                <BusTeam key={value._id} bus={data} setBus={setData} title="Encadrant" role={"supervisor"} idTeam={value._id} addOpen={addOpen} setAddOpen={setAddOpen} />
+              ))
           ) : (
             <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} />
           )}

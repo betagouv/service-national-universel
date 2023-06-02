@@ -150,8 +150,16 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
     if (!memberToDelete) {
       ligne.team.push(NewMember);
     } else {
-      memberToDelete.remove();
-      ligne.team.push(NewMember);
+      memberToDelete.set({
+        role: value.role,
+        lastName: value.lastname,
+        firstName: value.firstname,
+        birthdate: value.birthdate,
+        phone: value.phone,
+        mail: value.mail,
+        forth: value.forth,
+        back: value.back,
+      });
     }
     await ligne.save({ fromUser: req.user });
 

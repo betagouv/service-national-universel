@@ -11,7 +11,7 @@ import Toggle from "../../../../../components/Toggle";
 import Bin from "../../../../../assets/Bin";
 import validator from "validator";
 
-export default function BusTeam({ bus, setBus, title, role, setAddOpen, idTeam }) {
+export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen, idTeam }) {
   const user = useSelector((state) => state.Auth.user);
   const [editInfo, setEditInfo] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -63,7 +63,7 @@ export default function BusTeam({ bus, setBus, title, role, setAddOpen, idTeam }
       if (!data.birthdate) errors.birthdate = "Ce champ est obligatoire";
       if (!data.mail) errors.mail = "Ce champ est obligatoire";
       if (!data.phone) errors.phone = "Ce champ est obligatoire";
-      if (data.forth === false && data.back === false) errors.travel = "Vous devez valider un aller ou un retour";
+      if (data.forth === false && data.back === false) errors.travel = "Vous devez valider un aller et/ou un retour";
 
       if (Object.keys(errors).length > 0) {
         setErrors(errors);
@@ -89,7 +89,10 @@ export default function BusTeam({ bus, setBus, title, role, setAddOpen, idTeam }
   };
 
   const DeleteInfo = async () => {
-    if (data.idTeam === "create") return setAddOpen(false);
+    if (data.idTeam === "create" && setAddOpen) return setAddOpen(false);
+    if (data.idTeam === "create") {
+      return setEditInfo(false);
+    }
     try {
       setIsLoading(true);
       //delete data
@@ -116,7 +119,7 @@ export default function BusTeam({ bus, setBus, title, role, setAddOpen, idTeam }
           <>
             {!editInfo ? (
               <>
-                {role === "supervisor" && bus.team.filter((item) => item.role === "supervisor").length && bus.team.length < 5 ? (
+                {role === "supervisor" && bus.team.filter((item) => item.role === "supervisor").length && bus.team.length < 5 && !addOpen ? (
                   <button className="flex text-blue-600 mr-[44rem] mt-1 cursor-pointer text-sm hover:underline" onClick={() => setAddOpen(true)}>
                     + Ajouter un encadrant
                   </button>
