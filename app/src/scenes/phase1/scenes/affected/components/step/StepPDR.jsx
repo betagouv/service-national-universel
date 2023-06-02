@@ -168,6 +168,8 @@ export default function StepPDR({ young, center }) {
             <h1 className={`text-base leading-7 ${enabled ? "text-gray-900" : "text-gray-400"}`}>
               {young.meetingPointId || young.deplacementPhase1Autonomous === "true"
                 ? "Lieu de rassemblement"
+                : young?.transportInfoGivenByLocal === "true"
+                ? "Confirmation du point de rendez-vous : vous n'avez rien à faire"
                 : pdrChoiceExpired
                 ? "Date limite dépassée"
                 : "Confirmez votre point de rassemblement"}
@@ -252,6 +254,8 @@ export default function StepPDR({ young, center }) {
             <div className={`text-sm ${valid && "text-green-600"} ${enabled ? "text-gray-900" : "text-gray-400"}`}>
               {young.meetingPointId || young.deplacementPhase1Autonomous === "true"
                 ? "Lieu de rassemblement"
+                : young?.transportInfoGivenByLocal === "true"
+                ? "Confirmation du point de rendez-vous : vous n'avez rien à faire"
                 : pdrChoiceExpired
                 ? "Date limite dépassée"
                 : "Confirmez votre point de rassemblement"}
