@@ -2,20 +2,23 @@ import Img3 from "../../assets/homePhase2Desktop.png";
 import Img2 from "../../assets/homePhase2Mobile.png";
 import React from "react";
 import { useSelector } from "react-redux";
-import { translate, translateCohortTemp } from "snu-lib";
-import Check from "../../assets/icons/Check";
 import plausibleEvent from "../../services/plausible";
+import { getCohort } from "../../utils/cohorts";
+import Clock from "../../assets/icons/Clock";
+import WaitingListContent from "./components/WaitingListContent";
+import { translate, translateCohortTemp } from "snu-lib";
 import { CgDanger } from "react-icons/cg";
 
 export default function WaitingList() {
   const young = useSelector((state) => state.Auth.young);
+  const cohort = getCohort(young.cohort);
 
   return (
     <>
       {/* DESKTOP */}
       <div className="hidden lg:flex">
-        <div className="m-10 w-full">
-          <div className="flex items-center justify-between overflow-hidden rounded-xl bg-white shadow-sm">
+        <div className="m-8 w-full">
+          <div className="flex items-center justify-between overflow-hidden rounded-xl bg-white shadow-sm max-w-7xl mx-auto">
             <div className="flex w-1/2 flex-col gap-8 py-6 pl-10 pr-3">
               <div className="text-[44px] font-medium leading-tight tracking-tight text-gray-800">
                 <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
@@ -36,12 +39,10 @@ export default function WaitingList() {
               ) : null}
 
               <hr className="text-gray-200" />
-              <div className="flex items-center gap-5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 p-2">
-                  <Check className="text-gray-600" />
-                </div>
-                <div className="flex-1 text-sm leading-5 text-[#6B7280]">
-                  Votre inscription au SNU est bien validée. Nous vous recontacterons dès qu’une place se libère dans les prochains jours.
+              <div className="flex gap-5">
+                <Clock className="text-gray-600 flex-1 rounded-full bg-gray-100 p-2" />
+                <div className="flex-1 text-sm leading-5 text-gray-500 space-y-6">
+                  <WaitingListContent showLinks={cohort?.uselessInformation?.showChangeCohortButtonOnHomeWaitingList} />
                 </div>
               </div>
               <hr className="text-gray-200" />
@@ -81,12 +82,10 @@ export default function WaitingList() {
             ) : null}
 
             <hr className="mt-3 text-gray-200" />
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 p-2">
-                <Check className="text-gray-600" />
-              </div>
-              <div className="flex-1 text-sm text-[#738297]">
-                Votre inscription au SNU est bien validée. Nous vous recontacterons dès qu’une place se libère dans les prochains jours.
+            <div className="flex gap-2 my-2">
+              <Clock className="text-gray-600 rounded-full bg-gray-100 p-2" />
+              <div className="flex-1 text-sm leading-5 text-gray-500 space-y-4">
+                <WaitingListContent showLinks={cohort?.uselessInformation?.showChangeCohortButtonOnHomeWaitingList} />
               </div>
             </div>
             <hr className="text-gray-200" />

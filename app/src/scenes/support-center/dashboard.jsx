@@ -15,6 +15,7 @@ import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
 import { supportURL } from "../../config";
 import plausibleEvent from "../../services/plausible";
+import BannerJuly from "./BannerJuly";
 
 const articles = [
   {
@@ -231,8 +232,8 @@ export default function Dashboard(props) {
           ))}
         </Articles>
         <hr style={{ margin: "2rem" }} />
+        <BannerJuly />
         <h4 style={{ textAlign: "center" }}>Vous n&apos;avez pas trouvé de réponse à votre demande?</h4>
-
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>

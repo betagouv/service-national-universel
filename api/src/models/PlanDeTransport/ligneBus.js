@@ -5,6 +5,65 @@ const patchHistory = require("mongoose-patch-history").default;
 const { COHORTS } = require("snu-lib");
 const MODELNAME = "lignebus";
 
+const BusTeam = new mongoose.Schema({
+  role: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Role de l'accompagnant",
+    },
+  },
+  lastName: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Nom de l'accompagnant",
+    },
+  },
+  firstName: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Prenom de l'accompagnant",
+    },
+  },
+  birthdate: {
+    type: Date,
+    required: true,
+    documentation: {
+      description: "Date de naissance de l'accompagnant",
+    },
+  },
+  mail: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Email de l'accompagnant",
+    },
+  },
+  phone: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Numéro de téléphone de l'accompagnant",
+    },
+  },
+  forth: {
+    type: Boolean,
+    required: true,
+    documentation: {
+      description: "Concerné par l'aller",
+    },
+  },
+  back: {
+    type: Boolean,
+    required: true,
+    documentation: {
+      description: "Concerné par le retour",
+    },
+  },
+});
+
 const Schema = new mongoose.Schema({
   cohort: {
     type: String,
@@ -131,6 +190,13 @@ const Schema = new mongoose.Schema({
     required: true,
     documentation: {
       description: "Liste des points de rassemblement",
+    },
+  },
+
+  team: {
+    type: [BusTeam],
+    documentation: {
+      description: "Liste des accompagnateurs du bus",
     },
   },
 

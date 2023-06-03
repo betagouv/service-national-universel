@@ -90,7 +90,7 @@ router.post("/signup_verify", async (req, res) => {
 
     const young = await YoungObject.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
-    const token = jwt.sign({ _id: young._id, passport: young.passport, lastLogoutAt: null }, config.secret, { expiresIn: "30d" });
+    const token = jwt.sign({ _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.secret, { expiresIn: "30d" });
     return res.status(200).send({ ok: true, token, data: serializeYoung(young, young) });
   } catch (error) {
     capture(error);
