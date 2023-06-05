@@ -98,7 +98,7 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
           <WithdrawFormModalContent
             withdrawnReasons={WITHRAWN_REASONS.filter(
               (r) => !r.phase2Only || young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED,
-            )}
+            ).filter((r) => !r.cohortOnly || r.cohortOnly.includes(young.cohort))}
             withdrawnMessage={withdrawnMessage}
             setWithdrawnMessage={setWithdrawnMessage}
             withdrawnReason={withdrawnReason}
