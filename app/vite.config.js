@@ -35,11 +35,6 @@ export default defineConfig(({ command, mode }) => {
   return {
     port: 8081,
     plugins: plugins,
-    build: {
-      nodeOptions: {
-        "--max-old-space-size": "8192", // Allocate 8GB of memory
-      },
-      sourcemap: true,
-    },
+    build: { sourcemap: true },
   };
 });

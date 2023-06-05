@@ -1,8 +1,6 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
-// import { environment } from "./src/config";
-// console.log("🚀 ~ file: vite.config.js:5 ~ environment:", environment);
 
 // eslint-disable-next-line no-unused-vars
 export default defineConfig(({ command, mode }) => {
@@ -38,12 +36,7 @@ export default defineConfig(({ command, mode }) => {
   }
 
   return {
-    build: {
-      sourcemap: true,
-      nodeOptions: {
-        "--max-old-space-size": "8192", // Allocate 8GB of memory
-      },
-    },
+    build: { sourcemap: true },
     server: {
       port: 8082,
     },
