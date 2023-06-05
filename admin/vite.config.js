@@ -41,5 +41,6 @@ export default defineConfig(({ command, mode }) => {
       port: 8082,
     },
     plugins: plugins,
+    outDir: "build",
   };
 });
