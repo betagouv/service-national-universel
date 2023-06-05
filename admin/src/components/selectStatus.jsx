@@ -219,6 +219,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         }}
       />
       <ModalWithdrawn
+        young={young}
         isOpen={modal === YOUNG_STATUS.WITHDRAWN}
         title="Desistement du SNU"
         message="Précisez la raison du désistement"

@@ -110,7 +110,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     <option key="none" value="">
       Motif
     </option>,
-    ...WITHRAWN_REASONS.map((reason) => (
+    ...WITHRAWN_REASONS.filter((r) => !r.cohortOnly || r.cohortOnly.includes(young.cohort)).map((reason) => (
       <option key={reason.value} value={reason.value}>
         {reason.label}
       </option>

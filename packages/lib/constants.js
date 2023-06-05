@@ -430,6 +430,11 @@ const WITHRAWN_REASONS = [
     label: "Non disponibilité pour motif scolaire ou professionnel",
   },
   {
+    value: "change_date_july_2023",
+    label: "Changements des dates de mon séjour du 5 au 17 juillet 2023",
+    cohortOnly: ["Juillet 2023"],
+  },
+  {
     value: "no_interest",
     label: "Perte d'intérêt pour le SNU",
   },
