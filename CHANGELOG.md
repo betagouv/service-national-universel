@@ -1,3 +1,16 @@
+# [1.285.0](https://github.com/betagouv/service-national-universel/compare/v1.284.0...v1.285.0) (2023-06-05)
+
+
+### Bug Fixes
+
+* **api:** fix fix young in bus with context ([8cf39e9](https://github.com/betagouv/service-national-universel/commit/8cf39e93d785fa5538509e4266580d1ded1142ca))
+* **api:** list young-by-bus ([95070fc](https://github.com/betagouv/service-national-universel/commit/95070fceea3f75238bb0d6ccf4d3132a3c5ac6f5))
+
+
+### Features
+
+* **lib/app/admin:** date changes as withdrawn reason for july 2023 ([#2680](https://github.com/betagouv/service-national-universel/issues/2680)) ([0779237](https://github.com/betagouv/service-national-universel/commit/077923722337d6610e62993c993baa818910ee7d))
+
 # [1.284.0](https://github.com/betagouv/service-national-universel/compare/v1.283.0...v1.284.0) (2023-06-02)
 
 
