@@ -699,7 +699,7 @@ function canSearchLigneBus(actor) {
 }
 
 function canExportLigneBus(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
 function canEditLigneBusGeneralInfo(actor) {

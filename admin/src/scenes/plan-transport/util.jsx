@@ -282,25 +282,21 @@ export async function exportLigneBusJeune(user, cohort, ligne, travel) {
 
     const headcenter = await API.get(`/referent/${session.data.headCenterId}`);
     if (!headcenter.ok) return toastr.error("Une erreur est survenue");
-
+    console.log(headcenter);
     const refDep = await API.get(`/department-service/${data.centerDepartment}`);
     if (!refDep.ok) return toastr.error("Une erreur est survenue");
 
     const contactRefDep = refDep.data.contacts.filter((item) => item.cohort === cohort);
+    console.log(refDep);
 
     const mappy = (value, field) => {
       return data.pointDeRassemblements.filter((point) => point.meetingPointId === value.meetingPointId)[0][field];
     };
 
-    const makeTeam = (key, array) => {
-      let goodteam = array?.filter((item) => item[key] === true);
-      let team = goodteam?.reduce((accumulator, item) => {
-        accumulator["name"] = (accumulator["name"] || "") + item.firstName + " " + item.lastName + " / ";
-        accumulator["phone"] = (accumulator["phone"] || "") + item.Phone + " / ";
-        return accumulator;
-      }, {});
-      return team;
-    };
+    const leader = data.team?.filter((item) => item.role === "leader");
+    const supervisor = data.team?.filter((item) => item.role === "supervisor");
+    const forthTeam = supervisor?.filter((item) => item.forth === true);
+    const backTeam = supervisor?.filter((item) => item.back === true);
 
     let excel = [
       { name: "Aller", data: [] },
@@ -315,12 +311,25 @@ export async function exportLigneBusJeune(user, cohort, ligne, travel) {
         "Heure de départ du bus": mappy(item, "departureHour"),
         "Heure d'arrivée au centre": data.centerArrivalTime,
         "Contact d'urgence SNU": "01 55 55 13 27",
+        "Mail SNU": "signal-snu@jeunesse-sports.gouv.fr ",
         "Contact d'urgence Travel Planet": "09 72 56 62 04",
-        "Contact departemental": contactRefDep[0]?.contactPhone,
+        "Mail Travel Planet": "snu@my-travelplanet.com",
+        "Contact departemental": contactRefDep[0]?.contactName,
+        "Tel departemental": contactRefDep[0]?.contactPhone,
+        "Mail départemental": contactRefDep[0]?.contactMail,
+        "Nom du chef de centre": headcenter.data.firstName + " " + headcenter.data.lastName,
         "Télephone du chef de centre": headcenter.data.phone,
         "Mail du chef de centre": headcenter.data.email,
-        "Nom des convoyeurs": makeTeam("forth", data.team)?.name,
-        "Tel des convoyeurs": makeTeam("forth", data.team)?.phone,
+        "Nom du Chef de File": leader[0]?.firstName + " " + leader[0]?.lastName,
+        "Tel du Chef de File": leader[0]?.phone,
+        "Nom encadrant 1": forthTeam[0]?.firstName + " " + forthTeam[0]?.lastName,
+        "Tel encadrant 1": forthTeam[0]?.phone,
+        "Nom encadrant 2": forthTeam[1]?.firstName + " " + forthTeam[1]?.lastName,
+        "Tel encadrant 2": forthTeam[1]?.phone,
+        "Nom encadrant 3": forthTeam[2]?.firstName + " " + forthTeam[2]?.lastName,
+        "Tel encadrant 3": forthTeam[2]?.phone,
+        "Nom encadrant 4": forthTeam[3]?.firstName + " " + forthTeam[3]?.lastName,
+        "Tel encadrant 4": forthTeam[3]?.phone,
         "Nom du jeune": item.lastName,
         "Prénom du jeune": item.firstName,
         "Date de naissance": item.birthdateAt,
@@ -338,12 +347,25 @@ export async function exportLigneBusJeune(user, cohort, ligne, travel) {
         "Heure de départ du bus": data.centerDepartureTime,
         "Heure d'arrivée au PDR": mappy(item, "returnHour"),
         "Contact d'urgence SNU": "01 55 55 13 27",
+        "Mail SNU": "signal-snu@jeunesse-sports.gouv.fr ",
         "Contact d'urgence Travel Planet": "09 72 56 62 04",
-        "Contact departemental": contactRefDep[0]?.contactPhone,
+        "Mail Travel Planet": "snu@my-travelplanet.com",
+        "Contact departemental": contactRefDep[0]?.contactName,
+        "Tel departemental": contactRefDep[0]?.contactPhone,
+        "Mail départemental": contactRefDep[0]?.contactMail,
+        "Nom du chef de centre": headcenter.data.firstName + " " + headcenter.data.lastName,
         "Télephone du chef de centre": headcenter.data.phone,
         "Mail du chef de centre": headcenter.data.email,
-        "Nom des convoyeurs": makeTeam("back", data.team)?.name,
-        "Tel des convoyeurs": makeTeam("back", data.team)?.phone,
+        "Nom du Chef de File": leader[0]?.firstName + " " + leader[0]?.lastName,
+        "Tel du Chef de File": leader[0]?.phone,
+        "Nom encadrant 1": backTeam[0]?.firstName + " " + backTeam[0]?.lastName,
+        "Tel encadrant 1": backTeam[0]?.phone,
+        "Nom encadrant 2": backTeam[1]?.firstName + " " + backTeam[1]?.lastName,
+        "Tel encadrant 2": backTeam[1]?.phone,
+        "Nom encadrant 3": backTeam[2]?.firstName + " " + backTeam[2]?.lastName,
+        "Tel encadrant 3": backTeam[2]?.phone,
+        "Nom encadrant 4": backTeam[3]?.firstName + " " + backTeam[3]?.lastName,
+        "Tel encadrant 4": backTeam[3]?.phone,
         "Nom du jeune": item.lastName,
         "Prénom du jeune": item.firstName,
         "Date de naissance": item.birthdateAt,

@@ -163,7 +163,7 @@ export default function View(props) {
                 Demander une modification
               </button>
             )}
-            {canExportLigneBus(user) && data.team.length > 0 ? (
+            {canExportLigneBus(user) /* && data.team.length > 0 */ ? (
               <SelectAction
                 title="Exporter la ligne"
                 alignItems="right"
