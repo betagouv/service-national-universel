@@ -35,7 +35,6 @@ export default defineConfig(({ command, mode }) => {
   return {
     port: 8081,
     plugins: plugins,
-    build: { sourcemap: true },
-    outDir: "build",
+    build: { sourcemap: true, outDir: "build" },
   };
 });
