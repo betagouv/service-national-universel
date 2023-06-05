@@ -230,7 +230,7 @@ export async function exportLigneBus(user, cohort) {
         }),
       };
     });
-
+    console.log(formatedRep);
     generateExcelWorkbook(formatedRep, "Listes_volontaires_par_ligne");
   } catch (e) {
     console.log(e);
@@ -292,29 +292,75 @@ export async function exportLigneBusJeune(user, cohort, ligne, travel) {
     if (!youngs || !youngs.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
     console.log(youngs);
 
+    const session = await API.get(`/session-phase1/${youngs[0].sessionPhase1Id}`);
+    if (!session.ok) return toastr.error("Une erreur est survenue");
+
+    const headcenter = await API.get(`/referent/${session.data.headCenterId}`);
+    if (!headcenter.ok) return toastr.error("Une erreur est survenue");
+
+    const refDep = await API.get(`/department-service/${data.centerDepartment}`);
+    if (!refDep.ok) return toastr.error("Une erreur est survenue");
+
+    const contactRefDep = refDep.data.contacts.filter((item) => item.cohort === cohort);
+
     const mappy = (value, field) => {
       return data.pointDeRassemblements.filter((point) => point.meetingPointId === value.meetingPointId)[0][field];
     };
-    let excel = [];
-    let team = {
-      Nom: "charle",
-      Phone: "0600000000",
+
+    const makeTeam = (key, array) => {
+      let goodteam = array?.filter((item) => item[key] === true);
+      let team = goodteam?.reduce((accumulator, item) => {
+        accumulator["name"] = (accumulator["name"] || "") + item.firstName + " " + item.lastName + " / ";
+        accumulator["phone"] = (accumulator["phone"] || "") + item.Phone + " / ";
+        return accumulator;
+      }, {});
+      return team;
     };
+
+    let excel = [
+      { name: "Aller", data: [] },
+      { name: "Retour", data: [] },
+    ];
+
     youngs.map((item) =>
-      excel.push({
+      excel[0].data.push({
         "Numéro de ligne": data.busId,
         "Adresse du point de RDV": mappy(item, "address") + ", " + mappy(item, "zip") + ", " + mappy(item, "city"),
         "Heure de convocation": mappy(item, "meetingHour"),
         "Heure de départ du bus": mappy(item, "departureHour"),
         "Heure d'arrivée au centre": data.centerArrivalTime,
-        "Contact d'urgence SNU": "test",
-        "Contact d'urgence Travel Planet": "test",
-        "Contact departemental": "A faire",
-        "Télephone du chef de centre": "",
-        "Mail du chef de centre": "",
-        team,
+        "Contact d'urgence SNU": "01 55 55 13 27",
+        "Contact d'urgence Travel Planet": "09 72 56 62 04",
+        "Contact departemental": contactRefDep[0]?.contactPhone,
+        "Télephone du chef de centre": headcenter.data.phone,
+        "Mail du chef de centre": headcenter.data.email,
+        "Nom des convoyeurs": makeTeam("forth", data.team)?.name,
+        "Tel des convoyeurs": makeTeam("forth", data.team)?.phone,
         "Nom du jeune": item.lastName,
-        "Préom du jeune": item.firstName,
+        "Prénom du jeune": item.firstName,
+        "Date de naissance": item.birthdateAt,
+        "Téléphone du jeune": item.phone,
+        "Télephone du parent1": item.parent1Phone,
+        "Télephone du parent2": item.parent2Phone,
+        Présent: "",
+        Commentaire: "",
+      }),
+    );
+    youngs.map((item) =>
+      excel[1].data.push({
+        "Numéro de ligne": data.busId,
+        "Adresse du point de RDV": mappy(item, "address") + ", " + mappy(item, "zip") + ", " + mappy(item, "city"),
+        "Heure de départ du bus": data.centerDepartureTime,
+        "Heure d'arrivée au PDR": mappy(item, "returnHour"),
+        "Contact d'urgence SNU": "01 55 55 13 27",
+        "Contact d'urgence Travel Planet": "09 72 56 62 04",
+        "Contact departemental": contactRefDep[0]?.contactPhone,
+        "Télephone du chef de centre": headcenter.data.phone,
+        "Mail du chef de centre": headcenter.data.email,
+        "Nom des convoyeurs": makeTeam("back", data.team)?.name,
+        "Tel des convoyeurs": makeTeam("back", data.team)?.phone,
+        "Nom du jeune": item.lastName,
+        "Prénom du jeune": item.firstName,
         "Date de naissance": item.birthdateAt,
         "Téléphone du jeune": item.phone,
         "Télephone du parent1": item.parent1Phone || "Non renseigné",
@@ -324,6 +370,16 @@ export async function exportLigneBusJeune(user, cohort, ligne, travel) {
       }),
     );
     console.log(excel);
+    switch (travel) {
+      case "Aller":
+        generateExcelWorkbook([excel[0]], `Fiche_Convoyeur_ligne_${data.busId}`);
+        break;
+      case "Retour":
+        generateExcelWorkbook([excel[1]], `Fiche_Convoyeur_ligne_${data.busId}`);
+        break;
+      default:
+        generateExcelWorkbook(excel, `Fiche_Convoyeur_ligne_${data.busId}`);
+    }
   } catch (e) {
     console.log(e);
     toastr.error("Erreur !", translate(e.code));
