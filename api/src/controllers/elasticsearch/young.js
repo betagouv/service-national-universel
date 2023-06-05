@@ -127,7 +127,7 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
   if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
     contextFilters.push({ terms: { "department.keyword": user.department } });
   }
-  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+  if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
     const sessionPhase1 = await SessionPhase1Object.find({ department: { $in: user.department } });
     if (sessionPhase1.length === 0) {
       contextFilters.push({ terms: { "department.keyword": user.department } });
@@ -164,7 +164,7 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
 
     // Context filters
     const contextFilters = [
-      // ...youngContextFilters,
+      ...youngContextFilters,
       { terms: { "ligneId.keyword": [String(req.params.ligneId)] } },
       { terms: { "status.keyword": ["VALIDATED"] } },
       { bool: { must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }] } },
