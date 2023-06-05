@@ -164,7 +164,7 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
 
     // Context filters
     const contextFilters = [
-      ...youngContextFilters,
+      // ...youngContextFilters,
       { terms: { "ligneId.keyword": [String(req.params.ligneId)] } },
       { terms: { "status.keyword": ["VALIDATED"] } },
       { bool: { must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }] } },
