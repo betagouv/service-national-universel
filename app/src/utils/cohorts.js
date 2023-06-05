@@ -1,6 +1,6 @@
 import api from "../services/api";
 import { capture } from "../sentry";
-import { sessions2023 } from "snu-lib";
+import { regionsListDROMS, sessions2023 } from "snu-lib";
 import dayjs from "dayjs";
 let cohorts = null;
 let cohortsCachedAt = null;
@@ -88,3 +88,25 @@ export function getCohortPeriod(cohort) {
 
   return `du ${formattedStart} au ${formattedEnd}`;
 }
+
+export const departureDate = (young, meetingPoint) => {
+  if (meetingPoint?.departuredDate) {
+    return meetingPoint?.departuredDate;
+  }
+  if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
+    return new Date(2023, 6, 5);
+  }
+  const cohortDetail = getCohort(young.cohort);
+  return cohortDetail.dateStart;
+};
+
+export const returnDate = (young, meetingPoint) => {
+  if (meetingPoint?.returnDate) {
+    return meetingPoint?.returnDate;
+  }
+  if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
+    return new Date(2023, 6, 17);
+  }
+  const cohortDetail = getCohort(young.cohort);
+  return cohortDetail.dateEnd;
+};
