@@ -255,3 +255,139 @@ async function getAllResults(index, query) {
   if (!result.data.length) return [];
   return result.data;
 }
+
+export async function exportLigneBusJeune(cohort, ligne, travel, team) {
+  try {
+    const filter = {
+      busId: [ligne],
+    };
+
+    const resultat = await API.post("/elasticsearch/plandetransport/export", {
+      filters: filter,
+      exportFields: "*",
+    });
+    const data = resultat.data[0];
+    if (!data) return toastr.error("Aucune ligne de bus n'a été trouvée");
+
+    const youngs = await API.post(`/elasticsearch/young/in-bus/${String(data._id)}/export`, {
+      filters: {},
+      exportFields: "*",
+    });
+    if (!youngs) return toastr.error("Aucun volontaire affecté n'a été trouvé");
+
+    const session = await API.get(`/session-phase1/${youngs.data[0].sessionPhase1Id}`);
+    if (!session.ok) return toastr.error("Une erreur est survenue");
+
+    const headcenter = await API.get(`/referent/${session.data.headCenterId}`);
+    if (!headcenter.ok) return toastr.error("Une erreur est survenue");
+
+    const refDep = await API.get(`/department-service/${data.centerDepartment}`);
+    if (!refDep.ok) return toastr.error("Une erreur est survenue");
+
+    const contactRefDep = refDep.data.contacts.filter((item) => item.cohort === cohort);
+
+    const mappy = (value, field) => {
+      return data.pointDeRassemblements.filter((point) => point.meetingPointId === value.meetingPointId)[0][field];
+    };
+
+    const forthTeam = team.filter((item) => item.forth === true);
+    const forthTeamLeader = forthTeam.filter((item) => item.role === "leader");
+    const forthTeamSupervisor = forthTeam.filter((item) => item.role === "supervisor");
+
+    const backTeam = team.filter((item) => item.back === true);
+    const backTeamLeader = backTeam.filter((item) => item.role === "leader");
+    const backTeamSupervisor = backTeam.filter((item) => item.role === "supervisor");
+
+    let excel = [
+      { name: "Aller", data: [] },
+      { name: "Retour", data: [] },
+    ];
+
+    youngs.data.map((item) =>
+      excel[0].data.push({
+        "Numéro de ligne": ligne,
+        "Adresse du point de RDV": mappy(item, "address") + ", " + mappy(item, "zip") + ", " + mappy(item, "city"),
+        "Heure de convocation": mappy(item, "meetingHour"),
+        "Heure de départ du bus": mappy(item, "departureHour"),
+        "Heure d'arrivée au centre": data.centerArrivalTime,
+        "Contact d'urgence SNU": "01 55 55 13 27",
+        "Mail SNU": "signal-snu@jeunesse-sports.gouv.fr ",
+        "Contact d'urgence Travel Planet": "09 72 56 62 04",
+        "Mail Travel Planet": "snu@my-travelplanet.com",
+        "Contact departemental": contactRefDep[0]?.contactName,
+        "Tel departemental": contactRefDep[0]?.contactPhone,
+        "Mail départemental": contactRefDep[0]?.contactMail,
+        "Nom du chef de centre": headcenter.data.firstName + " " + headcenter.data.lastName,
+        "Télephone du chef de centre": headcenter.data.phone,
+        "Mail du chef de centre": headcenter.data.email,
+        "Nom du Chef de File": forthTeamLeader.length === 0 ? "" : forthTeamLeader[0].firstName + " " + forthTeamLeader[0].lastName,
+        "Tel du Chef de File": forthTeamLeader.length === 0 ? "" : forthTeamLeader[0].phone,
+        "Nom encadrant 1": forthTeamSupervisor.length === 0 ? "" : forthTeamSupervisor[0].firstName + " " + forthTeamSupervisor[0].lastName,
+        "Tel encadrant 1": forthTeamSupervisor.length === 0 ? "" : forthTeamSupervisor[0].phone,
+        "Nom encadrant 2": forthTeamSupervisor.length > 0 ? forthTeamSupervisor[1].firstName + " " + forthTeamSupervisor[1].lastName : "",
+        "Tel encadrant 2": forthTeamSupervisor.length > 0 ? forthTeamSupervisor[1].phone : "",
+        "Nom encadrant 3": forthTeamSupervisor.length > 1 ? forthTeamSupervisor[2].firstName + " " + forthTeamSupervisor[2].lastName : "",
+        "Tel encadrant 3": forthTeamSupervisor.length > 1 ? forthTeamSupervisor[2].phone : "",
+        "Nom encadrant 4": forthTeamSupervisor.length > 2 ? forthTeamSupervisor[3].firstName + " " + forthTeamSupervisor[3].lastName : "",
+        "Tel encadrant 4": forthTeamSupervisor.length > 2 ? forthTeamSupervisor[3].phone : "",
+        "Nom du jeune": item.lastName,
+        "Prénom du jeune": item.firstName,
+        "Date de naissance": item.birthdateAt,
+        "Téléphone du jeune": item.phone,
+        "Télephone du parent1": item.parent1Phone,
+        "Télephone du parent2": item.parent2Phone,
+        Présent: "",
+        Commentaire: "",
+      }),
+    );
+    youngs.data.map((item) =>
+      excel[1].data.push({
+        "Numéro de ligne": ligne,
+        "Adresse du point de RDV": mappy(item, "address") + ", " + mappy(item, "zip") + ", " + mappy(item, "city"),
+        "Heure de départ du bus": data.centerDepartureTime,
+        "Heure d'arrivée au PDR": mappy(item, "returnHour"),
+        "Contact d'urgence SNU": "01 55 55 13 27",
+        "Mail SNU": "signal-snu@jeunesse-sports.gouv.fr ",
+        "Contact d'urgence Travel Planet": "09 72 56 62 04",
+        "Mail Travel Planet": "snu@my-travelplanet.com",
+        "Contact departemental": contactRefDep[0]?.contactName,
+        "Tel departemental": contactRefDep[0]?.contactPhone,
+        "Mail départemental": contactRefDep[0]?.contactMail,
+        "Nom du chef de centre": headcenter.data.firstName + " " + headcenter.data.lastName,
+        "Télephone du chef de centre": headcenter.data.phone,
+        "Mail du chef de centre": headcenter.data.email,
+        "Nom du Chef de File": backTeamLeader.length === 0 ? "" : backTeamLeader[0].firstName + " " + backTeamLeader[0].lastName,
+        "Tel du Chef de File": backTeamLeader.length === 0 ? "" : backTeamLeader[0].phone,
+        "Nom encadrant 1": backTeamSupervisor.length === 0 ? "" : backTeamSupervisor[0].firstName + " " + backTeamSupervisor[0].lastName,
+        "Tel encadrant 1": backTeamSupervisor.length === 0 ? "" : backTeamSupervisor[0].phone,
+        "Nom encadrant 2": backTeamSupervisor.length > 0 ? backTeamSupervisor[1].firstName + " " + backTeamSupervisor[1].lastName : "",
+        "Tel encadrant 2": backTeamSupervisor.length > 0 ? backTeamSupervisor[1].phone : "",
+        "Nom encadrant 3": backTeamSupervisor.length > 1 ? backTeamSupervisor[2].firstName + " " + backTeamSupervisor[2].lastName : "",
+        "Tel encadrant 3": backTeamSupervisor.length > 1 ? backTeamSupervisor[2].phone : "",
+        "Nom encadrant 4": backTeamSupervisor.length > 2 ? backTeamSupervisor[3].firstName + " " + backTeamSupervisor[3].lastName : "",
+        "Tel encadrant 4": backTeamSupervisor.length > 2 ? backTeamSupervisor[3].phone : "",
+        "Nom du jeune": item.lastName,
+        "Prénom du jeune": item.firstName,
+        "Date de naissance": item.birthdateAt,
+        "Téléphone du jeune": item.phone,
+        "Télephone du parent1": item.parent1Phone,
+        "Télephone du parent2": item.parent2Phone,
+        Présent: "",
+        Commentaire: "",
+      }),
+    );
+    switch (travel) {
+      case "Aller":
+        generateExcelWorkbook([excel[0]], `Fiche_Convoyeur_ligne_${data.busId}`);
+        break;
+      case "Retour":
+        generateExcelWorkbook([excel[1]], `Fiche_Convoyeur_ligne_${data.busId}`);
+        break;
+      default:
+        generateExcelWorkbook(excel, `Fiche_Convoyeur_ligne_${data.busId}`);
+    }
+  } catch (e) {
+    console.log(e);
+    toastr.error("Erreur !", translate(e.code));
+  }
+}
