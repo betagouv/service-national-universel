@@ -163,7 +163,7 @@ export default function View(props) {
                 Demander une modification
               </button>
             )}
-            {canExportLigneBus(user) && (
+            {canExportLigneBus(user) && data.team.length > 0 ? (
               <SelectAction
                 title="Exporter la ligne"
                 alignItems="right"
@@ -178,7 +178,7 @@ export default function View(props) {
                   },
                 ]}
               />
-            )}
+            ) : null}
           </div>
         </div>
         <div className="flex flex-col gap-8">

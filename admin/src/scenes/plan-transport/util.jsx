@@ -270,29 +270,14 @@ export async function exportLigneBusJeune(user, cohort, ligne, travel) {
     console.log(data);
     if (!data) return toastr.error("Aucune ligne de bus n'a été trouvée");
 
-    const bodyYoung = {
-      query: {
-        bool: {
-          must: [{ match_all: {} }, { term: { "cohort.keyword": cohort } }, { term: { "status.keyword": "VALIDATED" } }, { terms: { "ligneId.keyword": [data._id] } }],
-          must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
-        },
-      },
-      aggs: {
-        group_by_bus: {
-          terms: {
-            field: "ligneId.keyword",
-            size: ES_NO_LIMIT,
-          },
-        },
-      },
-      track_total_hits: true,
-    };
-
-    const youngs = await getAllResults("young-having-meeting-point-in-geography", bodyYoung);
-    if (!youngs || !youngs.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
+    const youngs = await API.post(`/elasticsearch/young/in-bus/${String(data._id)}/export`, {
+      filters: {},
+      exportFields: "*",
+    });
     console.log(youngs);
+    if (!youngs) return toastr.error("Aucun volontaire affecté n'a été trouvé");
 
-    const session = await API.get(`/session-phase1/${youngs[0].sessionPhase1Id}`);
+    const session = await API.get(`/session-phase1/${youngs.data[0].sessionPhase1Id}`);
     if (!session.ok) return toastr.error("Une erreur est survenue");
 
     const headcenter = await API.get(`/referent/${session.data.headCenterId}`);
@@ -322,9 +307,9 @@ export async function exportLigneBusJeune(user, cohort, ligne, travel) {
       { name: "Retour", data: [] },
     ];
 
-    youngs.map((item) =>
+    youngs.data.map((item) =>
       excel[0].data.push({
-        "Numéro de ligne": data.busId,
+        "Numéro de ligne": ligne,
         "Adresse du point de RDV": mappy(item, "address") + ", " + mappy(item, "zip") + ", " + mappy(item, "city"),
         "Heure de convocation": mappy(item, "meetingHour"),
         "Heure de départ du bus": mappy(item, "departureHour"),
@@ -346,9 +331,9 @@ export async function exportLigneBusJeune(user, cohort, ligne, travel) {
         Commentaire: "",
       }),
     );
-    youngs.map((item) =>
+    youngs.data.map((item) =>
       excel[1].data.push({
-        "Numéro de ligne": data.busId,
+        "Numéro de ligne": ligne,
         "Adresse du point de RDV": mappy(item, "address") + ", " + mappy(item, "zip") + ", " + mappy(item, "city"),
         "Heure de départ du bus": data.centerDepartureTime,
         "Heure d'arrivée au PDR": mappy(item, "returnHour"),
