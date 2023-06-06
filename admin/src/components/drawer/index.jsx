@@ -342,7 +342,7 @@ const Drawer = (props) => {
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
-              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, history, subrole: user.subRole })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, history, subRole: user.subRole })}
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
                 referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history, info, setInfo })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
