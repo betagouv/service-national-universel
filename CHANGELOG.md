@@ -1,3 +1,16 @@
+# [1.286.0](https://github.com/betagouv/service-national-universel/compare/v1.285.0...v1.286.0) (2023-06-06)
+
+
+### Bug Fixes
+
+* **admin:** on change youngPhase1Agreement ([2c3586a](https://github.com/betagouv/service-national-universel/commit/2c3586a6f925d9b0f698bed54ea9311670a2b240))
+* **lib:** es role ([0d5c83c](https://github.com/betagouv/service-national-universel/commit/0d5c83c8d08860df0a08564a0f2eea2acf4e8268))
+
+
+### Features
+
+* **admin:** plan-de-transport wip1 ([#2683](https://github.com/betagouv/service-national-universel/issues/2683)) ([f455099](https://github.com/betagouv/service-national-universel/commit/f45509995fa1d6ce58161cf79e0c60458c51c4a6))
+
 # [1.285.0](https://github.com/betagouv/service-national-universel/compare/v1.284.0...v1.285.0) (2023-06-05)
 
 
