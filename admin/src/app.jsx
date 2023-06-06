@@ -32,6 +32,7 @@ import SessionShareIndex from "./scenes/session-phase1/index";
 import TableDeRepartition from "./scenes/plan-transport/table-repartition";
 import SchemaDeRepartition from "./scenes/plan-transport/schema-repartition";
 import LigneBus from "./scenes/plan-transport/ligne-bus";
+import EditTransport from "./scenes/edit-transport";
 import DSNJExport from "./scenes/dsnj-export";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
 import Etablissement from "./scenes/school";
@@ -218,6 +219,7 @@ const Home = () => {
             <RestrictedRoute path="/equipe" component={Team} />
             <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
             {/* Plan de transport */}
+            {user?.subRole === "god" && <RestrictedRoute path="/edit-transport" component={EditTransport} />}
             {/* Table de répartition */}
             <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
             {/* Ligne de bus */}

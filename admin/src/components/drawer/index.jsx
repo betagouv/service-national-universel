@@ -122,7 +122,7 @@ function supervisor({ user, onClick, from }) {
   );
 }
 
-function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, from, history }) {
+function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, from, history, subRole }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -135,6 +135,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/table-repartition" title="Table de répartition" onClick={onClick} />
       <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
       <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
+      {subRole === "god" && <DrawerTab to="/edit-transport" title="Edit Plan de transport" onClick={onClick} beta />}
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
@@ -341,7 +342,7 @@ const Drawer = (props) => {
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
-              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, history })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, history, subRole: user.subRole })}
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
                 referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history, info, setInfo })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
@@ -358,7 +359,7 @@ const Drawer = (props) => {
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
-              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, history })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, history, subRole: user.subRole })}
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
                 referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
