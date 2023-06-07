@@ -642,7 +642,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
               patches.push({
                 modelName: doc.modelName,
                 date: doc.date,
-                lineId: bus?._id,
+                ref: bus?._id,
                 refName: bus?.busId,
                 op: op.op,
                 path: op.path,
@@ -666,7 +666,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
               patches.push({
                 modelName: doc.modelName,
                 date: doc.date,
-                lineId: bus._id,
+                ref: bus._id,
                 refName: bus.busId,
                 op: op.op,
                 path: op.path,
