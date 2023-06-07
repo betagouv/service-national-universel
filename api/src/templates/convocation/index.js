@@ -138,7 +138,6 @@ const render = async (young) => {
       )
       .replace(/{{LUNCH_BREAK}}/g, sanitizeAll(ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid pour le repas.</li>` : ""));
   } catch (e) {
-    console.log(e);
     throw e;
   }
 };
