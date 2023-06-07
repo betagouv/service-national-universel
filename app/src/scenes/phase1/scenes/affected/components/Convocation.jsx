@@ -10,7 +10,7 @@ import { translate, htmlCleaner } from "../../../../../utils";
 import { Hero, Content } from "../../../../../components/Content";
 import { supportURL } from "../../../../../config";
 
-import { getCohortDetail, departureDate, returnDate } from "../../../../../utils/cohorts";
+import { departureDate, returnDate } from "../../../../../utils/cohorts";
 import dayjs from "dayjs";
 import { translateCohortTemp } from "snu-lib";
 
@@ -21,18 +21,10 @@ export default function Convocation() {
   const [meetingPoint, setMeetingPoint] = useState();
   const [center, setCenter] = useState();
   const [service, setService] = useState();
-  const [cohort, setCohort] = useState();
 
   const isFromDOMTOM = () => {
     return false;
   };
-
-  //   return (
-  //     ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
-  //       young.department,
-  //     ) && young.grade !== "Terminale"
-  //   );
-  // };
 
   const getMeetingPoint = async () => {
     const { data, code, ok } = await api.get(`/point-de-rassemblement/fullInfo/${young.meetingPointId}/${young.ligneId}`);
@@ -54,7 +46,6 @@ export default function Convocation() {
     // À changer par la suite ? Notamment le isFromDOMTOM() ?
     if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.transportInfoGivenByLocal !== "true") return console.log("unauthorized");
     getCenter();
-    setCohort(getCohortDetail(young.cohort));
     young.meetingPointId && getMeetingPoint();
     getService();
   }, [young]);
