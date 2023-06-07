@@ -255,3 +255,162 @@ async function getAllResults(index, query) {
   if (!result.data.length) return [];
   return result.data;
 }
+
+export async function exportLigneBusJeune(cohort, ligne, travel, team) {
+  try {
+    const filter = {
+      busId: [ligne],
+    };
+
+    const resultat = await API.post("/elasticsearch/plandetransport/export", {
+      filters: filter,
+      exportFields: "*",
+    });
+    const data = resultat.data[0];
+    if (!data) return toastr.error("Aucune ligne de bus n'a été trouvée");
+
+    const youngs = await API.post(`/elasticsearch/young/in-bus/${String(data._id)}/export`, {
+      filters: {},
+      exportFields: "*",
+    });
+    if (!youngs) return toastr.error("Aucun volontaire affecté n'a été trouvé");
+
+    const session = await API.get(`/session-phase1/${youngs.data[0].sessionPhase1Id}`);
+    if (!session.ok) return toastr.error("Une erreur est survenue");
+
+    const headcenter = await API.get(`/referent/${session.data.headCenterId}`);
+    if (!headcenter.ok) return toastr.error("Une erreur est survenue");
+
+    const refDep = await API.get(`/department-service/${data.centerDepartment}`);
+    if (!refDep.ok) return toastr.error("Une erreur est survenue");
+
+    const contactRefDep = refDep.data.contacts.filter((item) => item.cohort === cohort);
+
+    const mappy = (value, field) => {
+      return data.pointDeRassemblements.filter((point) => point.meetingPointId === value.meetingPointId)[0][field];
+    };
+
+    const forthTeam = team.filter((item) => item.forth === true);
+    const forthTeamLeader = forthTeam.filter((item) => item.role === "leader");
+    const forthTeamSupervisor = forthTeam.filter((item) => item.role === "supervisor");
+
+    const backTeam = team.filter((item) => item.back === true);
+    const backTeamLeader = backTeam.filter((item) => item.role === "leader");
+    const backTeamSupervisor = backTeam.filter((item) => item.role === "supervisor");
+
+    let excel = [
+      { name: "Aller", data: [] },
+      { name: "Retour", data: [] },
+    ];
+
+    youngs.data.map((item) =>
+      excel[0].data.push({
+        "Numéro de ligne": ligne,
+        "Adresse du point de RDV": mappy(item, "address") + ", " + mappy(item, "zip") + ", " + mappy(item, "city"),
+        "Heure de convocation": mappy(item, "meetingHour"),
+        "Heure de départ du bus": mappy(item, "departureHour"),
+        "Heure d'arrivée au centre": data.centerArrivalTime,
+        "Contact d'urgence SNU": "01 55 55 13 27",
+        "Mail SNU": "signal-snu@jeunesse-sports.gouv.fr ",
+        "Contact d'urgence Travel Planet": "09 72 56 62 04",
+        "Mail Travel Planet": "snu@my-travelplanet.com",
+        "Contact departemental": contactRefDep[0]?.contactName,
+        "Tel departemental": contactRefDep[0]?.contactPhone,
+        "Mail départemental": contactRefDep[0]?.contactMail,
+        "Nom du chef de centre": headcenter.data.firstName + " " + headcenter.data.lastName,
+        "Télephone du chef de centre": headcenter.data.phone,
+        "Mail du chef de centre": headcenter.data.email,
+      }),
+    );
+    forthTeamLeader.length > 0
+      ? excel[0].data.forEach((obj) => {
+          obj["Nom Chef de File"] = forthTeamLeader[0].firstName + " " + forthTeamLeader[0].lastName;
+          obj["Tel Chef de File"] = forthTeamLeader[0].phone;
+        })
+      : null;
+    if (forthTeamSupervisor.length > 0) {
+      forthTeamSupervisor.forEach((supervisor, index) => {
+        excel[0].data.forEach((obj) => {
+          obj["Nom Encadrant " + (index + 1)] = supervisor.firstName + " " + supervisor.lastName;
+          obj["Tel Encadrant " + (index + 1)] = supervisor.phone;
+        });
+      });
+    }
+    youngs.data.forEach((young, index) => {
+      const { data } = excel[0];
+
+      data[index] = {
+        ...data[index],
+        "Nom du jeune": young.lastName,
+        "Prénom du jeune": young.firstName,
+        "Date de naissance": young.birthdateAt,
+        "Téléphone du jeune": young.phone,
+        "Télephone du parent1": young.parent1Phone,
+        "Télephone du parent2": young.parent2Phone,
+        Présent: "",
+        Commentaire: "",
+      };
+    });
+
+    youngs.data.map((item) =>
+      excel[1].data.push({
+        "Numéro de ligne": ligne,
+        "Adresse du point de RDV": mappy(item, "address") + ", " + mappy(item, "zip") + ", " + mappy(item, "city"),
+        "Heure de départ du bus": data.centerDepartureTime,
+        "Heure d'arrivée au PDR": mappy(item, "returnHour"),
+        "Contact d'urgence SNU": "01 55 55 13 27",
+        "Mail SNU": "signal-snu@jeunesse-sports.gouv.fr ",
+        "Contact d'urgence Travel Planet": "09 72 56 62 04",
+        "Mail Travel Planet": "snu@my-travelplanet.com",
+        "Contact departemental": contactRefDep[0]?.contactName,
+        "Tel departemental": contactRefDep[0]?.contactPhone,
+        "Mail départemental": contactRefDep[0]?.contactMail,
+        "Nom du chef de centre": headcenter.data.firstName + " " + headcenter.data.lastName,
+        "Télephone du chef de centre": headcenter.data.phone,
+        "Mail du chef de centre": headcenter.data.email,
+      }),
+    );
+    backTeamLeader.length > 0
+      ? excel[1].data.forEach((obj) => {
+          obj["Nom Chef de File"] = backTeamLeader[0].firstName + " " + backTeamLeader[0].lastName;
+          obj["Tel Chef de File"] = backTeamLeader[0].phone;
+        })
+      : null;
+    if (backTeamSupervisor.length > 0) {
+      backTeamSupervisor.forEach((supervisor, index) => {
+        excel[1].data.forEach((obj) => {
+          obj["Nom Encadrant " + (index + 1)] = supervisor.firstName + " " + supervisor.lastName;
+          obj["Tel Encadrant " + (index + 1)] = supervisor.phone;
+        });
+      });
+    }
+    youngs.data.forEach((young, index) => {
+      const { data } = excel[1];
+
+      data[index] = {
+        ...data[index],
+        "Nom du jeune": young.lastName,
+        "Prénom du jeune": young.firstName,
+        "Date de naissance": young.birthdateAt,
+        "Téléphone du jeune": young.phone,
+        "Télephone du parent1": young.parent1Phone,
+        "Télephone du parent2": young.parent2Phone,
+        Présent: "",
+        Commentaire: "",
+      };
+    });
+    switch (travel) {
+      case "Aller":
+        generateExcelWorkbook([excel[0]], `Fiche_Convoyeur_ligne_${data.busId}`);
+        break;
+      case "Retour":
+        generateExcelWorkbook([excel[1]], `Fiche_Convoyeur_ligne_${data.busId}`);
+        break;
+      default:
+        generateExcelWorkbook(excel, `Fiche_Convoyeur_ligne_${data.busId}`);
+    }
+  } catch (e) {
+    console.log(e);
+    toastr.error("Erreur !", translate(e.code));
+  }
+}
