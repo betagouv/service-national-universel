@@ -2000,6 +2000,8 @@ Schema.plugin(
       "loginAttempts",
       "parent1Inscription2023Token",
       "parent2Inscription2023Token",
+      "updatedAt",
+      "lastLoginAt",
     ],
   }),
   MODELNAME,

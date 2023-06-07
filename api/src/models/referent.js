@@ -281,6 +281,8 @@ Schema.plugin(
       "invitationToken",
       "invitationExpires",
       "loginAttempts",
+      "updatedAt",
+      "lastLoginAt",
     ],
   }),
   MODELNAME,
