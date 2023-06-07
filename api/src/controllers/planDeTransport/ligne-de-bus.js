@@ -769,7 +769,7 @@ function pathToKey(path) {
 function filterPatchWithQuery(p, query) {
   return (
     // bus
-    p.refName.toLowerCase().includes(query) ||
+    p.refName?.toLowerCase()?.includes(query) ||
     // field
     translateBusPatchesField(pathToKey(p.path)).toLowerCase().includes(query) ||
     // original-value
