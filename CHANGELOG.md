@@ -1,3 +1,17 @@
+# [1.287.0](https://github.com/betagouv/service-national-universel/compare/v1.286.0...v1.287.0) (2023-06-07)
+
+
+### Bug Fixes
+
+* **api:** synchro es useless field ([b2688a4](https://github.com/betagouv/service-national-universel/commit/b2688a4235eac418377a038392e28cc80b698964))
+* **app:** add military mission domain ([5bf1739](https://github.com/betagouv/service-national-universel/commit/5bf1739e1e87b43a44fe768358b626f655b74a61))
+
+
+### Features
+
+* **admin:** Add Export Convoyeur d'une Ligne ([#2682](https://github.com/betagouv/service-national-universel/issues/2682)) ([ab63eb9](https://github.com/betagouv/service-national-universel/commit/ab63eb9309a5b3c26638b5342ff2b23aeb607251))
+* **admin:** update export schema ([1b13878](https://github.com/betagouv/service-national-universel/commit/1b13878c67f501290dcdf5720eecad1e6760b598))
+
 # [1.286.0](https://github.com/betagouv/service-national-universel/compare/v1.285.0...v1.286.0) (2023-06-06)
 
 
