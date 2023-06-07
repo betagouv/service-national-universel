@@ -24,7 +24,7 @@ export default function WaitingList() {
                 <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
               </div>
               <div className="mt-2 text-xl font-bold text-[#242526]">
-                Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {translateCohortTemp(young.cohort)}.
+                Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {translateCohortTemp(young)}.
               </div>
 
               {young.cohort === "Juillet 2023" ? (
@@ -67,7 +67,7 @@ export default function WaitingList() {
               <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
             </div>
             <div className="mt-3 text-lg font-bold text-[#242526]">
-              Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {translateCohortTemp(young.cohort)}.
+              Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {translateCohortTemp(young)}.
             </div>
 
             {young.cohort === "Juillet 2023" ? (

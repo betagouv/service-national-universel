@@ -26,19 +26,8 @@ export default function WaitingAffectation({ young }) {
           <article>
             <h1 className="mb-4 flex flex-col text-2xl leading-7 md:gap-3 md:text-[44px] md:text-5xl md:leading-12">
               <span>Mon séjour de cohésion</span>
-              <strong className="flex items-center">{translateCohortTemp(young.cohort)}</strong>
+              <strong className="flex items-center">{translateCohortTemp(young)}</strong>
             </h1>
-
-            {young.cohort === "Juillet 2023" ? (
-              <div className="flex max-w-2xl items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-6 mb-6 drop-shadow">
-                <div className="bg-red-500 text-white p-2 rounded-full">
-                  <CgDanger />
-                </div>
-                <p className="text-sm">
-                  Si vous résidez <strong>en Outre-mer</strong>, vos dates de séjour sont maintenues <strong>du 4 au 16 juillet</strong>.
-                </p>
-              </div>
-            ) : null}
 
             {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null}
 

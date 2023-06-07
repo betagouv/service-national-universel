@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { translate, translateCohort, youngCanChangeSession } from "snu-lib";
+import { translateCohortTemp, youngCanChangeSession } from "snu-lib";
 import { getCohortDetail } from "../../../../utils/cohorts";
 import { isStepMedicalFieldDone } from "./utils/steps.utils";
 import api from "../../../../services/api";
@@ -29,21 +29,19 @@ export default function Affected() {
     window.scrollTo(0, 0);
   }
 
-  const getMeetingPoint = async () => {
-    const { data, ok } = await api.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
-    if (!ok) setMeetingPoint(null);
-    setMeetingPoint(data);
-  };
-
   useEffect(() => {
     if (!young.sessionPhase1Id) return;
     (async () => {
-      setLoading(true);
-      const { data, code, ok } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
-      if (!ok) return toastr.error("error", translate(code));
-      setCenter(data);
-      getMeetingPoint();
-      setLoading(false);
+      try {
+        const { data: center } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
+        const { data: meetingPoint } = await api.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
+        setCenter(center);
+        setMeetingPoint(meetingPoint);
+      } catch (e) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération des informations de votre séjour de cohésion.");
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [young]);
 
@@ -75,7 +73,7 @@ export default function Affected() {
             <h1 className="text-2xl md:space-y-4 md:text-5xl">
               Mon séjour de cohésion
               <br />
-              <strong className="flex items-center">{translateCohort(young.cohort)}</strong>
+              <strong className="flex items-center">{translateCohortTemp(young)}</strong>
             </h1>
             {youngCanChangeSession(young) ? <ChangeStayLink className="my-4 md:my-8" /> : null}
           </div>

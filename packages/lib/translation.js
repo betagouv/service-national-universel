@@ -1,3 +1,5 @@
+import { regionsListDROMS } from "./region-and-departments";
+
 const translate = (value) => {
   switch (value) {
     case "NONE":
@@ -425,7 +427,9 @@ const translateCohort = (cohort) => {
   }
 };
 
-const translateCohortTemp = (cohort) => {
+const translateCohortTemp = (young) => {
+  const { cohort } = young;
+
   switch (cohort) {
     case "Février 2022":
       return "du 13 au 25 Février 2022";
@@ -442,7 +446,10 @@ const translateCohortTemp = (cohort) => {
     case "Juin 2023":
       return "du 11 au 23 Juin 2023";
     case "Juillet 2023":
-      return "du 5 au 17 Juillet 2023"; // Date modifiée
+      if ([...regionsListDROMS, "Polynésie française"].includes(young.region)) {
+        return "du 4 au 16 Juillet 2023";
+      }
+      return "du 5 au 17 Juillet 2023";
     default:
       return cohort;
   }

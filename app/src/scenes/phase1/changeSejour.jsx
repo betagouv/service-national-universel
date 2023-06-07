@@ -15,7 +15,7 @@ import { setYoung } from "../../redux/auth/actions";
 
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { capture } from "../../sentry";
-import { YOUNG_STATUS, calculateAge } from "snu-lib";
+import { calculateAge, regionsListDROMS, translateCohortTemp } from "snu-lib";
 
 export default function changeSejour() {
   const young = useSelector((state) => state.Auth.young);
@@ -146,7 +146,7 @@ export default function changeSejour() {
                   <p>
                     <b>Une contrainte personnelle, familiale, scolaire ou professionnelle ?</b>
                     <br />
-                    Vous pouvez modifier les dates de votre séjour initialement prévu {translateCohort(young.cohort)}.
+                    Vous pouvez modifier les dates de votre séjour initialement prévu {translateCohortTemp(young)}.
                   </p>
                   <p style={{ marginTop: 10, marginBottom: 9, fontSize: 14, fontWeight: 500 }}>Dates de séjour</p>
                   <ActionBox color="#ffffff" width="375px">
@@ -160,7 +160,9 @@ export default function changeSejour() {
                           {sejours.map((cohort) => {
                             return (
                               <DropdownItem key={cohort} className="dropdown-item" onClick={() => setNewSejour(cohort)}>
-                                Séjour {translateCohort(cohort)}
+                                {cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)
+                                  ? "Séjour du 5 au 17 Juillet"
+                                  : `Séjour ${translateCohort(cohort)}`}
                               </DropdownItem>
                             );
                           })}
@@ -228,7 +230,17 @@ export default function changeSejour() {
                             Êtes-vous sûr ? <br /> <br />
                             Ancien séjour : <Badge color="#aaaaaa" backgroundColor="#F9FCFF" text={young.cohort} style={{ cursor: "default" }} />
                             <br />
-                            Nouveau séjour : <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={translateCohort(newSejour)} style={{ cursor: "default" }} />
+                            Nouveau séjour :{" "}
+                            <Badge
+                              color="#0C7CFF"
+                              backgroundColor="#F9FCFF"
+                              text={
+                                newSejour === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)
+                                  ? "Séjour du 5 au 17 Juillet"
+                                  : translateCohort(newSejour)
+                              }
+                              style={{ cursor: "default" }}
+                            />
                             <div className="mt-2 text-xs">Cette action est irréversible, souhaitez-vous confirmer cette action ?</div>
                           </>
                         }
