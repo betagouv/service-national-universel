@@ -89,7 +89,7 @@ export function getCohortPeriod(cohort) {
   return `du ${formattedStart} au ${formattedEnd}`;
 }
 
-export const departureDate = (young, meetingPoint) => {
+export function getDepartureDate(young, meetingPoint) {
   if (meetingPoint?.departuredDate) {
     return meetingPoint?.departuredDate;
   }
@@ -98,9 +98,9 @@ export const departureDate = (young, meetingPoint) => {
   }
   const cohortDetail = getCohort(young.cohort);
   return cohortDetail.dateStart;
-};
+}
 
-export const returnDate = (young, meetingPoint) => {
+export function getReturnDate(young, meetingPoint) {
   if (meetingPoint?.returnDate) {
     return meetingPoint?.returnDate;
   }
@@ -109,4 +109,4 @@ export const returnDate = (young, meetingPoint) => {
   }
   const cohortDetail = getCohort(young.cohort);
   return cohortDetail.dateEnd;
-};
+}
