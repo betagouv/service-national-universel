@@ -119,7 +119,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
           <>
             {!editInfo ? (
               <>
-                {role === "supervisor" && bus.team.filter((item) => item.role === "supervisor").length && bus.team.length < 5 && !addOpen ? (
+                {role === "supervisor" && bus.team.filter((item) => item.role === "supervisor").length && bus.team.length < 11 && !addOpen ? (
                   <button className="flex text-blue-600 mr-[44rem] mt-1 cursor-pointer text-sm hover:underline" onClick={() => setAddOpen(true)}>
                     + Ajouter un encadrant
                   </button>

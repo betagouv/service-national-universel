@@ -320,26 +320,38 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
         "Nom du chef de centre": headcenter.data.firstName + " " + headcenter.data.lastName,
         "Télephone du chef de centre": headcenter.data.phone,
         "Mail du chef de centre": headcenter.data.email,
-        "Nom du Chef de File": forthTeamLeader.length === 0 ? "" : forthTeamLeader[0].firstName + " " + forthTeamLeader[0].lastName,
-        "Tel du Chef de File": forthTeamLeader.length === 0 ? "" : forthTeamLeader[0].phone,
-        "Nom encadrant 1": forthTeamSupervisor.length === 0 ? "" : forthTeamSupervisor[0].firstName + " " + forthTeamSupervisor[0].lastName,
-        "Tel encadrant 1": forthTeamSupervisor.length === 0 ? "" : forthTeamSupervisor[0].phone,
-        "Nom encadrant 2": forthTeamSupervisor.length > 0 ? forthTeamSupervisor[1].firstName + " " + forthTeamSupervisor[1].lastName : "",
-        "Tel encadrant 2": forthTeamSupervisor.length > 0 ? forthTeamSupervisor[1].phone : "",
-        "Nom encadrant 3": forthTeamSupervisor.length > 1 ? forthTeamSupervisor[2].firstName + " " + forthTeamSupervisor[2].lastName : "",
-        "Tel encadrant 3": forthTeamSupervisor.length > 1 ? forthTeamSupervisor[2].phone : "",
-        "Nom encadrant 4": forthTeamSupervisor.length > 2 ? forthTeamSupervisor[3].firstName + " " + forthTeamSupervisor[3].lastName : "",
-        "Tel encadrant 4": forthTeamSupervisor.length > 2 ? forthTeamSupervisor[3].phone : "",
-        "Nom du jeune": item.lastName,
-        "Prénom du jeune": item.firstName,
-        "Date de naissance": item.birthdateAt,
-        "Téléphone du jeune": item.phone,
-        "Télephone du parent1": item.parent1Phone,
-        "Télephone du parent2": item.parent2Phone,
-        Présent: "",
-        Commentaire: "",
       }),
     );
+    forthTeamLeader.length > 0
+      ? excel[0].data.forEach((obj) => {
+          obj["Nom Chef de File"] = forthTeamLeader[0].firstName + " " + forthTeamLeader[0].lastName;
+          obj["Tel Chef de File"] = forthTeamLeader[0].phone;
+        })
+      : null;
+    if (forthTeamSupervisor.length > 0) {
+      forthTeamSupervisor.forEach((supervisor, index) => {
+        excel[0].data.forEach((obj) => {
+          obj["Nom Encadrant " + (index + 1)] = supervisor.firstName + " " + supervisor.lastName;
+          obj["Tel Encadrant " + (index + 1)] = supervisor.phone;
+        });
+      });
+    }
+    youngs.data.forEach((young, index) => {
+      const { data } = excel[0];
+
+      data[index] = {
+        ...data[index],
+        "Nom du jeune": young.lastName,
+        "Prénom du jeune": young.firstName,
+        "Date de naissance": young.birthdateAt,
+        "Téléphone du jeune": young.phone,
+        "Télephone du parent1": young.parent1Phone,
+        "Télephone du parent2": young.parent2Phone,
+        Présent: "",
+        Commentaire: "",
+      };
+    });
+
     youngs.data.map((item) =>
       excel[1].data.push({
         "Numéro de ligne": ligne,
@@ -356,26 +368,37 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
         "Nom du chef de centre": headcenter.data.firstName + " " + headcenter.data.lastName,
         "Télephone du chef de centre": headcenter.data.phone,
         "Mail du chef de centre": headcenter.data.email,
-        "Nom du Chef de File": backTeamLeader.length === 0 ? "" : backTeamLeader[0].firstName + " " + backTeamLeader[0].lastName,
-        "Tel du Chef de File": backTeamLeader.length === 0 ? "" : backTeamLeader[0].phone,
-        "Nom encadrant 1": backTeamSupervisor.length === 0 ? "" : backTeamSupervisor[0].firstName + " " + backTeamSupervisor[0].lastName,
-        "Tel encadrant 1": backTeamSupervisor.length === 0 ? "" : backTeamSupervisor[0].phone,
-        "Nom encadrant 2": backTeamSupervisor.length > 0 ? backTeamSupervisor[1].firstName + " " + backTeamSupervisor[1].lastName : "",
-        "Tel encadrant 2": backTeamSupervisor.length > 0 ? backTeamSupervisor[1].phone : "",
-        "Nom encadrant 3": backTeamSupervisor.length > 1 ? backTeamSupervisor[2].firstName + " " + backTeamSupervisor[2].lastName : "",
-        "Tel encadrant 3": backTeamSupervisor.length > 1 ? backTeamSupervisor[2].phone : "",
-        "Nom encadrant 4": backTeamSupervisor.length > 2 ? backTeamSupervisor[3].firstName + " " + backTeamSupervisor[3].lastName : "",
-        "Tel encadrant 4": backTeamSupervisor.length > 2 ? backTeamSupervisor[3].phone : "",
-        "Nom du jeune": item.lastName,
-        "Prénom du jeune": item.firstName,
-        "Date de naissance": item.birthdateAt,
-        "Téléphone du jeune": item.phone,
-        "Télephone du parent1": item.parent1Phone,
-        "Télephone du parent2": item.parent2Phone,
-        Présent: "",
-        Commentaire: "",
       }),
     );
+    backTeamLeader.length > 0
+      ? excel[1].data.forEach((obj) => {
+          obj["Nom Chef de File"] = backTeamLeader[0].firstName + " " + backTeamLeader[0].lastName;
+          obj["Tel Chef de File"] = backTeamLeader[0].phone;
+        })
+      : null;
+    if (backTeamSupervisor.length > 0) {
+      backTeamSupervisor.forEach((supervisor, index) => {
+        excel[1].data.forEach((obj) => {
+          obj["Nom Encadrant " + (index + 1)] = supervisor.firstName + " " + supervisor.lastName;
+          obj["Tel Encadrant " + (index + 1)] = supervisor.phone;
+        });
+      });
+    }
+    youngs.data.forEach((young, index) => {
+      const { data } = excel[1];
+
+      data[index] = {
+        ...data[index],
+        "Nom du jeune": young.lastName,
+        "Prénom du jeune": young.firstName,
+        "Date de naissance": young.birthdateAt,
+        "Téléphone du jeune": young.phone,
+        "Télephone du parent1": young.parent1Phone,
+        "Télephone du parent2": young.parent2Phone,
+        Présent: "",
+        Commentaire: "",
+      };
+    });
     switch (travel) {
       case "Aller":
         generateExcelWorkbook([excel[0]], `Fiche_Convoyeur_ligne_${data.busId}`);
