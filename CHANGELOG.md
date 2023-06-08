@@ -1,3 +1,12 @@
+## [1.287.1](https://github.com/betagouv/service-national-universel/compare/v1.287.0...v1.287.1) (2023-06-08)
+
+
+### Bug Fixes
+
+* **admin:** do not crash if initials are unavailable in mission contact ([375429c](https://github.com/betagouv/service-national-universel/commit/375429c1465f8a30865c91a4664240695565b97d))
+* **admin:** Statut receptionné - fiche sanitaire ([#2685](https://github.com/betagouv/service-national-universel/issues/2685)) ([fff4d74](https://github.com/betagouv/service-national-universel/commit/fff4d747c2fde28cde57d2e32b7c8343d697b5d6))
+* **api:** es remove statut session ([6c01d6f](https://github.com/betagouv/service-national-universel/commit/6c01d6f9ecd12da424e326098ba62989b20782b1))
+
 # [1.287.0](https://github.com/betagouv/service-national-universel/compare/v1.286.0...v1.287.0) (2023-06-07)
 
 
