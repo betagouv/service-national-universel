@@ -170,7 +170,7 @@ export default function View(props) {
             )}
             {canExportLigneBus(user) && data.team.length > 0 ? (
               <SelectAction
-                title="Exporter la ligne"
+                title="Exporter les convoyeurs"
                 alignItems="right"
                 buttonClassNames="bg-blue-600"
                 textClassNames="text-white font-medium text-sm"
