@@ -16,7 +16,7 @@ import api from "../../../services/api";
 import { PlainButton } from "../components/Buttons";
 import Select from "../components/Select";
 import { TabItem, Title, translateStatus } from "../components/commons";
-import { exportLigneBus, getTransportIcon } from "../util";
+import { exportLigneBus, getTransportIcon, exportConvoyeur } from "../util";
 import Excel from "./components/Icons/Excel.png";
 import ListPanel from "./modificationPanel/List";
 
@@ -298,6 +298,18 @@ const ReactiveList = ({ cohort, history }) => {
                           render: (
                             <div className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
                               <div className="text-sm text-gray-700">Volontaires par ligne</div>
+                            </div>
+                          ),
+                        }
+                      : null,
+                    [ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)
+                      ? {
+                          action: async () => {
+                            await exportConvoyeur(cohort);
+                          },
+                          render: (
+                            <div className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+                              <div className="text-sm text-gray-700">Convoyeurs</div>
                             </div>
                           ),
                         }

@@ -703,6 +703,9 @@ function canSearchLigneBus(actor) {
 function canExportLigneBus(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
 }
+function canExportConvoyeur(actor) {
+  return [ROLES.ADMIN, ROLES.TRANSPORTER].includes(actor.role);
+}
 
 function canEditLigneBusTeam(actor) {
   return [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
@@ -851,6 +854,7 @@ export {
   canEditLigneBusPointDeRassemblement,
   canEditLigneBusTeam,
   canExportLigneBus,
+  canExportConvoyeur,
   ligneBusCanCreateDemandeDeModification,
   ligneBusCanViewDemandeDeModification,
   ligneBusCanSendMessageDemandeDeModification,
