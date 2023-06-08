@@ -55,7 +55,7 @@ router.post("/young-affectation/:cohort/:action(search|export)", passport.authen
     const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    let contextFilters = [{ term: { "cohort.keyword": req.params.cohort } }, { term: { "status.keyword": "VALIDATED" } }, { range: { placesLeft: { gt: 0 } } }];
+    let contextFilters = [{ term: { "cohort.keyword": req.params.cohort } }, { range: { placesLeft: { gt: 0 } } }];
     if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
 
