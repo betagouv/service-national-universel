@@ -274,7 +274,6 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
       exportFields: "*",
     });
     if (!youngs) return toastr.error("Aucun volontaire affecté n'a été trouvé");
-    console.log(youngs);
 
     const session = await API.get(`/session-phase1/${youngs.data[0].sessionPhase1Id}`);
     if (!session.ok) return toastr.error("Une erreur est survenue");
