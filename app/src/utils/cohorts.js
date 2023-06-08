@@ -1,6 +1,6 @@
 import api from "../services/api";
 import { capture } from "../sentry";
-import { regionsListDROMS, sessions2023 } from "snu-lib";
+import { YOUNG_STATUS_PHASE1, regionsListDROMS, sessions2023 } from "snu-lib";
 import dayjs from "dayjs";
 let cohorts = null;
 let cohortsCachedAt = null;
@@ -89,7 +89,16 @@ export function getCohortPeriod(cohort) {
   return `du ${formattedStart} au ${formattedEnd}`;
 }
 
-export function getDepartureDate(young, meetingPoint) {
+/**
+ * @param {object} young
+ * @param {object} [meetingPoint]
+ * @returns {date} the date of the departure of the young from the meeting point if they have one,
+ * or the default date for the cohort if they don't (local transport or traveling by own means).
+ */
+export function getDepartureDate(young, meetingPoint = null) {
+  if (![YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.WITHDRAWN].includesyoung.statusPhase1) {
+    throw new Error("Young is not affected");
+  }
   if (meetingPoint?.departuredDate) {
     return meetingPoint?.departuredDate;
   }
@@ -97,10 +106,16 @@ export function getDepartureDate(young, meetingPoint) {
     return new Date(2023, 6, 5);
   }
   const cohortDetail = getCohort(young.cohort);
-  return cohortDetail.dateStart;
+  return new Date(cohortDetail.dateStart);
 }
 
-export function getReturnDate(young, meetingPoint) {
+/**
+ * @param {object} young
+ * @param {object} [meetingPoint]
+ * @returns {date} the date of the return of the young from the meeting point if they have one,
+ * or the default date for the cohort if they don't (local transport or traveling by own means).
+ */
+export function getReturnDate(young, meetingPoint = null) {
   if (meetingPoint?.returnDate) {
     return meetingPoint?.returnDate;
   }
@@ -108,5 +123,5 @@ export function getReturnDate(young, meetingPoint) {
     return new Date(2023, 6, 17);
   }
   const cohortDetail = getCohort(young.cohort);
-  return cohortDetail.dateEnd;
+  return new Date(cohortDetail.dateEnd);
 }
