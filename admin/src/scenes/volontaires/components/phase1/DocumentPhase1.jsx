@@ -8,8 +8,8 @@ import Select from "../../../../components/TailwindSelect";
 import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
 
 const getStatusCohesionStayMedical = (young) => {
-  if (young?.cohesionStayMedicalFileDownload === "false") return "TO_DOWNLOAD";
-  if (young?.cohesionStayMedicalFileDownload === "true") return "RECEIVED";
+  if (young?.cohesionStayMedicalFileReceived === "false" && young?.cohesionStayMedicalFileDownload === "false") return "TO_DOWNLOAD";
+  if (young?.cohesionStayMedicalFileReceived === "true" && young?.cohesionStayMedicalFileDownload === "true") return "RECEIVED";
   return "DOWNLOADED";
 };
 
