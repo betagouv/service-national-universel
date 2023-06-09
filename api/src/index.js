@@ -3,7 +3,7 @@ require("dotenv").config({ path: "./.env-staging" });
 // ! Ignore specific error
 const originalConsoleError = console.error;
 console.error = function (message) {
-  if (!message.includes("AWS SDK for JavaScript (v2) into maintenance mode")) {
+  if (!message?.includes("AWS SDK for JavaScript (v2) into maintenance mode")) {
     originalConsoleError.apply(console, arguments);
   }
 };
