@@ -1,3 +1,18 @@
+# [1.288.0](https://github.com/betagouv/service-national-universel/compare/v1.287.1...v1.288.0) (2023-06-09)
+
+
+### Bug Fixes
+
+* **admin:** itinerary stepsort by hour and minute ([1c4e4a0](https://github.com/betagouv/service-national-universel/commit/1c4e4a0be393d40762af62b524093540f6d4ef8c))
+* **api:** Add lexfo to exception list staging ([45b353a](https://github.com/betagouv/service-national-universel/commit/45b353a597438942d2d77edc0ee119ba549552b4))
+* **api:** Remove Metabase.jar ([3aa85b0](https://github.com/betagouv/service-national-universel/commit/3aa85b0354fab83eae14dad3fb3a1f63f10ac186))
+* **api:** Update ignore message ([3e3e66c](https://github.com/betagouv/service-national-universel/commit/3e3e66c57a58a5918fe03801c38f828804dc90e0))
+
+
+### Features
+
+* **api:** Add lexfo to email list for send in blue and withdraw EY ([eb4e2ac](https://github.com/betagouv/service-national-universel/commit/eb4e2ac982fa3ab19194aa4daa10aca2b5babdcc))
+
 ## [1.287.1](https://github.com/betagouv/service-national-universel/compare/v1.287.0...v1.287.1) (2023-06-08)
 
 
