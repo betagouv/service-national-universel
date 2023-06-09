@@ -107,6 +107,7 @@ app.use("/analytics", require("./controllers/analytics"));
 app.use("/plan-de-transport/import", require("./controllers/planDeTransport/import"));
 app.use("/elasticsearch", require("./controllers/elasticsearch"));
 app.use("/dashboard/engagement", require("./controllers/dashboard/engagement"));
+app.use("/edit-transport", require("./controllers/planDeTransport/edit-transport"));
 
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));
