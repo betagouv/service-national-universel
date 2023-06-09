@@ -6,6 +6,7 @@ import ReactTooltip from "react-tooltip";
 import LinearIceBerg from "../../../assets/Linear-IceBerg";
 import LinearMap from "../../../assets/Linear-Map";
 import ChevronRight from "../../../assets/icons/ChevronRight";
+import Eye from "../../../assets/icons/Eye";
 import { ResultTable } from "../../../components/filters-system-v2";
 import { buildQuery } from "../../../components/filters-system-v2/components/filters/utils";
 import { MultiLine } from "../../../components/list";
@@ -35,16 +36,26 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
   const [paramData, setParamData] = useState({ page: 0, size: 3 });
   const [data, setData] = useState([]);
 
+  async function getPdrs(data) {
+    for (const center of data) {
+      const res = await api.get(`/point-de-rassemblement/ligneToPoint/${young.cohort}/${center.cohesionCenterId}`);
+      const pdr = res.data.map((item) => item.meetingPoint);
+      center.meetingPoint = pdr;
+    }
+    return data;
+  }
+
   const updateOnParamChange = useCallback(
     debounce(async (selectedFilters, paramData) => {
-      buildQuery(`/elasticsearch/sessionPhase1/young-affectation/${young.cohort}/search`, selectedFilters, paramData?.page, [], paramData?.sort).then((res) => {
+      buildQuery(`/elasticsearch/sessionPhase1/young-affectation/${young.cohort}/search`, selectedFilters, paramData?.page, [], paramData?.sort).then(async (res) => {
         if (!res) return;
         const newParamData = {
           count: res.count,
         };
         if (paramData.count !== res.count) newParamData.page = 0;
+        const dataPdrs = await getPdrs(res.data);
         setParamData((paramData) => ({ ...paramData, ...newParamData }));
-        setData(res.data);
+        setData(dataPdrs);
       });
     }, 250),
     [],
@@ -441,7 +452,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
 }
 
 const HitCenter = ({ hit, onSend }) => {
-  console.log(hit);
+  console.log("hit", hit);
   return (
     <>
       <hr />
@@ -453,8 +464,11 @@ const HitCenter = ({ hit, onSend }) => {
           </MultiLine>
         </div>
         <div className="w-1/4">
-          <div key={hit.cohort} className={`w-fit rounded-full border-[1px] border-[#0C7CFF] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]`}>
-            {hit.cohort}
+          <div key={hit.meetingPoint.length} className={`w-fit rounded-full border-[1px] border-gray-500 bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-black`}>
+            <div className="text-gray-500">
+              <Eye />
+            </div>
+            {hit.meetingPoint.length} points de rassemblement proposés
           </div>
         </div>
         <div className="cursor-pointer" onClick={onSend}>

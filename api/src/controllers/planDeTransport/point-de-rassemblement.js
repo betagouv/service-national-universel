@@ -473,7 +473,6 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
         $replaceRoot: { newRoot: "$meetingPoint" },
       },
     ]);
-
     const schemaMeetingPointIds = schemaMeetingPoints.map((m) => m._id.toString());
 
     const ligneToPoint = await LigneToPointModel.find({ meetingPointId: { $in: schemaMeetingPointIds }, deletedAt: { $exists: false } });

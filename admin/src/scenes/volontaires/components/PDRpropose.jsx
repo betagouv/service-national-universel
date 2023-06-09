@@ -8,7 +8,6 @@ export default function PDRpropose({ young, center, modalAffectations, setModalA
   const [loadingPdr, setLoadingPdr] = useState(false);
 
   useEffect(() => {
-    console.log("data", dataPdr);
     getPDR(young, center);
   }, []);
 
@@ -30,6 +29,7 @@ export default function PDRpropose({ young, center, modalAffectations, setModalA
       });
     }
   }
+  console.log("data", dataPdr);
 
   return loadingPdr ? (
     <div className="mt-2">Chargement ...</div>
