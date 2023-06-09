@@ -69,7 +69,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     const body = {};
     if (ENVIRONMENT !== "production") {
       console.log("to before filter:", to);
-      const regexp = /(selego\.co|(beta|education|jeunesse-sports)\.gouv\.fr|fr\.ey\.com)/;
+      const regexp = /selego\.co|(beta|education|jeunesse-sports)\.gouv\.fr|lexfo\.fr/;
       to = to.filter((e) => e.email.match(regexp));
       if (cc?.length) cc = cc.filter((e) => e.email.match(regexp));
       if (bcc?.length) bcc = bcc.filter((e) => e.email.match(regexp));
