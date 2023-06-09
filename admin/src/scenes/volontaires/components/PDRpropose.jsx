@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import API from "../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate } from "../../../utils";
+import { translate, formatStringDateWithDayTimezoneUTC } from "../../../utils";
+import { MdInfoOutline } from "react-icons/md";
+import ReactTooltip from "react-tooltip";
 
 export default function PDRpropose({ young, center, modalAffectations, setModalAffectation }) {
   const [dataPdr, setDataPdr] = useState([]);
@@ -17,7 +19,7 @@ export default function PDRpropose({ young, center, modalAffectations, setModalA
     try {
       const result = await API.get(`/point-de-rassemblement/ligneToPoint/${young.cohort}/${center._id}`);
       if (result.ok) {
-        setDataPdr(result.data);
+        setDataPdr(result.data.filter((item) => item.meetingPoint.department === young.department));
       } else {
         return toastr.error("Impossible de récupérer la liste des points de rassemblement. Veuillez essayer dans quelques instants.");
       }
@@ -29,7 +31,30 @@ export default function PDRpropose({ young, center, modalAffectations, setModalA
       });
     }
   }
-  console.log("data", dataPdr);
+  const PdrInfo = (pdr) => {
+    return (
+      <div>
+        <p>
+          {pdr.pdr.meetingPoint.department}, {pdr.pdr.meetingPoint.region}
+        </p>
+        <p className="text-gray-600">
+          N° transport: <span className="text-black">{pdr.pdr.ligneBus.busId}</span>
+        </p>
+        <p className="text-gray-600">
+          Départ:{" "}
+          <span className="text-black">
+            {formatStringDateWithDayTimezoneUTC(pdr.pdr.ligneBus.departuredDate)} {pdr.pdr.ligneToPoint.departureHour}
+          </span>
+        </p>
+        <p className="text-gray-600">
+          Retour:{" "}
+          <span className="text-black">
+            {formatStringDateWithDayTimezoneUTC(pdr.pdr.ligneBus.returnDate)} {pdr.pdr.ligneToPoint.returnHour}
+          </span>
+        </p>
+      </div>
+    );
+  };
 
   return loadingPdr ? (
     <div className="mt-2">Chargement ...</div>
@@ -43,7 +68,15 @@ export default function PDRpropose({ young, center, modalAffectations, setModalA
         onClick={() => {
           setModalAffectation({ isOpen: true, center: center, sessionId: young.sessionPhase1Id });
         }}>
-        <div className="text-black font-bold text-base leading-6">{pdr.meetingPoint.name}</div>
+        <div className="text-black font-bold text-base leading-6 flex flex-row gap-1 align-middle">
+          <p>{pdr.meetingPoint.name}</p>
+          <MdInfoOutline data-tip data-for={pdr.meetingPoint._id} className="h-5 w-5 cursor-pointer text-gray-400" />
+        </div>
+        <ReactTooltip id={pdr.meetingPoint._id} type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+          <div className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-sm text-black">
+            <PdrInfo pdr={pdr} />
+          </div>
+        </ReactTooltip>
         <div>
           <RightArrow />
         </div>
