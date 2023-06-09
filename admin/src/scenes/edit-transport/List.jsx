@@ -184,7 +184,7 @@ const Line = ({ hit, currentTab, onClick, open, meetingPtsToSave, setMeetingPtsT
   const [meetingPoints, setMeetingPoints] = useState(
     currentTab === "aller"
       ? //sort meetingPoints by departureHour
-        hit.pointDeRassemblements.sort((a, b) => a.departureHour.replace(":", "") - b.departureHour.replace(":", ""))
+      hit.pointDeRassemblements.sort((a, b) => a.departureHour.replace(":", "") - b.departureHour.replace(":", ""))
       : hit.pointDeRassemblements.sort((a, b) => a.returnHour.replace(":", "") - b.returnHour.replace(":", "")),
   );
 
@@ -285,6 +285,7 @@ const MeetingPoints = ({ meetingPoints, setMeetingPoints, id, currentTab, meetin
     };
 
     const save = async (data) => {
+      toastr.info("Sauvegarde en cours...");
       try {
         const { ok } = await api.put(`/edit-transport/${id}`, {
           ...data,
