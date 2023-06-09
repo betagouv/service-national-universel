@@ -31,7 +31,7 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
                   <input
                     className={`w-full bg-white text-sm ${disabled ? "text-gray-400" : "text-gray-900"}`}
                     disabled={true}
-                    value={value ? dayjs(value).locale("fr").format("DD/MM/YYYY") : ""}
+                    value={value ? dayjs(value).format("DD/MM/YYYY") : ""}
                     placeholder={placeholder}
                   />
                 </div>

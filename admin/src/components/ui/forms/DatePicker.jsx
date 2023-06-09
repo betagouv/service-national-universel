@@ -1,6 +1,6 @@
 import React from "react";
 import { DayPicker } from "react-day-picker";
-import fr from "date-fns/locale/fr";
+// import fr from "date-fns/locale/fr";
 
 const formatWeekdayName = (day) => {
   return day.toLocaleDateString("fr", { weekday: "long" }).substring(0, 3);
@@ -17,7 +17,7 @@ export default function DatePicker({ value, onChange, disabled, fromYear, toYear
       mode={mode}
       captionLayout="dropdown-buttons"
       showOutsideDays={true}
-      locale={fr}
+      // locale={fr}
       defaultMonth={defaultMonth}
       fromYear={fromYear}
       toYear={toYear}
