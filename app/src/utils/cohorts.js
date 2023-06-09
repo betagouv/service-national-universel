@@ -53,7 +53,7 @@ export function getMeetingPointChoiceLimitDateForCohort(cohortName) {
 
 export function canChooseMeetingPointForCohort(cohortName) {
   const limitDate = getMeetingPointChoiceLimitDateForCohort(cohortName);
-  return limitDate && limitDate.isAfter(dayjs());
+  return limitDate && dayjs().isBefore(limitDate);
 }
 
 export function getCohortDetail(cohortName) {
