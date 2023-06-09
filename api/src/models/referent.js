@@ -271,6 +271,7 @@ Schema.plugin(patchHistory, {
 
 Schema.plugin(
   mongooseElastic(esClient, {
+    selectiveIndexing: true,
     ignore: [
       "password",
       "lastLogoutAt",
