@@ -51,6 +51,12 @@ const departureOnMonday = [{
     "$oid": "6476043ece77f613cb3b561d"
   },
   "busId": "OCC034510"
+},
+{
+  "_id": {
+    "$oid": "6476041dce77f613cb3b38c4"
+  },
+  "busId": "CVL041852"
 }];
 
 export const busLignesDepartLundi = departureOnMonday.map((e) => e._id.$oid);

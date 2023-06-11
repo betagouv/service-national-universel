@@ -219,8 +219,8 @@ const Espace = () => {
 
       <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
       <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
-      <ModalMonday isOpen={isModalTuesdayOpen} onClose={() => setIsModalTuesdayOpen(false)} />
-      <ModalTuesday isOpen={isModalMondayOpen} onClose={() => setIsModalMondayOpen(false)} />
+      <ModalMonday isOpen={isModalMondayOpen} onClose={() => setIsModalMondayOpen(false)} />
+      <ModalTuesday isOpen={isModalTuesdayOpen} onClose={() => setIsModalTuesdayOpen(false)} />
     </>
   );
 };
