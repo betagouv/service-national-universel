@@ -53,6 +53,7 @@ import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 import { cohortsInit } from "./utils/cohorts";
 import { getAvailableSessions } from "./services/cohort.service";
+import { busLignesDepartLundi } from "./utils/transport";
 
 initSentry();
 initApi();
@@ -135,48 +136,6 @@ const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
   const [warningBusDepartLundiModalOpen, setWarningBusDepartLundiModalOpen] = useState(false);
-
-  const busLignesDepartLundi = [
-    "64760411ce77f613cb3b2c26",
-    "64760413ce77f613cb3b2ebf",
-    "6476041cce77f613cb3b37b1",
-    "6476041cce77f613cb3b3864",
-    "64760426ce77f613cb3b4153",
-    "6476042bce77f613cb3b4667",
-    "6476042cce77f613cb3b46e4",
-    "6476042cce77f613cb3b475e",
-    "6476042dce77f613cb3b4899",
-    "64760430ce77f613cb3b4b79",
-    "64760430ce77f613cb3b4bcd",
-    "64760430ce77f613cb3b4bed",
-    "64760431ce77f613cb3b4d38",
-    "64760431ce77f613cb3b4d68",
-    "64760432ce77f613cb3b4dec",
-    "64760436ce77f613cb3b50eb",
-    "6476043ece77f613cb3b561d",
-    "6476043ece77f613cb3b5637",
-    "64760441ce77f613cb3b5924",
-    "64760441ce77f613cb3b595e",
-    "64760441ce77f613cb3b597b",
-    "64760442ce77f613cb3b5a57",
-    "64760442ce77f613cb3b5a8b",
-    "64760442ce77f613cb3b5b27",
-    "64760442ce77f613cb3b5b5f",
-    "64760444ce77f613cb3b5d55",
-    "6480bb533579770986713955",
-    "6480bb593579770986713fb0",
-    "64760410ce77f613cb3b2bf5",
-    "64760431ce77f613cb3b4d38",
-    "64760431ce77f613cb3b4d68",
-    "64760442ce77f613cb3b5af3",
-    "64760428ce77f613cb3b42c3",
-    "64760443ce77f613cb3b5bcf",
-    "64760443ce77f613cb3b5c03",
-    "64760410ce77f613cb3b2b92",
-    "64760413ce77f613cb3b2e8b",
-    "6476041bce77f613cb3b375c",
-    "6476042bce77f613cb3b46ad",
-  ];
 
   const young = useSelector((state) => state.Auth.young);
 
