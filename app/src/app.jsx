@@ -40,7 +40,7 @@ import SupportCenter from "./scenes/support-center";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
 
 import ModalCGU from "./components/modals/ModalCGU";
-import ModalBusWarningDepartLundi from "./components/modals/ModalBusWarningDepartLundi";
+import ModalPostponedDeparture from "./components/modals/ModalPostponedDeparture";
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 
@@ -135,7 +135,7 @@ export default function App() {
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
-  const [warningBusDepartLundiModalOpen, setWarningBusDepartLundiModalOpen] = useState(false);
+  const [isModalPostponedDepartureOpen, setIsModalPostponedDepartureOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
 
@@ -154,11 +154,10 @@ const Espace = () => {
       setIsModalCGUOpen(true);
     }
 
+    // ! To clean after departure. Or just keep it for later.
     if (young && young.cohort === "Juin 2023" && busLignesDepartLundi.includes(young.ligneId)) {
-      setWarningBusDepartLundiModalOpen(true);
+      setIsModalPostponedDepartureOpen(true);
     }
-    // ! To clean after depart Juin
-    // Or just keep it for later.
 
     if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       getAvailableSessions(young).then((sessions) => {
@@ -168,6 +167,7 @@ const Espace = () => {
     return () => {
       setIsModalCGUOpen(false);
       setIsResumePhase1WithdrawnModalOpen(false);
+      setIsModalPostponedDepartureOpen(false);
     };
   }, [young]);
 
@@ -210,9 +210,10 @@ const Espace = () => {
         </Switch>
       </main>
       <Footer />
+
       <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
       <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
-      <ModalBusWarningDepartLundi isOpen={warningBusDepartLundiModalOpen} onClose={() => setWarningBusDepartLundiModalOpen(false)} />
+      <ModalPostponedDeparture isOpen={isModalPostponedDepartureOpen} onClose={() => setIsModalPostponedDepartureOpen(false)} />
     </>
   );
 };
