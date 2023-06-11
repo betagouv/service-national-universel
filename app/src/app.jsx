@@ -40,7 +40,8 @@ import SupportCenter from "./scenes/support-center";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
 
 import ModalCGU from "./components/modals/ModalCGU";
-import ModalPostponedDeparture from "./components/modals/ModalPostponedDeparture";
+import ModalMonday from "./components/modals/ModalMonday";
+import ModalTuesday from "./components/modals/ModalTuesday";
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 
@@ -53,7 +54,7 @@ import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 import { cohortsInit } from "./utils/cohorts";
 import { getAvailableSessions } from "./services/cohort.service";
-import { busLignesDepartLundi } from "./utils/transport";
+import { busLignesDepartLundi, busLignesDepartMardi } from "./utils/transport";
 
 initSentry();
 initApi();
@@ -135,7 +136,8 @@ export default function App() {
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
-  const [isModalPostponedDepartureOpen, setIsModalPostponedDepartureOpen] = useState(false);
+  const [isModalMondayOpen, setIsModalMondayOpen] = useState(false);
+  const [isModalTuesdayOpen, setIsModalTuesdayOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
 
@@ -156,7 +158,10 @@ const Espace = () => {
 
     // ! To clean after departure. Or just keep it for later.
     if (young && young.cohort === "Juin 2023" && busLignesDepartLundi.includes(young.ligneId)) {
-      setIsModalPostponedDepartureOpen(true);
+      setIsModalMondayOpen(true);
+    }
+    if (young && young.cohort === "Juin 2023" && busLignesDepartMardi.includes(young.ligneId)) {
+      setIsModalTuesdayOpen(true);
     }
 
     if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
@@ -167,7 +172,8 @@ const Espace = () => {
     return () => {
       setIsModalCGUOpen(false);
       setIsResumePhase1WithdrawnModalOpen(false);
-      setIsModalPostponedDepartureOpen(false);
+      setIsModalMondayOpen(false);
+      setIsModalTuesdayOpen(false);
     };
   }, [young]);
 
@@ -213,7 +219,8 @@ const Espace = () => {
 
       <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
       <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
-      <ModalPostponedDeparture isOpen={isModalPostponedDepartureOpen} onClose={() => setIsModalPostponedDepartureOpen(false)} />
+      <ModalMonday isOpen={isModalTuesdayOpen} onClose={() => setIsModalTuesdayOpen(false)} />
+      <ModalTuesday isOpen={isModalMondayOpen} onClose={() => setIsModalMondayOpen(false)} />
     </>
   );
 };

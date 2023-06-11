@@ -3,7 +3,7 @@ import Modal from "../ui/modals/Modal";
 import { IoWarning } from "react-icons/io5";
 import ButtonLight from "../ui/buttons/ButtonLight";
 
-const ModalPostponedDeparture = ({ isOpen, onClose }) => {
+const ModalTuesday = ({ isOpen, onClose }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-xl bg-white rounded-xl p-6">
       <div className="text-sm text-gray-700 leading-5 space-y-4">
@@ -17,7 +17,7 @@ const ModalPostponedDeparture = ({ isOpen, onClose }) => {
           Conscients des difficultés logistiques que cette contrainte de dernière minute peut causer dans votre organisation, nous vous prions de nous excuser pour ce changement.
         </p>
         <p>Nous reviendrons vers vous au plus vite pour vous préciser votre nouvel horaire de départ.</p>
-        <p>Pour toute demande de renseignements, nous vous invitons à nous contacter via le centre d'aide.</p>
+        <p>Nous vous remercions d'avance pour votre compréhension.</p>
       </div>
       <div className="mt-12">
         <ButtonLight className="w-full" onClick={onClose}>
@@ -28,4 +28,4 @@ const ModalPostponedDeparture = ({ isOpen, onClose }) => {
   );
 };
 
-export default ModalPostponedDeparture;
+export default ModalTuesday;
