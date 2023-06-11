@@ -165,12 +165,6 @@ const departureOnTuesday = [{
 },
 {
   "_id": {
-    "$oid": "6476042cce77f613cb3b4706"
-  },
-  "busId": "IDF091002"
-},
-{
-  "_id": {
     "$oid": "6476042cce77f613cb3b475e"
   },
   "busId": "IDF091017"
