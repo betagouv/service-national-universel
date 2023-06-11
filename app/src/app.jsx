@@ -134,7 +134,7 @@ export default function App() {
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
-  const [warningBusDepartLundiModalOpen, setWarningBusDepartLundiModalOpen] = useState(true);
+  const [warningBusDepartLundiModalOpen, setWarningBusDepartLundiModalOpen] = useState(false);
 
   const busLignesDepartLundi = [
     "64760411ce77f613cb3b2c26",
