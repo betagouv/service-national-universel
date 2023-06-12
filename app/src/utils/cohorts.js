@@ -90,8 +90,8 @@ export function getCohortPeriod(cohort) {
 }
 
 export const departureDate = (young, meetingPoint) => {
-  if (meetingPoint?.departuredDate) {
-    return meetingPoint?.departuredDate;
+  if (meetingPoint?.bus?.departuredDate) {
+    return meetingPoint?.bus?.departuredDate;
   }
   if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
     return new Date(2023, 6, 5);
@@ -101,8 +101,8 @@ export const departureDate = (young, meetingPoint) => {
 };
 
 export const returnDate = (young, meetingPoint) => {
-  if (meetingPoint?.returnDate) {
-    return meetingPoint?.returnDate;
+  if (meetingPoint?.bus?.returnDate) {
+    return meetingPoint?.bus?.returnDate;
   }
   if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
     return new Date(2023, 6, 17);
