@@ -3,6 +3,7 @@ const forceProd = false;
 const environment = import.meta.env.MODE;
 console.log("🚀 ~ file: config.js:4 ~ environment:", environment);
 let apiURL = "http://localhost:8080";
+console.log("🚀 ~ file: config.js:6 ~ apiURL:", apiURL)
 let appURL = "http://localhost:8081";
 let adminURL = "http://localhost:8082";
 let supportURL = "http://localhost:8083";
@@ -27,5 +28,7 @@ if (environment === "production") {
   SENTRY_TRACING_SAMPLE_RATE = 0.01;
 }
 const S3PREFIX = "";
+
+console.log("🚀 ~ file: config.js:4 ~ apiURL:", apiURL);
 
 export { apiURL, appURL, S3PREFIX, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, environment, adminURL, supportURL, maintenance };
