@@ -1091,6 +1091,7 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
       }
       await young.save({ fromUser: req.user });
       await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
+      await updatePlacesSessionPhase1(sessionPhase1, req.user);
       if (key === "cohesionStayPresence" && newValue === "true") {
         let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
         if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
