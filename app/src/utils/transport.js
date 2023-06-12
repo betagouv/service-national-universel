@@ -196,21 +196,9 @@ const departureOnTuesday = [
   },
   {
     _id: {
-      $oid: "6476042dce77f613cb3b4879",
-    },
-    busId: "IDF092741",
-  },
-  {
-    _id: {
       $oid: "6476042dce77f613cb3b4899",
     },
     busId: "IDF092742",
-  },
-  {
-    _id: {
-      $oid: "6476042fce77f613cb3b4a6d",
-    },
-    busId: "IDF095073",
   },
   {
     _id: {
@@ -236,13 +224,6 @@ const departureOnTuesday = [
     },
     busId: "NOA017912",
   },
-
-  {
-    _id: {
-      $oid: "64760430ce77f613cb3b4bed",
-    },
-    busId: "NOA023381",
-  },
   {
     _id: {
       $oid: "64760431ce77f613cb3b4d38",
@@ -254,12 +235,6 @@ const departureOnTuesday = [
       $oid: "64760431ce77f613cb3b4d68",
     },
     busId: "NOA033852",
-  },
-  {
-    _id: {
-      $oid: "64760434ce77f613cb3b4fe7",
-    },
-    busId: "NOA087432",
   },
   {
     _id: {
@@ -309,12 +284,6 @@ const departureOnTuesday = [
       $oid: "64760441ce77f613cb3b597b",
     },
     busId: "PAC083432",
-  },
-  {
-    _id: {
-      $oid: "64760442ce77f613cb3b5a57",
-    },
-    busId: "PDL044036",
   },
   {
     _id: {
@@ -370,6 +339,12 @@ const departureOnTuesday = [
     },
     busId: "IDF095059",
   },
+  {
+    "_id": {
+      "$oid": "6476042dce77f613cb3b4859"
+    },
+    "busId": "IDF092073"
+  }
 ];
 
 const departureOnTuesdayByLocalTransport = [
