@@ -1,3 +1,20 @@
+# [1.289.0](https://github.com/betagouv/service-national-universel/compare/v1.288.0...v1.289.0) (2023-06-12)
+
+
+### Bug Fixes
+
+* **admin:** Download file for emploi du temps séjour ([1b46455](https://github.com/betagouv/service-national-universel/commit/1b464552eb7f77e181086ca6aaaf93c0a1e817d1))
+* **admin:** Download file possible ([033cedf](https://github.com/betagouv/service-national-universel/commit/033cedf540f0a7a424715d32ecc419e77039db96))
+* **admin,api:**  plan de transport wip2 ([#2690](https://github.com/betagouv/service-national-universel/issues/2690)) ([30101d3](https://github.com/betagouv/service-national-universel/commit/30101d32e0cb3b80a60dd0d699660668e99007ab))
+* **api:** data-for-check bus ([b875959](https://github.com/betagouv/service-national-universel/commit/b8759594e856e50e14cf3bbb921aa6b5831cf8d2))
+* **api:** Refetch session when updating places with multiaction ([d643631](https://github.com/betagouv/service-national-universel/commit/d6436314c256178edfcf306748a8d2037d0c11ff))
+* **app:** hour view convocation ([99dac94](https://github.com/betagouv/service-national-universel/commit/99dac94ca2ebeb468d807b9b6b46bff29e54c0e1))
+
+
+### Features
+
+* **api:** volontaire pointé absent libere une place ([#2693](https://github.com/betagouv/service-national-universel/issues/2693)) ([84fa97d](https://github.com/betagouv/service-national-universel/commit/84fa97d78b74a3d326b23afc22ff8238c1304949))
+
 # [1.288.0](https://github.com/betagouv/service-national-universel/compare/v1.287.1...v1.288.0) (2023-06-09)
 
 
