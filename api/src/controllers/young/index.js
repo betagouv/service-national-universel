@@ -1081,8 +1081,6 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const sessionPhase1 = await SessionPhase1.findById(youngs[0].sessionPhase1Id);
-
     for (let young of youngs) {
       if ((key === "cohesionStayPresence" && newValue === "false") || (key === "presenceJDM" && young.cohesionStayPresence === "false")) {
         young.set({ cohesionStayPresence: "false", presenceJDM: "false" });
@@ -1090,6 +1088,7 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
         young.set({ [key]: newValue });
       }
       await young.save({ fromUser: req.user });
+      const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
       await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
       await updatePlacesSessionPhase1(sessionPhase1, req.user);
       if (key === "cohesionStayPresence" && newValue === "true") {

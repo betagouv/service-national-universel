@@ -216,7 +216,6 @@ const updatePlacesSessionPhase1 = async (sessionPhase1, fromUser) => {
   // console.log(`update place sessionPhase1 ${sessionPhase1?._id}`);
   try {
     const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
-    const sessionPhase1 = await SessionPhase1.findById(sessionPhase1._id);
     const placesTaken = youngs.filter(
       (young) => ["AFFECTED", "DONE"].includes(young.statusPhase1) && young.cohesionStayPresence !== "false" && young.status === "VALIDATED",
     ).length;
