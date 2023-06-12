@@ -69,7 +69,7 @@ exports.handler = async () => {
         }
       }
     });
-    if ( countTotal === 0 || countHit === 0){
+    if (countHit === 0) {
       slack.info({
         title: "noticePushMission",
         text: `Pas de jeunes ciblé(e)s.\nmails envoyés: ${countHit}\nPas de missions proposées.`,
