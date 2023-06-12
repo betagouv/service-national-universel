@@ -880,5 +880,4 @@ module.exports = {
   getTransporter,
   getStatusPhase1FromValidationDateWithSpecificCase,
   getStatusPhase1FromValidationDate,
-  autoValidationSessionPhase1YoungTest,
 };
