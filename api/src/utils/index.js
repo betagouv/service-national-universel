@@ -591,7 +591,7 @@ async function notifDepartmentChange(department, template, young, extraParams = 
   }
 }
 
-async function autoValidationSessionPhase1YoungTest({ young, sessionPhase1, req }) {
+async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
   const { validationDate: dateDeValidation, validationDateForTerminaleGrade: dateDeValidationTerminale } = await getCohortValidationDate(sessionPhase1.cohort);
   if (!dateDeValidation || !dateDeValidationTerminale) return;
   
@@ -662,55 +662,6 @@ async function getStatusPhase1FromValidationDateWithSpecificCase(young, dateDeVa
     } else {
       young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
     }
-  }
-}
-
-async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
-  // const dateDeValidation = {
-  //   2019: new Date("06/28/2019"),
-  //   2020: new Date("07/02/2021"),
-  //   2021: new Date("07/02/2021"),
-  //   "Juin 2022": new Date(2022, 5, 20, 18), //20 juin 2022 à 18h
-  //   "Juillet 2022": new Date(2022, 6, 11, 18), //11 juillet 2022 à 18h
-  // };
-  //
-  // const dateDeValidationTerminale = {
-  //   2019: new Date("06/28/2019"),
-  //   2020: new Date("07/02/2021"),
-  //   2021: new Date("07/02/2021"),
-  //   "Juin 2022": new Date(2022, 5, 22, 18), //22 juin 2022 à 18h
-  //   "Juillet 2022": new Date(2022, 6, 13, 18), //13 juillet 2022 à 18h
-  // };
-  const { validationDate: dateDeValidation, validationDateForTerminaleGrade: dateDeValidationTerminale } = await getCohortValidationDate(sessionPhase1.cohort);
-
-  if (!dateDeValidation || !dateDeValidationTerminale) return;
-
-  const now = new Date();
-  if ((now >= dateDeValidation && young?.grade !== "Terminale") || (now >= dateDeValidationTerminale && young?.grade === "Terminale")) {
-    if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
-      if (
-        (now >= dateDeValidation && young?.grade !== "Terminale" && (!young?.departSejourAt || young?.departSejourAt > dateDeValidation)) ||
-        (now >= dateDeValidationTerminale && young?.grade === "Terminale" && (!young?.departSejourAt || young?.departSejourAt > dateDeValidationTerminale))
-      ) {
-        if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
-          young.set({ statusPhase1: "NOT_DONE" });
-        } else {
-          young.set({ statusPhase1: "DONE" });
-        }
-      } else {
-        if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
-          young.set({ statusPhase1: "NOT_DONE" });
-        } else if (
-          young?.departSejourMotif &&
-          ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young.departSejourMotif)
-        ) {
-          young.set({ statusPhase1: "DONE" });
-        }
-      }
-    } else {
-      young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
-    }
-    await young.save({ fromUser: req.user });
   }
 }
 

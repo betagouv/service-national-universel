@@ -17,7 +17,7 @@ const SessionPhase1Model = require("../../models/sessionPhase1");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const CohortModel = require("../../models/cohort");
-const { ERRORS, autoValidationSessionPhase1Young, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1YoungTest} = require("../../utils");
+const { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young} = require("../../utils");
 const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");
 const { sendTemplate } = require("../../sendinblue");
 
@@ -179,8 +179,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
     await young.save({ fromUser: req.user });
 
     const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-    // await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
-    await autoValidationSessionPhase1YoungTest({ young, sessionPhase1, req });
+    await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
 
     res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
@@ -210,8 +209,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
     await young.save({ fromUser: req.user });
 
     const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-    // await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
-    await autoValidationSessionPhase1YoungTest({ young, sessionPhase1, req });
+    await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
 
     res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
@@ -258,8 +256,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
     if (!["youngPhase1Agreement", "isTravelingByPlane"].includes(key)) {
       const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
       if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      // await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
-      await autoValidationSessionPhase1YoungTest({ young, sessionPhase1, req });
+      await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
     }
 
     if (key === "cohesionStayPresence" && newValue === "true") {

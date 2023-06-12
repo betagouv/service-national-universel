@@ -35,7 +35,6 @@ const {
   getCcOfYoung,
   getFile,
   autoValidationSessionPhase1Young,
-  autoValidationSessionPhase1YoungTest,
   deleteFile,
   updateSeatsTakenInBusLine,
 } = require("../../utils");
@@ -1041,8 +1040,7 @@ router.post("/phase1/multiaction/depart", passport.authenticate("referent", { se
     for (let young of youngs) {
       young.set({ departSejourAt, departSejourMotif, departSejourMotifComment, departInform: "true" });
       await young.save({ fromUser: req.user });
-      // await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
-      await autoValidationSessionPhase1YoungTest({ young, sessionPhase1, req });
+      await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
     }
 
     res.status(200).send({ ok: true, data: youngs.map(serializeYoung) });
@@ -1092,8 +1090,7 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
         young.set({ [key]: newValue });
       }
       await young.save({ fromUser: req.user });
-      // await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
-      await autoValidationSessionPhase1YoungTest({ young, sessionPhase1, req });
+      await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
       if (key === "cohesionStayPresence" && newValue === "true") {
         let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
         if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
