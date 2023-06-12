@@ -90,6 +90,9 @@ export function getCohortPeriod(cohort) {
 }
 
 export const departureDate = (young, meetingPoint) => {
+  if (meetingPoint?.departuredDate) {
+    return meetingPoint?.departuredDate;
+  }
   if (meetingPoint?.bus?.departuredDate) {
     return meetingPoint?.bus?.departuredDate;
   }
@@ -101,6 +104,9 @@ export const departureDate = (young, meetingPoint) => {
 };
 
 export const returnDate = (young, meetingPoint) => {
+  if (meetingPoint?.returnDate) {
+    return meetingPoint?.returnDate;
+  }
   if (meetingPoint?.bus?.returnDate) {
     return meetingPoint?.bus?.returnDate;
   }
