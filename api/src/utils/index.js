@@ -591,9 +591,10 @@ async function notifDepartmentChange(department, template, young, extraParams = 
   }
 }
 
-async function autoValidationSessionPhase1YoungTest({ young, sessionPhase1 }) {
+async function autoValidationSessionPhase1YoungTest({ young, sessionPhase1, req }) {
   const { validationDate: dateDeValidation, validationDateForTerminaleGrade: dateDeValidationTerminale } = await getCohortValidationDate(sessionPhase1.cohort);
   if (!dateDeValidation || !dateDeValidationTerminale) return;
+  
   if ( dateDeValidation === dateDeValidationTerminale ){
     await getStatusPhase1FromValidationDate(young, dateDeValidation);
   } else {
