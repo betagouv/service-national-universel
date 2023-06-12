@@ -69,14 +69,21 @@ exports.handler = async () => {
         }
       }
     });
-    slack.info({
-      title: "noticePushMission",
-      text: `${countHit}/${countTotal} (${((countHit / countTotal) * 100).toFixed(
-        2,
-      )}%) jeunes ciblé(e)s.\nmails envoyés: ${countHit}\nnombre de missions proposées / mail : ${JSON.stringify(
-        countMissionSent,
-      )}\ncohortes (si missions proposées) : ${JSON.stringify(countMissionSentCohort)}`,
-    });
+    if (countHit === 0) {
+      slack.info({
+        title: "noticePushMission",
+        text: `Pas de jeunes ciblé(e)s.\nmails envoyés: ${countHit}\nPas de missions proposées.`,
+      });
+    } else {
+      slack.info({
+        title: "noticePushMission",
+        text: `${countHit}/${countTotal} (${((countHit / countTotal) * 100).toFixed(
+          2,
+        )}%) jeunes ciblé(e)s.\nmails envoyés: ${countHit}\nnombre de missions proposées / mail : ${JSON.stringify(
+          countMissionSent,
+        )}\ncohortes (si missions proposées) : ${JSON.stringify(countMissionSentCohort)}`,
+      });
+    }
   } catch (e) {
     capture(e);
     slack.error({ title: "noticePushMission", text: JSON.stringify(e) });
