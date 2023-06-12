@@ -12,8 +12,7 @@ const NOT_FOUND = " NOT_FOUND";
 
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    /*if (req.user.role !== "admin" || req.user.subRole !== "god")
-        return res.status(401).send({ ok: false, code: UNAUTHORIZED });*/
+    if (req.user.role !== "admin" || req.user.subRole !== "god") return res.status(401).send({ ok: false, code: UNAUTHORIZED });
     const body = req.body;
     const { id } = req.params;
     let ligne = await PlanTransportModel.findOne({ _id: id });
