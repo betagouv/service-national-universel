@@ -1,5 +1,4 @@
-const environment = import.meta.MODE;
-console.log("🚀 ~ file: config.js:2 ~ environment:", environment);
+const environment = import.meta.env.MODE;
 
 let apiURL = "http://localhost:8080";
 console.log("🚀 ~ file: config.js:5 ~ apiURL:", apiURL);
@@ -34,7 +33,5 @@ let franceConnectUrl = "https://fcp.integ01.dev-franceconnect.fr/api/v1";
 if (environment === "production") {
   franceConnectUrl = "https://app.franceconnect.gouv.fr/api/v1";
 }
-
-console.log("🚀 ~ file: config.js:5 ~ apiURL:", apiURL);
 
 export { apiURL, S3PREFIX, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, environment, franceConnectUrl, adminURL, appURL, supportURL, maintenance };
