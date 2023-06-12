@@ -1,7 +1,6 @@
 const environment = import.meta.env.MODE;
 
 let apiURL = "http://localhost:8080";
-console.log("🚀 ~ file: config.js:5 ~ apiURL:", apiURL);
 let adminURL = "http://localhost:8082";
 let appURL = "http://localhost:8081";
 let supportURL = "http://localhost:8083";
