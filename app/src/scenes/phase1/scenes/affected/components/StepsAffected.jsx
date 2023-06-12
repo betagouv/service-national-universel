@@ -40,7 +40,7 @@ export default function StepsAffected({ center, departureDate, returnDate }) {
       </article>
       <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">
-        <StepPDR young={young} center={center} />
+        <StepPDR center={center} departureDate={departureDate} returnDate={returnDate} />
       </div>
       <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">

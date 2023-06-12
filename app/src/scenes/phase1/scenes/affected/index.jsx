@@ -23,6 +23,7 @@ export default function Affected() {
   const [meetingPoint, setMeetingPoint] = useState();
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const [loading, setLoading] = useState(true);
+
   const departureDate = getDepartureDate(young, meetingPoint);
   const returnDate = getReturnDate(young, meetingPoint);
 

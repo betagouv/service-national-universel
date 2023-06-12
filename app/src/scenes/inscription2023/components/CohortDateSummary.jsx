@@ -1,18 +1,7 @@
 import React from "react";
-import { getCohortDetail, getDepartureDate, getReturnDate } from "../../../utils/cohorts";
 import dayjs from "dayjs";
-import Loader from "../../../components/Loader";
-import { useSelector } from "react-redux";
 
-export default function CohortDateSummary({ cohortName, className = "", choosenMeetingPoint }) {
-  const young = useSelector((state) => state.Auth.young);
-  const cohort = getCohortDetail(cohortName, young);
-  const departureDate = getDepartureDate(young, choosenMeetingPoint);
-  const returnDate = getReturnDate(young, choosenMeetingPoint);
-
-  if (!cohort) {
-    return <Loader />;
-  }
+export default function CohortDateSummary({ departureDate, returnDate, className }) {
   return (
     <div className={`flex flex-col items-center rounded-xl bg-gray-50 py-2 px-3 md:flex-row ${className}`}>
       <DateSummary type="Aller" date={departureDate} className="mb-8 md:mb-0 md:mr-8" />

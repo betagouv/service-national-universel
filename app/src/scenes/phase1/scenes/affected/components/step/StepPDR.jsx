@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
-import { getCohortDetail, getMeetingPointChoiceLimitDateForCohort } from "../../../../../../utils/cohorts";
+import { getCohortDetail, getMeetingHour, getMeetingPointChoiceLimitDateForCohort, getReturnHour } from "../../../../../../utils/cohorts";
 import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR, isStepPDRDone } from "../../utils/steps.utils";
 import dayjs from "dayjs";
 import CohortDateSummary from "../../../../../inscription2023/components/CohortDateSummary";
@@ -12,7 +12,7 @@ import LinearMap from "../../../../../../assets/icons/LinearMap";
 import { BorderButton } from "../../../../../../components/buttons/SimpleButtons";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../../../../redux/auth/actions";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Check from "../../../../../../assets/icons/Check";
 import CloseSvg from "../../../../../../assets/Close";
 import { ModalContainer } from "../../../../../../components/modals/Modal";
@@ -21,7 +21,8 @@ import { Modal } from "reactstrap";
 import ConfirmationModal from "../../../../components/modals/ConfirmationModal";
 import Warning from "../../../../../../assets/icons/Warning";
 
-export default function StepPDR({ young, center }) {
+export default function StepPDR({ center, departureDate, returnDate }) {
+  const young = useSelector((state) => state.Auth.young);
   const enabled = young ? true : false;
   const valid = isStepPDRDone(young);
   const [openedDesktop, setOpenedDesktop] = useState(false);
@@ -31,17 +32,17 @@ export default function StepPDR({ young, center }) {
   const [meetingPoints, setMeetingPoints] = useState(null);
   const [error, setError] = useState(null);
   const [choosenMeetingPoint, setChoosenMeetingPoint] = useState(null);
-  const [cohort, setCohort] = useState(null);
 
   const [modalMeetingPoint, setModalMeetingPoint] = useState({ isOpen: false, meetingPoint: null });
   const [loading, setLoading] = useState(false);
+
+  const meetingHour = getMeetingHour(choosenMeetingPoint);
+  const returnHour = getReturnHour(choosenMeetingPoint);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (young) {
-      setCohort(getCohortDetail(young.cohort));
-
       const date = getMeetingPointChoiceLimitDateForCohort(young.cohort);
       if (date) {
         setPdrChoiceLimitDate(dayjs(date).locale("fr").format("D MMMM YYYY"));
@@ -191,7 +192,7 @@ export default function StepPDR({ young, center }) {
             </p>
           </div>
         </div>
-        {openedDesktop && <CohortDateSummary cohortName={young.cohort} choosenMeetingPoint={choosenMeetingPoint} className="ml-4" />}
+        {openedDesktop && <CohortDateSummary departureDate={departureDate} returnDate={returnDate} />}
         {enabled && young.transportInfoGivenByLocal !== "true" ? (
           <div className="ml-4 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 hover:scale-110">
             {openedDesktop ? <HiOutlineChevronUp className="h-5 w-5" /> : <HiOutlineChevronDown className="h-5 w-5" />}
@@ -264,12 +265,12 @@ export default function StepPDR({ young, center }) {
               {young.meetingPointId ? (
                 <>
                   <div>{addressOf(choosenMeetingPoint)}</div>
-                  {cohort && choosenMeetingPoint && <MobileDateDetail startHour={choosenMeetingPoint.meetingHour} returnHour={choosenMeetingPoint.returnHour} cohort={cohort} />}
+                  <MobileDateDetail departureDate={departureDate} returnDate={returnDate} startHour={meetingHour} returnHour={returnHour} />
                 </>
               ) : young.deplacementPhase1Autonomous === "true" ? (
                 <>
                   <div>Je me rends au centre et en reviens par mes propres moyens</div>
-                  {cohort && <MobileDateDetail startHour={ALONE_ARRIVAL_HOUR} returnHour={ALONE_DEPARTURE_HOUR} cohort={cohort} />}
+                  <MobileDateDetail departureDate={departureDate} returnDate={returnDate} startHour={meetingHour} returnHour={returnHour} />
                 </>
               ) : young.transportInfoGivenByLocal === "true" ? (
                 <>Les informations sur les modalités d&apos;acheminement vers le centre et de retour vous seront transmises par e-mail par les services académiques.</>
@@ -291,7 +292,7 @@ export default function StepPDR({ young, center }) {
             <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={() => setOpenedMobile(false)} />
             <div className="w-full p-12 md:p-4">
               <div className="mb-3 text-center text-lg font-bold text-gray-900">Confirmez votre point de rassemblement</div>
-              <CohortDateSummary cohortName={young.cohort} className="mb-4" />
+              <CohortDateSummary departureDate={departureDate} returnDate={returnDate} className="mb-4" />
               {error && <div className="text-red my-4 text-center text-sm">{error}</div>}
               {meetingPoints ? (
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
@@ -329,19 +330,19 @@ export default function StepPDR({ young, center }) {
   );
 }
 
-function MobileDateDetail({ startHour, returnHour, cohort }) {
+function MobileDateDetail({ departureDate, returnDate, startHour, returnHour }) {
   return (
     <div className="my-3 grid grid-cols-2 gap-2">
       <div className="">
         <div className="font-bold">Aller à {startHour}</div>
         <div className="text-xs">
-          <span className="capitalize">{dayjs(cohort.dateStart).locale("fr").format("dddd")}</span> <span>{dayjs(cohort.dateStart).locale("fr").format("D MMMM")}</span>
+          <span className="capitalize">{dayjs(departureDate).locale("fr").format("dddd")}</span> <span>{dayjs(departureDate).locale("fr").format("D MMMM")}</span>
         </div>
       </div>
       <div className="">
         <div className="font-bold">Retour à {returnHour}</div>
         <div className="text-xs">
-          <span className="capitalize">{dayjs(cohort.dateEnd).locale("fr").format("dddd")}</span> <span>{dayjs(cohort.dateEnd).locale("fr").format("D MMMM")}</span>
+          <span className="capitalize">{dayjs(returnDate).locale("fr").format("dddd")}</span> <span>{dayjs(returnDate).locale("fr").format("D MMMM")}</span>
         </div>
       </div>
     </div>
