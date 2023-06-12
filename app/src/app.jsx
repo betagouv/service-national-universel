@@ -42,6 +42,7 @@ import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPa
 import ModalCGU from "./components/modals/ModalCGU";
 import ModalMonday from "./components/modals/ModalMonday";
 import ModalTuesday from "./components/modals/ModalTuesday";
+import ModalTuesdayLocalTransport from "./components/modals/ModalTuesdayLocalTransport";
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 
@@ -54,7 +55,7 @@ import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 import { cohortsInit } from "./utils/cohorts";
 import { getAvailableSessions } from "./services/cohort.service";
-import { busLignesDepartLundi, busLignesDepartMardi } from "./utils/transport";
+import { busLignesDepartLundi, busLignesDepartMardi, busLignesDepartMardiByLocalTransport } from "./utils/transport";
 
 initSentry();
 initApi();
@@ -138,6 +139,7 @@ const Espace = () => {
   const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
   const [isModalMondayOpen, setIsModalMondayOpen] = useState(false);
   const [isModalTuesdayOpen, setIsModalTuesdayOpen] = useState(false);
+  const [isModalTuesdayLocalTransportOpen, setIsModalTuesdayLocalTransportOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
 
@@ -164,6 +166,10 @@ const Espace = () => {
       setIsModalTuesdayOpen(true);
     }
 
+    if (young && young.cohort === "Juin 2023" && busLignesDepartMardiByLocalTransport.includes(young.ligneId)) {
+      setIsModalTuesdayLocalTransportOpen(true);
+    }
+
     if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       getAvailableSessions(young).then((sessions) => {
         if (sessions.length) setIsResumePhase1WithdrawnModalOpen(true);
@@ -174,6 +180,7 @@ const Espace = () => {
       setIsResumePhase1WithdrawnModalOpen(false);
       setIsModalMondayOpen(false);
       setIsModalTuesdayOpen(false);
+      setIsModalTuesdayLocalTransportOpen(false);
     };
   }, [young]);
 
@@ -221,6 +228,7 @@ const Espace = () => {
       <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
       <ModalMonday isOpen={isModalMondayOpen} onClose={() => setIsModalMondayOpen(false)} />
       <ModalTuesday isOpen={isModalTuesdayOpen} onClose={() => setIsModalTuesdayOpen(false)} />
+      <ModalTuesdayLocalTransport isOpen={isModalTuesdayLocalTransportOpen} onClose={() => setIsModalTuesdayLocalTransportOpen(false)} />
     </>
   );
 };
