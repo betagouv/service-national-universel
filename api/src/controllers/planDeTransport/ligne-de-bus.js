@@ -389,7 +389,6 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
 
     const ligneBus = await LigneBusModel.findById(id);
     if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
     //Get all youngs for this ligne and by meeting point
     const queryYoung = [
       { $match: { _id: ligneBus._id } },
@@ -406,6 +405,7 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
                     { $eq: ["$cohort", ligneBus.cohort] },
                     { $eq: ["$status", "VALIDATED"] },
                     { $eq: ["$sessionPhase1Id", ligneBus.sessionId] },
+                    { $eq: ["$ligneId", ligneBus._id.toString()] },
                     { $eq: ["$meetingPointId", "$$meetingPoint"] },
                   ],
                 },
