@@ -1,3 +1,27 @@
+# [1.290.0](https://github.com/betagouv/service-national-universel/compare/v1.289.0...v1.290.0) (2023-06-13)
+
+
+### Bug Fixes
+
+* **admin,api:** pdt-wip3 ([#2699](https://github.com/betagouv/service-national-universel/issues/2699)) ([79e5fb6](https://github.com/betagouv/service-national-universel/commit/79e5fb61ffc656404b702fa49d511d25ce0a8f49))
+* **api:** Download convocation date ([bfa4a33](https://github.com/betagouv/service-national-universel/commit/bfa4a338760d288d09afb3ba2e0a3cd19691df33))
+* **api:** Quelle erreur Raph ! ([0d1954d](https://github.com/betagouv/service-national-universel/commit/0d1954dd2400ef5bf97c11db31c34a7a64714846))
+* **api:** Remove Template 231 from api ([#2668](https://github.com/betagouv/service-national-universel/issues/2668)) ([0db4695](https://github.com/betagouv/service-national-universel/commit/0db46956746da6e972da69accedb91eb73587b07))
+* **api:** Update ignore message ([1750f56](https://github.com/betagouv/service-national-universel/commit/1750f56ce14e346e5addc3b7f749c391bb42a3e3))
+* **app:** Coherence des dates episode 3 ([ee12348](https://github.com/betagouv/service-national-universel/commit/ee123489c9506c39360ae80a1f977f2255cb363a))
+* **app:** Fin du choix de PDR à 23:59 au lieu de 00:01 ([#2689](https://github.com/betagouv/service-national-universel/issues/2689)) ([53948e6](https://github.com/betagouv/service-national-universel/commit/53948e6931f5d0a05a01d304a7d4317340d5e963))
+* **app:** JDMA ([1bbe791](https://github.com/betagouv/service-national-universel/commit/1bbe7911b099aca6a1573c635ae41369fc5a22b9))
+* **app, api:** Mon Compte/Phase 1 - statut "Affecté" : Cohérence de l'affichage des dates de séjour ([#2684](https://github.com/betagouv/service-national-universel/issues/2684)) ([55cacb8](https://github.com/betagouv/service-national-universel/commit/55cacb877fde12fe6b089db7f910028633aff039))
+* **security:** serialize in new elasticsearch when serializer available ([#2603](https://github.com/betagouv/service-national-universel/issues/2603)) ([24e3a42](https://github.com/betagouv/service-national-universel/commit/24e3a4279a2828baeafc2aa2d9b0297fad13d8a6))
+
+
+### Features
+
+* **admin:** Amelioration UX Affectation Manuelle ([#2691](https://github.com/betagouv/service-national-universel/issues/2691)) ([d381c24](https://github.com/betagouv/service-national-universel/commit/d381c243953f4f52aa9f0bc3a82abcf1b507a449))
+* **admin/api:** ADD Export de tous les convoyeurs d'une cohort ([#2687](https://github.com/betagouv/service-national-universel/issues/2687)) ([0cb96fd](https://github.com/betagouv/service-national-universel/commit/0cb96fda86f2a1ba6e8d93d1adf501d2c368c9a3))
+* **admin/api:** droit-a-image-pdf-quand-non-autorisation ([#2675](https://github.com/betagouv/service-national-universel/issues/2675)) ([53daeb4](https://github.com/betagouv/service-national-universel/commit/53daeb431da19d346e10dacfea4250f02bd0c108))
+* **api:** Do not update ElasticSearch if document didn't changed ([#2697](https://github.com/betagouv/service-national-universel/issues/2697)) ([12e8ce0](https://github.com/betagouv/service-national-universel/commit/12e8ce0e869bb48edaa84bceb7579fdee9395e6b))
+
 # [1.289.0](https://github.com/betagouv/service-national-universel/compare/v1.288.0...v1.289.0) (2023-06-12)
 
 
