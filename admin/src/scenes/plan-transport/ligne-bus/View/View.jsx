@@ -16,6 +16,7 @@ import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
 import SelectAction from "../../../../components/SelectAction";
 import Bus from "../../../../assets/icons/Bus";
+import { exportLigneBusJeune } from "../../util";
 
 export default function View(props) {
   const [data, setData] = React.useState(null);
@@ -111,6 +112,45 @@ export default function View(props) {
 
   const leader = data.team.filter((item) => item.role === "leader")[0]?._id || null;
 
+  let exportItems = [
+    {
+      key: "exportData",
+      action: async () => {
+        await exportLigneBusJeune(cohort.name, data.busId, "total", data.team);
+      },
+      render: (
+        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+          <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+          <div className="text-sm text-gray-700">Informations complètes</div>
+        </div>
+      ),
+    },
+    {
+      key: "exportDataAller",
+      action: async () => {
+        await exportLigneBusJeune(cohort.name, data.busId, "Aller", data.team);
+      },
+      render: (
+        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+          <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+          <div className="text-sm text-gray-700">Informations Aller</div>
+        </div>
+      ),
+    },
+    {
+      key: "exportDataRetour",
+      action: async () => {
+        await exportLigneBusJeune(cohort.name, data.busId, "Retour", data.team);
+      },
+      render: (
+        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+          <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+          <div className="text-sm text-gray-700">Informations Retour</div>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <>
       <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
@@ -128,6 +168,22 @@ export default function View(props) {
                 Demander une modification
               </button>
             )}
+            {canExportLigneBus(user) && data.team.length > 0 ? (
+              <SelectAction
+                title="Exporter la ligne"
+                alignItems="right"
+                buttonClassNames="bg-blue-600"
+                textClassNames="text-white font-medium text-sm"
+                rightIconClassNames="text-blue-300"
+                optionsGroup={[
+                  {
+                    key: "export",
+                    title: "Télécharger",
+                    items: exportItems,
+                  },
+                ]}
+              />
+            ) : null}
           </div>
         </div>
         <div className="flex flex-col gap-8">
@@ -142,7 +198,7 @@ export default function View(props) {
           </div>
           <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
 
-          <BusTeam bus={data} setBus={setData} title={"Chef de file"} role={"leader"} idTeam={leader} addOpen={addOpen}/>
+          <BusTeam bus={data} setBus={setData} title={"Chef de file"} role={"leader"} idTeam={leader} addOpen={addOpen} />
           {data.team.filter((item) => item.role === "supervisor").length > 0 ? (
             data.team
               .filter((item) => item.role === "supervisor")

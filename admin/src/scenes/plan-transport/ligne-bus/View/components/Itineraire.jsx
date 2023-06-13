@@ -42,8 +42,15 @@ export default function Itineraire({ meetingsPoints, center, aller, retour }) {
     }
 
     let sortMeetingsPoints = flatMeetingsPoints.sort((a, b) => {
-      if (showRetour) return a.returnHour.split(":")[0] - b.returnHour.split(":")[0];
-      return a.departureHour.split(":")[0] - b.departureHour.split(":")[0];
+      const fieldName = showRetour ? "returnHour" : "departureHour";
+      const hourA = a[fieldName].split(":")[0];
+      const hourB = b[fieldName].split(":")[0];
+      if (hourA !== hourB) {
+        return hourA - hourB;
+      }
+      const minuteA = a[fieldName].split(":")[1];
+      const minuteB = b[fieldName].split(":")[1];
+      return minuteA - minuteB;
     });
 
     let timeline = sortMeetingsPoints.map((meetingPoint, index) => {

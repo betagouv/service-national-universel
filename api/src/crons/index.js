@@ -1,7 +1,6 @@
 const cron = require("node-cron");
 const { ENVIRONMENT } = require("../config");
 
-const mailRecapDepartment = require("./mailRecap/cron_hebdo_department");
 const apiEngagement = require("./syncApiEngagement");
 const missionOutdated = require("./missionOutdated");
 const computeGoalsInscription = require("./computeGoalsInscription");
@@ -65,16 +64,6 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule("0 9 * * 1", function () {
     noticePushMission.handler();
-  });
-
-  // every tuesday at 0900
-  cron.schedule("0 8 * * 2", function () {
-    mailRecapDepartment.handler();
-  });
-
-  // every thursday at 0900
-  cron.schedule("0 8 * * 4", function () {
-    mailRecapDepartment.handler();
   });
 
   // everyday at 0200

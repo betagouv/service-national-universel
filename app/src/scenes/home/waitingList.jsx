@@ -2,16 +2,23 @@ import Img3 from "../../assets/homePhase2Desktop.png";
 import Img2 from "../../assets/homePhase2Mobile.png";
 import React from "react";
 import { useSelector } from "react-redux";
-import plausibleEvent from "../../services/plausible";
 import { getCohort } from "../../utils/cohorts";
 import Clock from "../../assets/icons/Clock";
 import WaitingListContent from "./components/WaitingListContent";
 import { translate, translateCohortTemp } from "snu-lib";
-import { CgDanger } from "react-icons/cg";
+import JDMA from "../../components/JDMA";
+import { environment } from "../../config";
+import plausibleEvent from "../../services/plausible";
 
 export default function WaitingList() {
   const young = useSelector((state) => state.Auth.young);
   const cohort = getCohort(young.cohort);
+
+  function handleClick() {
+    if (environment === "production") {
+      plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) });
+    }
+  }
 
   return (
     <>
@@ -27,17 +34,6 @@ export default function WaitingList() {
                 Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {translateCohortTemp(young)}.
               </div>
 
-              {young.cohort === "Juillet 2023" ? (
-                <div className="flex max-w-2xl items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-6 mb-6 drop-shadow">
-                  <div className="bg-red-500 text-white p-2 rounded-full">
-                    <CgDanger />
-                  </div>
-                  <p className="text-sm">
-                    Si vous résidez <strong>en Outre-mer</strong>, vos dates de séjour sont maintenues <strong>du 4 au 16 juillet</strong>.
-                  </p>
-                </div>
-              ) : null}
-
               <hr className="text-gray-200" />
               <div className="flex gap-5">
                 <Clock className="text-gray-600 flex-1 rounded-full bg-gray-100 p-2" />
@@ -49,13 +45,9 @@ export default function WaitingList() {
             </div>
             <img className="w-1/2 object-fill" src={Img3} />
           </div>
-          <div className="mt-10 flex justify-end">
-            <a
-              className="w-40"
-              href="https://voxusagers.numerique.gouv.fr/Demarches/3154?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
-              onClick={() => plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) })}>
-              <img src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg" alt="Je donne mon avis" />
-            </a>
+
+          <div className="flex justify-end py-4 pr-8">
+            <JDMA id="3154" />
           </div>
         </div>
       </div>
@@ -70,17 +62,6 @@ export default function WaitingList() {
               Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {translateCohortTemp(young)}.
             </div>
 
-            {young.cohort === "Juillet 2023" ? (
-              <div className="flex max-w-2xl items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-6 mb-6 drop-shadow">
-                <div className="bg-red-500 text-white p-2 rounded-full">
-                  <CgDanger />
-                </div>
-                <p className="text-sm">
-                  Si vous résidez <strong>en Outre-mer</strong>, vos dates de séjour sont maintenues <strong>du 4 au 16 juillet</strong>.
-                </p>
-              </div>
-            ) : null}
-
             <hr className="mt-3 text-gray-200" />
             <div className="flex gap-2 my-2">
               <Clock className="text-gray-600 rounded-full bg-gray-100 p-2" />
@@ -90,13 +71,8 @@ export default function WaitingList() {
             </div>
             <hr className="text-gray-200" />
 
-            <div className="mt-20 flex justify-center">
-              <a
-                className="w-36"
-                href="https://voxusagers.numerique.gouv.fr/Demarches/3154?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
-                onClick={() => plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) })}>
-                <img src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg" alt="Je donne mon avis" />
-              </a>
+            <div className="flex justify-end py-4 pr-8">
+              <JDMA id="3154" onClick={handleClick} />
             </div>
           </div>
           <img className="object-contain" src={Img2} />

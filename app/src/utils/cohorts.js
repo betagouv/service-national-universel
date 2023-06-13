@@ -98,6 +98,7 @@ export function getCohortPeriod(cohort) {
  */
 export function getDepartureDate(young, meetingPoint = null) {
   if (meetingPoint?.departuredDate) return meetingPoint?.departuredDate;
+  if (meetingPoint?.bus?.departuredDate) return meetingPoint?.bus?.departuredDate;
   return getGlobalDepartureDate(young);
 }
 
@@ -108,8 +109,8 @@ export function getDepartureDate(young, meetingPoint = null) {
  * or the default date for the cohort if they don't (local transport or traveling by own means).
  */
 export function getReturnDate(young, meetingPoint = null) {
-  console.log("🚀 ~ file: cohorts.js:111 ~ getReturnDate ~ meetingPoint:", meetingPoint)
   if (meetingPoint?.returnDate) return meetingPoint?.returnDate;
+  if (meetingPoint?.bus?.returnDate) return meetingPoint?.bus?.returnDate;
   return getGlobalReturnDate(young);
 }
 

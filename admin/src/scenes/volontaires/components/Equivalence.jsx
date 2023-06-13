@@ -255,9 +255,11 @@ export default function CardEquivalence({ young, equivalence }) {
   );
 }
 
-const getInitials = (word) =>
-  (word || "UK")
+const getInitials = (word) => {
+  const initials = (word || "UK")
     .match(/\b(\w)/g)
-    .join("")
-    .substring(0, 2)
-    .toUpperCase();
+    ?.join("")
+    ?.substring(0, 2)
+    ?.toUpperCase();
+  return initials || "";
+};

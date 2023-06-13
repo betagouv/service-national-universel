@@ -217,7 +217,7 @@ const updatePlacesSessionPhase1 = async (sessionPhase1, fromUser) => {
   try {
     const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
     const placesTaken = youngs.filter(
-      (young) => (["AFFECTED", "DONE"].includes(young.statusPhase1) || ["AFFECTED", "DONE"].includes(young.statusPhase1Tmp)) && young.status === "VALIDATED",
+      (young) => ["AFFECTED", "DONE"].includes(young.statusPhase1) && young.cohesionStayPresence !== "false" && young.status === "VALIDATED",
     ).length;
     const placesLeft = Math.max(0, sessionPhase1.placesTotal - placesTaken);
     if (sessionPhase1.placesLeft !== placesLeft) {

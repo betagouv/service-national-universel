@@ -4,6 +4,8 @@ import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
 import { getCohortDetail, getMeetingHour, getMeetingPointChoiceLimitDateForCohort, getReturnHour } from "../../../../../../utils/cohorts";
 import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR, isStepPDRDone } from "../../utils/steps.utils";
 import dayjs from "dayjs";
+const utc = require("dayjs/plugin/utc");
+dayjs.extend(utc);
 import CohortDateSummary from "../../../../../inscription2023/components/CohortDateSummary";
 import Loader from "../../../../../../components/Loader";
 import { capture } from "../../../../../../sentry";
@@ -22,43 +24,31 @@ import ConfirmationModal from "../../../../components/modals/ConfirmationModal";
 import Warning from "../../../../../../assets/icons/Warning";
 
 export default function StepPDR({ center, departureDate, returnDate }) {
-  const young = useSelector((state) => state.Auth.young);
-  const enabled = young ? true : false;
-  const valid = isStepPDRDone(young);
   const [openedDesktop, setOpenedDesktop] = useState(false);
   const [openedMobile, setOpenedMobile] = useState(false);
-  const [pdrChoiceLimitDate, setPdrChoiceLimitDate] = useState("?");
-  const [pdrChoiceExpired, setPdrChoiceExpired] = useState(false);
   const [meetingPoints, setMeetingPoints] = useState(null);
   const [error, setError] = useState(null);
   const [choosenMeetingPoint, setChoosenMeetingPoint] = useState(null);
-
   const [modalMeetingPoint, setModalMeetingPoint] = useState({ isOpen: false, meetingPoint: null });
   const [loading, setLoading] = useState(false);
 
+  const young = useSelector((state) => state.Auth.young);
+  const dispatch = useDispatch();
+  const enabled = young ? true : false;
+  const valid = isStepPDRDone(young);
+  const date = getMeetingPointChoiceLimitDateForCohort(young.cohort);
+  const pdrChoiceLimitDate = date ? dayjs(date).locale("fr").format("D MMMM YYYY") : "?";
+  const pdrChoiceExpired = date ? dayjs.utc().isAfter(dayjs(date)) : false;
   const meetingHour = getMeetingHour(choosenMeetingPoint);
   const returnHour = getReturnHour(choosenMeetingPoint);
 
-  const dispatch = useDispatch();
-
   useEffect(() => {
-    if (young) {
-      const date = getMeetingPointChoiceLimitDateForCohort(young.cohort);
-      if (date) {
-        setPdrChoiceLimitDate(dayjs(date).locale("fr").format("D MMMM YYYY"));
-        setPdrChoiceExpired(dayjs(date).isBefore(new Date()));
-      } else {
-        setPdrChoiceLimitDate("-");
-        setPdrChoiceExpired(false);
-      }
-
+    if (young && !meetingPoints) {
       loadMeetingPoints();
     }
   }, [young]);
 
   async function loadMeetingPoints() {
-    setMeetingPoints(null);
-    setError(null);
     try {
       const result = await api.get(`/point-de-rassemblement/available`);
       if (!result.ok) {
