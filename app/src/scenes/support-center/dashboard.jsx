@@ -232,7 +232,6 @@ export default function Dashboard(props) {
           ))}
         </Articles>
         <hr style={{ margin: "2rem" }} />
-        <BannerJuly />
         <h4 style={{ textAlign: "center" }}>Vous n&apos;avez pas trouvé de réponse à votre demande?</h4>
         <div className="help-section">
           <div className="help-section-block">
