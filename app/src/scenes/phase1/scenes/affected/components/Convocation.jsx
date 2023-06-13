@@ -10,29 +10,21 @@ import { translate, htmlCleaner } from "../../../../../utils";
 import { Hero, Content } from "../../../../../components/Content";
 import { supportURL } from "../../../../../config";
 
-import { getCohortDetail, departureDate, returnDate } from "../../../../../utils/cohorts";
 import dayjs from "dayjs";
 import { translateCohortTemp } from "snu-lib";
+import { getMeetingHour, getReturnHour } from "../../../../../utils/cohorts";
 
-export default function Convocation() {
+export default function Convocation({ departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
 
   const [meetingPoint, setMeetingPoint] = useState();
   const [center, setCenter] = useState();
   const [service, setService] = useState();
-  const [cohort, setCohort] = useState();
 
   const isFromDOMTOM = () => {
     return false;
   };
-
-  //   return (
-  //     ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
-  //       young.department,
-  //     ) && young.grade !== "Terminale"
-  //   );
-  // };
 
   const getMeetingPoint = async () => {
     const { data, code, ok } = await api.get(`/point-de-rassemblement/fullInfo/${young.meetingPointId}/${young.ligneId}`);
@@ -54,7 +46,6 @@ export default function Convocation() {
     // À changer par la suite ? Notamment le isFromDOMTOM() ?
     if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.transportInfoGivenByLocal !== "true") return console.log("unauthorized");
     getCenter();
-    setCohort(getCohortDetail(young.cohort));
     young.meetingPointId && getMeetingPoint();
     getService();
   }, [young]);
@@ -132,10 +123,10 @@ export default function Convocation() {
                   <div className="text-center">
                     <div>
                       <b>Le </b>
-                      {dayjs(departureDate(young, meetingPoint)).locale("fr").format("dddd DD MMMM")}
+                      {dayjs(departureDate).locale("fr").format("dddd DD MMMM YYYY")}
                     </div>
                     <div>
-                      <b>A </b> {meetingPoint ? meetingPoint.ligneToPoint.meetingHour : "16:00"}
+                      <b>A </b> {getMeetingHour(meetingPoint)}
                     </div>
                     <div>
                       <b>Au </b>
@@ -181,8 +172,8 @@ export default function Convocation() {
               </ConvocText>
             ) : (
               <ConvocText>
-                Le <b>retour de votre séjour </b>est prévu le {dayjs(returnDate(young, meetingPoint)).locale("fr").format("dddd DD MMMM")} à{" "}
-                {meetingPoint ? meetingPoint.ligneToPoint.returnHour : "11:00"}, au même endroit que le jour du départ en centre SNU.
+                Le <b>retour de votre séjour </b>est prévu le {dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")} à {getReturnHour(meetingPoint)}, au même endroit que le
+                jour du départ en centre SNU.
               </ConvocText>
             )}
           </>

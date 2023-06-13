@@ -4,16 +4,14 @@ import LongArrow from "../../../../../assets/icons/LongArrow";
 import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR } from "../utils/steps.utils.js";
 import { useSelector } from "react-redux";
 
-export default function TravelInfo({ location, cohortDetails }) {
+export default function TravelInfo({ location, departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
 
-  if (!location || !cohortDetails) {
+  if (!location) {
     return <></>;
   }
 
-  const goDate = location?.bus?.departuredDate || cohortDetails.dateStart;
   const goHour = location?.ligneToPoint?.meetingHour || ALONE_ARRIVAL_HOUR;
-  const returnDate = location?.bus?.returnDate || cohortDetails.dateEnd;
   const returnHour = location?.ligneToPoint?.returnHour || ALONE_DEPARTURE_HOUR;
 
   return (
@@ -37,7 +35,7 @@ export default function TravelInfo({ location, cohortDetails }) {
               </span>
             </p>
             <p className="text-sm">
-              <span className="capitalize">{dayjs(goDate).locale("fr").format("dddd")}</span> <span>{dayjs(goDate).locale("fr").format("D MMMM")}</span> à {goHour}
+              <span className="capitalize">{dayjs(departureDate).locale("fr").format("dddd")}</span> <span>{dayjs(departureDate).locale("fr").format("D MMMM")}</span> à {goHour}
             </p>
             <p className="my-2 rounded-xl bg-gray-100 py-2 px-3 text-sm">
               {location.name},

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { translateCohortTemp, youngCanChangeSession } from "snu-lib";
-import { getCohortDetail } from "../../../../utils/cohorts";
+import { getDepartureDate, getReturnDate } from "../../../../utils/cohorts";
 import { isStepMedicalFieldDone } from "./utils/steps.utils";
 import api from "../../../../services/api";
 
@@ -23,7 +23,9 @@ export default function Affected() {
   const [meetingPoint, setMeetingPoint] = useState();
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const [loading, setLoading] = useState(true);
-  const cohortDetails = getCohortDetail(young.cohort);
+
+  const departureDate = getDepartureDate(young, meetingPoint);
+  const returnDate = getReturnDate(young, meetingPoint);
 
   if (isStepMedicalFieldDone(young)) {
     window.scrollTo(0, 0);
@@ -83,12 +85,12 @@ export default function Affected() {
 
         {isStepMedicalFieldDone(young) && (
           <div className="order-2 flex flex-none flex-col gap-4 md:flex-row">
-            <TravelInfo location={young?.meetingPointId ? meetingPoint : center} cohortDetails={cohortDetails} />
+            <TravelInfo location={young?.meetingPointId ? meetingPoint : center} departureDate={departureDate} returnDate={returnDate} />
             <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
           </div>
         )}
 
-        <StepsAffected center={center} />
+        <StepsAffected center={center} departureDate={departureDate} returnDate={returnDate} />
         <FaqAffected className={`${isStepMedicalFieldDone(young) ? "order-3" : "order-4"}`} />
       </div>
 
