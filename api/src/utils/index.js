@@ -593,62 +593,25 @@ async function notifDepartmentChange(department, template, young, extraParams = 
 
 async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
   const { validationDate: dateDeValidation, validationDateForTerminaleGrade: dateDeValidationTerminale } = await getCohortValidationDate(sessionPhase1.cohort);
-  if (!dateDeValidation || !dateDeValidationTerminale) return;
-  
-  if ( dateDeValidation === dateDeValidationTerminale ){
-    await updateStatusPhase1FromValidationDate(young, dateDeValidation, req.user);
-  } else {
-    await updateStatusPhase1FromValidationDateWithSpecificCase(young, dateDeValidation, dateDeValidationTerminale, req.user);
+  if (!dateDeValidation || !dateDeValidationTerminale) {
+    throw new Error("❌ validationDate & validationDateForTerminaleGrade missing on cohort " + sessionPhase1.cohort);
   }
+  const isTerminale = young?.grade === "Terminale";
+  const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
+  await updateStatusPhase1(young, validationDate, isTerminale, req.user);
 }
 
-async function updateStatusPhase1FromValidationDate(young, dateDeValidation, fromUser){
+async function updateStatusPhase1(young, validationDate, isTerminale, fromUser) {
   try {
     const now = new Date();
-    // Cette constante nous permet de vérifier si un jeune a passé sa date de validation 
-    const isValidationDatePassed = now >= dateDeValidation;
-    // Cette constante nous permet de vérifier si un jeune étant présent au début du séjour et à la JDM
-    const isCohesionStayValid = young.cohesionStayPresence === "true" && young.presenceJDM === "true";
-    // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1
-    const isDepartureDateValid = now >= dateDeValidation && (!young.departSejourAt || young.departSejourAt > dateDeValidation);
-  
+    // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
+    const isValidationDatePassed = now >= validationDate;
+    // Cette constante nous permet de vérifier si un jeune étant présent au début du séjour et à la JDM (basé sur son grade)
+    const isCohesionStayValid = young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || isTerminale);
+    // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
+    const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt > validationDate);
+
     // On valide la phase 1 si toutes les condition sont réunis. Une exception : le jeune a été exclu.
-    if (isValidationDatePassed && isCohesionStayValid && isDepartureDateValid) {
-      if (young.departSejourMotif && young.departSejourMotif === "Exclusion") {
-        young.set({ statusPhase1: "NOT_DONE" });
-      } else {
-        young.set({ statusPhase1: "DONE" });
-      }
-    } else {
-      // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
-      if (young.departSejourMotif && ["Exclusion", "Autre"].includes(young?.departSejourMotif)) {
-        young.set({ statusPhase1: "NOT_DONE" });
-      } else if (
-        young.departSejourMotif &&
-        ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young?.departSejourMotif)
-      ) {
-        young.set({ statusPhase1: "DONE" });
-      } 
-    }
-    await young.save({ fromUser });
-  } catch(e) {
-    console.log(e);
-    capture(e);
-  }
-}
-
-async function updateStatusPhase1FromValidationDateWithSpecificCase(young, dateDeValidation, dateDeValidationTerminale, fromUser ) {
-  try {
-    const now = new Date();
-    // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (en fonction de son grade)
-    const isValidationDatePassed = (now >= dateDeValidation && young?.grade !== "Terminale") || (now >= dateDeValidationTerminale && young?.grade === "Terminale");
-    // Cette constante nous permet de vérifier si un jeune étant présent au début du séjour et à la JDM (en fonction de son grade)
-    const isCohesionStayValid = young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale");
-    // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (en fonction de son grade)
-    const isDepartureDateValid = now >= (young?.grade === "Terminale" ? dateDeValidationTerminale : dateDeValidation) && (!young?.departSejourAt || young?.departSejourAt > (young?.grade === "Terminale" ? dateDeValidationTerminale : dateDeValidation));
-    
-    // Dans ce premier cas on vient vérifier que toutes les conditions préalable sont bonnes. si c'est la cas on valide sa phase 1.
-    // Un exception : si le jeune a été exclu du séjour.
     if (isValidationDatePassed && isCohesionStayValid && isDepartureDateValid) {
       if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
         young.set({ statusPhase1: "NOT_DONE" });
@@ -656,10 +619,8 @@ async function updateStatusPhase1FromValidationDateWithSpecificCase(young, dateD
         young.set({ statusPhase1: "DONE" });
       }
     } else {
-    // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
-      if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young?.departSejourMotif)) {
-        young.set({ statusPhase1: "NOT_DONE" });
-      } else if (
+      // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
+      if (
         young?.departSejourMotif &&
         ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young?.departSejourMotif)
       ) {
@@ -888,6 +849,4 @@ module.exports = {
   updateYoungApplicationFilesType,
   updateHeadCenter,
   getTransporter,
-  updateStatusPhase1FromValidationDateWithSpecificCase,
-  updateStatusPhase1FromValidationDate,
 };
