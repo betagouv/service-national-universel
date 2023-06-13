@@ -136,7 +136,7 @@ function getGlobalReturnDate(young) {
  * or a default hour if they don't (local transport or traveling by own means).
  */
 export function getMeetingHour(meetingPoint = null) {
-  if (meetingPoint?.meetingHour) return meetingPoint.meetingHour; // check variable names
+  if (meetingPoint?.meetingHour) return meetingPoint.meetingHour;
   if (meetingPoint?.ligneToPoint?.meetingHour) return meetingPoint.ligneToPoint.meetingHour;
   return ALONE_ARRIVAL_HOUR;
 }
@@ -147,7 +147,7 @@ export function getMeetingHour(meetingPoint = null) {
  * or a default hour if they don't (local transport or traveling by own means).
  */
 export function getReturnHour(meetingPoint = null) {
-  if (meetingPoint?.returnHour) return meetingPoint.returnHour; // check variable names
+  if (meetingPoint?.returnHour) return meetingPoint.returnHour;
   if (meetingPoint?.ligneToPoint?.returnHour) return meetingPoint.ligneToPoint.returnHour;
   return ALONE_DEPARTURE_HOUR;
 }

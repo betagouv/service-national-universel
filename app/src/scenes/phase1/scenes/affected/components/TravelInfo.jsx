@@ -1,8 +1,8 @@
 import React from "react";
 import dayjs from "dayjs";
 import LongArrow from "../../../../../assets/icons/LongArrow";
-import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR } from "../utils/steps.utils.js";
 import { useSelector } from "react-redux";
+import { getMeetingHour, getReturnHour } from "../../../../../utils/cohorts";
 
 export default function TravelInfo({ location, departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
@@ -11,8 +11,8 @@ export default function TravelInfo({ location, departureDate, returnDate }) {
     return <></>;
   }
 
-  const goHour = location?.ligneToPoint?.meetingHour || ALONE_ARRIVAL_HOUR;
-  const returnHour = location?.ligneToPoint?.returnHour || ALONE_DEPARTURE_HOUR;
+  const meetingHour = getMeetingHour(location);
+  const returnHour = getReturnHour(location);
 
   return (
     <div className="p-4 md:ml-10">
@@ -35,7 +35,8 @@ export default function TravelInfo({ location, departureDate, returnDate }) {
               </span>
             </p>
             <p className="text-sm">
-              <span className="capitalize">{dayjs(departureDate).locale("fr").format("dddd")}</span> <span>{dayjs(departureDate).locale("fr").format("D MMMM")}</span> à {goHour}
+              <span className="capitalize">{dayjs(departureDate).locale("fr").format("dddd")}</span> <span>{dayjs(departureDate).locale("fr").format("D MMMM")}</span> à{" "}
+              {meetingHour}
             </p>
             <p className="my-2 rounded-xl bg-gray-100 py-2 px-3 text-sm">
               {location.name},

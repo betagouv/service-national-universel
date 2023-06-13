@@ -76,9 +76,9 @@ const render = async (young) => {
     //add 12h to dateEnd
     cohortDateEnd.setHours(cohortDateEnd.getHours() + 12);
 
-    const departureDate = (young, meetingPoint) => {
-      if (meetingPoint?.departuredDate) {
-        return meetingPoint?.departuredDate;
+    const departureDate = () => {
+      if (ligneBus?.departuredDate) {
+        return ligneBus?.departuredDate;
       }
       if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
         return new Date(2023, 6, 5);
@@ -86,9 +86,9 @@ const render = async (young) => {
       return cohort.dateStart;
     };
 
-    const returnDate = (young, meetingPoint) => {
-      if (meetingPoint?.returnDate) {
-        return meetingPoint?.returnDate;
+    const returnDate = () => {
+      if (ligneBus?.returnDate) {
+        return ligneBus?.returnDate;
       }
       if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
         return new Date(2023, 6, 17);
@@ -120,11 +120,11 @@ const render = async (young) => {
       .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
       .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
       .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
-      .replace(/{{MEETING_DATE}}/g, sanitizeAll(dayjs(departureDate(young, meetingPoint)).locale("fr-FR").format("dddd DD MMMM YYYY")))
+      .replace(/{{MEETING_DATE}}/g, sanitizeAll(dayjs(departureDate()).locale("fr-FR").format("dddd DD MMMM YYYY")))
       .replace(/{{MEETING_HOURS}}/g, sanitizeAll(`<b>A</b> ${meetingPoint ? ligneToPoint.meetingHour : "16:00"}`))
       .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(`<b>Au</b> ${getMeetingAddress(meetingPoint, center)}`))
       .replace(/{{TRANSPORT}}/g, sanitizeAll(ligneBus ? `<b>Numéro de transport</b> : ${ligneBus.busId}` : ""))
-      .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(dayjs(returnDate(young, meetingPoint)).locale("fr").format("dddd DD MMMM YYYY")))
+      .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(dayjs(returnDate()).locale("fr").format("dddd DD MMMM YYYY")))
       .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(meetingPoint ? ligneToPoint.returnHour : "11:00"))
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
       .replace(/{{TOP}}/g, sanitizeAll(getTop()))
