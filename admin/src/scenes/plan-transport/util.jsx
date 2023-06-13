@@ -414,3 +414,70 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
     toastr.error("Erreur !", translate(e.code));
   }
 }
+
+export async function exportConvoyeur(cohort) {
+  try {
+    const resultat = await API.get(`/ligne-de-bus/cohort/${cohort}`);
+    if (!resultat.ok) return toastr.error("Aucune ligne de bus n'a été trouvée");
+
+    const ligneBus = resultat.data.ligneBus;
+    const centers = resultat.data.centers;
+
+    for (let i = 0; i < ligneBus.length; i++) {
+      const currentLigneBus = ligneBus[i];
+
+      const matchingCenter = centers.find((c) => c._id === currentLigneBus.centerId);
+
+      if (matchingCenter) {
+        currentLigneBus.centerCode = matchingCenter.code2022;
+        currentLigneBus.centerDepartment = matchingCenter.department;
+      }
+    }
+
+    const findTeam = (item) => {
+      const leader = item.team.filter((member) => member.role === "leader");
+      const supervisor = item.team.filter((member) => member.role === "supervisor");
+      const team = {};
+
+      if (leader.length > 0) {
+        team["Nom Chef de File"] = leader[0].lastName;
+        team["Prénom Chef de File"] = leader[0].firstName;
+        team["Date naissance Chef de File"] = leader[0].birthdate;
+        team["Mail Chef de File"] = leader[0].mail;
+        team["Tel Chef de File"] = leader[0].phone;
+        team["Aller"] = leader[0].forth === true ? "Oui" : "Non";
+        team["Retour"] = leader[0].back === true ? "Oui" : "Non";
+      }
+      if (supervisor.length > 0) {
+        supervisor.forEach((supervisor, index) => {
+          team["Nom Encadrant " + (index + 1)] = supervisor.lastName;
+          team["Prénom Encadrant " + (index + 1)] = supervisor.firstName;
+          team["Date naissance Encadrant " + (index + 1)] = supervisor.birthdate;
+          team["Mail Encadrant " + (index + 1)] = supervisor.mail;
+          team["Tel Encadrant " + (index + 1)] = supervisor.phone;
+          team["Aller"] = supervisor.forth === true ? "Oui" : "Non";
+          team["Retour"] = supervisor.back === true ? "Oui" : "Non";
+        });
+      }
+      return team;
+    };
+
+    let excel = [{ name: "Convoyeur", data: [] }];
+    ligneBus.forEach((item) => {
+      const team = findTeam(item);
+
+      const dataItem = {
+        "Numéro de ligne": item.busId,
+        "Code centre": item.centerCode,
+        Département: item.centerDepartment,
+        ...team,
+      };
+
+      excel[0].data.push(dataItem);
+    });
+    generateExcelWorkbook(excel, `Fiche_Convoyeur_cohort_${cohort}`);
+  } catch (e) {
+    console.log(e);
+    toastr.error("Erreur !", translate(e.code));
+  }
+}

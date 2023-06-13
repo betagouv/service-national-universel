@@ -20,6 +20,7 @@ const {
   formatStringLongDate,
   isIsoDate,
   translateBusPatchesField,
+  canExportConvoyeur,
 } = require("snu-lib");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
@@ -38,6 +39,29 @@ router.get("/all", passport.authenticate("referent", { session: false, failWithE
     const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints } });
     const ligneToPoints = await LigneToPointModel.find({ lineId: { $in: ligneBus.map((l) => l._id) } });
     return res.status(200).send({ ok: true, data: { ligneBus, meetingPoints, ligneToPoints } });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+//Récupère toutes les ligneBus + les centres associés
+
+router.get("/cohort/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      cohort: Joi.string().required(),
+    }).validate(req.params);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (!canExportConvoyeur(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { cohort } = value;
+
+    const ligneBus = await LigneBusModel.find({ cohort: { $in: [cohort] }, deletedAt: { $exists: false } });
+    let arrayCenter = [];
+    ligneBus.map((l) => (arrayCenter = arrayCenter.concat(l.centerId)));
+    const centers = await cohesionCenterModel.find({ _id: { $in: arrayCenter } });
+    return res.status(200).send({ ok: true, data: { ligneBus, centers } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
