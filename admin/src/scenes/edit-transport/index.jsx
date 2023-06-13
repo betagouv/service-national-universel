@@ -4,7 +4,6 @@ import { SentryRoute } from "../../sentry";
 import List from "./List";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
-
 export default function Index() {
   useDocumentTitle("Edit Plan de transport");
   return (
