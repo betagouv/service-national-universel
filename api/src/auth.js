@@ -195,7 +195,7 @@ class Auth {
 
     try {
       const { user } = req;
-      user.set({ lastLoginAt: Date.now() });
+      user.set({ lastActivityAt: Date.now() });
       await user.save();
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       res.send({ ok: true, token: value.token, user: data, data });
