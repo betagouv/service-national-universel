@@ -9,7 +9,9 @@
     "tailwind": "npx tailwindcss -i ./src/index.css -o ./src/tailwindcss.css --watch",
     "start": "node server/index.js",
     "install": "node src/build-only-on-clevercloud.js",
-    "build": "node --max-old-space-size=3000 node_modules/webpack/bin/webpack.js"
+    "build": "node --max-old-space-size=3000 ../node_modules/webpack/bin/webpack.js",
+    "lint": "eslint src --ext .js,.jsx",
+    "lint:fix": "eslint --ext .js --fix src"
   },
   "devDependencies": {
     "@babel/cli": "7.19.3",
@@ -29,9 +31,9 @@
     "copy-webpack-plugin": "10.2.4",
     "css-loader": "5.2.7",
     "eslint": "8.27.0",
-    "eslint-config-prettier": "8.8.0",
+    "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-import": "2.26.0",
-    "eslint-plugin-prettier": "4.2.1",
+    "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "4.6.0",
     "file-loader": "6.2.0",
@@ -55,7 +57,6 @@
     "@sentry/integrations": "^7.17.4",
     "@sentry/react": "^7.17.4",
     "@sentry/tracing": "^7.17.4",
-    "@tailwindcss/line-clamp": "^0.4.2",
     "babel-loader": "8.3.0",
     "bootstrap": "4.6.1",
     "browser-image-resizer": "^2.4.1",
@@ -96,7 +97,7 @@
     "regenerator-runtime": "0.13.9",
     "sanitize-html": "^2.7.3",
     "slugify": "^1.6.5",
-    "snu-lib": "file:../lib",
+    "snu-lib": "*",
     "styled-components": "5.3.6",
     "validator": "13.7.0",
     "xlsx": "0.17.4"

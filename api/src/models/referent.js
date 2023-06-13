@@ -4,7 +4,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
-const { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib/roles");
+const { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib");
 
 const MODELNAME = "referent";
 
@@ -281,6 +281,8 @@ Schema.plugin(
       "invitationToken",
       "invitationExpires",
       "loginAttempts",
+      "updatedAt",
+      "lastLoginAt",
     ],
   }),
   MODELNAME,

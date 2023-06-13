@@ -2,11 +2,10 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const { ROLES_LIST } = require("snu-lib");
+const { ROLES_LIST, PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR } = require("snu-lib");
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
-const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR } = require("snu-lib/phone-number");
 const MODELNAME = "young";
 
 const File = new mongoose.Schema({
@@ -1934,6 +1933,7 @@ Schema.methods.comparePassword = async function (p) {
 
 //Sync with sendinblue
 Schema.post("save", function (doc) {
+  if (ENVIRONMENT === "testing") return;
   sendinblue.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
@@ -2000,6 +2000,8 @@ Schema.plugin(
       "loginAttempts",
       "parent1Inscription2023Token",
       "parent2Inscription2023Token",
+      "updatedAt",
+      "lastLoginAt",
     ],
   }),
   MODELNAME,

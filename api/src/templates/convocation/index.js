@@ -68,6 +68,13 @@ const render = async (young) => {
     if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
     const contacts = service?.contacts.filter((c) => c.cohort === young.cohort) || [];
 
+    const cohortDateStart = new Date(cohort?.dateStart);
+    const cohortDateEnd = new Date(cohort?.dateEnd);
+    //add 12h to dateStart
+    cohortDateStart.setHours(cohortDateStart.getHours() + 12);
+    //add 12h to dateEnd
+    cohortDateEnd.setHours(cohortDateEnd.getHours() + 12);
+
     const html = fs.readFileSync(path.resolve(__dirname, "./cohesion.html"), "utf8");
     return html
       .replace(
@@ -89,7 +96,7 @@ const render = async (young) => {
       .replace(/{{CITY}}/g, sanitizeAll(young.city))
       .replace(
         /{{COHESION_STAY_DATE_STRING}}/g,
-        sanitizeAll(datefns.format(new Date(cohort?.dateStart), "dd MMMM", { locale: fr }) + " au " + datefns.format(new Date(cohort?.dateEnd), "dd MMMM yyyy", { locale: fr })),
+        sanitizeAll(datefns.format(cohortDateStart, "dd MMMM", { locale: fr }) + " au " + datefns.format(cohortDateEnd, "dd MMMM yyyy", { locale: fr })),
       )
       .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(center.name))
       .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
@@ -99,9 +106,7 @@ const render = async (young) => {
         /{{MEETING_DATE}}/g,
         sanitizeAll(
           `<b>Le</b> ${
-            ligneBus
-              ? datefns.format(new Date(ligneBus?.departuredDate), "EEEE dd MMMM", { locale: fr })
-              : datefns.format(new Date(cohort?.dateStart), "EEEE dd MMMM", { locale: fr })
+            ligneBus ? datefns.format(new Date(ligneBus?.departuredDate), "EEEE dd MMMM", { locale: fr }) : datefns.format(cohortDateStart, "EEEE dd MMMM", { locale: fr })
           }`,
         ),
       )
@@ -110,9 +115,7 @@ const render = async (young) => {
       .replace(/{{TRANSPORT}}/g, sanitizeAll(ligneBus ? `<b>Numéro de transport</b> : ${ligneBus.busId}` : ""))
       .replace(
         /{{MEETING_DATE_RETURN}}/g,
-        sanitizeAll(
-          ligneBus ? datefns.format(new Date(ligneBus?.returnDate), "EEEE dd MMMM", { locale: fr }) : datefns.format(new Date(cohort?.dateEnd), "EEEE dd MMMM", { locale: fr }),
-        ),
+        sanitizeAll(ligneBus ? datefns.format(new Date(ligneBus?.returnDate), "EEEE dd MMMM", { locale: fr }) : datefns.format(cohortDateEnd, "EEEE dd MMMM", { locale: fr })),
       )
       .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(meetingPoint ? ligneToPoint.returnHour : "11:00"))
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
@@ -149,6 +152,13 @@ const renderLocalTransport = async (young) => {
     if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
     const contacts = service?.contacts.filter((c) => c.cohort === young.cohort) || [];
 
+    const cohortDateStart = new Date(cohort?.dateStart);
+    const cohortDateEnd = new Date(cohort?.dateEnd);
+    //add 12h to dateStart
+    cohortDateStart.setHours(cohortDateStart.getHours() + 12);
+    //add 12h to dateEnd
+    cohortDateEnd.setHours(cohortDateEnd.getHours() + 12);
+
     const html = fs.readFileSync(path.resolve(__dirname, "./cohesionLocalService.html"), "utf8");
     return html
       .replace(
@@ -170,14 +180,14 @@ const renderLocalTransport = async (young) => {
       .replace(/{{CITY}}/g, sanitizeAll(young.city))
       .replace(
         /{{COHESION_STAY_DATE_STRING}}/g,
-        sanitizeAll(datefns.format(cohort?.dateStart, "dd MMMM", { locale: fr }) + " au " + datefns.format(cohort?.dateEnd, "dd MMMM yyyy", { locale: fr })),
+        sanitizeAll(datefns.format(cohortDateStart, "dd MMMM", { locale: fr }) + " au " + datefns.format(cohortDateEnd, "dd MMMM yyyy", { locale: fr })),
       )
       .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(center.name))
       .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
       .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
       .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
-      .replace(/{{MEETING_DATE}}/g, sanitizeAll(`<b>Le</b> ${datefns.format(new Date(cohort?.dateStart), "EEEE dd MMMM", { locale: fr })}`))
-      .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(datefns.format(new Date(cohort?.dateEnd), "EEEE dd MMMM", { locale: fr })))
+      .replace(/{{MEETING_DATE}}/g, sanitizeAll(`<b>Le</b> ${datefns.format(cohortDateStart, "EEEE dd MMMM", { locale: fr })}`))
+      .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(datefns.format(new Date(cohortDateEnd), "EEEE dd MMMM", { locale: fr })))
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
       .replace(/{{TOP}}/g, sanitizeAll(getTop()))
       .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
@@ -234,7 +244,7 @@ const renderDOMTOM = async (young) => {
 };
 
 const cohesion = async (young) => {
-  if (isFromDOMTOM(young)) return renderDOMTOM(young);
+  // if (isFromDOMTOM(young)) return renderDOMTOM(young);
   if (young?.transportInfoGivenByLocal === "true") return renderLocalTransport(young);
   return render(young);
 };

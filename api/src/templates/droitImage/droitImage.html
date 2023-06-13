@@ -1,0 +1,159 @@
+<html>
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+        <style>
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+            @font-face {
+                font-family: "Marianne";
+                src: url('../../assets/fonts/Marianne/Marianne-Regular.woff') format('woff');
+            }
+
+            * {
+                font-family: "Marianne", "Arial", "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+            }
+
+            .header {
+                display: flex;
+                align-items: center;
+                gap: 0.2cm;
+            }
+
+            .title {
+                font-size: 14pt;
+                font-weight: bold;
+                color: #385EA9;
+                text-align: center;
+                margin: 14pt 0;
+            }
+
+            .content {
+                margin: 0 2.5cm;
+            }
+
+            p {
+                font-size: 11pt;
+                line-height: 1.2em;
+                margin-top: 1cm;
+            }
+
+            .span2Parents {
+                display: {{WITH_2_PARENTS_SPAN}};
+            }
+            .span1Parent {
+                display: {{WITH_1_PARENT_SPAN}};
+            }
+            .block2Parents {
+                display: {{WITH_2_PARENTS_BLOCK}};
+            }
+            .block1Parent {
+                display: {{WITH_1_PARENT_BLOCK}};
+            }
+            .allow {
+                display: {{ALLOW}};
+            }
+            .disallow {
+                display: {{DISALLOW}};
+            }
+
+            .parent1HasDate {
+                display: {{PARENT1_HAS_DATE}};
+            }
+            .parent2HasDate {
+                display: {{PARENT2_HAS_DATE}};
+            }
+
+            .two-columns {
+                display: flex;
+                align-items: flex-start;
+                gap: 1cm;
+                margin-top: -1cm;
+            }
+
+            .two-columns > div {
+                flex: 1 1 0;
+            }
+
+            .two-columns p.date {
+                margin-top: 0.5cm;
+            }
+
+            ul li {
+                font-size: 11pt;
+                line-height: 1.2em;
+            }
+
+            .note {
+                font-size: 7pt;
+                font-style: italic;
+                margin-top: 1cm;
+            }
+
+            .authorization {
+                display: flex;
+                align-items: flex-start;
+            }
+
+            .authorization p {
+                margin-left: 0.5cm;
+                margin-top: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <img src="{{BASE_URL}}/images/republique-francaise.svg" alt="République Française" height="80"/>
+            <img src="{{BASE_URL}}/images/logo-snu.png" alt="Logo-SNU" width="50" height="50"/>
+        </div>
+        <div class="content">
+            <div class="title">DROIT &Agrave; L&rsquo;IMAGE</div>
+            <p><b>Je, soussign&eacute;(e), repr&eacute;sentant l&eacute;gal n&deg;1 : </b><i>{{PARENT1}}</i></p>
+            <p class="block2Parents"><b>Je, soussign&eacute;(e), repr&eacute;sentant l&eacute;gal n&deg;2 : </b><i>{{PARENT2}}</i></p>
+            <p><b>Représentant<span class="span2Parents">s</span> <span class="span1Parent">légal</span><span class="span2Parents">légaux</span> de </b><i>{{YOUNG_NAME}}</i></p>
+
+            <div class="authorization">
+                <div class="allow">&#9745;</div>
+                <div class="disallow">&#9744;</div>
+                <p><span class="span1Parent">autorise</span><span class="span2Parents">autorisons</span> le Ministère de l’Education Nationale et de la Jeunesse (MENJ), ses partenaires et
+                    les journalistes dûment accrédités par les services communication du ministère et/ou des préfectures à
+                    enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en
+                    intégralité, ensemble ou séparément, sur leurs publications respectives.</p>
+            </div>
+            <div class="authorization">
+                <div class="disallow">&#9745;</div>
+                <div class="allow">&#9744;</div>
+                <p>n&apos;<span class="span1Parent">autorise</span><span class="span2Parents">autorisons</span> pas le MENJ et les journalistes à enregistrer, reproduire et représenter l’image
+                    et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou séparément, sur les
+                    supports détaillés ci-dessous.</p>
+            </div>
+            <p>Cette autorisation est valable pour une utilisation :</p>
+            <ul>
+                <li>d’une durée de 5 ans à compter de la signature de la présente ;</li>
+                <li>sur tous les supports d’information et de communication imprimés ou numériques à but non lucratif ;</li>
+                <li>édités par les services de l’État ainsi que sur tous réseaux de communication, y compris télévisuels ou Internet ;</li>
+                <li>de l’image du volontaire représenté en tant que telle et/ou intégrée dans une œuvre papier, numérique ou audiovisuelle.</li>
+            </ul>
+
+            <p>Conformément aux dispositions légales en vigueur relatives au droit à l’image, le MENJ s’engage à ce que la publication et la diffusion de l’image ainsi que des commentaires l’accompagnant <b>ne portent pas atteinte à sa vie privée, à sa dignité et à sa réputation. En vertu du Règlement général sur la protection des données (RGPD), entré en application le 25 mai 2018, le sujet ou son/ses représentant(s) légal/légaux dispose(ent) d’un libre accès aux photos concernant la personne mineure et a le droit de demander à tout moment le retrait de celles-ci*.</b></p>
+
+            <p>La présente autorisation est consentie à titre gratuit.</p>
+
+            <div class="two-columns">
+                <div>
+                    <p><i>{{PARENT1}}</i></p>
+                    <p class="date parent1HasDate">Validé le : {{PARENT1_DATE}}</p>
+                </div>
+                <div class="block2Parents">
+                    <p><i>{{PARENT2}}</i></p>
+                    <p class="date parent2HasDate">Validé le : {{PARENT2_DATE}}</p>
+                </div>
+            </div>
+
+            <div class="note">
+                * Conformément à la loi informatique et libertés du 6 janvier 1978, vous disposez d’un droit de libre accès, de rectification, de modification et de suppression des données qui vous concernent. Pour toute réclamation, vous pouvez adresser un mail à l’adresse : www.education.gouv.fr/contact-DPD ou courrier recommandé avec accusé de réception (accompagné des copies des photographies concernées, ou, pour une vidéo, de la copie d’écran), à l’adresse suivante : Ministère de l’Éducation nationale et de la Jeunesse - Secrétariat général - Délégation à la communication 110, rue de Grenelle - 75357 Paris Cedex 07. Votre demande doit être accompagnée de la photocopie d’un titre d’identité comportant votre signature. Si cette démarche reste sans réponse dans un délai de 2 mois ou en cas de réponse insatisfaisante, vous pouvez saisir la Cnil pour contester la diffusion de votre image.
+            </div>
+        </div>
+    </body>
+</html>

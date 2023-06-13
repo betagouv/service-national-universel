@@ -8,7 +8,9 @@
     "mobile:open": "webpack serve --port 8081 --mode development --config webpack.dev.config.js --progress --liveReload --open --hot --inline --host 0.0.0.0",
     "start": "node server/index.js",
     "install": "node src/build-only-on-clevercloud.js",
-    "build": "node --max-old-space-size=3000 node_modules/webpack/bin/webpack.js"
+    "build": "node --max-old-space-size=3000 ../node_modules/webpack/bin/webpack.js",
+    "lint": "eslint src --ext .js,.jsx",
+    "lint:fix": "eslint --ext .js --fix src"
   },
   "devDependencies": {
     "@babel/cli": "7.19.3",
@@ -26,6 +28,9 @@
     "@sentry/webpack-plugin": "^1.20.0",
     "copy-webpack-plugin": "10.2.4",
     "css-loader": "5.2.7",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.32.2",
     "file-loader": "6.2.0",
     "fs": "0.0.1-security",
     "html-webpack-plugin": "5.5.0",
@@ -90,7 +95,7 @@
     "regenerator-runtime": "0.13.9",
     "sanitize-html": "^2.7.3",
     "slugify": "^1.6.5",
-    "snu-lib": "file:../lib",
+    "snu-lib": "*",
     "styled-components": "5.3.6",
     "use-detect-keyboard-open": "^0.2.0",
     "validator": "13.7.0"

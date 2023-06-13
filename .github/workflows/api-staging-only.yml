@@ -10,7 +10,7 @@ env:
   MSG_MINIMAL: true
   SLACK_FOOTER: ""
 
-name: Test & Deploy API
+name: Deploy API (Staging)
 
 on:
   push:
@@ -18,7 +18,7 @@ on:
       - staging
     paths:
       - api/**
-      - lib/**
+      - packages/**
 
 jobs:
   deploy:
@@ -32,14 +32,12 @@ jobs:
         with:
           node-version: 18.x
 
-      - name: Add lib into current folder
+      - name: Build lib
+        continue-on-error: false
         run: |
-          cp -Rf ./lib ./api/snu-lib
-          sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./api/package.json
-
-      - name: Install packages
-        working-directory: ${{ env.SUBFOLDER_NAME }}
-        run: npm install
+          npm install -w packages/lib
+          npm run build -w packages/lib
+          rm packages/lib/.gitignore
 
       - name: Create SSH key
         run: |
@@ -60,19 +58,14 @@ jobs:
         run: |
           rm -rf .git
 
-      - name: Add lib into current folder
-        run: |
-          cp -Rf ./lib ./api/snu-lib
-          sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./api/package.json
-
       - name: Push
-        working-directory: ${{ env.SUBFOLDER_NAME }}
         run: |
           git init
           git config user.email "github.deployer@gmail.com"
           git config user.name "Github Deployer"
           git remote add cloudstaging "$CLEVER_CLOUD_GIT_REMOTE_STAGING"
-          git add .
+          git add packages ${{ env.SUBFOLDER_NAME }}
+          find . -maxdepth 1 -type f -exec git add {} +  # Add first level files
           git commit -m "For deploy"
           git push -f -u cloudstaging master
         env:

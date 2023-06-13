@@ -2,7 +2,10 @@ const CohesionCenterObject = require("../../models/cohesionCenter");
 const SessionPhase1 = require("../../models/sessionPhase1");
 
 async function createCohesionCenter(cohesionCenter) {
-  return await CohesionCenterObject.create(cohesionCenter);
+  const center = await CohesionCenterObject.create(cohesionCenter);
+  // Wait 100 ms to be sure that the center is created in the database
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  return center;
 }
 
 async function createCohesionCenterWithSession(cohesionCenter, session) {

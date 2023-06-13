@@ -18,11 +18,11 @@ on:
       - main
     paths:
       - api/**
-      - lib/**
+      - packages/**
   pull_request:
     paths:
       - api/**
-      - lib/**
+      - packages/**
 
 jobs:
   test:
@@ -41,14 +41,17 @@ jobs:
         with:
           mongodb-version: "4.0"
 
-      - name: Add lib into current folder
-        run: |
-          cp -Rf ./lib ./api/snu-lib
-          sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./api/package.json
-
       - name: Install packages
-        working-directory: ${{ env.SUBFOLDER_NAME }}
         run: npm install
+
+      - name: Lint code
+        working-directory: ${{ env.SUBFOLDER_NAME }}
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Build lib
+        continue-on-error: false
+        run: npm run build -w packages/lib
 
       - name: Test and Send coverage
         uses: paambaati/codeclimate-action@v2.7.5
@@ -69,10 +72,17 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v2
 
-      - name: Node 16.x
+      - name: Node 18.x
         uses: actions/setup-node@v2
         with:
-          node-version: 16.x
+          node-version: 18.x
+
+      - name: Build lib
+        continue-on-error: false
+        run: |
+          npm install -w packages/lib
+          npm run build -w packages/lib
+          rm packages/lib/.gitignore
 
       - name: Create SSH key
         run: |
@@ -93,20 +103,15 @@ jobs:
         run: |
           rm -rf .git
 
-      - name: Add lib into current folder
-        run: |
-          cp -Rf ./lib ./api/snu-lib
-          sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./api/package.json
-
       - name: Push
-        working-directory: ${{ env.SUBFOLDER_NAME }}
         run: |
           git init
           git config user.email "github.deployer@gmail.com"
           git config user.name "Github Deployer"
           git remote add cloudstaging "$CLEVER_CLOUD_GIT_REMOTE_STAGING"
           git remote add cloudprod "$CLEVER_CLOUD_GIT_REMOTE_PROD"
-          git add .
+          git add packages ${{ env.SUBFOLDER_NAME }}
+          find . -maxdepth 1 -type f -exec git add {} +  # Add first level files
           git commit -m "For deploy"
           git push -f -u cloudstaging master
           git push -f -u cloudprod master

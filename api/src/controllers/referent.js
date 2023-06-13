@@ -46,8 +46,6 @@ const {
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } = require("../utils/serializer");
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
-const { department2region } = require("snu-lib/region-and-departments");
-const { translateCohort } = require("snu-lib/translation");
 const {
   ROLES_LIST,
   canInviteUser,
@@ -71,9 +69,11 @@ const {
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS_PHASE1,
   MILITARY_FILE_KEYS,
+  department2region,
+  translateCohort,
+  formatPhoneNumberFromPhoneZone,
 } = require("snu-lib");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
-const { formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -224,10 +224,6 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    if (value.role === ROLES.RESPONSIBLE || value.role === ROLES.SUPERVISOR) {
-      if (!value.phone) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     if (!canInviteUser(req.user.role, value.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

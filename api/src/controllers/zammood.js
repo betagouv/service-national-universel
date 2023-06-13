@@ -7,7 +7,7 @@ const fs = require("fs");
 const Joi = require("joi");
 const { v4: uuid } = require("uuid");
 
-const { ROLES } = require("snu-lib/roles");
+const { ROLES, SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 const slack = require("../slack");
 const { cookieOptions } = require("../cookie-options");
@@ -16,7 +16,6 @@ const zammood = require("../zammood");
 const { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } = require("../utils");
 const { ADMIN_URL, ENVIRONMENT, FILE_ENCRYPTION_SECRET_SUPPORT } = require("../config.js");
 const { sendTemplate } = require("../sendinblue");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
 const { validateId } = require("../utils/validator");

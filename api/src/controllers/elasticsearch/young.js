@@ -2,20 +2,68 @@ const passport = require("passport");
 const express = require("express");
 const Joi = require("joi");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch } = require("snu-lib/roles");
+const { ROLES, canSearchInElasticSearch, YOUNG_STATUS_PHASE1, ES_NO_LIMIT } = require("snu-lib");
 const datesub = require("date-fns/sub");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
-const { YOUNG_STATUS_PHASE1, ES_NO_LIMIT } = require("snu-lib");
 const { serializeYoungs } = require("../../utils/es-serializer");
 const StructureObject = require("../../models/structure");
 const ApplicationObject = require("../../models/application");
 const SessionPhase1Object = require("../../models/sessionPhase1");
 const CohesionCenterObject = require("../../models/cohesionCenter");
+const MissionObject = require("../../models/mission");
 const { getCohortNamesEndAfter } = require("../../utils/cohort");
+
+function getYoungsFilters(user) {
+  return [
+    "cohort.keyword",
+    "originalCohort.keyword",
+    "status.keyword",
+    "country.keyword",
+    "academy.keyword",
+    "region.keyword",
+    "department.keyword",
+    "hasNotes.keyword",
+    "grade.keyword",
+    "gender.keyword",
+    user.role === ROLES.REFERENT_DEPARTMENT ? "schoolName.keyword" : null,
+    "situation.keyword",
+    "ppsBeneficiary.keyword",
+    "paiBeneficiary.keyword",
+    "isRegionRural.keyword",
+    "qpv.keyword",
+    "handicap.keyword",
+    "allergies.keyword",
+    "specificAmenagment.keyword",
+    "reducedMobilityAccess.keyword",
+    "imageRight.keyword",
+    "CNIFileNotValidOnStart.keyword",
+    "statusPhase1.keyword",
+    "hasMeetingInformation.keyword",
+    "handicapInSameDepartment.keyword",
+    "youngPhase1Agreement.keyword",
+    "cohesionStayPresence.keyword",
+    "presenceJDM.keyword",
+    "departInform.keyword",
+    "departSejourMotif.keyword",
+    "cohesionStayMedicalFileReceived.keyword",
+    "ligneId.keyword",
+    "isTravelingByPlane.keyword",
+    "statusPhase2.keyword",
+    "phase2ApplicationStatus.keyword",
+    "statusPhase2Contract.keyword",
+    "statusMilitaryPreparationFiles.keyword",
+    "phase2ApplicationFilesType.keyword",
+    "status_equivalence.keyword",
+    "statusPhase3.keyword",
+    "schoolDepartment.keyword",
+    "parentAllowSNU.keyword",
+    "sessionPhase1Id.keyword",
+  ].filter(Boolean);
+}
 
 async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
   const contextFilters = [];
@@ -79,7 +127,7 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
   if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
     contextFilters.push({ terms: { "department.keyword": user.department } });
   }
-  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+  if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
     const sessionPhase1 = await SessionPhase1Object.find({ department: { $in: user.department } });
     if (sessionPhase1.length === 0) {
       contextFilters.push({ terms: { "department.keyword": user.department } });
@@ -360,6 +408,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       "presenceJDM.keyword",
       "departInform.keyword",
       "departSejourMotif.keyword",
+      "youngPhase1Agreement.keyword",
     ];
     const sortFields = [];
 
@@ -422,6 +471,162 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(serializeYoungs(response.body));
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    // Configuration
+    const searchFields = ["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip", "parent1Email.keyword", "parent2Email.keyword"];
+    const filterFields = getYoungsFilters(user);
+
+    const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt"];
+
+    const { youngContextFilters, youngContextError } = await buildYoungContext(user);
+    if (youngContextError) {
+      return res.status(youngContextError.status).send(youngContextError.body);
+    }
+
+    const { error: errorQuery, value: query } = Joi.object({
+      tab: Joi.string().trim().valid("volontaire"),
+    }).validate(req.query, { stripUnknown: true });
+    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // Context filters
+    const contextFilters = [
+      ...youngContextFilters,
+      query.tab === "volontaire" ? { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST", "DELETED"] } } : null,
+    ].filter(Boolean);
+
+    // Body params validation
+    const { queryFilters, page, sort, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body: body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // Build request body
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields,
+      queryFilters,
+      page,
+      sort,
+      contextFilters,
+    });
+
+    if (req.params.action === "export") {
+      const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+    } else {
+      const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      return res.status(200).send(response.body);
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/young-having-school-in-dep-or-region/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    // Configuration
+    const searchFields = ["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip", "parent1Email.keyword", "parent2Email.keyword"];
+    const filterFields = getYoungsFilters(user);
+
+    const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt"];
+
+    const { error: errorQuery, value: query } = Joi.object({
+      tab: Joi.string().trim().valid("volontaire"),
+    }).validate(req.query, { stripUnknown: true });
+    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // Context filters
+    const contextFilters = [
+      query.tab === "volontaire" ? { terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } } : null,
+      user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "schoolDepartment.keyword": user.department } } : null,
+      user.role === ROLES.REFERENT_REGION ? { terms: { "schoolRegion.keyword": [user.region] } } : null,
+    ].filter(Boolean);
+
+    // Body params validation
+    const { queryFilters, page, sort, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body: body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // Build request body
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields,
+      queryFilters,
+      page,
+      sort,
+      contextFilters,
+    });
+
+    if (req.params.action === "export") {
+      const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+    } else {
+      const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      return res.status(200).send(response.body);
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/propose-mission/:id/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    // Configuration
+    const searchFields = ["email.keyword", "firstName.folded", "lastName.folded"];
+    const filterFields = ["cohort.keyword", "statusPhase2.keyword", "phase2ApplicationStatus.keyword"];
+
+    const sortFields = [];
+
+    const { youngContextFilters, youngContextError } = await buildYoungContext(user);
+    if (youngContextError) {
+      return res.status(youngContextError.status).send(youngContextError.body);
+    }
+
+    const mission = await MissionObject.findById(req.params.id);
+    if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // Context filters
+    const contextFilters = [
+      ...youngContextFilters,
+      { terms: { "status.keyword": ["VALIDATED"] } },
+      { terms: { "statusPhase1.keyword": ["DONE", "EXEMPTED"] } },
+      { terms: { "statusPhase2.keyword": ["IN_PROGRESS", "WAITING_REALISATION"] } },
+    ];
+
+    // Body params validation
+    const { queryFilters, page, sort, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body: body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // Build request body
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields,
+      queryFilters,
+      page,
+      sort,
+      contextFilters,
+      size: 12,
+    });
+
+    if (mission.location?.lat && mission.location?.lon) {
+      hitsRequestBody.sort = { _geo_distance: { location: [mission.location?.lon, mission.location?.lat], order: "asc", unit: "km" } };
+    }
+    if (req.params.action === "export") {
+      const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+    } else {
+      const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      return res.status(200).send(response.body);
     }
   } catch (error) {
     capture(error);

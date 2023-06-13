@@ -48,7 +48,7 @@ module.exports = () => {
 
   return {
     mode,
-    entry: ["./src/index.js"],
+    entry: ["./src/index.jsx"],
     devtool: "source-map",
     output: {
       path: path.resolve("build"),
@@ -56,7 +56,7 @@ module.exports = () => {
       sourceMapFilename: "[contenthash].index.js.map",
       publicPath: "/",
     },
-    resolve: { fallback: { fs: false } },
+    resolve: { extensions: [".js", ".jsx"] },
     module: {
       rules: [
         {
@@ -64,10 +64,9 @@ module.exports = () => {
           use: ["style-loader", "css-loader", "postcss-loader"],
         },
         {
-          test: /\.js$/,
+          test: /\.(js|jsx)$/,
           loader: "babel-loader",
           include: path.resolve("src"),
-          exclude: /node_modules(?!\/snu-lib)/,
           options: { babelrc: true },
         },
         {

@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-unused-modules
 const express = require("express");
 const passport = require("passport");
 const fetch = require("node-fetch");
@@ -16,7 +15,6 @@ const redis = require("redis");
 const { decrypt, encrypt } = require("../../cryptoUtils");
 const config = require("../../config");
 const { capture } = require("../../sentry");
-const { getQPV, getDensity } = require("../../geo");
 const YoungObject = require("../../models/young");
 const ReferentModel = require("../../models/referent");
 const SessionPhase1 = require("../../models/sessionPhase1");
@@ -36,7 +34,6 @@ const {
   translateFileStatusPhase1,
   getCcOfYoung,
   getFile,
-  notifDepartmentChange,
   autoValidationSessionPhase1Young,
   deleteFile,
   updateSeatsTakenInBusLine,
@@ -55,18 +52,20 @@ const {
   canViewYoungApplications,
   canEditPresenceYoung,
   canDeletePatchesHistory,
-} = require("snu-lib/roles");
-const { translateCohort } = require("snu-lib/translation");
-const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES, YOUNG_STATUS_PHASE2 } = require("snu-lib/constants");
-const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
+  translateCohort,
+  SENDINBLUE_TEMPLATES,
+  YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS,
+  ROLES,
+  YOUNG_STATUS_PHASE2,
+  youngCanChangeSession,
+} = require("snu-lib");
 const { getFilteredSessions } = require("../../utils/cohort");
-const { formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
 const { anonymizeContractsFromYoungId } = require("../../services/contract");
 const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
-router.post("/signup2023", (req, res) => YoungAuth.signUp2023(req, res));
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -91,7 +90,7 @@ router.post("/signup_verify", async (req, res) => {
 
     const young = await YoungObject.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
-    const token = jwt.sign({ _id: young._id, passport: young.passport, lastLogoutAt: null }, config.secret, { expiresIn: "30d" });
+    const token = jwt.sign({ _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.secret, { expiresIn: "30d" });
     return res.status(200).send({ ok: true, token, data: serializeYoung(young, young) });
   } catch (error) {
     capture(error);
@@ -430,128 +429,18 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
   }
 });
 
-router.put("/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/accept-cgu", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = validateYoung(req.body, req.user);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    if (value.phone) {
-      value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
-    }
-    if (value.parent1Phone) {
-      value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
-    }
-    if (value.parent2Phone) {
-      value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
-    }
-
-    // TODO: diviser en 4 endpoints
-    const fieldsToKeep = [
-      //CGU
-      "acceptCGU",
-
-      // Infos générales
-      "gender",
-      "email",
-      "phone",
-      "phoneZone",
-
-      // Représentants légaux
-      "parent1Status",
-      "parent1FirstName",
-      "parent1LastName",
-      "parent1Email",
-      "parent1Phone",
-      "parent1PhoneZone",
-      "parent2Status",
-      "parent2FirstName",
-      "parent2LastName",
-      "parent2Email",
-      "parent2Phone",
-      "parent2PhoneZone",
-
-      // Préférences de MIG
-      "domains",
-      "missionFormat",
-      "period",
-      "periodRanking",
-      "mobilityTransport",
-      "mobilityTransportOther",
-      "professionnalProject",
-      "professionnalProjectPrecision",
-      "desiredLocation",
-      "engaged",
-      "engagedDescription",
-      "mobilityNearHome",
-      "mobilityNearSchool",
-      "mobilityNearRelative",
-      "mobilityNearRelativeName",
-      "mobilityNearRelativeAddress",
-      "mobilityNearRelativeZip",
-      "mobilityNearRelativeCity",
-    ];
-
-    for (const key in value) {
-      if (!fieldsToKeep.includes(key)) delete value[key];
-    }
-
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    if (value?.department && young?.department && value?.department !== young?.department) {
-      await notifDepartmentChange(value.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
-      await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young, { newDepartment: value.department });
-    }
-
-    if (value?.status === YOUNG_STATUS.WITHDRAWN) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.WITHDRAWN, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: {
-          message: value.withdrawnMessage,
-        },
-      });
-    }
-
-    young.set(value);
+    young.set({ acceptCGU: "true" });
     await young.save({ fromUser: req.user });
 
-    // Check quartier prioritaires.
-    if (value.zip && value.city && value.address) {
-      const qpv = await getQPV(value.zip, value.city, value.address);
-      if (qpv === true) young.set({ qpv: "true" });
-      else if (qpv === false) young.set({ qpv: "false" });
-      else young.set({ qpv: "" });
-      await young.save({ fromUser: req.user });
-    }
-
-    // Check quartier prioritaires.
-    if (value.cityCode) {
-      const populationDensity = await getDensity(value.cityCode);
-      young.set({ populationDensity });
-      await young.save({ fromUser: req.user });
-    }
-
-    // if they had a cohesion center, we check if we need to update the places taken / left
-    if (young.sessionPhase1Id) {
-      const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
-    }
-
-    // if they had a bus, we check if we need to update the places taken / left in the bus
-    if (young.ligneId) {
-      const bus = await LigneDeBusModel.findById(young.ligneId);
-      if (bus) await updateSeatsTakenInBusLine(bus);
-    }
-    return res.status(200).send({ ok: true, data: young });
+    res.status(200).send({ ok: true, data: serializeYoung(young, young) });
   } catch (error) {
     capture(error);
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -1192,8 +1081,6 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const sessionPhase1 = await SessionPhase1.findById(youngs[0].sessionPhase1Id);
-
     for (let young of youngs) {
       if ((key === "cohesionStayPresence" && newValue === "false") || (key === "presenceJDM" && young.cohesionStayPresence === "false")) {
         young.set({ cohesionStayPresence: "false", presenceJDM: "false" });
@@ -1201,7 +1088,9 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
         young.set({ [key]: newValue });
       }
       await young.save({ fromUser: req.user });
+      const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
       await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
+      await updatePlacesSessionPhase1(sessionPhase1, req.user);
       if (key === "cohesionStayPresence" && newValue === "true") {
         let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
         if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
@@ -1274,5 +1163,6 @@ router.use("/reinscription", require("./reinscription"));
 router.use("/inscription2023", require("./inscription2023"));
 router.use("/note", require("./note"));
 router.use("/:id/point-de-rassemblement", require("./point-de-rassemblement"));
+router.use("/account", require("./account"));
 
 module.exports = router;

@@ -9,8 +9,7 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
-const { canEditPresenceYoung, ROLES, canAssignManually } = require("snu-lib/roles");
-const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib/constants");
+const { canEditPresenceYoung, ROLES, canAssignManually, SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
 
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
@@ -258,6 +257,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
       const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
       if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
+      await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
     if (key === "cohesionStayPresence" && newValue === "true") {

@@ -1,0 +1,24 @@
+{
+  "name": "snu-lib",
+  "version": "1.0.0",
+  "description": "",
+  "main": "common-js/index.cjs",
+  "module": "index.js",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c --watch",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint --ext .js --fix src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.21.8",
+    "@babel/preset-env": "^7.21.5",
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "eslint": "^8.41.0",
+    "rollup": "^2.79.1"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "service-national-universel",
+  "scripts": {
+    "lint": "turbo run lint --continue",
+    "dev": "turbo run dev",
+    "build": "turbo run build --filter=$APP_NAME",
+    "start": "turbo run start --filter=$APP_NAME",
+    "test": "turbo build --filter='./packages/lib' && turbo run test --filter=api"
+  },
+  "dependencies": {
+    "turbo": "^1.9.4"
+  },
+  "workspaces": [
+    "packages/*",
+    "app",
+    "admin",
+    "api"
+  ],
+  "engines": {
+    "node": "^18.16.0",
+    "npm": "^9.5.1",
+    "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
+  }
+}

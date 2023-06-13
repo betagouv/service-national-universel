@@ -18,12 +18,12 @@ const {
   canViewStructureChildren,
   isSupervisor,
   isAdmin,
-} = require("snu-lib/roles");
+  SENDINBLUE_TEMPLATES,
+} = require("snu-lib");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
 const { validateId, validateStructure, validateStructureManager } = require("../utils/validator");
 const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 const setAndSave = async (data, keys, fromUser) => {
   data.set({ ...keys });
@@ -214,7 +214,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const missionsLinkedToReferent = await MissionObject.find({ structureId: checkedId });
 
     const applicationsLinkedToReferent = await ApplicationObject.find({ missionId: { $in: missionsLinkedToReferent.map((mission) => mission._id) } });
-    
+
     if (applicationsLinkedToReferent.length) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
 
     const referentsLinkedToStructure = await ReferentObject.find({ structureId: checkedId });
@@ -227,7 +227,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
       await mission.remove();
     }
 
-    await structure.remove(); 
+    await structure.remove();
     console.log(`Structure ${req.params.id} has been deleted by ${req.user._id}`);
     res.status(200).send({ ok: true });
   } catch (error) {

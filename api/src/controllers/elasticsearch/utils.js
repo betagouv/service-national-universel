@@ -9,7 +9,7 @@ function searchSubQuery([value], fields) {
       should: [
         { multi_match: { query: value, fields, type: "cross_fields", operator: "and" } },
         { multi_match: { query: value, fields, type: "phrase", operator: "and" } },
-        { multi_match: { query: value, fields, type: "phrase_prefix", operator: "and" } },
+        { multi_match: { query: value, fields: fields.map((e) => e.replace(".keyword", "")), type: "phrase_prefix", operator: "and" } },
       ],
       minimum_should_match: 1,
     },
@@ -67,13 +67,17 @@ function buildNdJson(header, hitsQuery, aggsQuery = null) {
   return [JSON.stringify(header), JSON.stringify(hitsQuery), JSON.stringify(header), JSON.stringify(aggsQuery)].join("\n") + "\n";
 }
 
-function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, customQueries }) {
+function buildArbitratyNdJson(...args) {
+  return args.map((e) => JSON.stringify(e)).join("\n") + "\n";
+}
+
+function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, customQueries, size = 20 }) {
   // We always need a fresh query to avoid side effects.
   const getMainQuery = () => unsafeStrucuredClone({ bool: { must: [{ match_all: {} }], filter: contextFilters } });
   // Search query
   const search = (queryFilters.searchbar || []).filter((e) => e.trim()).length ? searchSubQuery(queryFilters.searchbar, searchFields) : null;
   // Hits request body
-  const hitsRequestBody = { query: getMainQuery(), size: 20, from: page * 20, sort: buildSort(sort), track_total_hits: true };
+  const hitsRequestBody = { query: getMainQuery(), size, from: page * size, sort: buildSort(sort) };
   if (search) hitsRequestBody.query.bool.must.push(search);
   for (const key of filterFields) {
     const keyWithoutKeyword = key.replace(".keyword", "");
@@ -107,6 +111,7 @@ function joiElasticSearch({ filterFields, sortFields = [], body }) {
 
 module.exports = {
   buildNdJson,
+  buildArbitratyNdJson,
   buildRequestBody,
   joiElasticSearch,
 };

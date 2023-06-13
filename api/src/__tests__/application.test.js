@@ -10,14 +10,14 @@ const { dbConnect, dbClose } = require("./helpers/db");
 const { notExisitingMissionId, createMissionHelper, getMissionByIdHelper } = require("./helpers/mission");
 const { createReferentHelper } = require("./helpers/referent");
 const { notExistingYoungId, createYoungHelper, getYoungByIdHelper } = require("./helpers/young");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
   sendEmail: () => Promise.resolve(),
 }));
 
-jest.setTimeout(10_000);
+jest.setTimeout(30_000);
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -140,9 +140,7 @@ describe("Application", () => {
       expect(res.status).toBe(403);
 
       // Failed update (wrong young id)
-      res = await request(getAppHelper())
-        .put("/application")
-        .send({ priority: "1", status: "DONE", _id: application._id.toString(), youngId: secondYoung._id });
+      res = await request(getAppHelper()).put("/application").send({ priority: "1", status: "DONE", _id: application._id.toString(), youngId: secondYoung._id });
       expect(res.status).toBe(400);
 
       passport.user = previous;
@@ -240,15 +238,11 @@ describe("Application", () => {
       passport.user = young;
 
       // Successful request
-      let res = await request(getAppHelper())
-        .post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`)
-        .send({});
+      let res = await request(getAppHelper()).post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`).send({});
       expect(res.status).toBe(200);
 
       // Failed request (not allowed)
-      res = await request(getAppHelper())
-        .post(`/application/${secondApplication._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`)
-        .send({});
+      res = await request(getAppHelper()).post(`/application/${secondApplication._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`).send({});
       expect(res.status).toBe(403);
 
       passport.user = previous;

@@ -14,7 +14,7 @@ const {
   notExisitingProgramId,
 } = require("./helpers/program");
 const { dbConnect, dbClose } = require("./helpers/db");
-const { ROLES } = require("snu-lib/roles");
+const { ROLES } = require("snu-lib");
 const getNewReferentFixture = require("./fixtures/referent");
 const { createReferentHelper } = require("./helpers/referent");
 

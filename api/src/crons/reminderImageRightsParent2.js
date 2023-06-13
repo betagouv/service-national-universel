@@ -32,6 +32,8 @@ exports.handler = async () => {
       parent2AllowImageRights: { $exists: false },
     }).cursor();
 
+    if (!cursor) return;
+
     await cursor.eachAsync(async function (young) {
       countNotice++;
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_IMAGERIGHT_REMINDER, {

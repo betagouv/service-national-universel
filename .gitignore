@@ -2,6 +2,8 @@
 
 .github/.DS_Store
 
+**/.turbo
+
 .vscode
 .env*
 .cache_ggshield

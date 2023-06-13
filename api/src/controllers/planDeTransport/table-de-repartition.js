@@ -1,12 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { canViewTableDeRepartition, canEditTableDeRepartitionDepartment, canEditTableDeRepartitionRegion } = require("snu-lib/roles");
+const { region2department, canViewTableDeRepartition, canEditTableDeRepartitionDepartment, canEditTableDeRepartitionRegion } = require("snu-lib");
 const { ERRORS } = require("../../utils");
 const tableDeRepartition = require("../../models/PlanDeTransport/tableDeRepartition");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
-const { region2department } = require("snu-lib");
 
 router.post("/region", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {

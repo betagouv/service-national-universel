@@ -7,15 +7,21 @@ const crypto = require("crypto");
 const YoungObject = require("../../models/young");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
-const { validateFirstName } = require("../../utils/validator");
+const { validateFirstName, validateParents, representantSchema } = require("../../utils/validator");
 const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
-const { canUpdateYoungStatus, START_DATE_SESSION_PHASE1, YOUNG_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
+const {
+  canUpdateYoungStatus,
+  START_DATE_SESSION_PHASE1,
+  YOUNG_STATUS,
+  SENDINBLUE_TEMPLATES,
+  isInRuralArea,
+  PHONE_ZONES_NAMES_ARR,
+  formatPhoneNumberFromPhoneZone,
+} = require("snu-lib");
 const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
 const { getFilteredSessions } = require("../../utils/cohort");
-const { isInRuralArea } = require("snu-lib");
-const { PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR, formatPhoneNumberFromPhoneZone } = require("snu-lib/phone-number");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -84,14 +90,14 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       ...value,
       ...(value.livesInFrance === "true"
         ? {
-            foreignCountry: "",
-            foreignAddress: "",
-            foreignCity: "",
-            foreignZip: "",
-            hostFirstName: "",
-            hostLastName: "",
-            hostRelationship: "",
-          }
+          foreignCountry: "",
+          foreignAddress: "",
+          foreignCity: "",
+          foreignZip: "",
+          hostFirstName: "",
+          hostLastName: "",
+          hostRelationship: "",
+        }
         : {}),
       ...validateCorrectionRequest(young, keyList),
     };
@@ -314,56 +320,7 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     const { error: typeError, value: type } = checkParameter(req.params.type);
     if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const isRequired = type !== "save";
-
-    const representantSchema = {
-      parent1Status: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
-      parent1FirstName: needRequired(validateFirstName().trim(), isRequired),
-      parent1LastName: needRequired(Joi.string().trim(), isRequired),
-      parent1Email: needRequired(Joi.string().trim().email(), isRequired),
-      parent1Phone: needRequired(Joi.string().trim(), isRequired),
-      parent1PhoneZone: needRequired(
-        Joi.string()
-          .trim()
-          .valid(...PHONE_ZONES_NAMES_ARR),
-        isRequired,
-      ),
-      parent2: needRequired(Joi.string().trim().valid(true, false), isRequired),
-      parent2Status: Joi.alternatives().conditional("parent2", {
-        is: true,
-        then: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
-        otherwise: Joi.isError(new Error()),
-      }),
-      parent2FirstName: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(validateFirstName().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      parent2LastName: Joi.alternatives().conditional("parent2", {
-        is: true,
-        then: needRequired(Joi.string().uppercase().trim(), isRequired),
-        otherwise: Joi.isError(new Error()),
-      }),
-      parent2Email: Joi.alternatives().conditional("parent2", {
-        is: true,
-        then: needRequired(Joi.string().trim().email(), isRequired),
-        otherwise: Joi.isError(new Error()),
-      }),
-      parent2Phone: Joi.alternatives().conditional("parent2", {
-        is: true,
-        then: needRequired(Joi.string().trim(), isRequired),
-        otherwise: Joi.isError(new Error()),
-      }),
-
-      parent2PhoneZone: Joi.alternatives().conditional("parent2", {
-        is: true,
-        then: needRequired(
-          Joi.string()
-            .trim()
-            .valid(...PHONE_ZONES_NAMES_ARR),
-          isRequired,
-        ),
-        otherwise: Joi.isError(new Error()),
-      }),
-    };
-
-    let { error, value } = Joi.object(representantSchema).validate(req.body, { stripUnknown: true });
+    let { error, value } = validateParents(req.body, type !== "save");
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -391,7 +348,8 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       if (!young?.parent2Inscription2023Token && value.parent2) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
     }
     if (type === "correction") {
-      const keyList = Object.keys(representantSchema);
+
+      const keyList = Object.keys(representantSchema(false));
       value = { ...value, ...validateCorrectionRequest(young, keyList) };
     }
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

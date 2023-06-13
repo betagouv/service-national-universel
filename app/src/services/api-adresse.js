@@ -1,4 +1,6 @@
 import { capture } from "../sentry";
+import { department2region, departmentLookUp } from "snu-lib/region-and-departments";
+
 // https://adresse.data.gouv.fr/api-doc/adresse
 // Filtres possibles : postcode, citycode (INSEE), type, limit, autocomplete
 
@@ -62,4 +64,48 @@ const putLocation = async (city, zip) => {
   }
 };
 
-export { apiAdress, putLocation };
+const getSuggestions = async (address, city, zip) => {
+  try {
+    let res = await apiAdress(`${address}, ${city}, ${zip}`, { postcode: zip });
+
+    // Si pas de résultat, on tente avec la ville et le code postal uniquement
+    if (res?.features?.length === 0) {
+      res = await apiAdress(`${city}, ${zip}`, { postcode: zip });
+    }
+
+    const arr = res?.features;
+
+    if (arr?.length > 0) return { ok: true, status: "FOUND", ...arr[0] };
+    else return { ok: false, status: "NOT_FOUND" };
+  } catch (e) {
+    return { ok: false, status: "NOT_FOUND" };
+  }
+};
+
+const formatResult = (suggestion) => {
+  let depart = suggestion.properties.postcode.substr(0, 2);
+
+  // Cas particuliers : codes postaux en Polynésie
+  if (["97", "98"].includes(depart)) {
+    depart = suggestion.properties.postcode.substr(0, 3);
+  }
+
+  // Cas particuliers : code postaux en Corse
+  if (depart === "20") {
+    depart = suggestion.properties.context.substr(0, 2);
+    if (!["2A", "2B"].includes(depart)) depart = "2B";
+  }
+
+  return {
+    address: suggestion.properties.name,
+    zip: suggestion.properties.postcode,
+    city: suggestion.properties.city,
+    department: departmentLookUp[depart],
+    departmentNumber: depart,
+    location: { lon: suggestion.geometry.coordinates[0], lat: suggestion.geometry.coordinates[1] },
+    region: department2region[departmentLookUp[depart]],
+    cityCode: suggestion.properties.citycode,
+  };
+};
+
+export { apiAdress, putLocation, getSuggestions, formatResult };

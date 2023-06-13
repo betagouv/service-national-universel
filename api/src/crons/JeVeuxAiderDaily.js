@@ -12,10 +12,9 @@ const StructureModel = require("../models/structure");
 const ReferentModel = require("../models/referent");
 
 const { sendTemplate } = require("../sendinblue");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
 
-const { ROLES, departmentLookUp, department2region, MISSION_DOMAINS, MISSION_STATUS } = require("snu-lib");
+const { ROLES, departmentLookUp, department2region, MISSION_DOMAINS, MISSION_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { updateApplicationStatus, updateApplicationTutor } = require("../services/application");
 const { getTutorName } = require("../services/mission");
 

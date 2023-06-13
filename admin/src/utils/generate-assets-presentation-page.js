@@ -6,7 +6,7 @@ const slugify = require("slugify");
 
 const projectDir = path.resolve(__dirname, "..", "..");
 const srcDir = path.join(projectDir, "src");
-const destinationPath = path.join(srcDir, "scenes", "develop", "AssetsPresentationPage.js");
+const destinationPath = path.join(srcDir, "scenes", "develop", "AssetsPresentationPage.jsx");
 let uniqueId = 0;
 
 const ASSET_COUNT_PER_LINE = 8;
