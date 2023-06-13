@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
+import { HiX, HiCheck } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
@@ -13,6 +14,11 @@ import api from "../../services/api";
 import Select from "./components/Select";
 import { TabItem, Title } from "../plan-transport/components/commons";
 import TimePicker from "./components/TimePicker";
+import TooltipCapacity from "./components/TooltipCapacity";
+import TooltipAddress from "./components/TooltipAddress";
+import TooltipDeleteButtonPlan from "./components/TooltipDeleteButtonPlan";
+import TooltipCenter from "./components/TooltipCenter";
+import ChevronDown from "../../assets/icons/ChevronDown";
 
 const cohortList = [
   { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
@@ -39,6 +45,7 @@ export default function List() {
 
   const getPlanDetransport = async () => {
     try {
+      setIsLoading(true);
       const { ok, code, data: reponseBus } = await api.get(`/ligne-de-bus/cohort/${cohort}/hasValue`);
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération du plan de transport", translate(code));
@@ -56,7 +63,6 @@ export default function List() {
       history.push(`/edit-transport?cohort=${cohort}`);
       setCohort(cohort);
     }
-    setIsLoading(true);
     getPlanDetransport();
   }, [cohort]);
 
@@ -93,26 +99,34 @@ export default function List() {
 const ReactiveList = ({ cohort, history }) => {
   const { user } = useSelector((state) => state.Auth);
   const [currentTab, setCurrentTab] = React.useState("aller");
-  const [data, setData] = React.useState([]);
+  const [lines, setLines] = React.useState([]);
   const pageId = "edittransport";
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({ page: 0 });
-  const [lignesOpen, setLignesOpen] = React.useState([]);
   const filterArray = [].filter((e) => e);
   const [meetingPtsToSave, setMeetingPtsToSave] = useState([]);
+  const [youngs, setYoungs] = useState();
 
-  const openLignes = (id, meetingPointIds) => {
-    const tmp = lignesOpen;
-    const index = tmp.findIndex((e) => e === id);
-    let mustSave = false;
-    for (let id of meetingPointIds) if (meetingPtsToSave.includes(id)) mustSave = true;
-    if (index < 0) tmp.push(id);
-    else {
-      if (mustSave) toastr.warning("Certaines modifivations n'ont pas été enregistrées.", { autoClose: 6000 });
-      tmp.splice(index, 1);
+  useEffect(() => {
+    if (!lines.length) return;
+    try {
+      const getYoungs = async () => {
+        const ligneIds = lines.map((e) => e._id);
+
+        const res = await api.post("/edit-transport/youngs", { ligneIds, cohort });
+        if (res.ok) {
+          setYoungs(res.data);
+        } else toastr.error("Oups, une erreur est survenue lors de la récupération des jeunes");
+      };
+      getYoungs();
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des jeunes");
     }
+  }, [lines]);
 
-    setLignesOpen([...tmp]);
+  const deletePlan = () => {
+    // TODO
   };
 
   return (
@@ -123,12 +137,12 @@ const ReactiveList = ({ cohort, history }) => {
       </div>
       <div className="mb-8 flex flex-col rounded-lg bg-white py-4">
         <div className="flex items-center justify-between bg-white px-4 pt-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             <Filters
               defaultUrlParam={`cohort=${cohort}`}
               pageId={pageId}
               route="/elasticsearch/plandetransport/search"
-              setData={(value) => setData(value)}
+              setData={(value) => setLines(value)}
               filters={filterArray}
               searchPlaceholder="Rechercher une ligne (numéro, ville, region)"
               selectedFilters={selectedFilters}
@@ -137,11 +151,22 @@ const ReactiveList = ({ cohort, history }) => {
               setParamData={setParamData}
             />
           </div>
+          {youngs && !youngs.length ? (
+            <button onClick={deletePlan} className="bg-red-600 rounded shadow-xl px-3 py-2 hover:scale-105 duration-200 ease-in-out border text-white">
+              Supprimer le plan de transport
+            </button>
+          ) : (
+            <TooltipDeleteButtonPlan youngs={youngs} cohort={cohort}>
+              <button disabled className="bg-red-600 rounded px-3 py-2 duration-200 ease-in-out border text-white cursor-not-allowed opacity-50">
+                Supprimer le plan de transport
+              </button>
+            </TooltipDeleteButtonPlan>
+          )}
         </div>
         <ResultTable
           paramData={paramData}
           setParamData={setParamData}
-          currentEntryOnPage={data?.length > 0}
+          currentEntryOnPage={lines?.length > 0}
           render={
             <div className="mt-6 mb-2 flex w-full flex-col">
               <hr />
@@ -153,23 +178,8 @@ const ReactiveList = ({ cohort, history }) => {
                 <div className="w-[15%]">Centres de destinations</div>
                 <div className="w-[15%]">Taux de remplissage</div>
               </div>
-              {data?.map((hit) => {
-                return (
-                  <Line
-                    key={hit._id}
-                    hit={hit}
-                    currentTab={currentTab}
-                    onClick={() =>
-                      openLignes(
-                        hit._id,
-                        hit.pointDeRassemblements.map((e) => e.meetingPointId),
-                      )
-                    }
-                    open={lignesOpen.includes(hit._id)}
-                    meetingPtsToSave={meetingPtsToSave}
-                    setMeetingPtsToSave={setMeetingPtsToSave}
-                  />
-                );
+              {lines?.map((hit) => {
+                return <Line key={hit._id} hit={hit} currentTab={currentTab} meetingPtsToSave={meetingPtsToSave} setMeetingPtsToSave={setMeetingPtsToSave} youngs={youngs} />;
               })}
               <hr />
             </div>
@@ -180,18 +190,20 @@ const ReactiveList = ({ cohort, history }) => {
   );
 };
 
-const Line = ({ hit, currentTab, onClick, open, meetingPtsToSave, setMeetingPtsToSave }) => {
+const Line = ({ hit, currentTab, meetingPtsToSave, setMeetingPtsToSave, youngs }) => {
+  const [open, setOpen] = useState(false);
+
   const [meetingPoints, setMeetingPoints] = useState(
     currentTab === "aller"
       ? //sort meetingPoints by departureHour
-      hit.pointDeRassemblements.sort((a, b) => a.departureHour.replace(":", "") - b.departureHour.replace(":", ""))
+        hit.pointDeRassemblements.sort((a, b) => a.departureHour.replace(":", "") - b.departureHour.replace(":", ""))
       : hit.pointDeRassemblements.sort((a, b) => a.returnHour.replace(":", "") - b.returnHour.replace(":", "")),
   );
 
   return (
     <>
       <hr />
-      <div className={`flex items-center py-6 px-4 ${open ? "" : "hover:bg-gray-50"} ${open ? "bg-gray-200" : ""}`} onClick={onClick}>
+      <div className={`flex items-center py-6 px-4 cursor-pointer ${open ? "" : "hover:bg-gray-50"} ${open ? "bg-gray-200" : ""}`} onClick={() => setOpen((o) => !o)}>
         <div className="flex flex-col w-[15%]">
           <div className="text-sm font-medium">{hit.busId}</div>
         </div>
@@ -240,6 +252,7 @@ const Line = ({ hit, currentTab, onClick, open, meetingPtsToSave, setMeetingPtsT
         meetingPoints.length ? (
           <>
             <div className="flex justify-between w-full items-center py-3 px-4 text-xs uppercase text-gray-400">
+              <div className="w-[5%] mr-5"></div>
               <div className="w-[10%]">Nom</div>
               <div className="w-[20%]">Type de transport</div>
               {currentTab === "aller" ? (
@@ -253,14 +266,9 @@ const Line = ({ hit, currentTab, onClick, open, meetingPtsToSave, setMeetingPtsT
               <div className="w-[20%]">Adresse</div>
               <div className="w-[10%]"></div>
             </div>
-            <MeetingPoints
-              meetingPoints={meetingPoints}
-              setMeetingPoints={setMeetingPoints}
-              id={hit._id}
-              currentTab={currentTab}
-              meetingPtsToSave={meetingPtsToSave}
-              setMeetingPtsToSave={setMeetingPtsToSave}
-            />
+            {meetingPoints?.map((meetingPoint) => {
+              return <MeetingPoint key={meetingPoint._id} meetingPoint={meetingPoint} currentTab={currentTab} youngs={youngs} ligneId={hit._id} />;
+            })}
           </>
         ) : (
           <p className="flex items-center justify-center py-3 text-snu-purple-800">Aucun points de rencontres</p>
@@ -272,146 +280,126 @@ const Line = ({ hit, currentTab, onClick, open, meetingPtsToSave, setMeetingPtsT
   );
 };
 
-const MeetingPoints = ({ meetingPoints, setMeetingPoints, id, currentTab, meetingPtsToSave, setMeetingPtsToSave }) => {
-  {
-    const handleChange = (path, value, i) => {
-      const tmp = meetingPtsToSave;
-      const index = tmp.findIndex((e) => e === meetingPoints[i].meetingPointId);
-      if (index < 0) tmp.push(meetingPoints[i].meetingPointId);
-      setMeetingPtsToSave([...tmp]);
-      const newMeetingPts = meetingPoints;
-      newMeetingPts[i][path] = value;
-      setMeetingPoints([...newMeetingPts]);
-    };
+const MeetingPoint = ({ meetingPoint, currentTab, youngs, ligneId }) => {
+  const [tempMeetingPoint, setTempMeetingPoint] = useState(meetingPoint);
+  const [open, setOpen] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
-    const save = async (data) => {
-      toastr.info("Sauvegarde en cours...");
-      try {
-        const { ok } = await api.put(`/edit-transport/${id}`, {
-          ...data,
-        });
-        if (ok) {
-          const tmp = meetingPtsToSave;
-          const index = tmp.findIndex((e) => e === data.meetingPointId);
-          if (index >= 0) tmp.splice(index, 1);
-          setMeetingPtsToSave([...tmp]);
-          toastr.success("Le points de rendez-vous a été modifié.");
-        } else toastr.error("Oups, une erreur est survenue lors de la modifications du points de rendez-vous.");
-      } catch (e) {
-        capture(e);
-        toastr.error("Oups, une erreur est survenue lors de la modifications du points de rendez-vous.");
-      }
-    };
+  React.useEffect(() => {
+    setTempMeetingPoint(meetingPoint);
+  }, [meetingPoint]);
 
-    return meetingPoints.map((_, i) => {
-      return (
-        <div key={meetingPoints[i].meetingPointId} className="flex justify-between items-center py-6 px-4 hover:bg-gray-50 text-snu-purple-800">
-          <div className="w-[10%]">{meetingPoints[i].name.replace("PDR-", "").replace("PDR -", "")}</div>
-          <div className="w-[20%]">
-            <Select
-              options={transportTypeList}
-              value={meetingPoints[i].transportType}
-              onChange={(e) => {
-                handleChange("transportType", e, i);
-              }}
-            />
-          </div>
-          {currentTab === "aller" ? (
-            <>
-              <div className="w-[20%]">
-                <TimePicker value={meetingPoints[i].meetingHour} onChange={(value) => handleChange("meetingHour", value, i)} />
-              </div>
-              <div className="w-[20%]">
-                <TimePicker value={meetingPoints[i].departureHour} onChange={(value) => handleChange("departureHour", value, i)} />
-              </div>
-            </>
-          ) : (
+  const handleChange = ({ path, value }) => {
+    setIsDirty(true);
+    setTempMeetingPoint((prev) => ({ ...prev, [path]: value }));
+  };
+
+  const cancel = () => {
+    console.log("cancel");
+    setTempMeetingPoint(meetingPoint);
+    setIsDirty(false);
+  };
+
+  const save = async (data) => {
+    toastr.info("Sauvegarde en cours...");
+    try {
+      console.log(data);
+      const { ok } = await api.put(`/edit-transport/${ligneId}`, {
+        ...data,
+      });
+      if (ok) {
+        setIsDirty(false);
+        toastr.success("Le points de rendez-vous a été modifié.");
+      } else toastr.error("Oups, une erreur est survenue lors de la modifications du points de rendez-vous.");
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la modifications du points de rendez-vous.");
+    }
+  };
+
+  const young = youngs?.filter((e) => e.meetingPointId === tempMeetingPoint.meetingPointId);
+  return (
+    <div>
+      <div
+        className={`flex justify-between items-center py-6 px-4 text-snu-purple-800 cursor-pointer ${isDirty ? "bg-snu-purple-100" : "hover:bg-gray-50"}`}
+        onClick={() => setOpen((o) => !o)}>
+        <ChevronDown className={`text-gray-400 ${open ? "rotate-180" : ""}`} />
+        <div className="w-[10%]">{tempMeetingPoint.name.replace("PDR-", "").replace("PDR -", "")}</div>
+        <div className="w-[20%]">
+          <Select
+            options={transportTypeList}
+            value={tempMeetingPoint.transportType}
+            onChange={(value) => {
+              handleChange({ path: "transportType", value });
+            }}
+          />
+        </div>
+        {currentTab === "aller" ? (
+          <>
             <div className="w-[20%]">
-              <TimePicker value={meetingPoints[i].returnHour} onChange={(value) => handleChange("returnHour", value, i)} />
+              <TimePicker value={tempMeetingPoint.meetingHour} onChange={(value) => handleChange({ path: "meetingHour", value })} />
             </div>
-          )}
+            <div className="w-[20%]">
+              <TimePicker value={tempMeetingPoint.departureHour} onChange={(value) => handleChange({ path: "departureHour", value })} />
+            </div>
+          </>
+        ) : (
           <div className="w-[20%]">
-            <TooltipAddress meetingPt={meetingPoints[i]} handleChange={handleChange} index={i}>
-              <div className="h-[40px] w-full">
-                <input className="h-8 w-full" type="text" name="address" value={meetingPoints[i].address} onChange={(e) => handleChange("address", e.target.value, i)} />
-              </div>
-            </TooltipAddress>
+            <TimePicker value={tempMeetingPoint.returnHour} onChange={(value) => handleChange({ path: "returnHour", value })} />
           </div>
-          <div className="w-[10%] flex items-center justify-center">
-            {meetingPtsToSave.includes(meetingPoints[i].meetingPointId) ? (
-              <button className="bg-snu-purple-800 text-white rounded h-8 px-3 py-2 flex items-center justify-center" onClick={() => save(meetingPoints[i])}>
-                Save
+        )}
+        <div className="w-[20%]">
+          <TooltipAddress meetingPt={tempMeetingPoint} handleChange={handleChange}>
+            <div className="h-[40px] w-full">
+              <input
+                onClick={(event) => event.stopPropagation()}
+                className="h-8 w-full"
+                type="text"
+                name="address"
+                value={tempMeetingPoint.address}
+                onChange={(event) => handleChange({ path: "address", value: event.target.value })}
+              />
+            </div>
+          </TooltipAddress>
+        </div>
+        <div className="w-[10%] flex items-center justify-center">
+          {isDirty ? (
+            <div className="flex items-center gap-1">
+              <button className="bg-white text-gray-700 h-8 w-8 flex items-center justify-center border border-gray-700" onClick={cancel}>
+                <HiX />
               </button>
-            ) : (
-              <></>
-            )}
-          </div>
-        </div>
-      );
-    });
-  }
-};
-
-const TooltipCenter = ({ children, name, region, department, ...props }) => {
-  return (
-    <div className="group relative flex flex-col items-center" {...props}>
-      {children}
-      <div className="absolute !top-8 left-0 mb-3 hidden flex-col items-center group-hover:flex">
-        <div className="leading-2 relative z-[500] whitespace-nowrap rounded-lg bg-white py-3 px-3 text-xs text-[#414458] shadow-lg">
-          <div className="flex flex-col">
-            <div className="text-sm font-medium">{`${name}`}</div>
-            <div className="text-xs text-gray-400">{`${region} • ${department}`}</div>
-          </div>
+              <button className="bg-snu-purple-800 text-white h-8 w-8 flex items-center justify-center" onClick={() => save(tempMeetingPoint)}>
+                <HiCheck />
+              </button>
+            </div>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
-    </div>
-  );
-};
-
-const TooltipCapacity = ({ children, youngCapacity, youngSeatsTaken, followerCapacity, ...props }) => {
-  return (
-    <div className="group relative flex flex-col items-center" {...props}>
-      {children}
-      <div className="absolute !top-8 rigth-0 mb-3 hidden flex-col items-center group-hover:flex">
-        <div className="leading-2 relative z-[500] whitespace-nowrap rounded-lg bg-white py-3 px-3 text-xs text-[#414458] shadow-lg">
-          <div className="flex flex-col">
-            <div className="text-sm font-medium">{`Capacité pour jeunes: ${youngSeatsTaken} / ${youngCapacity}`}</div>
-            <div className="text-xs text-gray-400">{`Capacité pour accompagnateurs: ${followerCapacity}`}</div>
-          </div>
+      {open ? (
+        <div className="flex flex-col w-1/3 items-start justify-center py-6 px-4 text-snu-purple-800 border rounded m-5 shadow-xl">
+          <div className="w-full text-gray-400 px-4 pb-3">{`${young.length} Jeune${young.length > 1 ? "s" : ""} affectés a ce point de rendez-vous.`}</div>
+          {young.length ? (
+            <div className="flex justify-start items-center w-full pb-3 px-4  text-snu-purple-800">
+              <div className="w-1/4 mr-5 text-gray-400">Lastname</div>
+              <div className="w-1/4 text-gray-400">FirstName</div>
+            </div>
+          ) : (
+            <></>
+          )}
+          {young.map((y, i) => {
+            return (
+              <div key={`young-${i}`} className="flex justify-start items-center w-full pb-3 px-4  text-snu-purple-800">
+                <div className="w-1/4 mr-5">{y.lastName}</div>
+                <div className="w-1/4">{y.firstName}</div>
+              </div>
+            );
+          })}
         </div>
-      </div>
-    </div>
-  );
-};
-
-const TooltipAddress = ({ children, meetingPt, handleChange, index }) => {
-  return (
-    <div className="group relative flex flex-col items-center">
-      {children}
-      <div className="absolute !top-8 left-0 mb-3 hidden flex-col items-center group-hover:flex">
-        <div className="leading-2 relative z-[500] whitespace-nowrap rounded-lg bg-white py-3 px-3 text-xs text-[#414458] shadow-lg">
-          <div className="flex flex-col">
-            <div className="text-sm font-medium">
-              {"Ville: "}
-              <span className="text-xs text-gray-400">
-                <input type="text" name="city" value={meetingPt.city} onChange={(e) => handleChange("city", e.target.value, index)} />
-              </span>
-            </div>
-            <div className="text-sm font-medium">
-              {"Departement: "}
-              <span className="text-xs text-gray-400">
-                <input type="text" name="department" value={meetingPt.department} onChange={(e) => handleChange("department", e.target.value, index)} />
-              </span>
-            </div>
-            <div className="text-sm font-medium">
-              {"Region: "}
-              <span className="text-xs text-gray-400">
-                <input type="text" name="region" value={meetingPt.region} onChange={(e) => handleChange("region", e.target.value, index)} />
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      ) : (
+        <></>
+      )}
     </div>
   );
 };
