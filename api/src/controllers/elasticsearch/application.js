@@ -9,6 +9,7 @@ const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 const StructureObject = require("../../models/structure");
 const Joi = require("joi");
+const { serializeApplications } = require("../../utils/es-serializer");
 
 const { serializeApplications } = require("../../utils/es-serializer");
 
