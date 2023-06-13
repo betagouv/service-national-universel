@@ -92,7 +92,9 @@ export default function Affected() {
         <FaqAffected className={`${isStepMedicalFieldDone(young) ? "order-3" : "order-4"}`} />
       </div>
 
-      <JDMA id="3504" />
+      <div className="flex justify-end py-4 pr-8">
+        <JDMA id="3504" />
+      </div>
     </div>
   );
 }

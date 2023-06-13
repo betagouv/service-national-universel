@@ -42,6 +42,7 @@
     "express": "^4.18.2",
     "express-fileupload": "^1.4.0",
     "express-session": "^1.17.3",
+    "fast-csv": "^4.3.6",
     "file-type": "^16.5.3",
     "gm": "^1.25.0",
     "helmet": "^4.5.0",

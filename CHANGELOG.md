@@ -1,3 +1,44 @@
+# [1.289.0](https://github.com/betagouv/service-national-universel/compare/v1.288.0...v1.289.0) (2023-06-12)
+
+
+### Bug Fixes
+
+* **admin:** Download file for emploi du temps séjour ([1b46455](https://github.com/betagouv/service-national-universel/commit/1b464552eb7f77e181086ca6aaaf93c0a1e817d1))
+* **admin:** Download file possible ([033cedf](https://github.com/betagouv/service-national-universel/commit/033cedf540f0a7a424715d32ecc419e77039db96))
+* **admin,api:**  plan de transport wip2 ([#2690](https://github.com/betagouv/service-national-universel/issues/2690)) ([30101d3](https://github.com/betagouv/service-national-universel/commit/30101d32e0cb3b80a60dd0d699660668e99007ab))
+* **api:** data-for-check bus ([b875959](https://github.com/betagouv/service-national-universel/commit/b8759594e856e50e14cf3bbb921aa6b5831cf8d2))
+* **api:** Refetch session when updating places with multiaction ([d643631](https://github.com/betagouv/service-national-universel/commit/d6436314c256178edfcf306748a8d2037d0c11ff))
+* **app:** hour view convocation ([99dac94](https://github.com/betagouv/service-national-universel/commit/99dac94ca2ebeb468d807b9b6b46bff29e54c0e1))
+
+
+### Features
+
+* **api:** volontaire pointé absent libere une place ([#2693](https://github.com/betagouv/service-national-universel/issues/2693)) ([84fa97d](https://github.com/betagouv/service-national-universel/commit/84fa97d78b74a3d326b23afc22ff8238c1304949))
+
+# [1.288.0](https://github.com/betagouv/service-national-universel/compare/v1.287.1...v1.288.0) (2023-06-09)
+
+
+### Bug Fixes
+
+* **admin:** itinerary stepsort by hour and minute ([1c4e4a0](https://github.com/betagouv/service-national-universel/commit/1c4e4a0be393d40762af62b524093540f6d4ef8c))
+* **api:** Add lexfo to exception list staging ([45b353a](https://github.com/betagouv/service-national-universel/commit/45b353a597438942d2d77edc0ee119ba549552b4))
+* **api:** Remove Metabase.jar ([3aa85b0](https://github.com/betagouv/service-national-universel/commit/3aa85b0354fab83eae14dad3fb3a1f63f10ac186))
+* **api:** Update ignore message ([3e3e66c](https://github.com/betagouv/service-national-universel/commit/3e3e66c57a58a5918fe03801c38f828804dc90e0))
+
+
+### Features
+
+* **api:** Add lexfo to email list for send in blue and withdraw EY ([eb4e2ac](https://github.com/betagouv/service-national-universel/commit/eb4e2ac982fa3ab19194aa4daa10aca2b5babdcc))
+
+## [1.287.1](https://github.com/betagouv/service-national-universel/compare/v1.287.0...v1.287.1) (2023-06-08)
+
+
+### Bug Fixes
+
+* **admin:** do not crash if initials are unavailable in mission contact ([375429c](https://github.com/betagouv/service-national-universel/commit/375429c1465f8a30865c91a4664240695565b97d))
+* **admin:** Statut receptionné - fiche sanitaire ([#2685](https://github.com/betagouv/service-national-universel/issues/2685)) ([fff4d74](https://github.com/betagouv/service-national-universel/commit/fff4d747c2fde28cde57d2e32b7c8343d697b5d6))
+* **api:** es remove statut session ([6c01d6f](https://github.com/betagouv/service-national-universel/commit/6c01d6f9ecd12da424e326098ba62989b20782b1))
+
 # [1.287.0](https://github.com/betagouv/service-national-universel/compare/v1.286.0...v1.287.0) (2023-06-07)
 
 
