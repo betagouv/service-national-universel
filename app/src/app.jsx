@@ -8,7 +8,9 @@ import queryString from "query-string";
 import { setYoung } from "./redux/auth/actions";
 
 import Footer from "./components/footer";
+import Navbar from "./components/layout/navbar";
 import Loader from "./components/Loader";
+import ModalResumePhase1ForWithdrawn from "./components/modals/ModalResumePhase1ForWithdrawn";
 import Account from "./scenes/account";
 import AllEngagements from "./scenes/all-engagements/index";
 import AuthV2 from "./scenes/authV2";
@@ -17,6 +19,7 @@ import Candidature from "./scenes/candidature";
 import CGU from "./scenes/CGU";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
+import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
 import Diagoriente from "./scenes/diagoriente";
 import Engagement from "./scenes/engagement";
 import Home from "./scenes/home";
@@ -24,25 +27,19 @@ import Inscription2023 from "./scenes/inscription2023";
 import Maintenance from "./scenes/maintenance";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Missions from "./scenes/missions";
-import ModalResumePhase1ForWithdrawn from "./components/modals/ModalResumePhase1ForWithdrawn";
-import Navbar from "./components/layout/navbar";
+import NonEligible from "./scenes/noneligible";
 import Phase1 from "./scenes/phase1";
 import changeSejour from "./scenes/phase1/changeSejour";
 import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
 import Preferences from "./scenes/preferences";
 import PreInscription from "./scenes/preinscription";
-import NonEligible from "./scenes/noneligible";
 import PublicSupport from "./scenes/public-support-center";
 import ReInscription from "./scenes/reinscription";
 import RepresentantsLegaux from "./scenes/representants-legaux";
 import SupportCenter from "./scenes/support-center";
-import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
 
 import ModalCGU from "./components/modals/ModalCGU";
-import ModalMonday from "./components/modals/ModalMonday";
-import ModalTuesday from "./components/modals/ModalTuesday";
-import ModalTuesdayLocalTransport from "./components/modals/ModalTuesdayLocalTransport";
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 
@@ -50,12 +47,11 @@ import { toastr } from "react-redux-toastr";
 import "./index.css";
 import { canYoungResumePhase1, ENABLE_PM, YOUNG_STATUS } from "./utils";
 
+import * as Sentry from "@sentry/react";
 import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
-import * as Sentry from "@sentry/react";
-import { cohortsInit } from "./utils/cohorts";
 import { getAvailableSessions } from "./services/cohort.service";
-import { busLignesDepartLundi, busLignesDepartMardi, busLignesDepartMardiByLocalTransport } from "./utils/transport";
+import { cohortsInit } from "./utils/cohorts";
 
 initSentry();
 initApi();
@@ -137,9 +133,7 @@ export default function App() {
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
-  const [isModalMondayOpen, setIsModalMondayOpen] = useState(false);
-  const [isModalTuesdayOpen, setIsModalTuesdayOpen] = useState(false);
-  const [isModalTuesdayLocalTransportOpen, setIsModalTuesdayLocalTransportOpen] = useState(false);
+  // const [isModalMondayOpen, setIsModalMondayOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
 
@@ -159,16 +153,9 @@ const Espace = () => {
     }
 
     // ! To clean after departure. Or just keep it for later.
-    if (young && young.cohort === "Juin 2023" && busLignesDepartLundi.includes(young.ligneId)) {
-      setIsModalMondayOpen(true);
-    }
-    if (young && young.cohort === "Juin 2023" && busLignesDepartMardi.includes(young.ligneId)) {
-      setIsModalTuesdayOpen(true);
-    }
-
-    if (young && young.cohort === "Juin 2023" && busLignesDepartMardiByLocalTransport.includes(young.ligneId)) {
-      setIsModalTuesdayLocalTransportOpen(true);
-    }
+    // if (young && young.cohort === "Juin 2023" && busLignesDepartLundi.includes(young.ligneId)) {
+    //   setIsModalMondayOpen(true);
+    // }
 
     if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       getAvailableSessions(young).then((sessions) => {
@@ -178,9 +165,7 @@ const Espace = () => {
     return () => {
       setIsModalCGUOpen(false);
       setIsResumePhase1WithdrawnModalOpen(false);
-      setIsModalMondayOpen(false);
-      setIsModalTuesdayOpen(false);
-      setIsModalTuesdayLocalTransportOpen(false);
+      // setIsModalMondayOpen(false);
     };
   }, [young]);
 
@@ -226,9 +211,7 @@ const Espace = () => {
 
       <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
       <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
-      <ModalMonday isOpen={isModalMondayOpen} onClose={() => setIsModalMondayOpen(false)} />
-      <ModalTuesday isOpen={isModalTuesdayOpen} onClose={() => setIsModalTuesdayOpen(false)} />
-      <ModalTuesdayLocalTransport isOpen={isModalTuesdayLocalTransportOpen} onClose={() => setIsModalTuesdayLocalTransportOpen(false)} />
+      {/* <ModalMonday isOpen={isModalMondayOpen} onClose={() => setIsModalMondayOpen(false)} /> */}
     </>
   );
 };
