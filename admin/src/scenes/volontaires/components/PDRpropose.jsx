@@ -33,22 +33,22 @@ export default function PDRpropose({ young, center, modalAffectations, setModalA
   }
   const PdrInfo = (pdr) => {
     return (
-      <div>
-        <p>
+      <div className="flex gap-1 flex-col">
+        <p className="text-sm text-gray-900">
           {pdr.pdr.meetingPoint.department}, {pdr.pdr.meetingPoint.region}
         </p>
-        <p className="text-gray-600">
-          N° transport: <span className="text-black">{pdr.pdr.ligneBus.busId}</span>
+        <p className="text-sm text-gray-600">
+          N° transport: <span className="text-gray-900">{pdr.pdr.ligneBus.busId}</span>
         </p>
-        <p className="text-gray-600">
+        <p className="text-sm text-gray-600">
           Départ:{" "}
-          <span className="text-black">
+          <span className="text-gray-900">
             {formatStringDateWithDayTimezoneUTC(pdr.pdr.ligneBus.departuredDate)} {pdr.pdr.ligneToPoint.departureHour}
           </span>
         </p>
-        <p className="text-gray-600">
+        <p className="text-sm text-gray-600">
           Retour:{" "}
-          <span className="text-black">
+          <span className="text-gray-900">
             {formatStringDateWithDayTimezoneUTC(pdr.pdr.ligneBus.returnDate)} {pdr.pdr.ligneToPoint.returnHour}
           </span>
         </p>
@@ -61,27 +61,29 @@ export default function PDRpropose({ young, center, modalAffectations, setModalA
   ) : dataPdr.length === 0 ? (
     <div className="mt-2">Aucun résultat.</div>
   ) : (
-    dataPdr.map((pdr) => (
-      <div
-        key={pdr.meetingPoint._id}
-        className="flex w-full flex-row items-center justify-between gap-4 px-2 border-b-[1px] border-t-[1px] border-gray-200 pb-1.5 pt-1.5 cursor-pointer"
-        onClick={() => {
-          setModalAffectation({ isOpen: true, center: center, sessionId: young.sessionPhase1Id });
-        }}>
-        <div className="text-black font-bold text-base leading-6 flex flex-row gap-1 align-middle">
-          <p>{pdr.meetingPoint.name}</p>
-          <MdInfoOutline data-tip data-for={pdr.meetingPoint._id} className="h-5 w-5 cursor-pointer text-gray-400" />
-        </div>
-        <ReactTooltip id={pdr.meetingPoint._id} type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-          <div className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-sm text-black">
-            <PdrInfo pdr={pdr} />
+    <div className="grid grid-cols-1 divide-y  border-y-[1px] border-gray-200">
+      {dataPdr.map((pdr) => (
+        <div
+          key={pdr.meetingPoint._id}
+          className="flex w-full flex-row items-center justify-between gap-4 px-2  py-2 cursor-pointer"
+          onClick={() => {
+            setModalAffectation({ isOpen: true, center: center, sessionId: young.sessionPhase1Id });
+          }}>
+          <div className="flex items-center text-gray-900 font-bold text-base leading-6  gap-4">
+            <p>{pdr.meetingPoint.name}</p>
+            <MdInfoOutline data-tip data-for={pdr.meetingPoint._id} className="h-5 w-5 cursor-pointer text-gray-400" />
           </div>
-        </ReactTooltip>
-        <div>
-          <RightArrow />
+          <ReactTooltip id={pdr.meetingPoint._id} type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+            <div className=" w-fit list-outside !px-2 !py-1.5 text-left text-sm text-black">
+              <PdrInfo pdr={pdr} />
+            </div>
+          </ReactTooltip>
+          <div>
+            <RightArrow />
+          </div>
         </div>
-      </div>
-    ))
+      ))}
+    </div>
   );
 }
 const RightArrow = () => {
