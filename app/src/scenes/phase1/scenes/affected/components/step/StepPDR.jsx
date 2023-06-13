@@ -4,6 +4,8 @@ import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
 import { getCohortDetail, getMeetingPointChoiceLimitDateForCohort } from "../../../../../../utils/cohorts";
 import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR, isStepPDRDone } from "../../utils/steps.utils";
 import dayjs from "dayjs";
+const utc = require("dayjs/plugin/utc");
+dayjs.extend(utc);
 import CohortDateSummary from "../../../../../inscription2023/components/CohortDateSummary";
 import Loader from "../../../../../../components/Loader";
 import { capture } from "../../../../../../sentry";
@@ -12,7 +14,7 @@ import LinearMap from "../../../../../../assets/icons/LinearMap";
 import { BorderButton } from "../../../../../../components/buttons/SimpleButtons";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../../../../redux/auth/actions";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Check from "../../../../../../assets/icons/Check";
 import CloseSvg from "../../../../../../assets/Close";
 import { ModalContainer } from "../../../../../../components/modals/Modal";
@@ -21,43 +23,32 @@ import { Modal } from "reactstrap";
 import ConfirmationModal from "../../../../components/modals/ConfirmationModal";
 import Warning from "../../../../../../assets/icons/Warning";
 
-export default function StepPDR({ young, center }) {
-  const enabled = young ? true : false;
-  const valid = isStepPDRDone(young);
+export default function StepPDR({ center }) {
+  const young = useSelector((state) => state.Auth.young);
+  const dispatch = useDispatch();
+
   const [openedDesktop, setOpenedDesktop] = useState(false);
   const [openedMobile, setOpenedMobile] = useState(false);
-  const [pdrChoiceLimitDate, setPdrChoiceLimitDate] = useState("?");
-  const [pdrChoiceExpired, setPdrChoiceExpired] = useState(false);
   const [meetingPoints, setMeetingPoints] = useState(null);
   const [error, setError] = useState(null);
   const [choosenMeetingPoint, setChoosenMeetingPoint] = useState(null);
-  const [cohort, setCohort] = useState(null);
-
   const [modalMeetingPoint, setModalMeetingPoint] = useState({ isOpen: false, meetingPoint: null });
   const [loading, setLoading] = useState(false);
 
-  const dispatch = useDispatch();
+  const cohort = young ? young.cohort : null;
+  const enabled = young ? true : false;
+  const valid = isStepPDRDone(young);
+  const date = getMeetingPointChoiceLimitDateForCohort(young.cohort);
+  const pdrChoiceLimitDate = date ? dayjs(date).locale("fr").format("D MMMM YYYY") : "?";
+  const pdrChoiceExpired = date ? dayjs.utc().isAfter(dayjs(date)) : false;
 
   useEffect(() => {
-    if (young) {
-      setCohort(getCohortDetail(young.cohort));
-
-      const date = getMeetingPointChoiceLimitDateForCohort(young.cohort);
-      if (date) {
-        setPdrChoiceLimitDate(dayjs(date).locale("fr").format("D MMMM YYYY"));
-        setPdrChoiceExpired(dayjs(date).isBefore(new Date()));
-      } else {
-        setPdrChoiceLimitDate("-");
-        setPdrChoiceExpired(false);
-      }
-
+    if (young && !meetingPoints) {
       loadMeetingPoints();
     }
   }, [young]);
 
   async function loadMeetingPoints() {
-    setMeetingPoints(null);
-    setError(null);
     try {
       const result = await api.get(`/point-de-rassemblement/available`);
       if (!result.ok) {

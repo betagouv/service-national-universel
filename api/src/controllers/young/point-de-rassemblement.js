@@ -11,9 +11,14 @@ const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateId } = require("../../utils/validator");
+const { isPDRChoiceOpenForYoung } = require("../../services/pointDeRassemblement.service");
 
 router.put("/", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    // verify date
+    const isOpen = await isPDRChoiceOpenForYoung(req.user);
+    if (!isOpen) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
     // verify data
     const { error, value } = Joi.object({
       meetingPointId: Joi.string().optional(),

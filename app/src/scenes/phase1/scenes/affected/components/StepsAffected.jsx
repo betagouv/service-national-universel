@@ -40,7 +40,7 @@ export default function StepsAffected({ center }) {
       </article>
       <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">
-        <StepPDR young={young} center={center} />
+        <StepPDR center={center} />
       </div>
       <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">
