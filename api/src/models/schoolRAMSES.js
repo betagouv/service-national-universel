@@ -23,7 +23,7 @@ const Schema = new mongoose.Schema(
   { timestamps: true },
 );
 
-Schema.plugin(mongooseElastic(esClient, { ignore: ["data"] }), MODELNAME);
+Schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["data"] }), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 
