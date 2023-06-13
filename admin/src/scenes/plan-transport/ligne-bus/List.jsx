@@ -3,7 +3,7 @@ import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import { ROLES, getDepartmentNumber, translate } from "snu-lib";
+import { ROLES, canExportConvoyeur, getDepartmentNumber, translate } from "snu-lib";
 import ArrowUp from "../../../assets/ArrowUp";
 import Comment from "../../../assets/comment";
 import History from "../../../assets/icons/History";
@@ -302,7 +302,7 @@ const ReactiveList = ({ cohort, history }) => {
                           ),
                         }
                       : null,
-                    [ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)
+                    canExportConvoyeur(user)
                       ? {
                           action: async () => {
                             await exportConvoyeur(cohort);
