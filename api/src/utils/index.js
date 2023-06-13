@@ -596,72 +596,82 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
   if (!dateDeValidation || !dateDeValidationTerminale) return;
   
   if ( dateDeValidation === dateDeValidationTerminale ){
-    await getStatusPhase1FromValidationDate(young, dateDeValidation);
+    await updateStatusPhase1FromValidationDate(young, dateDeValidation, req.user);
   } else {
-    await getStatusPhase1FromValidationDateWithSpecificCase(young, dateDeValidation, dateDeValidationTerminale);
-  }
-
-  await young.save({ fromUser: req.user });
-}
-
-async function getStatusPhase1FromValidationDate(young, dateDeValidation){
-  const now = new Date();
-  // Cette constante nous permet de vérifier si un jeune a passé sa date de validation 
-  const isValidationDatePassed = now >= dateDeValidation;
-  // Cette constante nous permet de vérifier si un jeune étant présent au début du séjour et à la JDM
-  const isCohesionStayValid = young.cohesionStayPresence === "true" && young.presenceJDM === "true";
-  // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1
-  const isDepartureDateValid = now >= dateDeValidation && (!young.departSejourAt || young.departSejourAt > dateDeValidation);
-
-  // On valide la phase 1 si toutes les condition sont réunis. Une exception : le jeune a été exclu.
-  if (isValidationDatePassed && isCohesionStayValid && isDepartureDateValid) {
-    if (young.departSejourMotif && young.departSejourMotif === "Exclusion") {
-      young.set({ statusPhase1: "NOT_DONE" });
-    } else {
-      young.set({ statusPhase1: "DONE" });
-    }
-  } else {
-    // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
-    if (young.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
-      young.set({ statusPhase1: "NOT_DONE" });
-    } else if (
-      young.departSejourMotif &&
-      ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young.departSejourMotif)
-    ) {
-      young.set({ statusPhase1: "DONE" });
-    } 
+    await updateStatusPhase1FromValidationDateWithSpecificCase(young, dateDeValidation, dateDeValidationTerminale, req.user);
   }
 }
 
-async function getStatusPhase1FromValidationDateWithSpecificCase(young, dateDeValidation, dateDeValidationTerminale ) {
-  const now = new Date();
-  // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (en fonction de son grade)
-  const isValidationDatePassed = (now >= dateDeValidation && young?.grade !== "Terminale") || (now >= dateDeValidationTerminale && young?.grade === "Terminale");
-  // Cette constante nous permet de vérifier si un jeune étant présent au début du séjour et à la JDM (en fonction de son grade)
-  const isCohesionStayValid = young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale");
-  // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (en fonction de son grade)
-  const isDepartureDateValid = now >= (young?.grade === "Terminale" ? dateDeValidationTerminale : dateDeValidation) && (!young?.departSejourAt || young?.departSejourAt > (young?.grade === "Terminale" ? dateDeValidationTerminale : dateDeValidation));
+async function updateStatusPhase1FromValidationDate(young, dateDeValidation, fromUser){
+  try {
+    const now = new Date();
+    // Cette constante nous permet de vérifier si un jeune a passé sa date de validation 
+    const isValidationDatePassed = now >= dateDeValidation;
+    // Cette constante nous permet de vérifier si un jeune étant présent au début du séjour et à la JDM
+    const isCohesionStayValid = young.cohesionStayPresence === "true" && young.presenceJDM === "true";
+    // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1
+    const isDepartureDateValid = now >= dateDeValidation && (!young.departSejourAt || young.departSejourAt > dateDeValidation);
   
-  // Dans ce premier cas on vient vérifier que toutes les conditions préalable sont bonnes. si c'est la cas on valide sa phase 1.
-  // Un exception : si le jeune a été exclu du séjour.
-  if (isValidationDatePassed && isCohesionStayValid && isDepartureDateValid) {
-    if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
-      young.set({ statusPhase1: "NOT_DONE" });
+    // On valide la phase 1 si toutes les condition sont réunis. Une exception : le jeune a été exclu.
+    if (isValidationDatePassed && isCohesionStayValid && isDepartureDateValid) {
+      if (young.departSejourMotif && young.departSejourMotif === "Exclusion") {
+        young.set({ statusPhase1: "NOT_DONE" });
+      } else {
+        young.set({ statusPhase1: "DONE" });
+      }
     } else {
-      young.set({ statusPhase1: "DONE" });
+      // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
+      if (young.departSejourMotif && ["Exclusion", "Autre"].includes(young?.departSejourMotif)) {
+        young.set({ statusPhase1: "NOT_DONE" });
+      } else if (
+        young.departSejourMotif &&
+        ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young?.departSejourMotif)
+      ) {
+        young.set({ statusPhase1: "DONE" });
+      } 
     }
-  } else {
-  // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
-    if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
-      young.set({ statusPhase1: "NOT_DONE" });
-    } else if (
-      young?.departSejourMotif &&
-      ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young.departSejourMotif)
-    ) {
-      young.set({ statusPhase1: "DONE" });
+    await young.save({ fromUser });
+  } catch(e) {
+    console.log(e);
+    capture(e);
+  }
+}
+
+async function updateStatusPhase1FromValidationDateWithSpecificCase(young, dateDeValidation, dateDeValidationTerminale, fromUser ) {
+  try {
+    const now = new Date();
+    // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (en fonction de son grade)
+    const isValidationDatePassed = (now >= dateDeValidation && young?.grade !== "Terminale") || (now >= dateDeValidationTerminale && young?.grade === "Terminale");
+    // Cette constante nous permet de vérifier si un jeune étant présent au début du séjour et à la JDM (en fonction de son grade)
+    const isCohesionStayValid = young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale");
+    // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (en fonction de son grade)
+    const isDepartureDateValid = now >= (young?.grade === "Terminale" ? dateDeValidationTerminale : dateDeValidation) && (!young?.departSejourAt || young?.departSejourAt > (young?.grade === "Terminale" ? dateDeValidationTerminale : dateDeValidation));
+    
+    // Dans ce premier cas on vient vérifier que toutes les conditions préalable sont bonnes. si c'est la cas on valide sa phase 1.
+    // Un exception : si le jeune a été exclu du séjour.
+    if (isValidationDatePassed && isCohesionStayValid && isDepartureDateValid) {
+      if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
+        young.set({ statusPhase1: "NOT_DONE" });
+      } else {
+        young.set({ statusPhase1: "DONE" });
+      }
     } else {
-      young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
+    // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
+      if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young?.departSejourMotif)) {
+        young.set({ statusPhase1: "NOT_DONE" });
+      } else if (
+        young?.departSejourMotif &&
+        ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young?.departSejourMotif)
+      ) {
+        young.set({ statusPhase1: "DONE" });
+      } else {
+        young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
+      }
     }
+    await young.save({ fromUser });
+  } catch(e) {
+    console.log(e);
+    capture(e);
   }
 }
 
@@ -878,6 +888,6 @@ module.exports = {
   updateYoungApplicationFilesType,
   updateHeadCenter,
   getTransporter,
-  getStatusPhase1FromValidationDateWithSpecificCase,
-  getStatusPhase1FromValidationDate,
+  updateStatusPhase1FromValidationDateWithSpecificCase,
+  updateStatusPhase1FromValidationDate,
 };
