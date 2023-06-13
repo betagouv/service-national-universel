@@ -1,4 +1,6 @@
 import dayjs from "dayjs";
+const utc = require("dayjs/plugin/utc");
+dayjs.extend(utc);
 import React, { useCallback, useEffect, useState } from "react";
 import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
 import { toastr } from "react-redux-toastr";
@@ -55,7 +57,8 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
   }, [selectedFilters, paramData.page]);
 
   // true à J - 12 du départ
-  const youngSelectDisabled = !dayjs(cohort?.pdrChoiceLimitDate).isAfter(dayjs());
+  const date = cohort?.pdrChoiceLimitDate;
+  const youngSelectDisabled = date ? dayjs.utc().isAfter(dayjs(date)) : false;
 
   const closeModal = () => {
     setInputPdr("");
