@@ -1,3 +1,19 @@
+# [1.291.0](https://github.com/betagouv/service-national-universel/compare/v1.290.0...v1.291.0) (2023-06-14)
+
+
+### Bug Fixes
+
+* **admin:** list error key, throw error on fail to fetch new list system ([4488d54](https://github.com/betagouv/service-national-universel/commit/4488d544a4f61ba154256b6d76fa7ad34f676645))
+* **api:** bug statusMilitaryPreparationFiles ([#2700](https://github.com/betagouv/service-national-universel/issues/2700)) ([46bb89c](https://github.com/betagouv/service-national-universel/commit/46bb89cf6527af31d95a92961bd0a1707fd445ec))
+
+
+### Features
+
+* **admin:** add email copy on user ([04b15f2](https://github.com/betagouv/service-national-universel/commit/04b15f235e8179a464768775fcace29f37844c57))
+* **admin:** Passage en prod du téléchargement des PDF d'attestation de droits à l'image. ([#2701](https://github.com/betagouv/service-national-universel/issues/2701)) ([33c67c3](https://github.com/betagouv/service-national-universel/commit/33c67c336000062b33ffb6e1f2640f3de3047902))
+* **admin/api:** LastActivity field ([#2698](https://github.com/betagouv/service-national-universel/issues/2698)) ([3a4e2b4](https://github.com/betagouv/service-national-universel/commit/3a4e2b4cfdf87019c362b3d6e466aa773c99155b))
+* **api:** better search for young ([b3d4177](https://github.com/betagouv/service-national-universel/commit/b3d4177b38576c2e4f721f903393129b743a82c8))
+
 # [1.290.0](https://github.com/betagouv/service-national-universel/compare/v1.289.0...v1.290.0) (2023-06-13)
 
 
