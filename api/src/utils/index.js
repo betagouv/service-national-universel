@@ -591,17 +591,17 @@ async function notifDepartmentChange(department, template, young, extraParams = 
   }
 }
 
-async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
+async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) {
   const { validationDate: dateDeValidation, validationDateForTerminaleGrade: dateDeValidationTerminale } = await getCohortValidationDate(sessionPhase1.cohort);
   if (!dateDeValidation || !dateDeValidationTerminale) {
     throw new Error("❌ validationDate & validationDateForTerminaleGrade missing on cohort " + sessionPhase1.cohort);
   }
   const isTerminale = young?.grade === "Terminale";
   const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
-  await updateStatusPhase1(young, validationDate, isTerminale, req.user);
+  await updateStatusPhase1(young, validationDate, isTerminale, user);
 }
 
-async function updateStatusPhase1(young, validationDate, isTerminale, fromUser) {
+async function updateStatusPhase1(young, validationDate, isTerminale, user) {
   try {
     const now = new Date();
     // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
@@ -621,7 +621,6 @@ async function updateStatusPhase1(young, validationDate, isTerminale, fromUser) 
     } else {
       // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
       if (
-        young?.departSejourMotif &&
         ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young?.departSejourMotif)
       ) {
         young.set({ statusPhase1: "DONE" });
@@ -629,7 +628,7 @@ async function updateStatusPhase1(young, validationDate, isTerminale, fromUser) 
         young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
       }
     }
-    await young.save({ fromUser });
+    await young.save({ fromUser: user });
   } catch(e) {
     console.log(e);
     capture(e);
