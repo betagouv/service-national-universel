@@ -18,14 +18,14 @@ const Phase1ConfirmationFormBlock = ({ className = "", young = null, values = nu
     setIsYoungModalAgreementOpen(true);
   };
 
-  const handleConfirmationYoungAgreement = async (value) => {
+  const handleConfirmationYoungAgreement = async () => {
     if (!young) {
       return;
     }
 
     try {
       setLoading(true);
-      const { title, message, data } = await updateYoungPhase1Agreement({ youngId: young.id, isAgree: value });
+      const { title, message, data } = await updateYoungPhase1Agreement({ youngId: young._id, isAgree: values.youngPhase1Agreement });
       toastr.success(title, message);
       setValues(data);
       setYoung(data);

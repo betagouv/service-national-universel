@@ -257,6 +257,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
       const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
       if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       await autoValidationSessionPhase1Young({ young, sessionPhase1, user:req.user });
+      await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
     if (key === "cohesionStayPresence" && newValue === "true") {

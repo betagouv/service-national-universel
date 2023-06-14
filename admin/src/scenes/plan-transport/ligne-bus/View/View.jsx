@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate } from "snu-lib";
+import { isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate, canExportLigneBus } from "snu-lib";
 import Breadcrumbs from "../../../../components/Breadcrumbs";
 import Loader from "../../../../components/Loader";
 import { capture } from "../../../../sentry";
@@ -10,9 +10,13 @@ import { Title } from "../../components/commons";
 import Creation from "../modificationPanel/Creation";
 import Centre from "./components/Centre";
 import Info from "./components/Info";
+import BusTeam from "./components/BusTeam";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
+import SelectAction from "../../../../components/SelectAction";
+import Bus from "../../../../assets/icons/Bus";
+import { exportLigneBusJeune } from "../../util";
 
 export default function View(props) {
   const [data, setData] = React.useState(null);
@@ -21,6 +25,7 @@ export default function View(props) {
   const [panelOpen, setPanelOpen] = React.useState(false);
   const [nbYoung, setNbYoung] = React.useState();
   const [cohort, setCohort] = React.useState();
+  const [addOpen, setAddOpen] = React.useState(false);
   const user = useSelector((state) => state.Auth.user);
 
   const getBus = async () => {
@@ -35,7 +40,6 @@ export default function View(props) {
       };
 
       const { responses } = await api.esQuery("young", body, null, "?showAffectedToRegionOrDep=1");
-
       setNbYoung(responses[0].hits.total.value);
 
       if (!ok) {
@@ -101,8 +105,51 @@ export default function View(props) {
     getDataForCheck();
     getDemandeDeModification();
   }, []);
-
+  React.useEffect(() => {
+    setAddOpen(false);
+  }, [data]);
   if (!data) return <Loader />;
+
+  const leader = data.team.filter((item) => item.role === "leader")[0]?._id || null;
+
+  let exportItems = [
+    {
+      key: "exportData",
+      action: async () => {
+        await exportLigneBusJeune(cohort.name, data.busId, "total", data.team);
+      },
+      render: (
+        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+          <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+          <div className="text-sm text-gray-700">Informations complètes</div>
+        </div>
+      ),
+    },
+    {
+      key: "exportDataAller",
+      action: async () => {
+        await exportLigneBusJeune(cohort.name, data.busId, "Aller", data.team);
+      },
+      render: (
+        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+          <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+          <div className="text-sm text-gray-700">Informations Aller</div>
+        </div>
+      ),
+    },
+    {
+      key: "exportDataRetour",
+      action: async () => {
+        await exportLigneBusJeune(cohort.name, data.busId, "Retour", data.team);
+      },
+      render: (
+        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+          <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+          <div className="text-sm text-gray-700">Informations Retour</div>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <>
@@ -113,13 +160,31 @@ export default function View(props) {
             <Title>{data.busId}</Title>
             <div className="cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]">{data.cohort}</div>
           </div>
-          {ligneBusCanCreateDemandeDeModification(user) && isLigneBusDemandeDeModificationOpen(user, cohort) && (
-            <button
-              className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
-              onClick={() => setPanelOpen(true)}>
-              Demander une modification
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {ligneBusCanCreateDemandeDeModification(user) && isLigneBusDemandeDeModificationOpen(user, cohort) && (
+              <button
+                className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
+                onClick={() => setPanelOpen(true)}>
+                Demander une modification
+              </button>
+            )}
+            {canExportLigneBus(user) && data.team.length > 0 ? (
+              <SelectAction
+                title="Exporter la ligne"
+                alignItems="right"
+                buttonClassNames="bg-blue-600"
+                textClassNames="text-white font-medium text-sm"
+                rightIconClassNames="text-blue-300"
+                optionsGroup={[
+                  {
+                    key: "export",
+                    title: "Télécharger",
+                    items: exportItems,
+                  },
+                ]}
+              />
+            ) : null}
+          </div>
         </div>
         <div className="flex flex-col gap-8">
           <div className="flex gap-4">
@@ -132,6 +197,19 @@ export default function View(props) {
             <Modification demandeDeModification={demandeDeModification} getModification={getDemandeDeModification} />
           </div>
           <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
+
+          <BusTeam bus={data} setBus={setData} title={"Chef de file"} role={"leader"} idTeam={leader} addOpen={addOpen} />
+          {data.team.filter((item) => item.role === "supervisor").length > 0 ? (
+            data.team
+              .filter((item) => item.role === "supervisor")
+              .map((value) => (
+                <BusTeam key={value._id} bus={data} setBus={setData} title="Encadrant" role={"supervisor"} idTeam={value._id} addOpen={addOpen} setAddOpen={setAddOpen} />
+              ))
+          ) : (
+            <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} />
+          )}
+          {addOpen ? <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} setAddOpen={setAddOpen} /> : null}
+
           <div className="flex items-start gap-4">
             <div className="flex w-1/2 flex-col gap-4">
               {data.meetingsPointsDetail.map((pdr, index) => (

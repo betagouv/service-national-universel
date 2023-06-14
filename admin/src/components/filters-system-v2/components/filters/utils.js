@@ -1,34 +1,41 @@
+import { toastr } from "react-redux-toastr";
+import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
 import { COHESION_STAY_START } from "snu-lib";
 
 export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort) => {
-  const resAlternative = await api.post(route, {
-    page,
-    filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
-      if (value.filter.length === 1 && value.filter[0] === "") return e;
-      return { ...e, [key]: value.filter.map((e) => String(e)) };
-    }, {}),
-    sort: sort ? { field: sort.field, order: sort.order } : null,
-  });
+  try {
+    const resAlternative = await api.post(route, {
+      page,
+      filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
+        if (value.filter.length === 1 && value.filter[0] === "") return e;
+        return { ...e, [key]: value.filter.map((e) => String(e)) };
+      }, {}),
+      sort: sort ? { field: sort.field, order: sort.order } : null,
+    });
 
-  const aggs = resAlternative.responses[1].aggregations;
-  const data = resAlternative.responses[0].hits.hits.map((h) => ({ ...h._source, _id: h._id, sort: h?.sort }));
-  const count = resAlternative.responses[0].hits.total.value;
-  const newFilters = {};
+    const aggs = resAlternative.responses[1].aggregations;
+    const data = resAlternative.responses[0].hits.hits.map((h) => ({ ...h._source, _id: h._id, sort: h?.sort }));
+    const count = resAlternative.responses[0].hits.total.value;
+    const newFilters = {};
 
-  // map a travers les aggregations pour recuperer les filtres
-  filterArray.map((f) => {
-    if (f.customComponent) return;
-    if (f.disabledBaseQuery) return;
-    newFilters[f.name] = aggs[f.name].names.buckets.filter((b) => b.doc_count > 0).map((b) => ({ key: b.key, doc_count: b.doc_count }));
+    // map a travers les aggregations pour recuperer les filtres
+    filterArray.map((f) => {
+      if (f.customComponent) return;
+      if (f.disabledBaseQuery) return;
+      newFilters[f.name] = aggs[f.name].names.buckets.filter((b) => b.doc_count > 0).map((b) => ({ key: b.key, doc_count: b.doc_count }));
 
-    // check for any transformData function
-    if (f.transformData) {
-      newFilters[f.name] = f.transformData(newFilters[f.name]);
-    }
-  });
+      // check for any transformData function
+      if (f.transformData) {
+        newFilters[f.name] = f.transformData(newFilters[f.name]);
+      }
+    });
 
-  return { data, count, newFilters };
+    return { data, count, newFilters };
+  } catch (e) {
+    capture(e);
+    toastr.error("Oups, une erreur est survenue lors du chargement des données, veuillez recharger la page.");
+  }
 };
 
 export const getURLParam = (urlParams, setParamData, filters) => {

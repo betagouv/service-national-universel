@@ -11,6 +11,7 @@ const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRep
 const {
   canViewLigneBus,
   canCreateLigneBus,
+  canEditLigneBusTeam,
   canEditLigneBusGeneralInfo,
   canEditLigneBusCenter,
   canEditLigneBusPointDeRassemblement,
@@ -19,6 +20,7 @@ const {
   formatStringLongDate,
   isIsoDate,
   translateBusPatchesField,
+  canExportConvoyeur,
 } = require("snu-lib");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
@@ -43,6 +45,29 @@ router.get("/all", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
+//Récupère toutes les ligneBus + les centres associés
+
+router.get("/cohort/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      cohort: Joi.string().required(),
+    }).validate(req.params);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (!canExportConvoyeur(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { cohort } = value;
+
+    const ligneBus = await LigneBusModel.find({ cohort: { $in: [cohort] }, deletedAt: { $exists: false } });
+    let arrayCenter = [];
+    ligneBus.map((l) => (arrayCenter = arrayCenter.concat(l.centerId)));
+    const centers = await cohesionCenterModel.find({ _id: { $in: arrayCenter } });
+    return res.status(200).send({ ok: true, data: { ligneBus, centers } });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.put("/:id/info", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -57,7 +82,6 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
       lunchBreak: Joi.boolean().required(),
       lunchBreakReturn: Joi.boolean().required(),
     }).validate({ ...req.params, ...req.body });
-
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!canEditLigneBusGeneralInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -109,6 +133,99 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
     const infoBus = await getInfoBus(ligne);
 
     return res.status(200).send({ ok: true, data: infoBus });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/team", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      role: Joi.string().required(),
+      idTeam: Joi.string(),
+      lastname: Joi.string().required(),
+      firstname: Joi.string().required(),
+      birthdate: Joi.date().required(),
+      phone: Joi.string().required(),
+      mail: Joi.string().required(),
+      forth: Joi.boolean().required(),
+      back: Joi.boolean().required(),
+    }).validate({ ...req.params, ...req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!canEditLigneBusTeam(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const ligne = await LigneBusModel.findById(value.id);
+    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const NewMember = {
+      role: value.role,
+      lastName: value.lastname,
+      firstName: value.firstname,
+      birthdate: value.birthdate,
+      phone: value.phone,
+      mail: value.mail,
+      forth: value.forth,
+      back: value.back,
+    };
+
+    const memberToDelete = ligne.team.id(value.idTeam);
+    if (!memberToDelete) {
+      ligne.team.push(NewMember);
+    } else {
+      memberToDelete.set({
+        role: value.role,
+        lastName: value.lastname,
+        firstName: value.firstname,
+        birthdate: value.birthdate,
+        phone: value.phone,
+        mail: value.mail,
+        forth: value.forth,
+        back: value.back,
+      });
+    }
+    await ligne.save({ fromUser: req.user });
+
+    const infoBus = await getInfoBus(ligne);
+
+    return res.status(200).send({ ok: true, data: infoBus });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/teamDelete", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      idTeam: Joi.string().required(),
+      role: Joi.string().required(),
+      lastname: Joi.string().required(),
+      firstname: Joi.string().required(),
+      birthdate: Joi.date().required(),
+      phone: Joi.string().required(),
+      mail: Joi.string().required(),
+      forth: Joi.boolean().required(),
+      back: Joi.boolean().required(),
+    }).validate({ ...req.params, ...req.body });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const ligne = await LigneBusModel.findById(value.id);
+    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const memberToDelete = ligne.team.id(value.idTeam);
+    if (!memberToDelete) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    await memberToDelete.remove();
+    await ligne.save({ fromUser: req.user });
+
+    const infoBus = await getInfoBus(ligne);
+
+    res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -296,7 +413,6 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
 
     const ligneBus = await LigneBusModel.findById(id);
     if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
     //Get all youngs for this ligne and by meeting point
     const queryYoung = [
       { $match: { _id: ligneBus._id } },
@@ -313,6 +429,7 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
                     { $eq: ["$cohort", ligneBus.cohort] },
                     { $eq: ["$status", "VALIDATED"] },
                     { $eq: ["$sessionPhase1Id", ligneBus.sessionId] },
+                    { $eq: ["$ligneId", ligneBus._id.toString()] },
                     { $eq: ["$meetingPointId", "$$meetingPoint"] },
                   ],
                 },
@@ -496,139 +613,95 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
     // --- query
     // ------ find all patches ids
     const { cohort } = value;
-    const lines = await LigneBusModel.find({ cohort }, { _id: 1 });
-    console.log("Count lines: ", lines.length);
+    const lines = await LigneBusModel.find({ cohort });
     if (lines.length > 0) {
       const lineIds = lines.map((line) => line._id);
+      const lineSet = {};
+      for (const line of lines) {
+        lineSet[line._id.toString()] = line;
+      }
       const lineStringIds = lineIds.map((l) => l.toString());
-      const lineToPoints = await LigneToPointModel.find({ lineId: { $in: lineStringIds } }, { _id: 1 });
+      const lineToPoints = await LigneToPointModel.find({ lineId: { $in: lineStringIds } }, { _id: 1, lineId: 1 });
       const lineToPointIds = lineToPoints.map((line) => line._id);
-      // const modificationBuses = await ModificationBusModel.find({ lineId: { $in: lineStringIds } }, { _id: 1 });
-      // const modificationBusIds = modificationBuses.map((line) => line._id);
-
-      // ------ manage pagination
-      if (offset === undefined || offset === null) {
-        if (page === undefined || page === null || page < 1) {
-          offset = 0;
-        } else {
-          offset = page * limit;
-        }
+      const lineToPointSet = {};
+      for (const ltp of lineToPoints) {
+        lineToPointSet[ltp._id.toString()] = ltp.lineId;
       }
 
       // ------ compute filters
-      let filter = {};
-      let hasFilter = false;
+      let filterOpFunction;
       if (filterOp && filterOp.trim().length > 0) {
-        filter.op = filterOp;
-        hasFilter = true;
-      }
-      if (filterPath && filterPath.trim().length > 0) {
-        filter.path = (filterPath.trim()[0] === "/" ? "" : "/") + filterPath.trim();
-        hasFilter = true;
-      }
-      if (filterUserId && filterUserId.trim().length > 0) {
-        try {
-          filter["user._id"] = ObjectId(filterUserId);
-          hasFilter = true;
-        } catch (err) {
-          // bad filterUserId... let us ignore this filter.
+        if (filterPath && filterPath.trim().length > 0) {
+          const realFilterPath = (filterPath.trim()[0] === "/" ? "" : "/") + filterPath.trim();
+          filterOpFunction = (op) => op.path === realFilterPath && op.op === filterOp;
+        } else {
+          filterOpFunction = (op) => op.op === filterOp;
+        }
+      } else {
+        if (filterPath && filterPath.trim().length > 0) {
+          const realFilterPath = (filterPath.trim()[0] === "/" ? "" : "/") + filterPath.trim();
+          filterOpFunction = (op) => op.path === realFilterPath;
+        } else {
+          filterOpFunction = () => true;
         }
       }
-      const pipelineFilter = hasFilter ? [{ $match: filter }] : [];
+      let filterUserFunction;
+      if (filterUserId && filterUserId.trim().length > 0) {
+        filterUserFunction = (doc) => doc.user && doc.user._id && doc.user._id.toString() === filterUserId;
+      } else {
+        filterUserFunction = () => true;
+      }
 
-      // ------ build complete pipeline
-      const pipeline = [
-        // tout ceci est là pour remplacer un $unionWith qui n'existe pas dans la version de mongo < 4.4
-        { $limit: 1 },
-        { $project: { _id: 1 } },
-        { $project: { _id: 0 } },
-        {
-          $lookup: {
-            from: "lignebus_patches",
-            pipeline: [{ $match: { ref: { $in: lineIds } } }, { $addFields: { lineId: { $toObjectId: "$ref" } } }],
-            as: "ligneBuses",
-          },
-        },
-        {
-          $lookup: {
-            from: "lignetopoint_patches",
-            pipeline: [
-              { $match: { ref: { $in: lineToPointIds } } },
-              { $addFields: { lineToPointId: { $toObjectId: "$ref" } } },
-              {
-                $lookup: {
-                  from: "lignetopoints",
-                  localField: "lineToPointId",
-                  foreignField: "_id",
-                  as: "lineToPoint",
-                },
-              },
-              { $unwind: "$lineToPoint" },
-              { $addFields: { lineId: { $toObjectId: "$lineToPoint.lineId" } } },
-            ],
-            as: "ligneToPoints",
-          },
-        },
-        /*{
-          $lookup: {
-            from: "modificationbus_patches",
-            pipeline: [
-              { $match: { ref: { $in: modificationBusIds } } },
-              { $addFields: { modificationId: { $toObjectId: "$ref" } } },
-              {
-                $lookup: {
-                  from: "modificationbuses",
-                  localField: "modificationId",
-                  foreignField: "_id",
-                  as: "modificationBus",
-                },
-              },
-              { $unwind: "$modificationBus" },
-              { $addFields: { lineId: { $toObjectId: "$modificationBus.lineId" } } },
-            ],
-            as: "modificationBuses",
-          },
-        },*/
-        { $project: { union: { $concatArrays: ["$ligneBuses", "$ligneToPoints" /*, "$modificationBuses"*/] } } },
-        { $unwind: "$union" },
-        { $replaceRoot: { newRoot: "$union" } },
-        {
-          $lookup: {
-            from: "lignebuses",
-            localField: "lineId",
-            foreignField: "_id",
-            as: "bus",
-          },
-        },
-        { $unwind: "$bus" },
-        { $addFields: { refName: "$bus.busId" } },
-        { $project: { bus: 0, lineToPoint: 0, lineToPointId: 0, modificationBus: 0, modificationId: 0 } },
-        { $sort: { date: -1 } },
+      // --- get all ops...
+      const db = mongoose.connection.db;
+      let patches = [];
 
-        // on déplie chaque op.
-        { $unwind: "$ops" },
-        {
-          $addFields: {
-            op: "$ops.op",
-            path: "$ops.path",
-            value: "$ops.value",
-            originalValue: "$ops.originalValue",
-          },
-        },
-        { $project: { ops: 0, __v: 0 } },
+      // --- lignebus patches...
+      let cursor = db.collection("lignebus_patches").find({ ref: { $in: lineIds } });
+      for await (const doc of cursor) {
+        if (doc.ops && filterUserFunction(doc)) {
+          const bus = lineSet[doc.ref];
+          for (const op of doc.ops) {
+            if (filterOpFunction(op) && !HIDDEN_FIELDS.includes(op.path) && !IGNORED_VALUES.includes(op.value) && !IGNORED_VALUES.includes(op.originalValue)) {
+              patches.push({
+                modelName: doc.modelName,
+                date: doc.date,
+                ref: bus?._id,
+                refName: bus?.busId,
+                op: op.op,
+                path: op.path,
+                value: op.value,
+                originalValue: op.originalValue,
+                user: doc.user,
+              });
+            }
+          }
+        }
+      }
 
-        // unwind on values array (fait anciennement en front)
-        { $unwind: { path: "$value", preserveNullAndEmptyArrays: true } },
-
-        // filter (fait anciennement en front)
-        { $match: { path: { $nin: HIDDEN_FIELDS } } },
-        { $match: { $or: [{ value: { $nin: IGNORED_VALUES } }, { originalValue: { $nin: IGNORED_VALUES } }] } },
-        ...pipelineFilter,
-      ];
-
-      const patches = await LigneBusModel.aggregate(pipeline);
-      // console.log(pipeline);
-      // console.log("PATCHES: ", patches);
+      // --- lineToPoints patches...
+      cursor = db.collection("lignetopoint_patches").find({ ref: { $in: lineToPointIds } });
+      for await (const doc of cursor) {
+        if (doc.ops && filterUserFunction(doc)) {
+          const lineId = lineToPointSet[doc._id.toString()];
+          const bus = lineId ? lineSet[lineId] : {};
+          for (const op of doc.ops) {
+            if (filterOpFunction(op) && !HIDDEN_FIELDS.includes(op.path) && !IGNORED_VALUES.includes(op.value) && !IGNORED_VALUES.includes(op.originalValue)) {
+              patches.push({
+                modelName: doc.modelName,
+                date: doc.date,
+                ref: bus._id,
+                refName: bus.busId,
+                op: op.op,
+                path: op.path,
+                value: op.value,
+                originalValue: op.originalValue,
+                user: doc.user,
+              });
+            }
+          }
+        }
+      }
 
       // --- results
       if (patches && patches.length > 0) {
@@ -642,6 +715,11 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
         } else {
           results = patches;
         }
+
+        // --- sort patches
+        patches.sort((a, b) => {
+          return b.date.valueOf() - a.date.valueOf();
+        });
 
         if (nopagination) {
           // --- result without pagination
@@ -657,6 +735,14 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
           });
         } else {
           // --- result with pagination
+          if (offset === undefined || offset === null) {
+            if (page === undefined || page === null || page < 1) {
+              offset = 0;
+            } else {
+              offset = page * limit;
+            }
+          }
+
           return res.status(200).send({
             ok: true,
             data: results.slice(offset, offset + limit),
@@ -707,7 +793,7 @@ function pathToKey(path) {
 function filterPatchWithQuery(p, query) {
   return (
     // bus
-    p.refName.toLowerCase().includes(query) ||
+    p.refName?.toLowerCase()?.includes(query) ||
     // field
     translateBusPatchesField(pathToKey(p.path)).toLowerCase().includes(query) ||
     // original-value

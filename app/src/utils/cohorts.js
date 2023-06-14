@@ -1,7 +1,8 @@
 import api from "../services/api";
 import { capture } from "../sentry";
-import { sessions2023 } from "snu-lib";
+import { regionsListDROMS, sessions2023 } from "snu-lib";
 import dayjs from "dayjs";
+import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR } from "../scenes/phase1/scenes/affected/utils/steps.utils";
 let cohorts = null;
 let cohortsCachedAt = null;
 
@@ -87,4 +88,66 @@ export function getCohortPeriod(cohort) {
   const formattedEnd = new Intl.DateTimeFormat("fr-FR", endDateformatOptions).format(endDate);
 
   return `du ${formattedStart} au ${formattedEnd}`;
+}
+
+/**
+ * @param {object} young
+ * @param {object} [meetingPoint]
+ * @returns {date} the date of the departure of the young from the meeting point if they have one,
+ * or the default date for the cohort if they don't (local transport or traveling by own means).
+ */
+export function getDepartureDate(young, meetingPoint = null) {
+  if (meetingPoint?.departuredDate) return meetingPoint?.departuredDate;
+  if (meetingPoint?.bus?.departuredDate) return meetingPoint?.bus?.departuredDate;
+  return getGlobalDepartureDate(young);
+}
+
+/**
+ * @param {object} young
+ * @param {object} [meetingPoint]
+ * @returns {date} the date of the return of the young to the meeting point if they have one,
+ * or the default date for the cohort if they don't (local transport or traveling by own means).
+ */
+export function getReturnDate(young, meetingPoint = null) {
+  if (meetingPoint?.returnDate) return meetingPoint?.returnDate;
+  if (meetingPoint?.bus?.returnDate) return meetingPoint?.bus?.returnDate;
+  return getGlobalReturnDate(young);
+}
+
+function getGlobalDepartureDate(young) {
+  if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
+    return new Date(2023, 6, 5);
+  }
+  const cohortDetail = getCohort(young.cohort);
+  return new Date(cohortDetail.dateStart);
+}
+
+function getGlobalReturnDate(young) {
+  if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
+    return new Date(2023, 6, 17);
+  }
+  const cohortDetail = getCohort(young.cohort);
+  return new Date(cohortDetail.dateEnd);
+}
+
+/**
+ * @param {object} [meetingPoint]
+ * @returns the hour of the departure of the young from the meeting point if they have one,
+ * or a default hour if they don't (local transport or traveling by own means).
+ */
+export function getMeetingHour(meetingPoint = null) {
+  if (meetingPoint?.meetingHour) return meetingPoint.meetingHour;
+  if (meetingPoint?.ligneToPoint?.meetingHour) return meetingPoint.ligneToPoint.meetingHour;
+  return ALONE_ARRIVAL_HOUR;
+}
+
+/**
+ * @param {object} [meetingPoint]
+ * @returns the hour of the return of the young to the meeting point if they have one,
+ * or a default hour if they don't (local transport or traveling by own means).
+ */
+export function getReturnHour(meetingPoint = null) {
+  if (meetingPoint?.returnHour) return meetingPoint.returnHour;
+  if (meetingPoint?.ligneToPoint?.returnHour) return meetingPoint.ligneToPoint.returnHour;
+  return ALONE_DEPARTURE_HOUR;
 }

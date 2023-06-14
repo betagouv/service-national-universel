@@ -9,6 +9,7 @@ const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 const StructureObject = require("../../models/structure");
 const Joi = require("joi");
+const { serializeReferents } = require("../../utils/es-serializer");
 
 async function buildReferentContext(user) {
   const contextFilters = [];
@@ -166,10 +167,10 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     if (req.params.action === "export") {
       const response = await allRecords("referent", hitsRequestBody.query);
-      return res.status(200).send({ ok: true, data: response });
+      return res.status(200).send({ ok: true, data: serializeReferents(response) });
     } else {
       const response = await esClient.msearch({ index: "referent", body: buildNdJson({ index: "referent", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(serializeReferents(response.body));
     }
   } catch (error) {
     capture(error);

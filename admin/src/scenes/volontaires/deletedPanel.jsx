@@ -40,7 +40,7 @@ export default function DeletedVolontairePanel({ onChange, value }) {
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
           </div>
-          <Details title="Vu(e) le" value={formatStringLongDate(young.lastLoginAt)} />
+          <Details title="Vu(e) le" value={formatStringLongDate(young.lastActivityAt)} />
         </div>
         <Info title="Coordonnées" id={young._id}>
           <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />

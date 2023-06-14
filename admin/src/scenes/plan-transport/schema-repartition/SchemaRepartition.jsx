@@ -285,6 +285,8 @@ export default function SchemaRepartition({ region, department }) {
     let sheetData = groups.map((g) => {
       let data = {
         cohort: g.cohort,
+        id: g._id.toString(),
+        updatedAt: dayjs(g.updatedAt).format("DD/MM/YYYY HH:mm"),
         region: g.fromRegion,
         department: g.fromDepartment,
         youngsVolume: g.youngsVolume,
@@ -329,6 +331,8 @@ export default function SchemaRepartition({ region, department }) {
     // --- fix header names
     let headers = [
       "Cohorte",
+      "ID",
+      "Date de dernière modification",
       "Région des volontaires",
       "Département des volontaires",
       "Nombre de volontaires",

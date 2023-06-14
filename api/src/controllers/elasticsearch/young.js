@@ -127,7 +127,7 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
   if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
     contextFilters.push({ terms: { "department.keyword": user.department } });
   }
-  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+  if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
     const sessionPhase1 = await SessionPhase1Object.find({ department: { $in: user.department } });
     if (sessionPhase1.length === 0) {
       contextFilters.push({ terms: { "department.keyword": user.department } });
@@ -204,7 +204,7 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
       return res.status(200).send({ ok: true, data: serializeYoungs(response) });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(serializeYoungs(response.body));
     }
   } catch (error) {
     capture(error);
@@ -373,7 +373,7 @@ router.post("/by-point-de-rassemblement/:meetingPointId/:action(search|export)",
       return res.status(200).send({ ok: true, data: serializeYoungs(response) });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(serializeYoungs(response.body));
     }
   } catch (error) {
     capture(error);
@@ -470,7 +470,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       return res.status(200).send({ ok: true, data: serializeYoungs(response) });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(serializeYoungs(response.body));
     }
   } catch (error) {
     capture(error);

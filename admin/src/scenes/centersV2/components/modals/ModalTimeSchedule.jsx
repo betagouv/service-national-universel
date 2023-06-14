@@ -73,7 +73,7 @@ function TimeScheduleFile({ session, file, onDelete, className = "" }) {
 
   return (
     <div className={`flex items-center justify-between border-b-[1px] border-b-gray-200 py-4 ${className}`}>
-      <div className="grow-1">{file.name}</div>
+      <div className="grow-1">{file.name.substring(0,25)}</div>
       {communicating ? (
         <div>
           <Loader size="2rem" className="m-0" />

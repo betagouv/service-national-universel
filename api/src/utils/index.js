@@ -29,9 +29,9 @@ const {
   CELLAR_KEYSECRET_SUPPORT,
   PUBLIC_BUCKET_NAME_SUPPORT,
   translateFileStatusPhase1,
-  SUB_ROLES,
   getAge,
 } = require("../config");
+const { SUB_ROLES } = require("snu-lib");
 const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES } = require("snu-lib");
 const { capture } = require("../sentry");
 const { getCohortValidationDate } = require("./cohort");
@@ -217,7 +217,7 @@ const updatePlacesSessionPhase1 = async (sessionPhase1, fromUser) => {
   try {
     const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
     const placesTaken = youngs.filter(
-      (young) => (["AFFECTED", "DONE"].includes(young.statusPhase1) || ["AFFECTED", "DONE"].includes(young.statusPhase1Tmp)) && young.status === "VALIDATED",
+      (young) => ["AFFECTED", "DONE"].includes(young.statusPhase1) && young.cohesionStayPresence !== "false" && young.status === "VALIDATED",
     ).length;
     const placesLeft = Math.max(0, sessionPhase1.placesTotal - placesTaken);
     if (sessionPhase1.placesLeft !== placesLeft) {

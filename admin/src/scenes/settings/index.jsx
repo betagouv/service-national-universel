@@ -628,6 +628,7 @@ export default function Settings() {
                             Fin de la possibilité pour un utilisateur de choisir l’option “Je laisse [Prénom du volontaire] choisir son point de rassemblement” dans la modale de
                             choix du point de rassemblement.
                           </li>
+                          <li>Cela prend effet à 23h59 heure de Paris.</li>
                         </ul>
                       </ReactTooltip>
                     </div>

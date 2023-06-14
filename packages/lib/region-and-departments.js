@@ -161,6 +161,19 @@ const regionList = [
   "Nouvelle-Calédonie",
 ];
 
+// Attention : Polynésie française et Nouvelle-Calédonie ne sont pas des DROMS mais des cas à part.
+const regionsListDROMS = [
+  "Guadeloupe",
+  "Martinique",
+  "Guyane",
+  "La Réunion",
+  "Saint-Pierre-et-Miquelon",
+  "Mayotte",
+  "Terres australes et antarctiques françaises",
+  "Wallis-et-Futuna",
+];
+
+
 const department2region = {
   Ain: "Auvergne-Rhône-Alpes",
   Aisne: "Hauts-de-France",
@@ -378,6 +391,7 @@ export {
   departmentList,
   getDepartmentNumber,
   regionList,
+  regionsListDROMS,
   department2region,
   region2department,
   getDepartmentByZip,
@@ -394,6 +408,7 @@ export default {
   departmentList,
   getDepartmentNumber,
   regionList,
+  regionsListDROMS,
   department2region,
   region2department,
   getDepartmentByZip,
