@@ -53,19 +53,19 @@ export default function ExportEngagementReport({ filter }) {
     setLoadingText("100 %");
 
     const linesFilter = [];
-    if(filter.cohorts && filter.cohorts.length > 0) {
+    if (filter.cohorts && filter.cohorts.length > 0) {
       linesFilter.push({ Type: "Cohortes", Valeur: filter.cohorts.join(", ") });
     }
-    if(filter.region && filter.region.length > 0) {
+    if (filter.region && filter.region.length > 0) {
       linesFilter.push({ Type: "Régions", Valeur: filter.region.join(", ") });
     }
-    if(filter.department && filter.department.length > 0) {
+    if (filter.department && filter.department.length > 0) {
       linesFilter.push({ Type: "Département", Valeur: filter.department.join(", ") });
     }
-    if(filter.academy && filter.academy.length > 0) {
+    if (filter.academy && filter.academy.length > 0) {
       linesFilter.push({ Type: "Académie", Valeur: filter.academy.join(", ") });
     }
-    if(filter.status && filter.status.length > 0) {
+    if (filter.status && filter.status.length > 0) {
       linesFilter.push({ Type: "Statut d'inscription", Valeur: filter.status.join(", ") });
     }
 
@@ -105,22 +105,22 @@ export default function ExportEngagementReport({ filter }) {
 
 async function computeYoungStatuses(filter) {
   const youngs = await api.post("/elasticsearch/young/aggregate-status/export", {
-    "filters": filter
+    filters: filter,
   });
   let lines = [];
-  for(const row of youngs.data) {
+  for (const row of youngs.data) {
     let line = {
       ["Académie"]: row.academy,
       ["Région"]: row.region,
-      ["Département"]: row.department
+      ["Département"]: row.department,
     };
-    for(const status of Object.values(YOUNG_STATUS_PHASE1)) {
+    for (const status of Object.values(YOUNG_STATUS_PHASE1)) {
       line["Phase 1 - " + translate(status)] = row["phase1_" + status];
     }
-    for(const status of Object.values(YOUNG_STATUS_PHASE2)) {
+    for (const status of Object.values(YOUNG_STATUS_PHASE2)) {
       line["Phase 2 - " + translate(status)] = row["phase2_" + status];
     }
-    for(const status of Object.values(YOUNG_STATUS_PHASE3)) {
+    for (const status of Object.values(YOUNG_STATUS_PHASE3)) {
       line["Phase 3 - " + translate(status)] = row["phase3_" + status];
     }
     lines.push(line);
@@ -131,30 +131,30 @@ async function computeYoungStatuses(filter) {
 async function computeStructures(filter) {
   // --- get data
   const structures = await api.post("/elasticsearch/structure/export", {
-    "filters": filter
+    filters: filter,
   });
 
   // --- aggregate
   let types = {};
   let departments = {};
-  for(const structure of structures.data) {
-    if(departments[structure.department] === undefined) {
+  for (const structure of structures.data) {
+    if (departments[structure.department] === undefined) {
       departments[structure.department] = {
         department: structure.department,
         region: structure.region,
         count: 0,
-        networkAffiliated: 0
-      }
+        networkAffiliated: 0,
+      };
     }
     departments[structure.department].count++;
-    if(structure.networkId) {
+    if (structure.networkId) {
       departments[structure.department].networkAffiliated++;
     }
-    if(departments[structure.department][structure.legalStatus] === undefined) {
+    if (departments[structure.department][structure.legalStatus] === undefined) {
       departments[structure.department][structure.legalStatus] = 0;
     }
     departments[structure.department][structure.legalStatus]++;
-    if(structure.types) {
+    if (structure.types) {
       for (const type of structure.types) {
         types[type] = type;
         if (departments[structure.department][type] === undefined) {
@@ -172,12 +172,12 @@ async function computeStructures(filter) {
       ["Département"]: row.department,
       ["Région"]: row.region,
       ["Nb Structures"]: row.count,
-      ["Nb Affiliés à un réseau"]: row.networkAffiliated
+      ["Nb Affiliés à un réseau"]: row.networkAffiliated,
     };
-    for(const status of Object.values(STRUCTURE_LEGAL_STATUS)) {
+    for (const status of Object.values(STRUCTURE_LEGAL_STATUS)) {
       line[translate(status)] = row[status] || 0;
     }
-    for(const type of Object.keys(types)) {
+    for (const type of Object.keys(types)) {
       line[type] = row[type] || 0;
     }
     lines.push(line);

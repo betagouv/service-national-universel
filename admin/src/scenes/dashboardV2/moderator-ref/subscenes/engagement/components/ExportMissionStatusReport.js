@@ -11,7 +11,7 @@ import dayjs from "dayjs";
 
 export default function ExportMissionStatusReport({ filter }) {
   const [loading, setLoading] = useState(false);
-  const [modal, setModal] = useState({isOpen: false, onConfirm: null});
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loadingText, setLoadingText] = useState("0 %");
   const user = useSelector((state) => state.Auth.user);
 
@@ -48,17 +48,17 @@ export default function ExportMissionStatusReport({ filter }) {
     try {
       let linesFilter = [];
       let queryFilter = {};
-      if(filter.department) {
+      if (filter.department) {
         queryFilter.department = filter.department;
         linesFilter.push({ Type: "Département", Valeur: filter.department.join(", ") });
       }
-      if(filter.region) {
+      if (filter.region) {
         queryFilter.region = filter.region;
         linesFilter.push({ Type: "Région", Valeur: filter.region.join(", ") });
       }
       if (filter.isJvaMission === "true" || filter.isJvaMission === "false") {
         queryFilter.isJvaMission = [filter.isJvaMission];
-        linesFilter.push({ Type: "source", "Valeur": filter.isJvaMission === "true" ? "JVA" : "SNU" });
+        linesFilter.push({ Type: "source", Valeur: filter.isJvaMission === "true" ? "JVA" : "SNU" });
       }
       if (filter.fromDate) {
         const date = dayjs(filter.fromDate).format("YYYY/MM/DD");
@@ -71,19 +71,19 @@ export default function ExportMissionStatusReport({ filter }) {
         linesFilter.push({ Type: "Date de fin", Valeur: date });
       }
       const query = {
-        "page": 0,
-        "filters": queryFilter,
-        "sort": {"field": "createdAt", "order": "desc"}
-      }
+        page: 0,
+        filters: queryFilter,
+        sort: { "field": "createdAt", "order": "desc" }
+      };
       const result = await api.post("/elasticsearch/mission/export", query);
-      const lines = aggregateMissionsStatusData(result.data);
+      const lines = await aggregateMissionsStatusData(result.data);
 
       const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
       const sheetData = XLSX.utils.json_to_sheet(lines);
       const sheetFilter = XLSX.utils.json_to_sheet(linesFilter);
       const wb = { Sheets: { ["Données"]: sheetData, Filtres: sheetFilter }, SheetNames: ["Données", "Filtres"] };
       const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      const data = new Blob([excelBuffer], {type: fileType});
+      const data = new Blob([excelBuffer], { type: fileType });
       setLoading(false);
       const now = new Date();
       const exportDate = `${now.getFullYear()}${now.getMonth() + 1}${("0" + now.getDate()).slice(-2)}`;
@@ -103,10 +103,10 @@ export default function ExportMissionStatusReport({ filter }) {
         isOpen={modal?.isOpen}
         title={modal?.title}
         message={modal?.message}
-        onCancel={() => setModal({isOpen: false, onConfirm: null})}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
         onConfirm={() => {
           modal?.onConfirm();
-          setModal({isOpen: false, onConfirm: null});
+          setModal({ isOpen: false, onConfirm: null });
         }}
       />
     </>

@@ -637,7 +637,6 @@ router.post("/propose-mission/:id/:action(search|export)", passport.authenticate
 router.post("/aggregate-status/:action(export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user, body } = req;
-
     // Configuration
     const searchFields = ["email", "firstName", "lastName", "city", "zip"];
     const filterFields = [
@@ -664,9 +663,7 @@ router.post("/aggregate-status/:action(export)", passport.authenticate(["referen
       "departSejourMotif.keyword",
     ];
     const sortFields = [];
-
     if (!canSearchInElasticSearch(user, "young")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     // Context filters
     const contextFilters = [];
 
@@ -693,9 +690,8 @@ router.post("/aggregate-status/:action(export)", passport.authenticate(["referen
     // Body params validation
     const { queryFilters, page, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
     // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+    const { hitsRequestBody } = buildRequestBody({
       searchFields,
       filterFields,
       queryFilters,
@@ -720,7 +716,7 @@ function aggregateStatus(youngs) {
       departments[young.department] = {
         department: young.department,
         region: young.region,
-        academy: young.academy
+        academy: young.academy,
       };
     }
     if (departments[young.department]["phase1_" + young.statusPhase1] === undefined) {
