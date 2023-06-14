@@ -73,7 +73,7 @@ export default function ExportMissionStatusReport({ filter }) {
       const query = {
         page: 0,
         filters: queryFilter,
-        sort: { "field": "createdAt", "order": "desc" }
+        sort: { field: "createdAt", order: "desc" },
       };
       const result = await api.post("/elasticsearch/mission/export", query);
       const lines = await aggregateMissionsStatusData(result.data);
@@ -116,7 +116,7 @@ export default function ExportMissionStatusReport({ filter }) {
 export async function aggregateMissionsStatusData(data) {
   const aggregation = {};
 
-  for(const row of data) {
+  for (const row of data) {
     let agg = aggregation[row.department];
     if (agg === undefined) {
       aggregation[row.department] = {
@@ -128,8 +128,8 @@ export async function aggregateMissionsStatusData(data) {
     }
 
     // agg.rows.push(row);
-    if(agg[row.status] === undefined) {
-      agg[row.status] = { count: 0, placesTotal: 0, placesLeft: 0};
+    if (agg[row.status] === undefined) {
+      agg[row.status] = { count: 0, placesTotal: 0, placesLeft: 0 };
     }
     agg[row.status].count++;
     agg[row.status].placesTotal += row.placesTotal;
@@ -139,7 +139,7 @@ export async function aggregateMissionsStatusData(data) {
   return Object.values(aggregation).map((row) => {
     let line = {
       ["Région"]: row.region,
-      ["Département"]: row.department
+      ["Département"]: row.department,
     };
     for (const status of Object.values(MISSION_STATUS)) {
       line[translate(status) + " - Nombre de missions déposées"] = row[status]?.count || 0;
