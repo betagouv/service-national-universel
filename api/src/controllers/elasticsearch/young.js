@@ -481,7 +481,6 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user, body } = req;
-    return res.status(401).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     // Configuration
     const searchFields = ["email.keyword^3", "firstName.folded^1", "lastName.folded^1", "parent1Email.keyword^4", "parent2Email.keyword^5"];
     const filterFields = getYoungsFilters(user);
