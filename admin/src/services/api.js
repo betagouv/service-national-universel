@@ -251,9 +251,7 @@ class api {
           headers: { Authorization: `JWT ${this.token}` },
           body: formData,
         });
-        if (response.status === 401) {
-          this.goToAuth();
-        }
+
         if (response.status === 401) {
           this.goToAuth();
         }
