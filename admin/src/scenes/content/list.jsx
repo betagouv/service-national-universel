@@ -53,7 +53,7 @@ export default function List() {
           })
           .map((p, i) => (
             <div key={i} style={{ marginBottom: "1.5rem" }}>
-              <ProgramCard onDelete={getPrograms} program={p} image={p.imageFile ? p.imageFile : images[`../assets/programmes-engagement/${p.imageString}`]?.default} />
+              <ProgramCard onDelete={getPrograms} program={p} image={p.imageFile ? p.imageFile : images[`../../assets/programmes-engagement/${p.imageString}`]?.default} />
             </div>
           ))}
       </Wrapper>
