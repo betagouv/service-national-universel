@@ -1794,7 +1794,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
             <div className="font-bold">Droit à l&apos;image</div>
             <div className="flex items-center">
               <div>Accord : {translate(young.parent1AllowImageRights) || PENDING_ACCORD}</div>
-              {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && !readonly && young.parent1Email && (
+              {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && young.parent1Email && (
                 <a href="#" className="ml-4 block text-blue-600 underline" onClick={(e) => confirmImageRightsChange(1, e)}>
                   Modifier
                 </a>
@@ -1906,7 +1906,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                     <div className="font-bold">Droit à l&apos;image</div>
                     <div className="flex items-center">
                       <div>Accord : {translate(young.parent2AllowImageRights) || PENDING_ACCORD}</div>
-                      {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && !readonly && young.parent2Email && (
+                      {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && young.parent2Email && (
                         <a href="#" className="ml-4 block text-blue-600 underline" onClick={(e) => confirmImageRightsChange(2, e)}>
                           Modifier
                         </a>
