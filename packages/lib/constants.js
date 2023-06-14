@@ -113,6 +113,7 @@ const MISSION_DOMAINS = {
   SECURITY: "SECURITY",
   SOLIDARITY: "SOLIDARITY",
   SPORT: "SPORT",
+  MILITARY: "MILITARY",
 };
 
 const YOUNG_SITUATIONS = {
@@ -309,7 +310,7 @@ const SENDINBLUE_TEMPLATES = {
     INSCRIPTION_REMIND_CORRECTION: "169",
     INSCRIPTION_WAITING_LIST: "171",
     INSCRIPTION_REFUSED: "172",
-    INSTRUCTION_END_WAITING_VALIDATION_ELIGIBLE: "935",
+    INSTRUCTION_END_WAITING_VALIDATION_ELIGIBLE: "978",
     INSTRUCTION_END_WAITING_VALIDATION_NOT_ELIGIBLE: "656",
     INSTRUCTION_END_WAITING_CORRECTION_ELIGIBLE: "936",
     INSTRUCTION_END_WAITING_CORRECTION_NOT_ELIGIBLE: "658",
@@ -428,6 +429,11 @@ const WITHRAWN_REASONS = [
   {
     value: "unavailable_pro",
     label: "Non disponibilité pour motif scolaire ou professionnel",
+  },
+  {
+    value: "change_date_july_2023",
+    label: "Changements des dates de mon séjour du 5 au 17 juillet 2023",
+    cohortOnly: ["Juillet 2023"],
   },
   {
     value: "no_interest",

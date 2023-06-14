@@ -32,7 +32,7 @@ export default function Settings() {
   const urlParams = new URLSearchParams(window.location.search);
   const [cohort, setCohort] = React.useState(urlParams.get("cohort") || "Février 2023 - C");
   const [isLoading, setIsLoading] = React.useState(true);
-  const readOnly = isSuperAdmin(user) ? false : true;
+  const readOnly = !isSuperAdmin(user);
   const [noChange, setNoChange] = React.useState(true);
   const history = useHistory();
   const [mounted, setMounted] = React.useState(false);
@@ -370,11 +370,6 @@ export default function Settings() {
                       onChange={() => setData({ ...data, pdrEditionOpenForTransporter: !data.pdrEditionOpenForTransporter })}
                     />
                   </div>
-                </div>
-                <div className="flex w-[10%] items-center justify-center">
-                  <div className="h-[90%] w-[1px] border-r-[1px] border-gray-200"></div>
-                </div>
-                <div className="flex w-[45%] flex-col gap-4">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
                       <p className="text-xs  font-medium text-gray-900">Création de groupe et modification du schéma de répartition</p>
@@ -405,6 +400,34 @@ export default function Settings() {
                           },
                         });
                       }}
+                    />
+                  </div>
+                </div>
+                <div className="flex w-[10%] items-center justify-center">
+                  <div className="h-[90%] w-[1px] border-r-[1px] border-gray-200"></div>
+                </div>
+                <div className="flex w-[45%] flex-col gap-4">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs  font-medium text-gray-900">Accès au schéma de répartition </p>
+                      <MdInfoOutline data-tip data-for="acces_schema" className="h-5 w-5 cursor-pointer text-gray-400" />
+                      <ReactTooltip id="acces_schema" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                        <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                          Autoriser ou bloquer l’accès à la consultation du schéma de répartition.
+                        </p>
+                      </ReactTooltip>
+                    </div>
+                    <SimpleToggle
+                      label="Référents régionaux"
+                      disabled={isLoading || readOnly}
+                      value={data.schemaAccessForReferentRegion}
+                      onChange={() => setData({ ...data, schemaAccessForReferentRegion: !data.schemaAccessForReferentRegion })}
+                    />
+                    <SimpleToggle
+                      label="Référents départementaux"
+                      disabled={isLoading || readOnly}
+                      value={data.schemaAccessForReferentDepartment}
+                      onChange={() => setData({ ...data, schemaAccessForReferentDepartment: !data.schemaAccessForReferentDepartment })}
                     />
                   </div>
 
@@ -605,6 +628,7 @@ export default function Settings() {
                             Fin de la possibilité pour un utilisateur de choisir l’option “Je laisse [Prénom du volontaire] choisir son point de rassemblement” dans la modale de
                             choix du point de rassemblement.
                           </li>
+                          <li>Cela prend effet à 23h59 heure de Paris.</li>
                         </ul>
                       </ReactTooltip>
                     </div>

@@ -7,7 +7,7 @@ import { WITHRAWN_REASONS } from "../../utils";
 import RoundWarning from "../../assets/RoundWarning";
 import CloseSvg from "../../assets/Close";
 
-export default function ModalWithdrawn({ isOpen, title, message, onChange, onConfirm, placeholder = "Votre message..." }) {
+export default function ModalWithdrawn({ isOpen, title, message, onChange, onConfirm, placeholder = "Votre message...", young }) {
   const [withdrawnMessage, setWithdrawnMessage] = useState();
   const [withdrawnReason, setWithdrawnReason] = useState("");
   const [sending, setSending] = useState(false);
@@ -29,7 +29,7 @@ export default function ModalWithdrawn({ isOpen, title, message, onChange, onCon
             <option disabled value="" label="Choisir">
               Choisir
             </option>
-            {WITHRAWN_REASONS.map((reason) => (
+            {WITHRAWN_REASONS.filter((r) => !r.cohortOnly || r.cohortOnly.includes(young.cohort)).map((reason) => (
               <option key={reason.value} value={reason.value} label={reason.label}>
                 {reason.label}
               </option>

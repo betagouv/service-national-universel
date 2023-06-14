@@ -24,8 +24,8 @@ import { orderCohort } from "../../../components/filters-system-v2/components/fi
 import api from "../../../services/api";
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 
-export const getFilterArray = (user) =>
-  [
+export const getFilterArray = (user, bus, session) => {
+  return [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
     { title: "Cohorte d'origine", name: "originalCohort", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
     { title: "Statut", name: "status", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateInscriptionStatus, defaultValue: ["VALIDATED"] },
@@ -160,6 +160,18 @@ export const getFilterArray = (user) =>
       translate: translatePhase1,
     },
     {
+      title: "Centre",
+      name: "sessionPhase1Id",
+      parentGroup: "Phase 1",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A" || !session.length) return item;
+        const res = session.find((option) => option._id.toString() === item);
+        if (!res) return "N/A - Supprimé";
+        return (res?.codeCentre || "N/A") + " - " + res?.cohesionCenterId;
+      },
+    },
+    {
       title: "Confirmation PDR",
       name: "hasMeetingInformation",
       parentGroup: "Phase 1",
@@ -220,7 +232,10 @@ export const getFilterArray = (user) =>
       name: "ligneId",
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
-      translate: translate,
+      translate: (item) => {
+        if (item === "N/A" || !bus?.ligneBus) return item;
+        return bus.ligneBus.find((option) => option._id.toString() === item)?.busId;
+      },
     },
     {
       title: "Voyage en avion",
@@ -279,8 +294,9 @@ export const getFilterArray = (user) =>
       translate: translate,
     },
   ].filter(Boolean);
+};
 
-export async function transformVolontaires(data, values, centers, sessionsPhase1) {
+export async function transformVolontaires(data, values, centers, sessionsPhase1, busLines) {
   let all = data;
   if (values.includes("schoolSituation")) {
     const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
@@ -295,11 +311,9 @@ export async function transformVolontaires(data, values, centers, sessionsPhase1
       }
     }
   }
-
-  const response = await api.get("/ligne-de-bus/all");
-  const meetingPoints = response ? response.data.meetingPoints : [];
-  const ligneBus = response ? response.data.ligneBus : [];
-  const ligneToPoints = response ? response.data.ligneToPoints : [];
+  const meetingPoints = busLines.meetingPoints || [];
+  const ligneBus = busLines.ligneBus || [];
+  const ligneToPoints = busLines.ligneToPoints || [];
 
   return all.map((data) => {
     let center = {};
@@ -459,6 +473,7 @@ export async function transformVolontaires(data, values, centers, sessionsPhase1
         "Présence à la JDM": !data.presenceJDM ? "Non renseignée" : data.presenceJDM === "true" ? "Présent" : "Absent",
         "Date de départ": !data.departSejourAt ? "Non renseignée" : formatDateFRTimezoneUTC(data.departSejourAt),
         "Motif du départ": data?.departSejourMotif,
+        "Commentaire du départ": data?.departSejourMotifComment,
       },
       phase2: {
         "Domaine de MIG 1": data.domains[0],

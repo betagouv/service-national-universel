@@ -171,7 +171,7 @@ Schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-Schema.plugin(mongooseElastic(esClient, { ignore: ["team"] }), MODELNAME);
+Schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["team"] }), MODELNAME);
 
 Schema.index({ cohesionCenterId: 1 });
 

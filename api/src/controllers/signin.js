@@ -49,13 +49,13 @@ router.get("/token", async (req, res) => {
 
     const young = await Young.findOne(value);
     if (young) {
-      young.set({ lastLoginAt: Date.now() });
+      young.set({ lastActivityAt: Date.now() });
       await young.save();
       return res.status(200).send({ ok: true, user: { ...serializeYoung(young, young), allowedRole: "young" } });
     }
     const referent = await Referent.findOne(value);
     if (referent) {
-      referent.set({ lastLoginAt: Date.now() });
+      referent.set({ lastActivityAt: Date.now() });
       await referent.save();
       return res.status(200).send({ ok: true, user: { ...serializeReferent(referent, referent), allowedRole: allowedRole(referent) } });
     }

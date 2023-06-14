@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch, department2region, departmentList, COHORTS } = require("snu-lib");
+const { ROLES, canSearchInElasticSearch, department2region, departmentList, COHORTS, ES_NO_LIMIT } = require("snu-lib");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
@@ -9,6 +9,7 @@ const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 const StructureObject = require("../../models/structure");
 const Joi = require("joi");
+const { serializeReferents } = require("../../utils/es-serializer");
 
 async function buildReferentContext(user) {
   const contextFilters = [];
@@ -166,11 +167,32 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     if (req.params.action === "export") {
       const response = await allRecords("referent", hitsRequestBody.query);
-      return res.status(200).send({ ok: true, data: response });
+      return res.status(200).send({ ok: true, data: serializeReferents(response) });
     } else {
       const response = await esClient.msearch({ index: "referent", body: buildNdJson({ index: "referent", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(serializeReferents(response.body));
     }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/structure/:structure", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    if (!canSearchInElasticSearch(req.user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const response = await esClient.msearch({
+      index: "referent",
+      body: buildNdJson(
+        { index: "referent", type: "_doc" },
+        {
+          query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": req.params.structure } }] } },
+          size: ES_NO_LIMIT,
+        },
+      ),
+    });
+    return res.status(200).send(response.body);
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

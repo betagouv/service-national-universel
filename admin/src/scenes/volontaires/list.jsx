@@ -6,9 +6,11 @@ import { Listbox, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { BsDownload } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
+import { toastr } from "react-redux-toastr";
 import { youngExportFields } from "snu-lib";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import Loader from "../../components/Loader";
 import { ExportComponent, Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
 import { appURL } from "../../config";
 import api from "../../services/api";
@@ -25,6 +27,7 @@ export default function VolontaireList() {
   const [volontaire, setVolontaire] = useState(null);
   const [centers, setCenters] = useState(null);
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
+  const [bus, setBus] = useState(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
 
   //List state
@@ -36,18 +39,24 @@ export default function VolontaireList() {
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
 
-  const filterArray = getFilterArray(user);
+  const filterArray = getFilterArray(user, bus, sessionsPhase1);
 
   useEffect(() => {
     (async () => {
-      const { data } = await api.get("/cohesion-center");
-      setCenters(data);
-    })();
-    (async () => {
-      const { data } = await api.get("/session-phase1/");
-      setSessionsPhase1(data);
+      try {
+        const { data: centers } = await api.get("/cohesion-center");
+        const { data: sessions } = await api.get("/session-phase1/");
+        const { data: bus } = await api.get("/ligne-de-bus/all");
+        setCenters(centers);
+        setSessionsPhase1(sessions);
+        setBus(bus);
+      } catch (e) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+      }
     })();
   }, []);
+
+  if (!centers || !sessionsPhase1 || !bus) return <Loader />;
 
   return (
     <>
@@ -66,7 +75,7 @@ export default function VolontaireList() {
               isOpen={isExportOpen}
               setIsOpen={setIsExportOpen}
               route="/elasticsearch/young/export?tab=volontaire"
-              transform={(data, values) => transformVolontaires(data, values, centers, sessionsPhase1)}
+              transform={(data, values) => transformVolontaires(data, values, centers, sessionsPhase1, bus)}
               exportFields={youngExportFields}
               exportTitle="volontaires"
               showTotalHits={true}

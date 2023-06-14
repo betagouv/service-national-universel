@@ -4,7 +4,7 @@ import PlanTransportBreadcrumb from "../components/PlanTransportBreadcrumb";
 import { Box, BoxHeader, MiniTitle, Badge, AlertPoint, BigDigits, Loading, regionList } from "../components/commons";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import ChevronRight from "../../../assets/icons/ChevronRight";
-import { cohortList, formatRate, parseQuery } from "../util";
+import { formatRate, parseQuery } from "../util";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import People from "../../../assets/icons/People";
 import ProgressBar from "../components/ProgressBar";
@@ -21,9 +21,13 @@ import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { useSelector } from "react-redux";
 import ButtonPrimary from "../../../components/ui/buttons/ButtonPrimary";
-import { getCohortByName } from "../../../services/cohort.service";
+import { getCohortByName, getCohorts } from "../../../services/cohort.service";
 import ReactTooltip from "react-tooltip";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
+import Puzzle from "../../../assets/icons/Puzzle";
+import dayjs from "dayjs";
+import advancedFormat from "dayjs/plugin/advancedFormat";
+dayjs.extend(advancedFormat);
 
 const ExcelFileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
 
@@ -33,7 +37,7 @@ export default function SchemaRepartition({ region, department }) {
   const { user } = useSelector((state) => state.Auth);
   const [isNational, setIsNational] = useState(!region && !department);
   const [isDepartmental, setIsDepartmental] = useState(!!(region && department));
-  const [cohort, setCohort] = useState(getDefaultCohort());
+  const [cohort, setCohort] = useState(null);
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState({
     capacity: 0,
@@ -45,6 +49,9 @@ export default function SchemaRepartition({ region, department }) {
     toRegions: [],
   });
   const [data, setData] = useState({ rows: getDefaultRows() });
+  const [cohortList, setCohortList] = useState(null);
+  const [cohortOptions, setCohortOptions] = useState([]);
+
   if (region) useDocumentTitle(`Schéma de répartition - ${region}`);
   if (department) useDocumentTitle(`Schéma de répartition - ${department}`);
   if (!department && !region) useDocumentTitle("Schéma de répartition");
@@ -64,15 +71,43 @@ export default function SchemaRepartition({ region, department }) {
 
   function getDefaultCohort() {
     const { cohort } = parseQuery(location.search);
-    if (cohort) {
+    if (cohort && cohortList && cohortOptions.find((c) => c.value === cohort)) {
       return cohort;
     } else {
-      return cohortList[0].value;
+      return cohortOptions && cohortOptions.length > 0 ? cohortOptions[0].value : null;
     }
   }
 
   useEffect(() => {
-    loadData();
+    loadCohorts();
+  }, []);
+
+  useEffect(() => {
+    if (cohortList !== null) {
+      setCohortOptions(
+        cohortList
+          .filter((c) => {
+            return (
+              [ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role) ||
+              (user.role === ROLES.REFERENT_DEPARTMENT && c.schemaAccessForReferentDepartment) ||
+              (user.role === ROLES.REFERENT_REGION && c.schemaAccessForReferentRegion)
+            );
+          })
+          .map((c) => ({ value: c.name, label: formatCohortName(c) })),
+      );
+    } else {
+      setCohortOptions([]);
+    }
+  }, [cohortList]);
+
+  useEffect(() => {
+    setCohort(getDefaultCohort());
+  }, [cohortOptions]);
+
+  useEffect(() => {
+    if (cohort) {
+      loadData();
+    }
   }, [cohort]);
 
   useEffect(() => {
@@ -111,6 +146,28 @@ export default function SchemaRepartition({ region, department }) {
     setSummary({ capacity, total, assigned, intradepartmental, intradepartmentalAssigned, centers, toRegions });
   }, [data]);
 
+  function formatCohortName(cohort) {
+    let from;
+
+    if (cohort) {
+      const start = dayjs(cohort.dateStart).locale("fr");
+      const end = dayjs(cohort.dateEnd).locale("fr");
+
+      if (start.year() === end.year()) {
+        if (start.month() === end.month()) {
+          from = start.format("Do");
+        } else {
+          from = start.format("Do MMMM");
+        }
+      } else {
+        from = start.format("Do MMMM YYYY");
+      }
+      const to = end.format("Do MMMM YYYY");
+      return `Séjour du ${from} au ${to}`;
+    } else {
+      return "";
+    }
+  }
   function getDefaultRows() {
     if (department) {
       return [];
@@ -130,6 +187,18 @@ export default function SchemaRepartition({ region, department }) {
       intradepartmental: 0,
       intradepartmentalAssigned: 0,
     };
+  }
+
+  async function loadCohorts() {
+    try {
+      setLoading(true);
+      const cohorts = await getCohorts();
+      setCohortList(cohorts);
+      setLoading(false);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+    }
   }
 
   async function loadData() {
@@ -216,6 +285,8 @@ export default function SchemaRepartition({ region, department }) {
     let sheetData = groups.map((g) => {
       let data = {
         cohort: g.cohort,
+        id: g._id.toString(),
+        updatedAt: dayjs(g.updatedAt).format("DD/MM/YYYY HH:mm"),
         region: g.fromRegion,
         department: g.fromDepartment,
         youngsVolume: g.youngsVolume,
@@ -255,12 +326,13 @@ export default function SchemaRepartition({ region, department }) {
       }
     });
 
-    // console.log("sheetData: ", sheetData);
     let sheet = XLSX.utils.json_to_sheet(sheetData);
 
     // --- fix header names
     let headers = [
       "Cohorte",
+      "ID",
+      "Date de dernière modification",
       "Région des volontaires",
       "Département des volontaires",
       "Nombre de volontaires",
@@ -311,35 +383,49 @@ export default function SchemaRepartition({ region, department }) {
             onGoToNational={goToNational}
             onGoToRegion={goToRegion}
           />
-          <div className="flex gap-4">
-            {user.role === ROLES.REFERENT_DEPARTMENT && user.department.length > 1 && <Select options={departementsList} value={department} onChange={handleChangeDepartment} />}
-            <Select options={cohortList} value={cohort} onChange={handleChangeCohort} />
-          </div>
+          {cohortOptions.length > 0 && (
+            <div className="flex gap-4">
+              {user.role === ROLES.REFERENT_DEPARTMENT && user.department.length > 1 && <Select options={departementsList} value={department} onChange={handleChangeDepartment} />}
+              <Select options={cohortOptions} value={cohort} onChange={handleChangeCohort} />
+            </div>
+          )}
         </div>
-        <div className="my-[40px] flex">
-          <div className="flex grow flex-col">
-            <BoxVolontaires className="mb-[8px] grow" summary={summary} loading={loading} />
-            <BoxAffectation className="mt-[8px] grow" summary={summary} loading={loading} />
+        {cohortOptions.length === 0 ? (
+          <div className="flex justify-center items-center mt-[120px]">
+            <div className="text-gray-900 flex flex-col items-center">
+              <Puzzle />
+              <div className="text-2xl font-bold text-center mb-8 mt-9">Ooops...</div>
+              <div className="text-xl text-center">Aucun schéma de répartition n’est disponible pour le moment.</div>
+            </div>
           </div>
-          <BoxDisponibilite className="mx-[16px] grow" summary={summary} loading={loading} isNational={isNational} />
-          <BoxCentres className="grow" summary={summary} loading={loading} isDepartmental={isDepartmental} user={user} />
-        </div>
-        {isDepartmental ? (
-          <>
-            <SchemaEditor
-              onExportDetail={exportDetail}
-              region={region}
-              department={department}
-              cohort={cohort}
-              groups={data && data.groups ? data.groups : { intra: [], extra: [] }}
-              summary={summary}
-              onChange={loadData}
-              user={user}
-            />
-            <SchemaDepartmentDetail department={department} cohort={cohort} departmentData={data} />
-          </>
         ) : (
-          <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={exportDetail} cohort={cohort} user={user} />
+          <>
+            <div className="my-[40px] flex">
+              <div className="flex grow flex-col">
+                <BoxVolontaires className="mb-[8px] grow" summary={summary} loading={loading} />
+                <BoxAffectation className="mt-[8px] grow" summary={summary} loading={loading} />
+              </div>
+              <BoxDisponibilite className="mx-[16px] grow" summary={summary} loading={loading} isNational={isNational} />
+              <BoxCentres className="grow" summary={summary} loading={loading} isDepartmental={isDepartmental} user={user} />
+            </div>
+            {isDepartmental ? (
+              <>
+                <SchemaEditor
+                  onExportDetail={exportDetail}
+                  region={region}
+                  department={department}
+                  cohort={cohort}
+                  groups={data && data.groups ? data.groups : { intra: [], extra: [] }}
+                  summary={summary}
+                  onChange={loadData}
+                  user={user}
+                />
+                <SchemaDepartmentDetail department={department} cohort={cohort} departmentData={data} />
+              </>
+            ) : (
+              <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={exportDetail} cohort={cohort} user={user} />
+            )}
+          </>
         )}
       </div>
     </div>

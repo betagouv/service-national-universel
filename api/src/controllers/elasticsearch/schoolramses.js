@@ -87,7 +87,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     }
 
     if (req.params.action === "export") {
-      let response = await allRecords("schoolramses", hitsRequestBody.query);
+      let response = serializeRamsesSchools(await allRecords("schoolramses", hitsRequestBody.query));
       const reducedSchool = await getYoungsFromSchoolIds(response.map((h) => h._id));
       response = response.map((h) => {
         const schoolInfo = reducedSchool[h._id];

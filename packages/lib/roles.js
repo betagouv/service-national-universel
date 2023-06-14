@@ -202,7 +202,7 @@ function canViewReferent(actor, target) {
 }
 
 function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, structure }) {
-  const isMe = actor.id === originalTarget.id;
+  const isMe = actor._id === originalTarget._id;
   const isAdmin = actor.role === ROLES.ADMIN;
   const withoutChangingRole = modifiedTarget === null || !("role" in modifiedTarget) || modifiedTarget.role === originalTarget.role;
   const isResponsibleModifyingResponsibleWithoutChangingRole =
@@ -261,7 +261,10 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
       isReferentModifyingReferentWithoutChangingRole ||
       isReferentModifyingHeadCenterWithoutChangingRole) &&
     (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion || isReferentModifyingHeadCenterWithoutChangingRole : true) &&
-    (actor.role === ROLES.REFERENT_DEPARTMENT ? isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole : true);
+    (actor.role === ROLES.REFERENT_DEPARTMENT
+      ? ([ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) || isMe) &&
+        (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
+      : true);
   return authorized;
 }
 
@@ -618,7 +621,7 @@ function canSearchInElasticSearch(actor, index) {
   } else if (index === "modificationbus") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (index === "young-having-meeting-point-in-geography") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
   } else if (index === "young-by-school") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (index === "young") {
@@ -696,6 +699,17 @@ function canDeleteLigneBus(actor) {
 }
 
 function canSearchLigneBus(actor) {
+  return [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+}
+
+function canExportLigneBus(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
+}
+function canExportConvoyeur(actor) {
+  return [ROLES.ADMIN, ROLES.TRANSPORTER].includes(actor.role);
+}
+
+function canEditLigneBusTeam(actor) {
   return [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
@@ -840,6 +854,9 @@ export {
   canEditLigneBusGeneralInfo,
   canEditLigneBusCenter,
   canEditLigneBusPointDeRassemblement,
+  canEditLigneBusTeam,
+  canExportLigneBus,
+  canExportConvoyeur,
   ligneBusCanCreateDemandeDeModification,
   ligneBusCanViewDemandeDeModification,
   ligneBusCanSendMessageDemandeDeModification,

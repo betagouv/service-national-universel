@@ -100,7 +100,7 @@ router.post(
       const worksheet = workbook.Sheets["ALLER-RETOUR"];
       const lines = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: null });
 
-      if (lines.length <= 1) {
+      if (lines.length < 1) {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
 
@@ -332,7 +332,7 @@ router.post(
           }
         }
       }
-      // Check if `ID PDR ${i}` exists in DB
+      // Check if `ID PDR ${i}` exists in DB, and if departement is the same as the PDR.
       for (const [i, line] of lines.entries()) {
         const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
@@ -341,6 +341,8 @@ router.post(
               const pdr = await PdrModel.findOne({ _id: line[`ID PDR ${pdrNumber}`], deletedAt: { $exists: false } });
               if (!pdr) {
                 errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
+              } else if ((pdr?.department || "").toLowerCase() !== departmentLookUp[line[`N° DE DEPARTEMENT PDR ${pdrNumber}`]]?.toLowerCase()) {
+                errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_DEPARTEMENT, extra: line[`ID PDR ${pdrNumber}`] });
               }
             } else if (!["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
               errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });

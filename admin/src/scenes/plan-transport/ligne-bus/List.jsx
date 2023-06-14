@@ -3,7 +3,7 @@ import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import { ROLES, getDepartmentNumber, translate } from "snu-lib";
+import { ROLES, canExportConvoyeur, getDepartmentNumber, translate } from "snu-lib";
 import ArrowUp from "../../../assets/ArrowUp";
 import Comment from "../../../assets/comment";
 import History from "../../../assets/icons/History";
@@ -16,7 +16,7 @@ import api from "../../../services/api";
 import { PlainButton } from "../components/Buttons";
 import Select from "../components/Select";
 import { TabItem, Title, translateStatus } from "../components/commons";
-import { exportLigneBus, getTransportIcon } from "../util";
+import { exportLigneBus, getTransportIcon, exportConvoyeur } from "../util";
 import Excel from "./components/Icons/Excel.png";
 import ListPanel from "./modificationPanel/List";
 
@@ -259,6 +259,7 @@ const ReactiveList = ({ cohort, history }) => {
                                 pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
                                 pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
                                 pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr?.busArrivalHour || "";
+                                pdrs[`HEURE DE CONVOCATION AU PDR ${num}`] = pdr?.meetingHour || "";
                                 pdrs[`HEURE DE DEPART DU PDR ${num}`] = pdr?.departureHour || "";
                                 pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${num}`] = pdr?.returnHour || "";
                               }
@@ -297,6 +298,18 @@ const ReactiveList = ({ cohort, history }) => {
                           render: (
                             <div className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
                               <div className="text-sm text-gray-700">Volontaires par ligne</div>
+                            </div>
+                          ),
+                        }
+                      : null,
+                    canExportConvoyeur(user)
+                      ? {
+                          action: async () => {
+                            await exportConvoyeur(cohort);
+                          },
+                          render: (
+                            <div className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+                              <div className="text-sm text-gray-700">Convoyeurs</div>
                             </div>
                           ),
                         }
