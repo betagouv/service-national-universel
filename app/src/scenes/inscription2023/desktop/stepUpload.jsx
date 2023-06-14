@@ -17,6 +17,7 @@ import ErrorMessage from "../components/ErrorMessage";
 import MyDocs from "../components/MyDocs";
 import FileImport from "../components/FileImport";
 import { getCorrectionsForStepUpload } from "../../../utils/navigation";
+const images = import.meta.globEager("../../../assets/programmes-engagement/*");
 
 export default function StepUpload() {
   let { category } = useParams();
@@ -149,11 +150,6 @@ export default function StepUpload() {
     }
   }
 
-  function getImgUrl(path) {
-    const imgUrl = new URL(path, import.meta.url).href;
-    return imgUrl;
-  }
-
   if (!category) return <div>Loading</div>;
 
   return (
@@ -177,13 +173,13 @@ export default function StepUpload() {
 
       <div className="my-10 flex w-full justify-around">
         <div>
-          <img className="h-64" src={getImgUrl(`../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />
+          <img className="h-64" src={images[`../../assets/IDProof/${ID[category].imgFront}`]?.default} alt={ID[category].title} />
           <div className="mt-4 text-sm text-center text-gray-500">Recto</div>
         </div>
 
         {ID[category].imgBack && (
           <div>
-            <img className="h-64" src={getImgUrl(`../assets/IDProof/${ID[category].imgBack}`)} alt={ID[category].title} />
+            <img className="h-64" src={images[`../../assets/IDProof/${ID[category].imgBack}`]?.default} alt={ID[category].title} />
             <div className="mt-4 text-sm text-center text-gray-500">Verso</div>
           </div>
         )}

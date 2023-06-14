@@ -12,7 +12,7 @@ import MissionCard from "../components/missionCard";
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
 import { HeroContainer, Hero } from "../../../components/Content";
-import { getImgUrl } from "../../../utils";
+const images = import.meta.globEager("../../../assets/programmes-engagement/*");
 
 export default function WaitingRealisation() {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -48,7 +48,7 @@ export default function WaitingRealisation() {
         <Row>
           {programs.slice(0, 3).map((p, i) => (
             <Col key={i}>
-              <ProgramCard program={p} image={p.imageFile ? p.imageFile : getImgUrl(`../assets/programmes-engagement/${p.imageString}`)} />
+              <ProgramCard program={p} image={p.imageFile ? p.imageFile : images[`../../assets/programmes-engagement/${p.imageString}`]?.default} />
             </Col>
           ))}
         </Row>

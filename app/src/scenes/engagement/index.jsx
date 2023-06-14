@@ -8,7 +8,8 @@ import ProgramCard from "../../components/programCard";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import { useSelector } from "react-redux";
-import { getImgUrl } from "../../utils";
+
+const images = import.meta.globEager("../../assets/programmes-engagement/*");
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
@@ -38,7 +39,7 @@ export default function Index() {
           })
           .map((p, i) => (
             <Col key={i} md={4}>
-              <ProgramCard program={p} image={p.imageFile ? p.imageFile : getImgUrl(`../assets/programmes-engagement/${p.imageString}`)} />
+              <ProgramCard program={p} image={p.imageFile ? p.imageFile : images[`../../assets/programmes-engagement/${p.imageString}`]?.default} />
             </Col>
           ))}
       </Row>
