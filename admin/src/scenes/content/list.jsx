@@ -8,7 +8,9 @@ import ProgramCard from "./components/programCard";
 import api from "../../services/api";
 import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
-import { translate, ROLES, getImgUrl } from "../../utils";
+import { translate, ROLES } from "../../utils";
+
+const images = import.meta.globEager("../../assets/programmes-engagement/*");
 
 export default function List() {
   const [programs, setPrograms] = useState();
@@ -51,7 +53,7 @@ export default function List() {
           })
           .map((p, i) => (
             <div key={i} style={{ marginBottom: "1.5rem" }}>
-              <ProgramCard onDelete={getPrograms} program={p} image={p.imageFile ? p.imageFile : getImgUrl(`../assets/programmes-engagement/${p.imageString}`)} />
+              <ProgramCard onDelete={getPrograms} program={p} image={p.imageFile ? p.imageFile : images[`../assets/programmes-engagement/${p.imageString}`]?.default} />
             </div>
           ))}
       </Wrapper>
