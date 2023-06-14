@@ -123,7 +123,7 @@ router.post("/signup_invite", async (req, res) => {
 
     young.set({ password });
     young.set({ registredAt: Date.now() });
-    young.set({ lastLoginAt: Date.now() });
+    young.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
     young.set({ invitationToken: "" });
     young.set({ invitationExpires: null });
 
