@@ -360,7 +360,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       
       const html = await phase1(young)
       // const context = await timeout(getPDF(html, req.body.options || { format: "A4", margin: 0 }), TIMEOUT_PDF_SERVICE);
-      const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
+      const context = await timeout(getPDF(html, { landscape: true }), TIMEOUT_PDF_SERVICE);
       zip.addFile(young.lastName + " " + young.firstName + " - certificat.pdf", context);
     }
 
@@ -371,7 +371,8 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       "cache-control": "public, max-age=1",
     });
     res.status(200).end(zip.toBuffer());
-    const newhtml = html.replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl())).replace(/{{BODY}}/g, data.join(""));
+
+    // const newhtml = html.replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl())).replace(/{{BODY}}/g, data.join(""));
     
     // const buffer = await renderFromHtml(newhtml, req.body.options || { format: "A4", margin: 0 });
 
