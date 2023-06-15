@@ -23,7 +23,7 @@ class api {
 
   goToAuth() {
     if (window && window.location && window.location.href) {
-      window.location.href = "/auth?disconnected=1";
+      return (window.location.href = "/auth?disconnected=1");
     }
   }
 
