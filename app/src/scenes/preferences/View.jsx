@@ -26,6 +26,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
             Enregistrer
           </PlainButton>
         </div>
+        {Object.values(errors).length ? <div className="text-center mt-6 text-sm text-[#F71701]">Il y a des erreurs ou des données manquantes dans le formulaire.</div> : null}
         <Section>
           <Title noBorder>Sélectionnez les 3 thématiques qui vous intéressent le plus</Title>
           <div className="grid grid-cols-4 gap-2 md:mx-8 md:grid-cols-2 md:gap-4">
@@ -139,6 +140,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
           <div className="md:mx-8">
             <div className="md:rounded-0 mb-8 rounded-lg border-[1px] border-gray-200 py-6 px-3 md:mb-0 md:border-none md:p-0">
               <MiniTitle>Format préféré</MiniTitle>
+              {errors.missionFormat && <div className="m-2 text-center text-sm text-[#F71701]">{errors.missionFormat}</div>}
               <ToggleGroup
                 className="md:mb-8 md:text-center"
                 value={young.missionFormat}
@@ -149,6 +151,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
             </div>
             <div className="md:rounded-0 mb-8 rounded-lg border-[1px] border-gray-200 py-6 px-3 md:mb-0 md:border-none md:p-0">
               <MiniTitle>Période de réalisation de la mission</MiniTitle>
+              {errors.period && <div className="m-2 text-center text-sm text-[#F71701]">{errors.period}</div>}
               <ToggleGroup
                 className="md:mb-8 md:text-center"
                 value={young.period}
@@ -253,7 +256,8 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
             </div>
           </div>
         </Section>
-        <div className="mt-10 flex justify-center md:justify-end">
+        {Object.values(errors).length ? <div className="text-center mt-6 text-sm text-[#F71701]">Il y a des erreurs ou des données manquantes dans le formulaire.</div> : null}
+        <div className="mt-6 flex justify-center md:justify-end">
           <PlainButton onClick={onSave} spinner={saving}>
             Enregistrer
           </PlainButton>

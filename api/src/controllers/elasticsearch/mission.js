@@ -8,6 +8,7 @@ const { ERRORS, isYoung, isReferent } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 const StructureObject = require("../../models/structure");
+const { serializeMissions } = require("../../utils/es-serializer");
 
 async function buildMissionContext(user) {
   const contextFilters = [];
@@ -95,10 +96,10 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
 
     if (req.params.action === "export") {
       const response = await allRecords("mission", hitsRequestBody.query);
-      return res.status(200).send({ ok: true, data: response });
+      return res.status(200).send({ ok: true, data: serializeMissions(response) });
     } else {
       const response = await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(serializeMissions(response.body));
     }
   } catch (error) {
     capture(error);
@@ -168,10 +169,10 @@ router.post("/by-structure/:id/:action(search|export)", passport.authenticate(["
 
     if (req.params.action === "export") {
       const response = await allRecords("mission", hitsRequestBody.query);
-      return res.status(200).send({ ok: true, data: response });
+      return res.status(200).send({ ok: true, data: serializeMissions(response) });
     } else {
       const response = await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(serializeMissions(response.body));
     }
   } catch (error) {
     capture(error);
@@ -236,6 +237,50 @@ router.post("/propose/:action(search|export)", passport.authenticate(["referent"
       page,
       sort,
       contextFilters,
+    });
+
+    if (req.params.action === "export") {
+      const response = await allRecords("mission", hitsRequestBody.query);
+      return res.status(200).send({ ok: true, data: response });
+    } else {
+      const response = await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      return res.status(200).send(response.body);
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/by-tutor/:id/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    // Configuration
+    const searchFields = [];
+    const filterFields = [];
+    const sortFields = [];
+
+    // Body params validation
+    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { missionContextFilters, missionContextError } = await buildMissionContext(user);
+    if (missionContextError) {
+      return res.status(missionContextError.status).send(missionContextError.body);
+    }
+
+    // Context filters
+    const contextFilters = [...missionContextFilters, { terms: { "tutorId.keyword": [req.params.id] } }];
+
+    // Build request body
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields,
+      queryFilters,
+      page,
+      sort,
+      contextFilters,
+      size: 5,
     });
 
     if (req.params.action === "export") {

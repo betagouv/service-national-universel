@@ -11,6 +11,8 @@ const SENDER_EMAIL = "no_reply-mailauto@snu.gouv.fr";
 
 //https://my.sendinblue.com/lists/add-attributes
 
+const regexp_exception_staging = /selego\.co|(beta|education|jeunesse-sports)\.gouv\.fr|lexfo\.fr/;
+
 const api = async (path, options = {}) => {
   try {
     if (!SENDINBLUEKEY) {
@@ -69,10 +71,9 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     const body = {};
     if (ENVIRONMENT !== "production") {
       console.log("to before filter:", to);
-      const regexp = /(selego\.co|(beta|education|jeunesse-sports)\.gouv\.fr|fr\.ey\.com)/;
-      to = to.filter((e) => e.email.match(regexp));
-      if (cc?.length) cc = cc.filter((e) => e.email.match(regexp));
-      if (bcc?.length) bcc = bcc.filter((e) => e.email.match(regexp));
+      to = to.filter((e) => e.email.match(regexp_exception_staging));
+      if (cc?.length) cc = cc.filter((e) => e.email.match(regexp_exception_staging));
+      if (bcc?.length) bcc = bcc.filter((e) => e.email.match(regexp_exception_staging));
     }
     body.to = [to];
     if (cc?.length) body.cc = cc;
@@ -136,10 +137,9 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
     const body = { templateId: parseInt(id) };
     if (!force && ENVIRONMENT !== "production") {
       console.log("emailTo before filter:", emailTo);
-      const regexp = /(selego\.co|(beta|education|jeunesse-sports)\.gouv\.fr|fr\.ey\.com)/;
-      emailTo = emailTo.filter((e) => e.email.match(regexp));
-      if (cc?.length) cc = cc.filter((e) => e.email.match(regexp));
-      if (bcc?.length) bcc = bcc.filter((e) => e.email.match(regexp));
+      emailTo = emailTo.filter((e) => e.email.match(regexp_exception_staging));
+      if (cc?.length) cc = cc.filter((e) => e.email.match(regexp_exception_staging));
+      if (bcc?.length) bcc = bcc.filter((e) => e.email.match(regexp_exception_staging));
     }
     if (emailTo) body.to = emailTo;
     if (cc?.length) body.cc = cc;

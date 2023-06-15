@@ -14,8 +14,10 @@ import Convocation from "../Convocation";
 import { capture } from "../../../../../../sentry";
 import { translate } from "snu-lib";
 import { isStepAgreementDone, isStepConvocationDone } from "../../utils/steps.utils";
+import { useSelector } from "react-redux";
 
-export default function StepConvocation({ young }) {
+export default function StepConvocation({ departureDate, returnDate }) {
+  const young = useSelector((state) => state.Auth.young);
   const [showConvocation, setShowConvocation] = useState(false);
   const [stateMobil, setStateMobil] = useState(false);
   const valid = isStepConvocationDone(young);
@@ -133,7 +135,7 @@ export default function StepConvocation({ young }) {
 
       {showConvocation ? (
         <div className="hidden pb-4 md:flex">
-          <Convocation />
+          <Convocation departureDate={departureDate} returnDate={returnDate} />
         </div>
       ) : null}
       {stateMobil ? (

@@ -1,46 +1,41 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal } from "reactstrap";
-import { translate, ES_NO_LIMIT } from "../../utils";
+import { translate } from "../../utils";
 
-import { ReactiveBase } from "@appbaseio/reactivesearch";
 import { toastr } from "react-redux-toastr";
 import { formatStringDateTimezoneUTC } from "snu-lib/date";
 import CloseSvg from "../../assets/Close";
 import CheckCircle from "../../assets/icons/CheckCircle";
-import { apiURL } from "../../config";
+import CursorClick from "../../assets/icons/CursorClick";
 import api from "../../services/api";
 import ModalButton from "../buttons/ModalButton";
-import { ResultTable } from "../list";
-import ReactiveListComponent from "../ReactiveListComponent";
-import CursorClick from "../../assets/icons/CursorClick";
 
 import ReactSelect, { components } from "react-select";
+import { ResultTable } from "../filters-system-v2";
+import { buildQuery } from "../filters-system-v2/components/filters/utils";
 import ModalConfirm from "./ModalConfirm";
 
 export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, onConfirm, size = "xl", cancelText = "Annuler" }) {
   if (!tutor) return null;
 
-  // https://reactjs.org/docs/hooks-faq.html#is-there-something-like-forceupdate
-  const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   const [responsables, setResponsables] = useState([]);
   const [missionsSelected, setMissionsSelected] = useState([]);
   const [missionsInPage, setMissionsInPage] = useState([]);
   const [sending, setSending] = useState(false);
 
+  const [paramData, setParamData] = useState({ page: 0 });
+  const [data, setData] = useState([]);
+
   const checkboxRef = React.useRef();
 
   useEffect(() => {
     (async () => {
-      const { responses } = await api.esQuery("referent", {
-        query: {
-          bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": tutor.structureId } }] },
-        },
-        size: ES_NO_LIMIT,
-      });
+      const { responses } = await api.post("/elasticsearch/referent/structure/" + tutor.structureId);
       if (responses.length) {
         setResponsables(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })).filter((e) => e._id.toString() !== tutor._id.toString()));
       }
     })();
+    fetchMissions();
   }, []);
 
   useEffect(() => {
@@ -63,24 +58,25 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
     setSending(false);
   };
 
-  const getDefaultQuery = () => ({
-    query: {
-      bool: {
-        must_not: {
-          term: { dummy: ignored }, // * Used to force a re-render of the component
-        },
-        filter: { term: { "tutorId.keyword": tutor._id.toString() } },
-      },
-    },
-    track_total_hits: true,
-  });
-
   const onClickMainCheckBox = () => {
     if (missionsSelected.length === 0) {
       setMissionsSelected(missionsInPage);
     } else {
       setMissionsSelected([]);
     }
+  };
+
+  const fetchMissions = async () => {
+    await buildQuery(`/elasticsearch/mission/by-tutor/${tutor._id.toString()}/search`, {}, paramData?.page, []).then((res) => {
+      if (!res) return;
+      const newParamData = {
+        count: res.count,
+      };
+      if (paramData.count !== res.count) newParamData.page = 0;
+      setParamData((paramData) => ({ ...paramData, ...newParamData }));
+      setData(res.data);
+      if (res?.data) setMissionsInPage(res.data.map((h) => ({ _id: h._id, name: h.name })));
+    });
   };
 
   const responsablesOptions = responsables.map((e) => ({ label: e.firstName + " " + e.lastName, value: e._id.toString() }));
@@ -99,57 +95,42 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
           </div>
         </div>
         <div className="flex w-full flex-col items-center justify-center px-8 text-center ">
-          <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-            <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
-              <div style={{ flex: 1, position: "relative" }}>
-                <ResultTable>
-                  <ReactiveListComponent
-                    defaultQuery={getDefaultQuery}
-                    dataField="name.keyword"
-                    sortBy="asc"
-                    pagination={true}
-                    paginationAt="bottom"
-                    showTopResultStats={false}
-                    pageSize={50}
-                    onData={async ({ rawData }) => {
-                      if (rawData?.hits?.hits) setMissionsInPage(rawData.hits.hits.map((h) => ({ _id: h._id, name: h._source.name })));
-                    }}
-                    render={({ data }) => {
-                      if (data.length === 0) return null;
-
-                      return (
-                        <>
-                          <Header
-                            missionsSelected={missionsSelected}
-                            setMissionsSelected={setMissionsSelected}
-                            responsablesOptions={responsablesOptions}
-                            forceUpdate={forceUpdate}
-                          />
-                          <Table
-                            data={data}
-                            checkboxRef={checkboxRef}
-                            onClickMainCheckBox={onClickMainCheckBox}
-                            responsablesOptions={responsablesOptions}
-                            missionsSelected={missionsSelected}
-                            setMissionsSelected={setMissionsSelected}
-                            forceUpdate={forceUpdate}
-                          />
-                        </>
-                      );
-                    }}
-                    renderNoResults={() => {
-                      return (
-                        <div className="flex items-center justify-center gap-2 ">
-                          <CheckCircle className="h-10 w-10 text-green-600" />
-                          <h1 className="text-center font-normal text-gray-600">Toutes les missions ont bien été redistribuées</h1>
-                        </div>
-                      );
-                    }}
-                  />
-                </ResultTable>
-              </div>
+          <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
+            <div style={{ flex: 1, position: "relative" }}>
+              {data.length === 0 ? (
+                <div className="flex items-center justify-center gap-2 ">
+                  <CheckCircle className="h-10 w-10 text-green-600" />
+                  <h1 className="text-center font-normal text-gray-600">Toutes les missions ont bien été redistribuées</h1>
+                </div>
+              ) : (
+                <ResultTable
+                  paramData={paramData}
+                  setParamData={setParamData}
+                  currentEntryOnPage={data?.length}
+                  size={data?.length}
+                  render={
+                    <>
+                      <Header
+                        missionsSelected={missionsSelected}
+                        setMissionsSelected={setMissionsSelected}
+                        responsablesOptions={responsablesOptions}
+                        fetchMissions={fetchMissions}
+                      />
+                      <Table
+                        data={data}
+                        checkboxRef={checkboxRef}
+                        onClickMainCheckBox={onClickMainCheckBox}
+                        responsablesOptions={responsablesOptions}
+                        missionsSelected={missionsSelected}
+                        setMissionsSelected={setMissionsSelected}
+                        fetchMissions={fetchMissions}
+                      />
+                    </>
+                  }
+                />
+              )}
             </div>
-          </ReactiveBase>
+          </div>
         </div>
         <div className="mb-4 flex justify-center gap-2">
           <ModalButton disabled={sending} onClick={onCancel || onChange}>
@@ -164,7 +145,7 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
   );
 }
 
-const Header = ({ missionsSelected, setMissionsSelected, responsablesOptions, forceUpdate }) => {
+const Header = ({ missionsSelected, setMissionsSelected, responsablesOptions, fetchMissions }) => {
   const [modalConfirmationReattributionTutor, setModalConfirmationReattributionTutor] = useState({ isOpen: false });
   const [loading, setLoading] = useState(false);
 
@@ -221,8 +202,8 @@ const Header = ({ missionsSelected, setMissionsSelected, responsablesOptions, fo
                 isOpen: false,
               });
               setMissionsSelected([]);
+              await fetchMissions();
               setLoading(false);
-              forceUpdate();
             },
           });
         }}
@@ -233,6 +214,7 @@ const Header = ({ missionsSelected, setMissionsSelected, responsablesOptions, fo
         message={`Veuillez confirmer la réattribution à ${modalConfirmationReattributionTutor.label}.`}
         onChange={() => {
           setModalConfirmationReattributionTutor({ isOpen: false, onConfirm: null });
+          fetchMissions();
           setLoading(false);
         }}
         onConfirm={modalConfirmationReattributionTutor?.onSubmit}
@@ -241,7 +223,7 @@ const Header = ({ missionsSelected, setMissionsSelected, responsablesOptions, fo
   );
 };
 
-function Table({ data, checkboxRef, onClickMainCheckBox, responsablesOptions, missionsSelected, setMissionsSelected, forceUpdate }) {
+function Table({ data, checkboxRef, onClickMainCheckBox, responsablesOptions, missionsSelected, setMissionsSelected, fetchMissions }) {
   return (
     <table className="w-full">
       <thead className="">
@@ -280,7 +262,7 @@ function Table({ data, checkboxRef, onClickMainCheckBox, responsablesOptions, mi
               setMissionsSelected((prev) => {
                 return prev.filter((e) => e._id.toString() !== hit._id.toString());
               });
-              forceUpdate();
+              fetchMissions();
             }}
             selected={missionsSelected.find((e) => e._id.toString() === hit._id.toString())}
           />

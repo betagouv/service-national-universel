@@ -5,7 +5,7 @@ import heroBanner from "../../assets/hero-banner.png";
 import CurvedArrowLeft from "../../assets/icons/CurvedArrowLeft";
 import DiscoverStay from "../../assets/icons/DiscoverStay";
 import WaitFor from "../../assets/icons/WaitFor";
-import { translateCohort } from "../../utils";
+import { CgDanger } from "react-icons/cg";
 import ChangeStayLink from "./components/ChangeStayLink";
 import CheckYourSpamSection from "./components/CheckYourSpamSection";
 import Container from "./components/Container";
@@ -13,6 +13,7 @@ import FaqSection from "./components/FaqWaitingAffectation";
 import TestimonialsSection from "./components/TestimonialsSection";
 import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
+import { translateCohortTemp } from "snu-lib";
 
 export default function WaitingAffectation({ young }) {
   return (
@@ -25,9 +26,11 @@ export default function WaitingAffectation({ young }) {
           <article>
             <h1 className="mb-4 flex flex-col text-2xl leading-7 md:gap-3 md:text-[44px] md:text-5xl md:leading-12">
               <span>Mon séjour de cohésion</span>
-              <strong className="flex items-center">{translateCohort(young.cohort)}</strong>
+              <strong className="flex items-center">{translateCohortTemp(young)}</strong>
             </h1>
+
             {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null}
+
             <div className="flex max-w-[688px] items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-[22px] drop-shadow">
               <div className="hidden h-[42px] w-[42px] md:block">
                 <WaitFor />

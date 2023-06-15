@@ -94,6 +94,7 @@ export default function Details({ center, setCenter, sessions }) {
       }
       if (!data?.typology) error.typology = "La typologie est obligatoire";
       if (!data?.domain) error.domain = "Le domaine est obligatoire";
+      if (!data?.academy) error.academy = "Veuillez vérifier l'adresse du centre";
 
       // check session
       const canUpdateSession = sessions.filter((s) => s.placesTotal > data.placesTotal).length === 0;
@@ -292,6 +293,7 @@ export default function Details({ center, setCenter, sessions }) {
                     onChange={(e) => setData({ ...data, academy: e.target.value })}
                     value={"Académie de " + data.academy}
                     disabled={true}
+                    error={errors?.academy}
                   />
                 </>
               )}

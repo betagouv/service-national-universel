@@ -1,3 +1,4 @@
+/* eslint-disable no-inner-declarations */
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
@@ -7,6 +8,7 @@ const { ERRORS } = require("../../utils");
 const { buildArbitratyNdJson } = require("./utils");
 const { sessions2023, ROLES, ES_NO_LIMIT } = require("snu-lib");
 const CohortModel = require("../../models/cohort");
+const ApplicationModel = require("../../models/application");
 
 router.post("/default", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -17,13 +19,24 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     const cohorts5daysBeforeInscriptionEnd = sessions2023
       .filter((c) => new Date(c.eligibility.instructionEndDate) - Date.now() < 5 * 24 * 60 * 60 * 1000 && new Date(c.eligibility.instructionEndDate) - Date.now() > 0)
       .map((e) => e.name);
-    const cohorts5dayBeforepdrChoiceLimitDate = cohorts
-      .filter((c) => new Date(c.pdrChoiceLimitDate) - Date.now() < 5 * 24 * 60 * 60 * 1000 && new Date(c.pdrChoiceLimitDate) - Date.now() > 0)
+    const cohortsOneWeekBeforepdrChoiceLimitDate = cohorts
+      .filter((c) => new Date(c.pdrChoiceLimitDate) - Date.now() < 7 * 24 * 60 * 60 * 1000 && new Date(c.pdrChoiceLimitDate) - Date.now() > 0)
       .map((e) => e.name);
-    // // entre 2 semaines avant le 1er jour du séjour et le dernier jour du séjour, alors alerte (1 alerte par session)
+    // entre 2 semaines avant le 1er jour du séjour et le dernier jour du séjour, alors alerte (1 alerte par session)
     const cohorts2weeksBeforeSessionStart = cohorts
       .filter((c) => new Date(c.dateStart) - Date.now() < 14 * 24 * 60 * 60 * 1000 && new Date(c.dateEnd) - Date.now() > 0)
       .map((e) => e.name);
+    // dateStart - 7 weeks > now && dateStart ≤ now
+    const cohorts7weeksBeforeSessionStart = cohorts
+      .filter((c) => new Date(c.dateStart) - Date.now() < 7 * 7 * 24 * 60 * 60 * 1000 && new Date(c.dateStart) - Date.now() > 0)
+      .map((e) => e.name);
+    const cohorts2daysAfterSessionStart = cohorts.filter((c) => new Date(c.dateStart) + 2 * 24 * 60 * 60 * 1000 < Date.now()).map((e) => e.name);
+    // dateStart > now && dateEnd + 2 weeks < now
+    const cohorts2weeksAfterSessionEnd = cohorts
+      .filter((c) => new Date(c.dateStart) > Date.now() && new Date(c.dateEnd) + 2 * 7 * 24 * 60 * 60 * 1000 < Date.now())
+      .map((e) => e.name);
+
+    const cohortsSessionEditionOpen = cohorts.filter((c) => c.sessionEditionOpenForReferentRegion && c.sessionEditionOpenForReferentDepartment).map((e) => e.name);
 
     function queryFromFilter(filter, { regionField = "region.keyword", departmentField = "department.keyword" } = {}) {
       const body = {
@@ -41,6 +54,43 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
         ...body,
         aggs: { [fieldName.replace(".keyword", "")]: { terms: { field: fieldName, size: 1000 } } },
       };
+    }
+
+    async function departmentsFromTableRepartition(cohorts) {
+      // Liste des départements de la table de répartition pour la personne qui regarde et les cohortes concernées
+      const q = queryFromFilter([{ terms: { "cohort.keyword": cohorts } }, { bool: { must: { exists: { field: "fromDepartment" } } } }], {
+        regionField: "fromRegion",
+        departmentField: "fromDepartment",
+      });
+      q.size = ES_NO_LIMIT;
+      const responseRepartition = await esClient.msearch({
+        index: "tablederepartition",
+        body: buildArbitratyNdJson({ index: "tablederepartition", type: "_doc" }, q),
+      });
+      const departmentsCohortsFromRepartition = responseRepartition.body.responses[0].hits.hits.map((e) => e._source);
+      return departmentsCohortsFromRepartition;
+    }
+
+    function missingElementsByCohortDepartment(response, departmentsCohortsFromRepartition, cohorts) {
+      const data = [];
+      for (const cohort of cohorts) {
+        const cohortDepartments = departmentsCohortsFromRepartition.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment);
+        // Chaque département doit avoir un contact pour la cohorte
+        for (const department of cohortDepartments) {
+          const cohortDepartmentsWithContact = response.body.responses
+            .filter((e) => e.aggregations)
+            .find((e) => e.aggregations.department.buckets.find((e) => e.key === department));
+          // Si le département n'a pas de session phase 1 pour la cohorte on l'ajoute dans la liste à signaler.
+          if (!cohortDepartmentsWithContact) {
+            if (!data.find((e) => e.cohort === cohort && e.department === department))
+              data.push({
+                cohort,
+                department,
+              });
+          }
+        }
+      }
+      return data;
     }
 
     // Dossier. X dossiers d’inscription en attente de validation pour le séjour de [Février 2023 C] (A instruire)
@@ -101,7 +151,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     // Point de rassemblement (À suivre) X volontaires n’ont pas confirmé leur point de rassemblement
     // sejour_rassemblement_non_confirmé
     async function sejourRassemblementNonConfirmé() {
-      const cohorts = cohorts5dayBeforepdrChoiceLimitDate;
+      const cohorts = cohortsOneWeekBeforepdrChoiceLimitDate;
       if (!cohorts.length) return { sejour_rassemblement_non_confirmé: [] };
 
       const response = await esClient.msearch({
@@ -166,23 +216,14 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
       };
     }
 
+    // Point de rassemblement (À déclarer) Au moins 1 point de rassemblement est à déclarer pour le séjour de [Février 2023-C].
+    // sejour_point_de_rassemblement_à_déclarer
     async function pointDeRassemblementADéclarer() {
       const cohorts = cohortsNotStarted;
       if (!cohorts.length) return { sejour_point_de_rassemblement_à_déclarer: [] };
-
-      // Liste des départements de la table de répartition pour la personne qui regarde et les cohortes concernées
-      const q = queryFromFilter([{ terms: { "cohort.keyword": cohorts } }, { bool: { must: { exists: { field: "fromDepartment" } } } }], {
-        regionField: "fromRegion",
-        departmentField: "fromDepartment",
-      });
-      q.size = ES_NO_LIMIT;
-      const responseRepartition = await esClient.msearch({
-        index: "tablederepartition",
-        body: buildArbitratyNdJson({ index: "tablederepartition", type: "_doc" }, q),
-      });
+      const departmentsCohortsFromRepartition = await departmentsFromTableRepartition(cohorts);
       // On récupère les points de rassemblement pour chaque cohorte groupés par département
       // Si un département de la cohorte n'a pas de point de rassemblement on l'ajoute dans la liste à signaler.
-      const departmentsCohorts = responseRepartition.body.responses[0].hits.hits.map((e) => e._source);
       const response = await esClient.msearch({
         index: "pointderassemblement",
         body: buildArbitratyNdJson(
@@ -192,7 +233,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
               withAggs(
                 queryFromFilter([
                   { terms: { "cohort.keyword": [cohort] } },
-                  { terms: { "department.keyword": departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
+                  { terms: { "department.keyword": departmentsCohortsFromRepartition.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
                 ]),
                 "department.keyword",
               ),
@@ -200,28 +241,10 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           }),
         ),
       });
-      const sejour_point_de_rassemblement_à_déclarer = [];
-      for (const cohort of cohorts) {
-        const cohortDepartments = departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment);
-        // Chaque département doit avoir un point de rassemblement
-        for (const department of cohortDepartments) {
-          const cohortDepartmentsWithPdr = response.body.responses.filter((e) => e.aggregations).find((e) => e.aggregations.department.buckets.find((e) => e.key === department));
-          // Si le département n'a pas de point de rassemblement on l'ajoute dans la liste à signaler.
-          if (!cohortDepartmentsWithPdr) {
-            if (!sejour_point_de_rassemblement_à_déclarer.find((e) => e.cohort === cohort && e.department === department))
-              sejour_point_de_rassemblement_à_déclarer.push({
-                cohort,
-                department,
-              });
-          }
-        }
-      }
-      return { sejour_point_de_rassemblement_à_déclarer };
-    }
 
-    async function centreADéclarer() {
-      return { sejour_centre_à_déclarer: [] };
-      // Todo en s'inspirant de pointDeRassemblementADéclarer
+      // Pour chaque département, si le département n'a pas de point de rassemblement on l'ajoute dans la liste à signaler.
+      const sejour_point_de_rassemblement_à_déclarer = missingElementsByCohortDepartment(response, departmentsCohortsFromRepartition, cohorts);
+      return { sejour_point_de_rassemblement_à_déclarer };
     }
 
     // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
@@ -251,22 +274,11 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     // Contact (À renseigner) Au moins 1 contact de convocation doit être renseigné pour le séjour de [Février 2023-C].
     // sejour_contact_à_renseigner
     async function sejourContactÀRenseigner() {
-      const cohorts = cohortsNotStarted; // FIXME
+      const cohorts = cohorts7weeksBeforeSessionStart;
       if (!cohorts.length) return { sejour_contact_à_renseigner: [] };
-
-      // Liste des départements de la table de répartition pour la personne qui regarde et les cohortes concernées
-      const q = queryFromFilter([{ terms: { "cohort.keyword": cohorts } }, { bool: { must: { exists: { field: "fromDepartment" } } } }], {
-        regionField: "fromRegion",
-        departmentField: "fromDepartment",
-      });
-      q.size = ES_NO_LIMIT;
-      const responseRepartition = await esClient.msearch({
-        index: "tablederepartition",
-        body: buildArbitratyNdJson({ index: "tablederepartition", type: "_doc" }, q),
-      });
+      const departmentsCohortsFromRepartition = await departmentsFromTableRepartition(cohorts);
       // On récupère les entrées de département service pour chaque cohorte groupés par département
       // Si un département de la cohorte n'a pas de contact on l'ajoute dans la liste à signaler.
-      const departmentsCohorts = responseRepartition.body.responses[0].hits.hits.map((e) => e._source);
       const response = await esClient.msearch({
         index: "departmentservice",
         body: buildArbitratyNdJson(
@@ -285,7 +297,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
                       },
                     },
                   },
-                  { terms: { "department.keyword": departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
+                  { terms: { "department.keyword": departmentsCohortsFromRepartition.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
                 ]),
                 "department.keyword",
               ),
@@ -293,31 +305,16 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           }),
         ),
       });
-      const sejour_contact_à_renseigner = [];
-      for (const cohort of cohorts) {
-        const cohortDepartments = departmentsCohorts.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment);
-        // Chaque département doit avoir un contact pour la cohorte
-        for (const department of cohortDepartments) {
-          const cohortDepartmentsWithContact = response.body.responses
-            .filter((e) => e.aggregations)
-            .find((e) => e.aggregations.department.buckets.find((e) => e.key === department));
-          // Si le département n'a pas de contact pour la cohorte on l'ajoute dans la liste à signaler.
-          if (!cohortDepartmentsWithContact) {
-            if (!sejour_contact_à_renseigner.find((e) => e.cohort === cohort && e.department === department))
-              sejour_contact_à_renseigner.push({
-                cohort,
-                department,
-              });
-          }
-        }
-      }
+
+      // Pour chaque département, si le département n'a pas de contact pour la cohorte on l'ajoute dans la liste à signaler
+      const sejour_contact_à_renseigner = missingElementsByCohortDepartment(response, departmentsCohortsFromRepartition, cohorts);
       return { sejour_contact_à_renseigner };
     }
 
     // Cas particuliers (À contacter) X volontaires à contacter pour préparer leur accueil pour le séjour de [Février 2023 - C]
     // sejour_volontaires_à_contacter
     async function sejourVolontairesÀContacter() {
-      const cohorts = cohortsNotStarted; // FIXME
+      const cohorts = cohorts2daysAfterSessionStart; // 2 jours après le début de la session
       if (!cohorts.length) return { sejour_volontaires_à_contacter: [] };
 
       const response = await esClient.msearch({
@@ -352,7 +349,7 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
     // Chef de centre (A renseigner) X chefs de centre sont à renseigner pour le séjour de [Février 2023 - C]
     // sejour_chef_de_centre
     async function sejourChefDeCentre() {
-      const cohorts = cohortsNotStarted; // FIXME
+      const cohorts = cohortsNotStarted;
       if (!cohorts.length) return { sejour_chef_de_centre: [] };
 
       const response = await esClient.msearch({
@@ -371,6 +368,327 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           };
         }),
       };
+    }
+
+    // Contrat (À renseigner) 1 représentant de l’État est à renseigner
+    // engagement_contrat_à_renseigner
+    async function contratÀRenseigner() {
+      if (!cohorts.length) return { engagement_contrat_à_renseigner: [] };
+      const departmentsCohortsFromRepartition = await departmentsFromTableRepartition(cohorts);
+      // On récupère les entrées de département service pour chaque cohorte groupés par département
+      // Si un département de la cohorte n'a pas de contact on l'ajoute dans la liste à signaler.
+      const response = await esClient.msearch({
+        index: "departmentservice",
+        body: buildArbitratyNdJson(
+          ...cohorts.flatMap((cohort) => {
+            return [
+              { index: "departmentservice", type: "_doc" },
+              withAggs(
+                queryFromFilter([
+                  { terms: { "cohort.keyword": [cohort] } },
+                  { bool: { must: { exists: { field: "contacts" } } } },
+                  { terms: { "department.keyword": departmentsCohortsFromRepartition.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
+                ]),
+                "department.keyword",
+              ),
+            ];
+          }),
+        ),
+      });
+      // Pour chaque département, si le département n'a pas de contact pour la cohorte on l'ajoute dans la liste à signaler
+      const engagement_contrat_à_renseigner = missingElementsByCohortDepartment(response, departmentsCohortsFromRepartition, cohorts);
+      return { engagement_contrat_à_renseigner };
+    }
+
+    // Centre (À déclarer) Au moins 1 centre est en attente de déclaration pour le séjour de [Février 2023-C].
+    // sejour_centre_à_déclarer
+    async function sejourCentreÀDéclarer() {
+      const cohorts = cohortsSessionEditionOpen;
+      if (!cohorts.length) return { sejour_centre_à_déclarer: [] };
+      const departmentsCohortsFromRepartition = await departmentsFromTableRepartition(cohorts);
+      // On récupère les entrées de session phase 1 pour chaque cohorte groupés par département
+      const response = await esClient.msearch({
+        index: "sessionphase1",
+        body: buildArbitratyNdJson(
+          ...cohorts.flatMap((cohort) => {
+            return [
+              { index: "sessionphase1", type: "_doc" },
+              withAggs(
+                queryFromFilter([
+                  { terms: { "cohort.keyword": [cohort] } },
+                  { terms: { "department.keyword": departmentsCohortsFromRepartition.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
+                ]),
+                "department.keyword",
+              ),
+            ];
+          }),
+        ),
+      });
+      // Pour chaque département, si le département n'a pas de session phase 1 pour la cohorte on l'ajoute dans la liste à signaler
+      const sejour_centre_à_déclarer = missingElementsByCohortDepartment(response, departmentsCohortsFromRepartition, cohorts);
+      return { sejour_centre_à_déclarer };
+    }
+
+    // Pointage. X centres n’ont pas pointés tous leurs volontaires à l’arrivée au séjour de [Février 2023-C] (A renseigner)
+    // sejour_pointage
+    async function sejourPointage() {
+      const cohorts = cohorts2weeksAfterSessionEnd;
+      if (!cohorts.length) return { sejourPointage: [] };
+
+      const response = await esClient.msearch({
+        index: "young",
+        body: buildArbitratyNdJson(
+          ...cohorts.flatMap((cohort) => {
+            return [
+              { index: "young", type: "_doc" },
+              withAggs(
+                queryFromFilter([
+                  { terms: { "cohort.keyword": [cohort] } },
+                  { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
+                  { bool: { must_not: { exists: { field: "cohesionStayPresence.keyword" } } } },
+                ]),
+                "sessionPhase1Id.keyword",
+              ),
+            ];
+          }),
+        ),
+      });
+
+      const sejourPointage = [];
+      for (let i = 0; i < response.body.responses.length; i++) {
+        const r = response.body.responses[i];
+        const cohort = cohorts[i];
+        const sessionCount = r.aggregations.sessionPhase1Id.buckets.reduce((acc, e) => {
+          if (e.doc_count > 0) acc++;
+          return acc;
+        }, 0);
+        if (sessionCount > 0) {
+          sejourPointage.push({ cohort, count: sessionCount });
+        }
+      }
+      return { sejourPointage };
+    }
+
+    // Pointage. X centres n’ont pas pointés tous leurs volontaires à la JDM sur le séjour de [Février 2023-C] (A renseigner)
+    // sejour_pointage_jdm
+    async function sejourPointageJDM() {
+      const cohorts = cohorts2weeksAfterSessionEnd;
+      if (!cohorts.length) return { sejour_pointage_jdm: [] };
+
+      const response = await esClient.msearch({
+        index: "young",
+        body: buildArbitratyNdJson(
+          ...cohorts.flatMap((cohort) => {
+            return [
+              { index: "young", type: "_doc" },
+              withAggs(
+                queryFromFilter([
+                  { terms: { "cohort.keyword": [cohort] } },
+                  { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
+                  { bool: { must_not: { exists: { field: "presenceJDM.keyword" } } } },
+                ]),
+                "sessionPhase1Id.keyword",
+              ),
+            ];
+          }),
+        ),
+      });
+
+      const sejour_pointage_jdm = [];
+      for (let i = 0; i < response.body.responses.length; i++) {
+        const r = response.body.responses[i];
+        const cohort = cohorts[i];
+        const sessionCount = r.aggregations.sessionPhase1Id.buckets.reduce((acc, e) => {
+          if (e.doc_count > 0) acc++;
+          return acc;
+        }, 0);
+        if (sessionCount > 0) {
+          sejour_pointage_jdm.push({ cohort, count: sessionCount });
+        }
+      }
+      return { sejour_pointage_jdm };
+    }
+
+    // Volontaires (À suivre) X volontaires ayant commencé leur mission sans contrat signé
+    // volontaires_à_suivre_sans_contrat
+    async function volontairesÀSuivreSansContrat() {
+      const match = { "youngInfo.statusPhase2": "IN_PROGRESS" };
+      if (req.user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = req.user.region;
+      if (req.user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: req.user.department };
+      const query = [
+        {
+          $match: {
+            status: { $in: ["VALIDATED", "IN_PROGRESS"] },
+            contractStatus: { $in: ["DRAFT", "SENT"] },
+            youngId: { $exists: true, $ne: "N/A" },
+            missionId: { $exists: true },
+          },
+        },
+        {
+          $addFields: {
+            youngObjectId: {
+              $toObjectId: "$youngId",
+            },
+            missionObjectId: {
+              $toObjectId: "$missionId",
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "youngs",
+            localField: "youngObjectId",
+            foreignField: "_id",
+            as: "youngInfo",
+          },
+        },
+        {
+          $unwind: "$youngInfo",
+        },
+        {
+          $match: match,
+        },
+        {
+          $lookup: {
+            from: "missions",
+            localField: "missionObjectId",
+            foreignField: "_id",
+            as: "missionInfo",
+          },
+        },
+        {
+          $unwind: "$missionInfo",
+        },
+        {
+          $match: {
+            "missionInfo.startAt": { $gt: new Date() },
+          },
+        },
+      ];
+      const result = await ApplicationModel.aggregate(query);
+      return { volontaires_à_suivre_sans_contrat: result.length };
+    }
+
+    // Volontaires (À suivre) X volontaires ayant commencé leur mission sans statut à jour
+    // volontaires_à_suivre_sans_statut
+    async function volontairesÀSuivreSansStatut() {
+      const match = { "youngInfo.statusPhase2": "IN_PROGRESS" };
+      if (req.user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = req.user.region;
+      if (req.user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: req.user.department };
+      const query = [
+        {
+          $match: {
+            status: { $in: ["VALIDATED"] },
+            youngId: { $exists: true, $ne: "N/A" },
+            missionId: { $exists: true },
+          },
+        },
+        {
+          $addFields: {
+            youngObjectId: {
+              $toObjectId: "$youngId",
+            },
+            missionObjectId: {
+              $toObjectId: "$missionId",
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "youngs",
+            localField: "youngObjectId",
+            foreignField: "_id",
+            as: "youngInfo",
+          },
+        },
+        {
+          $unwind: "$youngInfo",
+        },
+        {
+          $match: match,
+        },
+        {
+          $lookup: {
+            from: "missions",
+            localField: "missionObjectId",
+            foreignField: "_id",
+            as: "missionInfo",
+          },
+        },
+        {
+          $unwind: "$missionInfo",
+        },
+        {
+          $match: {
+            "missionInfo.startAt": { $gt: new Date() },
+            "missionInfo.endAt": { $lt: new Date() },
+          },
+        },
+      ];
+      const result = await ApplicationModel.aggregate(query);
+      return { volontaires_à_suivre_sans_statut: result.length };
+    }
+
+    // Volontaires (À suivre) X volontaires ayant achevé leur mission sans statut à jour
+    // volontaires_à_suivre_achevé_sans_statut
+    async function volontairesÀSuivreAchevéSansStatut() {
+      const match = { "youngInfo.statusPhase2": "IN_PROGRESS" };
+      if (req.user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = req.user.region;
+      if (req.user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: req.user.department };
+      const query = [
+        {
+          $match: {
+            status: { $in: ["VALIDATED", "IN_PROGRESS"] },
+            youngId: { $exists: true, $ne: "N/A" },
+            missionId: { $exists: true },
+          },
+        },
+        {
+          $addFields: {
+            youngObjectId: {
+              $toObjectId: "$youngId",
+            },
+            missionObjectId: {
+              $toObjectId: "$missionId",
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "youngs",
+            localField: "youngObjectId",
+            foreignField: "_id",
+            as: "youngInfo",
+          },
+        },
+        {
+          $unwind: "$youngInfo",
+        },
+        {
+          $match: match,
+        },
+        {
+          $lookup: {
+            from: "missions",
+            localField: "missionObjectId",
+            foreignField: "_id",
+            as: "missionInfo",
+          },
+        },
+        {
+          $unwind: "$missionInfo",
+        },
+        {
+          $match: {
+            "missionInfo.endAt": { $lt: new Date() },
+          },
+        },
+        {
+          $limit: 1000,
+        },
+      ];
+      const result = await ApplicationModel.aggregate(query);
+      return { volontaires_à_suivre_achevé_sans_statut: result.length };
     }
 
     async function basicInscriptions() {
@@ -440,6 +758,10 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           // engagement_mission_en_attente_de_validation
           { index: "mission", type: "_doc" },
           queryFromFilter([{ terms: { "status.keyword": ["WAITING_VALIDATION"] } }]),
+          // Phase 3 (À suivre) X demandes de validation de phase 3 à suivre
+          // engagement_phase3_en_attente_de_validation
+          { index: "young", type: "_doc" },
+          queryFromFilter([{ terms: { "statusPhase3.keyword": ["WAITING_VALIDATION"] } }]),
         ),
       });
       const results = response.body.responses;
@@ -448,8 +770,10 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
         engagement_contrat_en_attente_de_signature: results[1].hits.total.value,
         engagement_dossier_militaire_en_attente_de_validation: results[2].hits.total.value,
         engagement_mission_en_attente_de_validation: results[3].hits.total.value,
+        engagement_phase3_en_attente_de_validation: results[4].hits.total.value,
       };
     }
+    // TODO: Optimize async/await and run all queries in parallel.
     return res.status(200).send({
       ok: true,
       data: {
@@ -462,14 +786,20 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
           ...(await sejourRassemblementNonConfirmé()),
           ...(await sejourParticipationNonConfirmée()),
           ...(await pointDeRassemblementADéclarer()),
-          ...(await centreADéclarer()),
+          ...(await sejourCentreÀDéclarer()),
           ...(await sejourEmploiDuTempsNonDéposé()),
           ...(await sejourContactÀRenseigner()),
           ...(await sejourVolontairesÀContacter()),
           ...(await sejourChefDeCentre()),
+          ...(await sejourPointage()),
+          ...(await sejourPointageJDM()),
         },
         engagement: {
           ...(await basicEngagement()),
+          ...(await contratÀRenseigner()),
+          ...(await volontairesÀSuivreSansContrat()),
+          ...(await volontairesÀSuivreSansStatut()),
+          ...(await volontairesÀSuivreAchevéSansStatut()),
         },
       },
     });

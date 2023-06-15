@@ -1,3 +1,4 @@
+/* eslint-disable no-inner-declarations */
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
@@ -37,6 +38,36 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       const response = await esClient.msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(response.body);
     }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/not-in-cohort/:cohort", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // Configuration
+    const searchFields = ["name", "city", "zip", "code2022", "typology", "domain", "centerDesignation"];
+
+    // Authorization
+    if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // Body params validation
+    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields: [], body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // Context filters
+    let contextFilters = [];
+    if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
+
+    // Build request body
+    const { hitsRequestBody } = buildRequestBody({ searchFields, filterFields: [], queryFilters, page, sort, contextFilters });
+    hitsRequestBody.size = ES_NO_LIMIT;
+    hitsRequestBody.query.bool.must_not = [{ term: { "cohorts.keyword": String(req.params.cohort) } }];
+
+    const response = await esClient.msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody) });
+    return res.status(200).send(response.body);
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

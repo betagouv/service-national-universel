@@ -37,7 +37,6 @@ import General from "./general";
 import Pointage from "./pointage";
 import Profil from "../../../assets/icons/Profil";
 import * as Sentry from "@sentry/react";
-import { environment } from "../../../config";
 
 export default function CenterYoungIndex() {
   const [modalExportMail, setModalExportMail] = useState({ isOpen: false });
@@ -144,6 +143,12 @@ export default function CenterYoungIndex() {
       parentGroup: "Dossier",
       translate: translate,
       missingLabel: "Non renseigné",
+    },
+    {
+      title: "Confirmation de participation",
+      name: "youngPhase1Agreement",
+      parentGroup: "Dossier",
+      translate: translate,
     },
     {
       title: "Présence à l'arrivée",
@@ -426,10 +431,7 @@ export default function CenterYoungIndex() {
         </div>
       ),
     },
-  ];
-
-  if (environment !== "production") {
-    exportItems.push({
+    {
       key: "exportImageRights",
       action: async () => {
         await exportImageRights();
@@ -440,8 +442,8 @@ export default function CenterYoungIndex() {
           <div className="text-sm text-gray-700">Droits à l&apos;image</div>
         </div>
       ),
-    });
-  }
+    }
+  ];
 
   return (
     <>
@@ -672,6 +674,7 @@ const transformData = async ({ data, centerId }) => {
       "Ville du centre": center.city || "",
       "Département du centre": center.department || "",
       "Région du centre": center.region || "",
+      "Participation au séjour": data.youngPhase1Agreement === "true" ? "Oui" : "Non",
       "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
       "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
       "Informations de transport sont transmises par les services locaux": translate(data.transportInfoGivenByLocal),

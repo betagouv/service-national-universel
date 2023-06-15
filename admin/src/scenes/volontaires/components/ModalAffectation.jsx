@@ -1,4 +1,6 @@
 import dayjs from "dayjs";
+const utc = require("dayjs/plugin/utc");
+dayjs.extend(utc);
 import React, { useCallback, useEffect, useState } from "react";
 import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
 import { toastr } from "react-redux-toastr";
@@ -6,6 +8,7 @@ import ReactTooltip from "react-tooltip";
 import LinearIceBerg from "../../../assets/Linear-IceBerg";
 import LinearMap from "../../../assets/Linear-Map";
 import ChevronRight from "../../../assets/icons/ChevronRight";
+import Eye from "../../../assets/icons/Eye";
 import { ResultTable } from "../../../components/filters-system-v2";
 import { buildQuery } from "../../../components/filters-system-v2/components/filters/utils";
 import { MultiLine } from "../../../components/list";
@@ -35,16 +38,28 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
   const [paramData, setParamData] = useState({ page: 0, size: 3 });
   const [data, setData] = useState([]);
 
+  async function getPdrs(data) {
+    for (const center of data) {
+      const res = await api.get(`/point-de-rassemblement/ligneToPoint/${young.cohort}/${center.cohesionCenterId}`);
+      const pdr = res.data.map((item) => item.meetingPoint);
+      const ligne = res.data.map((item) => item.ligneBus);
+      center.meetingPoint = pdr;
+      center.ligneBus = ligne;
+    }
+    return data;
+  }
+
   const updateOnParamChange = useCallback(
     debounce(async (selectedFilters, paramData) => {
-      buildQuery(`/elasticsearch/sessionPhase1/young-affectation/${young.cohort}/search`, selectedFilters, paramData?.page, [], paramData?.sort).then((res) => {
+      buildQuery(`/elasticsearch/sessionPhase1/young-affectation/${young.cohort}/search`, selectedFilters, paramData?.page, [], paramData?.sort).then(async (res) => {
         if (!res) return;
         const newParamData = {
           count: res.count,
         };
         if (paramData.count !== res.count) newParamData.page = 0;
+        const dataPdrs = await getPdrs(res.data);
         setParamData((paramData) => ({ ...paramData, ...newParamData }));
-        setData(res.data);
+        setData(dataPdrs);
       });
     }, 250),
     [],
@@ -55,7 +70,8 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
   }, [selectedFilters, paramData.page]);
 
   // true à J - 12 du départ
-  const youngSelectDisabled = !dayjs(cohort?.pdrChoiceLimitDate).isAfter(dayjs());
+  const date = cohort?.pdrChoiceLimitDate;
+  const youngSelectDisabled = date ? dayjs.utc().isAfter(dayjs(date)) : false;
 
   const closeModal = () => {
     setInputPdr("");
@@ -128,6 +144,15 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
       const result = await api.get(url);
       if (result.ok) {
         setCurrentPage(0);
+        result.data.sort((a, b) => {
+          if (a.meetingPoint.department === young.department && b.meetingPoint.department !== young.department) {
+            return -1;
+          } else if (a.meetingPoint.department !== young.department && b.meetingPoint.department === young.department) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
         setDataPdr(result.data.map((el) => el.meetingPoint));
         setDataLigneToPoint(result.data);
       } else {
@@ -189,6 +214,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                     <HitCenter
                       key={hit._id}
                       hit={hit}
+                      young={young}
                       onSend={() => {
                         setStep(2);
                         setSession(hit);
@@ -284,6 +310,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                               key={hit._id}
                               hit={hit}
                               data={dataLigneToPoint.filter((e) => e.meetingPoint._id === hit._id)[0]}
+                              young={young}
                               onSend={() => {
                                 setStep(3);
                                 setSelectedPdr({ pdr: hit, data: dataLigneToPoint.filter((e) => e.meetingPoint._id === hit._id)[0] });
@@ -440,11 +467,56 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
   );
 }
 
-const HitCenter = ({ hit, onSend }) => {
-  console.log(hit);
+const ListPdr = (hit) => {
+  return (
+    <>
+      <p>Points de rassemblement proposés à ce jeune</p>
+      <ul>
+        {hit.hit.meetingPoint.map((pdr) => {
+          if (pdr.department === hit.young.department) {
+            return (
+              <li className="font-bold p-2" key={pdr._id}>
+                {pdr.name}
+                <p className="font-normal">
+                  {pdr.department}, {pdr.region} - <span className="text-gray-500">N°ligne :</span>
+                  {pdr.busId}
+                </p>
+              </li>
+            );
+          }
+          return null;
+        })}
+      </ul>
+    </>
+  );
+};
+
+const HitCenter = ({ hit, onSend, young }) => {
+  const pdr = hit.meetingPoint.filter((pdr) => pdr.department === young.department).length;
+  hit.meetingPoint.map((pdr) => {
+    for (let i = 0; i < hit.ligneBus.length; i++) {
+      if (hit.ligneBus[i].meetingPointsIds.filter((item) => item === pdr._id).length > 0) {
+        pdr.busId = hit.ligneBus[i].busId;
+      }
+    }
+  });
   return (
     <>
       <hr />
+      {pdr === 0 ? (
+        <ReactTooltip id="pdr-vide" className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
+          <div className="text-[black] text-sm">
+            <p>Auncune ligne de transport avec des places disponibles ne correspond à ce trajet</p>
+          </div>
+        </ReactTooltip>
+      ) : (
+        <ReactTooltip id={hit._id} className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
+          <div className="text-[black] text-sm">
+            <ListPdr hit={hit} young={young} />
+          </div>
+        </ReactTooltip>
+      )}
+
       <div className="flex w-full flex-row items-center justify-between gap-4 px-2">
         <div className="w-1/2">
           <MultiLine>
@@ -452,9 +524,9 @@ const HitCenter = ({ hit, onSend }) => {
             <p>{`${hit.cityCentre || ""} • ${hit.department || ""}`}</p>
           </MultiLine>
         </div>
-        <div className="w-1/4">
-          <div key={hit.cohort} className={`w-fit rounded-full border-[1px] border-[#0C7CFF] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]`}>
-            {hit.cohort}
+        <div className="flex flex-row m-auto justify-center align-middle" data-tip data-for={pdr === 0 ? "pdr-vide" : hit._id}>
+          <div className={`w-fit rounded-full border-[1px] border-gray-500 ${pdr === 0 ? "bg-[#F9FCFF]" : "bg-[#F3F4F6]"}  px-3 py-1 text-xs font-medium leading-5 text-black`}>
+            <Eye className="text-gray-500 inline" /> {pdr} points de rassemblement proposés
           </div>
         </div>
         <div className="cursor-pointer" onClick={onSend}>
@@ -465,19 +537,24 @@ const HitCenter = ({ hit, onSend }) => {
   );
 };
 
-const HitPdr = ({ hit, onSend, data }) => {
+const HitPdr = ({ hit, onSend, data, young }) => {
   return (
     <>
       <hr />
-      <div className="flex w-full flex-row items-center justify-between gap-4 px-2">
+      <div className="flex w-full flex-row items-center justify-between gap-4 px-2 ">
         <div className="w-1/2">
           <MultiLine>
             <span className="font-bold text-black">{hit.name}</span>
             <p>{`${hit.department || ""} • ${hit.address || ""}, ${hit.zip || ""} ${hit.city || ""}`}</p>
+            <p>
+              N° transport: <span className="text-gray-900">{data?.ligneBus.busId}</span>
+            </p>
           </MultiLine>
         </div>
-        <div className="w-1/3 text-xs text-[#738297]">
-          Num. transport <span className="text-gray-900">{data?.ligneBus.busId}</span>
+        <div className="w-1/3 text-xs text-[#738297] justify-center">
+          {hit.department === young.department ? (
+            <div className={`w-fit rounded-full border-[1px] border-gray-500 bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-gray-500 m-auto`}>proposé au jeune</div>
+          ) : null}
         </div>
         <div className="flex w-1/2 flex-col">
           <div className="text-xs text-[#738297]">

@@ -1,23 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { getCohortDetail } from "../../../utils/cohorts";
+import React from "react";
 import dayjs from "dayjs";
-import Loader from "../../../components/Loader";
 
-export default function CohortDateSummary({ cohortName, className = "" }) {
-  const [cohort, setCohort] = useState();
-
-  useEffect(() => {
-    setCohort(getCohortDetail(cohortName));
-  }, [cohortName]);
-
-  if (!cohort) {
-    return <Loader />;
-  }
-
+export default function CohortDateSummary({ departureDate, returnDate, className }) {
   return (
     <div className={`flex flex-col items-center rounded-xl bg-gray-50 py-2 px-3 md:flex-row ${className}`}>
-      <DateSummary type="Aller" date={cohort.dateStart} className="mb-8 md:mb-0 md:mr-8" />
-      <DateSummary type="Retour" date={cohort.dateEnd} />
+      <DateSummary type="Aller" date={departureDate} className="mb-8 md:mb-0 md:mr-8" />
+      <DateSummary type="Retour" date={returnDate} />
     </div>
   );
 }

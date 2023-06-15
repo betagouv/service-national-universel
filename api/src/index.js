@@ -3,9 +3,8 @@ require("dotenv").config({ path: "./.env-staging" });
 // ! Ignore specific error
 const originalConsoleError = console.error;
 console.error = function (message) {
-  if (!message.includes("AWS SDK for JavaScript (v2) into maintenance mode")) {
-    originalConsoleError.apply(console, arguments);
-  }
+  if (typeof message === "string" && message.includes("AWS SDK for JavaScript (v2) into maintenance mode")) return;
+  originalConsoleError.apply(console, arguments);
 };
 
 const { initSentry, capture } = require("./sentry");
@@ -107,6 +106,7 @@ app.use("/analytics", require("./controllers/analytics"));
 app.use("/plan-de-transport/import", require("./controllers/planDeTransport/import"));
 app.use("/elasticsearch", require("./controllers/elasticsearch"));
 app.use("/dashboard/engagement", require("./controllers/dashboard/engagement"));
+app.use("/edit-transport", require("./controllers/planDeTransport/edit-transport"));
 
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));

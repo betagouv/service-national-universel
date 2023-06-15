@@ -18,6 +18,7 @@ import Phase1ConfirmationFormBlock from "../components/phase1/Phase1Confirmation
 import { getCohortByName } from "../../../services/cohort.service";
 import Phase1Header from "../components/phase1/Phase1Header";
 import Phase1PresenceFormBlock from "../components/phase1/Phase1PresenceFormBlock";
+import PDRpropose from "../components/PDRpropose";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -184,8 +185,15 @@ export default function Phase1(props) {
                       <div>Les informations de transport seront transmises par les services locaux.</div>
                     ) : young?.deplacementPhase1Autonomous === "true" ? (
                       <div>{young.firstName} se rend au centre et en revient par ses propres moyens.</div>
+                    ) : editing ? (
+                      <>
+                        <div>{young.firstName} n&apos;a pas encore confirmé son point de rassemblement.</div>
+                      </>
                     ) : (
-                      <div>{young.firstName} n&apos;a pas encore confirmé son point de rassemblement.</div>
+                      <>
+                        <div>{young.firstName} n&apos;a pas encore confirmé son point de rassemblement. Voici le(s) point(s) de rassemblement proposé(s) :</div>
+                        <PDRpropose young={young} center={cohesionCenter} modalAffectations={modalAffectations} setModalAffectation={setModalAffectation}></PDRpropose>
+                      </>
                     )}
                   </div>
                   {isCohortOpenForAffectation && editing && (

@@ -90,7 +90,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
     return res.status(200).send({ ok: true, data: cohorts });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, data: [], code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -235,6 +235,8 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       repartitionSchemaCreateAndEditGroupAvailability: Joi.boolean().required(),
       repartitionSchemaDownloadAvailability: Joi.boolean(),
       isTransportPlanCorrectionRequestOpen: Joi.boolean(),
+      schemaAccessForReferentRegion: Joi.boolean(),
+      schemaAccessForReferentDepartment: Joi.boolean(),
       uselessInformation: Joi.object().allow(null),
     }).validate(req.body, { stripUnknown: true });
     if (bodyError) {

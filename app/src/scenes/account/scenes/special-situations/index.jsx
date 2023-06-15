@@ -33,8 +33,10 @@ const AccountSpecialSituationsPage = () => {
             <Checkbox label="Je suis bénéficiaire d'un Projet d'accueil individualisé (PAI)" name="paiBeneficiary" value={values.paiBeneficiary} disabled useCheckedAsValue />
             <Checkbox label="J'ai des allergies ou intolérances alimentaires" name="allergies" value={values.allergies} disabled useCheckedAsValue />
             <Checkbox label="J'ai besoin d'aménagements spécifiques" name="specificAmenagment" value={values.specificAmenagment} disabled useCheckedAsValue />
-            {values.specificAmenagment && <Textarea label="Nature de cet aménagement spécifique" name="specificAmenagmentType" value={values.specificAmenagmentType} disabled />}
-            <Checkbox label="J'ai besoin dun aménagement pour mobilité réduite" name="reducedMobilityAccess" value={values.reducedMobilityAccess} disabled useCheckedAsValue />
+            {values.specificAmenagment === "true" && values.specificAmenagmentType !== "Contenu supprimé" && (
+              <Textarea label="Nature de cet aménagement spécifique" name="specificAmenagmentType" value={values.specificAmenagmentType} disabled />
+            )}
+            <Checkbox label="J'ai besoin d'un aménagement pour mobilité réduite" name="reducedMobilityAccess" value={values.reducedMobilityAccess} disabled useCheckedAsValue />
             <Checkbox
               label="J'ai besoin dêtre affecté(e) dans un centre de mon département de résidence"
               name="handicapInSameDepartment"
