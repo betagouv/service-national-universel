@@ -249,7 +249,7 @@ class api {
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
-        if (response.status === 401) {
+        if (response.status === 401 && window.location.href.indexOf("/auth") === -1) {
           this.goToAuth();
         }
         const res = await response.json();

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import Invite from "./invite";
@@ -11,18 +11,19 @@ import { HiLogout, HiUser, HiUserAdd } from "react-icons/hi";
 import { FiSettings } from "react-icons/fi";
 
 import Avatar from "../Avatar";
-import { isSuperAdmin } from "snu-lib";
 
 export default function HeaderUser() {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const { user } = useSelector((state) => state.Auth);
+  const history = useHistory();
 
   if (!user) return <div />;
 
   async function logout() {
     await api.post(`/referent/logout`);
     dispatch(setUser(null));
+    return history.push("/auth");
   }
 
   return (

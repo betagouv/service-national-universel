@@ -3,6 +3,7 @@ import "isomorphic-fetch";
 
 import * as Sentry from "@sentry/react";
 import { apiURL } from "../config";
+import { status } from "../utils";
 
 let fetch = window.fetch;
 
@@ -24,7 +25,7 @@ class api {
 
   goToAuth() {
     if (window && window.location && window.location.href) {
-      window.location.href = "/auth?unauthorized=1";
+      return (window.location.href = "/auth?unauthorized=1");
     }
   }
 
@@ -221,6 +222,7 @@ class api {
         if (response.status === 401) {
           this.goToAuth();
         }
+        console.log("coucou2");
         const res = await response.json();
         resolve(res);
       } catch (e) {
@@ -256,6 +258,9 @@ class api {
           this.goToAuth();
         }
         const res = await response.json();
+        if (response.status !== 200) {
+          return reject(res);
+        }
         resolve(res);
       } catch (e) {
         reject(e);
@@ -308,11 +313,13 @@ class api {
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
-
-        if (response.status === 401) {
+        if (response.status === 401 && window.location.href.indexOf("/auth") === -1) {
           this.goToAuth();
         }
         const res = await response.json();
+        if (response.status !== 200) {
+          return reject(res);
+        }
         resolve(res);
       } catch (e) {
         reject(e);
