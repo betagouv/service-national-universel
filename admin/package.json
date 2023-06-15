@@ -11,6 +11,7 @@
     "install": "node src/build-only-on-clevercloud.js",
     "build": "NODE_OPTIONS=--max_old_space_size=8192 vite build",
     "build:staging": "NODE_OPTIONS=--max_old_space_size=8192 vite build --mode staging",
+    "build:dev": "NODE_OPTIONS=--max_old_space_size=8192 vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint src --ext .js,.jsx",
     "lint:fix": "eslint --ext .js --fix src"

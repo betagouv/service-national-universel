@@ -36,7 +36,7 @@ export default defineConfig(({ command, mode }) => {
   }
 
   return {
-    build: { sourcemap: true, outDir: "build" },
+    build: { sourcemap: mode === "development" ? false : true, outDir: "build", port: 8082 },
     server: {
       port: 8082,
     },
