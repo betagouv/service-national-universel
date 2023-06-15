@@ -1,14 +1,18 @@
 const express = require("express");
 const Joi = require("joi");
 const passport = require("passport");
-const { ERRORS } = require("../../utils");
+const { ERRORS, notifDepartmentChange, YOUNG_STATUS_PHASE1, YOUNG_STATUS } = require("../../utils");
+const { getQPV, getDensity } = require("../../geo");
 const router = express.Router({ mergeParams: true });
 const YoungObject = require("../../models/young");
+const CohortObject = require("../../models/cohort");
 const { serializeYoung } = require("../../utils/serializer");
+const { getFilteredSessions } = require("../../utils/cohort");
 const { capture } = require("../../sentry");
-const { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated } = require("snu-lib");
+const { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const validator = require("validator");
 const { validateParents } = require("../../utils/validator");
+const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
 
 router.put("/profile", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -41,6 +45,12 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
   }
 });
 
+// Regles de modification d’adresse :
+// 1, Lorsque je suis affectée et jusqu’au jour de retour de séjour je ne peux pas modifier mon adresse.
+// 2, En cas de changement de département mon eligibilité doit être vérifiée si
+//    - mon statut d’inscription est “validée sur liste principale” OU “validée sur liste complémentaire” ET
+//    - mon statut phase 1 “en attente d’affectation”
+
 router.put("/address", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { value, error } = Joi.object({
@@ -62,17 +72,81 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       department: Joi.string().trim().required(),
       region: Joi.string().trim().required(),
       cityCode: Joi.string().trim().default("").allow("", null),
+      status: Joi.string().valid("VALIDATED", "WAITING_LIST", "NOT_ELIGIBLE").allow(null),
+      cohort: Joi.string().allow(null),
     }).validate(req.body, { stripUnknown: true });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const currentCohort = await CohortObject.findOne({ name: young.cohort });
+
+    // If the young is affected and the cohort is not ended address can't be updated.
+    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && new Date(currentCohort.dateEnd).valueOf() > Date.now()) {
+      return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+    }
+
+    if (
+      // Cohort and status should be checked
+      value.department !== young.department &&
+      value.cohort !== "à venir" &&
+      young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION &&
+      (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)
+    ) {
+      const availableSessions = await getFilteredSessions({ ...young, ...value });
+
+      const cohort = value.cohort ? value.cohort : young.cohort;
+      const status = value.status ? value.status : young.status;
+      let isGoalReached = false;
+
+      // Check cohort availability
+      const isEligible = availableSessions.find((s) => s.name === cohort);
+
+      if (!isEligible && status !== YOUNG_STATUS.NOT_ELIGIBLE) {
+        return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+      }
+
+      // Check if cohort goal is reached
+      if (isEligible) {
+        const fillingRate = await getFillingRate(value.department, cohort);
+        isGoalReached = fillingRate >= FILLING_RATE_LIMIT;
+      }
+
+      if (isGoalReached && status === YOUNG_STATUS.VALIDATED) {
+        return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+      }
+
+      // Address should be updated without any other modification.
+    } else if ((value.cohort && value.cohort !== young.cohort && value.cohort !== "à venir") || (value.status && value.status !== young.status)) {
+      return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+    }
+
+    if (young.department && value.department !== young.department) {
+      await notifDepartmentChange(value.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
+      await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young, { newDepartment: value.department });
+    }
 
     young.set(value);
     await young.save({ fromUser: req.user });
 
-    res.status(200).send({ ok: true, data: serializeYoung(young) });
+    // Check quartier prioritaires.
+    if (value.zip && value.city && value.address) {
+      const qpv = await getQPV(value.zip, value.city, value.address);
+      if (qpv === true) young.set({ qpv: "true" });
+      else if (qpv === false) young.set({ qpv: "false" });
+      else young.set({ qpv: "" });
+      await young.save({ fromUser: req.user });
+    }
+
+    // Check population density.
+    if (value.cityCode) {
+      const populationDensity = await getDensity(value.cityCode);
+      young.set({ populationDensity });
+      await young.save({ fromUser: req.user });
+    }
+
+    res.status(200).send({ ok: true, data: serializeYoung(young, young) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
