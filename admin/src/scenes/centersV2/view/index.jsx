@@ -12,7 +12,7 @@ import CenterInformations from "./CenterInformations";
 import Pencil from "../../../assets/icons/Pencil";
 import Trash from "../../../assets/icons/Trash";
 
-import { COHESION_STAY_START, canPutSpecificDateOnSessionPhase1, isSessionEditionOpen } from "snu-lib";
+import { COHESION_STAY_START, canPutSpecificDateOnSessionPhase1, formatLongDateFR, isSessionEditionOpen } from "snu-lib";
 
 import Field from "../components/Field";
 
@@ -21,6 +21,7 @@ import Loader from "../../../components/Loader";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import TimeSchedule from "../components/TimeSchedule";
 import ToggleDate from "../../../components/ui/forms/DateForm/ToggleDate";
+import dayjs from "dayjs";
 
 export default function Index({ ...props }) {
   const history = useHistory();
@@ -29,7 +30,6 @@ export default function Index({ ...props }) {
   const [center, setCenter] = useState();
   const [sessions, setSessions] = useState([]);
   const [focusedSession, setFocusedSession] = useState(null);
-  const [hasSpecificDate, setHasSpecificDate] = useState([]);
 
   const query = queryString.parse(location.search);
   const { cohorte: cohortQueryUrl } = query;
@@ -218,7 +218,7 @@ export default function Index({ ...props }) {
 
   if (!center) return <Loader />;
 
-  console.log(focusedSession);
+  console.log(focusedCohortData);
 
   return (
     <>
@@ -327,6 +327,15 @@ export default function Index({ ...props }) {
                       <div className="flex flex-col w-full">
                         <ToggleDate
                           label="Dates spécifiques"
+                          tooltipText={
+                            <p>
+                              Les dates de cette session diffèrent des dates officielles :{" "}
+                              <strong>{`${dayjs(focusedCohortData.dateStart).locale("fr").format("DD")} - ${dayjs(focusedCohortData.dateEnd)
+                                .locale("fr")
+                                .format("DD MMMM YYYY")}`}</strong>
+                              .
+                            </p>
+                          }
                           readOnly={!editingBottom || !canPutSpecificDateOnSessionPhase1(user)}
                           value={editInfoSession.hasSpecificDate}
                           onChange={() => setEditInfoSession({ ...editInfoSession, hasSpecificDate: !editInfoSession.hasSpecificDate })}
