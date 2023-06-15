@@ -168,3 +168,5 @@ export const debounce = (fn, delay) => {
     }, delay);
   };
 };
+
+export const desktopBreakpoint = 768;

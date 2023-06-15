@@ -4,7 +4,7 @@ import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
 import { getMeetingHour, getMeetingPointChoiceLimitDateForCohort, getReturnHour } from "../../../../../../utils/cohorts";
 import { isStepPDRDone } from "../../utils/steps.utils";
 import dayjs from "dayjs";
-const utc = require("dayjs/plugin/utc");
+import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 import CohortDateSummary from "../../../../../inscription2023/components/CohortDateSummary";
 import Loader from "../../../../../../components/Loader";
