@@ -612,20 +612,26 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
     const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt > validationDate);
 
     // On valide la phase 1 si toutes les condition sont réunis. Une exception : le jeune a été exclu.
-    if (isValidationDatePassed && isCohesionStayValid && isDepartureDateValid) {
-      if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
-        young.set({ statusPhase1: "NOT_DONE" });
+    if(isValidationDatePassed){
+      if (isValidationDatePassed && isCohesionStayValid && isDepartureDateValid) {
+        console.log("coucou")
+        if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
+          young.set({ statusPhase1: "NOT_DONE" });
+        } else {
+          young.set({ statusPhase1: "DONE" });
+        }
       } else {
-        young.set({ statusPhase1: "DONE" });
-      }
-    } else {
-      // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
-      if (
-        ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young?.departSejourMotif)
-      ) {
-        young.set({ statusPhase1: "DONE" });
-      } else {
-        young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
+        // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
+        if (
+          ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young?.departSejourMotif)
+        ) {
+          young.set({ statusPhase1: "DONE" });
+        } else if (young.cohesionStayPresence === "true" && !young.presenceJDM) {
+          young.set({ statusPhase1: "AFFECTED" });
+        } 
+        else {
+          young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
+        }
       }
     }
     await young.save({ fromUser: user });
