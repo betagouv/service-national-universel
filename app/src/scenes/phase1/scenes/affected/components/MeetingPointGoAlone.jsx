@@ -3,8 +3,9 @@ import LinearMap from "../../../../../assets/icons/LinearMap";
 import Check from "../../../../../assets/icons/Check";
 import dayjs from "dayjs";
 import { BorderButton } from "../../../../../components/buttons/SimpleButtons";
+import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR } from "../utils/steps.utils";
 
-function MeetingPointGoAlone({ center, onChoose, choosed, expired, meetingPointsCount, meetingHour, returnHour, departureDate, returnDate }) {
+function MeetingPointGoAlone({ center, onChoose, choosed, expired, meetingPointsCount, departureDate, returnDate }) {
   const [opened, setOpened] = useState(false);
 
   useEffect(() => {
@@ -35,11 +36,11 @@ function MeetingPointGoAlone({ center, onChoose, choosed, expired, meetingPoints
             className={`mt-4 text-left md:absolute md:top-[100%] md:mt-0 md:rounded-lg md:bg-[#FFFFFF] md:p-6 md:shadow ${
               meetingPointsCount === 0 ? "md:left-[-70px]" : "md:right-[-120px]"
             }`}>
-            <div className="text-sm font-bold text-[#242526] md:whitespace-nowrap md:text-lg">Rendez vous directement à votre lieu d’affectation</div>
+            <div className="text-sm font-bold text-[#242526] md:whitespace-nowrap md:text-lg">Rendez-vous directement à votre lieu d’affectation</div>
             <div className="text-sm text-gray-700 md:whitespace-nowrap">{center.address + " " + center.zip + " " + center.city}</div>
             <div className="mt-4 flex flex-col md:flex-row md:items-center">
-              <CenterSchedule type="Aller" hour={meetingHour} date={departureDate} className="mb-[16px] md:mb-0 md:mr-4" />
-              <CenterSchedule type="Retour" hour={returnHour} date={returnDate} />
+              <CenterSchedule type="Aller" hour={ALONE_ARRIVAL_HOUR} date={departureDate} className="mb-[16px] md:mb-0 md:mr-4" />
+              <CenterSchedule type="Retour" hour={ALONE_DEPARTURE_HOUR} date={returnDate} />
             </div>
           </div>
         )}

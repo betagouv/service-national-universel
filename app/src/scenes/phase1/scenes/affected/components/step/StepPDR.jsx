@@ -179,13 +179,14 @@ export default function StepPDR({ center, departureDate, returnDate }) {
               ))}
               <MeetingPointGoAlone
                 center={center}
-                young={young}
                 onChoose={() => {
                   return setModalMeetingPoint({ isOpen: true });
                 }}
                 choosed={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
                 expired={pdrChoiceExpired}
                 meetingPointsCount={meetingPoints.length}
+                departureDate={departureDate}
+                returnDate={returnDate}
               />
             </div>
           ) : (
@@ -298,13 +299,13 @@ function MobileDateDetail({ departureDate, returnDate, startHour, returnHour }) 
       <div className="">
         <div className="font-bold">Aller à {startHour}</div>
         <div className="text-xs">
-          <span className="capitalize">{dayjs(departureDate).locale("fr").format("dddd")}</span> <span>{dayjs(departureDate).locale("fr").format("D MMMM")}</span>
+          <span className="capitalize">{dayjs(departureDate).locale("fr").format("dddd D MMMM")}</span>
         </div>
       </div>
       <div className="">
         <div className="font-bold">Retour à {returnHour}</div>
         <div className="text-xs">
-          <span className="capitalize">{dayjs(returnDate).locale("fr").format("dddd")}</span> <span>{dayjs(returnDate).locale("fr").format("D MMMM")}</span>
+          <span className="capitalize">{dayjs(returnDate).locale("fr").format("dddd D MMMM")}</span>
         </div>
       </div>
     </div>
