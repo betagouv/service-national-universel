@@ -94,27 +94,36 @@ export function getCohortPeriod(cohort) {
 /**
  * @param {object} young
  * @param {object} [meetingPoint]
- * @returns {date} the date of the departure of the young from the meeting point if they have one,
- * or the default date for the cohort if they don't (local transport or traveling by own means).
+ * @param {object} [session]
+ * @returns {date} the date of departure to the cohesion center from the following resource:
+ * 1. the meeting point if they have one (young has a transport line)
+ * 2. the session if it has a specific date
+ * 3. the default date for the cohort.
  */
-export async function getDepartureDate(young) {
-  try {
-    if (young.meetingPointId) {
-      const meetingPoint = await api.get("/young/point-de-rassemblement/withbus/");
-      return meetingPoint.bus.departuredDate;
-    }
-    if (young.cohesionCenterId) {
-      const session = await api.get("/young/session/");
-      return session.dateStart;
-    }
-    if (young.cohort !== "à venir") {
-      const cohort = await api.get(`/cohort/${young.cohort}`);
-      return cohort.dateStart;
-    }
-    return undefined;
-  } catch (e) {
-    capture(e);
-  }
+// export async function getDepartureDate(young) {
+//   try {
+//     if (young.meetingPointId) {
+//       const meetingPoint = await api.get("/young/point-de-rassemblement/withbus/");
+//       return meetingPoint.bus.departuredDate;
+//     }
+//     if (young.cohesionCenterId) {
+//       const session = await api.get("/young/session/");
+//       return session.dateStart;
+//     }
+//     if (young.cohort !== "à venir") {
+//       const cohort = await api.get(`/cohort/${young.cohort}`);
+//       return cohort.dateStart;
+//     }
+//     return undefined;
+//   } catch (e) {
+//     capture(e);
+//   }
+// }
+export function getDepartureDate(young, meetingPoint, session) {
+  if (meetingPoint?.bus?.departuredDate) return meetingPoint?.bus?.departuredDate;
+  if (meetingPoint?.departuredDate) return meetingPoint?.departuredDate;
+  if (session?.dateStart) return session?.dateStart;
+  return getGlobalDepartureDate(young.cohort);
 }
 
 /**
