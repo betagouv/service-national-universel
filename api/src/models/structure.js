@@ -337,7 +337,7 @@ Schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-Schema.plugin(mongooseElastic(esClient, { ignore: ["jvaRawData"] }), MODELNAME);
+Schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["jvaRawData"] }), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

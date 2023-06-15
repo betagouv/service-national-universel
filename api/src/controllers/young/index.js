@@ -123,7 +123,7 @@ router.post("/signup_invite", async (req, res) => {
 
     young.set({ password });
     young.set({ registredAt: Date.now() });
-    young.set({ lastLoginAt: Date.now() });
+    young.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
     young.set({ invitationToken: "" });
     young.set({ invitationExpires: null });
 
@@ -906,7 +906,7 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
 
     const updatedYoung = await young.save({ fromUser: req.user });
 
-    res.status(200).send({ ok: true, data: updatedYoung });
+    res.status(200).send({ ok: true, data: serializeYoung(updatedYoung, updatedYoung) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -944,7 +944,7 @@ router.put("/abandon", passport.authenticate("young", { session: false, failWith
 
     const updatedYoung = await young.save({ fromUser: req.user });
 
-    res.status(200).send({ ok: true, data: updatedYoung });
+    res.status(200).send({ ok: true, data: serializeYoung(updatedYoung, updatedYoung) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -1040,7 +1040,7 @@ router.post("/phase1/multiaction/depart", passport.authenticate("referent", { se
     for (let young of youngs) {
       young.set({ departSejourAt, departSejourMotif, departSejourMotifComment, departInform: "true" });
       await young.save({ fromUser: req.user });
-      await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
+      await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
     }
 
     res.status(200).send({ ok: true, data: youngs.map(serializeYoung) });
@@ -1089,7 +1089,7 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
       }
       await young.save({ fromUser: req.user });
       const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
-      await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
+      await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
       await updatePlacesSessionPhase1(sessionPhase1, req.user);
       if (key === "cohesionStayPresence" && newValue === "true") {
         let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];

@@ -354,6 +354,7 @@ router.post("/signup_invite", async (req, res) => {
       password,
       registredAt: Date.now(),
       lastLoginAt: Date.now(),
+      lastActivityAt: Date.now(),
       invitationToken: "",
       invitationExpires: null,
       acceptCGU,

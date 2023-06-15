@@ -510,7 +510,7 @@ const HeroStyle = styled.div`
     @media (max-width: 768px) {
       min-height: 0;
     }
-    ${({ thumbImage = HERO_IMAGES_LIST[1] }) => `background: url(${require(`../../assets/${thumbImage}`)}) no-repeat center;`}
+    /* background: url(images[../../assets/programmes-engagement/${HERO_IMAGES_LIST[1]}]?.default) no-repeat center; */
     background-size: cover;
     flex: 1;
     -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);

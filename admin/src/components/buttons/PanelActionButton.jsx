@@ -1,11 +1,12 @@
 import React from "react";
 import styled from "styled-components";
-
 import LoadingButton from "./LoadingButton";
+
+const images = import.meta.globEager("../../assets/panel-icons/*.svg");
 
 export default function PanelActionButton({ icon, title, ...rest }) {
   return (
-    <Button icon={icon ? require(`../../assets/${icon}.svg`) : null} color="#fff" {...rest}>
+    <Button icon={icon ? images[`../../assets/panel-icons/${icon}.svg`]?.default : null} color="#fff" {...rest}>
       {title}
     </Button>
   );

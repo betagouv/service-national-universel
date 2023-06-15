@@ -11,8 +11,6 @@ const StructureObject = require("../../models/structure");
 const Joi = require("joi");
 const { serializeApplications } = require("../../utils/es-serializer");
 
-const { serializeApplications } = require("../../utils/es-serializer");
-
 async function buildApplicationContext(user) {
   const contextFilters = [];
 

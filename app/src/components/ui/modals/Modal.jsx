@@ -3,7 +3,7 @@ import React, { Fragment } from "react";
 import ButtonPrimary from "../buttons/ButtonPrimary";
 import ButtonLight from "../buttons/ButtonLight";
 
-const Modal = ({ isOpen = false, onClose: handleClose = () => {}, children = null, className = "w-full bg-white p-4 md:w-[512px] md:p-6" }) => {
+const Modal = ({ isOpen = false, onClose: handleClose = () => {}, children = <></>, className = "w-full bg-white p-4 md:w-[512px] md:p-6" }) => {
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-20" onClose={handleClose}>
