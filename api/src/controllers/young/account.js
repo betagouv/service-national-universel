@@ -72,7 +72,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
     young.set(value);
     await young.save({ fromUser: req.user });
 
-    res.status(200).send({ ok: true, data: serializeYoung(young) });
+    res.status(200).send({ ok: true, data: serializeYoung(young, young) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
