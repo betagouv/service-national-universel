@@ -231,11 +231,6 @@ export default function CenterYoungIndex() {
 
   const viewAttestation = async () => {
     setLoading(true);
-    // await downloadPDF({
-    //   url: `/session-phase1/${sessionId}/certificate`,
-    //   body: { options: { landscape: true } },
-    //   fileName: `attestations`,
-    // });
     try {
       const file = await api.openpdf(`/session-phase1/${sessionId}/certificate`, {});
       download(file, "certificates.zip");

@@ -45,6 +45,11 @@ const destinataireLabel = ({ firstName, lastName }, ministres) => {
   return `félicite${ministres.length > 1 ? "nt" : ""} <strong>${firstName} ${lastName}</strong>`;
 };
 
+const noticeImpression = async () => {
+  const html = fs.readFileSync(path.resolve(__dirname, "./notice.html"), "utf8");
+  return html;
+}
+
 const phase1 = async (young) => {
   const d = COHESION_STAY_END[young.cohort];
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
@@ -105,4 +110,4 @@ const snu = (young) => {
     .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
 };
 
-module.exports = { phase1, phase2, phase3, snu };
+module.exports = { phase1, phase2, phase3, snu, noticeImpression };
