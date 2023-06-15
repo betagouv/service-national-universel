@@ -1,8 +1,8 @@
 import React, { Fragment } from "react";
-import Toggle from "../../../components/Toggle";
-import DateIcon from "../../../assets/icons/DateIcon";
+import Toggle from "../../../Toggle";
+import DateIcon from "../../../../assets/icons/DateIcon";
 import { Popover, Transition } from "@headlessui/react";
-import DatePicker from "../../../components/ui/forms/DatePicker";
+import DatePicker from "../DatePicker";
 import dayjs from "dayjs";
 
 function classNames(...classes) {

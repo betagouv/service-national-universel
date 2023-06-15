@@ -318,6 +318,10 @@ function canViewSessionPhase1(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
+function canPutSpecificDateOnSessionPhase1(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+}
+
 function isSessionEditionOpen(actor, cohort) {
   switch (actor?.role) {
     case ROLES.ADMIN:
@@ -867,5 +871,5 @@ export {
   canSendPlanDeTransport,
   canSendImageRightsForSessionPhase1,
   isSupervisor,
-  isAdmin,
+  canPutSpecificDateOnSessionPhase1,
 };
