@@ -97,10 +97,24 @@ export function getCohortPeriod(cohort) {
  * @returns {date} the date of the departure of the young from the meeting point if they have one,
  * or the default date for the cohort if they don't (local transport or traveling by own means).
  */
-export function getDepartureDate(young, meetingPoint = null) {
-  if (meetingPoint?.departuredDate) return meetingPoint?.departuredDate;
-  if (meetingPoint?.bus?.departuredDate) return meetingPoint?.bus?.departuredDate;
-  return getGlobalDepartureDate(young);
+export async function getDepartureDate(young) {
+  try {
+    if (young.meetingPointId) {
+      const meetingPoint = await api.get("/young/point-de-rassemblement/withbus/");
+      return meetingPoint.bus.departuredDate;
+    }
+    if (young.cohesionCenterId) {
+      const session = await api.get("/young/session/");
+      return session.dateStart;
+    }
+    if (young.cohort !== "à venir") {
+      const cohort = await api.get(`/cohort/${young.cohort}`);
+      return cohort.dateStart;
+    }
+    return undefined;
+  } catch (e) {
+    capture(e);
+  }
 }
 
 /**
