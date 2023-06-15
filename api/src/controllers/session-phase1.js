@@ -67,6 +67,8 @@ const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { readTemplate, renderWithTemplate } = require("../templates/droitImage");
 const fetch = require("node-fetch");
+const JSZip = require('jszip');
+const { phase1 } = require('../../src/templates/certificate/index')
 
 const TIMEOUT_PDF_SERVICE = 15000;
 
@@ -304,67 +306,79 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       capture("No young found with body: " + JSON.stringify(body));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
+//     let html = `<!DOCTYPE html>
+//   <html lang="en">
+//     <head>
+//       <meta charset="UTF-8" />
+//       <title>Attestation phase 1 - SNU</title>
+//       <link rel="stylesheet" href="{{BASE_URL}}/css/style.css" />
+//     </head>
 
-    let html = `<!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <title>Attestation phase 1 - SNU</title>
-      <link rel="stylesheet" href="{{BASE_URL}}/css/style.css" />
-    </head>
+//     <body style="margin: 0; font-family: Marianne, Helvetica, Arial, sans-serif">
+//       {{BODY}}
+//     </body>
+// </html>`;
 
-    <body style="margin: 0; font-family: Marianne, Helvetica, Arial, sans-serif">
-      {{BODY}}
-    </body>
-</html>`;
-
-    const subHtml = `
-  <div style="position: relative; margin: 0;min-height:100vh;width:100%;max-height:100vh;">
-    <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="bg" />
-      <div class="container">
-        <div class="text-center l4">
-        <br />
-          <p>{{TO}}, volontaire à l'édition {{COHORT}},</p>
-          <p>pour la réalisation de son <strong>séjour de cohésion</strong>, {{COHESION_DATE}}, au centre de :</p>
-          <p>{{COHESION_CENTER_NAME}} {{COHESION_CENTER_LOCATION}},</p>
-          <p>validant la <strong>phase 1</strong> du Service National Universel.</p>
-          <br />
-          <p class="text-date">Fait le {{DATE}}</p>
-        </div>
-      </div>
-    </div>`;
+//     const subHtml = `
+//   <div style="position: relative; margin: 0;min-height:100vh;width:100%;max-height:100vh;">
+//     <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="bg" />
+//       <div class="container">
+//         <div class="text-center l4">
+//         <br />
+//           <p>{{TO}}, volontaire à l'édition {{COHORT}},</p>
+//           <p>pour la réalisation de son <strong>séjour de cohésion</strong>, {{COHESION_DATE}}, au centre de :</p>
+//           <p>{{COHESION_CENTER_NAME}} {{COHESION_CENTER_LOCATION}},</p>
+//           <p>validant la <strong>phase 1</strong> du Service National Universel.</p>
+//           <br />
+//           <p class="text-date">Fait le {{DATE}}</p>
+//         </div>
+//       </div>
+//     </div>`;
 
     if (!youngs || youngs.length === 0) {
       return res.status(400).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
     }
 
-    const data = [];
-    const d = COHESION_STAY_END[youngs[0].cohort];
-    const ministresData = getMinistres(d);
-    const template = ministresData.template;
-    const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
+    // const data = [];
+    // const d = COHESION_STAY_END[youngs[0].cohort];
+    // const ministresData = getMinistres(d);
+    // const template = ministresData.template;
+    // const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
+    let zip = new Zip();
     for (const young of youngs) {
-      data.push(
-        subHtml
-          .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
-          .replace(/{{COHORT}}/g, sanitizeAll({ ...END_DATE_PHASE1, ...PHASE1_YOUNG_ACCESS_LIMIT }[young.cohort]?.getYear() + 1900))
-          .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort]?.toLowerCase()))
-          .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
-          .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))
-          .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
-          .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
-          .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }))),
-      );
+      // data.push(
+      //   subHtml
+      //     .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
+      //     .replace(/{{COHORT}}/g, sanitizeAll({ ...END_DATE_PHASE1, ...PHASE1_YOUNG_ACCESS_LIMIT }[young.cohort]?.getYear() + 1900))
+      //     .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort]?.toLowerCase()))
+      //     .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
+      //     .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))
+      //     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+      //     .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
+      //     .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }))),
+      // );
+      
+      const html = await phase1(young)
+      // const context = await timeout(getPDF(html, req.body.options || { format: "A4", margin: 0 }), TIMEOUT_PDF_SERVICE);
+      const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
+      zip.addFile(young.lastName + " " + young.firstName + " - certificat.pdf", context);
     }
 
+    // Create and send the zip file
+    res.set({
+      "content-disposition": `inline; filename="certificats.zip"`,
+      "content-type": "application/zip",
+      "cache-control": "public, max-age=1",
+    });
+    res.status(200).end(zip.toBuffer());
     const newhtml = html.replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl())).replace(/{{BODY}}/g, data.join(""));
+    
+    // const buffer = await renderFromHtml(newhtml, req.body.options || { format: "A4", margin: 0 });
 
-    const buffer = await renderFromHtml(newhtml, req.body.options || { format: "A4", margin: 0 });
-
-    res.contentType("application/pdf");
-    res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
-    res.set("Cache-Control", "public, max-age=1");
-    res.send(buffer);
+    // res.contentType("application/pdf");
+    // res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
+    // res.set("Cache-Control", "public, max-age=1");
+    // res.send(buffer);
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -889,7 +903,6 @@ async function getPDF(html, options) {
     headers: { "Content-Type": "application/json", Accept: "application/pdf" },
     body: JSON.stringify({ html, options }),
   });
-
   if (response.status && response.status !== 200) {
     throw new Error("Error with PDF service");
   }
