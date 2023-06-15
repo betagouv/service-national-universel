@@ -1,4 +1,3 @@
-import Img2 from "snu-lib";
 import React from "react";
 import { Modal } from "reactstrap";
 import { translateStatusMilitaryPreparationFiles, translate } from "../../../../utils";

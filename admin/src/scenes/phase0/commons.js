@@ -1,7 +1,8 @@
 import countries from "i18n-iso-countries";
 import constants from "snu-lib/constants";
 import translation from "snu-lib/translation";
-countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
+import * as fr from "i18n-iso-countries/langs/fr.json";
+countries.registerLocale(fr);
 const countriesList = countries.getNames("fr", { select: "official" });
 
 export const SPECIFIC_SITUATIONS_KEY = [
