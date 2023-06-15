@@ -49,7 +49,6 @@ import ButtonLight from "../../components/ui/buttons/ButtonLight";
 import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
 import PhoneField from "./components/PhoneField";
 import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
-import { environment } from "../../config";
 import downloadPDF from "../../utils/download-pdf";
 
 const REJECTION_REASONS = {
@@ -1800,7 +1799,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                 </a>
               )}
             </div>
-            {environment !== "production" && (young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && (
+            {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && (
               <ButtonLight className="mt-2" onClick={downloadImageRightDocument}>
                 Télécharger le droit à l&apos;image {pdfDownloading}
               </ButtonLight>
@@ -1912,7 +1911,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                         </a>
                       )}
                     </div>
-                    {environment !== "production" && (young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && (
+                    {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && (
                       <ButtonLight className="mt-2" onClick={downloadImageRightDocument}>
                         Télécharger le droit à l&apos;image {pdfDownloading}
                       </ButtonLight>
