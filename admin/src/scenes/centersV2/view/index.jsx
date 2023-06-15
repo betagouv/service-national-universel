@@ -328,13 +328,15 @@ export default function Index({ ...props }) {
                         <ToggleDate
                           label="Dates spécifiques"
                           tooltipText={
-                            <p>
-                              Les dates de cette session diffèrent des dates officielles :{" "}
-                              <strong>{`${dayjs(focusedCohortData.dateStart).locale("fr").format("DD")} - ${dayjs(focusedCohortData.dateEnd)
-                                .locale("fr")
-                                .format("DD MMMM YYYY")}`}</strong>
-                              .
-                            </p>
+                            focusedCohortData ? (
+                              <p>
+                                Les dates de cette session diffèrent des dates officielles :{" "}
+                                <strong>{`${dayjs(focusedCohortData.dateStart).locale("fr").format("DD")} - ${dayjs(focusedCohortData.dateEnd)
+                                  .locale("fr")
+                                  .format("DD MMMM YYYY")}`}</strong>
+                                .
+                              </p>
+                            ) : null
                           }
                           readOnly={!editingBottom || !canPutSpecificDateOnSessionPhase1(user)}
                           value={editInfoSession.hasSpecificDate}
