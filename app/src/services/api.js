@@ -1,7 +1,6 @@
 import "isomorphic-fetch";
 import fetchRetry from "fetch-retry";
 import { apiURL } from "../config";
-console.log("🚀 ~ file: api.js:4 ~ apiURL:", apiURL);
 import * as Sentry from "@sentry/react";
 
 let fetch = window.fetch;

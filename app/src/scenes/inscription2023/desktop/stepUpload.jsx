@@ -17,7 +17,7 @@ import ErrorMessage from "../components/ErrorMessage";
 import MyDocs from "../components/MyDocs";
 import FileImport from "../components/FileImport";
 import { getCorrectionsForStepUpload } from "../../../utils/navigation";
-const images = import.meta.globEager("../../../assets/programmes-engagement/*");
+const images = import.meta.globEager("../../../assets/IDProof/*");
 
 export default function StepUpload() {
   let { category } = useParams();

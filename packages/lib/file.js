@@ -7,7 +7,6 @@ function download(file, fileName) {
     const a = document.createElement("a");
     document.body.appendChild(a);
     a.href = URL.createObjectURL(file);
-
     a.download = fileName;
     a.click();
   }

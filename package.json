@@ -8,7 +8,6 @@
     "test": "turbo build --filter='./packages/lib' && turbo run test --filter=api"
   },
   "dependencies": {
-    "@swc/plugin-styled-components": "^1.5.67",
     "turbo": "^1.9.4"
   },
   "workspaces": [
