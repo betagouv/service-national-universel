@@ -29,10 +29,8 @@ const {
   CELLAR_KEYSECRET_SUPPORT,
   PUBLIC_BUCKET_NAME_SUPPORT,
   translateFileStatusPhase1,
-  getAge,
 } = require("../config");
-const { SUB_ROLES } = require("snu-lib");
-const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES } = require("snu-lib");
+const { YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, SUB_ROLES } = require("snu-lib");
 const { capture } = require("../sentry");
 const { getCohortValidationDate } = require("./cohort");
 
@@ -612,9 +610,9 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
     const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt > validationDate);
 
     // On valide la phase 1 si toutes les condition sont réunis. Une exception : le jeune a été exclu.
-    if(isValidationDatePassed){
+    if (isValidationDatePassed) {
       if (isValidationDatePassed && isCohesionStayValid && isDepartureDateValid) {
-        console.log("coucou")
+        console.log("coucou");
         if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
           young.set({ statusPhase1: "NOT_DONE" });
         } else {
@@ -622,20 +620,17 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
         }
       } else {
         // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
-        if (
-          ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young?.departSejourMotif)
-        ) {
+        if (["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young?.departSejourMotif)) {
           young.set({ statusPhase1: "DONE" });
         } else if (young.cohesionStayPresence === "true" && !young.presenceJDM) {
           young.set({ statusPhase1: "AFFECTED" });
-        } 
-        else {
+        } else {
           young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
         }
       }
     }
     await young.save({ fromUser: user });
-  } catch(e) {
+  } catch (e) {
     console.log(e);
     capture(e);
   }
@@ -839,6 +834,8 @@ module.exports = {
   checkStatusContract,
   sanitizeAll,
   YOUNG_STATUS,
+  YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE2,
   YOUNG_SITUATIONS,
   STEPS,
   STEPS2023,
