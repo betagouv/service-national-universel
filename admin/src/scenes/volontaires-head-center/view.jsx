@@ -7,17 +7,22 @@ import VolontairePhase0View from "../phase0/view";
 import Phase1 from "../volontaires/view/phase1";
 
 import Breadcrumbs from "../../components/Breadcrumbs";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function VolontaireHeadCenter({ ...props }) {
   const [young, setYoung] = useState();
+  const setDocumentTitle = useDocumentTitle("Volontaires");
+
+  const getYoung = async () => {
+    const id = props.match && props.match.params && props.match.params.id;
+    if (!id) return <div />;
+    const { data } = await api.get(`/referent/young/${id}`);
+    setYoung(data);
+    setDocumentTitle(`${data?.firstName} ${data?.lastName}`);
+  };
 
   useEffect(() => {
-    (async () => {
-      const id = props.match && props.match.params && props.match.params.id;
-      if (!id) return <div />;
-      const { data } = await api.get(`/referent/young/${id}`);
-      setYoung(data);
-    })();
+    getYoung();
   }, [props.match.params.id]);
 
   if (!young) return <div />;
@@ -26,7 +31,7 @@ export default function VolontaireHeadCenter({ ...props }) {
       <Breadcrumbs items={[{ label: "Volontaires", to: `/centre/${young.cohesionCenterId}/${young.sessionPhase1Id}/general` }, { label: "Fiche du volontaire" }]} />
       <Switch>
         <SentryRoute path="/volontaire/:id/phase1" component={() => <Phase1 young={young} />} />
-        <SentryRoute path="/volontaire/:id" component={() => <VolontairePhase0View young={young} globalMode="readonly" />} />
+        <SentryRoute path="/volontaire/:id" component={() => <VolontairePhase0View young={young} globalMode="readonly" onChange={getYoung} />} />
       </Switch>
     </>
   );
