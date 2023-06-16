@@ -146,7 +146,7 @@ const ListPoints = ({ user }) => {
             }}
             selectedFilters={selectedFilters}
             icon={<BsDownload className="text-gray-400" />}
-            css={{
+            customCss={{
               override: true,
               button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
               loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
@@ -297,6 +297,13 @@ const ListSessions = ({ user, firstSession }) => {
             filters={filterArray}
             exportTitle="point_de_rassemblement"
             route="/elasticsearch/pointderassemblement/export"
+            selectedFilters={selectedFilters}
+            icon={<BsDownload className="text-gray-400" />}
+            customCss={{
+              override: true,
+              button: `text-gray-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+              loadingButton: `text-gray-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
+            }}
             transform={async (data) => {
               const youngsByMettingPoints = await getYoungsByPdr(data.map((d) => d._id));
               const linesByMettingPoints = await getLinesByPdr(data.map((d) => d._id));
@@ -319,13 +326,6 @@ const ListSessions = ({ user, firstSession }) => {
                 });
               }
               return res;
-            }}
-            selectedFilters={selectedFilters}
-            icon={<BsDownload className="text-gray-400" />}
-            css={{
-              override: true,
-              button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
-              loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
             }}
           />
         </div>
