@@ -109,7 +109,7 @@ export default function VolontaireList() {
               route="/elasticsearch/young/search?tab=volontaire"
               setData={(value) => setData(value)}
               filters={filterArray}
-              searchPlaceholder="Rechercher par prénom, nom, email, ville, code postal..."
+              searchPlaceholder="Rechercher par prénom, nom, email, code postal..."
               selectedFilters={selectedFilters}
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
