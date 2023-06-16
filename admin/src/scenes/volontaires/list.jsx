@@ -91,7 +91,7 @@ export default function VolontaireList() {
                 selectedFilters={selectedFilters}
                 setIsOpen={() => true}
                 icon={<BsDownload className="text-white h-4 w-4 group-hover:!text-blue-600" />}
-                css={{
+                customCss={{
                   override: true,
                   button: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
                   loadingButton: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,

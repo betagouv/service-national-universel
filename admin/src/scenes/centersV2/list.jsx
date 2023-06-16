@@ -216,7 +216,7 @@ const ListSession = ({ firstSession }) => {
             }}
             selectedFilters={selectedFilters}
             icon={<BsDownload className="text-gray-400" />}
-            css={{
+            customCss={{
               override: true,
               button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
               loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
@@ -369,7 +369,7 @@ const ListCenter = ({ firstSession }) => {
             selectedFilters={selectedFilters}
             searchPlaceholder="Rechercher par mots clés, ville, code postal..."
             icon={<BsDownload className="text-gray-400" />}
-            css={{
+            customCss={{
               override: true,
               button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
               loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,

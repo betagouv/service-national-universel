@@ -16,7 +16,7 @@ export default function ExportComponent({
   searchType = "export",
   fieldsToExport = "*",
   setIsOpen,
-  css = { override: false },
+  customCss,
   icon,
   selectedFilters,
 }) {
@@ -49,15 +49,15 @@ export default function ExportComponent({
         transform={transform}
         searchType={searchType}
         fieldsToExport={fieldsToExport}
-        css={css}
+        customCss={customCss}
       />
     );
   }
 
   return (
     <div className={setIsOpen && "w-fit"}>
-      {css?.override ? (
-        <LoadingButtonV2 onClick={onClick} style={css.button}>
+      {customCss?.override ? (
+        <LoadingButtonV2 onClick={onClick} style={customCss.button}>
           <div className={icon && "flex items-center gap-2"}>
             {icon ? icon : null}
             {title}
@@ -80,7 +80,7 @@ export default function ExportComponent({
   );
 }
 
-function Loading({ onFinish, loading, exportTitle, transform, selectedFilters, route, searchType, fieldsToExport, css }) {
+function Loading({ onFinish, loading, exportTitle, transform, selectedFilters, route, searchType, fieldsToExport, customCss }) {
   const STATUS_LOADING = "Récupération des données";
   const STATUS_TRANSFORM = "Mise en forme";
   const STATUS_EXPORT = "Création du fichier";
@@ -118,8 +118,8 @@ function Loading({ onFinish, loading, exportTitle, transform, selectedFilters, r
 
   return (
     <div className={fieldsToExport !== "*" && "w-full"}>
-      {css?.override ? (
-        <LoadingButtonV2 loading={loading || run} loadingText={status} style={css.loadingButton}></LoadingButtonV2>
+      {customCss?.override ? (
+        <LoadingButtonV2 loading={loading || run} loadingText={status} style={customCss.loadingButton}></LoadingButtonV2>
       ) : (
         <LoadingButton loading={loading || run} loadingText={status}></LoadingButton>
       )}
