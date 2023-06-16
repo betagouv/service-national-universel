@@ -1,3 +1,23 @@
+# [1.293.0](https://github.com/betagouv/service-national-universel/compare/v1.292.0...v1.293.0) (2023-06-16)
+
+
+### Bug Fixes
+
+* **admin:** style export component ([#2709](https://github.com/betagouv/service-national-universel/issues/2709)) ([c51fb59](https://github.com/betagouv/service-national-universel/commit/c51fb598335e1fc21081b392e771666ada670dc2))
+* **admin/api:** young search ([71fef4e](https://github.com/betagouv/service-national-universel/commit/71fef4e994313bc9493a618f99c9af317ef829db))
+* **api:** dates convoc ([0e5fa10](https://github.com/betagouv/service-national-universel/commit/0e5fa10d0abfcc6bc90b3f08d0bac7405079fd6c))
+
+
+### Features
+
+* **admin:** Chef de centre : possibilité d’envoyer une demande de modification du droit à l’image (individuelle) ([#2703](https://github.com/betagouv/service-national-universel/issues/2703)) ([a5cdb25](https://github.com/betagouv/service-national-universel/commit/a5cdb2552814d26271a2c9f346b92de00e733d9a))
+* **api:** update autovalidationSessionPhase1 for cohort: Juin 2023 ([#2710](https://github.com/betagouv/service-national-universel/issues/2710)) ([1e2b2d4](https://github.com/betagouv/service-national-universel/commit/1e2b2d40df79c5fc40c1b668ffde30a2f1eff719))
+
+
+### Reverts
+
+* Revert "feat(admin/app): gestion des 401 (#2704)" ([80688be](https://github.com/betagouv/service-national-universel/commit/80688be40858dab390b7c9bfb32eba913040abcb)), closes [#2704](https://github.com/betagouv/service-national-universel/issues/2704)
+
 # [1.292.0](https://github.com/betagouv/service-national-universel/compare/v1.291.0...v1.292.0) (2023-06-15)
 
 
