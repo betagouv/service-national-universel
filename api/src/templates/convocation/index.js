@@ -17,6 +17,7 @@ const { formatStringDate, formatStringDateTimezoneUTC, translateCohortTemp, getD
 
 const datefns = require("date-fns");
 var { fr } = require("date-fns/locale");
+const { regionsListDROMS } = require("snu-lib/region-and-departments");
 
 function getBg() {
   return getSignedUrl("convocation/convocation_template_base.png");
@@ -61,8 +62,39 @@ const render = async (young) => {
     if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
     const contacts = service?.contacts.filter((c) => c.cohort === young.cohort) || [];
 
-    const departureDate = getDepartureDate(young, ligneBus, session, cohort);
-    const returnDate = getReturnDate(young, ligneBus, session, cohort);
+    const departureDate = () => {
+      if (ligneBus?.departuredDate) {
+        return ligneBus?.departuredDate;
+      }
+      if (session.dateStart) {
+        const sessionDateStart = new Date(session.dateStart);
+        sessionDateStart.setHours(sessionDateStart.getHours() + 12);
+        return sessionDateStart;
+      }
+      if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
+        return new Date(2023, 6, 5);
+      }
+      const cohortDateStart = new Date(cohort?.dateStart);
+      cohortDateStart.setHours(cohortDateStart.getHours() + 12);
+      return cohortDateStart;
+    };
+
+    const returnDate = () => {
+      if (ligneBus?.returnDate) {
+        return ligneBus?.returnDate;
+      }
+      if (session.dateEnd) {
+        const sessionDateEnd = new Date(session.dateEnd);
+        sessionDateEnd.setHours(sessionDateEnd.getHours() + 12);
+        return sessionDateEnd;
+      }
+      if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
+        return new Date(2023, 6, 17);
+      }
+      const cohortDateEnd = new Date(cohort?.dateEnd);
+      cohortDateEnd.setHours(cohortDateEnd.getHours() + 12);
+      return cohortDateEnd;
+    };
 
     const html = fs.readFileSync(path.resolve(__dirname, "./cohesion.html"), "utf8");
     return html

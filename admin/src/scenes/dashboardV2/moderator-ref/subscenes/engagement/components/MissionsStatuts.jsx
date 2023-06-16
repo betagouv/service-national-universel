@@ -166,7 +166,7 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
           }
           return result;
         }}
-        css={{ override: true, button: "bg-gray-100 rounded text-gray-900 text-xs font-medium py-[7px] px-[10px] hover:bg-gray-200" }}
+        customCss={{ override: true, button: "bg-gray-100 rounded text-gray-900 text-xs font-medium py-[7px] px-[10px] hover:bg-gray-200" }}
       />
     </ReactiveBase>
   );

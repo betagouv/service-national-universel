@@ -19,7 +19,7 @@ export default function ExportComponent({
   defaultQuery = () => ({ query: { query: { match_all: {} } } }),
   fieldsToExport = "*",
   setIsOpen,
-  css = { override: false },
+  customCss = { override: false },
   icon,
 }) {
   const [exporting, setExporting] = useState(false);
@@ -70,7 +70,7 @@ export default function ExportComponent({
               transform={transform}
               searchType={searchType}
               fieldsToExport={fieldsToExport}
-              css={css}
+              customCss={customCss}
             />
           );
         }}
@@ -80,8 +80,8 @@ export default function ExportComponent({
 
   return (
     <div className={setIsOpen && "w-full"}>
-      {css?.override ? (
-        <LoadingButtonV2 onClick={onClick} style={css.button}>
+      {customCss?.override ? (
+        <LoadingButtonV2 onClick={onClick} style={customCss.button}>
           <div className={icon && "flex items-center gap-2"}>
             {icon ? icon : null}
             {title}
@@ -104,7 +104,7 @@ export default function ExportComponent({
   );
 }
 
-function Loading({ onFinish, loading, exportTitle, transform, currentQuery, index, searchType, fieldsToExport, css }) {
+function Loading({ onFinish, loading, exportTitle, transform, currentQuery, index, searchType, fieldsToExport, customCss }) {
   const STATUS_LOADING = "Récupération des données";
   const STATUS_TRANSFORM = "Mise en forme";
   const STATUS_EXPORT = "Création du fichier";
@@ -142,8 +142,8 @@ function Loading({ onFinish, loading, exportTitle, transform, currentQuery, inde
 
   return (
     <div className={fieldsToExport !== "*" && "w-full"}>
-      {css?.override ? (
-        <LoadingButtonV2 loading={loading || run} loadingText={status} style={css.loadingButton}></LoadingButtonV2>
+      {customCss?.override ? (
+        <LoadingButtonV2 loading={loading || run} loadingText={status} style={customCss.loadingButton}></LoadingButtonV2>
       ) : (
         <LoadingButton loading={loading || run} loadingText={status}></LoadingButton>
       )}

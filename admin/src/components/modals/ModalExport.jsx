@@ -80,7 +80,7 @@ export default function ModalExport({ isOpen, setIsOpen, index, transform, expor
             transform={(data) => transform(data, selectedFields)}
             fieldsToExport={fieldsToExport}
             setIsOpen={setIsOpen}
-            css={{
+            customCss={{
               override: true,
               button: "w-full bg-blue-600 text-blue-50 rounded-md px-4 py-2 text-sm hover:brightness-125 transition",
               loadingButton: "w-full bg-blue-600 text-blue-50 rounded-md px-4 py-2 text-sm brightness-75 cursor-not-allowed",
