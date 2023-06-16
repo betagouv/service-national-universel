@@ -12,7 +12,7 @@ import { supportURL } from "../../../../../config";
 
 import dayjs from "dayjs";
 import { translateCohortTemp } from "snu-lib";
-import { getMeetingHour, getReturnHour } from "../../../../../utils/cohorts";
+import { getMeetingHour, getReturnHour } from "snu-lib/transport-info";
 
 export default function Convocation({ departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);

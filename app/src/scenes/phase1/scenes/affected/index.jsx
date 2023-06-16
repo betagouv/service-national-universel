@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { translateCohortTemp, youngCanChangeSession } from "snu-lib";
-import { getCohort, getDepartureDate, getReturnDate } from "../../../../utils/cohorts";
+import { getCohort } from "../../../../utils/cohorts";
 import { isStepMedicalFieldDone } from "./utils/steps.utils";
 import api from "../../../../services/api";
 
@@ -16,6 +16,7 @@ import Problem from "./components/Problem";
 import StepsAffected from "./components/StepsAffected";
 import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
+import { getDepartureDate, getReturnDate } from "snu-lib/transport-info";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -37,8 +38,9 @@ export default function Affected() {
         const { data: center } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
         const { data: meetingPoint } = await api.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
         const { data: session } = await api.get("/young/session/");
-        setDepartureDate(getDepartureDate(young, meetingPoint, session));
-        setReturnDate(getReturnDate(young, meetingPoint, session));
+        const cohort = getCohort(young);
+        setDepartureDate(getDepartureDate(young, meetingPoint, session, cohort));
+        setReturnDate(getReturnDate(young, meetingPoint, session, cohort));
         setCenter(center);
         setMeetingPoint(meetingPoint);
       } catch (e) {

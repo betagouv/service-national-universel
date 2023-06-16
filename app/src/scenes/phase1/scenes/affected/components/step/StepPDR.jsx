@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
-import { getMeetingHour, getMeetingPointChoiceLimitDateForCohort, getReturnHour } from "../../../../../../utils/cohorts";
+import { getMeetingPointChoiceLimitDateForCohort } from "../../../../../../utils/cohorts";
 import { isStepPDRDone } from "../../utils/steps.utils";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -20,6 +20,7 @@ import { Modal } from "reactstrap";
 import MeetingPointGoAlone from "../MeetingPointGoAlone";
 import MeetingPointConfirmationModal from "../MeetingPointConfirmationModal";
 import MeetingPointChooser from "../MeetingPointChooser";
+import { getMeetingHour, getReturnHour } from "snu-lib/transport-info";
 
 export default function StepPDR({ center, departureDate, returnDate }) {
   const [openedDesktop, setOpenedDesktop] = useState(false);
