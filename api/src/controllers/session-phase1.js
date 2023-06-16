@@ -69,6 +69,7 @@ const { readTemplate, renderWithTemplate } = require("../templates/droitImage");
 const fetch = require("node-fetch");
 const { phase1, noticeImpression } = require('../../src/templates/certificate/index')
 
+
 const TIMEOUT_PDF_SERVICE = 15000;
 
 const getCohesionCenterLocation = (cohesionCenter) => {
@@ -311,16 +312,16 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     }
     console.log(youngs.length)
     let zip = new Zip();
+    
     for (const young of youngs) {
       const html = await phase1(young)
       const context = await timeout(getPDF(html, { format: "A4", margin: 0  , landscape: true }), TIMEOUT_PDF_SERVICE);
       zip.addFile(young.lastName + " " + young.firstName + " - certificat.pdf", context);
     }
-
     const htmlNotice = await noticeImpression();
     const context = await timeout(getPDF(htmlNotice, { format: "A4", margin: 0  }), TIMEOUT_PDF_SERVICE);
-    zip.insertFile(0, "notice-d'impression.pdf", contextNotice);
-    // Create and send the zip file
+    zip.addFile("01-notice-d'impression.pdf", context);
+    
     res.set({
       "content-disposition": `inline; filename="certificats.zip"`,
       "content-type": "application/zip",
