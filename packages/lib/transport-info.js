@@ -74,17 +74,26 @@ const centersInJulyClosingEarly = [{
 
 /**
  * @param {Object} young
- * @param {Object} [meetingPoint]
- * @param {Object} [session]
+ * @param {Object} session
  * @param {Object} cohort
+ * @param {Object} [meetingPoint]
  * @returns {date} the date of departure to the cohesion center from the following resource:
  * 1. The meeting point if they have one (young has a transport line)
  * 2. If not, the session if it has a specific date
  * 3. If not, the default date for the cohort.
  */
-function getDepartureDate(young, meetingPoint, session, cohort) {
+function getDepartureDate(young, session, cohort, meetingPoint = null) {
+  if (!session && !cohort) throw new Error("getDepartureDate: session and cohort are required");
+  if (young.meetingPointId) return getMeetingPointDepartureDate(young, meetingPoint);
+  return getCenterArrivalDate(young, session, cohort);
+}
+
+function getMeetingPointDepartureDate(young, meetingPoint) {
   if (meetingPoint?.bus?.departuredDate) return new Date(meetingPoint?.bus?.departuredDate);
-  if (meetingPoint?.departuredDate) return new Date(meetingPoint?.departuredDate);
+  return new Date(meetingPoint?.departuredDate);
+}
+
+function getCenterArrivalDate(young, session, cohort) {
   if (session?.dateStart) return new Date(session?.dateStart);
   return getGlobalDepartureDate(young, cohort);
 }
@@ -98,17 +107,26 @@ function getGlobalDepartureDate(young, cohort) {
 
 /**
  * @param {Object} young
- * @param {object} [meetingPoint]
- * @param {object} [session]
+ * @param {object} session
  * @param {object} cohort
+ * @param {object} [meetingPoint]
  * @returns {date} the date of departure from the cohesion center from the following resource:
  * 1. The meeting point if they have one (young has a transport line).
  * 2. If not, the session if it has a specific date.
  * 3. If not, the default date for the cohort.
  */
-function getReturnDate(young, meetingPoint = null, session = null, cohort = null) {
-  if (meetingPoint?.returnDate) return meetingPoint?.returnDate;
+function getReturnDate(young, session, cohort, meetingPoint = null) {
+  if (!session && !cohort) throw new Error("getReturnDate: session and cohort are required");
+  if (young.meetingPointId) return getMeetingPointReturnDate(young, meetingPoint);
+  return getCenterReturnDate(young, session, cohort);
+}
+
+function getMeetingPointReturnDate(young, meetingPoint) {
   if (meetingPoint?.bus?.returnDate) return meetingPoint?.bus?.returnDate;
+  return meetingPoint?.returnDate;
+}
+
+function getCenterReturnDate(young, session, cohort) {
   if (session?.dateEnd) return new Date(session?.dateEnd);
   return getGlobalReturnDate(young, cohort);
 }

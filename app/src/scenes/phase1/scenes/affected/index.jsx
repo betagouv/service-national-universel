@@ -27,8 +27,8 @@ export default function Affected() {
   const [loading, setLoading] = useState(true);
 
   const cohort = getCohort(young.cohort);
-  const departureDate = getDepartureDate(young, meetingPoint, session, cohort);
-  const returnDate = getReturnDate(young, meetingPoint, session, cohort);
+  const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
+  const returnDate = getReturnDate(young, session, cohort, meetingPoint);
 
   if (isStepMedicalFieldDone(young)) {
     window.scrollTo(0, 0);
