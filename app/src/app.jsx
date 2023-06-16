@@ -74,7 +74,6 @@ export default function App() {
     if (utm_campaign) sessionProperties.utm_campaign = utm_campaign;
     async function fetchData() {
       try {
-        if (window.location.href.indexOf("/auth") !== -1) return setLoading(false);
         const { ok, user, token } = await api.get("/young/signin_token");
         if (!ok) {
           dispatch(setYoung(null));
@@ -83,6 +82,7 @@ export default function App() {
         if (token) api.setToken(token);
         if (ok && user) {
           dispatch(setYoung(user));
+
           await cohortsInit();
         }
       } catch (e) {
