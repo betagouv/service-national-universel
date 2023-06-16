@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-const utc = require("dayjs/plugin/utc");
+import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 import React, { useCallback, useEffect, useState } from "react";
 import { BiChevronLeft, BiChevronRight } from "react-icons/bi";

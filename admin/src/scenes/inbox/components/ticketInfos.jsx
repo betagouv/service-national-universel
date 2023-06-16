@@ -6,8 +6,9 @@ import styled from "styled-components";
 
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import api from "../../../services/api";
-import { ticketStateNameById, copyToClipboard, translate, getAge, formatDateFRTimezoneUTC, translatePhase1, translatePhase2 } from "../../../utils";
+import { copyToClipboard, translate, getAge, formatDateFRTimezoneUTC, translatePhase1, translatePhase2 } from "../../../utils";
 import { appURL } from "../../../config";
+import copy from "../../../assets/copy.svg";
 
 export default function TicketInfos({ ticket }) {
   const [user, setUser] = useState([]);
@@ -153,7 +154,7 @@ const Item = ({ title, content, copy = false }) => {
         {copy ? (
           <div
             className="icon"
-            icon={require(`../../../assets/copy.svg`)}
+            icon={copy}
             onClick={() => {
               copyToClipboard(content);
               toastr.success(`'${title}' a été copié dans le presse papier.`);

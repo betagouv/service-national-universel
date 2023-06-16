@@ -2,7 +2,7 @@ import React from "react";
 import Modal from "../../../../../../components/ui/modals/Modal";
 import InformationCircle from "../../../../../../assets/icons/InformationCircle";
 
-const ChangedDepartmentInfoModalContent = ({ onClose, cohortPeriod, type }) => {
+const ChangedDepartmentInfoModalContent = ({ onConfirm, cohortPeriod, type, isLoading }) => {
   return (
     <>
       <div className="flex justify-center">
@@ -18,14 +18,14 @@ const ChangedDepartmentInfoModalContent = ({ onClose, cohortPeriod, type }) => {
         </div>
       )}
 
-      {type === "NO_COHORT" && (
+      {type === "NOT_ELIGIBLE" && (
         <div className="text-gray-500 md:text-center">
           Aucun séjour de cohésion n'est prévu <span className="text-gray-900 font-medium">{cohortPeriod}</span> dans votre nouveau département de résidence. Malheureusement, vous
           n’êtes plus éligible à un prochain séjour de cohésion.
         </div>
       )}
 
-      <Modal.Buttons onConfirm={onClose} confirmText="J'ai compris" />
+      <Modal.Buttons onConfirm={onConfirm} confirmText="J'ai compris" disabled={isLoading} />
     </>
   );
 };

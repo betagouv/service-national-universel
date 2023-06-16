@@ -98,7 +98,7 @@ export default function List() {
                   exportTitle="Mon équipe"
                   route={`/elasticsearch/referent/team/export?tab=${currentTab}`}
                   selectedFilters={selectedFilters}
-                  css={{
+                  customCss={{
                     override: true,
                     button: `text-blue-600 border-[1px] border-blue-600 rounded-md px-7 py-1  text-sm hover:shadow-button`,
                     loadingButton: `text-blue-600  border border-blue-600 rounded-md px-7 py-1  text-sm`,

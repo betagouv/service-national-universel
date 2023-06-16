@@ -482,7 +482,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   try {
     const { user, body } = req;
     // Configuration
-    const searchFields = ["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip", "parent1Email.keyword", "parent2Email.keyword"];
+    const searchFields = ["email.keyword^3", "firstName.folded^1", "lastName.folded^1", "parent1Email.keyword^4", "parent2Email.keyword^5"];
     const filterFields = getYoungsFilters(user);
 
     const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt"];

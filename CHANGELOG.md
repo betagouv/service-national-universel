@@ -1,3 +1,36 @@
+# [1.292.0](https://github.com/betagouv/service-national-universel/compare/v1.291.0...v1.292.0) (2023-06-15)
+
+
+### Bug Fixes
+
+* **admin:** more accessible input forms ([66fba12](https://github.com/betagouv/service-national-universel/commit/66fba12726a839e3a4d6e63bfa916c0e53781f55))
+* **admin:** Put lastLoginAt when lastActivityAt is not defined ([8fac775](https://github.com/betagouv/service-national-universel/commit/8fac775a9eeed5678330c8910e5fb522a154f829))
+* **api:** Better error handling for imageReminderParent2 ([16e3cf2](https://github.com/betagouv/service-national-universel/commit/16e3cf2e875d0aa1af935c5ee364187b79b17cba))
+* **api:** Serialize young ([121e1b4](https://github.com/betagouv/service-national-universel/commit/121e1b44afd2c082d1ae45d263d07d9121f8e04d))
+* **app:** disable toastr ([252caea](https://github.com/betagouv/service-national-universel/commit/252caea38473bf531a6e63320e68b32b423609cc))
+
+
+### Features
+
+* **admin/app:** gestion des 401 ([#2704](https://github.com/betagouv/service-national-universel/issues/2704)) ([861b921](https://github.com/betagouv/service-national-universel/commit/861b9219ab59c10e29c175c504e1676cdf2f4438))
+* **api/app:** change address backend logic and fixes ([#2659](https://github.com/betagouv/service-national-universel/issues/2659)) ([44221e9](https://github.com/betagouv/service-national-universel/commit/44221e90268850fb53005595a914aeabd15c59d9))
+
+# [1.291.0](https://github.com/betagouv/service-national-universel/compare/v1.290.0...v1.291.0) (2023-06-14)
+
+
+### Bug Fixes
+
+* **admin:** list error key, throw error on fail to fetch new list system ([4488d54](https://github.com/betagouv/service-national-universel/commit/4488d544a4f61ba154256b6d76fa7ad34f676645))
+* **api:** bug statusMilitaryPreparationFiles ([#2700](https://github.com/betagouv/service-national-universel/issues/2700)) ([46bb89c](https://github.com/betagouv/service-national-universel/commit/46bb89cf6527af31d95a92961bd0a1707fd445ec))
+
+
+### Features
+
+* **admin:** add email copy on user ([04b15f2](https://github.com/betagouv/service-national-universel/commit/04b15f235e8179a464768775fcace29f37844c57))
+* **admin:** Passage en prod du téléchargement des PDF d'attestation de droits à l'image. ([#2701](https://github.com/betagouv/service-national-universel/issues/2701)) ([33c67c3](https://github.com/betagouv/service-national-universel/commit/33c67c336000062b33ffb6e1f2640f3de3047902))
+* **admin/api:** LastActivity field ([#2698](https://github.com/betagouv/service-national-universel/issues/2698)) ([3a4e2b4](https://github.com/betagouv/service-national-universel/commit/3a4e2b4cfdf87019c362b3d6e466aa773c99155b))
+* **api:** better search for young ([b3d4177](https://github.com/betagouv/service-national-universel/commit/b3d4177b38576c2e4f721f903393129b743a82c8))
+
 # [1.290.0](https://github.com/betagouv/service-national-universel/compare/v1.289.0...v1.290.0) (2023-06-13)
 
 

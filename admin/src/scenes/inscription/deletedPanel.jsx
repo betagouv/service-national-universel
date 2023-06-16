@@ -40,7 +40,7 @@ export default function DeletedInscriptionPanel({ onChange, value }) {
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
           </div>
-          <Details title="Vu(e) le" value={formatStringLongDate(young.lastActivityAt)} />
+          <Details title="Vu(e) le" value={formatStringLongDate(young.lastActivityAt ?? young.lastLoginAt)} />
         </div>
         <Info title="Coordonnées" id={young._id}>
           <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />

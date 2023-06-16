@@ -3,6 +3,7 @@ import { capture } from "../sentry";
 import { regionsListDROMS, sessions2023 } from "snu-lib";
 import dayjs from "dayjs";
 import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR } from "../scenes/phase1/scenes/affected/utils/steps.utils";
+import { centersInJulyClosingEarly } from "snu-lib/plan-de-transport";
 let cohorts = null;
 let cohortsCachedAt = null;
 
@@ -123,6 +124,9 @@ function getGlobalDepartureDate(young) {
 }
 
 function getGlobalReturnDate(young) {
+  if (young.cohort === "Juillet 2023" && young.cohesionCenterId && centersInJulyClosingEarly.map((c) => c._id.$oid).includes(young.cohesionCenterId)) {
+    return new Date(2021, 6, 16);
+  }
   if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
     return new Date(2023, 6, 17);
   }

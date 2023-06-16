@@ -237,7 +237,7 @@ const ReactiveList = ({ cohort, history }) => {
                           filters={filterArray}
                           selectedFilters={selectedFilters}
                           setIsOpen={() => true}
-                          css={{
+                          customCss={{
                             override: true,
                             button: `flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer w-full text-sm text-gray-700`,
                             loadingButton: `text-sm text-gray-700`,

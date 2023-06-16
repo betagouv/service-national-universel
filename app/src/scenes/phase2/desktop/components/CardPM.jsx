@@ -1,4 +1,3 @@
-import Img2 from "snu-lib";
 import React from "react";
 import { translateStatusMilitaryPreparationFiles, translate } from "../../../../utils";
 import { BsChevronDown } from "react-icons/bs";

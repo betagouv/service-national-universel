@@ -88,7 +88,7 @@ export default function List() {
                 }}
                 selectedFilters={selectedFilters}
                 icon={<BsDownload className="text-gray-400" />}
-                css={{
+                customCss={{
                   override: true,
                   button: `text-grey-700 bg-white border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,
                   loadingButton: `text-grey-700 bg-white  border border-gray-300 h-10 rounded-md px-3 font-medium text-sm`,

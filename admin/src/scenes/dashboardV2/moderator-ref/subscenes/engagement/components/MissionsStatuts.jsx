@@ -43,10 +43,10 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
 
         // --- compute export filter
         const exportFilter = {};
-        if(filters.department) {
+        if (filters.department) {
           exportFilter.department = filters.department;
         }
-        if(filters.region) {
+        if (filters.region) {
           exportFilter.region = filters.region;
         }
         if (missionFilters.start) {
@@ -55,20 +55,17 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
         if (missionFilters.end) {
           exportFilter.toDate = missionFilters.end;
         }
-        if(missionFilters.sources) {
-          if(missionFilters.sources.includes("JVA")) {
-            if(missionFilters.sources.includes("SNU")) {
+        if (missionFilters.sources) {
+          if (missionFilters.sources.includes("JVA")) {
+            if (missionFilters.sources.includes("SNU")) {
               // rien sur le filtre
-            }
-            else {
+            } else {
               exportFilter.isJvaMission = "true";
             }
-          }
-          else {
-            if(missionFilters.sources.includes("SNU")) {
+          } else {
+            if (missionFilters.sources.includes("SNU")) {
               exportFilter.isJvaMission = "false";
-            }
-            else {
+            } else {
               // rien sur le filtre
             }
           }
@@ -85,9 +82,7 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
     setLoading(false);
   }
 
-  const exportButton = (
-    <ExportMissionStatusReport filter={exportFilter} />
-  );
+  const exportButton = <ExportMissionStatusReport filter={exportFilter} />;
 
   return (
     <DashboardBox title="Statut des missions proposées" className={className} headerChildren={exportButton}>

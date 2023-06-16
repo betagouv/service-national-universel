@@ -1,4 +1,4 @@
-const environment = getEnvironment();
+const environment = import.meta.env.MODE;
 
 let apiURL = "http://localhost:8080";
 let adminURL = "http://localhost:8082";
@@ -31,12 +31,6 @@ let franceConnectUrl = "https://fcp.integ01.dev-franceconnect.fr/api/v1";
 
 if (environment === "production") {
   franceConnectUrl = "https://app.franceconnect.gouv.fr/api/v1";
-}
-
-function getEnvironment() {
-  if (window.location.href.indexOf("localhost") !== -1 || window.location.href.indexOf("127.0.0.1") !== -1) return "development";
-  if (window.location.href.indexOf("moncompte.beta-snu.dev") !== -1) return "staging";
-  return "production";
 }
 
 export { apiURL, S3PREFIX, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, environment, franceConnectUrl, adminURL, appURL, supportURL, maintenance };
