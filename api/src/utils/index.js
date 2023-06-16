@@ -608,7 +608,7 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
     const now = new Date();
     // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
     const isValidationDatePassed = now >= validationDate;
-    // Cette constante nous permet de vérifier si un jeune étant présent au début du séjour et à la JDM (basé sur son grade)
+    // Cette constante nous permet de vérifier si un jeune était présent au début du séjour et à la JDM (basé sur son grade)
     const isCohesionStayValid = young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || isTerminale);
     // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
     const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt > validationDate);
@@ -634,7 +634,6 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
     }
     await young.save({ fromUser: user });
   } catch (e) {
-    console.log(e);
     capture(e);
   }
 }
@@ -644,7 +643,7 @@ async function updateStatusPhase1WithSpecificCase(young, validationDate, user) {
     const now = new Date();
     // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
     const isValidationDatePassed = now >= validationDate;
-    // Cette constante nous permet de vérifier si un jeune étant présent au début du séjour (exception pour cette cohorte : pas besoin de JDM)(basé sur son grade)
+    // Cette constante nous permet de vérifier si un jeune était présent au début du séjour (exception pour cette cohorte : pas besoin de JDM)(basé sur son grade)
     const isCohesionStayValid = young.cohesionStayPresence === "true";
     // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
     const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt > validationDate);
