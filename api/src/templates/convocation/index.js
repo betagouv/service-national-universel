@@ -69,13 +69,6 @@ const render = async (young) => {
     if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
     const contacts = service?.contacts.filter((c) => c.cohort === young.cohort) || [];
 
-    const cohortDateStart = new Date(cohort?.dateStart);
-    const cohortDateEnd = new Date(cohort?.dateEnd);
-    //add 12h to dateStart
-    cohortDateStart.setHours(cohortDateStart.getHours() + 12);
-    //add 12h to dateEnd
-    cohortDateEnd.setHours(cohortDateEnd.getHours() + 12);
-
     const departureDate = () => {
       if (ligneBus?.departuredDate) {
         return ligneBus?.departuredDate;
@@ -83,7 +76,9 @@ const render = async (young) => {
       if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
         return new Date(2023, 6, 5);
       }
-      return cohort.dateStart;
+      const cohortDateStart = new Date(cohort?.dateStart);
+      cohortDateStart.setHours(cohortDateStart.getHours() + 12);
+      return cohortDateStart;
     };
 
     const returnDate = () => {
@@ -93,7 +88,9 @@ const render = async (young) => {
       if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
         return new Date(2023, 6, 17);
       }
-      return cohort.dateEnd;
+      const cohortDateEnd = new Date(cohort?.dateEnd);
+      cohortDateEnd.setHours(cohortDateEnd.getHours() + 12);
+      return cohortDateEnd;
     };
 
     const html = fs.readFileSync(path.resolve(__dirname, "./cohesion.html"), "utf8");
