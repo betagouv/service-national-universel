@@ -7,7 +7,7 @@ import StepConvocation from "./step/stepConvocation";
 import StepMedicalField from "./step/stepMedicalFile";
 import StepPDR from "./step/StepPDR";
 
-export default function StepsAffected({ center, departureDate, returnDate }) {
+export default function StepsAffected({ center, meetingPoint, departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
   if (!young) return null;
   const nbvalid = numberOfStepsCompleted(young);
@@ -40,7 +40,7 @@ export default function StepsAffected({ center, departureDate, returnDate }) {
       </article>
       <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">
-        <StepPDR center={center} departureDate={departureDate} returnDate={returnDate} />
+        <StepPDR center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
       </div>
       <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">
@@ -48,7 +48,7 @@ export default function StepsAffected({ center, departureDate, returnDate }) {
       </div>
       <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">
-        <StepConvocation departureDate={departureDate} returnDate={returnDate} />
+        <StepConvocation center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
       </div>
       <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">

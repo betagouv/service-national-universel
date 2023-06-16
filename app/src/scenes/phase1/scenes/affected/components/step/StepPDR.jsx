@@ -22,12 +22,11 @@ import MeetingPointConfirmationModal from "../MeetingPointConfirmationModal";
 import MeetingPointChooser from "../MeetingPointChooser";
 import { getMeetingHour, getReturnHour } from "snu-lib/transport-info";
 
-export default function StepPDR({ center, departureDate, returnDate }) {
+export default function StepPDR({ center, meetingPoint, departureDate, returnDate }) {
   const [openedDesktop, setOpenedDesktop] = useState(false);
   const [openedMobile, setOpenedMobile] = useState(false);
   const [meetingPoints, setMeetingPoints] = useState(null);
   const [error, setError] = useState(null);
-  const [choosenMeetingPoint, setChoosenMeetingPoint] = useState(null);
   const [modalMeetingPoint, setModalMeetingPoint] = useState({ isOpen: false, meetingPoint: null });
   const [loading, setLoading] = useState(false);
 
@@ -38,8 +37,8 @@ export default function StepPDR({ center, departureDate, returnDate }) {
   const date = getMeetingPointChoiceLimitDateForCohort(young.cohort);
   const pdrChoiceLimitDate = date ? dayjs(date).locale("fr").format("D MMMM YYYY") : "?";
   const pdrChoiceExpired = date ? dayjs.utc().isAfter(dayjs(date)) : false;
-  const meetingHour = getMeetingHour(choosenMeetingPoint);
-  const returnHour = getReturnHour(choosenMeetingPoint);
+  const meetingHour = getMeetingHour(meetingPoint);
+  const returnHour = getReturnHour(meetingPoint);
 
   useEffect(() => {
     if (young && !meetingPoints) {
@@ -54,12 +53,6 @@ export default function StepPDR({ center, departureDate, returnDate }) {
         setError("Nous n'avons pas réussi à charger les points de rassemblements. Veuillez réessayer dans quelques instants.");
       } else {
         setMeetingPoints(result.data);
-        if (young.meetingPointId) {
-          const mp = result.data.find((mp) => mp._id === young.meetingPointId);
-          if (mp) {
-            setChoosenMeetingPoint(mp);
-          }
-        }
       }
     } catch (err) {
       capture(err);
@@ -140,7 +133,7 @@ export default function StepPDR({ center, departureDate, returnDate }) {
             </h1>
             <p className={`text-sm leading-5 ${enabled ? "text-gray-500" : "text-gray-400"}`}>
               {young.meetingPointId ? (
-                <>{addressOf(choosenMeetingPoint)}</>
+                <>{addressOf(meetingPoint)}</>
               ) : young.deplacementPhase1Autonomous === "true" ? (
                 <>Je me rends au centre et en reviens par mes propres moyens</>
               ) : young.transportInfoGivenByLocal === "true" ? (
@@ -228,7 +221,7 @@ export default function StepPDR({ center, departureDate, returnDate }) {
             <div className={` text-sm leading-5 ${valid && "text-green-600 opacity-70"} ${enabled ? "text-gray-500" : "text-gray-400"}`}>
               {young.meetingPointId ? (
                 <>
-                  <div>{addressOf(choosenMeetingPoint)}</div>
+                  <div>{addressOf(meetingPoint)}</div>
                   <MobileDateDetail departureDate={departureDate} returnDate={returnDate} startHour={meetingHour} returnHour={returnHour} />
                 </>
               ) : young.deplacementPhase1Autonomous === "true" ? (

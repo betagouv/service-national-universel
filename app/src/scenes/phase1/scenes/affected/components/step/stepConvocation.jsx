@@ -16,7 +16,7 @@ import { translate } from "snu-lib";
 import { isStepAgreementDone, isStepConvocationDone } from "../../utils/steps.utils";
 import { useSelector } from "react-redux";
 
-export default function StepConvocation({ departureDate, returnDate }) {
+export default function StepConvocation({ center, meetingPoint, departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
   const [showConvocation, setShowConvocation] = useState(false);
   const [stateMobil, setStateMobil] = useState(false);
@@ -135,7 +135,7 @@ export default function StepConvocation({ departureDate, returnDate }) {
 
       {showConvocation ? (
         <div className="hidden pb-4 md:flex">
-          <Convocation departureDate={departureDate} returnDate={returnDate} />
+          <Convocation center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
         </div>
       ) : null}
       {stateMobil ? (
@@ -180,7 +180,7 @@ export default function StepConvocation({ departureDate, returnDate }) {
               </div>
               {showConvocation ? (
                 <div className="pb-4">
-                  <Convocation />
+                  <Convocation center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
                 </div>
               ) : null}
             </div>
