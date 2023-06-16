@@ -13,11 +13,10 @@ const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 
 const DepartmentServiceModel = require("../../models/departmentService");
-const { formatStringDate, formatStringDateTimezoneUTC, translateCohortTemp, getDepartureDate, getReturnDate } = require("snu-lib");
+const { formatStringDate, formatStringDateTimezoneUTC, translateCohortTemp, regionsListDROMS } = require("snu-lib");
 
 const datefns = require("date-fns");
 var { fr } = require("date-fns/locale");
-const { regionsListDROMS } = require("snu-lib/region-and-departments");
 
 function getBg() {
   return getSignedUrl("convocation/convocation_template_base.png");
