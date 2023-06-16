@@ -22,10 +22,13 @@ export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
   const [meetingPoint, setMeetingPoint] = useState();
+  const [session, setSession] = useState();
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [departureDate, setDepartureDate] = useState();
-  const [returnDate, setReturnDate] = useState();
+
+  const cohort = getCohort(young.cohort);
+  const departureDate = getDepartureDate(young, meetingPoint, session, cohort);
+  const returnDate = getReturnDate(young, meetingPoint, session, cohort);
 
   if (isStepMedicalFieldDone(young)) {
     window.scrollTo(0, 0);
@@ -37,12 +40,10 @@ export default function Affected() {
       try {
         const { data: center } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
         const { data: meetingPoint } = await api.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
-        const { data: session } = await api.get("/young/session/");
-        const cohort = getCohort(young);
-        setDepartureDate(getDepartureDate(young, meetingPoint, session, cohort));
-        setReturnDate(getReturnDate(young, meetingPoint, session, cohort));
+        const { data: session } = await api.get(`/young/${young._id}/session/`);
         setCenter(center);
         setMeetingPoint(meetingPoint);
+        setSession(session);
       } catch (e) {
         toastr.error("Oups, une erreur est survenue lors de la récupération des informations de votre séjour de cohésion.");
       } finally {

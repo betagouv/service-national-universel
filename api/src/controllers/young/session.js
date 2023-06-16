@@ -26,3 +26,5 @@ router.get("/", passport.authenticate(["young"], { session: false, failWithError
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+module.exports = router;

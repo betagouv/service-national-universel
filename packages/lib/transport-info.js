@@ -153,3 +153,12 @@ export {
   getMeetingHour,
   getReturnHour,
 }
+
+export default {
+  getDepartureDate,
+  getGlobalDepartureDate,
+  getReturnDate,
+  getGlobalReturnDate,
+  getMeetingHour,
+  getReturnHour,
+}
