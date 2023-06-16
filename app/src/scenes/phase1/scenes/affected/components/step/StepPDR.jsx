@@ -20,7 +20,7 @@ import { Modal } from "reactstrap";
 import MeetingPointGoAlone from "../MeetingPointGoAlone";
 import MeetingPointConfirmationModal from "../MeetingPointConfirmationModal";
 import MeetingPointChooser from "../MeetingPointChooser";
-import { getMeetingHour, getReturnHour } from "snu-lib/transport-info";
+import { TRANSPORT_TIMES, getMeetingHour, getReturnHour } from "snu-lib/transport-info";
 
 export default function StepPDR({ center, meetingPoint, departureDate, returnDate }) {
   const [openedDesktop, setOpenedDesktop] = useState(false);
@@ -179,8 +179,8 @@ export default function StepPDR({ center, meetingPoint, departureDate, returnDat
                 choosed={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
                 expired={pdrChoiceExpired}
                 meetingPointsCount={meetingPoints.length}
-                departureDate={departureDate}
-                returnDate={returnDate}
+                departureDate={TRANSPORT_TIMES.ALONE_ARRIVAL_HOUR}
+                returnDate={TRANSPORT_TIMES.ALONE_DEPARTURE_HOUR}
               />
             </div>
           ) : (

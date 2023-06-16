@@ -146,6 +146,7 @@ function getReturnHour(meetingPoint = null) {
 }
 
 export {
+  TRANSPORT_TIMES,
   getDepartureDate,
   getGlobalDepartureDate,
   getReturnDate,
@@ -155,6 +156,7 @@ export {
 }
 
 export default {
+  TRANSPORT_TIMES,
   getDepartureDate,
   getGlobalDepartureDate,
   getReturnDate,
