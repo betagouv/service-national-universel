@@ -67,8 +67,7 @@ const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { readTemplate, renderWithTemplate } = require("../templates/droitImage");
 const fetch = require("node-fetch");
-const { phase1 } = require('../../src/templates/certificate/index')
-
+const { phase1 } = require("../../src/templates/certificate/index");
 
 const TIMEOUT_PDF_SERVICE = 15000;
 
@@ -381,11 +380,6 @@ router.post("/:id/admin/certificate", passport.authenticate("referent", { sessio
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const { errorBody } = Joi.object({
-      options: Joi.object().allow(null, {}),
-    }).validate({ ...req.body }, { stripUnknown: true });
-    if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
     const session = await SessionPhase1Model.findById(id);
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -402,25 +396,22 @@ router.post("/:id/admin/certificate", passport.authenticate("referent", { sessio
     };
 
     const youngs = await YoungModel.find(body);
-    if (!youngs) {
+    if (!youngs.length) {
       capture("No young found with body: " + JSON.stringify(body));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (!youngs || youngs.length === 0) {
-      return res.status(400).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-    }
-    
     let zip = new Zip();
     for (const young of youngs) {
-      const html = await phase1(young)
-      const context = await timeout(getPDF(html, { format: "A4", margin: 0  , landscape: true }), TIMEOUT_PDF_SERVICE);
+      const html = await phase1(young);
+      const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
       zip.addFile(young.lastName + " " + young.firstName + " - certificat.pdf", context);
     }
     const noticePdf = await getFile(`file/noticeImpression.pdf`);
-    const noticeBody = noticePdf.Body
-    zip.addFile("01-notice-d'impression.pdf", noticeBody);
-    
+    if (noticePdf) {
+      zip.addFile("01-notice-d'impression.pdf", noticePdf.Body);
+    }
+
     res.set({
       "content-disposition": `inline; filename="certificats.zip"`,
       "content-type": "application/zip",
