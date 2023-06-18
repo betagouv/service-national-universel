@@ -231,18 +231,11 @@ export default function CenterYoungIndex() {
 
   const viewAttestation = async () => {
     setLoading(true);
-    try {
-      const file = await api.openpdf(`/session-phase1/${sessionId}/certificate`, {});
-      download(file, "certificates.zip");
-    } catch (e) {
-      // We don't capture unauthorized. Just redirect.
-      if (e?.message === "unauthorized") {
-        return (window.location.href = "/auth/login?disconnected=1");
-      }
-      // We need more info to understand download issues.
-      Sentry.captureException(e);
-      toastr.error("Téléchargement impossible", e?.message, { timeOut: 10000 });
-    }
+    await downloadPDF({
+      url: `/session-phase1/${sessionId}/certificate`,
+      body: { options: { landscape: true } },
+      fileName: `attestations.pdf`,
+    });
     setLoading(false);
   };
 
