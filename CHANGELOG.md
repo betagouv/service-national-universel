@@ -1,3 +1,11 @@
+# [1.294.0](https://github.com/betagouv/service-national-universel/compare/v1.293.0...v1.294.0) (2023-06-18)
+
+
+### Features
+
+* **admin/api:** update export Zip certificates  ([#2711](https://github.com/betagouv/service-national-universel/issues/2711)) ([c42839d](https://github.com/betagouv/service-national-universel/commit/c42839d208340668c350f47bc1d21957f27491ef))
+* **api/admin:** open attestations zip all user + clean old root ([e1687ac](https://github.com/betagouv/service-national-universel/commit/e1687ac8e06c753f47efcbbc6f223d91ea871e7a))
+
 # [1.293.0](https://github.com/betagouv/service-national-universel/compare/v1.292.0...v1.293.0) (2023-06-16)
 
 
