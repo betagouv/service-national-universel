@@ -37,6 +37,7 @@ import General from "./general";
 import Pointage from "./pointage";
 import Profil from "../../../assets/icons/Profil";
 import * as Sentry from "@sentry/react";
+import { isSuperAdmin } from "snu-lib";
 
 export default function CenterYoungIndex() {
   const [modalExportMail, setModalExportMail] = useState({ isOpen: false });
@@ -46,6 +47,7 @@ export default function CenterYoungIndex() {
   const [loading, setLoading] = useState();
   const [isYoungCheckinOpen, setIsYoungCheckinOpen] = useState();
   const [focusedSession, setFocusedSession] = useState(null);
+  const [hasYoungValidated, setHasYoungValidated] = useState(false);
 
   const filterArray = [
     {
@@ -235,6 +237,23 @@ export default function CenterYoungIndex() {
       body: { options: { landscape: true } },
       fileName: `attestations.pdf`,
     });
+    setLoading(false);
+  };
+
+  const newViewAttestation = async () => {
+    setLoading(true);
+    try {
+      const file = await api.openpdf(`/session-phase1/${sessionId}/admin/certificate`, {});
+      download(file, "certificates.zip");
+    } catch (e) {
+      // We don't capture unauthorized. Just redirect.
+      if (e?.message === "unauthorized") {
+        return (window.location.href = "/auth/login?disconnected=1");
+      }
+      // We need more info to understand download issues.
+      Sentry.captureException(e);
+      toastr.error("Téléchargement impossible", e?.message, { timeOut: 10000 });
+    }
     setLoading(false);
   };
 
@@ -442,7 +461,7 @@ export default function CenterYoungIndex() {
           <div className="text-sm text-gray-700">Droits à l&apos;image</div>
         </div>
       ),
-    }
+    },
   ];
 
   return (
@@ -460,6 +479,14 @@ export default function CenterYoungIndex() {
               className="flex cursor-pointer items-center justify-between gap-3 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white disabled:cursor-wait disabled:opacity-50">
               Exporter les attestations
             </button>
+            {isSuperAdmin(user) && hasYoungValidated && (
+              <button
+                disabled={loading}
+                onClick={() => newViewAttestation()}
+                className="flex cursor-pointer items-center justify-between gap-3 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white disabled:cursor-wait disabled:opacity-50">
+                Exporter les attestations en Zip
+              </button>
+            )}
             <SelectAction
               title="Exporter les volontaires"
               alignItems="right"
@@ -516,11 +543,21 @@ export default function CenterYoungIndex() {
           </nav>
         </div>
         <div className="bg-white pt-4">
-          {currentTab === "general" && <General filter={filter} updateFilter={updateFilter} focusedSession={focusedSession} filterArray={filterArray} />}
-          {currentTab === "tableau-de-pointage" && (
-            <Pointage updateFilter={updateFilter} isYoungCheckinOpen={isYoungCheckinOpen} focusedSession={focusedSession} filterArray={filterArray} />
+          {currentTab === "general" && (
+            <General filter={filter} updateFilter={updateFilter} focusedSession={focusedSession} filterArray={filterArray} setHasYoungValidated={setHasYoungValidated} />
           )}
-          {currentTab === "fiche-sanitaire" && <FicheSanitaire updateFilter={updateFilter} focusedSession={focusedSession} filterArray={filterArray} />}
+          {currentTab === "tableau-de-pointage" && (
+            <Pointage
+              updateFilter={updateFilter}
+              isYoungCheckinOpen={isYoungCheckinOpen}
+              focusedSession={focusedSession}
+              filterArray={filterArray}
+              setHasYoungValidated={setHasYoungValidated}
+            />
+          )}
+          {currentTab === "fiche-sanitaire" && (
+            <FicheSanitaire updateFilter={updateFilter} focusedSession={focusedSession} filterArray={filterArray} setHasYoungValidated={setHasYoungValidated} />
+          )}
         </div>
       </div>
       <ModalExportMail isOpen={modalExportMail?.isOpen} onCancel={() => setModalExportMail({ isOpen: false, value: null })} onSubmit={modalExportMail?.onSubmit} />

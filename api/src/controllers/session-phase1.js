@@ -67,6 +67,7 @@ const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { readTemplate, renderWithTemplate } = require("../templates/droitImage");
 const fetch = require("node-fetch");
+const { phase1 } = require("../../src/templates/certificate/index");
 
 const TIMEOUT_PDF_SERVICE = 15000;
 
@@ -365,6 +366,58 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
     res.set("Cache-Control", "public, max-age=1");
     res.send(buffer);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/:id/admin/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const session = await SessionPhase1Model.findById(id);
+    if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
+    if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canDownloadYoungDocuments(req.user, cohesionCenter)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const body = {
+      sessionPhase1Id: session._id,
+      statusPhase1: "DONE",
+    };
+
+    const youngs = await YoungModel.find(body);
+    if (!youngs.length) {
+      capture("No young found with body: " + JSON.stringify(body));
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    let zip = new Zip();
+    for (const young of youngs) {
+      const html = await phase1(young);
+      const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
+      zip.addFile(young.lastName + " " + young.firstName + " - certificat.pdf", context);
+    }
+    const noticePdf = await getFile(`file/noticeImpression.pdf`);
+    if (noticePdf) {
+      zip.addFile("01-notice-d'impression.pdf", noticePdf.Body);
+    }
+
+    res.set({
+      "content-disposition": `inline; filename="certificats.zip"`,
+      "content-type": "application/zip",
+      "cache-control": "public, max-age=1",
+    });
+    res.status(200).end(zip.toBuffer());
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -889,7 +942,6 @@ async function getPDF(html, options) {
     headers: { "Content-Type": "application/json", Accept: "application/pdf" },
     body: JSON.stringify({ html, options }),
   });
-
   if (response.status && response.status !== 200) {
     throw new Error("Error with PDF service");
   }
