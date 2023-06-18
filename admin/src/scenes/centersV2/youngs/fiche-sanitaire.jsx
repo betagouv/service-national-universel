@@ -11,7 +11,7 @@ import Panel from "../../volontaires/panel";
 import ModalMultiPointageFicheSanitaire from "../components/modals/ModalMultiPointageFicheSanitaire";
 import ModalPointageFicheSanitaire from "../components/modals/ModalPointageFicheSanitaire";
 
-export default function FicheSanitaire({ updateFilter, focusedSession, filterArray }) {
+export default function FicheSanitaire({ updateFilter, focusedSession, filterArray, setHasYoungValidated }) {
   const [young, setYoung] = useState();
   const [youngSelected, setYoungSelected] = useState([]);
   const [youngsInPage, setYoungsInPage] = useState([]);
@@ -81,6 +81,7 @@ export default function FicheSanitaire({ updateFilter, focusedSession, filterArr
                     setData={(value) => {
                       if (value) setYoungsInPage(value.map((h) => ({ _id: h._id, firstName: h.firstName, lastName: h.lastName })));
                       setData(value);
+                      setHasYoungValidated(value.some((e) => e.statusPhase1 === "DONE"));
                     }}
                     filters={filterArray}
                     searchPlaceholder="Rechercher par prénom, nom, email, ville, code postal..."

@@ -19,7 +19,7 @@ import ModalPointageDepart from "../components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../components/modals/ModalPointagePresenceArrivee";
 import ModalPointagePresenceJDM from "../components/modals/ModalPointagePresenceJDM";
 
-export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSession, filterArray }) {
+export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSession, filterArray, setHasYoungValidated }) {
   const history = useHistory();
   const [young, setYoung] = useState();
   const [youngSelected, setYoungSelected] = useState([]);
@@ -43,14 +43,6 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
   useEffect(() => {
     updateFilter(selectedFilters);
   }, [selectedFilters]);
-
-  const getDefaultQuery = () => ({
-    query: {
-      bool: { filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } }, { term: { "sessionPhase1Id.keyword": focusedSession?._id.toString() } }] },
-    },
-    sort: [{ "lastName.keyword": "asc" }],
-    track_total_hits: true,
-  });
 
   useEffect(() => {
     if (!checkboxRef.current) return;
@@ -102,6 +94,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
                     setData={(value) => {
                       if (value) setYoungsInPage(value.map((h) => ({ _id: h._id, firstName: h.firstName, lastName: h.lastName })));
                       setData(value);
+                      setHasYoungValidated(value.some((e) => e.statusPhase1 === "DONE"));
                     }}
                     filters={filterArray}
                     searchPlaceholder="Rechercher par prénom, nom, email, ville, code postal..."

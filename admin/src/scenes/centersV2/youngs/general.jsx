@@ -8,7 +8,7 @@ import api from "../../../services/api";
 import { YOUNG_STATUS_COLORS, formatDateFR, getAge, translatePhase1 } from "../../../utils";
 import Panel from "../../volontaires/panel";
 
-export default function General({ updateFilter, focusedSession, filterArray }) {
+export default function General({ updateFilter, focusedSession, filterArray, setHasYoungValidated }) {
   const [young, setYoung] = useState();
 
   //List state
@@ -47,7 +47,10 @@ export default function General({ updateFilter, focusedSession, filterArray }) {
                 <Filters
                   pageId={pageId}
                   route={`/elasticsearch/young/by-session/${focusedSession._id}/search`}
-                  setData={(value) => setData(value)}
+                  setData={(value) => {
+                    setData(value);
+                    setHasYoungValidated(value.some((e) => e.statusPhase1 === "DONE"));
+                  }}
                   filters={filterArray}
                   searchPlaceholder="Rechercher par prénom, nom, email, ville, code postal..."
                   selectedFilters={selectedFilters}
