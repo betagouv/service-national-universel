@@ -67,7 +67,7 @@ const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { readTemplate, renderWithTemplate } = require("../templates/droitImage");
 const fetch = require("node-fetch");
-const { phase1, noticeImpression } = require('../../src/templates/certificate/index')
+const { phase1 } = require('../../src/templates/certificate/index')
 
 
 const TIMEOUT_PDF_SERVICE = 15000;
@@ -307,20 +307,119 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
+    let html = `<!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Attestation phase 1 - SNU</title>
+      <link rel="stylesheet" href="{{BASE_URL}}/css/style.css" />
+    </head>
+
+    <body style="margin: 0; font-family: Marianne, Helvetica, Arial, sans-serif">
+      {{BODY}}
+    </body>
+</html>`;
+
+    const subHtml = `
+  <div style="position: relative; margin: 0;min-height:100vh;width:100%;max-height:100vh;">
+    <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="bg" />
+      <div class="container">
+        <div class="text-center l4">
+        <br />
+          <p>{{TO}}, volontaire à l'édition {{COHORT}},</p>
+          <p>pour la réalisation de son <strong>séjour de cohésion</strong>, {{COHESION_DATE}}, au centre de :</p>
+          <p>{{COHESION_CENTER_NAME}} {{COHESION_CENTER_LOCATION}},</p>
+          <p>validant la <strong>phase 1</strong> du Service National Universel.</p>
+          <br />
+          <p class="text-date">Fait le {{DATE}}</p>
+        </div>
+      </div>
+    </div>`;
+
     if (!youngs || youngs.length === 0) {
       return res.status(400).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
     }
-    console.log(youngs.length)
-    let zip = new Zip();
+
+    const data = [];
+    const d = COHESION_STAY_END[youngs[0].cohort];
+    const ministresData = getMinistres(d);
+    const template = ministresData.template;
+    const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
+    for (const young of youngs) {
+      data.push(
+        subHtml
+          .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
+          .replace(/{{COHORT}}/g, sanitizeAll({ ...END_DATE_PHASE1, ...PHASE1_YOUNG_ACCESS_LIMIT }[young.cohort]?.getYear() + 1900))
+          .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort]?.toLowerCase()))
+          .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
+          .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))
+          .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+          .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
+          .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }))),
+      );
+    }
+
+    const newhtml = html.replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl())).replace(/{{BODY}}/g, data.join(""));
+
+    const buffer = await renderFromHtml(newhtml, req.body.options || { format: "A4", margin: 0 });
+
+    res.contentType("application/pdf");
+    res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
+    res.set("Cache-Control", "public, max-age=1");
+    res.send(buffer);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/:id/admin/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const { errorBody } = Joi.object({
+      options: Joi.object().allow(null, {}),
+    }).validate({ ...req.body }, { stripUnknown: true });
+    if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const session = await SessionPhase1Model.findById(id);
+    if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
+    if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canDownloadYoungDocuments(req.user, cohesionCenter)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const body = {
+      sessionPhase1Id: session._id,
+      statusPhase1: "DONE",
+    };
+
+    const youngs = await YoungModel.find(body);
+    if (!youngs) {
+      capture("No young found with body: " + JSON.stringify(body));
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    if (!youngs || youngs.length === 0) {
+      return res.status(400).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    }
     
+    let zip = new Zip();
     for (const young of youngs) {
       const html = await phase1(young)
       const context = await timeout(getPDF(html, { format: "A4", margin: 0  , landscape: true }), TIMEOUT_PDF_SERVICE);
       zip.addFile(young.lastName + " " + young.firstName + " - certificat.pdf", context);
     }
-    const htmlNotice = await noticeImpression();
-    const context = await timeout(getPDF(htmlNotice, { format: "A4", margin: 0  }), TIMEOUT_PDF_SERVICE);
-    zip.addFile("01-notice-d'impression.pdf", context);
+    const noticePdf = await getFile(`file/noticeImpression.pdf`);
+    const noticeBody = noticePdf.Body
+    zip.addFile("01-notice-d'impression.pdf", noticeBody);
     
     res.set({
       "content-disposition": `inline; filename="certificats.zip"`,
