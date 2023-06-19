@@ -33,20 +33,20 @@ export default function PDRpropose({ young, center, modalAffectations, setModalA
   }
   const PdrInfo = (pdr) => {
     return (
-      <div className="flex gap-1 flex-col">
-        <p className="text-sm text-gray-900">
+      <div className="flex gap-1 flex-col text-[12px] leading-5">
+        <p className=" text-gray-900">
           {pdr.pdr.meetingPoint.department}, {pdr.pdr.meetingPoint.region}
         </p>
-        <p className="text-sm text-gray-600">
+        <p className=" text-gray-600">
           N° transport: <span className="text-gray-900">{pdr.pdr.ligneBus.busId}</span>
         </p>
-        <p className="text-sm text-gray-600">
+        <p className=" text-gray-600">
           Départ:{" "}
           <span className="text-gray-900">
             {formatStringDateWithDayTimezoneUTC(pdr.pdr.ligneBus.departuredDate)} {pdr.pdr.ligneToPoint.departureHour}
           </span>
         </p>
-        <p className="text-sm text-gray-600">
+        <p className=" text-gray-600">
           Retour:{" "}
           <span className="text-gray-900">
             {formatStringDateWithDayTimezoneUTC(pdr.pdr.ligneBus.returnDate)} {pdr.pdr.ligneToPoint.returnHour}
@@ -69,7 +69,7 @@ export default function PDRpropose({ young, center, modalAffectations, setModalA
           onClick={() => {
             setModalAffectation({ isOpen: true, center: center, sessionId: young.sessionPhase1Id });
           }}>
-          <div className="flex items-center text-gray-900 font-bold text-base leading-6  gap-4">
+          <div className="flex items-center text-gray-900 font-bold text-[15px] leading-6  gap-4">
             <p>{pdr.meetingPoint.name}</p>
             <MdInfoOutline data-tip data-for={pdr.meetingPoint._id} className="h-5 w-5 cursor-pointer text-gray-400" />
           </div>
@@ -79,7 +79,7 @@ export default function PDRpropose({ young, center, modalAffectations, setModalA
             </div>
           </ReactTooltip>
           <div>
-            <RightArrow />
+            <RightArrow  />
           </div>
         </div>
       ))}
@@ -88,9 +88,30 @@ export default function PDRpropose({ young, center, modalAffectations, setModalA
 }
 const RightArrow = () => {
   return (
-    <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none" className="pt-0.5">
+      <g filter="url(#filter0_d_12796_150431)">
+        <rect x="2" y="1" width="32" height="32" rx="16" fill="#2563EB" />
+        <path d="M15.5 11.1666L21.3333 16.9999L15.5 22.8333" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </g>
+      <defs>
+        <filter id="filter0_d_12796_150431" x="0" y="0" width="36" height="36" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+          <feOffset dy="1" />
+          <feGaussianBlur stdDeviation="1" />
+          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0" />
+          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_12796_150431" />
+          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_12796_150431" result="shape" />
+        </filter>
+      </defs>
+    </svg>
+  );
+};
+
+{
+  /* <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g filter="url(#filter0_d_3100_51832)">
-        <rect x="2" y="1" width="38" height="38" rx="19" fill="#2563EB" />
+        <rect x="2" y="1" width="32" height="32" rx="19" fill="#2563EB" />
         <path d="M18.5 14.1667L24.3333 20L18.5 25.8334" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </g>
       <defs>
@@ -104,6 +125,5 @@ const RightArrow = () => {
           <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_3100_51832" result="shape" />
         </filter>
       </defs>
-    </svg>
-  );
-};
+    </svg> */
+}

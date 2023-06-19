@@ -470,15 +470,15 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
 const ListPdr = (hit) => {
   return (
     <>
-      <p>Points de rassemblement proposés à ce jeune</p>
+      <p className="text-gray-900 text-sm font-medium">Points de rassemblement proposés à ce jeune</p>
       <ul>
         {hit.hit.meetingPoint.map((pdr) => {
           if (pdr.department === hit.young.department) {
             return (
-              <li className="font-bold p-2" key={pdr._id}>
+              <li className="font-bold text-[12px] leading-5 p-2 text-gray-900" key={pdr._id}>
                 {pdr.name}
                 <p className="font-normal">
-                  {pdr.department}, {pdr.region} - <span className="text-gray-500">N°ligne :</span>
+                  {pdr.department}, {pdr.region} - <span className="text-gray-500">N°ligne : </span>
                   {pdr.busId}
                 </p>
               </li>
@@ -492,6 +492,7 @@ const ListPdr = (hit) => {
 };
 
 const HitCenter = ({ hit, onSend, young }) => {
+  console.log(hit);
   const pdr = hit.meetingPoint.filter((pdr) => pdr.department === young.department).length;
   hit.meetingPoint.map((pdr) => {
     for (let i = 0; i < hit.ligneBus.length; i++) {
@@ -505,7 +506,7 @@ const HitCenter = ({ hit, onSend, young }) => {
       <hr />
       {pdr === 0 ? (
         <ReactTooltip id="pdr-vide" className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
-          <div className="text-[black] text-sm">
+          <div className="text-gray-900 text-[12px] leading-[24px] w-[260px]">
             <p>Auncune ligne de transport avec des places disponibles ne correspond à ce trajet</p>
           </div>
         </ReactTooltip>
@@ -520,12 +521,12 @@ const HitCenter = ({ hit, onSend, young }) => {
       <div className="flex w-full flex-row items-center justify-between gap-4 px-2">
         <div className="w-1/2">
           <MultiLine>
-            <span className="font-bold text-black">{hit.nameCentre}</span>
-            <p>{`${hit.cityCentre || ""} • ${hit.department || ""}`}</p>
+            <span className="font-bold text-[15px] leading-6 text-gray-900">{hit.nameCentre}</span>
+            <p className="text-[12px] leading-[15px]">{`${hit.cityCentre || ""} • ${hit.department || ""}`}</p>
           </MultiLine>
         </div>
         <div className="flex flex-row m-auto justify-center align-middle" data-tip data-for={pdr === 0 ? "pdr-vide" : hit._id}>
-          <div className={`w-fit rounded-full border-[1px] border-gray-500 ${pdr === 0 ? "bg-[#F9FCFF]" : "bg-[#F3F4F6]"}  px-3 py-1 text-xs font-medium leading-5 text-black`}>
+          <div className={`w-fit rounded-full border-[0.5px] border-gray-400 ${pdr === 0 ? "bg-[#FFFFFF]" : "bg-gray-100"}  px-3 py-1 text-[12px] leading-[22px] text-gray-500`}>
             <Eye className="text-gray-500 inline" /> {pdr} points de rassemblement proposés
           </div>
         </div>
@@ -542,30 +543,34 @@ const HitPdr = ({ hit, onSend, data, young }) => {
     <>
       <hr />
       <div className="flex w-full flex-row items-center justify-between gap-4 px-2 ">
-        <div className="w-1/2">
+        <div className="w-2/3">
           <MultiLine>
-            <span className="font-bold text-black">{hit.name}</span>
-            <p>{`${hit.department || ""} • ${hit.address || ""}, ${hit.zip || ""} ${hit.city || ""}`}</p>
-            <p>
-              N° transport: <span className="text-gray-900">{data?.ligneBus.busId}</span>
-            </p>
+            <div className="flex">
+              <span className="text-[15px] leading-6 font-bold text-gray-900 w-2/3">{hit.name}</span>
+              {hit.department === young.department ? (
+                <div className={` flex w-1/3 rounded-full border-[0.5px] border-gray-500 bg-gray-50 text-[12px] font-medium leading-[22px] m-auto justify-center`}>
+                  <span className="text-gray-600 m-1">proposé au jeune</span>
+                </div>
+              ) : null}
+            </div>
+            <div className="text-[12px] leading-[18px]">
+              <p>{`${hit.department || ""} • ${hit.address || ""}, ${hit.zip || ""} ${hit.city || ""}`}</p>
+              <p>
+                N° transport: <span className="text-gray-900">{data?.ligneBus.busId}</span>
+              </p>
+            </div>
           </MultiLine>
         </div>
-        <div className="w-1/3 text-xs text-[#738297] justify-center">
-          {hit.department === young.department ? (
-            <div className={`w-fit rounded-full border-[1px] border-gray-500 bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-gray-500 m-auto`}>proposé au jeune</div>
-          ) : null}
-        </div>
-        <div className="flex w-1/2 flex-col">
-          <div className="text-xs text-[#738297]">
+        <div className="flex w-1/3 flex-col text-[12px] leading-[18px]">
+          <div className="text-gray-500">
             Départ :{" "}
-            <span className="capitalize text-gray-900">
+            <span className=" text-gray-900">
               {formatStringDateWithDayTimezoneUTC(data?.ligneBus.departuredDate)} {data?.ligneToPoint.departureHour}
             </span>
           </div>
-          <div className="text-xs text-[#738297]">
+          <div className=" text-gray-500">
             Retour :{" "}
-            <span className="capitalize text-gray-900">
+            <span className=" text-gray-900">
               {formatStringDateWithDayTimezoneUTC(data?.ligneBus?.returnDate)} {data?.ligneToPoint.returnHour}
             </span>
           </div>
@@ -579,7 +584,7 @@ const HitPdr = ({ hit, onSend, data, young }) => {
 };
 const RightArrow = () => {
   return (
-    <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg" className="pt-[2px]">
       <g filter="url(#filter0_d_3100_51832)">
         <rect x="2" y="1" width="38" height="38" rx="19" fill="#2563EB" />
         <path d="M18.5 14.1667L24.3333 20L18.5 25.8334" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
