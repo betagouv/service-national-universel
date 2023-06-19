@@ -12,16 +12,16 @@ import CenterInformations from "./CenterInformations";
 import Pencil from "../../../assets/icons/Pencil";
 import Trash from "../../../assets/icons/Trash";
 
-import { COHESION_STAY_START, canPutSpecificDateOnSessionPhase1, formatLongDateFR, isSessionEditionOpen } from "snu-lib";
+import { COHESION_STAY_START, canPutSpecificDateOnSessionPhase1, isSessionEditionOpen } from "snu-lib";
 
 import Field from "../components/Field";
 
+import dayjs from "dayjs";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import Loader from "../../../components/Loader";
+import ToggleDate from "../../../components/ui/forms/dateForm/ToggleDate";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import TimeSchedule from "../components/TimeSchedule";
-import ToggleDate from "../../../components/ui/forms/DateForm/ToggleDate";
-import dayjs from "dayjs";
 
 export default function Index({ ...props }) {
   const history = useHistory();
