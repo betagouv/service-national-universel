@@ -7,7 +7,7 @@ import { BiLoaderAlt } from "react-icons/bi";
 
 const IdCardReader = ({ young, cniFile }) => {
   const [isDownloading, setIsDownloading] = useState(false);
-
+  
   const getFileTitle = () => {
     if (cniFile.category === "passport") {
       return "Passeport";
@@ -38,7 +38,7 @@ const IdCardReader = ({ young, cniFile }) => {
               Nom : <span>{cniFile.name}</span>
             </p>
             <p className="mx-2 hidden text-gray-500 xl:block">•</p>
-            <p className="mb-[1rem] text-sm text-gray-500 xl:mb-0">Expire le {new Date(cniFile.expirationDate).toLocaleDateString("fr-fr")}</p>
+            <p className="mb-[1rem] text-sm text-gray-500 xl:mb-0">Expire le {new Date(young.latestCNIFileExpirationDate).toLocaleDateString("fr-fr")}</p>
           </div>
         </div>
         <ButtonLight onClick={handleDownloadFile} disabled={isDownloading} className="bg-white xl:ml-auto">
