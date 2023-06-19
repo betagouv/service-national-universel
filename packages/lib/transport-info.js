@@ -1,4 +1,4 @@
-import { regionsListDROMS } from "./region-and-departments";
+import { YOUNG_STATUS_PHASE1 } from "./constants";
 
 const TRANSPORT_TIMES = {
   ALONE_ARRIVAL_HOUR: "11:00",
@@ -18,7 +18,8 @@ const TRANSPORT_TIMES = {
 function getDepartureDate(young, session, cohort, meetingPoint = null) {
   if (!session && !cohort) throw new Error("getDepartureDate: session and cohort are required");
   if (meetingPoint?.bus || meetingPoint?.ligneBus || meetingPoint?.departuredDate) return getMeetingPointDepartureDate(meetingPoint);
-  return getCenterArrivalDate(session, cohort);
+  if (young.status !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return getCenterArrivalDate(session, cohort);
+  return getGlobalDepartureDate(cohort);
 }
 
 function getMeetingPointDepartureDate(meetingPoint) {
@@ -49,7 +50,8 @@ function getGlobalDepartureDate(cohort) {
 function getReturnDate(young, session, cohort, meetingPoint = null) {
   if (!session && !cohort) throw new Error("getReturnDate: session and cohort are required");
   if (meetingPoint?.bus || meetingPoint?.ligneBus || meetingPoint?.departuredDate) return getMeetingPointReturnDate(meetingPoint);
-  return getCenterReturnDate(session, cohort);
+  if (young.status !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return getCenterReturnDate(session, cohort);
+  return getGlobalReturnDate(cohort);
 }
 
 function getMeetingPointReturnDate(meetingPoint) {
