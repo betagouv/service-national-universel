@@ -411,10 +411,20 @@ router.post("/:id/admin/certificate", passport.authenticate("referent", { sessio
     }
 
     let zip = new Zip();
-    for (const young of youngs) {
-      const html = await phase1(young);
-      const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
-      zip.addFile(young.lastName + " " + young.firstName + " - certificat.pdf", context);
+    const batchSize = 10;
+    const numBatches = Math.ceil(youngs.length / batchSize);
+    for (let i = 0; i < numBatches; i++) {
+      const batchStart = i * batchSize;
+      const batchEnd = Math.min(batchStart + batchSize, youngs.length);
+      const pdfPromises = youngs.slice(batchStart, batchEnd).map(async (young) => {
+        const html = await phase1(young);
+        const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
+        return { name: young.lastName + " " + young.firstName + " - certificat.pdf", body: context };
+      });
+      const pdfs = await Promise.all(pdfPromises);
+      pdfs.forEach((pdf) => {
+        zip.addFile(pdf.name, pdf.body);
+      });
     }
     const noticePdf = await getFile(`file/noticeImpression.pdf`);
     if (noticePdf) {
