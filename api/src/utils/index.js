@@ -597,9 +597,9 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) 
   const isTerminale = young?.grade === "Terminale";
   const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
   if(young.cohort === "Juin 2023"){
-    await updateStatusPhase1WithSpecificCase(young, validationDate, isTerminale, user)
+    await updateStatusPhase1WithSpecificCase(young, validationDate, user)
   } else {
-    await updateStatusPhase1(young, validationDate, user);
+    await updateStatusPhase1(young, validationDate, isTerminale, user);
   }
 }
 
@@ -625,7 +625,7 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
         // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
         if (["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young?.departSejourMotif)) {
           young.set({ statusPhase1: "DONE" });
-        } if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
+        } else if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
           young.set({ statusPhase1: "NOT_DONE" });
         } else if (young.cohesionStayPresence === "true" && !young.presenceJDM) {
           young.set({ statusPhase1: "AFFECTED" });
