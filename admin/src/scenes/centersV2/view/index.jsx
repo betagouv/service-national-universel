@@ -115,13 +115,14 @@ export default function Index({ ...props }) {
 
         if (!blockFocus) setFocusedSession(allSessions.data.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
       } else {
-        const sessionFiltered = allSessions.data.filter((session) => session.headCenterId === user._id);
-        sessionFiltered.data = sessionFiltered.data.map((session) => {
-          return {
-            ...session,
-            hasSpecificDate: session?.dateStart && session?.dateEnd ? true : false,
-          };
-        });
+        const sessionFiltered = allSessions.data
+          .filter((session) => session.headCenterId === user._id)
+          .map((session) => {
+            return {
+              ...session,
+              hasSpecificDate: session?.dateStart && session?.dateEnd ? true : false,
+            };
+          });
         sessionFiltered.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
         const blockedSession = sessionFiltered.find((s) => s.cohort === focusedCohort);
         if (user.role === ROLES.HEAD_CENTER) {
