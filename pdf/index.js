@@ -66,6 +66,8 @@ app.get("/", (req, res) => {
 
 app.post("/render", async (req, res) => {
   try {
+    const random = Math.random();
+    console.time("RENDERING " + random);
     const buffer = await renderFromHtml(req.body.html, req.body.options || {});
     if (!buffer)
       throw new Error("No buffer returned : " + JSON.stringify(req.body));
@@ -78,6 +80,7 @@ app.post("/render", async (req, res) => {
     res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
     res.set("Cache-Control", "public, max-age=1");
     res.send(buffer);
+    console.timeEnd("RENDERING " + random);
   } catch (error) {
     console.log(error);
     capture(error);
