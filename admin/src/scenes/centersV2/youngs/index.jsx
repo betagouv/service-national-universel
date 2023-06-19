@@ -1,17 +1,15 @@
-import * as Sentry from "@sentry/react";
 import dayjs from "dayjs";
 import * as FileSaver from "file-saver";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { NavLink, useHistory, useParams } from "react-router-dom";
-import { ES_NO_LIMIT, download, getDepartmentNumber } from "snu-lib";
+import { ES_NO_LIMIT, getDepartmentNumber, download } from "snu-lib";
 import * as XLSX from "xlsx";
 import Bus from "../../../assets/icons/Bus";
 import ClipboardList from "../../../assets/icons/ClipboardList";
 import Menu from "../../../assets/icons/Menu";
 import PencilAlt from "../../../assets/icons/PencilAlt";
-import Profil from "../../../assets/icons/Profil";
 import ShieldCheck from "../../../assets/icons/ShieldCheck";
 import Warning from "../../../assets/icons/Warning";
 import Breadcrumbs from "../../../components/Breadcrumbs";
@@ -32,10 +30,14 @@ import {
   translatePhase1,
   youngCheckinField,
 } from "../../../utils";
+import downloadPDF from "../../../utils/download-pdf";
 import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";
 import General from "./general";
 import Pointage from "./pointage";
+import Profil from "../../../assets/icons/Profil";
+import * as Sentry from "@sentry/react";
+import { isSuperAdmin } from "snu-lib";
 
 export default function CenterYoungIndex() {
   const [modalExportMail, setModalExportMail] = useState({ isOpen: false });
@@ -230,8 +232,18 @@ export default function CenterYoungIndex() {
 
   const viewAttestation = async () => {
     setLoading(true);
+    await downloadPDF({
+      url: `/session-phase1/${sessionId}/certificate`,
+      body: { options: { landscape: true } },
+      fileName: `attestations.pdf`,
+    });
+    setLoading(false);
+  };
+
+  const newViewAttestation = async () => {
+    setLoading(true);
     try {
-      const file = await api.openpdf(`/session-phase1/${sessionId}/certificate`, {});
+      const file = await api.openpdf(`/session-phase1/${sessionId}/admin/certificate`, {});
       download(file, "certificates.zip");
     } catch (e) {
       // We don't capture unauthorized. Just redirect.
@@ -461,12 +473,18 @@ export default function CenterYoungIndex() {
         <div className="flex items-center justify-between">
           <div className="mb-4 text-2xl font-bold">Volontaires</div>
           <div className="flex items-center gap-2">
-            {hasYoungValidated && (
+            <button
+              disabled={loading}
+              onClick={() => viewAttestation()}
+              className="flex cursor-pointer items-center justify-between gap-3 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white disabled:cursor-wait disabled:opacity-50">
+              Exporter les attestations
+            </button>
+            {isSuperAdmin(user) && hasYoungValidated && (
               <button
                 disabled={loading}
-                onClick={() => viewAttestation()}
+                onClick={() => newViewAttestation()}
                 className="flex cursor-pointer items-center justify-between gap-3 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white disabled:cursor-wait disabled:opacity-50">
-                Exporter les attestations
+                Exporter les attestations en Zip
               </button>
             )}
             <SelectAction

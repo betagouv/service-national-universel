@@ -596,8 +596,8 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) 
   }
   const isTerminale = young?.grade === "Terminale";
   const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
-  if(young.cohort === "Juin 2023"){
-    await updateStatusPhase1WithSpecificCase(young, validationDate, user)
+  if (young.cohort === "Juin 2023") {
+    await updateStatusPhase1WithSpecificCase(young, validationDate, user);
   } else {
     await updateStatusPhase1(young, validationDate, isTerminale, user);
   }
