@@ -664,7 +664,7 @@ async function updateStatusPhase1WithSpecificCase(young, validationDate, user) {
           young.set({ statusPhase1: "DONE" });
         } else if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
           young.set({ statusPhase1: "NOT_DONE" });
-        } else if (young.cohesionStayPresence === "true") {
+        } else if (young.cohesionStayPresence !== "false") {
           young.set({ statusPhase1: "AFFECTED" });
         } else {
           young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
