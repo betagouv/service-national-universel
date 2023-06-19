@@ -634,7 +634,7 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
         }
       }
     }
-    // await young.save({ fromUser: user });
+    await young.save({ fromUser: user });
   } catch (e) {
     capture(e);
   }
@@ -671,7 +671,7 @@ async function updateStatusPhase1WithSpecificCase(young, validationDate, user) {
         }
       }
     }
-    // await young.save({ fromUser: user });
+    await young.save({ fromUser: user });
   } catch (e) {
     console.log(e);
     capture(e);
