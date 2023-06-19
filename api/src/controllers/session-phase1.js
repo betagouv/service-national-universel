@@ -915,12 +915,22 @@ router.post("/:sessionId/image-rights", passport.authenticate(["referent"], { se
     // --- start zip file
     let zip = new Zip();
 
-    // --- build PDFS and zip'em
+    // --- build PDFS 10 by 10 and zip'em
     const template = readTemplate();
-    for (const young of youngs) {
-      const html = renderWithTemplate(young, template);
-      const body = await timeout(getPDF(html, { format: "A4", margin: 0 }), TIMEOUT_PDF_SERVICE);
-      zip.addFile(young.lastName + " " + young.firstName + " - Droits à l'image.pdf", body);
+    const batchSize = 10;
+    const numBatches = Math.ceil(youngs.length / batchSize);
+    for (let i = 0; i < numBatches; i++) {
+      const batchStart = i * batchSize;
+      const batchEnd = Math.min(batchStart + batchSize, youngs.length);
+      const pdfPromises = youngs.slice(batchStart, batchEnd).map(async (young) => {
+        const html = renderWithTemplate(young, template);
+        const body = await timeout(getPDF(html, { format: "A4", margin: 0 }), TIMEOUT_PDF_SERVICE);
+        return { name: young.lastName + " " + young.firstName + " - Droits à l'image.pdf", body };
+      });
+      const pdfs = await Promise.all(pdfPromises);
+      pdfs.forEach((pdf) => {
+        zip.addFile(pdf.name, pdf.body);
+      });
     }
 
     // --- send zip file
