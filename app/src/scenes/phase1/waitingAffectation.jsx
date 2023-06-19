@@ -14,12 +14,12 @@ import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
 import { translateCohortTemp } from "snu-lib";
 import { environment } from "../../config";
-import { transportDatesToString, getDepartureDate as getDepartureDateLegacy, getReturnDate as getReturnDateLegacy } from "../../utils/cohorts";
+import { transportDatesToString, getDepartureDate as getDepartureDateLegacy, getReturnDate as getReturnDateLegacy, getCohort } from "../../utils/cohorts";
 import { useSelector } from "react-redux";
 
 export default function WaitingAffectation() {
   const young = useSelector((state) => state.Auth.young);
-  const cohort = useSelector((state) => state.Auth.cohort);
+  const cohort = getCohort(young.cohort);
   const departureDate = environment === "production" ? getDepartureDateLegacy(young) : getDepartureDate(young, {}, cohort);
   const returnDate = environment === "production" ? getReturnDateLegacy(young) : getReturnDate(young, {}, cohort);
 
