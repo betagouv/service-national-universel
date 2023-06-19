@@ -44,7 +44,7 @@ export default function StepsAffected({ center, meetingPoint, departureDate, ret
       </div>
       <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">
-        <StepAgreement young={young} />
+        <StepAgreement departureDate={departureDate} returnDate={returnDate} />
       </div>
       <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">

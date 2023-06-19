@@ -14,7 +14,7 @@ import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
 import { translateCohortTemp } from "snu-lib";
 import { environment } from "../../config";
-import { sessionDatesToString, getDepartureDate as getDepartureDateLegacy, getReturnDate as getReturnDateLegacy } from "../../utils/cohorts";
+import { transportDatesToString, getDepartureDate as getDepartureDateLegacy, getReturnDate as getReturnDateLegacy } from "../../utils/cohorts";
 import { useSelector } from "react-redux";
 
 export default function WaitingAffectation() {
@@ -33,7 +33,7 @@ export default function WaitingAffectation() {
           <article>
             <h1 className="mb-4 flex flex-col text-2xl leading-7 md:gap-3 md:text-[44px] md:text-5xl md:leading-12">
               <span>Mon séjour de cohésion</span>
-              <strong className="flex items-center">{environment === "production" ? translateCohortTemp(young) : sessionDatesToString(departureDate, returnDate)}</strong>
+              <strong className="flex items-center">{environment === "production" ? translateCohortTemp(young) : transportDatesToString(departureDate, returnDate)}</strong>
             </h1>
 
             {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null}

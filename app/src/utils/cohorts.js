@@ -156,7 +156,7 @@ export function getReturnHour(meetingPoint = null) {
   return ALONE_DEPARTURE_HOUR;
 }
 
-export const sessionDatesToString = (departureDate, returnDate) => {
+export const transportDatesToString = (departureDate, returnDate) => {
   if (departureDate.getMonth() === returnDate.getMonth()) {
     return `du ${departureDate.getDate()} au ${returnDate.getDate()} ${departureDate.toLocaleString("fr", { month: "long", year: "numeric" })}`;
   }

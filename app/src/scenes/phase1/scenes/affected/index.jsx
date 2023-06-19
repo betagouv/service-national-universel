@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { translateCohortTemp, youngCanChangeSession } from "snu-lib";
-import { getCohort, getDepartureDate as getDepartureDateLegacy, getReturnDate as getReturnDateLegacy, sessionDatesToString } from "../../../../utils/cohorts";
+import { getCohort, getDepartureDate as getDepartureDateLegacy, getReturnDate as getReturnDateLegacy, transportDatesToString } from "../../../../utils/cohorts";
 import { isStepMedicalFieldDone } from "./utils/steps.utils";
 import api from "../../../../services/api";
 
@@ -81,7 +81,7 @@ export default function Affected() {
             <h1 className="text-2xl md:space-y-4 md:text-5xl">
               Mon séjour de cohésion
               <br />
-              <strong className="flex items-center">{environment === "production" ? translateCohortTemp(young) : sessionDatesToString(departureDate, returnDate)}</strong>
+              <strong className="flex items-center">{environment === "production" ? translateCohortTemp(young) : transportDatesToString(departureDate, returnDate)}</strong>
             </h1>
             {youngCanChangeSession(young) ? <ChangeStayLink className="my-4 md:my-8" /> : null}
           </div>
