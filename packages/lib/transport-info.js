@@ -18,7 +18,7 @@ const TRANSPORT_TIMES = {
 function getDepartureDate(young, session, cohort, meetingPoint = null) {
   if (!session && !cohort) throw new Error("getDepartureDate: session and cohort are required");
   if (meetingPoint?.bus || meetingPoint?.ligneBus || meetingPoint?.departuredDate) return getMeetingPointDepartureDate(meetingPoint);
-  return getCenterArrivalDate(young, session, cohort);
+  return getCenterArrivalDate(session, cohort);
 }
 
 function getMeetingPointDepartureDate(meetingPoint) {
@@ -27,15 +27,12 @@ function getMeetingPointDepartureDate(meetingPoint) {
   return new Date(meetingPoint?.departuredDate);
 }
 
-function getCenterArrivalDate(young, session, cohort) {
+function getCenterArrivalDate(session, cohort) {
   if (session?.dateStart) return new Date(session?.dateStart);
-  return getGlobalDepartureDate(young, cohort);
+  return getGlobalDepartureDate(cohort);
 }
 
-function getGlobalDepartureDate(young, cohort) {
-  if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
-    return new Date(2023, 6, 5);
-  }
+function getGlobalDepartureDate(cohort) {
   return new Date(cohort.dateStart);
 }
 
@@ -52,7 +49,7 @@ function getGlobalDepartureDate(young, cohort) {
 function getReturnDate(young, session, cohort, meetingPoint = null) {
   if (!session && !cohort) throw new Error("getReturnDate: session and cohort are required");
   if (meetingPoint?.bus || meetingPoint?.ligneBus || meetingPoint?.departuredDate) return getMeetingPointReturnDate(meetingPoint);
-  return getCenterReturnDate(young, session, cohort);
+  return getCenterReturnDate(session, cohort);
 }
 
 function getMeetingPointReturnDate(meetingPoint) {
@@ -61,15 +58,12 @@ function getMeetingPointReturnDate(meetingPoint) {
   return new Date(meetingPoint?.returnDate);
 }
 
-function getCenterReturnDate(young, session, cohort) {
+function getCenterReturnDate(session, cohort) {
   if (session?.dateEnd) return new Date(session?.dateEnd);
-  if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(session.region)) {
-    return new Date(2023, 6, 17);
-  }
-  return getGlobalReturnDate(young, cohort);
+  return getGlobalReturnDate(cohort);
 }
 
-function getGlobalReturnDate(young, cohort) {
+function getGlobalReturnDate(cohort) {
   return new Date(cohort.dateEnd);
 }
 
