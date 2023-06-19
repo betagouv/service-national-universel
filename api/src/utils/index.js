@@ -634,7 +634,7 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
         }
       }
     }
-    await young.save({ fromUser: user });
+    // await young.save({ fromUser: user });
   } catch (e) {
     capture(e);
   }
@@ -662,18 +662,16 @@ async function updateStatusPhase1WithSpecificCase(young, validationDate, user) {
         // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
         if (["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young?.departSejourMotif)) {
           young.set({ statusPhase1: "DONE" });
-        } else if (!young.cohesionStayPresence) {
-          young.set({ statusPhase1: "AFFECTED" });
         } else if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
           young.set({ statusPhase1: "NOT_DONE" });
-        } else if (young.cohesionStayPresence === "true") {
+        } else if (young.cohesionStayPresence !== "false") {
           young.set({ statusPhase1: "AFFECTED" });
         } else {
           young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
         }
       }
     }
-    await young.save({ fromUser: user });
+    // await young.save({ fromUser: user });
   } catch (e) {
     console.log(e);
     capture(e);
