@@ -627,12 +627,14 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
           young.set({ statusPhase1: "DONE" });
         } else if (young.cohesionStayPresence === "true" && !young.presenceJDM) {
           young.set({ statusPhase1: "AFFECTED" });
+        } if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
+          young.set({ statusPhase1: "NOT_DONE" });
         } else {
           young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
         }
       }
     }
-    await young.save({ fromUser: user });
+    // await young.save({ fromUser: user });
   } catch (e) {
     capture(e);
   }
@@ -662,12 +664,14 @@ async function updateStatusPhase1WithSpecificCase(young, validationDate, user) {
           young.set({ statusPhase1: "DONE" });
         } else if (young.cohesionStayPresence === "true") {
           young.set({ statusPhase1: "AFFECTED" });
+        } if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
+          young.set({ statusPhase1: "NOT_DONE" });
         } else {
           young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
         }
       }
     }
-    await young.save({ fromUser: user });
+    // await young.save({ fromUser: user });
   } catch (e) {
     console.log(e);
     capture(e);
