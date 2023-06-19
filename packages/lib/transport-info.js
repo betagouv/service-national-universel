@@ -5,73 +5,6 @@ const TRANSPORT_TIMES = {
   ALONE_DEPARTURE_HOUR: "16:00",
 }
 
-const centersInJulyClosingEarly = [{
-  "_id": {
-    "$oid": "609bebb10c1cc9a888ae8fba"
-  },
-  "code": "SNU844210",
-  "code2022": "ARALYO04203"
-},
-{
-  "_id": {
-    "$oid": "609bebb20c1cc9a888ae8fc2"
-  },
-  "code": "SNU846313",
-  "code2022": "ARACLE06301"
-},
-{
-  "_id": {
-    "$oid": "609bebc60c1cc9a888ae909b"
-  },
-  "code": "SNU761102",
-  "code2022": "OCCMON01101"
-},
-{
-  "_id": {
-    "$oid": "609bebca0c1cc9a888ae90c7"
-  },
-  "code": "SNU524401",
-  "code2022": "PDLNAN04401"
-},
-{
-  "_id": {
-    "$oid": "60a7dd5aa9f80b075f068cea"
-  },
-  "code": "SNU117511",
-  "code2022": "IDFPAR07501"
-},
-{
-  "_id": {
-    "$oid": "626b07616f7eb607e9b88b90"
-  },
-  "code2022": "ARAGRE03802"
-},
-{
-  "_id": {
-    "$oid": "63c553786a71d408cb817985"
-  },
-  "code2022": "GENAM08804"
-},
-{
-  "_id": {
-    "$oid": "63da4af647841408c5940c78"
-  },
-  "code2022": "PACNIC00601"
-},
-{
-  "_id": {
-    "$oid": "63dff1eeca0dad08c4d81261"
-  },
-  "code2022": "ARAGRE03805"
-},
-// pour test en staging
-{
-  "_id": {
-    "$oid": "63873264a4ec702331abec5f"
-  },
-  "code2022": "ARAGRE03805"
-}]
-
 /**
  * @param {Object} young
  * @param {Object} session
@@ -84,12 +17,13 @@ const centersInJulyClosingEarly = [{
  */
 function getDepartureDate(young, session, cohort, meetingPoint = null) {
   if (!session && !cohort) throw new Error("getDepartureDate: session and cohort are required");
-  if (young.meetingPointId) return getMeetingPointDepartureDate(young, meetingPoint);
+  if (meetingPoint) return getMeetingPointDepartureDate(meetingPoint);
   return getCenterArrivalDate(young, session, cohort);
 }
 
-function getMeetingPointDepartureDate(young, meetingPoint) {
+function getMeetingPointDepartureDate(meetingPoint) {
   if (meetingPoint?.bus?.departuredDate) return new Date(meetingPoint?.bus?.departuredDate);
+  if (meetingPoint?.ligneBus?.departuredDate) return new Date(meetingPoint?.ligneBus?.departuredDate);
   return new Date(meetingPoint?.departuredDate);
 }
 
@@ -117,12 +51,13 @@ function getGlobalDepartureDate(young, cohort) {
  */
 function getReturnDate(young, session, cohort, meetingPoint = null) {
   if (!session && !cohort) throw new Error("getReturnDate: session and cohort are required");
-  if (young.meetingPointId) return getMeetingPointReturnDate(young, meetingPoint);
+  if (meetingPoint) return getMeetingPointReturnDate(meetingPoint);
   return getCenterReturnDate(young, session, cohort);
 }
 
-function getMeetingPointReturnDate(young, meetingPoint) {
+function getMeetingPointReturnDate(meetingPoint) {
   if (meetingPoint?.bus?.returnDate) return new Date(meetingPoint?.bus?.returnDate);
+  if (meetingPoint?.ligneBus?.returnDate) return new Date(meetingPoint?.ligneBus?.returnDate);
   return new Date(meetingPoint?.returnDate);
 }
 
