@@ -17,7 +17,7 @@ const TRANSPORT_TIMES = {
  */
 function getDepartureDate(young, session, cohort, meetingPoint = null) {
   if (!session && !cohort) throw new Error("getDepartureDate: session and cohort are required");
-  if (meetingPoint) return getMeetingPointDepartureDate(meetingPoint);
+  if (meetingPoint?.bus || meetingPoint?.ligneBus || meetingPoint?.departuredDate) return getMeetingPointDepartureDate(meetingPoint);
   return getCenterArrivalDate(young, session, cohort);
 }
 
@@ -51,7 +51,7 @@ function getGlobalDepartureDate(young, cohort) {
  */
 function getReturnDate(young, session, cohort, meetingPoint = null) {
   if (!session && !cohort) throw new Error("getReturnDate: session and cohort are required");
-  if (meetingPoint) return getMeetingPointReturnDate(meetingPoint);
+  if (meetingPoint?.bus || meetingPoint?.ligneBus || meetingPoint?.departuredDate) return getMeetingPointReturnDate(meetingPoint);
   return getCenterReturnDate(young, session, cohort);
 }
 
