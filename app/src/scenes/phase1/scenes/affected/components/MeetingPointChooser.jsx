@@ -2,42 +2,43 @@ import React from "react";
 import LinearMap from "../../../../../assets/icons/LinearMap";
 import Check from "../../../../../assets/icons/Check";
 import { BorderButton } from "../../../../../components/buttons/SimpleButtons";
+import dayjs from "dayjs";
 
-function MeetingPointChooser({ meetingPoint, onChoose, choosed, expired }) {
-  const completeAddress = meetingPoint.address + " " + meetingPoint.zip + " " + meetingPoint.city;
-
+function MeetingPointChooser({ meetingPoint, onChoose, chosen, expired }) {
   return (
-    <div className="flex flex-col items-center rounded-lg bg-gray-50 p-4">
+    <div className="flex flex-col items-center rounded-lg bg-gray-50 p-4 w-64">
       <LinearMap />
-      <div className="mt-3 text-center text-base font-bold text-[#242526]">{meetingPoint.name}</div>
-      <div className="mt-1 flex-1 text-center text-sm text-gray-800 underline">{completeAddress}</div>
-      <div className="mt-1 flex-1 text-center text-sm text-gray-500">N° de transport : {meetingPoint.busLineName}</div>
-      <div className="my-4 h-[1px] w-[66px] bg-gray-200" />
-      <div className="mb-8 flex items-center">
-        <Schedule type="Aller" className="mr-4">
-          {meetingPoint.meetingHour}
-        </Schedule>
-        <Schedule type="Retour">{meetingPoint.returnHour}</Schedule>
+      <p className="my-2 text-center text-base font-bold text-gray-800">{meetingPoint.name}</p>
+      <p className="text-center text-xs text-gray-500">
+        {meetingPoint.address}
+        <br />
+        {meetingPoint.zip + " " + meetingPoint.city}
+      </p>
+      <p className="mt-3 text-center text-xs text-gray-500">N° de transport : {meetingPoint.busLineName}</p>
+
+      <hr className="my-3 w-16" />
+
+      <div className="flex text-gray-500 items-center">
+        <p className="text-xs">Aller &nbsp;</p>
+        <p className="text-base text-gray-800">{dayjs(meetingPoint.departuredDate).locale("fr").format("DD MMMM")} à&nbsp;</p>
+        <p className="text-base text-gray-800 font-semibold">{meetingPoint.meetingHour}</p>
       </div>
-      {choosed ? (
-        <div className="flex items-center rounded-[10px] border-[1px]  border-blue-600 bg-blue-600 py-2.5 px-3 text-sm font-medium text-[#FFFFFF]">
+      <div className="mb-3 flex text-gray-500 items-center">
+        <p className="text-xs">Retour &nbsp;</p>
+        <p className="text-base text-gray-800">{dayjs(meetingPoint.returnDate).locale("fr").format("DD MMMM")} à&nbsp;</p>
+        <p className="text-base text-gray-800 font-semibold">{meetingPoint.returnHour}</p>
+      </div>
+
+      {chosen ? (
+        <button disabled className="flex items-center rounded border-[1px] border-blue-600 bg-blue-600 py-2.5 px-3 text-sm font-medium text-white">
           <Check className="mr-2" />
           Choisi
-        </div>
+        </button>
       ) : expired ? (
-        <div className="rounded-[10px] border-[1px] border-gray-300 bg-[#FFFFFF]  py-2.5 px-3 text-sm font-medium text-gray-500">Date limite dépassée</div>
+        <div className="rounded-lg border-[1px] border-gray-300 bg-white  py-2.5 px-3 text-sm font-medium text-gray-500">Date limite dépassée</div>
       ) : (
         <BorderButton onClick={onChoose}>Choisir ce point</BorderButton>
       )}
-    </div>
-  );
-}
-
-function Schedule({ type, children, className }) {
-  return (
-    <div className={`flex items-center ${className}`}>
-      <div className="mr-1 text-sm text-gray-500">{type}</div>
-      <div className="text-lg font-bold text-[#242526]">{children}</div>
     </div>
   );
 }
