@@ -1,8 +1,8 @@
-import "isomorphic-fetch";
 import fetchRetry from "fetch-retry";
+import "isomorphic-fetch";
 
-import { apiURL } from "../config";
 import * as Sentry from "@sentry/react";
+import { apiURL } from "../config";
 
 let fetch = window.fetch;
 
@@ -20,6 +20,12 @@ function jsonOrRedirectToSignIn(response) {
 class api {
   constructor() {
     this.token = "";
+  }
+
+  goToAuth() {
+    if (window && window.location && window.location.href) {
+      return (window.location.href = "/auth?unauthorized=1");
+    }
   }
 
   getToken() {
@@ -84,6 +90,9 @@ class api {
       headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
       body: typeof body === "string" ? body : JSON.stringify(body),
     });
+    if (response.status === 401) {
+      this.goToAuth();
+    }
     if (response.status !== 200) {
       throw await response.json();
     }
@@ -102,7 +111,9 @@ class api {
           credentials: "include",
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
         });
-
+        if (response.status === 401) {
+          this.goToAuth();
+        }
         const res = await response.json();
         resolve(res);
       } catch (e) {
@@ -124,7 +135,9 @@ class api {
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
-
+        if (response.status === 401) {
+          this.goToAuth();
+        }
         const res = await response.json();
         resolve(res);
       } catch (e) {
@@ -152,6 +165,9 @@ class api {
           headers: { Authorization: `JWT ${this.token}` },
           body: formData,
         });
+        if (response.status === 401) {
+          this.goToAuth();
+        }
         const res = await response.json();
         resolve(res);
       } catch (e) {
@@ -179,6 +195,9 @@ class api {
           headers: {},
           body: formData,
         });
+        if (response.status === 401) {
+          this.goToAuth();
+        }
         const res = await response.json();
         resolve(res);
       } catch (e) {
@@ -199,6 +218,9 @@ class api {
           method: "DELETE",
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
         });
+        if (response.status === 401) {
+          this.goToAuth();
+        }
         const res = await response.json();
         resolve(res);
       } catch (e) {
@@ -229,7 +251,14 @@ class api {
           headers: { Authorization: `JWT ${this.token}` },
           body: formData,
         });
+
+        if (response.status === 401) {
+          this.goToAuth();
+        }
         const res = await response.json();
+        if (response.status !== 200) {
+          return reject(res);
+        }
         resolve(res);
       } catch (e) {
         reject(e);
@@ -257,6 +286,10 @@ class api {
           headers: { Authorization: `JWT ${this.token}` },
           body: formData,
         });
+
+        if (response.status === 401) {
+          this.goToAuth();
+        }
         const res = await response.json();
         resolve(res);
       } catch (e) {
@@ -279,6 +312,9 @@ class api {
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
 
+        if (response.status === 401 && window.location.href.indexOf("/auth") === -1) {
+          this.goToAuth();
+        }
         const res = await response.json();
         if (response.status !== 200) {
           return reject(res);

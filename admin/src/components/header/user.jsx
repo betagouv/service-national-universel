@@ -1,28 +1,29 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { NavLink, useHistory } from "react-router-dom";
 
-import Invite from "./invite";
+import { FiSettings } from "react-icons/fi";
+import { HiLogout, HiUser, HiUserAdd } from "react-icons/hi";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import { ROLES } from "../../utils";
 import plausibleEvent from "../../services/plausible";
-import { HiLogout, HiUser, HiUserAdd } from "react-icons/hi";
-import { FiSettings } from "react-icons/fi";
+import { ROLES } from "../../utils";
+import Invite from "./invite";
 
 import Avatar from "../Avatar";
-import { isSuperAdmin } from "snu-lib";
 
 export default function HeaderUser() {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const { user } = useSelector((state) => state.Auth);
+  const history = useHistory();
 
   if (!user) return <div />;
 
   async function logout() {
     await api.post(`/referent/logout`);
     dispatch(setUser(null));
+    return history.push("/auth");
   }
 
   return (
