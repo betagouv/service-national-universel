@@ -4,21 +4,21 @@ import { setYoung } from "../../../../../../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import { BsCheck2 } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
-import { getMeetingPointChoiceLimitDateForCohort } from "../../../../../../utils/cohorts";
-import { isStepPDRDone } from "../../utils/steps.utils";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 import { capture } from "../../../../../../sentry";
-import { getMeetingHour, getReturnHour } from "snu-lib/transport-info";
 import api from "../../../../../../services/api";
+import { getMeetingHour, getReturnHour } from "snu-lib/transport-info";
+import { getMeetingPointChoiceLimitDateForCohort } from "../../../../../../utils/cohorts";
+import { isStepPDRDone } from "../../utils/steps.utils";
 
-import Loader from "../../../../../../components/Loader";
-import LinearMap from "../../../../../../assets/icons/LinearMap";
 import CloseSvg from "../../../../../../assets/Close";
-import MeetingPointGoAlone from "../MeetingPointGoAlone";
-import MeetingPointConfirmationModal from "../MeetingPointConfirmationModal";
+import LinearMap from "../../../../../../assets/icons/LinearMap";
+import Loader from "../../../../../../components/Loader";
 import MeetingPointChooser from "../MeetingPointChooser";
+import MeetingPointConfirmationModal from "../MeetingPointConfirmationModal";
+import MeetingPointGoAlone from "../MeetingPointGoAlone";
 import Modal from "../../../../../../components/ui/modals/Modal";
 
 export default function StepPDR({ center, meetingPoint, departureDate, returnDate }) {
@@ -162,9 +162,7 @@ export default function StepPDR({ center, meetingPoint, departureDate, returnDat
                 <MeetingPointChooser
                   key={mp._id}
                   meetingPoint={mp}
-                  onChoose={() => {
-                    return setModalMeetingPoint({ isOpen: true, meetingPoint: mp });
-                  }}
+                  onChoose={() => setModalMeetingPoint({ isOpen: true, meetingPoint: mp })}
                   chosen={mp._id === young.meetingPointId && mp.busLineId === young.ligneId}
                   expired={pdrChoiceExpired}
                 />
@@ -238,38 +236,37 @@ export default function StepPDR({ center, meetingPoint, departureDate, returnDat
           </div>
         </div>
       </div>
-      {openedMobile && (
-        <Modal isOpen={openedMobile} onClose={() => setOpenedMobile(false)}>
-          <div className="flex mb-3">
-            <p className="text-center text-lg font-bold text-gray-900">Confirmez votre point de rassemblement</p>
-            <CloseSvg className="hover:cursor-pointer" height={20} width={20} onClick={() => setOpenedMobile(false)} />
-          </div>
-          {error && <div className="text-red my-4 text-center text-sm">{error}</div>}
-          <div className="flex flex-col items-center gap-6">
-            {meetingPoints &&
-              meetingPoints.map((mp) => (
-                <MeetingPointChooser
-                  key={mp._id}
-                  meetingPoint={mp}
-                  onChoose={() => {
-                    return setModalMeetingPoint({ isOpen: true, meetingPoint: mp });
-                  }}
-                  choosed={mp._id === young.meetingPointId}
-                  expired={pdrChoiceExpired}
-                />
-              ))}
-            <MeetingPointGoAlone
-              center={center}
-              young={young}
-              onChoose={() => {
-                return setModalMeetingPoint({ isOpen: true });
-              }}
-              choosed={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
-              expired={pdrChoiceExpired}
-            />
-          </div>
-        </Modal>
-      )}
+
+      <Modal isOpen={openedMobile} onClose={() => setOpenedMobile(false)}>
+        <div className="flex mb-3">
+          <p className="text-center text-lg font-bold text-gray-900">Confirmez votre point de rassemblement</p>
+          <CloseSvg className="hover:cursor-pointer" height={20} width={20} onClick={() => setOpenedMobile(false)} />
+        </div>
+        {error && <div className="text-red my-4 text-center text-sm">{error}</div>}
+        <div className="flex flex-col items-center gap-6">
+          {meetingPoints &&
+            meetingPoints.map((mp) => (
+              <MeetingPointChooser
+                key={mp._id}
+                meetingPoint={mp}
+                onChoose={() => {
+                  return setModalMeetingPoint({ isOpen: true, meetingPoint: mp });
+                }}
+                choosed={mp._id === young.meetingPointId}
+                expired={pdrChoiceExpired}
+              />
+            ))}
+          <MeetingPointGoAlone
+            center={center}
+            young={young}
+            onChoose={() => {
+              return setModalMeetingPoint({ isOpen: true });
+            }}
+            choosed={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
+            expired={pdrChoiceExpired}
+          />
+        </div>
+      </Modal>
     </>
   );
 }
