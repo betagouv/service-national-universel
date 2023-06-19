@@ -1,3 +1,23 @@
+# [1.295.0](https://github.com/betagouv/service-national-universel/compare/v1.294.0...v1.295.0) (2023-06-19)
+
+
+### Bug Fixes
+
+* **admin:** fix session filtering for head centers ([e180316](https://github.com/betagouv/service-national-universel/commit/e1803169e093c66391b82faf6c3ac709747ed7c6))
+* **admin:** keep old behavior in modal affectation for prod ([0437103](https://github.com/betagouv/service-national-universel/commit/04371039997dd5b0ab552a11a4968b16b0e8d3a9))
+* **api:** Fix auto-validation hors Juin 2023 ([c93f37d](https://github.com/betagouv/service-national-universel/commit/c93f37d234222950d26f99ad352a04657fcc573b))
+* **api/pdf:** Render pdf 10 by 10 in batch mode ([6cc8c74](https://github.com/betagouv/service-national-universel/commit/6cc8c74ba43bdfa9f327076f0c96a743cacf89cf))
+* **app:** do not capture cohort fetch error when user is logged out ([e7c4bad](https://github.com/betagouv/service-national-universel/commit/e7c4bad290c209e9baabb0077415d37abdebea93))
+* **app:** waiting affectation cohort data ([782cc4e](https://github.com/betagouv/service-national-universel/commit/782cc4e8d7dc177c58245170d445dca2937f37a9))
+* **lib:** dont display session date for young waiting affectation ([952160c](https://github.com/betagouv/service-national-universel/commit/952160c9de9144bea68f32086b13fd70cd374a24))
+* **lib:** DROMS dates globales ([e6331c6](https://github.com/betagouv/service-national-universel/commit/e6331c60623bd938fe43889bd029850ea6e31ef6))
+
+
+### Features
+
+* **admin/api/app:** Date de session spécifique ([#2705](https://github.com/betagouv/service-national-universel/issues/2705)) ([d757101](https://github.com/betagouv/service-national-universel/commit/d757101b8c0ce716a8a0521a5db92b5399989bb5))
+* **api:** New condition for autovalidationStatusPhase1 ([#2716](https://github.com/betagouv/service-national-universel/issues/2716)) ([c6df6ff](https://github.com/betagouv/service-national-universel/commit/c6df6ff34f1a2b7845a5b994a62328e3e1dade69))
+
 # [1.294.0](https://github.com/betagouv/service-national-universel/compare/v1.293.0...v1.294.0) (2023-06-18)
 
 
