@@ -10,6 +10,9 @@ let cohortsCachedAt = null;
 export async function cohortsInit() {
   try {
     const result = await api.get("/cohort");
+    if (result.code === 401) {
+      return;
+    }
     if (!result.ok) {
       capture("Unable to load global cohorts data");
     } else {
