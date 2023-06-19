@@ -10,12 +10,12 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
 import { capture } from "../../sentry";
 import api from "../../services/api";
-import DatePickerInput from "./components/DatePickerInput";
+import DatePickerInput from "../../components/ui/forms/dateForm/DatePickerInput";
 import InputText from "../../components/ui/forms/InputText";
 import InputTextarea from "../../components/ui/forms/InputTextarea";
 import Select from "../../components/forms/Select";
-import SimpleToggle from "./components/SimpleToggle";
-import ToggleDate from "./components/ToggleDate";
+import SimpleToggle from "../../components/ui/forms/dateForm/SimpleToggle";
+import ToggleDate from "../../components/ui/forms/dateForm/ToggleDate";
 import { BiLoaderAlt } from "react-icons/bi";
 import { settings, uselessSettings } from "./utils";
 

@@ -12,30 +12,17 @@ import { supportURL } from "../../../../../config";
 
 import dayjs from "dayjs";
 import { translateCohortTemp } from "snu-lib";
-import { getMeetingHour, getReturnHour } from "../../../../../utils/cohorts";
+import { getMeetingHour, getReturnHour } from "snu-lib/transport-info";
 
-export default function Convocation({ departureDate, returnDate }) {
+export default function Convocation({ center, meetingPoint, departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
-
-  const [meetingPoint, setMeetingPoint] = useState();
-  const [center, setCenter] = useState();
   const [service, setService] = useState();
 
   const isFromDOMTOM = () => {
     return false;
   };
 
-  const getMeetingPoint = async () => {
-    const { data, code, ok } = await api.get(`/point-de-rassemblement/fullInfo/${young.meetingPointId}/${young.ligneId}`);
-    if (!ok) return toastr.error("error", translate(code));
-    setMeetingPoint(data);
-  };
-  const getCenter = async () => {
-    const { data, code, ok } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
-    if (!ok) return toastr.error("error", translate(code));
-    setCenter(data);
-  };
   const getService = async () => {
     const { data, code, ok } = await api.get(`/department-service/${young.department}`);
     if (!ok) return toastr.error("error", translate(code));
@@ -43,27 +30,14 @@ export default function Convocation({ departureDate, returnDate }) {
   };
 
   useEffect(() => {
-    // À changer par la suite ? Notamment le isFromDOMTOM() ?
-    if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.transportInfoGivenByLocal !== "true") return console.log("unauthorized");
-    getCenter();
-    young.meetingPointId && getMeetingPoint();
-    getService();
+    if (young?.department && !service) getService();
   }, [young]);
 
   const getMeetingAddress = () => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
-    const complement = meetingPoint.pointDeRassemblement?.complementAddress.find((c) => c.cohort === young.cohort);
+    const complement = meetingPoint?.complementAddress.find((c) => c.cohort === young.cohort);
     const complementText = complement?.complement ? ", " + complement.complement : "";
-    return (
-      meetingPoint.pointDeRassemblement.name +
-      ", " +
-      meetingPoint.pointDeRassemblement.address +
-      " " +
-      meetingPoint.pointDeRassemblement.zip +
-      " " +
-      meetingPoint.pointDeRassemblement.city +
-      complementText
-    );
+    return meetingPoint.name + ", " + meetingPoint.address + " " + meetingPoint.zip + " " + meetingPoint.city + complementText;
   };
 
   if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.transportInfoGivenByLocal !== "true") {

@@ -12,7 +12,7 @@ import CenterInformations from "./CenterInformations";
 import Pencil from "../../../assets/icons/Pencil";
 import Trash from "../../../assets/icons/Trash";
 
-import { COHESION_STAY_START, isSessionEditionOpen } from "snu-lib";
+import { COHESION_STAY_START, canPutSpecificDateOnSessionPhase1, formatLongDateFR, isSessionEditionOpen } from "snu-lib";
 
 import Field from "../components/Field";
 
@@ -20,6 +20,8 @@ import Breadcrumbs from "../../../components/Breadcrumbs";
 import Loader from "../../../components/Loader";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import TimeSchedule from "../components/TimeSchedule";
+import ToggleDate from "../../../components/ui/forms/DateForm/ToggleDate";
+import dayjs from "dayjs";
 
 export default function Index({ ...props }) {
   const history = useHistory();
@@ -102,11 +104,24 @@ export default function Index({ ...props }) {
       if (allSessions.data.length === 0) setSessions([]);
       const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[0]?.cohort;
       if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)) {
+        allSessions.data = allSessions.data.map((session) => {
+          return {
+            ...session,
+            hasSpecificDate: session?.dateStart && session?.dateEnd ? true : false,
+          };
+        });
         allSessions.data.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
         setSessions(allSessions.data);
+
         if (!blockFocus) setFocusedSession(allSessions.data.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
       } else {
         const sessionFiltered = allSessions.data.filter((session) => session.headCenterId === user._id);
+        sessionFiltered.data = sessionFiltered.data.map((session) => {
+          return {
+            ...session,
+            hasSpecificDate: session?.dateStart && session?.dateEnd ? true : false,
+          };
+        });
         sessionFiltered.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
         const blockedSession = sessionFiltered.find((s) => s.cohort === focusedCohort);
         if (user.role === ROLES.HEAD_CENTER) {
@@ -144,6 +159,18 @@ export default function Index({ ...props }) {
     } else if (editInfoSession.placesTotal < focusedSession.placesTotal - focusedSession.placesLeft) {
       errorsObject.placesTotal = "Le nombre de places total est inférieur au nombre d'inscrits";
     }
+
+    if (editInfoSession.hasSpecificDate) {
+      if (!editInfoSession.dateStart || !editInfoSession.dateEnd) {
+        errorsObject.date = "La date de début et de fin sont obligatoires";
+      } else if (editInfoSession.dateStart > editInfoSession.dateEnd) {
+        errorsObject.date = "La date de début doit être antérieure à la date de fin";
+      }
+    } else {
+      editInfoSession.dateStart = null;
+      editInfoSession.dateEnd = null;
+    }
+
     setErrors(errorsObject);
     if (Object.keys(errorsObject).length > 0) return setLoading(false);
     const { ok, code, data: returnedData } = await api.put(`/session-phase1/${focusedSession._id}`, editInfoSession);
@@ -155,7 +182,7 @@ export default function Index({ ...props }) {
     setLoading(false);
     setErrors({});
     // faut aussi change le state sessions
-    setFocusedSession(returnedData);
+    setFocusedSession({ ...returnedData, hasSpecificDate: returnedData?.dateStart && returnedData?.dateEnd ? true : false });
     getCenter(true);
     setEditingBottom(false);
   };
@@ -190,13 +217,16 @@ export default function Index({ ...props }) {
   }
 
   if (!center) return <Loader />;
+
+  console.log(focusedCohortData);
+
   return (
     <>
       {user.role !== ROLES.HEAD_CENTER && <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />}
       <CenterInformations center={center} setCenter={setCenter} sessions={sessions} />
       {/* SESSION COMPONENT : */}
       {sessions.length > 0 ? (
-        <div className="mx-8 mb-8 overflow-hidden rounded-lg bg-white pt-2">
+        <div className="mx-8 mb-8 rounded-lg bg-white pt-2 z-0">
           <div className="border-bottom flex items-center justify-between px-4">
             <div className="justify-left flex items-center">
               {(sessions || []).map((item, index) => (
@@ -265,11 +295,12 @@ export default function Index({ ...props }) {
                   />
                   {/* // liste des volontaires */}
                   <div className="flex max-w-xl flex-1 flex-col items-center justify-between gap-2 border-x-[1px] border-gray-200 bg-white">
-                    <div className="flex w-full flex-1 items-center justify-center border-b-[1px] border-gray-200">
+                    <div className="flex w-full flex-1 items-center justify-center">
                       <button className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
                         Voir les volontaires
                       </button>
                     </div>
+                    <div className="w-full border-b-[1px] border-gray-200" />
                     <div className="flex flex-1 items-center justify-center">
                       <button className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/equipe`)}>
                         Voir l&apos;équipe
@@ -277,9 +308,9 @@ export default function Index({ ...props }) {
                     </div>
                   </div>
 
-                  {/* // équipe */}
-                  <div className="flex min-w-1/4 max-w-xl flex-1 flex-col items-center justify-center gap-4 bg-white p-4">
-                    <div className="w-64">
+                  {/* // info */}
+                  <div className="flex max-w-xl flex-1 flex-col items-center justify-around bg-white">
+                    <div className="flex w-80 flex-1 items-center justify-center ">
                       <Field
                         error={errors.placesTotal}
                         readOnly={!editingBottom || !canCreateOrUpdateCohesionCenter(user)}
@@ -290,6 +321,41 @@ export default function Index({ ...props }) {
                           "C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
                         }
                       />
+                    </div>
+                    <div className="w-full border-b-[1px] h-[1px] border-gray-200" />
+                    <div className="flex flex-1 items-center justify-center w-80">
+                      <div className="flex flex-col w-full">
+                        <ToggleDate
+                          label="Dates spécifiques"
+                          tooltipText={
+                            focusedCohortData ? (
+                              <p>
+                                Les dates de cette session diffèrent des dates officielles :{" "}
+                                <strong>{`${dayjs(focusedCohortData.dateStart).locale("fr").format("DD")} - ${dayjs(focusedCohortData.dateEnd)
+                                  .locale("fr")
+                                  .format("DD MMMM YYYY")}`}</strong>
+                                .
+                              </p>
+                            ) : null
+                          }
+                          readOnly={!editingBottom || !canPutSpecificDateOnSessionPhase1(user)}
+                          value={editInfoSession.hasSpecificDate}
+                          onChange={() => setEditInfoSession({ ...editInfoSession, hasSpecificDate: !editInfoSession.hasSpecificDate })}
+                          range={{
+                            from: editInfoSession?.dateStart || undefined,
+                            to: editInfoSession?.dateEnd || undefined,
+                          }}
+                          onChangeRange={(range) => {
+                            setEditInfoSession({
+                              ...editInfoSession,
+                              hasSpecificDate: range?.from !== undefined || range?.to !== undefined,
+                              dateStart: range?.from,
+                              dateEnd: range?.to,
+                            });
+                          }}
+                        />
+                        {errors?.date && <div className="text-[#EF4444] mx-auto mt-1">{errors?.date}</div>}
+                      </div>
                     </div>
                   </div>
                 </div>

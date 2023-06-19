@@ -56,7 +56,9 @@ export default function TimeSchedule({ session, className = "", onSessionChanged
         </div>
         <MoreButton onClick={() => setModalOpened(true)} />
       </div>
-      <Field className="ml-[70px] w-[250px]" readOnly={true} label="Statut" value={hasTimeSchedule ? "Déposé" : "Non déposé"} />
+      <div className=" ml-[70px] w-[250px]">
+        <Field readOnly={true} label="Statut" value={hasTimeSchedule ? "Déposé" : "Non déposé"} />
+      </div>
       {modalOpened && <ModalTimeSchedule session={session} onCancel={() => setModalOpened(false)} onChanged={onSessionChanged} />}
     </div>
   );

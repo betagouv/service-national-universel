@@ -48,6 +48,7 @@ const {
   isSessionEditionOpen,
   canSendTimeScheduleReminderForSessionPhase1,
   canSendImageRightsForSessionPhase1,
+  canPutSpecificDateOnSessionPhase1,
 } = require("snu-lib");
 const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
@@ -218,6 +219,14 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     let oldHeadCenterId = sessionPhase1.headCenterId;
     const hasHeadCenterChanged = oldHeadCenterId !== value.oldHeadCenterId;
+
+    if (!value.dateStart || !value.dateEnd) {
+      value.dateStart = undefined;
+      value.dateEnd = undefined;
+    } else {
+      value.dateStart = formatDateTimeZone(value.dateStart);
+      value.dateEnd = formatDateTimeZone(value.dateEnd);
+    }
 
     sessionPhase1.set({ ...value });
     await sessionPhase1.save({ fromUser: req.user });
@@ -967,5 +976,12 @@ function stream2buffer(stream) {
     stream.on("error", (err) => reject(err));
   });
 }
+
+const formatDateTimeZone = (date) => {
+  //set timezone to UTC
+  let d = new Date(date);
+  d.toISOString();
+  return d;
+};
 
 module.exports = router;

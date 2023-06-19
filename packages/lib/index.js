@@ -239,3 +239,4 @@ export * from "./roles";
 export * from "./sessions";
 export * from "./translation";
 export * from "./zammood";
+export * from "./transport-info";

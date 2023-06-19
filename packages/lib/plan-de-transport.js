@@ -98,7 +98,6 @@ const centersInJulyClosingEarly = [{
     "$oid": "63873264a4ec702331abec5f"
   },
   "code2022": "ARAGRE03805"
-}]
-
+}];
 
 export { PDT_IMPORT_ERRORS, PDT_IMPORT_ERRORS_TRANSLATION, centersInJulyClosingEarly };

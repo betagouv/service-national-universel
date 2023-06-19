@@ -2,7 +2,7 @@ import React from "react";
 import dayjs from "dayjs";
 import LongArrow from "../../../../../assets/icons/LongArrow";
 import { useSelector } from "react-redux";
-import { getMeetingHour, getReturnHour } from "../../../../../utils/cohorts";
+import { getMeetingHour, getReturnHour } from "snu-lib/transport-info";
 
 export default function TravelInfo({ location, departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
