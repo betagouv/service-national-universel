@@ -625,10 +625,10 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
         // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
         if (["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young?.departSejourMotif)) {
           young.set({ statusPhase1: "DONE" });
-        } else if (young.cohesionStayPresence === "true" && !young.presenceJDM) {
-          young.set({ statusPhase1: "AFFECTED" });
         } if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
           young.set({ statusPhase1: "NOT_DONE" });
+        } else if (young.cohesionStayPresence === "true" && !young.presenceJDM) {
+          young.set({ statusPhase1: "AFFECTED" });
         } else {
           young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
         }
@@ -662,10 +662,10 @@ async function updateStatusPhase1WithSpecificCase(young, validationDate, user) {
         // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
         if (["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young?.departSejourMotif)) {
           young.set({ statusPhase1: "DONE" });
+        } else if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
+          young.set({ statusPhase1: "NOT_DONE" });
         } else if (young.cohesionStayPresence === "true") {
           young.set({ statusPhase1: "AFFECTED" });
-        } if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
-          young.set({ statusPhase1: "NOT_DONE" });
         } else {
           young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
         }
