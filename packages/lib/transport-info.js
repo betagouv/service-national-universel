@@ -122,22 +122,19 @@ function getReturnDate(young, session, cohort, meetingPoint = null) {
 }
 
 function getMeetingPointReturnDate(young, meetingPoint) {
-  if (meetingPoint?.bus?.returnDate) return meetingPoint?.bus?.returnDate;
-  return meetingPoint?.returnDate;
+  if (meetingPoint?.bus?.returnDate) return new Date(meetingPoint?.bus?.returnDate);
+  return new Date(meetingPoint?.returnDate);
 }
 
 function getCenterReturnDate(young, session, cohort) {
   if (session?.dateEnd) return new Date(session?.dateEnd);
+  if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(session.region)) {
+    return new Date(2023, 6, 17);
+  }
   return getGlobalReturnDate(young, cohort);
 }
 
 function getGlobalReturnDate(young, cohort) {
-  if (young.cohort === "Juillet 2023" && young.cohesionCenterId && centersInJulyClosingEarly.map((c) => c._id.$oid).includes(young.cohesionCenterId)) {
-    return new Date(2021, 6, 16);
-  }
-  if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
-    return new Date(2023, 6, 17);
-  }
   return new Date(cohort.dateEnd);
 }
 

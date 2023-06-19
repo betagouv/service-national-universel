@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { translateCohortTemp, youngCanChangeSession } from "snu-lib";
-import { getCohort } from "../../../../utils/cohorts";
+import { getCohort, getDepartureDate as getDepartureDateLegacy, getReturnDate as getReturnDateLegacy, sessionDatesToString } from "../../../../utils/cohorts";
 import { isStepMedicalFieldDone } from "./utils/steps.utils";
 import api from "../../../../services/api";
 
@@ -17,6 +17,7 @@ import StepsAffected from "./components/StepsAffected";
 import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
 import { getDepartureDate, getReturnDate } from "snu-lib/transport-info";
+import { environment } from "../../../../config";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -27,8 +28,8 @@ export default function Affected() {
   const [loading, setLoading] = useState(true);
 
   const cohort = getCohort(young.cohort);
-  const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
-  const returnDate = getReturnDate(young, session, cohort, meetingPoint);
+  const departureDate = environment === "production" ? getDepartureDateLegacy(young, meetingPoint) : getDepartureDate(young, session, cohort, meetingPoint);
+  const returnDate = environment === "production" ? getReturnDateLegacy(young, meetingPoint) : getReturnDate(young, session, cohort, meetingPoint);
 
   if (isStepMedicalFieldDone(young)) {
     window.scrollTo(0, 0);
@@ -80,7 +81,7 @@ export default function Affected() {
             <h1 className="text-2xl md:space-y-4 md:text-5xl">
               Mon séjour de cohésion
               <br />
-              <strong className="flex items-center">{translateCohortTemp(young)}</strong>
+              <strong className="flex items-center">{environment === "production" ? translateCohortTemp(young) : sessionDatesToString(departureDate, returnDate)}</strong>
             </h1>
             {youngCanChangeSession(young) ? <ChangeStayLink className="my-4 md:my-8" /> : null}
           </div>
