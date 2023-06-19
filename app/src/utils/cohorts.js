@@ -10,7 +10,7 @@ let cohortsCachedAt = null;
 export async function cohortsInit() {
   try {
     const result = await api.get("/cohort");
-    if (result.code === 401) {
+    if (result.status === 401) {
       return;
     }
     if (!result.ok) {
