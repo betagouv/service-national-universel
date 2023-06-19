@@ -17,6 +17,7 @@ import ModalTailwind from "../../../components/modals/ModalTailwind";
 import api from "../../../services/api";
 import { debounce, formatStringDateWithDayTimezoneUTC, translate } from "../../../utils";
 import { getDepartureDate, getMeetingHour, getReturnDate, getReturnHour } from "snu-lib/transport-info";
+import { environment } from "../../../config";
 
 const LIST_PAGE_LIMIT = 3;
 
@@ -379,7 +380,56 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                 </div>
               </div>
             </div>
-            {session && cohort && <MeetingInfo young={young} session={session} cohort={cohort} selectedPdr={selectedPdr} />}
+            {environment !== "production" && session && cohort && <MeetingInfo young={young} session={session} cohort={cohort} selectedPdr={selectedPdr} />}
+
+            {environment === "production" && selectedPdr && (
+              <div className="mb-2 flex flex-row justify-center gap-6">
+                <div className="flex flex-row">
+                  <div className="flex flex-col items-center justify-center rounded-lg bg-white p-1 px-2 font-bold shadow-sm">
+                    <div className="capitalize text-orange-600">{dayjs(selectedPdr?.data.ligneBus?.departuredDate).locale("fr").format("MMM")}</div>
+                    <div className="text-lg text-gray-700">{dayjs(selectedPdr?.data.ligneBus?.departuredDate).locale("fr").format("D")}</div>
+                  </div>
+                  <div className="ml-2 flex flex-col items-start justify-center">
+                    <div className="font-bold text-gray-900">Aller à {selectedPdr?.data.ligneToPoint.departureHour}</div>
+                    <div className="text-gray-600 first-letter:capitalize">{dayjs(selectedPdr?.data.ligneBus?.departuredDate).locale("fr").format("dddd D MMMM")}</div>
+                  </div>
+                </div>
+                <div className="flex flex-row">
+                  <div className="flex flex-col items-center justify-center rounded-lg bg-white p-1 px-2 font-bold shadow-sm">
+                    <div className="capitalize text-orange-600">{dayjs(selectedPdr?.data.ligneBus?.returnDate).locale("fr").format("MMM")}</div>
+                    <div className="text-lg text-gray-700">{dayjs(selectedPdr?.data.ligneBus?.returnDate).locale("fr").format("D")}</div>
+                  </div>
+                  <div className="ml-2 flex flex-col items-start justify-center">
+                    <div className="font-bold text-gray-900">Retour à {selectedPdr?.data.ligneToPoint.returnHour}</div>
+                    <div className="text-gray-600 first-letter:capitalize">{dayjs(selectedPdr?.data.ligneBus?.returnDate).locale("fr").format("dddd D MMMM")}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {environment === "production" && pdrOption === "self-going" && (
+              <div className="mb-2 flex flex-row justify-center gap-6">
+                <div className="flex flex-row">
+                  <div className="flex flex-col items-center justify-center rounded-lg bg-white p-1 px-2 font-bold shadow-sm">
+                    <div className="capitalize text-orange-600">{dayjs(cohort.dateStart).locale("fr").format("MMM")}</div>
+                    <div className="text-lg text-gray-700">{dayjs(cohort.dateStart).locale("fr").format("D")}</div>
+                  </div>
+                  <div className="ml-2 flex flex-col items-start justify-center">
+                    <div className="font-bold text-gray-900">Aller à 16h</div>
+                    <div className="text-gray-600 first-letter:capitalize">{dayjs(cohort.dateStart).locale("fr").format("dddd D MMMM")}</div>
+                  </div>
+                </div>
+                <div className="flex flex-row">
+                  <div className="flex flex-col items-center justify-center rounded-lg bg-white p-1 px-2 font-bold shadow-sm">
+                    <div className="capitalize text-orange-600">{dayjs(cohort.dateEnd).locale("fr").format("MMM")}</div>
+                    <div className="text-lg text-gray-700">{dayjs(cohort.dateEnd).locale("fr").format("D")}</div>
+                  </div>
+                  <div className="ml-2 flex flex-col items-start justify-center">
+                    <div className="font-bold text-gray-900">Retour à 11h</div>
+                    <div className="text-gray-600 first-letter:capitalize">{dayjs(cohort.dateEnd).locale("fr").format("dddd D MMMM")}</div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
