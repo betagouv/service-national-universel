@@ -76,7 +76,8 @@ export default function App() {
   useEffect(() => {
     async function fetchData() {
       try {
-        if (window.location.href.indexOf("/auth") !== -1) return setLoading(false);
+        const isOnAuthPage = window.location.href.indexOf("/auth") !== -1;
+        if (isOnAuthPage) return setLoading(false);
         const res = await api.get("/referent/signin_token");
         if (!res.ok || !res.user) {
           dispatch(setUser(null));

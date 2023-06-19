@@ -7,7 +7,7 @@ let fetch = window.fetch;
 
 function jsonOrRedirectToSignIn(response) {
   if (response.ok === false && response.status === 401) {
-    if (window && window.location && window.location.href) {
+    if (window?.location?.href) {
       window.location.href = "/auth?disconnected=1";
       // We need to return responses to prevent the promise from rejecting.
       return { responses: [] };
