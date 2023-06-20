@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { translateCohortTemp, youngCanChangeSession } from "snu-lib";
-import { getCohort, getDepartureDate as getDepartureDateLegacy, getReturnDate as getReturnDateLegacy, transportDatesToString } from "../../../../utils/cohorts";
+import { translateCohortTemp, transportDatesToString, youngCanChangeSession } from "snu-lib";
+import { getCohort, getDepartureDate as getDepartureDateLegacy, getReturnDate as getReturnDateLegacy } from "../../../../utils/cohorts";
 import { isStepMedicalFieldDone } from "./utils/steps.utils";
 import api from "../../../../services/api";
 
