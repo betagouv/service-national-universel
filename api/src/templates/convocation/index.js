@@ -119,7 +119,7 @@ const render = async (young) => {
       .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
       .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
       .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
-      .replace(/{{MEETING_DATE}}/g, sanitizeAll("Le " + dayjs(departureDate()).locale("fr-FR").format("dddd DD MMMM YYYY")))
+      .replace(/{{MEETING_DATE}}/g, sanitizeAll("<b>Le</b> " + dayjs(departureDate()).locale("fr-FR").format("dddd DD MMMM YYYY")))
       .replace(/{{MEETING_HOURS}}/g, sanitizeAll(`<b>A</b> ${meetingPoint ? ligneToPoint.meetingHour : "16:00"}`))
       .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(`<b>Au</b> ${getMeetingAddress(meetingPoint, center)}`))
       .replace(/{{TRANSPORT}}/g, sanitizeAll(ligneBus ? `<b>Numéro de transport</b> : ${ligneBus.busId}` : ""))
