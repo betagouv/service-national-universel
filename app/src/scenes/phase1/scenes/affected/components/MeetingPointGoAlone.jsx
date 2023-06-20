@@ -7,13 +7,13 @@ import { TRANSPORT_TIMES } from "snu-lib";
 
 function MeetingPointGoAlone({ center, onChoose, chosen, expired, departureDate, returnDate }) {
   return (
-    <div className="flex flex-col items-center rounded-lg bg-gray-50 p-4 w-64">
+    <div className="flex flex-col items-center rounded-lg bg-gray-50 p-3 w-64 gap-1">
       <LinearMap gray="true" />
-      <p className="my-2 text-center text-base font-bold text-gray-800">Je me rends au centre et en reviens par mes propres moyens</p>
+      <p className="my-2 text-center text-base font-bold text-gray-800 leading-5">Je me rends au centre et en reviens par mes propres moyens</p>
 
       <p className="text-xs text-gray-500 text-center">{center.name}</p>
       <p className="text-xs text-gray-500">{center.address}</p>
-      <p className="text-xs text-gray-500">{center.zip + " " + center.city}</p>
+      <p className="text-xs text-gray-500 mb-auto">{center.zip + " " + center.city}</p>
 
       <hr className="my-3 w-16" />
 
