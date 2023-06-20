@@ -8,6 +8,7 @@ import Pencil from "../../../assets/icons/Pencil";
 import XCircleFull from "../../../assets/icons/XCircleFull";
 import CheckCircleFull from "../../../assets/icons/CheckCircleFull";
 import Clock from "../../../assets/icons/Clock";
+import { MISSION_STATUS, translate } from "../../../utils";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -18,7 +19,10 @@ function design(statusToColors, selected, type) {
 }
 
 export default function Select({ options, selected, setSelected, label, readOnly = false, icon }) {
-  const statusToColors = GetColor(options, selected);
+  const optionsSelect = Object.keys(MISSION_STATUS).map((status) => {
+    return { label: translate(status), value: status };
+  });
+  const statusToColors = GetColor(optionsSelect);
 
   return (
     <div className="w-full">
@@ -83,9 +87,8 @@ export default function Select({ options, selected, setSelected, label, readOnly
   );
 }
 
-function GetColor(options, selected) {
+function GetColor(options) {
   const optionsValue = options.map((item) => item.value);
-  optionsValue.push(selected.value);
   optionsValue.sort();
   const bgcolor = ["bg-indigo-50", "bg-violet-50", "bg-sky-500", "bg-red-50", "bg-emerald-50", "bg-yellow-500", "bg-orange-400"];
   const color = ["text-indigo-500", "text-violet-600", "text-white", "text-red-600", "text-emerald-600", "text-white", "text-white"];
