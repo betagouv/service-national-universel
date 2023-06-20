@@ -54,8 +54,6 @@ class api {
   }
 
   esQuery(index, body, route = null, queryParam = "") {
-    if (!this.token) return Promise.resolve({ ok: false });
-
     const header = { index, type: "_doc" };
     return fetch(`${apiURL}/es/${route || index}/_msearch${queryParam}`, {
       retries: 3,
@@ -99,7 +97,6 @@ class api {
   }
 
   async openpdf(path, body) {
-    if (!this.token) return Promise.resolve({ ok: false });
     const response = await fetch(`${apiURL}${path}`, {
       retries: 3,
       retryDelay: 1000,
@@ -120,7 +117,6 @@ class api {
   }
 
   get(path) {
-    if (!this.token) return Promise.resolve({ ok: false });
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
@@ -144,7 +140,6 @@ class api {
   }
 
   put(path, body) {
-    if (!this.token) return Promise.resolve({ ok: false });
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
@@ -169,7 +164,6 @@ class api {
   }
 
   putFormData(path, body, files) {
-    if (!this.token) return Promise.resolve({ ok: false });
     let formData = new FormData();
     for (let i = 0; i < files.length; i++) {
       formData.append(files[i].name, files[i], files[i].name);
@@ -200,7 +194,6 @@ class api {
   }
 
   postFormData(path, body, files) {
-    if (!this.token) return Promise.resolve({ ok: false });
     let formData = new FormData();
     for (let i = 0; i < files.length; i++) {
       formData.append(files[i].name, files[i], files[i].name);
@@ -231,7 +224,6 @@ class api {
   }
 
   remove(path) {
-    if (!this.token) return Promise.resolve({ ok: false });
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
@@ -255,7 +247,6 @@ class api {
   }
 
   uploadFile(path, arr, properties) {
-    if (!this.token) return Promise.resolve({ ok: false });
     const names = arr.map((e) => e.name || e);
     const files = arr.filter((e) => typeof e === "object");
     let formData = new FormData();
@@ -282,9 +273,6 @@ class api {
           this.goToAuth();
         }
         const res = await response.json();
-        if (response.status !== 200) {
-          return reject(res);
-        }
         resolve(res);
       } catch (e) {
         reject(e);
@@ -293,7 +281,6 @@ class api {
   }
 
   uploadID(youngId, file, metadata = {}) {
-    if (!this.token) return Promise.resolve({ ok: false });
     let formData = new FormData();
     const safeFilename = encodeURIComponent(file.name.replace(/'/g, ""));
     formData.append("file", file, safeFilename);
@@ -326,7 +313,6 @@ class api {
   }
 
   post(path, body) {
-    if (!this.token) return Promise.resolve({ ok: false });
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
@@ -340,7 +326,7 @@ class api {
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
 
-        if (response.status === 401 && window.location.href.indexOf("/auth") === -1) {
+        if (response.status === 401) {
           this.goToAuth();
         }
         const res = await response.json();

@@ -75,7 +75,7 @@ export default function App() {
     async function fetchData() {
       try {
         if (window.location.href.indexOf("/auth") !== -1) return setLoading(false);
-        const { ok, user, token } = await api.get("/young/signin_token");
+        const { ok, user, token } = await api.checkToken();
         if (!ok) {
           dispatch(setYoung(null));
           return setLoading(false);

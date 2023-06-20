@@ -7,11 +7,9 @@ let fetch = window.fetch;
 
 function jsonOrRedirectToSignIn(response) {
   if (response.ok === false && response.status === 401) {
-    if (window?.location?.href) {
-      window.location.href = "/auth?disconnected=1";
-      // We need to return responses to prevent the promise from rejecting.
-      return { responses: [] };
-    }
+    window.location.href = "/auth?disconnected=1";
+    // We need to return responses to prevent the promise from rejecting.
+    return { responses: [] };
   }
   return response.json();
 }
@@ -22,11 +20,37 @@ class api {
   }
 
   goToAuth() {
-    if (window && window.location && window.location.href) {
-      return (window.location.href = "/auth?disconnected=1");
-    }
+    return (window.location.href = "/auth?unauthorized=1");
   }
 
+  getToken() {
+    return this.token;
+  }
+
+  setToken(token) {
+    this.token = token;
+  }
+
+  checkToken() {
+    if (!this.token) return Promise.resolve({ ok: false });
+    return new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch("/young/signin_token", {
+          retries: 3,
+          retryDelay: 1000,
+          retryOn: [502, 503, 504],
+          mode: "cors",
+          method: "GET",
+          credentials: "include",
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+        });
+        const res = await response.json();
+        resolve(res);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
   esQuery(index, body) {
     const header = { index, type: "_doc" };
     return fetch(`${apiURL}/es/${index}/_msearch`, {
@@ -69,14 +93,6 @@ class api {
     }
     return obj;
   }
-
-  setToken(token) {
-    this.token = token;
-  }
-  getToken() {
-    return this.token;
-  }
-
   openpdf(path, body) {
     return new Promise(async (resolve, reject) => {
       try {
@@ -249,7 +265,7 @@ class api {
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
-        if (response.status === 401 && window.location.href.indexOf("/auth") === -1) {
+        if (response.status === 401) {
           this.goToAuth();
         }
         const res = await response.json();
