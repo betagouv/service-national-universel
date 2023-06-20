@@ -94,6 +94,8 @@ export function getCohortPeriod(cohort) {
   return `du ${formattedStart} au ${formattedEnd}`;
 }
 
+// TODO: remove those functions and use the ones from lib
+
 /**
  * @param {object} young
  * @param {object} [meetingPoint]
@@ -158,13 +160,3 @@ export function getReturnHour(meetingPoint = null) {
   if (meetingPoint?.ligneToPoint?.returnHour) return meetingPoint.ligneToPoint.returnHour;
   return ALONE_DEPARTURE_HOUR;
 }
-
-export const transportDatesToString = (departureDate, returnDate) => {
-  if (departureDate.getMonth() === returnDate.getMonth()) {
-    return `du ${departureDate.getDate()} au ${returnDate.getDate()} ${departureDate.toLocaleString("fr", { month: "long", year: "numeric" })}`;
-  }
-  return `du ${departureDate.getDate()} ${departureDate.toLocaleString("fr", { month: "long" })} au ${returnDate.getDate()} ${returnDate.toLocaleString("fr", {
-    month: "long",
-    year: "numeric",
-  })}`;
-};

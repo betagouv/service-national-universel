@@ -3,25 +3,19 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-
-import Loader from "../../../../../components/Loader";
+import dayjs from "dayjs";
+import { supportURL } from "../../../../../config";
 import api from "../../../../../services/api";
 import { translate, htmlCleaner } from "../../../../../utils";
-import { Hero, Content } from "../../../../../components/Content";
-import { supportURL } from "../../../../../config";
+import { getMeetingHour, getReturnHour, transportDatesToString } from "snu-lib";
 
-import dayjs from "dayjs";
-import { translateCohortTemp } from "snu-lib";
-import { getMeetingHour, getReturnHour } from "snu-lib/transport-info";
+import Loader from "../../../../../components/Loader";
+import { Hero, Content } from "../../../../../components/Content";
 
 export default function Convocation({ center, meetingPoint, departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const [service, setService] = useState();
-
-  const isFromDOMTOM = () => {
-    return false;
-  };
 
   const getService = async () => {
     const { data, code, ok } = await api.get(`/department-service/${young.department}`);
@@ -40,7 +34,7 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
     return meetingPoint.name + ", " + meetingPoint.address + " " + meetingPoint.zip + " " + meetingPoint.city + complementText;
   };
 
-  if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.transportInfoGivenByLocal !== "true") {
+  if (!young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.transportInfoGivenByLocal !== "true") {
     return (
       <Warning>
         ⚠️ Impossible d&apos;afficher votre convocation, merci de contacter le <a onClick={() => history.push("/besoin-d-aide")}>support</a>.
@@ -74,55 +68,42 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
           <br /> <i style={{ fontSize: ".8rem" }}>Article R.113-1 du code du service national</i>
         </ConvocText>
         <ConvocText>
-          Je suis heureux de vous informer que votre candidature pour participer au séjour de cohésion, phase 1 du service national universel, <b>{translateCohortTemp(young)}</b>,
-          a été retenue. Votre séjour se déroulera au : {center.name}, {center.address} {center.zip} {center.city}
+          Je suis heureux de vous informer que votre candidature pour participer au séjour de cohésion, phase 1 du service national universel,{" "}
+          <b>{transportDatesToString(departureDate, returnDate)}</b>, a été retenue. Votre séjour se déroulera au : {center.name}, {center.address} {center.zip} {center.city}
         </ConvocText>
-        {isFromDOMTOM() ? (
-          <>
-            <ConvocText className="italic">
-              Les informations sur les modalités d&apos;acheminement vers le centre et de retour Vous seront transmises par e-mail par les services académiques.
-            </ConvocText>
-            <ConvocText style={{ border: "solid 1px #666", padding: "1rem", margin: "1rem" }}>
-              Attention ! votre représentant légal doit rester jusqu&apos;à votre prise en charge par l&apos;équipe encadrant le séjour de cohésion.
-            </ConvocText>
-          </>
+        {young.transportInfoGivenByLocal === "true" ? (
+          <ConvocText>Les informations de transport vous sont transmises par les services locaux.</ConvocText>
         ) : (
           <>
-            {young.transportInfoGivenByLocal === "true" ? (
-              <ConvocText>Les informations de transport vous sont transmises par les serivces locaux.</ConvocText>
-            ) : (
-              <>
-                <ConvocText>
-                  Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
-                  <div className="text-center">
-                    <div>
-                      <b>Le </b>
-                      {dayjs(departureDate).locale("fr").format("dddd DD MMMM YYYY")}
-                    </div>
-                    <div>
-                      <b>A </b> {getMeetingHour(meetingPoint)}
-                    </div>
-                    <div>
-                      <b>Au </b>
-                      {getMeetingAddress()}
-                    </div>
-                    <div>
-                      {meetingPoint?.bus ? (
-                        <>
-                          <b>Numéro de transport</b> {`: ${meetingPoint?.bus?.busId}`}
-                        </>
-                      ) : (
-                        ""
-                      )}
-                    </div>
-                  </div>
-                </ConvocText>
-                <ConvocText style={{ border: "solid 1px #666", padding: "1rem", margin: "1rem" }}>
-                  Attention à bien respecter l&apos;horaire indiqué. En cas de retard, vous ne pourrez pas effectuer votre séjour de cohésion. Votre représentant légal doit rester
-                  jusqu&apos;à votre prise en charge par les accompagnateurs
-                </ConvocText>
-              </>
-            )}
+            <ConvocText>
+              Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
+              <div className="text-center">
+                <div>
+                  <b>Le </b>
+                  {dayjs(departureDate).locale("fr").format("dddd DD MMMM YYYY")}
+                </div>
+                <div>
+                  <b>A </b> {getMeetingHour(meetingPoint)}
+                </div>
+                <div>
+                  <b>Au </b>
+                  {getMeetingAddress()}
+                </div>
+                <div>
+                  {meetingPoint?.bus ? (
+                    <>
+                      <b>Numéro de transport</b> {`: ${meetingPoint?.bus?.busId}`}
+                    </>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              </div>
+            </ConvocText>
+            <ConvocText style={{ border: "solid 1px #666", padding: "1rem", margin: "1rem" }}>
+              Attention à bien respecter l&apos;horaire indiqué. En cas de retard, vous ne pourrez pas effectuer votre séjour de cohésion. Votre représentant légal doit rester
+              jusqu&apos;à votre prise en charge par les accompagnateurs
+            </ConvocText>
           </>
         )}
         <ConvocText>
@@ -134,24 +115,20 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
             <li>- votre pièce d&apos;identité</li>
             <li>- la fiche sanitaire complétée, sous enveloppe destinée au référent sanitaire,</li>
             <li>- en fonction des consignes sanitaires le jour du départ, 2 masques jetables à usage médical pour le transport en commun, </li>
-            {!isFromDOMTOM() ? <li>- une collation ou un déjeuner froid, selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li> : null}
+            <li>- une collation ou un déjeuner froid, selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>
           </ul>
         </ConvocText>
         <ConvocText>Enfin, nous vous demandons de bien vouloir étiqueter vos bagages.</ConvocText>
-        {!isFromDOMTOM() ? (
-          <>
-            {young.transportInfoGivenByLocal === "true" ? (
-              <ConvocText>
-                Le <b>retour de votre séjour </b>est prévu au même endroit que le jour du départ en centre SNU.
-              </ConvocText>
-            ) : (
-              <ConvocText>
-                Le <b>retour de votre séjour </b>est prévu le {dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")} à {getReturnHour(meetingPoint)}, au même endroit que le
-                jour du départ en centre SNU.
-              </ConvocText>
-            )}
-          </>
-        ) : null}
+        {young.transportInfoGivenByLocal === "true" ? (
+          <ConvocText>
+            Le <b>retour de votre séjour </b>est prévu au même endroit que le jour du départ en centre SNU.
+          </ConvocText>
+        ) : (
+          <ConvocText>
+            Le <b>retour de votre séjour </b>est prévu le {dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")} à {getReturnHour(meetingPoint)}, au même endroit que le jour
+            du départ en centre SNU.
+          </ConvocText>
+        )}
         <ConvocText>
           <b>
             Votre représentant légal veillera à bien respecter ces modalités de retour (horaire, lieu de prise en charge). Vous ne pourrez repartir seul, sauf si vous présentez une
