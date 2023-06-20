@@ -14,12 +14,21 @@ import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
 import { getCohort } from "../../utils/cohorts";
 import { useSelector } from "react-redux";
+import Loader from "../../components/Loader";
 
 export default function WaitingAffectation() {
   const young = useSelector((state) => state.Auth.young);
   const cohort = getCohort(young.cohort);
-  const departureDate = getDepartureDate(young, {}, cohort);
-  const returnDate = getReturnDate(young, {}, cohort);
+  const departureDate = cohort ? getDepartureDate(young, {}, cohort) : null;
+  const returnDate = cohort ? getReturnDate(young, {}, cohort) : null;
+
+  if (!cohort) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <Loader />
+      </div>
+    );
+  }
 
   return (
     <>
