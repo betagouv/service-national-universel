@@ -17,9 +17,9 @@ import { useDispatch, useSelector } from "react-redux";
 import CloseSvg from "../../../../../../assets/Close";
 import { ModalContainer } from "../../../../../../components/modals/Modal";
 import { Modal } from "reactstrap";
-import MeetingPointGoAlone from "../MeetingPointGoAlone";
-import MeetingPointConfirmationModal from "../MeetingPointConfirmationModal";
-import MeetingPointChooser from "../MeetingPointChooser";
+import MeetingPointGoAlone from "../MeetingPointGoAloneOld";
+import MeetingPointConfirmationModal from "../MeetingPointConfirmationModalOld";
+import MeetingPointChooser from "../MeetingPointChooserOld";
 import { TRANSPORT_TIMES, getMeetingHour, getReturnHour } from "snu-lib/transport-info";
 
 export default function StepPDR({ center, meetingPoint, departureDate, returnDate }) {

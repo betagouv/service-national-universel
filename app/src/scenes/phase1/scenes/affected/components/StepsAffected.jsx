@@ -42,10 +42,10 @@ export default function StepsAffected({ center, meetingPoint, departureDate, ret
       </article>
       <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">
-        {environment !== "production" ? (
-          <StepPDR center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
-        ) : (
+        {environment === "production" ? (
           <StepPDROld center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+        ) : (
+          <StepPDR center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
         )}
       </div>
       <hr className="-mx-20 hidden text-gray-200 md:flex" />

@@ -9,7 +9,7 @@ import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 import { capture } from "../../../../../../sentry";
 import api from "../../../../../../services/api";
-import { getMeetingHour, getReturnHour } from "snu-lib/transport-info";
+import { getMeetingHour, getReturnHour } from "snu-lib";
 import { getMeetingPointChoiceLimitDateForCohort } from "../../../../../../utils/cohorts";
 import { isStepPDRDone } from "../../utils/steps.utils";
 
