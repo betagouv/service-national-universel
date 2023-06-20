@@ -9,7 +9,7 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
-const { canEditPresenceYoung, ROLES, canAssignManually, SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
+const { canEditPresenceYoung, ROLES, canAssignManually, SENDINBLUE_TEMPLATES, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } = require("snu-lib");
 
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
@@ -17,7 +17,7 @@ const SessionPhase1Model = require("../../models/sessionPhase1");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const CohortModel = require("../../models/cohort");
-const { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young} = require("../../utils");
+const { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } = require("../../utils");
 const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");
 const { sendTemplate } = require("../../sendinblue");
 
@@ -80,8 +80,11 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
       young.set({ status: "VALIDATED" });
     }
 
+    if ([YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.AFFECTED].includes(young.statusPhase1)) {
+      young.set({ statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED });
+    }
+
     young.set({
-      statusPhase1: "AFFECTED",
       sessionPhase1Id: sessionId,
       cohesionCenterId: centerId,
       deplacementPhase1Autonomous: pdrOption === "self-going" ? "true" : "false",
@@ -179,7 +182,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
     await young.save({ fromUser: req.user });
 
     const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-    await autoValidationSessionPhase1Young({ young, sessionPhase1, user:req.user });
+    await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
 
     res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
@@ -209,7 +212,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
     await young.save({ fromUser: req.user });
 
     const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-    await autoValidationSessionPhase1Young({ young, sessionPhase1, user:req.user });
+    await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
 
     res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
@@ -256,7 +259,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
     if (!["youngPhase1Agreement", "isTravelingByPlane"].includes(key)) {
       const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
       if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      await autoValidationSessionPhase1Young({ young, sessionPhase1, user:req.user });
+      await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
       await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
