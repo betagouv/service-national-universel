@@ -21,8 +21,31 @@ import NextStep from "./components/NextStep";
 export default function Done() {
   const young = useSelector((state) => state.Auth.young) || {};
   const [openAttestationButton, setOpenAttestationButton] = React.useState(false);
-  const [modalOpen, setModalOpen] = React.useState({ isOpen: false });
+  const [modalOpen, setModalOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [center, setCenter] = React.useState(null);
+  const [meetingPoint, setMeetingPoint] = React.useState(null);
+  const [session, setSession] = React.useState(null);
+
+  async function handleClickModal() {
+    try {
+      if (!center || !meetingPoint || !session) {
+        const { data: center, ok: okCenter } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
+        if (!okCenter) throw new Error("Error while fetching center");
+        const { data: meetingPoint, ok: okMeetingPoint } = await api.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
+        if (!okMeetingPoint) throw new Error("Error while fetching meeting point");
+        const { data: session, ok: okSession } = await api.get(`/young/${young._id}/session/`);
+        if (!okSession) throw new Error("Error while fetching session");
+        setCenter(center);
+        setMeetingPoint(meetingPoint);
+        setSession(session);
+      }
+      setModalOpen(true);
+    } catch (e) {
+      capture(e);
+      toastr.error(e.message);
+    }
+  }
 
   const refAttestationButton = React.useRef();
 
@@ -82,9 +105,7 @@ export default function Done() {
                   </div>
                   <div className="flex items-center gap-5">
                     {!isCohortDone(young.cohort) && (
-                      <button
-                        className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs font-medium leading-4 hover:border-gray-500"
-                        onClick={() => setModalOpen({ isOpen: true })}>
+                      <button className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs font-medium leading-4 hover:border-gray-500" onClick={handleClickModal}>
                         Mes informations de retour de séjour
                       </button>
                     )}
@@ -171,9 +192,7 @@ export default function Done() {
           </div>
           <div className="flex flex-col items-center gap-3 py-3">
             {!isCohortDone(young.cohort) ? (
-              <button
-                className="whitespace-nowrap rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs font-medium leading-4"
-                onClick={() => setModalOpen({ isOpen: true })}>
+              <button className="whitespace-nowrap rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs font-medium leading-4" onClick={handleClickModal}>
                 Mes informations de retour de séjour
               </button>
             ) : null}
@@ -237,7 +256,9 @@ export default function Done() {
 
       <NextStep />
 
-      {!isCohortDone(young.cohort) && <InfoConvocation isOpen={modalOpen?.isOpen} onCancel={() => setModalOpen({ isOpen: false })} />}
+      {!isCohortDone(young.cohort) && modalOpen && (
+        <InfoConvocation isOpen={modalOpen} onCancel={() => setModalOpen(false)} center={center} meetingPoint={meetingPoint} session={session} />
+      )}
     </>
   );
 }

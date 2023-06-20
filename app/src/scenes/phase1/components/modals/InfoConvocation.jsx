@@ -5,29 +5,20 @@ import { Modal } from "reactstrap";
 import Calendar from "../../../../assets/calendar";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
 import Download from "../../../../assets/icons/Download";
-import Loader from "../../../../components/Loader";
 import api from "../../../../services/api";
 import downloadPDF from "../../../../utils/download-pdf";
 import { toastr } from "react-redux-toastr";
 import { getReturnDate, getReturnHour, translate } from "snu-lib";
 import { capture } from "../../../../sentry";
-import { getCohort } from "../../../../utils/cohorts";
 import dayjs from "dayjs";
 
-export default function InfoConvocation({ isOpen, onCancel, title }) {
+export default function InfoConvocation({ isOpen, onCancel, title, meetingPoint, session, center, cohort }) {
   const young = useSelector((state) => state.Auth.young) || {};
   const [selectOpen, setSelectOpen] = React.useState(false);
   const refSelect = React.useRef(null);
-  const [meetingPoint, setMeetingPoint] = React.useState();
-  const [center, setCenter] = React.useState();
-  const [session, setSession] = React.useState();
-  const cohort = getCohort(young.cohort);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [loadingConvocation, setLoadingConvocation] = React.useState(false);
-
-  const isAutonomous = young.deplacementPhase1Autonomous === "true";
   const returnDate = getReturnDate(young, session, cohort, meetingPoint);
-  const returnHour = getReturnHour(young, session, cohort, meetingPoint);
+  const returnHour = getReturnHour(meetingPoint);
+  const [loadingConvocation, setLoadingConvocation] = React.useState(false);
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
@@ -40,26 +31,6 @@ export default function InfoConvocation({ isOpen, onCancel, title }) {
       document.removeEventListener("click", handleClickOutside, true);
     };
   }, []);
-
-  React.useEffect(() => {
-    if (center && session) return;
-    (async () => {
-      try {
-        setIsLoading(true);
-        const { data: center } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
-        const { data: meetingPoint } = await api.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
-        const { data: session } = await api.get(`/young/${young._id}/session/`);
-        setCenter(center);
-        setMeetingPoint(meetingPoint);
-        setSession(session);
-        setIsLoading(false);
-      } catch (e) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération des informations de votre séjour de cohésion.");
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, [young]);
 
   const viewConvocation = async ({ uri }) => {
     setLoadingConvocation(true);
@@ -90,7 +61,7 @@ export default function InfoConvocation({ isOpen, onCancel, title }) {
   };
 
   const getMeetingAddress = () => {
-    if (isAutonomous || !meetingPoint?.address) {
+    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint?.address) {
       return [center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ");
     } else {
       let address = [meetingPoint.address];
@@ -113,13 +84,6 @@ export default function InfoConvocation({ isOpen, onCancel, title }) {
       return address.join(", ");
     }
   };
-
-  if (isLoading)
-    return (
-      <Modal centered isOpen={isOpen} onCancel={onCancel} size="">
-        <Loader />
-      </Modal>
-    );
 
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="">
@@ -161,7 +125,7 @@ export default function InfoConvocation({ isOpen, onCancel, title }) {
             </div>
           </div>
         </div>
-        {young.transportInfoGivenByLocal ? (
+        {young.transportInfoGivenByLocal === "true" ? (
           <p className="text-center mt-4">Les informations de transport vous sont transmises par les services locaux.</p>
         ) : (
           <div className="mt-4 flex flex-col items-center gap-6 md:flex-row">
