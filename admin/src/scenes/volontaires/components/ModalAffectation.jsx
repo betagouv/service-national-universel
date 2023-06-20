@@ -380,7 +380,9 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                 </div>
               </div>
             </div>
-            {environment !== "production" && session && cohort && <MeetingInfo young={young} session={session} cohort={cohort} selectedPdr={selectedPdr} />}
+            {environment !== "production" && session && cohort && pdrOption !== "local" && (
+              <MeetingInfo young={young} session={session} cohort={cohort} selectedPdr={selectedPdr} />
+            )}
 
             {environment === "production" && selectedPdr && (
               <div className="mb-2 flex flex-row justify-center gap-6">

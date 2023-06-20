@@ -78,7 +78,7 @@ function getGlobalReturnDate(young, cohort) {
 
 /**
  * @param {object} [meetingPoint]
- * @returns the hour of the departure of the young from the meeting point if they have one,
+ * @returns {string} the hour of the departure of the young from the meeting point if they have one,
  * or a default hour if they don't (local transport or traveling by own means).
  */
 function getMeetingHour(meetingPoint = null) {
@@ -89,7 +89,7 @@ function getMeetingHour(meetingPoint = null) {
 
 /**
  * @param {object} [meetingPoint]
- * @returns the hour of the return of the young to the meeting point if they have one,
+ * @returns {string} the hour of the return of the young to the meeting point if they have one,
  * or a default hour if they don't (local transport or traveling by own means).
  */
 function getReturnHour(meetingPoint = null) {
@@ -97,6 +97,23 @@ function getReturnHour(meetingPoint = null) {
   if (meetingPoint?.ligneToPoint?.returnHour) return meetingPoint.ligneToPoint.returnHour;
   return TRANSPORT_TIMES.ALONE_DEPARTURE_HOUR;
 }
+
+/**
+ * Get the transport dates and returns a formatted string
+ * e.g "du 5 au 17 juillet 2023"
+ * @param {date} departureDate 
+ * @param {date} returnDate 
+ * @returns {string}
+ */
+const transportDatesToString = (departureDate, returnDate) => {
+  if (departureDate.getMonth() === returnDate.getMonth()) {
+    return `du ${departureDate.getDate()} au ${returnDate.getDate()} ${departureDate.toLocaleString("fr", { month: "long", year: "numeric" })}`;
+  }
+  return `du ${departureDate.getDate()} ${departureDate.toLocaleString("fr", { month: "long" })} au ${returnDate.getDate()} ${returnDate.toLocaleString("fr", {
+    month: "long",
+    year: "numeric",
+  })}`;
+};
 
 export {
   TRANSPORT_TIMES,
@@ -106,6 +123,7 @@ export {
   getGlobalReturnDate,
   getMeetingHour,
   getReturnHour,
+  transportDatesToString,
 }
 
 export default {
@@ -116,4 +134,5 @@ export default {
   getGlobalReturnDate,
   getMeetingHour,
   getReturnHour,
+  transportDatesToString,
 }

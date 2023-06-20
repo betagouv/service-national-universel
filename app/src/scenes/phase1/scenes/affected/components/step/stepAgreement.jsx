@@ -9,10 +9,9 @@ import CloseSvg from "../../../../../../assets/Close";
 import { ModalContainer } from "../../../../../../components/modals/Modal";
 import { setYoung } from "../../../../../../redux/auth/actions";
 import api from "../../../../../../services/api";
-import { translateCohortTemp } from "snu-lib";
+import { translateCohortTemp, transportDatesToString } from "snu-lib";
 import plausibleEvent from "../../../../../../services/plausible";
 import { isStepAgreementDone, isStepPDRDone } from "../../utils/steps.utils";
-import { transportDatesToString } from "../../../../../../utils/cohorts";
 import { environment } from "../../../../../../config";
 
 export default function StepAgreement({ departureDate, returnDate }) {

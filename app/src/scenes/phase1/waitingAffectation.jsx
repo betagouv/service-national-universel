@@ -1,5 +1,5 @@
 import React from "react";
-import { getDepartureDate, getReturnDate, youngCanChangeSession } from "snu-lib";
+import { getDepartureDate, getReturnDate, translateCohortTemp, transportDatesToString, youngCanChangeSession } from "snu-lib";
 import hero2 from "../../assets/hero-2.png";
 import heroBanner from "../../assets/hero-banner.png";
 import CurvedArrowLeft from "../../assets/icons/CurvedArrowLeft";
@@ -12,9 +12,8 @@ import FaqSection from "./components/FaqWaitingAffectation";
 import TestimonialsSection from "./components/TestimonialsSection";
 import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
-import { translateCohortTemp } from "snu-lib";
 import { environment } from "../../config";
-import { transportDatesToString, getDepartureDate as getDepartureDateLegacy, getReturnDate as getReturnDateLegacy, getCohort } from "../../utils/cohorts";
+import { getDepartureDate as getDepartureDateLegacy, getReturnDate as getReturnDateLegacy, getCohort } from "../../utils/cohorts";
 import { useSelector } from "react-redux";
 
 export default function WaitingAffectation() {
