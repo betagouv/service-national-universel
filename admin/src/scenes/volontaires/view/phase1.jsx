@@ -37,7 +37,7 @@ export default function Phase1(props) {
   const [isYoungCheckinOpen, setIsYoungCheckinOpen] = useState(false);
 
   function getDisplayCenterButton() {
-    if (young.status !== "VALIDATED" && young.status !== "WAITING_LIST") {
+    if ((young.status !== "VALIDATED" && young.status !== "WAITING_LIST") || (young.statusPhase1 !== "WAITING_AFFECTATION" && young.statusPhase1 !== "AFFECTED")) {
       setIsCohortOpenForAffection(false);
     } else if (cohort) {
       setIsCohortOpenForAffection(canAssignManually(user, young, cohort));
