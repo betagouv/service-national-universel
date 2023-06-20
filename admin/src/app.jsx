@@ -132,7 +132,7 @@ const Home = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await api.api.checkToken();
+        const res = await api.checkToken();
         if (!res.ok || !res.user) {
           api.setToken(null);
           dispatch(setUser(null));
