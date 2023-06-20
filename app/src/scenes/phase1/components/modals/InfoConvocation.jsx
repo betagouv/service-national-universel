@@ -161,7 +161,9 @@ export default function InfoConvocation({ isOpen, onCancel, title }) {
             </div>
           </div>
         </div>
-        {returnDate && (
+        {young.transportInfoGivenByLocal ? (
+          <p className="text-center mt-4">Les informations de transport vous sont transmises par les services locaux.</p>
+        ) : (
           <div className="mt-4 flex flex-col items-center gap-6 md:flex-row">
             <div className="flex items-center justify-center gap-2 pr-4 md:border-r-[1px]">
               <Calendar
