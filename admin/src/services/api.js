@@ -30,6 +30,10 @@ class api {
     }
   }
 
+  getToken() {
+    return this.token;
+  }
+
   setToken(token) {
     this.token = token;
   }
