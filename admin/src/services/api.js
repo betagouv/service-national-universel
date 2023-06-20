@@ -6,15 +6,11 @@ import { apiURL } from "../config";
 
 let fetch = window.fetch;
 
-const exceptionToRedirect = "/auth";
-
 function jsonOrRedirectToSignIn(response) {
   if (response.ok === false && response.status === 401) {
-    if (window?.location?.pathname?.indexOf(exceptionToRedirect) === -1) {
-      window.location.href = "/auth?unauthorized=1";
-      // We need to return responses to prevent the promise from rejecting.
-      return { responses: [] };
-    }
+    window.location.href = "/auth?unauthorized=1";
+    // We need to return responses to prevent the promise from rejecting.
+    return { responses: [] };
   }
   return response.json();
 }
@@ -25,9 +21,7 @@ class api {
   }
 
   goToAuth() {
-    if (window?.location?.pathname?.indexOf(exceptionToRedirect) === -1) {
-      return (window.location.href = "/auth?unauthorized=1");
-    }
+    return (window.location.href = "/auth?unauthorized=1");
   }
 
   getToken() {
