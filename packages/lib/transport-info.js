@@ -36,7 +36,7 @@ function getCenterArrivalDate(young, session, cohort) {
 
 function getGlobalDepartureDate(young, cohort) {
   if (young.cohort === "Juillet 2023" && [...regionsListDROMS, "Polynésie française"].includes(young.region)) {
-    return new Date(2023, 6, 5);
+    return new Date(2023, 6, 4);
   }
   return new Date(cohort.dateStart);
 }
