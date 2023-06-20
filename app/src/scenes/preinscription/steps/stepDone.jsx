@@ -10,6 +10,7 @@ import { capture } from "../../../sentry";
 import plausibleEvent from "../../../services/plausible";
 import DSFRContainer from "../../../components/inscription/DSFRContainer";
 import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
+import { toastr } from "react-redux-toastr";
 
 export default function StepDone() {
   // eslint-disable-next-line no-unused-vars
@@ -21,7 +22,8 @@ export default function StepDone() {
     await api.post(`/young/logout`);
     dispatch(setYoung(null));
     removePersistedData(true);
-    history.push("/");
+    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
+    return history.push("/auth");
   };
 
   async function handleClick() {

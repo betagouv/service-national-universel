@@ -34,7 +34,7 @@ class api {
   checkToken() {
     return new Promise(async (resolve, reject) => {
       try {
-        const response = await fetch("/young/signin_token", {
+        const response = await fetch(`${apiURL}/young/signin_token`, {
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],

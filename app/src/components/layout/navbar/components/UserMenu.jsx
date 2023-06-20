@@ -13,6 +13,8 @@ export default function UserMenu({ onClose }) {
   async function logout() {
     await API.post(`/young/logout`);
     dispatch(setYoung(null));
+    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
+    return history.push("/auth");
   }
 
   return (
