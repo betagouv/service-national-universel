@@ -237,7 +237,7 @@ export default function Done() {
 
       <NextStep />
 
-      <InfoConvocation isOpen={modalOpen?.isOpen} onCancel={() => setModalOpen({ isOpen: false })} />
+      {!isCohortDone(young.cohort) && <InfoConvocation isOpen={modalOpen?.isOpen} onCancel={() => setModalOpen({ isOpen: false })} />}
     </>
   );
 }
