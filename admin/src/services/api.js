@@ -6,11 +6,11 @@ import { apiURL } from "../config";
 
 let fetch = window.fetch;
 
-const exceptionToRedirect = ["/auth", "/auth/login", "/auth/signup", "/auth/forgot-password", "/auth/reset-password"];
+const exceptionToRedirect = "/auth";
 
 function jsonOrRedirectToSignIn(response) {
   if (response.ok === false && response.status === 401) {
-    if (window?.location?.href) {
+    if (window?.location?.pathname?.indexOf(exceptionToRedirect) === -1) {
       window.location.href = "/auth?unauthorized=1";
       // We need to return responses to prevent the promise from rejecting.
       return { responses: [] };
@@ -25,16 +25,39 @@ class api {
   }
 
   goToAuth() {
-    if (window?.location?.href) {
+    if (window?.location?.pathname?.indexOf(exceptionToRedirect) === -1) {
       return (window.location.href = "/auth?unauthorized=1");
     }
   }
 
-  getToken() {
-    return this.token;
+  setToken(token) {
+    this.token = token;
+  }
+
+  checkToken() {
+    if (!this.token) return Promise.resolve({ ok: false });
+    return new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch("/referent/signin_token", {
+          retries: 3,
+          retryDelay: 1000,
+          retryOn: [502, 503, 504],
+          mode: "cors",
+          method: "GET",
+          credentials: "include",
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+        });
+        const res = await response.json();
+        resolve(res);
+      } catch (e) {
+        reject(e);
+      }
+    });
   }
 
   esQuery(index, body, route = null, queryParam = "") {
+    if (!this.token) return Promise.resolve({ ok: false });
+
     const header = { index, type: "_doc" };
     return fetch(`${apiURL}/es/${route || index}/_msearch${queryParam}`, {
       retries: 3,
@@ -77,11 +100,8 @@ class api {
     return obj;
   }
 
-  setToken(token) {
-    this.token = token;
-  }
-
   async openpdf(path, body) {
+    if (!this.token) return Promise.resolve({ ok: false });
     const response = await fetch(`${apiURL}${path}`, {
       retries: 3,
       retryDelay: 1000,
@@ -102,6 +122,7 @@ class api {
   }
 
   get(path) {
+    if (!this.token) return Promise.resolve({ ok: false });
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
@@ -125,6 +146,7 @@ class api {
   }
 
   put(path, body) {
+    if (!this.token) return Promise.resolve({ ok: false });
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
@@ -149,6 +171,7 @@ class api {
   }
 
   putFormData(path, body, files) {
+    if (!this.token) return Promise.resolve({ ok: false });
     let formData = new FormData();
     for (let i = 0; i < files.length; i++) {
       formData.append(files[i].name, files[i], files[i].name);
@@ -179,6 +202,7 @@ class api {
   }
 
   postFormData(path, body, files) {
+    if (!this.token) return Promise.resolve({ ok: false });
     let formData = new FormData();
     for (let i = 0; i < files.length; i++) {
       formData.append(files[i].name, files[i], files[i].name);
@@ -209,6 +233,7 @@ class api {
   }
 
   remove(path) {
+    if (!this.token) return Promise.resolve({ ok: false });
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
@@ -232,6 +257,7 @@ class api {
   }
 
   uploadFile(path, arr, properties) {
+    if (!this.token) return Promise.resolve({ ok: false });
     const names = arr.map((e) => e.name || e);
     const files = arr.filter((e) => typeof e === "object");
     let formData = new FormData();
@@ -269,6 +295,7 @@ class api {
   }
 
   uploadID(youngId, file, metadata = {}) {
+    if (!this.token) return Promise.resolve({ ok: false });
     let formData = new FormData();
     const safeFilename = encodeURIComponent(file.name.replace(/'/g, ""));
     formData.append("file", file, safeFilename);
@@ -301,6 +328,7 @@ class api {
   }
 
   post(path, body) {
+    if (!this.token) return Promise.resolve({ ok: false });
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {

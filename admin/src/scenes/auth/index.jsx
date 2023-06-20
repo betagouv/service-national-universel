@@ -1,17 +1,44 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Switch } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../sentry";
 
-import Reset from "./reset";
+import { useDispatch } from "react-redux";
 import Forgot from "./forgot";
-import Signin from "./signin";
-import SignupInvite from "./signupInvite";
-import Signup from "./signup";
 import InvitationExpired from "./invitationexpired";
+import Reset from "./reset";
+import Signin from "./signin";
+import Signup from "./signup";
+import SignupInvite from "./signupInvite";
+import api from "../../services/api";
+import { setUser } from "../../redux/auth/actions";
+import Loader from "../../components/Loader";
 
 export default function AuthIndex() {
   useDocumentTitle("Connexion");
+
+  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await api.checkToken();
+        if (!res.ok || !res.user) {
+          api.setToken(null);
+          dispatch(setUser(null));
+          return setLoading(false);
+        }
+        if (res.token) api.setToken(res.token);
+        if (res.user) dispatch(setUser(res.user));
+      } catch (e) {
+        console.log(e);
+      }
+      setLoading(false);
+    }
+    fetchData();
+  }, []);
+
+  if (loading) return <Loader />;
 
   return (
     <div className="flex flex-1 bg-white">
