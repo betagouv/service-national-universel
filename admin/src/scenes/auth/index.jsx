@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Switch } from "react-router-dom";
+import { Switch, Redirect, useLocation } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../sentry";
 
@@ -16,6 +16,9 @@ import Loader from "../../components/Loader";
 
 export default function AuthIndex() {
   useDocumentTitle("Connexion");
+
+  let location = useLocation();
+  let parentPath = location.pathname.substring(0, location.pathname.lastIndexOf("/"));
 
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
@@ -48,7 +51,8 @@ export default function AuthIndex() {
         <SentryRoute path="/auth/signup/invite" component={SignupInvite} />
         <SentryRoute path="/auth/signup" component={Signup} />
         <SentryRoute path="/auth/invitationexpired" component={InvitationExpired} />
-        <SentryRoute path="/auth" component={Signin} />
+        <SentryRoute exact path="/auth" component={Signin} />
+        <Redirect to={parentPath} /> {/* This will redirect to the parent path if no other Routes match */}
       </Switch>
     </div>
   );

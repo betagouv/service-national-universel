@@ -33,10 +33,9 @@ class api {
   }
 
   checkToken() {
-    if (!this.token) return Promise.resolve({ ok: false });
     return new Promise(async (resolve, reject) => {
       try {
-        const response = await fetch("/referent/signin_token", {
+        const response = await fetch(`${apiURL}/referent/signin_token`, {
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],

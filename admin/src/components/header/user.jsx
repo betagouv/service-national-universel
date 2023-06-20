@@ -11,6 +11,7 @@ import { ROLES } from "../../utils";
 import Invite from "./invite";
 
 import Avatar from "../Avatar";
+import { toastr } from "react-redux-toastr";
 
 export default function HeaderUser() {
   const dispatch = useDispatch();
@@ -23,6 +24,7 @@ export default function HeaderUser() {
   async function logout() {
     await api.post(`/referent/logout`);
     dispatch(setUser(null));
+    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
     return history.push("/auth");
   }
 

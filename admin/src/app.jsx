@@ -235,7 +235,6 @@ const Home = () => {
             <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
             {/* Only for developper eyes... */}
             {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
-
             {/* DASHBOARD */}
             {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
             {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
