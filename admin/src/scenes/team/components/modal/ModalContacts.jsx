@@ -7,6 +7,7 @@ import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
+import Select from "../../../centersV2/components/Select";
 
 export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contacts, cohorts, getService }) {
   const [currentTab, setCurrentTab] = useState();
@@ -103,6 +104,13 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
 
   if (!contacts || !cohorts || !currentTab) return null;
 
+  const optionsContact = contacts[currentTab].map((contact) => ({
+    value: contact.contactName,
+    label: contact.contactName,
+  }));
+  console.log("edit", edit);
+  console.log("contacts", contacts);
+
   return (
     <ModalForm classNameModal="max-w-3xl" isOpen={isOpen} onCancel={onCancel}>
       <div className="flex w-full flex-col pt-2">
@@ -148,84 +156,93 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
             )}
           </>
         ) : (
-          <form className="w-full" onSubmit={handleSubmit}>
-            <div className="flex flex-col items-center justify-center px-8 pb-4">
-              <div className="flex w-full flex-col justify-center ">
-                <div className="flex flex-row">
-                  <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                    <label htmlFor="firstName" className="m-0 w-full text-left text-gray-500">
-                      Prénom
-                    </label>
-                    <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="firstName" id="firstName" onChange={handleChange} value={edit.firstName} />
-                  </div>
-
-                  <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                    <label htmlFor="lastName" className="m-0 w-full text-left text-gray-500">
-                      Nom
-                    </label>
-                    <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="lastName" id="lastName" onChange={handleChange} value={edit.lastName} />
-                  </div>
-                </div>
-                <div className="flex flex-row">
-                  <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                    <label htmlFor="contactPhone" className="m-0 w-full text-left text-gray-500">
-                      Téléphone
-                    </label>
-                    <input
-                      type="tel"
-                      pattern="\d*"
-                      required={!edit.contactMail}
-                      disabled={isLoading}
-                      className="w-full disabled:bg-gray-200"
-                      name="contactPhone"
-                      id="contactPhone"
-                      onChange={handleChange}
-                      value={edit.contactPhone}
-                    />
-                  </div>
-                  <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                    <label htmlFor="contactMail" className="m-0 w-full text-left text-gray-500">
-                      Adresse email
-                    </label>
-                    <input
-                      required={!edit.contactPhone}
-                      disabled={isLoading}
-                      className="w-full disabled:bg-gray-200"
-                      name="contactMail"
-                      id="contactMail"
-                      onChange={handleChange}
-                      value={edit.contactMail}
-                    />
-                  </div>
-                </div>
-              </div>
-              {!newContact ? (
-                <div className="flex w-full flex-row justify-center">
-                  <button disabled={isLoading} className="pt-2 hover:border-b-[1px] hover:border-red-500" type="button" onClick={handleDelete}>
-                    <div className="flex w-full flex-row items-center justify-center text-red-500">
-                      <HiOutlineTrash className="text-lg text-red-300 " />
-                      Supprimer le contact
+          <div>
+            <p>Ajouter à ce séjour un contact déjà existant...</p>
+            <Select
+              options={optionsContact}
+              selected={optionsContact.find((e) => e.value === edit.contactName)}
+              setSelected={(e) => setEdit(contacts[currentTab].find((contact) => contact.contactName === e.value))}
+            />
+            <p>... ou un nouveau contact :</p>
+            <form className="w-full" onSubmit={handleSubmit}>
+              <div className="flex flex-col items-center justify-center px-8 pb-4">
+                <div className="flex w-full flex-col justify-center ">
+                  <div className="flex flex-row">
+                    <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                      <label htmlFor="firstName" className="m-0 w-full text-left text-gray-500">
+                        Prénom
+                      </label>
+                      <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="firstName" id="firstName" onChange={handleChange} value={edit.firstName} />
                     </div>
+
+                    <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                      <label htmlFor="lastName" className="m-0 w-full text-left text-gray-500">
+                        Nom
+                      </label>
+                      <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="lastName" id="lastName" onChange={handleChange} value={edit.lastName} />
+                    </div>
+                  </div>
+                  <div className="flex flex-row">
+                    <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                      <label htmlFor="contactPhone" className="m-0 w-full text-left text-gray-500">
+                        Téléphone
+                      </label>
+                      <input
+                        type="tel"
+                        pattern="\d*"
+                        required={!edit.contactMail}
+                        disabled={isLoading}
+                        className="w-full disabled:bg-gray-200"
+                        name="contactPhone"
+                        id="contactPhone"
+                        onChange={handleChange}
+                        value={edit.contactPhone}
+                      />
+                    </div>
+                    <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                      <label htmlFor="contactMail" className="m-0 w-full text-left text-gray-500">
+                        Adresse email
+                      </label>
+                      <input
+                        required={!edit.contactPhone}
+                        disabled={isLoading}
+                        className="w-full disabled:bg-gray-200"
+                        name="contactMail"
+                        id="contactMail"
+                        onChange={handleChange}
+                        value={edit.contactMail}
+                      />
+                    </div>
+                  </div>
+                </div>
+                {!newContact ? (
+                  <div className="flex w-full flex-row justify-center">
+                    <button disabled={isLoading} className="pt-2 hover:border-b-[1px] hover:border-red-500" type="button" onClick={handleDelete}>
+                      <div className="flex w-full flex-row items-center justify-center text-red-500">
+                        <HiOutlineTrash className="text-lg text-red-300 " />
+                        Supprimer le contact
+                      </div>
+                    </button>
+                  </div>
+                ) : null}
+
+                <div className="mt-4 flex w-full flex-row justify-center">
+                  <button
+                    className="border-grey-300 hover:border-lg m-2 flex flex-1 cursor-pointer items-center justify-center rounded-lg border-[1px] py-2 px-8 shadow-sm"
+                    onClick={onChange}
+                    disabled={isLoading}>
+                    Annuler
+                  </button>
+                  <button
+                    className="m-2 flex flex-1 items-center justify-center rounded-lg border-[1px] border-indigo-700 bg-indigo-600 py-2 px-8 text-white shadow-sm hover:opacity-90"
+                    type="submit"
+                    disabled={isLoading}>
+                    {newContact ? "Ajouter un contact" : "Enregistrer"}
                   </button>
                 </div>
-              ) : null}
-
-              <div className="mt-4 flex w-full flex-row justify-center">
-                <button
-                  className="border-grey-300 hover:border-lg m-2 flex flex-1 cursor-pointer items-center justify-center rounded-lg border-[1px] py-2 px-8 shadow-sm"
-                  onClick={onChange}
-                  disabled={isLoading}>
-                  Annuler
-                </button>
-                <button
-                  className="m-2 flex flex-1 items-center justify-center rounded-lg border-[1px] border-indigo-700 bg-indigo-600 py-2 px-8 text-white shadow-sm hover:opacity-90"
-                  type="submit"
-                  disabled={isLoading}>
-                  {newContact ? "Ajouter un contact" : "Enregistrer"}
-                </button>
               </div>
-            </div>
-          </form>
+            </form>
+          </div>
         )}
       </div>
     </ModalForm>
