@@ -9,7 +9,7 @@ import Loader from "../../../../components/Loader";
 import api from "../../../../services/api";
 import downloadPDF from "../../../../utils/download-pdf";
 import { toastr } from "react-redux-toastr";
-import { translate } from "snu-lib";
+import { getReturnDate, getReturnHour, translate } from "snu-lib";
 import { capture } from "../../../../sentry";
 import { getCohort } from "../../../../utils/cohorts";
 import dayjs from "dayjs";
@@ -18,42 +18,16 @@ export default function InfoConvocation({ isOpen, onCancel, title }) {
   const young = useSelector((state) => state.Auth.young) || {};
   const [selectOpen, setSelectOpen] = React.useState(false);
   const refSelect = React.useRef(null);
-  const [isAutonomous, setIsAutonomous] = React.useState(false);
   const [meetingPoint, setMeetingPoint] = React.useState();
   const [center, setCenter] = React.useState();
+  const [session, setSession] = React.useState();
+  const cohort = getCohort(young.cohort);
   const [isLoading, setIsLoading] = React.useState(false);
   const [loadingConvocation, setLoadingConvocation] = React.useState(false);
-  const [returnDate, setReturnDate] = React.useState(null);
 
-  const getMeetingPoint = async () => {
-    try {
-      const { data, ok } = await api.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
-      console.log("PDR = ", data);
-      if (!ok) {
-        setMeetingPoint(null);
-        return;
-      }
-      setMeetingPoint(data);
-    } catch (e) {
-      console.log(e);
-      setMeetingPoint(null);
-    }
-  };
-
-  const getCenter = async () => {
-    try {
-      const { data, ok } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
-      console.log(young.sessionPhase1Id);
-      if (!ok) {
-        setCenter(null);
-        return;
-      }
-      setCenter(data);
-    } catch (e) {
-      console.log(e);
-      setCenter(null);
-    }
-  };
+  const isAutonomous = young.deplacementPhase1Autonomous === "true";
+  const returnDate = getReturnDate(young, session, cohort, meetingPoint);
+  const returnHour = getReturnHour(young, session, cohort, meetingPoint);
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
@@ -68,38 +42,24 @@ export default function InfoConvocation({ isOpen, onCancel, title }) {
   }, []);
 
   React.useEffect(() => {
-    setIsLoading(true);
-    setIsAutonomous(young.deplacementPhase1Autonomous === "true");
-    getMeetingPoint();
-    getCenter();
-    setIsLoading(false);
-  }, [young]);
-
-  React.useEffect(() => {
-    let date = null;
-    if (isAutonomous || !meetingPoint || !meetingPoint.bus) {
-      const cohort = getCohort(young.cohort);
-      if (cohort) {
-        date = cohort.dateEnd;
+    if (center && session) return;
+    (async () => {
+      try {
+        setIsLoading(true);
+        const { data: center } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
+        const { data: meetingPoint } = await api.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
+        const { data: session } = await api.get(`/young/${young._id}/session/`);
+        setCenter(center);
+        setMeetingPoint(meetingPoint);
+        setSession(session);
+        setIsLoading(false);
+      } catch (e) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération des informations de votre séjour de cohésion.");
+      } finally {
+        setIsLoading(false);
       }
-    } else {
-      date = meetingPoint.bus.returnDate;
-    }
-
-    const hour = meetingPoint && meetingPoint.ligneToPoint ? meetingPoint.ligneToPoint.returnHour : "11h";
-
-    if (date) {
-      const d = dayjs(date).locale("fr");
-      setReturnDate({
-        date: d.format("DD"),
-        month: d.format("MMM").toUpperCase().replace(".", ""),
-        complete: d.format("dddd D MMMM YYYY"),
-        hour,
-      });
-    } else {
-      setReturnDate({});
-    }
-  }, [meetingPoint]);
+    })();
+  }, [young]);
 
   const viewConvocation = async ({ uri }) => {
     setLoadingConvocation(true);
@@ -130,7 +90,7 @@ export default function InfoConvocation({ isOpen, onCancel, title }) {
   };
 
   const getMeetingAddress = () => {
-    if (isAutonomous || !meetingPoint) {
+    if (isAutonomous || !meetingPoint?.address) {
       return [center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ");
     } else {
       let address = [meetingPoint.address];
@@ -204,10 +164,14 @@ export default function InfoConvocation({ isOpen, onCancel, title }) {
         {returnDate && (
           <div className="mt-4 flex flex-col items-center gap-6 md:flex-row">
             <div className="flex items-center justify-center gap-2 pr-4 md:border-r-[1px]">
-              <Calendar date={returnDate.date} month={returnDate.month} className="mx-3 h-10 w-7 shadow-ninaBlock md:h-12 md:w-11" />
+              <Calendar
+                date={returnDate.getDate()}
+                month={dayjs(returnDate).format("MMM").toUpperCase().replace(".", "")}
+                className="mx-3 h-10 w-7 shadow-ninaBlock md:h-12 md:w-11"
+              />
               <div className="flex flex-col">
-                <div className="whitespace-nowrap text-xs font-bold">Retour à {returnDate.hour}</div>
-                <div className="whitespace-nowrap text-xs text-gray-600">{returnDate.complete}</div>
+                <div className="whitespace-nowrap text-xs font-bold">Retour à {returnHour}</div>
+                <div className="whitespace-nowrap text-xs text-gray-600">{dayjs(returnDate).locale("fr").format("dddd D MMMM YYYY")}</div>
               </div>
             </div>
             <div className="flex w-2/3 text-center text-xs font-normal leading-5 text-gray-800 md:w-full md:!text-left">{getMeetingAddress()}</div>
