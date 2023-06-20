@@ -32,7 +32,6 @@ class api {
   }
 
   checkToken() {
-    if (!this.token) return Promise.resolve({ ok: false });
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch("/young/signin_token", {

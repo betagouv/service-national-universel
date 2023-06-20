@@ -77,6 +77,7 @@ export default function App() {
         if (window.location.href.indexOf("/auth") !== -1) return setLoading(false);
         const { ok, user, token } = await api.checkToken();
         if (!ok) {
+          api.setToken(null);
           dispatch(setYoung(null));
           return setLoading(false);
         }
