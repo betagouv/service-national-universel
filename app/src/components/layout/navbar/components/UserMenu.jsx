@@ -5,6 +5,7 @@ import API from "../../../../services/api";
 import MenuLink from "./MenuLink";
 import MenuButton from "./MenuButton";
 import { permissionPhase2 } from "../../../../utils";
+import { toastr } from "react-redux-toastr";
 
 export default function UserMenu({ onClose }) {
   const dispatch = useDispatch();
