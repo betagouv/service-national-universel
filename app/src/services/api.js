@@ -7,7 +7,7 @@ let fetch = window.fetch;
 
 function jsonOrRedirectToSignIn(response) {
   if (response.ok === false && response.status === 401) {
-    window.location.href = "/auth?disconnected=1";
+    if (window?.location?.pathname !== "/auth") window.location.href = "/auth?disconnected=1";
     // We need to return responses to prevent the promise from rejecting.
     return { responses: [] };
   }
@@ -20,7 +20,7 @@ class api {
   }
 
   goToAuth() {
-    return (window.location.href = "/auth?disconnected=1");
+    if (window?.location?.pathname !== "/auth") return (window.location.href = "/auth?disconnected=1");
   }
 
   getToken() {
