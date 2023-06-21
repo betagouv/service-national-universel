@@ -25,7 +25,6 @@ export default function StepPDR({ center, meetingPoint, departureDate, returnDat
   const [openedDesktop, setOpenedDesktop] = useState(false);
   const [openedMobile, setOpenedMobile] = useState(false);
   const [meetingPoints, setMeetingPoints] = useState(null);
-  console.log("🚀 ~ file: StepPDR.jsx:28 ~ StepPDR ~ meetingPoints:", meetingPoints);
   const [error, setError] = useState(null);
   const [modalMeetingPoint, setModalMeetingPoint] = useState({ isOpen: false, meetingPoint: null });
   const [loading, setLoading] = useState(false);
