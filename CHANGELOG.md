@@ -1,3 +1,32 @@
+# [1.297.0](https://github.com/betagouv/service-national-universel/compare/v1.296.0...v1.297.0) (2023-06-21)
+
+
+### Bug Fixes
+
+* **admin:** Get count of tickets instead of collection ([d789f39](https://github.com/betagouv/service-national-universel/commit/d789f396c0d4cc27e07924f928e32c947cb9f355))
+* **admin:** on logout ([d801260](https://github.com/betagouv/service-national-universel/commit/d80126028c0cdb091f39e1b555f0e9c720de7454))
+* **admin:** structure view open tab mission for ref ([c6ce5b2](https://github.com/betagouv/service-national-universel/commit/c6ce5b2bef3131a4b214f7051971797f98756669))
+* **admin,api:** edit plan de transport wip([#2729](https://github.com/betagouv/service-national-universel/issues/2729)) ([968977e](https://github.com/betagouv/service-national-universel/commit/968977e0e53de68064ea599063252e515d3614f9))
+* **admin/app:** validation contract ([0f3243b](https://github.com/betagouv/service-national-universel/commit/0f3243b83df40174454769dee7fb2c9d95636191))
+* **api:** historic plan de transport ([095581a](https://github.com/betagouv/service-national-universel/commit/095581ad286f70ba89169254a19ddf56ae27affe))
+* **api/admin:** Fix bug on logout ([6415e25](https://github.com/betagouv/service-national-universel/commit/6415e253c9e114c1423ab4ca080a1c7ead603eec))
+* **app:** Bug no history ([8e6637a](https://github.com/betagouv/service-national-universel/commit/8e6637a9cea3dbc129a07512aaa38902a698c255))
+* **app:** correct dates on MeetingPointGoAlone ([048945d](https://github.com/betagouv/service-national-universel/commit/048945d726347b8cc386500cc2e28d21e618b898))
+* **app:** fix case in PDR component import ([03e31a3](https://github.com/betagouv/service-national-universel/commit/03e31a33ab555fb9b0b5a98bf6dcbe8bea36f75b))
+* **app:** Fix sign as young ([ee67043](https://github.com/betagouv/service-national-universel/commit/ee67043a2343f44bcbd37ef220f8a75bad08207c))
+* **app:** Integrations retours sur etape choix PDR ([ded7e6a](https://github.com/betagouv/service-national-universel/commit/ded7e6a1d86fb94aca3d3e89ea9967cc7ba4bdf8))
+* **app:** step PDR retours part 2 ([d1292c0](https://github.com/betagouv/service-national-universel/commit/d1292c07c436812e5f9271f5c7b2a4daa9d26a36))
+
+
+### Features
+
+* **admin:** Fix loader ([#2725](https://github.com/betagouv/service-national-universel/issues/2725)) ([18d019b](https://github.com/betagouv/service-national-universel/commit/18d019bc8c7beb58e0f96ecbeca563b28352bb1d))
+* **admin:** New Loader for exportPdf ([#2724](https://github.com/betagouv/service-national-universel/issues/2724)) ([97dd5a9](https://github.com/betagouv/service-national-universel/commit/97dd5a936b38a989403a2fce779f84167a436049))
+* **admin/api:** Export Engagement global et missions ([#2612](https://github.com/betagouv/service-national-universel/issues/2612)) ([3b0546e](https://github.com/betagouv/service-national-universel/commit/3b0546e5c829c257a261db6c2bf73d1ef5de1808))
+* **api:** ajout ID groupe template notifications transporteur ([#2721](https://github.com/betagouv/service-national-universel/issues/2721)) ([be21adb](https://github.com/betagouv/service-national-universel/commit/be21adb7c5373942c74b02a6cd3bf0f445eb3c10))
+* **app:** Phase 1 - statut "Affecté" : Amélioration de l'affichage des choix de transport ([#2719](https://github.com/betagouv/service-national-universel/issues/2719)) ([c2ab1bd](https://github.com/betagouv/service-national-universel/commit/c2ab1bdaadd200328fadb5175dd3a0a34965105a))
+* **app/admin:** gestion des 401 V2 ([#2713](https://github.com/betagouv/service-national-universel/issues/2713)) ([dccfda1](https://github.com/betagouv/service-national-universel/commit/dccfda10bd108bb9c4feb6ea0e585043b2aa6849))
+
 # [1.296.0](https://github.com/betagouv/service-national-universel/compare/v1.295.0...v1.296.0) (2023-06-20)
 
 
