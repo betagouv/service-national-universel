@@ -21,7 +21,7 @@ export default function Select({ options, selected, setSelected, label, readOnly
                   } items-center bg-white py-2 px-2.5`}>
                   {icon ? icon : null}
                   <div className={`flex w-full flex-col `}>
-                    <label className="text-xs leading-4 text-gray-500">{label}</label>
+                    {label ? <label className="text-xs leading-4 text-gray-500">{label}</label> : null}
                     <div className="flex w-full items-center justify-between">
                       <span className="block truncate">{selected?.label}</span>
                       <span className="pointer-events-none flex items-center pr-2">

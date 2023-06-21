@@ -15,6 +15,8 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
   const [newContact, setNewContact] = useState(false);
   const [edit, setEdit] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const [proposedContact, setProposedContact] = useState([]);
+  const [optionsContact, setOptionsContact] = useState([]);
 
   const resetState = () => {
     setEdit(null);
@@ -32,16 +34,49 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
     resetState();
   };
 
+  const getAllContact = () => {
+    let arrContact = Object.values(contacts).flat();
+    const uniqueContact = arrContact.reduce((acc, contact) => {
+      const { _id, cohort, ...contactWithoutId } = contact;
+      const isDuplicate = acc.some(
+        (c) => c.contactMail === contactWithoutId.contactMail && c.contactPhone === contactWithoutId.contactPhone && c.contactName === contactWithoutId.contactName,
+      );
+
+      if (!isDuplicate) {
+        const updatedContact = {
+          ...contactWithoutId,
+          firstName: contactWithoutId.contactName.split(" ")[0],
+          lastName: contactWithoutId.contactName.split(" ")[1],
+        };
+        acc.push(updatedContact);
+      }
+
+      return acc;
+    }, []);
+
+    const proposedContact = uniqueContact.filter((contact) => {
+      return !contacts[currentTab].some((item) => {
+        return item.contactName === contact.contactName && item.contactPhone === contact.contactPhone && item.contactMail === contact.contactMail;
+      });
+    });
+    const options = Object.values(proposedContact).map((value) => ({
+      value: value.contactName,
+      label: value.contactName,
+    }));
+    setProposedContact(proposedContact);
+    setOptionsContact(options);
+  };
+
   useEffect(() => {
     setEdit(null);
     setHit(null);
     setNewContact(false);
+    getAllContact();
   }, [currentTab]);
 
   useEffect(() => {
     if (contacts) {
       if (newContact) {
-        //setallcontact ICIiIIIIIIIIIII
         setEdit({});
       } else if (hit) {
         let firstName = hit.contactName.substring(0, hit.contactName.indexOf(" "));
@@ -79,12 +114,11 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
     setIsLoading(true);
     try {
       let value = {
-        contactName: `${edit.firstName} ${edit.lastName}`,
+        contactName: `${edit.firstName} ${edit.lastName}` || edit.contactName,
         contactPhone: edit.contactPhone,
         contactMail: edit.contactMail,
         contactId: edit.contactId,
       };
-
       const { ok } = await api.post(`/department-service/${idServiceDep}/cohort/${currentTab}/contact`, value);
       if (!ok) {
         resetState();
@@ -104,33 +138,6 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
   };
 
   if (!contacts || !cohorts || !currentTab) return null;
-  console.log(currentTab);
-  let allContact = [];
-  Object.values(contacts).forEach((values) => {
-    if (values.cohort !== currentTab) {
-      allContact.push(...values);
-    }
-  });
-  const uniqueContact = allContact.reduce((acc, contact) => {
-    const { _id, cohort, ...contactWithoutId } = contact;
-
-    const duplicateIndex = acc.findIndex(
-      (c) => c.contactMail === contactWithoutId.contactMail && c.contactPhone === contactWithoutId.contactPhone && c.contactName === contactWithoutId.contactName,
-    );
-
-    if (duplicateIndex === -1) {
-      acc.push(contactWithoutId);
-    }
-
-    return acc;
-  }, []);
-  const optionsContact = uniqueContact.map((contact) => ({
-    value: contact.contactName,
-    label: contact.contactName,
-  }));
-
-  console.log("edit", edit);
-  console.log(uniqueContact);
 
   return (
     <ModalForm classNameModal="max-w-3xl" isOpen={isOpen} onCancel={onCancel}>
@@ -156,7 +163,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
             {contacts[currentTab].length ? (
               <div className="grid grid-cols-2 grid-rows-2 gap-4 px-4 pb-4">
                 {contacts[currentTab].map((contact) => (
-                  <Contact contact={contact} key={contact} setHit={setHit} />
+                  <Contact contact={contact} key={contact._id} setHit={setHit} />
                 ))}
                 {contacts[currentTab].length < 4 && (
                   <div
@@ -178,13 +185,17 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
           </>
         ) : (
           <div>
-            <p>Ajouter à ce séjour un contact déjà existant...</p>
-            <Select
-              options={optionsContact}
-              selected={optionsContact.find((e) => e.value === edit.contactName)}
-              setSelected={(e) => setEdit(uniqueContact.find((contact) => contact.contactName === e.value))}
-            />
-            <p>... ou un nouveau contact :</p>
+            {optionsContact.length ? (
+              <div className=" w-full px-8 py-2 text-[14px] leading-[20px]">
+                <p className="text-gray-500 pb-3">Ajouter à ce séjour un contact déjà existant...</p>
+                <Select
+                  options={optionsContact}
+                  selected={optionsContact.find((e) => e.value === edit.contactName)}
+                  setSelected={(e) => setEdit(proposedContact.find((contact) => contact.contactName === e.value))}
+                />
+                <p className="text-gray-500 pt-3">... ou un nouveau contact :</p>
+              </div>
+            ) : null}
             <form className="w-full" onSubmit={handleSubmit}>
               <div className="flex flex-col items-center justify-center px-8 pb-4">
                 <div className="flex w-full flex-col justify-center ">
