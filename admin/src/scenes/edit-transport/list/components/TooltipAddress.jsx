@@ -2,7 +2,7 @@ import React from "react";
 
 const TooltipAddress = ({ children, meetingPt, handleChange }) => {
   return (
-    <div className="group relative flex flex-col items-center">
+    <div className="group relative flex flex-col items-center" onClick={(event) => event.stopPropagation()}>
       {children}
       <div className="absolute !top-8 left-0 mb-3 hidden flex-col items-center group-hover:flex">
         <div className="leading-2 relative z-[500] whitespace-nowrap rounded-lg bg-white py-3 px-3 text-xs text-[#414458] shadow-lg">

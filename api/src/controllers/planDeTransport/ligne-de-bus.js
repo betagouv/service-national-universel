@@ -344,6 +344,103 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
   }
 });
 
+router.post("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      meetingPointId: Joi.string().required(),
+    }).validate({ ...req.params, ...req.body });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (req.user.role !== "admin" || req.user.subRole !== "god") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const { id, meetingPointId } = value;
+
+    const ligne = await LigneBusModel.findById(id);
+    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const meetingPoint = await PointDeRassemblementModel.findById(meetingPointId);
+    if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const ligneToPoint = await LigneToPointModel.create({
+      lineId: ligne._id.toString(),
+      meetingPointId: meetingPoint._id.toString(),
+      transportType: "bus",
+      returnHour: "00:00",
+      meetingHour: "00:00",
+      departureHour: "00:00",
+      busArrivalHour: "00:00",
+    });
+
+    ligne.set({ meetingPointsIds: [...ligne.meetingPointsIds, meetingPoint._id.toString()] });
+    await ligne.save({ fromUser: req.user });
+
+    // * Update slave PlanTransport
+    const planDeTransport = await PlanTransportModel.findById(id);
+    const pointDeRassemblement = await PointDeRassemblementModel.findById(ObjectId(meetingPoint._id));
+    planDeTransport.pointDeRassemblements.push({
+      meetingPointId: meetingPoint._id,
+      ...pointDeRassemblement._doc,
+      busArrivalHour: ligneToPoint.busArrivalHour,
+      meetingHour: ligneToPoint.meetingHour,
+      departureHour: ligneToPoint.departureHour,
+      returnHour: ligneToPoint.returnHour,
+      transportType: ligneToPoint.transportType,
+    });
+
+    await planDeTransport.save({ fromUser: req.user });
+    // * End update slave PlanTransport
+
+    const infoBus = await getInfoBus(ligne);
+
+    return res.status(200).send({ ok: true, data: infoBus });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.delete("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      meetingPointId: Joi.string().required(),
+    }).validate({ ...req.params, ...req.body });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (req.user.role !== "admin" || req.user.subRole !== "god") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const { id, meetingPointId } = value;
+
+    const ligne = await LigneBusModel.findById(id);
+    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const meetingPoint = await PointDeRassemblementModel.findById(meetingPointId);
+    if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const ligneToPoint = await LigneToPointModel.findOne({ lineId: id, meetingPointId });
+    if (!ligneToPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    ligneToPoint.set({ deletedAt: new Date() });
+    await ligneToPoint.save({ fromUser: req.user });
+
+    ligne.set({ meetingPointsIds: ligne.meetingPointsIds.filter((id) => id !== meetingPoint._id.toString()) });
+    await ligne.save({ fromUser: req.user });
+
+    // * Update slave PlanTransport
+    const planDeTransport = await PlanTransportModel.findById(id);
+    planDeTransport.pointDeRassemblements = planDeTransport.pointDeRassemblements.filter((p) => p.meetingPointId.toString() !== meetingPoint._id.toString());
+    await planDeTransport.save({ fromUser: req.user });
+    // * End update slave PlanTransport
+
+    const infoBus = await getInfoBus(ligne);
+
+    return res.status(200).send({ ok: true, data: infoBus });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
