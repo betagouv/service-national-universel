@@ -180,7 +180,7 @@ export default function PublicSupportCenter(props) {
         {!user && (
           <p style={{ textAlign: "center", fontSize: "0.8rem", color: "#6B7280" }}>
             Vous avez déjà un compte sur le site du SNU ?{" "}
-            <Link to="/auth" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
+            <Link to="/auth?redirect=besoin-d-aide" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
               Connectez-vous
             </Link>
           </p>
