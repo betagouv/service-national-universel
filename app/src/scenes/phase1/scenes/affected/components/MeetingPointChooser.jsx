@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 
 function MeetingPointChooser({ meetingPoint, onChoose, chosen, expired }) {
   return (
-    <div className="flex flex-col items-center rounded-lg bg-gray-50 p-3 w-64 gap-1">
+    <div className="flex flex-col items-center rounded-lg bg-gray-50 p-3 w-64 h-88 gap-1">
       <LinearMap />
       <p className="my-2 text-center text-base font-bold text-gray-800 leading-5">{meetingPoint.name}</p>
       <p className="text-center text-xs text-gray-500">

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
-import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
@@ -15,7 +14,6 @@ import { isStepAgreementDone, isStepPDRDone } from "../../utils/steps.utils";
 
 export default function StepAgreement({ departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
-  const [stateDesktop, setStateDesktop] = useState(false);
   const [stateMobil, setStateMobil] = useState(false);
   const valid = isStepAgreementDone(young);
   const enabled = isStepPDRDone(young);
@@ -28,42 +26,13 @@ export default function StepAgreement({ departureDate, returnDate }) {
     toastr.success("Votre engagement a bien été enregistré");
     plausibleEvent("affecté_step2");
     dispatch(setYoung(data));
-    setStateDesktop(false);
     setStateMobil(false);
   };
 
   return (
     <>
-      {/* Desktop */}
-      <div className={`hidden flex-row items-center justify-between md:flex ${enabled && "cursor-pointer"}`} onClick={() => setStateDesktop(enabled ? !stateDesktop : false)}>
-        <div className="flex flex-1 flex-row items-center py-4">
-          {valid ? (
-            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
-              <BsCheck2 className="h-5 w-5 text-white" />
-            </div>
-          ) : (
-            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full border-[1px] border-gray-200 text-gray-700">2</div>
-          )}
-          <div className="mx-3 flex flex-1 flex-col">
-            <h1 className={`text-base leading-7 ${enabled ? "text-gray-900" : "text-gray-400"}`}>Confirmez votre participation au séjour</h1>
-            <p className={`text-sm leading-5 ${enabled ? "text-gray-500" : "text-gray-400"}`}>Vous devez confirmer votre participation au séjour avant votre départ.</p>
-          </div>
-        </div>
-        {enabled ? (
-          stateDesktop ? (
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 hover:scale-110">
-              <HiOutlineChevronUp className="h-5 w-5" />
-            </div>
-          ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 hover:scale-110">
-              <HiOutlineChevronDown className="h-5 w-5" />
-            </div>
-          )
-        ) : null}
-      </div>
-      {/* Mobile */}
       <div
-        className={`mb-3 ml-4 flex h-36 cursor-pointer items-center rounded-xl border-[1px] md:hidden ${valid ? "border-green-500 bg-green-50" : "bg-white"} `}
+        className={`mb-3 ml-4 flex h-36 cursor-pointer items-center rounded-xl border-[1px] ${valid ? "border-green-500 bg-green-50" : "bg-white"} `}
         onClick={() => setStateMobil(enabled ? !stateMobil : false)}>
         <div className="flex w-full -translate-x-5 flex-row items-center">
           {valid ? (
@@ -82,9 +51,8 @@ export default function StepAgreement({ departureDate, returnDate }) {
           </div>
         </div>
       </div>
-      {stateDesktop ? content({ handleSubmit, young, departureDate, returnDate }) : null}
-      {stateMobil ? (
-        <Modal centered isOpen={stateMobil} toggle={() => setStateMobil(false)} size="xl">
+      {stateMobil && (
+        <Modal centered isOpen={stateMobil} toggle={() => setStateMobil(false)} size="lg">
           <ModalContainer>
             <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={() => setStateMobil(false)} />
             <div className="w-full p-4">
@@ -94,7 +62,7 @@ export default function StepAgreement({ departureDate, returnDate }) {
             </div>
           </ModalContainer>
         </Modal>
-      ) : null}
+      )}
     </>
   );
 }
@@ -110,8 +78,8 @@ const content = ({ handleSubmit, young, departureDate, returnDate }) => {
     );
   };
   return (
-    <div className="mb-2 flex flex-shrink flex-col flex-wrap justify-center gap-6 p-2 md:justify-start lg:flex-row">
-      <div className="flex flex-col rounded-2xl border-[1px] border-blue-600 py-5 px-5 shadow-sm md:max-w-screen-1/2 lg:w-1/3">
+    <div className="mb-2 flex flex-shrink flex-col flex-wrap justify-center gap-6 p-2 lg:flex-row items-center">
+      <div className="flex flex-col justify-between rounded-2xl border-[1px] border-blue-600 py-5 px-5 shadow-sm w-80 h-80">
         <h1 className="pb-4 text-xl font-bold leading-7">Je confirme</h1>
         <div className="text-sm text-gray-600">
           <p className="pb-2">
@@ -133,7 +101,8 @@ const content = ({ handleSubmit, young, departureDate, returnDate }) => {
           Valider
         </button>
       </div>
-      <div className="flex flex-col rounded-2xl border-[1px] border-gray-100 py-5 px-5 shadow-sm md:max-w-screen-1/2 lg:w-1/3">
+
+      <div className="rounded-2xl border-[1px] border-gray-100 py-5 px-5 shadow-sm w-80 h-80">
         <h1 className="pb-4 text-xl font-bold leading-7">J&apos;ai changé d&apos;avis</h1>
         <p className="pb-3 text-sm text-gray-600">Les dates ne me conviennent plus ({transportDatesToString(departureDate, returnDate)})</p>
         <Link to="/changer-de-sejour" className="whitespace-nowrap pb-4 text-sm text-blue-600 hover:underline hover:underline-offset-2">

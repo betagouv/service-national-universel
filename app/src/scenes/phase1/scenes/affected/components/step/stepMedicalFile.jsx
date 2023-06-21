@@ -60,54 +60,9 @@ export default function StepMedicalField({ young }) {
         title="Envoie de document par mail"
         subTitle={`Vous allez recevoir le lien de téléchargement de la fiche sanitaire par mail à l'adresse ${young.email}.`}
       />
-      {/* Desktop */}
-      <div className="hidden flex-col md:flex lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-1 flex-row items-center py-4">
-          {valid ? (
-            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
-              <BsCheck2 className="h-5 w-5 text-white" />
-            </div>
-          ) : (
-            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full border-[1px] border-gray-200 text-gray-700">4</div>
-          )}
-          <div className="mx-3 flex flex-1 flex-col">
-            <h1 className={`text-base leading-7 ${enabled ? "text-gray-900" : "text-gray-400"}`}>Téléchargez votre fiche sanitaire</h1>
-            <p className={`text-sm leading-5 ${enabled ? "text-gray-500" : "text-gray-400"}`}>
-              Si vous ne l’avez pas déjà fait, vous devez renseigner votre fiche sanitaire et la remettre à votre arrivée au centre de séjour.
-            </p>
-          </div>
-        </div>
-        {/* Button */}
-        {enabled ? (
-          <>
-            <div className="flex flex-row items-center justify-center pb-4 lg:!pb-0">
-              <ButtonLink onClick={() => setMedicalFileModalOpen(true)} className="pl-4 pr-8">
-                Voir le mode d’emploi
-              </ButtonLink>
-              <button
-                className="mr-4 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-gray-100 hover:scale-110"
-                onClick={() => setSendEmailConfirmationModalOpen(true)}>
-                <WithTooltip tooltipText="Recevoir par email">
-                  <HiOutlineMail className="h-5 w-5 text-gray-600" />
-                </WithTooltip>
-              </button>
-              <a target="blank" href={CDN_BASE_URL + "/file/fiche-sanitaire-2023.pdf"} onClick={handleDownload}>
-                <button
-                  type="button"
-                  className={`flex flex-row items-center justify-center rounded-lg px-4 py-2 ${
-                    valid ? "border-[1px] border-blue-700 " : "bg-blue-600"
-                  } cursor-pointer hover:scale-105`}>
-                  <HiOutlineDownload className={`h-5 w-5 ${valid ? "text-blue-700" : "text-blue-300"} mr-2`} />
-                  <span className={`${valid ? "text-blue-700" : "text-white"}`}>Télécharger</span>
-                </button>
-              </a>
-            </div>
-          </>
-        ) : null}
-      </div>
       {/* Mobile */}
       <div
-        className={`mb-3 ml-4 flex h-36 cursor-pointer items-center rounded-xl border-[1px] md:hidden ${valid ? "border-green-500 bg-green-50" : "bg-white"} `}
+        className={`mb-3 ml-4 flex h-36 cursor-pointer items-center rounded-xl border-[1px] ${valid ? "border-green-500 bg-green-50" : "bg-white"} `}
         onClick={() => setMedicalFileModalOpen(enabled ? !isMedicalFileModalOpen : false)}>
         <div className="flex w-full -translate-x-5 flex-row items-center">
           {valid ? (

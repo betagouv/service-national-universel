@@ -119,96 +119,9 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
         loading={loading}
       />
 
-      {/* Desktop */}
-      <div className={`hidden flex-row items-center justify-between md:flex ${enabled && "cursor-pointer"}`} onClick={handleOpenDesktop}>
-        <div className="lex-row flex items-center py-4">
-          {valid ? (
-            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
-              <BsCheck2 className="h-5 w-5 text-white" />
-            </div>
-          ) : (
-            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full border-[1px] border-gray-200 text-gray-700">1</div>
-          )}
-          {(young.meetingPointId || young.deplacementPhase1Autonomous === "true") && <LinearMap />}
-          <div className="mx-3 flex flex-1 flex-col">
-            <h1 className={`text-base leading-7 ${enabled ? "text-gray-900" : "text-gray-400"}`}>
-              {young.meetingPointId || young.deplacementPhase1Autonomous === "true"
-                ? "Lieu de rassemblement"
-                : young?.transportInfoGivenByLocal === "true"
-                ? "Confirmation du point de rendez-vous : vous n'avez rien à faire"
-                : pdrChoiceExpired
-                ? "Date limite dépassée"
-                : "Confirmez votre point de rassemblement"}
-            </h1>
-            <p className={`text-sm leading-5 ${enabled ? "text-gray-500" : "text-gray-400"}`}>
-              {young.meetingPointId ? (
-                <>
-                  {meetingPoint.name}, {addressOf(meetingPoint)},{" "}
-                  <strong>
-                    aller le {dayjs(departureDate).locale("fr").format("dddd D MMMM")} à {meetingHour}, retour le {dayjs(returnDate).locale("fr").format("dddd D MMMM")} à{" "}
-                    {returnHour}
-                  </strong>
-                </>
-              ) : young.deplacementPhase1Autonomous === "true" ? (
-                <>
-                  Je me rends au centre et en reviens par mes propres moyens : {center.name}, {addressOf(center)},{" "}
-                  <strong>
-                    arrivée le {dayjs(departureDate).locale("fr").format("dddd D MMMM")} à {meetingHour}, départ le {dayjs(returnDate).locale("fr").format("dddd D MMMM")} à{" "}
-                    {returnHour}
-                  </strong>
-                </>
-              ) : young.transportInfoGivenByLocal === "true" ? (
-                <>Les informations sur les modalités d&apos;acheminement vers le centre et de retour vous seront transmises par e-mail par les services académiques.</>
-              ) : pdrChoiceExpired ? (
-                <>Un point de rassemblement va vous être attribué par votre référent SNU.</>
-              ) : (
-                <>
-                  A faire avant le <span className="text-bold">{pdrChoiceLimitDate}</span>.
-                </>
-              )}
-            </p>
-          </div>
-        </div>
-        {enabled && young.transportInfoGivenByLocal !== "true" ? (
-          <div className="ml-4 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 hover:scale-110">
-            {openedDesktop ? <HiOutlineChevronUp className="h-5 w-5" /> : <HiOutlineChevronDown className="h-5 w-5" />}
-          </div>
-        ) : null}
-      </div>
-      {openedDesktop && (
-        <div className="mb-8">
-          {error && <div className="text-red my-4 text-center text-sm">{error}</div>}
-          {meetingPoints ? (
-            <div className="flex gap-6">
-              {meetingPoints.map((mp) => (
-                <MeetingPointChooser
-                  key={mp._id}
-                  meetingPoint={mp}
-                  onChoose={() => setModalMeetingPoint({ isOpen: true, meetingPoint: mp })}
-                  chosen={mp._id === young.meetingPointId && mp.busLineId === young.ligneId}
-                  expired={pdrChoiceExpired}
-                />
-              ))}
-              <MeetingPointGoAlone
-                center={center}
-                onChoose={() => setModalMeetingPoint({ isOpen: true })}
-                chosen={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
-                expired={pdrChoiceExpired}
-                departureDate={goAloneDepartureDate}
-                returnDate={goAloneReturnDate}
-              />
-            </div>
-          ) : (
-            <div className="flex justify-center">
-              <Loader />
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Mobile */}
       <div
-        className={`relative mb-3 ml-4 flex min-h-[144px] cursor-pointer items-center rounded-xl border-[1px] md:hidden ${
+        className={`relative mb-3 ml-4 flex min-h-[144px] cursor-pointer items-center rounded-xl border-[1px] ${
           valid ? "border-green-500 bg-green-50" : !young.meetingPointId || young.deplacementPhase1Autonomous !== "true" ? "border-blue-600" : "bg-white"
         } `}
         onClick={handleOpenMobile}>
@@ -259,13 +172,11 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
         </div>
       </div>
 
-      <Modal isOpen={openedMobile} onClose={() => setOpenedMobile(false)}>
-        <div className="flex mb-3">
-          <p className="text-center text-lg font-bold text-gray-900">Confirmez votre point de rassemblement</p>
-          <CloseSvg className="hover:cursor-pointer" height={20} width={20} onClick={() => setOpenedMobile(false)} />
-        </div>
+      <Modal isOpen={openedMobile} onClose={() => setOpenedMobile(false)} className="w-auto bg-white p-8 rounded">
+        <CloseSvg className="ml-auto hover:cursor-pointer" height={16} width={16} onClick={() => setOpenedMobile(false)} />
+        <h2 className="text-center text-lg font-bold text-gray-800 mb-4">Confirmez votre point de rassemblement</h2>
         {error && <div className="text-red my-4 text-center text-sm">{error}</div>}
-        <div className="flex flex-col items-center gap-6">
+        <div className="flex flex-col md:flex-row items-center gap-6">
           {meetingPoints &&
             meetingPoints.map((mp) => (
               <MeetingPointChooser
