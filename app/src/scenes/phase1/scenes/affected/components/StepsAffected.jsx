@@ -9,7 +9,7 @@ import StepPDR from "./step/StepPDR";
 import StepPDROld from "./step/stepPDROld";
 import { environment } from "../../../../../config";
 
-export default function StepsAffected({ center, meetingPoint, departureDate, returnDate }) {
+export default function StepsAffected({ center, session, meetingPoint, departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
   if (!young) return null;
   const nbvalid = numberOfStepsCompleted(young);
@@ -45,7 +45,7 @@ export default function StepsAffected({ center, meetingPoint, departureDate, ret
         {environment === "production" ? (
           <StepPDROld center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
         ) : (
-          <StepPDR center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+          <StepPDR center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
         )}
       </div>
       <hr className="-mx-20 hidden text-gray-200 md:flex" />

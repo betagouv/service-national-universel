@@ -9,8 +9,8 @@ import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 import { capture } from "../../../../../../sentry";
 import api from "../../../../../../services/api";
-import { getMeetingHour, getReturnHour } from "snu-lib";
-import { getMeetingPointChoiceLimitDateForCohort } from "../../../../../../utils/cohorts";
+import { getDepartureDate, getMeetingHour, getReturnDate, getReturnHour } from "snu-lib";
+import { getCohort, getMeetingPointChoiceLimitDateForCohort } from "../../../../../../utils/cohorts";
 import { isStepPDRDone } from "../../utils/steps.utils";
 
 import CloseSvg from "../../../../../../assets/Close";
@@ -21,7 +21,7 @@ import MeetingPointConfirmationModal from "../MeetingPointConfirmationModal";
 import MeetingPointGoAlone from "../MeetingPointGoAlone";
 import Modal from "../../../../../../components/ui/modals/Modal";
 
-export default function StepPDR({ center, meetingPoint, departureDate, returnDate }) {
+export default function StepPDR({ center, session, meetingPoint, departureDate, returnDate }) {
   const [openedDesktop, setOpenedDesktop] = useState(false);
   const [openedMobile, setOpenedMobile] = useState(false);
   const [meetingPoints, setMeetingPoints] = useState(null);
@@ -30,12 +30,15 @@ export default function StepPDR({ center, meetingPoint, departureDate, returnDat
   const [loading, setLoading] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
+  const cohort = getCohort(young.cohort);
   const dispatch = useDispatch();
   const enabled = young ? true : false;
   const valid = isStepPDRDone(young);
   const date = getMeetingPointChoiceLimitDateForCohort(young.cohort);
   const pdrChoiceLimitDate = date ? dayjs(date).locale("fr").format("D MMMM YYYY") : "?";
   const pdrChoiceExpired = date ? dayjs.utc().isAfter(dayjs(date)) : false;
+  const goAloneDepartureDate = getDepartureDate(young, session, cohort);
+  const goAloneReturnDate = getReturnDate(young, session, cohort);
   const meetingHour = getMeetingHour(meetingPoint);
   const returnHour = getReturnHour(meetingPoint);
 
@@ -179,8 +182,8 @@ export default function StepPDR({ center, meetingPoint, departureDate, returnDat
                 onChoose={() => setModalMeetingPoint({ isOpen: true })}
                 chosen={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
                 expired={pdrChoiceExpired}
-                departureDate={departureDate}
-                returnDate={returnDate}
+                departureDate={goAloneDepartureDate}
+                returnDate={goAloneReturnDate}
               />
             </div>
           ) : (
@@ -259,7 +262,7 @@ export default function StepPDR({ center, meetingPoint, departureDate, returnDat
                 onChoose={() => {
                   return setModalMeetingPoint({ isOpen: true, meetingPoint: mp });
                 }}
-                choosed={mp._id === young.meetingPointId}
+                chosen={mp._id === young.meetingPointId}
                 expired={pdrChoiceExpired}
               />
             ))}
@@ -269,8 +272,10 @@ export default function StepPDR({ center, meetingPoint, departureDate, returnDat
             onChoose={() => {
               return setModalMeetingPoint({ isOpen: true });
             }}
-            choosed={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
+            chosen={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
             expired={pdrChoiceExpired}
+            departureDate={goAloneDepartureDate}
+            returnDate={goAloneReturnDate}
           />
         </div>
       </Modal>

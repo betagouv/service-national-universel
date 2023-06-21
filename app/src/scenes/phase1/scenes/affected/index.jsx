@@ -95,7 +95,7 @@ export default function Affected() {
           </div>
         )}
 
-        <StepsAffected center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+        <StepsAffected center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
         <FaqAffected className={`${isStepMedicalFieldDone(young) ? "order-3" : "order-4"}`} />
       </div>
 
