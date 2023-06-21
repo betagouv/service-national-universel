@@ -683,14 +683,14 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
       cursor = db.collection("lignetopoint_patches").find({ ref: { $in: lineToPointIds } });
       for await (const doc of cursor) {
         if (doc.ops && filterUserFunction(doc)) {
-          const lineId = lineToPointSet[doc._id.toString()];
+          const lineId = lineToPointSet[doc.ref.toString()];
           const bus = lineId ? lineSet[lineId] : {};
           for (const op of doc.ops) {
             if (filterOpFunction(op) && !HIDDEN_FIELDS.includes(op.path) && !IGNORED_VALUES.includes(op.value) && !IGNORED_VALUES.includes(op.originalValue)) {
               patches.push({
                 modelName: doc.modelName,
                 date: doc.date,
-                ref: bus._id,
+                ref: bus?._id.toString(),
                 refName: bus.busId,
                 op: op.op,
                 path: op.path,
@@ -742,7 +742,6 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
               offset = page * limit;
             }
           }
-
           return res.status(200).send({
             ok: true,
             data: results.slice(offset, offset + limit),
