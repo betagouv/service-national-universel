@@ -213,7 +213,7 @@ const Espace = () => {
   if (!young) {
     const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
     if (redirect === "inscription") return <Redirect to="/preinscription" />;
-    else return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
+    else return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}&disconnected=1` : "", pathname: "/auth" }} />;
   }
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE) return <Redirect to="/noneligible" />;

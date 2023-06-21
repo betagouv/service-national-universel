@@ -20,7 +20,7 @@ class api {
   }
 
   goToAuth() {
-    return (window.location.href = "/auth?unauthorized=1");
+    return (window.location.href = "/auth?disconnected=1");
   }
 
   getToken() {
