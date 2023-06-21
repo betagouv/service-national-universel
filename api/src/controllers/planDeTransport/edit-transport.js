@@ -96,16 +96,4 @@ router.get("/allLines/:cohort", passport.authenticate("referent", { session: fal
   }
 });
 
-router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    if (req.user.role !== "admin" || req.user.subRole !== "god") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
-    const { id } = req.params;
-    await PlanTransportModel.findByIdAndDelete(id);
-    res.status(200).send({ ok: true });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 module.exports = router;
