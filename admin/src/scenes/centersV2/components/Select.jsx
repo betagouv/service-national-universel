@@ -7,7 +7,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Select({ options, selected, setSelected, label, readOnly = false, icon, error }) {
+export default function Select({ options, selected, setSelected, label, readOnly = false, icon, error, size = "" }) {
   return (
     <div className="coucou">
       <Listbox value={selected} onChange={setSelected}>
@@ -18,7 +18,7 @@ export default function Select({ options, selected, setSelected, label, readOnly
                 <div
                   className={`flex flex-row ${!readOnly ? "cursor-default" : "cursor-pointer"} rounded-lg border ${
                     error ? "border-red-500" : "border-gray-300"
-                  } items-center bg-white py-2 px-2.5`}>
+                  } items-center bg-white py-2 px-2.5 ${size}`}>
                   {icon ? icon : null}
                   <div className={`flex w-full flex-col `}>
                     {label ? <label className="text-xs leading-4 text-gray-500">{label}</label> : null}

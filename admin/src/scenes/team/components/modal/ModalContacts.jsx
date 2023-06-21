@@ -186,12 +186,13 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
         ) : (
           <div>
             {optionsContact.length ? (
-              <div className=" w-full px-8 py-2 text-[14px] leading-[20px]">
+              <div className=" w-full px-10 py-2 text-[14px] leading-[20px]">
                 <p className="text-gray-500 pb-3">Ajouter à ce séjour un contact déjà existant...</p>
                 <Select
                   options={optionsContact}
                   selected={optionsContact.find((e) => e.value === edit.contactName)}
                   setSelected={(e) => setEdit(proposedContact.find((contact) => contact.contactName === e.value))}
+                  size={"h-[52px]"}
                 />
                 <p className="text-gray-500 pt-3">... ou un nouveau contact :</p>
               </div>
