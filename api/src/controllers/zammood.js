@@ -95,6 +95,22 @@ router.post("/tickets", passport.authenticate(["referent", "young"], { session: 
   }
 });
 
+router.post("/ticketscount", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { ok, data } = await zammood.api(`/v0/ticket/count`, {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify(req.body),
+    });
+    if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 // Get one tickets with its messages.
 router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
