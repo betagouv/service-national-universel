@@ -61,7 +61,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     const { structureContextFilters, structureContextError } = await buildStructureContext(user);
     if (structureContextError) {
-      return res.status(missionContextError.status).send(missionContextError.body);
+      return res.status(structureContextError.status).send(structureContextError.body);
     }
 
     // Context filters
@@ -128,6 +128,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       return res.status(200).send(response);
     }
   } catch (error) {
+    console.log("ERROR: ", error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }

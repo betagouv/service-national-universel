@@ -797,6 +797,13 @@ const MIME_TYPES = {
   EXCEL: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };
 
+const STRUCTURE_LEGAL_STATUS = {
+  PUBLIC: "PUBLIC",
+  ASSOCIATION: "ASSOCIATION",
+  PRIVATE: "PRIVATE",
+  OTHER: "OTHER"
+};
+
 export {
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
@@ -849,6 +856,7 @@ export {
   TEMPLATE_DESCRIPTIONS,
   MIME_TYPES,
   YOUNG_SCHOOLED_SITUATIONS,
+  STRUCTURE_LEGAL_STATUS,
 };
 export default {
   YOUNG_STATUS,
@@ -902,4 +910,5 @@ export default {
   TEMPLATE_DESCRIPTIONS,
   MIME_TYPES,
   YOUNG_SCHOOLED_SITUATIONS,
+  STRUCTURE_LEGAL_STATUS,
 };
