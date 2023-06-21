@@ -1,5 +1,5 @@
 import React from "react";
-import { getDepartureDate, getReturnDate, youngCanChangeSession } from "snu-lib";
+import { getDepartureDate, getReturnDate, translateCohortTemp, transportDatesToString, youngCanChangeSession } from "snu-lib";
 import hero2 from "../../assets/hero-2.png";
 import heroBanner from "../../assets/hero-banner.png";
 import CurvedArrowLeft from "../../assets/icons/CurvedArrowLeft";
@@ -12,16 +12,14 @@ import FaqSection from "./components/FaqWaitingAffectation";
 import TestimonialsSection from "./components/TestimonialsSection";
 import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
-import { translateCohortTemp } from "snu-lib";
-import { environment } from "../../config";
-import { transportDatesToString, getDepartureDate as getDepartureDateLegacy, getReturnDate as getReturnDateLegacy, getCohort } from "../../utils/cohorts";
+import { getCohort } from "../../utils/cohorts";
 import { useSelector } from "react-redux";
 
 export default function WaitingAffectation() {
   const young = useSelector((state) => state.Auth.young);
   const cohort = getCohort(young.cohort);
-  const departureDate = environment === "production" ? getDepartureDateLegacy(young) : getDepartureDate(young, {}, cohort);
-  const returnDate = environment === "production" ? getReturnDateLegacy(young) : getReturnDate(young, {}, cohort);
+  const departureDate = cohort ? getDepartureDate(young, {}, cohort) : null;
+  const returnDate = cohort ? getReturnDate(young, {}, cohort) : null;
 
   return (
     <>
@@ -33,7 +31,7 @@ export default function WaitingAffectation() {
           <article>
             <h1 className="mb-4 flex flex-col text-2xl leading-7 md:gap-3 md:text-[44px] md:text-5xl md:leading-12">
               <span>Mon séjour de cohésion</span>
-              <strong className="flex items-center">{environment === "production" ? translateCohortTemp(young) : transportDatesToString(departureDate, returnDate)}</strong>
+              <strong className="flex items-center">{cohort ? transportDatesToString(departureDate, returnDate) : translateCohortTemp(young.cohort)}</strong>
             </h1>
 
             {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null}

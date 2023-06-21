@@ -1,3 +1,45 @@
+# [1.296.0](https://github.com/betagouv/service-national-universel/compare/v1.295.0...v1.296.0) (2023-06-20)
+
+
+### Bug Fixes
+
+* **admin:** open affection right for all phase 1 status ([b13ea43](https://github.com/betagouv/service-national-universel/commit/b13ea43ea52c4dcbc1a67083a274ab243171f2e5))
+* **api/admin:** date specific session ([#2720](https://github.com/betagouv/service-national-universel/issues/2720)) ([3eacfa0](https://github.com/betagouv/service-national-universel/commit/3eacfa03ef92a7e56267dee562c26933e82e6217))
+* **app:** add loader diagoriente ([67c4ac0](https://github.com/betagouv/service-national-universel/commit/67c4ac08109065db2b0923f8bdf2edf9e8d81146))
+* **app:** do not capture error on cohort fetch if user is not logged in ([df772ca](https://github.com/betagouv/service-national-universel/commit/df772cabdccb71eca0236ae06867a25147a3ea80))
+* **app:** dont render transport info modal if stay is over ([f600112](https://github.com/betagouv/service-national-universel/commit/f6001122c3fc511d5c63ed6b4fc1e3a7e6b9966c))
+* **app:** phase 1 done - return infos ([384aad7](https://github.com/betagouv/service-national-universel/commit/384aad7ac0fd6278223780e590d8a0fd07a48d0a))
+* **app:** phase 1 infos retour transports locaux ([3791be9](https://github.com/betagouv/service-national-universel/commit/3791be9be80b0b043da6ac2eceaeeeb01c414d97))
+* **app:** transport info on phase 1 done and not done pages ([ada163c](https://github.com/betagouv/service-national-universel/commit/ada163c4e973e20f3b3d881ba2c20822549b8dbb))
+* **app:** wait for cohort data to load ([74a2f71](https://github.com/betagouv/service-national-universel/commit/74a2f71abf2e184ab3efcec64c7deb99b3296a22))
+* **app:** waiting affectation for legacy ([1ec54a7](https://github.com/betagouv/service-national-universel/commit/1ec54a79b4cf8ff01c8bfeddc574c12208b523b2))
+* **lib:** remove unnecessary throw in dates functions ([3626dcb](https://github.com/betagouv/service-national-universel/commit/3626dcb94838495812698daed3c43c68dd3c2ee6))
+
+
+### Features
+
+* **admin/api:** MEP date de sejour dynamique ([#2722](https://github.com/betagouv/service-national-universel/issues/2722)) ([c483a97](https://github.com/betagouv/service-national-universel/commit/c483a979c524fd36c3a4644fa88dbeb249769c94))
+
+# [1.295.0](https://github.com/betagouv/service-national-universel/compare/v1.294.0...v1.295.0) (2023-06-19)
+
+
+### Bug Fixes
+
+* **admin:** fix session filtering for head centers ([e180316](https://github.com/betagouv/service-national-universel/commit/e1803169e093c66391b82faf6c3ac709747ed7c6))
+* **admin:** keep old behavior in modal affectation for prod ([0437103](https://github.com/betagouv/service-national-universel/commit/04371039997dd5b0ab552a11a4968b16b0e8d3a9))
+* **api:** Fix auto-validation hors Juin 2023 ([c93f37d](https://github.com/betagouv/service-national-universel/commit/c93f37d234222950d26f99ad352a04657fcc573b))
+* **api/pdf:** Render pdf 10 by 10 in batch mode ([6cc8c74](https://github.com/betagouv/service-national-universel/commit/6cc8c74ba43bdfa9f327076f0c96a743cacf89cf))
+* **app:** do not capture cohort fetch error when user is logged out ([e7c4bad](https://github.com/betagouv/service-national-universel/commit/e7c4bad290c209e9baabb0077415d37abdebea93))
+* **app:** waiting affectation cohort data ([782cc4e](https://github.com/betagouv/service-national-universel/commit/782cc4e8d7dc177c58245170d445dca2937f37a9))
+* **lib:** dont display session date for young waiting affectation ([952160c](https://github.com/betagouv/service-national-universel/commit/952160c9de9144bea68f32086b13fd70cd374a24))
+* **lib:** DROMS dates globales ([e6331c6](https://github.com/betagouv/service-national-universel/commit/e6331c60623bd938fe43889bd029850ea6e31ef6))
+
+
+### Features
+
+* **admin/api/app:** Date de session spécifique ([#2705](https://github.com/betagouv/service-national-universel/issues/2705)) ([d757101](https://github.com/betagouv/service-national-universel/commit/d757101b8c0ce716a8a0521a5db92b5399989bb5))
+* **api:** New condition for autovalidationStatusPhase1 ([#2716](https://github.com/betagouv/service-national-universel/issues/2716)) ([c6df6ff](https://github.com/betagouv/service-national-universel/commit/c6df6ff34f1a2b7845a5b994a62328e3e1dade69))
+
 # [1.294.0](https://github.com/betagouv/service-national-universel/compare/v1.293.0...v1.294.0) (2023-06-18)
 
 

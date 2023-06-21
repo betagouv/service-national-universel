@@ -8,10 +8,11 @@ import api from "../../services/api";
 import { translate, formatStringDate, urlWithScheme } from "../../utils";
 import plausibleEvent from "../../services/plausible";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
+import Loader from "../../components/Loader";
 
 export default function Index() {
   useDocumentTitle("Diagoriente");
-  const [diagorienteUrl, setDiagorienteUrl] = useState();
+  const [diagorienteUrl, setDiagorienteUrl] = useState(null);
   const [diagorienteCardData, setDiagorienteCardData] = useState();
   const [skills, setSkills] = useState([]);
 
@@ -63,6 +64,8 @@ export default function Index() {
       ]);
     }
   }, [diagorienteCardData]);
+
+  if (!diagorienteUrl) return <Loader />;
 
   return (
     <>

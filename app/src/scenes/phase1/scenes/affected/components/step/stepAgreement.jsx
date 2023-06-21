@@ -9,11 +9,9 @@ import CloseSvg from "../../../../../../assets/Close";
 import { ModalContainer } from "../../../../../../components/modals/Modal";
 import { setYoung } from "../../../../../../redux/auth/actions";
 import api from "../../../../../../services/api";
-import { translateCohortTemp } from "snu-lib";
+import { transportDatesToString } from "snu-lib";
 import plausibleEvent from "../../../../../../services/plausible";
 import { isStepAgreementDone, isStepPDRDone } from "../../utils/steps.utils";
-import { transportDatesToString } from "../../../../../../utils/cohorts";
-import { environment } from "../../../../../../config";
 
 export default function StepAgreement({ departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
@@ -137,9 +135,7 @@ const content = ({ handleSubmit, young, departureDate, returnDate }) => {
       </div>
       <div className="flex flex-col rounded-2xl border-[1px] border-gray-100 py-5 px-5 shadow-sm md:max-w-screen-1/2 lg:w-1/3">
         <h1 className="pb-4 text-xl font-bold leading-7">J&apos;ai changé d&apos;avis</h1>
-        <p className="pb-3 text-sm text-gray-600">
-          Les dates ne me conviennent plus ({environment === "production" ? translateCohortTemp(young) : transportDatesToString(departureDate, returnDate)})
-        </p>
+        <p className="pb-3 text-sm text-gray-600">Les dates ne me conviennent plus ({transportDatesToString(departureDate, returnDate)})</p>
         <Link to="/changer-de-sejour" className="whitespace-nowrap pb-4 text-sm text-blue-600 hover:underline hover:underline-offset-2">
           Changer de séjour &gt;
         </Link>
