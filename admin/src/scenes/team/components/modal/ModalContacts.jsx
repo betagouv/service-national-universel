@@ -41,6 +41,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
   useEffect(() => {
     if (contacts) {
       if (newContact) {
+        //setallcontact ICIiIIIIIIIIIII
         setEdit({});
       } else if (hit) {
         let firstName = hit.contactName.substring(0, hit.contactName.indexOf(" "));
@@ -103,13 +104,33 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
   };
 
   if (!contacts || !cohorts || !currentTab) return null;
+  console.log(currentTab);
+  let allContact = [];
+  Object.values(contacts).forEach((values) => {
+    if (values.cohort !== currentTab) {
+      allContact.push(...values);
+    }
+  });
+  const uniqueContact = allContact.reduce((acc, contact) => {
+    const { _id, cohort, ...contactWithoutId } = contact;
 
-  const optionsContact = contacts[currentTab].map((contact) => ({
+    const duplicateIndex = acc.findIndex(
+      (c) => c.contactMail === contactWithoutId.contactMail && c.contactPhone === contactWithoutId.contactPhone && c.contactName === contactWithoutId.contactName,
+    );
+
+    if (duplicateIndex === -1) {
+      acc.push(contactWithoutId);
+    }
+
+    return acc;
+  }, []);
+  const optionsContact = uniqueContact.map((contact) => ({
     value: contact.contactName,
     label: contact.contactName,
   }));
+
   console.log("edit", edit);
-  console.log("contacts", contacts);
+  console.log(uniqueContact);
 
   return (
     <ModalForm classNameModal="max-w-3xl" isOpen={isOpen} onCancel={onCancel}>
@@ -161,7 +182,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
             <Select
               options={optionsContact}
               selected={optionsContact.find((e) => e.value === edit.contactName)}
-              setSelected={(e) => setEdit(contacts[currentTab].find((contact) => contact.contactName === e.value))}
+              setSelected={(e) => setEdit(uniqueContact.find((contact) => contact.contactName === e.value))}
             />
             <p>... ou un nouveau contact :</p>
             <form className="w-full" onSubmit={handleSubmit}>
