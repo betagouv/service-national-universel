@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { translateCohortTemp, transportDatesToString, youngCanChangeSession } from "snu-lib";
-import { getCohort, getDepartureDate as getDepartureDateLegacy, getReturnDate as getReturnDateLegacy } from "../../../../utils/cohorts";
+import { transportDatesToString, youngCanChangeSession } from "snu-lib";
+import { getCohort } from "../../../../utils/cohorts";
 import { isStepMedicalFieldDone } from "./utils/steps.utils";
 import api from "../../../../services/api";
 
@@ -17,7 +17,6 @@ import StepsAffected from "./components/StepsAffected";
 import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
 import { getDepartureDate, getReturnDate } from "snu-lib/transport-info";
-import { environment } from "../../../../config";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -28,8 +27,8 @@ export default function Affected() {
   const [loading, setLoading] = useState(true);
 
   const cohort = getCohort(young.cohort);
-  const departureDate = environment === "production" ? getDepartureDateLegacy(young, meetingPoint) : getDepartureDate(young, session, cohort, meetingPoint);
-  const returnDate = environment === "production" ? getReturnDateLegacy(young, meetingPoint) : getReturnDate(young, session, cohort, meetingPoint);
+  const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
+  const returnDate = getReturnDate(young, session, cohort, meetingPoint);
 
   if (isStepMedicalFieldDone(young)) {
     window.scrollTo(0, 0);
@@ -78,10 +77,10 @@ export default function Affected() {
 
         <header className="items-between order-1 flex flex-col px-4 py-4 md:!px-8 lg:flex-row lg:justify-between lg:!px-16">
           <div>
-            <h1 className="text-2xl md:space-y-4 md:text-5xl">
+            <h1 className="text-2xl leading-[2.5rem] md:text-5xl md:leading-[3.5rem]">
               Mon séjour de cohésion
               <br />
-              <strong className="flex items-center">{environment === "production" ? translateCohortTemp(young) : transportDatesToString(departureDate, returnDate)}</strong>
+              <strong>{transportDatesToString(departureDate, returnDate)}</strong>
             </h1>
             {youngCanChangeSession(young) ? <ChangeStayLink className="my-4 md:my-8" /> : null}
           </div>
@@ -96,7 +95,7 @@ export default function Affected() {
           </div>
         )}
 
-        <StepsAffected center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+        <StepsAffected center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
         <FaqAffected className={`${isStepMedicalFieldDone(young) ? "order-3" : "order-4"}`} />
       </div>
 

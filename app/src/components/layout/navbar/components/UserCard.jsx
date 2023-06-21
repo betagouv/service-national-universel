@@ -5,6 +5,7 @@ import ChevronDown from "../../../../assets/icons/ChevronDown";
 import { setYoung } from "../../../../redux/auth/actions";
 import API from "../../../../services/api";
 import { permissionPhase2 } from "../../../../utils";
+import { toastr } from "react-redux-toastr";
 
 export default function User() {
   const user = useSelector((state) => state.Auth.young);
@@ -66,6 +67,8 @@ function Menu({ open, menuRef, user, onClose }) {
   async function logout() {
     await API.post(`/young/logout`);
     dispatch(setYoung(null));
+    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
+    return history.push("/auth");
   }
 
   return (

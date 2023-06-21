@@ -19,7 +19,30 @@ export default function NotDone() {
   const young = useSelector((state) => state.Auth.young) || {};
   const history = useHistory();
   const dispatch = useDispatch();
-  const [modalOpen, setModalOpen] = React.useState({ isOpen: false });
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [center, setCenter] = React.useState(null);
+  const [meetingPoint, setMeetingPoint] = React.useState(null);
+  const [session, setSession] = React.useState(null);
+
+  async function handleClickModal() {
+    try {
+      if (!center || !meetingPoint || !session) {
+        const { data: center, ok: okCenter } = await API.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
+        if (!okCenter) throw new Error("Error while fetching center");
+        const { data: meetingPoint, ok: okMeetingPoint } = await API.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
+        if (!okMeetingPoint) throw new Error("Error while fetching meeting point");
+        const { data: session, ok: okSession } = await API.get(`/young/${young._id}/session/`);
+        if (!okSession) throw new Error("Error while fetching session");
+        setCenter(center);
+        setMeetingPoint(meetingPoint);
+        setSession(session);
+      }
+      setModalOpen(true);
+    } catch (e) {
+      capture(e);
+      toastr.error(e.message);
+    }
+  }
 
   async function goToReinscription() {
     try {
@@ -49,9 +72,7 @@ export default function NotDone() {
           </p>
           <p>Nous vous invitons à vous rapprocher de votre référent départemental pour la suite de votre parcours.</p>
           {!isCohortDone(young.cohort) && (
-            <button
-              className="mt-8 rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs font-medium leading-4 hover:border-gray-500"
-              onClick={() => setModalOpen({ isOpen: true })}>
+            <button className="mt-8 rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs font-medium leading-4 hover:border-gray-500" onClick={handleClickModal}>
               Voir mes informations de convocation
             </button>
           )}
@@ -84,7 +105,8 @@ export default function NotDone() {
         </div>
         <div className="thumb" />
       </Hero>
-      <InfoConvocation isOpen={modalOpen?.isOpen} onCancel={() => setModalOpen({ isOpen: false })} title="Information de convocation" />
+
+      {modalOpen && !isCohortDone(young.cohort) && <InfoConvocation isOpen={modalOpen} onCancel={() => setModalOpen(false)} title="Information de convocation" />}
     </HeroContainer>
   );
 }

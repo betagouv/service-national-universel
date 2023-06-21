@@ -17,9 +17,8 @@ const TRANSPORT_TIMES = {
  * 3. If not, the default date for the cohort.
  */
 function getDepartureDate(young, session, cohort, meetingPoint = null) {
-  if (!session && !cohort) throw new Error("getDepartureDate: session and cohort are required");
   if (meetingPoint?.bus || meetingPoint?.ligneBus || meetingPoint?.departuredDate) return getMeetingPointDepartureDate(meetingPoint);
-  if (young.status !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return getCenterArrivalDate(young, session, cohort);
+  if (young?.status && young.status !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return getCenterArrivalDate(young, session, cohort);
   return getGlobalDepartureDate(young, cohort);
 }
 
@@ -36,9 +35,10 @@ function getCenterArrivalDate(young, session, cohort) {
 
 function getGlobalDepartureDate(young, cohort) {
   if (young.cohort === "Juillet 2023" && [...regionsListDROMS, "Polynésie française"].includes(young.region)) {
-    return new Date(2023, 6, 5);
+    return new Date(2023, 6, 4);
   }
-  return new Date(cohort.dateStart);
+  if (cohort?.dateStart) return new Date(cohort.dateStart);
+  return new Date();
 }
 
 /**
@@ -52,9 +52,8 @@ function getGlobalDepartureDate(young, cohort) {
  * 3. If not, the default date for the cohort.
  */
 function getReturnDate(young, session, cohort, meetingPoint = null) {
-  if (!session && !cohort) throw new Error("getReturnDate: session and cohort are required");
   if (meetingPoint?.bus || meetingPoint?.ligneBus || meetingPoint?.departuredDate) return getMeetingPointReturnDate(meetingPoint);
-  if (young.status !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return getCenterReturnDate(young, session, cohort);
+  if (young?.status && young.status !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return getCenterReturnDate(young, session, cohort);
   return getGlobalReturnDate(young, cohort);
 }
 
@@ -70,10 +69,11 @@ function getCenterReturnDate(young, session, cohort) {
 }
 
 function getGlobalReturnDate(young, cohort) {
-  if (young.cohort === "Juillet 2023" && [...regionsListDROMS, "Polynésie française"].includes(young.region)) {
+  if (young?.cohort === "Juillet 2023" && [...regionsListDROMS, "Polynésie française"].includes(young.region)) {
     return new Date(2023, 6, 16);
   }
-  return new Date(cohort.dateEnd);
+  if (cohort?.dateEnd) return new Date(cohort.dateEnd);
+  return new Date();
 }
 
 /**
