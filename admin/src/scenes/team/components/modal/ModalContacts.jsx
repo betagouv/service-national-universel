@@ -114,7 +114,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
     setIsLoading(true);
     try {
       let value = {
-        contactName: `${edit.firstName} ${edit.lastName}` || edit.contactName,
+        contactName: `${edit.firstName} ${edit.lastName}`,
         contactPhone: edit.contactPhone,
         contactMail: edit.contactMail,
         contactId: edit.contactId,
