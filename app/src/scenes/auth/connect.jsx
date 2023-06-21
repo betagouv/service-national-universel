@@ -9,10 +9,12 @@ import Loader from "../../components/Loader";
 import { cohortsInit } from "../../utils/cohorts";
 
 export default function Connect({ location }) {
+  console.log("🚀 ~ file: connect.jsx:12 ~ Connect ~ location:", location);
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
 
   const params = queryString.parse(location.search);
+  console.log("🚀 ~ file: connect.jsx:17 ~ Connect ~ params:", params);
   const { token, young_id } = params;
 
   if (!token || !young_id) {
