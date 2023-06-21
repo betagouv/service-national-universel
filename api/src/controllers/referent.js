@@ -158,7 +158,7 @@ router.post("/signup", async (req, res) => {
 
     const user = await ReferentModel.create({ password, email, firstName, lastName, role, acceptCGU, phone, mobile: phone });
     const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_MAX_AGE });
-    res.cookie("jwt", token, cookieOptions());
+    res.cookie("jwt_ref", token, cookieOptions());
 
     return res.status(200).send({ user, token, ok: true });
   } catch (error) {
@@ -189,7 +189,8 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     if (!canSigninAs(req.user, user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
-    res.cookie("jwt", token, cookieOptions());
+    if (type === "referent") res.cookie("jwt_ref", token, cookieOptions());
+    else if (type === "young") res.cookie("jwt_young", token, cookieOptions());
 
     return res.status(200).send({ ok: true, token, data: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
   } catch (error) {
@@ -361,7 +362,7 @@ router.post("/signup_invite", async (req, res) => {
     });
 
     const token = jwt.sign({ _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: "30d" });
-    res.cookie("jwt", token, cookieOptions());
+    res.cookie("jwt_ref", token, cookieOptions());
 
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);

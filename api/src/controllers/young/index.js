@@ -128,7 +128,7 @@ router.post("/signup_invite", async (req, res) => {
     young.set({ invitationExpires: null });
 
     const token = jwt.sign({ _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.secret, { expiresIn: "30d" });
-    res.cookie("jwt", token, cookieOptions());
+    res.cookie("jwt_young", token, cookieOptions());
 
     await young.save({ fromUser: req.user });
 
