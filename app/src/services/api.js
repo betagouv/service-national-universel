@@ -112,7 +112,9 @@ class api {
         const file = await response.blob();
         resolve(file);
       } catch (e) {
-        console.log(e);
+        Sentry.setContext("body", body);
+        Sentry.setContext("path", path);
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -160,6 +162,9 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext("path", path);
+        Sentry.setContext("body", body);
+        Sentry.captureException(e);
         reject(e);
       }
     });

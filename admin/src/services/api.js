@@ -67,6 +67,8 @@ class api {
     })
       .then((r) => jsonOrRedirectToSignIn(r))
       .catch((e) => {
+        Sentry.setContext("body", body);
+        Sentry.setContext("route", route);
         Sentry.captureException(e);
         console.error(e);
         return { responses: [] };
@@ -96,23 +98,27 @@ class api {
   }
 
   async openpdf(path, body) {
-    const response = await fetch(`${apiURL}${path}`, {
-      retries: 3,
-      retryDelay: 1000,
-      retryOn: [502, 503, 504],
-      mode: "cors",
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
-      body: typeof body === "string" ? body : JSON.stringify(body),
-    });
-    if (response.status === 401) {
-      this.goToAuth();
+    try {
+      const response = await fetch(`${apiURL}${path}`, {
+        retries: 3,
+        retryDelay: 1000,
+        retryOn: [502, 503, 504],
+        mode: "cors",
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+        body: typeof body === "string" ? body : JSON.stringify(body),
+      });
+      if (response.status !== 200) {
+        throw await response.json();
+      }
+      return response.blob();
+    } catch (e) {
+      Sentry.setContext("path", path);
+      Sentry.setContext("body", body);
+      Sentry.captureException(e);
+      reject(e);
     }
-    if (response.status !== 200) {
-      throw await response.json();
-    }
-    return response.blob();
   }
 
   get(path) {
@@ -157,6 +163,9 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext("path", path);
+        Sentry.setContext("body", body);
+        Sentry.captureException(e);
         reject(e);
       }
     });
