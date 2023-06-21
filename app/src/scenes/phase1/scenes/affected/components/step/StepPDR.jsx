@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../../../../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
@@ -25,6 +25,7 @@ export default function StepPDR({ center, meetingPoint, departureDate, returnDat
   const [openedDesktop, setOpenedDesktop] = useState(false);
   const [openedMobile, setOpenedMobile] = useState(false);
   const [meetingPoints, setMeetingPoints] = useState(null);
+  console.log("🚀 ~ file: StepPDR.jsx:28 ~ StepPDR ~ meetingPoints:", meetingPoints);
   const [error, setError] = useState(null);
   const [modalMeetingPoint, setModalMeetingPoint] = useState({ isOpen: false, meetingPoint: null });
   const [loading, setLoading] = useState(false);
@@ -39,13 +40,8 @@ export default function StepPDR({ center, meetingPoint, departureDate, returnDat
   const meetingHour = getMeetingHour(meetingPoint);
   const returnHour = getReturnHour(meetingPoint);
 
-  useEffect(() => {
-    if (young && !meetingPoints) {
-      loadMeetingPoints();
-    }
-  }, [young]);
-
   async function loadMeetingPoints() {
+    if (meetingPoints?.length) return;
     try {
       const result = await api.get(`/point-de-rassemblement/available`);
       if (!result.ok) {
@@ -97,6 +93,20 @@ export default function StepPDR({ center, meetingPoint, departureDate, returnDat
     }
   }
 
+  async function handleOpenDesktop() {
+    if (enabled && young.transportInfoGivenByLocal !== "true") {
+      await loadMeetingPoints();
+      setOpenedDesktop(!openedDesktop);
+    } else setOpenedDesktop(false);
+  }
+
+  async function handleOpenMobile() {
+    if (enabled && young.transportInfoGivenByLocal !== "true") {
+      await loadMeetingPoints();
+      setOpenedMobile(!openedMobile);
+    } else setOpenedMobile(false);
+  }
+
   return (
     <>
       <MeetingPointConfirmationModal
@@ -108,9 +118,7 @@ export default function StepPDR({ center, meetingPoint, departureDate, returnDat
       />
 
       {/* Desktop */}
-      <div
-        className={`hidden flex-row items-center justify-between md:flex ${enabled && "cursor-pointer"}`}
-        onClick={() => setOpenedDesktop(enabled && young.transportInfoGivenByLocal !== "true" ? !openedDesktop : false)}>
+      <div className={`hidden flex-row items-center justify-between md:flex ${enabled && "cursor-pointer"}`} onClick={handleOpenDesktop}>
         <div className="lex-row flex items-center py-4">
           {valid ? (
             <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
@@ -189,7 +197,7 @@ export default function StepPDR({ center, meetingPoint, departureDate, returnDat
         className={`relative mb-3 ml-4 flex min-h-[144px] cursor-pointer items-center rounded-xl border-[1px] md:hidden ${
           valid ? "border-green-500 bg-green-50" : !young.meetingPointId || young.deplacementPhase1Autonomous !== "true" ? "border-blue-600" : "bg-white"
         } `}
-        onClick={() => setOpenedMobile(enabled && young.transportInfoGivenByLocal !== "true" ? !openedMobile : false)}>
+        onClick={handleOpenMobile}>
         {(young.meetingPointId || young.deplacementPhase1Autonomous === "true") && (
           <LinearMap gray={(!young.meetingPointId).toString()} className="absolute top-[10px] right-[10px]" />
         )}
