@@ -8,7 +8,7 @@ export default function Menu({ tab, structure }) {
   const user = useSelector((state) => state.Auth.user);
 
   const tabs = [{ label: "Détails", id: "details", src: `/structure/${structure._id}` }];
-  if ([ROLES.ADMIN, ROLES.SUPERVISOR].includes(user.role)) {
+  if ([ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
     tabs.push({ label: "Missions", id: "missions", src: `/structure/${structure._id}/missions` });
   }
   if (canViewPatchesHistory(user)) {
