@@ -209,11 +209,15 @@ class api {
 
   uploadFile(path, arr, properties) {
     const names = arr.map((e) => e.name || e);
-    const files = arr.filter((e) => typeof e === "object");
+    let files = arr.filter((e) => typeof e === "object");
     let formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      const safeFilename = encodeURIComponent(files[i].name.replace(/'/g, ""));
-      formData.append(files[i].name, files[i], safeFilename);
+    for (let file of files) {
+      const safeFilename = encodeURIComponent(file.name.replaceAll(/'/g, ""));
+      Object.defineProperty(file, "name", {
+        writable: true,
+        value: safeFilename,
+      });
+      formData.append(file.name, file, safeFilename);
     }
     let allData = properties ? { names, ...properties } : { names };
     formData.append("body", JSON.stringify(allData));
@@ -239,7 +243,11 @@ class api {
 
   uploadID(youngId, file, metadata = {}) {
     let formData = new FormData();
-    const safeFilename = encodeURIComponent(file.name.replace(/'/g, ""));
+    const safeFilename = encodeURIComponent(file.name.replaceAll(/'/g, ""));
+    Object.defineProperty(file, "name", {
+      writable: true,
+      value: safeFilename,
+    });
     formData.append("file", file, safeFilename);
     for (const [key, value] of Object.entries(metadata)) {
       formData.append(key, value);
