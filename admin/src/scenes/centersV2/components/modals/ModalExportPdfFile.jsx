@@ -1,7 +1,7 @@
 import ModalTailwind from "../../../../components/modals/ModalTailwind";
 import { BiLoaderAlt } from "react-icons/bi";
 
-export default function ModalExportMail({ isOpen, title, message, estimation }) {
+export default function ModalExportPdfFile({ isOpen, title, message, estimation }) {
 
   return (
     <ModalTailwind isOpen={isOpen} onClose={() => setIsOpen(false)} className="w-[700px] rounded-xl bg-white">
