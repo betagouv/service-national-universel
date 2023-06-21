@@ -235,7 +235,7 @@ export default function CenterYoungIndex() {
       isOpen: true,
       title: "Export de document Pdf",
       message: "Veuillez patienter, votre téléchargement est en cours...",
-      estimation: "Environ 1 minutes ..."
+      estimation: "Environ 1 minute ..."
     });
     try {
       const file = await api.openpdf(`/session-phase1/${sessionId}/certificate`, {});
