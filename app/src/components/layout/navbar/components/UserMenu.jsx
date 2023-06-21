@@ -5,6 +5,7 @@ import API from "../../../../services/api";
 import MenuLink from "./MenuLink";
 import MenuButton from "./MenuButton";
 import { permissionPhase2 } from "../../../../utils";
+import { toastr } from "react-redux-toastr";
 
 export default function UserMenu({ onClose }) {
   const dispatch = useDispatch();
@@ -13,6 +14,8 @@ export default function UserMenu({ onClose }) {
   async function logout() {
     await API.post(`/young/logout`);
     dispatch(setYoung(null));
+    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
+    return history.push("/auth");
   }
 
   return (

@@ -1,18 +1,16 @@
-import "isomorphic-fetch";
 import fetchRetry from "fetch-retry";
+import "isomorphic-fetch";
 
-import { apiURL } from "../config";
 import * as Sentry from "@sentry/react";
+import { apiURL } from "../config";
 
 let fetch = window.fetch;
 
 function jsonOrRedirectToSignIn(response) {
   if (response.ok === false && response.status === 401) {
-    if (window && window.location && window.location.href) {
-      window.location.href = "/auth?unauthorized=1";
-      // We need to return responses to prevent the promise from rejecting.
-      return { responses: [] };
-    }
+    window.location.href = "/auth?unauthorized=1";
+    // We need to return responses to prevent the promise from rejecting.
+    return { responses: [] };
   }
   return response.json();
 }
@@ -22,8 +20,36 @@ class api {
     this.token = "";
   }
 
+  goToAuth() {
+    return (window.location.href = "/auth?unauthorized=1");
+  }
+
   getToken() {
     return this.token;
+  }
+
+  setToken(token) {
+    this.token = token;
+  }
+
+  checkToken() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch(`${apiURL}/referent/signin_token`, {
+          retries: 3,
+          retryDelay: 1000,
+          retryOn: [502, 503, 504],
+          mode: "cors",
+          method: "GET",
+          credentials: "include",
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+        });
+        const res = await response.json();
+        resolve(res);
+      } catch (e) {
+        reject(e);
+      }
+    });
   }
 
   esQuery(index, body, route = null, queryParam = "") {
@@ -69,10 +95,6 @@ class api {
     return obj;
   }
 
-  setToken(token) {
-    this.token = token;
-  }
-
   async openpdf(path, body) {
     const response = await fetch(`${apiURL}${path}`, {
       retries: 3,
@@ -84,6 +106,9 @@ class api {
       headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
       body: typeof body === "string" ? body : JSON.stringify(body),
     });
+    if (response.status === 401) {
+      this.goToAuth();
+    }
     if (response.status !== 200) {
       throw await response.json();
     }
@@ -102,7 +127,9 @@ class api {
           credentials: "include",
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
         });
-
+        if (response.status === 401) {
+          this.goToAuth();
+        }
         const res = await response.json();
         resolve(res);
       } catch (e) {
@@ -124,7 +151,9 @@ class api {
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
-
+        if (response.status === 401) {
+          this.goToAuth();
+        }
         const res = await response.json();
         resolve(res);
       } catch (e) {
@@ -152,6 +181,9 @@ class api {
           headers: { Authorization: `JWT ${this.token}` },
           body: formData,
         });
+        if (response.status === 401) {
+          this.goToAuth();
+        }
         const res = await response.json();
         resolve(res);
       } catch (e) {
@@ -179,6 +211,9 @@ class api {
           headers: {},
           body: formData,
         });
+        if (response.status === 401) {
+          this.goToAuth();
+        }
         const res = await response.json();
         resolve(res);
       } catch (e) {
@@ -199,6 +234,9 @@ class api {
           method: "DELETE",
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
         });
+        if (response.status === 401) {
+          this.goToAuth();
+        }
         const res = await response.json();
         resolve(res);
       } catch (e) {
@@ -229,6 +267,10 @@ class api {
           headers: { Authorization: `JWT ${this.token}` },
           body: formData,
         });
+
+        if (response.status === 401) {
+          this.goToAuth();
+        }
         const res = await response.json();
         resolve(res);
       } catch (e) {
@@ -257,6 +299,10 @@ class api {
           headers: { Authorization: `JWT ${this.token}` },
           body: formData,
         });
+
+        if (response.status === 401) {
+          this.goToAuth();
+        }
         const res = await response.json();
         resolve(res);
       } catch (e) {
@@ -279,6 +325,9 @@ class api {
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
 
+        if (response.status === 401) {
+          this.goToAuth();
+        }
         const res = await response.json();
         if (response.status !== 200) {
           return reject(res);

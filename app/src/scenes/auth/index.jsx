@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch } from "react-router-dom";
+import { Switch, useLocation, Redirect } from "react-router-dom";
 
 import MobileReset from "./mobile/reset";
 import MobileForgot from "./mobile/forgot";
@@ -41,6 +41,9 @@ const Render = ({ screen }) => {
 };
 
 export default function Index() {
+  let location = useLocation();
+  let parentPath = location.pathname.substring(0, location.pathname.lastIndexOf("/"));
+
   return (
     <Switch>
       <SentryRoute path="/auth/signup/invite" component={() => <Render screen="invite" />} />
@@ -48,6 +51,7 @@ export default function Index() {
       <SentryRoute path="/auth/forgot" component={() => <Render screen="forgot" />} />
       <SentryRoute path="/auth/connect" component={Connect} />
       <SentryRoute path="/auth" component={() => <Render screen="auth" />} />
+      <Redirect to={parentPath} /> {/* This will redirect to the parent path if no other Routes match */}
     </Switch>
   );
 }

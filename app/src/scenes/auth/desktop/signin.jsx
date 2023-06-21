@@ -28,9 +28,8 @@ export default function Signin() {
   const params = queryString.parse(location.search);
   const { redirect, disconnected } = params;
 
-  // if (disconnected === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
-
   React.useEffect(() => {
+    if (!young && disconnected === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
     if (young) history.push("/" + (redirect || ""));
   }, [young]);
 

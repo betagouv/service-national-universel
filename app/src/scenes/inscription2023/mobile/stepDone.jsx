@@ -111,7 +111,8 @@ export default function StepWaitingConsent() {
     setLoading(true);
     await api.post(`/young/logout`);
     dispatch(setYoung(null));
-    history.push("/");
+    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
+    return history.push("/auth");
   };
 
   return !notAuthorised ? (
