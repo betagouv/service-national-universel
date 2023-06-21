@@ -680,7 +680,7 @@ router.post("/aggregate-status/:action(export)", passport.authenticate(["referen
       contextFilters.push({ terms: { "sessionPhase1Id.keyword": [sessionsPhase1.map((e) => e._id.toString())] } });
     }
     if (user.role === ROLES.REFERENT_REGION) {
-      contextFilters.push({ terms: { "region.keyword": user.region } });
+      contextFilters.push({ terms: { "region.keyword": [user.region] } });
     }
 
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
