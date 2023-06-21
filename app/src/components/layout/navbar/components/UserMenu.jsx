@@ -1,5 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 import { setYoung } from "../../../../redux/auth/actions";
 import API from "../../../../services/api";
 import MenuLink from "./MenuLink";
@@ -10,6 +11,7 @@ import { toastr } from "react-redux-toastr";
 export default function UserMenu({ onClose }) {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.young);
+  const history = useHistory();
 
   async function logout() {
     await API.post(`/young/logout`);
