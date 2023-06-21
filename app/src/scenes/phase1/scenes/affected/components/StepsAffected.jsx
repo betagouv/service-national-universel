@@ -6,6 +6,8 @@ import StepAgreement from "./step/stepAgreement";
 import StepConvocation from "./step/stepConvocation";
 import StepMedicalField from "./step/stepMedicalFile";
 import StepPDR from "./step/StepPDR";
+import StepPDROld from "./step/StepPDROld";
+import { environment } from "../../../../../config";
 
 export default function StepsAffected({ center, meetingPoint, departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
@@ -40,7 +42,11 @@ export default function StepsAffected({ center, meetingPoint, departureDate, ret
       </article>
       <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">
-        <StepPDR center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+        {environment === "production" ? (
+          <StepPDROld center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+        ) : (
+          <StepPDR center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+        )}
       </div>
       <hr className="-mx-20 hidden text-gray-200 md:flex" />
       <div className="flex flex-col ">
