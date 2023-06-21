@@ -6,7 +6,7 @@ import StepAgreement from "./step/stepAgreement";
 import StepConvocation from "./step/stepConvocation";
 import StepMedicalField from "./step/stepMedicalFile";
 import StepPDR from "./step/StepPDR";
-import StepPDROld from "./step/StepPDROld";
+import StepPDROld from "./step/stepPDROld";
 import { environment } from "../../../../../config";
 
 export default function StepsAffected({ center, meetingPoint, departureDate, returnDate }) {
