@@ -70,8 +70,13 @@ class ApiService {
 
   uploadFile(path, files) {
     let formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      formData.append(files[i].name, files[i], files[i].name);
+    for (let file of files) {
+      const safeFilename = encodeURIComponent(file.name.replaceAll(/'/g, ""));
+      Object.defineProperty(file, "name", {
+        writable: true,
+        value: safeFilename,
+      });
+      formData.append(file.name, file, safeFilename);
     }
     return new Promise((resolve, reject) => {
       try {
