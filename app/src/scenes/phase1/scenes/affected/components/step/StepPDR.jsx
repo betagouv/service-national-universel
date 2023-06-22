@@ -150,7 +150,13 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
                   </strong>
                 </>
               ) : young.deplacementPhase1Autonomous === "true" ? (
-                <>Je me rends au centre et en reviens par mes propres moyens</>
+                <>
+                  Je me rends au centre et en reviens par mes propres moyens : {center.name}, {addressOf(center)},{" "}
+                  <strong>
+                    arrivée le {dayjs(departureDate).locale("fr").format("dddd D MMMM")} à {meetingHour}, départ le {dayjs(returnDate).locale("fr").format("dddd D MMMM")} à{" "}
+                    {returnHour}
+                  </strong>
+                </>
               ) : young.transportInfoGivenByLocal === "true" ? (
                 <>Les informations sur les modalités d&apos;acheminement vers le centre et de retour vous seront transmises par e-mail par les services académiques.</>
               ) : pdrChoiceExpired ? (

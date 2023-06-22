@@ -5,22 +5,9 @@ import * as Sentry from "@sentry/react";
 
 let fetch = window.fetch;
 
-function jsonOrRedirectToSignIn(response) {
-  if (response.ok === false && response.status === 401) {
-    if (window?.location?.pathname !== "/auth") window.location.href = "/auth?disconnected=1";
-    // We need to return responses to prevent the promise from rejecting.
-    return { responses: [] };
-  }
-  return response.json();
-}
-
 class api {
   constructor() {
     this.token = "";
-  }
-
-  goToAuth() {
-    if (window?.location?.pathname !== "/auth") return (window.location.href = "/auth?disconnected=1");
   }
 
   getToken() {
@@ -64,7 +51,14 @@ class api {
       headers: { "Content-Type": "application/x-ndjson", Authorization: `JWT ${this.token}` },
       body: [header, body].map((e) => `${JSON.stringify(e)}\n`).join(""),
     })
-      .then((r) => jsonOrRedirectToSignIn(r))
+      .then((response) => {
+        if (response.ok === false && response.status === 401) {
+          if (window?.location?.pathname !== "/auth") window.location.href = "/auth?disconnected=1";
+          // We need to return responses to prevent the promise from rejecting.
+          return { responses: [] };
+        }
+        return response.json();
+      })
       .catch((e) => {
         Sentry.setContext("body", body);
         Sentry.captureException(e);
@@ -114,7 +108,10 @@ class api {
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
         if (response.status === 401) {
-          this.goToAuth();
+          if (window?.location?.pathname !== "/auth") {
+            window.location.href = "/auth?disconnected=1";
+            return;
+          }
         }
         if (response.status !== 200) return reject();
         const file = await response.blob();
@@ -141,7 +138,10 @@ class api {
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
         });
         if (response.status === 401) {
-          this.goToAuth();
+          if (window?.location?.pathname !== "/auth") {
+            window.location.href = "/auth?disconnected=1";
+            return;
+          }
         }
         const res = await response.json();
         resolve(res);
@@ -167,7 +167,10 @@ class api {
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
         if (response.status === 401) {
-          this.goToAuth();
+          if (window?.location?.pathname !== "/auth") {
+            window.location.href = "/auth?disconnected=1";
+            return;
+          }
         }
         const res = await response.json();
         resolve(res);
@@ -202,7 +205,10 @@ class api {
           body: formData,
         });
         if (response.status === 401) {
-          this.goToAuth();
+          if (window?.location?.pathname !== "/auth") {
+            window.location.href = "/auth?disconnected=1";
+            return;
+          }
         }
         const res = await response.json();
         resolve(res);
@@ -236,7 +242,10 @@ class api {
           body: formData,
         });
         if (response.status === 401) {
-          this.goToAuth();
+          if (window?.location?.pathname !== "/auth") {
+            window.location.href = "/auth?disconnected=1";
+            return;
+          }
         }
         const res = await response.json();
         resolve(res);
@@ -260,7 +269,10 @@ class api {
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
         });
         if (response.status === 401) {
-          this.goToAuth();
+          if (window?.location?.pathname !== "/auth") {
+            window.location.href = "/auth?disconnected=1";
+            return;
+          }
         }
         const res = await response.json();
         resolve(res);
@@ -286,7 +298,10 @@ class api {
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
         if (response.status === 401) {
-          this.goToAuth();
+          if (window?.location?.pathname !== "/auth") {
+            window.location.href = "/auth?disconnected=1";
+            return;
+          }
         }
         const res = await response.json();
         if (response.status !== 200) {
