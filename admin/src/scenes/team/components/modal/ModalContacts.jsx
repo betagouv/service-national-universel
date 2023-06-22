@@ -7,7 +7,7 @@ import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
-import Select from "../../../centersV2/components/Select";
+import SelectContact from "../SelectContact";
 
 export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contacts, cohorts, getService }) {
   const [currentTab, setCurrentTab] = useState();
@@ -16,7 +16,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
   const [edit, setEdit] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const [proposedContact, setProposedContact] = useState([]);
-  const [optionsContact, setOptionsContact] = useState([]);
+  //const [optionsContact, setOptionsContact] = useState([]);
 
   const resetState = () => {
     setEdit(null);
@@ -47,6 +47,8 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
           ...contactWithoutId,
           firstName: contactWithoutId.contactName.split(" ")[0],
           lastName: contactWithoutId.contactName.split(" ")[1],
+          value: contactWithoutId.contactName,
+          label: contactWithoutId.contactName,
         };
         acc.push(updatedContact);
       }
@@ -59,12 +61,12 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
         return item.contactName === contact.contactName && item.contactPhone === contact.contactPhone && item.contactMail === contact.contactMail;
       });
     });
-    const options = Object.values(proposedContact).map((value) => ({
+    /* const options = Object.values(proposedContact).map((value) => ({
       value: value.contactName,
       label: value.contactName,
-    }));
+    })); */
     setProposedContact(proposedContact);
-    setOptionsContact(options);
+    //setOptionsContact(options);
   };
 
   useEffect(() => {
@@ -185,14 +187,14 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
           </>
         ) : (
           <div>
-            {optionsContact.length ? (
+            {proposedContact.length ? (
               <div className=" w-full px-10 py-2 text-[14px] leading-[20px]">
                 <p className="text-gray-500 pb-3">Ajouter à ce séjour un contact déjà existant...</p>
-                <Select
-                  options={optionsContact}
-                  selected={optionsContact.find((e) => e.value === edit.contactName)}
+                <SelectContact
+                  label={"Mes contacts"}
+                  options={proposedContact}
+                  selected={proposedContact.find((e) => e.value === edit.contactName)}
                   setSelected={(e) => setEdit(proposedContact.find((contact) => contact.contactName === e.value))}
-                  size={"h-[52px]"}
                 />
                 <p className="text-gray-500 pt-3">... ou un nouveau contact :</p>
               </div>
