@@ -6,7 +6,7 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import SelectTable from "./components/SelectTable";
 import TooltipAddress from "./components/TooltipAddress";
-import { IoLocationOutline, IoTrashBin } from "react-icons/io5";
+import { IoLocationOutline, IoTrashBin, IoArrowRedoOutline } from "react-icons/io5";
 
 const transportTypeList = [
   { label: "bus", value: "bus" },
@@ -14,7 +14,7 @@ const transportTypeList = [
   { label: "avion", value: "avion" },
 ];
 
-export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingPointIds, ligne }) {
+export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingPointIds, ligne, cohort }) {
   const [defaultMeetingPoint, setDefaultMeetingPoint] = useState();
   const [tempMeetingPoint, setTempMeetingPoint] = useState();
   const [isDirty, setIsDirty] = useState(false);
@@ -113,7 +113,7 @@ export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingP
           isDirty ? "bg-snu-purple-100" : "hover:bg-gray-50"
         }`}>
         <td>
-          <div className="h-full flex items-center justify-center group hover:bg-red-50" onClick={() => deleteLigneToPoint()}>
+          <div className="h-full flex items-center justify-center group hover:bg-red-50 cursor-pointer" onClick={() => deleteLigneToPoint()}>
             <IoTrashBin className="text-gray-300 group-hover:text-red-400" />
           </div>
         </td>
@@ -128,11 +128,22 @@ export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingP
           </div>
         </td>
         <td>
-          {!dataForCheck ? (
-            <div>loading...</div>
-          ) : (
-            <div className="">{(dataForCheck?.meetingPoints || []).find((v) => v.meetingPointId === tempMeetingPoint.meetingPointId)?.youngsCount || 0}</div>
-          )}
+          <div className="flex h-full w-full justify-around items-center">
+            {!dataForCheck ? (
+              <div>loading...</div>
+            ) : (
+              <>
+                <div className="flex-1">{(dataForCheck?.meetingPoints || []).find((v) => v.meetingPointId === tempMeetingPoint.meetingPointId)?.youngsCount || 0}</div>
+                <a
+                  className="h-full flex flex-1 items-center gap-1 p-1 border-[1px] border-gray-100 hover:border-gray-400 hover:text-snu-purple-800"
+                  href={`/edit-transport/deplacement?cohort=${cohort}&meeting_point_id_from=${tempMeetingPoint._id.toString()}`}
+                  target="_blank"
+                  rel="noreferrer">
+                  <IoArrowRedoOutline /> Déplacer
+                </a>
+              </>
+            )}
+          </div>
         </td>
         <td>
           <SelectTable
