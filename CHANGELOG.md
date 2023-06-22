@@ -1,3 +1,21 @@
+# [1.298.0](https://github.com/betagouv/service-national-universel/compare/v1.297.0...v1.298.0) (2023-06-22)
+
+
+### Bug Fixes
+
+* **admin,api:** wip edit plan de transport ([#2735](https://github.com/betagouv/service-national-universel/issues/2735)) ([1cfc6db](https://github.com/betagouv/service-national-universel/commit/1cfc6db2c56bd41e339e3822db23eb8391f2142b))
+* **admin/app:** Better error handling on fetch ([f1d8e5e](https://github.com/betagouv/service-national-universel/commit/f1d8e5e2b8ccb8de76a4c1d8bff1cba7ab8e9030))
+* **admin/app:** Update redirection to auth handling ([e3a3761](https://github.com/betagouv/service-national-universel/commit/e3a376187cbdfb4381cb2f27a3b80eeb40f8b28e))
+* **api:** Api adresse on api ([f131030](https://github.com/betagouv/service-national-universel/commit/f131030f2f3c15826e474289e141570ca16e8868))
+* **api:** Update 401 handling ([16df6be](https://github.com/betagouv/service-national-universel/commit/16df6bef0faa918f622fc4e4c5f3a6ee40ba143d))
+* **app:** Better capture ([f455192](https://github.com/betagouv/service-national-universel/commit/f4551926ec5d2af780285a7d3a6b3eb5f30a0e2b))
+
+
+### Features
+
+* **api/admin/app:** New sentry error ([#2734](https://github.com/betagouv/service-national-universel/issues/2734)) ([b2f086c](https://github.com/betagouv/service-national-universel/commit/b2f086c5bc4d5867bd3512db108c3b0a5d82742f))
+* **app:** Phase 1 - Affecté : Mise en prod des améliorations de l'étape de choix de PDR ([60ebf4e](https://github.com/betagouv/service-national-universel/commit/60ebf4e9c159f697cb478a99c13fd17031054234))
+
 # [1.297.0](https://github.com/betagouv/service-national-universel/compare/v1.296.0...v1.297.0) (2023-06-21)
 
 
