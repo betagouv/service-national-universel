@@ -110,7 +110,7 @@ class api {
       if (response.status === 401) {
         if (window?.location?.pathname !== "/auth") {
           window.location.href = "/auth?disconnected=1";
-          throw new Error("Unauthorized, redirecting...");
+          return;
         }
       }
       if (response.status !== 200) {
@@ -121,7 +121,6 @@ class api {
       Sentry.setContext("path", path);
       Sentry.setContext("body", body);
       Sentry.captureException(e);
-      reject(e);
     }
   }
 
