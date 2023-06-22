@@ -97,6 +97,7 @@ app.use("/table-de-repartition", require("./controllers/planDeTransport/table-de
 app.use("/schema-de-repartition", require("./controllers/planDeTransport/schema-de-repartition"));
 app.use("/point-de-rassemblement", require("./controllers/planDeTransport/point-de-rassemblement"));
 app.use("/ligne-de-bus", require("./controllers/planDeTransport/ligne-de-bus"));
+app.use("/ligne-to-point", require("./controllers/planDeTransport/ligne-to-point"));
 app.use("/demande-de-modification", require("./controllers/planDeTransport/demande-de-modification"));
 app.use("/young-edition", require("./controllers/young-edition"));
 app.use("/tags", require("./controllers/tags"));

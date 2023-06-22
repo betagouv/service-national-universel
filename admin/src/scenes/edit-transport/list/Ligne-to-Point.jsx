@@ -6,7 +6,7 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import SelectTable from "./components/SelectTable";
 import TooltipAddress from "./components/TooltipAddress";
-import { IoLocationOutline, IoTrashBin } from "react-icons/io5";
+import { IoLocationOutline, IoTrashBin, IoArrowRedoOutline } from "react-icons/io5";
 
 const transportTypeList = [
   { label: "bus", value: "bus" },
@@ -14,7 +14,7 @@ const transportTypeList = [
   { label: "avion", value: "avion" },
 ];
 
-export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingPointIds, ligne }) {
+export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingPointIds, ligne, cohort }) {
   const [defaultMeetingPoint, setDefaultMeetingPoint] = useState();
   const [tempMeetingPoint, setTempMeetingPoint] = useState();
   const [isDirty, setIsDirty] = useState(false);
@@ -24,7 +24,7 @@ export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingP
     const getMeetingPoint = async () => {
       try {
         if (!meetingPointId) return;
-        const { ok, data } = await api.get(`/edit-transport/meetingPoints/?meetingPointId=${meetingPointId}&ligneId=${ligneId}`);
+        const { ok, data } = await api.get(`/ligne-to-point/meeting-point/${meetingPointId}`);
         if (ok) {
           setTempMeetingPoint(data);
           setDefaultMeetingPoint(data);
@@ -94,8 +94,9 @@ export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingP
   // todo: delete ligne to point
   const deleteLigneToPoint = async () => {
     try {
-      if (!window.confirm(`Êtes-vous sûr de vouloir supprimer le point de rendez-vous ?\nPDR: ${tempMeetingPoint.name.replace(/PDR\s*-/, "")}\nligne: ${ligne.busId}`)) return;
-      const response = await api.remove(`/ligne-de-bus/${ligne._id}/point-de-rassemblement/${tempMeetingPoint._id}`);
+      if (!window.confirm(`Êtes-vous sûr de vouloir supprimer le point de rendez-vous ?\nPDR: ${tempMeetingPoint.meetingPoint.name.replace(/PDR\s*-/, "")}\nligne: ${ligne.busId}`))
+        return;
+      const response = await api.remove(`/ligne-de-bus/${ligne._id}/point-de-rassemblement/${tempMeetingPoint.meetingPointId}`);
       if (response.ok) {
         toastr.success("Le point de rencontre a été ajouté à la ligne.");
       } else toastr.error("Oups, une erreur est survenue lors de l'ajout du point de rencontre à la ligne.");
@@ -109,30 +110,40 @@ export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingP
   return (
     <>
       <tr
-        className={`cursor-default [&>td]:h-10 [&>td]:p-1 divide-x border-b-[1px] border-gray-300 divide-gray-300 py-6 px-4 text-snu-purple-800 ${
-          isDirty ? "bg-snu-purple-100" : "hover:bg-gray-50"
-        }`}>
+        className={`cursor-default [&>td]:h-10 [&>td]:p-1 divide-x border-b-[1px] border-gray-300 divide-gray-300 py-6 px-4 text-snu-purple-800 ${isDirty ? "bg-snu-purple-100" : "hover:bg-gray-50"
+          }`}>
         <td>
-          <div className="h-full flex items-center justify-center group hover:bg-red-50" onClick={() => deleteLigneToPoint()}>
+          <div className="h-full flex items-center justify-center group hover:bg-red-50 cursor-pointer" onClick={() => deleteLigneToPoint()}>
             <IoTrashBin className="text-gray-300 group-hover:text-red-400" />
           </div>
         </td>
         <td>
           <div className="flex items-center gap-1">
             <a className="ml-6 cursor-pointer hover:underline" href={`/point-de-rassemblement/${tempMeetingPoint.meetingPointId.toString()}`}>
-              {tempMeetingPoint.name.replace(/PDR\s*-/, "")}
+              {tempMeetingPoint.meetingPoint.name.replace(/PDR\s*-/, "")}
             </a>
-            <TooltipAddress meetingPt={tempMeetingPoint} handleChange={handleChange}>
+            <TooltipAddress meetingPt={tempMeetingPoint.meetingPoint} handleChange={handleChange}>
               <IoLocationOutline />
             </TooltipAddress>
           </div>
         </td>
         <td>
-          {!dataForCheck ? (
-            <div>loading...</div>
-          ) : (
-            <div className="">{(dataForCheck?.meetingPoints || []).find((v) => v.meetingPointId === tempMeetingPoint.meetingPointId)?.youngsCount || 0}</div>
-          )}
+          <div className="flex h-full w-full justify-around items-center">
+            {!dataForCheck ? (
+              <div>loading...</div>
+            ) : (
+              <>
+                <div className="flex-1">{(dataForCheck?.meetingPoints || []).find((v) => v.meetingPointId === tempMeetingPoint.meetingPointId)?.youngsCount || 0}</div>
+                <a
+                  className="h-full flex flex-1 items-center gap-1 p-1 border-[1px] border-gray-100 hover:border-gray-400 hover:text-snu-purple-800"
+                  href={`/edit-transport/deplacement?cohort=${cohort}&ligne_to_point_id_from=${tempMeetingPoint._id.toString()}`}
+                  target="_blank"
+                  rel="noreferrer">
+                  <IoArrowRedoOutline /> Déplacer
+                </a>
+              </>
+            )}
+          </div>
         </td>
         <td>
           <SelectTable
