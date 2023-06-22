@@ -1,5 +1,5 @@
 const { capture } = require("../sentry");
-import * as Sentry from "@sentry/react";
+const { setContext } = require("@sentry/node");
 
 const apiAdress = async (path, options = {}) => {
   try {
@@ -14,7 +14,7 @@ const apiAdress = async (path, options = {}) => {
     });
     return await res.json();
   } catch (e) {
-    Sentry.setContext("path", path);
+    setContext("path", path);
     capture(e);
   }
 };
