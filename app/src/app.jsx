@@ -3,8 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Router, Switch, useLocation } from "react-router-dom";
 
-import queryString from "query-string";
-
 import { setYoung } from "./redux/auth/actions";
 
 import Footer from "./components/footer";
@@ -75,6 +73,7 @@ export default function App() {
           ) : (
             <Switch>
               {/* Aucune authentification nécessaire */}
+              <SentryRoute path="/preinscription" component={PreInscription} />
               <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
               <SentryRoute path="/validate-contract/done" component={ContractDone} />
               <SentryRoute path="/validate-contract" component={Contract} />
@@ -83,8 +82,6 @@ export default function App() {
               <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements"]} component={() => <OptionalLogIn />} />
               {/* Authentification nécessaire */}
               <SentryRoute path="/" component={() => <MandatoryLogIn />} />
-              {/* A retravailler quand on rouvrira */}
-              <SentryRoute path="/preinscription" component={PreInscription} />
             </Switch>
           )}
         </div>
@@ -168,6 +165,7 @@ const MandatoryLogIn = () => {
 
   return (
     <Switch>
+      <SentryRoute path="/inscription2023" component={Inscription2023} />
       <SentryRoute path="/" component={Espace} />
     </Switch>
   );
@@ -237,7 +235,6 @@ const Espace = () => {
         <Switch>
           <SentryRoute exact path="/" component={Home} />
           <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
-          <SentryRoute path="/inscription2023" component={Inscription2023} />
           <SentryRoute path="/noneligible" component={NonEligible} />
           <SentryRoute path="/reinscription" component={ReInscription} />
           <SentryRoute path="/account" component={Account} />
