@@ -46,6 +46,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -65,6 +66,7 @@ class api {
     })
       .then((r) => jsonOrRedirectToSignIn(r))
       .catch((e) => {
+        Sentry.setContext("body", body);
         Sentry.captureException(e);
         console.error(e);
         return { responses: [] };
@@ -80,18 +82,24 @@ class api {
   }
 
   getAggregations(response) {
-    if (!response || !response.aggregations) return {};
-    const keys = Object.keys(response.aggregations);
-    if (!keys.length) return {};
+    try {
+      if (!response || !response.aggregations) return {};
+      const keys = Object.keys(response.aggregations);
+      if (!keys.length) return {};
 
-    if (response.aggregations[keys[0]].value !== undefined) return response.aggregations[keys[0]].value;
+      if (response.aggregations[keys[0]].value !== undefined) return response.aggregations[keys[0]].value;
 
-    let obj = {};
-    for (let i = 0; i < response.aggregations[keys[0]].buckets.length; i++) {
-      obj[response.aggregations[keys[0]].buckets[i].key] = response.aggregations[keys[0]].buckets[i].doc_count;
+      let obj = {};
+      for (let i = 0; i < response.aggregations[keys[0]].buckets.length; i++) {
+        obj[response.aggregations[keys[0]].buckets[i].key] = response.aggregations[keys[0]].buckets[i].doc_count;
+      }
+      return obj;
+    } catch (e) {
+      Sentry.captureException(e);
+      reject(e);
     }
-    return obj;
   }
+
   openpdf(path, body) {
     return new Promise(async (resolve, reject) => {
       try {
@@ -138,6 +146,8 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext("body", body);
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -197,6 +207,9 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext("path", path);
+        Sentry.setContext("arg", arg);
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -228,6 +241,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -251,6 +265,8 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext(e);
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -278,6 +294,9 @@ class api {
         }
         resolve(res);
       } catch (e) {
+        Sentry.setContext("body", body);
+        Sentry.setContext("path", path);
+        Sentry.captureException(e);
         reject(e);
       }
     });

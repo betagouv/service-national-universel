@@ -24,7 +24,7 @@ const apiAdress = async (query, filters = {}, options = {}) => {
     });
     return await res.json();
   } catch (e) {
-    Sentry.setContext("path", url)
+    Sentry.setContext("path", url);
     capture(e);
   }
 };

@@ -47,6 +47,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -139,6 +140,8 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext("path", path);
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -196,6 +199,9 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext("path", path);
+        Sentry.setContext("body", body);
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -226,6 +232,9 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext("path", path);
+        Sentry.setContext("body", body);
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -249,6 +258,8 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext("path", path);
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -283,6 +294,9 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext("arg", arg);
+        Sentry.setContext("path", path);
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -315,6 +329,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -343,6 +358,9 @@ class api {
         }
         resolve(res);
       } catch (e) {
+        Sentry.setContext("path", path);
+        Sentry.setContext("body", body);
+        Sentry.captureException(e);
         reject(e);
       }
     });
