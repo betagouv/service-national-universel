@@ -140,7 +140,7 @@ class api {
 
   uploadFile(path, arr) {
     const names = arr.map((e) => e.name || e);
-    const files = arr.filter((e) => typeof e === "object");
+    let files = arr.filter((e) => typeof e === "object");
     let formData = new FormData();
     for (let file of files) {
       const safeFilename = encodeURIComponent(file.name.replaceAll(/'/g, ""));
