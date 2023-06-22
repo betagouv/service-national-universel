@@ -1,5 +1,12 @@
 import { ExtraErrorData, Offline, ReportingObserver } from "@sentry/integrations";
-import { init, reactRouterV5Instrumentation, withSentryRouting, captureException as sentryCaptureException, captureMessage as sentryCaptureMessage } from "@sentry/react";
+import {
+  init,
+  reactRouterV5Instrumentation,
+  withSentryRouting,
+  captureException as sentryCaptureException,
+  captureMessage as sentryCaptureMessage,
+  setContext,
+} from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
 import { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, apiURL } from "./config";
 import { Route } from "react-router-dom";
@@ -58,16 +65,32 @@ function initSentry() {
   });
 }
 
-function capture(err) {
+function capture(err, contexte) {
   console.log("capture", err);
-  if (err) {
-    sentryCaptureException(err);
+  if (!err) {
+    captureMessage("Error not defined");
+    return;
+  }
+
+  if (err instanceof Error) {
+    sentryCaptureException(err, contexte);
+  } else if (err.error instanceof Error) {
+    sentryCaptureException(err.error, contexte);
+  } else if (err.message) {
+    sentryCaptureMessage(err.message, contexte);
+  } else {
+    sentryCaptureMessage("Error not defined well", { extra: { error: err } });
   }
 }
-function captureMessage(mess) {
+function captureMessage(mess, contexte) {
   console.log("captureMessage", mess);
+  if (!mess) {
+    captureMessage("Error not defined");
+    return;
+  }
+
   if (mess) {
-    sentryCaptureMessage(mess);
+    sentryCaptureMessage(mess, contexte);
   }
 }
 
