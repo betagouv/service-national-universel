@@ -96,8 +96,9 @@ class api {
   }
 
   async openpdf(path, body) {
+    let response;
     try {
-      const response = await fetch(`${apiURL}${path}`, {
+      response = await fetch(`${apiURL}${path}`, {
         retries: 3,
         retryDelay: 1000,
         retryOn: [502, 503, 504],
@@ -113,9 +114,15 @@ class api {
           return;
         }
       }
-      if (response.status !== 200) {
-        throw await response.json();
-      }
+    } catch (e) {
+      Sentry.setContext("path", path);
+      Sentry.setContext("body", body);
+      Sentry.captureException(e);
+    }
+    if (response.status !== 200) {
+      throw await response.json();
+    }
+    try {
       return response.blob();
     } catch (e) {
       Sentry.setContext("path", path);
@@ -314,8 +321,9 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        Sentry.setContext("arg", arg);
+        Sentry.setContext("arr", arr);
         Sentry.setContext("path", path);
+        Sentry.setContext("properties", properties);
         Sentry.captureException(e);
         reject(e);
       }

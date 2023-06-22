@@ -146,7 +146,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        Sentry.setContext("body", body);
+        Sentry.setContext("path", path);
         Sentry.captureException(e);
         reject(e);
       }
@@ -214,7 +214,7 @@ class api {
         resolve(res);
       } catch (e) {
         Sentry.setContext("path", path);
-        Sentry.setContext("arg", arg);
+        Sentry.setContext("arr", arr);
         Sentry.captureException(e);
         reject(e);
       }
@@ -277,7 +277,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        Sentry.setContext(e);
+        Sentry.setContext("path", path);
         Sentry.captureException(e);
         reject(e);
       }
