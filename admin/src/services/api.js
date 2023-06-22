@@ -38,6 +38,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -64,6 +65,8 @@ class api {
         return response.json();
       })
       .catch((e) => {
+        Sentry.setContext("body", body);
+        Sentry.setContext("route", route);
         Sentry.captureException(e);
         console.error(e);
         return { responses: [] };
@@ -93,26 +96,33 @@ class api {
   }
 
   async openpdf(path, body) {
-    const response = await fetch(`${apiURL}${path}`, {
-      retries: 3,
-      retryDelay: 1000,
-      retryOn: [502, 503, 504],
-      mode: "cors",
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
-      body: typeof body === "string" ? body : JSON.stringify(body),
-    });
-    if (response.status === 401) {
-      if (window?.location?.pathname !== "/auth") {
-        window.location.href = "/auth?disconnected=1";
-        throw new Error("Unauthorized, redirecting...");
+    try {
+      const response = await fetch(`${apiURL}${path}`, {
+        retries: 3,
+        retryDelay: 1000,
+        retryOn: [502, 503, 504],
+        mode: "cors",
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+        body: typeof body === "string" ? body : JSON.stringify(body),
+      });
+      if (response.status === 401) {
+        if (window?.location?.pathname !== "/auth") {
+          window.location.href = "/auth?disconnected=1";
+          throw new Error("Unauthorized, redirecting...");
+        }
       }
+      if (response.status !== 200) {
+        throw await response.json();
+      }
+      return response.blob();
+    } catch (e) {
+      Sentry.setContext("path", path);
+      Sentry.setContext("body", body);
+      Sentry.captureException(e);
+      reject(e);
     }
-    if (response.status !== 200) {
-      throw await response.json();
-    }
-    return response.blob();
   }
 
   get(path) {
@@ -136,6 +146,8 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext("path", path);
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -163,6 +175,9 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext("path", path);
+        Sentry.setContext("body", body);
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -196,6 +211,9 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext("path", path);
+        Sentry.setContext("body", body);
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -229,6 +247,9 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext("path", path);
+        Sentry.setContext("body", body);
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -255,6 +276,8 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext("path", path);
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -292,6 +315,9 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.setContext("arg", arg);
+        Sentry.setContext("path", path);
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -327,6 +353,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
+        Sentry.captureException(e);
         reject(e);
       }
     });
@@ -358,6 +385,9 @@ class api {
         }
         resolve(res);
       } catch (e) {
+        Sentry.setContext("path", path);
+        Sentry.setContext("body", body);
+        Sentry.captureException(e);
         reject(e);
       }
     });

@@ -1,4 +1,5 @@
 import { capture } from "../sentry";
+import * as Sentry from "@sentry/react";
 // https://adresse.data.gouv.fr/api-doc/adresse
 // Filtres possibles : postcode, citycode (INSEE), type, limit, autocomplete
 
@@ -21,6 +22,8 @@ const apiAdress = async (query, filters = {}, options = {}) => {
     });
     return await res.json();
   } catch (e) {
+    Sentry.setContext("path", url);
+    Sentry.captureException(e);
     capture(e);
   }
 };

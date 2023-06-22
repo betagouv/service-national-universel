@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import { capture } from "../sentry";
 import { department2region, departmentLookUp } from "snu-lib/region-and-departments";
 
@@ -23,6 +24,7 @@ const apiAdress = async (query, filters = {}, options = {}) => {
     });
     return await res.json();
   } catch (e) {
+    Sentry.setContext("path", url);
     capture(e);
   }
 };
