@@ -16,6 +16,7 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import api from "../../../services/api";
 import { debounce, formatStringDateWithDayTimezoneUTC, translate } from "../../../utils";
+import RightArrow from "./RightArrow";
 
 const LIST_PAGE_LIMIT = 3;
 
@@ -296,7 +297,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                   <input className="searchbox" placeholder="Rechercher un point de rassemblement" value={inputPdr} onChange={(e) => setInputPdr(e.target.value)} />
                 </div>
 
-                <div className="flex h-[300px] w-full flex-col items-center justify-start gap-4">
+                <div className="flex h-[300px] w-full flex-col items-center justify-start gap-2 mt-4">
                   {loadingPdr ? (
                     <div className="mt-2">Chargement ...</div>
                   ) : (
@@ -317,7 +318,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                               }}
                             />
                           ))}
-                          <div className="flex flex-row gap-4 self-end">
+                          <div className="flex flex-row gap-4 self-end absolute bottom-[3.75rem]">
                             {currentPage > 0 && (
                               <div className="p cursor-pointer rounded border-[1px] border-gray-300" onClick={() => setCurrentPage((currentPage) => currentPage - 1)}>
                                 <BiChevronLeft className="text-gray-400" size={40} />
@@ -453,7 +454,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
             }
             setStep((step) => step - 1);
           }}
-          className="mb-2 flex-1 cursor-pointer rounded border-[1px] border-gray-300 py-2 text-center text-sm font-medium text-gray-700">
+          className=" mt-5 mb-2 flex-1 cursor-pointer rounded border-[1px] border-gray-300 py-2 text-center text-sm font-medium text-gray-700">
           Retour
         </div>
 
@@ -492,7 +493,6 @@ const ListPdr = (hit) => {
 };
 
 const HitCenter = ({ hit, onSend, young }) => {
-  console.log(hit);
   const pdr = hit.meetingPoint.filter((pdr) => pdr.department === young.department).length;
   hit.meetingPoint.map((pdr) => {
     for (let i = 0; i < hit.ligneBus.length; i++) {
@@ -542,14 +542,15 @@ const HitPdr = ({ hit, onSend, data, young }) => {
   return (
     <>
       <hr />
-      <div className="flex w-full flex-row items-center justify-between gap-4 px-2 ">
+      <div className="flex w-full flex-row items-center justify-between gap-2 px-2 border-t-[1px] border-[#F4F5FA] pt-3">
         <div className="w-2/3">
           <MultiLine>
-            <div className="flex">
-              <span className="text-[15px] leading-6 font-bold text-gray-900 w-2/3">{hit.name}</span>
+            <div className="flex flex-row justify-start align-top">
+              <span className="text-[15px] leading-6 font-bold text-gray-900 w-1/2">{hit.name}</span>
               {hit.department === young.department ? (
-                <div className={` flex w-1/3 rounded-full border-[0.5px] border-gray-500 bg-gray-50 text-[12px] font-medium leading-[22px] m-auto justify-center`}>
-                  <span className="text-gray-600 m-1">proposé au jeune</span>
+                <div
+                  className={` flex rounded-full border-[0.5px] border-gray-500 bg-gray-50 text-[12px] font-medium leading-[22px] w-[130px] h-[25px] justify-center align-middle mt-1`}>
+                  <span className="text-gray-600">proposé au jeune</span>
                 </div>
               ) : null}
             </div>
@@ -580,26 +581,5 @@ const HitPdr = ({ hit, onSend, data, young }) => {
         </div>
       </div>
     </>
-  );
-};
-const RightArrow = () => {
-  return (
-    <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg" className="pt-[2px]">
-      <g filter="url(#filter0_d_3100_51832)">
-        <rect x="2" y="1" width="38" height="38" rx="19" fill="#2563EB" />
-        <path d="M18.5 14.1667L24.3333 20L18.5 25.8334" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </g>
-      <defs>
-        <filter id="filter0_d_3100_51832" x="0" y="0" width="42" height="42" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
-          <feOffset dy="1" />
-          <feGaussianBlur stdDeviation="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_3100_51832" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_3100_51832" result="shape" />
-        </filter>
-      </defs>
-    </svg>
   );
 };
