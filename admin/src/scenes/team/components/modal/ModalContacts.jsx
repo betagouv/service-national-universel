@@ -16,7 +16,6 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
   const [edit, setEdit] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const [proposedContact, setProposedContact] = useState([]);
-  //const [optionsContact, setOptionsContact] = useState([]);
 
   const resetState = () => {
     setEdit(null);
@@ -61,12 +60,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
         return item.contactName === contact.contactName && item.contactPhone === contact.contactPhone && item.contactMail === contact.contactMail;
       });
     });
-    /* const options = Object.values(proposedContact).map((value) => ({
-      value: value.contactName,
-      label: value.contactName,
-    })); */
     setProposedContact(proposedContact);
-    //setOptionsContact(options);
   };
 
   useEffect(() => {
