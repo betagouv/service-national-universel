@@ -1,10 +1,14 @@
 import React from "react";
 import { GoPrimitiveDot } from "react-icons/go";
 import { IoAirplaneOutline, IoRocketOutline } from "react-icons/io5";
-import { formatDateFR } from "snu-lib";
+import { formatDateFR, ROLES, translate } from "snu-lib";
 import BusSvg from "../../../../../assets/icons/Bus";
 import Train from "../../components/Icons/Train";
 import Toggle from "../../components/Toggle";
+import { useSelector } from "react-redux";
+import API from "../../../../../services/api";
+import { capture } from "../../../../../sentry";
+import { toastr } from "react-redux-toastr";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -23,9 +27,25 @@ function getIcon(type) {
   }
 }
 
-export default function Itineraire({ meetingsPoints, center, aller, retour }) {
+export default function Itineraire({ meetingsPoints, center, aller, retour, bus, setBus }) {
   const [showRetour, setShowRetour] = React.useState(false);
   const [timeline, setTimeline] = React.useState([]);
+  const [delayedBack, setDelayedBack] = React.useState(false);
+  const [delayedForth, setDelayedForth] = React.useState(false);
+  const user = useSelector((state) => state.Auth.user);
+  const [data, setData] = React.useState({
+    busId: bus.busId || "",
+    departuredDate: bus.departuredDate || "",
+    returnDate: bus.returnDate || "",
+    youngCapacity: bus.youngCapacity || "",
+    totalCapacity: bus.totalCapacity || "",
+    followerCapacity: bus.followerCapacity || "",
+    travelTime: bus.travelTime || "",
+    lunchBreak: bus.lunchBreak || false,
+    lunchBreakReturn: bus.lunchBreakReturn || false,
+    delayedForth: bus.delayedForth || "false",
+    delayedBack: bus.delayedBack || "false",
+  });
 
   const toggleAllerRetour = () => {
     let flatMeetingsPoints = [];
@@ -89,9 +109,43 @@ export default function Itineraire({ meetingsPoints, center, aller, retour }) {
     setTimeline(timeline);
   };
 
+  const Boolean = (data) => {
+    if (data === "true") return true;
+    if (data === "false") return false;
+  };
+
+  const Isdelayed = async () => {
+    showRetour
+      ? data.delayedBack === "true"
+        ? (data.delayedBack = "false")
+        : (data.delayedBack = "true")
+      : data.delayedForth === "true"
+      ? (data.delayedForth = "false")
+      : (data.delayedForth = "true");
+
+    try {
+      const { ok, code, data: ligneInfo } = await API.put(`/ligne-de-bus/${bus._id}/info`, data);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la modification de la ligne", translate(code));
+        return;
+      }
+      setBus(ligneInfo);
+      setDelayedForth(data.delayedForth);
+      setDelayedBack(data.delayedBack);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la modification de la ligne");
+    }
+  };
+
   React.useEffect(() => {
     toggleAllerRetour();
   }, [showRetour, meetingsPoints, center, aller, retour]);
+
+  React.useEffect(() => {
+    setDelayedBack(data.delayedBack);
+    setDelayedForth(data.delayedForth);
+  }, []);
 
   return (
     <div className="w-1/2 rounded-xl bg-white p-8">
@@ -102,7 +156,9 @@ export default function Itineraire({ meetingsPoints, center, aller, retour }) {
             <div className="text-xs font-light leading-5 text-gray-500">Aller</div>
             <div className="text-xs leading-4 text-gray-800">{formatDateFR(aller)}</div>
           </div>
+
           <Toggle value={showRetour} onChange={() => setShowRetour(!showRetour)} />
+
           <div className="flex flex-col">
             <div className="text-xs font-light leading-5 text-gray-500">Retour</div>
             <div className="text-xs leading-4 text-gray-800">{formatDateFR(retour)}</div>
@@ -149,6 +205,18 @@ export default function Itineraire({ meetingsPoints, center, aller, retour }) {
           ))}
         </ul>
       </div>
+      {[ROLES.ADMIN].includes(user.role) ? (
+        <div className="bg-gray-100 rounded-md w-full flex flex-row py-2 gap-3 px-3 align-middle">
+          <input
+            type="checkbox"
+            checked={showRetour ? delayedBack === "true" : delayedForth === "true"}
+            onChange={() => {
+              Isdelayed();
+            }}
+          />
+          <p>Signaler le retard de la ligne de bus {showRetour ? '"Retour"' : '"Aller"'}</p>
+        </div>
+      ) : null}
     </div>
   );
 }

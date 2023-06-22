@@ -34,6 +34,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "modificationBuses.status.keyword",
       "modificationBuses.opinion.keyword",
       "lineFillingRate",
+      "delayedForth.keyword",
+      "delayedBack.keyword",
     ];
     const sortFields = [];
 

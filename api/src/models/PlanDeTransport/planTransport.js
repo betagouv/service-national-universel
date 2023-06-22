@@ -245,6 +245,20 @@ const Schema = new mongoose.Schema({
       description: "Liste des modifications de lignes",
     },
   },
+  delayedForth: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "La ligne est retardée à l'allée",
+    },
+  },
+  delayedBack: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "La ligne est retardée au Retour",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
