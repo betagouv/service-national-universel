@@ -90,7 +90,7 @@ class api {
       return obj;
     } catch (e) {
       Sentry.captureException(e);
-      reject(e);
+      return;
     }
   }
 

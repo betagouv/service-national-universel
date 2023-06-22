@@ -107,6 +107,12 @@ class api {
         headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
         body: typeof body === "string" ? body : JSON.stringify(body),
       });
+      if (response.status === 401) {
+        if (window?.location?.pathname !== "/auth") {
+          window.location.href = "/auth?disconnected=1";
+          throw new Error("Unauthorized, redirecting...");
+        }
+      }
       if (response.status !== 200) {
         throw await response.json();
       }
