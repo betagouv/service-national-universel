@@ -208,6 +208,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  deletedAt: { type: Date },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

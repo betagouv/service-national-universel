@@ -134,7 +134,7 @@ class Auth {
     const { password, email } = value;
     try {
       const now = new Date();
-      const user = await this.model.findOne({ email });
+      const user = await this.model.findOne({ email, deletedAt: { $exists: false } });
 
       if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       if (user.loginAttempts > 12) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
@@ -250,7 +250,7 @@ class Auth {
     const { email } = value;
 
     try {
-      const user = await this.model.findOne({ email });
+      const user = await this.model.findOne({ email, deletedAt: { $exists: false } });
       if (!user) return res.status(404).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
 
       const token = await crypto.randomBytes(20).toString("hex");
@@ -286,6 +286,7 @@ class Auth {
       const user = await this.model.findOne({
         forgotPasswordResetToken: token,
         forgotPasswordResetExpires: { $gt: Date.now() },
+        deletedAt: { $exists: false },
       });
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       const match = await user.comparePassword(password);

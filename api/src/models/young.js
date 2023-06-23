@@ -1917,6 +1917,7 @@ const Schema = new mongoose.Schema({
   environmentInterest: { type: String },
   citizenshipInterest: { type: String },
 
+  deletedAt: { type: Date },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
