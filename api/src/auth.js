@@ -155,23 +155,25 @@ class Auth {
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       }
 
-      const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
-      const isKnownIp = await user.compareIps(ip);
-      if (!user.userIps || user.userIps?.length === 0 || !isKnownIp) {
-        const token2FA = await crypto.randomBytes(20).toString("hex");
-        user.set({ token2FA, token2FAExpires: Date.now() + 1000 * 60 * 10 });
-        await user.save();
+      if (user.constructor.modelName === "referent") {
+        const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
+        const isKnownIp = await user.compareIps(ip);
+        if (!user.userIps || user.userIps?.length === 0 || !isKnownIp) {
+          const token2FA = await crypto.randomBytes(20).toString("hex");
+          user.set({ token2FA, token2FAExpires: Date.now() + 1000 * 60 * 10 });
+          await user.save();
 
-        // todo faire le template sur sb
-        await sendTemplate(SENDINBLUE_TEMPLATES.SIGNIN_2FA, {
-          emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
-          params: { token2FA },
-        });
+          // todo faire le template sur sb
+          await sendTemplate(SENDINBLUE_TEMPLATES.SIGNIN_2FA, {
+            emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
+            params: { token2FA },
+          });
 
-        return res.status(200).send({
-          ok: true,
-          code: "2FA_REQUIRED",
-        });
+          return res.status(200).send({
+            ok: true,
+            code: "2FA_REQUIRED",
+          });
+        }
       }
 
       user.set({ loginAttempts: 0 });
