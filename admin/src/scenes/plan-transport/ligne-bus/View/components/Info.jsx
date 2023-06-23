@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { canEditLigneBusGeneralInfo, translate } from "snu-lib";
+import { canEditLigneBusGeneralInfo, isPdrEditionOpen, translate } from "snu-lib";
 import Pencil from "../../../../../assets/icons/Pencil";
 import DatePickerList from "../../components/DatePickerList";
 import Field from "../../components/Field";
@@ -17,7 +17,7 @@ const options = [
   { label: "Non", value: false },
 ];
 
-export default function Info({ bus, setBus, dataForCheck, nbYoung }) {
+export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
   const user = useSelector((state) => state.Auth.user);
   const [editInfo, setEditInfo] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -118,7 +118,7 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung }) {
     <div className="w-full rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <div className="text-xl leading-6 text-[#242526]">Informations générales</div>
-        {canEditLigneBusGeneralInfo(user) ? (
+        {canEditLigneBusGeneralInfo(user) && isPdrEditionOpen(user, cohort) ? (
           <>
             {!editInfo ? (
               <button

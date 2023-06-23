@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { canEditLigneBusPointDeRassemblement, ROLES, translate } from "snu-lib";
+import { canEditLigneBusPointDeRassemblement, isPdrEditionOpen, ROLES, translate } from "snu-lib";
 import DoubleProfil from "../../components/Icons/DoubleProfil";
 import Pencil from "../../../../../assets/icons/Pencil";
 import ExternalLink from "../../../../../assets/icons/ExternalLink";
@@ -23,7 +23,7 @@ const options = [
 
 const keys = ["code", "name", "city", "zip", "department", "region"];
 
-export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, getVolume }) {
+export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, getVolume, cohort }) {
   const user = useSelector((state) => state.Auth.user);
   const [editPdr, setEditPdr] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -167,7 +167,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
             <div className="pb-1 text-lg font-medium leading-5 text-gray-900">{volume.find((v) => v.meetingPointId === pdr._id)?.youngsCount || 0} </div>
           </div>
         </div>
-        {canEditLigneBusPointDeRassemblement(user) ? (
+        {canEditLigneBusPointDeRassemblement(user) && isPdrEditionOpen(user, cohort) ? (
           <>
             {!editPdr ? (
               <button

@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { canEditLigneBusTeam, translate } from "snu-lib";
+import { canEditLigneBusTeam, isPdrEditionOpen, translate } from "snu-lib";
 import Pencil from "../../../../../assets/icons/Pencil";
 import DatePickerList from "../../components/DatePickerList";
 import Field from "../../components/Field";
@@ -11,7 +11,7 @@ import Toggle from "../../../../../components/Toggle";
 import Bin from "../../../../../assets/Bin";
 import validator from "validator";
 
-export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen, idTeam }) {
+export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen, idTeam, cohort }) {
   const user = useSelector((state) => state.Auth.user);
   const [editInfo, setEditInfo] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -115,7 +115,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
     <div className="w-full rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <div className="text-xl leading-6 text-[#242526]">{title}</div>
-        {canEditLigneBusTeam(user) ? (
+        {canEditLigneBusTeam(user) && isPdrEditionOpen(user, cohort) ? (
           <>
             {!editInfo ? (
               <>

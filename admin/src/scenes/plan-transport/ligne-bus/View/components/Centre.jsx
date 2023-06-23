@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
-import { canEditLigneBusCenter, ROLES, translate } from "snu-lib";
+import { canEditLigneBusCenter, isPdrEditionOpen, ROLES, translate } from "snu-lib";
 import ExternalLink from "../../../../../assets/icons/ExternalLink";
 import Pencil from "../../../../../assets/icons/Pencil";
 import { capture } from "../../../../../sentry";
@@ -10,7 +10,7 @@ import api from "../../../../../services/api";
 import Field from "../../components/Field";
 import Iceberg from "../../components/Icons/Iceberg";
 
-export default function Centre({ bus, setBus }) {
+export default function Centre({ bus, setBus, cohort }) {
   const user = useSelector((state) => state.Auth.user);
   const [editCenter, setEditCenter] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -64,7 +64,7 @@ export default function Centre({ bus, setBus }) {
     <div className="w-1/2 rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <div className="text-xl leading-6 text-[#242526]">Centre de cohésion</div>
-        {canEditLigneBusCenter(user) ? (
+        {canEditLigneBusCenter(user) && isPdrEditionOpen(user, cohort) ? (
           <>
             {!editCenter ? (
               <button
