@@ -1,5 +1,4 @@
 const { capture } = require("../sentry");
-const { setContext } = require("@sentry/node");
 
 const apiAdress = async (path, options = {}) => {
   try {
@@ -14,8 +13,7 @@ const apiAdress = async (path, options = {}) => {
     });
     return await res.json();
   } catch (e) {
-    setContext("path", path);
-    capture(e);
+    capture(e, { extra: { path: path } });
   }
 };
 
