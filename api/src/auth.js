@@ -163,7 +163,7 @@ class Auth {
         await user.save();
 
         // todo faire le template sur sb
-        await sendTemplate("1", {
+        await sendTemplate(SENDINBLUE_TEMPLATES.SIGNIN_2FA, {
           emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
           params: { token2FA },
         });
