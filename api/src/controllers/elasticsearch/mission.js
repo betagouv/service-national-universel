@@ -74,7 +74,7 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
       searchFields,
       filterFields,
-      queryFilters,
+      queryFilters: queryFilters || {},
       customQueries: {
         fromDate: (query, value) => {
           const date = new Date(value);
@@ -93,6 +93,8 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
       sort,
       contextFilters,
     });
+
+    console.log("QUERY = ", JSON.stringify(hitsRequestBody.query));
 
     if (req.params.action === "export") {
       const response = await allRecords("mission", hitsRequestBody.query);

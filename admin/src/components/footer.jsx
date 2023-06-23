@@ -13,7 +13,6 @@ export default function FooterComponent() {
   useEffect(() => {
     if (history) {
       return history.listen((location) => {
-        console.log(location.pathname);
         setFrom(location.pathname);
       });
     }

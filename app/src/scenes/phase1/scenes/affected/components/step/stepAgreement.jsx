@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
 import { Modal } from "reactstrap";
@@ -9,11 +9,12 @@ import CloseSvg from "../../../../../../assets/Close";
 import { ModalContainer } from "../../../../../../components/modals/Modal";
 import { setYoung } from "../../../../../../redux/auth/actions";
 import api from "../../../../../../services/api";
-import { translateCohortTemp } from "snu-lib";
+import { transportDatesToString } from "snu-lib";
 import plausibleEvent from "../../../../../../services/plausible";
 import { isStepAgreementDone, isStepPDRDone } from "../../utils/steps.utils";
 
-export default function StepAgreement({ young }) {
+export default function StepAgreement({ departureDate, returnDate }) {
+  const young = useSelector((state) => state.Auth.young);
   const [stateDesktop, setStateDesktop] = useState(false);
   const [stateMobil, setStateMobil] = useState(false);
   const valid = isStepAgreementDone(young);
@@ -81,7 +82,7 @@ export default function StepAgreement({ young }) {
           </div>
         </div>
       </div>
-      {stateDesktop ? content({ handleSubmit, young }) : null}
+      {stateDesktop ? content({ handleSubmit, young, departureDate, returnDate }) : null}
       {stateMobil ? (
         <Modal centered isOpen={stateMobil} toggle={() => setStateMobil(false)} size="xl">
           <ModalContainer>
@@ -89,7 +90,7 @@ export default function StepAgreement({ young }) {
             <div className="w-full p-4">
               <h1 className="pb-1 text-center text-xl text-gray-900">Confirmez votre participation au séjour</h1>
               <p className="pb-4 text-center text-base text-gray-500">Vous devez confirmer votre participation au séjour avant votre départ.</p>
-              {content({ handleSubmit, young })}
+              {content({ handleSubmit, young, departureDate, returnDate })}
             </div>
           </ModalContainer>
         </Modal>
@@ -98,7 +99,7 @@ export default function StepAgreement({ young }) {
   );
 }
 
-const content = ({ handleSubmit, young }) => {
+const content = ({ handleSubmit, young, departureDate, returnDate }) => {
   const isFromDOMTOM = () => {
     return (
       (["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
@@ -134,7 +135,7 @@ const content = ({ handleSubmit, young }) => {
       </div>
       <div className="flex flex-col rounded-2xl border-[1px] border-gray-100 py-5 px-5 shadow-sm md:max-w-screen-1/2 lg:w-1/3">
         <h1 className="pb-4 text-xl font-bold leading-7">J&apos;ai changé d&apos;avis</h1>
-        <p className="pb-3 text-sm text-gray-600">Les dates ne me conviennent plus ({translateCohortTemp(young)})</p>
+        <p className="pb-3 text-sm text-gray-600">Les dates ne me conviennent plus ({transportDatesToString(departureDate, returnDate)})</p>
         <Link to="/changer-de-sejour" className="whitespace-nowrap pb-4 text-sm text-blue-600 hover:underline hover:underline-offset-2">
           Changer de séjour &gt;
         </Link>

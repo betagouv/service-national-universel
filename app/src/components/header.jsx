@@ -9,6 +9,7 @@ import { Link, useLocation, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../redux/auth/actions";
 import api from "../services/api";
+import { toastr } from "react-redux-toastr";
 
 const Header = () => {
   const history = useHistory();
@@ -19,7 +20,8 @@ const Header = () => {
   const logout = async () => {
     await api.post(`/young/logout`);
     dispatch(setYoung(null));
-    history.push("/");
+    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
+    return history.push("/auth");
   };
 
   const { pathname } = useLocation();

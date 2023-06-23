@@ -199,6 +199,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  busEditionOpenForTransporter: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Ouverture ou fermeture de l'édition des bus pour les transporteurs",
+    },
+  },
+
   //information n'impactant le fonctionnement de l'application
   uselessInformation: {
     type: mongoose.Schema.Types.Mixed,

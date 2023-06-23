@@ -1,8 +1,8 @@
 import { Popover, Transition } from "@headlessui/react";
 import dayjs from "dayjs";
 import React, { Fragment } from "react";
-import DateIcon from "../../../assets/icons/DateIcon";
-import DatePicker from "../../../components/ui/forms/DatePicker";
+import DateIcon from "../../../../assets/icons/DateIcon";
+import DatePicker from "../DatePicker";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");

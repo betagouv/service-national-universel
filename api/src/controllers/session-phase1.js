@@ -30,6 +30,7 @@ const {
   isSessionEditionOpen,
   canSendTimeScheduleReminderForSessionPhase1,
   canSendImageRightsForSessionPhase1,
+  canPutSpecificDateOnSessionPhase1,
 } = require("snu-lib");
 const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
@@ -178,6 +179,14 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     let oldHeadCenterId = sessionPhase1.headCenterId;
     const hasHeadCenterChanged = oldHeadCenterId !== value.oldHeadCenterId;
 
+    if (!value.dateStart || !value.dateEnd) {
+      value.dateStart = undefined;
+      value.dateEnd = undefined;
+    } else {
+      value.dateStart = formatDateTimeZone(value.dateStart);
+      value.dateEnd = formatDateTimeZone(value.dateEnd);
+    }
+
     sessionPhase1.set({ ...value });
     await sessionPhase1.save({ fromUser: req.user });
     await updateHeadCenter(sessionPhase1.headCenterId, req.user);
@@ -261,10 +270,20 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     }
 
     let zip = new Zip();
-    for (const young of youngs) {
-      const html = await phase1(young);
-      const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
-      zip.addFile(young.lastName + " " + young.firstName + " - certificat.pdf", context);
+    const batchSize = 10;
+    const numBatches = Math.ceil(youngs.length / batchSize);
+    for (let i = 0; i < numBatches; i++) {
+      const batchStart = i * batchSize;
+      const batchEnd = Math.min(batchStart + batchSize, youngs.length);
+      const pdfPromises = youngs.slice(batchStart, batchEnd).map(async (young) => {
+        const html = await phase1(young);
+        const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
+        return { name: young.lastName + " " + young.firstName + " - certificat.pdf", body: context };
+      });
+      const pdfs = await Promise.all(pdfPromises);
+      pdfs.forEach((pdf) => {
+        zip.addFile(pdf.name, pdf.body);
+      });
     }
     const noticePdf = await getFile(`file/noticeImpression.pdf`);
     if (noticePdf) {
@@ -774,12 +793,22 @@ router.post("/:sessionId/image-rights", passport.authenticate(["referent"], { se
     // --- start zip file
     let zip = new Zip();
 
-    // --- build PDFS and zip'em
+    // --- build PDFS 10 by 10 and zip'em
     const template = readTemplate();
-    for (const young of youngs) {
-      const html = renderWithTemplate(young, template);
-      const body = await timeout(getPDF(html, { format: "A4", margin: 0 }), TIMEOUT_PDF_SERVICE);
-      zip.addFile(young.lastName + " " + young.firstName + " - Droits à l'image.pdf", body);
+    const batchSize = 10;
+    const numBatches = Math.ceil(youngs.length / batchSize);
+    for (let i = 0; i < numBatches; i++) {
+      const batchStart = i * batchSize;
+      const batchEnd = Math.min(batchStart + batchSize, youngs.length);
+      const pdfPromises = youngs.slice(batchStart, batchEnd).map(async (young) => {
+        const html = renderWithTemplate(young, template);
+        const body = await timeout(getPDF(html, { format: "A4", margin: 0 }), TIMEOUT_PDF_SERVICE);
+        return { name: young.lastName + " " + young.firstName + " - Droits à l'image.pdf", body };
+      });
+      const pdfs = await Promise.all(pdfPromises);
+      pdfs.forEach((pdf) => {
+        zip.addFile(pdf.name, pdf.body);
+      });
     }
 
     // --- send zip file
@@ -816,5 +845,12 @@ function stream2buffer(stream) {
     stream.on("error", (err) => reject(err));
   });
 }
+
+const formatDateTimeZone = (date) => {
+  //set timezone to UTC
+  let d = new Date(date);
+  d.toISOString();
+  return d;
+};
 
 module.exports = router;

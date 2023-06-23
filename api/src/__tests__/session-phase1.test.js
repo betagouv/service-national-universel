@@ -72,9 +72,9 @@ describe("Session Phase 1", () => {
       const sessionPhase1 = await createSessionWithCohesionCenter(getNewCohesionCenterFixtureV2(), getNewSessionPhase1Fixture({ headCenterId: referent.id, cohort: cohort.name }));
       const res = await request(getAppHelper())
         .put("/session-phase1/" + sessionPhase1._id)
-        .send({ cohort: "2020", cohesionCenterId: sessionPhase1.cohesionCenterId, status: "WAITING_VALIDATION" });
+        .send({ cohort: "2020", cohesionCenterId: sessionPhase1.cohesionCenterId });
       expect(res.status).toBe(200);
-      expect(res.body.data.status).toBe("WAITING_VALIDATION");
+      expect(res.body.data.cohesionCenterId).toBe(sessionPhase1.cohesionCenterId);
       expect(res.body.data.cohort).toBe("2020");
     });
     it("should be only allowed to admin and referent", async () => {

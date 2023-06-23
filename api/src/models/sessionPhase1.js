@@ -133,6 +133,19 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  dateStart: {
+    type: Date,
+    documentation: {
+      description: "Date spécifique de début du séjour",
+    },
+  },
+  dateEnd: {
+    type: Date,
+    documentation: {
+      description: "Date spécifique de fin du séjour",
+    },
+  },
+
   // TODO: remove this field
   status: {
     type: String,

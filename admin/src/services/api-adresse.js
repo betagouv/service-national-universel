@@ -21,7 +21,7 @@ const apiAdress = async (query, filters = {}, options = {}) => {
     });
     return await res.json();
   } catch (e) {
-    capture(e);
+    capture(e, { extra: { url: url } });
   }
 };
 

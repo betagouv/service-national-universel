@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { translateCohortTemp, youngCanChangeSession } from "snu-lib";
-import { getDepartureDate, getReturnDate } from "../../../../utils/cohorts";
+import { transportDatesToString, youngCanChangeSession } from "snu-lib";
+import { getCohort } from "../../../../utils/cohorts";
 import { isStepMedicalFieldDone } from "./utils/steps.utils";
 import api from "../../../../services/api";
 
@@ -16,16 +16,19 @@ import Problem from "./components/Problem";
 import StepsAffected from "./components/StepsAffected";
 import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
+import { getDepartureDate, getReturnDate } from "snu-lib/transport-info";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
   const [meetingPoint, setMeetingPoint] = useState();
+  const [session, setSession] = useState();
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const departureDate = getDepartureDate(young, meetingPoint);
-  const returnDate = getReturnDate(young, meetingPoint);
+  const cohort = getCohort(young.cohort);
+  const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
+  const returnDate = getReturnDate(young, session, cohort, meetingPoint);
 
   if (isStepMedicalFieldDone(young)) {
     window.scrollTo(0, 0);
@@ -37,8 +40,10 @@ export default function Affected() {
       try {
         const { data: center } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
         const { data: meetingPoint } = await api.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
+        const { data: session } = await api.get(`/young/${young._id}/session/`);
         setCenter(center);
         setMeetingPoint(meetingPoint);
+        setSession(session);
       } catch (e) {
         toastr.error("Oups, une erreur est survenue lors de la récupération des informations de votre séjour de cohésion.");
       } finally {
@@ -72,10 +77,10 @@ export default function Affected() {
 
         <header className="items-between order-1 flex flex-col px-4 py-4 md:!px-8 lg:flex-row lg:justify-between lg:!px-16">
           <div>
-            <h1 className="text-2xl md:space-y-4 md:text-5xl">
+            <h1 className="text-2xl leading-[2.5rem] md:text-5xl md:leading-[3.5rem]">
               Mon séjour de cohésion
               <br />
-              <strong className="flex items-center">{translateCohortTemp(young)}</strong>
+              <strong>{transportDatesToString(departureDate, returnDate)}</strong>
             </h1>
             {youngCanChangeSession(young) ? <ChangeStayLink className="my-4 md:my-8" /> : null}
           </div>
@@ -90,7 +95,7 @@ export default function Affected() {
           </div>
         )}
 
-        <StepsAffected center={center} departureDate={departureDate} returnDate={returnDate} />
+        <StepsAffected center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
         <FaqAffected className={`${isStepMedicalFieldDone(young) ? "order-3" : "order-4"}`} />
       </div>
 

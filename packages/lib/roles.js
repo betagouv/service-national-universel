@@ -318,6 +318,10 @@ function canViewSessionPhase1(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
+function canPutSpecificDateOnSessionPhase1(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+}
+
 function isSessionEditionOpen(actor, cohort) {
   switch (actor?.role) {
     case ROLES.ADMIN:
@@ -349,6 +353,17 @@ function isPdrEditionOpen(actor, cohort) {
       return false;
   }
 }
+
+const isBusEditionOpen = (actor, cohort) => {
+  switch (actor?.role) {
+    case ROLES.ADMIN:
+      return true;
+    case ROLES.TRANSPORTER:
+      return cohort?.busEditionOpenForTransporter;
+    default:
+      return false;
+  }
+};
 
 function isLigneBusDemandeDeModificationOpen(actor, cohort) {
   if (actor.role === ROLES.ADMIN) return true;
@@ -577,7 +592,7 @@ function canCreateOrUpdateDepartmentService(actor) {
 function canChangeYoungCohort(actor, young) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(young.department);
-  const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && actor.region === target.region;
+  const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && actor.region === young.region;
   const authorized = isAdmin || isReferentDepartmentFromTargetDepartment || isReferentRegionFromTargetRegion;
   return authorized;
 }
@@ -623,6 +638,10 @@ function canSearchInElasticSearch(actor, index) {
   } else if (index === "young-having-meeting-point-in-geography") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
   } else if (index === "young-by-school") {
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  } else if (index === "young") {
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  } else if (index === "aggregate-status") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   }
   return false;
@@ -863,9 +882,11 @@ export {
   ligneBusCanEditTagsDemandeDeModification,
   canCreateTags,
   isSuperAdmin,
+  isAdmin,
   canSendTimeScheduleReminderForSessionPhase1,
   canSendPlanDeTransport,
   canSendImageRightsForSessionPhase1,
   isSupervisor,
-  isAdmin,
+  canPutSpecificDateOnSessionPhase1,
+  isBusEditionOpen,
 };

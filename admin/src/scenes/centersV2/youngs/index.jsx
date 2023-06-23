@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/react";
 import dayjs from "dayjs";
 import * as FileSaver from "file-saver";
 import React, { useEffect, useState } from "react";
@@ -36,6 +35,7 @@ import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";
 import General from "./general";
 import Pointage from "./pointage";
+import ModalExportPdfFile from "../components/modals/ModalExportPdfFile";
 
 export default function CenterYoungIndex() {
   const [modalExportMail, setModalExportMail] = useState({ isOpen: false });
@@ -46,6 +46,7 @@ export default function CenterYoungIndex() {
   const [isYoungCheckinOpen, setIsYoungCheckinOpen] = useState();
   const [focusedSession, setFocusedSession] = useState(null);
   const [hasYoungValidated, setHasYoungValidated] = useState(false);
+  const [modal, setModal] = useState({ isOpen: false });
 
   const filterArray = [
     {
@@ -229,7 +230,12 @@ export default function CenterYoungIndex() {
   }, []);
 
   const viewAttestation = async () => {
-    setLoading(true);
+    setModal({
+      isOpen: true,
+      title: "Export de document Pdf",
+      message: "Veuillez patienter, votre téléchargement est en cours...",
+      estimation: "Environ 1 minute ...",
+    });
     try {
       const file = await api.openpdf(`/session-phase1/${sessionId}/certificate`, {});
       download(file, "certificates.zip");
@@ -239,10 +245,10 @@ export default function CenterYoungIndex() {
         return (window.location.href = "/auth/login?disconnected=1");
       }
       // We need more info to understand download issues.
-      Sentry.captureException(e);
+      capture(e);
       toastr.error("Téléchargement impossible", e?.message, { timeOut: 10000 });
     }
-    setLoading(false);
+    setModal({ isOpen: false });
   };
 
   const exportData = async () => {
@@ -408,7 +414,7 @@ export default function CenterYoungIndex() {
         return (window.location.href = "/auth/login?disconnected=1");
       }
       // We need more info to understand download issues.
-      Sentry.captureException(e);
+      capture(e);
       toastr.error("Téléchargement impossible", e?.message, { timeOut: 10000 });
     }
   };
@@ -469,6 +475,14 @@ export default function CenterYoungIndex() {
                 Exporter les attestations
               </button>
             )}
+            <ModalExportPdfFile
+              isOpen={modal?.isOpen}
+              title={modal?.title}
+              message={modal?.message}
+              estimation={modal?.estimation}
+              onClose={() => setIsOpen(false)}
+              className="w-[900px] rounded-xl bg-white"
+            />
             <SelectAction
               title="Exporter les volontaires"
               alignItems="right"

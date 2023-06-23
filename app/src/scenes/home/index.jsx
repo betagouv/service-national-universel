@@ -1,5 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
+import { Redirect } from "react-router-dom";
 
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "../../utils";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
@@ -18,9 +19,11 @@ import Phase1NotDone from "./Phase1NotDone";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import FutureCohort from "./FutureCohort";
 
-export default () => {
+export default function Home() {
   useDocumentTitle("Accueil");
-  const young = useSelector((state) => state.Auth.young) || {};
+  const young = useSelector((state) => state.Auth.young);
+
+  if (!young) return <Redirect to="/auth" />;
 
   const renderStep = () => {
     if (young.status === YOUNG_STATUS.ABANDONED)
@@ -95,4 +98,4 @@ export default () => {
   };
 
   return renderStep();
-};
+}

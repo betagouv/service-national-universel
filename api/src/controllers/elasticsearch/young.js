@@ -634,4 +634,108 @@ router.post("/propose-mission/:id/:action(search|export)", passport.authenticate
   }
 });
 
+router.post("/aggregate-status/:action(export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    // Configuration
+    const searchFields = ["email", "firstName", "lastName", "city", "zip"];
+    const filterFields = [
+      "status.keyword",
+      "statusPhase1.keyword",
+      "region.keyword",
+      "department.keyword",
+      "academy.keyword",
+      "gender.keyword",
+      "grade.keyword",
+      "handicap.keyword",
+      "ppsBeneficiary.keyword",
+      "paiBeneficiary.keyword",
+      "qpv.keyword",
+      "allergies.keyword",
+      "specificAmenagment.keyword",
+      "reducedMobilityAccess.keyword",
+      "cohesionStayMedicalFileReceived.keyword",
+      "imageRight.keyword",
+      "autoTestPCR.keyword",
+      "cohesionStayPresence.keyword",
+      "presenceJDM.keyword",
+      "departInform.keyword",
+      "departSejourMotif.keyword",
+    ];
+    const sortFields = [];
+    if (!canSearchInElasticSearch(user, "young")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Context filters
+    const contextFilters = [];
+
+    if (user.role === ROLES.HEAD_CENTER) {
+      const sessionsPhase1 = await SessionPhase1Object.find({ headCenterId: user._id });
+      if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const visibleCohorts = await getCohortNamesEndAfter(datesub(new Date(), { months: 3 }));
+      if (visibleCohorts.length > 0) {
+        contextFilters.push({ terms: { "cohort.keyword": visibleCohorts } });
+      } else {
+        // Tried that to specify when there's just no data or when the head center has no longer access
+        return res.status(200).send({ ok: true, data: "no cohort available" });
+      }
+      contextFilters.push({ terms: { "sessionPhase1Id.keyword": [sessionsPhase1.map((e) => e._id.toString())] } });
+    }
+    if (user.role === ROLES.REFERENT_REGION) {
+      contextFilters.push({ terms: { "region.keyword": [user.region] } });
+    }
+
+    if (user.role === ROLES.REFERENT_DEPARTMENT) {
+      contextFilters.push({ terms: { "department.keyword": user.department } });
+    }
+
+    // Body params validation
+    const { queryFilters, page, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    // Build request body
+    const { hitsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields,
+      queryFilters,
+      page,
+      sort: null,
+      contextFilters,
+    });
+
+    const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+    const data = aggregateStatus(serializeYoungs(response));
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+function aggregateStatus(youngs) {
+  let departments = {};
+  for (const young of youngs) {
+    if (departments[young.department] === undefined) {
+      departments[young.department] = {
+        department: young.department,
+        region: young.region,
+        academy: young.academy,
+      };
+    }
+    if (departments[young.department]["phase1_" + young.statusPhase1] === undefined) {
+      departments[young.department]["phase1_" + young.statusPhase1] = 0;
+    }
+    departments[young.department]["phase1_" + young.statusPhase1]++;
+
+    if (departments[young.department]["phase2_" + young.statusPhase2] === undefined) {
+      departments[young.department]["phase2_" + young.statusPhase2] = 0;
+    }
+    departments[young.department]["phase2_" + young.statusPhase2]++;
+
+    if (departments[young.department]["phase3_" + young.statusPhase3] === undefined) {
+      departments[young.department]["phase3_" + young.statusPhase3] = 0;
+    }
+    departments[young.department]["phase3_" + young.statusPhase3]++;
+  }
+
+  return Object.values(departments);
+}
+
 module.exports = router;

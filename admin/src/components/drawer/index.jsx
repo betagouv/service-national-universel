@@ -312,7 +312,7 @@ const Drawer = (props) => {
 
       const getTickets = async (query) => {
         try {
-          const { data } = await api.post(`/zammood/tickets`, query);
+          const { data } = await api.post(`/zammood/ticketscount`, query);
           props.dispatchTickets(data);
         } catch (error) {
           console.log(error);

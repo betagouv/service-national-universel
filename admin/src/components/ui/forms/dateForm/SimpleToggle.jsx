@@ -1,5 +1,5 @@
 import React from "react";
-import Toggle from "../../../components/Toggle";
+import Toggle from "../../../Toggle";
 
 export default function SimpleToggle({ value, onChange, disabled = false, label }) {
   return (

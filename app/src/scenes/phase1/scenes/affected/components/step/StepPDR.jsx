@@ -1,64 +1,55 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setYoung } from "../../../../../../redux/auth/actions";
+import { toastr } from "react-redux-toastr";
 import { BsCheck2 } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
-import { getMeetingHour, getMeetingPointChoiceLimitDateForCohort, getReturnHour } from "../../../../../../utils/cohorts";
-import { isStepPDRDone } from "../../utils/steps.utils";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
-import CohortDateSummary from "../../../../../inscription2023/components/CohortDateSummary";
-import Loader from "../../../../../../components/Loader";
 import { capture } from "../../../../../../sentry";
 import api from "../../../../../../services/api";
-import LinearMap from "../../../../../../assets/icons/LinearMap";
-import { toastr } from "react-redux-toastr";
-import { setYoung } from "../../../../../../redux/auth/actions";
-import { useDispatch, useSelector } from "react-redux";
-import CloseSvg from "../../../../../../assets/Close";
-import { ModalContainer } from "../../../../../../components/modals/Modal";
-import { Modal } from "reactstrap";
-import MeetingPointGoAlone from "../MeetingPointGoAlone";
-import MeetingPointConfirmationModal from "../MeetingPointConfirmationModal";
-import MeetingPointChooser from "../MeetingPointChooser";
+import { getDepartureDate, getMeetingHour, getReturnDate, getReturnHour } from "snu-lib";
+import { getCohort, getMeetingPointChoiceLimitDateForCohort } from "../../../../../../utils/cohorts";
+import { isStepPDRDone } from "../../utils/steps.utils";
 
-export default function StepPDR({ center, departureDate, returnDate }) {
+import CloseSvg from "../../../../../../assets/Close";
+import LinearMap from "../../../../../../assets/icons/LinearMap";
+import Loader from "../../../../../../components/Loader";
+import MeetingPointChooser from "../MeetingPointChooser";
+import MeetingPointConfirmationModal from "../MeetingPointConfirmationModal";
+import MeetingPointGoAlone from "../MeetingPointGoAlone";
+import Modal from "../../../../../../components/ui/modals/Modal";
+
+export default function StepPDR({ center, session, meetingPoint, departureDate, returnDate }) {
   const [openedDesktop, setOpenedDesktop] = useState(false);
   const [openedMobile, setOpenedMobile] = useState(false);
   const [meetingPoints, setMeetingPoints] = useState(null);
   const [error, setError] = useState(null);
-  const [choosenMeetingPoint, setChoosenMeetingPoint] = useState(null);
   const [modalMeetingPoint, setModalMeetingPoint] = useState({ isOpen: false, meetingPoint: null });
   const [loading, setLoading] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
+  const cohort = getCohort(young.cohort);
   const dispatch = useDispatch();
   const enabled = young ? true : false;
   const valid = isStepPDRDone(young);
   const date = getMeetingPointChoiceLimitDateForCohort(young.cohort);
   const pdrChoiceLimitDate = date ? dayjs(date).locale("fr").format("D MMMM YYYY") : "?";
   const pdrChoiceExpired = date ? dayjs.utc().isAfter(dayjs(date)) : false;
-  const meetingHour = getMeetingHour(choosenMeetingPoint);
-  const returnHour = getReturnHour(choosenMeetingPoint);
-
-  useEffect(() => {
-    if (young && !meetingPoints) {
-      loadMeetingPoints();
-    }
-  }, [young]);
+  const goAloneDepartureDate = getDepartureDate(young, session, cohort);
+  const goAloneReturnDate = getReturnDate(young, session, cohort);
+  const meetingHour = getMeetingHour(meetingPoint);
+  const returnHour = getReturnHour(meetingPoint);
 
   async function loadMeetingPoints() {
+    if (meetingPoints?.length) return;
     try {
       const result = await api.get(`/point-de-rassemblement/available`);
       if (!result.ok) {
         setError("Nous n'avons pas réussi à charger les points de rassemblements. Veuillez réessayer dans quelques instants.");
       } else {
         setMeetingPoints(result.data);
-        if (young.meetingPointId) {
-          const mp = result.data.find((mp) => mp._id === young.meetingPointId);
-          if (mp) {
-            setChoosenMeetingPoint(mp);
-          }
-        }
       }
     } catch (err) {
       capture(err);
@@ -104,6 +95,20 @@ export default function StepPDR({ center, departureDate, returnDate }) {
     }
   }
 
+  async function handleOpenDesktop() {
+    if (enabled && young.transportInfoGivenByLocal !== "true") {
+      await loadMeetingPoints();
+      setOpenedDesktop(!openedDesktop);
+    } else setOpenedDesktop(false);
+  }
+
+  async function handleOpenMobile() {
+    if (enabled && young.transportInfoGivenByLocal !== "true") {
+      await loadMeetingPoints();
+      setOpenedMobile(!openedMobile);
+    } else setOpenedMobile(false);
+  }
+
   return (
     <>
       <MeetingPointConfirmationModal
@@ -115,9 +120,7 @@ export default function StepPDR({ center, departureDate, returnDate }) {
       />
 
       {/* Desktop */}
-      <div
-        className={`hidden flex-row items-center justify-between md:flex ${enabled && "cursor-pointer"}`}
-        onClick={() => setOpenedDesktop(enabled && young.transportInfoGivenByLocal !== "true" ? !openedDesktop : false)}>
+      <div className={`hidden flex-row items-center justify-between md:flex ${enabled && "cursor-pointer"}`} onClick={handleOpenDesktop}>
         <div className="lex-row flex items-center py-4">
           {valid ? (
             <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
@@ -139,9 +142,21 @@ export default function StepPDR({ center, departureDate, returnDate }) {
             </h1>
             <p className={`text-sm leading-5 ${enabled ? "text-gray-500" : "text-gray-400"}`}>
               {young.meetingPointId ? (
-                <>{addressOf(choosenMeetingPoint)}</>
+                <>
+                  {meetingPoint.name}, {addressOf(meetingPoint)},{" "}
+                  <strong>
+                    aller le {dayjs(departureDate).locale("fr").format("dddd D MMMM")} à {meetingHour}, retour le {dayjs(returnDate).locale("fr").format("dddd D MMMM")} à{" "}
+                    {returnHour}
+                  </strong>
+                </>
               ) : young.deplacementPhase1Autonomous === "true" ? (
-                <>Je me rends au centre et en reviens par mes propres moyens</>
+                <>
+                  Je me rends au centre et en reviens par mes propres moyens : {center.name}, {addressOf(center)},{" "}
+                  <strong>
+                    arrivée le {dayjs(departureDate).locale("fr").format("dddd D MMMM")} à {meetingHour}, départ le {dayjs(returnDate).locale("fr").format("dddd D MMMM")} à{" "}
+                    {returnHour}
+                  </strong>
+                </>
               ) : young.transportInfoGivenByLocal === "true" ? (
                 <>Les informations sur les modalités d&apos;acheminement vers le centre et de retour vous seront transmises par e-mail par les services académiques.</>
               ) : pdrChoiceExpired ? (
@@ -154,7 +169,6 @@ export default function StepPDR({ center, departureDate, returnDate }) {
             </p>
           </div>
         </div>
-        {openedDesktop && <CohortDateSummary departureDate={departureDate} returnDate={returnDate} />}
         {enabled && young.transportInfoGivenByLocal !== "true" ? (
           <div className="ml-4 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 hover:scale-110">
             {openedDesktop ? <HiOutlineChevronUp className="h-5 w-5" /> : <HiOutlineChevronDown className="h-5 w-5" />}
@@ -162,31 +176,26 @@ export default function StepPDR({ center, departureDate, returnDate }) {
         ) : null}
       </div>
       {openedDesktop && (
-        <div className="my-12">
+        <div className="mb-8">
           {error && <div className="text-red my-4 text-center text-sm">{error}</div>}
           {meetingPoints ? (
-            <div className="grid grid-cols-4 gap-4">
+            <div className="flex gap-6">
               {meetingPoints.map((mp) => (
                 <MeetingPointChooser
                   key={mp._id}
                   meetingPoint={mp}
-                  onChoose={() => {
-                    return setModalMeetingPoint({ isOpen: true, meetingPoint: mp });
-                  }}
-                  choosed={mp._id === young.meetingPointId && mp.busLineId === young.ligneId}
+                  onChoose={() => setModalMeetingPoint({ isOpen: true, meetingPoint: mp })}
+                  chosen={mp._id === young.meetingPointId && mp.busLineId === young.ligneId}
                   expired={pdrChoiceExpired}
                 />
               ))}
               <MeetingPointGoAlone
                 center={center}
-                onChoose={() => {
-                  return setModalMeetingPoint({ isOpen: true });
-                }}
-                choosed={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
+                onChoose={() => setModalMeetingPoint({ isOpen: true })}
+                chosen={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
                 expired={pdrChoiceExpired}
-                meetingPointsCount={meetingPoints.length}
-                departureDate={departureDate}
-                returnDate={returnDate}
+                departureDate={goAloneDepartureDate}
+                returnDate={goAloneReturnDate}
               />
             </div>
           ) : (
@@ -202,7 +211,7 @@ export default function StepPDR({ center, departureDate, returnDate }) {
         className={`relative mb-3 ml-4 flex min-h-[144px] cursor-pointer items-center rounded-xl border-[1px] md:hidden ${
           valid ? "border-green-500 bg-green-50" : !young.meetingPointId || young.deplacementPhase1Autonomous !== "true" ? "border-blue-600" : "bg-white"
         } `}
-        onClick={() => setOpenedMobile(enabled && young.transportInfoGivenByLocal !== "true" ? !openedMobile : false)}>
+        onClick={handleOpenMobile}>
         {(young.meetingPointId || young.deplacementPhase1Autonomous === "true") && (
           <LinearMap gray={(!young.meetingPointId).toString()} className="absolute top-[10px] right-[10px]" />
         )}
@@ -227,7 +236,7 @@ export default function StepPDR({ center, departureDate, returnDate }) {
             <div className={` text-sm leading-5 ${valid && "text-green-600 opacity-70"} ${enabled ? "text-gray-500" : "text-gray-400"}`}>
               {young.meetingPointId ? (
                 <>
-                  <div>{addressOf(choosenMeetingPoint)}</div>
+                  <div>{addressOf(meetingPoint)}</div>
                   <MobileDateDetail departureDate={departureDate} returnDate={returnDate} startHour={meetingHour} returnHour={returnHour} />
                 </>
               ) : young.deplacementPhase1Autonomous === "true" ? (
@@ -249,46 +258,39 @@ export default function StepPDR({ center, departureDate, returnDate }) {
           </div>
         </div>
       </div>
-      {openedMobile && (
-        <Modal centered isOpen={true} toggle={() => setOpenedMobile(false)} size="xl">
-          <ModalContainer>
-            <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={() => setOpenedMobile(false)} />
-            <div className="w-full p-12 md:p-4">
-              <div className="mb-3 text-center text-lg font-bold text-gray-900">Confirmez votre point de rassemblement</div>
-              <CohortDateSummary departureDate={departureDate} returnDate={returnDate} className="mb-4" />
-              {error && <div className="text-red my-4 text-center text-sm">{error}</div>}
-              {meetingPoints ? (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                  {meetingPoints.map((mp) => (
-                    <MeetingPointChooser
-                      key={mp._id}
-                      meetingPoint={mp}
-                      onChoose={() => {
-                        return setModalMeetingPoint({ isOpen: true, meetingPoint: mp });
-                      }}
-                      choosed={mp._id === young.meetingPointId}
-                      expired={pdrChoiceExpired}
-                    />
-                  ))}
-                  <MeetingPointGoAlone
-                    center={center}
-                    young={young}
-                    onChoose={() => {
-                      return setModalMeetingPoint({ isOpen: true });
-                    }}
-                    choosed={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
-                    expired={pdrChoiceExpired}
-                  />
-                </div>
-              ) : (
-                <div className="flex justify-center">
-                  <Loader />
-                </div>
-              )}
-            </div>
-          </ModalContainer>
-        </Modal>
-      )}
+
+      <Modal isOpen={openedMobile} onClose={() => setOpenedMobile(false)}>
+        <div className="flex mb-3">
+          <p className="text-center text-lg font-bold text-gray-900">Confirmez votre point de rassemblement</p>
+          <CloseSvg className="hover:cursor-pointer" height={20} width={20} onClick={() => setOpenedMobile(false)} />
+        </div>
+        {error && <div className="text-red my-4 text-center text-sm">{error}</div>}
+        <div className="flex flex-col items-center gap-6">
+          {meetingPoints &&
+            meetingPoints.map((mp) => (
+              <MeetingPointChooser
+                key={mp._id}
+                meetingPoint={mp}
+                onChoose={() => {
+                  return setModalMeetingPoint({ isOpen: true, meetingPoint: mp });
+                }}
+                chosen={mp._id === young.meetingPointId}
+                expired={pdrChoiceExpired}
+              />
+            ))}
+          <MeetingPointGoAlone
+            center={center}
+            young={young}
+            onChoose={() => {
+              return setModalMeetingPoint({ isOpen: true });
+            }}
+            chosen={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
+            expired={pdrChoiceExpired}
+            departureDate={goAloneDepartureDate}
+            returnDate={goAloneReturnDate}
+          />
+        </div>
+      </Modal>
     </>
   );
 }

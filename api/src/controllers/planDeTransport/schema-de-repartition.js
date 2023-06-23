@@ -952,10 +952,8 @@ router.post("", passport.authenticate("referent", { session: false, failWithErro
     ]);
 
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
-      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
       const referentTransport = await getTransporter();
       if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
       let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
       const mail = await sendTemplate(template, {
         emailTo: referentTransport.map((referent) => ({
@@ -965,7 +963,8 @@ router.post("", passport.authenticate("referent", { session: false, failWithErro
         params: {
           trigger: "group_added",
           region: data.fromRegion,
-          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+          group_id: data._id,
+          cta: `${ADMIN_URL}/schema-repartition?cohort=${data.cohort}`,
         },
       });
     }
@@ -1004,10 +1003,8 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     ]);
 
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
-      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
       const referentTransport = await getTransporter();
       if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
       let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
       const mail = await sendTemplate(template, {
         emailTo: referentTransport.map((referent) => ({
@@ -1017,11 +1014,11 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
         params: {
           trigger: "group_deleted",
           region: schema.fromRegion,
-          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+          group_id: schema._id,
+          cta: `${ADMIN_URL}/schema-repartition?cohort=${schema.cohort}`,
         },
       });
     }
-
     // --- résultat
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -1071,10 +1068,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     ]);
 
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
-      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
       const referentTransport = await getTransporter();
       if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
       let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
       const mail = await sendTemplate(template, {
         emailTo: referentTransport.map((referent) => ({
@@ -1084,7 +1079,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         params: {
           trigger: "group_changed",
           region: schema.fromRegion,
-          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+          group_id: schema._id,
+          cta: `${ADMIN_URL}/schema-repartition?cohort=${schema.cohort}`,
         },
       });
     }

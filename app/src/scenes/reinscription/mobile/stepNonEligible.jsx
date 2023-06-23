@@ -11,6 +11,7 @@ import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import API from "../../../services/api";
+import { toastr } from "react-redux-toastr";
 
 export default function NonEligible() {
   const young = useSelector((state) => state.Auth.young);
@@ -54,7 +55,8 @@ export default function NonEligible() {
     setLoading(true);
     await API.post(`/young/logout`);
     dispatch(setYoung(null));
-    history.push("/");
+    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
+    return history.push("/auth");
   };
 
   const getMessageNonEligible = async (young) => {
