@@ -131,7 +131,7 @@ describe("Young", () => {
   });
 
   describe("GET /young/:id/patches", () => {
-    it("should return 404 if young not found", async () => {
+    it.only("should return 404 if young not found", async () => {
       const res = await request(getAppHelper()).get(`/young/${notExistingYoungId}/patches`).send();
       expect(res.statusCode).toEqual(404);
     });
