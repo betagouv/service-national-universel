@@ -1,16 +1,16 @@
 import React from "react";
+import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useSelector } from "react-redux";
-import { canEditLigneBusGeneralInfo, isPdrEditionOpen, translate } from "snu-lib";
+import { toastr } from "react-redux-toastr";
+import { useHistory } from "react-router-dom";
+import { canEditLigneBusGeneralInfo, isBusEditionOpen, translate } from "snu-lib";
 import Pencil from "../../../../../assets/icons/Pencil";
+import Loader from "../../../../../components/Loader";
+import { capture } from "../../../../../sentry";
+import api from "../../../../../services/api";
 import DatePickerList from "../../components/DatePickerList";
 import Field from "../../components/Field";
 import Select from "../../components/Select";
-import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
-import { capture } from "../../../../../sentry";
-import { toastr } from "react-redux-toastr";
-import api from "../../../../../services/api";
-import Loader from "../../../../../components/Loader";
-import { useHistory } from "react-router-dom";
 
 const options = [
   { label: "Oui", value: true },
@@ -118,7 +118,7 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
     <div className="w-full rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <div className="text-xl leading-6 text-[#242526]">Informations générales</div>
-        {canEditLigneBusGeneralInfo(user) && isPdrEditionOpen(user, cohort) ? (
+        {canEditLigneBusGeneralInfo(user) && isBusEditionOpen(user, cohort) ? (
           <>
             {!editInfo ? (
               <button

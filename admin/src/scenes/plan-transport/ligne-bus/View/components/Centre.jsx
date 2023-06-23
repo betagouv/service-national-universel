@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
-import { canEditLigneBusCenter, isPdrEditionOpen, ROLES, translate } from "snu-lib";
+import { canEditLigneBusCenter, isBusEditionOpen, ROLES, translate } from "snu-lib";
 import ExternalLink from "../../../../../assets/icons/ExternalLink";
 import Pencil from "../../../../../assets/icons/Pencil";
 import { capture } from "../../../../../sentry";
@@ -64,7 +64,7 @@ export default function Centre({ bus, setBus, cohort }) {
     <div className="w-1/2 rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <div className="text-xl leading-6 text-[#242526]">Centre de cohésion</div>
-        {canEditLigneBusCenter(user) && isPdrEditionOpen(user, cohort) ? (
+        {canEditLigneBusCenter(user) && isBusEditionOpen(user, cohort) ? (
           <>
             {!editCenter ? (
               <button

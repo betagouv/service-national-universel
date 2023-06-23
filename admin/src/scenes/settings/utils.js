@@ -45,4 +45,5 @@ export const settings = {
   busListAvailability: false,
   repartitionSchemaCreateAndEditGroupAvailability: false,
   repartitionSchemaDownloadAvailability: false,
+  busEditionOpenForTransporter: false,
 };

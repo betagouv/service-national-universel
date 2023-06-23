@@ -237,6 +237,7 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       isTransportPlanCorrectionRequestOpen: Joi.boolean(),
       schemaAccessForReferentRegion: Joi.boolean(),
       schemaAccessForReferentDepartment: Joi.boolean(),
+      busEditionOpenForTransporter: Joi.boolean(),
       uselessInformation: Joi.object().allow(null),
     }).validate(req.body, { stripUnknown: true });
     if (bodyError) {

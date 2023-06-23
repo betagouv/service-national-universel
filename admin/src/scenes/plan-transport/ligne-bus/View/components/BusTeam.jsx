@@ -1,15 +1,15 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { canEditLigneBusTeam, isPdrEditionOpen, translate } from "snu-lib";
+import { toastr } from "react-redux-toastr";
+import { canEditLigneBusTeam, isBusEditionOpen, translate } from "snu-lib";
+import validator from "validator";
+import Bin from "../../../../../assets/Bin";
 import Pencil from "../../../../../assets/icons/Pencil";
+import Toggle from "../../../../../components/Toggle";
+import { capture } from "../../../../../sentry";
+import api from "../../../../../services/api";
 import DatePickerList from "../../components/DatePickerList";
 import Field from "../../components/Field";
-import { capture } from "../../../../../sentry";
-import { toastr } from "react-redux-toastr";
-import api from "../../../../../services/api";
-import Toggle from "../../../../../components/Toggle";
-import Bin from "../../../../../assets/Bin";
-import validator from "validator";
 
 export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen, idTeam, cohort }) {
   const user = useSelector((state) => state.Auth.user);
@@ -115,7 +115,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
     <div className="w-full rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <div className="text-xl leading-6 text-[#242526]">{title}</div>
-        {canEditLigneBusTeam(user) && isPdrEditionOpen(user, cohort) ? (
+        {canEditLigneBusTeam(user) && isBusEditionOpen(user, cohort) ? (
           <>
             {!editInfo ? (
               <>
