@@ -895,21 +895,21 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     const center = cohesionCenterModel.findById(ligne.centerId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const depRef = pdrs.map((pdr) => pdr.department);
-    depRef.push(center.department);
+    const departmentListToNotify = pdrs.map((pdr) => pdr.department);
+    departmentListToNotify.push(center.department);
 
-    const users = await ReferentModel.find({ department: { $in: depRef } });
+    const users = await ReferentModel.find({ department: { $in: departmentListToNotify } });
     if (!users?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const roles = ["manager_department", "assistant_manager_department", "secretariat", "manager_phase2"];
+    const priority_roles = ["manager_department", "assistant_manager_department", "secretariat", "manager_phase2"];
 
     const usersToNotify = [];
-    for (const dep of depRef) {
-      const usersDep = users.filter((u) => u.department.includes(dep));
+    for (const dep of departmentListToNotify) {
+      const usersFromDep = users.filter((u) => u.department.includes(dep));
 
       let usersToNotifyInDep = null;
-      for (const role of roles) {
-        usersToNotifyInDep = usersDep.filter((u) => u.subRole === role);
+      for (const role of priority_roles) {
+        usersToNotifyInDep = usersFromDep.filter((u) => u.subRole === role);
         if (usersToNotifyInDep.length) {
           break;
         }
