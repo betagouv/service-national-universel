@@ -1,3 +1,17 @@
+# [1.299.0](https://github.com/betagouv/service-national-universel/compare/v1.298.0...v1.299.0) (2023-06-23)
+
+
+### Bug Fixes
+
+* **api-adresse:** Update sentry error context ([0035cd8](https://github.com/betagouv/service-national-universel/commit/0035cd846a8c6c9722bc19d0822b4b4177adeec7))
+
+
+### Features
+
+* **admin:** Hide edit button in bus line page for transporter if isPdrOpenForTransporter is false ([#2738](https://github.com/betagouv/service-national-universel/issues/2738)) ([c343251](https://github.com/betagouv/service-national-universel/commit/c3432510ae7d5bb486e7dac33fb48c0f732cdb23))
+* **admin/api:** Ajouter un bouton pour envoyer les informations de la ligne de transport aux référents ([#2739](https://github.com/betagouv/service-national-universel/issues/2739)) ([1d6f4a1](https://github.com/betagouv/service-national-universel/commit/1d6f4a1bc33495c532901ea3606e3a9f24e2ec98))
+* **api:** DO NOT ALLOW TO DOWNLOAD CNI ([9d67409](https://github.com/betagouv/service-national-universel/commit/9d67409317dfba16b20412b06aafb6c3dce13de9))
+
 # [1.298.0](https://github.com/betagouv/service-national-universel/compare/v1.297.0...v1.298.0) (2023-06-22)
 
 
