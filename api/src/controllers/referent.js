@@ -664,6 +664,7 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
 // Todo: refactor
 // get /young/:id/file/:key/:filename accessible only by ref or themself
 router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
   try {
     const { error, value } = Joi.object({
       youngId: Joi.string().required(),
@@ -746,6 +747,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
 //todo: refactor do not duplicate routes
 // get /young/:id/file/:key/:filename accessible only by ref or themself
 router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
   try {
     const { error, value } = Joi.object({
       youngId: Joi.string().required(),
@@ -795,6 +797,7 @@ router.post(
   passport.authenticate("referent", { session: false, failWithError: true }),
   fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req, res) => {
+    return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     try {
       const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
       const { error, value } = Joi.object({
@@ -1130,6 +1133,7 @@ router.get("/:id/session-phase1", passport.authenticate("referent", { session: f
 
 router.put("/young/:id/phase1Status/:document", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
+    return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const keys = ["cohesionStayMedical", "imageRight", "rules"];
     const { error: documentError, value: document } = Joi.string()
       .required()
@@ -1206,6 +1210,7 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
 });
 
 router.put("/young/:id/removeMilitaryFile/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
   try {
     const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
     const { error, value } = Joi.object({
