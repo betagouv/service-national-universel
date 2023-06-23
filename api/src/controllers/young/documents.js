@@ -451,6 +451,8 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     }
     const { id, key, fileId } = value;
 
+    if (key.includes("cniFiles")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
     // Check permissions
 
     const young = await YoungObject.findById(id);
