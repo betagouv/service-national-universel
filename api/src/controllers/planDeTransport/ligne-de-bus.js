@@ -8,9 +8,9 @@ const PlanTransportModel = require("../../models/PlanDeTransport/planTransport")
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const cohesionCenterModel = require("../../models/cohesionCenter");
 const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
+const ReferentModel = require("../../models/referent");
 const {
   canViewLigneBus,
-  canCreateLigneBus,
   canEditLigneBusTeam,
   canEditLigneBusGeneralInfo,
   canEditLigneBusCenter,
@@ -21,12 +21,16 @@ const {
   isIsoDate,
   translateBusPatchesField,
   canExportConvoyeur,
+  isAdmin,
+  SENDINBLUE_TEMPLATES,
 } = require("snu-lib");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
+const { sendTemplate } = require("../../sendinblue");
+const { ADMIN_URL } = require("../../config");
 
 /**
  * Récupère toutes les ligneBus +  les points de rassemblemnts associés
@@ -865,6 +869,69 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
     } else {
       return res.status(200).send({ ok: true, data: [], pagination: { count: 0, pageCount: 0, page: 0 } });
     }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/:id/notifyRef", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+    }).validate({ ...req.params });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!isAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    let { id } = value;
+
+    const ligne = await LigneBusModel.findById(id);
+    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const pdrs = await PointDeRassemblementModel.find({ _id: ligne.meetingPointsIds });
+    if (!pdrs?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const center = cohesionCenterModel.findById(ligne.centerId);
+    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const depRef = pdrs.map((pdr) => pdr.department);
+    depRef.push(center.department);
+
+    const users = await ReferentModel.find({ department: { $in: depRef } });
+    if (!users?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const roles = ["manager_department", "assistant_manager_department", "secretariat", "manager_phase2"];
+
+    const usersToNotify = [];
+    for (const dep of depRef) {
+      const usersDep = users.filter((u) => u.department.includes(dep));
+
+      let usersToNotifyInDep = null;
+      for (const role of roles) {
+        usersToNotifyInDep = usersDep.filter((u) => u.subRole === role);
+        if (usersToNotifyInDep.length) {
+          break;
+        }
+      }
+
+      usersToNotify.push(...usersToNotifyInDep);
+    }
+
+    const uniqueUsersToNotify = [...new Set(usersToNotify.map((obj) => JSON.stringify(obj)))].map((str) => JSON.parse(str));
+    // send notification
+    await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.NOTIF_REF, {
+      emailTo: uniqueUsersToNotify.map((referent) => ({
+        name: `${referent.firstName} ${referent.lastName}`,
+        email: referent.email,
+      })),
+      params: {
+        lineName: ligne.busId,
+        cta: `${ADMIN_URL}/ligne-de-bus/${ligne._id.toString()}`,
+      },
+    });
+
+    return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
