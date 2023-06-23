@@ -92,7 +92,7 @@ function capture(err, contexte) {
   } else if (err.message) {
     sentryCaptureMessage(err.message, contexte);
   } else {
-    sentryCaptureMessage("Error not defined well", { extra: { error: err } });
+    sentryCaptureMessage("Error not defined well", { extra: { error: err, contexte: contexte } });
   }
 }
 function captureMessage(mess, contexte) {
