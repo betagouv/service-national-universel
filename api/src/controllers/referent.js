@@ -125,7 +125,6 @@ function cleanReferentData(referent) {
 }
 
 router.post("/signin", (req, res) => ReferentAuth.signin(req, res));
-router.post("/signin-2fa", (req, res) => ReferentAuth.signin2FA(req, res));
 router.post("/logout", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     await ReferentAuth.logout(req, res);
