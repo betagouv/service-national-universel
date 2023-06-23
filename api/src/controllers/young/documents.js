@@ -203,6 +203,7 @@ router.post(
   passport.authenticate(["young", "referent"], { session: false, failWithError: true }),
   fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req, res) => {
+    return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     try {
       // Validate
 
@@ -345,6 +346,7 @@ router.post(
 
 // Delete one file
 router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
+  return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
   try {
     // Validate
 
@@ -394,6 +396,7 @@ router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { se
 
 // Get the list of files for a given key
 router.get("/:key", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
+  return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
   try {
     // Validate
 
@@ -433,6 +436,7 @@ router.get("/:key", passport.authenticate(["young", "referent"], { session: fals
 
 // Download one file
 router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
+  return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
   try {
     // Validate
 
