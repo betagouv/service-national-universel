@@ -1,6 +1,6 @@
 import fetchRetry from "fetch-retry";
 import { apiURL } from "../config";
-import * as Sentry from "@sentry/react";
+import { capture } from "../sentry";
 
 let fetch = window.fetch;
 
@@ -32,7 +32,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        Sentry.captureException(e);
+        capture(e);
         reject(e);
       }
     });
@@ -59,8 +59,7 @@ class api {
         return response.json();
       })
       .catch((e) => {
-        Sentry.setContext("body", body);
-        Sentry.captureException(e);
+        capture(e, { extra: { body: body } });
         console.error(e);
         return { responses: [] };
       });
@@ -88,7 +87,7 @@ class api {
       }
       return obj;
     } catch (e) {
-      Sentry.captureException(e);
+      capture(e);
       return;
     }
   }
@@ -116,9 +115,7 @@ class api {
         const file = await response.blob();
         resolve(file);
       } catch (e) {
-        Sentry.setContext("body", body);
-        Sentry.setContext("path", path);
-        Sentry.captureException(e);
+        capture(e, { extra: { body: body, path: path } });
         reject(e);
       }
     });
@@ -145,8 +142,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        Sentry.setContext("path", path);
-        Sentry.captureException(e);
+        capture(e, { extra: { path: path } });
         reject(e);
       }
     });
@@ -174,9 +170,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        Sentry.setContext("path", path);
-        Sentry.setContext("body", body);
-        Sentry.captureException(e);
+        capture(e, { extra: { path: path, body: body } });
         reject(e);
       }
     });
@@ -212,9 +206,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        Sentry.setContext("path", path);
-        Sentry.setContext("arr", arr);
-        Sentry.captureException(e);
+        capture(e, { extra: { path: path, arr: arr } });
         reject(e);
       }
     });
@@ -249,7 +241,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        Sentry.captureException(e);
+        capture(e);
         reject(e);
       }
     });
@@ -276,8 +268,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        Sentry.setContext("path", path);
-        Sentry.captureException(e);
+        capture(e, { extra: { path: path } });
         reject(e);
       }
     });
@@ -308,9 +299,7 @@ class api {
         }
         resolve(res);
       } catch (e) {
-        Sentry.setContext("body", body);
-        Sentry.setContext("path", path);
-        Sentry.captureException(e);
+        capture(e, { extra: { path: path, body: body } });
         reject(e);
       }
     });
