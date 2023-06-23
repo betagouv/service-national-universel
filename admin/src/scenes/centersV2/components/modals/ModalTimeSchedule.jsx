@@ -66,14 +66,14 @@ function TimeScheduleFile({ session, file, onDelete, className = "" }) {
       const blob = new Blob([new Uint8Array(result.data.data)], { type: result.mimeType });
       download(blob, result.fileName);
     } catch (err) {
-      toastr.error("Impossible de télécharger le fichier. Veuillez essayer dans quelques instants.");
+      toastr.error("Impossible de télécharger le fichier. Veuillez réessayer dans quelques instants.");
     }
     setCommunicating(false);
   }
 
   return (
     <div className={`flex items-center justify-between border-b-[1px] border-b-gray-200 py-4 ${className}`}>
-      <div className="grow-1">{file.name.substring(0,25)}</div>
+      <div className="grow-1">{file.name.substring(0, 25)}</div>
       {communicating ? (
         <div>
           <Loader size="2rem" className="m-0" />

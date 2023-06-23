@@ -157,12 +157,12 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
         setDataPdr(result.data.map((el) => el.meetingPoint));
         setDataLigneToPoint(result.data);
       } else {
-        setError("Impossible de récupérer la liste des points de rassemblement. Veuillez essayer dans quelques instants.");
+        setError("Impossible de récupérer la liste des points de rassemblement. Veuillez réessayer dans quelques instants.");
       }
       setLoadingPdr(false);
     } catch (err) {
       //capture(err);
-      setError("Impossible de récupérer la liste des points de rassemblement. Veuillez essayer dans quelques instants.");
+      setError("Impossible de récupérer la liste des points de rassemblement. Veuillez réessayer dans quelques instants.");
       setLoadingPdr(false);
     }
     //setLoadingPdr(loadingPdr - 1);

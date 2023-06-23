@@ -21,12 +21,12 @@ export default function PDRpropose({ young, center, modalAffectations, setModalA
       if (result.ok) {
         setDataPdr(result.data.filter((item) => item.meetingPoint.department === young.department));
       } else {
-        return toastr.error("Impossible de récupérer la liste des points de rassemblement. Veuillez essayer dans quelques instants.");
+        return toastr.error("Impossible de récupérer la liste des points de rassemblement. Veuillez réessayer dans quelques instants.");
       }
       setLoadingPdr(false);
     } catch (err) {
       setLoadingPdr(false);
-      return toastr.error("Impossible de récupérer la liste des points de rassemblement. Veuillez essayer dans quelques instants.", translate(err?.code), {
+      return toastr.error("Impossible de récupérer la liste des points de rassemblement. Veuillez réessayer dans quelques instants.", translate(err?.code), {
         timeOut: 2000,
       });
     }
