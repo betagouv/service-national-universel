@@ -1,5 +1,4 @@
 import fetchRetry from "fetch-retry";
-import "isomorphic-fetch";
 
 import * as Sentry from "@sentry/react";
 import { apiURL } from "../config";
