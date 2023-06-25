@@ -234,9 +234,8 @@ const Schema = new mongoose.Schema({
 
 Schema.pre("save", async function (next) {
   if (this.isModified("password") || this.isNew) {
-    bcrypt.hash(this.password, 10, (e, hash) => {
-      this.password = hash;
-    });
+    const hashedPassword = await bcrypt.hash(this.password, 10);
+    this.password = hashedPassword;
   }
   if (this.isModified("userIps") || this.isNew) {
     const _userIps = [];
@@ -246,7 +245,6 @@ Schema.pre("save", async function (next) {
     }
     this.userIps = _userIps;
   }
-
   return next();
 });
 
