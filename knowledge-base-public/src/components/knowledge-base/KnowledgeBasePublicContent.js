@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import Wrapper from "../Wrapper";
 import Breadcrumb from "../BreadCrumb";
-import KnowledgeBasePublicSection from "./KnowledgeBasePublicSection";
+import KnowledgeBasePublicSection from "./KnowledgeBasePublicSectionOld";
 import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 import KnowledgeBasePublicArticle from "./KnowledgeBasePublicArticle";
 
