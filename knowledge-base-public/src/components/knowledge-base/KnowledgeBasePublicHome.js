@@ -1,15 +1,22 @@
-import { useEffect, useState } from "react";
 import Head from "next/head";
 import Wrapper from "../Wrapper";
+import LoaderHomeOld from "./LoaderHomeOld";
+import LoaderHome from "./LoaderHome";
 import KnowledgeBasePublicSection from "./KnowledgeBasePublicSection";
+import KnowledgeBasePublicSectionOld from "./KnowledgeBasePublicSectionOld";
 import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
-import LoaderSection from "../LoaderSection";
-import LoaderArticle from "../LoaderArticle";
+import React, { useState, useEffect } from "react";
+import { environment } from "../../config";
+import useDevice from "../../hooks/useDevice";
 
 const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
+  const { device } = useDevice();
+  // @todo state and useEffect to be deleted : only used for testing purposes
   const [showLoading, setShowLoading] = useState(true);
   useEffect(() => {
-    setShowLoading(isLoading);
+    setTimeout(() => {
+      setShowLoading(isLoading);
+    }, 0);
   }, [isLoading]);
 
   return (
@@ -28,30 +35,14 @@ const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
             </div>
           </div>
         </div>
-        {showLoading ? (
+        {(showLoading || !device) && (environment === "production" ? <LoaderHomeOld /> : <LoaderHome />)}
+        {!showLoading && (
           <>
-            <div className="col-span-full row-span-2 row-start-2 mx-auto grid-cols-2 flex-col flex-wrap justify-center gap-2.5 md:grid md:flex-row md:px-10 lg:flex lg:max-w-screen-95 lg:overflow-hidden lg:px-6">
-              <LoaderSection />
-              <LoaderSection />
-              <LoaderSection />
-              <LoaderSection />
-            </div>
-            <main className="flex h-full flex-shrink flex-col justify-evenly overflow-y-auto sm:px-2 lg:flex-row lg:px-0">
-              <section className="flex max-w-4xl shrink-0 flex-grow flex-col pt-12">
-                <h3 className="flex items-center text-sm font-bold uppercase text-snu-purple-900 sm:px-4 sm:pb-2 lg:px-16">Sujets</h3>
-                <LoaderArticle />
-                <LoaderArticle />
-                <LoaderArticle />
-                <LoaderArticle />
-                <LoaderArticle />
-                <LoaderArticle />
-                <LoaderArticle />
-              </section>
-            </main>
-          </>
-        ) : (
-          <>
-            <KnowledgeBasePublicSection isRoot item={item} />
+            {environment === "production" ? (
+              <KnowledgeBasePublicSectionOld isRoot item={item} isLoading={showLoading} />
+            ) : (
+              <KnowledgeBasePublicSection isRoot item={item} device={device} isLoading={showLoading} />
+            )}
             <KnowledgeBasePublicNoAnswer />
           </>
         )}
