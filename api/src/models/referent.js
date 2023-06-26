@@ -307,6 +307,9 @@ Schema.plugin(patchHistory, {
     "/invitationExpires",
     "/loginAttempts",
     "/updatedAt",
+    "/userIps",
+    "/token2FA",
+    "/token2FAExpires",
   ],
 });
 
@@ -325,6 +328,9 @@ Schema.plugin(
       "loginAttempts",
       "updatedAt",
       "lastActivityAt",
+      "userIps",
+      "token2FA",
+      "token2FAExpires",
     ],
   }),
   MODELNAME,
