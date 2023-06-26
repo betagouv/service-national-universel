@@ -237,6 +237,10 @@ Schema.pre("save", async function (next) {
     const hashedPassword = await bcrypt.hash(this.password, 10);
     this.password = hashedPassword;
   }
+  return next();
+});
+
+Schema.pre("save", async function (next) {
   if (this.isModified("userIps") || this.isNew) {
     const _userIps = [];
     for (let ip of this.userIps) {

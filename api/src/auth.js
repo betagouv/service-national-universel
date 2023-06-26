@@ -162,7 +162,6 @@ class Auth {
         user.set({ token2FA, token2FAExpires: Date.now() + 1000 * 60 * 10 });
         await user.save();
 
-        // todo faire le template sur sb
         await sendTemplate(SENDINBLUE_TEMPLATES.SIGNIN_2FA, {
           emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
           params: { token2FA },
