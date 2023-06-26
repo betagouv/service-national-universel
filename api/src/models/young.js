@@ -1972,7 +1972,9 @@ Schema.methods.comparePassword = async function (p) {
 
 Schema.methods.compareIps = async function (ip) {
   const user = await OBJ.findById(this._id).select("userIps");
-  return user.userIps.some((_ip) => bcrypt.compare(ip, _ip));
+  const promises = user.userIps.map((_ip) => bcrypt.compare(ip, _ip));
+  const responses = await Promise.all(promises);
+  return responses.some((e) => e);
 };
 
 //Sync with sendinblue
@@ -2026,6 +2028,9 @@ Schema.plugin(patchHistory, {
     "/statusPhase3UpdatedAt",
     "/statusPhase2ValidatedAt",
     "/statusPhase3ValidatedAt",
+    "/userIps",
+    "/token2FA",
+    "/token2FAExpires",
   ],
 });
 
@@ -2048,6 +2053,9 @@ Schema.plugin(
       "parent2Inscription2023Token",
       "updatedAt",
       "lastActivityAt",
+      "userIps",
+      "token2FA",
+      "token2FAExpires",
     ],
   }),
   MODELNAME,
