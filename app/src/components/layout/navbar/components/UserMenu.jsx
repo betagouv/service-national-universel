@@ -31,7 +31,7 @@ export default function UserMenu({ onClose }) {
       </div>
       <ul>
         <MenuLink onClose={onClose} to="/account" text="Mon Profil" />
-        {permissionPhase2(user) && <MenuLink onClose={onClose} to="preferences" text="Mes préférences de mission" />}
+        {permissionPhase2(user) && <MenuLink onClose={onClose} to="/preferences" text="Mes préférences de mission" />}
         <MenuButton onClick={logout} text="Déconnexion" />
       </ul>
     </nav>
