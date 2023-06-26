@@ -155,7 +155,7 @@ class Auth {
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       }
 
-      if (!isYoung(user) || config.ENVIRONMENT !== "production") {
+      if (!isYoung(user) || config.ENVIRONMENT === "development" || config.ENVIRONMENT === "staging") {
         const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
         const isKnownIp = await user.compareIps(ip);
         if (!user.userIps || user.userIps?.length === 0 || !isKnownIp) {
