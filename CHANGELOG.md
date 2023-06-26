@@ -1,3 +1,26 @@
+# [1.300.0](https://github.com/betagouv/service-national-universel/compare/v1.299.0...v1.300.0) (2023-06-26)
+
+
+### Bug Fixes
+
+* **api:** compareIps async ([4fc5ed9](https://github.com/betagouv/service-national-universel/commit/4fc5ed9385123c2b2d78a95f951882ad4942a2e8))
+* **api:** condition for retrieving youngs for dsnj export ([f99de16](https://github.com/betagouv/service-national-universel/commit/f99de161878161db7388f614e05762d7aaf6be39))
+* **app:** add slash to preferences link in menu ([84464c4](https://github.com/betagouv/service-national-universel/commit/84464c4571397c1f5aa05d76b3a274b9b63f5fae))
+
+
+### Features
+
+* **admin:** revue design Affectation Manuelle ([#2714](https://github.com/betagouv/service-national-universel/issues/2714)) ([c4295b9](https://github.com/betagouv/service-national-universel/commit/c4295b9434312e3f057bfb36e097ca6240f41dd5))
+* **all:** Replace 403 with 418 (to avoid fetch errors) ([#2752](https://github.com/betagouv/service-national-universel/issues/2752)) ([1f06ebe](https://github.com/betagouv/service-national-universel/commit/1f06ebe46737d2d0726f0e76fcec988902767148))
+* **api/admin:** MEP 2fa admin ([#2749](https://github.com/betagouv/service-national-universel/issues/2749)) ([8d13c9a](https://github.com/betagouv/service-national-universel/commit/8d13c9a2bec7c1b227a573098e8a2efb1323e62f))
+* **api/app:** 2fa app ([#2750](https://github.com/betagouv/service-national-universel/issues/2750)) ([96dd14b](https://github.com/betagouv/service-national-universel/commit/96dd14ba1ffb9f45b17aaa167cc1770985774743))
+* 2fa ([#2745](https://github.com/betagouv/service-national-universel/issues/2745)) ([b905f60](https://github.com/betagouv/service-national-universel/commit/b905f6039bdc3695601dafc2104456f0330c4358))
+
+
+### Reverts
+
+* **api:** Reopen fil downloads ([103f401](https://github.com/betagouv/service-national-universel/commit/103f4011a767ed3d414c5aff690db19e3c644882))
+
 # [1.299.0](https://github.com/betagouv/service-national-universel/compare/v1.298.0...v1.299.0) (2023-06-23)
 
 
