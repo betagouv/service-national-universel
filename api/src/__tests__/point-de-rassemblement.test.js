@@ -62,7 +62,7 @@ describe("Meeting point", () => {
       const res = await request(getAppHelper())
         .put("/point-de-rassemblement/delete/cohort/" + pointDeRassemblement._id)
         .send({ cohort: "Février 2023 - C" });
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(418);
     });
     it("should return 200 ", async () => {
       const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
@@ -86,7 +86,7 @@ describe("Meeting point", () => {
       const res = await request(getAppHelper())
         .delete("/point-de-rassemblement/" + pointDeRassemblement._id)
         .send();
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(418);
     });
     it("should return 200 ", async () => {
       const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
@@ -109,7 +109,7 @@ describe("Meeting point", () => {
       const res = await request(getAppHelper())
         .get("/point-de-rassemblement/fullInfo/" + pointDeRassemblement._id + "/" + pointDeRassemblement._id)
         .send();
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(418);
       passport.user = previous;
     });
     it("should return 403 when young try to fetch another bus than his", async () => {
@@ -127,7 +127,7 @@ describe("Meeting point", () => {
       const res = await request(getAppHelper())
         .get("/point-de-rassemblement/fullInfo/" + pdr._id + "/" + bus._id)
         .send();
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(418);
       passport.user = previous;
     });
   });

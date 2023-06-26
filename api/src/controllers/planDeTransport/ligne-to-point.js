@@ -15,7 +15,7 @@ router.get("/meeting-point/:meetingPointId", passport.authenticate("referent", {
     }).validate(req.params);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewLigneBus(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { meetingPointId } = value;
 

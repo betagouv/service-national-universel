@@ -47,7 +47,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // check que le code est bien unique
     const centerCode = await CohesionCenterModel.find({ code2022: value.code2022 });
@@ -96,7 +96,7 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     const { error: errorId, value: cohesionCenterId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
@@ -146,7 +146,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error, value } = Joi.object({
       academy: Joi.string().required(),
@@ -231,7 +231,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canViewCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewCohesionCenter(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await CohesionCenterModel.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -250,7 +250,7 @@ router.get("/:id/cohort/:cohort/session-phase1", passport.authenticate("referent
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canViewCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewCohesionCenter(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const center = await CohesionCenterModel.findById(value.id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -273,7 +273,7 @@ router.get("/:id/cohort/:cohort/stats", passport.authenticate("referent", { sess
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canSearchSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchSessionPhase1(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     try {
       const center = await CohesionCenterModel.findById(value.id);
@@ -303,7 +303,7 @@ router.get("/:id/session-phase1", passport.authenticate("referent", { session: f
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canViewCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewCohesionCenter(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const center = await CohesionCenterModel.findById(id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -320,7 +320,7 @@ router.get("/:id/session-phase1", passport.authenticate("referent", { session: f
 
 router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (!canViewCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewCohesionCenter(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await CohesionCenterModel.find({});
     return res.status(200).send({ ok: true, data: data.map(serializeCohesionCenter) });
   } catch (error) {
@@ -343,7 +343,7 @@ router.get("/young/:youngId", passport.authenticate(["young"], { session: false,
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && req.user._id.toString() !== id) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
@@ -361,7 +361,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (req.user.role !== ROLES.ADMIN) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role !== ROLES.ADMIN) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const center = await CohesionCenterModel.findById(id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 

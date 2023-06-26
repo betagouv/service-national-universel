@@ -77,12 +77,12 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
 
     // A young can only download their own documents.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     // Create html
     const html = await getHtmlTemplate(type, template, young);
@@ -143,10 +143,10 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
 
     // A young can only send to them their own documents.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     if (isReferent(req.user) && !canSendFileByMailToYoung(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     let contract;
@@ -203,7 +203,7 @@ router.post(
   passport.authenticate(["young", "referent"], { session: false, failWithError: true }),
   fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req, res) => {
-    return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     try {
       // Validate
 
@@ -257,9 +257,9 @@ router.post(
       const young = await YoungObject.findById(id);
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-      if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      if (isReferent(req.user) && !canEditYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      if (body.category === "cniFiles" && young.files.cniFiles.length >= 3) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      if (isYoung(req.user) && req.user.id !== id) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      if (isReferent(req.user) && !canEditYoung(req.user, young)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      if (body.category === "cniFiles" && young.files.cniFiles.length >= 3) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
       // Upload files
 
@@ -285,7 +285,7 @@ router.post(
             const { isInfected } = await clamscan.isInfected(tempFilePath);
             if (isInfected) {
               capture(`File ${name} of user(${req.user.id})is infected`);
-              return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+              return res.status(418).send({ ok: false, code: ERRORS.FILE_INFECTED });
             }
           } catch (e) {
             capture(e);
@@ -346,7 +346,7 @@ router.post(
 
 // Delete one file
 router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
-  return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+  return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
   try {
     // Validate
 
@@ -370,8 +370,8 @@ router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { se
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    if (isReferent(req.user) && !canEditYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (isYoung(req.user) && req.user.id !== id) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (isReferent(req.user) && !canEditYoung(req.user, young)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     // Delete on s3
 
@@ -396,7 +396,7 @@ router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { se
 
 // Get the list of files for a given key
 router.get("/:key", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
-  return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+  return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
   try {
     // Validate
 
@@ -419,11 +419,11 @@ router.get("/:key", passport.authenticate(["young", "referent"], { session: fals
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (isYoung(req.user) && req.user.id !== id) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     // Send response
 
@@ -436,7 +436,7 @@ router.get("/:key", passport.authenticate(["young", "referent"], { session: fals
 
 // Download one file
 router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
-  return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+  return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
   try {
     // Validate
 
@@ -455,18 +455,18 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     }
     const { id, key, fileId } = value;
 
-    if (key.includes("cniFiles")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (key.includes("cniFiles")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     // Check permissions
 
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (isYoung(req.user) && req.user.id !== id) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     // Download from s3
 

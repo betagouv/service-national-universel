@@ -44,7 +44,7 @@ router.post("/mission/:action(_msearch|export)", passport.authenticate(["young",
 
     // A young can only see validated missions.
     if (isYoung(user)) filter.push({ term: { "status.keyword": "VALIDATED" } });
-    if (isReferent(user) && !canSearchInElasticSearch(user, "mission")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isReferent(user) && !canSearchInElasticSearch(user, "mission")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // A responsible cans only see their structure's missions.
     if (user.role === ROLES.RESPONSIBLE) {
@@ -88,7 +88,7 @@ router.post("/missionapi/_msearch", passport.authenticate(["young"], { session: 
 router.post("/school/_msearch", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { body, user } = req;
-    if (isReferent(user) && !canSearchInElasticSearch(user, "school")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isReferent(user) && !canSearchInElasticSearch(user, "school")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const response = await esClient.msearch({ index: "school", body });
     return res.status(200).send(serializeSchools(response.body));
   } catch (error) {
@@ -251,7 +251,7 @@ router.post("/young-having-school-in-department/:view/:action(_msearch|export)",
 
     const { user, body } = req;
 
-    if (!canSearchInElasticSearch(user, "young-having-school-in-department")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "young-having-school-in-department")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const filter = [{ terms: { "schoolDepartment.keyword": user.department } }];
 
@@ -285,7 +285,7 @@ router.post("/young-having-school-in-region/:view/:action(_msearch|export)", pas
 
     const { user, body } = req;
 
-    if (!canSearchInElasticSearch(user, "young-having-school-in-region")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "young-having-school-in-region")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const filter = [{ terms: { "schoolRegion.keyword": [user.region] } }];
 
@@ -311,7 +311,7 @@ router.post("/young-having-meeting-point-in-geography/export", passport.authenti
   try {
     const { user, body } = req;
 
-    if (!canSearchInElasticSearch(user, "young-having-meeting-point-in-geography")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "young-having-meeting-point-in-geography")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const response = await allRecords("young", body.query);
     return res.status(200).send({ ok: true, data: serializeYoungs(response) });
@@ -326,19 +326,19 @@ router.post("/cohesionyoung/:id/:action(_msearch|export)", passport.authenticate
   try {
     const { user, body } = req;
 
-    if (!canSearchInElasticSearch(user, "cohesionyoung")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "cohesionyoung")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (user.role === ROLES.REFERENT_REGION) {
       const centers = await CohesionCenterObject.find({ region: user.region });
       if (!centers.map((e) => e._id.toString()).includes(req.params.id)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
 
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
       const centers = await CohesionCenterObject.find({ department: { $in: user.department } });
       if (!centers.map((e) => e._id.toString()).includes(req.params.id)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
 
@@ -368,7 +368,7 @@ router.post("/sessionphase1young/:id/:action(_msearch|export)", passport.authent
   try {
     const { user, body } = req;
 
-    if (!canSearchInElasticSearch(user, "sessionphase1young")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "sessionphase1young")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     let filter = [
       {
@@ -390,14 +390,14 @@ router.post("/sessionphase1young/:id/:action(_msearch|export)", passport.authent
         return res.status(200).send({ ok: true, data: "no cohort available" });
       }
       if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.id)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
     if (user.role === ROLES.REFERENT_REGION) {
       const centers = await CohesionCenterObject.find({ region: user.region });
       const sessionsPhase1 = await SessionPhase1Object.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
       if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.id)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
 
@@ -405,7 +405,7 @@ router.post("/sessionphase1young/:id/:action(_msearch|export)", passport.authent
       const centers = await CohesionCenterObject.find({ department: user.department });
       const sessionsPhase1 = await SessionPhase1Object.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
       if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.id)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
 
@@ -427,7 +427,7 @@ router.post("/structure/:action(_msearch|export)", passport.authenticate(["refer
     const { body, user } = req;
     const filter = [];
 
-    if (!canSearchInElasticSearch(user, "structure")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "structure")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // A responsible can only see their structure and parent structure (not sure why we need ES though).
     if (user.role === ROLES.RESPONSIBLE) {
@@ -466,7 +466,7 @@ router.post("/referent/:action(_msearch|export)", passport.authenticate(["refere
     const { user, body } = req;
     let filter = [];
 
-    if (!canSearchInElasticSearch(user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "referent")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // A responsible cans only see their structure's referent (responsible and supervisor).
     if (user.role === ROLES.RESPONSIBLE) {
@@ -535,7 +535,7 @@ router.post("/application/:action(_msearch|export)", passport.authenticate(["ref
     const { user, body } = req;
     const filter = [];
 
-    if (!canSearchInElasticSearch(user, "application")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "application")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // A responsible can only see their structure's applications.
     if (user.role === ROLES.RESPONSIBLE) {
@@ -570,7 +570,7 @@ router.post("/cohesioncenter/:action(_msearch|export)", passport.authenticate(["
     const { user, body } = req;
     let filter = [];
 
-    if (!canSearchInElasticSearch(user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "cohesioncenter")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (user.role === ROLES.REFERENT_REGION) filter.push({ term: { "region.keyword": user.region } });
     if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ terms: { "department.keyword": user.department } });
@@ -593,7 +593,7 @@ router.post("/edit-cohesioncenter/_msearch", passport.authenticate(["referent"],
     const { user, body } = req;
     let filter = [];
 
-    if (!canSearchInElasticSearch(user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "cohesioncenter")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const response = await esClient.msearch({ index: "cohesioncenter", body: withFilterForMSearch(body, filter) });
     return res.status(200).send(response.body);
@@ -608,7 +608,7 @@ router.post("/sessionphase1/:action(_msearch|export)", passport.authenticate(["r
     const { user, body } = req;
     let filter = [];
 
-    if (!canSearchSessionPhase1(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchSessionPhase1(user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (req.params.action === "export") {
       const response = await allRecords("sessionphase1", applyFilterOnQuery(req.body.query, filter));
@@ -637,7 +637,7 @@ router.post("/pointderassemblement/:action(_msearch|export)", passport.authentic
       },
     });
 
-    if (!canSearchMeetingPoints(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchMeetingPoints(user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (req.params.action === "export") {
       const response = await allRecords("pointderassemblement", applyFilterOnQuery(req.body.query, filter));
@@ -666,7 +666,7 @@ router.post("/lignebus/:action(_msearch|export)", passport.authenticate(["refere
       },
     });
 
-    if (!canSearchLigneBus(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchLigneBus(user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (req.params.action === "export") {
       const response = await allRecords("lignebus", applyFilterOnQuery(req.body.query, filter));
@@ -695,7 +695,7 @@ router.post("/plandetransport/:action(_msearch|export)", passport.authenticate([
       },
     });
 
-    if (!canSearchLigneBus(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchLigneBus(user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (req.params.action === "export") {
       const response = await allRecords("plandetransport", applyFilterOnQuery(req.body.query, filter));
@@ -724,7 +724,7 @@ router.post("/bus/:action(_msearch|export)", passport.authenticate(["referent"],
       },
     });
 
-    if (!canViewBus(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewBus(user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (req.params.action === "export") {
       const response = await allRecords("meetingpoint", applyFilterOnQuery(req.body.query, filter));
@@ -743,7 +743,7 @@ router.post("/email/:action(_msearch|export)", passport.authenticate(["referent"
   try {
     const { user, body } = req;
 
-    if (!canViewEmailHistory(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewEmailHistory(user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     let filter = [];
 
@@ -772,7 +772,7 @@ router.post("/association/:action(_msearch|export)", passport.authenticate(["ref
     };
     const es = new (require("@elastic/elasticsearch").Client)(options);
 
-    if (!canSearchAssociation(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchAssociation(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const serializeResponse = (response) => {
       return serializeHits(response, (hit) => {
@@ -802,7 +802,7 @@ router.post("/team/:action(_msearch|export)", passport.authenticate(["referent"]
     const { user, body } = req;
     let filter = [];
 
-    if (!canSearchInElasticSearch(user, "team")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "team")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
       filter.push({
@@ -836,7 +836,7 @@ router.post("/modificationbus/:action(_msearch|export)", passport.authenticate([
     const { user, body } = req;
     let filter = [];
 
-    if (!canSearchInElasticSearch(user, "modificationbus")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "modificationbus")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (req.params.action === "export") {
       const response = await allRecords("modificationbus", applyFilterOnQuery(req.body.query, filter));
@@ -853,7 +853,7 @@ router.post("/modificationbus/:action(_msearch|export)", passport.authenticate([
 router.post("/inscriptiongoal/_msearch", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { body, user } = req;
-    if (!isReferent(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!isReferent(user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const response = await esClient.msearch({ index: "inscriptiongoal", body });
     return res.status(200).send(response.body);
   } catch (error) {
