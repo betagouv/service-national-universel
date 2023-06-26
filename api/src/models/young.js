@@ -459,6 +459,26 @@ const Schema = new mongoose.Schema({
       description: "Mot de passe du volontaire",
     },
   },
+  userIps: {
+    type: [String],
+    default: [],
+    documentation: {
+      description: "Liste des IP utilisées par l'utilisateur",
+    },
+  },
+  token2FA: {
+    type: String,
+    default: "",
+    documentation: {
+      description: "Token servant à la 2FA",
+    },
+  },
+  token2FAExpires: {
+    type: Date,
+    documentation: {
+      description: "Date limite de validité du token pour 2FA",
+    },
+  },
   loginAttempts: {
     type: Number,
     default: 0,
@@ -1933,9 +1953,26 @@ Schema.pre("save", function (next) {
   }
 });
 
+Schema.pre("save", async function (next) {
+  if (this.isModified("userIps") || this.isNew) {
+    const _userIps = [];
+    for (let ip of this.userIps) {
+      const hashedIp = await bcrypt.hash(ip, 10);
+      _userIps.push(hashedIp);
+    }
+    this.userIps = _userIps;
+  }
+  return next();
+});
+
 Schema.methods.comparePassword = async function (p) {
   const user = await OBJ.findById(this._id).select("password");
   return bcrypt.compare(p, user.password || "");
+};
+
+Schema.methods.compareIps = async function (ip) {
+  const user = await OBJ.findById(this._id).select("userIps");
+  return user.userIps.some((_ip) => bcrypt.compare(ip, _ip));
 };
 
 //Sync with sendinblue

@@ -67,6 +67,7 @@ const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscripti
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
+router.post("/signin-2fa", (req, res) => YoungAuth.signin2FA(req, res));
 router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     await YoungAuth.logout(req, res);
