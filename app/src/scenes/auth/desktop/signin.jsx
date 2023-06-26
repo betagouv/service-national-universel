@@ -37,7 +37,10 @@ export default function Signin() {
     if (loading || disabled) return;
     setLoading(true);
     try {
-      const { user: young, token } = await api.post(`/young/signin`, { email, password });
+      const { user: young, token, code } = await api.post(`/young/signin`, { email, password });
+      if (code === "2FA_REQUIRED") {
+        return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
+      }
       if (young) {
         if (redirect?.startsWith("http")) return (window.location.href = redirect);
         if (token) api.setToken(token);
