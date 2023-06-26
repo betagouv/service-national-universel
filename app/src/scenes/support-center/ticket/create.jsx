@@ -175,10 +175,10 @@ export default function TicketCreate(props) {
 
                 {values.step2?.id === "PHASE_1_WITHDRAWAL" && (
                   <>
-                    <div className="flex gap-4 px-3 pt-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-3 pt-10">
                       {articles?.map((article) => (
                         <a
-                          className="bg-white rounded-xl p-3 w-96 flex flex-col gap-2 border-2 text-sm hover:border-blue-500 hover:text-gray-800 transition group"
+                          className="bg-white rounded-xl p-3 flex flex-col gap-2 border-2 text-sm hover:border-blue-500 hover:text-gray-800 transition group"
                           href={urlWithScheme(article.url)}
                           target="_blank"
                           rel="noreferrer"
