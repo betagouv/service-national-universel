@@ -179,8 +179,6 @@ const MandatoryLogIn = () => {
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
-  const [bus, setBus] = useState({});
-  const [isModalDelayedOpen, setIsModaldelayedOpen] = useState(false);
   // const [isModalMondayOpen, setIsModalMondayOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
@@ -195,25 +193,10 @@ const Espace = () => {
     return toastr.success("Vous avez bien accepté les conditions générales d'utilisation.");
   };
 
-  const getBus = async () => {
-    try {
-      const { ok, code, data: reponseBus } = await api.get("/young/bus");
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
-      }
-      setBus(reponseBus);
-      if (reponseBus.delayedForth === "true" || reponseBus.delayedBack === "true") setIsModaldelayedOpen(true);
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
-    }
-  };
-
   useEffect(() => {
     if (young && young.acceptCGU !== "true") {
       setIsModalCGUOpen(true);
     }
-    getBus();
 
     // ! To clean after departure. Or just keep it for later.
     // if (young && young.cohort === "Juin 2023" && busLignesDepartLundi.includes(young.ligneId)) {
@@ -274,7 +257,6 @@ const Espace = () => {
 
       <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
       <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
-      <ModalDelayed isOpen={isModalDelayedOpen} onClose={() => setIsModaldelayedOpen(false)} bus={bus} />
       {/* <ModalMonday isOpen={isModalMondayOpen} onClose={() => setIsModalMondayOpen(false)} /> */}
     </>
   );
