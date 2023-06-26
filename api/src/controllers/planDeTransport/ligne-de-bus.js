@@ -81,8 +81,8 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
       travelTime: Joi.string().required(),
       lunchBreak: Joi.boolean().required(),
       lunchBreakReturn: Joi.boolean().required(),
-      delayedForth: Joi.boolean().required(),
-      delayedBack: Joi.boolean().required(),
+      delayedForth: Joi.string(),
+      delayedBack: Joi.string(),
     }).validate({ ...req.params, ...req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 

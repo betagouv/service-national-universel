@@ -202,6 +202,7 @@ const Schema = new mongoose.Schema({
   delayedForth: {
     type: String,
     enum: ["true", "false"],
+    default: "false",
     documentation: {
       description: "La ligne est retardée à l'allée",
     },
@@ -209,6 +210,7 @@ const Schema = new mongoose.Schema({
   delayedBack: {
     type: String,
     enum: ["true", "false"],
+    default: "false",
     documentation: {
       description: "La ligne est retardée au Retour",
     },
