@@ -37,7 +37,7 @@ afterAll(dbClose);
 
 describe("Referent", () => {
   describe("POST /referent/signup_invite/:template", () => {
-    it.only("should invite and add referent", async () => {
+    it("should invite and add referent", async () => {
       const referentFixture = getNewReferentFixture();
       const referentsBefore = await getReferentsHelper();
       const res = await request(getAppHelper()).post("/referent/signup_invite/001").send(referentFixture);
