@@ -156,7 +156,7 @@ class Auth {
       }
 
       // enable it only on staging for referent
-      if (config.ENVIRONMENT !== "production" && !isYoung(user)) {
+      if (!isYoung(user)) {
         const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
         const isKnownIp = await user.compareIps(ip);
         if (!user.userIps || user.userIps?.length === 0 || !isKnownIp) {
