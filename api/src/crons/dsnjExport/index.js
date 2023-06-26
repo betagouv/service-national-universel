@@ -52,11 +52,10 @@ const generateCohesionCentersExport = async (cohort) => {
 
 const generateYoungsExport = async (cohort, afterSession = false) => {
   const sessions = await SessionPhase1Model.find({ cohort: cohort.name }).select({ _id: 1, cohesionCenterId: 1 });
-  const sessionIds = sessions.map(({ _id }) => _id);
   const cohesionCenterIds = sessions.map(({ cohesionCenterId }) => cohesionCenterId);
   const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: cohesionCenterIds } }).select({ _id: 1, name: 1, code2022: 1 });
   const cohesionCenterParSessionId = {};
-  const youngs = await YoungModel.find({ sessionPhase1Id: { $in: sessionIds }, status: { $in: ["VALIDATED", "WAITING_LIST"] } }).select({
+  const youngs = await YoungModel.find({ cohort: cohort.name, status: { $in: ["VALIDATED", "WAITING_LIST"] } }).select({
     _id: 1,
     sessionPhase1Id: 1,
     email: 1,
@@ -75,7 +74,6 @@ const generateYoungsExport = async (cohort, afterSession = false) => {
     phone: 1,
     situation: 1,
     statusPhase1: 1,
-    presenceJDM: 1,
   });
 
   const formattedYoungs = youngs.map(
@@ -98,15 +96,18 @@ const generateYoungsExport = async (cohort, afterSession = false) => {
       phone,
       situation,
       statusPhase1,
-      presenceJDM,
     }) => {
       const isFrench = frenchNationality === "true";
       const wasBornInFrance = birthCountry === "France";
-      let cohesionCenter = cohesionCenterParSessionId[sessionPhase1Id];
-      if (!cohesionCenter) {
-        cohesionCenter = findCohesionCenterBySessionId(sessionPhase1Id, sessions, cohesionCenters);
-        cohesionCenterParSessionId[sessionPhase1Id] = cohesionCenter;
+      let cohesionCenter;
+      if (sessionPhase1Id) {
+        cohesionCenter = cohesionCenterParSessionId[sessionPhase1Id];
+        if (!cohesionCenter) {
+          cohesionCenter = findCohesionCenterBySessionId(sessionPhase1Id, sessions, cohesionCenters);
+          cohesionCenterParSessionId[sessionPhase1Id] = cohesionCenter;
+        }
       }
+
       return {
         "Identifiant technique": _id.toString(),
         "Email du volontaire": email,
@@ -125,10 +126,10 @@ const generateYoungsExport = async (cohort, afterSession = false) => {
         "Commune volontaire": city,
         "Téléphone volontaire": phone,
         "Statut professionnel": situationTranslations[situation] || situation,
-        "ID du centre": cohesionCenter._id.toString(),
-        "Libellé du centre": cohesionCenter.name,
+        "ID du centre": cohesionCenter ? cohesionCenter._id.toString() : "",
+        "Libellé du centre": cohesionCenter ? cohesionCenter.name : "",
         "Date début session": cohort.dateStart,
-        'Validation séjour (validation phase 1 ET présence JDM "oui")': afterSession ? (statusPhase1 === "DONE" && presenceJDM === "true" ? "Oui" : "Non") : "null",
+        "Validation séjour (Validation phase 1)": afterSession ? (statusPhase1 === "DONE" ? "Oui" : "Non") : "null",
       };
     },
   );
