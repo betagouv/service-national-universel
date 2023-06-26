@@ -10,14 +10,13 @@ import api from "../../../services/api";
 import { HeroContainer } from "../../../components/Content";
 import FileUpload, { useFileUpload } from "../../../components/FileUpload";
 import ErrorMessage, { requiredMessage } from "../../inscription2023/components/ErrorMessageOld";
-import { SelectTag, step0, step1, step2Technical, step2Question } from "./worflow";
+import { SelectTag, step0, step1, step2Technical, step2Question, articles } from "./worflow";
 import { translate, urlWithScheme } from "../../../utils";
 import { capture } from "../../../sentry";
 import Unlock from "../../../assets/icons/Unlock";
 import QuestionBubble from "../../../assets/icons/QuestionBubble";
 import ChevronRight from "../../../assets/icons/ChevronRight";
 import LoadingButton from "../../../components/buttons/LoadingButton";
-import { supportURL } from "../../../config";
 
 export default function TicketCreate(props) {
   const { files, addFiles, deleteFile, error } = useFileUpload();
@@ -33,21 +32,6 @@ export default function TicketCreate(props) {
       toastr.error(error, "");
     }
   }, [error]);
-
-  const articles = [
-    {
-      title: "Phase 1 : Changer les dates de mon séjour",
-      emoji: "🌲",
-      body: "Vous n'êtes plus disponible pendant votre séjour ? Découvrer comment transférer votre inscription sur un autre séjour du SNU.",
-      url: `${supportURL}/base-de-connaissance/je-souhaite-changer-les-dates-de-mon-sejour`,
-    },
-    {
-      title: "Phase 1 : Se désister",
-      emoji: "😕",
-      body: "Vous n'êtes plus en mesure de participer au séjour ? Vous pouvez vous désister directement depuis votre espace.",
-      url: `${supportURL}/base-de-connaissance/je-me-desiste-du-snu`,
-    },
-  ];
 
   return (
     <Container>
@@ -192,8 +176,8 @@ export default function TicketCreate(props) {
                       ))}
                     </div>
 
-                    <button onClick={() => setAnswerNotFound(true)} className="text-blue-600 underline mt-4">
-                      Je n'ai pas trouvé de réponse à ma question
+                    <button onClick={() => setAnswerNotFound(true)} className="text-blue-600 hover:underline underline-offset-4 decoration-2 mx-3 my-6 text-left">
+                      Contacter quelqu'un
                     </button>
                   </>
                 )}
