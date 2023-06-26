@@ -233,7 +233,7 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.pre("save", async function (next) {
-  if (this.isModified("password") || this.isNew) {
+  if (this.isModified("password")) {
     const hashedPassword = await bcrypt.hash(this.password, 10);
     this.password = hashedPassword;
   }
