@@ -57,7 +57,7 @@ describe("Department service", () => {
       departmentServiceFixture.department = "bar";
       const departmentService = await createDepartmentServiceHelper(departmentServiceFixture);
       const res = await request(getAppHelper()).get(`/department-service/bar`).send();
-      expect(res.statusCode).toEqual(403);
+      expect(res.statusCode).toEqual(418);
       await deleteDepartmentServiceByIdHelper(departmentService._id);
       passport.user = previous;
     });

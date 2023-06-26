@@ -68,7 +68,7 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
     }
 
     if (!canUpdateYoungStatus({ body: { status: YOUNG_STATUS.WAITING_CORRECTION }, current: young })) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     young.set({ correctionRequests: requests, status: YOUNG_STATUS.WAITING_CORRECTION });
@@ -124,7 +124,7 @@ router.delete("/:youngId/:field", passport.authenticate("referent", { session: f
       let status = young.status;
       if (!stillWaitingCorrection && status === YOUNG_STATUS.WAITING_CORRECTION) {
         if (!canUpdateYoungStatus({ body: { status: YOUNG_STATUS.WAITING_VALIDATION }, current: young })) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+          return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         }
         status = YOUNG_STATUS.WAITING_VALIDATION;
       }

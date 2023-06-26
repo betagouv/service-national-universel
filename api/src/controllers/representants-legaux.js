@@ -31,7 +31,7 @@ function tokenParentValidMiddleware(req, res, next) {
   const field = req.query.parent === "2" ? "parent2Inscription2023Token" : "parent1Inscription2023Token";
   YoungModel.findOne({ [field]: token })
     .then((young) => {
-      if (!young) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!young) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       req.young = young;
       next();
     })
@@ -70,7 +70,7 @@ router.put("/representant-fromFranceConnect/:id", tokenParentValidMiddleware, as
     const young = req.young;
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set(value);
     await young.save({ fromUser: req.user });
@@ -197,7 +197,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
         } else value.status = YOUNG_STATUS.NOT_AUTORISED;
 
         if (!canUpdateYoungStatus({ body: value, current: young })) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+          return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         }
         statusChanged = true;
 

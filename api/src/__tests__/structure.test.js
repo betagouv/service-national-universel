@@ -130,7 +130,7 @@ describe("Structure", () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const res = await request(getAppHelper()).get(`/structure/${structure._id}/patches`).send();
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(418);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if structure found with patches", async () => {

@@ -197,7 +197,7 @@ describe("Structure", () => {
       passport.user = secondYoung;
 
       const res = await request(getAppHelper()).get(`/contract/${contract._id}`).send();
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(418);
 
       passport.user = previous;
     });
@@ -298,7 +298,7 @@ describe("Structure", () => {
       passport.user = secondYoung;
 
       const resDownload = await request(getAppHelper()).post(`/contract/${contract._id}/download`).send();
-      expect(resDownload.status).toBe(403);
+      expect(resDownload.status).toBe(418);
       passport.user = previous;
     });
 

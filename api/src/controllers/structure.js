@@ -75,7 +75,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    if (!canCreateStructure(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateStructure(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (isSupervisor(req.user)) {
       checkedStructure.networkId = req.user.structureId;
@@ -102,7 +102,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const structure = await StructureObject.findById(checkedId);
     if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canModifyStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canModifyStructure(req.user, structure)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error: errorStructure, value: checkedStructure } = validateStructure(req.body);
     if (errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -127,7 +127,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 router.get("/networks", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const data = await StructureObject.find({ isNetwork: "true" }).sort("name");
-    if (!canViewStructureChildren(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewStructureChildren(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
   } catch (error) {
     capture(error);
@@ -140,7 +140,7 @@ router.get("/:id/children", passport.authenticate("referent", { session: false, 
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!canViewStructureChildren(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewStructureChildren(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const structure = await StructureObject.findById(checkedId);
     if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -164,7 +164,7 @@ router.get("/:id/mission", passport.authenticate("referent", { session: false, f
     const data = await MissionObject.find({ structureId: checkedId });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canViewMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewMission(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     return res.status(200).send({ ok: true, data: data.map(serializeMission) });
   } catch (error) {
@@ -180,7 +180,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!canViewStructures(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewStructures(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await StructureObject.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -194,7 +194,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
 
 router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (!canViewStructures(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewStructures(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await StructureObject.find({});
     return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
   } catch (error) {
@@ -209,7 +209,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const structure = await StructureObject.findById(checkedId);
-    if (!canDeleteStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canDeleteStructure(req.user, structure)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const missionsLinkedToReferent = await MissionObject.find({ structureId: checkedId });
 
@@ -252,7 +252,7 @@ router.post("/:id/representant", passport.authenticate("referent", { session: fa
     const structure = await StructureObject.findById(structureId);
     if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canModifyStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canModifyStructure(req.user, structure)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     structure.set({ structureManager: value });
     await structure.save({ fromUser: req.user });
@@ -271,7 +271,7 @@ router.delete("/:id/representant", passport.authenticate("referent", { session: 
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canModifyStructure(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canModifyStructure(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const structure = await StructureObject.findById(value);
     if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 

@@ -28,7 +28,7 @@ router.post("/:cohort", passport.authenticate("referent", { session: false, fail
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    if (!canUpdateInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateInscriptionGoals(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const promises = inscriptionsGoals.map((item) => {
       return InscriptionGoalModel.findOneAndUpdate(
@@ -54,7 +54,7 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewInscriptionGoals(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // 2021 can be empty in database. This could be removed once all data is migrated.
     const data = await InscriptionGoalModel.find({ cohort: value.cohort === "2021" ? ["2021", null] : value.cohort });
@@ -73,7 +73,7 @@ router.get("/:department/current", passport.authenticate("referent", { session: 
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewInscriptionGoals(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const y2020 = await YoungModel.find({ cohort: "2020", statusPhase1: "WAITING_AFFECTATION", department: value.department }).countDocuments();
     const y2021 = await YoungModel.find({ cohort: "2021", status: "VALIDATED", department: value.department }).countDocuments();
@@ -94,7 +94,7 @@ router.get("/:cohort/department/:department", passport.authenticate("referent", 
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewInscriptionGoals(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { department, cohort } = value;
     const fillingRate = await getFillingRate(department, cohort);

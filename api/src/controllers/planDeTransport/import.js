@@ -69,7 +69,7 @@ router.post(
       const file = files[0];
 
       if (!canSendPlanDeTransport(req.user)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
       const { name, tempFilePath, mimetype } = file;
@@ -89,7 +89,7 @@ router.post(
           const { isInfected } = await clamscan.isInfected(tempFilePath);
           if (isInfected) {
             capture(`File ${name} of user(${req.user.id})is infected`);
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+            return res.status(418).send({ ok: false, code: ERRORS.FILE_INFECTED });
           }
         } catch {
           return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
@@ -432,7 +432,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
     }
 
     if (!canSendPlanDeTransport(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const lines = importData.lines;
