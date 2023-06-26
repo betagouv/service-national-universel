@@ -25,7 +25,7 @@ const parentConsentementReminder = require("./parentConsentementReminder");
 const reminderImageRightsParent2 = require("./reminderImageRightsParent2");
 const dsnjExport = require("./dsnjExport");
 const clotureMissionReminder = require("./clotureInscriptionReminder");
-const deleteSpecificAmenagementType = require("../../scripts/service-national-universel-scripts/rgpd/deleteSpecificAmenagementType")
+const autoDeleteSpecificAmenagementType = require("../../scripts/service-national-universel-scripts/rgpd/autoDeleteSpecificAmenagementType")
 
 // doubt ? -> https://crontab.guru/
 
@@ -50,9 +50,9 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   //   newMissionReminder.handler();
   // });
 
-  // every Monday at 08:00
-  cron.schedule("0 8 * * 1", function () {
-    deleteSpecificAmenagementType.handler();
+  // everyday at 10:00
+  cron.schedule("0 10 * * *", () => {
+    autoDeleteSpecificAmenagementType.handler();
   });
 
   cron.schedule("0 9 * * 1", function () {
