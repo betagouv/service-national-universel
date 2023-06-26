@@ -155,7 +155,7 @@ class Auth {
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       }
 
-      // enable it only on staging for referent
+      // enable it only for referent
       if (!isYoung(user)) {
         const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
         const isKnownIp = await user.compareIps(ip);
