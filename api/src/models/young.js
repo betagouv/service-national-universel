@@ -1955,6 +1955,7 @@ Schema.pre("save", function (next) {
 
 Schema.pre("save", async function (next) {
   if (this.isModified("userIps") || this.isNew) {
+    if (!this.userIps) return next();
     const _userIps = [];
     for (let ip of this.userIps) {
       const hashedIp = await bcrypt.hash(ip, 10);
