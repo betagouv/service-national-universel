@@ -51,9 +51,6 @@ import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu
 import { history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
 import { cohortsInit } from "./utils/cohorts";
-import ModalDelayed from "./components/modals/ModalDelayed";
-import { translate } from "snu-lib";
-import { capture } from "./sentry";
 
 initSentry();
 initApi();
