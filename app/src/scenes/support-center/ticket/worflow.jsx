@@ -101,7 +101,13 @@ export const step2Question = {
   PHASE_1: {
     parentId: "QUESTION",
     id: "PHASE_1",
-    label: "Phase 1 - séjour de cohésion",
+    label: "Phase 1 - Séjour de cohésion",
+    tags: ["TAG_phase_1"],
+  },
+  PHASE_1_WITHDRAWAL: {
+    parentId: "QUESTION",
+    id: "PHASE_1_WITHDRAWAL",
+    label: "Phase 1 - Changer de séjour/se désister",
     tags: ["TAG_phase_1"],
   },
   PHASE_2: {
