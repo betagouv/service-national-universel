@@ -15,7 +15,6 @@ import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExterna
 import { getCohort } from "../../utils/cohorts";
 import { useSelector } from "react-redux";
 import BannerTermJuly from "./components/BannerTermJuly";
-// import { BsExclamationCircle } from "react-icons/bs";
 
 export default function WaitingAffectation() {
   const young = useSelector((state) => state.Auth.young);
@@ -38,7 +37,7 @@ export default function WaitingAffectation() {
             </h1>
             {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null}
             {allowedGrades.includes(young.grade) && (
-              <BannerTermJuly responsive={"flex items-start justify-center mb-2 border-[1px] border-gray-200 rounded-lg shadow-sm lg:items-center"} />
+              <BannerTermJuly responsive={"flex items-start justify-center mb-2 border-[1px] bg-white border-gray-200 rounded-lg shadow-sm lg:items-center"} />
             )}
             <div className="flex max-w-[688px] items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-[22px] drop-shadow">
               <div className="hidden h-[42px] w-[42px] md:block">

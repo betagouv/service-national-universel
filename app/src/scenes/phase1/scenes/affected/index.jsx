@@ -86,14 +86,14 @@ export default function Affected() {
             </h1>
             {youngCanChangeSession(young) ? <ChangeStayLink className="my-4 md:my-8" /> : null}
             {allowedGrades.includes(young.grade) && (
-              <BannerTermJuly responsive={"flex items-start justify-center mb-2 border-[1px] border-gray-200 rounded-lg shadow-sm p-4 lg:hidden"} />
+              <BannerTermJuly responsive={"flex items-start justify-center mb-2 border-[1px] bg-white border-gray-200 rounded-lg shadow-sm lg:hidden"} />
             )}
           </div>
 
           <CenterInfo center={center} />
         </header>
         {allowedGrades.includes(young.grade) && (
-          <BannerTermJuly responsive="hidden lg:flex order-2 items-center justify-center mb-4 border-[1px] border-gray-200 shadow-sm rounded-lg mx-10" />
+          <BannerTermJuly responsive="hidden lg:flex order-2 items-center justify-start mb-4 bg-white border-[1px] border-gray-200 shadow-sm rounded-lg mx-[5%]" />
         )}
         {isStepMedicalFieldDone(young) && (
           <div className="order-3 flex flex-none flex-col gap-4 md:flex-row">
