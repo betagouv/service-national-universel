@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { Field } from "formik";
 import ErrorMessage, { requiredMessage } from "../../inscription2023/components/ErrorMessageOld";
 import { supportURL } from "../../../config";
+import plausibleEvent from "../../../services/plausible";
 
 export const SelectTag = ({ options, name, value, title, selectPlaceholder, handleChange, errors, touched }) => {
   return (
@@ -16,6 +17,9 @@ export const SelectTag = ({ options, name, value, title, selectPlaceholder, hand
         value={value || ""}
         onChange={(e) => {
           const value = options.find((o) => o.id === e.target.value);
+          if (e.target.value === "PHASE_1_WITHDRAWAL") {
+            plausibleEvent("Besoin d'aide - Desistement/Changement de sejour");
+          }
           handleChange({ target: { name, value } });
         }}
         validate={(v) => !v && requiredMessage}>

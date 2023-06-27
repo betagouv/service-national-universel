@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
 import close from "../../assets/cancel.png";
-
+import plausibleEvent from "../../services/plausible";
 import api from "../../services/api";
 import { translate, departmentList, department2region, urlWithScheme } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -23,6 +23,11 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
       toastr.error(error, "");
     }
   }, [error]);
+
+  const handleClick = () => {
+    setAnswerNotFound(true);
+    plausibleEvent("Besoin d'aide - Je n'ai pas trouve de reponse");
+  };
 
   return (
     <Form>
@@ -186,7 +191,7 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
                     ))}
                   </div>
 
-                  <button onClick={() => setAnswerNotFound(true)} className="text-blue-600 hover:underline underline-offset-4 decoration-2 mx-3 my-6 text-left">
+                  <button onClick={handleClick} className="text-blue-600 hover:underline underline-offset-4 decoration-2 mx-3 my-6 text-left">
                     Contacter quelqu'un
                   </button>
                 </>
