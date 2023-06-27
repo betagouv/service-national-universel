@@ -18,6 +18,7 @@ import ModalMultiPointagePresenceJDM from "../components/modals/ModalMultiPointa
 import ModalPointageDepart from "../components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../components/modals/ModalPointagePresenceArrivee";
 import ModalPointagePresenceJDM from "../components/modals/ModalPointagePresenceJDM";
+import { COHORTS_BEFORE_JULY_2023 } from "snu-lib";
 
 export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSession, filterArray, setHasYoungValidated }) {
   const history = useHistory();
@@ -322,7 +323,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
                       </th>
                       <th className="">Volontaire</th>
                       <th className="">Présence à l&apos;arrivée</th>
-                      <th className="">Présence JDM</th>
+                      {COHORTS_BEFORE_JULY_2023.includes(focusedSession?.cohort) ? <th className="">Présence JDM</th> : null}
                       <th className="">Départ</th>
                     </tr>
                   </thead>
@@ -343,6 +344,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
                         }
                         selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
                         isYoungCheckinOpen={isYoungCheckinOpen}
+                        focusedSession={focusedSession}
                       />
                     ))}
                   </tbody>
@@ -383,7 +385,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
   );
 }
 
-const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen }) => {
+const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen, focusedSession }) => {
   const [value, setValue] = useState(null);
   const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
   const [modalPointagePresenceJDM, setModalPointagePresenceJDM] = useState({ isOpen: false });
@@ -461,38 +463,40 @@ const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen }) 
             )}
           </div>
         </td>
-        <td className={`${bgColor}`}>
-          <div className="text-xs font-normal text-[#242526]" onClick={(e) => e.stopPropagation()}>
-            {isYoungCheckinOpen ? (
-              <select
-                className={`cursor-pointer rounded-lg border-[1px] border-gray-200 py-2 px-3 text-black ${presenceJDMBgColor} ${presenceJDMTextColor} disabled:cursor-auto disabled:text-gray-500`}
-                value={value.presenceJDM || ""}
-                disabled={value.cohesionStayPresence === "false"}
-                onChange={(e) => {
-                  setModalPointagePresenceJDM({
-                    isOpen: true,
-                    value: e.target.value,
-                  });
-                }}
-                style={{ fontFamily: "Marianne" }}>
-                <option disabled label="Présence JDM">
-                  Présence JDM
-                </option>
-                {[
-                  { label: "Non renseigné", value: "", disabled: true, hidden: true },
-                  { label: "Présent", value: "true" },
-                  { label: "Absent", value: "false" },
-                ].map((option, i) => (
-                  <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
-                    {option.label}
+        {COHORTS_BEFORE_JULY_2023.includes(focusedSession?.cohort) ? (
+          <td className={`${bgColor}`}>
+            <div className="text-xs font-normal text-[#242526]" onClick={(e) => e.stopPropagation()}>
+              {isYoungCheckinOpen ? (
+                <select
+                  className={`cursor-pointer rounded-lg border-[1px] border-gray-200 py-2 px-3 text-black ${presenceJDMBgColor} ${presenceJDMTextColor} disabled:cursor-auto disabled:text-gray-500`}
+                  value={value.presenceJDM || ""}
+                  disabled={value.cohesionStayPresence === "false"}
+                  onChange={(e) => {
+                    setModalPointagePresenceJDM({
+                      isOpen: true,
+                      value: e.target.value,
+                    });
+                  }}
+                  style={{ fontFamily: "Marianne" }}>
+                  <option disabled label="Présence JDM">
+                    Présence JDM
                   </option>
-                ))}
-              </select>
-            ) : (
-              <div className="">{value.presenceJDM === "true" ? "Présent" : value.presenceJDM === "false" ? "Absent" : "Non renseigné"}</div>
-            )}
-          </div>
-        </td>
+                  {[
+                    { label: "Non renseigné", value: "", disabled: true, hidden: true },
+                    { label: "Présent", value: "true" },
+                    { label: "Absent", value: "false" },
+                  ].map((option, i) => (
+                    <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="">{value.presenceJDM === "true" ? "Présent" : value.presenceJDM === "false" ? "Absent" : "Non renseigné"}</div>
+              )}
+            </div>
+          </td>
+        ) : null}
         <td className={`${bgColor} mr-2 rounded-r-lg`}>
           <div className={`text-xs font-normal  ${mainTextColor}`} onClick={(e) => e.stopPropagation()}>
             <div

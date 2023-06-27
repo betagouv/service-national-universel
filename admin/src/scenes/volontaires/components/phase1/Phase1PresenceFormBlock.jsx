@@ -8,6 +8,7 @@ import { formatDateFR } from "../../../../utils";
 import ModalChangePresenceOnArrival from "../../../../components/modals/young/ModalChangePresenceOnArrival";
 import ModalChangePresenceJDM from "../../../../components/modals/young/ModalChangePresenceJDM";
 import ModalPointageDepart from "../../../centersV2/components/modals/ModalPointageDepart";
+import { COHORTS_BEFORE_JULY_2023 } from "../../../../utils";
 
 const Phase1PresenceFormBlock = ({ className = "", young = null, values = null, setValues, setYoung, editing = false, setLoading, isYoungCheckinOpen }) => {
   const [isPresenceOnArrivalModalOpen, setIsPresenceOnArrivalModalOpen] = useState(false);
@@ -80,22 +81,24 @@ const Phase1PresenceFormBlock = ({ className = "", young = null, values = null, 
               ]}
             />
           </div>
-          <div className="min-w-[250px] flex-1">
-            <TailwindSelect
-              name="presenceJDM"
-              label="Présence JDM"
-              readOnly={!editing || !isYoungCheckinOpen}
-              type="select"
-              icon={<BadgeCheck className="text-gray-500" width={20} height={20} />}
-              setSelected={handleOnChangePresenceJDM}
-              selected={values.presenceJDM || ""}
-              options={[
-                { label: "Non renseigné", value: "", disabled: true, hidden: true },
-                { label: "Présent", value: "true" },
-                { label: "Absent", value: "false" },
-              ]}
-            />
-          </div>
+          {COHORTS_BEFORE_JULY_2023.includes(young?.cohort) ? (
+            <div className="min-w-[250px] flex-1">
+              <TailwindSelect
+                name="presenceJDM"
+                label="Présence JDM"
+                readOnly={!editing || !isYoungCheckinOpen}
+                type="select"
+                icon={<BadgeCheck className="text-gray-500" width={20} height={20} />}
+                setSelected={handleOnChangePresenceJDM}
+                selected={values.presenceJDM || ""}
+                options={[
+                  { label: "Non renseigné", value: "", disabled: true, hidden: true },
+                  { label: "Présent", value: "true" },
+                  { label: "Absent", value: "false" },
+                ]}
+              />
+            </div>
+          ) : null}
           <div className="min-w-[250px] flex-1 items-stretch">
             <div
               onClick={() => {

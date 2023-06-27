@@ -209,6 +209,8 @@ const DEFAULT_STRUCTURE_NAME = "Ma nouvelle Structure";
 
 const COHORTS = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023"];
 
+const COHORTS_BEFORE_JULY_2023 = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023"];
+
 const INTEREST_MISSION_LIMIT_DATE = {
   2019: "23 mars 2021",
   2020: "31 décembre 2021",
@@ -842,6 +844,7 @@ export {
   WITHRAWN_REASONS,
   CONSENTMENT_TEXTS,
   COHORTS,
+  COHORTS_BEFORE_JULY_2023,
   START_DATE_SESSION_PHASE1,
   COHESION_STAY_START,
   FILE_STATUS_PHASE1,
