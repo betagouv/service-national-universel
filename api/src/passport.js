@@ -1,7 +1,7 @@
 const passport = require("passport");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
-const { secret, APP_URL, ADMIN_URL } = require("./config");
+const { secret, APP_URL, ADMIN_URL, KNOWLEDGEBASE_URL } = require("./config");
 const { capture } = require("./sentry");
 const Joi = require("joi");
 
@@ -17,6 +17,10 @@ function getToken(req) {
     const origin = req.get("Origin");
     if (origin === APP_URL) token = req.cookies.jwt_young;
     else if (origin === ADMIN_URL) token = req.cookies.jwt_ref;
+    else if (origin === KNOWLEDGEBASE_URL) {
+      token = req.cookies.jwt_ref;
+      if (!token) token = req.cookies.jwt_young;
+    }
   }
   return token;
 }
