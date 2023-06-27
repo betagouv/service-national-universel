@@ -241,7 +241,7 @@ class Auth {
   }
 
   async signinToken(req, res) {
-    const { error, value } = Joi.object({ token: Joi.string().required() }).validate({ token: req.cookies.jwt_ref });
+    const { error, value } = Joi.object({ token_ref: Joi.string(), token_young: Joi.string() }).validate({ token_ref: req.cookies.jwt_ref, token_young: req.cookies.jwt_young });
     if (error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
 
     try {
@@ -249,7 +249,9 @@ class Auth {
       user.set({ lastActivityAt: Date.now() });
       await user.save();
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
-      res.send({ ok: true, token: value.token, user: data, data });
+      const token = isYoung(user) ? value.token_young : value.token_ref;
+      if (!data || !token) throw Error("PB with signin_token");
+      res.send({ ok: true, token: token, user: data, data });
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
