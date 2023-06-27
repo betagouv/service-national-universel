@@ -135,7 +135,7 @@ describe("Referent", () => {
       passport.user = referent;
       passport.user.set = jest.fn();
       passport.user.save = jest.fn();
-      const res = await request(getAppHelper()).get("/referent/signin_token").set("Cookie", ["jwt=blah"]);
+      const res = await request(getAppHelper()).get("/referent/signin_token").set("Cookie", ["jwt_ref=blah"]);
       expect(res.status).toBe(200);
       expect(passport.user.set).toHaveBeenCalled();
       expect(passport.user.save).toHaveBeenCalled();
