@@ -190,7 +190,10 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
 
     const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
     if (type === "referent") res.cookie("jwt_ref", token, cookieOptions());
-    else if (type === "young") res.cookie("jwt_young", token, cookieOptions());
+    else if (type === "young") {
+      res.cookie("jwt_young", token, cookieOptions());
+      return res.status(200).send({ ok: true });
+    }
 
     return res.status(200).send({ ok: true, token, data: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
   } catch (error) {
