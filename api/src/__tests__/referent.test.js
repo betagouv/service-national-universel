@@ -433,7 +433,7 @@ describe("Referent", () => {
         .post("/referent/signin_as/referent/" + referent._id)
         .send();
       expect(res.statusCode).toEqual(200);
-      expect(res.headers["set-cookie"][0]).toContain("jwt=");
+      expect(res.headers["set-cookie"][0]).toContain("jwt_ref=");
     });
   });
 });
