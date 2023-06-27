@@ -223,7 +223,7 @@ const Espace = () => {
 
   const forceRedirectInscription =
     [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young.status) ||
-    (inscriptionModificationOpenForYoungs(young.cohort, young) && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
+    (inscriptionModificationOpenForYoungs(young.cohort, young, environment) && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
   if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
 
   return (

@@ -8,6 +8,7 @@ import { useHistory } from "react-router-dom";
 import { translateField, translateCorrectionReason, translate, YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
 import plausibleEvent from "../../services/plausible";
 import { redirectToCorrection } from "../../utils/navigation";
+import { environment } from "../../config";
 
 export default function WaitingCorrectionV2() {
   const young = useSelector((state) => state.Auth.young);
@@ -42,11 +43,11 @@ export default function WaitingCorrectionV2() {
                         <button
                           className="rounded-lg border-[1px] border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:!disabled:bg-blue-600 hover:!disabled:text-white disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-50"
                           onClick={() => history.push(redirectToCorrection(correction.field))}
-                          disabled={young.status === YOUNG_STATUS.WAITING_CORRECTION && !inscriptionModificationOpenForYoungs(young.cohort, young)}>
+                          disabled={young.status === YOUNG_STATUS.WAITING_CORRECTION && !inscriptionModificationOpenForYoungs(young.cohort, young, environment)}>
                           Corriger
                         </button>
                       </div>
-                      {!inscriptionModificationOpenForYoungs(young.cohort, young) && (
+                      {!inscriptionModificationOpenForYoungs(young.cohort, young, environment) && (
                         <span className="text-sm leading-5 text-[#6B7280]">La date limite pour modifier votre dossier d'inscription a été dépassée.</span>
                       )}
                       <hr className="border-gray-200" />
@@ -91,13 +92,13 @@ export default function WaitingCorrectionV2() {
                         {correction?.message ? <div className="text-sm font-normal text-gray-600">{correction.message}</div> : null}
                       </div>
                       <button
-                        disabled={young.status === YOUNG_STATUS.WAITING_CORRECTION && !inscriptionModificationOpenForYoungs(young.cohort, young)}
+                        disabled={young.status === YOUNG_STATUS.WAITING_CORRECTION && !inscriptionModificationOpenForYoungs(young.cohort, young, environment)}
                         className="rounded-lg border-[1px] border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:!disabled:bg-blue-600 hover:!disabled:text-white disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-50"
                         onClick={() => history.push(redirectToCorrection(correction.field))}>
                         Corriger
                       </button>
                     </div>
-                    {!inscriptionModificationOpenForYoungs(young.cohort, young) && (
+                    {!inscriptionModificationOpenForYoungs(young.cohort, young, environment) && (
                       <span className="text-sm leading-5 text-[#6B7280]">La date limite pour modifier votre dossier d'inscription a été dépassée.</span>
                     )}
                     <hr className="border-gray-200" />

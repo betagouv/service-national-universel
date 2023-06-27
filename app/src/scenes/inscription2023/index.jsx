@@ -132,7 +132,7 @@ export default function Index() {
   }
 
   //si la periode de modification est finie
-  if (environment === "production" && !inscriptionModificationOpenForYoungs(young.cohort, young) && young.status !== YOUNG_STATUS.NOT_AUTORISED) {
+  if (!inscriptionModificationOpenForYoungs(young.cohort, young, environment) && young.status !== YOUNG_STATUS.NOT_AUTORISED) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 

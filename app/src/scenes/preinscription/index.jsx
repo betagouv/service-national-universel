@@ -41,7 +41,7 @@ const Step = () => {
     return <Redirect to={`/preinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
-  if (!inscriptionCreationOpenForYoungs() && environment === "production") {
+  if (!inscriptionCreationOpenForYoungs("", false, environment)) {
     return <Redirect to="/" />;
   }
 

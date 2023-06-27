@@ -12,6 +12,8 @@ import Error from "../../../components/error";
 import queryString from "query-string";
 import { useHistory } from "react-router-dom";
 import { cohortsInit } from "../../../utils/cohorts";
+import { Link } from "react-router-dom";
+import { environment } from "../../../config";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -110,6 +112,14 @@ export default function Signin() {
             </a>
           </div>
         </div>
+
+        {environment !== "production" && (
+          <Link to="/auth/preeinscription">
+            <p className="text-blue-france-sun-113 text-center hover:underline hover:text-blue-france-sun-113 mt-4 decoration-2 underline-offset-4">
+              Pré-inscription - accès staging
+            </p>
+          </Link>
+        )}
       </div>
     </div>
   );
