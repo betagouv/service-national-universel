@@ -195,23 +195,27 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
     const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
     await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
 
-    const referentDep = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
-    if (!referentDep) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const referentsDep = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
+    if (!referentsDep) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const manager = referentDep.filter(
+    // on envoie au chef de projet departemental (ou assistant)
+    const managers = referentsDep.filter(
       (referent) => referent.subRole === REFERENT_DEPARTMENT_SUBROLE.manager_department || referent.subRole === REFERENT_DEPARTMENT_SUBROLE.assistant_manager_department,
     );
 
-    const secretariat = referentDep.filter(
+    // sinon on envoie au secretariat du departement ou au manager de phase2
+    const secretariat = referentsDep.filter(
       (referent) => referent.subRole === REFERENT_DEPARTMENT_SUBROLE.secretariat || referent.subRole === REFERENT_DEPARTMENT_SUBROLE.manager_phase2,
     );
 
-    let contactConv = [];
-    if (!manager.length && !secretariat.length) {
+    // si toujours rien on envoie a son contact Convocation
+
+    let contactsConv = [];
+    if (!managers.length && !secretariat.length) {
       const serviceDep = await DepartmentServiceModel.find({ department: young.department });
       if (!serviceDep) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      contactConv = serviceDep[0].contacts.filter((contact) => contact.cohort === young.cohort);
-      contactConv = contactConv.map((contact) => {
+      contactsConv = serviceDep[0].contacts.filter((contact) => contact.cohort === young.cohort);
+      contactsConv = contactsConv.map((contact) => {
         const [firstName, lastName] = contact.contactName.split(" ");
         const email = contact.contactMail;
 
@@ -223,9 +227,9 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
         };
       });
     }
-    const sendContact = manager.length ? manager : secretariat.length ? secretariat : contactConv;
+    const sendContact = managers.length ? managers : secretariat.length ? secretariat : contactsConv;
 
-    let template = SENDINBLUE_TEMPLATES.young.DEPARTURE_CENTRE;
+    let template = SENDINBLUE_TEMPLATES.referent.DEPARTURE_CENTER;
     const mail = await sendTemplate(template, {
       emailTo: sendContact.map((referent) => ({
         name: `${referent.firstName} ${referent.lastName}`,
