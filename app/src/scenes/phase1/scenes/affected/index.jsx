@@ -88,7 +88,7 @@ export default function Affected() {
               <div className="flex items-start justify-center mb-2 border-[1px] border-gray-200 rounded-lg shadow-sm p-4 lg:hidden">
                 <BsExclamationCircle className="h-[20px] w-[65px] text-red-500 mt-1" />
                 <span className="ml-3 text-black text-[14px]">
-                  En cas de convocation aux épreuves du Baccalauréat du second groupe, vous arriverez au centre par vos propres moyen <strong>Le 8 juillet</strong>
+                  En cas de convocation aux épreuves du Baccalauréat du second groupe, vous arriverez au centre par vos propres moyens <strong>Le 8 juillet</strong>.
                 </span>
               </div>
             )}
@@ -100,7 +100,7 @@ export default function Affected() {
           <div className="hidden lg:flex order-2 items-center justify-center mb-4 border-[1px] border-gray-200 shadow-sm rounded-lg mx-20">
             <BsExclamationCircle className="h-4 w-4 text-red-500" />
             <span className="text-black text-[14px] ml-2 mt-4 mb-6">
-              En cas de convocation aux épreuves du Baccalauréat du second groupe, vous arriverez au centre par vos propres moyen <strong>Le 8 juillet</strong>
+              En cas de convocation aux épreuves du Baccalauréat du second groupe, vous arriverez au centre par vos propres moyens <strong>Le 8 juillet</strong>.
             </span>
           </div>
         )}
