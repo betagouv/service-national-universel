@@ -72,7 +72,7 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
           <b>{transportDatesToString(departureDate, returnDate)}</b>, a été retenue. Votre séjour se déroulera au : {center.name}, {center.address} {center.zip} {center.city}
         </ConvocText>
         {young.transportInfoGivenByLocal === "true" ? (
-          <ConvocText>Les informations de transport vous sont transmises par les services locaux.</ConvocText>
+          <ConvocText>Vos informations de transport vous sont transmises par email.</ConvocText>
         ) : (
           <>
             <ConvocText>

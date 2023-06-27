@@ -142,7 +142,6 @@ const render = async (young) => {
 };
 
 const renderLocalTransport = async (young) => {
-  console.log(getBaseUrl());
   try {
     if (!["AFFECTED", "DONE", "NOT_DONE"].includes(young.statusPhase1)) throw `young ${young.id} not affected`;
     if (!young.sessionPhase1Id) throw `young ${young.id} unauthorized`;

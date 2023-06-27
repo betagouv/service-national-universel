@@ -17,7 +17,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const sortFields = [];
 
     // Authorization
-    if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
     const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
@@ -50,7 +50,7 @@ router.post("/not-in-cohort/:cohort", passport.authenticate(["referent"], { sess
     const searchFields = ["name", "city", "zip", "code2022", "typology", "domain", "centerDesignation"];
 
     // Authorization
-    if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
     const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields: [], body: req.body });
@@ -82,8 +82,8 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
     const sortFields = [];
 
     // Authorization
-    if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    if (!canSearchSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchSessionPhase1(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
     const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });

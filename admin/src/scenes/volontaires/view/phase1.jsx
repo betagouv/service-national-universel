@@ -209,7 +209,7 @@ export default function Phase1(props) {
                         <Field title="N˚&nbsp;transport" value={meetingPoint?.bus.busId} externalLink={`${adminURL}/ligne-de-bus/${meetingPoint?.bus._id}`} />
                       </div>
                     ) : young?.transportInfoGivenByLocal === "true" ? (
-                      <div>Les informations de transport seront transmises par les services locaux.</div>
+                      <div>Les informations de transport seront transmises par email.</div>
                     ) : young?.deplacementPhase1Autonomous === "true" ? (
                       <div>{young.firstName} se rend au centre et en revient par ses propres moyens.</div>
                     ) : editing ? (

@@ -1,6 +1,6 @@
 import React from "react";
 import { BsCheck2 } from "react-icons/bs";
-import ChevronDown from "../../../../assets/icons/ChevronDown";
+import ChevronDown from "../../../assets/icons/ChevronDown";
 
 export default function Select({ options, value, Icon = null, alignItems = "left", onChange, disabled }) {
   const [open, setOpen] = React.useState(false);

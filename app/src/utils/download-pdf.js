@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/react";
 import { download } from "snu-lib";
 
 import api from "../services/api";
+import { capture } from "../sentry";
 
 export default async function downloadPDF({
   url,
@@ -20,7 +21,7 @@ export default async function downloadPDF({
       return (window.location.href = redirectUrl);
     }
     // We need more info to understand download issues.
-    Sentry.captureException(e);
+    capture(e);
     toastr.error(errorTitle, e?.message, { timeOut: 10000 });
   }
 }

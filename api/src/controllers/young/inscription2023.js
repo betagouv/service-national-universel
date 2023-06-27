@@ -90,19 +90,19 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       ...value,
       ...(value.livesInFrance === "true"
         ? {
-          foreignCountry: "",
-          foreignAddress: "",
-          foreignCity: "",
-          foreignZip: "",
-          hostFirstName: "",
-          hostLastName: "",
-          hostRelationship: "",
-        }
+            foreignCountry: "",
+            foreignAddress: "",
+            foreignCity: "",
+            foreignZip: "",
+            hostFirstName: "",
+            hostLastName: "",
+            hostRelationship: "",
+          }
         : {}),
       ...validateCorrectionRequest(young, keyList),
     };
 
-    if (!canUpdateYoungStatus({ body: update, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: update, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const formatedDate = new Date(update.birthdateAt);
     formatedDate.setUTCHours(11, 0, 0, 0);
@@ -247,7 +247,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       value = { ...value, ...validateCorrectionRequest(young, keyList) };
     }
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
       ...value,
@@ -300,7 +300,7 @@ router.put("/consentement", passport.authenticate("young", { session: false, fai
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
       acceptCGU: "true",
@@ -348,11 +348,10 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       if (!young?.parent2Inscription2023Token && value.parent2) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
     }
     if (type === "correction") {
-
       const keyList = Object.keys(representantSchema(false));
       value = { ...value, ...validateCorrectionRequest(young, keyList) };
     }
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set(value);
     await young.save({ fromUser: req.user });
@@ -417,7 +416,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Check inscription goals
     const sessions = await getFilteredSessions(young);
@@ -482,7 +481,7 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
       }
 
       let data = { ...value, ...validateCorrectionRequest(young, ["latestCNIFileExpirationDate", "cniFile"]) };
-      if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       const CNIFileNotValidOnStart = data.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort];
       young.set({ ...data, CNIFileNotValidOnStart });
     }
@@ -584,7 +583,7 @@ router.put("/profil", passport.authenticate("young", { session: false, failWithE
     const keyList = Object.keys(profilSchema);
     let data = { ...value, ...validateCorrectionRequest(young, keyList) };
 
-    if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set(data);
     await young.save({ fromUser: req.user });

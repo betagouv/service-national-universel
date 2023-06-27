@@ -47,7 +47,7 @@ describe("Program", () => {
       passport.user = referent;
       const programFixture = { ...getNewProgramFixture(), department: "bar" };
       const res = await request(getAppHelper()).post("/program").send(programFixture);
-      expect(res.statusCode).toEqual(403);
+      expect(res.statusCode).toEqual(418);
       passport.user = previous;
     });
     it("should return 403 if user is referent region and create a program for another region ", async () => {
@@ -57,7 +57,7 @@ describe("Program", () => {
       passport.user = referent;
       const programFixture = { ...getNewProgramFixture(), region: "bar" };
       const res = await request(getAppHelper()).post("/program").send(programFixture);
-      expect(res.statusCode).toEqual(403);
+      expect(res.statusCode).toEqual(418);
       passport.user = previous;
     });
   });
@@ -83,11 +83,11 @@ describe("Program", () => {
       const passport = require("passport");
       passport.user.role = ROLES.REFERENT_DEPARTMENT;
       let res = await request(getAppHelper()).put("/program/" + program._id);
-      expect(res.statusCode).toEqual(403);
+      expect(res.statusCode).toEqual(418);
 
       passport.user.role = ROLES.REFERENT_REGION;
       res = await request(getAppHelper()).put("/program/" + program._id);
-      expect(res.statusCode).toEqual(403);
+      expect(res.statusCode).toEqual(418);
 
       passport.user.role = ROLES.ADMIN;
     });
