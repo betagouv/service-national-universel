@@ -126,7 +126,7 @@ export default function InfoConvocation({ isOpen, onCancel, title, meetingPoint,
           </div>
         </div>
         {young.transportInfoGivenByLocal === "true" ? (
-          <p className="text-center mt-4">Les informations de transport vous sont transmises par email.</p>
+          <p className="text-center mt-4">Vos informations de transport vous sont transmises par email.</p>
         ) : (
           <div className="mt-4 flex flex-col items-center gap-6 md:flex-row">
             <div className="flex items-center justify-center gap-2 pr-4 md:border-r-[1px]">
