@@ -114,7 +114,7 @@ export default function Signin() {
         </div>
 
         {environment !== "production" && (
-          <Link to="/auth/preeinscription">
+          <Link to="/preinscription">
             <p className="text-blue-france-sun-113 text-center hover:underline hover:text-blue-france-sun-113 mt-4 decoration-2 underline-offset-4">
               Pré-inscription - accès staging
             </p>
