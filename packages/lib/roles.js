@@ -263,7 +263,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
     (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion || isReferentModifyingHeadCenterWithoutChangingRole : true) &&
     (actor.role === ROLES.REFERENT_DEPARTMENT
       ? ([ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) || isMe) &&
-      (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
+        (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
       : true);
   return authorized;
 }
@@ -353,6 +353,17 @@ function isPdrEditionOpen(actor, cohort) {
       return false;
   }
 }
+
+const isBusEditionOpen = (actor, cohort) => {
+  switch (actor?.role) {
+    case ROLES.ADMIN:
+      return true;
+    case ROLES.TRANSPORTER:
+      return cohort?.busEditionOpenForTransporter;
+    default:
+      return false;
+  }
+};
 
 function isLigneBusDemandeDeModificationOpen(actor, cohort) {
   if (actor.role === ROLES.ADMIN) return true;
@@ -628,6 +639,10 @@ function canSearchInElasticSearch(actor, index) {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
   } else if (index === "young-by-school") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  } else if (index === "young") {
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  } else if (index === "aggregate-status") {
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   }
   return false;
 }
@@ -873,4 +888,5 @@ export {
   canSendImageRightsForSessionPhase1,
   isSupervisor,
   canPutSpecificDateOnSessionPhase1,
+  isBusEditionOpen,
 };

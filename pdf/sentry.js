@@ -64,16 +64,34 @@ function initSentry(app) {
   };
 }
 
-function capture(err) {
+function capture(err, contexte) {
   console.log("capture", err);
-  if (err) {
-    sentryCaptureException(err);
+  if (!err) {
+    captureMessage("Error not defined");
+    return;
+  }
+
+  if (err instanceof Error) {
+    sentryCaptureException(err, contexte);
+  } else if (err.error instanceof Error) {
+    sentryCaptureException(err.error, contexte);
+  } else if (err.message) {
+    sentryCaptureMessage(err.message, contexte);
+  } else {
+    sentryCaptureMessage("Error not defined well", {
+      extra: { error: err, contexte: contexte },
+    });
   }
 }
-function captureMessage(mess) {
+function captureMessage(mess, contexte) {
   console.log("captureMessage", mess);
+  if (!mess) {
+    captureMessage("Error not defined");
+    return;
+  }
+
   if (mess) {
-    sentryCaptureMessage(mess);
+    sentryCaptureMessage(mess, contexte);
   }
 }
 

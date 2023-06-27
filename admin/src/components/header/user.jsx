@@ -74,12 +74,10 @@ export default function HeaderUser() {
             </NavLink>
           )}
           <hr className="m-0 border-t-coolGray-100" />
-          <NavLink to="/logout" onClick={logout}>
-            <div className="group  flex cursor-pointer items-center  gap-2 p-3 text-red-700 hover:bg-coolGray-100 hover:text-red-700">
-              <HiLogout className="text-red-700 group-hover:scale-110" />
-              Se déconnecter
-            </div>
-          </NavLink>
+          <div className="group  flex cursor-pointer items-center  gap-2 p-3 text-red-700 hover:bg-coolGray-100 hover:text-red-700" onClick={logout}>
+            <HiLogout className="text-red-700 group-hover:scale-110" />
+            Se déconnecter
+          </div>
         </div>
       </div>
     </div>

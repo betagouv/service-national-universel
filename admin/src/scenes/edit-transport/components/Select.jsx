@@ -40,7 +40,6 @@ export default function Select({ options, value, Icon = null, alignItems = "left
           </div>
           {!disabled && <ChevronDown className={`text-gray-400 ${open ? "rotate-180" : ""}`} />}
         </button>
-
         {/* display options */}
         <div
           className={`${open ? "block" : "hidden"}  absolute min-w-[100px] rounded-lg bg-white transition ${

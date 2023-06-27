@@ -335,7 +335,7 @@ router.post("/get-group-detail", passport.authenticate("referent", { session: fa
     }
 
     if (!canViewSchemaDeRepartition(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // get center detail
@@ -371,7 +371,7 @@ router.get("/department-detail/:department/:cohort", passport.authenticate("refe
     const { department, cohort } = valueParams;
 
     if (!canViewSchemaDeRepartition(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // get centers
@@ -460,7 +460,7 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
     const { cohort } = value;
 
     if (!canViewSchemaDeRepartition(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- get stats for each departments
@@ -598,7 +598,7 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
     const { cohort, region } = value;
 
     if (!canViewSchemaDeRepartition(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- get stats for each departments
@@ -774,7 +774,7 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
     const { cohort, region, department } = value;
 
     if (!canViewSchemaDeRepartition(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- find to regions from departments
@@ -939,7 +939,7 @@ router.post("", passport.authenticate("referent", { session: false, failWithErro
     }
 
     if (!canCreateSchemaDeRepartition(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- création
@@ -952,10 +952,8 @@ router.post("", passport.authenticate("referent", { session: false, failWithErro
     ]);
 
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
-      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
       const referentTransport = await getTransporter();
       if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
       let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
       const mail = await sendTemplate(template, {
         emailTo: referentTransport.map((referent) => ({
@@ -965,7 +963,8 @@ router.post("", passport.authenticate("referent", { session: false, failWithErro
         params: {
           trigger: "group_added",
           region: data.fromRegion,
-          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+          group_id: data._id,
+          cta: `${ADMIN_URL}/schema-repartition?cohort=${data.cohort}`,
         },
       });
     }
@@ -988,7 +987,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const { id } = value;
 
     if (!canDeleteSchemaDeRepartition(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- delete schema
@@ -1004,10 +1003,8 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     ]);
 
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
-      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
       const referentTransport = await getTransporter();
       if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
       let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
       const mail = await sendTemplate(template, {
         emailTo: referentTransport.map((referent) => ({
@@ -1017,11 +1014,11 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
         params: {
           trigger: "group_deleted",
           region: schema.fromRegion,
-          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+          group_id: schema._id,
+          cta: `${ADMIN_URL}/schema-repartition?cohort=${schema.cohort}`,
         },
       });
     }
-
     // --- résultat
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -1045,7 +1042,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
 
     if (!canEditSchemaDeRepartition(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- update
@@ -1071,10 +1068,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     ]);
 
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
-      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
       const referentTransport = await getTransporter();
       if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
       let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
       const mail = await sendTemplate(template, {
         emailTo: referentTransport.map((referent) => ({
@@ -1084,7 +1079,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         params: {
           trigger: "group_changed",
           region: schema.fromRegion,
-          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+          group_id: schema._id,
+          cta: `${ADMIN_URL}/schema-repartition?cohort=${schema.cohort}`,
         },
       });
     }

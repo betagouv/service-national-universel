@@ -117,7 +117,7 @@ router.post("/:id/change-classement/:rank", passport.authenticate(["young"], { s
 
     // A young can only update his own application.
     if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const allApplications = await ApplicationObject.find({ youngId: young._id.toString() });
@@ -157,37 +157,37 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // On vérifie si les candidatures sont ouvertes.
-    if (mission.visibility === "HIDDEN") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (mission.visibility === "HIDDEN") return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     value.isJvaMission = mission.isJvaMission;
 
     const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canApplyToPhase2(young)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // A young can only create their own applications.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     // - admin can create all applications
     // - referent can create applications of their department/region
     // - responsible and supervisor can create applications of their structures
     if (isReferent(req.user)) {
       if (!canCreateYoungApplication(req.user, young)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
       if (req.user.role === ROLES.RESPONSIBLE) {
         if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         if (value.structureId.toString() !== req.user.structureId.toString()) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+          return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
       if (req.user.role === ROLES.SUPERVISOR) {
         if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
         if (!structures.map((e) => e._id.toString()).includes(value.structureId.toString())) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+          return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
     }
@@ -195,7 +195,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     // On vérifie que la candidature n'existe pas déjà en base de donnée.
     const doublon = await ApplicationObject.findOne({ youngId: value.youngId, missionId: value.missionId });
     if (doublon) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     value.contractStatus = "DRAFT";
     const data = await ApplicationObject.create(value);
@@ -276,7 +276,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
 
       // A young can only update his own application.
       if (!canUpdateApplication(req.user, application, young, structures)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
     }
 
@@ -314,7 +314,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
 
     // A young can only update his own application.
     if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // - admin can update all applications
@@ -322,19 +322,19 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     // - responsible and supervisor can update applications of their structures
     if (isReferent(req.user)) {
       if (!canCreateYoungApplication(req.user, young)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
       if (req.user.role === ROLES.RESPONSIBLE) {
         if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         if (application.structureId.toString() !== req.user.structureId.toString()) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+          return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
       if (req.user.role === ROLES.SUPERVISOR) {
         if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
         if (!structures.map((e) => e._id.toString()).includes(application.structureId.toString())) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+          return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
     }
@@ -373,7 +373,7 @@ router.put("/:id/visibilite", passport.authenticate(["young"], { session: false,
 
     // A young can only update his own application.
     if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     application.set({ hidden: joiBody.value.hidden });
@@ -401,11 +401,11 @@ router.get("/:id/contract", passport.authenticate("referent", { session: false, 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     if (isReferent(req.user) && !canViewContract(req.user, contract)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
@@ -430,7 +430,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (!canViewYoungApplications(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     return res.status(200).send({ ok: true, data: serializeApplication(data) });
@@ -497,7 +497,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && req.user._id.toString() !== application.youngId) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // - admin can notify for all applications
@@ -505,19 +505,19 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     // - responsible and supervisor can notify for applications of their structures
     if (isReferent(req.user)) {
       if (!canCreateYoungApplication(req.user, young)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
       if (req.user.role === ROLES.RESPONSIBLE) {
         if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         if (application.structureId.toString() !== req.user.structureId.toString()) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+          return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
       if (req.user.role === ROLES.SUPERVISOR) {
         if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
         if (!structures.map((e) => e._id.toString()).includes(application.structureId.toString())) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+          return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
     }
@@ -739,7 +739,7 @@ router.post(
             const { isInfected } = await clamscan.isInfected(tempFilePath);
             if (isInfected) {
               capture(`File ${name} of user(${user._id})is infected`);
-              return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+              return res.status(418).send({ ok: false, code: ERRORS.FILE_INFECTED });
             }
           } catch {
             return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
@@ -787,7 +787,7 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
     const young = await YoungObject.findById(application.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (isYoung(req.user) && req.user._id.toString() !== young?._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isYoung(req.user) && req.user._id.toString() !== young?._id.toString()) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const downloaded = await getFile(`app/young/${young._id}/application/${key}/${name}`);
     const decryptedBuffer = decrypt(downloaded.Body);

@@ -56,7 +56,7 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
 
   useEffect(() => {
     checkUserAuthorizations();
-  }, []);
+  }, [cohortName]);
 
   return (
     <Box className={className}>

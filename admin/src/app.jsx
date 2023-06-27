@@ -49,7 +49,7 @@ import Footer from "./components/footer";
 import Loader from "./components/Loader";
 
 import api, { initApi } from "./services/api";
-import { initSentry, SentryRoute, history } from "./sentry";
+import { initSentry, SentryRoute, history, capture } from "./sentry";
 
 import { adminURL, environment } from "./config";
 import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
@@ -172,7 +172,7 @@ const Home = () => {
           setSessionPhase1List(sessions.reverse());
           dispatch(setSessionPhase1(activeSession));
         } catch (e) {
-          Sentry.captureException(e);
+          capture(e);
         }
       })();
     }
@@ -272,7 +272,7 @@ const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) 
   const user = useSelector((state) => state.Auth.user);
   if (!user) {
     const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
-    return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}&unauthorized=1` : "", pathname: "/auth" }} />;
+    return <Redirect to={{ search: redirect ? `?redirect=${redirect}&unauthorized=1` : "", pathname: "/auth" }} />;
   }
 
   const matchRoute = limitedAccess[user.role]?.authorised.some((route) => pathname.includes(route));

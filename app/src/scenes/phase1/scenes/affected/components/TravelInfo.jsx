@@ -20,7 +20,7 @@ export default function TravelInfo({ location, departureDate, returnDate }) {
       {!location?.ligneToPoint && (
         <p className="mb-4 text-sm">
           {young.transportInfoGivenByLocal === "true"
-            ? "Les informations de transport seront transmises par les services locaux."
+            ? "Les informations de transport vous seront transmises par email."
             : "Je me rends au centre et en reviens par mes propres moyens."}
         </p>
       )}

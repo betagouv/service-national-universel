@@ -477,8 +477,12 @@ const checkStatusContract = (contract) => {
     tokenKeys.push("youngContractToken");
     validateKeys.push("youngContractStatus");
   } else {
-    tokenKeys.push("parent1Token", "parent2Token");
-    validateKeys.push("parent1Status", "parent2Status");
+    tokenKeys.push("parent1Token");
+    validateKeys.push("parent1Status");
+    if (contract.parent2Email) {
+      tokenKeys.push("parent2Token");
+      validateKeys.push("parent2Status");
+    }
   }
 
   const tokenCount = tokenKeys.reduce((acc, current) => (contract[current] ? acc + 1 : acc), 0);
