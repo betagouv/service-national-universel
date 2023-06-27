@@ -9,6 +9,7 @@ import api from "../../../services/api";
 import { copyToClipboard, translate, getAge, formatDateFRTimezoneUTC, translatePhase1, translatePhase2 } from "../../../utils";
 import { appURL } from "../../../config";
 import copy from "../../../assets/copy.svg";
+import plausibleEvent from "../../../services/plausible";
 
 export default function TicketInfos({ ticket }) {
   const [user, setUser] = useState([]);
@@ -49,6 +50,15 @@ export default function TicketInfos({ ticket }) {
     history.go(0);
   };
 
+  const onPrendreLaPlace = async (young_id) => {
+    if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
+
+    plausibleEvent("Volontaires/CTA - Prendre sa place");
+    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    window.open(appURL, "_blank");
+  };
+
   const renderInfos = () => {
     if (tag === "EMETTEUR_Volontaire") {
       return (
@@ -60,9 +70,9 @@ export default function TicketInfos({ ticket }) {
             <Link to={`/volontaire/${user._id}/edit`} target="_blank" rel="noopener noreferrer">
               <PanelActionButton icon="pencil" title="Modifier" />
             </Link>
-            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${user._id}`}>
+            <button onClick={() => onPrendreLaPlace(user._id)}>
               <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
-            </a>
+            </button>
           </div>
           <>
             {user.birthdateAt && <Item title="Date de naissance" content={`Né(e) le ${formatDateFRTimezoneUTC(user.birthdateAt)} • ${getAge(user.birthdateAt)} ans`} />}
@@ -94,9 +104,9 @@ export default function TicketInfos({ ticket }) {
             <Link to={`/user/${user._id}/edit`} target="_blank" rel="noopener noreferrer">
               <PanelActionButton icon="pencil" title="Modifier" />
             </Link>
-            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${user._id}`}>
+            <button onClick={() => onPrendreLaPlace(user._id)}>
               <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
-            </a>
+            </button>
           </div>
           <hr />
           <>

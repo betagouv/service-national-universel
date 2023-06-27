@@ -35,6 +35,7 @@ import NoteIcon from "../../volontaires/view/notes/components/NoteIcon";
 import { PHASE_1, PHASE_2, PHASE_3, PHASE_INSCRIPTION } from "../../volontaires/view/notes/utils";
 import NoteDisplayModal from "../../volontaires/view/notes/components/NoteDisplayModal";
 import ModalConfirmDeleteYoung from "../../../components/modals/young/ModalConfirmDeleteYoung";
+import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
 const blueBadge = { color: "#66A7F4", backgroundColor: "#F9FCFF" };
 const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
@@ -210,6 +211,15 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     return true;
   };
 
+  const onPrendreLaPlace = async (young_id) => {
+    if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
+
+    plausibleEvent("Volontaires/CTA - Prendre sa place");
+    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    window.open(appURL, "_blank");
+  };
+
   return (
     <div className="flex items-end justify-end border-b-[1px] border-b-[#E5E7EB] px-[30px] pt-[15px]">
       <NoteDisplayModal notes={viewedNotes} isOpen={viewedNotes.length > 0} onClose={() => setVieweNotes([])} user={user} />
@@ -325,13 +335,9 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                 <Button icon={<Bin fill="red" />} onClick={handleDeleteYoung}>
                   Supprimer
                 </Button>
-                <Button
-                  className="ml-[8px]"
-                  icon={<TakePlace className="text-[#6B7280]" />}
-                  href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}
-                  onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
-                  Prendre sa place
-                </Button>
+                <button onClick={() => onPrendreLaPlace(user._id)}>
+                  <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+                </button>
               </div>
             )}
           </div>
