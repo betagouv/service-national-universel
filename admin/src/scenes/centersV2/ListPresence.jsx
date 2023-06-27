@@ -138,8 +138,7 @@ export default function ListPresence() {
             <div className="mt-6 mb-2 flex w-full flex-col border-y-[1px] border-gray-100">
               <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400">
                 <div className="w-[30%] uppercase">Centre</div>
-                {/* array1.some(value => !array2.includes(value)); */}
-                {selectedFilters?.cohorts?.filter?.filter((cohort) => cohort === "Juillet 2023").length ? null : <div className="w-[20%] uppercase">présence JDM</div>}
+                {selectedFilters?.cohorts?.filter?.some((value) => !COHORTS_BEFORE_JULY_2023.includes(value)) ? null : <div className="w-[20%] uppercase">présence JDM</div>}
                 <div className="w-[20%] uppercase">présence à l’arrivée</div>
                 <div className="w-[10%] uppercase">départ</div>
                 <div className="w-[20%] uppercase">FICHE SANITAIRE</div>
@@ -163,7 +162,7 @@ const Hit = ({ hit, selectedFilters, onClick }) => {
         <div className="truncate font-bold leading-6 text-gray-900">{hit.name}</div>
         <div className="text-xs font-normal leading-4 text-gray-500">{`${hit.city || ""} • ${hit.department || ""}`}</div>
       </div>
-      {selectedFilters.cohorts.filter.filter((cohort) => cohort === "Juillet 2023").length ? null : (
+      {selectedFilters?.cohorts?.filter?.some((value) => !COHORTS_BEFORE_JULY_2023.includes(value)) ? null : (
         <div className="flex w-[20%] flex-col gap-2">
           <>
             <span className="text-sm font-normal leading-none text-gray-900">
