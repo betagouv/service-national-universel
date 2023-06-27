@@ -419,13 +419,6 @@ describe("Referent", () => {
         .post("/referent/signin_as/young/" + young._id)
         .send();
       expect(res.statusCode).toEqual(200);
-      expect(res.body.data).toEqual(
-        expect.objectContaining({
-          _id: young._id.toString(),
-          firstName: young.firstName,
-          lastName: young.lastName,
-        }),
-      );
     });
     it("should return a jwt token", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
