@@ -44,7 +44,7 @@ router.put("/cancel", passport.authenticate("referent", { session: false, failWi
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (!canEditYoung(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const oldMeetingPoint = await MeetingPointModel.findById(young.meetingPointId);
@@ -82,11 +82,11 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
 
     // A young can only update their own meeting points.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     if (isReferent(req.user) && !canEditYoung(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     let bus = null;

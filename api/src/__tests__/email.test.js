@@ -29,7 +29,7 @@ describe("Email", () => {
       for (const role of Object.values(unauthorizedRoles)) {
         passport.user.role = role;
         let res = await request(getAppHelper()).get("/email?email=test@example.org");
-        expect(res.statusCode).toEqual(403);
+        expect(res.statusCode).toEqual(418);
       }
       passport.user.role = ADMIN;
       res = await request(getAppHelper()).get("/email?email=test@example.org");

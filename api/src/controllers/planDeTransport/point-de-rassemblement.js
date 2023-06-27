@@ -187,7 +187,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canCreateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
+    if (!canCreateMeetingPoint(req.user)) return res.status(418).send({ ok: false, code: ERRORS.FORBIDDEN });
 
     const { cohort, name, address, complementAddress, city, zip, department, region, location } = value;
 
@@ -242,7 +242,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     // * Update slave PlanTransport
     const pointDeRassemblement = await PointDeRassemblementModel.findById(id);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!canUpdateMeetingPoint(req.user, pointDeRassemblement)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateMeetingPoint(req.user, pointDeRassemblement)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     pointDeRassemblement.set({ name, address, city, zip, department, region, location });
     await pointDeRassemblement.save({ fromUser: req.user });
@@ -306,11 +306,11 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
 
     const pointDeRassemblement = await PointDeRassemblementModel.findById(id);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!canUpdateMeetingPoint(req.user, pointDeRassemblement)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateMeetingPoint(req.user, pointDeRassemblement)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const cohortData = await CohortModel.findOne({ name: cohort });
     if (!cohortData) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!isPdrEditionOpen(req.user, cohortData)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!isPdrEditionOpen(req.user, cohortData)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     let cohortsToUpdate = pointDeRassemblement.cohorts;
     if (!cohortsToUpdate.includes(cohort)) cohortsToUpdate.push(cohort);
@@ -361,7 +361,7 @@ router.put("/delete/cohort/:id", passport.authenticate("referent", { session: fa
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canDeleteMeetingPointSession(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canDeleteMeetingPointSession(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { id, cohort } = value;
 
@@ -369,7 +369,7 @@ router.put("/delete/cohort/:id", passport.authenticate("referent", { session: fa
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const youngs = await YoungModel.find({ meetingPointId: id, cohort: cohort });
-    if (youngs.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (youngs.length > 0) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     let cohortsToUpdate = pointDeRassemblement.cohorts.filter((c) => c !== cohort);
     let complementAddressToUpdate = pointDeRassemblement.complementAddress.filter((c) => c.cohort !== cohort);
@@ -389,7 +389,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     const { error: errorId, value: checkedId } = validateId(req.params.id);
 
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewMeetingPoints(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await PointDeRassemblementModel.findOne({ _id: checkedId, deletedAt: { $exists: false } });
 
@@ -415,7 +415,7 @@ router.get("/fullInfo/:pdrId/:busId", passport.authenticate(["referent", "young"
     if (isYoung(req.user)) {
       const young = await YoungModel.findById(req.user._id);
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (young.meetingPointId !== pdrId || young.ligneId !== busId) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (young.meetingPointId !== pdrId || young.ligneId !== busId) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const pointDeRassemblement = await PointDeRassemblementModel.findById(pdrId);
@@ -518,7 +518,7 @@ router.get("/:id/bus/:cohort", passport.authenticate("referent", { session: fals
       .validate(req.params.cohort);
 
     if (errorId || errorCohort) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewMeetingPoints(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await PointDeRassemblementModel.findOne({ _id: checkedId, deletedAt: { $exists: false } });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -543,13 +543,13 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canDeleteMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canDeleteMeetingPoint(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const pointDeRassemblement = await PointDeRassemblementModel.findById(checkedId);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const youngs = await YoungModel.find({ meetingPointId: checkedId });
-    if (youngs.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (youngs.length > 0) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const now = new Date();
     pointDeRassemblement.set({ deletedAt: now });
@@ -575,7 +575,7 @@ router.get("/:id/in-schema", passport.authenticate("referent", { session: false,
     const { id } = valueParams;
 
     if (!canViewMeetingPoints(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- update

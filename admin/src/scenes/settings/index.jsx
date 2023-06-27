@@ -466,7 +466,23 @@ export default function Settings() {
                       }}
                     />
                   </div>
-
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs  font-medium text-gray-900">Modification du plan de transport</p>
+                      <MdInfoOutline data-tip data-for="demande_correction" className="h-5 w-5 cursor-pointer text-gray-400" />
+                      <ReactTooltip id="demande_correction" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                        <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                          Ouverture ou fermeture pour les utilisateurs de la possibilité de modifier le plan de transport au niveau d'une ligne"
+                        </p>
+                      </ReactTooltip>
+                    </div>
+                    <SimpleToggle
+                      label="Transporteurs"
+                      disabled={isLoading || readOnly}
+                      value={data.busEditionOpenForTransporter}
+                      onChange={() => setData({ ...data, busEditionOpenForTransporter: !data.busEditionOpenForTransporter })}
+                    />
+                  </div>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
                       <p className="text-xs  font-medium text-gray-900">Demande de correction sur le plan de transport</p>

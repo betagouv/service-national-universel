@@ -49,11 +49,11 @@ export default function GroupCenter({ group, className = "", onChangeStep, onCha
       if (result.ok) {
         setList(result.data);
       } else {
-        setError("Impossible de récupérer la liste des centres. Veuillez essayer dans quelques instants.");
+        setError("Impossible de récupérer la liste des centres. Veuillez réessayer dans quelques instants.");
       }
     } catch (err) {
       capture(err);
-      setError("Impossible de récupérer la liste des centres. Veuillez essayer dans quelques instants.");
+      setError("Impossible de récupérer la liste des centres. Veuillez réessayer dans quelques instants.");
     }
     setLoading(false);
   }

@@ -10,7 +10,7 @@ import { Filters, ResultTable } from "../../../components/filters-system-v2";
 import Loader from "../../../components/Loader";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import Select from "./components/Select";
+import Select from "../components/Select";
 import { Title } from "../../plan-transport/components/commons";
 import TooltipDeleteButtonPlan from "./components/TooltipDeleteButtonPlan";
 
@@ -85,11 +85,11 @@ export default function List() {
 }
 
 const ReactiveList = ({ cohort }) => {
+  const { user } = useSelector((state) => state.Auth);
   const [lines, setLines] = React.useState([]);
   const pageId = "edittransport";
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({ page: 0 });
-  const filterArray = [].filter((e) => e);
   const [youngs, setYoungs] = useState();
   const [allLines, setAllLines] = useState();
   const history = useHistory();
@@ -129,6 +129,8 @@ const ReactiveList = ({ cohort }) => {
   const deletePlan = () => {
     // TODO
   };
+
+  const filterArray = [{ title: "Numéro de la ligne", name: "busId", parentGroup: "Bus", missingLabel: "Non renseigné" }].filter((e) => e);
 
   return (
     <div className="mb-8 flex flex-col rounded-lg bg-white py-4">
@@ -199,7 +201,7 @@ const ReactiveList = ({ cohort }) => {
               </thead>
               <tbody>
                 {lines?.map((hit) => {
-                  return <LigneDeBus key={hit._id} hit={hit} />;
+                  return <LigneDeBus key={hit._id} hit={hit} cohort={cohort} />;
                 })}
               </tbody>
             </table>

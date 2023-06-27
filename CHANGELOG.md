@@ -1,3 +1,58 @@
+# [1.300.0](https://github.com/betagouv/service-national-universel/compare/v1.299.0...v1.300.0) (2023-06-26)
+
+
+### Bug Fixes
+
+* **api:** compareIps async ([4fc5ed9](https://github.com/betagouv/service-national-universel/commit/4fc5ed9385123c2b2d78a95f951882ad4942a2e8))
+* **api:** condition for retrieving youngs for dsnj export ([f99de16](https://github.com/betagouv/service-national-universel/commit/f99de161878161db7388f614e05762d7aaf6be39))
+* **app:** add slash to preferences link in menu ([84464c4](https://github.com/betagouv/service-national-universel/commit/84464c4571397c1f5aa05d76b3a274b9b63f5fae))
+
+
+### Features
+
+* **admin:** revue design Affectation Manuelle ([#2714](https://github.com/betagouv/service-national-universel/issues/2714)) ([c4295b9](https://github.com/betagouv/service-national-universel/commit/c4295b9434312e3f057bfb36e097ca6240f41dd5))
+* **all:** Replace 403 with 418 (to avoid fetch errors) ([#2752](https://github.com/betagouv/service-national-universel/issues/2752)) ([1f06ebe](https://github.com/betagouv/service-national-universel/commit/1f06ebe46737d2d0726f0e76fcec988902767148))
+* **api/admin:** MEP 2fa admin ([#2749](https://github.com/betagouv/service-national-universel/issues/2749)) ([8d13c9a](https://github.com/betagouv/service-national-universel/commit/8d13c9a2bec7c1b227a573098e8a2efb1323e62f))
+* **api/app:** 2fa app ([#2750](https://github.com/betagouv/service-national-universel/issues/2750)) ([96dd14b](https://github.com/betagouv/service-national-universel/commit/96dd14ba1ffb9f45b17aaa167cc1770985774743))
+* 2fa ([#2745](https://github.com/betagouv/service-national-universel/issues/2745)) ([b905f60](https://github.com/betagouv/service-national-universel/commit/b905f6039bdc3695601dafc2104456f0330c4358))
+
+
+### Reverts
+
+* **api:** Reopen fil downloads ([103f401](https://github.com/betagouv/service-national-universel/commit/103f4011a767ed3d414c5aff690db19e3c644882))
+
+# [1.299.0](https://github.com/betagouv/service-national-universel/compare/v1.298.0...v1.299.0) (2023-06-23)
+
+
+### Bug Fixes
+
+* **api-adresse:** Update sentry error context ([0035cd8](https://github.com/betagouv/service-national-universel/commit/0035cd846a8c6c9722bc19d0822b4b4177adeec7))
+
+
+### Features
+
+* **admin:** Hide edit button in bus line page for transporter if isPdrOpenForTransporter is false ([#2738](https://github.com/betagouv/service-national-universel/issues/2738)) ([c343251](https://github.com/betagouv/service-national-universel/commit/c3432510ae7d5bb486e7dac33fb48c0f732cdb23))
+* **admin/api:** Ajouter un bouton pour envoyer les informations de la ligne de transport aux référents ([#2739](https://github.com/betagouv/service-national-universel/issues/2739)) ([1d6f4a1](https://github.com/betagouv/service-national-universel/commit/1d6f4a1bc33495c532901ea3606e3a9f24e2ec98))
+* **api:** DO NOT ALLOW TO DOWNLOAD CNI ([9d67409](https://github.com/betagouv/service-national-universel/commit/9d67409317dfba16b20412b06aafb6c3dce13de9))
+
+# [1.298.0](https://github.com/betagouv/service-national-universel/compare/v1.297.0...v1.298.0) (2023-06-22)
+
+
+### Bug Fixes
+
+* **admin,api:** wip edit plan de transport ([#2735](https://github.com/betagouv/service-national-universel/issues/2735)) ([1cfc6db](https://github.com/betagouv/service-national-universel/commit/1cfc6db2c56bd41e339e3822db23eb8391f2142b))
+* **admin/app:** Better error handling on fetch ([f1d8e5e](https://github.com/betagouv/service-national-universel/commit/f1d8e5e2b8ccb8de76a4c1d8bff1cba7ab8e9030))
+* **admin/app:** Update redirection to auth handling ([e3a3761](https://github.com/betagouv/service-national-universel/commit/e3a376187cbdfb4381cb2f27a3b80eeb40f8b28e))
+* **api:** Api adresse on api ([f131030](https://github.com/betagouv/service-national-universel/commit/f131030f2f3c15826e474289e141570ca16e8868))
+* **api:** Update 401 handling ([16df6be](https://github.com/betagouv/service-national-universel/commit/16df6bef0faa918f622fc4e4c5f3a6ee40ba143d))
+* **app:** Better capture ([f455192](https://github.com/betagouv/service-national-universel/commit/f4551926ec5d2af780285a7d3a6b3eb5f30a0e2b))
+
+
+### Features
+
+* **api/admin/app:** New sentry error ([#2734](https://github.com/betagouv/service-national-universel/issues/2734)) ([b2f086c](https://github.com/betagouv/service-national-universel/commit/b2f086c5bc4d5867bd3512db108c3b0a5d82742f))
+* **app:** Phase 1 - Affecté : Mise en prod des améliorations de l'étape de choix de PDR ([60ebf4e](https://github.com/betagouv/service-national-universel/commit/60ebf4e9c159f697cb478a99c13fd17031054234))
+
 # [1.297.0](https://github.com/betagouv/service-national-universel/compare/v1.296.0...v1.297.0) (2023-06-21)
 
 

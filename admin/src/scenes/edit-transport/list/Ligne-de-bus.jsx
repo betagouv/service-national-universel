@@ -14,12 +14,14 @@ import TooltipCenter from "./components/TooltipCenter";
 import { IoCaretDown, IoCaretForward, IoOpenOutline } from "react-icons/io5";
 import PointDeRassemblement from "./components/PointDeRassemblement";
 import LigneToPoint from "./Ligne-to-Point";
+import { useHistory } from "react-router-dom";
 
-export default function LigneDeBus({ hit }) {
+export default function LigneDeBus({ hit, cohort }) {
   const [tempLine, setTempLine] = useState(hit);
   const [isDirty, setIsDirty] = useState(false);
   const [open, setOpen] = useState(false);
   const [dirtyMeetingPointIds, setDirtyMeetingPointIds] = useState([]);
+  const history = useHistory();
 
   const handleOpen = () => {
     if (dirtyMeetingPointIds.length > 0) return toastr.warning(`${dirtyMeetingPointIds.length} PDR non enregistré(s).\nEnregistrez ou Annulez avant de refermer la ligne.`);
@@ -307,7 +309,7 @@ export default function LigneDeBus({ hit }) {
                     <th className="px-1 py-3 whitespace-nowrap font-normal">
                       <span className="ml-6">Nom</span>
                     </th>
-                    <th className="px-1 py-3 whitespace-nowrap font-normal">Affectés</th>
+                    <th className="px-1 py-3 whitespace-nowrap font-normal">Volontaires</th>
                     <th className="px-1 py-3 whitespace-nowrap font-normal">Type de transport</th>
                     <th className="px-1 py-3 whitespace-nowrap font-normal">
                       <BsArrowRight className="text-blue-700" />
@@ -336,6 +338,7 @@ export default function LigneDeBus({ hit }) {
                         ligneId={hit._id}
                         setDirtyMeetingPointIds={setDirtyMeetingPointIds}
                         ligne={hit}
+                        cohort={cohort}
                       />
                     );
                   })}

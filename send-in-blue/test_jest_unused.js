@@ -59,12 +59,12 @@ describe("POST /email", () => {
       .post("/email")
       .set("x-forwarded-for", "1.2.3.4")
       .send({ subject: "hello", email: "foo@bar.fr" });
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(418);
   });
   it("should reject when no IP", async () => {
     const res = await request(getAppHelper())
       .post("/email")
       .send({ subject: "hello", email: "foo@bar.fr" });
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(418);
   });
 });

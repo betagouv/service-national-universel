@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
 
-export default function SelectInput({ options, onChange, disabled, placeholder, renderOption, youngs, allLines }) {
+export default function SelectInput({ options, onChange, disabled, placeholder, renderOption, val }) {
   const [open, setOpen] = useState(false);
-  const [valueOnChange, setValueOnChange] = useState("");
+  const [valueOnChange, setValueOnChange] = useState(val);
   const ref = React.useRef(null);
 
   useEffect(() => {
