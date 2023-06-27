@@ -14,6 +14,7 @@ import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
 import { getCohort } from "../../utils/cohorts";
 import { useSelector } from "react-redux";
+import { BsExclamationCircle } from "react-icons/bs";
 
 export default function WaitingAffectation() {
   const young = useSelector((state) => state.Auth.young);
@@ -33,9 +34,15 @@ export default function WaitingAffectation() {
               <span>Mon séjour de cohésion</span>
               <strong className="flex items-center">{cohort ? transportDatesToString(departureDate, returnDate) : translateCohortTemp(young.cohort)}</strong>
             </h1>
-
             {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null}
-
+            {young.grade === "Terminale" && (
+              <div className="flex items-start justify-center mb-2 border-[1px] border-gray-200 rounded-lg shadow-sm lg:items-center">
+                <BsExclamationCircle className="h-[20px] w-[65px] text-red-500 sm:mt-7 lg:h-6 w-6 ml-2 lg:mt-0" />
+                <span className="ml-3 text-black text-[14px] lg:ml-2 mt-4 mb-6">
+                  En cas de convocation aux épreuves du Baccalauréat du second groupe, vous arriverez au centre par vos propres moyen <strong>Le 8 juillet</strong>
+                </span>
+              </div>
+            )}
             <div className="flex max-w-[688px] items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-[22px] drop-shadow">
               <div className="hidden h-[42px] w-[42px] md:block">
                 <WaitFor />
