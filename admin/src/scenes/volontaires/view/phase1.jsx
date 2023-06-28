@@ -104,8 +104,6 @@ export default function Phase1(props) {
     }
   }, [cohort]);
 
-  console.log(meetingPoint);
-
   return (
     <>
       <YoungHeader young={props.young} tab="phase1" onChange={props.onChange} />
