@@ -17,6 +17,7 @@ import StepsAffected from "./components/StepsAffected";
 import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
 import { getDepartureDate, getReturnDate } from "snu-lib/transport-info";
+import BannerTermJuly from "../../components/BannerTermJuly";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -29,6 +30,7 @@ export default function Affected() {
   const cohort = getCohort(young.cohort);
   const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
   const returnDate = getReturnDate(young, session, cohort, meetingPoint);
+  const allowedGrades = ["TermGT", "TermPro"];
 
   if (isStepMedicalFieldDone(young)) {
     window.scrollTo(0, 0);
@@ -83,13 +85,18 @@ export default function Affected() {
               <strong>{transportDatesToString(departureDate, returnDate)}</strong>
             </h1>
             {youngCanChangeSession(young) ? <ChangeStayLink className="my-4 md:my-8" /> : null}
+            {allowedGrades.includes(young.grade) && (
+              <BannerTermJuly responsive={"flex items-start justify-center mb-2 border-[1px] bg-white border-gray-200 rounded-lg shadow-sm lg:hidden"} />
+            )}
           </div>
 
           <CenterInfo center={center} />
         </header>
-
+        {allowedGrades.includes(young.grade) && (
+          <BannerTermJuly responsive="hidden lg:flex order-2 items-center justify-start mb-4 bg-white border-[1px] border-gray-200 shadow-sm rounded-lg mx-[5%]" />
+        )}
         {isStepMedicalFieldDone(young) && (
-          <div className="order-2 flex flex-none flex-col gap-4 md:flex-row">
+          <div className="order-3 flex flex-none flex-col gap-4 md:flex-row">
             <TravelInfo location={young?.meetingPointId ? meetingPoint : center} departureDate={departureDate} returnDate={returnDate} />
             <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
           </div>

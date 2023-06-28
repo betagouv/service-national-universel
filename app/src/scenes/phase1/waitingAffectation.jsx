@@ -14,12 +14,14 @@ import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
 import { getCohort } from "../../utils/cohorts";
 import { useSelector } from "react-redux";
+import BannerTermJuly from "./components/BannerTermJuly";
 
 export default function WaitingAffectation() {
   const young = useSelector((state) => state.Auth.young);
   const cohort = getCohort(young.cohort);
   const departureDate = cohort ? getDepartureDate(young, {}, cohort) : null;
   const returnDate = cohort ? getReturnDate(young, {}, cohort) : null;
+  const allowedGrades = ["TermGT", "TermPro"];
 
   return (
     <>
@@ -33,9 +35,10 @@ export default function WaitingAffectation() {
               <span>Mon séjour de cohésion</span>
               <strong className="flex items-center">{cohort ? transportDatesToString(departureDate, returnDate) : translateCohortTemp(young.cohort)}</strong>
             </h1>
-
             {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null}
-
+            {allowedGrades.includes(young.grade) && (
+              <BannerTermJuly responsive={"flex items-start justify-center mb-2 border-[1px] bg-white border-gray-200 rounded-lg shadow-sm lg:items-center"} />
+            )}
             <div className="flex max-w-[688px] items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-[22px] drop-shadow">
               <div className="hidden h-[42px] w-[42px] md:block">
                 <WaitFor />
