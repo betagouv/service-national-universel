@@ -6,8 +6,10 @@ function WaitingListContent({ showLinks }) {
     return (
       <>
         <p>
-          Des places peuvent se libérer à tout moment. Si vous le souhaitez, vous pouvez donc être convoqué(e) dans les prochains jours et jusqu’à l’avant-veille du départ en
-          séjour. Pour cela, vous n’avez rien à faire : restez inscrit à ce séjour.
+          <strong>
+            Des places peuvent se libérer à tout moment. Si vous le souhaitez, vous pouvez donc être convoqué(e) dans les prochains jours et jusqu’au lendemain du départ en séjour.
+          </strong>
+          Pour cela, vous n’avez rien à faire : restez inscrit à ce séjour.
         </p>
         <p>
           Par contre, si vous ne souhaitez pas recevoir une convocation tardive, vous pouvez choisir de vous{" "}
