@@ -1,3 +1,25 @@
+# [1.302.0](https://github.com/betagouv/service-national-universel/compare/v1.301.0...v1.302.0) (2023-06-28)
+
+
+### Bug Fixes
+
+* **admin:** allow french polynesian numbers for structure reps ([3a7f4d3](https://github.com/betagouv/service-national-universel/commit/3a7f4d3e030cea6b55e6c13a2e677b9b8ab44c8d))
+* **admin/app:** trim token 2fa ([2162c0c](https://github.com/betagouv/service-national-universel/commit/2162c0c4ed81f6030c23cd8eb9cc81b595fb9ae8))
+* **api:** add line break in convocation contacts ([4c4585a](https://github.com/betagouv/service-national-universel/commit/4c4585ad4cceee5d5a6b1c8571e79d4c6ff97ca1))
+* **api:** correct dates on convocation dl for DROMS affected in France ([766a331](https://github.com/betagouv/service-national-universel/commit/766a33156c131f135eabfd4e4bd91c3e4a7a9524))
+* **api:** sejour de test ([9eeb8fe](https://github.com/betagouv/service-national-universel/commit/9eeb8fe377ef77888d0a5d9384503df46af987c8))
+* **app:** change address modal adjustements ([1b5ea30](https://github.com/betagouv/service-national-universel/commit/1b5ea3018a2fd83aa13e10ad2c032c8c430644ad))
+
+
+### Features
+
+* **api:** update autovalidationStatusPhase1 for July ([#2747](https://github.com/betagouv/service-national-universel/issues/2747)) ([18a256b](https://github.com/betagouv/service-national-universel/commit/18a256bc031844946f9d2ff7afa90f497a00e43a))
+* **api:** update dsnj export with dynamic start dates ([9637a7a](https://github.com/betagouv/service-national-universel/commit/9637a7a44ca5d31d8cbbe343e968e6c9bf064103))
+* **api/admin:** Ajout d'un champ "retardé" sur les lignes de bus  ([#2737](https://github.com/betagouv/service-national-universel/issues/2737)) ([b02e95d](https://github.com/betagouv/service-national-universel/commit/b02e95d14abac342d440263a6c4f61049b6fb62a))
+* **app:** bandeau pour les terminales ([#2755](https://github.com/betagouv/service-national-universel/issues/2755)) ([2b1a14d](https://github.com/betagouv/service-national-universel/commit/2b1a14d9cfb87847f02569d85cd7f70291780f09))
+* **app:** Modale terminale affecte ([#2756](https://github.com/betagouv/service-national-universel/issues/2756)) ([c078a48](https://github.com/betagouv/service-national-universel/commit/c078a48b306ac73b815fb7f34f150bdb9f32333f))
+* **app/admin:** Info for 2FA signin ([83b82fa](https://github.com/betagouv/service-national-universel/commit/83b82fae74974b72678223a3ffa0f9937080e343))
+
 # [1.301.0](https://github.com/betagouv/service-national-universel/compare/v1.300.0...v1.301.0) (2023-06-27)
 
 
