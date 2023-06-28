@@ -54,7 +54,6 @@ export default function Phase1(props) {
       try {
         const { data } = await getCohortByName(young.cohort);
         setCohort(data);
-        //getLigne();
       } catch (error) {
         capture(error);
         const { title, message } = error;
