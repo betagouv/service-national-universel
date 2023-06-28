@@ -898,31 +898,46 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     const pdrs = await PointDeRassemblementModel.find({ _id: ligne.meetingPointsIds });
     if (!pdrs?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const center = cohesionCenterModel.findById(ligne.centerId);
+    const center = await cohesionCenterModel.findById(ligne.centerId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const departmentListToNotify = pdrs.map((pdr) => pdr.department);
     departmentListToNotify.push(center.department);
 
-    const users = await ReferentModel.find({ department: { $in: departmentListToNotify } });
+    const regionListToNotify = pdrs.map((pdr) => pdr.region);
+    regionListToNotify.push(center.region);
+
+    const users = await ReferentModel.find({
+      $or: [{ department: { $in: departmentListToNotify } }, { $and: [{ role: "referent_region" }, { region: { $in: regionListToNotify } }] }],
+    });
     if (!users?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const priority_roles = ["manager_department", "assistant_manager_department", "secretariat", "manager_phase2"];
+    const priority_roles = ["coordinator", "assistant_coordinator", "manager_department", "assistant_manager_department", "secretariat", "manager_phase2"];
 
-    const usersToNotify = [];
-    for (const dep of departmentListToNotify) {
-      const usersFromDep = users.filter((u) => u.department.includes(dep));
+    const getUsersToNotify = (listToNotify, field, role = null) => {
+      const usersToNotify = [];
 
-      let usersToNotifyInDep = null;
-      for (const role of priority_roles) {
-        usersToNotifyInDep = usersFromDep.filter((u) => u.subRole === role);
-        if (usersToNotifyInDep.length) {
-          break;
+      for (const item of listToNotify) {
+        const filteredUsers = users.filter((u) => u[field].includes(item) && (role ? u.role === role : true));
+
+        let usersToNotifyInItem = null;
+        for (const priorityRole of priority_roles) {
+          usersToNotifyInItem = filteredUsers.filter((u) => u.subRole === priorityRole);
+          if (usersToNotifyInItem.length) {
+            break;
+          }
         }
+
+        usersToNotify.push(...usersToNotifyInItem);
       }
 
-      usersToNotify.push(...usersToNotifyInDep);
-    }
+      return usersToNotify;
+    };
+
+    const usersToNotifyDep = getUsersToNotify(departmentListToNotify, "department");
+    const usersToNotifyReg = getUsersToNotify(regionListToNotify, "region", "referent_region");
+
+    const usersToNotify = usersToNotifyDep.concat(usersToNotifyReg);
 
     const uniqueUsersToNotify = [...new Set(usersToNotify.map((obj) => JSON.stringify(obj)))].map((str) => JSON.parse(str));
     // send notification
