@@ -107,7 +107,7 @@ export default function VolontairePanel({ onChange, value }) {
               </Link>
               {user.role !== ROLES.HEAD_CENTER && (
                 <>
-                  <button onClick={() => onPrendreLaPlace(user._id)}>
+                  <button onClick={() => onPrendreLaPlace(young._id)}>
                     <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
                   </button>
                   <PanelActionButton onClick={handleDeleteYoung} icon="bin" title="Supprimer" />

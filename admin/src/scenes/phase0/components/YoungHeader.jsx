@@ -335,7 +335,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                 <Button icon={<Bin fill="red" />} onClick={handleDeleteYoung}>
                   Supprimer
                 </Button>
-                <button onClick={() => onPrendreLaPlace(user._id)}>
+                <button onClick={() => onPrendreLaPlace(young._id)}>
                   <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
                 </button>
               </div>
