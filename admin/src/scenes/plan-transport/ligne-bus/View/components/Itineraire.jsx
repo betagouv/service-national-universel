@@ -30,22 +30,7 @@ function getIcon(type) {
 export default function Itineraire({ meetingsPoints, center, aller, retour, bus, setBus }) {
   const [showRetour, setShowRetour] = React.useState(false);
   const [timeline, setTimeline] = React.useState([]);
-  const [delayedBack, setDelayedBack] = React.useState(false);
-  const [delayedForth, setDelayedForth] = React.useState(false);
   const user = useSelector((state) => state.Auth.user);
-  const [data, setData] = React.useState({
-    busId: bus.busId || "",
-    departuredDate: bus.departuredDate || "",
-    returnDate: bus.returnDate || "",
-    youngCapacity: bus.youngCapacity || "",
-    totalCapacity: bus.totalCapacity || "",
-    followerCapacity: bus.followerCapacity || "",
-    travelTime: bus.travelTime || "",
-    lunchBreak: bus.lunchBreak || false,
-    lunchBreakReturn: bus.lunchBreakReturn || false,
-    delayedForth: bus.delayedForth || "false",
-    delayedBack: bus.delayedBack || "false",
-  });
 
   const toggleAllerRetour = () => {
     let flatMeetingsPoints = [];
@@ -114,14 +99,22 @@ export default function Itineraire({ meetingsPoints, center, aller, retour, bus,
     if (data === "false") return false;
   };
 
-  const Isdelayed = async () => {
-    showRetour
-      ? data.delayedBack === "true"
-        ? (data.delayedBack = "false")
-        : (data.delayedBack = "true")
-      : data.delayedForth === "true"
-      ? (data.delayedForth = "false")
-      : (data.delayedForth = "true");
+  const toggleDelay = async () => {
+    const data = {
+      busId: bus.busId || "",
+      departuredDate: bus.departuredDate || "",
+      returnDate: bus.returnDate || "",
+      youngCapacity: bus.youngCapacity || "",
+      totalCapacity: bus.totalCapacity || "",
+      followerCapacity: bus.followerCapacity || "",
+      travelTime: bus.travelTime || "",
+      lunchBreak: bus.lunchBreak || false,
+      lunchBreakReturn: bus.lunchBreakReturn || false,
+      delayedForth: bus.delayedForth || "false",
+      delayedBack: bus.delayedBack || "false",
+    };
+    if (showRetour) data.delayedBack = bus.delayedBack === "true" ? "false" : "true";
+    else data.delayedForth = bus.delayedForth === "true" ? "false" : "true";
 
     try {
       const { ok, code, data: ligneInfo } = await API.put(`/ligne-de-bus/${bus._id}/info`, data);
@@ -130,8 +123,6 @@ export default function Itineraire({ meetingsPoints, center, aller, retour, bus,
         return;
       }
       setBus(ligneInfo);
-      setDelayedForth(data.delayedForth);
-      setDelayedBack(data.delayedBack);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la modification de la ligne");
@@ -141,11 +132,6 @@ export default function Itineraire({ meetingsPoints, center, aller, retour, bus,
   React.useEffect(() => {
     toggleAllerRetour();
   }, [showRetour, meetingsPoints, center, aller, retour]);
-
-  React.useEffect(() => {
-    setDelayedBack(data.delayedBack);
-    setDelayedForth(data.delayedForth);
-  }, []);
 
   return (
     <div className="w-1/2 rounded-xl bg-white p-8">
@@ -209,9 +195,9 @@ export default function Itineraire({ meetingsPoints, center, aller, retour, bus,
         <div className="bg-gray-100 rounded-md w-full flex flex-row py-2 gap-3 px-3 align-middle">
           <input
             type="checkbox"
-            checked={showRetour ? delayedBack === "true" : delayedForth === "true"}
+            checked={showRetour ? bus.delayedBack === "true" : bus.delayedForth === "true"}
             onChange={() => {
-              Isdelayed();
+              toggleDelay();
             }}
           />
           <p>Signaler le retard de la ligne de bus {showRetour ? '"Retour"' : '"Aller"'}</p>

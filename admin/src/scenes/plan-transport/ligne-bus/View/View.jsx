@@ -224,7 +224,7 @@ export default function View(props) {
             bg="bg-[#B45309]"
             Icon={AiOutlineExclamationCircle}
             message={`Le départ de cette ligne de bus est retardé ${
-              data.delayedForth === "true" && data.delayedBack === "true" ? "à l'Aller et au Retour" : data.delayedForth === "true" ? "à l'Aller" : "au Retour"
+              data.delayedForth === "true" && data.delayedBack === "true" ? "à l'aller et au retour" : data.delayedForth === "true" ? "à l'aller" : "au retour"
             }.`}
           />
         ) : null}
