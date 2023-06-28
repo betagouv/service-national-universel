@@ -4,16 +4,15 @@ import { addDays, formatISO } from "date-fns";
 import dayjs from "dayjs";
 
 export default function ValidationDateSelector({ data, value, onChange }) {
-  const [selectedDuration, setSelectedDuration] = useState(8);
-  const [newValidationDate, setNewValidationDate] = useState(value);
-
+  const [selectedDuration, setSelectedDuration] = useState(0);
+  const [newValidationDate, setNewValidationDate] = useState("");
 //   useEffect(() => {
 //     setNewValidationDate(value);
 //   }, [value]);
 
-  useEffect(() => {
-    handleDurationSelect(selectedDuration);
-  }, [data.dateStart]);
+//   useEffect(() => {
+//     handleDurationSelect(selectedDuration);
+//   }, [data.dateStart]);
 
   const handleDurationSelect = (duration) => {
     setSelectedDuration(duration);
@@ -30,9 +29,10 @@ export default function ValidationDateSelector({ data, value, onChange }) {
   return (
     <div className="flex flex-col">
       <select onChange={(e) => handleDurationSelect(parseInt(e.target.value))}>
-        <option value={8}>
-          8 days
+        <option defaultValue value="0">
+          choisir un nombre de jour pour validation
         </option>
+        <option value={8}>8 days</option>
         <option value={10}>10 days</option>
         <option value={12}>12 days</option>
       </select>
@@ -40,7 +40,7 @@ export default function ValidationDateSelector({ data, value, onChange }) {
       {/* {validationDate && <p>Validation date: {validationDate}</p>} */}
       <input
         type="text"
-        value={dayjs(newValidationDate).format("DD/MM/YYYY") || ""}
+        value={dayjs(newValidationDate).format("DD/MM/YYYY")}
         // value={validationDate}
         // onChange={() => setData({ ...data, validationDate: validationDateNoTerm })}
         onChange={onChange}
