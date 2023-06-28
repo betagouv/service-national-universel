@@ -33,7 +33,6 @@ export default function Phase1(props) {
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState(props.young);
-  const [ligneBus, setLigneBus] = useState([]);
 
   const [isCohortOpenForAffectation, setIsCohortOpenForAffection] = useState(false);
   const [cohort, setCohort] = useState();
@@ -49,27 +48,13 @@ export default function Phase1(props) {
     }
   }
 
-  const getLigne = async () => {
-    try {
-      const { ok, code, data: reponseBus } = await api.get(`/ligne-de-bus/${young.ligneId}`);
-
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
-      }
-      setLigneBus(reponseBus);
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
-    }
-  };
-
   useEffect(() => {
     // --- get cohort.
     (async () => {
       try {
         const { data } = await getCohortByName(young.cohort);
         setCohort(data);
-        getLigne();
+        //getLigne();
       } catch (error) {
         capture(error);
         const { title, message } = error;
@@ -119,16 +104,22 @@ export default function Phase1(props) {
     }
   }, [cohort]);
 
+  console.log(meetingPoint);
+
   return (
     <>
       <YoungHeader young={props.young} tab="phase1" onChange={props.onChange} />
       <div className="p-[30px]">
-        {ligneBus.delayedForth === "true" || ligneBus.delayedBack === "true" ? (
+        {meetingPoint?.bus?.delayedForth === "true" || meetingPoint?.bus?.delayedBack === "true" ? (
           <InfoMessage
             bg="bg-[#B45309]"
             Icon={AiOutlineExclamationCircle}
             message={`Le départ de la ligne de bus de ce jeune est retardé ${
-              ligneBus.delayedForth === "true" && ligneBus.delayedBack === "true" ? "à l'Aller et au Retour" : ligneBus.delayedForth === "true" ? "à l'Aller" : "au Retour"
+              meetingPoint?.bus?.delayedForth === "true" && meetingPoint?.bus?.delayedBack === "true"
+                ? "à l'Aller et au Retour"
+                : meetingPoint?.bus?.delayedForth === "true"
+                ? "à l'Aller"
+                : "au Retour"
             }.`}
           />
         ) : null}
