@@ -8,7 +8,7 @@ function WaitingListContent({ showLinks }) {
         <p>
           <strong>
             Des places peuvent se libérer à tout moment. Si vous le souhaitez, vous pouvez donc être convoqué(e) dans les prochains jours et jusqu’au lendemain du départ en séjour.
-          </strong>
+          </strong>{" "}
           Pour cela, vous n’avez rien à faire : restez inscrit à ce séjour.
         </p>
         <p>
