@@ -105,19 +105,19 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
       <input type="checkbox" className="hidden" checked={valid} readOnly />
 
       {valid ? (
-        <button className="relative mb-3 ml-4 flex min-h-[144px] items-center rounded-xl border-[1px] border-emerald-500 bg-emerald-50" onClick={handleOpenMobile}>
+        <button className="relative mb-3 ml-4 flex min-h-[144px] items-center rounded-xl border-2 border-green-400 bg-green-50 w-full" onClick={handleOpenMobile}>
           {(young.meetingPointId || young.deplacementPhase1Autonomous === "true") && (
             <LinearMap gray={(!young.meetingPointId).toString()} className="absolute top-[10px] right-[10px]" />
           )}
           <div className="flex w-full -translate-x-5 flex-row items-center">
-            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500">
+            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
               <BsCheck2 className="h-5 w-5 text-white" />
             </div>
             <div className="ml-3 mr-8 mt-4 flex-1 text-left">
-              <div className="text-sm text-emerald-600">
+              <div className="text-sm text-green-600">
                 {young?.transportInfoGivenByLocal === "true" ? "Confirmation du point de rendez-vous : vous n'avez rien à faire" : "Lieu de rassemblement"}
               </div>
-              <div className={` text-sm leading-5 ${valid && "text-emerald-600 opacity-70"} ${enabled ? "text-gray-500" : "text-gray-400"}`}>
+              <div className={` text-sm leading-5 ${valid && "text-green-600 opacity-70"} ${enabled ? "text-gray-500" : "text-gray-400"}`}>
                 {young.meetingPointId ? (
                   <>
                     <div>{addressOf(meetingPoint)}</div>

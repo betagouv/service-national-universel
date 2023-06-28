@@ -27,10 +27,12 @@ export default function StepsAffected({ center, session, meetingPoint, departure
         </div>
       </article>
 
-      <StepPDR center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
-      <StepAgreement departureDate={departureDate} returnDate={returnDate} />
-      <StepConvocation center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
-      <StepMedicalField young={young} />
+      <div className="space-y-6">
+        <StepPDR center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+        <StepAgreement departureDate={departureDate} returnDate={returnDate} />
+        <StepConvocation center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+        <StepMedicalField young={young} />
+      </div>
     </section>
   );
 }
