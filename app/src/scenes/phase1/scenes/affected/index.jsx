@@ -96,9 +96,13 @@ export default function Affected() {
           <BannerTermJuly responsive="hidden lg:flex order-2 items-center justify-start mb-4 bg-white border-[1px] border-gray-200 shadow-sm rounded-lg mx-[5%]" />
         )}
         {isStepMedicalFieldDone(young) && (
-          <div className="order-3 flex flex-none flex-col gap-4 md:flex-row">
-            <TravelInfo location={young?.meetingPointId ? meetingPoint : center} departureDate={departureDate} returnDate={returnDate} />
-            <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
+          <div className="order-3 flex-none gap-6 grid grid-cols-1 md:grid-cols-3">
+            <div>
+              <TravelInfo location={young?.meetingPointId ? meetingPoint : center} departureDate={departureDate} returnDate={returnDate} />
+            </div>
+            <div className="col-span-2">
+              <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
+            </div>
           </div>
         )}
 
