@@ -78,19 +78,6 @@ async function getCohortNamesEndAfter(date) {
   return cohorts.map((cohort) => cohort.name);
 }
 
-async function getLastCohortEndBefore(date) {
-  try {
-    return CohortModel.findOne({ dateEnd: { $lt: date } }).sort({ dateEnd: -1 });
-  } catch (err) {
-    return null;
-  }
-}
-
-async function getLastCohortNameEndBefore(date) {
-  const lastCohort = await getLastCohortEndBefore(date);
-  return lastCohort ? lastCohort.name : null;
-}
-
 async function getCohortValidationDate(cohortName) {
   try {
     return CohortModel.findOne({ name: cohortName }, { validationDate: 1, validationDateForTerminaleGrade: 1 });
@@ -104,7 +91,5 @@ module.exports = {
   getAllSessions,
   getCohortNamesEndAfter,
   getCohortsEndAfter,
-  getLastCohortEndBefore,
-  getLastCohortNameEndBefore,
   getCohortValidationDate,
 };
