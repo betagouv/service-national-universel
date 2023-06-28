@@ -7,7 +7,7 @@ import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
-import SelectContact from "../SelectContact";
+import Select from "react-select";
 
 export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contacts, cohorts, getService }) {
   const [currentTab, setCurrentTab] = useState();
@@ -184,11 +184,14 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
             {proposedContact.length ? (
               <div className=" w-full px-10 py-2 text-[14px] leading-[20px]">
                 <p className="text-gray-500 pb-3">Ajouter à ce séjour un contact déjà existant...</p>
-                <SelectContact
-                  label={"Mes contacts"}
+                <Select
                   options={proposedContact}
-                  selected={proposedContact.find((e) => e.value === edit.contactName)}
-                  setSelected={(e) => setEdit(proposedContact.find((contact) => contact.contactName === e.value))}
+                  onChange={(e) => setEdit(proposedContact.find((contact) => contact.contactName === e.value))}
+                  placeholder="Rechercher un contact"
+                  maxMenuHeight={240}
+                  styles={{
+                    placeholder: (styles) => ({ ...styles, color: "#6B7280" }),
+                  }}
                 />
                 <p className="text-gray-500 pt-3">... ou un nouveau contact :</p>
               </div>
