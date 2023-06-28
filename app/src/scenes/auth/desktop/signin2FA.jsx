@@ -33,7 +33,7 @@ export default function Signin() {
     setLoading(true);
     try {
       setLoading(true);
-      const response = await api.post(`/young/signin-2fa`, { email, token_2fa: token });
+      const response = await api.post(`/young/signin-2fa`, { email, token_2fa: token.trim() });
       setLoading(false);
       if (response.token) api.setToken(response.token);
       if (response.user) {

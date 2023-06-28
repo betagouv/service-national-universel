@@ -26,7 +26,7 @@ export default function Signin() {
   const onSubmit = async ({ email, token }) => {
     try {
       setLoading(true);
-      const response = await api.post(`/referent/signin-2fa`, { email, token_2fa: token });
+      const response = await api.post(`/referent/signin-2fa`, { email, token_2fa: token.trim() });
       setLoading(false);
       if (response.token) api.setToken(response.token);
       if (response.user) {
