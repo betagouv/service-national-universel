@@ -199,6 +199,22 @@ const Schema = new mongoose.Schema({
       description: "Liste des accompagnateurs du bus",
     },
   },
+  delayedForth: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "La ligne est retardée à l'allée",
+    },
+  },
+  delayedBack: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "La ligne est retardée au Retour",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

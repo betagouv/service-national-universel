@@ -203,11 +203,6 @@ const Espace = () => {
         if (sessions.length) setIsResumePhase1WithdrawnModalOpen(true);
       });
     }
-    return () => {
-      setIsModalCGUOpen(false);
-      setIsResumePhase1WithdrawnModalOpen(false);
-      // setIsModalMondayOpen(false);
-    };
   }, [young]);
 
   if (!young) {

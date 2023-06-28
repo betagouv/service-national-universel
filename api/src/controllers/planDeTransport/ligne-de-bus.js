@@ -85,11 +85,13 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
       travelTime: Joi.string().required(),
       lunchBreak: Joi.boolean().required(),
       lunchBreakReturn: Joi.boolean().required(),
+      delayedForth: Joi.string(),
+      delayedBack: Joi.string(),
     }).validate({ ...req.params, ...req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canEditLigneBusGeneralInfo(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    let { id, busId, departuredDate, returnDate, youngCapacity, totalCapacity, followerCapacity, travelTime, lunchBreak, lunchBreakReturn } = value;
+    if (!canEditLigneBusGeneralInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    let { id, busId, departuredDate, returnDate, youngCapacity, totalCapacity, followerCapacity, travelTime, lunchBreak, lunchBreakReturn, delayedForth, delayedBack } = value;
 
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -112,6 +114,8 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
       travelTime,
       lunchBreak,
       lunchBreakReturn,
+      delayedForth,
+      delayedBack,
     });
 
     await ligne.save({ fromUser: req.user });
@@ -130,6 +134,8 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
       travelTime,
       lunchBreak,
       lunchBreakReturn,
+      delayedForth,
+      delayedBack,
     });
     await planDeTransport.save({ fromUser: req.user });
     // * End update slave PlanTransport

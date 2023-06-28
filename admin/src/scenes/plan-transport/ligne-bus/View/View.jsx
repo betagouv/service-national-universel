@@ -18,6 +18,8 @@ import Info from "./components/Info";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
+import InfoMessage from "../../../dashboardV2/components/ui/InfoMessage";
+import { AiOutlineExclamationCircle } from "react-icons/ai";
 
 export default function View(props) {
   const [data, setData] = React.useState(null);
@@ -217,6 +219,15 @@ export default function View(props) {
             )}
           </div>
         </div>
+        {data.delayedForth === "true" || data.delayedBack === "true" ? (
+          <InfoMessage
+            bg="bg-[#B45309]"
+            Icon={AiOutlineExclamationCircle}
+            message={`Le départ de cette ligne de bus est retardé ${
+              data.delayedForth === "true" && data.delayedBack === "true" ? "à l'aller et au retour" : data.delayedForth === "true" ? "à l'aller" : "au retour"
+            }.`}
+          />
+        ) : null}
         <div className="flex flex-col gap-8">
           <div className="flex gap-4">
             <Itineraire
@@ -224,6 +235,8 @@ export default function View(props) {
               aller={data.departuredDate}
               retour={data.returnDate}
               center={{ ...data.centerDetail, departureHour: data.centerArrivalTime, returnHour: data.centerDepartureTime }}
+              bus={data}
+              setBus={setData}
             />
             <Modification demandeDeModification={demandeDeModification} getModification={getDemandeDeModification} />
           </div>
