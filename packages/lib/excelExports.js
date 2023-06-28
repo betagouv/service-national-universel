@@ -174,7 +174,7 @@ const youngExportFields = [
     desc: [
       "Autonomie",
       "Numéro de bus",
-      "Les informations de transport transmises par les services locaux",
+      "Les informations de transports transmises par email",
       "ID du bus",
       "Nom du point de rassemblement",
       "Adresse du point de rassemblement",
