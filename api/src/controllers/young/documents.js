@@ -312,6 +312,7 @@ router.post(
         // Upload file using ObjectId as file name
 
         const data = fs.readFileSync(tempFilePath);
+        console.log("🚀 ~ file: documents.js:315 ~ data:", data)
         const encryptedBuffer = encrypt(data);
         const resultingFile = { mimetype: mimeFromMagicNumbers, encoding: "7bit", data: encryptedBuffer };
         if (MILITARY_FILE_KEYS.includes(key)) {

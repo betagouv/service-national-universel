@@ -1,5 +1,6 @@
 import URI from "urijs";
 import { supportApiUrl } from "../config";
+import { createFormDataForFileUpload } from "snu-lib/file";
 
 class ApiService {
   getUrl({ origin = supportApiUrl, path, query = {} }) {
@@ -69,15 +70,7 @@ class ApiService {
   }
 
   uploadFile(path, files) {
-    let formData = new FormData();
-    for (let file of files) {
-      const safeFilename = encodeURIComponent(file.name.replaceAll(/'/g, ""));
-      Object.defineProperty(file, "name", {
-        writable: true,
-        value: safeFilename,
-      });
-      formData.append(file.name, file, safeFilename);
-    }
+    const formData = createFormDataForFileUpload(files);
     return new Promise((resolve, reject) => {
       try {
         fetch(this.getUrl({ path }), {

@@ -2,6 +2,7 @@ import "isomorphic-fetch";
 import fetchRetry from "fetch-retry";
 import { apiURL } from "../config";
 import * as Sentry from "@sentry/react";
+import { createFormDataForFileUpload } from "snu-lib";
 
 let fetch = window.fetch;
 
@@ -139,53 +140,10 @@ class api {
   }
 
   uploadFile(path, arr) {
-    const names = arr.map((e) => e.name || e);
-    let files = arr.filter((e) => typeof e === "object");
-    let formData = new FormData();
-    for (let file of files) {
-      const safeFilename = encodeURIComponent(file.name.replaceAll(/'/g, ""));
-      Object.defineProperty(file, "name", {
-        writable: true,
-        value: safeFilename,
-      });
-      formData.append(file.name, file, safeFilename);
-    }
-    formData.append("body", JSON.stringify({ names }));
+    const formData = createFormDataForFileUpload(arr);
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
-          retries: 3,
-          retryDelay: 1000,
-          retryOn: [502, 503, 504],
-          mode: "cors",
-          method: "POST",
-          credentials: "include",
-          headers: { Authorization: `JWT ${this.token}` },
-          body: formData,
-        });
-        const res = await response.json();
-        resolve(res);
-      } catch (e) {
-        reject(e);
-      }
-    });
-  }
-
-  uploadID(youngId, file, metadata = {}) {
-    let formData = new FormData();
-    const safeFilename = encodeURIComponent(file.name.replace(/'/g, ""));
-    Object.defineProperty(file, "name", {
-      writable: true,
-      value: safeFilename,
-    });
-    formData.append("file", file, safeFilename);
-    for (const [key, value] of Object.entries(metadata)) {
-      formData.append(key, value);
-    }
-
-    return new Promise(async (resolve, reject) => {
-      try {
-        const response = await fetch(`${apiURL}/young/${youngId}/documents/cniFiles`, {
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
