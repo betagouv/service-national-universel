@@ -107,7 +107,6 @@ export default function VolontairePanel({ onChange, value }) {
               </Link>
               {user.role !== ROLES.HEAD_CENTER && (
                 <>
-                  if (!young) return toastr.error("Vous devez être connecté pour effectuer cette action.");
                   <button onClick={() => onPrendreLaPlace(user._id)}>
                     <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
                   </button>
