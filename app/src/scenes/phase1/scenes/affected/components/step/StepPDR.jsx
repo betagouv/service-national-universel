@@ -137,7 +137,7 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
                 : young?.transportInfoGivenByLocal === "true"
                 ? "Confirmation du point de rendez-vous : vous n'avez rien à faire"
                 : pdrChoiceExpired
-                ? "Date limite dépassée"
+                ? "Non disponible"
                 : "Confirmez votre point de rassemblement"}
             </h1>
             <p className={`text-sm leading-5 ${enabled ? "text-gray-500" : "text-gray-400"}`}>
@@ -230,7 +230,7 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
                 : young?.transportInfoGivenByLocal === "true"
                 ? "Confirmation du point de rendez-vous : vous n'avez rien à faire"
                 : pdrChoiceExpired
-                ? "Date limite dépassée"
+                ? "Non disponible"
                 : "Confirmez votre point de rassemblement"}
             </div>
             <div className={` text-sm leading-5 ${valid && "text-green-600 opacity-70"} ${enabled ? "text-gray-500" : "text-gray-400"}`}>
