@@ -671,7 +671,7 @@ async function updateStatusPhase1WithSpecificCaseJuly(young, validationDate, use
         } else if (young.cohesionStayPresence !== "false") {
           young.set({ statusPhase1: "AFFECTED" });
         } else {
-          young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
+          young.set({ statusPhase1: "NOT_DONE" });
         }
       }
     }
