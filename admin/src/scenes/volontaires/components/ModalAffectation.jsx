@@ -284,7 +284,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                     }}
                     className="flex w-1/3 flex-auto cursor-pointer flex-row items-center justify-center gap-4 rounded-lg border-[1px] border-gray-200 py-3 hover:bg-gray-100">
                     <div className="w-5/6 text-sm">
-                      Plan de transport <span className="font-bold">transmis par les services locaux</span>
+                      Plan de transport <span className="font-bold">transmis par email</span>
                     </div>
                     <ChevronRight className="text-gray-400" width={8} height={16} />
                   </div>
@@ -373,7 +373,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                   ) : pdrOption === "self-going" ? (
                     <div>Le volontaire se rendra directement au centre et en reviendra par ses propres moyens.</div>
                   ) : pdrOption === "local" ? (
-                    <div>Les informations de transport sont transmises par les services locaux.</div>
+                    <div>Les informations de transport sont transmises par email.</div>
                   ) : (
                     <div>Le volontaire choisira lui-même son point de rassemblement.</div>
                   )}
@@ -413,7 +413,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
         </div>
 
         {step === 3 && (
-          <div onClick={handleAffectation} className="mb-2 flex-1 cursor-pointer rounded border-[1px] bg-blue-600 py-2 text-center text-sm font-medium text-white">
+          <div onClick={handleAffectation} className="mb-2 mt-5 flex-1 cursor-pointer rounded border-[1px] bg-blue-600 py-2 text-center text-sm font-medium text-white">
             Confirmer
           </div>
         )}

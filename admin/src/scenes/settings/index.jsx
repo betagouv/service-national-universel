@@ -18,6 +18,7 @@ import SimpleToggle from "../../components/ui/forms/dateForm/SimpleToggle";
 import ToggleDate from "../../components/ui/forms/dateForm/ToggleDate";
 import { BiLoaderAlt } from "react-icons/bi";
 import { settings, uselessSettings } from "./utils";
+import { environment } from "../../config";
 
 const cohortList = [
   { label: "Février 2023 - C", value: "Février 2023 - C" },
@@ -26,6 +27,8 @@ const cohortList = [
   { label: "Juin 2023", value: "Juin 2023" },
   { label: "Juillet 2023", value: "Juillet 2023" },
 ];
+
+if (environment !== "production") cohortList.push({ label: "Séjour de test", value: "Séjour de test" });
 
 export default function Settings() {
   const { user } = useSelector((state) => state.Auth);

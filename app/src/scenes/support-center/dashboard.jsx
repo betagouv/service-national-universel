@@ -198,13 +198,6 @@ export default function Dashboard(props) {
 
   return (
     <HeroContainer>
-      <NavLink style={{ color: "#32257F", fontWeight: "bold" }} to="/">
-        {" "}
-        <svg width="8" height="11" viewBox="0 0 6 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4.42367 0L0.423279 4.00716L4.42367 8.01432L5.41483 7.02148L2.4056 4.00716L5.41483 0.992838L4.42367 0Z" fill="#32257F" />
-        </svg>{" "}
-        Retour à mon espace
-      </NavLink>
       <Container>
         <h3 className="text-center text-[32px]">Besoin d&apos;aide&nbsp;?</h3>
         <div className=" mt-2 mr-auto ml-auto flex w-full content-center items-center justify-center md:w-2/3 md:flex-1">

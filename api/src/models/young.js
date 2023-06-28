@@ -211,6 +211,7 @@ const Schema = new mongoose.Schema({
       "2020",
       "2019",
       "à venir",
+      "Séjour de test",
     ],
     documentation: {
       description: "Cohorte",

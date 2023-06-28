@@ -15,6 +15,7 @@ import { inscriptionCreationOpenForYoungs } from "snu-lib";
 import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import Footer from "../../components/footerV2";
 import Header from "../../components/header";
+import { environment } from "../../config";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -40,7 +41,7 @@ const Step = () => {
     return <Redirect to={`/preinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
-  if (!inscriptionCreationOpenForYoungs()) {
+  if (!inscriptionCreationOpenForYoungs("", false, environment)) {
     return <Redirect to="/" />;
   }
 
@@ -48,15 +49,15 @@ const Step = () => {
 };
 
 export default function Index() {
-  return <Redirect to="/auth" />;
+  // Inscriptions are currently closed in production
+  if (environment === "production") return <Redirect to="/auth" />;
 
   const young = useSelector((state) => state.Auth.young);
-
   if (young) return <Redirect to="/" />;
 
   return (
     <PreInscriptionContextProvider>
-      <div className="flex min-h-screen flex-col justify-between bg-beige-gris-galet-975">
+      <div className="flex flex-col justify-between bg-beige-gris-galet-975">
         <Header />
         <Switch>
           <SentryRoute path="/preinscription/:step" component={Step} />;

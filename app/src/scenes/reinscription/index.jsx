@@ -2,6 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { Redirect, useParams } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
+import { environment } from "../../config";
 
 import MobileConsentements from "./mobile/stepConsentements";
 import MobileDocuments from "./mobile/stepDocuments";
@@ -92,7 +93,7 @@ export default function Index() {
   }
 
   //si la periode de modification est finie
-  if (!reInscriptionModificationOpenForYoungs(young.cohort)) {
+  if (!reInscriptionModificationOpenForYoungs(young.cohort, environment)) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 

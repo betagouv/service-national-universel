@@ -13,6 +13,8 @@ import api from "../../../services/api";
 import Error from "../../../components/error";
 import Footer from "../../../components/footerV2";
 import { cohortsInit } from "../../../utils/cohorts";
+import { environment } from "../../../config";
+import { Link } from "react-router-dom";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -106,6 +108,14 @@ export default function Signin() {
             href="https://www.snu.gouv.fr/?utm_source=moncompte&utm_medium=website&utm_campaign=fin+inscriptions+2023&utm_content=cta+notifier#formulaire">
             Recevoir une alerte par email
           </a>
+
+          {environment !== "production" && (
+            <Link to="/preinscription">
+              <p className="text-blue-france-sun-113 text-center hover:underline hover:text-blue-france-sun-113 mt-4 decoration-2 underline-offset-4">
+                Pré-inscription - accès staging
+              </p>
+            </Link>
+          )}
         </div>
       </div>
       <Footer />

@@ -1,3 +1,18 @@
+# [1.301.0](https://github.com/betagouv/service-national-universel/compare/v1.300.0...v1.301.0) (2023-06-27)
+
+
+### Bug Fixes
+
+* **admin:** cohort authorisation for schema ([e0d316a](https://github.com/betagouv/service-national-universel/commit/e0d316a54d70a3b28144b79eb7742ea1b02d96e8))
+* **app/admin:** Elements de language choix PDR : services locaux -> email ([bdd4af8](https://github.com/betagouv/service-national-universel/commit/bdd4af8283614db20ef4cd5dd1718fbcd526d0b5))
+
+
+### Features
+
+* **admin:** Email automatique au référent d’origine - départ du volontaire  ([#2746](https://github.com/betagouv/service-national-universel/issues/2746)) ([4e3faf8](https://github.com/betagouv/service-national-universel/commit/4e3faf8bf0c06545bfd7d2a527ca53585b03807c))
+* **app:** Besoin d'aide/Contacter quelqu'un : Ajout d'une catégorie "Désistement" ([#2751](https://github.com/betagouv/service-national-universel/issues/2751)) ([c4d81fb](https://github.com/betagouv/service-national-universel/commit/c4d81fb7f521df082e578657aa3ddcff514fe14a))
+* **app/admin/lib:** Donner accès au funnel d'inscription en staging ([#2733](https://github.com/betagouv/service-national-universel/issues/2733)) ([93820b3](https://github.com/betagouv/service-national-universel/commit/93820b3401514ca27badf7f559f1b620325e5fe2))
+
 # [1.300.0](https://github.com/betagouv/service-national-universel/compare/v1.299.0...v1.300.0) (2023-06-26)
 
 
