@@ -81,25 +81,27 @@ const sessions2023 = [
       instructionEndDate: new Date("2023-05-12T22:00:00.000Z"), // 12 mai
     },
   },
-  {
-    id: "2023_12",
-    name: "Séjour de test",
-    dateStart: new Date("12/01/2023"),
-    dateEnd: new Date("12/15/2023"),
-    buffer: 99999,
-    event: "Phase0/CTA preinscription - sejour de test",
-    eligibility: {
-      zones: ["A", "B", "C", "DOM", "PF", "Etranger"],
-      schoolLevels: ["NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"],
-      bornAfter: new Date("07/17/2005"),
-      bornBefore: new Date("07/05/2008"),
-      inscriptionEndDate: new Date("2023-12-01T22:00:00.000Z"),
-      instructionEndDate: new Date("2023-12-01T22:00:00.000Z")
-    },
-  }
 ];
+
+const testCohort = {
+  id: "2023_12",
+  name: "Séjour de test",
+  dateStart: new Date("12/01/2023"),
+  dateEnd: new Date("12/15/2023"),
+  buffer: 99999,
+  event: "Phase0/CTA preinscription - sejour de test",
+  eligibility: {
+    zones: ["A", "B", "C", "DOM", "PF", "Etranger"],
+    schoolLevels: ["NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"],
+    bornAfter: new Date("07/17/2005"),
+    bornBefore: new Date("07/05/2008"),
+    inscriptionEndDate: new Date("2023-12-01T22:00:00.000Z"),
+    instructionEndDate: new Date("2023-12-01T22:00:00.000Z")
+  },
+}
 
 export {
   sessions2023,
+  testCohort,
   oldSessions,
 };

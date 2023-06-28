@@ -1,10 +1,14 @@
-const { YOUNG_STATUS, sessions2023, region2zone, oldSessions, getRegionForEligibility } = require("snu-lib");
+const { YOUNG_STATUS, sessions2023, region2zone, oldSessions, getRegionForEligibility, testCohort } = require("snu-lib");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
+const { ENVIRONMENT } = require("../config");
 
 async function getFilteredSessions(young) {
   const region = getRegionForEligibility(young);
+  if (ENVIRONMENT !== "production") {
+    sessions2023.push(testCohort);
+  }
   const sessions = sessions2023.filter(
     (session) =>
       session.eligibility.zones.includes(region2zone[region]) &&
