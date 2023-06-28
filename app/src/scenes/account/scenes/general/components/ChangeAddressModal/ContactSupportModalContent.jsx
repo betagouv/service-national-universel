@@ -7,9 +7,10 @@ const ContactSupportModalContent = ({ onClose }) => {
     <>
       <Modal.Title>J’ai changé d’adresse</Modal.Title>
       <Modal.Subtitle>Vous avez changé d&apos;adresse alors que vous êtes affecté(e) à un séjour de cohésion, contactez le support : </Modal.Subtitle>
-      <div>
+      <div className="my-4">
         <AppLink to="/besoin-d-aide">Je contacte le support</AppLink>
       </div>
+      <Modal.Buttons onCancel={onClose} confirmText="Fermer" />
     </>
   );
 };

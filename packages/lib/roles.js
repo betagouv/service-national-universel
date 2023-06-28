@@ -263,7 +263,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
     (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion || isReferentModifyingHeadCenterWithoutChangingRole : true) &&
     (actor.role === ROLES.REFERENT_DEPARTMENT
       ? ([ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) || isMe) &&
-      (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
+        (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
       : true);
   return authorized;
 }
@@ -353,6 +353,17 @@ function isPdrEditionOpen(actor, cohort) {
       return false;
   }
 }
+
+const isBusEditionOpen = (actor, cohort) => {
+  switch (actor?.role) {
+    case ROLES.ADMIN:
+      return true;
+    case ROLES.TRANSPORTER:
+      return cohort?.busEditionOpenForTransporter;
+    default:
+      return false;
+  }
+};
 
 function isLigneBusDemandeDeModificationOpen(actor, cohort) {
   if (actor.role === ROLES.ADMIN) return true;
@@ -877,4 +888,5 @@ export {
   canSendImageRightsForSessionPhase1,
   isSupervisor,
   canPutSpecificDateOnSessionPhase1,
+  isBusEditionOpen,
 };

@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { ROLES } from "snu-lib";
+import { capture } from "../../../sentry";
+
 import Select from "./components/Select";
+import MainSelect from "../components/Select";
 import { HiX, HiCheck } from "react-icons/hi";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
@@ -10,14 +15,25 @@ import { useHistory } from "react-router-dom";
 import SelectInput from "./components/SelectInput";
 import { MdMan } from "react-icons/md";
 
+const cohortList = [
+  { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
+  { label: "Séjour du <b>9 au 21 Avril 2023</b>", value: "Avril 2023 - A" },
+  { label: "Séjour du <b>16 au 28 Avril 2023</b>", value: "Avril 2023 - B" },
+  { label: "Séjour du <b>11 au 23 Juin 2023</b>", value: "Juin 2023" },
+  { label: "Séjour du <b>4 au 16 Juillet 2023</b>", value: "Juillet 2023" },
+];
+
 const ChangeYoungs = () => {
+  const { user, sessionPhase1 } = useSelector((state) => state.Auth);
   const urlParams = new URLSearchParams(window.location.search);
-  const cohort = urlParams.get("cohort");
+  const defaultCohort = user.role === ROLES.ADMIN && sessionPhase1 ? sessionPhase1.cohort : "Février 2023 - C";
+  const [cohort, setCohort] = React.useState(urlParams.get("cohort") || defaultCohort);
+  const ligne_id_from = urlParams.get("ligne_id_from");
   const history = useHistory();
   return (
     <>
       <div className="w-full flex justify-between items-center">
-        <Breadcrumbs items={[{ label: "Edit plan de transport" }]} />
+        <Breadcrumbs items={[{ label: "Edit plan de transport", to: "/edit-transport" }, { label: "Déplacement de volontaires" }]} />
         <button
           className="border border-white  hover:scale-110 duration-200 ease-in-out rounded px-2 py-1 bg-snu-purple-800 text-white shadow-xl mt-2 mr-2"
           onClick={() => history.push(`/edit-transport?cohort=${cohort}`)}>
@@ -27,9 +43,18 @@ const ChangeYoungs = () => {
 
       <div className="flex w-full flex-col px-8 pb-8 h-full">
         <div className="flex items-center justify-between py-8">
-          <Title>Deplacement des jeunes</Title>
+          <Title>Déplacement de volontaires</Title>
+          <MainSelect
+            options={cohortList}
+            value={cohort}
+            disabled={user.role !== ROLES.ADMIN && user.subRole !== "god"}
+            onChange={(e) => {
+              setCohort(e);
+              history.replace({ search: `?cohort=${e}` });
+            }}
+          />
         </div>
-        <ChangeYoung cohort={cohort} />
+        <ChangeYoung cohort={cohort} defaultLine={ligne_id_from} />
       </div>
     </>
   );
@@ -37,7 +62,7 @@ const ChangeYoungs = () => {
 
 export default ChangeYoungs;
 
-const ChangeYoung = ({ cohort }) => {
+const ChangeYoung = ({ cohort, defaultLine }) => {
   const [allLines, setAllLines] = useState();
   const [youngs, setYoungs] = useState();
   const [linesInView, setLinesInView] = useState([]);
@@ -50,15 +75,17 @@ const ChangeYoung = ({ cohort }) => {
   const [unauthorized, setUnauthorized] = useState(false);
 
   useEffect(() => {
+    if (!cohort) return;
     try {
       const getAllLines = async () => {
         const res = await api.get(`/edit-transport/allLines/${cohort}`);
         if (res.ok) {
+          const lineDefault = res.data.find((e) => e._id === defaultLine);
           setAllLines(res.data.reverse());
-          setLinesInView(res.data.slice(0, 2));
+          setLinesInView([lineDefault ? lineDefault : res.data[0], lineDefault ? lineDefault : res.data[0]]);
         } else toastr.error("Oups, une erreur est survenue lors de la récupération des linesInView");
       };
-      if (cohort) getAllLines();
+      getAllLines();
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération des linesInView");
@@ -84,13 +111,11 @@ const ChangeYoung = ({ cohort }) => {
   }, [allLines, isCancel]);
 
   const cancel = () => {
-    console.log("cancel");
     setIsCancel((o) => !o);
     setIsDirty(false);
   };
 
   const save = () => {
-    console.log("save");
     try {
       const saveYoungs = async (data) => {
         const res = await api.post("/edit-transport/saveYoungs", { data, busFrom: linesInView[0], busTo: linesInView[1] });
@@ -127,16 +152,11 @@ const ChangeYoung = ({ cohort }) => {
   };
 
   useEffect(() => {
-    console.log(checkedYoungs);
-  }, [checkedYoungs]);
-
-  useEffect(() => {
     const line = linesInView[1];
     if (!line || !checkedYoungs) return;
     const checkedNumber = line._id === linesInView[0]._id ? 0 : checkedYoungs.filter((e) => e).length;
     const total = line.youngCapacity;
     const numOfYoung = youngs.filter((e) => e.ligneId === line._id).length;
-    console.log(numOfYoung);
     setUnauthorized(numOfYoung + checkedNumber > total);
   }, [checkedYoungs, linesInView[1]]);
 
@@ -150,7 +170,8 @@ const ChangeYoung = ({ cohort }) => {
 
   const move = () => {
     if (unauthorized) return toastr.error("La capacité du bus ne permet pas de faire le transfert");
-    if (!checkedYoungs || !checkedYoungs[0]) return;
+    if (!checkedYoungs) return;
+    if (!checkedYoungs.filter((e) => e).length) return toastr.error("Aucun jeunes selectionnés");
     const toLine = linesInView[1]._id;
     const toPdr = selectedPdr[1].meetingPointId;
     const tmp = youngs;
@@ -161,6 +182,7 @@ const ChangeYoung = ({ cohort }) => {
         tmp[index].ligneId = toLine;
       }
     }
+    setCheckedYoungs([]);
     setIsDirty(true);
     setYoungs([...tmp]);
   };
@@ -200,19 +222,66 @@ const ChangeYoung = ({ cohort }) => {
       </div>
       <div className="flex justify-center p-5 w-wull h-full bg-white shadow-xl rounded">
         {linesInView.map((ligne, index) => {
+          const total = ligne.youngCapacity;
+          const youngsCount =
+            linesInView[0]._id === linesInView[1]._id
+              ? youngs.filter((e) => e.meetingPointId === selectedPdr[index]?.meetingPointId).length
+              : youngs?.filter((e) => e.ligneId === ligne._id).length;
+          const factor = index ? 1 : -1;
+          const checkedNumber = factor * (!checkedYoungs ? 0 : checkedYoungs?.filter((e) => e).length);
+          const capacityPercent = Math.round(((checkedNumber + youngsCount) * 100) / total);
+
           return (
             <div className={`flex flex-col w-1/2 items-start ml-3 ${!index % 2 ? "border-r" : ""}`} key={`doppable-${index}`}>
-              <div className="text-md mb-2">
+              <div className="text-md mb-2 w-full">
                 {currentTab === "aller" ? (
                   <>
                     <p>
-                      {"From: "}
-                      <span className="text-gray-400">{`${linesInView[index].pointDeRassemblements[0]?.region}`}</span>
+                      From:
+                      <span className="text-gray-400 ml-2">{`${linesInView[index].pointDeRassemblements[0]?.region}`}</span>
                     </p>
                     <p>
-                      {"To: "}
-                      <span className="text-gray-400">{`${linesInView[index].centerRegion}`}</span>
+                      To:
+                      <span className="text-gray-400 ml-2">{`${linesInView[index].centerRegion}`}</span>
                     </p>
+                    {youngs ? (
+                      <>
+                        <div className="flex w-4/5 justify-between items-center">
+                          <p className="w-1/5 ">{"Capacité: "}</p>
+                          <div className="w-2/5 flex justify-center items-center">
+                            <span className="text-gray-400 mx-2">{`${checkedNumber + youngsCount} / ${total}`}</span>
+                            <MdMan color={youngsCount + checkedNumber > total ? "#e6000c" : "#00e667"} />
+                          </div>
+                          {total ? (
+                            <div className="flex w-2/5 items-center gap-4">
+                              <div className="text-sm font-normal">{capacityPercent}%</div>
+                              <div className="flex flex-col items-center">
+                                <svg className="h-9 w-9 -rotate-90" viewBox="0 0 120 120">
+                                  <circle cx="60" cy="60" r="40" fill="none" stroke="#F0F0F0" strokeDashoffset={`calc(100 - 0)`} strokeWidth="15" />
+                                  <circle
+                                    className="percent fifty"
+                                    strokeDasharray={100}
+                                    strokeDashoffset={`calc(100 - ${Math.min(capacityPercent, 100)}`}
+                                    cx="60"
+                                    cy="60"
+                                    r="40"
+                                    fill="none"
+                                    stroke={capacityPercent > 100 ? "#e6000c" : "#1E40AF"}
+                                    strokeWidth="15"
+                                    pathLength="100"
+                                    strokeLinecap="round"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+                          ) : (
+                            <></>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <></>
+                    )}
                   </>
                 ) : (
                   <>
@@ -230,6 +299,7 @@ const ChangeYoung = ({ cohort }) => {
               <div className="text-gray-400">Ligne :</div>
               <div className="flex w-4/5">
                 <SelectInput
+                  val={ligne.busId}
                   disabled={isDirty ? true : false}
                   options={allLines.map((e) => {
                     return { label: e.busId, value: e._id };
@@ -237,8 +307,7 @@ const ChangeYoung = ({ cohort }) => {
                   onChange={(value) => onChangeLine(value, index)}
                   placeholder="Choisir une ligne de transport"
                   renderOption={(option) => {
-                    const youngsOfLine = youngs.filter((e) => e.ligneId === option.value);
-                    const numOfYoung = youngsOfLine ? youngsOfLine.length : 0;
+                    const numOfYoung = youngs.filter((e) => e.ligneId === option.value).length;
                     const total = allLines.find((e) => e._id === option.value).youngCapacity;
 
                     return (
@@ -260,7 +329,7 @@ const ChangeYoung = ({ cohort }) => {
                   options={ligne.pointDeRassemblements.map((e) => {
                     return { label: e.name.replace("PDR-", "").replace("PDR -", ""), value: e.meetingPointId };
                   })}
-                  value={selectedPdr[index] ? selectedPdr[index].meetingPointId : { placeholder: "Selectionner un PDR" }}
+                  value={selectedPdr[index] ? selectedPdr[index].meetingPointId : { placeholder: "Selectionner un point de rassemblement" }}
                   onChange={(value) => onChangePdr(value, index, ligne)}
                   renderOption={(option) => {
                     const numOfYoung = youngs.filter((e) => e.meetingPointId === option.value).length;
@@ -277,12 +346,15 @@ const ChangeYoung = ({ cohort }) => {
                   }}
                 />
                 {!index % 2 && selectedPdr[index] ? (
-                  <div className="mt-2">
+                  <div className="mt-2 h-[40px]">
                     <input className="accent-snu-purple-800" type="checkbox" onChange={(e) => setCheckedAll(e.target.checked, index)} />
                     <span className="ml-2">{checkedAll ? "Tous déselectionner" : "Tous sélectionner"}</span>
+                    <p className="mt-2">
+                      Jeunes selectioné : <span className="text-gray-400">{checkedYoungs ? checkedYoungs.filter((e) => e).length : 0}</span>
+                    </p>
                   </div>
                 ) : (
-                  <div className="mt-[26px]"></div>
+                  <div className="mt-2 h-[40px]"></div>
                 )}
               </div>
               {selectedPdr[index] ? (

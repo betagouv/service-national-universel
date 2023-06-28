@@ -49,7 +49,7 @@ import Footer from "./components/footer";
 import Loader from "./components/Loader";
 
 import api, { initApi } from "./services/api";
-import { initSentry, SentryRoute, history } from "./sentry";
+import { initSentry, SentryRoute, history, capture } from "./sentry";
 
 import { adminURL, environment } from "./config";
 import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
@@ -172,7 +172,7 @@ const Home = () => {
           setSessionPhase1List(sessions.reverse());
           dispatch(setSessionPhase1(activeSession));
         } catch (e) {
-          Sentry.captureException(e);
+          capture(e);
         }
       })();
     }

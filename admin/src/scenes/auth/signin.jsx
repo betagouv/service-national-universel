@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Formik, Field } from "formik";
-import { Link, Redirect } from "react-router-dom";
+import { Link, Redirect, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import queryString from "query-string";
@@ -15,6 +15,7 @@ import { GoTools } from "react-icons/go";
 import { formatToActualTime } from "snu-lib/date";
 
 export default function Signin() {
+  const history = useHistory();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
   const [userIsValid, setUserIsValid] = useState(true);
@@ -52,7 +53,10 @@ export default function Signin() {
                 initialValues={{ email: "", password: "" }}
                 onSubmit={async ({ email, password }, actions) => {
                   try {
-                    const { user, token } = await api.post(`/referent/signin`, { email, password });
+                    const { user, token, code } = await api.post(`/referent/signin`, { email, password });
+                    if (code === "2FA_REQUIRED") {
+                      return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
+                    }
                     if (token) api.setToken(token);
                     if (user) {
                       if (redirect?.startsWith("http")) return (window.location.href = redirect);

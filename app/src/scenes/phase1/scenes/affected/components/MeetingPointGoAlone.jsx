@@ -31,10 +31,10 @@ function MeetingPointGoAlone({ center, onChoose, chosen, expired, departureDate,
       {chosen ? (
         <button disabled className="w-full flex items-center justify-center rounded-[10px] border-[1px] border-blue-600 bg-blue-600 py-2.5 px-3 text-xs font-medium text-white">
           <Check className="mr-2" />
-          Choisi
+          Validé
         </button>
       ) : expired ? (
-        <div className="rounded-[10px] border-[1px] border-gray-300 bg-white py-2.5 px-3 text-sm font-medium text-gray-500">Date limite dépassée</div>
+        <div className="rounded-[10px] border-[1px] border-gray-300 bg-white py-2.5 px-3 text-sm font-medium text-gray-500 w-full text-center">Non disponible</div>
       ) : (
         <BorderButton onClick={onChoose} className="w-full">
           Choisir

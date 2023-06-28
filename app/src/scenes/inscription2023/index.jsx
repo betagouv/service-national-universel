@@ -33,6 +33,7 @@ import Header from "./../../components/header";
 import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import { YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
 import FutureCohort from "./FutureCohort";
+import { environment } from "../../config";
 
 function renderStep(step, device) {
   if (step === STEPS.COORDONNEES) return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;
@@ -131,7 +132,7 @@ export default function Index() {
   }
 
   //si la periode de modification est finie
-  if (!inscriptionModificationOpenForYoungs(young.cohort, young) && young.status !== YOUNG_STATUS.NOT_AUTORISED) {
+  if (!inscriptionModificationOpenForYoungs(young.cohort, young, environment) && young.status !== YOUNG_STATUS.NOT_AUTORISED) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
