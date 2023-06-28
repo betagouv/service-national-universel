@@ -193,7 +193,7 @@ const renderLocalTransport = async (young) => {
         sanitizeAll(
           contacts
             .map((contact) => {
-              return `<li>${contact.contactName} - ${contact.contactPhone || ""} - ${contact.contactMail || ""}</li>`;
+              return `<li>${contact.contactName} - ${contact.contactPhone || ""} <br> ${contact.contactMail || ""}</li>`;
             })
             .join(""),
         ),
