@@ -6,7 +6,7 @@ const { capture } = require("./sentry");
 const config = require("./config");
 const { sendTemplate } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
-const { validatePassword, ERRORS, isYoung, STEPS2023 } = require("./utils");
+const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent } = require("./utils");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
@@ -103,7 +103,8 @@ class Auth {
         inscriptionStep2023: STEPS2023.COORDONNEES,
       });
       const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_MAX_AGE });
-      res.cookie("jwt", token, cookieOptions());
+      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions());
+      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions());
 
       await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
         emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
@@ -178,7 +179,8 @@ class Auth {
       await user.save();
 
       const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
-      res.cookie("jwt", token, cookieOptions());
+      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions());
+      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions());
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       return res.status(200).send({
@@ -228,7 +230,9 @@ class Auth {
       const { user } = req;
       user.set({ lastLogoutAt: Date.now() });
       await user.save();
-      res.clearCookie("jwt", logoutCookieOptions());
+      if (isYoung(user)) res.clearCookie("jwt_young", logoutCookieOptions());
+      else if (isReferent(user)) res.clearCookie("jwt_ref", logoutCookieOptions());
+
       return res.status(200).send({ ok: true });
     } catch (error) {
       capture(error);
@@ -237,7 +241,7 @@ class Auth {
   }
 
   async signinToken(req, res) {
-    const { error, value } = Joi.object({ token: Joi.string().required() }).validate({ token: req.cookies.jwt });
+    const { error, value } = Joi.object({ token_ref: Joi.string(), token_young: Joi.string() }).validate({ token_ref: req.cookies.jwt_ref, token_young: req.cookies.jwt_young });
     if (error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
 
     try {
@@ -245,7 +249,9 @@ class Auth {
       user.set({ lastActivityAt: Date.now() });
       await user.save();
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
-      res.send({ ok: true, token: value.token, user: data, data });
+      const token = isYoung(user) ? value.token_young : value.token_ref;
+      if (!data || !token) throw Error("PB with signin_token");
+      res.send({ ok: true, token: token, user: data, data });
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -281,7 +287,8 @@ class Auth {
       await user.save();
 
       const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
-      res.cookie("jwt", token, cookieOptions());
+      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions());
+      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions());
 
       return res.status(200).send({ ok: true, user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
     } catch (error) {

@@ -99,8 +99,6 @@ const OptionalLogIn = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        if (location.pathname.includes("/auth/connect")) return setLoading(false);
-
         const { ok, user, token } = await api.checkToken();
         if (!ok) {
           api.setToken(null);

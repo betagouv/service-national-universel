@@ -24,6 +24,7 @@ import { Title } from "../pointDeRassemblement/components/common";
 import { transformInscription, transformVolontairesSchool } from "../volontaires/utils";
 import DeletedInscriptionPanel from "./deletedPanel";
 import Panel from "./panel";
+import { toastr } from "react-redux-toastr";
 
 export default function Inscription() {
   useDocumentTitle("Inscriptions");
@@ -326,6 +327,15 @@ function classNames(...classes) {
 const Action = ({ hit }) => {
   const user = useSelector((state) => state.Auth.user);
 
+  const onPrendreLaPlace = async (young_id) => {
+    if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
+
+    plausibleEvent("Volontaires/CTA - Prendre sa place");
+    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    window.open(appURL, "_blank");
+  };
+
   return (
     <Listbox>
       {({ open }) => (
@@ -353,17 +363,12 @@ const Action = ({ hit }) => {
                   </Listbox.Option>
                 </Link>
                 {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && hit.status !== YOUNG_STATUS.DELETED ? (
-                  <a
-                    className="!cursor-pointer"
-                    href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
-                    <Listbox.Option
-                      className={({ active }) => classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9")}>
-                      <div className={"block truncate font-normal text-xs"}>Prendre sa place</div>
-                    </Listbox.Option>
-                  </a>
+                  <Listbox.Option
+                    className={({ active }) => classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9")}>
+                    <button className={"block truncate font-normal text-xs"} onClick={() => onPrendreLaPlace(hit._id)}>
+                      Prendre sa place
+                    </button>
+                  </Listbox.Option>
                 ) : null}
               </Listbox.Options>
             </Transition>
