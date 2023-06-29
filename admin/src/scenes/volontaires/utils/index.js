@@ -233,8 +233,8 @@ export const getFilterArray = (user, bus, session) => {
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
       translate: (item) => {
-        if (item === "N/A" || !bus?.ligneBus) return item;
-        return bus.ligneBus.find((option) => option._id.toString() === item)?.busId;
+        if (item === "N/A" || !bus?.length) return item;
+        return bus.find((option) => option._id.toString() === item)?.busId;
       },
     },
     {
@@ -296,38 +296,22 @@ export const getFilterArray = (user, bus, session) => {
   ].filter(Boolean);
 };
 
-export async function transformVolontaires(data, values, centers, sessionsPhase1, busLines) {
+export async function transformVolontaires(data, values) {
   let all = data;
-  if (values.includes("schoolSituation")) {
-    const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-    if (schoolsId?.length) {
-      const { responses } = await api.esQuery("schoolramses", {
-        query: { bool: { must: { ids: { values: schoolsId } } } },
-        size: ES_NO_LIMIT,
-      });
-      if (responses.length) {
-        const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-      }
-    }
-  }
-  const meetingPoints = busLines.meetingPoints || [];
-  const ligneBus = busLines.ligneBus || [];
-  const ligneToPoints = busLines.ligneToPoints || [];
 
   return all.map((data) => {
     let center = {};
-    if (data.cohesionCenterId && centers && sessionsPhase1) {
-      center = centers.find((c) => c._id === data.cohesionCenterId);
+    if (data.cohesionCenterId && data.sessionPhase1Id) {
+      center = data?.center;
       if (!center) center = {};
     }
     let meetingPoint = {};
     let bus = {};
     let ligneToPoint = {};
-    if (data.meetingPointId && meetingPoints) {
-      meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
-      bus = ligneBus.find((lb) => lb._id === data.ligneId);
-      ligneToPoint = ligneToPoints.find((ltp) => ltp.lineId === data.ligneId && ltp.meetingPointId === data.meetingPointId);
+    if (data.meetingPointId && data.ligneId) {
+      bus = data?.bus || {};
+      ligneToPoint = data?.ligneToPoint || {};
+      meetingPoint = data?.meetingPoint || {};
     }
 
     if (!data.domains) data.domains = [];
@@ -372,12 +356,12 @@ export async function transformVolontaires(data, values, centers, sessionsPhase1
       schoolSituation: {
         Situation: translate(data.situation),
         Niveau: translate(data.grade),
-        "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-        "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-        "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-        "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-        "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-        "UAI de l'établissement": data.esSchool?.uai,
+        "Type d'établissement": translate(data.school?.type || data.schoolType),
+        "Nom de l'établissement": data.school?.fullName || data.schoolName,
+        "Code postal de l'établissement": data.school?.postcode || data.schoolZip,
+        "Ville de l'établissement": data.school?.city || data.schoolCity,
+        "Département de l'établissement": departmentLookUp[data.school?.department] || data.schoolDepartment,
+        "UAI de l'établissement": data.school?.uai,
       },
       situation: {
         "Quartier Prioritaire de la ville": translate(data.qpv),

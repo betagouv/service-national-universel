@@ -5,7 +5,7 @@ const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { buildNdJson, joiElasticSearch, buildRequestBody } = require("./utils");
-const { ES_NO_LIMIT, canSearchLigneBus } = require("snu-lib");
+const { ES_NO_LIMIT, canSearchLigneBus, canSearchInElasticSearch } = require("snu-lib");
 const { allRecords } = require("../../es/utils");
 
 router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -147,6 +147,32 @@ router.post("/search", passport.authenticate(["referent"], { session: false, fai
     }
 
     return res.status(200).send(response.body);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // Configuration
+    const searchFields = [];
+    const filterFields = [];
+    const sortFields = [];
+
+    // Authorization
+    if (!canSearchInElasticSearch(req.user, "lignebus")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // Body params validation
+    const { queryFilters, page, sort, error, exportFields } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    let contextFilters = [];
+
+    const { hitsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
+
+    const response = await allRecords("lignebus", hitsRequestBody.query, esClient, exportFields);
+    return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
