@@ -43,7 +43,7 @@ export default function Signin() {
       }
     } catch (e) {
       setLoading(false);
-      toastr.error("Erreur détectée");
+      toastr.error("(Double authentification) Code non reconnu.", "Merci d'inscrire le dernier code reçu par email");
     }
   };
 
