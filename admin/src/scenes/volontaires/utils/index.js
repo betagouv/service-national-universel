@@ -308,7 +308,6 @@ export async function transformVolontaires(data, values) {
     let meetingPoint = {};
     let bus = {};
     let ligneToPoint = {};
-    console.log(data.meetingPointId, data.ligneId);
     if (data.meetingPointId && data.ligneId) {
       bus = data?.bus || {};
       ligneToPoint = data?.ligneToPoint || {};

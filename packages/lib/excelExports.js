@@ -57,7 +57,6 @@ const youngExportFields = [
   {
     id: "schoolSituation",
     title: "Situation scolaire",
-    index: "schoolramses",
     desc: [
       "Niveau",
       "Type d'établissement",
@@ -165,7 +164,6 @@ const youngExportFields = [
   },
   {
     id: "phase1Affectation",
-    fieldTofetch: "cohesionCenterId",
     title: "Phase 1 - Affectation ",
     desc: ["ID", "Code", "Nom", "Ville", "Département et région du centre"],
     fields: ["cohesionCenterId", "sessionPhase1Id"],

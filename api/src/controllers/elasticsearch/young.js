@@ -539,7 +539,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
         //get bus
         const busIds = [...new Set(data.map((item) => item.ligneId).filter((e) => e))];
         const bus = await allRecords("lignebus", { bool: { must: { ids: { values: busIds } } } });
-        console.log("bus", bus.length);
         data = data.map((item) => ({ ...item, bus: bus?.find((e) => e._id.toString() === item.ligneId) }));
         //get ligneToPoint
         const meetingPointsIds = [...new Set(bus.reduce((prev, item) => [...prev, ...item.meetingPointsIds], []))];
