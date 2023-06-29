@@ -19,17 +19,17 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (!canSearchInElasticSearch(req.user, "sessionphase1")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, sort, error, exportFields } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     let contextFilters = [];
     if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
 
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
 
     if (req.params.action === "export") {
-      const response = await allRecords("sessionphase1", hitsRequestBody.query);
+      const response = await allRecords("sessionphase1", hitsRequestBody.query, esClient, exportFields);
       return res.status(200).send({ ok: true, data: response });
     } else {
       const response = await esClient.msearch({ index: "sessionphase1", body: buildNdJson({ index: "sessionphase1", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
