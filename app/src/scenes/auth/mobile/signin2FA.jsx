@@ -67,16 +67,9 @@ export default function Signin() {
           <label className="text-base text-[#161616] mb-2">
             Un mail contenant le code unique de connexion vous a été envoyé à l'adresse <b>{email}</b>.
           </label>
-          <label className="text-base text-[#161616] mb-2">
+          <label className="text-base text-[#161616] mb-4">
             Ce code est valable pendant <b>10 minutes</b>, si vous avez reçu plusieurs codes veuillez svp <b>utiliser le dernier</b> qui vous a été transmis par mail
           </label>
-          <label className="text-base text-[#161616] mb-2">Si vous ne recevez pas le mail, nous vous invitons à vérifier que :</label>
-          <ul className="text-base text-[#161616] mb-2 list-disc">
-            <li className="ml-4 mb-2">L'adresse mail que vous utilisez est bien celle indiquée ci-dessus</li>
-            <li className="ml-4 mb-2">Le mail ne se trouve pas dans vos spam</li>
-            <li className="ml-4 mb-2">l'adresse mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
-            <li className="ml-4 mb-2">votre boite de réception n'est pas saturée</li>
-          </ul>
           <Input placeholder="123abc" value={token2FA} onChange={(e) => setToken2FA(e)} />
         </div>
         <button
@@ -84,6 +77,15 @@ export default function Signin() {
           onClick={() => onSubmit({ email, token: token2FA })}>
           Valider
         </button>
+        <div className="px-4 mt-6">
+          <label className="text-gray-500 text-xs mb-2">Si vous ne recevez pas le mail, nous vous invitons à vérifier que :</label>
+          <ul className="text-gray-500 text-xs mb-2 list-disc">
+            <li className="ml-4">L'adresse mail que vous utilisez est bien celle indiquée ci-dessus</li>
+            <li className="ml-4">Le mail ne se trouve pas dans vos spam</li>
+            <li className="ml-4">l'adresse mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
+            <li className="ml-4">votre boite de réception n'est pas saturée</li>
+          </ul>
+        </div>
       </div>
       <Footer />
     </>
