@@ -36,7 +36,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
   const handleDownloadAttestationPdfFile = async () => {
     await downloadPDF({
       url: `/young/${young._id}/documents/certificate/1`,
-      fileName: `${young.firstName} ${young.lastName} - attestation 1.pdf`,
+      fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
     });
   };
 
@@ -44,7 +44,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
     try {
       setLoading(true);
       const { ok, code } = await api.post(`/young/${young._id}/documents/convocation/cohesion/send-email`, {
-        fileName: `${young.firstName} ${young.lastName} - convocation.pdf`,
+        fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
       });
       setLoading(false);
       if (!ok) throw new Error(translate(code));
