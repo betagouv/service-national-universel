@@ -251,7 +251,9 @@ class Auth {
       await user.save();
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       const token = isYoung(user) ? value.token_young : value.token_ref;
-      if (!data || !token) throw Error("PB with signin_token");
+      if (!data || !token) {
+        return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
+      }
       res.send({ ok: true, token: token, user: data, data });
     } catch (error) {
       capture(error);
