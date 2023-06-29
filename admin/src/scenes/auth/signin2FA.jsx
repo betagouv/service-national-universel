@@ -70,11 +70,11 @@ export default function Signin() {
                 <div className="self-stretch mb-2 text-justify">
                   Un mail contenant le code unique de connexion vous a été envoyé à l'adresse <b>{email}</b>.
                 </div>
-                <div className="self-stretch mb-2 text-justify">
-                  Ce code est valable pendant <b>10 minutes</b>, si vous avez reçu plusieurs codes veuillez svp <b>utiliser le dernier</b> qui vous a été transmis par mail
+                <div className="self-stretch mb-4 text-justify">
+                  Ce code est valable pendant <b>10 minutes</b>, si vous avez reçu plusieurs codes veuillez svp <b>utiliser le dernier</b> qui vous a été transmis par mail.
                 </div>
-                <div className="self-stretch text-justify mb-2">Si vous ne recevez pas le mail, nous vous invitons à vérifier que :</div>
-                <ul className="self-stretch mb-4 text-justify">
+                <div className="self-stretch text-gray-500 text-xs text-justify mb-2">Si vous ne recevez pas le mail, nous vous invitons à vérifier que :</div>
+                <ul className="self-stretch text-gray-500 text-xs mb-4 text-justify">
                   <li>L'adresse mail que vous utilisez est bien celle indiquée ci-dessus</li>
                   <li>Le mail ne se trouve pas dans vos spam</li>
                   <li>l'adresse mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
