@@ -58,32 +58,29 @@ export default function Signin() {
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="text-[22px] font-bold text-[#161616]">Me connecter</div>
         <div className="flex items-center gap-4 py-4">
-          <RightArrow />
-          <div className="flex items-center gap-2 text-blue-500 uppercase">
-            <BsShieldLock className="text-blue-500 text-4xl" /> Authentification à deux facteurs
+          <div className="flex items-center text-[#161616] text-[21px] gap-2">
+            <BsShieldLock className="text-4xl text-[#161616] text-[21px]" /> Authentification à deux facteurs
           </div>
         </div>
         <div className="flex flex-col gap-1 py-4">
-          <label className="text-base text-[#161616] mb-2">
-            Un mail contenant le code unique de connexion vous a été envoyé à l'adresse <b>{email}</b>.
+          <label className="text-[14px] text-[#3A3A3A] mb-4">
+            Un mail contenant le code unique de connexion vous a été envoyé à l'adresse <b>{email}</b>. Ce code est valable pendant 10 minutes, si vous avez reçu plusieurs codes
+            veuillez svp utiliser le dernier qui vous a été transmis par mail.
           </label>
-          <label className="text-base text-[#161616] mb-4">
-            Ce code est valable pendant <b>10 minutes</b>, si vous avez reçu plusieurs codes veuillez svp <b>utiliser le dernier</b> qui vous a été transmis par mail
-          </label>
+          <label className="text-[14px] text-[#3A3A3A] mb-2">Saisir le code reçu par email</label>
           <Input placeholder="123abc" value={token2FA} onChange={(e) => setToken2FA(e)} />
         </div>
-        <button
-          className={`flex w-full cursor-pointer items-center justify-center p-2 ${disabled || loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
-          onClick={() => onSubmit({ email, token: token2FA })}>
-          Valider
+        <button className="flex w-full cursor-pointer items-center justify-center p-2 bg-[#000091] text-white" onClick={() => onSubmit({ email, token: token2FA })}>
+          Connexion
         </button>
-        <div className="px-4 mt-6">
-          <label className="text-gray-500 text-xs mb-2">Si vous ne recevez pas le mail, nous vous invitons à vérifier que :</label>
-          <ul className="text-gray-500 text-xs mb-2 list-disc">
-            <li className="ml-4">L'adresse mail que vous utilisez est bien celle indiquée ci-dessus</li>
-            <li className="ml-4">Le mail ne se trouve pas dans vos spam</li>
-            <li className="ml-4">l'adresse mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
-            <li className="ml-4">votre boite de réception n'est pas saturée</li>
+        <hr className="mt-4"></hr>
+        <div className="mt-4">
+          <label className="text-gray-500 text-[12px] mb-2">Si vous ne recevez pas le mail, nous vous invitons à vérifier que :</label>
+          <ul className="text-[#0063CB] text-xs mb-2 list-disc">
+            <li className="ml-3 mb-1">L'adresse mail que vous utilisez est bien celle indiquée ci-dessus</li>
+            <li className="ml-3 mb-1">Le mail ne se trouve pas dans vos spam</li>
+            <li className="ml-3 mb-1">l'adresse mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
+            <li className="ml-3 mb-1">votre boite de réception n'est pas saturée</li>
           </ul>
         </div>
       </div>
