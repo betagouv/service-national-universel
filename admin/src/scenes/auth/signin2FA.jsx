@@ -78,8 +78,8 @@ export default function Signin() {
                   <ul className="self-stretch text-gray-500 text-xs mb-4 text-justify">
                     <li>L'adresse mail que vous utilisez est bien celle indiquée ci-dessus</li>
                     <li>Le mail ne se trouve pas dans vos spam</li>
-                    <li>l'adresse mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
-                    <li>votre boite de réception n'est pas saturée</li>
+                    <li>L'adresse mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
+                    <li>Votre boite de réception n'est pas saturée</li>
                   </ul>
                 </div>
                 <div className="self-stretch my-2 mx-24">
@@ -97,7 +97,7 @@ export default function Signin() {
                   disabled={loading}
                   onClick={() => onSubmit({ email, token: token2FA })}
                   className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 mx-24 text-base font-medium text-white transition-colors">
-                  Valider
+                  Connexion
                 </button>
               </div>
             )}
