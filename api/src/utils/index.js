@@ -13,6 +13,7 @@ const SessionPhase1 = require("../models/sessionPhase1");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
+const { addDays, formatISO } = require("date-fns");
 const { APP_URL, ADMIN_URL } = require("../config");
 const {
   CELLAR_ENDPOINT,
@@ -32,7 +33,7 @@ const {
 } = require("../config");
 const { YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, SUB_ROLES } = require("snu-lib");
 const { capture } = require("../sentry");
-const { getCohortValidationDate } = require("./cohort");
+const { getCohortValidationDate, getCohortDaysToValidate } = require("./cohort");
 
 // Timeout a promise in ms
 const timeout = (prom, time) => {
@@ -593,17 +594,46 @@ async function notifDepartmentChange(department, template, young, extraParams = 
   }
 }
 
+async function addingDayToDate(days, dateStart) {
+  try {
+    // const startDate = new Date(dateStart);
+    // const newDate = addDays(startDate, days);
+    // const formattedValidationDate = formatISO(newDate);
+    // // setNewValidationDate(formattedValidationDate);
+    // const validationDateWithDays = formattedValidationDate;
+    const startDate = new Date(dateStart);
+    const newDate = addDays(startDate, days);
+    const formattedValidationDate = newDate.toISOString();
+
+    return formattedValidationDate;
+
+    // return validationDateWithDays;
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) {
+  const dateStart = sessionPhase1.dateStart;
+  const { daysToValidate: daysToValidate, daysToValidateForTerminalGrade: daysToValidateForTerminalGrade } = await getCohortDaysToValidate(sessionPhase1.cohort);
   const { validationDate: dateDeValidation, validationDateForTerminaleGrade: dateDeValidationTerminale } = await getCohortValidationDate(sessionPhase1.cohort);
   if (!dateDeValidation || !dateDeValidationTerminale) {
     throw new Error("❌ validationDate & validationDateForTerminaleGrade missing on cohort " + sessionPhase1.cohort);
   }
+  if (!daysToValidate || !daysToValidateForTerminalGrade) {
+    throw new Error("❌ validationDate & validationDateForTerminaleGrade missing on cohort " + sessionPhase1.cohort);
+  }
+
   const isTerminale = young?.grade === "Terminale";
   const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
+  // cette constante nous permet d'avoir le jour nécessaire à la validation d'un séjour en fonction du grade d'un Young
+  const days = isTerminale ? daysToValidate : daysToValidateForTerminalGrade;
+  const validationDateWithDays = await addingDayToDate(days, dateStart);
+
   if (young.cohort === "Juin 2023") {
     await updateStatusPhase1WithSpecificCase(young, validationDate, user);
   } else if (young.cohort === "Juillet 2023") {
-    await updateStatusPhase1WithSpecificCaseJuly(young, validationDate, user);
+    await updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithDays, user);
   } else {
     await updateStatusPhase1(young, validationDate, isTerminale, user);
   }
@@ -646,11 +676,12 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
   }
 }
 
-async function updateStatusPhase1WithSpecificCaseJuly(young, validationDate, user) {
+async function updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithDays, user) {
   try {
     const now = new Date();
+
     // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
-    const isValidationDatePassed = now >= validationDate;
+    const isValidationDatePassed = now >= validationDateWithDays;
     // Cette constante nous permet de vérifier si un jeune était présent au début du séjour (exception pour cette cohorte : pas besoin de JDM)(basé sur son grade)
     const isCohesionStayValid = young.cohesionStayPresence === "true";
     // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)

@@ -86,10 +86,19 @@ async function getCohortValidationDate(cohortName) {
   }
 }
 
+async function getCohortDaysToValidate(cohortName) {
+  try{
+    return CohortModel.findOne({ name: cohortName }, { daysToValidate: 1, daysToValidateForTerminalGrade: 1 });
+  }catch(err){
+    return{}
+  }
+}
+
 module.exports = {
   getFilteredSessions,
   getAllSessions,
   getCohortNamesEndAfter,
   getCohortsEndAfter,
   getCohortValidationDate,
+  getCohortDaysToValidate,
 };

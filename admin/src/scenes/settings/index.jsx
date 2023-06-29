@@ -46,10 +46,7 @@ export default function Settings() {
     ...settings,
     ...uselessSettings,
   });
-  // const [validationDateNoTerm, setValidationDateNoTerm] = React.useState(null);
-  // const [selectedDurationNoTerm, setSelectedDurationNoTerm] = React.useState(8);
-  // const [validationDateForTerm, setValidationDateForTerm] = React.useState(null);
-  // console.log(data.dateStart, data.dateEnd);
+
   const getCohort = async () => {
     try {
       const { ok, data: reponseCohort } = await await api.get("/cohort/" + cohort);
@@ -76,37 +73,6 @@ export default function Settings() {
     }
   };
 
-  // const handleDurationSelect = (duration) => {
-  //   setSelectedDurationNoTerm(duration);
-
-  //   // Calculate the new validation date based on the selected duration
-  //   const startDate = new Date(data.dateStart);
-  //   const newValidationDate = addDays(startDate, duration);
-  //   const formattedValidationDate = formatISO(newValidationDate);
-  //   setValidationDateNoTerm(formattedValidationDate);
-  // };
-
-  // React.useEffect(() => {
-  //   if (data.name === "Juillet 2023") {
-  //     const startDate = new Date(data.dateStart);
-  //     const newValidationDate = addDays(startDate, 8);
-  //     const formatNewValidationDate = formatISO(newValidationDate);
-  //     setValidationDateNoTerm(formatNewValidationDate);
-
-  //     const newValidationDateForTerm = addDays(startDate, 10);
-  //     const formatNewValidationDateForTerm = formatISO(newValidationDateForTerm);
-  //     setValidationDateForTerm(formatNewValidationDateForTerm);
-
-  //     console.log(formatNewValidationDate, formatNewValidationDateForTerm);
-  //     console.log(validationDateNoTerm, validationDateForTerm);
-  //     // setData((prevData) => ({
-  //     //   ...prevData,
-  //     //   validationDate,
-  //     //   validationDateForTerm,
-  //     // }));
-  //   }
-  // }, [data.dateStart]);
-
   React.useEffect(() => {
     setIsLoading(true);
     getCohort();
@@ -122,9 +88,6 @@ export default function Settings() {
       setIsLoading(true);
       delete data.name;
       delete data.snuId;
-      // data.validationDate = validationDateNoTerm;
-      // data.validationDateForTerminaleGrade = validationDateForTerm;
-      console.log(data);
       const { ok, code } = await api.put(`/cohort/${cohort}`, data);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la mise à jour de la session", code);
@@ -845,27 +808,18 @@ export default function Settings() {
                         <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Par défaut 9e jour après le début du séjour.</p>
                       </ReactTooltip>
                     </div>
-                    {data.name === "Juillet 2023" ? (
+                    {data.name === "Juillet 2023" || data.name === "Juin 2023" ? (
                       <>
-                        {/* <label>Volontaires (non Terminales)</label>
-                        <input
-                          type="text"
-                          value={dayjs(validationDateNoTerm).format("DD/MM/YYYY")}
-                          // onChange={() => setData({ ...data, validationDate: validationDateNoTerm })}
-                          disabled={isLoading}
-                          readOnly={readOnly}
+                        <ValidationDateSelectorInput
+                          days={data.daysToValidate}
+                          label={"Nombre de jour pour validation(non Terminales)"}
+                          onChange={(e) => setData({ ...data, daysToValidate: e })}
                         />
-                        <label>Volontaires (Terminales)</label>
-                        <input type="text" value={dayjs(validationDateForTerm).format("DD/MM/YYYY")} disabled={isLoading} readOnly={readOnly} /> */}
-                        {/* <div>
-                          <ValidationDateSelectorInput onSelect={handleDurationSelect} />
-                          {validationDateNoTerm && <p>Selected duration: {selectedDurationNoTerm} days</p>}
-                          {validationDateNoTerm && <p>Validation date: {validationDateNoTerm}</p>}
-                        </div> */}
-                        <label>Volontaires (non Terminales)</label>
-                        <ValidationDateSelectorInput data={data} value={data.validationDate} onChange={(e) => setData({...data, validationDate: e })}/>
-                        <label>Volontaires (Terminales)</label>
-                        <ValidationDateSelectorInput data={data} value={data.validationDateForTerminaleGrade} onChange={(e) => setData({...data, validationDateForTerminaleGrade: e })}/>
+                        <ValidationDateSelectorInput
+                          days={data.daysToValidateForTerminalGrade}
+                          label={"Nombre de jour pour validation(Terminales)"}
+                          onChange={(e) => setData({ ...data, daysToValidateForTerminalGrade: e })}
+                        />
                       </>
                     ) : (
                       <>
@@ -887,20 +841,6 @@ export default function Settings() {
                         />
                       </>
                     )}
-                    {/* <>
-                      <div>
-                        <label>Volontaires (non Terminales)</label>
-                        <input type="text" value={data.validationDate ? format(data.validationDate, "dd/MM/yyyy") : ""} disabled={isLoading} readOnly={readOnly} />
-                      </div>
-                      <div>
-                        <label>Volontaires (Terminales)</label>
-                        <input type="text" value={data.validationDateForTerminaleGrade ? format(data.validationDateForTerminaleGrade, "dd/MM/yyyy") : ""} disabled={isLoading} readOnly={readOnly} />
-                      </div>
-                    </> */}
-                    {/* <label>Volontaires (non Terminales)</label>
-                    <input type="text" value={format(validationDate, "dd/MM/yyyy")} disabled={isLoading} readOnly={readOnly} />
-                    <label>Volontaires (Terminales)</label>
-                    <input type="text" value={format(validationDateForTerm, "dd/MM/yyyy")} disabled={isLoading} readOnly={readOnly} /> */}
                   </div>
                 </div>
               </div>
