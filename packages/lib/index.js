@@ -215,6 +215,11 @@ const formatPhoneNumberFR = (tel) => {
   return formatted;
 };
 
+const formatMessageForReadingInnerHTML = (content) => {
+  const message = content.replace(/\\n/g, "<br>").replace(/\\r/g, "<br>");
+  return message;
+};
+
 export {
   isEndOfInscriptionManagement2021,
   inscriptionModificationOpenForYoungs,
@@ -229,6 +234,7 @@ export {
   canUserUpdateYoungStatus,
   youngCanChangeSession,
   formatPhoneNumberFR,
+  formatMessageForReadingInnerHTML,
 };
 export * from "./academy";
 export * from "./colors";
