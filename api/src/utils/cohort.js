@@ -7,9 +7,9 @@ const { ENVIRONMENT } = require("../config");
 async function getFilteredSessions(young) {
   const region = getRegionForEligibility(young);
   let sessionsToFilter = sessions2023;
-  if (ENVIRONMENT !== "production") {
-    sessionsToFilter = [...sessions2023, testCohort];
-  }
+  // if (ENVIRONMENT !== "production") {
+  //   sessionsToFilter = [...sessions2023, testCohort];
+  // }
   const sessions = sessionsToFilter.filter(
     (session) =>
       session.eligibility.zones.includes(region2zone[region]) &&
