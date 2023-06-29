@@ -6,10 +6,11 @@ const { ENVIRONMENT } = require("../config");
 
 async function getFilteredSessions(young) {
   const region = getRegionForEligibility(young);
+  let sessionsToFilter = sessions2023;
   if (ENVIRONMENT !== "production") {
-    sessions2023.push(testCohort);
+    sessionsToFilter = [...sessions2023, testCohort];
   }
-  const sessions = sessions2023.filter(
+  const sessions = sessionsToFilter.filter(
     (session) =>
       session.eligibility.zones.includes(region2zone[region]) &&
       session.eligibility.schoolLevels.includes(young.grade) &&
