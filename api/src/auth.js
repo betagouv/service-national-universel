@@ -213,7 +213,8 @@ class Auth {
     await user.save();
 
     const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
-    res.cookie("jwt", token, cookieOptions());
+    if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions());
+    else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions());
 
     const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
     return res.status(200).send({
