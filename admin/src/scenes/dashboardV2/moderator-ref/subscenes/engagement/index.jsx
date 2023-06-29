@@ -14,6 +14,7 @@ import SectionStructures from "./components/SectionStructures";
 import SectionMissions from "./components/SectionMissions";
 import plausibleEvent from "../../../../../services/plausible";
 import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
+import ExportEngagementReport from "./components/ExportEngagementReport";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -110,9 +111,7 @@ export default function Index() {
       active="engagement"
       navChildren={
         <div className="flex items-center gap-2">
-          <ButtonPrimary className="text-sm">
-            Exporter le rapport <span className="font-bold">“Engagement”</span>
-          </ButtonPrimary>
+          <ExportEngagementReport filter={selectedFilters} />
           <ButtonPrimary
             className="text-sm"
             onClick={() => {

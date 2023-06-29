@@ -264,7 +264,7 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
           />
         </div>
         <div className="w-1/2">
-          <img className="mx-auto h-32" src={require(`../../../assets/IDProof/${ID[category].imgDate}`)} alt={ID.title} />
+          <img className="mx-auto h-32" src={images[`../../../assets/IDProof/${ID[category].imgDate}`]} alt={ID.title} />
         </div>
       </div>
     </>

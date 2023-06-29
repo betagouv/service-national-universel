@@ -49,7 +49,7 @@ import Footer from "./components/footer";
 import Loader from "./components/Loader";
 
 import api, { initApi } from "./services/api";
-import { initSentry, SentryRoute, history } from "./sentry";
+import { initSentry, SentryRoute, history, capture } from "./sentry";
 
 import { adminURL, environment } from "./config";
 import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
@@ -71,39 +71,19 @@ function FallbackComponent() {
 const myFallback = <FallbackComponent />;
 
 export default function App() {
-  const [loading, setLoading] = useState(true);
-  const dispatch = useDispatch();
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        if (window.location.href.indexOf("/auth") !== -1) return setLoading(false);
-        const res = await api.get("/referent/signin_token");
-        if (!res.ok || !res.user) {
-          dispatch(setUser(null));
-          return setLoading(false);
-        }
-        if (res.token) api.setToken(res.token);
-        if (res.user) dispatch(setUser(res.user));
-      } catch (e) {
-        console.log(e);
-      }
-      setLoading(false);
-    }
-    fetchData();
-  }, []);
-
-  if (loading) return <Loader />;
-
   return (
     <Sentry.ErrorBoundary fallback={myFallback}>
       <Router history={history}>
         <div className="main">
           <Switch>
+            {/* Aucune authentification nécessaire */}
             <SentryRoute path="/validate" component={Validate} />
             <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-            <SentryRoute path="/auth" component={Auth} />
             <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
             <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+            {/* Authentification accessoire */}
+            <SentryRoute path="/auth" component={Auth} />
+            {/* Authentification nécessaire */}
             <SentryRoute path="/" component={Home} />
           </Switch>
           <Footer />
@@ -117,6 +97,7 @@ const Home = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [loading, setLoading] = useState(true);
 
   const [drawerVisible, setDrawerVisible] = useState(false);
 
@@ -149,7 +130,54 @@ const Home = () => {
   };
 
   useEffect(() => {
-    if (user && user.acceptCGU !== "true") {
+    async function fetchData() {
+      try {
+        const res = await api.checkToken();
+        if (!res.ok || !res.user) {
+          api.setToken(null);
+          dispatch(setUser(null));
+          return setLoading(false);
+        }
+        if (res.token) api.setToken(res.token);
+        if (res.user) dispatch(setUser(res.user));
+      } catch (e) {
+        console.log(e);
+      }
+      setLoading(false);
+    }
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    if (user.role === ROLES.HEAD_CENTER) {
+      (async () => {
+        try {
+          const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1?with_cohesion_center=true`);
+          if (!ok) return console.log(`Error: ${code}`);
+
+          const sessions = data.sort((a, b) => COHESION_STAY_END[a.cohort] - COHESION_STAY_END[b.cohort]);
+          const now = new Date();
+          now.setHours(0, 0, 0, 0);
+
+          // on regarde la session la plus proche dans le futur qui ne sait pas terminé il y a plus de 3 jours
+          // i.e. une session est considérée terminée 3 jours après la date de fin du séjour
+          const activeSession =
+            sessions.find((s) => {
+              const limit = COHESION_STAY_END[s.cohort].setDate(COHESION_STAY_END[s.cohort].getDate() + 3);
+              return limit >= now;
+            }) || sessions[0];
+
+          setSessionPhase1List(sessions.reverse());
+          dispatch(setSessionPhase1(activeSession));
+        } catch (e) {
+          capture(e);
+        }
+      })();
+    }
+
+    if (user.acceptCGU !== "true") {
       setModal({
         isOpen: true,
         title: "Conditions générales d'utilisation",
@@ -169,29 +197,7 @@ const Home = () => {
     }
   }, [user]);
 
-  React.useEffect(() => {
-    if (!user) return;
-    if (user.role !== ROLES.HEAD_CENTER) return;
-    (async () => {
-      const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1?with_cohesion_center=true`);
-      if (!ok) return console.log(`Error: ${code}`);
-
-      const sessions = data.sort((a, b) => COHESION_STAY_END[a.cohort] - COHESION_STAY_END[b.cohort]);
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-
-      // on regarde la session la plus proche dans le futur qui ne sait pas terminé il y a plus de 3 jours
-      // i.e. une session est considérée terminée 3 jours après la date de fin du séjour
-      const activeSession =
-        sessions.find((s) => {
-          const limit = COHESION_STAY_END[s.cohort].setDate(COHESION_STAY_END[s.cohort].getDate() + 3);
-          return limit >= now;
-        }) || sessions[0];
-
-      setSessionPhase1List(sessions.reverse());
-      dispatch(setSessionPhase1(activeSession));
-    })();
-  }, [user]);
+  if (loading) return <Loader />;
 
   return (
     <div>
@@ -200,7 +206,6 @@ const Home = () => {
         <Drawer open={drawerVisible} onOpen={setDrawerVisible} />
         <div className={drawerVisible ? `flex-1 ml-[220px] min-h-screen` : `flex-1 lg:ml-[220px] min-h-screen`}>
           <Switch>
-            <SentryRoute path="/auth" component={Auth} />
             <RestrictedRoute path="/structure" component={Structure} />
             <RestrictedRoute path="/settings" component={Settings} />
             <RestrictedRoute path="/profil" component={Profil} />
@@ -230,7 +235,6 @@ const Home = () => {
             <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
             {/* Only for developper eyes... */}
             {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
-
             {/* DASHBOARD */}
             {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
             {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
@@ -268,14 +272,10 @@ const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) 
   const user = useSelector((state) => state.Auth.user);
   if (!user) {
     const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
-    return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
+    return <Redirect to={{ search: redirect ? `?redirect=${redirect}&unauthorized=1` : "", pathname: "/auth" }} />;
   }
 
-  const matchRoute = limitedAccess[user.role]?.authorised.find((route) => {
-    if (pathname.includes(route)) {
-      return true;
-    }
-  });
+  const matchRoute = limitedAccess[user.role]?.authorised.some((route) => pathname.includes(route));
 
   if (limitedAccess[user.role] && !matchRoute) {
     return <Redirect to={limitedAccess[user.role].default} />;

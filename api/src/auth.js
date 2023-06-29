@@ -6,7 +6,7 @@ const { capture } = require("./sentry");
 const config = require("./config");
 const { sendTemplate } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
-const { validatePassword, ERRORS, isYoung, STEPS2023 } = require("./utils");
+const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent } = require("./utils");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
@@ -103,7 +103,8 @@ class Auth {
         inscriptionStep2023: STEPS2023.COORDONNEES,
       });
       const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_MAX_AGE });
-      res.cookie("jwt", token, cookieOptions());
+      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions());
+      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions());
 
       await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
         emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
@@ -134,13 +135,13 @@ class Auth {
     const { password, email } = value;
     try {
       const now = new Date();
-      const user = await this.model.findOne({ email });
+      const user = await this.model.findOne({ email, deletedAt: { $exists: false } });
 
       if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       if (user.loginAttempts > 12) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
       if (user.nextLoginAttemptIn > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
 
-      const match = config.ENVIRONMENT === "development" || config.ENVIRONMENT === "staging" || (await user.comparePassword(password));
+      const match = config.ENVIRONMENT === "development" || (await user.comparePassword(password));
       if (!match) {
         const loginAttempts = (user.loginAttempts || 0) + 1;
 
@@ -155,12 +156,31 @@ class Auth {
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       }
 
+      const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
+      const isKnownIp = await user.compareIps(ip);
+      if (!user.userIps || user.userIps?.length === 0 || !isKnownIp) {
+        const token2FA = await crypto.randomBytes(20).toString("hex");
+        user.set({ token2FA, token2FAExpires: Date.now() + 1000 * 60 * 10 });
+        await user.save();
+
+        await sendTemplate(SENDINBLUE_TEMPLATES.SIGNIN_2FA, {
+          emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
+          params: { token2FA },
+        });
+
+        return res.status(200).send({
+          ok: true,
+          code: "2FA_REQUIRED",
+        });
+      }
+
       user.set({ loginAttempts: 0 });
       user.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
       await user.save();
 
       const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
-      res.cookie("jwt", token, cookieOptions());
+      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions());
+      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions());
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       return res.status(200).send({
@@ -175,13 +195,44 @@ class Auth {
     }
   }
 
+  async signin2FA(req, res) {
+    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), token_2fa: Joi.string().required() }).unknown().validate(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    const { email, token_2fa } = value;
+    const user = await this.model.findOne({
+      email,
+      token2FA: token_2fa,
+      token2FAExpires: { $gt: Date.now() },
+    });
+    if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+
+    const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
+    user.set({ userIps: [...user.userIps, ip], token2FA: null, token2FAExpires: null });
+    user.set({ loginAttempts: 0 });
+    user.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
+    await user.save();
+
+    const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
+    res.cookie("jwt", token, cookieOptions());
+
+    const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+    return res.status(200).send({
+      ok: true,
+      token,
+      user: data,
+      data,
+    });
+  }
+
   async logout(req, res) {
     try {
       // Find user by token
       const { user } = req;
       user.set({ lastLogoutAt: Date.now() });
       await user.save();
-      res.clearCookie("jwt", logoutCookieOptions());
+      if (isYoung(user)) res.clearCookie("jwt_young", logoutCookieOptions());
+      else if (isReferent(user)) res.clearCookie("jwt_ref", logoutCookieOptions());
+
       return res.status(200).send({ ok: true });
     } catch (error) {
       capture(error);
@@ -190,7 +241,7 @@ class Auth {
   }
 
   async signinToken(req, res) {
-    const { error, value } = Joi.object({ token: Joi.string().required() }).validate({ token: req.cookies.jwt });
+    const { error, value } = Joi.object({ token_ref: Joi.string(), token_young: Joi.string() }).validate({ token_ref: req.cookies.jwt_ref, token_young: req.cookies.jwt_young });
     if (error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
 
     try {
@@ -198,7 +249,9 @@ class Auth {
       user.set({ lastActivityAt: Date.now() });
       await user.save();
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
-      res.send({ ok: true, token: value.token, user: data, data });
+      const token = isYoung(user) ? value.token_young : value.token_ref;
+      if (!data || !token) throw Error("PB with signin_token");
+      res.send({ ok: true, token: token, user: data, data });
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -234,7 +287,8 @@ class Auth {
       await user.save();
 
       const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
-      res.cookie("jwt", token, cookieOptions());
+      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions());
+      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions());
 
       return res.status(200).send({ ok: true, user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
     } catch (error) {
@@ -250,7 +304,7 @@ class Auth {
     const { email } = value;
 
     try {
-      const user = await this.model.findOne({ email });
+      const user = await this.model.findOne({ email, deletedAt: { $exists: false } });
       if (!user) return res.status(404).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
 
       const token = await crypto.randomBytes(20).toString("hex");
@@ -286,6 +340,7 @@ class Auth {
       const user = await this.model.findOne({
         forgotPasswordResetToken: token,
         forgotPasswordResetExpires: { $gt: Date.now() },
+        deletedAt: { $exists: false },
       });
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       const match = await user.comparePassword(password);

@@ -113,11 +113,11 @@ export default function GroupGatheringPlaces({ group, className = "", onChangeSt
           setGatheringPlacesCount(result.data.total);
         }
       } else {
-        setError("Impossible de récupérer la liste des points de rassemblement. Veuillez essayer dans quelques instants.");
+        setError("Impossible de récupérer la liste des points de rassemblement. Veuillez réessayer dans quelques instants.");
       }
     } catch (err) {
       capture(err);
-      setError("Impossible de récupérer la liste des points de rassemblement. Veuillez essayer dans quelques instants.");
+      setError("Impossible de récupérer la liste des points de rassemblement. Veuillez réessayer dans quelques instants.");
     }
     setLoading(loading - 1);
   }
@@ -131,11 +131,11 @@ export default function GroupGatheringPlaces({ group, className = "", onChangeSt
         if (result.ok && result.data.gatheringPlaces) {
           setSelection(result.data.gatheringPlaces);
         } else {
-          setError("Impossible de récupérer la liste des points de rassemblement sélectionnés. Veuillez essayer dans quelques instants.");
+          setError("Impossible de récupérer la liste des points de rassemblement sélectionnés. Veuillez réessayer dans quelques instants.");
         }
       } catch (err) {
         capture(err);
-        setError("Impossible de récupérer la liste des points de rassemblement sélectionnés. Veuillez essayer dans quelques instants.");
+        setError("Impossible de récupérer la liste des points de rassemblement sélectionnés. Veuillez réessayer dans quelques instants.");
       }
     }
     setLoading(false);

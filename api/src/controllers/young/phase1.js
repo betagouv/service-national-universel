@@ -9,14 +9,25 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
-const { canEditPresenceYoung, ROLES, canAssignManually, SENDINBLUE_TEMPLATES, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } = require("snu-lib");
-
+const {
+  canEditPresenceYoung,
+  ROLES,
+  canAssignManually,
+  SENDINBLUE_TEMPLATES,
+  YOUNG_STATUS,
+  YOUNG_STATUS_PHASE1,
+  REFERENT_DEPARTMENT_SUBROLE,
+  getDepartmentByZip,
+} = require("snu-lib");
+const { ADMIN_URL, ENVIRONMENT } = require("../../config");
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const CohortModel = require("../../models/cohort");
+const ReferentModel = require("../../models/referent");
+const DepartmentServiceModel = require("../../models/departmentService");
 const { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } = require("../../utils");
 const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");
 const { sendTemplate } = require("../../sendinblue");
@@ -48,9 +59,9 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // check if referent is allowed to edit this young --> Todo with cohort
-    if (!canEditPresenceYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canEditPresenceYoung(req.user, young)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    if (young.status === YOUNG_STATUS.WITHDRAWN) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (young.status === YOUNG_STATUS.WITHDRAWN) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // verification nombre de place ?
     const session = await SessionPhase1Model.findById(sessionId);
@@ -60,7 +71,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     const cohort = await CohortModel.findOne({ name: session.cohort });
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canAssignManually(req.user, young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canAssignManually(req.user, young, cohort)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
 
@@ -140,10 +151,10 @@ router.post("/dispense", passport.authenticate("referent", { session: false, fai
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (!canEditPresenceYoung(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     // passage en dispensé unqiuement si séjour non réalisé
-    if (req.user.role !== ROLES.ADMIN && young.statusPhase1 !== "NOT_DONE") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role !== ROLES.ADMIN && young.statusPhase1 !== "NOT_DONE") return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({ statusPhase1MotifDetail, statusPhase1Motif, statusPhase1: "EXEMPTED" });
     await young.save({ fromUser: req.user });
@@ -175,7 +186,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (!canEditPresenceYoung(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     young.set({ departSejourAt, departSejourMotif, departSejourMotifComment, departInform: "true" });
@@ -183,6 +194,57 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
 
     const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
     await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
+
+    const referentsDep = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
+    if (!referentsDep) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // on envoie au chef de projet departemental (ou assistant)
+    const managers = referentsDep.filter(
+      (referent) => referent.subRole === REFERENT_DEPARTMENT_SUBROLE.manager_department || referent.subRole === REFERENT_DEPARTMENT_SUBROLE.assistant_manager_department,
+    );
+
+    // sinon on envoie au secretariat du departement ou au manager de phase2
+    const secretariat = referentsDep.filter(
+      (referent) => referent.subRole === REFERENT_DEPARTMENT_SUBROLE.secretariat || referent.subRole === REFERENT_DEPARTMENT_SUBROLE.manager_phase2,
+    );
+
+    // si toujours rien on envoie a son contact Convocation
+
+    let contactsConv = [];
+    if (!managers.length && !secretariat.length) {
+      const serviceDep = await DepartmentServiceModel.find({ department: young.department });
+      if (!serviceDep) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      contactsConv = serviceDep[0].contacts.filter((contact) => contact.cohort === young.cohort);
+      contactsConv = contactsConv.map((contact) => {
+        const [firstName, lastName] = contact.contactName.split(" ");
+        const email = contact.contactMail;
+
+        return {
+          ...contact,
+          firstName,
+          lastName,
+          email,
+        };
+      });
+    }
+    const sendContact = managers.length ? managers : secretariat.length ? secretariat : contactsConv;
+
+    let template = SENDINBLUE_TEMPLATES.referent.DEPARTURE_CENTER;
+    const mail = await sendTemplate(template, {
+      emailTo: sendContact.map((referent) => ({
+        name: `${referent.firstName} ${referent.lastName}`,
+        email: referent.email,
+      })),
+      params: {
+        youngFirstName: young.firstName,
+        youngLastName: young.lastName,
+        centreName: young.cohesionCenterName,
+        centreDepartement: getDepartmentByZip(young.cohesionCenterZip),
+        departureReason: departSejourMotif,
+        departureNote: departSejourMotifComment,
+        cta: `${ADMIN_URL}/volontaire/${young._id}`,
+      },
+    });
 
     res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
@@ -205,7 +267,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (!canEditPresenceYoung(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     young.set({ departSejourAt: undefined, departSejourMotif: undefined, departSejourMotifComment: undefined, departInform: undefined });
@@ -245,7 +307,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (!canEditPresenceYoung(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     if ((key === "cohesionStayPresence" || key === "presenceJDM" || key === "isTravelingByPlane") && newValue == "") {

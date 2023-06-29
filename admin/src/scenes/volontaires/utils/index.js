@@ -446,7 +446,7 @@ export async function transformVolontaires(data, values, centers, sessionsPhase1
       },
       phase1Transport: {
         "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
-        "Informations de transport sont transmises par les services locaux": translate(data.transportInfoGivenByLocal),
+        "Informations de transports transmises par email": translate(data.transportInfoGivenByLocal),
         "Bus n˚": bus?.busId,
         "Nom du point de rassemblement": meetingPoint?.name,
         "Adresse point de rassemblement": meetingPoint?.address,

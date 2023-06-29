@@ -298,7 +298,7 @@ export default function Contract({ young }) {
                     firstName={contract?.parent1FirstName}
                     validationDate={contract?.parent1ValidationDate}
                   />
-                  {young.parent2Email && (
+                  {contract.parent2Email && (
                     <ContractStatusBadge
                       title="Représentant légal 2"
                       target="parent2"

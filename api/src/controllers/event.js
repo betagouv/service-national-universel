@@ -16,7 +16,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     }
     // Only accessible by persons who can access associations for now (aka referents and admins).
     // The only event creatable id of type "ASSOCIATION" currently.
-    if (!canCreateEvent(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateEvent(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     await EventObject.create({ ...event, userId: req.user.id, userType: isYoung(req.user) ? "young" : "referent" });
     return res.status(200).send({ ok: true });

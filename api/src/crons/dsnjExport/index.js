@@ -1,13 +1,17 @@
 require("../../mongo");
 
 const XLSX = require("xlsx");
-const { getDepartmentNumber } = require("snu-lib");
+const { getDepartmentNumber, getDepartureDate } = require("snu-lib");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
 const CohortModel = require("../../models/cohort");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const YoungModel = require("../../models/young");
+const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
+const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
+
 const { findCohesionCenterBySessionId, genderTranslation, situationTranslations, addToSlackRapport, printSlackInfo } = require("./utils");
 const { uploadFile } = require("../../utils");
 const { encrypt } = require("../../cryptoUtils");
@@ -51,12 +55,11 @@ const generateCohesionCentersExport = async (cohort) => {
 };
 
 const generateYoungsExport = async (cohort, afterSession = false) => {
-  const sessions = await SessionPhase1Model.find({ cohort: cohort.name }).select({ _id: 1, cohesionCenterId: 1 });
-  const sessionIds = sessions.map(({ _id }) => _id);
+  const sessions = await SessionPhase1Model.find({ cohort: cohort.name }).select({ _id: 1, cohesionCenterId: 1, dateStart: 1 });
   const cohesionCenterIds = sessions.map(({ cohesionCenterId }) => cohesionCenterId);
   const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: cohesionCenterIds } }).select({ _id: 1, name: 1, code2022: 1 });
   const cohesionCenterParSessionId = {};
-  const youngs = await YoungModel.find({ sessionPhase1Id: { $in: sessionIds }, status: { $in: ["VALIDATED", "WAITING_LIST"] } }).select({
+  const youngs = await YoungModel.find({ cohort: cohort.name, status: { $in: ["VALIDATED", "WAITING_LIST"] } }).select({
     _id: 1,
     sessionPhase1Id: 1,
     email: 1,
@@ -75,11 +78,16 @@ const generateYoungsExport = async (cohort, afterSession = false) => {
     phone: 1,
     situation: 1,
     statusPhase1: 1,
-    presenceJDM: 1,
+    status: 1,
+    cohort: 1,
+    region: 1,
+    meetingPointId: 1,
+    ligneId: 1,
   });
 
-  const formattedYoungs = youngs.map(
-    ({
+  const formattedYoungs = [];
+  for (const young of youngs) {
+    const {
       _id,
       sessionPhase1Id,
       email,
@@ -98,40 +106,59 @@ const generateYoungsExport = async (cohort, afterSession = false) => {
       phone,
       situation,
       statusPhase1,
-      presenceJDM,
-    }) => {
-      const isFrench = frenchNationality === "true";
-      const wasBornInFrance = birthCountry === "France";
-      let cohesionCenter = cohesionCenterParSessionId[sessionPhase1Id];
+      ligneId,
+      meetingPointId,
+    } = young;
+
+    const isFrench = frenchNationality === "true";
+    const wasBornInFrance = birthCountry === "France";
+    let cohesionCenter;
+    if (sessionPhase1Id) {
+      cohesionCenter = cohesionCenterParSessionId[sessionPhase1Id];
       if (!cohesionCenter) {
         cohesionCenter = findCohesionCenterBySessionId(sessionPhase1Id, sessions, cohesionCenters);
         cohesionCenterParSessionId[sessionPhase1Id] = cohesionCenter;
       }
-      return {
-        "Identifiant technique": _id.toString(),
-        "Email du volontaire": email,
-        Nationalité: isFrench ? "Française" : "Étrangère",
-        "Nom volontaire": lastName,
-        "Prénom(s) volontaire": firstName,
-        "Sexe volontaire": genderTranslation[gender],
-        "Date de naissance volontaire": birthdateAt,
-        "Pays de naissance volontaire": birthCountry,
-        "Code Postal naissance volontaire (si né en France)": wasBornInFrance ? birthCityZip : "",
-        "Commune naissance volontaire (si né en France)": wasBornInFrance ? birthCity : "",
-        "Ville de naissance volontaire(si né à l'étranger)": wasBornInFrance ? "" : birthCity,
-        "Adresse volontaire": address,
-        "Complément d’adresse 1 volontaire": complementAddress,
-        "Code Postal volontaire": zip,
-        "Commune volontaire": city,
-        "Téléphone volontaire": phone,
-        "Statut professionnel": situationTranslations[situation] || situation,
-        "ID du centre": cohesionCenter._id.toString(),
-        "Libellé du centre": cohesionCenter.name,
-        "Date début session": cohort.dateStart,
-        'Validation séjour (validation phase 1 ET présence JDM "oui")': afterSession ? (statusPhase1 === "DONE" && presenceJDM === "true" ? "Oui" : "Non") : "null",
-      };
-    },
-  );
+    }
+
+    const pdr = await PointDeRassemblementModel.findById(meetingPointId);
+    let meetingPoint;
+    const bus = await LigneBusModel.findById(ligneId);
+    const ligneToPoint = await LigneToPointModel.findOne({ lineId: ligneId, meetingPointId, deletedAt: { $exists: false } });
+    if (pdr) {
+      meetingPoint = { ...pdr.toObject(), bus, ligneToPoint };
+    } else {
+      meetingPoint = { bus, ligneToPoint };
+    }
+    const session = sessions.find(({ _id }) => _id.toString() === sessionPhase1Id);
+
+    const formattedYoung = {
+      "Identifiant technique": _id.toString(),
+      "Email du volontaire": email,
+      Nationalité: isFrench ? "Française" : "Étrangère",
+      "Nom volontaire": lastName,
+      "Prénom(s) volontaire": firstName,
+      "Sexe volontaire": genderTranslation[gender],
+      "Date de naissance volontaire": birthdateAt,
+      "Pays de naissance volontaire": birthCountry,
+      "Code Postal naissance volontaire (si né en France)": wasBornInFrance ? birthCityZip : "",
+      "Commune naissance volontaire (si né en France)": wasBornInFrance ? birthCity : "",
+      "Ville de naissance volontaire(si né à l'étranger)": wasBornInFrance ? "" : birthCity,
+      "Adresse volontaire": address,
+      "Complément d’adresse 1 volontaire": complementAddress,
+      "Code Postal volontaire": zip,
+      "Commune volontaire": city,
+      "Téléphone volontaire": phone,
+      "Statut professionnel": situationTranslations[situation] || situation,
+      "ID du centre": cohesionCenter ? cohesionCenter._id.toString() : "",
+      "Libellé du centre": cohesionCenter ? cohesionCenter.name : "",
+      "Date début session": getDepartureDate(young, session, cohort, meetingPoint),
+      "Validation séjour (Validation phase 1)": afterSession ? (statusPhase1 === "DONE" ? "Oui" : "Non") : "null",
+    };
+
+    formattedYoungs.push(formattedYoung);
+  }
+
   const worksheet1 = XLSX.utils.json_to_sheet(formattedYoungs);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet1, "Jeune", true);

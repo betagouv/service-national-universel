@@ -54,11 +54,11 @@ describe("Mission", () => {
       const passport = require("passport");
       passport.user.role = ROLES.VISITOR;
       let res = await request(getAppHelper()).put("/mission/" + mission._id);
-      expect(res.statusCode).toEqual(403);
+      expect(res.statusCode).toEqual(418);
 
       passport.user.role = ROLES.HEAD_CENTER;
       res = await request(getAppHelper()).put("/mission/" + mission._id);
-      expect(res.statusCode).toEqual(403);
+      expect(res.statusCode).toEqual(418);
 
       passport.user.role = ROLES.ADMIN;
     });
@@ -195,7 +195,7 @@ describe("Mission", () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const res = await request(getAppHelper()).get(`/mission/${mission._id}/patches`).send();
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(418);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if mission found with patches", async () => {

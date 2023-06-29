@@ -1,28 +1,31 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { NavLink, useHistory } from "react-router-dom";
 
-import Invite from "./invite";
+import { FiSettings } from "react-icons/fi";
+import { HiLogout, HiUser, HiUserAdd } from "react-icons/hi";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import { ROLES } from "../../utils";
 import plausibleEvent from "../../services/plausible";
-import { HiLogout, HiUser, HiUserAdd } from "react-icons/hi";
-import { FiSettings } from "react-icons/fi";
+import { ROLES } from "../../utils";
+import Invite from "./invite";
 
 import Avatar from "../Avatar";
-import { isSuperAdmin } from "snu-lib";
+import { toastr } from "react-redux-toastr";
 
 export default function HeaderUser() {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const { user } = useSelector((state) => state.Auth);
+  const history = useHistory();
 
   if (!user) return <div />;
 
   async function logout() {
     await api.post(`/referent/logout`);
     dispatch(setUser(null));
+    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
+    return history.push("/auth");
   }
 
   return (
@@ -71,12 +74,10 @@ export default function HeaderUser() {
             </NavLink>
           )}
           <hr className="m-0 border-t-coolGray-100" />
-          <NavLink to="/logout" onClick={logout}>
-            <div className="group  flex cursor-pointer items-center  gap-2 p-3 text-red-700 hover:bg-coolGray-100 hover:text-red-700">
-              <HiLogout className="text-red-700 group-hover:scale-110" />
-              Se déconnecter
-            </div>
-          </NavLink>
+          <div className="group  flex cursor-pointer items-center  gap-2 p-3 text-red-700 hover:bg-coolGray-100 hover:text-red-700" onClick={logout}>
+            <HiLogout className="text-red-700 group-hover:scale-110" />
+            Se déconnecter
+          </div>
         </div>
       </div>
     </div>

@@ -27,7 +27,7 @@ const router = express.Router();
 
 router.get("/tickets", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { ok, data } = await zammood.api(`/v0/ticket?email=${req.user.email}`, { method: "GET", credentials: "include" });
+    const { ok, data } = await zammood.api(`/v0/ticket?email=${encodeURIComponent(req.user.email)}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data });
@@ -87,6 +87,22 @@ router.post("/tickets", passport.authenticate(["referent", "young"], { session: 
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // TODO : JOI - verif body coté SUPPORT
+
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/ticketscount", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { ok, data } = await zammood.api(`/v0/ticket/count`, {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify(req.body),
+    });
+    if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -384,7 +400,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
           const { isInfected } = await clamscan.isInfected(tempFilePath);
           if (isInfected) {
             capture(`File ${name} is infected`);
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+            return res.status(418).send({ ok: false, code: ERRORS.FILE_INFECTED });
           }
         } catch {
           return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });

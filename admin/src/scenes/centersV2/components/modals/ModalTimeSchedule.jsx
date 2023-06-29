@@ -66,7 +66,7 @@ function TimeScheduleFile({ session, file, onDelete, className = "" }) {
       const blob = new Blob([new Uint8Array(result.data.data)], { type: result.mimeType });
       download(blob, result.fileName);
     } catch (err) {
-      toastr.error("Impossible de télécharger le fichier. Veuillez essayer dans quelques instants.");
+      toastr.error("Impossible de télécharger le fichier. Veuillez réessayer dans quelques instants.");
     }
     setCommunicating(false);
   }

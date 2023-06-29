@@ -7,6 +7,7 @@ import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
+import Select from "react-select";
 
 export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contacts, cohorts, getService }) {
   const [currentTab, setCurrentTab] = useState();
@@ -14,6 +15,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
   const [newContact, setNewContact] = useState(false);
   const [edit, setEdit] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const [proposedContact, setProposedContact] = useState([]);
 
   const resetState = () => {
     setEdit(null);
@@ -31,10 +33,41 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
     resetState();
   };
 
+  const getAllContact = () => {
+    let arrContact = Object.values(contacts).flat();
+    const uniqueContact = arrContact.reduce((acc, contact) => {
+      const { _id, cohort, ...contactWithoutId } = contact;
+      const isDuplicate = acc.some(
+        (c) => c.contactMail === contactWithoutId.contactMail && c.contactPhone === contactWithoutId.contactPhone && c.contactName === contactWithoutId.contactName,
+      );
+
+      if (!isDuplicate) {
+        const updatedContact = {
+          ...contactWithoutId,
+          firstName: contactWithoutId.contactName.split(" ")[0],
+          lastName: contactWithoutId.contactName.split(" ")[1],
+          value: contactWithoutId.contactName,
+          label: contactWithoutId.contactName,
+        };
+        acc.push(updatedContact);
+      }
+
+      return acc;
+    }, []);
+
+    const proposedContact = uniqueContact.filter((contact) => {
+      return !contacts[currentTab].some((item) => {
+        return item.contactName === contact.contactName && item.contactPhone === contact.contactPhone && item.contactMail === contact.contactMail;
+      });
+    });
+    setProposedContact(proposedContact);
+  };
+
   useEffect(() => {
     setEdit(null);
     setHit(null);
     setNewContact(false);
+    getAllContact();
   }, [currentTab]);
 
   useEffect(() => {
@@ -82,7 +115,6 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
         contactMail: edit.contactMail,
         contactId: edit.contactId,
       };
-
       const { ok } = await api.post(`/department-service/${idServiceDep}/cohort/${currentTab}/contact`, value);
       if (!ok) {
         resetState();
@@ -127,7 +159,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
             {contacts[currentTab].length ? (
               <div className="grid grid-cols-2 grid-rows-2 gap-4 px-4 pb-4">
                 {contacts[currentTab].map((contact) => (
-                  <Contact contact={contact} key={contact} setHit={setHit} />
+                  <Contact contact={contact} key={contact._id} setHit={setHit} />
                 ))}
                 {contacts[currentTab].length < 4 && (
                   <div
@@ -148,84 +180,101 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
             )}
           </>
         ) : (
-          <form className="w-full" onSubmit={handleSubmit}>
-            <div className="flex flex-col items-center justify-center px-8 pb-4">
-              <div className="flex w-full flex-col justify-center ">
-                <div className="flex flex-row">
-                  <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                    <label htmlFor="firstName" className="m-0 w-full text-left text-gray-500">
-                      Prénom
-                    </label>
-                    <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="firstName" id="firstName" onChange={handleChange} value={edit.firstName} />
-                  </div>
-
-                  <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                    <label htmlFor="lastName" className="m-0 w-full text-left text-gray-500">
-                      Nom
-                    </label>
-                    <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="lastName" id="lastName" onChange={handleChange} value={edit.lastName} />
-                  </div>
-                </div>
-                <div className="flex flex-row">
-                  <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                    <label htmlFor="contactPhone" className="m-0 w-full text-left text-gray-500">
-                      Téléphone
-                    </label>
-                    <input
-                      type="tel"
-                      pattern="\d*"
-                      required={!edit.contactMail}
-                      disabled={isLoading}
-                      className="w-full disabled:bg-gray-200"
-                      name="contactPhone"
-                      id="contactPhone"
-                      onChange={handleChange}
-                      value={edit.contactPhone}
-                    />
-                  </div>
-                  <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                    <label htmlFor="contactMail" className="m-0 w-full text-left text-gray-500">
-                      Adresse email
-                    </label>
-                    <input
-                      required={!edit.contactPhone}
-                      disabled={isLoading}
-                      className="w-full disabled:bg-gray-200"
-                      name="contactMail"
-                      id="contactMail"
-                      onChange={handleChange}
-                      value={edit.contactMail}
-                    />
-                  </div>
-                </div>
+          <div>
+            {proposedContact.length ? (
+              <div className=" w-full px-10 py-2 text-[14px] leading-[20px]">
+                <p className="text-gray-500 pb-3">Ajouter à ce séjour un contact déjà existant...</p>
+                <Select
+                  options={proposedContact}
+                  onChange={(e) => setEdit(proposedContact.find((contact) => contact.contactName === e.value))}
+                  placeholder="Rechercher un contact"
+                  maxMenuHeight={240}
+                  styles={{
+                    placeholder: (styles) => ({ ...styles, color: "#6B7280" }),
+                  }}
+                />
+                <p className="text-gray-500 pt-3">... ou un nouveau contact :</p>
               </div>
-              {!newContact ? (
-                <div className="flex w-full flex-row justify-center">
-                  <button disabled={isLoading} className="pt-2 hover:border-b-[1px] hover:border-red-500" type="button" onClick={handleDelete}>
-                    <div className="flex w-full flex-row items-center justify-center text-red-500">
-                      <HiOutlineTrash className="text-lg text-red-300 " />
-                      Supprimer le contact
+            ) : null}
+            <form className="w-full" onSubmit={handleSubmit}>
+              <div className="flex flex-col items-center justify-center px-8 pb-4">
+                <div className="flex w-full flex-col justify-center ">
+                  <div className="flex flex-row">
+                    <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                      <label htmlFor="firstName" className="m-0 w-full text-left text-gray-500">
+                        Prénom
+                      </label>
+                      <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="firstName" id="firstName" onChange={handleChange} value={edit.firstName} />
                     </div>
+
+                    <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                      <label htmlFor="lastName" className="m-0 w-full text-left text-gray-500">
+                        Nom
+                      </label>
+                      <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="lastName" id="lastName" onChange={handleChange} value={edit.lastName} />
+                    </div>
+                  </div>
+                  <div className="flex flex-row">
+                    <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                      <label htmlFor="contactPhone" className="m-0 w-full text-left text-gray-500">
+                        Téléphone
+                      </label>
+                      <input
+                        type="tel"
+                        pattern="\d*"
+                        required={!edit.contactMail}
+                        disabled={isLoading}
+                        className="w-full disabled:bg-gray-200"
+                        name="contactPhone"
+                        id="contactPhone"
+                        onChange={handleChange}
+                        value={edit.contactPhone}
+                      />
+                    </div>
+                    <div className={`m-2 flex flex-1 flex-col rounded-lg border-[1px] py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                      <label htmlFor="contactMail" className="m-0 w-full text-left text-gray-500">
+                        Adresse email
+                      </label>
+                      <input
+                        required={!edit.contactPhone}
+                        disabled={isLoading}
+                        className="w-full disabled:bg-gray-200"
+                        name="contactMail"
+                        id="contactMail"
+                        onChange={handleChange}
+                        value={edit.contactMail}
+                      />
+                    </div>
+                  </div>
+                </div>
+                {!newContact ? (
+                  <div className="flex w-full flex-row justify-center">
+                    <button disabled={isLoading} className="pt-2 hover:border-b-[1px] hover:border-red-500" type="button" onClick={handleDelete}>
+                      <div className="flex w-full flex-row items-center justify-center text-red-500">
+                        <HiOutlineTrash className="text-lg text-red-300 " />
+                        Supprimer le contact
+                      </div>
+                    </button>
+                  </div>
+                ) : null}
+
+                <div className="mt-4 flex w-full flex-row justify-center">
+                  <button
+                    className="border-grey-300 hover:border-lg m-2 flex flex-1 cursor-pointer items-center justify-center rounded-lg border-[1px] py-2 px-8 shadow-sm"
+                    onClick={onChange}
+                    disabled={isLoading}>
+                    Annuler
+                  </button>
+                  <button
+                    className="m-2 flex flex-1 items-center justify-center rounded-lg border-[1px] border-indigo-700 bg-indigo-600 py-2 px-8 text-white shadow-sm hover:opacity-90"
+                    type="submit"
+                    disabled={isLoading}>
+                    {newContact ? "Ajouter un contact" : "Enregistrer"}
                   </button>
                 </div>
-              ) : null}
-
-              <div className="mt-4 flex w-full flex-row justify-center">
-                <button
-                  className="border-grey-300 hover:border-lg m-2 flex flex-1 cursor-pointer items-center justify-center rounded-lg border-[1px] py-2 px-8 shadow-sm"
-                  onClick={onChange}
-                  disabled={isLoading}>
-                  Annuler
-                </button>
-                <button
-                  className="m-2 flex flex-1 items-center justify-center rounded-lg border-[1px] border-indigo-700 bg-indigo-600 py-2 px-8 text-white shadow-sm hover:opacity-90"
-                  type="submit"
-                  disabled={isLoading}>
-                  {newContact ? "Ajouter un contact" : "Enregistrer"}
-                </button>
               </div>
-            </div>
-          </form>
+            </form>
+          </div>
         )}
       </div>
     </ModalForm>

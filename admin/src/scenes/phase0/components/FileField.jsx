@@ -51,7 +51,7 @@ export function FileField({ young, label, className = "", onChange, mode, status
       const blob = new Blob([new Uint8Array(result.data.data)], { type: result.mimeType });
       download(blob, result.fileName);
     } catch (err) {
-      toastr.error("Impossible de télécharger la pièce. Veuillez essayer dans quelques instants.");
+      toastr.error("Impossible de télécharger la pièce. Veuillez réessayer dans quelques instants.");
     }
   }
 

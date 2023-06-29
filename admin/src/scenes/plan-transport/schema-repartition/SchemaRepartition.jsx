@@ -575,7 +575,7 @@ function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onE
 
   useEffect(() => {
     checkIfUserIsAuthorizedToExportData();
-  }, []);
+  }, [cohortName]);
 
   return (
     <Box className={className}>

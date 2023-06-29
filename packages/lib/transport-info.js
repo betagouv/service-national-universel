@@ -2,8 +2,8 @@ import { YOUNG_STATUS_PHASE1 } from "./constants";
 import { regionsListDROMS } from "./region-and-departments";
 
 const TRANSPORT_TIMES = {
-  ALONE_ARRIVAL_HOUR: "11:00",
-  ALONE_DEPARTURE_HOUR: "16:00",
+  ALONE_ARRIVAL_HOUR: "16:00",
+  ALONE_DEPARTURE_HOUR: "11:00",
 }
 
 /**

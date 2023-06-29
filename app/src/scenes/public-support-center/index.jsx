@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
 import { HeroContainer } from "../../components/Content";
 import { supportURL } from "../../config";
@@ -186,14 +187,9 @@ export default function Index(props) {
         {!young && (
           <p style={{ textAlign: "center", fontSize: "0.8rem", color: "#6B7280" }}>
             Vous avez déjà un compte sur le site du SNU ?{" "}
-            <a
-              className="link"
-              style={{ color: "#32257F", fontWeight: "bold", fontSize: "16px" }}
-              href="https://moncompte.snu.gouv.fr/auth/login?redirect=besoin-d-aide"
-              target="_blank"
-              rel="noopener noreferrer">
+            <Link to="/auth/signin" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
               Connectez-vous
-            </a>
+            </Link>
           </p>
         )}
         <h3 className="!mt-3 text-center text-[32px]">Besoin d&apos;aide&nbsp;?</h3>

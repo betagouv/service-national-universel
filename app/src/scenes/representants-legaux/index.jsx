@@ -89,61 +89,59 @@ const Step = ({ step }) => {
 
 export default function Index() {
   return (
-    <>
-      <Switch>
-        <SentryRoute path="/representants-legaux/token-invalide" component={() => <Step step={STEPS.TOKEN_INVALIDE} />} />
-        <SentryRoute path="/representants-legaux/france-connect-callback" component={() => <FranceConnectCallback />} />
+    <Switch>
+      <SentryRoute path="/representants-legaux/token-invalide" component={() => <Step step={STEPS.TOKEN_INVALIDE} />} />
+      <SentryRoute path="/representants-legaux/france-connect-callback" component={() => <FranceConnectCallback />} />
 
-        <SentryRoute
-          path={[
-            "/representants-legaux/cni-invalide",
-            "/representants-legaux/cni-invalide-done",
-            "/representants-legaux/presentation",
-            "/representants-legaux/verification",
-            "/representants-legaux/consentement",
-            "/representants-legaux/done",
-            "/representants-legaux/droits-image",
-            "/representants-legaux/droits-image-done",
-          ]}
-          component={() => (
-            <Switch>
-              <RepresentantsLegauxContextProvider parentId="1">
-                <SentryRoute path="/representants-legaux/cni-invalide" component={() => <Step step={STEPS.CNI_INVALIDE} />} />
-                <SentryRoute path="/representants-legaux/cni-invalide-done" component={() => <Step step={STEPS.CNI_INVALIDE_DONE} />} />
-                <SentryRoute path="/representants-legaux/presentation" component={() => <Step step={STEPS.PRESENTATION} />} />
-                <SentryRoute path="/representants-legaux/verification" component={() => <Step step={STEPS.VERIFICATION} />} />
-                <SentryRoute path="/representants-legaux/consentement" component={() => <Step step={STEPS.CONSENTEMENT} />} />
-                <SentryRoute path="/representants-legaux/done" component={() => <Step step={STEPS.DONE} />} />
-                <SentryRoute path="/representants-legaux/droits-image" component={() => <Step step={STEPS.IMAGE_RIGHTS} />} />
-                <SentryRoute path="/representants-legaux/droits-image-done" component={() => <Step step={STEPS.IMAGE_RIGHTS_DONE} />} />
-              </RepresentantsLegauxContextProvider>
-            </Switch>
-          )}
-        />
+      <SentryRoute
+        path={[
+          "/representants-legaux/cni-invalide",
+          "/representants-legaux/cni-invalide-done",
+          "/representants-legaux/presentation",
+          "/representants-legaux/verification",
+          "/representants-legaux/consentement",
+          "/representants-legaux/done",
+          "/representants-legaux/droits-image",
+          "/representants-legaux/droits-image-done",
+        ]}
+        component={() => (
+          <Switch>
+            <RepresentantsLegauxContextProvider parentId="1">
+              <SentryRoute path="/representants-legaux/cni-invalide" component={() => <Step step={STEPS.CNI_INVALIDE} />} />
+              <SentryRoute path="/representants-legaux/cni-invalide-done" component={() => <Step step={STEPS.CNI_INVALIDE_DONE} />} />
+              <SentryRoute path="/representants-legaux/presentation" component={() => <Step step={STEPS.PRESENTATION} />} />
+              <SentryRoute path="/representants-legaux/verification" component={() => <Step step={STEPS.VERIFICATION} />} />
+              <SentryRoute path="/representants-legaux/consentement" component={() => <Step step={STEPS.CONSENTEMENT} />} />
+              <SentryRoute path="/representants-legaux/done" component={() => <Step step={STEPS.DONE} />} />
+              <SentryRoute path="/representants-legaux/droits-image" component={() => <Step step={STEPS.IMAGE_RIGHTS} />} />
+              <SentryRoute path="/representants-legaux/droits-image-done" component={() => <Step step={STEPS.IMAGE_RIGHTS_DONE} />} />
+            </RepresentantsLegauxContextProvider>
+          </Switch>
+        )}
+      />
 
-        <SentryRoute
-          path={[
-            "/representants-legaux/presentation-parent2",
-            "/representants-legaux/verification-parent2",
-            "/representants-legaux/consentement-parent2",
-            "/representants-legaux/done-parent2",
-            "/representants-legaux/droits-image2",
-            "/representants-legaux/droits-image-done2",
-          ]}
-          component={() => (
-            <Switch>
-              <RepresentantsLegauxContextProvider parentId="2">
-                <SentryRoute path="/representants-legaux/presentation-parent2" component={() => <Step step={STEPS.PRESENTATION_PARENT2} />} />
-                <SentryRoute path="/representants-legaux/verification-parent2" component={() => <Step step={STEPS.VERIFICATION_PARENT2} />} />
-                <SentryRoute path="/representants-legaux/consentement-parent2" component={() => <Step step={STEPS.CONSENTEMENT_PARENT2} />} />
-                <SentryRoute path="/representants-legaux/done-parent2" component={() => <Step step={STEPS.DONE_PARENT2} />} />
-                <SentryRoute path="/representants-legaux/droits-image2" component={() => <Step step={STEPS.IMAGE_RIGHTS_PARENT2} />} />
-                <SentryRoute path="/representants-legaux/droits-image-done2" component={() => <Step step={STEPS.IMAGE_RIGHTS_DONE_PARENT2} />} />
-              </RepresentantsLegauxContextProvider>
-            </Switch>
-          )}
-        />
-      </Switch>
-    </>
+      <SentryRoute
+        path={[
+          "/representants-legaux/presentation-parent2",
+          "/representants-legaux/verification-parent2",
+          "/representants-legaux/consentement-parent2",
+          "/representants-legaux/done-parent2",
+          "/representants-legaux/droits-image2",
+          "/representants-legaux/droits-image-done2",
+        ]}
+        component={() => (
+          <Switch>
+            <RepresentantsLegauxContextProvider parentId="2">
+              <SentryRoute path="/representants-legaux/presentation-parent2" component={() => <Step step={STEPS.PRESENTATION_PARENT2} />} />
+              <SentryRoute path="/representants-legaux/verification-parent2" component={() => <Step step={STEPS.VERIFICATION_PARENT2} />} />
+              <SentryRoute path="/representants-legaux/consentement-parent2" component={() => <Step step={STEPS.CONSENTEMENT_PARENT2} />} />
+              <SentryRoute path="/representants-legaux/done-parent2" component={() => <Step step={STEPS.DONE_PARENT2} />} />
+              <SentryRoute path="/representants-legaux/droits-image2" component={() => <Step step={STEPS.IMAGE_RIGHTS_PARENT2} />} />
+              <SentryRoute path="/representants-legaux/droits-image-done2" component={() => <Step step={STEPS.IMAGE_RIGHTS_DONE_PARENT2} />} />
+            </RepresentantsLegauxContextProvider>
+          </Switch>
+        )}
+      />
+    </Switch>
   );
 }

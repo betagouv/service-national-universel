@@ -12,6 +12,8 @@ import Error from "../../../components/error";
 import queryString from "query-string";
 import { useHistory } from "react-router-dom";
 import { cohortsInit } from "../../../utils/cohorts";
+import { Link } from "react-router-dom";
+import { environment } from "../../../config";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -28,9 +30,8 @@ export default function Signin() {
   const params = queryString.parse(location.search);
   const { redirect, disconnected } = params;
 
-  // if (disconnected === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
-
   React.useEffect(() => {
+    if (!young && disconnected === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
     if (young) history.push("/" + (redirect || ""));
   }, [young]);
 
@@ -38,7 +39,10 @@ export default function Signin() {
     if (loading || disabled) return;
     setLoading(true);
     try {
-      const { user: young, token } = await api.post(`/young/signin`, { email, password });
+      const { user: young, token, code } = await api.post(`/young/signin`, { email, password });
+      if (code === "2FA_REQUIRED") {
+        return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
+      }
       if (young) {
         if (redirect?.startsWith("http")) return (window.location.href = redirect);
         if (token) api.setToken(token);
@@ -108,6 +112,14 @@ export default function Signin() {
             </a>
           </div>
         </div>
+
+        {environment !== "production" && (
+          <Link to="/preinscription">
+            <p className="text-blue-france-sun-113 text-center hover:underline hover:text-blue-france-sun-113 mt-4 decoration-2 underline-offset-4">
+              Pré-inscription - accès staging
+            </p>
+          </Link>
+        )}
       </div>
     </div>
   );

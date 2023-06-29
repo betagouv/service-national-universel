@@ -12,7 +12,7 @@ export async function cohortsInit() {
       return;
     }
     if (!result.ok) {
-      capture("Unable to load global cohorts data");
+      capture("Unable to load global cohorts data :" + JSON.stringify(result));
     } else {
       cohorts = result.data;
       cohortsCachedAt = Date.now();

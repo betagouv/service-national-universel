@@ -142,7 +142,7 @@ describe("Young", () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const res = await request(getAppHelper()).get(`/young/${young._id}/patches`).send();
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(418);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if young found with patches", async () => {
@@ -195,7 +195,7 @@ describe("Young", () => {
       const previous = passport.user;
       passport.user = me;
       const res = await request(getAppHelper()).put(`/young/${they._id}/validate-mission-phase3`).send();
-      expect(res.statusCode).toEqual(403);
+      expect(res.statusCode).toEqual(418);
       passport.user = previous;
     });
   });
@@ -717,7 +717,7 @@ describe("Young", () => {
 
       // Failed request (not allowed)
       res = await request(getAppHelper()).get("/young/" + secondYoung._id + "/application");
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(418);
 
       passport.user = previous;
     });

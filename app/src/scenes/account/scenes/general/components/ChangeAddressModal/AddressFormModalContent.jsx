@@ -8,7 +8,7 @@ import { formatResult, getSuggestions } from "../../../../../../services/api-adr
 
 const emptyAddress = { address: "", zip: "", city: "" };
 
-const AddressFormModalContent = ({ onClose, onConfirm, isLoading }) => {
+const AddressFormModalContent = ({ onCancel, onConfirm, isLoading }) => {
   const [formValues, setFormValues] = useState(emptyAddress);
   const [suggestion, setSuggestion] = useState();
   const [errors, setErrors] = useState({});
@@ -78,7 +78,7 @@ const AddressFormModalContent = ({ onClose, onConfirm, isLoading }) => {
         {!suggestion && (
           <Modal.Buttons
             isLoading={isLoading}
-            onCancel={onClose}
+            onCancel={onCancel}
             onConfirm={onAddressVerify}
             cancelText="Annuler"
             confirmText={
@@ -106,6 +106,7 @@ const AddressFormModalContent = ({ onClose, onConfirm, isLoading }) => {
                 Oui
               </ButtonPrimary>
               <ButtonLight disabled={isLoading} onClick={onAddressVerified()}>{`Non, garder "${formValues.address}, ${formValues.zip} ${formValues.city}"`}</ButtonLight>
+              <ButtonLight onClick={onCancel}>Annuler</ButtonLight>
             </Modal.ButtonContainer>
           </>
         )}

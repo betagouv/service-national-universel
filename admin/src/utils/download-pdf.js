@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/react";
 import { download } from "snu-lib";
 
 import api from "../services/api";
+import { capture } from "../sentry";
 
 export default async function downloadPDF({ url, body, fileName, redirectUrl = "/auth/login?disconnected=1", errorTitle = "Une erreur est survenue lors du téléchargement" }) {
   try {
@@ -18,7 +19,7 @@ export default async function downloadPDF({ url, body, fileName, redirectUrl = "
       return (window.location.href = redirectUrl);
     }
     // We need more info to understand download issues.
-    Sentry.captureException(e);
+    capture(e);
 
     toastr.error(errorTitle + (e.code === "PDF_ERROR" ? ", merci de réessayer ultérieurement" : ""), e?.message, { timeOut: 10000 });
   }

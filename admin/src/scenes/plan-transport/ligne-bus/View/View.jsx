@@ -1,22 +1,25 @@
 import React from "react";
+import { HiOutlineBell, HiOutlineChatAlt } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate, canExportLigneBus } from "snu-lib";
+import { ROLES, canExportLigneBus, isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate } from "snu-lib";
+import Bus from "../../../../assets/icons/Bus";
 import Breadcrumbs from "../../../../components/Breadcrumbs";
 import Loader from "../../../../components/Loader";
+import SelectAction from "../../../../components/SelectAction";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
 import { Title } from "../../components/commons";
+import { exportLigneBusJeune } from "../../util";
 import Creation from "../modificationPanel/Creation";
+import BusTeam from "./components/BusTeam";
 import Centre from "./components/Centre";
 import Info from "./components/Info";
-import BusTeam from "./components/BusTeam";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
-import SelectAction from "../../../../components/SelectAction";
-import Bus from "../../../../assets/icons/Bus";
-import { exportLigneBusJeune } from "../../util";
+import InfoMessage from "../../../dashboardV2/components/ui/InfoMessage";
+import { AiOutlineExclamationCircle } from "react-icons/ai";
 
 export default function View(props) {
   const [data, setData] = React.useState(null);
@@ -27,6 +30,7 @@ export default function View(props) {
   const [cohort, setCohort] = React.useState();
   const [addOpen, setAddOpen] = React.useState(false);
   const user = useSelector((state) => state.Auth.user);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const getBus = async () => {
     try {
@@ -100,6 +104,25 @@ export default function View(props) {
     }
   };
 
+  const sendNotifRef = async () => {
+    try {
+      const id = props.match && props.match.params && props.match.params.id;
+      if (!id) return <div />;
+      setIsLoading(true);
+      const { ok, code } = await api.post(`/ligne-de-bus/${id}/notifyRef`);
+      if (!ok) {
+        setIsLoading(false);
+        return toastr.error("Oups, une erreur est survenue lors de l'envoi de la notification", translate(code));
+      }
+      setIsLoading(false);
+      toastr.success("Notification envoyée !");
+    } catch (e) {
+      capture(e);
+      setIsLoading(false);
+      toastr.error("Oups, une erreur est survenue lors de l'envoi de la notification");
+    }
+  };
+
   React.useEffect(() => {
     getBus();
     getDataForCheck();
@@ -153,8 +176,26 @@ export default function View(props) {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
-      <div className="m-8 flex flex-col gap-8">
+      <div className="flex justify-between mr-8 items-center">
+        <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
+        {canExportLigneBus(user) && data.team.length > 0 ? (
+          <SelectAction
+            title="Exporter la ligne"
+            alignItems="right"
+            buttonClassNames="bg-blue-600 mt-8"
+            textClassNames="text-white font-medium text-sm"
+            rightIconClassNames="text-blue-300"
+            optionsGroup={[
+              {
+                key: "export",
+                title: "Télécharger",
+                items: exportItems,
+              },
+            ]}
+          />
+        ) : null}
+      </div>
+      <div className="mx-8 mb-8 mt-3 flex flex-col gap-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Title>{data.busId}</Title>
@@ -162,30 +203,31 @@ export default function View(props) {
           </div>
           <div className="flex items-center gap-2">
             {ligneBusCanCreateDemandeDeModification(user) && isLigneBusDemandeDeModificationOpen(user, cohort) && (
-              <button
-                className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
-                onClick={() => setPanelOpen(true)}>
+              <button className="flex items-center gap-2 px-3 bg-white text-blue-600 rounded-lg hover:scale-105 h-[30px]" onClick={() => setPanelOpen(true)}>
+                <HiOutlineChatAlt className="text-blue-600 h-4 w-4" />
                 Demander une modification
               </button>
             )}
-            {canExportLigneBus(user) && data.team.length > 0 ? (
-              <SelectAction
-                title="Exporter la ligne"
-                alignItems="right"
-                buttonClassNames="bg-blue-600"
-                textClassNames="text-white font-medium text-sm"
-                rightIconClassNames="text-blue-300"
-                optionsGroup={[
-                  {
-                    key: "export",
-                    title: "Télécharger",
-                    items: exportItems,
-                  },
-                ]}
-              />
-            ) : null}
+            {user.role === ROLES.ADMIN && (
+              <button
+                disabled={isLoading}
+                className="flex items-center gap-2 px-3 bg-white text-blue-600 rounded-lg hover:scale-105 h-[30px] disabled:hover:scale-100 disabled:opacity-75 disabled:cursor-progress"
+                onClick={() => sendNotifRef()}>
+                <HiOutlineBell className="text-blue-600 h-4 w-4" />
+                Avertir le référent
+              </button>
+            )}
           </div>
         </div>
+        {data.delayedForth === "true" || data.delayedBack === "true" ? (
+          <InfoMessage
+            bg="bg-[#B45309]"
+            Icon={AiOutlineExclamationCircle}
+            message={`Le départ de cette ligne de bus est retardé ${
+              data.delayedForth === "true" && data.delayedBack === "true" ? "à l'aller et au retour" : data.delayedForth === "true" ? "à l'aller" : "au retour"
+            }.`}
+          />
+        ) : null}
         <div className="flex flex-col gap-8">
           <div className="flex gap-4">
             <Itineraire
@@ -193,12 +235,14 @@ export default function View(props) {
               aller={data.departuredDate}
               retour={data.returnDate}
               center={{ ...data.centerDetail, departureHour: data.centerArrivalTime, returnHour: data.centerDepartureTime }}
+              bus={data}
+              setBus={setData}
             />
             <Modification demandeDeModification={demandeDeModification} getModification={getDemandeDeModification} />
           </div>
-          <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} />
+          <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} cohort={cohort} />
 
-          <BusTeam bus={data} setBus={setData} title={"Chef de file"} role={"leader"} idTeam={leader} addOpen={addOpen} />
+          <BusTeam bus={data} setBus={setData} title={"Chef de file"} role={"leader"} idTeam={leader} addOpen={addOpen} cohort={cohort} />
           {data.team.filter((item) => item.role === "supervisor").length > 0 ? (
             data.team
               .filter((item) => item.role === "supervisor")
@@ -206,17 +250,26 @@ export default function View(props) {
                 <BusTeam key={value._id} bus={data} setBus={setData} title="Encadrant" role={"supervisor"} idTeam={value._id} addOpen={addOpen} setAddOpen={setAddOpen} />
               ))
           ) : (
-            <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} />
+            <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} cohort={cohort} />
           )}
           {addOpen ? <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} setAddOpen={setAddOpen} /> : null}
 
           <div className="flex items-start gap-4">
             <div className="flex w-1/2 flex-col gap-4">
               {data.meetingsPointsDetail.map((pdr, index) => (
-                <PointDeRassemblement bus={data} pdr={pdr} setBus={setData} index={index} key={index} volume={dataForCheck?.meetingPoints} getVolume={getDataForCheck} />
+                <PointDeRassemblement
+                  bus={data}
+                  pdr={pdr}
+                  setBus={setData}
+                  index={index}
+                  key={index}
+                  volume={dataForCheck?.meetingPoints}
+                  getVolume={getDataForCheck}
+                  cohort={cohort}
+                />
               ))}
             </div>
-            <Centre bus={data} setBus={setData} />
+            <Centre bus={data} setBus={setData} cohort={cohort} />
           </div>
         </div>
       </div>

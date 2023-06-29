@@ -5,13 +5,13 @@ import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
 import { NavLink, useHistory } from "react-router-dom";
-
+import plausibleEvent from "../../../services/plausible";
 import api from "../../../services/api";
 import { HeroContainer } from "../../../components/Content";
 import FileUpload, { useFileUpload } from "../../../components/FileUpload";
 import ErrorMessage, { requiredMessage } from "../../inscription2023/components/ErrorMessageOld";
-import { SelectTag, step0, step1, step2Technical, step2Question } from "./worflow";
-import { translate } from "../../../utils";
+import { SelectTag, step0, step1, step2Technical, step2Question, articles } from "./worflow";
+import { translate, urlWithScheme } from "../../../utils";
 import { capture } from "../../../sentry";
 import Unlock from "../../../assets/icons/Unlock";
 import QuestionBubble from "../../../assets/icons/QuestionBubble";
@@ -21,6 +21,7 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 export default function TicketCreate(props) {
   const { files, addFiles, deleteFile, error } = useFileUpload();
   const [isLoading, setLoading] = useState(false);
+  const [answerNotFound, setAnswerNotFound] = useState(false);
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
 
@@ -32,9 +33,14 @@ export default function TicketCreate(props) {
     }
   }, [error]);
 
+  const handleClick = () => {
+    setAnswerNotFound(true);
+    plausibleEvent("Besoin d'aide - Je n'ai pas trouve de reponse");
+  };
+
   return (
     <Container>
-      <BackButton to={`/besoin-d-aide`}>{"<"} Retour à l&apos;accueil</BackButton>
+      <BackButton to={`/besoin-d-aide`}>{"<"} Retour</BackButton>
       <Heading>
         <h4>Contacter quelqu&apos;un</h4>
         <p>Vous avez un problème technique, vous souhaitez en savoir plus sur votre situation, ou souhaitez contacter l&apos;un de vos référents ?</p>
@@ -103,83 +109,116 @@ export default function TicketCreate(props) {
               setLoading(false);
             }
           }}>
-          {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
-            <>
-              <SelectTag
-                name="step0"
-                options={Object.values(step0)}
-                title={"Je suis"}
-                selectPlaceholder={"Choisir mon rôle"}
-                handleChange={handleChange}
-                value={values?.step0?.id}
-                values={values}
-                errors={errors}
-                touched={touched}
-              />
-              <SelectTag
-                name="step1"
-                options={Object.values(step1)}
-                title={"Ma demande"}
-                selectPlaceholder={"Choisir la catégorie"}
-                handleChange={handleChange}
-                value={values?.step1?.id}
-                values={values}
-                errors={errors}
-                touched={touched}
-              />
-              {values.step1?.id === "TECHNICAL" ? (
+          {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => {
+            const showForm = (values.step2?.id !== undefined && values.step2.id !== "PHASE_1_WITHDRAWAL") || answerNotFound === true;
+            return (
+              <>
                 <SelectTag
-                  name="step2"
-                  options={Object.values(step2Technical)}
-                  title={"Sujet"}
-                  selectPlaceholder={"Choisir le sujet"}
+                  name="step0"
+                  options={Object.values(step0)}
+                  title={"Je suis"}
+                  selectPlaceholder={"Choisir mon rôle"}
                   handleChange={handleChange}
-                  value={values.step2?.id}
+                  value={values?.step0?.id}
                   values={values}
                   errors={errors}
                   touched={touched}
                 />
-              ) : null}
-              {values.step1?.id === "QUESTION" ? (
                 <SelectTag
-                  name="step2"
-                  options={Object.values(step2Question)}
-                  title={"Sujet"}
-                  selectPlaceholder={"Choisir le sujet"}
+                  name="step1"
+                  options={Object.values(step1)}
+                  title={"Ma demande"}
+                  selectPlaceholder={"Choisir la catégorie"}
                   handleChange={handleChange}
-                  value={values.step2?.id}
+                  value={values?.step1?.id}
                   values={values}
                   errors={errors}
                   touched={touched}
                 />
-              ) : null}
-              <Item
-                name="message"
-                title="Mon message"
-                type="textarea"
-                value={values.message}
-                handleChange={handleChange}
-                validate={(v) => !v && requiredMessage}
-                errors={errors}
-                touched={touched}
-                rows="5"
-              />
-              <FileUpload
-                disabled={isLoading}
-                className="px-[15px]"
-                files={files}
-                addFiles={addFiles}
-                deleteFile={deleteFile}
-                filesAccepted={["jpeg", "png", "pdf", "word", "excel"]}
-              />
-              <div className="mt-[15px] ml-[15px] flex flex-col md:flex-row">
-                <LoadingButton loading={isLoading} type="submit" style={{ maxWidth: "150px" }} onClick={handleSubmit} disabled={isSubmitting}>
-                  Envoyer
-                </LoadingButton>
-                {isLoading && files.length > 0 && <div className="mt-2 text-sm text-gray-500 md:ml-4 md:mt-0">{translate("UPLOAD_IN_PROGRESS")}</div>}
-              </div>
-            </>
-          )}
+                {values.step1?.id === "TECHNICAL" ? (
+                  <SelectTag
+                    name="step2"
+                    options={Object.values(step2Technical)}
+                    title={"Sujet"}
+                    selectPlaceholder={"Choisir le sujet"}
+                    handleChange={handleChange}
+                    value={values.step2?.id}
+                    values={values}
+                    errors={errors}
+                    touched={touched}
+                  />
+                ) : null}
+                {values.step1?.id === "QUESTION" ? (
+                  <SelectTag
+                    name="step2"
+                    options={Object.values(step2Question)}
+                    title={"Sujet"}
+                    selectPlaceholder={"Choisir le sujet"}
+                    handleChange={handleChange}
+                    value={values.step2?.id}
+                    values={values}
+                    errors={errors}
+                    touched={touched}
+                  />
+                ) : null}
+
+                {values.step2?.id === "PHASE_1_WITHDRAWAL" && (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-3 pt-10">
+                      {articles?.map((article) => (
+                        <a
+                          className="bg-white rounded-xl p-3 flex flex-col gap-2 border-2 text-sm hover:border-blue-500 hover:text-gray-800 transition group"
+                          href={urlWithScheme(article.url)}
+                          target="_blank"
+                          rel="noreferrer"
+                          key={article.url}>
+                          <p className="flex gap-2 font-semibold">
+                            {article.emoji} {article.title}
+                          </p>
+                          <p className="">{article.body}</p>
+                          <p className="mt-auto text-right text-blue-600 group-hover:underline underline-offset-4 decoration-2 transition-all">Lire la suite</p>
+                        </a>
+                      ))}
+                    </div>
+
+                    <button onClick={handleClick} className="text-blue-600 hover:underline underline-offset-4 decoration-2 mx-3 my-6 text-left">
+                      Contacter quelqu'un
+                    </button>
+                  </>
+                )}
+
+                {showForm && (
+                  <>
+                    <Item
+                      name="message"
+                      title="Mon message"
+                      type="textarea"
+                      value={values.message}
+                      handleChange={handleChange}
+                      validate={(v) => !v && requiredMessage}
+                      errors={errors}
+                      touched={touched}
+                      rows="5"
+                    />
+                    <FileUpload
+                      disabled={isLoading}
+                      className="px-[15px]"
+                      files={files}
+                      addFiles={addFiles}
+                      deleteFile={deleteFile}
+                      filesAccepted={["jpeg", "png", "pdf", "word", "excel"]}
+                    />
+                    <div className="mt-[15px] ml-[15px] flex flex-col md:flex-row">
+                      <LoadingButton loading={isLoading} type="submit" style={{ maxWidth: "150px" }} onClick={handleSubmit} disabled={isSubmitting}>
+                        Envoyer
+                      </LoadingButton>
+                      {isLoading && files.length > 0 && <div className="mt-2 text-sm text-gray-500 md:ml-4 md:mt-0">{translate("UPLOAD_IN_PROGRESS")}</div>}
+                    </div>
+                  </>
+                )}
+              </>
+            );
+          }}
         </Formik>
       </Form>
     </Container>

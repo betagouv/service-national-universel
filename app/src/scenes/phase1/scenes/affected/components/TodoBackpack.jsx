@@ -32,7 +32,7 @@ export default function TodoBackpack({ lunchBreak }) {
   }
 
   return (
-    <div className="mx-[0.5rem] flex overflow-hidden rounded-xl bg-white shadow-nina md:mx-[0rem] md:shadow-none lg:w-2/3">
+    <div className="mx-[0.5rem] flex overflow-hidden rounded-xl bg-white shadow-nina md:mx-[0rem] md:shadow-none">
       <MedicalFileModal isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} />
 
       <div className="relative p-4">

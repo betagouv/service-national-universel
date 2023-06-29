@@ -16,13 +16,13 @@ const ticketStateIdByName = (name) => {
   );
 };
 const totalOpenedTickets = (tickets) => {
-  return (tickets || []).filter((ticket) => (ticket || {}).status.toLowerCase() === "open").length;
+  return (tickets || []).find((group) => group._id === "OPEN").total || 0;
 };
 const totalNewTickets = (tickets) => {
-  return (tickets || []).filter((ticket) => (ticket || {}).status.toLowerCase() === "new").length;
+  return (tickets || []).find((group) => group._id === "NEW").total || 0;
 };
 const totalClosedTickets = (tickets) => {
-  return (tickets || []).filter((ticket) => (ticket || {}).status.toLowerCase() === "closed").length;
+  return (tickets || []).find((group) => group._id === "CLOSED").total || 0;
 };
 
 export {

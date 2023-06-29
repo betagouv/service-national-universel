@@ -3,8 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Router, Switch, useLocation } from "react-router-dom";
 
-import queryString from "query-string";
-
 import { setYoung } from "./redux/auth/actions";
 
 import Footer from "./components/footer";
@@ -13,8 +11,7 @@ import Loader from "./components/Loader";
 import ModalResumePhase1ForWithdrawn from "./components/modals/ModalResumePhase1ForWithdrawn";
 import Account from "./scenes/account";
 import AllEngagements from "./scenes/all-engagements/index";
-import AuthV2 from "./scenes/authV2";
-import Bug from "./scenes/bug";
+import Auth from "./scenes/auth";
 import Candidature from "./scenes/candidature";
 import CGU from "./scenes/CGU";
 import Contract from "./scenes/contract";
@@ -63,38 +60,6 @@ function FallbackComponent() {
 const myFallback = <FallbackComponent />;
 
 export default function App() {
-  const [loading, setLoading] = useState(true);
-  const dispatch = useDispatch();
-  useEffect(() => {
-    const params = queryString.parse(location.search);
-    const { utm_source, utm_medium, utm_campaign } = params;
-    const sessionProperties = {};
-    if (utm_source) sessionProperties.utm_source = utm_source;
-    if (utm_medium) sessionProperties.utm_medium = utm_medium;
-    if (utm_campaign) sessionProperties.utm_campaign = utm_campaign;
-    async function fetchData() {
-      try {
-        const { ok, user, token } = await api.get("/young/signin_token");
-        if (!ok) {
-          dispatch(setYoung(null));
-          return setLoading(false);
-        }
-        if (token) api.setToken(token);
-        if (ok && user) {
-          dispatch(setYoung(user));
-
-          await cohortsInit();
-        }
-      } catch (e) {
-        console.log(e);
-      }
-      setLoading(false);
-    }
-    fetchData();
-  }, []);
-
-  if (loading) return <Loader />;
-
   return (
     <Sentry.ErrorBoundary fallback={myFallback}>
       <Router history={history}>
@@ -107,21 +72,16 @@ export default function App() {
             </Switch>
           ) : (
             <Switch>
-              <SentryRoute path="/bug" component={Bug} />
+              {/* Aucune authentification nécessaire */}
+              <SentryRoute path="/preinscription" component={PreInscription} />
               <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-              <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
-              <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
               <SentryRoute path="/validate-contract/done" component={ContractDone} />
               <SentryRoute path="/validate-contract" component={Contract} />
-              <SentryRoute path="/inscription2023" component={Inscription2023} />
-              {/* @todo: clean this */}
-              <SentryRoute path="/noneligible" component={NonEligible} />
-              <SentryRoute path="/reinscription" component={ReInscription} />
-              <SentryRoute path="/preinscription" component={PreInscription} />
-              <SentryRoute path="/auth" component={AuthV2} />
-              <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} /> :
-              <SentryRoute path="/public-engagements" component={AllEngagements} />
-              <SentryRoute path="/" component={Espace} />
+              <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
+              {/* Authentification accessoire */}
+              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements"]} component={() => <OptionalLogIn />} />
+              {/* Authentification nécessaire */}
+              <SentryRoute path="/" component={() => <MandatoryLogIn />} />
             </Switch>
           )}
         </div>
@@ -129,6 +89,85 @@ export default function App() {
     </Sentry.ErrorBoundary>
   );
 }
+
+const OptionalLogIn = () => {
+  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+
+  const location = useLocation();
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const { ok, user, token } = await api.checkToken();
+        if (!ok) {
+          api.setToken(null);
+          dispatch(setYoung(null));
+          return setLoading(false);
+        }
+        if (token) api.setToken(token);
+        if (ok && user) {
+          dispatch(setYoung(user));
+          await cohortsInit();
+          if (location.pathname.includes("/auth")) return <Redirect to="/" />;
+        }
+      } catch (e) {
+        console.log(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  if (loading) return <Loader />;
+
+  return (
+    <Switch>
+      <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+      <SentryRoute path="/auth" component={Auth} />
+      <SentryRoute path="/public-engagements" component={AllEngagements} />
+      <Redirect to="/" />
+    </Switch>
+  );
+};
+
+const MandatoryLogIn = () => {
+  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const { ok, user, token } = await api.checkToken();
+        if (!ok) {
+          api.setToken(null);
+          dispatch(setYoung(null));
+          return <Redirect to="/auth" />;
+        }
+        if (token) api.setToken(token);
+        if (ok && user) {
+          dispatch(setYoung(user));
+          await cohortsInit();
+        }
+      } catch (e) {
+        console.log(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  if (loading) return <Loader />;
+
+  return (
+    <Switch>
+      <SentryRoute path="/inscription2023" component={Inscription2023} />
+      <SentryRoute path="/" component={Espace} />
+    </Switch>
+  );
+};
 
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
@@ -162,17 +201,12 @@ const Espace = () => {
         if (sessions.length) setIsResumePhase1WithdrawnModalOpen(true);
       });
     }
-    return () => {
-      setIsModalCGUOpen(false);
-      setIsResumePhase1WithdrawnModalOpen(false);
-      // setIsModalMondayOpen(false);
-    };
   }, [young]);
 
   if (!young) {
     const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
     if (redirect === "inscription") return <Redirect to="/preinscription" />;
-    else return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
+    else return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}&disconnected=1` : "", pathname: "/auth" }} />;
   }
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE) return <Redirect to="/noneligible" />;
@@ -182,7 +216,7 @@ const Espace = () => {
 
   const forceRedirectInscription =
     [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young.status) ||
-    (inscriptionModificationOpenForYoungs(young.cohort, young) && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
+    (inscriptionModificationOpenForYoungs(young.cohort, young, environment) && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
   if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
 
   return (
@@ -192,6 +226,10 @@ const Espace = () => {
       </div>
       <main className="mt-16 md:mt-0 md:ml-[16rem]">
         <Switch>
+          <SentryRoute exact path="/" component={Home} />
+          <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
+          <SentryRoute path="/noneligible" component={NonEligible} />
+          <SentryRoute path="/reinscription" component={ReInscription} />
           <SentryRoute path="/account" component={Account} />
           <SentryRoute path="/phase1" component={Phase1} />
           <SentryRoute path="/phase2" component={Phase2} />
@@ -204,7 +242,7 @@ const Espace = () => {
           <SentryRoute path="/diagoriente" component={Diagoriente} />
           {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
           {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
-          <SentryRoute path="/" component={Home} />
+          <Redirect to="/" />
         </Switch>
       </main>
       <Footer />
