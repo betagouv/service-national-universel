@@ -36,7 +36,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
   const handleDownloadAttestationPdfFile = async () => {
     await downloadPDF({
       url: `/young/${young._id}/documents/certificate/1`,
-      fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
+      fileName: `${young.firstName} ${young.lastName} - attestation 1.pdf`,
     });
   };
 
@@ -59,7 +59,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
   const handleDownloadConvocationPdfFile = async () => {
     await downloadPDF({
       url: `/young/${young._id}/documents/convocation/cohesion`,
-      fileName: `${young.firstName} ${young.lastName} - attestation 1.pdf`,
+      fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
     });
   };
 
