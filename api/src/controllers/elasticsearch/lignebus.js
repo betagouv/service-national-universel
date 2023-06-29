@@ -133,7 +133,6 @@ router.post("/search", passport.authenticate(["referent"], { session: false, fai
           filter: [{ terms: { _id: meetingPointsIds } }],
         },
       });
-      console.log("✍️  meetingPoints:", meetingPoints);
       if (lignesToPoint.length > 0) {
         for (let ligneBus of lignesBus) {
           const ltp = lignesToPoint
