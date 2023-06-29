@@ -808,7 +808,7 @@ export default function Settings() {
                         <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Par défaut 9e jour après le début du séjour.</p>
                       </ReactTooltip>
                     </div>
-                    {data.name === "Juillet 2023" || data.name === "Juin 2023" ? (
+                    {data.name === "Juillet 2023" ? (
                       <>
                         <ValidationDateSelectorInput
                           days={data.daysToValidate}

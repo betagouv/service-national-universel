@@ -13,7 +13,7 @@ const SessionPhase1 = require("../models/sessionPhase1");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
-const { addDays, formatISO } = require("date-fns");
+const { addDays } = require("date-fns");
 const { APP_URL, ADMIN_URL } = require("../config");
 const {
   CELLAR_ENDPOINT,
@@ -596,18 +596,14 @@ async function notifDepartmentChange(department, template, young, extraParams = 
 
 async function addingDayToDate(days, dateStart) {
   try {
-    // const startDate = new Date(dateStart);
-    // const newDate = addDays(startDate, days);
-    // const formattedValidationDate = formatISO(newDate);
-    // // setNewValidationDate(formattedValidationDate);
-    // const validationDateWithDays = formattedValidationDate;
     const startDate = new Date(dateStart);
     const newDate = addDays(startDate, days);
+    newDate.setUTCHours(23);
+    newDate.setUTCMinutes(59);
     const formattedValidationDate = newDate.toISOString();
+    // const formattedValidationDate = formatISO(newDate);
 
     return formattedValidationDate;
-
-    // return validationDateWithDays;
   } catch (e) {
     console.log(e);
   }
@@ -623,13 +619,12 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) 
   if (!daysToValidate || !daysToValidateForTerminalGrade) {
     throw new Error("❌ validationDate & validationDateForTerminaleGrade missing on cohort " + sessionPhase1.cohort);
   }
-
   const isTerminale = young?.grade === "Terminale";
+  // cette constante nous permet d'avoir la date de validation d'un séjour en fonction du grade d'un Young
   const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
-  // cette constante nous permet d'avoir le jour nécessaire à la validation d'un séjour en fonction du grade d'un Young
+  // cette constante nous permet d'avoir le nombre de jour nécessaire à la validation d'un séjour en fonction du grade d'un Young
   const days = isTerminale ? daysToValidate : daysToValidateForTerminalGrade;
   const validationDateWithDays = await addingDayToDate(days, dateStart);
-
   if (young.cohort === "Juin 2023") {
     await updateStatusPhase1WithSpecificCase(young, validationDate, user);
   } else if (young.cohort === "Juillet 2023") {
