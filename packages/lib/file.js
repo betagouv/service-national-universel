@@ -31,7 +31,7 @@ function createFormDataForFileUpload(arr, properties) {
   }
 
   const names = files.map((e) => e.name || e);
-  let allData = properties ? { names, ...properties } : { names };
+  let allData = { names, ...properties || {} };
   formData.append("body", JSON.stringify(allData));
   return formData;
 }

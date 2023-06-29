@@ -69,7 +69,7 @@ class ApiService {
     return this.execute({ method: "DELETE", ...args });
   }
 
-  uploadFile(path, files) {
+  uploadFiles(path, files) {
     const formData = createFormDataForFileUpload(files);
     return new Promise((resolve, reject) => {
       try {

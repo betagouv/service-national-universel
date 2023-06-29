@@ -73,7 +73,7 @@ function TimeScheduleFile({ session, file, onDelete, className = "" }) {
 
   return (
     <div className={`flex items-center justify-between border-b-[1px] border-b-gray-200 py-4 ${className}`}>
-      <div className="grow-1">{file.name.substring(0,25)}</div>
+      <div className="grow-1">{file.name.substring(0, 25)}</div>
       {communicating ? (
         <div>
           <Loader size="2rem" className="m-0" />
@@ -141,7 +141,7 @@ function DropZone({ session, className = "", sessionChanged }) {
 
     setUploading(true);
     try {
-      const res = await api.uploadFile(`/session-phase1/${session._id}/time-schedule`, [file]);
+      const res = await api.uploadFiles(`/session-phase1/${session._id}/time-schedule`, [file]);
       if (res.code === "FILE_CORRUPTED") {
         setError(
           "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",

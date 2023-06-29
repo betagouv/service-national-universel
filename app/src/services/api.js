@@ -139,7 +139,7 @@ class api {
     });
   }
 
-  uploadFile(path, arr) {
+  uploadFiles(path, arr) {
     const formData = createFormDataForFileUpload(arr);
     return new Promise(async (resolve, reject) => {
       try {
