@@ -360,6 +360,12 @@ const isBusEditionOpen = (actor, cohort) => {
       return true;
     case ROLES.TRANSPORTER:
       return cohort?.busEditionOpenForTransporter;
+    case ROLES.REFERENT_REGION:
+      return cohort?.busEditionOpenForTransporter;
+    case ROLES.REFERENT_DEPARTMENT:
+      return cohort?.busEditionOpenForTransporter;
+    case ROLES.HEAD_CENTER:
+      return cohort?.busEditionOpenForTransporter;
     default:
       return false;
   }
