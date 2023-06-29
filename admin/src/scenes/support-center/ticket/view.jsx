@@ -16,6 +16,7 @@ import SuccessIcon from "../../../components/SuccessIcon";
 import FileUpload, { useFileUpload } from "../../../components/FileUpload";
 import { capture } from "../../../sentry";
 import FileSaver from "file-saver";
+import { formatMessageForReadingInnerHTML } from "snu-lib";
 
 const updateHeightElement = (e) => {
   e.style.height = "inherit";
@@ -205,7 +206,7 @@ const Message = ({ from, date, content, fromMe, files = [] }) => {
   return fromMe ? (
     <MessageContainer>
       <MessageBubble align={"right"} backgroundColor={colors.darkPurple}>
-        <MessageContent color="white" dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
+        <MessageContent color="white" dangerouslySetInnerHTML={{ __html: formatMessageForReadingInnerHTML(content) }}></MessageContent>
         <MessageDate color="#ccc">{date}</MessageDate>
         {files.map((file) => (
           <File
@@ -222,7 +223,7 @@ const Message = ({ from, date, content, fromMe, files = [] }) => {
     <MessageContainer>
       <MessageFrom>{from}</MessageFrom>
       <MessageBubble align={"left"} backgroundColor={colors.lightGrey} color="white">
-        <MessageContent dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
+        <MessageContent dangerouslySetInnerHTML={{ __html: formatMessageForReadingInnerHTML(content) }}></MessageContent>
         <MessageDate>{date}</MessageDate>
         {files.map((file) => (
           <File
