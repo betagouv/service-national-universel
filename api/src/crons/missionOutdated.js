@@ -15,7 +15,9 @@ const fileName = path.basename(__filename, ".js");
 
 const clean = async () => {
   let countAutoArchived = 0;
-  const cursor = await Mission.find({ endAt: { $lt: Date.now() }, status: "VALIDATED" }).cursor();
+  const cursor = await Mission.find({ endAt: { $lt: Date.now() }, status: "VALIDATED" })
+    .cursor()
+    .addCursorFlag("noCursorTimeout", true);
   await cursor.eachAsync(async function (mission) {
     countAutoArchived++;
     console.log(`${mission._id} ${mission.name} archived.`);
@@ -42,7 +44,9 @@ const clean = async () => {
 const notify1Week = async () => {
   let countNotice = 0;
   const now = Date.now();
-  const cursor = await Mission.find({ endAt: { $lt: addDays(now, 8), $gte: addDays(now, 7) }, status: "VALIDATED" }).cursor();
+  const cursor = await Mission.find({ endAt: { $lt: addDays(now, 8), $gte: addDays(now, 7) }, status: "VALIDATED" })
+    .cursor()
+    .addCursorFlag("noCursorTimeout", true);
   await cursor.eachAsync(async function (mission) {
     countNotice++;
     console.log(`${mission._id} ${mission.name} : 1 week notice.`);
