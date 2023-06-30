@@ -71,7 +71,15 @@ const ChangeYoung = ({ cohort }) => {
   const urlParams = new URLSearchParams(window.location.search);
 
   useEffect(() => {
-    if (!cohort) return;
+    setAllLines();
+    setSelectedLigneFrom(null);
+    setSelectedPDRFrom(null);
+    setSelectedLigneTo(null);
+    setSelectedPDRTo(null);
+    setCheckedYoungs([]);
+    if (!cohort) {
+      return;
+    }
     try {
       const getAllLines = async () => {
         const res = await api.get(`/edit-transport/allLines/${cohort}`);
@@ -127,7 +135,13 @@ const ChangeYoung = ({ cohort }) => {
     try {
       const saveYoungs = async (data) => {
         // todo make it more explicit in url : /edit-transport/from/:ligne_id_from/to/:ligne_id_to
-        const res = await api.post("/edit-transport/saveYoungs", { data, busFrom: selectedLigneFrom._id, busTo: selectedLigneTo._id, pdrFromId: selectedPDRFrom._id, pdrToId: selectedPDRTo._id });
+        const res = await api.post("/edit-transport/saveYoungs", {
+          data,
+          busFrom: selectedLigneFrom._id,
+          busTo: selectedLigneTo._id,
+          pdrFromId: selectedPDRFrom._id,
+          pdrToId: selectedPDRTo._id,
+        });
         if (res.ok) {
           toastr.success("Les jeunes ont bien été déplacé.");
           setIsDirty(false);
@@ -138,7 +152,7 @@ const ChangeYoung = ({ cohort }) => {
         const index = youngs.findIndex((e) => e._id === y._id);
         if (index >= 0) data.push(youngs[index]);
       }
-      setCheckedYoungs([])
+      setCheckedYoungs([]);
       saveYoungs(data);
     } catch (e) {
       capture(e);
@@ -169,8 +183,8 @@ const ChangeYoung = ({ cohort }) => {
       if (index >= 0) {
         tmp[index].meetingPointId = toPdr;
         tmp[index].ligneId = toLine;
-        tmp[index].sessionPhase1Id = selectedLigneTo.sessionId
-        tmp[index].cohensioncenterId = selectedLigneTo.cohensioncenterId
+        tmp[index].sessionPhase1Id = selectedLigneTo.sessionId;
+        tmp[index].cohensioncenterId = selectedLigneTo.cohensioncenterId;
       }
     }
     setIsDirty(true);

@@ -12,11 +12,15 @@ const From = ({ youngs, allLines, isDirty, selectedMeetingPoint, setSelectedMeet
   const [meetingPointsOptions, setMeetingPointsOptions] = useState([]);
   const [meetingPoints, setMeetingPoints] = useState([]);
   const urlParams = new URLSearchParams(window.location.search);
-  const [youngsFilter, setYoungsFilter] = useState([])
+  const [youngsFilter, setYoungsFilter] = useState([]);
 
   useEffect(() => {
-    setYoungsFilter(youngs.filter(e => {return e.meetingPointId === selectedMeetingPoint?._id && e.sessionPhase1Id === selectedLigne.sessionId}))
-  }, [selectedMeetingPoint, youngs])
+    setYoungsFilter(
+      youngs.filter((e) => {
+        return e.meetingPointId === selectedMeetingPoint?._id && e.sessionPhase1Id === selectedLigne.sessionId;
+      }),
+    );
+  }, [selectedMeetingPoint, youngs]);
 
   React.useEffect(() => {
     try {
@@ -29,7 +33,7 @@ const From = ({ youngs, allLines, isDirty, selectedMeetingPoint, setSelectedMeet
         const { data, ok, code } = await api.post(`/edit-transport/meetingPoints`, selectedLigne.meetingPointsIds);
         if (!ok) return toastr.error("error", code);
         setMeetingPointsOptions(data.map((e) => ({ label: e.name, value: e })));
-        setMeetingPoints(data)
+        setMeetingPoints(data);
         if (urlParams.get("pdr_from_id")) {
           const pdr = data.find((e) => e._id === urlParams.get("pdr_from_id"));
           if (pdr) {
@@ -72,7 +76,9 @@ const From = ({ youngs, allLines, isDirty, selectedMeetingPoint, setSelectedMeet
           placeholder="Choisir une ligne de transport"
           renderOption={(option) => {
             //todo calculate capacity
-            const numOfYoung = youngs.filter((e) => {return e.ligneId === option.value._id && e.sessionPhase1Id === option.value.sessionId}).length;
+            const numOfYoung = youngs.filter((e) => {
+              return e.ligneId === option.value._id && e.sessionPhase1Id === option.value.sessionId;
+            }).length;
             const total = allLines.find((e) => e._id === option.value._id).youngCapacity;
             return (
               <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
@@ -92,10 +98,15 @@ const From = ({ youngs, allLines, isDirty, selectedMeetingPoint, setSelectedMeet
           disabled={isDirty || !selectedLigne}
           options={meetingPointsOptions}
           value={selectedMeetingPoint}
-          onChange={(value) => {setSelectedMeetingPoint(value); setCheckedYoungs([])}}
+          onChange={(value) => {
+            setSelectedMeetingPoint(value);
+            setCheckedYoungs([]);
+          }}
           placeholder="Choisir un point de rassemblement"
           renderOption={(option) => {
-            const numOfYoung = youngs.filter((e) => {return e.meetingPointId === option.value._id && e.sessionPhase1Id === selectedLigne.sessionId}).length;
+            const numOfYoung = youngs.filter((e) => {
+              return e.meetingPointId === option.value._id && e.sessionPhase1Id === selectedLigne.sessionId;
+            }).length;
             const total = selectedLigne?.youngCapacity || 0;
             return (
               <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
@@ -111,15 +122,19 @@ const From = ({ youngs, allLines, isDirty, selectedMeetingPoint, setSelectedMeet
       </div>
       <div className={`flex flex-col overflow-y-scroll justify-start items-center bg-white rounded shadow-xl w-full max-h-full mt-1 p-3`}>
         <div className="flex w-full gap-3 items-center border-b mb-2 px-1 py-2 bg-white">
-          {!isDirty ? <input
-            className="accent-snu-purple-800"
-            type="checkbox"
-            checked={youngsFilter.length > 0 && youngsFilter.every((young) => checkedYoungs.find((e) => e._id === young._id))}
-            onChange={() => {
-              if (checkedYoungs?.length > 0) setCheckedYoungs([]);
-              else setCheckedYoungs(youngsFilter);
-            }}
-          /> : <></>}
+          {!isDirty ? (
+            <input
+              className="accent-snu-purple-800"
+              type="checkbox"
+              checked={youngsFilter.length > 0 && youngsFilter.every((young) => checkedYoungs.find((e) => e._id === young._id))}
+              onChange={() => {
+                if (checkedYoungs?.length > 0) setCheckedYoungs([]);
+                else setCheckedYoungs(youngsFilter);
+              }}
+            />
+          ) : (
+            <></>
+          )}
           <p className="text-xs text-gray-400">
             {isDirty ? `${checkedYoungs?.length} volontaire(s) déplacé(s) ` : `${checkedYoungs?.length}/${youngsFilter.length} volontaire(s) sélectioné(s)`}
           </p>
