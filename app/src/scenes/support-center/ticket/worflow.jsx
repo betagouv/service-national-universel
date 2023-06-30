@@ -110,19 +110,19 @@ export const step2Question = {
   },
   PHASE_1_DEPARTURE: {
     parentId: "QUESTION",
-    id: "PHASE_1",
+    id: "PHASE_1_DEPARTURE",
     label: "Phase 1 - Mon départ en séjour",
     tags: ["TAG_phase_1"],
   },
   PHASE_1_RETURN: {
     parentId: "QUESTION",
-    id: "PHASE_1",
+    id: "PHASE_1_RETURN",
     label: "Phase 1 - Mon retour de séjour",
     tags: ["TAG_phase_1"],
   },
   PHASE_1_PDR_CHANGE: {
     parentId: "QUESTION",
-    id: "PHASE_1",
+    id: "PHASE_1_PDR_CHANGE",
     label: "Phase 1 - Changer de point de rassemblement",
     tags: ["TAG_phase_1"],
   },
