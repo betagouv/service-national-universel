@@ -40,7 +40,6 @@ const ChangeYoungs = () => {
           <MainSelect
             options={cohortList}
             value={cohort}
-            disabled={user.role !== ROLES.ADMIN && user.subRole !== "god"}
             onChange={(e) => {
               setCohort(e);
               history.replace({ search: `?cohort=${e}` });
@@ -229,9 +228,8 @@ const ChangeYoung = ({ cohort }) => {
           <button
             disabled={!selectedPDRFrom || !selectedPDRTo}
             type="button"
-            className={`${
-              unauthorized || !checkedYoungs || !checkedYoungs[0] || !selectedPDRTo || !selectedPDRFrom ? "cursor-not-allowed opacity-50 text-gray-300" : "text-snu-purple-800"
-            } flex flex-col items-center justify-center`}
+            className={`${unauthorized || !checkedYoungs || !checkedYoungs[0] || !selectedPDRTo || !selectedPDRFrom ? "cursor-not-allowed opacity-50 text-gray-300" : "text-snu-purple-800"
+              } flex flex-col items-center justify-center`}
             onClick={() => move()}>
             <IoArrowForwardCircleOutline className="text-5xl" />
             {unauthorized || !checkedYoungs || !checkedYoungs[0] || !selectedPDRTo || !selectedPDRFrom ? null : <span className="text-sm">cliquer pour déplacer</span>}

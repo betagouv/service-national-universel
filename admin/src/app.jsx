@@ -224,7 +224,7 @@ const Home = () => {
             <RestrictedRoute path="/equipe" component={Team} />
             <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
             {/* Plan de transport */}
-            {user?.subRole === "god" && <RestrictedRoute path="/edit-transport" component={EditTransport} />}
+            {user?.role === "admin" && <RestrictedRoute path="/edit-transport" component={EditTransport} />}
             {/* Table de répartition */}
             <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
             {/* Ligne de bus */}

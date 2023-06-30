@@ -15,7 +15,7 @@ const { ERRORS, updateSeatsTakenInBusLine } = require("../../utils");
 
 router.post("/youngs/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (req.user.role !== "admin" || req.user.subRole !== "god") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
+    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
     const { ligneIds, cohort } = req.body;
     const youngs = await YoungModel.find({ ligneId: { $in: [...ligneIds] } }, "_id firstName lastName ligneId meetingPointId cohort status sessionPhase1Id cohensioncenterId");
     if (!youngs || !youngs.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -34,7 +34,7 @@ router.post("/youngs/", passport.authenticate("referent", { session: false, fail
 // todo : put it in the correct controller
 router.post("/meetingPoints", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (req.user.role !== "admin" || req.user.subRole !== "god") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
+    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
     let meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: [...req.body] } });
     if (!meetingPoints || !meetingPoints.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     res.status(200).send({ ok: true, data: meetingPoints });
@@ -46,7 +46,7 @@ router.post("/meetingPoints", passport.authenticate("referent", { session: false
 
 router.post("/saveYoungs", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (req.user.role !== "admin" || req.user.subRole !== "god") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
+    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
     const youngs = req.body.data;
     const ids = youngs.map((e) => e._id);
     const busFrom = await LigneBusModel.findById(req.body.busFrom);
@@ -72,7 +72,7 @@ router.post("/saveYoungs", passport.authenticate("referent", { session: false, f
 
 router.get("/allLines/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (req.user.role !== "admin" || req.user.subRole !== "god") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
+    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
     const { cohort } = req.params;
     let lines = await LigneBusModel.find({ cohort: cohort }, "_id busId centerId youngCapacity meetingPointsIds sessionId").lean();
     if (!lines) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

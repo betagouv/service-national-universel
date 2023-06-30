@@ -363,7 +363,7 @@ router.post("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (req.user.role !== "admin" || req.user.subRole !== "god") return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role !== "admin") return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const { id, meetingPointId } = value;
 
     const ligne = await LigneBusModel.findById(id);
