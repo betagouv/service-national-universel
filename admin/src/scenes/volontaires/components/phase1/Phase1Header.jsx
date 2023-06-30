@@ -3,7 +3,7 @@ import DocumentSelect from "../DocumentSelect";
 import Badge from "../../../../components/Badge";
 import downloadPDF from "../../../../utils/download-pdf";
 import { toastr } from "react-redux-toastr";
-import { ROLES, YOUNG_STATUS_COLORS, translate, translatePhase1 } from "snu-lib";
+import { ROLES, YOUNG_STATUS_COLORS, canDownloadYoungDocuments, translate, translatePhase1 } from "snu-lib";
 import api from "../../../../services/api";
 import Pencil from "../../../../assets/icons/Pencil";
 import { capture } from "../../../../sentry";
@@ -97,7 +97,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
         <div className="flex items-center justify-center gap-2">
           <div className="text-lg font-medium leading-4">Séjour de cohésion</div>
           <Badge minify text={translatePhase1(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />
-          {canUserDownloadConvocation() && (
+          {canUserDownloadConvocation() && canDownloadYoungDocuments(user, young) && (
             <DocumentSelect
               title="Convocation"
               onClickPdf={handleDownloadConvocationPdfFile}
