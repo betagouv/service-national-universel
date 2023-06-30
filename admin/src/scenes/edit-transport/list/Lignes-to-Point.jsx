@@ -35,6 +35,7 @@ export default function LignesToPoint({ ligne, setDirtyMeetingPointIds, cohort }
 
   React.useEffect(() => {
     getMeetingPoints();
+    return () => setValues([]);
   }, [ligne]);
 
   if (loading) return <div className="text-xs text-gray-400 animate-pulse">Chargement...</div>;
@@ -60,6 +61,7 @@ const LigneToPoint = ({ meetingPoint, ligneId, setDirtyMeetingPointIds, ligne, c
 
   React.useEffect(() => {
     setDefaultMeetingPoint(meetingPoint);
+    setTempMeetingPoint(meetingPoint);
   }, [meetingPoint]);
 
   React.useEffect(() => {
@@ -72,7 +74,6 @@ const LigneToPoint = ({ meetingPoint, ligneId, setDirtyMeetingPointIds, ligne, c
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
       }
-      console.log("dataforcheck", reponseCheck)
       setDataForCheck(reponseCheck);
     } catch (e) {
       capture(e);
@@ -151,7 +152,7 @@ const LigneToPoint = ({ meetingPoint, ligneId, setDirtyMeetingPointIds, ligne, c
             <a className="ml-6 cursor-pointer hover:underline" href={`/point-de-rassemblement/${tempMeetingPoint.meetingPointId.toString()}`} target="_blank" rel="noreferrer">
               {tempMeetingPoint.meetingPoint.name.replace(/PDR\s*-/, "")}
             </a>
-            <TooltipAddress meetingPt={tempMeetingPoint.meetingPoint} handleChange={handleChange}>
+            <TooltipAddress meetingPt={tempMeetingPoint.meetingPoint}>
               <IoLocationOutline />
             </TooltipAddress>
           </div>
