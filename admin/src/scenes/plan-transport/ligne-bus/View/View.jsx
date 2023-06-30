@@ -139,7 +139,7 @@ export default function View(props) {
     {
       key: "exportData",
       action: async () => {
-        await exportLigneBusJeune(cohort.name, data.busId, "total", data.team);
+        await exportLigneBusJeune(cohort.name, data, "total", data.team);
       },
       render: (
         <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
