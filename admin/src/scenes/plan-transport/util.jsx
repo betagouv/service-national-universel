@@ -258,22 +258,11 @@ async function getAllResults(index, query) {
 
 export async function exportLigneBusJeune(cohort, ligne, travel, team) {
   try {
-    const filter = {
-      busId: [ligne],
-    };
-
-    const resultat = await API.post("/elasticsearch/plandetransport/export", {
-      filters: filter,
-      exportFields: "*",
-    });
-    const data = resultat.data[0];
-    if (!data) return toastr.error("Aucune ligne de bus n'a été trouvée");
-
-    const youngs = await API.post(`/elasticsearch/young/in-bus/${String(data._id)}/export`, {
+    const youngs = await API.post(`/elasticsearch/young/in-bus/${String(ligne._id)}/export`, {
       filters: {},
       exportFields: "*",
     });
-    if (!youngs) return toastr.error("Aucun volontaire affecté n'a été trouvé");
+    if (!youngs?.data?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
 
     const session = await API.get(`/session-phase1/${youngs.data[0].sessionPhase1Id}`);
     if (!session.ok) return toastr.error("Une erreur est survenue");
@@ -281,13 +270,13 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
     const headcenter = await API.get(`/referent/${session.data.headCenterId}`);
     if (!headcenter.ok) return toastr.error("Une erreur est survenue");
 
-    const refDep = await API.get(`/department-service/${data.centerDepartment}`);
+    const refDep = await API.get(`/department-service/${ligne.centerDetail.department}`);
     if (!refDep.ok) return toastr.error("Une erreur est survenue");
 
     const contactRefDep = refDep.data.contacts.filter((item) => item.cohort === cohort);
 
     const mappy = (value, field) => {
-      return data.pointDeRassemblements.filter((point) => point.meetingPointId === value.meetingPointId)[0][field];
+      return ligne.meetingsPointsDetail.filter((point) => point.meetingPointId === value.meetingPointId)[0][field];
     };
 
     const forthTeam = team.filter((item) => item.forth === true);
@@ -305,11 +294,11 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
 
     youngs.data.map((item) =>
       excel[0].data.push({
-        "Numéro de ligne": ligne,
+        "Numéro de ligne": ligne.busId,
         "Adresse du point de RDV": mappy(item, "address") + ", " + mappy(item, "zip") + ", " + mappy(item, "city"),
         "Heure de convocation": mappy(item, "meetingHour"),
         "Heure de départ du bus": mappy(item, "departureHour"),
-        "Heure d'arrivée au centre": data.centerArrivalTime,
+        "Heure d'arrivée au centre": ligne.centerArrivalTime,
         "Contact d'urgence SNU": "01 55 55 13 27",
         "Mail SNU": "signal-snu@jeunesse-sports.gouv.fr ",
         "Contact d'urgence Travel Planet": "09 72 56 62 04",
@@ -356,7 +345,7 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
       excel[1].data.push({
         "Numéro de ligne": ligne,
         "Adresse du point de RDV": mappy(item, "address") + ", " + mappy(item, "zip") + ", " + mappy(item, "city"),
-        "Heure de départ du bus": data.centerDepartureTime,
+        "Heure de départ du bus": ligne.centerDepartureTime,
         "Heure d'arrivée au PDR": mappy(item, "returnHour"),
         "Contact d'urgence SNU": "01 55 55 13 27",
         "Mail SNU": "signal-snu@jeunesse-sports.gouv.fr ",
@@ -401,13 +390,13 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
     });
     switch (travel) {
       case "Aller":
-        generateExcelWorkbook([excel[0]], `Fiche_Convoyeur_ligne_${data.busId}`);
+        generateExcelWorkbook([excel[0]], `Fiche_Convoyeur_ligne_${ligne.busId}`);
         break;
       case "Retour":
-        generateExcelWorkbook([excel[1]], `Fiche_Convoyeur_ligne_${data.busId}`);
+        generateExcelWorkbook([excel[1]], `Fiche_Convoyeur_ligne_${ligne.busId}`);
         break;
       default:
-        generateExcelWorkbook(excel, `Fiche_Convoyeur_ligne_${data.busId}`);
+        generateExcelWorkbook(excel, `Fiche_Convoyeur_ligne_${ligne.busId}`);
     }
   } catch (e) {
     console.log(e);

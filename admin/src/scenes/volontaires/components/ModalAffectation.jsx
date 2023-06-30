@@ -137,7 +137,6 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
     //setLoadingPdr(loadingPdr + 1);
     setLoadingPdr(true);
     try {
-      console.log(session);
       let url = "/point-de-rassemblement/ligneToPoint";
       url += "/" + young.cohort + "/" + session.cohesionCenterId;
       url += "?offset=" + currentPage * LIST_PAGE_LIMIT + "&limit=" + LIST_PAGE_LIMIT;
