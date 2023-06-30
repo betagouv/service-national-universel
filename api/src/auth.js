@@ -163,10 +163,12 @@ class Auth {
         user.set({ token2FA, token2FAExpires: Date.now() + 1000 * 60 * 10 });
         await user.save();
 
-        await sendTemplate(SENDINBLUE_TEMPLATES.SIGNIN_2FA, {
-          emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
-          params: { token2FA },
-        });
+        if (config.ENVIRONMENT !== "development") {
+          await sendTemplate(SENDINBLUE_TEMPLATES.SIGNIN_2FA, {
+            emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
+            params: { token2FA },
+          });
+        }
 
         return res.status(200).send({
           ok: true,
@@ -199,11 +201,10 @@ class Auth {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), token_2fa: Joi.string().required() }).unknown().validate(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     const { email, token_2fa } = value;
-    const user = await this.model.findOne({
-      email,
-      token2FA: token_2fa,
-      token2FAExpires: { $gt: Date.now() },
-    });
+    let user;
+    if (config.ENVIRONMENT === "development") user = await this.model.findOne({ email });
+    else user = await this.model.findOne({ email, token2FA: token_2fa, token2FAExpires: { $gt: Date.now() } });
+
     if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
 
     const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
