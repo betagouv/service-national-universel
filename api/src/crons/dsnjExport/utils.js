@@ -181,6 +181,7 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
       meetingPoint = { bus, ligneToPoint };
     }
     const session = sessions.find(({ _id }) => _id.toString() === sessionPhase1Id);
+    const startDate = getDepartureDate(young, session, cohort, meetingPoint);
 
     const formattedYoung = {
       "Identifiant technique": _id.toString(),
@@ -202,7 +203,7 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
       "Statut professionnel": situationTranslations[situation] || situation,
       "ID du centre": cohesionCenter ? cohesionCenter._id.toString() : "",
       "Libellé du centre": cohesionCenter ? cohesionCenter.name : "",
-      "Date début session": getDepartureDate(young, session, cohort, meetingPoint).toLocaleDateString(),
+      "Date début session": new Intl.DateTimeFormat("fr-FR").format(startDate),
       "Validation séjour (Validation phase 1)": afterSession ? (statusPhase1 === "DONE" ? "Oui" : "Non") : "null",
     };
 
