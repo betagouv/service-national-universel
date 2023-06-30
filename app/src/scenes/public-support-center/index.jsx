@@ -12,6 +12,7 @@ import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 
 import ZammoodForm from "./form";
+import ModalForm from "../../components/modals/ModalForm";
 
 const articles = [
   {
@@ -178,6 +179,8 @@ const KnowledgeBaseArticleCard = ({ _id, position, title, slug, path, className 
 export default function Index(props) {
   const young = useSelector((state) => state.Auth.young);
   const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
   const [successMessage, setSuccessMessage] = useState("");
   const fromPage = new URLSearchParams(props.location.search).get("from");
 
@@ -232,10 +235,12 @@ export default function Index(props) {
                 onClick={() => {
                   plausibleEvent("Besoin d'aide - Contacter quelqu'un");
                   setOpen(true);
+                  setIsOpen(true);
                 }}>
                 Contacter quelqu&apos;un
               </LinkButton>
             </div>
+            <ModalForm isOpen={isOpen} onClose={() => setIsOpen(false)} />
           </div>
         </div>
         {open && <ZammoodForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} fromPage={fromPage} />}

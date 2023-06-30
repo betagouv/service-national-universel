@@ -64,6 +64,12 @@ export const step1 = {
 };
 
 export const step2Technical = {
+  CONNECTION: {
+    parentId: "TECHNICAL",
+    id: "CONNECTION",
+    label: "Pour me connecter",
+    tags: ["TAG_probleme_connexion"],
+  },
   DOWNLOAD: {
     parentId: "TECHNICAL",
     id: "DOWNLOAD",
@@ -93,13 +99,31 @@ export const step2Question = {
   PHASE_1: {
     parentId: "QUESTION",
     id: "PHASE_1",
-    label: "Phase 1 - Séjour de cohésion",
+    label: "Phase 1 - Pendant mon séjour de cohésion",
     tags: ["TAG_phase_1"],
   },
   PHASE_1_WITHDRAWAL: {
     parentId: "QUESTION",
     id: "PHASE_1_WITHDRAWAL",
     label: "Phase 1 - Changer de séjour/se désister",
+    tags: ["TAG_phase_1"],
+  },
+  PHASE_1_DEPARTURE: {
+    parentId: "QUESTION",
+    id: "PHASE_1",
+    label: "Phase 1 - Mon départ en séjour",
+    tags: ["TAG_phase_1"],
+  },
+  PHASE_1_RETURN: {
+    parentId: "QUESTION",
+    id: "PHASE_1",
+    label: "Phase 1 - Mon retour de séjour",
+    tags: ["TAG_phase_1"],
+  },
+  PHASE_1_PDR_CHANGE: {
+    parentId: "QUESTION",
+    id: "PHASE_1",
+    label: "Phase 1 - Changer de point de rassemblement",
     tags: ["TAG_phase_1"],
   },
   PHASE_2: {
@@ -119,12 +143,6 @@ export const step2Question = {
     id: "PHASE_3",
     label: "Phase 3 - L'engagement",
     tags: ["TAG_phase_3"],
-  },
-  OTHER: {
-    parentId: "QUESTION",
-    id: "OTHER",
-    label: "Autre",
-    tags: ["TAG_autre"],
   },
 };
 
