@@ -33,7 +33,7 @@ const {
 } = require("../config");
 const { YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, SUB_ROLES } = require("snu-lib");
 const { capture } = require("../sentry");
-const { getCohortValidationDate, getCohortDaysToValidate } = require("./cohort");
+const { getCohortDateInfo } = require("./cohort");
 
 // Timeout a promise in ms
 const timeout = (prom, time) => {
@@ -611,8 +611,13 @@ async function addingDayToDate(days, dateStart) {
 
 async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) {
   const dateStart = sessionPhase1.dateStart;
-  const { daysToValidate: daysToValidate, daysToValidateForTerminalGrade: daysToValidateForTerminalGrade } = await getCohortDaysToValidate(sessionPhase1.cohort);
-  const { validationDate: dateDeValidation, validationDateForTerminaleGrade: dateDeValidationTerminale } = await getCohortValidationDate(sessionPhase1.cohort);
+  const {
+    daysToValidate: daysToValidate,
+    daysToValidateForTerminalGrade: daysToValidateForTerminalGrade,
+    validationDate: dateDeValidation,
+    validationDateForTerminaleGrade: dateDeValidationTerminale,
+  } = await getCohortDateInfo(sessionPhase1.cohort);
+
   if (!dateDeValidation || !dateDeValidationTerminale) {
     throw new Error("❌ validationDate & validationDateForTerminaleGrade missing on cohort " + sessionPhase1.cohort);
   }
@@ -674,9 +679,10 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
 async function updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithDays, user) {
   try {
     const now = new Date();
-
+    const validationDate = new Date(validationDateWithDays);
     // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
-    const isValidationDatePassed = now >= validationDateWithDays;
+    const isValidationDatePassed = now >= validationDate;
+    console.log(isValidationDatePassed, now, validationDateWithDays);
     // Cette constante nous permet de vérifier si un jeune était présent au début du séjour (exception pour cette cohorte : pas besoin de JDM)(basé sur son grade)
     const isCohesionStayValid = young.cohesionStayPresence === "true";
     // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
@@ -701,6 +707,7 @@ async function updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithD
         }
       }
     }
+
     await young.save({ fromUser: user });
   } catch (e) {
     console.log(e);

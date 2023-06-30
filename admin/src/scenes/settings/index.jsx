@@ -21,7 +21,7 @@ import { settings, uselessSettings } from "./utils";
 import { environment } from "../../config";
 import { addDays, formatISO, format } from "date-fns";
 import dayjs from "dayjs";
-import ValidationDateSelectorInput from "../../components/ui/forms/dateForm/ValidationDateSelectorInput";
+import NumberInput from "../../components/ui/forms/NumberInput";
 
 const cohortList = [
   { label: "Février 2023 - C", value: "Février 2023 - C" },
@@ -810,12 +810,12 @@ export default function Settings() {
                     </div>
                     {data.name === "Juillet 2023" ? (
                       <>
-                        <ValidationDateSelectorInput
+                        <NumberInput
                           days={data.daysToValidate}
                           label={"Nombre de jour pour validation(non Terminales)"}
                           onChange={(e) => setData({ ...data, daysToValidate: e })}
                         />
-                        <ValidationDateSelectorInput
+                        <NumberInput
                           days={data.daysToValidateForTerminalGrade}
                           label={"Nombre de jour pour validation(Terminales)"}
                           onChange={(e) => setData({ ...data, daysToValidateForTerminalGrade: e })}

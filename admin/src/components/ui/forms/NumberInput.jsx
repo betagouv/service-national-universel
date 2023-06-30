@@ -1,9 +1,9 @@
 import React from "react";
 
-export default function ValidationDateSelector({ days, label, onChange }) {
+export default function NumberInput({ days, label, onChange }) {
   const handleInputChange = (event) => {
-    event.persist(); // Persist the synthetic event
-    onChange(event.target.value); // Access the event properties here
+    event.persist();
+    onChange(event.target.value);
   };
 
   return (
