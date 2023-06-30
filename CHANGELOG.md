@@ -1,3 +1,26 @@
+# [1.304.0](https://github.com/betagouv/service-national-universel/compare/v1.303.0...v1.304.0) (2023-06-30)
+
+
+### Bug Fixes
+
+* **admin:** download convocation ([3693768](https://github.com/betagouv/service-national-universel/commit/36937686d637070614c7da0188ad68738b215c8e))
+* **admin:** export convoyeur ([731c1f0](https://github.com/betagouv/service-national-universel/commit/731c1f04a02df999ad0143459465e73fc8c6ca2e))
+* **admin:** fix du bouton "Ajouter un encadrant" ([dc2426b](https://github.com/betagouv/service-national-universel/commit/dc2426b1c1eaa48579de488c292f3c80c531a57b))
+* **admin:** nission equivalence frequency field name ([2bc0630](https://github.com/betagouv/service-national-universel/commit/2bc06301c7b96c7f9f5b7121ae3e0504aaa86a1f))
+* **api:** session date in dsnj export ([9f7b527](https://github.com/betagouv/service-national-universel/commit/9f7b5277bad43f46705e463212db3389a6a8f5df))
+* quick win - retour gab 3006 ([#2770](https://github.com/betagouv/service-national-universel/issues/2770)) ([2199fcf](https://github.com/betagouv/service-national-universel/commit/2199fcf5d8b6e2905f6b2a9264892a0d05a06acb))
+* **api:** add noCursorTimeout flag to missionOutdated cron ([3d1fa89](https://github.com/betagouv/service-national-universel/commit/3d1fa89e45a2ed785a6ae20a1a78d564cb00621f))
+
+
+### Features
+
+* **app:** besoin d'aide modal + new questions([#2772](https://github.com/betagouv/service-national-universel/issues/2772)) ([00a16ba](https://github.com/betagouv/service-national-universel/commit/00a16bae713e3dcb7a8f4a1f77e15b5123a911d1))
+
+
+### Reverts
+
+* Revert "fix(api): Send 401 if signin_token not valid" ([e1bca7a](https://github.com/betagouv/service-national-universel/commit/e1bca7a01e20e610018fb52b08f6cdc75c903b57))
+
 # [1.303.0](https://github.com/betagouv/service-national-universel/compare/v1.302.0...v1.303.0) (2023-06-29)
 
 
