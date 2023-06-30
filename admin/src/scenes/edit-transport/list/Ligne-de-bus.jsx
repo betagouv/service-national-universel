@@ -76,9 +76,8 @@ export default function LigneDeBus({ hit, cohort }) {
     try {
       const response = await api.post(`/ligne-de-bus/${ligneDeBus._id}/point-de-rassemblement/${meetingPoint._id}`);
       if (response.ok) {
-        setTempLine(response.data.ligne);
+        setTempLine(response.data);
         toastr.success("Le point de rencontre a été ajouté à la ligne.");
-        
       } else toastr.error("Oups, une erreur est survenue lors de l'ajout du point de rencontre à la ligne.");
     } catch (e) {
       capture(e);
@@ -189,11 +188,7 @@ export default function LigneDeBus({ hit, cohort }) {
           </div>
         </td>
         <td>
-          <div className="h-full w-full">
-            <TooltipCapacity youngCapacity={hit.youngCapacity} youngSeatsTaken={hit.youngSeatsTaken} followerCapacity={hit.followerCapacity}>
-              <div className="opacity-75">{hit.youngSeatsTaken}</div>
-            </TooltipCapacity>
-          </div>
+          <div className="text-sm flex-1 whitespace-nowrap opacity-75">{hit.youngSeatsTaken}</div>
         </td>
         <td>
           <input
