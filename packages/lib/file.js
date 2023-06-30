@@ -17,7 +17,6 @@ function download(file, fileName) {
  * @param [File]
  * @returns FormData
  **/
-
 function createFormDataForFileUpload(arr, properties) {
   let files = arr.filter((e) => typeof e === "object");
   let formData = new FormData();
@@ -25,9 +24,9 @@ function createFormDataForFileUpload(arr, properties) {
   // File object name property is read-only, so we need to change it with Object.defineProperty
   for (let file of files) {
     // eslint-disable-next-line no-control-regex
-    const name = file.name.replace(/['/:*?"<>|\x00-\x1F\x80-\x9F]/g, "_").trim();
-    Object.defineProperty(file, "name", { value: encodeURIComponent(name) });
-    formData.append(file.name, file);
+    const name = encodeURIComponent(file.name.replace(/['/:*?"<>|\x00-\x1F\x80-\x9F]/g, "_").trim());
+    Object.defineProperty(file, "name", { value: name });
+    formData.append("file", file, name);
   }
 
   const names = files.map((e) => e.name || e);
