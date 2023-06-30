@@ -91,7 +91,7 @@ export default function ListBus(props) {
         },
         phase1Affectation: {
           "ID centre": center?._id?.toString() || "",
-          "Code centre": center?.code2022 || "",
+          "Code centre (2022)": center?.code2022 || "",
           "Nom du centre": center?.name || "",
           "Adresse du centre": center?.address || "",
           "Ville du centre": center?.city || "",
@@ -102,7 +102,7 @@ export default function ListBus(props) {
           "ID du transport": b?.busId || "",
           "ID du point de rassemblement": PDR?.code || "",
           "Nom du point de rassemblement": PDR?.name || "",
-          "Adresse du point de rassemblement": PDR?.address || "",
+          "Adresse point de rassemblement": PDR?.address || "",
           "Ville du point de rassemblement": PDR?.city || "",
           "Département du point de rassemblement": PDR?.department || "",
           "Région du point de rassemblement": PDR?.region || "",
