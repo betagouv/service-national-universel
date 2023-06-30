@@ -67,46 +67,6 @@ export default function ListPresence() {
     user.role === ROLES.ADMIN ? { title: "Code", name: "code2022", missingLabel: "Non renseignée", parentGroup: "Centre" } : null,
   ].filter((e) => e);
 
-  const exportField = async (all) => {
-    if (selectedFilters?.cohorts?.filter?.length && selectedFilters?.cohorts?.filter?.every((value) => !COHORTS_BEFORE_JULY_2023.includes(value))) {
-      return all?.map((data) => {
-        return {
-          Id: data._id.toString(),
-          "Code du centre": data.code2022,
-          Nom: data.name,
-          "Présence à l’arrivée - Présent": data.presenceOui || 0,
-          "Présence à l’arrivée - Absent": data.presenceNon || 0,
-          "Présence à l’arrivée - Non renseigné": data.presenceNR || 0,
-          "Présence à l’arrivée - Non renseigné (%)": (Math.round((data.presenceNR / data.total) * 100) || 0) + "%",
-          Départ: data.departOui || 0,
-          "Fiche sanitaire - Renseignée": data.sanitaryFieldOui || 0,
-          "Fiche sanitaire - Non renseignée": data.sanitaryFieldNon + data.sanitaryFieldNR || 0,
-          "Fiche sanitaire - Non renseignée (%)": (Math.round(((data.sanitaryFieldNon + data.sanitaryFieldNR) / data.total) * 100) || 0) + "%",
-          "Total des jeunes": data.total || 0,
-        };
-      });
-    } else
-      return all?.map((data) => {
-        return {
-          Id: data._id.toString(),
-          "Code du centre": data.code2022,
-          Nom: data.name,
-          "Présence JDM - Présent": data.presenceJDMOui || 0,
-          "Présence JDM - Absent": data.presenceJDMNon || 0,
-          "Présence JDM - Non renseigné": data.presenceJDMNR || 0,
-          "Présence JDM - Non renseigné (%)": (Math.round((data.presenceJDMNR / data.total) * 100) || 0) + "%",
-          "Présence à l’arrivée - Présent": data.presenceOui || 0,
-          "Présence à l’arrivée - Absent": data.presenceNon || 0,
-          "Présence à l’arrivée - Non renseigné": data.presenceNR || 0,
-          "Présence à l’arrivée - Non renseigné (%)": (Math.round((data.presenceNR / data.total) * 100) || 0) + "%",
-          Départ: data.departOui || 0,
-          "Fiche sanitaire - Renseignée": data.sanitaryFieldOui || 0,
-          "Fiche sanitaire - Non renseignée": data.sanitaryFieldNon + data.sanitaryFieldNR || 0,
-          "Fiche sanitaire - Non renseignée (%)": (Math.round(((data.sanitaryFieldNon + data.sanitaryFieldNR) / data.total) * 100) || 0) + "%",
-          "Total des jeunes": data.total || 0,
-        };
-      });
-  };
   return (
     <div className="flex w-full flex-1 flex-col gap-8 p-8">
       <Title>Centres</Title>
@@ -129,7 +89,28 @@ export default function ListPresence() {
               route="/elasticsearch/cohesioncenter/presence/export"
               filters={filterArray}
               exportTitle="Centres_de_cohesion"
-              transform={exportField}
+              transform={async (all) => {
+                return all?.map((data) => {
+                  return {
+                    Id: data._id.toString(),
+                    "Code du centre": data.code2022,
+                    Nom: data.name,
+                    "Présence JDM - Présent": data.presenceJDMOui || 0,
+                    "Présence JDM - Absent": data.presenceJDMNon || 0,
+                    "Présence JDM - Non renseigné": data.presenceJDMNR || 0,
+                    "Présence JDM - Non renseigné (%)": (Math.round((data.presenceJDMNR / data.total) * 100) || 0) + "%",
+                    "Présence à l’arrivée - Présent": data.presenceOui || 0,
+                    "Présence à l’arrivée - Absent": data.presenceNon || 0,
+                    "Présence à l’arrivée - Non renseigné": data.presenceNR || 0,
+                    "Présence à l’arrivée - Non renseigné (%)": (Math.round((data.presenceNR / data.total) * 100) || 0) + "%",
+                    Départ: data.departOui || 0,
+                    "Fiche sanitaire - Renseignée": data.sanitaryFieldOui || 0,
+                    "Fiche sanitaire - Non renseignée": data.sanitaryFieldNon + data.sanitaryFieldNR || 0,
+                    "Fiche sanitaire - Non renseignée (%)": (Math.round(((data.sanitaryFieldNon + data.sanitaryFieldNR) / data.total) * 100) || 0) + "%",
+                    "Total des jeunes": data.total || 0,
+                  };
+                });
+              }}
               selectedFilters={selectedFilters}
               icon={<BsDownload className="text-gray-400" />}
               customCss={{
