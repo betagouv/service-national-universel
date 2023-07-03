@@ -1,6 +1,8 @@
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import React from "react";
 import { getDepartureDate, getMeetingHour, getReturnDate, getReturnHour } from "snu-lib";
+dayjs.extend(utc);
 
 export default function MeetingInfo({ young, session, cohort, selectedPdr }) {
   const departureDate = getDepartureDate(young, session, cohort, selectedPdr);
