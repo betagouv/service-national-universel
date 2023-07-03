@@ -15,6 +15,7 @@ const {
   canEditLigneBusGeneralInfo,
   canEditLigneBusCenter,
   canEditLigneBusPointDeRassemblement,
+  isBusEditionOpen,
   ROLES,
   canViewPatchesHistory,
   formatStringLongDate,
@@ -77,6 +78,7 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
     const { error, value } = Joi.object({
       id: Joi.string().required(),
       busId: Joi.string().required(),
+      cohort: Joi.object(),
       departuredDate: Joi.date().required(),
       returnDate: Joi.date().required(),
       youngCapacity: Joi.number().required(),
@@ -90,9 +92,14 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
     }).validate({ ...req.params, ...req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canEditLigneBusGeneralInfo(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    let { id, busId, departuredDate, returnDate, youngCapacity, totalCapacity, followerCapacity, travelTime, lunchBreak, lunchBreakReturn, delayedForth, delayedBack } = value;
+    let { id, busId, cohort, departuredDate, returnDate, youngCapacity, totalCapacity, followerCapacity, travelTime, lunchBreak, lunchBreakReturn, delayedForth, delayedBack } =
+      value;
 
+    if (req.user.role === "transporter") {
+      if (!isBusEditionOpen(req.user, cohort)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (!canEditLigneBusGeneralInfo(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -153,6 +160,7 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
+      cohort: Joi.object(),
       role: Joi.string().required(),
       idTeam: Joi.string(),
       lastname: Joi.string().required(),
@@ -165,7 +173,11 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
     }).validate({ ...req.params, ...req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canEditLigneBusTeam(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role === "transporter") {
+      if (!isBusEditionOpen(req.user, value.cohort)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (!canEditLigneBusTeam(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const ligne = await LigneBusModel.findById(value.id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -210,6 +222,7 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
+      cohort: Joi.object(),
       idTeam: Joi.string().required(),
       role: Joi.string().required(),
       lastname: Joi.string().required(),
@@ -224,6 +237,12 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+    if (req.user.role === "transporter") {
+      if (!isBusEditionOpen(req.user, value.cohort)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (!canEditLigneBusTeam(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const ligne = await LigneBusModel.findById(value.id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -248,12 +267,18 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
       id: Joi.string().required(),
       centerArrivalTime: Joi.string().required(),
       centerDepartureTime: Joi.string().required(),
+      cohort: Joi.object(),
     }).validate({ ...req.params, ...req.body });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canEditLigneBusCenter(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    let { id, centerArrivalTime, centerDepartureTime } = value;
+    let { id, centerArrivalTime, centerDepartureTime, cohort } = value;
+
+    if (req.user.role === "transporter") {
+      if (!isBusEditionOpen(req.user, cohort)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (!canEditLigneBusCenter(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -280,6 +305,7 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
+      cohort: Joi.object(),
       transportType: Joi.string().required(),
       meetingHour: Joi.string().required(),
       busArrivalHour: Joi.string().required(),
@@ -290,10 +316,13 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
     }).validate({ ...req.params, ...req.body });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    const { id, cohort, transportType, meetingHour, busArrivalHour, departureHour, returnHour, meetingPointId, newMeetingPointId } = value;
 
-    if (!canEditLigneBusPointDeRassemblement(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const { id, transportType, meetingHour, busArrivalHour, departureHour, returnHour, meetingPointId, newMeetingPointId } = value;
-
+    if (req.user.role === "transporter") {
+      if (!isBusEditionOpen(req.user, cohort)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (!canEditLigneBusPointDeRassemblement(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
