@@ -907,6 +907,9 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     const regionListToNotify = pdrs.map((pdr) => pdr.region);
     regionListToNotify.push(center.region);
 
+    //on recherche les refDep des 2 departments avec les bon subRole
+    //ET les ref regionnaux des 2 regions avec les bons subRole
+
     const users = await ReferentModel.find({
       $or: [
         {
@@ -943,14 +946,9 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
 
     const UsersToNotify = [...new Set(users.map((obj) => JSON.stringify(obj)))].map((str) => JSON.parse(str)); 
 
-    console.log(UsersToNotify.length);
-    UsersToNotify.map((item)=>{
-      console.log(item.firstName,item.lastName,item.email);
-    })
-    return;
     // send notification
     await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.NOTIF_REF, {
-      emailTo: uniqueUsersToNotify.map((referent) => ({
+      emailTo: UsersToNotify.map((referent) => ({
         name: `${referent.firstName} ${referent.lastName}`,
         email: referent.email,
       })),
