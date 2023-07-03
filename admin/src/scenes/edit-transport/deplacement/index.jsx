@@ -13,6 +13,7 @@ import { Title } from "../../plan-transport/components/commons";
 import { useHistory } from "react-router-dom";
 import From from "./From";
 import To from "./To";
+import { environment } from "../../../config";
 import { IoArrowForwardCircleOutline } from "react-icons/io5";
 
 const cohortList = [
@@ -171,6 +172,7 @@ const ChangeYoung = ({ cohort }) => {
 
   // revoir la logique? plus simple
   const move = () => {
+    if (environment === "production") return toastr.error("Cette fonctionnalité est désactivée en production.");
     if (unauthorized) return toastr.error("La capacité du bus ne permet pas de faire le transfert");
     if (!checkedYoungs) return;
     if (!checkedYoungs.length) return toastr.error("Aucun jeunes selectionnés");
@@ -223,13 +225,15 @@ const ChangeYoung = ({ cohort }) => {
           setSelectedLigne={setSelectedLigneFrom}
           checkedYoungs={checkedYoungs}
           setCheckedYoungs={setCheckedYoungs}
+          cohort={cohort}
         />
         <div>
           <button
             disabled={!selectedPDRFrom || !selectedPDRTo}
             type="button"
-            className={`${unauthorized || !checkedYoungs || !checkedYoungs[0] || !selectedPDRTo || !selectedPDRFrom ? "cursor-not-allowed opacity-50 text-gray-300" : "text-snu-purple-800"
-              } flex flex-col items-center justify-center`}
+            className={`${
+              unauthorized || !checkedYoungs || !checkedYoungs[0] || !selectedPDRTo || !selectedPDRFrom ? "cursor-not-allowed opacity-50 text-gray-300" : "text-snu-purple-800"
+            } flex flex-col items-center justify-center`}
             onClick={() => move()}>
             <IoArrowForwardCircleOutline className="text-5xl" />
             {unauthorized || !checkedYoungs || !checkedYoungs[0] || !selectedPDRTo || !selectedPDRFrom ? null : <span className="text-sm">cliquer pour déplacer</span>}
@@ -241,6 +245,7 @@ const ChangeYoung = ({ cohort }) => {
           isDirty={isDirty}
           selectedMeetingPoint={selectedPDRTo}
           setSelectedMeetingPoint={setSelectedPDRTo}
+          selectedLigneFrom={selectedLigneFrom}
           selectedLigne={selectedLigneTo}
           setSelectedLigne={setSelectedLigneTo}
         />
