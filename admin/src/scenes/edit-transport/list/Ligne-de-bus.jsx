@@ -9,12 +9,12 @@ registerLocale("fr", fr);
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import SelectTable from "./components/SelectTable";
-import TooltipCapacity from "./components/TooltipCapacity";
 import TooltipCenter from "./components/TooltipCenter";
 import { IoCaretDown, IoCaretForward, IoOpenOutline } from "react-icons/io5";
 import PointDeRassemblement from "./components/PointDeRassemblement";
 import LignesToPoint from "./Lignes-to-Point";
 import { useHistory } from "react-router-dom";
+import { environment } from "../../../config";
 
 export default function LigneDeBus({ hit, cohort }) {
   const [tempLine, setTempLine] = useState(hit);
@@ -22,6 +22,7 @@ export default function LigneDeBus({ hit, cohort }) {
   const [open, setOpen] = useState(false);
   const [dirtyMeetingPointIds, setDirtyMeetingPointIds] = useState([]);
   const history = useHistory();
+  const [youngs, setYoungs] = useState([]);
 
   const handleOpen = () => {
     if (dirtyMeetingPointIds.length > 0) return toastr.warning(`${dirtyMeetingPointIds.length} PDR non enregistré(s).\nEnregistrez ou Annulez avant de refermer la ligne.`);
@@ -38,7 +39,19 @@ export default function LigneDeBus({ hit, cohort }) {
     setIsDirty(false);
   };
 
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const response = await api.post(`/elasticsearch/young/search`, { filters: { cohort: [cohort], ligneId: [hit._id.toString()] } });
+        setYoungs(response.responses[0].hits.hits?.map((e) => e._source) || []);
+      } catch (e) {
+        console.log(e);
+      }
+    })();
+  }, [hit, cohort]);
+
   const save = async (data) => {
+    if (environment === "production") return toastr.error("Cette fonctionnalité est désactivée en production.");
     toastr.info("Sauvegarde en cours...");
     try {
       const promises = [
@@ -73,6 +86,7 @@ export default function LigneDeBus({ hit, cohort }) {
   };
 
   const addLigneToPoint = async ({ ligneDeBus, meetingPoint }) => {
+    if (environment === "production") return toastr.error("Cette fonctionnalité est désactivée en production.");
     try {
       const response = await api.post(`/ligne-de-bus/${ligneDeBus._id}/point-de-rassemblement/${meetingPoint._id}`);
       if (response.ok) {
@@ -189,6 +203,7 @@ export default function LigneDeBus({ hit, cohort }) {
         </td>
         <td>
           <div className="text-sm flex-1 whitespace-nowrap opacity-75">{hit.youngSeatsTaken}</div>
+          <div className="text-sm flex-1 whitespace-nowrap opacity-75">{youngs?.length}</div>
         </td>
         <td>
           <input
@@ -327,7 +342,7 @@ export default function LigneDeBus({ hit, cohort }) {
                   </tr>
                 </thead>
                 <tbody>
-                  <LignesToPoint ligne={tempLine} setDirtyMeetingPointIds={setDirtyMeetingPointIds} cohort={cohort} />
+                  <LignesToPoint ligne={tempLine} setDirtyMeetingPointIds={setDirtyMeetingPointIds} cohort={cohort} youngs={youngs} />
                   <tr>
                     <td />
                     <td colSpan="2">
