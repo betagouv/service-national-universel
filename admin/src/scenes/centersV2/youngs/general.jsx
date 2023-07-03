@@ -81,7 +81,7 @@ export default function General({ updateFilter, focusedSession, filterArray, set
                       <th className="py-3 pl-4">Volontaire</th>
                       <th className="">Présence à l&apos;arrivée</th>
                       <th className="">Présence JDM</th>
-                      <th className="">Départ</th>
+                      <th className="">Départ Anticipé</th>
                       <th className="">Fiche Sanitaire</th>
                       <th className="">Statut phase 1</th>
                     </tr>
@@ -152,7 +152,7 @@ const Line = ({ hit, onClick, selected }) => {
               <div>{!value.departSejourAt ? "Renseigner un départ" : formatDateFR(value.departSejourAt)}</div>
             </div>
           ) : (
-            <None className="text-gray-500" />
+            <None className="text-gray-500 ml-5" />
           )}
         </div>
       </td>
