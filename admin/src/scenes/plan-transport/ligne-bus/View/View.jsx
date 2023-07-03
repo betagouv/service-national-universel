@@ -139,7 +139,7 @@ export default function View(props) {
     {
       key: "exportData",
       action: async () => {
-        await exportLigneBusJeune(cohort.name, data.busId, "total", data.team);
+        await exportLigneBusJeune(cohort.name, data, "total", data.team);
       },
       render: (
         <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
@@ -247,12 +247,22 @@ export default function View(props) {
             data.team
               .filter((item) => item.role === "supervisor")
               .map((value) => (
-                <BusTeam key={value._id} bus={data} setBus={setData} title="Encadrant" role={"supervisor"} idTeam={value._id} addOpen={addOpen} setAddOpen={setAddOpen} />
+                <BusTeam
+                  key={value._id}
+                  bus={data}
+                  setBus={setData}
+                  title="Encadrant"
+                  role={"supervisor"}
+                  idTeam={value._id}
+                  addOpen={addOpen}
+                  setAddOpen={setAddOpen}
+                  cohort={cohort}
+                />
               ))
           ) : (
             <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} cohort={cohort} />
           )}
-          {addOpen ? <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} setAddOpen={setAddOpen} /> : null}
+          {addOpen ? <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} setAddOpen={setAddOpen} cohort={cohort} /> : null}
 
           <div className="flex items-start gap-4">
             <div className="flex w-1/2 flex-col gap-4">

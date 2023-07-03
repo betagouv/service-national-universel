@@ -13,7 +13,7 @@ import TooltipCapacity from "./components/TooltipCapacity";
 import TooltipCenter from "./components/TooltipCenter";
 import { IoCaretDown, IoCaretForward, IoOpenOutline } from "react-icons/io5";
 import PointDeRassemblement from "./components/PointDeRassemblement";
-import LigneToPoint from "./Ligne-to-Point";
+import LignesToPoint from "./Lignes-to-Point";
 import { useHistory } from "react-router-dom";
 
 export default function LigneDeBus({ hit, cohort }) {
@@ -76,6 +76,7 @@ export default function LigneDeBus({ hit, cohort }) {
     try {
       const response = await api.post(`/ligne-de-bus/${ligneDeBus._id}/point-de-rassemblement/${meetingPoint._id}`);
       if (response.ok) {
+        setTempLine(response.data);
         toastr.success("Le point de rencontre a été ajouté à la ligne.");
       } else toastr.error("Oups, une erreur est survenue lors de l'ajout du point de rencontre à la ligne.");
     } catch (e) {
@@ -114,7 +115,7 @@ export default function LigneDeBus({ hit, cohort }) {
           </div>
         </td>
         <td>
-          <div className="flex flex-col flex-1 text-center opacity-75">{hit.meetingPointsIds.length}</div>
+          <div className="flex flex-col flex-1 text-center opacity-75">{tempLine.meetingPointsIds.length}</div>
         </td>
         <td onClick={(e) => e.stopPropagation()}>
           <DatePicker
@@ -138,7 +139,7 @@ export default function LigneDeBus({ hit, cohort }) {
           <div className="h-full">
             <input
               placeholder="hh:mm"
-              className="h-full bg-transparent"
+              className={`w-full h-full ${!/^\d{2}:\d{2}$/.test(tempLine.centerArrivalTime) ? "bg-red-100" : "bg-transparent"}`}
               type="text"
               value={tempLine.centerArrivalTime}
               onClick={(event) => event.stopPropagation()}
@@ -177,7 +178,7 @@ export default function LigneDeBus({ hit, cohort }) {
           <div className="h-full">
             <input
               placeholder="hh:mm"
-              className="h-full bg-transparent"
+              className={`w-full h-full ${!/^\d{2}:\d{2}$/.test(tempLine.centerDepartureTime) ? "bg-red-100" : "bg-transparent"}`}
               type="text"
               value={tempLine.centerDepartureTime}
               onClick={(event) => event.stopPropagation()}
@@ -187,11 +188,7 @@ export default function LigneDeBus({ hit, cohort }) {
           </div>
         </td>
         <td>
-          <div className="h-full w-full">
-            <TooltipCapacity youngCapacity={hit.youngCapacity} youngSeatsTaken={hit.youngSeatsTaken} followerCapacity={hit.followerCapacity}>
-              <div className="opacity-75">{hit.youngSeatsTaken}</div>
-            </TooltipCapacity>
-          </div>
+          <div className="text-sm flex-1 whitespace-nowrap opacity-75">{hit.youngSeatsTaken}</div>
         </td>
         <td>
           <input
@@ -299,7 +296,7 @@ export default function LigneDeBus({ hit, cohort }) {
         <></>
       )}
       {open ? (
-        hit.meetingPointsIds.length ? (
+        tempLine.meetingPointsIds.length ? (
           <tr>
             <td colSpan="17" className="border-[2px] border-gray-200">
               <table className="w-full table-fixed">
@@ -330,23 +327,12 @@ export default function LigneDeBus({ hit, cohort }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {hit.meetingPointsIds?.map((meetingPointId) => {
-                    return (
-                      <LigneToPoint
-                        key={`meetingPoint-${meetingPointId}`}
-                        meetingPointId={meetingPointId}
-                        ligneId={hit._id}
-                        setDirtyMeetingPointIds={setDirtyMeetingPointIds}
-                        ligne={hit}
-                        cohort={cohort}
-                      />
-                    );
-                  })}
+                  <LignesToPoint ligne={tempLine} setDirtyMeetingPointIds={setDirtyMeetingPointIds} cohort={cohort} />
                   <tr>
                     <td />
                     <td colSpan="2">
                       <div className="w-full flex justify-between">
-                        <PointDeRassemblement ligne={hit} onChange={(value) => addLigneToPoint({ ligneDeBus: hit, meetingPoint: value })} />
+                        <PointDeRassemblement ligne={tempLine} onChange={(value) => addLigneToPoint({ ligneDeBus: tempLine, meetingPoint: value })} />
                       </div>
                     </td>
                   </tr>

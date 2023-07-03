@@ -1,3 +1,51 @@
+# [1.304.0](https://github.com/betagouv/service-national-universel/compare/v1.303.0...v1.304.0) (2023-06-30)
+
+
+### Bug Fixes
+
+* **admin:** download convocation ([3693768](https://github.com/betagouv/service-national-universel/commit/36937686d637070614c7da0188ad68738b215c8e))
+* **admin:** export convoyeur ([731c1f0](https://github.com/betagouv/service-national-universel/commit/731c1f04a02df999ad0143459465e73fc8c6ca2e))
+* **admin:** fix du bouton "Ajouter un encadrant" ([dc2426b](https://github.com/betagouv/service-national-universel/commit/dc2426b1c1eaa48579de488c292f3c80c531a57b))
+* **admin:** nission equivalence frequency field name ([2bc0630](https://github.com/betagouv/service-national-universel/commit/2bc06301c7b96c7f9f5b7121ae3e0504aaa86a1f))
+* **api:** session date in dsnj export ([9f7b527](https://github.com/betagouv/service-national-universel/commit/9f7b5277bad43f46705e463212db3389a6a8f5df))
+* quick win - retour gab 3006 ([#2770](https://github.com/betagouv/service-national-universel/issues/2770)) ([2199fcf](https://github.com/betagouv/service-national-universel/commit/2199fcf5d8b6e2905f6b2a9264892a0d05a06acb))
+* **api:** add noCursorTimeout flag to missionOutdated cron ([3d1fa89](https://github.com/betagouv/service-national-universel/commit/3d1fa89e45a2ed785a6ae20a1a78d564cb00621f))
+
+
+### Features
+
+* **app:** besoin d'aide modal + new questions([#2772](https://github.com/betagouv/service-national-universel/issues/2772)) ([00a16ba](https://github.com/betagouv/service-national-universel/commit/00a16bae713e3dcb7a8f4a1f77e15b5123a911d1))
+
+
+### Reverts
+
+* Revert "fix(api): Send 401 if signin_token not valid" ([e1bca7a](https://github.com/betagouv/service-national-universel/commit/e1bca7a01e20e610018fb52b08f6cdc75c903b57))
+
+# [1.303.0](https://github.com/betagouv/service-national-universel/compare/v1.302.0...v1.303.0) (2023-06-29)
+
+
+### Bug Fixes
+
+* **admin:** update convocation file name ([b122bfd](https://github.com/betagouv/service-national-universel/commit/b122bfd1d72d98879ed530f1a847049ccfb2f0e7))
+* **admin:** update convocation file name ([b71b1cc](https://github.com/betagouv/service-national-universel/commit/b71b1cce9880d485a20deb06e3afe0a705639abf))
+* **admin/app:** wording error on invalid 2fa token ([6f86201](https://github.com/betagouv/service-national-universel/commit/6f862017ce9e1bb36bb17ab837f553e9bf3aeaf5))
+* **api:** Conflit 2fa token ([84541e3](https://github.com/betagouv/service-national-universel/commit/84541e39ecd9f13e7b5b22820981a10762dffbef))
+* **api:** convocation visual fix ([37f6dac](https://github.com/betagouv/service-national-universel/commit/37f6dac0ebf1afaee714c0fbc8db52f25637dbe5))
+* **api:** fix test cohort in staging ([50331f3](https://github.com/betagouv/service-national-universel/commit/50331f3bcd94b8ba67496c74bd4fd995a4e69bc3))
+* **api:** Send 401 if signin_token not valid ([ac65e56](https://github.com/betagouv/service-national-universel/commit/ac65e56780217bac8dfee7271a48bcc609ad3b75))
+* **api:** update places bus ans session on WITHDRAWN ([#2765](https://github.com/betagouv/service-national-universel/issues/2765)) ([96c936c](https://github.com/betagouv/service-national-universel/commit/96c936cb077a22a0a44054a9bd9a1fb42c33ad42))
+* **app, admin, api:** Correctly format support messages ([94478b3](https://github.com/betagouv/service-national-universel/commit/94478b306a53313761f9d3ac21670e5f988663ec))
+
+
+### Features
+
+* **admin/api:** optimize young list ([#2763](https://github.com/betagouv/service-national-universel/issues/2763)) ([978624a](https://github.com/betagouv/service-national-universel/commit/978624a325097f1b434afff4fd03504597a767d1))
+* **api:** dsnj export fixes and local script ([daf3d54](https://github.com/betagouv/service-national-universel/commit/daf3d54f84f3fabf79416c566933393089272c0e))
+* plan de transport wip 2906 ([#2764](https://github.com/betagouv/service-national-universel/issues/2764)) ([57cf827](https://github.com/betagouv/service-national-universel/commit/57cf82731572b83fdbb376f631f7cf2ad730d779))
+* **all:** Rework jwt ([#2727](https://github.com/betagouv/service-national-universel/issues/2727)) ([b42e62c](https://github.com/betagouv/service-national-universel/commit/b42e62cf5133b60860bb746c7b651d00f9f7b3d0))
+* **app/admin:** update 2FA info ([#2762](https://github.com/betagouv/service-national-universel/issues/2762)) ([5eb5cb5](https://github.com/betagouv/service-national-universel/commit/5eb5cb509317c3b7717197b7bd9eab91b9d3b0e5))
+* **app/admin:** update 2FA information for user ([#2761](https://github.com/betagouv/service-national-universel/issues/2761)) ([a409f6b](https://github.com/betagouv/service-national-universel/commit/a409f6b540998636ada4fbb2882ce57babbb8144))
+
 # [1.302.0](https://github.com/betagouv/service-national-universel/compare/v1.301.0...v1.302.0) (2023-06-28)
 
 

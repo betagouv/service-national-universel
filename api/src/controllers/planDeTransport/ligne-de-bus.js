@@ -90,7 +90,7 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
     }).validate({ ...req.params, ...req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canEditLigneBusGeneralInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canEditLigneBusGeneralInfo(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let { id, busId, departuredDate, returnDate, youngCapacity, totalCapacity, followerCapacity, travelTime, lunchBreak, lunchBreakReturn, delayedForth, delayedBack } = value;
 
     const ligne = await LigneBusModel.findById(id);
@@ -363,7 +363,7 @@ router.post("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (req.user.role !== "admin" || req.user.subRole !== "god") return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role !== "admin") return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const { id, meetingPointId } = value;
 
     const ligne = await LigneBusModel.findById(id);
@@ -398,47 +398,6 @@ router.post("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate
       transportType: ligneToPoint.transportType,
     });
 
-    await planDeTransport.save({ fromUser: req.user });
-    // * End update slave PlanTransport
-
-    const infoBus = await getInfoBus(ligne);
-
-    return res.status(200).send({ ok: true, data: infoBus });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.delete("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      meetingPointId: Joi.string().required(),
-    }).validate({ ...req.params, ...req.body });
-
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    if (req.user.role !== "admin" || req.user.subRole !== "god") return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const { id, meetingPointId } = value;
-
-    const ligne = await LigneBusModel.findById(id);
-    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const meetingPoint = await PointDeRassemblementModel.findById(meetingPointId);
-    if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const ligneToPoint = await LigneToPointModel.findOne({ lineId: id, meetingPointId });
-    if (!ligneToPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    ligneToPoint.set({ deletedAt: new Date() });
-    await ligneToPoint.save({ fromUser: req.user });
-
-    ligne.set({ meetingPointsIds: ligne.meetingPointsIds.filter((id) => id !== meetingPoint._id.toString()) });
-    await ligne.save({ fromUser: req.user });
-
-    // * Update slave PlanTransport
-    const planDeTransport = await PlanTransportModel.findById(id);
-    planDeTransport.pointDeRassemblements = planDeTransport.pointDeRassemblements.filter((p) => p.meetingPointId.toString() !== meetingPoint._id.toString());
     await planDeTransport.save({ fromUser: req.user });
     // * End update slave PlanTransport
 
@@ -501,6 +460,34 @@ router.get("/:id/availablePDR", passport.authenticate("referent", { session: fal
     const PDR = await PointDeRassemblementModel.find({ _id: { $in: idPDR } });
 
     return res.status(200).send({ ok: true, data: PDR });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:id/ligne-to-points", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+    }).validate(req.params);
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (!canViewLigneBus(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { id } = value;
+
+    const ligneBus = await LigneBusModel.findById(id);
+    if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const ligneToPoints = await LigneToPointModel.find({ lineId: id, meetingPointId: { $in: ligneBus.meetingPointsIds }, deletedAt: { $exists: false } });
+
+    for (let ligneToPoint of ligneToPoints) {
+      const meetingPoint = await PointDeRassemblementModel.findById(ligneToPoint.meetingPointId);
+      ligneToPoint._doc.meetingPoint = meetingPoint;
+    }
+
+    return res.status(200).send({ ok: true, data: ligneToPoints });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

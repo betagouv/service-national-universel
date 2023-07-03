@@ -25,7 +25,6 @@ export default function VolontaireList() {
   const user = useSelector((state) => state.Auth.user);
 
   const [volontaire, setVolontaire] = useState(null);
-  const [centers, setCenters] = useState(null);
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
   const [bus, setBus] = useState(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -44,10 +43,14 @@ export default function VolontaireList() {
   useEffect(() => {
     (async () => {
       try {
-        const { data: centers } = await api.get("/cohesion-center");
-        const { data: sessions } = await api.get("/session-phase1/");
-        const { data: bus } = await api.get("/ligne-de-bus/all");
-        setCenters(centers);
+        const { data: sessions } = await api.post(`/elasticsearch/sessionphase1/export`, {
+          filters: {},
+          exportFields: ["codeCentre", "cohesionCenterId"],
+        });
+        const { data: bus } = await api.post(`/elasticsearch/lignebus/export`, {
+          filters: {},
+          exportFields: ["busId"],
+        });
         setSessionsPhase1(sessions);
         setBus(bus);
       } catch (e) {
@@ -56,7 +59,7 @@ export default function VolontaireList() {
     })();
   }, []);
 
-  if (!centers || !sessionsPhase1 || !bus) return <Loader />;
+  if (!sessionsPhase1 || !bus) return <Loader />;
 
   return (
     <>
@@ -75,7 +78,7 @@ export default function VolontaireList() {
               isOpen={isExportOpen}
               setIsOpen={setIsExportOpen}
               route="/elasticsearch/young/export?tab=volontaire"
-              transform={(data, values) => transformVolontaires(data, values, centers, sessionsPhase1, bus)}
+              transform={(data, values) => transformVolontaires(data, values)}
               exportFields={youngExportFields}
               exportTitle="volontaires"
               showTotalHits={true}

@@ -65,7 +65,6 @@ export default function List() {
           <Select
             options={cohortList}
             value={cohort}
-            disabled={user.role !== ROLES.ADMIN && user.subRole !== "god"}
             onChange={(e) => {
               setCohort(e);
               history.replace({ search: `?cohort=${e}` });

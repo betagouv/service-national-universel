@@ -63,9 +63,11 @@ export default function Signin() {
           </div>
         </div>
         <div className="flex flex-col gap-1 py-4">
+          <label className="text-[14px] text-[#3A3A3A] mb-1">
+            Un mail contenant le code unique de connexion vous a été envoyé à l'adresse <b>{email}</b>.
+          </label>
           <label className="text-[14px] text-[#3A3A3A] mb-4">
-            Un mail contenant le code unique de connexion vous a été envoyé à l'adresse <b>{email}</b>. Ce code est valable pendant 10 minutes, si vous avez reçu plusieurs codes
-            veuillez svp utiliser le dernier qui vous a été transmis par mail.
+            Ce code est valable pendant 10 minutes, si vous avez reçu plusieurs codes veuillez svp utiliser le dernier qui vous a été transmis par mail.
           </label>
           <label className="text-[14px] text-[#3A3A3A] mb-2">Saisir le code reçu par email</label>
           <Input placeholder="123abc" value={token2FA} onChange={(e) => setToken2FA(e)} />
@@ -79,8 +81,8 @@ export default function Signin() {
           <ul className="text-[#0063CB] text-xs mb-2 list-disc">
             <li className="ml-3 mb-1">L'adresse mail que vous utilisez est bien celle indiquée ci-dessus</li>
             <li className="ml-3 mb-1">Le mail ne se trouve pas dans vos spam</li>
-            <li className="ml-3 mb-1">l'adresse mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
-            <li className="ml-3 mb-1">votre boite de réception n'est pas saturée</li>
+            <li className="ml-3 mb-1">L'adresse mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
+            <li className="ml-3 mb-1">Votre boite de réception n'est pas saturée</li>
           </ul>
         </div>
       </div>

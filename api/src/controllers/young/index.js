@@ -906,6 +906,16 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
     });
 
     const updatedYoung = await young.save({ fromUser: req.user });
+    if (young.sessionPhase1Id) {
+      const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
+    }
+
+    // if they had a bus, we check if we need to update the places taken / left in the bus
+    if (young.ligneId) {
+      const bus = await LigneDeBusModel.findById(young.ligneId);
+      if (bus) await updateSeatsTakenInBusLine(bus);
+    }
 
     res.status(200).send({ ok: true, data: serializeYoung(updatedYoung, updatedYoung) });
   } catch (error) {

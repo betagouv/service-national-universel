@@ -10,6 +10,7 @@ import dayjs from "dayjs";
 import API from "../../services/api";
 import * as XLSX from "xlsx";
 import { formatPhoneE164 } from "../../utils/formatPhoneE164";
+import { getPhoneZoneByDepartment } from "../../utils/getPhoneZoneByDepartment";
 import { formatDateFRTimezoneUTC } from "snu-lib";
 
 export function formatRate(value, total, fractionDigit = 0, allowMoreThan100 = false) {
@@ -260,22 +261,11 @@ async function getAllResults(index, query) {
 
 export async function exportLigneBusJeune(cohort, ligne, travel, team) {
   try {
-    const filter = {
-      busId: [ligne],
-    };
-
-    const resultat = await API.post("/elasticsearch/plandetransport/export", {
-      filters: filter,
-      exportFields: "*",
-    });
-    const data = resultat.data[0];
-    if (!data) return toastr.error("Aucune ligne de bus n'a été trouvée");
-
-    const youngs = await API.post(`/elasticsearch/young/in-bus/${String(data._id)}/export`, {
+    const youngs = await API.post(`/elasticsearch/young/in-bus/${String(ligne._id)}/export`, {
       filters: {},
       exportFields: "*",
     });
-    if (!youngs) return toastr.error("Aucun volontaire affecté n'a été trouvé");
+    if (!youngs?.data?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
 
     const session = await API.get(`/session-phase1/${youngs.data[0].sessionPhase1Id}`);
     if (!session.ok) return toastr.error("Une erreur est survenue");
@@ -288,13 +278,13 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
 
     const contactRefDepOrigine = refDepOrigine.data.contacts.filter((item) => item.cohort === cohort);
 
-    const refDepAccueil = await API.get(`/department-service/${data.centerDepartment}`);
+    const refDepAccueil = await API.get(`/department-service/${ligne.centerDetail.department}`);
     if (!refDepAccueil.ok) return toastr.error("Une erreur est survenue");
 
     const contactRefDepAccueil = refDepAccueil.data.contacts.filter((item) => item.cohort === cohort);
 
     const mappy = (value, field) => {
-      return data.pointDeRassemblements.filter((point) => point.meetingPointId === value.meetingPointId)[0][field];
+      return ligne.meetingsPointsDetail.filter((point) => point.meetingPointId === value.meetingPointId)[0][field];
     };
 
     const forthTeam = team.filter((item) => item.forth === true);
@@ -309,26 +299,28 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
       { name: "Aller", data: [] },
       { name: "Retour", data: [] },
     ];
-
+    console.log(youngs.data[1]);
+    console.log(getPhoneZoneByDepartment(youngs.data[0].phoneZone) || getPhoneZoneByDepartment(youngs.data[0].department));
+    return;
     youngs.data.map((item) =>
       excel[0].data.push({
-        "Bus n˚": ligne,
+        "Bus n˚": ligne.busId,
         "Adresse point de rassemblement": mappy(item, "address") + ", " + mappy(item, "zip") + ", " + mappy(item, "city"),
         "Heure de convocation": mappy(item, "meetingHour"),
         "Heure de départ du bus": mappy(item, "departureHour"),
-        "Heure d'arrivée au centre": data.centerArrivalTime,
+        "Heure d'arrivée au centre": ligne.centerArrivalTime,
         "Téléphone urgence SNU": "+33155551327",
         "Email SNU": "signal-snu@jeunesse-sports.gouv.fr ",
         "Téléphone urgence Travel Planet": "+33972566204",
         "Email Travel Planet": "snu@my-travelplanet.com",
         "Contact du département d'origine": contactRefDepOrigine[0]?.contactName,
-        "Téléphone du département d'origine": formatPhoneE164(contactRefDepOrigine[0]?.contactPhone),
+        "Téléphone du département d'origine": formatPhoneE164(contactRefDepOrigine[0]?.contactPhone, getPhoneZoneByDepartment(refDepOrigine.data?.department)),
         "Email du département d'origine": contactRefDepOrigine[0]?.contactMail,
         "Contact du département d'accueil": contactRefDepAccueil[0]?.contactName,
-        "Téléphone du département d'accueil": formatPhoneE164(contactRefDepAccueil[0]?.contactPhone),
+        "Téléphone du département d'accueil": formatPhoneE164(contactRefDepAccueil[0]?.contactPhone, getPhoneZoneByDepartment(refDepAccueil.data?.department)),
         "Email du département d'accueil": contactRefDepAccueil[0]?.contactMail,
         "Nom du chef de centre": headcenter.data.firstName + " " + headcenter.data.lastName,
-        "Téléphone du chef de centre": formatPhoneE164(headcenter.data.phone),
+        "Téléphone du chef de centre": formatPhoneE164(headcenter.data.phone, getPhoneZoneByDepartment(ligne.centerDetail.department)),
         "Email du chef de centre": headcenter.data.email,
       }),
     );
@@ -364,22 +356,22 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
 
     youngs.data.map((item) =>
       excel[1].data.push({
-        "Bus n˚": ligne,
+        "Bus n˚": ligne.busId,
         "Adresse point de rassemblement": mappy(item, "address") + ", " + mappy(item, "zip") + ", " + mappy(item, "city"),
-        "Heure de départ du bus": data.centerDepartureTime,
+        "Heure de départ du bus": ligne.centerDepartureTime,
         "Heure de Retour": mappy(item, "returnHour"),
         "Téléphone urgence SNU": "+33155551327",
         "Email SNU": "signal-snu@jeunesse-sports.gouv.fr ",
         "Téléphone urgence Travel Planet": "+33972566204",
         "Email Travel Planet": "snu@my-travelplanet.com",
         "Contact du département d'origine": contactRefDepOrigine[0]?.contactName,
-        "Téléphone du département d'origine": formatPhoneE164(contactRefDepOrigine[0]?.contactPhone),
+        "Téléphone du département d'origine": formatPhoneE164(contactRefDepOrigine[0]?.contactPhone, getPhoneZoneByDepartment(refDepOrigine.data?.department)),
         "Email du département d'origine": contactRefDepOrigine[0]?.contactMail,
         "Contact du département d'accueil": contactRefDepAccueil[0]?.contactName,
-        "Téléphone du département d'accueil": formatPhoneE164(contactRefDepAccueil[0]?.contactPhone),
+        "Téléphone du département d'accueil": formatPhoneE164(contactRefDepAccueil[0]?.contactPhone, getPhoneZoneByDepartment(refDepAccueil.data?.department)),
         "Email du département d'accueil": contactRefDepAccueil[0]?.contactMail,
         "Nom du chef de centre": headcenter.data.firstName + " " + headcenter.data.lastName,
-        "Téléphone du chef de centre": formatPhoneE164(headcenter.data.phone),
+        "Téléphone du chef de centre": formatPhoneE164(headcenter.data.phone, getPhoneZoneByDepartment(ligne.centerDetail.department)),
         "Email du chef de centre": headcenter.data.email,
       }),
     );
@@ -414,13 +406,13 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
     });
     switch (travel) {
       case "Aller":
-        generateExcelWorkbook([excel[0]], `Fiche_Convoyeur_ligne_${data.busId}`);
+        generateExcelWorkbook([excel[0]], `Fiche_Convoyeur_ligne_${ligne.busId}`);
         break;
       case "Retour":
-        generateExcelWorkbook([excel[1]], `Fiche_Convoyeur_ligne_${data.busId}`);
+        generateExcelWorkbook([excel[1]], `Fiche_Convoyeur_ligne_${ligne.busId}`);
         break;
       default:
-        generateExcelWorkbook(excel, `Fiche_Convoyeur_ligne_${data.busId}`);
+        generateExcelWorkbook(excel, `Fiche_Convoyeur_ligne_${ligne.busId}`);
     }
   } catch (e) {
     console.log(e);

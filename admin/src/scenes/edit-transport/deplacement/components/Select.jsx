@@ -2,7 +2,7 @@ import React from "react";
 import { BsCheck2 } from "react-icons/bs";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
 
-export default function Select({ options, value, renderOption, onChange, disabled }) {
+export default function Select({ options, value, renderOption, onChange, disabled, placeholder }) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
 
@@ -27,25 +27,15 @@ export default function Select({ options, value, renderOption, onChange, disable
     <div className="w-full" ref={ref}>
       <div className="relative">
         {/* select item */}
-        <button
-          disabled={disabled}
-          className={`flex w-full h-8  items-center justify-between gap-3 rounded-lg border border-gray-300 bg-white px-3 py-3 ${
-            disabled ? "cursor-not-allowed disabled:opacity-50" : "cursor-pointer"
-          }`}
-          style={{ fontFamily: "Marianne" }}
+        <div
+          className={`flex h-8 w-full items-center justify-between  rounded-lg border border-gray-300 bg-white px-3 py-3`}
           onClick={(event) => {
             event.stopPropagation();
             !disabled && setOpen((e) => !e);
           }}>
-          <div className="flex items-center gap-2">
-            <span
-              className={`whitespace-nowrap text-sm font-medium ${value?.placeholder ? "text-gray-400" : "text-snu-purple-800"} `}
-              dangerouslySetInnerHTML={{ __html: value?.placeholder ? value.placeholder : options.find((o) => o.value === value)?.label }}
-            />
-          </div>
+          {value?.name ? <div>{value?.name || placeholder}</div> : <div className="text-gray-400 text-xs">{placeholder}</div>}
           {!disabled && <ChevronDown className={`text-gray-400 ${open ? "rotate-180" : ""}`} />}
-        </button>
-        {/* display options */}
+        </div>
         <div
           className={`${
             open ? "block" : "hidden"

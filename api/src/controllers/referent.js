@@ -483,6 +483,12 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
       if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
+
+    if (young.ligneId) {
+      const bus = await LigneDeBusModel.findById(young.ligneId);
+      if (bus) await updateSeatsTakenInBusLine(bus);
+    }
+
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
