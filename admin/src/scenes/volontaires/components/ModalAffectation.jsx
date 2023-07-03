@@ -379,7 +379,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                 </div>
               </div>
             </div>
-            {session && cohort && pdrOption !== "local" && <MeetingInfo young={young} session={session} cohort={cohort} selectedPdr={selectedPdr.data} />}
+            {session && cohort && pdrOption !== "local" && <MeetingInfo young={young} session={session} cohort={cohort} selectedPdr={selectedPdr?.data} />}
           </div>
         )}
 
