@@ -299,9 +299,7 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
       { name: "Aller", data: [] },
       { name: "Retour", data: [] },
     ];
-    console.log(youngs.data[1]);
-    console.log(getPhoneZoneByDepartment(youngs.data[0].phoneZone) || getPhoneZoneByDepartment(youngs.data[0].department));
-    return;
+
     youngs.data.map((item) =>
       excel[0].data.push({
         "Bus n˚": ligne.busId,
@@ -327,14 +325,14 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
     forthTeamLeader.length > 0
       ? excel[0].data.forEach((obj) => {
           obj["Nom Chef de File"] = forthTeamLeader[0].firstName + " " + forthTeamLeader[0].lastName;
-          obj["Téléphone Chef de File"] = formatPhoneE164(forthTeamLeader[0].phone);
+          obj["Téléphone Chef de File"] = formatPhoneE164(forthTeamLeader[0].phone, getPhoneZoneByDepartment(refDepOrigine.data?.department));
         })
       : null;
     if (forthTeamSupervisor.length > 0) {
       forthTeamSupervisor.forEach((supervisor, index) => {
         excel[0].data.forEach((obj) => {
           obj["Nom Encadrant " + (index + 1)] = supervisor.firstName + " " + supervisor.lastName;
-          obj["Téléphone Encadrant " + (index + 1)] = formatPhoneE164(supervisor.phone);
+          obj["Téléphone Encadrant " + (index + 1)] = formatPhoneE164(supervisor.phone, getPhoneZoneByDepartment(refDepOrigine.data?.department));
         });
       });
     }
@@ -346,9 +344,9 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
         Nom: young.lastName,
         Prénom: young.firstName,
         "Date de naissance": formatDateFRTimezoneUTC(young.birthdateAt),
-        Téléphone: formatPhoneE164(young.phone, young.phoneZone),
-        "Téléphone représentant légal 1": formatPhoneE164(young.parent1Phone, young.parent1PhoneZone),
-        "Téléphone représentant légal 2": formatPhoneE164(young.parent2Phone, young.parent2PhoneZone),
+        Téléphone: formatPhoneE164(young.phone, young.phoneZone || getPhoneZoneByDepartment(young.department)),
+        "Téléphone représentant légal 1": formatPhoneE164(young.parent1Phone, young.parent1PhoneZone || getPhoneZoneByDepartment(young.department)),
+        "Téléphone représentant légal 2": formatPhoneE164(young.parent2Phone, young.parent2PhoneZone || getPhoneZoneByDepartment(young.department)),
         Présent: "",
         Commentaire: "",
       };
@@ -378,14 +376,14 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
     backTeamLeader.length > 0
       ? excel[1].data.forEach((obj) => {
           obj["Nom Chef de File"] = backTeamLeader[0].firstName + " " + backTeamLeader[0].lastName;
-          obj["Téléphone Chef de File"] = formatPhoneE164(backTeamLeader[0].phone);
+          obj["Téléphone Chef de File"] = formatPhoneE164(backTeamLeader[0].phone, getPhoneZoneByDepartment(refDepOrigine.data?.department));
         })
       : null;
     if (backTeamSupervisor.length > 0) {
       backTeamSupervisor.forEach((supervisor, index) => {
         excel[1].data.forEach((obj) => {
           obj["Nom Encadrant " + (index + 1)] = supervisor.firstName + " " + supervisor.lastName;
-          obj["Téléphone Encadrant " + (index + 1)] = formatPhoneE164(supervisor.phone);
+          obj["Téléphone Encadrant " + (index + 1)] = formatPhoneE164(supervisor.phone, getPhoneZoneByDepartment(refDepOrigine.data?.department));
         });
       });
     }
@@ -397,9 +395,9 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
         Nom: young.lastName,
         Prénom: young.firstName,
         "Date de naissance": formatDateFRTimezoneUTC(young.birthdateAt),
-        Téléphone: formatPhoneE164(young.phone, young.phoneZone),
-        "Téléphone représentant légal 1": formatPhoneE164(young.parent1Phone, young.parent1PhoneZone),
-        "Téléphone représentant légal 2": formatPhoneE164(young.parent2Phone, young.parent2PhoneZone),
+        Téléphone: formatPhoneE164(young.phone, young.phoneZone || getPhoneZoneByDepartment(young.department)),
+        "Téléphone représentant légal 1": formatPhoneE164(young.parent1Phone, young.parent1PhoneZone || getPhoneZoneByDepartment(young.department)),
+        "Téléphone représentant légal 2": formatPhoneE164(young.parent2Phone, young.parent2PhoneZone || getPhoneZoneByDepartment(young.department)),
         Présent: "",
         Commentaire: "",
       };
