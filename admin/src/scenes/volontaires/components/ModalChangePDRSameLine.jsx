@@ -170,7 +170,7 @@ const HitPdr = ({ hit, bus, young, onSend }) => {
             {hit._id === young.meetingPointId ? (
               <div
                 className={` flex rounded-full border-[0.5px] border-green-600  bg-green-50 text-[12px] font-medium leading-[22px] w-[130px] h-[25px] justify-center align-middle mt-1`}>
-                <span className="text-green-600">Affecté</span>
+                <span className="text-green-600">Selectionné</span>
               </div>
             ) : hit.department === young.department ? (
               <div
