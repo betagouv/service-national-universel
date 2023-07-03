@@ -8,7 +8,7 @@ import SelectInput from "./components/SelectInput";
 import { MdMan } from "react-icons/md";
 import YoungLine from "./YoungLine";
 
-const To = ({ youngs, allLines, isDirty, selectedMeetingPoint, setSelectedMeetingPoint, selectedLigne, setSelectedLigne }) => {
+const To = ({ youngs, allLines, isDirty, selectedMeetingPoint, setSelectedMeetingPoint, selectedLigne, setSelectedLigne, selectedLigneFrom }) => {
   const [meetingPointsOptions, setMeetingPointsOptions] = useState([]);
   const [meetingPoints, setMeetingPoints] = useState([]);
   const urlParams = new URLSearchParams(window.location.search);
@@ -65,9 +65,11 @@ const To = ({ youngs, allLines, isDirty, selectedMeetingPoint, setSelectedMeetin
         <SelectInput
           value={selectedLigne?.busId}
           disabled={isDirty}
-          options={allLines.map((e) => {
-            return { label: e.busId, value: e };
-          })}
+          options={allLines
+            .filter((l) => selectedLigneFrom && l.centerId === selectedLigneFrom?.centerId && l.sessionId === selectedLigneFrom?.sessionId)
+            .map((e) => {
+              return { label: e.busId, value: e };
+            })}
           onChange={(value) => {
             setSelectedLigne(value);
             setSelectedMeetingPoint(null);

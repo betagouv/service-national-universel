@@ -372,15 +372,21 @@ router.post("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate
     const meetingPoint = await PointDeRassemblementModel.findById(meetingPointId);
     if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const ligneToPoint = await LigneToPointModel.create({
-      lineId: ligne._id.toString(),
-      meetingPointId: meetingPoint._id.toString(),
-      transportType: "bus",
-      returnHour: "00:00",
-      meetingHour: "00:00",
-      departureHour: "00:00",
-      busArrivalHour: "00:00",
-    });
+    let ligneToPoint = await LigneToPointModel.findOne({ lineId: id, meetingPointId });
+    if (ligneToPoint) {
+      ligneToPoint.set({ deletedAt: undefined });
+      await ligneToPoint.save({ fromUser: req.user });
+    } else {
+      ligneToPoint = await LigneToPointModel.create({
+        lineId: ligne._id.toString(),
+        meetingPointId: meetingPoint._id.toString(),
+        transportType: "bus",
+        returnHour: "00:00",
+        meetingHour: "00:00",
+        departureHour: "00:00",
+        busArrivalHour: "00:00",
+      });
+    }
 
     ligne.set({ meetingPointsIds: [...ligne.meetingPointsIds, meetingPoint._id.toString()] });
     await ligne.save({ fromUser: req.user });

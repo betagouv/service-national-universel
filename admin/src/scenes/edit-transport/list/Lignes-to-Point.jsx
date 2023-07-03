@@ -8,6 +8,7 @@ import SelectTable from "./components/SelectTable";
 import TooltipAddress from "./components/TooltipAddress";
 import { IoLocationOutline, IoTrashBin, IoArrowRedoOutline } from "react-icons/io5";
 import { replaceSpacesNewList } from "../../../utils";
+import { environment } from "../../../config";
 
 const transportTypeList = [
   { label: "bus", value: "bus" },
@@ -15,7 +16,7 @@ const transportTypeList = [
   { label: "avion", value: "avion" },
 ];
 
-export default function LignesToPoint({ ligne, setDirtyMeetingPointIds, cohort }) {
+export default function LignesToPoint({ ligne, setDirtyMeetingPointIds, cohort, youngs }) {
   const [values, setValues] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -49,37 +50,20 @@ export default function LignesToPoint({ ligne, setDirtyMeetingPointIds, cohort }
       ligne={ligne}
       cohort={cohort}
       getMeetingPoints={getMeetingPoints}
+      youngs={youngs?.filter((y) => y.meetingPointId === mp.meetingPointId)}
     />
   ));
 }
 
-const LigneToPoint = ({ meetingPoint, ligneId, setDirtyMeetingPointIds, ligne, cohort, getMeetingPoints }) => {
+const LigneToPoint = ({ meetingPoint, ligneId, setDirtyMeetingPointIds, ligne, cohort, getMeetingPoints, youngs }) => {
   const [defaultMeetingPoint, setDefaultMeetingPoint] = useState();
   const [tempMeetingPoint, setTempMeetingPoint] = useState(meetingPoint);
   const [isDirty, setIsDirty] = useState(false);
-  const [dataForCheck, setDataForCheck] = useState([]);
 
   React.useEffect(() => {
     setDefaultMeetingPoint(meetingPoint);
     setTempMeetingPoint(meetingPoint);
   }, [meetingPoint]);
-
-  React.useEffect(() => {
-    getDataForCheck();
-  }, []);
-
-  const getDataForCheck = async () => {
-    try {
-      const { ok, code, data: reponseCheck } = await api.get(`/ligne-de-bus/${ligneId}/data-for-check`);
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
-      }
-      setDataForCheck(reponseCheck);
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
-    }
-  };
 
   if (!tempMeetingPoint) return <div className="text-xs text-gray-400 animate-pulse">Chargement...</div>;
 
@@ -96,6 +80,7 @@ const LigneToPoint = ({ meetingPoint, ligneId, setDirtyMeetingPointIds, ligne, c
   };
 
   const save = async (data) => {
+    if (environment === "production") return toastr.error("Cette fonctionnalité est désactivée en production.");
     toastr.info("Sauvegarde en cours...");
     try {
       const { ok } = await api.put(`/ligne-de-bus/${ligneId}/pointDeRassemblement`, {
@@ -121,6 +106,7 @@ const LigneToPoint = ({ meetingPoint, ligneId, setDirtyMeetingPointIds, ligne, c
 
   // todo: delete ligne to point
   const deleteLigneToPoint = async () => {
+    if (environment === "production") return toastr.error("Cette fonctionnalité est désactivée en production.");
     try {
       if (!window.confirm(`Êtes-vous sûr de vouloir supprimer le point de rendez-vous ?\nPDR: ${tempMeetingPoint.meetingPoint.name.replace(/PDR\s*-/, "")}\nligne: ${ligne.busId}`))
         return;
@@ -159,11 +145,11 @@ const LigneToPoint = ({ meetingPoint, ligneId, setDirtyMeetingPointIds, ligne, c
         </td>
         <td>
           <div className="flex h-full w-full justify-around items-center">
-            {!dataForCheck ? (
+            {!youngs ? (
               <div>loading...</div>
             ) : (
               <>
-                <div className="flex-1">{(dataForCheck?.meetingPoints || []).find((v) => v.meetingPointId === tempMeetingPoint.meetingPointId)?.youngsCount || 0}</div>
+                <div className="flex-1">{youngs?.length}</div>
                 <a
                   className="flex w-fit cursor-pointer flex-row items-center justify-center gap-2 self-end rounded border-[1px] border-gray-300 p-2 text-gray-900"
                   href={`/edit-transport/deplacement?cohort=${cohort}&pdr_from_id=${tempMeetingPoint.meetingPointId}&ligne_from_id=${ligne._id.toString()}`}
