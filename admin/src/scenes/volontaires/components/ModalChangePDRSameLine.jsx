@@ -33,7 +33,7 @@ export default function ModalChangePDRSameLine({ isOpen, onCancel, young, cohort
         setBus(data);
         setLoading(false);
       } catch (e) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération de la session", e);
+        toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(e.code));
         console.log(e);
       }
     })();
