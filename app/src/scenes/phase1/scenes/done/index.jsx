@@ -16,6 +16,8 @@ import { isCohortDone } from "../../../../utils/cohorts";
 import HeroPhase1Mobile from "./assets/herophase1mobile.png";
 import JDMDone from "./components/JDMDone";
 import JDMNotDone from "./components/JDMNotDone";
+import JDCDone from "./components/JDCDone";
+import JDCNotDone from "./components/JSCNotDone";
 import NextStep from "./components/NextStep";
 
 export default function Done() {
@@ -85,6 +87,8 @@ export default function Done() {
       return toastr.error("Erreur lors de l'envoie du document : ", e.message);
     }
   };
+
+  const needTheJDMPresenceTrue = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Février 2022", "2021", "2022"];
 
   return (
     <>
@@ -251,7 +255,9 @@ export default function Done() {
             </div>
           </div>
         </div>
-        {young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />}
+        {/* {needTheJDMPresenceTrue.includes(young.cohort) ? young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone /> : young.cohesionStayPresence === "true" ? <JDCDone/> : <JDCNotDone/>} */}
+        {needTheJDMPresenceTrue.includes(young.cohort) ? (young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />) : (young.cohesionStayPresence === "true" ? <JDCDone/> : <JDCNotDone/>)}
+
       </div>
 
       <NextStep />
