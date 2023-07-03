@@ -36,83 +36,7 @@ const Wrapper = ({ children }) => {
 
   return (
     <div className="flex min-h-screen w-full flex-col">
-      <header className="flex-none bg-white print:hidden ">
-        <div className="mr-auto ml-auto flex max-w-screen-95 flex-wrap items-center gap-4 py-4 px-8 lg:gap-8">
-          <div className="w-auto flex-none lg:w-1/6">
-            <Link href="/">
-              <img className="h-9 w-9 cursor-pointer" src="/assets/logo-snu.png" alt="" />
-            </Link>
-          </div>
-          <div className="order-3 w-full md:order-2 md:w-1/2 md:flex-1">
-            <KnowledgeBaseSearch
-              path="/base-de-connaissance"
-              className="rounded-md border border-gray-300 transition-colors focus:border-gray-400"
-              showNoAnswerButton
-              noAnswer="Nous ne trouvons pas d'article correspondant à votre recherche... 😢 Vous pouvez essayer avec d'autres mots clés ou cliquez sur le bouton ci-dessous"
-              restriction={restriction}
-            />
-          </div>
-          {isLoggedIn ? (
-            <>
-              <ProfileButton showNameAndRole className={withSeeAs ? "lg:order-4" : " w-auto lg:w-1/3 lg:flex-1 "} onLogout={onLogout} user={user}>
-                {["admin"].includes(user?.role) && (
-                  <Link legacyBehavior href={`${supportURL}/knowledge-base/${router?.query?.slug || ""}`} passHref>
-                    <a href="#" className="cursor-pointer text-sm font-medium text-gray-700">
-                      Espace d'édition
-                    </a>
-                  </Link>
-                )}
-                {!["young"].includes(user?.role) && (
-                  <Link legacyBehavior href={adminURL}>
-                    <a href="#" className="cursor-pointer text-sm font-medium text-gray-700">
-                      Espace admin SNU
-                    </a>
-                  </Link>
-                )}
-                {["young"].includes(user?.role) && (
-                  <Link legacyBehavior href={appURL}>
-                    <a href="#" className="cursor-pointer text-sm font-medium text-gray-700">
-                      Mon compte SNU
-                    </a>
-                  </Link>
-                )}
-              </ProfileButton>
-              {withSeeAs && (
-                <Popover className="relative order-1 mx-auto flex w-auto justify-end md:order-3  md:ml-auto md:flex-none lg:flex-1">
-                  <Popover.Button className="flex items-center justify-center gap-3 rounded-none border-none bg-white p-0 text-left shadow-none">
-                    <img src="/assets/change-user.png" className="h-5 w-5 grayscale" />
-                    <div className="flex h-full flex-col justify-center">
-                      <span className="text-sm font-medium text-gray-700">Voir les articles pour</span>
-                      {/* {!!user.role && <span className="text-xs font-medium text-gray-500">{SUPPORT_ROLES[seeAs || user.role]}</span>} */}
-                    </div>
-                  </Popover.Button>
-
-                  <Popover.Panel className="absolute right-0 top-10 z-10 min-w-[208px] lg:min-w-0">
-                    <div className="flex flex-col gap-4 rounded-md border border-gray-300 bg-white px-4 py-3">
-                      {roles
-                        .filter((role) => (user.role === "admin" ? true : categoryAccessibleReferent.includes(role)))
-                        .map((role) => (
-                          <a key={role} onClick={() => setSeeAs(role)} className={`text-sm font-${seeAs === role ? "bold" : "medium"} cursor-pointer text-gray-700`}>
-                            {translateRoleBDC[role]}
-                          </a>
-                        ))}
-                    </div>
-                  </Popover.Panel>
-                </Popover>
-              )}
-            </>
-          ) : (
-            <div className="order-2 flex w-auto flex-1 items-center justify-end gap-3 md:order-3 md:flex-none md:gap-5 lg:w-1/3 lg:gap-10">
-              <Link href={`${adminURL}/auth?redirect=${baseDeConnaissanceURL}/base-de-connaissance/${router?.query?.slug || ""}`}>
-                <span className="cursor-pointer text-sm font-medium text-gray-500 transition-colors hover:text-gray-600">Espace professionnel</span>
-              </Link>
-              <Link href={`${appURL}/auth?redirect=${baseDeConnaissanceURL}/base-de-connaissance/${router?.query?.slug || ""}`}>
-                <span className="cursor-pointer text-sm font-medium text-gray-500 transition-colors hover:text-gray-600">Espace volontaire</span>
-              </Link>
-            </div>
-          )}
-        </div>
-      </header>
+      <Header isLoggedIn={isLoggedIn} withSeeAs={withSeeAs} onLogout={onLogout} />
       {!!seeAs && withSeeAs && user?.role !== seeAs && (
         <button onClick={() => setSeeAs("admin")} className="noprint rounded-none border-none bg-red-500 font-normal">
           Vous visualisez la base de connaissance en tant que {translateRoleBDC[seeAs]}, pour retourner à votre vue cliquez ici
@@ -186,3 +110,80 @@ const Wrapper = ({ children }) => {
 };
 
 export default Wrapper;
+
+function Header({ isLoggedIn, withSeeAs, onLogout }) {
+  const { mutate, user, restriction } = useUser();
+  const { setSeeAs, seeAs, roles } = useContext(SeeAsContext);
+  const router = useRouter();
+
+  return (
+    <header className="flex-none bg-[#32257F] print:hidden ">
+      <div className="mx-auto flex items-center gap-6 p-6 border-b-[1px] border-white border-opacity-20">
+        <div className="w-auto flex-none">
+          <Link href="/">
+            <img className="h-12 w-12 cursor-pointer" src="/assets/logo-snu.png" alt="Logo du SNU" />
+          </Link>
+        </div>
+
+        <p className="uppercase text-white leading-tight tracking-wide font-medium text-sm">
+          service<br />
+          national<br />
+          universel
+        </p>
+
+        <p className="text-white">Base de connaissance</p>
+
+        {/* <div className="order-3 w-full md:order-2 md:w-1/2 md:flex-1">
+        <KnowledgeBaseSearch path="/base-de-connaissance" className="rounded-md border border-gray-300 transition-colors focus:border-gray-400" showNoAnswerButton noAnswer="Nous ne trouvons pas d'article correspondant à votre recherche... 😢 Vous pouvez essayer avec d'autres mots clés ou cliquez sur le bouton ci-dessous" restriction={restriction} />
+      </div> */}
+
+        <div className="ml-auto">
+          {isLoggedIn ? <>
+            <ProfileButton showNameAndRole className={withSeeAs ? "lg:order-4" : "w-auto lg:w-1/3 lg:flex-1 "} onLogout={onLogout} user={user}>
+              {["admin"].includes((user?.role)) && <Link legacyBehavior href={`${supportURL}/knowledge-base/${router?.query?.slug || ""}`} passHref>
+                <a href="#" className="cursor-pointer text-sm font-medium text-gray-700">
+                  Espace d'édition
+                </a>
+              </Link>}
+              {!["young"].includes((user?.role)) && <Link legacyBehavior href={adminURL}>
+                <a href="#" className="cursor-pointer text-sm font-medium text-gray-700">
+                  Espace admin SNU
+                </a>
+              </Link>}
+              {["young"].includes((user?.role)) && <Link legacyBehavior href={appURL}>
+                <a href="#" className="cursor-pointer text-sm font-medium text-gray-700">
+                  Mon compte SNU
+                </a>
+              </Link>}
+            </ProfileButton>
+            {withSeeAs && <Popover className="relative order-1 mx-auto flex w-auto justify-end md:order-3  md:ml-auto md:flex-none lg:flex-1">
+              <Popover.Button className="flex items-center justify-center gap-3 rounded-none border-none bg-white p-0 text-left shadow-none">
+                <img src="/assets/change-user.png" className="h-5 w-5 grayscale" />
+                <div className="flex h-full flex-col justify-center">
+                  <span className="text-sm font-medium text-gray-700">Voir les articles pour</span>
+                  {
+                    /* {!!user.role && <span className="text-xs font-medium text-gray-500">{SUPPORT_ROLES[seeAs || user.role]}</span>} */
+                  }
+                </div>
+              </Popover.Button>
+
+              <Popover.Panel className="absolute right-0 top-10 z-10 min-w-[208px] lg:min-w-0">
+                <div className="flex flex-col gap-4 rounded-md border border-gray-300 bg-white px-4 py-3">
+                  {roles.filter(role => user.role === "admin" ? true : categoryAccessibleReferent.includes(role)).map(role => <a key={role} onClick={() => setSeeAs(role)} className={`text-sm font-${seeAs === role ? "bold" : "medium"} cursor-pointer text-gray-700`}>
+                    {translateRoleBDC[role]}
+                  </a>)}
+                </div>
+              </Popover.Panel>
+            </Popover>}
+          </> : <div className="order-2 flex w-auto flex-1 items-center justify-end gap-3 md:order-3 md:flex-none md:gap-5 lg:w-1/3 lg:gap-10">
+            <Link href={`${adminURL}/auth?redirect=${baseDeConnaissanceURL}/base-de-connaissance/${router?.query?.slug || ""}`}>
+              <span className="cursor-pointer text-sm font-medium text-gray-500 transition-colors hover:text-gray-600">Espace professionnel</span>
+            </Link>
+            <Link href={`${appURL}/auth?redirect=${baseDeConnaissanceURL}/base-de-connaissance/${router?.query?.slug || ""}`}>
+              <span className="cursor-pointer text-sm font-medium text-gray-500 transition-colors hover:text-gray-600">Espace volontaire</span>
+            </Link>
+          </div>}
+        </div>
+      </div>
+    </header>);
+}
