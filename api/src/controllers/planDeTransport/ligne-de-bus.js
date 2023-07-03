@@ -908,38 +908,46 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     regionListToNotify.push(center.region);
 
     const users = await ReferentModel.find({
-      $or: [{ department: { $in: departmentListToNotify } }, { $and: [{ role: "referent_region" }, { region: { $in: regionListToNotify } }] }],
+      $or: [
+        {
+          $and: [
+            {
+              department: {
+                $in: departmentListToNotify,
+              },
+            },
+            {
+              role: "referent_department",
+              subRole: {
+                $in: ["manager_department", "assistant_manager_department", "secretariat", "manager_phase2"],
+              },
+            },
+          ],
+        },
+        {
+          $and: [
+            {
+              role: "referent_region",
+              subRole: {
+                $in: ["coordinator", "assistant_coordinator", "manager_phase2"],
+              },
+              region: {
+                $in: regionListToNotify,
+              },
+            },
+          ],
+        },
+      ],
     });
     if (!users?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const priority_roles = ["coordinator", "assistant_coordinator", "manager_department", "assistant_manager_department", "secretariat", "manager_phase2"];
+    const UsersToNotify = [...new Set(users.map((obj) => JSON.stringify(obj)))].map((str) => JSON.parse(str)); 
 
-    const getUsersToNotify = (listToNotify, field, role = null) => {
-      const usersToNotify = [];
-
-      for (const item of listToNotify) {
-        const filteredUsers = users.filter((u) => u[field].includes(item) && (role ? u.role === role : true));
-
-        let usersToNotifyInItem = null;
-        for (const priorityRole of priority_roles) {
-          usersToNotifyInItem = filteredUsers.filter((u) => u.subRole === priorityRole);
-          if (usersToNotifyInItem.length) {
-            break;
-          }
-        }
-
-        usersToNotify.push(...usersToNotifyInItem);
-      }
-
-      return usersToNotify;
-    };
-
-    const usersToNotifyDep = getUsersToNotify(departmentListToNotify, "department");
-    const usersToNotifyReg = getUsersToNotify(regionListToNotify, "region", "referent_region");
-
-    const usersToNotify = usersToNotifyDep.concat(usersToNotifyReg);
-
-    const uniqueUsersToNotify = [...new Set(usersToNotify.map((obj) => JSON.stringify(obj)))].map((str) => JSON.parse(str));
+    console.log(UsersToNotify.length);
+    UsersToNotify.map((item)=>{
+      console.log(item.firstName,item.lastName,item.email);
+    })
+    return;
     // send notification
     await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.NOTIF_REF, {
       emailTo: uniqueUsersToNotify.map((referent) => ({
