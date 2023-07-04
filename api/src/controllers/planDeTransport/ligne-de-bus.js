@@ -918,9 +918,7 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
         {
           department: { $in: departmentListToNotify },
           role: "referent_department",
-          subRole: {
-            $in: roleDep,
-          },
+          subRole: { $in: roleDep },
         },
         {
           role: "referent_region",
