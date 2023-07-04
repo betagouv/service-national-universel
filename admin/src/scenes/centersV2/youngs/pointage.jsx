@@ -286,7 +286,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
                             render: (
                               <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
                                 <ArrowCircleRight className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
-                                Renseigner un départ
+                                Renseigner un départ anticipé
                                 {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
                               </div>
                             ),
@@ -506,7 +506,9 @@ const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen }) 
                 }
               }}>
               <ArrowCircleRight className="text-gray-400 group-hover:scale-105" />
-              <div className={isYoungCheckinOpen ? "group-hover:underline" : ""}>{!value.departSejourAt ? "Renseigner un départ" : formatDateFR(value.departSejourAt)}</div>
+              <div className={isYoungCheckinOpen ? "group-hover:underline" : ""}>
+                {!value.departSejourAt ? "Renseigner un départ anticipé" : formatDateFR(value.departSejourAt)}
+              </div>
             </div>
           </div>
         </td>

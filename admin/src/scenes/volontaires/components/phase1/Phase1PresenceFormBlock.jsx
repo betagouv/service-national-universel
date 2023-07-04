@@ -104,7 +104,7 @@ const Phase1PresenceFormBlock = ({ className = "", young = null, values = null, 
               }}
               className={` flex flex-row items-center justify-start rounded border border-gray-300 py-2 px-2.5 ${editing && "cursor-pointer"} h-full`}>
               <ArrowCircleRight width={16} height={16} className="mx-2 mr-3 text-gray-400 group-hover:scale-105" />
-              {values?.departSejourAt ? <div>{formatDateFR(values.departSejourAt)}</div> : <div className="text-gray-500">Renseigner un départ</div>}
+              {values?.departSejourAt ? <div>{formatDateFR(values.departSejourAt)}</div> : <div className="text-gray-500">Renseigner un départ anticipé</div>}
             </div>
           </div>
         </div>
