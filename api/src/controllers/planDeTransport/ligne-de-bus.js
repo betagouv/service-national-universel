@@ -907,84 +907,58 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     const regionListToNotify = pdrs.map((pdr) => pdr.region);
     regionListToNotify.push(center.region);
 
+    const roleDep = ["manager_department", "assistant_manager_department", "secretariat", "manager_phase2"];
+    const roleReg = ["coordinator", "assistant_coordinator", "manager_phase2"];
+
     //on recherche les refDep des 2 departments avec les bon subRole
     //ET les ref regionnaux des 2 regions avec les bons subRole
 
     const users = await ReferentModel.find({
       $or: [
         {
-          $and: [
-            {
-              department: {
-                $in: departmentListToNotify,
-              },
-            },
-            {
-              role: "referent_department",
-              subRole: {
-                $in: ["manager_department", "assistant_manager_department", "secretariat", "manager_phase2"],
-              },
-            },
-          ],
+          department: { $in: departmentListToNotify },
+          role: "referent_department",
+          subRole: {
+            $in: roleDep,
+          },
         },
         {
-          $and: [
-            {
-              role: "referent_region",
-              subRole: {
-                $in: ["coordinator", "assistant_coordinator", "manager_phase2"],
-              },
-              region: {
-                $in: regionListToNotify,
-              },
-            },
-          ],
+          role: "referent_region",
+          subRole: { $in: roleReg },
+          region: { $in: regionListToNotify },
         },
       ],
     });
     if (!users?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const roleDep = ["manager_department", "assistant_manager_department", "secretariat", "manager_phase2"];
-    const roleReg = ["coordinator", "assistant_coordinator", "manager_phase2"];
-
-    const usersToNotify = [];
-
     //on prend un ref de chaque departement de la liste trié par subRole
     //et un ref de chaque region de la liste trié par subRole
 
-    for (let i = 0; i < departmentListToNotify.length || i < regionListToNotify.length; i++) {
-      if (i < departmentListToNotify.length) {
-        const dep = departmentListToNotify[i];
-        const usersFromDep = users.filter((u) => u.department.includes(dep) && u.role === "referent_department");
+    const usersToNotify = [];
 
-        for (const role of roleDep) {
-          const userToNotifyInDep = usersFromDep.find((u) => u.subRole === role);
+    const getListToNotify = (type, list, roles) => {
+      for (let i = 0; i < list.length; i++) {
+        const place = list[i];
+        let usersFromPlace = null;
+        if (type === "region") {
+          usersFromPlace = users.filter((u) => u.region === place && u.role === "referent_region");
+        }
+        if (type === "department") {
+          usersFromPlace = users.filter((u) => u.department.includes(place) && u.role === "referent_department");
+        }
+        for (const role of roles) {
+          const userToNotifyInPlace = usersFromPlace.find((u) => u.subRole === role);
 
-          if (userToNotifyInDep) {
-            usersToNotify.push(userToNotifyInDep);
+          if (userToNotifyInPlace) {
+            usersToNotify.push(userToNotifyInPlace);
             break;
           }
         }
       }
+    };
 
-      if (i < regionListToNotify.length) {
-        const reg = regionListToNotify[i];
-        const usersFromReg = users.filter((u) => u.region === reg && u.role === "referent_region");
-
-        for (const role of roleReg) {
-          const userToNotifyInReg = usersFromReg.find((u) => u.subRole === role);
-
-          if (userToNotifyInReg) {
-            usersToNotify.push(userToNotifyInReg);
-            break;
-          }
-        }
-      }
-
-      if (usersToNotify.length === departmentListToNotify.length + regionListToNotify.length) {
-        break;
-      }
-    }
+    getListToNotify("region", regionListToNotify, roleReg);
+    getListToNotify("department", departmentListToNotify, roleDep);
 
     const uniqueUsersToNotify = [...new Set(usersToNotify.map((obj) => JSON.stringify(obj)))].map((str) => JSON.parse(str));
 
