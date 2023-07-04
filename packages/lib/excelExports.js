@@ -166,7 +166,7 @@ const youngExportFields = [
     id: "phase1Affectation",
     title: "Phase 1 - Affectation ",
     desc: ["ID", "Code", "Nom", "Ville", "Département et région du centre"],
-    fields: ["cohesionCenterId"],
+    fields: ["cohesionCenterId", "sessionPhase1Id"],
   },
   {
     id: "phase1Transport",
@@ -174,7 +174,7 @@ const youngExportFields = [
     desc: [
       "Autonomie",
       "Numéro de bus",
-      "Les informations de transport transmises par les services locaux",
+      "Les informations de transports transmises par email",
       "ID du bus",
       "Nom du point de rassemblement",
       "Adresse du point de rassemblement",

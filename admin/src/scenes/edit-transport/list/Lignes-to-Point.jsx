@@ -7,6 +7,8 @@ import api from "../../../services/api";
 import SelectTable from "./components/SelectTable";
 import TooltipAddress from "./components/TooltipAddress";
 import { IoLocationOutline, IoTrashBin, IoArrowRedoOutline } from "react-icons/io5";
+import { replaceSpacesNewList } from "../../../utils";
+import { environment } from "../../../config";
 
 const transportTypeList = [
   { label: "bus", value: "bus" },
@@ -14,45 +16,54 @@ const transportTypeList = [
   { label: "avion", value: "avion" },
 ];
 
-export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingPointIds, ligne, cohort }) {
-  const [defaultMeetingPoint, setDefaultMeetingPoint] = useState();
-  const [tempMeetingPoint, setTempMeetingPoint] = useState();
-  const [isDirty, setIsDirty] = useState(false);
-  const [dataForCheck, setDataForCheck] = useState([]);
+export default function LignesToPoint({ ligne, setDirtyMeetingPointIds, cohort, youngs }) {
+  const [values, setValues] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  React.useEffect(() => {
-    const getMeetingPoint = async () => {
-      try {
-        if (!meetingPointId) return;
-        const { ok, data } = await api.get(`/ligne-to-point/meeting-point/${meetingPointId}`);
-        if (ok) {
-          setTempMeetingPoint(data);
-          setDefaultMeetingPoint(data);
-        } else toastr.error("Oups, une erreur est survenue lors de la recuperation du points de rendez-vous.");
-      } catch (e) {
-        capture(e);
-        toastr.error("Oups, une erreur est survenue lors de la recuperation du points de rendez-vous.");
-      }
-    };
-    getMeetingPoint();
-  }, []);
-
-  React.useEffect(() => {
-    getDataForCheck();
-  }, []);
-
-  const getDataForCheck = async () => {
+  const getMeetingPoints = async () => {
     try {
-      const { ok, code, data: reponseCheck } = await api.get(`/ligne-de-bus/${ligneId}/data-for-check`);
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
-      }
-      setDataForCheck(reponseCheck);
+      if (!ligne) return;
+      setLoading(true);
+      const response = await api.get(`/ligne-de-bus/${ligne._id}/ligne-to-points`);
+      setLoading(false);
+      setValues(response.data.sort((a, b) => a.departureHour.replace(":", "") - b.departureHour.replace(":", "")));
     } catch (e) {
+      setLoading(false);
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
+      toastr.error("Oups, une erreur est survenue lors de la récupération des points de rassemblement");
     }
   };
+
+  React.useEffect(() => {
+    getMeetingPoints();
+    return () => setValues([]);
+  }, [ligne]);
+
+  if (loading) return <div className="text-xs text-gray-400 animate-pulse">Chargement...</div>;
+
+  return values.map((mp) => (
+    <LigneToPoint
+      key={mp._id}
+      meetingPoint={mp}
+      ligneId={ligne._id}
+      setDirtyMeetingPointIds={setDirtyMeetingPointIds}
+      ligne={ligne}
+      cohort={cohort}
+      getMeetingPoints={getMeetingPoints}
+      youngs={youngs?.filter((y) => y.meetingPointId === mp.meetingPointId)}
+    />
+  ));
+}
+
+const LigneToPoint = ({ meetingPoint, ligneId, setDirtyMeetingPointIds, ligne, cohort, getMeetingPoints, youngs }) => {
+  const [defaultMeetingPoint, setDefaultMeetingPoint] = useState();
+  const [tempMeetingPoint, setTempMeetingPoint] = useState(meetingPoint);
+  const [isDirty, setIsDirty] = useState(false);
+
+  React.useEffect(() => {
+    setDefaultMeetingPoint(meetingPoint);
+    setTempMeetingPoint(meetingPoint);
+  }, [meetingPoint]);
 
   if (!tempMeetingPoint) return <div className="text-xs text-gray-400 animate-pulse">Chargement...</div>;
 
@@ -69,6 +80,7 @@ export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingP
   };
 
   const save = async (data) => {
+    if (environment === "production") return toastr.error("Cette fonctionnalité est désactivée en production.");
     toastr.info("Sauvegarde en cours...");
     try {
       const { ok } = await api.put(`/ligne-de-bus/${ligneId}/pointDeRassemblement`, {
@@ -84,6 +96,7 @@ export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingP
         setIsDirty(false);
         setDirtyMeetingPointIds((prev) => prev.filter((e) => e !== tempMeetingPoint.meetingPointId));
         toastr.success("Le points de rendez-vous a été modifié.");
+        getMeetingPoints();
       } else toastr.error("Oups, une erreur est survenue lors de la modifications du points de rendez-vous.");
     } catch (e) {
       capture(e);
@@ -93,13 +106,15 @@ export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingP
 
   // todo: delete ligne to point
   const deleteLigneToPoint = async () => {
+    if (environment === "production") return toastr.error("Cette fonctionnalité est désactivée en production.");
     try {
       if (!window.confirm(`Êtes-vous sûr de vouloir supprimer le point de rendez-vous ?\nPDR: ${tempMeetingPoint.meetingPoint.name.replace(/PDR\s*-/, "")}\nligne: ${ligne.busId}`))
         return;
-      const response = await api.remove(`/ligne-de-bus/${ligne._id}/point-de-rassemblement/${tempMeetingPoint.meetingPointId}`);
+      const response = await api.remove(`/ligne-to-point/${tempMeetingPoint._id}`);
       if (response.ok) {
         toastr.success("Le point de rencontre a été ajouté à la ligne.");
       } else toastr.error("Oups, une erreur est survenue lors de l'ajout du point de rencontre à la ligne.");
+      getMeetingPoints();
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de l'ajout du point de rencontre à la ligne.");
@@ -110,8 +125,9 @@ export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingP
   return (
     <>
       <tr
-        className={`cursor-default [&>td]:h-10 [&>td]:p-1 divide-x border-b-[1px] border-gray-300 divide-gray-300 py-6 px-4 text-snu-purple-800 ${isDirty ? "bg-snu-purple-100" : "hover:bg-gray-50"
-          }`}>
+        className={`cursor-default [&>td]:h-10 [&>td]:p-1 divide-x border-b-[1px] border-gray-300 divide-gray-300 py-6 px-4 text-snu-purple-800 ${
+          isDirty ? "bg-snu-purple-100" : "hover:bg-gray-50"
+        }`}>
         <td>
           <div className="h-full flex items-center justify-center group hover:bg-red-50 cursor-pointer" onClick={() => deleteLigneToPoint()}>
             <IoTrashBin className="text-gray-300 group-hover:text-red-400" />
@@ -119,27 +135,27 @@ export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingP
         </td>
         <td>
           <div className="flex items-center gap-1">
-            <a className="ml-6 cursor-pointer hover:underline" href={`/point-de-rassemblement/${tempMeetingPoint.meetingPointId.toString()}`}>
+            <a className="ml-6 cursor-pointer hover:underline" href={`/point-de-rassemblement/${tempMeetingPoint.meetingPointId.toString()}`} target="_blank" rel="noreferrer">
               {tempMeetingPoint.meetingPoint.name.replace(/PDR\s*-/, "")}
             </a>
-            <TooltipAddress meetingPt={tempMeetingPoint.meetingPoint} handleChange={handleChange}>
+            <TooltipAddress meetingPt={tempMeetingPoint.meetingPoint}>
               <IoLocationOutline />
             </TooltipAddress>
           </div>
         </td>
         <td>
           <div className="flex h-full w-full justify-around items-center">
-            {!dataForCheck ? (
+            {!youngs ? (
               <div>loading...</div>
             ) : (
               <>
-                <div className="flex-1">{(dataForCheck?.meetingPoints || []).find((v) => v.meetingPointId === tempMeetingPoint.meetingPointId)?.youngsCount || 0}</div>
+                <div className="flex-1">{youngs?.length}</div>
                 <a
-                  className="h-full flex flex-1 items-center gap-1 p-1 border-[1px] border-gray-100 hover:border-gray-400 hover:text-snu-purple-800"
-                  href={`/edit-transport/deplacement?cohort=${cohort}&ligne_to_point_id_from=${tempMeetingPoint._id.toString()}`}
+                  className="flex w-fit cursor-pointer flex-row items-center justify-center gap-2 self-end rounded border-[1px] border-gray-300 p-2 text-gray-900"
+                  href={`/edit-transport/deplacement?cohort=${cohort}&pdr_from_id=${tempMeetingPoint.meetingPointId}&ligne_from_id=${ligne._id.toString()}`}
                   target="_blank"
                   rel="noreferrer">
-                  <IoArrowRedoOutline /> Déplacer
+                  <IoArrowRedoOutline className="text-blue-500" /> Déplacer
                 </a>
               </>
             )}
@@ -158,7 +174,7 @@ export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingP
           <div className="h-full">
             <input
               placeholder="hh:mm"
-              className="h-full bg-transparent"
+              className={`w-full h-full ${!/^\d{2}:\d{2}$/.test(tempMeetingPoint.meetingHour) ? "bg-red-100" : "bg-transparent"}`}
               type="text"
               value={tempMeetingPoint.meetingHour}
               onClick={(event) => event.stopPropagation()}
@@ -171,7 +187,7 @@ export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingP
           <div className="h-full">
             <input
               placeholder="hh:mm"
-              className="h-full bg-transparent"
+              className={`w-full h-full ${!/^\d{2}:\d{2}$/.test(tempMeetingPoint.busArrivalHour) ? "bg-red-100" : "bg-transparent"}`}
               type="text"
               value={tempMeetingPoint.busArrivalHour}
               onClick={(event) => event.stopPropagation()}
@@ -184,7 +200,7 @@ export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingP
           <div className="h-full">
             <input
               placeholder="hh:mm"
-              className="h-full bg-transparent"
+              className={`w-full h-full ${!/^\d{2}:\d{2}$/.test(tempMeetingPoint.departureHour) ? "bg-red-100" : "bg-transparent"}`}
               type="text"
               value={tempMeetingPoint.departureHour}
               onClick={(event) => event.stopPropagation()}
@@ -197,7 +213,7 @@ export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingP
           <div className="h-full">
             <input
               placeholder="hh:mm"
-              className="h-full bg-transparent"
+              className={`w-full h-full ${!/^\d{2}:\d{2}$/.test(tempMeetingPoint.returnHour) ? "bg-red-100" : "bg-transparent"}`}
               type="text"
               value={tempMeetingPoint.returnHour}
               onClick={(event) => event.stopPropagation()}
@@ -239,4 +255,4 @@ export default function LigneToPoint({ meetingPointId, ligneId, setDirtyMeetingP
       )}
     </>
   );
-}
+};

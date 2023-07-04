@@ -1,6 +1,5 @@
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-dayjs.extend(utc);
 import React, { useCallback, useEffect, useState } from "react";
 import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
 import { toastr } from "react-redux-toastr";
@@ -17,7 +16,8 @@ import ModalTailwind from "../../../components/modals/ModalTailwind";
 import api from "../../../services/api";
 import { debounce, formatStringDateWithDayTimezoneUTC, translate } from "../../../utils";
 import RightArrow from "./RightArrow";
-import { getDepartureDate, getMeetingHour, getReturnDate, getReturnHour } from "snu-lib";
+import MeetingInfo from "./phase1/MeetingInfo";
+dayjs.extend(utc);
 
 const LIST_PAGE_LIMIT = 3;
 
@@ -137,7 +137,6 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
     //setLoadingPdr(loadingPdr + 1);
     setLoadingPdr(true);
     try {
-      console.log(session);
       let url = "/point-de-rassemblement/ligneToPoint";
       url += "/" + young.cohort + "/" + session.cohesionCenterId;
       url += "?offset=" + currentPage * LIST_PAGE_LIMIT + "&limit=" + LIST_PAGE_LIMIT;
@@ -284,7 +283,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                     }}
                     className="flex w-1/3 flex-auto cursor-pointer flex-row items-center justify-center gap-4 rounded-lg border-[1px] border-gray-200 py-3 hover:bg-gray-100">
                     <div className="w-5/6 text-sm">
-                      Plan de transport <span className="font-bold">transmis par les services locaux</span>
+                      Plan de transport <span className="font-bold">transmis par email</span>
                     </div>
                     <ChevronRight className="text-gray-400" width={8} height={16} />
                   </div>
@@ -373,14 +372,14 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                   ) : pdrOption === "self-going" ? (
                     <div>Le volontaire se rendra directement au centre et en reviendra par ses propres moyens.</div>
                   ) : pdrOption === "local" ? (
-                    <div>Les informations de transport sont transmises par les services locaux.</div>
+                    <div>Les informations de transport sont transmises par email.</div>
                   ) : (
                     <div>Le volontaire choisira lui-même son point de rassemblement.</div>
                   )}
                 </div>
               </div>
             </div>
-            {session && cohort && pdrOption !== "local" && <MeetingInfo young={young} session={session} cohort={cohort} selectedPdr={selectedPdr} />}
+            {session && cohort && pdrOption !== "local" && <MeetingInfo young={young} session={session} cohort={cohort} selectedPdr={selectedPdr?.data} />}
           </div>
         )}
 
@@ -413,7 +412,7 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
         </div>
 
         {step === 3 && (
-          <div onClick={handleAffectation} className="mb-2 flex-1 cursor-pointer rounded border-[1px] bg-blue-600 py-2 text-center text-sm font-medium text-white">
+          <div onClick={handleAffectation} className="mb-2 mt-5 flex-1 cursor-pointer rounded border-[1px] bg-blue-600 py-2 text-center text-sm font-medium text-white">
             Confirmer
           </div>
         )}
@@ -537,35 +536,3 @@ const HitPdr = ({ hit, onSend, data, young }) => {
     </>
   );
 };
-
-function MeetingInfo({ young, session, cohort, selectedPdr }) {
-  const departureDate = getDepartureDate(young, session, cohort, selectedPdr?.data);
-  const returnDate = getReturnDate(young, session, cohort, selectedPdr?.data);
-  const meetingHour = getMeetingHour(selectedPdr?.data);
-  const returnHour = getReturnHour(selectedPdr?.data);
-
-  return (
-    <div className="mb-2 flex flex-row justify-center gap-6">
-      <div className="flex flex-row">
-        <div className="flex flex-col items-center justify-center rounded-lg bg-white p-1 px-2 font-bold shadow-sm">
-          <div className="capitalize text-orange-600">{dayjs(departureDate).locale("fr").format("MMM")}</div>
-          <div className="text-lg text-gray-700">{dayjs(departureDate).locale("fr").format("D")}</div>
-        </div>
-        <div className="ml-2 flex flex-col items-start justify-center">
-          <div className="font-bold text-gray-900">Aller à {meetingHour}</div>
-          <div className="text-gray-600 first-letter:capitalize">{dayjs(departureDate).locale("fr").format("dddd D MMMM")}</div>
-        </div>
-      </div>
-      <div className="flex flex-row">
-        <div className="flex flex-col items-center justify-center rounded-lg bg-white p-1 px-2 font-bold shadow-sm">
-          <div className="capitalize text-orange-600">{dayjs(returnDate).locale("fr").format("MMM")}</div>
-          <div className="text-lg text-gray-700">{dayjs(returnDate).locale("fr").format("D")}</div>
-        </div>
-        <div className="ml-2 flex flex-col items-start justify-center">
-          <div className="font-bold text-gray-900">Retour à {returnHour}</div>
-          <div className="text-gray-600 first-letter:capitalize">{dayjs(returnDate).locale("fr").format("dddd D MMMM")}</div>
-        </div>
-      </div>
-    </div>
-  );
-}

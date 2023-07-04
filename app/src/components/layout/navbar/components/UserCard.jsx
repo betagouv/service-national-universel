@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
@@ -64,12 +64,19 @@ export default function User() {
 function Menu({ open, menuRef, user, onClose }) {
   const dispatch = useDispatch();
   const history = useHistory();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   async function logout() {
-    await API.post(`/young/logout`);
-    dispatch(setYoung(null));
-    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
-    return history.push("/auth");
+    try {
+      setIsLoggingOut(true);
+      await API.post(`/young/logout`);
+      dispatch(setYoung(null));
+      toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
+      return history.push("/auth");
+    } catch (e) {
+      toastr.error("Oups une erreur est survenue lors de la déconnexion", { timeOut: 10000 });
+      setIsLoggingOut(false);
+    }
   }
 
   return (
@@ -86,7 +93,11 @@ function Menu({ open, menuRef, user, onClose }) {
           Mes préférences de mission
         </Link>
       )}
-      <button onClick={logout} type="button" className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
+      <button
+        onClick={logout}
+        disabled={isLoggingOut}
+        type="button"
+        className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-50">
         Se déconnecter
       </button>
     </nav>

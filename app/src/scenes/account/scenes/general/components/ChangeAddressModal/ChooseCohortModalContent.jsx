@@ -3,7 +3,7 @@ import Modal from "../../../../../../components/ui/modals/Modal";
 import RadioButton from "../../../../../../components/forms/inputs/RadioButton";
 import Calendar from "../../../../../../assets/icons/CalendarFill";
 
-const ChooseCohortModalContent = ({ onConfirm, currentCohortPeriod, cohorts, isLoading }) => {
+const ChooseCohortModalContent = ({ onConfirm, currentCohortPeriod, cohorts, isLoading, onCancel }) => {
   const [newCohort, setNewCohort] = useState(null);
   return (
     <>
@@ -15,13 +15,12 @@ const ChooseCohortModalContent = ({ onConfirm, currentCohortPeriod, cohorts, isL
       <Modal.Title>Choisir un séjour</Modal.Title>
       <Modal.Subtitle>
         <div className="text-gray-500 md:text-center">
-          Malheureusement, aucun séjour de cohésion n&apos;est prévu <span className="text-gray-900 font-medium">{currentCohortPeriod}</span> dans votre nouveau département de
-          résidence.
+          Aucun séjour de cohésion n&apos;est prévu <span className="text-gray-900 font-medium">{currentCohortPeriod}</span> dans votre nouveau département de résidence.
         </div>
       </Modal.Subtitle>
       <div className="my-6 h-[1px] bg-gray-200" />
       <RadioButton className="mb-6" label="Choisissez un nouveau séjour :" value={newCohort} onChange={setNewCohort} options={cohorts} />
-      <Modal.Buttons onConfirm={() => onConfirm(newCohort)} confirmText="Valider ce séjour" disabled={isLoading || !newCohort} />
+      <Modal.Buttons onCancel={onCancel} cancelText="Annuler" onConfirm={() => onConfirm(newCohort)} confirmText="Valider ce séjour" disabled={isLoading || !newCohort} />
     </>
   );
 };

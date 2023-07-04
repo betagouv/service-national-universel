@@ -15,7 +15,9 @@ function isEndOfInscriptionManagement2021() {
 
 //force redeploy
 
-function inscriptionModificationOpenForYoungs(cohort, young) {
+function inscriptionModificationOpenForYoungs(cohort, young, env) {
+  if (env !== undefined && env !== "production") return true;
+
   switch (cohort) {
     case "2019":
     case "2020":
@@ -52,8 +54,8 @@ function inscriptionModificationOpenForYoungs(cohort, young) {
   }
 }
 
-function inscriptionCreationOpenForYoungs(cohort, allowed = false) {
-  if (allowed) return true;
+function inscriptionCreationOpenForYoungs(cohort, allowed = false, env) {
+  if ((env !== undefined && env !== "production") || allowed) return true;
   switch (cohort) {
     case "Février 2022":
       return new Date() < new Date(2022, 0, 10); // before 10 janvier 2022 morning
@@ -67,7 +69,9 @@ function inscriptionCreationOpenForYoungs(cohort, allowed = false) {
   }
 }
 
-function reInscriptionModificationOpenForYoungs(cohort) {
+function reInscriptionModificationOpenForYoungs(cohort, env) {
+  if (env !== undefined && env !== "production") return true;
+
   switch (cohort) {
     default:
       return new Date() < new Date(2023, 4, 11); // before 11 mai 2023 morning
@@ -211,6 +215,11 @@ const formatPhoneNumberFR = (tel) => {
   return formatted;
 };
 
+const formatMessageForReadingInnerHTML = (content) => {
+  const message = content.replace(/\\n/g, "<br>").replace(/\\r/g, "<br>");
+  return message;
+};
+
 export {
   isEndOfInscriptionManagement2021,
   inscriptionModificationOpenForYoungs,
@@ -225,6 +234,7 @@ export {
   canUserUpdateYoungStatus,
   youngCanChangeSession,
   formatPhoneNumberFR,
+  formatMessageForReadingInnerHTML,
 };
 export * from "./academy";
 export * from "./colors";

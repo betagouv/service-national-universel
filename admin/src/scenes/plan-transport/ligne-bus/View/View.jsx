@@ -18,6 +18,8 @@ import Info from "./components/Info";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
+import InfoMessage from "../../../dashboardV2/components/ui/InfoMessage";
+import { AiOutlineExclamationCircle } from "react-icons/ai";
 
 export default function View(props) {
   const [data, setData] = React.useState(null);
@@ -137,7 +139,7 @@ export default function View(props) {
     {
       key: "exportData",
       action: async () => {
-        await exportLigneBusJeune(cohort.name, data.busId, "total", data.team);
+        await exportLigneBusJeune(cohort.name, data, "total", data.team);
       },
       render: (
         <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
@@ -217,6 +219,15 @@ export default function View(props) {
             )}
           </div>
         </div>
+        {data.delayedForth === "true" || data.delayedBack === "true" ? (
+          <InfoMessage
+            bg="bg-[#B45309]"
+            Icon={AiOutlineExclamationCircle}
+            message={`Le départ de cette ligne de bus est retardé ${
+              data.delayedForth === "true" && data.delayedBack === "true" ? "à l'aller et au retour" : data.delayedForth === "true" ? "à l'aller" : "au retour"
+            }.`}
+          />
+        ) : null}
         <div className="flex flex-col gap-8">
           <div className="flex gap-4">
             <Itineraire
@@ -224,6 +235,8 @@ export default function View(props) {
               aller={data.departuredDate}
               retour={data.returnDate}
               center={{ ...data.centerDetail, departureHour: data.centerArrivalTime, returnHour: data.centerDepartureTime }}
+              bus={data}
+              setBus={setData}
             />
             <Modification demandeDeModification={demandeDeModification} getModification={getDemandeDeModification} />
           </div>
@@ -234,12 +247,22 @@ export default function View(props) {
             data.team
               .filter((item) => item.role === "supervisor")
               .map((value) => (
-                <BusTeam key={value._id} bus={data} setBus={setData} title="Encadrant" role={"supervisor"} idTeam={value._id} addOpen={addOpen} setAddOpen={setAddOpen} />
+                <BusTeam
+                  key={value._id}
+                  bus={data}
+                  setBus={setData}
+                  title="Encadrant"
+                  role={"supervisor"}
+                  idTeam={value._id}
+                  addOpen={addOpen}
+                  setAddOpen={setAddOpen}
+                  cohort={cohort}
+                />
               ))
           ) : (
             <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} cohort={cohort} />
           )}
-          {addOpen ? <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} setAddOpen={setAddOpen} /> : null}
+          {addOpen ? <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} setAddOpen={setAddOpen} cohort={cohort} /> : null}
 
           <div className="flex items-start gap-4">
             <div className="flex w-1/2 flex-col gap-4">

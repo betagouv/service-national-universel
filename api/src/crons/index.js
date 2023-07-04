@@ -39,7 +39,7 @@ const everyHours = (x) => `0 */${x} * * *`;
 /* eslint-enable no-unused-vars */
 
 // ! A jour du 16 juin 2023 (Source ChatGPT)
-// Voici les heures de déclenchement de chaque cron dans le fichier fourni :
+// Voici les heures de déclenchement de chaque cron dans le fichier fourni (en UTC):
 
 // applicationPending.handler() : tous les lundis à 9h00
 // deleteInactiveRefs.handler() : tous les jours à minuit

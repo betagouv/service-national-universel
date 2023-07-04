@@ -65,13 +65,13 @@ const render = async (young) => {
       if (ligneBus?.departuredDate) {
         return new Date(ligneBus?.departuredDate);
       }
-      if (session.dateStart) {
+      if (session?.dateStart) {
         const sessionDateStart = new Date(session.dateStart);
         sessionDateStart.setHours(sessionDateStart.getHours() + 12);
         return sessionDateStart;
       }
-      if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
-        return new Date(2023, 6, 5);
+      if (young.cohort === "Juillet 2023" && [...regionsListDROMS, "Polynésie française"].includes(young.region)) {
+        return new Date(2023, 6, 4);
       }
       const cohortDateStart = new Date(cohort?.dateStart);
       cohortDateStart.setHours(cohortDateStart.getHours() + 12);
@@ -87,8 +87,8 @@ const render = async (young) => {
         sessionDateEnd.setHours(sessionDateEnd.getHours() + 12);
         return sessionDateEnd;
       }
-      if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
-        return new Date(2023, 6, 17);
+      if (young?.cohort === "Juillet 2023" && [...regionsListDROMS, "Polynésie française"].includes(young.region)) {
+        return new Date(2023, 6, 16);
       }
       const cohortDateEnd = new Date(cohort?.dateEnd);
       cohortDateEnd.setHours(cohortDateEnd.getHours() + 12);
@@ -142,7 +142,6 @@ const render = async (young) => {
 };
 
 const renderLocalTransport = async (young) => {
-  console.log(getBaseUrl());
   try {
     if (!["AFFECTED", "DONE", "NOT_DONE"].includes(young.statusPhase1)) throw `young ${young.id} not affected`;
     if (!young.sessionPhase1Id) throw `young ${young.id} unauthorized`;
@@ -165,8 +164,8 @@ const renderLocalTransport = async (young) => {
         sessionDateStart.setHours(sessionDateStart.getHours() + 12);
         return sessionDateStart;
       }
-      if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
-        return new Date(2023, 6, 5);
+      if (young.cohort === "Juillet 2023" && [...regionsListDROMS, "Polynésie française"].includes(young.region)) {
+        return new Date(2023, 6, 4);
       }
       const cohortDateStart = new Date(cohort?.dateStart);
       cohortDateStart.setHours(cohortDateStart.getHours() + 12);
@@ -179,8 +178,8 @@ const renderLocalTransport = async (young) => {
         sessionDateEnd.setHours(sessionDateEnd.getHours() + 12);
         return sessionDateEnd;
       }
-      if (young.cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)) {
-        return new Date(2023, 6, 17);
+      if (young.cohort === "Juillet 2023" && [...regionsListDROMS, "Polynésie française"].includes(young.region)) {
+        return new Date(2023, 6, 16);
       }
       const cohortDateEnd = new Date(cohort?.dateEnd);
       cohortDateEnd.setHours(cohortDateEnd.getHours() + 12);

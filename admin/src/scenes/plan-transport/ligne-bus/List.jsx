@@ -178,6 +178,20 @@ const ReactiveList = ({ cohort, history }) => {
           translate: translate,
         }
       : null,
+    {
+      title: "Aller",
+      name: "delayedForth",
+      parentGroup: "Retard",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
+      title: "Retour",
+      name: "delayedBack",
+      parentGroup: "Retard",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
   ].filter((e) => e);
 
   return (
@@ -284,6 +298,8 @@ const ReactiveList = ({ cohort, history }) => {
                                 "PAUSE DÉJEUNER ALLER": data.lunchBreak ? "Oui" : "Non",
                                 "PAUSE DÉJEUNER RETOUR": data.lunchBreakReturn ? "Oui" : "Non",
                                 "TEMPS DE ROUTE": data.travelTime,
+                                "RETARD ALLER": data.delayedForth === "true" ? "Oui" : "Non",
+                                "RETARD RETOUR": data.delayedBack === "true" ? "Oui" : "Non",
                               };
                             });
                           }}

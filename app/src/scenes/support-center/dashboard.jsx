@@ -16,6 +16,8 @@ import SuccessIcon from "../../components/SuccessIcon";
 import { supportURL } from "../../config";
 import plausibleEvent from "../../services/plausible";
 import BannerJuly from "./BannerJuly";
+import ModalForm from "../../components/modals/ModalForm";
+import { useHistory } from "react-router-dom";
 
 const articles = [
   {
@@ -146,6 +148,8 @@ const KnowledgeBaseArticleCard = ({ _id, position, title, slug, path, className 
 export default function Dashboard(props) {
   const [userTickets, setUserTickets] = useState(null);
   const fromPage = new URLSearchParams(props.location.search).get("from");
+  const [isOpen, setIsOpen] = useState(false);
+  const history = useHistory();
 
   dayjs.extend(relativeTime).locale("fr");
 
@@ -198,13 +202,6 @@ export default function Dashboard(props) {
 
   return (
     <HeroContainer>
-      <NavLink style={{ color: "#32257F", fontWeight: "bold" }} to="/">
-        {" "}
-        <svg width="8" height="11" viewBox="0 0 6 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4.42367 0L0.423279 4.00716L4.42367 8.01432L5.41483 7.02148L2.4056 4.00716L5.41483 0.992838L4.42367 0Z" fill="#32257F" />
-        </svg>{" "}
-        Retour à mon espace
-      </NavLink>
       <Container>
         <h3 className="text-center text-[32px]">Besoin d&apos;aide&nbsp;?</h3>
         <div className=" mt-2 mr-auto ml-auto flex w-full content-center items-center justify-center md:w-2/3 md:flex-1">
@@ -240,9 +237,20 @@ export default function Dashboard(props) {
               une réponse par mail.
             </div>
             <div className="buttons mt-4">
-              <InternalLink onClick={() => plausibleEvent("Besoin d'aide - Contacter quelqu'un")} to={`/besoin-d-aide/ticket?from=${fromPage}`}>
+              <LinkButton
+                onClick={() => {
+                  plausibleEvent("Besoin d'aide - Contacter quelqu'un");
+                  setIsOpen(true);
+                }}>
                 Contacter&nbsp;quelqu&apos;un
-              </InternalLink>
+              </LinkButton>
+              <ModalForm
+                isOpen={isOpen}
+                onClose={() => {
+                  setIsOpen(false);
+                  history.push(`/besoin-d-aide/ticket?from=${fromPage}`);
+                }}
+              />{" "}
             </div>
           </div>
         </div>
@@ -319,6 +327,24 @@ const Container = styled.div`
     .help-section-text {
       text-align: center;
     }
+  }
+`;
+
+const LinkButton = styled.a`
+  max-width: 230px;
+  margin: 0.3rem;
+  background-color: #5245cc;
+  border: none;
+  border-radius: 5px;
+  padding: 12px 25px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  transition: opacity 0.3s;
+  :hover {
+    cursor: pointer;
+    color: #fff;
+    background: #463bad;
   }
 `;
 

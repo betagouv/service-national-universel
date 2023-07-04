@@ -1,7 +1,7 @@
 import React from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory, useParams, useLocation } from "react-router-dom";
 import { COHESION_STAY_START, COHORTS, ROLES, START_DATE_SESSION_PHASE1, canCreateMeetingPoint, getDepartmentNumber } from "snu-lib";
 import BusSvg from "../../assets/icons/Bus";
 import Calendar from "../../assets/icons/Calendar";
@@ -22,13 +22,19 @@ export default function List() {
   const [firstSession, setFirstSession] = React.useState(null);
   const history = useHistory();
   const { currentTab } = useParams();
+  const { search } = useLocation();
+  const query = new URLSearchParams(search);
 
   const getFirstCohortAvailable = () => {
+    let firstSession = null;
     for (const session of COHORTS) {
       if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
-        return setFirstSession(session);
+        firstSession = session;
+        break;
       }
     }
+    if (!firstSession) firstSession = "Juillet 2023";
+    setFirstSession(firstSession);
   };
 
   React.useEffect(() => {
@@ -38,6 +44,11 @@ export default function List() {
 
   React.useEffect(() => {
     getFirstCohortAvailable();
+  }, []);
+
+  React.useEffect(() => {
+    const modalCreationOpen = query.get("modal_creation_open");
+    setModal({ isOpen: !!modalCreationOpen });
   }, []);
 
   if (!firstSession || !user) return <div></div>;
@@ -82,7 +93,14 @@ export default function List() {
           </div>
         </div>
       </div>
-      <ModalCreation isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
+      <ModalCreation
+        isOpen={modal.isOpen}
+        onCancel={() => {
+          setModal({ isOpen: false });
+          query.delete("modal_creation_open");
+          history.replace({ search: query.toString() });
+        }}
+      />
     </>
   );
 }

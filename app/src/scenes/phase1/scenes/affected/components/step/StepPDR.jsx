@@ -137,7 +137,7 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
                 : young?.transportInfoGivenByLocal === "true"
                 ? "Confirmation du point de rendez-vous : vous n'avez rien à faire"
                 : pdrChoiceExpired
-                ? "Date limite dépassée"
+                ? "Non disponible"
                 : "Confirmez votre point de rassemblement"}
             </h1>
             <p className={`text-sm leading-5 ${enabled ? "text-gray-500" : "text-gray-400"}`}>
@@ -158,7 +158,7 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
                   </strong>
                 </>
               ) : young.transportInfoGivenByLocal === "true" ? (
-                <>Les informations sur les modalités d&apos;acheminement vers le centre et de retour vous seront transmises par e-mail par les services académiques.</>
+                <>Vos informations de transports vers le centre vous seront transmises par email.</>
               ) : pdrChoiceExpired ? (
                 <>Un point de rassemblement va vous être attribué par votre référent SNU.</>
               ) : (
@@ -230,7 +230,7 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
                 : young?.transportInfoGivenByLocal === "true"
                 ? "Confirmation du point de rendez-vous : vous n'avez rien à faire"
                 : pdrChoiceExpired
-                ? "Date limite dépassée"
+                ? "Non disponible"
                 : "Confirmez votre point de rassemblement"}
             </div>
             <div className={` text-sm leading-5 ${valid && "text-green-600 opacity-70"} ${enabled ? "text-gray-500" : "text-gray-400"}`}>
@@ -245,7 +245,7 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
                   <MobileDateDetail departureDate={departureDate} returnDate={returnDate} startHour={meetingHour} returnHour={returnHour} />
                 </>
               ) : young.transportInfoGivenByLocal === "true" ? (
-                <>Les informations sur les modalités d&apos;acheminement vers le centre et de retour vous seront transmises par e-mail par les services académiques.</>
+                <>Vos informations de transports vers le centre vous seront transmises par email.</>
               ) : pdrChoiceExpired ? (
                 <>Un point de rassemblement va vous être attribué par votre référent SNU.</>
               ) : (

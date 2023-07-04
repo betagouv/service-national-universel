@@ -512,7 +512,9 @@ const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen, fo
                 }
               }}>
               <ArrowCircleRight className="text-gray-400 group-hover:scale-105" />
-              <div className={isYoungCheckinOpen ? "group-hover:underline" : ""}>{!value.departSejourAt ? "Renseigner un départ" : formatDateFR(value.departSejourAt)}</div>
+              <div className={isYoungCheckinOpen ? "group-hover:underline" : ""}>
+                {!value.departSejourAt ? "Renseigner un départ anticipé" : formatDateFR(value.departSejourAt)}
+              </div>
             </div>
           </div>
         </td>

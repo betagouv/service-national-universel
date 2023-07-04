@@ -34,6 +34,13 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
 
   const dispatch = useDispatch();
 
+  const onCancel = () => {
+    setStep(changeAddressSteps.CONFIRM);
+    setNewCohortName(undefined);
+    setNewAddress(undefined);
+    onClose();
+  };
+
   useEffect(() => {
     if (young) {
       getCohort();
@@ -157,9 +164,10 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
       ) : (
         <>
           {step === changeAddressSteps.CONFIRM && <ChangeAddressConfirmModalContent onCancel={onClose} onConfirm={() => setStep(changeAddressSteps.NEW_ADDRESS)} />}
-          {step === changeAddressSteps.NEW_ADDRESS && <AddressFormModalContent onClose={onClose} onConfirm={onAddressEntered} isLoading={isLoading} />}
+          {step === changeAddressSteps.NEW_ADDRESS && <AddressFormModalContent onCancel={onCancel} onConfirm={onAddressEntered} isLoading={isLoading} />}
           {step === changeAddressSteps.COMPLEMENTARY_LIST && (
             <ChangedDepartmentInfoModalContent
+              onCancel={onCancel}
               onConfirm={() => updateAddress(newAddress, YOUNG_STATUS.WAITING_LIST)}
               cohortPeriod={getCohortPeriod(currentCohort)}
               type="COMPLEMENTARY_LIST"
@@ -168,6 +176,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
           )}
           {step === changeAddressSteps.NOT_ELIGIBLE && (
             <ChangedDepartmentInfoModalContent
+              onCancel={onCancel}
               onConfirm={() => updateAddress(newAddress, YOUNG_STATUS.NOT_ELIGIBLE)}
               cohortPeriod={getCohortPeriod(currentCohort)}
               type="NOT_ELIGIBLE"
@@ -176,6 +185,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
           )}
           {step === changeAddressSteps.CHOOSE_COHORT && (
             <ChooseCohortModalContent
+              onCancel={onCancel}
               onConfirm={chooseNewCohort}
               cohorts={availableCohorts.map((cohort) => ({ value: cohort, label: `Séjour ${translateCohort(cohort)}` }))}
               currentCohortPeriod={getCohortPeriod(currentCohort)}

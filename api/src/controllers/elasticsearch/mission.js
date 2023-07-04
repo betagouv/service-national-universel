@@ -94,8 +94,6 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
       contextFilters,
     });
 
-    console.log("QUERY = ", JSON.stringify(hitsRequestBody.query));
-
     if (req.params.action === "export") {
       const response = await allRecords("mission", hitsRequestBody.query);
       return res.status(200).send({ ok: true, data: serializeMissions(response) });
