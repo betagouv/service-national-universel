@@ -987,9 +987,7 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     }
 
     const uniqueUsersToNotify = [...new Set(usersToNotify.map((obj) => JSON.stringify(obj)))].map((str) => JSON.parse(str));
-    console.log(uniqueUsersToNotify);
-    console.log(uniqueUsersToNotify.length);
-    return;
+
     // send notification
     await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.NOTIF_REF, {
       emailTo: uniqueUsersToNotify.map((referent) => ({
