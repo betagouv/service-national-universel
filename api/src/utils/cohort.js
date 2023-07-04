@@ -80,7 +80,7 @@ async function getCohortNamesEndAfter(date) {
 
 async function getCohortDateInfo(cohortName) {
   try {
-    return CohortModel.findOne({ name: cohortName }, { validationDate: 1, validationDateForTerminaleGrade: 1, daysToValidate: 1, daysToValidateForTerminalGrade: 1 });
+    return CohortModel.findOne({ name: cohortName }, { validationDate: 1, validationDateForTerminaleGrade: 1, daysToValidate: 1, daysToValidateForTerminalGrade: 1, dateStart: 1 });
   } catch (err) {
     return {};
   }

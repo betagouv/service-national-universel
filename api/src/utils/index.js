@@ -601,7 +601,6 @@ async function addingDayToDate(days, dateStart) {
     newDate.setUTCHours(23);
     newDate.setUTCMinutes(59);
     const formattedValidationDate = newDate.toISOString();
-    // const formattedValidationDate = formatISO(newDate);
 
     return formattedValidationDate;
   } catch (e) {
@@ -610,13 +609,17 @@ async function addingDayToDate(days, dateStart) {
 }
 
 async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) {
-  const dateStart = sessionPhase1.dateStart;
+  const dateStartForSpecialSession = sessionPhase1.dateStart;
   const {
     daysToValidate: daysToValidate,
     daysToValidateForTerminalGrade: daysToValidateForTerminalGrade,
     validationDate: dateDeValidation,
     validationDateForTerminaleGrade: dateDeValidationTerminale,
+    dateStart: cohortDateStart,
   } = await getCohortDateInfo(sessionPhase1.cohort);
+
+  // Ici on regarde si la session à des date spécifique sinon on garde la date de la cohort
+  const dateStart = dateStartForSpecialSession === undefined ? cohortDateStart : dateStartForSpecialSession;
 
   if (!dateDeValidation || !dateDeValidationTerminale) {
     throw new Error("❌ validationDate & validationDateForTerminaleGrade missing on cohort " + sessionPhase1.cohort);
@@ -682,7 +685,6 @@ async function updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithD
     const validationDate = new Date(validationDateWithDays);
     // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
     const isValidationDatePassed = now >= validationDate;
-    console.log(isValidationDatePassed, now, validationDateWithDays);
     // Cette constante nous permet de vérifier si un jeune était présent au début du séjour (exception pour cette cohorte : pas besoin de JDM)(basé sur son grade)
     const isCohesionStayValid = young.cohesionStayPresence === "true";
     // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
