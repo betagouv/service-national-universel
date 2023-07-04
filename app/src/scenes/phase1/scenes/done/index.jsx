@@ -17,7 +17,7 @@ import HeroPhase1Mobile from "./assets/herophase1mobile.png";
 import JDMDone from "./components/JDMDone";
 import JDMNotDone from "./components/JDMNotDone";
 import JDCDone from "./components/JDCDone";
-import JDCNotDone from "./components/JSCNotDone";
+import JDCNotDone from "./components/JDCNotDone";
 import NextStep from "./components/NextStep";
 
 export default function Done() {
@@ -92,7 +92,7 @@ export default function Done() {
 
   return (
     <>
-      {/* DESKTOP VIEW*/}
+      {/* DESKTOP VIEW */}
       <div className="hidden flex-col md:flex">
         <div className="m-4 flex flex-col rounded-xl bg-white shadow-ninaBlock">
           <div className="flex flex-col-reverse items-start justify-between px-8 pt-4 lg:!flex-row">
@@ -177,7 +177,9 @@ export default function Done() {
                 Plus d’informations
               </a>
             </div>
-            <div className="flex flex-col items-center">{young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />}</div>
+            {/* <div className="flex flex-col items-center">{young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />}</div> */}
+            <div className="flex flex-col items-center">{needTheJDMPresenceTrue.includes(young.cohort) ? (young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />) : (young.cohesionStayPresence === "true" ? <JDCDone/> : <JDCNotDone/>)}</div>
+
           </div>
         </div>
       </div>
