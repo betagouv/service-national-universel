@@ -105,28 +105,20 @@ export default function StepEligibilite() {
       setError({ text: "Impossible de vérifier votre éligibilité" });
       setLoading(false);
     }
-    if (res.data.msg && environment === "production") {
+
+    if (environment !== "production" && (res.data.msg || res.data.length === 0)) {
+      res.data = [{ id: "à", name: "à venir", dateStart: new Date(2023, 11, 1), dateEnd: new Date(2023, 11, 15), buffer: 99999, event: "" }];
+    }
+
+    if (res.data.msg) {
       setData({ ...data, msg: res.data.msg, step: PREINSCRIPTION_STEPS.INELIGIBLE });
       return history.push("/preinscription/noneligible");
     }
     const sessions = res.data;
-
-    if (sessions.length === 0 && environment === "production") {
+    if (sessions.length === 0) {
       setData({ ...data, msg: "Il n'y a malheureusement plus de place dans votre département.", step: PREINSCRIPTION_STEPS.INELIGIBLE });
       return history.push("/preinscription/noneligible");
     }
-
-    if (sessions.length === 0) {
-      sessions.push({
-        id: "2023_12",
-        name: "Séjour à venir",
-        dateStart: new Date("12/01/2023"),
-        dateEnd: new Date("12/15/2023"),
-        buffer: 99999,
-        event: "Phase0/CTA preinscription - sejour de test",
-      });
-    }
-
     setData({ ...data, sessions, step: PREINSCRIPTION_STEPS.SEJOUR });
     return history.push("/preinscription/sejour");
   };
