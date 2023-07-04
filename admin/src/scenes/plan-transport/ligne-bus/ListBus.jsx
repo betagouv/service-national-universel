@@ -102,7 +102,7 @@ export default function ListBus(props) {
           "ID du transport": b?.busId || "",
           "ID du point de rassemblement": PDR?.code || "",
           "Nom du point de rassemblement": PDR?.name || "",
-          "Adresse du point de rassemblement": PDR?.address || "",
+          "Adresse point de rassemblement": PDR?.address || "",
           "Ville du point de rassemblement": PDR?.city || "",
           "Département du point de rassemblement": PDR?.department || "",
           "Région du point de rassemblement": PDR?.region || "",
