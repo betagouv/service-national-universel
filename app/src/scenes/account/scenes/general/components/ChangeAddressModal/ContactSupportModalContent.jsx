@@ -10,7 +10,7 @@ const ContactSupportModalContent = ({ onClose }) => {
       <div className="my-4">
         <AppLink to="/besoin-d-aide">Je contacte le support</AppLink>
       </div>
-      <Modal.Buttons onCancel={onClose} confirmText="Fermer" />
+      <Modal.Buttons onCancel={onClose} cancelText="Fermer" />
     </>
   );
 };
