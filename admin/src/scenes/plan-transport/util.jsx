@@ -268,18 +268,18 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
     if (!youngs?.data?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
 
     const session = await API.get(`/session-phase1/${youngs.data[0].sessionPhase1Id}`);
-    if (!session.ok) return toastr.error("Une erreur est survenue");
+    if (!session.ok) return toastr.error("Aucune session n'a été trouvée");
 
     const headcenter = await API.get(`/referent/${session.data.headCenterId}`);
-    if (!headcenter.ok) return toastr.error("Une erreur est survenue");
+    if (!headcenter.ok) return toastr.error("Aucun chef de centre n'a été trouvé");
 
     const refDepOrigine = await API.get(`/department-service/${youngs.data[0].department}`);
-    if (!refDepOrigine.ok) return toastr.error("Une erreur est survenue");
+    if (!refDepOrigine.ok) return toastr.error("Aucun référent n'a été trouvé dans le département d'origine");
 
     const contactRefDepOrigine = refDepOrigine.data.contacts.filter((item) => item.cohort === cohort);
 
     const refDepAccueil = await API.get(`/department-service/${ligne.centerDetail.department}`);
-    if (!refDepAccueil.ok) return toastr.error("Une erreur est survenue");
+    if (!refDepAccueil.ok) return toastr.error("Aucun référent n'a été trouvé dans le département d'accueil");
 
     const contactRefDepAccueil = refDepAccueil.data.contacts.filter((item) => item.cohort === cohort);
 

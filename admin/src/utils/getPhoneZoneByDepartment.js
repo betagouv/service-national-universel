@@ -3,7 +3,7 @@ export const getPhoneZoneByDepartment = (department) => {
     return;
   }
   let phoneZoneName = "";
-  switch (true) {
+  switch (department) {
     case "Guadeloupe":
       phoneZoneName = "GUADELOUPE";
       break;

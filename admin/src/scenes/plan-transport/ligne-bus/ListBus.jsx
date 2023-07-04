@@ -91,7 +91,7 @@ export default function ListBus(props) {
         },
         phase1Affectation: {
           "ID centre": center?._id?.toString() || "",
-          "Code centre (2022)": center?.code2022 || "",
+          "Code centre": center?.code2022 || "",
           "Nom du centre": center?.name || "",
           "Adresse du centre": center?.address || "",
           "Ville du centre": center?.city || "",
