@@ -944,11 +944,55 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     });
     if (!users?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const UsersToNotify = [...new Set(users.map((obj) => JSON.stringify(obj)))].map((str) => JSON.parse(str)); 
+    const roleDep = ["manager_department", "assistant_manager_department", "secretariat", "manager_phase2"];
+    const roleReg = ["coordinator", "assistant_coordinator", "manager_phase2"];
 
+    const usersToNotify = [];
+
+    //on prend un ref de chaque departement de la liste trié par subRole
+    //et un ref de chaque region de la liste trié par subRole
+
+    for (let i = 0; i < departmentListToNotify.length || i < regionListToNotify.length; i++) {
+      if (i < departmentListToNotify.length) {
+        const dep = departmentListToNotify[i];
+        const usersFromDep = users.filter((u) => u.department.includes(dep) && u.role === "referent_department");
+
+        for (const role of roleDep) {
+          const userToNotifyInDep = usersFromDep.find((u) => u.subRole === role);
+
+          if (userToNotifyInDep) {
+            usersToNotify.push(userToNotifyInDep);
+            break;
+          }
+        }
+      }
+
+      if (i < regionListToNotify.length) {
+        const reg = regionListToNotify[i];
+        const usersFromReg = users.filter((u) => u.region === reg && u.role === "referent_region");
+
+        for (const role of roleReg) {
+          const userToNotifyInReg = usersFromReg.find((u) => u.subRole === role);
+
+          if (userToNotifyInReg) {
+            usersToNotify.push(userToNotifyInReg);
+            break;
+          }
+        }
+      }
+
+      if (usersToNotify.length === departmentListToNotify.length + regionListToNotify.length) {
+        break;
+      }
+    }
+
+    const uniqueUsersToNotify = [...new Set(usersToNotify.map((obj) => JSON.stringify(obj)))].map((str) => JSON.parse(str));
+    console.log(uniqueUsersToNotify);
+    console.log(uniqueUsersToNotify.length);
+    return;
     // send notification
     await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.NOTIF_REF, {
-      emailTo: UsersToNotify.map((referent) => ({
+      emailTo: uniqueUsersToNotify.map((referent) => ({
         name: `${referent.firstName} ${referent.lastName}`,
         email: referent.email,
       })),
