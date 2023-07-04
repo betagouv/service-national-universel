@@ -21,8 +21,8 @@ export default function StepProfil() {
   const keyList = ["firstName", "lastName", "email", "emailConfirm", "password", "confirmPassword"];
   const history = useHistory();
 
-  const trimmedEmail = data?.email.trim();
-  const trimmedEmailConfirm = data?.emailConfirm.trim();
+  const trimmedEmail = data?.email?.trim();
+  const trimmedEmailConfirm = data?.emailConfirm?.trim();
 
   const validate = () => {
     let errors = {};

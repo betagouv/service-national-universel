@@ -99,27 +99,27 @@ export default function Signin() {
           </button>
         </div>
         <hr className="mt-4 border-b-1 text-[#E5E5E5]" />
-        <div className="mt-4 text-[#E5E5E5]">
+        <div className="mt-4 text-[#E5E5E5] space-y-3">
           <div className="mt-4 mb-2 text-center text-xl font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
-          <p className="text-center text-base text-[#161616]">
-            Les inscriptions sont clôturées pour le premier semestre 2023. Soyez informé(e) lors de l’ouverture des prochaines inscriptions.
+          <p className="text-center text-base text-[#161616] m-3">
+            Les inscriptions sont clôturées pour le premier semestre 2023.
+            <br />
+            Soyez informé(e) lors de l’ouverture des prochaines inscriptions.
           </p>
-          <div className="flex justify-center mt-3">
-            <a
-              className="plausible-event-name=Clic+LP+Inscription flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-[#000091] px-3 py-2 text-[#000091] hover:bg-[#000091] hover:text-white"
-              href="https://www.snu.gouv.fr/?utm_source=moncompte&utm_medium=website&utm_campaign=fin+inscriptions+2023&utm_content=cta+notifier#formulaire">
-              Recevoir une alerte par email
-            </a>
-          </div>
-        </div>
+          <a
+            className="plausible-event-name=Clic+LP+Inscription w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-[#000091] px-3 py-2 text-[#000091] hover:bg-[#000091] hover:text-white"
+            href="https://www.snu.gouv.fr/?utm_source=moncompte&utm_medium=website&utm_campaign=fin+inscriptions+2023&utm_content=cta+notifier#formulaire">
+            Recevoir une alerte par email
+          </a>
 
-        {environment !== "production" && (
-          <Link to="/preinscription">
-            <p className="text-blue-france-sun-113 text-center hover:underline hover:text-blue-france-sun-113 mt-4 decoration-2 underline-offset-4">
+          {environment !== "production" && (
+            <Link
+              to="/preinscription"
+              className="w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-blue-france-sun-113 px-3 py-2 text-blue-france-sun-113 hover:bg-blue-france-sun-113 hover:text-white">
               Pré-inscription - accès staging
-            </p>
-          </Link>
-        )}
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );
