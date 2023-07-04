@@ -177,7 +177,6 @@ export default function Done() {
                 Plus d’informations
               </a>
             </div>
-            {/* <div className="flex flex-col items-center">{young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />}</div> */}
             <div className="flex flex-col items-center">{needTheJDMPresenceTrue.includes(young.cohort) ? (young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />) : (young.cohesionStayPresence === "true" ? <JDCDone/> : <JDCNotDone/>)}</div>
 
           </div>
@@ -257,7 +256,6 @@ export default function Done() {
             </div>
           </div>
         </div>
-        {/* {needTheJDMPresenceTrue.includes(young.cohort) ? young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone /> : young.cohesionStayPresence === "true" ? <JDCDone/> : <JDCNotDone/>} */}
         {needTheJDMPresenceTrue.includes(young.cohort) ? (young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />) : (young.cohesionStayPresence === "true" ? <JDCDone/> : <JDCNotDone/>)}
 
       </div>
