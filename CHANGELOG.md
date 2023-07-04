@@ -1,3 +1,20 @@
+# [1.306.0](https://github.com/betagouv/service-national-universel/compare/v1.305.0...v1.306.0) (2023-07-04)
+
+
+### Bug Fixes
+
+* **admin:** firstSession ([35d0bf2](https://github.com/betagouv/service-national-universel/commit/35d0bf26e916c7d5914a142ec6cd744c284b9d1f))
+* **admin:** Fix onClose ([34ebe22](https://github.com/betagouv/service-national-universel/commit/34ebe22b346a1e16df1ad62c49ee3cf26da47af8))
+* **api:** 2fa ([f2bab4a](https://github.com/betagouv/service-national-universel/commit/f2bab4a7522e521764a8c84d5c6117575afec96a))
+* **api:** dsnj export start date ([3467f57](https://github.com/betagouv/service-national-universel/commit/3467f57327d639a114b25e835001db52fcc10f16))
+
+
+### Features
+
+* **admin:** modification des motifs de départ de séjour ([#2781](https://github.com/betagouv/service-national-universel/issues/2781)) ([9f62def](https://github.com/betagouv/service-national-universel/commit/9f62def441ef0d6e69b9a2ca824982fe2b7b8e8b))
+* **admin:** pointage des jeunes : renseigner un départ Anticipé [#2778](https://github.com/betagouv/service-national-universel/issues/2778) ([d2edb02](https://github.com/betagouv/service-national-universel/commit/d2edb020e3e9d55533c5091a8c21d32e8ba3baab))
+* **app:** mep update address ([9035c1d](https://github.com/betagouv/service-national-universel/commit/9035c1daee28cc8b8607bd1c121c1ffc24cd4fa5))
+
 # [1.305.0](https://github.com/betagouv/service-national-universel/compare/v1.304.0...v1.305.0) (2023-07-03)
 
 
