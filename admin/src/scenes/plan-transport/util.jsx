@@ -343,7 +343,7 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
 
     youngs.data.map((item) =>
       excel[1].data.push({
-        "Numéro de ligne": ligne,
+        "Numéro de ligne": ligne.busId,
         "Adresse du point de RDV": mappy(item, "address") + ", " + mappy(item, "zip") + ", " + mappy(item, "city"),
         "Heure de départ du bus": ligne.centerDepartureTime,
         "Heure d'arrivée au PDR": mappy(item, "returnHour"),
