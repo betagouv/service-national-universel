@@ -203,7 +203,7 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
       "Statut professionnel": situationTranslations[situation] || situation,
       "ID du centre": cohesionCenter ? cohesionCenter._id.toString() : "",
       "Libellé du centre": cohesionCenter ? cohesionCenter.name : "",
-      "Date début session": new Intl.DateTimeFormat("fr-FR").format(startDate),
+      "Date début session": startDate.toLocaleString("fr-FR").split(",")[0],
       "Validation séjour (Validation phase 1)": afterSession ? (statusPhase1 === "DONE" ? "Oui" : "Non") : "null",
     };
 
