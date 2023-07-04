@@ -151,7 +151,7 @@ export default function View(props) {
     {
       key: "exportDataAller",
       action: async () => {
-        await exportLigneBusJeune(cohort.name, data.busId, "Aller", data.team);
+        await exportLigneBusJeune(cohort.name, data, "Aller", data.team);
       },
       render: (
         <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
@@ -163,7 +163,7 @@ export default function View(props) {
     {
       key: "exportDataRetour",
       action: async () => {
-        await exportLigneBusJeune(cohort.name, data.busId, "Retour", data.team);
+        await exportLigneBusJeune(cohort.name, data, "Retour", data.team);
       },
       render: (
         <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { setYoung } from "../../../../redux/auth/actions";
@@ -12,12 +12,19 @@ export default function UserMenu({ onClose }) {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.young);
   const history = useHistory();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   async function logout() {
-    await API.post(`/young/logout`);
-    dispatch(setYoung(null));
-    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
-    return history.push("/auth");
+    try {
+      setIsLoggingOut(true);
+      await API.post(`/young/logout`);
+      dispatch(setYoung(null));
+      toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
+      return history.push("/auth");
+    } catch (e) {
+      toastr.error("Oups une erreur est survenue lors de la déconnexion", { timeOut: 10000 });
+      setIsLoggingOut(false);
+    }
   }
 
   return (
@@ -32,7 +39,7 @@ export default function UserMenu({ onClose }) {
       <ul>
         <MenuLink onClose={onClose} to="/account" text="Mon Profil" />
         {permissionPhase2(user) && <MenuLink onClose={onClose} to="/preferences" text="Mes préférences de mission" />}
-        <MenuButton onClick={logout} text="Déconnexion" />
+        <MenuButton disabled={isLoggingOut} onClick={logout} text="Déconnexion" />
       </ul>
     </nav>
   );

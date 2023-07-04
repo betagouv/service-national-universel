@@ -1,3 +1,17 @@
+# [1.305.0](https://github.com/betagouv/service-national-universel/compare/v1.304.0...v1.305.0) (2023-07-03)
+
+
+### Bug Fixes
+
+* pdt 0307 ([#2777](https://github.com/betagouv/service-national-universel/issues/2777)) ([eea46cf](https://github.com/betagouv/service-national-universel/commit/eea46cfa0e5cbaf898b8adad5ed54c7a66dfc883))
+* **admin:** send convocation by email ([4bf957f](https://github.com/betagouv/service-national-universel/commit/4bf957f4da80130a46e67fb296d63bffe5c09024))
+* **admin/app:** error on logout ([5695b92](https://github.com/betagouv/service-national-universel/commit/5695b9286348f823647dfc0d6aebee538f77309b))
+
+
+### Features
+
+* **admin:** add modal to change PDR in the same line ([#2775](https://github.com/betagouv/service-national-universel/issues/2775)) ([d266f0b](https://github.com/betagouv/service-national-universel/commit/d266f0b554388ab71b272b53ebc2791c24a2a495))
+
 # [1.304.0](https://github.com/betagouv/service-national-universel/compare/v1.303.0...v1.304.0) (2023-06-30)
 
 

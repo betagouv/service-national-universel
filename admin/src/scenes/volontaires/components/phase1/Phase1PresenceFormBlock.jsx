@@ -8,6 +8,7 @@ import { formatDateFR } from "../../../../utils";
 import ModalChangePresenceOnArrival from "../../../../components/modals/young/ModalChangePresenceOnArrival";
 import ModalChangePresenceJDM from "../../../../components/modals/young/ModalChangePresenceJDM";
 import ModalPointageDepart from "../../../centersV2/components/modals/ModalPointageDepart";
+import { COHORTS_BEFORE_JULY_2023 } from "../../../../utils";
 
 const Phase1PresenceFormBlock = ({ className = "", young = null, values = null, setValues, setYoung, editing = false, setLoading, isYoungCheckinOpen }) => {
   const [isPresenceOnArrivalModalOpen, setIsPresenceOnArrivalModalOpen] = useState(false);
@@ -80,22 +81,24 @@ const Phase1PresenceFormBlock = ({ className = "", young = null, values = null, 
               ]}
             />
           </div>
-          <div className="min-w-[250px] flex-1">
-            <TailwindSelect
-              name="presenceJDM"
-              label="Présence JDM"
-              readOnly={!editing || !isYoungCheckinOpen}
-              type="select"
-              icon={<BadgeCheck className="text-gray-500" width={20} height={20} />}
-              setSelected={handleOnChangePresenceJDM}
-              selected={values.presenceJDM || ""}
-              options={[
-                { label: "Non renseigné", value: "", disabled: true, hidden: true },
-                { label: "Présent", value: "true" },
-                { label: "Absent", value: "false" },
-              ]}
-            />
-          </div>
+          {COHORTS_BEFORE_JULY_2023.includes(young?.cohort) ? (
+            <div className="min-w-[250px] flex-1">
+              <TailwindSelect
+                name="presenceJDM"
+                label="Présence JDM"
+                readOnly={!editing || !isYoungCheckinOpen}
+                type="select"
+                icon={<BadgeCheck className="text-gray-500" width={20} height={20} />}
+                setSelected={handleOnChangePresenceJDM}
+                selected={values.presenceJDM || ""}
+                options={[
+                  { label: "Non renseigné", value: "", disabled: true, hidden: true },
+                  { label: "Présent", value: "true" },
+                  { label: "Absent", value: "false" },
+                ]}
+              />
+            </div>
+          ) : null}
           <div className="min-w-[250px] flex-1 items-stretch">
             <div
               onClick={() => {
@@ -104,7 +107,7 @@ const Phase1PresenceFormBlock = ({ className = "", young = null, values = null, 
               }}
               className={` flex flex-row items-center justify-start rounded border border-gray-300 py-2 px-2.5 ${editing && "cursor-pointer"} h-full`}>
               <ArrowCircleRight width={16} height={16} className="mx-2 mr-3 text-gray-400 group-hover:scale-105" />
-              {values?.departSejourAt ? <div>{formatDateFR(values.departSejourAt)}</div> : <div className="text-gray-500">Renseigner un départ</div>}
+              {values?.departSejourAt ? <div>{formatDateFR(values.departSejourAt)}</div> : <div className="text-gray-500">Renseigner un départ anticipé</div>}
             </div>
           </div>
         </div>

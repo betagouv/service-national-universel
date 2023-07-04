@@ -19,6 +19,7 @@ import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance
 import DatePickerList from "../components/DatePickerList";
 import DSFRContainer from "../../../components/inscription/DSFRContainer";
 import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
+import { environment } from "../../../config";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -104,6 +105,11 @@ export default function StepEligibilite() {
       setError({ text: "Impossible de vérifier votre éligibilité" });
       setLoading(false);
     }
+
+    if (environment !== "production" && (res.data.msg || res.data.length === 0)) {
+      res.data = [{ id: "à", name: "à venir", dateStart: new Date(2023, 11, 1), dateEnd: new Date(2023, 11, 15), buffer: 99999, event: "" }];
+    }
+
     if (res.data.msg) {
       setData({ ...data, msg: res.data.msg, step: PREINSCRIPTION_STEPS.INELIGIBLE });
       return history.push("/preinscription/noneligible");
