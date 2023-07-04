@@ -76,7 +76,8 @@ class Auth {
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-      const sessions = await getFilteredSessions(value);
+      let sessions = await getFilteredSessions(value);
+      if (config.ENVIRONMENT !== "production") sessions.push({ name: "à venir" });
       const session = sessions.find(({ name }) => name === value.cohort);
       if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
