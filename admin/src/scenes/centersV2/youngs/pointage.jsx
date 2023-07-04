@@ -3,7 +3,7 @@ import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
 import { BiLoaderAlt } from "react-icons/bi";
-import { formatDateFR, getAge, translate } from "snu-lib";
+import { formatDateFR, getAge, translate, COHORTS_BEFORE_JULY_2023 } from "snu-lib";
 import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
 import BadgeCheck from "../../../assets/icons/BadgeCheck";
 import CursorClick from "../../../assets/icons/CursorClick";
@@ -18,7 +18,6 @@ import ModalMultiPointagePresenceJDM from "../components/modals/ModalMultiPointa
 import ModalPointageDepart from "../components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../components/modals/ModalPointagePresenceArrivee";
 import ModalPointagePresenceJDM from "../components/modals/ModalPointagePresenceJDM";
-import { COHORTS_BEFORE_JULY_2023 } from "snu-lib";
 
 export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSession, filterArray, setHasYoungValidated }) {
   const history = useHistory();
@@ -81,190 +80,6 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
       </div>
     );
 
-  const getSelectOptionsGroup = () => {
-    let optionsGroup = [
-      {
-        key: "group1",
-        title: "L'arrivée au séjour",
-        items: [
-          {
-            key: "item1",
-            action: async () => {
-              if (youngSelected.length === 0) return;
-              setModalPointagePresenceArrivee({
-                isOpen: true,
-                values: youngSelected,
-                value: "true",
-                onSubmit: async () => {
-                  try {
-                    const { ok, code } = await api.post(`/young/phase1/multiaction/cohesionStayPresence`, {
-                      value: "true",
-                      ids: youngSelected.map((y) => y._id),
-                    });
-                    if (!ok) {
-                      toastr.error("Oups, une erreur s'est produite", translate(code));
-                      return;
-                    }
-                    history.go(0);
-                  } catch (e) {
-                    console.log(e);
-                    toastr.error("Oups, une erreur s'est produite", translate(e.code));
-                  }
-                },
-              });
-            },
-            render: (
-              <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-                <SpeakerPhone className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                <div className="font-normal">
-                  Marquer <span className="font-bold">présent</span>
-                  {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
-                </div>
-              </div>
-            ),
-          },
-          {
-            key: "item2",
-            action: async () => {
-              if (youngSelected.length === 0) return;
-              setModalPointagePresenceArrivee({
-                isOpen: true,
-                values: youngSelected,
-                value: "false",
-                onSubmit: async () => {
-                  try {
-                    const { ok, code } = await api.post(`/young/phase1/multiaction/cohesionStayPresence`, {
-                      value: "false",
-                      ids: youngSelected.map((y) => y._id),
-                    });
-                    if (!ok) {
-                      toastr.error("Oups, une erreur s'est produite", translate(code));
-                      return;
-                    }
-                    history.go(0);
-                  } catch (e) {
-                    console.log(e);
-                    toastr.error("Oups, une erreur s'est produite", translate(e.code));
-                  }
-                },
-              });
-            },
-            render: (
-              <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-                <SpeakerPhone className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
-                <div>
-                  Marquer <span className="font-bold">absent</span>
-                  {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
-                </div>
-              </div>
-            ),
-          },
-        ],
-      },
-    ];
-    if (COHORTS_BEFORE_JULY_2023.includes(focusedSession.cohort)) {
-      optionsGroup.push({
-        key: "group2",
-        title: "La JDM",
-        items: [
-          {
-            key: "item1",
-            action: async () => {
-              try {
-                if (youngSelected.length === 0) return;
-                setModalMultiPointagePresenceJDM({
-                  isOpen: true,
-                  values: youngSelected,
-                  value: "true",
-                  onSubmit: async () => {
-                    const { ok, code } = await api.post(`/young/phase1/multiaction/presenceJDM`, { value: "true", ids: youngSelected.map((y) => y._id) });
-                    if (!ok) {
-                      toastr.error("Oups, une erreur s'est produite", translate(code));
-                      return;
-                    }
-                    history.go(0);
-                  },
-                });
-              } catch (e) {
-                console.log(e);
-                toastr.error("Oups, une erreur s'est produite", translate(e.code));
-              }
-            },
-            render: (
-              <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-                <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                <div>
-                  Marquer <span className="font-bold">présent</span>
-                  {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
-                </div>
-              </div>
-            ),
-          },
-          {
-            key: "item2",
-            action: async () => {
-              try {
-                if (youngSelected.length === 0) return;
-                setModalMultiPointagePresenceJDM({
-                  isOpen: true,
-                  values: youngSelected,
-                  value: "false",
-                  onSubmit: async () => {
-                    const { ok, code } = await api.post(`/young/phase1/multiaction/presenceJDM`, { value: "false", ids: youngSelected.map((y) => y._id) });
-                    if (!ok) {
-                      toastr.error("Oups, une erreur s'est produite", translate(code));
-                      return;
-                    }
-                    history.go(0);
-                  },
-                });
-              } catch (e) {
-                console.log(e);
-                toastr.error("Oups, une erreur s'est produite", translate(e.code));
-              }
-            },
-            render: (
-              <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-                <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
-                <div>
-                  Marquer <span className="font-bold">absent</span>
-                  {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
-                </div>
-              </div>
-            ),
-          },
-        ],
-      });
-    }
-    optionsGroup.push({
-      key: "group3",
-      items: [
-        {
-          key: "item1",
-          action: async () => {
-            if (youngSelected.length === 0) return;
-            setModalPointageDepart({
-              isOpen: true,
-              values: youngSelected,
-              value: "false",
-              onSubmit: () => {
-                history.go(0);
-              },
-            });
-          },
-          render: (
-            <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-              <ArrowCircleRight className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
-              Renseigner un départ
-              {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
-            </div>
-          ),
-        },
-      ],
-    });
-    return optionsGroup;
-  };
-
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <div style={{ display: "flex", flexDirection: "column", flex: "1" }}>
@@ -297,7 +112,191 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
                   </div>
                 </div>
                 <div>
-                  <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={getSelectOptionsGroup()} />
+                  <SelectAction
+                    Icon={<CursorClick className="text-gray-400" />}
+                    title="Actions"
+                    alignItems="right"
+                    optionsGroup={[
+                      {
+                        key: "group1",
+                        title: "L'arrivée au séjour",
+                        items: [
+                          {
+                            key: "item1",
+                            action: async () => {
+                              if (youngSelected.length === 0) return;
+                              setModalPointagePresenceArrivee({
+                                isOpen: true,
+                                values: youngSelected,
+                                value: "true",
+                                onSubmit: async () => {
+                                  try {
+                                    const { ok, code } = await api.post(`/young/phase1/multiaction/cohesionStayPresence`, {
+                                      value: "true",
+                                      ids: youngSelected.map((y) => y._id),
+                                    });
+                                    if (!ok) {
+                                      toastr.error("Oups, une erreur s'est produite", translate(code));
+                                      return;
+                                    }
+                                    history.go(0);
+                                  } catch (e) {
+                                    console.log(e);
+                                    toastr.error("Oups, une erreur s'est produite", translate(e.code));
+                                  }
+                                },
+                              });
+                            },
+                            render: (
+                              <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+                                <SpeakerPhone className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+                                <div className="font-normal">
+                                  Marquer <span className="font-bold">présent</span>
+                                  {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
+                                </div>
+                              </div>
+                            ),
+                          },
+                          {
+                            key: "item2",
+                            action: async () => {
+                              if (youngSelected.length === 0) return;
+                              setModalPointagePresenceArrivee({
+                                isOpen: true,
+                                values: youngSelected,
+                                value: "false",
+                                onSubmit: async () => {
+                                  try {
+                                    const { ok, code } = await api.post(`/young/phase1/multiaction/cohesionStayPresence`, {
+                                      value: "false",
+                                      ids: youngSelected.map((y) => y._id),
+                                    });
+                                    if (!ok) {
+                                      toastr.error("Oups, une erreur s'est produite", translate(code));
+                                      return;
+                                    }
+                                    history.go(0);
+                                  } catch (e) {
+                                    console.log(e);
+                                    toastr.error("Oups, une erreur s'est produite", translate(e.code));
+                                  }
+                                },
+                              });
+                            },
+                            render: (
+                              <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+                                <SpeakerPhone className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
+                                <div>
+                                  Marquer <span className="font-bold">absent</span>
+                                  {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
+                                </div>
+                              </div>
+                            ),
+                          },
+                        ],
+                      },
+                      COHORTS_BEFORE_JULY_2023.includes(focusedSession.cohort)
+                        ? {
+                            key: "group2",
+                            title: "La JDM",
+                            items: [
+                              {
+                                key: "item1",
+                                action: async () => {
+                                  try {
+                                    if (youngSelected.length === 0) return;
+                                    setModalMultiPointagePresenceJDM({
+                                      isOpen: true,
+                                      values: youngSelected,
+                                      value: "true",
+                                      onSubmit: async () => {
+                                        const { ok, code } = await api.post(`/young/phase1/multiaction/presenceJDM`, { value: "true", ids: youngSelected.map((y) => y._id) });
+                                        if (!ok) {
+                                          toastr.error("Oups, une erreur s'est produite", translate(code));
+                                          return;
+                                        }
+                                        history.go(0);
+                                      },
+                                    });
+                                  } catch (e) {
+                                    console.log(e);
+                                    toastr.error("Oups, une erreur s'est produite", translate(e.code));
+                                  }
+                                },
+                                render: (
+                                  <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+                                    <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+                                    <div>
+                                      Marquer <span className="font-bold">présent</span>
+                                      {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
+                                    </div>
+                                  </div>
+                                ),
+                              },
+                              {
+                                key: "item2",
+                                action: async () => {
+                                  try {
+                                    if (youngSelected.length === 0) return;
+                                    setModalMultiPointagePresenceJDM({
+                                      isOpen: true,
+                                      values: youngSelected,
+                                      value: "false",
+                                      onSubmit: async () => {
+                                        const { ok, code } = await api.post(`/young/phase1/multiaction/presenceJDM`, { value: "false", ids: youngSelected.map((y) => y._id) });
+                                        if (!ok) {
+                                          toastr.error("Oups, une erreur s'est produite", translate(code));
+                                          return;
+                                        }
+                                        history.go(0);
+                                      },
+                                    });
+                                  } catch (e) {
+                                    console.log(e);
+                                    toastr.error("Oups, une erreur s'est produite", translate(e.code));
+                                  }
+                                },
+                                render: (
+                                  <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+                                    <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
+                                    <div>
+                                      Marquer <span className="font-bold">absent</span>
+                                      {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
+                                    </div>
+                                  </div>
+                                ),
+                              },
+                            ],
+                          }
+                        : null,
+                      {
+                        key: "group3",
+                        items: [
+                          {
+                            key: "item1",
+                            action: async () => {
+                              if (youngSelected.length === 0) return;
+                              setModalPointageDepart({
+                                isOpen: true,
+                                values: youngSelected,
+                                value: "false",
+                                onSubmit: () => {
+                                  history.go(0);
+                                },
+                              });
+                            },
+                            render: (
+                              <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+                                <ArrowCircleRight className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
+                                Renseigner un départ anticipé
+                                {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
+                              </div>
+                            ),
+                          },
+                        ],
+                      },
+                    ]}
+                  />
                 </div>
               </div>
               <div className="mt-2 flex flex-row flex-wrap items-center">
