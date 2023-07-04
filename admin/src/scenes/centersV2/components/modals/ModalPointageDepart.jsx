@@ -86,7 +86,7 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
                 Motif du départ
               </option>
               {/* todo mettre motifs en constantes */}
-              {["Exclusion", "Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire", "Autre"].map((d) => (
+              {["Exclusion", "Cas de force majeure (Fermeture du centre, éviction pour raison sanitaitre, rapatriement médical, convocation judiciaire, etc.)", "Autre"].map((d) => (
                 <option key={d} value={d}>
                   {d}
                 </option>
