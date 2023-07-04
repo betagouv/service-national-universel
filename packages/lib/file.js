@@ -26,7 +26,7 @@ function createFormDataForFileUpload(arr, properties) {
     // eslint-disable-next-line no-control-regex
     const name = encodeURIComponent(file.name.replace(/['/:*?"<>|\x00-\x1F\x80-\x9F]/g, "_").trim());
     Object.defineProperty(file, "name", { value: name });
-    formData.append("file", file, name);
+    formData.append(file.name, file, name);
   }
 
   const names = files.map((e) => e.name || e);
