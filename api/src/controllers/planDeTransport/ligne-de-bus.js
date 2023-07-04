@@ -907,58 +907,65 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     const regionListToNotify = pdrs.map((pdr) => pdr.region);
     regionListToNotify.push(center.region);
 
-    const roleDep = ["manager_department", "assistant_manager_department", "secretariat", "manager_phase2"];
-    const roleReg = ["coordinator", "assistant_coordinator", "manager_phase2"];
+    const subRoleRefDep = ["manager_department", "assistant_manager_department", "secretariat", "manager_phase2"];
+    const subRoleRefReg = ["coordinator", "assistant_coordinator", "manager_phase2"];
 
     //on recherche les refDep des 2 departments avec les bon subRole
     //ET les ref regionnaux des 2 regions avec les bons subRole
 
-    const users = await ReferentModel.find({
+    const referents = await ReferentModel.find({
       $or: [
         {
           department: { $in: departmentListToNotify },
           role: "referent_department",
-          subRole: { $in: roleDep },
+          subRole: { $in: subRoleRefDep },
         },
         {
           role: "referent_region",
-          subRole: { $in: roleReg },
+          subRole: { $in: subRoleRefReg },
           region: { $in: regionListToNotify },
         },
       ],
     });
-    if (!users?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!referents?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     //on prend un ref de chaque departement de la liste trié par subRole
     //et un ref de chaque region de la liste trié par subRole
 
-    const usersToNotify = [];
+    const referentsToNotify = [];
 
-    const getListToNotify = (type, list, roles) => {
+    const getRefListToNotify = (type, list, subRoles) => {
       for (let i = 0; i < list.length; i++) {
+        //place = soit une region soit un departement
         const place = list[i];
-        let usersFromPlace = null;
+        let referentsFromPlace = null;
+        //on filtre les user du departement ou de la region
         if (type === "region") {
-          usersFromPlace = users.filter((u) => u.region === place && u.role === "referent_region");
+          referentsFromPlace = referents.filter((u) => u.region === place && u.role === "referent_region");
         }
         if (type === "department") {
-          usersFromPlace = users.filter((u) => u.department.includes(place) && u.role === "referent_department");
+          referentsFromPlace = referents.filter((u) => u.department.includes(place) && u.role === "referent_department");
         }
-        for (const role of roles) {
-          const userToNotifyInPlace = usersFromPlace.find((u) => u.subRole === role);
+        for (const subRole of subRoles) {
+          //on recupere le premier user filtré qui a le bon subRole (le premier subRole du tableau) si il y en a pas le 2eme subRole etc...
+          const referentToNotifyInPlace = referentsFromPlace.find((u) => u.subRole === subRole);
 
-          if (userToNotifyInPlace) {
-            usersToNotify.push(userToNotifyInPlace);
+          if (referentToNotifyInPlace) {
+            //si on en trouve un on s'arrete la (on ne veut quún ref par departement/region)
+            referentsToNotify.push(referentToNotifyInPlace);
             break;
           }
         }
       }
     };
 
-    getListToNotify("region", regionListToNotify, roleReg);
-    getListToNotify("department", departmentListToNotify, roleDep);
+    //on recupere la liste des ref regionnaux a prevenir
+    getRefListToNotify("region", regionListToNotify, subRoleRefReg);
+    //on recupere la liste des ref departementaux a prevenir
+    getRefListToNotify("department", departmentListToNotify, subRoleRefDep);
 
-    const uniqueUsersToNotify = [...new Set(usersToNotify.map((obj) => JSON.stringify(obj)))].map((str) => JSON.parse(str));
+    //on genere le tableau des referents selectionné pour etre notifié
+    const uniqueUsersToNotify = [...new Set(referentsToNotify.map((obj) => JSON.stringify(obj)))].map((str) => JSON.parse(str));
 
     // send notification
     await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.NOTIF_REF, {
