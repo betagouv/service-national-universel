@@ -3,7 +3,7 @@ import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
 import { BiLoaderAlt } from "react-icons/bi";
-import { formatDateFR, getAge, translate } from "snu-lib";
+import { formatDateFR, getAge, translate, COHORTS_BEFORE_JULY_2023 } from "snu-lib";
 import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
 import BadgeCheck from "../../../assets/icons/BadgeCheck";
 import CursorClick from "../../../assets/icons/CursorClick";
@@ -195,78 +195,80 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
                           },
                         ],
                       },
-                      {
-                        key: "group2",
-                        title: "La JDM",
-                        items: [
-                          {
-                            key: "item1",
-                            action: async () => {
-                              try {
-                                if (youngSelected.length === 0) return;
-                                setModalMultiPointagePresenceJDM({
-                                  isOpen: true,
-                                  values: youngSelected,
-                                  value: "true",
-                                  onSubmit: async () => {
-                                    const { ok, code } = await api.post(`/young/phase1/multiaction/presenceJDM`, { value: "true", ids: youngSelected.map((y) => y._id) });
-                                    if (!ok) {
-                                      toastr.error("Oups, une erreur s'est produite", translate(code));
-                                      return;
-                                    }
-                                    history.go(0);
-                                  },
-                                });
-                              } catch (e) {
-                                console.log(e);
-                                toastr.error("Oups, une erreur s'est produite", translate(e.code));
-                              }
-                            },
-                            render: (
-                              <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-                                <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                                <div>
-                                  Marquer <span className="font-bold">présent</span>
-                                  {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
-                                </div>
-                              </div>
-                            ),
-                          },
-                          {
-                            key: "item2",
-                            action: async () => {
-                              try {
-                                if (youngSelected.length === 0) return;
-                                setModalMultiPointagePresenceJDM({
-                                  isOpen: true,
-                                  values: youngSelected,
-                                  value: "false",
-                                  onSubmit: async () => {
-                                    const { ok, code } = await api.post(`/young/phase1/multiaction/presenceJDM`, { value: "false", ids: youngSelected.map((y) => y._id) });
-                                    if (!ok) {
-                                      toastr.error("Oups, une erreur s'est produite", translate(code));
-                                      return;
-                                    }
-                                    history.go(0);
-                                  },
-                                });
-                              } catch (e) {
-                                console.log(e);
-                                toastr.error("Oups, une erreur s'est produite", translate(e.code));
-                              }
-                            },
-                            render: (
-                              <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-                                <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
-                                <div>
-                                  Marquer <span className="font-bold">absent</span>
-                                  {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
-                                </div>
-                              </div>
-                            ),
-                          },
-                        ],
-                      },
+                      COHORTS_BEFORE_JULY_2023.includes(focusedSession.cohort)
+                        ? {
+                            key: "group2",
+                            title: "La JDM",
+                            items: [
+                              {
+                                key: "item1",
+                                action: async () => {
+                                  try {
+                                    if (youngSelected.length === 0) return;
+                                    setModalMultiPointagePresenceJDM({
+                                      isOpen: true,
+                                      values: youngSelected,
+                                      value: "true",
+                                      onSubmit: async () => {
+                                        const { ok, code } = await api.post(`/young/phase1/multiaction/presenceJDM`, { value: "true", ids: youngSelected.map((y) => y._id) });
+                                        if (!ok) {
+                                          toastr.error("Oups, une erreur s'est produite", translate(code));
+                                          return;
+                                        }
+                                        history.go(0);
+                                      },
+                                    });
+                                  } catch (e) {
+                                    console.log(e);
+                                    toastr.error("Oups, une erreur s'est produite", translate(e.code));
+                                  }
+                                },
+                                render: (
+                                  <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+                                    <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+                                    <div>
+                                      Marquer <span className="font-bold">présent</span>
+                                      {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
+                                    </div>
+                                  </div>
+                                ),
+                              },
+                              {
+                                key: "item2",
+                                action: async () => {
+                                  try {
+                                    if (youngSelected.length === 0) return;
+                                    setModalMultiPointagePresenceJDM({
+                                      isOpen: true,
+                                      values: youngSelected,
+                                      value: "false",
+                                      onSubmit: async () => {
+                                        const { ok, code } = await api.post(`/young/phase1/multiaction/presenceJDM`, { value: "false", ids: youngSelected.map((y) => y._id) });
+                                        if (!ok) {
+                                          toastr.error("Oups, une erreur s'est produite", translate(code));
+                                          return;
+                                        }
+                                        history.go(0);
+                                      },
+                                    });
+                                  } catch (e) {
+                                    console.log(e);
+                                    toastr.error("Oups, une erreur s'est produite", translate(e.code));
+                                  }
+                                },
+                                render: (
+                                  <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+                                    <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
+                                    <div>
+                                      Marquer <span className="font-bold">absent</span>
+                                      {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
+                                    </div>
+                                  </div>
+                                ),
+                              },
+                            ],
+                          }
+                        : null,
                       {
                         key: "group3",
                         items: [
@@ -286,14 +288,14 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
                             render: (
                               <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
                                 <ArrowCircleRight className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
-                                Renseigner un départ
+                                Renseigner un départ anticipé
                                 {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
                               </div>
                             ),
                           },
                         ],
                       },
-                    ]}
+                    ].filter((item) => item !== null)}
                   />
                 </div>
               </div>
@@ -322,7 +324,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
                       </th>
                       <th className="">Volontaire</th>
                       <th className="">Présence à l&apos;arrivée</th>
-                      <th className="">Présence JDM</th>
+                      {COHORTS_BEFORE_JULY_2023.includes(focusedSession?.cohort) ? <th className="">Présence JDM</th> : null}
                       <th className="">Départ</th>
                     </tr>
                   </thead>
@@ -343,6 +345,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
                         }
                         selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
                         isYoungCheckinOpen={isYoungCheckinOpen}
+                        focusedSession={focusedSession}
                       />
                     ))}
                   </tbody>
@@ -383,7 +386,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
   );
 }
 
-const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen }) => {
+const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen, focusedSession }) => {
   const [value, setValue] = useState(null);
   const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
   const [modalPointagePresenceJDM, setModalPointagePresenceJDM] = useState({ isOpen: false });
@@ -461,38 +464,40 @@ const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen }) 
             )}
           </div>
         </td>
-        <td className={`${bgColor}`}>
-          <div className="text-xs font-normal text-[#242526]" onClick={(e) => e.stopPropagation()}>
-            {isYoungCheckinOpen ? (
-              <select
-                className={`cursor-pointer rounded-lg border-[1px] border-gray-200 py-2 px-3 text-black ${presenceJDMBgColor} ${presenceJDMTextColor} disabled:cursor-auto disabled:text-gray-500`}
-                value={value.presenceJDM || ""}
-                disabled={value.cohesionStayPresence === "false"}
-                onChange={(e) => {
-                  setModalPointagePresenceJDM({
-                    isOpen: true,
-                    value: e.target.value,
-                  });
-                }}
-                style={{ fontFamily: "Marianne" }}>
-                <option disabled label="Présence JDM">
-                  Présence JDM
-                </option>
-                {[
-                  { label: "Non renseigné", value: "", disabled: true, hidden: true },
-                  { label: "Présent", value: "true" },
-                  { label: "Absent", value: "false" },
-                ].map((option, i) => (
-                  <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
-                    {option.label}
+        {COHORTS_BEFORE_JULY_2023.includes(focusedSession?.cohort) ? (
+          <td className={`${bgColor}`}>
+            <div className="text-xs font-normal text-[#242526]" onClick={(e) => e.stopPropagation()}>
+              {isYoungCheckinOpen ? (
+                <select
+                  className={`cursor-pointer rounded-lg border-[1px] border-gray-200 py-2 px-3 text-black ${presenceJDMBgColor} ${presenceJDMTextColor} disabled:cursor-auto disabled:text-gray-500`}
+                  value={value.presenceJDM || ""}
+                  disabled={value.cohesionStayPresence === "false"}
+                  onChange={(e) => {
+                    setModalPointagePresenceJDM({
+                      isOpen: true,
+                      value: e.target.value,
+                    });
+                  }}
+                  style={{ fontFamily: "Marianne" }}>
+                  <option disabled label="Présence JDM">
+                    Présence JDM
                   </option>
-                ))}
-              </select>
-            ) : (
-              <div className="">{value.presenceJDM === "true" ? "Présent" : value.presenceJDM === "false" ? "Absent" : "Non renseigné"}</div>
-            )}
-          </div>
-        </td>
+                  {[
+                    { label: "Non renseigné", value: "", disabled: true, hidden: true },
+                    { label: "Présent", value: "true" },
+                    { label: "Absent", value: "false" },
+                  ].map((option, i) => (
+                    <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="">{value.presenceJDM === "true" ? "Présent" : value.presenceJDM === "false" ? "Absent" : "Non renseigné"}</div>
+              )}
+            </div>
+          </td>
+        ) : null}
         <td className={`${bgColor} mr-2 rounded-r-lg`}>
           <div className={`text-xs font-normal  ${mainTextColor}`} onClick={(e) => e.stopPropagation()}>
             <div
@@ -506,7 +511,9 @@ const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen }) 
                 }
               }}>
               <ArrowCircleRight className="text-gray-400 group-hover:scale-105" />
-              <div className={isYoungCheckinOpen ? "group-hover:underline" : ""}>{!value.departSejourAt ? "Renseigner un départ" : formatDateFR(value.departSejourAt)}</div>
+              <div className={isYoungCheckinOpen ? "group-hover:underline" : ""}>
+                {!value.departSejourAt ? "Renseigner un départ anticipé" : formatDateFR(value.departSejourAt)}
+              </div>
             </div>
           </div>
         </td>

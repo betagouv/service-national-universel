@@ -3,11 +3,12 @@ import DocumentSelect from "../DocumentSelect";
 import Badge from "../../../../components/Badge";
 import downloadPDF from "../../../../utils/download-pdf";
 import { toastr } from "react-redux-toastr";
-import { ROLES, YOUNG_STATUS_COLORS, translate, translatePhase1 } from "snu-lib";
+import { ROLES, YOUNG_STATUS_COLORS, canDownloadYoungDocuments, translate, translatePhase1 } from "snu-lib";
 import api from "../../../../services/api";
 import Pencil from "../../../../assets/icons/Pencil";
 import { capture } from "../../../../sentry";
 import ModalDispense from "../ModalDispense";
+import ModalConfirm from "../../../../components/modals/ModalConfirm";
 
 const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, loading = false, setValues, setYoung, user }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -24,6 +25,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
         fileName: `${young.firstName} ${young.lastName} - certificate 1.pdf`,
       });
       setLoading(false);
+      setModal({ isOpen: false });
       if (!ok) throw new Error(translate(code));
       toastr.success(`Document envoyé à ${young.email}`);
     } catch (e) {
@@ -44,9 +46,10 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
     try {
       setLoading(true);
       const { ok, code } = await api.post(`/young/${young._id}/documents/convocation/cohesion/send-email`, {
-        fileName: `${young.firstName} ${young.lastName} - convocation.pdf`,
+        fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
       });
       setLoading(false);
+      setModal({ isOpen: false });
       if (!ok) throw new Error(translate(code));
       toastr.success(`Document envoyé à ${young.email}`);
     } catch (e) {
@@ -59,7 +62,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
   const handleDownloadConvocationPdfFile = async () => {
     await downloadPDF({
       url: `/young/${young._id}/documents/convocation/cohesion`,
-      fileName: `${young.firstName} ${young.lastName} - attestation 1.pdf`,
+      fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
     });
   };
 
@@ -97,7 +100,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
         <div className="flex items-center justify-center gap-2">
           <div className="text-lg font-medium leading-4">Séjour de cohésion</div>
           <Badge minify text={translatePhase1(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />
-          {canUserDownloadConvocation() && (
+          {canUserDownloadConvocation() && canDownloadYoungDocuments(user, young) && (
             <DocumentSelect
               title="Convocation"
               onClickPdf={handleDownloadConvocationPdfFile}
@@ -133,6 +136,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
         </div>
         <EditTop />
       </div>
+      <ModalConfirm isOpen={modal?.isOpen} title={modal?.title} message={modal?.message} onCancel={() => setModal({ isOpen: false })} onConfirm={modal?.onConfirm} />
       <ModalDispense
         isOpen={modalDispense?.isOpen}
         youngId={young?._id}

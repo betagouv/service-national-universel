@@ -16,16 +16,23 @@ import { toastr } from "react-redux-toastr";
 export default function HeaderUser() {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { user } = useSelector((state) => state.Auth);
   const history = useHistory();
 
   if (!user) return <div />;
 
   async function logout() {
-    await api.post(`/referent/logout`);
-    dispatch(setUser(null));
-    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
-    return history.push("/auth");
+    try {
+      setIsLoggingOut(true);
+      await api.post(`/referent/logout`);
+      dispatch(setUser(null));
+      toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
+      return history.push("/auth");
+    } catch (e) {
+      toastr.error("Oups une erreur est survenue lors de la déconnexion", { timeOut: 10000 });
+      setIsLoggingOut(false);
+    }
   }
 
   return (
@@ -74,10 +81,13 @@ export default function HeaderUser() {
             </NavLink>
           )}
           <hr className="m-0 border-t-coolGray-100" />
-          <div className="group  flex cursor-pointer items-center  gap-2 p-3 text-red-700 hover:bg-coolGray-100 hover:text-red-700" onClick={logout}>
+          <button
+            disabled={isLoggingOut}
+            className="group w-full flex cursor-pointer items-center  gap-2 p-3 text-red-700 hover:bg-coolGray-100 hover:text-red-700 disabled:opacity-50"
+            onClick={logout}>
             <HiLogout className="text-red-700 group-hover:scale-110" />
             Se déconnecter
-          </div>
+          </button>
         </div>
       </div>
     </div>

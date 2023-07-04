@@ -28,6 +28,7 @@ import plausibleEvent from "../../services/plausible";
 import { ImQuotesLeft } from "react-icons/im";
 import ModalConfirmDeleteYoung from "../../components/modals/young/ModalConfirmDeleteYoung";
 import PanelV2 from "../../components/PanelV2";
+import { toastr } from "react-redux-toastr";
 
 export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
@@ -72,6 +73,15 @@ export default function VolontairePanel({ onChange, value }) {
 
   if (!value || !young) return <div />;
 
+  const onPrendreLaPlace = async (young_id) => {
+    if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
+
+    plausibleEvent("Volontaires/CTA - Prendre sa place");
+    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    window.open(appURL, "_blank");
+  };
+
   return (
     <>
       <PanelV2
@@ -97,9 +107,9 @@ export default function VolontairePanel({ onChange, value }) {
               </Link>
               {user.role !== ROLES.HEAD_CENTER && (
                 <>
-                  <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
+                  <button onClick={() => onPrendreLaPlace(young._id)}>
                     <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
-                  </a>
+                  </button>
                   <PanelActionButton onClick={handleDeleteYoung} icon="bin" title="Supprimer" />
                 </>
               )}

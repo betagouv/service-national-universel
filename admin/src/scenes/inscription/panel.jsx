@@ -17,6 +17,7 @@ import plausibleEvent from "../../services/plausible";
 import { formatPhoneNumberFR, getAge, isInRuralArea, translate as t, YOUNG_STATUS } from "../../utils";
 import styled from "styled-components";
 import PanelV2 from "../../components/PanelV2";
+import { toastr } from "react-redux-toastr";
 
 export default function InscriptionPanel({ onChange, value }) {
   const [young, setYoung] = useState(null);
@@ -53,6 +54,13 @@ export default function InscriptionPanel({ onChange, value }) {
     return date.toLocaleDateString();
   };
 
+  const onPrendreLaPlace = async (young_id) => {
+    plausibleEvent("Volontaires/CTA - Prendre sa place");
+    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    window.open(appURL, "_blank");
+  };
+
   return (
     <>
       <PanelV2
@@ -80,9 +88,9 @@ export default function InscriptionPanel({ onChange, value }) {
               <Link to={`/volontaire/${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Consulter profil jeune")}>
                 <PanelActionButton icon="eye" title="Consulter" />
               </Link>
-              <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
+              <button onClick={() => onPrendreLaPlace(value._id)}>
                 <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
-              </a>
+              </button>
               <PanelActionButton onClick={handleDeleteYoung} icon="bin" title="Supprimer" />
             </div>
             {value.status === YOUNG_STATUS.WITHDRAWN && <div className="mt-3">⚠️ Désistement : &quot;{value.withdrawnMessage}&quot;</div>}

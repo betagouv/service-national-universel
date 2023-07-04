@@ -29,8 +29,6 @@ const cohortList = [
   { label: "Juillet 2023", value: "Juillet 2023" },
 ];
 
-if (environment !== "production") cohortList.push({ label: "Séjour de test", value: "Séjour de test" });
-
 export default function Settings() {
   const { user } = useSelector((state) => state.Auth);
   const urlParams = new URLSearchParams(window.location.search);

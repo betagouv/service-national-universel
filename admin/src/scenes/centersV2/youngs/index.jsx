@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { NavLink, useHistory, useParams } from "react-router-dom";
-import { ES_NO_LIMIT, download, getDepartmentNumber } from "snu-lib";
+import { COHORTS_BEFORE_JULY_2023, ES_NO_LIMIT, download, getDepartmentNumber } from "snu-lib";
 import * as XLSX from "xlsx";
 import Bus from "../../../assets/icons/Bus";
 import ClipboardList from "../../../assets/icons/ClipboardList";
@@ -259,6 +259,11 @@ export default function CenterYoungIndex() {
       }, {}),
     });
     const result = await transformData({ data: data.data, centerId: id });
+    if (!COHORTS_BEFORE_JULY_2023.includes(result[0]?.Cohorte)) {
+      result.forEach((item) => {
+        delete item["Présence à la JDM"];
+      });
+    }
     const csv = await toArrayOfArray(result);
     await toXLSX(`volontaires_pointage_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`, csv);
   };
@@ -612,6 +617,7 @@ const transformData = async ({ data, centerId }) => {
       bus = ligneBus.find((lb) => lb._id === data?.ligneId);
       if (!meetingPoint) meetingPoint = {};
     }
+
     return {
       _id: data._id,
       Cohorte: data.cohort,

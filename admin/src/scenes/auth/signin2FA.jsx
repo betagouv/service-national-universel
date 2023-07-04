@@ -26,7 +26,7 @@ export default function Signin() {
   const onSubmit = async ({ email, token }) => {
     try {
       setLoading(true);
-      const response = await api.post(`/referent/signin-2fa`, { email, token_2fa: token });
+      const response = await api.post(`/referent/signin-2fa`, { email, token_2fa: token.trim() });
       setLoading(false);
       if (response.token) api.setToken(response.token);
       if (response.user) {
@@ -36,7 +36,7 @@ export default function Signin() {
     } catch (e) {
       setLoading(false);
       console.log("ERROR", e);
-      toastr.error("Erreur détectée");
+      toastr.error("(Double authentification) Code non reconnu.", "Merci d'inscrire le dernier code reçu par email");
     }
   };
 
@@ -63,14 +63,26 @@ export default function Signin() {
                 </div>
               </div>
             ) : (
-              <div>
-                <div className="flex items-center gap-2 text-blue-500 uppercase my-8 ">
+              <div className="py-4">
+                <div className="flex items-center gap-2 text-blue-500 uppercase mt-4 mb-2 ">
                   <BsShieldLock className="text-blue-500 text-4xl" /> Authentification à deux facteurs
                 </div>
-                <div className="self-stretch">
-                  Merci d'entrer le code transmis par e-mail à l'adresse <b>{email}</b> :
+                <div className="px-6">
+                  <div className="self-stretch mb-2 text-justify">
+                    Un mail contenant le code unique de connexion vous a été envoyé à l'adresse <b>{email}</b>.
+                  </div>
+                  <div className="self-stretch mb-4 text-justify">
+                    Ce code est valable pendant <b>10 minutes</b>, si vous avez reçu plusieurs codes veuillez svp <b>utiliser le dernier</b> qui vous a été transmis par mail.
+                  </div>
+                  <div className="self-stretch text-gray-500 text-xs text-justify mb-2">Si vous ne recevez pas le mail, nous vous invitons à vérifier que :</div>
+                  <ul className="self-stretch text-gray-500 text-xs mb-4 text-justify">
+                    <li>L'adresse mail que vous utilisez est bien celle indiquée ci-dessus</li>
+                    <li>Le mail ne se trouve pas dans vos spam</li>
+                    <li>L'adresse mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
+                    <li>Votre boite de réception n'est pas saturée</li>
+                  </ul>
                 </div>
-                <div className="self-stretch my-2">
+                <div className="self-stretch my-2 mx-24">
                   <input
                     className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
                     name="token2FA"
@@ -84,8 +96,8 @@ export default function Signin() {
                 <button
                   disabled={loading}
                   onClick={() => onSubmit({ email, token: token2FA })}
-                  className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 text-base font-medium text-white transition-colors">
-                  Valider
+                  className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 mx-24 text-base font-medium text-white transition-colors">
+                  Connexion
                 </button>
               </div>
             )}

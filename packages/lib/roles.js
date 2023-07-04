@@ -360,6 +360,12 @@ const isBusEditionOpen = (actor, cohort) => {
       return true;
     case ROLES.TRANSPORTER:
       return cohort?.busEditionOpenForTransporter;
+    case ROLES.REFERENT_REGION:
+      return cohort?.busEditionOpenForTransporter;
+    case ROLES.REFERENT_DEPARTMENT:
+      return cohort?.busEditionOpenForTransporter;
+    case ROLES.HEAD_CENTER:
+      return cohort?.busEditionOpenForTransporter;
     default:
       return false;
   }
@@ -643,6 +649,8 @@ function canSearchInElasticSearch(actor, index) {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (index === "aggregate-status") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  } else if (index === "lignebus") {
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
   }
   return false;
 }

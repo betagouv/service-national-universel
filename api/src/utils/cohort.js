@@ -1,4 +1,4 @@
-const { YOUNG_STATUS, sessions2023, region2zone, oldSessions, getRegionForEligibility } = require("snu-lib");
+const { YOUNG_STATUS, sessions2023, region2zone, oldSessions, getRegionForEligibility, testCohort } = require("snu-lib");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");

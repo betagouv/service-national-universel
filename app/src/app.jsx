@@ -99,8 +99,6 @@ const OptionalLogIn = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        if (location.pathname.includes("/auth/connect")) return setLoading(false);
-
         const { ok, user, token } = await api.checkToken();
         if (!ok) {
           api.setToken(null);
@@ -203,11 +201,6 @@ const Espace = () => {
         if (sessions.length) setIsResumePhase1WithdrawnModalOpen(true);
       });
     }
-    return () => {
-      setIsModalCGUOpen(false);
-      setIsResumePhase1WithdrawnModalOpen(false);
-      // setIsModalMondayOpen(false);
-    };
   }, [young]);
 
   if (!young) {

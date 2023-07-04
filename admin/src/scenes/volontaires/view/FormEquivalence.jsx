@@ -244,7 +244,7 @@ export default function FormEquivalence({ young, onChange }) {
                     />
                     <Controller
                       rules={{ required: true }}
-                      name="frequency.frequency"
+                      name="frequency.frequence"
                       control={control}
                       render={({ field: { ref, ...rest } }) => <Select {...rest} options={optionsFrequence} label="Fréquence" />}
                     />

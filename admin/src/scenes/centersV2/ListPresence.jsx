@@ -2,7 +2,7 @@ import React from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { getDepartmentNumber, ROLES, translateInscriptionStatus, translatePhase1, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { COHORTS_BEFORE_JULY_2023, getDepartmentNumber, ROLES, translateInscriptionStatus, translatePhase1, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import { Title } from "./components/commons";
 
@@ -15,6 +15,7 @@ export default function ListPresence() {
   const [paramData, setParamData] = React.useState({ page: 0 });
 
   const pageId = "centrePresence";
+  const selectedCohorts = selectedFilters?.cohorts?.filter;
 
   const filterArray = [
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", parentGroup: "Centre" },
@@ -138,13 +139,15 @@ export default function ListPresence() {
             <div className="mt-6 mb-2 flex w-full flex-col border-y-[1px] border-gray-100">
               <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400">
                 <div className="w-[30%] uppercase">Centre</div>
-                <div className="w-[20%] uppercase">présence JDM</div>
+                {selectedCohorts?.length && selectedCohorts?.every((value) => !COHORTS_BEFORE_JULY_2023.includes(value)) ? null : (
+                  <div className="w-[20%] uppercase">présence JDM</div>
+                )}
                 <div className="w-[20%] uppercase">présence à l’arrivée</div>
                 <div className="w-[10%] uppercase">départ</div>
                 <div className="w-[20%] uppercase">FICHE SANITAIRE</div>
               </div>
               {data.map((hit) => (
-                <Hit key={hit._id} hit={hit} onClick={() => history.push(`/centre/${hit._id}`)} />
+                <Hit key={hit._id} hit={hit} selectedCohorts={selectedCohorts} onClick={() => history.push(`/centre/${hit._id}`)} />
               ))}
             </div>
           }
@@ -154,7 +157,7 @@ export default function ListPresence() {
   );
 }
 
-const Hit = ({ hit, onClick }) => {
+const Hit = ({ hit, selectedCohorts, onClick }) => {
   if (!hit) return <div></div>;
   return (
     <div onClick={onClick} className="flex cursor-pointer items-center border-t-[1px] border-gray-100 py-3 px-4 hover:bg-gray-50">
@@ -162,16 +165,22 @@ const Hit = ({ hit, onClick }) => {
         <div className="truncate font-bold leading-6 text-gray-900">{hit.name}</div>
         <div className="text-xs font-normal leading-4 text-gray-500">{`${hit.city || ""} • ${hit.department || ""}`}</div>
       </div>
-      <div className="flex w-[20%] flex-col gap-2">
-        <>
-          <span className="text-sm font-normal leading-none text-gray-900">
-            <strong>{hit.presenceJDMOui || 0}</strong> Présents <strong>{hit.presenceJDMNon || 0}</strong> Absents
-          </span>
-          <span className="text-xs font-normal uppercase leading-none text-gray-500">
-            <strong>{hit.presenceJDMNR || 0}</strong> non renseignés ({Math.round((hit.presenceJDMNR / hit.total) * 100) || 0}%)
-          </span>
-        </>
-      </div>
+      {selectedCohorts.length && selectedCohorts?.every((value) => !COHORTS_BEFORE_JULY_2023.includes(value)) ? null : (
+        <div className="flex w-[20%] flex-col gap-2">
+          {hit.cohorts?.every((value) => !COHORTS_BEFORE_JULY_2023.includes(value)) ? (
+            <span className="text-xs font-normal uppercase leading-none text-gray-500">non renseigné</span>
+          ) : (
+            <>
+              <span className="text-sm font-normal leading-none text-gray-900">
+                <strong>{hit.presenceJDMOui || 0}</strong> Présents <strong>{hit.presenceJDMNon || 0}</strong> Absents
+              </span>
+              <span className="text-xs font-normal uppercase leading-none text-gray-500">
+                <strong>{hit.presenceJDMNR || 0}</strong> non renseignés ({Math.round((hit.presenceJDMNR / hit.total) * 100) || 0}%)
+              </span>
+            </>
+          )}
+        </div>
+      )}
       <div className="flex w-[20%] flex-col gap-2">
         <>
           <span className="text-sm font-normal leading-none text-gray-900">

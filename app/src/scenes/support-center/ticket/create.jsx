@@ -138,7 +138,9 @@ export default function TicketCreate(props) {
                 {values.step1?.id === "TECHNICAL" ? (
                   <SelectTag
                     name="step2"
-                    options={Object.values(step2Technical)}
+                    options={Object.entries(step2Technical)
+                      .filter(([key]) => key !== "CONNECTION")
+                      .map(([key, value]) => ({ id: key, ...value }))}
                     title={"Sujet"}
                     selectPlaceholder={"Choisir le sujet"}
                     handleChange={handleChange}

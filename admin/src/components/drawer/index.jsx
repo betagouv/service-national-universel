@@ -135,7 +135,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/table-repartition" title="Table de répartition" onClick={onClick} />
       <DrawerTab to="/schema-repartition" title="Schéma de répartition" onClick={onClick} />
       <DrawerTab to="/ligne-de-bus" title="Plan de transport" onClick={onClick} />
-      {subRole === "god" && <DrawerTab to="/edit-transport" title="Edit Plan de transport" onClick={onClick} beta />}
+      <DrawerTab to="/edit-transport" title="Edit Plan de transport" onClick={onClick} beta />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
