@@ -16,6 +16,8 @@ export default function ModalPointagePresenceJDM({ isOpen, onSubmit, onCancel, v
   const [departSejourAt, setDepartSejourAt] = React.useState("");
   const [departSejourMotifComment, setDepartSejourMotifComment] = React.useState("");
 
+  const motifArray = ["Exclusion", "Cas de force majeure (Fermeture du centre, éviction pour raison sanitaitre, rapatriement médical, convocation judiciaire, etc.)", "Autre"];
+
   const getTitle = () => `Renseigner le départ de ${values?.length} volontaire${isPlural ? "s" : ""}`;
   const getMessage = () =>
     `Vous êtes sur le point de renseigner le départ groupé de ${values?.length}
@@ -88,8 +90,7 @@ renseigner le motif et la date de départ.`;
                   <option value="" label="Motif du départ" disabled>
                     Motif du départ
                   </option>
-                  {/* todo mettre motifs en constantes */}
-                  {["Exclusion", "Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire", "Autre"].map((d) => (
+                  {motifArray.map((d) => (
                     <option key={d} value={d}>
                       {d}
                     </option>
