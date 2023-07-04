@@ -485,7 +485,7 @@ export default function CenterYoungIndex() {
               title={modal?.title}
               message={modal?.message}
               estimation={modal?.estimation}
-              onClose={() => setIsOpen(false)}
+              onClose={() => setModal({ isOpen: false })}
               className="w-[900px] rounded-xl bg-white"
             />
             <SelectAction
