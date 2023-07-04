@@ -295,7 +295,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
                           },
                         ],
                       },
-                    ]}
+                    ].filter((item) => item !== null)}
                   />
                 </div>
               </div>
