@@ -93,15 +93,17 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     let { id, busId, departuredDate, returnDate, youngCapacity, totalCapacity, followerCapacity, travelTime, lunchBreak, lunchBreakReturn, delayedForth, delayedBack } = value;
-    const ligneBus = await LigneBusModel.findById(id);
-    const cohort = await CohortModel.find({ name: ligneBus.cohort });
+
+    const ligne = await LigneBusModel.findById(id);
+    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.find({ name: ligne.cohort });
+    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     if (req.user.role === ROLES.TRANSPORTER) {
       if (!isBusEditionOpen(req.user, cohort[0])) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else {
       if (!canEditLigneBusGeneralInfo(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    const ligne = await LigneBusModel.findById(id);
-    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     youngCapacity = parseInt(youngCapacity);
     totalCapacity = parseInt(totalCapacity);
@@ -172,8 +174,10 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
     }).validate({ ...req.params, ...req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    const ligneBus = await LigneBusModel.findById(value.id);
-    const cohort = await CohortModel.find({ name: ligneBus.cohort });
+    const ligne = await LigneBusModel.findById(value.id);
+    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.find({ name: ligne.cohort });
+    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (req.user.role === ROLES.TRANSPORTER) {
       if (!isBusEditionOpen(req.user, cohort[0])) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -181,8 +185,6 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
       if (!canEditLigneBusTeam(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const ligne = await LigneBusModel.findById(value.id);
-    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const NewMember = {
       role: value.role,
       lastName: value.lastname,
@@ -238,16 +240,16 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const ligneBus = await LigneBusModel.findById(value.id);
-    const cohort = await CohortModel.find({ name: ligneBus.cohort });
+    const ligne = await LigneBusModel.findById(value.id);
+    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.find({ name: ligne.cohort });
+    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     if (req.user.role === ROLES.TRANSPORTER) {
       if (!isBusEditionOpen(req.user, cohort[0])) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else {
       if (!canEditLigneBusTeam(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-
-    const ligne = await LigneBusModel.findById(value.id);
-    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const memberToDelete = ligne.team.id(value.idTeam);
     if (!memberToDelete) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -276,17 +278,16 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
 
     let { id, centerArrivalTime, centerDepartureTime } = value;
 
-    const ligneBus = await LigneBusModel.findById(id);
-    const cohort = await CohortModel.find({ name: ligneBus.cohort });
+    const ligne = await LigneBusModel.findById(id);
+    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.find({ name: ligne.cohort });
+    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (req.user.role === ROLES.TRANSPORTER) {
       if (!isBusEditionOpen(req.user, cohort[0])) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else {
       if (!canEditLigneBusCenter(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-
-    const ligne = await LigneBusModel.findById(id);
-    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     //add some checks
 
@@ -321,15 +322,17 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     const { id, transportType, meetingHour, busArrivalHour, departureHour, returnHour, meetingPointId, newMeetingPointId } = value;
-    const ligneBus = await LigneBusModel.findById(id);
-    const cohort = await CohortModel.find({ name: ligneBus.cohort });
+
+    const ligne = await LigneBusModel.findById(id);
+    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.find({ name: ligne.cohort });
+    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     if (req.user.role === ROLES.TRANSPORTER) {
       if (!isBusEditionOpen(req.user, cohort[0])) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else {
       if (!canEditLigneBusPointDeRassemblement(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    const ligne = await LigneBusModel.findById(id);
-    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const ligneToPoint = await LigneToPointModel.findOne({ lineId: id, meetingPointId });
     if (!ligneToPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
