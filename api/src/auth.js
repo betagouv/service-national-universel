@@ -312,7 +312,7 @@ class Auth {
 
     try {
       const user = await this.model.findOne({ email, deletedAt: { $exists: false } });
-      if (!user) return res.status(404).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      if (!user) return res.status(200).send({ ok: true });
 
       const token = await crypto.randomBytes(20).toString("hex");
       user.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_MAX_AGE });
