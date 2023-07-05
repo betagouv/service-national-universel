@@ -95,7 +95,7 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
     let { id, busId, cohort, departuredDate, returnDate, youngCapacity, totalCapacity, followerCapacity, travelTime, lunchBreak, lunchBreakReturn, delayedForth, delayedBack } =
       value;
 
-    if (req.user.role === "transporter") {
+    if (req.user.role === ROLES.TRANSPORTER) {
       if (!isBusEditionOpen(req.user, cohort)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else {
       if (!canEditLigneBusGeneralInfo(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -173,7 +173,7 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
     }).validate({ ...req.params, ...req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (req.user.role === "transporter") {
+    if (req.user.role === ROLES.TRANSPORTER) {
       if (!isBusEditionOpen(req.user, value.cohort)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else {
       if (!canEditLigneBusTeam(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -237,7 +237,7 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    if (req.user.role === "transporter") {
+    if (req.user.role === ROLES.TRANSPORTER) {
       if (!isBusEditionOpen(req.user, value.cohort)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else {
       if (!canEditLigneBusTeam(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -274,7 +274,7 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
 
     let { id, centerArrivalTime, centerDepartureTime, cohort } = value;
 
-    if (req.user.role === "transporter") {
+    if (req.user.role === ROLES.TRANSPORTER) {
       if (!isBusEditionOpen(req.user, cohort)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else {
       if (!canEditLigneBusCenter(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -318,7 +318,7 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     const { id, cohort, transportType, meetingHour, busArrivalHour, departureHour, returnHour, meetingPointId, newMeetingPointId } = value;
 
-    if (req.user.role === "transporter") {
+    if (req.user.role === ROLES.TRANSPORTER) {
       if (!isBusEditionOpen(req.user, cohort)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else {
       if (!canEditLigneBusPointDeRassemblement(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
