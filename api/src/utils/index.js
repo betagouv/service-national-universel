@@ -608,6 +608,7 @@ async function addingDayToDate(days, dateStart) {
   }
 }
 
+// @todo : à clean sans les terminales
 async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) {
   const dateStartForSpecialSession = sessionPhase1.dateStart;
   const {
