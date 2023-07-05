@@ -246,7 +246,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
     region: originalTarget.region || structure?.region,
     // many users have an array like [""] for department
     department:
-      originalTarget.department?.length && originalTarget.department.length !== 1 && originalTarget.department[0] !== "" ? originalTarget.department : [structure?.department],
+      originalTarget.department?.length && originalTarget.department[0] !== "" ? originalTarget.department : [structure?.department],
   };
 
   const isActorAndTargetInTheSameRegion = actor.region === geographicTargetData.region;
@@ -262,7 +262,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
       isReferentModifyingHeadCenterWithoutChangingRole) &&
     (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion || isReferentModifyingHeadCenterWithoutChangingRole : true) &&
     (actor.role === ROLES.REFERENT_DEPARTMENT
-      ? ([ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) || isMe) &&
+      ? ([ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) || isMe) &&
         (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
       : true);
   return authorized;
