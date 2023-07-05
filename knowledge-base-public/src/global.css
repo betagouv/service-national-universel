@@ -2,6 +2,95 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Regular.woff);
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Regular_Italic.woff);
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Bold.woff);
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Bold_Italic.woff);
+  font-weight: bold;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Medium.woff);
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Medium_Italic.woff);
+  font-weight: 500;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-ExtraBold.woff);
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-ExtraBold_Italic.woff);
+  font-weight: 800;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Light.woff);
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Light_Italic.woff);
+  font-weight: 300;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Thin.woff);
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Thin_Italic.woff);
+  font-weight: 100;
+  font-style: italic;
+}
+
+* {
+  font-family: Marianne, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
 #__next {
   height: 100vh;
   width: 100%;
