@@ -173,7 +173,7 @@ export default function Done() {
                 Plus d’informations
               </a>
             </div>
-            <div className="flex flex-col items-center">{young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />}</div>
+            <div className="flex flex-col items-center">{young?.presenceJDM === "true" ? <JDMDone cohort={young.cohort} /> : <JDMNotDone cohort={young.cohort} />}</div>
           </div>
         </div>
       </div>
@@ -251,7 +251,7 @@ export default function Done() {
             </div>
           </div>
         </div>
-        {young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />}
+        {young?.presenceJDM === "true" ? <JDMDone cohort={young.cohort} /> : <JDMNotDone cohort={young.cohort} />}
       </div>
 
       <NextStep />
