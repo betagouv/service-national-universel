@@ -14,6 +14,9 @@ import { capture } from "../../../../sentry";
 import { isCohortDone } from "../../../../utils/cohorts";
 
 import HeroPhase1Mobile from "./assets/herophase1mobile.png";
+import { isCohortNeedJdm } from "../../../../utils/cohorts";
+import JDCDone from "./components/JDCDone";
+import JDCNotDone from "./components/JDCNotDone";
 import JDMDone from "./components/JDMDone";
 import JDMNotDone from "./components/JDMNotDone";
 import NextStep from "./components/NextStep";
@@ -173,7 +176,7 @@ export default function Done() {
                 Plus d’informations
               </a>
             </div>
-            <div className="flex flex-col items-center">{young?.presenceJDM === "true" ? <JDMDone cohort={young.cohort} /> : <JDMNotDone cohort={young.cohort} />}</div>
+            {isCohortNeedJdm(young.cohort) ? (young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />) : (young.cohesionStayPresence === "true" ? <JDCDone/> : <JDCNotDone/>)}
           </div>
         </div>
       </div>
@@ -251,7 +254,7 @@ export default function Done() {
             </div>
           </div>
         </div>
-        {young?.presenceJDM === "true" ? <JDMDone cohort={young.cohort} /> : <JDMNotDone cohort={young.cohort} />}
+        {isCohortNeedJdm(young.cohort) ? (young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />) : (young.cohesionStayPresence === "true" ? <JDCDone/> : <JDCNotDone/>)}
       </div>
 
       <NextStep />
