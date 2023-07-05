@@ -70,7 +70,6 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
       data.totalCapacity = parseInt(data.totalCapacity);
       data.youngCapacity = parseInt(data.youngCapacity);
       data.followerCapacity = parseInt(data.followerCapacity);
-      data.cohort = cohort;
 
       //total capacity must be greater than young capacity + follower capacity
       if (data?.totalCapacity < data?.youngCapacity + data?.followerCapacity) {
