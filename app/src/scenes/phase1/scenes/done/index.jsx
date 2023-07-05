@@ -26,7 +26,6 @@ export default function Done() {
   const [center, setCenter] = React.useState(null);
   const [meetingPoint, setMeetingPoint] = React.useState(null);
   const [session, setSession] = React.useState(null);
-  const needTheJDMPresenceTrue = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Février 2022", "2021", "2022", "2020"];
 
   async function handleClickModal() {
     try {
