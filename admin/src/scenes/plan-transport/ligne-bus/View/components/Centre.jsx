@@ -43,7 +43,6 @@ export default function Centre({ bus, setBus, cohort }) {
         setIsLoading(false);
         return;
       }
-      data.cohort = cohort;
       // Save data
       const { ok, code, data: ligneInfo } = await api.put(`/ligne-de-bus/${bus._id}/centre`, data);
 

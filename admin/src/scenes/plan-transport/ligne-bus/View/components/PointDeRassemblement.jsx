@@ -125,7 +125,6 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
         setIsLoading(false);
         return;
       }
-      data.cohort = cohort;
 
       // Save data
       const {

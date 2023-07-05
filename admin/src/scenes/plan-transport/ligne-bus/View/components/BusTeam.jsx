@@ -70,7 +70,6 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
         setIsLoading(false);
         return;
       }
-      data.cohort = cohort;
 
       //Save data
       const { ok, code, data: ligneInfo } = await api.put(`/ligne-de-bus/${bus._id}/team`, data);
@@ -97,7 +96,6 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
     try {
       setIsLoading(true);
       //delete data
-      data.cohort = cohort;
       const { ok, code, data: ligneInfo } = await api.put(`/ligne-de-bus/${bus._id}/teamDelete`, data);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la suppression", translate(code));
