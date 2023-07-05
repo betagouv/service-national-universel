@@ -206,6 +206,7 @@ export default function CenterYoungIndex() {
   }, [currentTab]);
 
   React.useEffect(() => {
+    if (!sessionId) return;
     (async function () {
       try {
         const result = await api.get(`/cohort/bysession/${sessionId}`);
@@ -227,7 +228,7 @@ export default function CenterYoungIndex() {
         setIsYoungCheckinOpen(false);
       }
     })();
-  }, []);
+  }, [sessionId]);
 
   const viewAttestation = async () => {
     setModal({
