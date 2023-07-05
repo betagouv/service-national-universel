@@ -1,3 +1,24 @@
+# [1.307.0](https://github.com/betagouv/service-national-universel/compare/v1.306.0...v1.307.0) (2023-07-05)
+
+
+### Bug Fixes
+
+* **admin:** call with sessionId undefined ([f526eda](https://github.com/betagouv/service-national-universel/commit/f526eda62142162e9adfb7135ec4744d3034272e))
+* **api:** Retourner le même code d'erreur en cas de mail trouvé ou non ([6d10fa7](https://github.com/betagouv/service-national-universel/commit/6d10fa77ef3e97789fa568423db87b0e8e80301d))
+* **app:**  Fix for old cohort ([#2786](https://github.com/betagouv/service-national-universel/issues/2786)) ([bc32c57](https://github.com/betagouv/service-national-universel/commit/bc32c5752abc544b00e70cb2786b7835e090cdc0))
+* **app:** fix bug on old cohort screen ([#2788](https://github.com/betagouv/service-national-universel/issues/2788)) ([1f551d1](https://github.com/betagouv/service-national-universel/commit/1f551d13fd4660c266b63c1b927fdad634d34f2d))
+
+
+### Features
+
+* **admin:** optimize loading time view bus ([6b7d2ee](https://github.com/betagouv/service-national-universel/commit/6b7d2ee2bfdbce5d9710cf17c807dfe6b7036e19))
+* **app:** update young screen for JDM/JDC ([#2780](https://github.com/betagouv/service-national-universel/issues/2780)) ([7380c78](https://github.com/betagouv/service-national-universel/commit/7380c781f40f9f8c06ae88a5d8bee186e332af1a))
+
+
+### Reverts
+
+* Revert "Fix(admin): Redonner les droits au refDep de modifier d'autre refDep de leur departement (#2782)" (#2787) ([0dae0ba](https://github.com/betagouv/service-national-universel/commit/0dae0ba26340c6340df96e022aa219256fd87468)), closes [#2782](https://github.com/betagouv/service-national-universel/issues/2782) [#2787](https://github.com/betagouv/service-national-universel/issues/2787)
+
 # [1.306.0](https://github.com/betagouv/service-national-universel/compare/v1.305.0...v1.306.0) (2023-07-04)
 
 
