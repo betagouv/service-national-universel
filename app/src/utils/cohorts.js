@@ -75,6 +75,15 @@ export function isCohortDone(cohortName) {
   return false;
 }
 
+export function isCohortNeedJdm(cohortName) {
+  const needTheJDMPresenceTrue = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Février 2022", "2021", "2022", "2020"];
+  if (needTheJDMPresenceTrue.includes(cohortName)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 export function getCohortPeriod(cohort) {
   const startDate = new Date(cohort.dateStart);
   const endDate = new Date(cohort.dateEnd);
