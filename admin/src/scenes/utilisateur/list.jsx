@@ -210,45 +210,6 @@ export default function List() {
 }
 
 const Hit = ({ hit, onClick, user, structure }) => {
-  const test = ({ actor, originalTarget, modifiedTarget = null, structure }) => {
-    const isReferentModifyingReferentWithoutChangingRole =
-      // Is referent...
-      [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) &&
-      // ... modifying referent ...
-      [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(originalTarget.role) &&
-      // ... witout changing its role.
-      (modifiedTarget === null || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(modifiedTarget.role));
-
-    const isReferentModifyingHeadCenterWithoutChangingRole =
-      // Is referent...
-      [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) &&
-      // ... modifying referent ...
-      originalTarget.role === ROLES.HEAD_CENTER &&
-      // ... witout changing its role.
-      (modifiedTarget === null || [ROLES.HEAD_CENTER].includes(modifiedTarget.role));
-
-    const geographicTargetData = {
-      region: originalTarget.region || structure?.region,
-      // many users have an array like [""] for department
-      department:
-        originalTarget.department?.length && originalTarget.department.length !== 1 && originalTarget.department[0] !== "" ? originalTarget.department : [structure?.department],
-    };
-
-    const isActorAndTargetInTheSameRegion = actor.region === geographicTargetData.region;
-    // Check si il y a au moins un match entre les departements de la target et de l'actor
-    const isActorAndTargetInTheSameDepartment = actor.department.some((department) => geographicTargetData.department.includes(department));
-
-    const authorized =
-      (isReferentModifyingReferentWithoutChangingRole || isReferentModifyingHeadCenterWithoutChangingRole) &&
-      (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion || isReferentModifyingHeadCenterWithoutChangingRole : true) &&
-      (actor.role === ROLES.REFERENT_DEPARTMENT
-        ? [ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.REFERENT_DEPARTMENT].includes(originalTarget.role) &&
-          (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
-        : true);
-    return authorized;
-  };
-  console.log(hit.firstName, test({ actor: user, originalTarget: hit, structure }));
-
   const displayActionButton = canUpdateReferent({ actor: user, originalTarget: hit, structure });
   dayjs.extend(relativeTime).locale("fr");
 
