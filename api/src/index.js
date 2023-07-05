@@ -143,6 +143,10 @@ app.get("/memory-stats", async (req, res) => {
   res.status(200).send(response);
 });
 
+app.get("/error_for_baleen", async (req, res) => {
+  res.status(403).send("SNU TEST");
+});
+
 app.get("/", async (req, res) => {
   const d = new Date();
   res.status(200).send("SNU " + d.toLocaleString());
