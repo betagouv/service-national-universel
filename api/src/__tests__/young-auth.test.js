@@ -254,9 +254,9 @@ describe("Young", () => {
       res = await request(getAppHelper()).post("/young/forgot_password");
       expect(res.status).toBe(404);
     });
-    it("should return 404 when user does not exist", async () => {
+    it("should return 200 when user does not exist", async () => {
       const res = await request(getAppHelper()).post("/young/forgot_password").send({ email: "foo@bar.fr" });
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(200);
     });
     it("should return return 200 when user exists", async () => {
       const fixture = getNewYoungFixture();
