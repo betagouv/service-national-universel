@@ -632,7 +632,7 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) 
   // cette constante nous permet d'avoir la date de validation d'un séjour en fonction du grade d'un Young
   const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
   // cette constante nous permet d'avoir le nombre de jour nécessaire à la validation d'un séjour en fonction du grade d'un Young
-  const days = isTerminale ? daysToValidate : daysToValidateForTerminalGrade;
+  const days = isTerminale ? daysToValidateForTerminalGrade : daysToValidate;
   const validationDateWithDays = await addingDayToDate(days, dateStart);
   if (young.cohort === "Juin 2023") {
     await updateStatusPhase1WithSpecificCase(young, validationDate, user);
