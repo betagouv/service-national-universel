@@ -107,7 +107,7 @@ export default function Done() {
                     Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
                   </div>
                   <div className="flex items-center gap-5">
-                    {!isCohortDone(young.cohort) && (
+                    {!isCohortDone(young.cohort, 3) && (
                       <button className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs font-medium leading-4 hover:border-gray-500" onClick={handleClickModal}>
                         Mes informations de retour de séjour
                       </button>
@@ -176,7 +176,7 @@ export default function Done() {
                 Plus d’informations
               </a>
             </div>
-            {isCohortNeedJdm(young.cohort) ? (young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />) : (young.cohesionStayPresence === "true" ? <JDCDone/> : <JDCNotDone/>)}
+            {isCohortNeedJdm(young.cohort) ? young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone /> : young.cohesionStayPresence === "true" ? <JDCDone /> : <JDCNotDone />}
           </div>
         </div>
       </div>
@@ -194,7 +194,7 @@ export default function Done() {
             Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
           </div>
           <div className="flex flex-col items-center gap-3 py-3">
-            {!isCohortDone(young.cohort) ? (
+            {!isCohortDone(young.cohort, 3) ? (
               <button className="whitespace-nowrap rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs font-medium leading-4" onClick={handleClickModal}>
                 Mes informations de retour de séjour
               </button>
@@ -254,12 +254,12 @@ export default function Done() {
             </div>
           </div>
         </div>
-        {isCohortNeedJdm(young.cohort) ? (young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone />) : (young.cohesionStayPresence === "true" ? <JDCDone/> : <JDCNotDone/>)}
+        {isCohortNeedJdm(young.cohort) ? young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone /> : young.cohesionStayPresence === "true" ? <JDCDone /> : <JDCNotDone />}
       </div>
 
       <NextStep />
 
-      {!isCohortDone(young.cohort) && modalOpen && (
+      {!isCohortDone(young.cohort, 3) && modalOpen && (
         <InfoConvocation isOpen={modalOpen} onCancel={() => setModalOpen(false)} center={center} meetingPoint={meetingPoint} session={session} />
       )}
     </>
