@@ -5,16 +5,16 @@ import useUser from "../../hooks/useUser";
 import { useEffect, useState } from "react";
 
 export default function Navigation() {
-  const { user } = useUser();
-  const [userRole, setUserRole] = useState(null);
+  const { restriction } = useUser();
+  const [userRole, setUserRole] = useState("public");
 
   useEffect(() => {
-    if (user?.role) {
-      setUserRole(user.role);
+    if (restriction) {
+      setUserRole(restriction);
     } else setUserRole(null);
-  }, [user]);
+  }, [restriction]);
 
   if (userRole === "young") return <YoungMenu />;
-  if (userRole !== null && userRole !== "young") return <AdminMenu />;
+  if (userRole !== null && userRole !== "public" && userRole !== "young") return <AdminMenu />;
   return <PublicMenu />;
 }
