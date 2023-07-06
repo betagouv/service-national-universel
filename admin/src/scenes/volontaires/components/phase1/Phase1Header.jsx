@@ -100,7 +100,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
         <div className="flex items-center justify-center gap-2">
           <div className="text-lg font-medium leading-4">Séjour de cohésion</div>
           <Badge minify text={translatePhase1(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />
-          {canUserDownloadConvocation() && canDownloadYoungDocuments(user, young) && (
+          {canUserDownloadConvocation() && (
             <DocumentSelect
               title="Convocation"
               onClickPdf={handleDownloadConvocationPdfFile}
