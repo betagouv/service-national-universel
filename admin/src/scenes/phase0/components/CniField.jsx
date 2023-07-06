@@ -119,7 +119,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
   const [changes, setChanges] = useState(false);
   const [cniFiles, setCniFiles] = useState([]);
   const [filesToUpload, setFilesToUpload] = useState();
-  const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : new Date());
+  const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
   const [category, setCategory] = useState(young?.latestCNIFileCategory || null);
   const [loading, setLoading] = useState(false);
 
