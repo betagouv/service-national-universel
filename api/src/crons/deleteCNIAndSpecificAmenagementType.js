@@ -9,8 +9,7 @@ exports.handler = async () => {
 
   const where = {
     statusPhase1: { $in: ["DONE", "NOT_DONE", "WITHDRAWN"] },
-    status: { $in: ["VALIDATED", "WITHDRAWN", "ABANDONED", "REFUSED", "NOT_ELIGIBLE", "NOT_AUTORISED"] },
-    cohort: { $ne: ["Juin 2023","Juillet 2023", "à venir"] },
+    status: { $in: ["WITHDRAWN", "ABANDONED", "REFUSED", "NOT_ELIGIBLE", "NOT_AUTORISED"] },
   };
   const total = await YoungModel.countDocuments(where);
 
@@ -19,8 +18,7 @@ exports.handler = async () => {
   await cursor.addCursorFlag("noCursorTimeout", true).eachAsync(async function (young) {
     try {
       if (!young) {
-        console.log("Young object not found.");
-        process.exit(0);
+        return;
       } else {
         young.set({ latestCNIFileExpirationDate: null, latestCNIFileCategory: "Deleted", files: { cniFiles: [] } });
         if (young.specificAmenagment === "true") {
