@@ -81,7 +81,7 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     }
 
     const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
-    if (isReferent(req.user) && (!canDownloadYoungDocuments(req.user, young, applications) || type === "convocation")) {
+    if (isReferent(req.user) && (!canDownloadYoungDocuments(req.user, young, applications) || type !== "convocation")) {
       return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     // Create html
