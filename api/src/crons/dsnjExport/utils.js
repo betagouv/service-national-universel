@@ -1,5 +1,6 @@
 const XLSX = require("xlsx");
 const { getDepartmentNumber, getDepartureDate, PHONE_ZONES } = require("snu-lib");
+const dayjs = require("dayjs");
 
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
@@ -181,7 +182,7 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
       meetingPoint = { bus, ligneToPoint };
     }
     const session = sessions.find(({ _id }) => _id.toString() === sessionPhase1Id);
-    const startDate = getDepartureDate(young, session, cohort, meetingPoint);
+    const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
 
     const formattedYoung = {
       "Identifiant technique": _id.toString(),
@@ -203,7 +204,7 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
       "Statut professionnel": situationTranslations[situation] || situation,
       "ID du centre": cohesionCenter ? cohesionCenter._id.toString() : "",
       "Libellé du centre": cohesionCenter ? cohesionCenter.name : "",
-      "Date début session": startDate.toLocaleString("fr-FR").split(",")[0],
+      "Date début session": dayjs(departureDate).locale("fr-FR").format("D/M/YYYY"),
       "Validation séjour (Validation phase 1)": afterSession ? (statusPhase1 === "DONE" ? "Oui" : "Non") : "null",
     };
 
