@@ -1,3 +1,13 @@
+## [1.307.1](https://github.com/betagouv/service-national-universel/compare/v1.307.0...v1.307.1) (2023-07-06)
+
+
+### Bug Fixes
+
+* **admin:** index on cohort to find if a cohort has a bus more quickly ([cb90d20](https://github.com/betagouv/service-national-universel/commit/cb90d2088748f72daa27037ccb6b59b309db4457))
+* **admin:** open dl convocation to everyone with an acces phase1 ([19d0d1e](https://github.com/betagouv/service-national-universel/commit/19d0d1e1de20e64986d7d1cb145c5a82a6db624f))
+* **app:** info convocation on phase1 not done page ([399b3ce](https://github.com/betagouv/service-national-universel/commit/399b3ceba8fe28294f4bba04d6f47c9eb0ea1c36))
+* **app:** retour information on done page ([c0f48b6](https://github.com/betagouv/service-national-universel/commit/c0f48b63297fab1ed1efb924c0828f6cced7ddb0))
+
 # [1.307.0](https://github.com/betagouv/service-national-universel/compare/v1.306.0...v1.307.0) (2023-07-05)
 
 
