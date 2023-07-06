@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import API from "../../services/api";
-import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
+import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCardOld";
 import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 import Loader from "../Loader";
 

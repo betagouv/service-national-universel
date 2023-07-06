@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import KnowledgeBaseSectionCard from "./KnowledgeBaseSectionCard";
 import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
-import LoaderSection from "../LoaderSectionOld";
 import React from "react";
 import { Accordion } from "../Accordion";
+import LoaderArticle from "../LoaderArticle";
 
 const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   const [sections, setSections] = useState(item?.children?.filter((c) => c.type === "section") || []);
@@ -17,22 +17,25 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
     setArticles(item?.children?.filter((c) => c.type === "article") || []);
   }, [item]);
 
-  if (isLoading || !device) {
+  if (isLoading) {
     return (
-      <section className="flex h-full flex-shrink flex-col justify-evenly overflow-y-auto sm:px-2 lg:flex-row lg:px-0">
-        <div className="flex shrink-0 flex-col sm:mt-4 lg:w-96  lg:border-l-2 lg:pt-12">
-          <h3 className="flex items-center px-4 text-sm font-bold uppercase text-snu-purple-900 lg:px-16">Catégories</h3>
-          <div id="sections" className="flex w-full flex-col overflow-y-auto sm:items-center md:flex-shrink md:flex-row md:flex-wrap md:justify-center md:px-4 md:pb-4 lg:px-12">
-            <LoaderSection />
+      <>
+        <div className="flex w-full items-center justify-center px-4">
+          <div className="mt-3 flex w-full flex-col items-center justify-center">
+            <LoaderArticle key="loader_article-1" className="mb-3" />
+            <LoaderArticle key="loader_article-2" className="mb-3" />
+            <LoaderArticle key="loader_article-3" className="mb-3" />
+            <LoaderArticle key="loader_article-4" className="mb-3" />
           </div>
         </div>
-      </section>
+      </>
     );
   }
+
   if (isRoot) {
     return (
       <>
-        <main className="mx-auto mt-[-75px] px-4 md:mt-[-80px]">
+        <div className="mx-auto mt-[-75px] px-4 md:mt-[-80px]">
           <div className="col-span-full grid-cols-2 gap-2.5 md:grid lg:max-w-screen-95 lg:grid-cols-3 lg:overflow-hidden lg:px-6 2xl:grid-cols-4">
             <h2 className="col-span-2 mb-4 text-xl font-bold text-white md:mx-2 lg:col-span-3 2xl:col-span-4">Thématiques générales</h2>
             {sections.map(({ _id, position, icon, title, slug, children }) => {
@@ -47,50 +50,34 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
                   slug={slug}
                   children={(children || []).slice(0, 3)}
                   className="mx-2 mb-8"
-                  isRoot={isRoot}
                 />
               ) : (
-                <>{children && children.length > 0 && <Accordion title={title} list={children} className="mb-3" path="/base-de-connaissance" />}</>
+                <>{children && children.length > 0 && <Accordion key={_id} title={title} list={children} className="mb-3" path="/base-de-connaissance" />}</>
               );
             })}
           </div>
-        </main>
+        </div>
       </>
     );
   }
 
   return (
-    <main className="flex h-full flex-shrink flex-col justify-evenly overflow-y-auto sm:px-2 lg:flex-row lg:px-0">
-      <section className="flex max-w-4xl shrink-0 flex-grow flex-col pt-12">
-        <h3 className="flex items-center text-sm font-bold uppercase text-snu-purple-900 sm:px-4 sm:pb-2 lg:px-16">Sujets</h3>
-        <div id="articles" className="flex h-full w-full flex-shrink flex-col overflow-y-auto sm:px-2 sm:pb-4 lg:px-12">
-          {articles.map((article) => (
-            <KnowledgeBaseArticleCard key={article._id} _id={article._id} position={article.position} title={article.title} slug={article.slug} path="/base-de-connaissance" />
+    <div className="flex w-full flex-col items-center justify-center px-4">
+      {sections.length > 0 && (
+        <div key={"sections"} className="mt-3 flex w-full flex-col items-center justify-center">
+          {sections.map(({ title, children, _id }) => {
+            return <>{children && children.length > 0 && <Accordion key={_id} title={title} list={children} className="mb-3 w-full" path="/base-de-connaissance" />}</>;
+          })}
+        </div>
+      )}
+      {articles.length > 0 && (
+        <div key="articles" className="mt-3 flex w-full flex-col items-center justify-center">
+          {articles.map(({ _id, title, slug }) => (
+            <KnowledgeBaseArticleCard key={_id} className="mb-3" title={title} slug={slug} path="/base-de-connaissance" />
           ))}
         </div>
-      </section>
-      {!!sections?.length && (
-        <section className="flex shrink-0 flex-col sm:mt-4 lg:w-96  lg:border-l-2 lg:pt-12">
-          <h3 className="flex items-center px-4 text-sm font-bold uppercase text-snu-purple-900 lg:px-16">Catégories</h3>
-          <div id="sections" className="flex w-full flex-col overflow-y-auto sm:items-center md:flex-shrink md:flex-row md:flex-wrap md:justify-center md:px-4 md:pb-4 lg:px-12">
-            {sections.map((section) => (
-              <KnowledgeBaseSectionCard
-                key={section._id}
-                _id={section._id}
-                path="/base-de-connaissance"
-                position={section.position}
-                imageSrc={section.imageSrc}
-                icon={section.icon}
-                title={section.title}
-                group={section.group}
-                createdAt={section.createdAt}
-                slug={section.slug}
-              />
-            ))}
-          </div>
-        </section>
       )}
-    </main>
+    </div>
   );
 };
 
