@@ -1,23 +1,23 @@
 import { useContext, useEffect, useState } from "react";
-import useUser from "../hooks/useUser";
-import SeeAsContext from "../contexts/seeAs";
-import { translateRoleBDC } from "../utils/constants";
-import Header from "./Header";
-import Footer from "./Footer";
-import { AiOutlineInfoCircle } from "react-icons/ai";
-
 import Link from "next/link";
 import { adminURL, appURL, baseDeConnaissanceURL, environment, snuApiUrl, supportURL } from "../config";
+import useUser from "../hooks/useUser";
+import { AiOutlineInfoCircle } from "react-icons/ai";
 import { useSWRConfig } from "swr";
 import API from "../services/api";
 import KnowledgeBaseSearch from "./knowledge-base/KnowledgeBaseSearch";
 import { useRouter } from "next/router";
 import ProfileButton from "./ProfileButton";
 import { Popover } from "@headlessui/react";
+import SeeAsContext from "../contexts/seeAs";
+import { translateRoleBDC } from "../utils/constants";
+import Header from "./Header";
+import Footer from "./Footer";
 
 const Wrapper = ({ children }) => {
   const { mutate, user, restriction } = useUser();
   const { setSeeAs, seeAs, roles } = useContext(SeeAsContext);
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ const Wrapper = ({ children }) => {
                 {["admin"].includes(user?.role) && (
                   <Link legacyBehavior href={`${supportURL}/knowledge-base/${router?.query?.slug || ""}`} passHref>
                     <a href="#" className="cursor-pointer text-sm font-medium text-gray-700">
-                      Espace d&apos;édition
+                      Espace d'édition
                     </a>
                   </Link>
                 )}
@@ -138,7 +138,7 @@ const Wrapper = ({ children }) => {
             </Link>
             <span className="hidden text-base text-[#E5E5E5] md:block">|</span>
             <Link href="https://moncompte.snu.gouv.fr/conditions-generales-utilisation">
-              <span className="shrink-0 cursor-pointer text-xs text-[#6A6A6A]">Conditions générales d&apos;utilisation</span>
+              <span className="shrink-0 cursor-pointer text-xs text-[#6A6A6A]">Conditions générales d'utilisation</span>
             </Link>
             <span className="hidden text-base text-[#E5E5E5] md:block">|</span>
             <Link href="https://www.snu.gouv.fr/">
@@ -146,7 +146,7 @@ const Wrapper = ({ children }) => {
             </Link>
           </div>
           <div className="flex max-w-full flex-wrap items-center justify-center  gap-4">
-            <span className="cursor-pointer text-center text-xs text-[#6A6A6A]">Tous droits réservés - Ministère de l&apos;éducation nationale et de la jeunesse - 2022</span>
+            <span className="cursor-pointer text-center text-xs text-[#6A6A6A]">Tous droits réservés - Ministère de l'éducation nationale et de la jeunesse - 2022</span>
           </div>
           <div className="flex max-w-full flex-wrap items-center justify-center  gap-4">
             <Link href="https://www.gouvernement.fr/">

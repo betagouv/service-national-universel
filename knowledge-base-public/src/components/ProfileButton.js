@@ -3,9 +3,17 @@ import { Popover } from "@headlessui/react";
 const ProfileButton = ({ children, className = "", onLogout, user }) => {
   return (
     <Popover className={`relative order-2 flex grow-0 justify-end ${className} md:flex-none`}>
-      <Popover.Button className="flex items-center text-sm font-bold tracking-tight justify-center h-10 w-10 gap-3 bg-blue-50 rounded-full uppercase text-[#32257F]">
-        {user.firstName?.[0]}
-        {user.lastName?.[0]}
+      <Popover.Button className="flex items-start justify-center gap-3 rounded-none border-none bg-white p-0 text-left shadow-none">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full border-4 border-red-500 uppercase text-snu-purple-900">
+          {user.firstName?.[0]}
+          {user.lastName?.[0]}
+        </span>
+        {/* showNameAndRole && (
+          <div className="flex h-full flex-col justify-center">
+            <span className="text-sm font-medium text-gray-700">{user.firstName}</span>
+            {!!user.role && <span className="text-xs font-medium text-gray-500">{SUPPORT_ROLES[user.role]}</span>}
+          </div>
+        ) */}
       </Popover.Button>
 
       <Popover.Panel className="absolute right-0 top-10 z-10 min-w-[208px] lg:min-w-[200px]">
