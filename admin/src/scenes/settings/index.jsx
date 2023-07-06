@@ -18,6 +18,8 @@ import SimpleToggle from "../../components/ui/forms/dateForm/SimpleToggle";
 import ToggleDate from "../../components/ui/forms/dateForm/ToggleDate";
 import { BiLoaderAlt } from "react-icons/bi";
 import { settings, uselessSettings } from "./utils";
+import { environment } from "../../config";
+import NumberInput from "../../components/ui/forms/NumberInput";
 
 const cohortList = [
   { label: "Février 2023 - C", value: "Février 2023 - C" },
@@ -802,22 +804,39 @@ export default function Settings() {
                         <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Par défaut 9e jour après le début du séjour.</p>
                       </ReactTooltip>
                     </div>
-                    <DatePickerInput
-                      mode="single"
-                      label="Volontaires (non Terminales)"
-                      value={data.validationDate}
-                      disabled={isLoading}
-                      readOnly={readOnly}
-                      onChange={(e) => setData({ ...data, validationDate: e })}
-                    />
-                    <DatePickerInput
-                      mode="single"
-                      label="Volontaires (Terminales)"
-                      disabled={isLoading}
-                      readOnly={readOnly}
-                      value={data.validationDateForTerminaleGrade}
-                      onChange={(e) => setData({ ...data, validationDateForTerminaleGrade: e })}
-                    />
+                    {data.name === "Juillet 2023" ? (
+                      <>
+                        <NumberInput
+                          days={data.daysToValidate}
+                          label={"Nombre de jour pour validation(non Terminales)"}
+                          onChange={(e) => setData({ ...data, daysToValidate: e })}
+                        />
+                        <NumberInput
+                          days={data.daysToValidateForTerminalGrade}
+                          label={"Nombre de jour pour validation(Terminales)"}
+                          onChange={(e) => setData({ ...data, daysToValidateForTerminalGrade: e })}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <DatePickerInput
+                          mode="single"
+                          label="Volontaires (non Terminales)"
+                          value={data.validationDate}
+                          disabled={isLoading}
+                          readOnly={readOnly}
+                          onChange={(e) => setData({ ...data, validationDate: e })}
+                        />
+                        <DatePickerInput
+                          mode="single"
+                          label="Volontaires (Terminales)"
+                          disabled={isLoading}
+                          readOnly={readOnly}
+                          value={data.validationDateForTerminaleGrade}
+                          onChange={(e) => setData({ ...data, validationDateForTerminaleGrade: e })}
+                        />
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

@@ -78,6 +78,14 @@ async function getCohortNamesEndAfter(date) {
   return cohorts.map((cohort) => cohort.name);
 }
 
+async function getCohortDateInfo(cohortName) {
+  try {
+    return CohortModel.findOne({ name: cohortName }, { validationDate: 1, validationDateForTerminaleGrade: 1, daysToValidate: 1, daysToValidateForTerminalGrade: 1, dateStart: 1 });
+  } catch (err) {
+    return {};
+  }
+}
+
 async function getCohortValidationDate(cohortName) {
   try {
     return CohortModel.findOne({ name: cohortName }, { validationDate: 1, validationDateForTerminaleGrade: 1 });
@@ -125,6 +133,7 @@ module.exports = {
   getAllSessions,
   getCohortNamesEndAfter,
   getCohortsEndAfter,
+  getCohortDateInfo,
   getCohortValidationDate,
   getDepartureDateSession,
   getReturnDateSession,
