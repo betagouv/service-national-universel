@@ -15,7 +15,7 @@ async function getHtmlTemplate(type, template, young, contract) {
   if (type === "droitImage" && template === "droitImage") return droitImage.render(young);
 }
 
-async function getDepartureDate(meetingPoint, session, young, cohort, regionsListDROMS) {
+function getDepartureDate(meetingPoint, session, young, cohort, regionsListDROMS) {
   if (meetingPoint?.departuredDate) {
     return new Date(meetingPoint?.departuredDate);
   }
@@ -32,7 +32,7 @@ async function getDepartureDate(meetingPoint, session, young, cohort, regionsLis
   return new Date(cohortDateStart);
 }
 
-async function getReturnDate(meetingPoint, session, young, cohort, regionsListDROMS) {
+function getReturnDate(meetingPoint, session, young, cohort, regionsListDROMS) {
   if (meetingPoint?.returnDate) {
     return new Date(meetingPoint?.returnDate);
   }

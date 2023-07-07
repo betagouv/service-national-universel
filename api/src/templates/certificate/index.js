@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
+const { getDepartureDate, getReturnDate } = require("../utils.js");
 const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END, MINISTRES, END_DATE_PHASE1, PHASE1_YOUNG_ACCESS_LIMIT, regionsListDROMS, transportDatesToString } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
@@ -70,7 +71,7 @@ const getMeetingPoint = async (young) => {
 };
 
 const phase1 = async (young) => {
-  const { getDepartureDate, getReturnDate } = await import("../utils.js");
+  //const { getDepartureDate, getReturnDate } = await import("../utils.js");
   const d = COHESION_STAY_END[young.cohort];
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
   const ministresData = getMinistres(d);
@@ -86,10 +87,7 @@ const phase1 = async (young) => {
     .replace(
       /{{COHESION_DATE}}/g,
       sanitizeAll(
-        transportDatesToString(
-          await getDepartureDate(meetingPoint, session, young, cohort, regionsListDROMS),
-          await getReturnDate(meetingPoint, session, young, cohort, regionsListDROMS),
-        ),
+        transportDatesToString(getDepartureDate(meetingPoint, session, young, cohort, regionsListDROMS), getReturnDate(meetingPoint, session, young, cohort, regionsListDROMS)),
       ),
     )
     .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
