@@ -88,6 +88,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   //   syncYoungStatsMetabase.handler();
   // });
 
+  // Toutes les semaines, le mardi à 9h30
   cron.schedule("30 9 * * 2", () => {
     deleteCNIAdnSpecificAmenagementType.handler();
   });
