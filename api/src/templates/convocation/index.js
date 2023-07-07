@@ -29,6 +29,7 @@ function getBottom() {
 }
 
 const render = async (young) => {
+  const { getDepartureDate, getReturnDate } = await import("../utils.js");
   const getMeetingAddress = (meetingPoint, center) => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
     const complement = meetingPoint?.complementAddress.find((c) => c.cohort === young.cohort);
@@ -61,40 +62,6 @@ const render = async (young) => {
     if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
     const contacts = service?.contacts.filter((c) => c.cohort === young.cohort) || [];
 
-    const departureDate = () => {
-      if (ligneBus?.departuredDate) {
-        return new Date(ligneBus?.departuredDate);
-      }
-      if (session?.dateStart) {
-        const sessionDateStart = new Date(session.dateStart);
-        sessionDateStart.setHours(sessionDateStart.getHours() + 12);
-        return sessionDateStart;
-      }
-      if (young.cohort === "Juillet 2023" && [...regionsListDROMS, "Polynésie française"].includes(young.region)) {
-        return new Date(2023, 6, 4);
-      }
-      const cohortDateStart = new Date(cohort?.dateStart);
-      cohortDateStart.setHours(cohortDateStart.getHours() + 12);
-      return new Date(cohortDateStart);
-    };
-
-    const returnDate = () => {
-      if (ligneBus?.returnDate) {
-        return new Date(ligneBus?.returnDate);
-      }
-      if (session.dateEnd) {
-        const sessionDateEnd = new Date(session.dateEnd);
-        sessionDateEnd.setHours(sessionDateEnd.getHours() + 12);
-        return sessionDateEnd;
-      }
-      if (young?.cohort === "Juillet 2023" && [...regionsListDROMS, "Polynésie française"].includes(young.region)) {
-        return new Date(2023, 6, 16);
-      }
-      const cohortDateEnd = new Date(cohort?.dateEnd);
-      cohortDateEnd.setHours(cohortDateEnd.getHours() + 12);
-      return new Date(cohortDateEnd);
-    };
-
     const html = fs.readFileSync(path.resolve(__dirname, "./cohesion.html"), "utf8");
     return html
       .replace(
@@ -114,16 +81,39 @@ const render = async (young) => {
       .replace(/{{ADDRESS}}/g, sanitizeAll(young.address))
       .replace(/{{ZIP}}/g, sanitizeAll(young.zip))
       .replace(/{{CITY}}/g, sanitizeAll(young.city))
-      .replace(/{{COHESION_STAY_DATE_STRING}}/g, sanitizeAll(transportDatesToString(departureDate(), returnDate())))
+      .replace(
+        /{{COHESION_STAY_DATE_STRING}}/g,
+        sanitizeAll(
+          transportDatesToString(
+            await getDepartureDate(meetingPoint, session, young, cohort, regionsListDROMS),
+            await getReturnDate(meetingPoint, session, young, cohort, regionsListDROMS),
+          ),
+        ),
+      )
       .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(center.name))
       .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
       .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
       .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
-      .replace(/{{MEETING_DATE}}/g, sanitizeAll("<b>Le</b> " + dayjs(departureDate()).locale("fr-FR").format("dddd DD MMMM YYYY")))
+      .replace(
+        /{{MEETING_DATE}}/g,
+        sanitizeAll(
+          "<b>Le</b> " +
+            dayjs(await getDepartureDate(meetingPoint, session, young, cohort, regionsListDROMS))
+              .locale("fr-FR")
+              .format("dddd DD MMMM YYYY"),
+        ),
+      )
       .replace(/{{MEETING_HOURS}}/g, sanitizeAll(`<b>A</b> ${meetingPoint ? ligneToPoint.meetingHour : "16:00"}`))
       .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(`<b>Au</b> ${getMeetingAddress(meetingPoint, center)}`))
       .replace(/{{TRANSPORT}}/g, sanitizeAll(ligneBus ? `<b>Numéro de transport</b> : ${ligneBus.busId}` : ""))
-      .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(dayjs(returnDate()).locale("fr").format("dddd DD MMMM YYYY")))
+      .replace(
+        /{{MEETING_DATE_RETURN}}/g,
+        sanitizeAll(
+          dayjs(await getReturnDate(meetingPoint, session, young, cohort, regionsListDROMS))
+            .locale("fr")
+            .format("dddd DD MMMM YYYY"),
+        ),
+      )
       .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(meetingPoint ? ligneToPoint.returnHour : "11:00"))
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
       .replace(/{{TOP}}/g, sanitizeAll(getTop()))

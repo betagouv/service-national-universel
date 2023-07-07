@@ -1,10 +1,12 @@
 const fs = require("fs");
 const path = require("path");
 const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
-const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END, MINISTRES, END_DATE_PHASE1, PHASE1_YOUNG_ACCESS_LIMIT } = require("snu-lib");
+const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END, MINISTRES, END_DATE_PHASE1, PHASE1_YOUNG_ACCESS_LIMIT, regionsListDROMS, transportDatesToString } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const MeetingPointModel = require("../../models/meetingPoint");
+const CohortModel = require("../../models/cohort");
+const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 
 const getCohesionCenter = async (young) => {
   let cohesionCenter;
@@ -45,17 +47,51 @@ const destinataireLabel = ({ firstName, lastName }, ministres) => {
   return `félicite${ministres.length > 1 ? "nt" : ""} <strong>${firstName} ${lastName}</strong>`;
 };
 
+const getSession = async (young) => {
+  let session = await SessionPhase1Model.findById(young.sessionPhase1Id);
+  if (!session) return;
+
+  return session;
+};
+
+const getCohort = async (young) => {
+  let cohort = await CohortModel.findOne({ name: young.cohort });
+  if (!cohort) return;
+
+  return cohort;
+};
+
+const getMeetingPoint = async (young) => {
+  if (!young.meetingPointId) return;
+  let meetingPoint = await PointDeRassemblementModel.findById(young.meetingPointId);
+  if (!meetingPoint) return;
+
+  return meetingPoint;
+};
+
 const phase1 = async (young) => {
+  const { getDepartureDate, getReturnDate } = await import("../utils.js");
   const d = COHESION_STAY_END[young.cohort];
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
   const ministresData = getMinistres(d);
   const template = ministresData.template;
   const cohesionCenter = await getCohesionCenter(young);
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
+  const session = await getSession(young);
+  const cohort = await getCohort(young);
+  const meetingPoint = await getMeetingPoint(young);
   return html
     .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
     .replace(/{{COHORT}}/g, sanitizeAll({ ...END_DATE_PHASE1, ...PHASE1_YOUNG_ACCESS_LIMIT }[young.cohort].getYear() + 1900))
-    .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort].toLowerCase()))
+    .replace(
+      /{{COHESION_DATE}}/g,
+      sanitizeAll(
+        transportDatesToString(
+          await getDepartureDate(meetingPoint, session, young, cohort, regionsListDROMS),
+          await getReturnDate(meetingPoint, session, young, cohort, regionsListDROMS),
+        ),
+      ),
+    )
     .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
     .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
