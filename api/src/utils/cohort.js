@@ -86,10 +86,46 @@ async function getCohortValidationDate(cohortName) {
   }
 }
 
+function getDepartureDateSession(meetingPoint, session, young, cohort, regionsListDROMS) {
+  if (meetingPoint?.departuredDate) {
+    return new Date(meetingPoint?.departuredDate);
+  }
+  if (session?.dateStart) {
+    const sessionDateStart = new Date(session.dateStart);
+    sessionDateStart.setHours(sessionDateStart.getHours() + 12);
+    return sessionDateStart;
+  }
+  if (young.cohort === "Juillet 2023" && [...regionsListDROMS, "Polynésie française"].includes(young.region)) {
+    return new Date(2023, 6, 4);
+  }
+  const cohortDateStart = new Date(cohort?.dateStart);
+  cohortDateStart.setHours(cohortDateStart.getHours() + 12);
+  return new Date(cohortDateStart);
+}
+
+function getReturnDateSession(meetingPoint, session, young, cohort, regionsListDROMS) {
+  if (meetingPoint?.returnDate) {
+    return new Date(meetingPoint?.returnDate);
+  }
+  if (session?.dateEnd) {
+    const sessionDateEnd = new Date(session.dateEnd);
+    sessionDateEnd.setHours(sessionDateEnd.getHours() + 12);
+    return sessionDateEnd;
+  }
+  if (young?.cohort === "Juillet 2023" && [...regionsListDROMS, "Polynésie française"].includes(young.region)) {
+    return new Date(2023, 6, 16);
+  }
+  const cohortDateEnd = new Date(cohort?.dateEnd);
+  cohortDateEnd.setHours(cohortDateEnd.getHours() + 12);
+  return new Date(cohortDateEnd);
+}
+
 module.exports = {
   getFilteredSessions,
   getAllSessions,
   getCohortNamesEndAfter,
   getCohortsEndAfter,
   getCohortValidationDate,
+  getDepartureDateSession,
+  getReturnDateSession,
 };
