@@ -37,7 +37,7 @@ export default function StepUpload() {
             text: `Ce fichier ${files.name} est trop volumineux.`,
           });
       }
-      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
+      const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
       if (res.code === "FILE_CORRUPTED") {
         setError({
           text: "Le fichier semble corrompu. Pouvez-vous changer le format ou régénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",

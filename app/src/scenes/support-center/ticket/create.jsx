@@ -83,7 +83,7 @@ export default function TicketCreate(props) {
                   const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
                   return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(translationKey), { timeOut: 5000 });
                 }
-                uploadedFiles = filesResponse.data;
+                uploadedFiles = filesResponsapi.uploadFiles;
               }
               const { message, step0, step1, step2 } = values;
               const title = `${step1?.label} - ${step2?.label}`;

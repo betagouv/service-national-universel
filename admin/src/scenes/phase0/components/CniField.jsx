@@ -179,7 +179,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
     if (!category || !date) return setError("Veuillez sélectionner une catégorie et une date d'expiration.");
 
     for (const file of files) {
-      const res = await api.uploadID(young._id, file, { category, expirationDate: date });
+      const res = await api.uploadFile(young._id, file, { category, expirationDate: date });
 
       if (res.code === "FILE_CORRUPTED") {
         setError(

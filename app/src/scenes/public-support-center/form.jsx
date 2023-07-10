@@ -49,6 +49,7 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
               }
               uploadedFiles = filesResponse.data;
             }
+            api.uploadFiles;
 
             const { message, firstName, lastName, email, step1, step2, department } = values;
             const response = await api.post("/zammood/ticket/form", {
