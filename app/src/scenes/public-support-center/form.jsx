@@ -42,7 +42,7 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
             let uploadedFiles;
             setLoading(true);
             if (files.length > 0) {
-              const filesResponse = await api.uploadFile("/zammood/upload", files);
+              const filesResponse = await api.uploadFiles("/zammood/upload", files);
               if (!filesResponse.ok) {
                 const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
                 return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(translationKey), { timeOut: 5000 });
