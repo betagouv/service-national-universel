@@ -4,7 +4,7 @@ const passport = require("passport");
 const Joi = require("joi");
 const { ObjectId } = require("mongodb");
 
-const { capture } = require("../sentry");
+const { capture, captureMessage } = require("../sentry");
 const ApplicationObject = require("../models/application");
 const ContractObject = require("../models/contract");
 const MissionObject = require("../models/mission");
@@ -729,6 +729,7 @@ router.post(
         const validTypes = ["image/jpeg", "image/png", "application/pdf"];
         if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
           fs.unlinkSync(tempFilePath);
+          captureMessage("Wrong filetype", { extra: { tempFilePath, mimetype } });
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
         if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
@@ -742,6 +743,7 @@ router.post(
               return res.status(418).send({ ok: false, code: ERRORS.FILE_INFECTED });
             }
           } catch {
+            captureMessage("SCAN FILE down");
             return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
           }
         }
