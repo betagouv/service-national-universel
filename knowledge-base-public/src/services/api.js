@@ -1,6 +1,6 @@
 import URI from "urijs";
 import { supportApiUrl } from "../config";
-import { createFormDataForFileUpload } from "snu-lib/file";
+import { createFormDataForFileUpload } from "snu-lib";
 
 class ApiService {
   getUrl({ origin = supportApiUrl, path, query = {} }) {
