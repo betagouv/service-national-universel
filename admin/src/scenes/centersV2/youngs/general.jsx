@@ -160,7 +160,7 @@ const Line = ({ hit, onClick, selected, focusedSession }) => {
               <div>{!value.departSejourAt ? "Renseigner un départ" : formatDateFR(value.departSejourAt)}</div>
             </div>
           ) : (
-            <None className="text-gray-500 ml-5" />
+            <None className="ml-5 text-gray-500" />
           )}
         </div>
       </td>

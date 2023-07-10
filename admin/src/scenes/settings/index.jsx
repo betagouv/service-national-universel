@@ -18,7 +18,6 @@ import SimpleToggle from "../../components/ui/forms/dateForm/SimpleToggle";
 import ToggleDate from "../../components/ui/forms/dateForm/ToggleDate";
 import { BiLoaderAlt } from "react-icons/bi";
 import { settings, uselessSettings } from "./utils";
-import { environment } from "../../config";
 import NumberInput from "../../components/ui/forms/NumberInput";
 
 const cohortList = [
@@ -135,7 +134,7 @@ export default function Settings() {
         </div>
         <div className="flex w-full flex-col gap-8">
           {/* Informations générales */}
-          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pt-8 pb-12 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
             <div className="flex w-full flex-col gap-8">
               <p className="text-lg font-medium leading-5 text-gray-900">Informations générales</p>
               <div className="flex">
@@ -307,7 +306,7 @@ export default function Settings() {
 
           {/* TODO implementer parametres sur la plateforme */}
           {/* Préparation des affectations et des transports (phase 1) */}
-          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pt-8 pb-12 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
             <div className="flex w-full flex-col gap-8">
               <p className="text-lg font-medium leading-5 text-gray-900">Préparation des affectations et des transports (phase 1)</p>
               <div className="flex">
@@ -520,7 +519,7 @@ export default function Settings() {
           </div>
 
           {/* Affectation et pointage (phase 1) */}
-          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pt-8 pb-12 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
             <div className="flex w-full flex-col gap-8">
               <p className="text-lg font-medium leading-5 text-gray-900">Affectation et pointage (phase 1)</p>
               <div className="flex">

@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
-import { adminURL, appURL, baseDeConnaissanceURL, snuApiUrl, supportURL } from "../config";
+import { adminURL, appURL, baseDeConnaissanceURL, environment, snuApiUrl, supportURL } from "../config";
 import useUser from "../hooks/useUser";
+import { AiOutlineInfoCircle } from "react-icons/ai";
 import { useSWRConfig } from "swr";
 import API from "../services/api";
 import KnowledgeBaseSearch from "./knowledge-base/KnowledgeBaseSearch";
@@ -10,6 +11,8 @@ import ProfileButton from "./ProfileButton";
 import { Popover } from "@headlessui/react";
 import SeeAsContext from "../contexts/seeAs";
 import { translateRoleBDC } from "../utils/constants";
+import Header from "./Header";
+import Footer from "./Footer";
 
 const Wrapper = ({ children }) => {
   const { mutate, user, restriction } = useUser();
@@ -29,12 +32,11 @@ const Wrapper = ({ children }) => {
     cache.clear();
   };
 
-  const router = useRouter();
-
   const withSeeAs = ["admin", "referent_department", "referent_region"].includes(user?.role);
+  const router = useRouter();
   const categoryAccessibleReferent = ["structure", "head_center", "young", "visitor"];
 
-  return (
+  if (environment === "production") return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="flex-none bg-white print:hidden ">
         <div className="mr-auto ml-auto flex max-w-screen-95 flex-wrap items-center gap-4 py-4 px-8 lg:gap-8">
@@ -182,6 +184,24 @@ const Wrapper = ({ children }) => {
         </div>
       </footer>
     </div>
+  );
+
+  return (
+    <>
+      <Header />
+      {!!seeAs && withSeeAs && user?.role !== seeAs && (
+        <div className="bg-blue-50 flex items-center justify-center gap-4 p-4 w-full">
+          <AiOutlineInfoCircle className="text-blue-500 text-xl flex-none" />
+          <p className="text-sm text-blue-800">Vous visualisez la base de connaissance en tant que {translateRoleBDC[seeAs]}.{" "}
+            <button onClick={() => setSeeAs("admin")} className="noprint text-sm text-blue-800 underline reset">
+              Rétablir la vue par défaut.
+            </button>
+          </p>
+        </div>
+      )}
+      <main className="bg-[#F3F4F6] print:bg-transparent">{children}</main>
+      <Footer />
+    </>
   );
 };
 
