@@ -3,7 +3,6 @@ require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const puppeteer = require("puppeteer");
 const bodyParser = require("body-parser");
-
 const { initSentry, capture } = require("./sentry");
 
 require("events").EventEmitter.defaultMaxListeners = 30; // Fix warning node
