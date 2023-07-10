@@ -8,6 +8,7 @@ import api from "../../../services/api";
 import { YOUNG_STATUS_COLORS, formatDateFR, getAge, translatePhase1 } from "../../../utils";
 import Panel from "../../volontaires/panel";
 import { COHORTS_BEFORE_JULY_2023 } from "../../../utils";
+import { captureMessage } from "../../../sentry";
 
 export default function General({ updateFilter, focusedSession, filterArray, setHasYoungValidated }) {
   const [young, setYoung] = useState();
@@ -25,6 +26,10 @@ export default function General({ updateFilter, focusedSession, filterArray, set
   }, [selectedFilters]);
 
   const handleClick = async (young) => {
+    if (!young?._id) {
+      captureMessage("Error with young :", { extra: { young } });
+      return;
+    }
     const { ok, data } = await api.get(`/referent/young/${young._id}`);
     if (ok) setYoung(data);
   };

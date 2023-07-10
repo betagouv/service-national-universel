@@ -30,6 +30,7 @@ import Panel from "../../volontaires/panel";
 import { SelectStatusApplicationPhase2 } from "../../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
 import MissionView from "./wrapper";
 import { currentFilterAsUrl } from "../../../components/filters-system-v2/components/filters/utils";
+import { captureMessage } from "../../../sentry";
 
 const genderTranslation = {
   male: "Masculin",
@@ -112,6 +113,10 @@ export default function Youngs({ mission, applications, updateMission }) {
   const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
   const handleClick = async (application) => {
+    if (!application?.youngId) {
+      captureMessage("Error with application :", { extra: { application } });
+      return;
+    }
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
     if (ok) setYoung(data);
   };

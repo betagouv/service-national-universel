@@ -18,6 +18,7 @@ import ModalMultiPointagePresenceJDM from "../components/modals/ModalMultiPointa
 import ModalPointageDepart from "../components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../components/modals/ModalPointagePresenceArrivee";
 import ModalPointagePresenceJDM from "../components/modals/ModalPointagePresenceJDM";
+import { captureMessage } from "../../../sentry";
 
 export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSession, filterArray, setHasYoungValidated }) {
   const history = useHistory();
@@ -59,6 +60,10 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
   }, [youngSelected]);
 
   const handleClick = async (young) => {
+    if (!young?._id) {
+      captureMessage("Error with young :", { extra: { young } });
+      return;
+    }
     const { ok, data } = await api.get(`/referent/young/${young._id}`);
     if (ok) setYoung(data);
   };

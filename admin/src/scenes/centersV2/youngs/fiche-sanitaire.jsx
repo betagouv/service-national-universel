@@ -10,6 +10,7 @@ import { getAge, translate } from "../../../utils";
 import Panel from "../../volontaires/panel";
 import ModalMultiPointageFicheSanitaire from "../components/modals/ModalMultiPointageFicheSanitaire";
 import ModalPointageFicheSanitaire from "../components/modals/ModalPointageFicheSanitaire";
+import { captureMessage } from "../../../sentry";
 
 export default function FicheSanitaire({ updateFilter, focusedSession, filterArray, setHasYoungValidated }) {
   const [young, setYoung] = useState();
@@ -54,6 +55,10 @@ export default function FicheSanitaire({ updateFilter, focusedSession, filterArr
   };
 
   const handleClick = async (young) => {
+    if (!young?._id) {
+      captureMessage("Error with young :", { extra: { young } });
+      return;
+    }
     const { ok, data } = await api.get(`/referent/young/${young._id}`);
     if (ok) setYoung(data);
   };
