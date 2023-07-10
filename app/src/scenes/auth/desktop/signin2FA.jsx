@@ -40,7 +40,7 @@ export default function Signin() {
       setLoading(false);
       if (response.token) api.setToken(response.token);
       if (response.user) {
-        if (environment === "production" ? isValidRedirectUrl(redirect) : redirect) return (window.location.href = redirect);
+        if (environment !== "production" ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
         if (redirect) {
           captureMessage("Invalid redirect url", { extra: { redirect } });
           toastr.error("Url de redirection invalide : " + redirect);
