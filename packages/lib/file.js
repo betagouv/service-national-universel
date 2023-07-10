@@ -18,7 +18,9 @@ function download(file, fileName) {
  * @returns FormData
  **/
 function createFormDataForFileUpload(arr, properties) {
-  let files = arr.filter((e) => typeof e === "object");
+  let files = [];
+  if (Array.isArray(arr)) files = arr.filter((e) => typeof e === "object");
+  else files = [arr];
   let formData = new FormData();
 
   // File object name property is read-only, so we need to change it with Object.defineProperty

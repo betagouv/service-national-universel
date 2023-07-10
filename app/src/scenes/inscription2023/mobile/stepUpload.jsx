@@ -85,7 +85,7 @@ export default function StepUpload() {
 
   async function uploadFiles() {
     if (recto) {
-      const res = await api.uploadFiles(young._id, recto, { category, expirationDate, side: "recto" });
+      const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, recto, { category, expirationDate, side: "recto" });
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -95,7 +95,7 @@ export default function StepUpload() {
     }
 
     if (verso) {
-      const res = await api.uploadFiles(young._id, verso, { category, expirationDate, side: "verso" });
+      const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, verso, { category, expirationDate, side: "verso" });
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
