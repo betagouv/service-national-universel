@@ -13,7 +13,7 @@ function download(file, fileName) {
 }
 
 /**
- * Creates Formdata for file upload and sanitize file names to get past firewall strict validation rules e.g apostrophe 
+ * Creates Formdata for file upload and sanitize file names to get past firewall strict validation rules e.g apostrophe
  * @param [File]
  * @returns FormData
  **/
@@ -26,6 +26,7 @@ function createFormDataForFileUpload(arr, properties) {
     // eslint-disable-next-line no-control-regex
     const name = encodeURIComponent(file.name.replace(/['/:*?"<>|\x00-\x1F\x80-\x9F]/g, "_").trim());
     Object.defineProperty(file, "name", { value: name });
+    // We add each file under a different key in order to not squash them
     formData.append(file.name, file, name);
   }
 
