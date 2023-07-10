@@ -1,7 +1,7 @@
 import React from "react";
 import { BsExclamationCircle } from "react-icons/bs";
 
-export default function ModalExportPdfFile(responsive) {
+export default function BannerTermJuly(responsive) {
   return (
     <div className={`${responsive.responsive}`}>
       <BsExclamationCircle className="h-[20px] w-[65px] text-red-500 sm:mt-7 ml-2 lg:h-6 w-6 lg:mt-0" />

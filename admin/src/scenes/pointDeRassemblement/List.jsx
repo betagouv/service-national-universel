@@ -26,11 +26,15 @@ export default function List() {
   const query = new URLSearchParams(search);
 
   const getFirstCohortAvailable = () => {
+    let firstSession = null;
     for (const session of COHORTS) {
       if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
-        return setFirstSession(session);
+        firstSession = session;
+        break;
       }
     }
+    if (!firstSession) firstSession = "Juillet 2023";
+    setFirstSession(firstSession);
   };
 
   React.useEffect(() => {
@@ -219,8 +223,9 @@ const Hit = ({ hit }) => {
                 <div
                   key={cohort + hit.name + index}
                   onClick={() => history.push(`/point-de-rassemblement/${hit._id}?cohort=${cohort}`)}
-                  className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${disabled ? "border-gray-100 bg-gray-100 text-gray-500" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF]"
-                    }`}>
+                  className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
+                    disabled ? "border-gray-100 bg-gray-100 text-gray-500" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF]"
+                  }`}>
                   {cohort}
                 </div>
               );

@@ -167,7 +167,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
             <div className="pb-1 text-lg font-medium leading-5 text-gray-900">{volume.find((v) => v.meetingPointId === pdr._id)?.youngsCount || 0} </div>
           </div>
         </div>
-        {canEditLigneBusPointDeRassemblement(user) && isBusEditionOpen(user, cohort) ? (
+        {canEditLigneBusPointDeRassemblement(user) || isBusEditionOpen(user, cohort) ? (
           <>
             {!editPdr ? (
               <button

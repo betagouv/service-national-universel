@@ -117,7 +117,7 @@ export default function Index() {
 
   if (!young) return <Redirect to="/preinscription" />;
 
-  if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && young.cohort === "à venir") {
+  if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && young.cohort === "à venir" && environment === "production") {
     return <FutureCohort />;
   }
 

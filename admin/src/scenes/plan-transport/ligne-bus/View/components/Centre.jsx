@@ -43,7 +43,6 @@ export default function Centre({ bus, setBus, cohort }) {
         setIsLoading(false);
         return;
       }
-
       // Save data
       const { ok, code, data: ligneInfo } = await api.put(`/ligne-de-bus/${bus._id}/centre`, data);
 
@@ -64,7 +63,7 @@ export default function Centre({ bus, setBus, cohort }) {
     <div className="w-1/2 rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <div className="text-xl leading-6 text-[#242526]">Centre de cohésion</div>
-        {canEditLigneBusCenter(user) && isBusEditionOpen(user, cohort) ? (
+        {canEditLigneBusCenter(user) || isBusEditionOpen(user, cohort) ? (
           <>
             {!editCenter ? (
               <button

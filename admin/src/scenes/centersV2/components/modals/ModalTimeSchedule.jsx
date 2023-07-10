@@ -141,7 +141,7 @@ function DropZone({ session, className = "", sessionChanged }) {
 
     setUploading(true);
     try {
-      const res = await api.uploadFile(`/session-phase1/${session._id}/time-schedule`, [file]);
+      const res = await api.uploadFiles(`/session-phase1/${session._id}/time-schedule`, [file]);
       if (res.code === "FILE_CORRUPTED") {
         setError(
           "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",

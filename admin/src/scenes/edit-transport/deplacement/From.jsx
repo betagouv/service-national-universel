@@ -8,19 +8,36 @@ import SelectInput from "./components/SelectInput";
 import { MdMan } from "react-icons/md";
 import YoungLine from "./YoungLine";
 
-const From = ({ youngs, allLines, isDirty, selectedMeetingPoint, setSelectedMeetingPoint, selectedLigne, setSelectedLigne, checkedYoungs, setCheckedYoungs }) => {
+const From = ({ allLines, isDirty, selectedMeetingPoint, setSelectedMeetingPoint, selectedLigne, setSelectedLigne, checkedYoungs, setCheckedYoungs, cohort }) => {
   const [meetingPointsOptions, setMeetingPointsOptions] = useState([]);
   const [meetingPoints, setMeetingPoints] = useState([]);
   const urlParams = new URLSearchParams(window.location.search);
   const [youngsFilter, setYoungsFilter] = useState([]);
+  const [youngs, setYoungs] = useState([]);
 
   useEffect(() => {
     setYoungsFilter(
       youngs.filter((e) => {
-        return e.meetingPointId === selectedMeetingPoint?._id && e.sessionPhase1Id === selectedLigne.sessionId;
+        return e.meetingPointId === selectedMeetingPoint?._id.toString();
       }),
     );
-  }, [selectedMeetingPoint, youngs]);
+  }, [youngs]);
+
+  React.useEffect(() => {
+    if (!selectedMeetingPoint) return setYoungs([]);
+    if (!selectedLigne) return setYoungs([]);
+    if (!cohort) return setYoungs([]);
+    (async () => {
+      try {
+        const response = await api.post(`/elasticsearch/young/search`, {
+          filters: { cohort: [cohort], ligneId: [selectedLigne?._id.toString()], meetingPointId: [selectedMeetingPoint._id.toString()] },
+        });
+        setYoungs(response.responses[0]?.hits?.hits?.map((e) => ({ ...e._source, _id: e._id })) || []);
+      } catch (e) {
+        console.log(e);
+      }
+    })();
+  }, [cohort, selectedMeetingPoint, selectedLigne]);
 
   React.useEffect(() => {
     try {

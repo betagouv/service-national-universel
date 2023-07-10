@@ -4,23 +4,24 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
-import api from "../../../services/api";
-import { translate, canAssignManually, YOUNG_STATUS_PHASE1, youngCheckinField } from "../../../utils";
-import DocumentPhase1 from "../components/phase1/DocumentPhase1";
-import ModalAffectations from "../components/ModalAffectation";
-import YoungHeader from "../../phase0/components/YoungHeader";
-import Refresh from "../../../assets/icons/Refresh";
-import { capture } from "../../../sentry";
 import dayjs from "dayjs";
+import { AiOutlineExclamationCircle } from "react-icons/ai";
 import ExternalLink from "../../../assets/icons/ExternalLink";
+import Refresh from "../../../assets/icons/Refresh";
 import { adminURL } from "../../../config";
-import Phase1ConfirmationFormBlock from "../components/phase1/Phase1ConfirmationFormBlock";
+import { capture } from "../../../sentry";
+import api from "../../../services/api";
 import { getCohortByName } from "../../../services/cohort.service";
+import { YOUNG_STATUS_PHASE1, canAssignManually, translate, youngCheckinField } from "../../../utils";
+import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
+import YoungHeader from "../../phase0/components/YoungHeader";
+import ModalAffectations from "../components/ModalAffectation";
+import ModalChangePDRSameLine from "../components/ModalChangePDRSameLine";
+import PDRpropose from "../components/PDRpropose";
+import DocumentPhase1 from "../components/phase1/DocumentPhase1";
+import Phase1ConfirmationFormBlock from "../components/phase1/Phase1ConfirmationFormBlock";
 import Phase1Header from "../components/phase1/Phase1Header";
 import Phase1PresenceFormBlock from "../components/phase1/Phase1PresenceFormBlock";
-import PDRpropose from "../components/PDRpropose";
-import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
-import { AiOutlineExclamationCircle } from "react-icons/ai";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -29,6 +30,7 @@ export default function Phase1(props) {
   const [cohesionCenter, setCohesionCenter] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalAffectations, setModalAffectation] = useState({ isOpen: false });
+  const [modalChangePdrSameLine, setModalChangePdrSameLine] = useState({ isOpen: false });
   // new useState
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -168,12 +170,12 @@ export default function Phase1(props) {
                     <Field title="Ville" value={cohesionCenter.city} />
                   </div>
                   {isCohortOpenForAffectation && editing && (
-                    <div
+                    <button
                       onClick={() => setModalAffectation({ isOpen: true })}
                       className="flex w-fit cursor-pointer flex-row items-center justify-center gap-2 self-end rounded border-[1px] border-gray-300 p-2">
                       <Refresh />
                       <div>Changer l&apos;affectation</div>
-                    </div>
+                    </button>
                   )}
                 </div>
                 <div className="mt-4 flex w-full flex-col items-start justify-start self-start">
@@ -212,18 +214,26 @@ export default function Phase1(props) {
                     )}
                   </div>
                   {isCohortOpenForAffectation && editing && (
-                    <div
-                      onClick={() => {
-                        setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id });
-                      }}
-                      className="flex w-fit cursor-pointer flex-row items-center justify-center gap-2 self-end rounded border-[1px] border-gray-300 p-2">
-                      {meetingPoint || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true" ? (
-                        <>
+                    <div className="flex items-center gap-3 !justify-end w-full">
+                      <button
+                        onClick={() => setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id })}
+                        className="flex cursor-pointer flex-row items-center justify-center gap-2 rounded border-[1px] border-gray-300 p-2">
+                        {meetingPoint || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true" ? (
+                          <>
+                            <Refresh />
+                            <div>Changer le PDR</div>
+                          </>
+                        ) : (
+                          <div>Choisir un PDR</div>
+                        )}
+                      </button>
+                      {young.meetingPointId && young.ligneId && (
+                        <button
+                          className="flex cursor-pointer flex-row items-center justify-center gap-2  rounded border-[1px] border-gray-300 p-2"
+                          onClick={() => setModalChangePdrSameLine({ isOpen: true })}>
                           <Refresh />
-                          <div>Changer le point de rassemblement</div>
-                        </>
-                      ) : (
-                        <div>Choisir un point de rassemblement</div>
+                          <div>Changer le PDR sur la ligne</div>
+                        </button>
                       )}
                     </div>
                   )}
@@ -274,6 +284,7 @@ export default function Phase1(props) {
         center={modalAffectations?.center}
         sessionId={modalAffectations?.sessionId}
       />
+      <ModalChangePDRSameLine isOpen={modalChangePdrSameLine?.isOpen} onCancel={() => setModalChangePdrSameLine({ isOpen: false })} young={young} cohort={cohort} />
     </>
   );
 }

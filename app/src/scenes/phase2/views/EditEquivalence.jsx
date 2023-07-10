@@ -63,7 +63,7 @@ export default function EditEquivalence() {
   const uploadFiles = async (files) => {
     setFilesList(files);
     setUploading(true);
-    const res = await api.uploadFile("/young/file/equivalenceFiles", files);
+    const res = await api.uploadFiles("/young/file/equivalenceFiles", files);
     if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier", translate(res.code));
     // We update it instant ( because the bucket is updated instant )
     setData({ ...data, files: res.data });
@@ -540,18 +540,18 @@ export default function EditEquivalence() {
           </div> */}
           {data?.files?.length
             ? data.files.map((file, index) => (
-              <div key={index} className="mt-1 flex w-full flex-row items-center justify-between rounded-lg border-[1px] border-gray-300 py-2 px-3">
-                <div className="flex flex-row items-center">
-                  <PaperClip className="mr-2 text-gray-400" />
-                  <div className="text-sm font-normal leading-5 text-gray-800">{file}</div>
+                <div key={index} className="mt-1 flex w-full flex-row items-center justify-between rounded-lg border-[1px] border-gray-300 py-2 px-3">
+                  <div className="flex flex-row items-center">
+                    <PaperClip className="mr-2 text-gray-400" />
+                    <div className="text-sm font-normal leading-5 text-gray-800">{file}</div>
+                  </div>
+                  <div
+                    className="cursor-pointer text-sm font-normal leading-5 text-gray-800 hover:underline"
+                    onClick={() => setData({ ...data, files: data?.files.filter((f) => file !== f) })}>
+                    Retirer
+                  </div>
                 </div>
-                <div
-                  className="cursor-pointer text-sm font-normal leading-5 text-gray-800 hover:underline"
-                  onClick={() => setData({ ...data, files: data?.files.filter((f) => file !== f) })}>
-                  Retirer
-                </div>
-              </div>
-            ))
+              ))
             : null}
           <div className="mt-3 flex w-full flex-col items-center rounded-lg border-[1px] border-dashed border-gray-300 py-4">
             <AddImage className="text-gray-400" />

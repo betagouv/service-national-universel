@@ -13,6 +13,7 @@ const SessionPhase1 = require("../models/sessionPhase1");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
+const { addDays } = require("date-fns");
 const { APP_URL, ADMIN_URL } = require("../config");
 const {
   CELLAR_ENDPOINT,
@@ -32,7 +33,7 @@ const {
 } = require("../config");
 const { YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, SUB_ROLES } = require("snu-lib");
 const { capture } = require("../sentry");
-const { getCohortValidationDate } = require("./cohort");
+const { getCohortDateInfo } = require("./cohort");
 
 // Timeout a promise in ms
 const timeout = (prom, time) => {
@@ -593,17 +594,50 @@ async function notifDepartmentChange(department, template, young, extraParams = 
   }
 }
 
+async function addingDayToDate(days, dateStart) {
+  try {
+    const startDate = new Date(dateStart);
+    const newDate = addDays(startDate, days);
+    newDate.setUTCHours(23);
+    newDate.setUTCMinutes(59);
+    const formattedValidationDate = newDate.toISOString();
+
+    return formattedValidationDate;
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+// @todo : à clean sans les terminales
 async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) {
-  const { validationDate: dateDeValidation, validationDateForTerminaleGrade: dateDeValidationTerminale } = await getCohortValidationDate(sessionPhase1.cohort);
+  const dateStartForSpecialSession = sessionPhase1.dateStart;
+  const {
+    daysToValidate: daysToValidate,
+    daysToValidateForTerminalGrade: daysToValidateForTerminalGrade,
+    validationDate: dateDeValidation,
+    validationDateForTerminaleGrade: dateDeValidationTerminale,
+    dateStart: cohortDateStart,
+  } = await getCohortDateInfo(sessionPhase1.cohort);
+
+  // Ici on regarde si la session à des date spécifique sinon on garde la date de la cohort
+  const dateStart = dateStartForSpecialSession === undefined ? cohortDateStart : dateStartForSpecialSession;
+
   if (!dateDeValidation || !dateDeValidationTerminale) {
     throw new Error("❌ validationDate & validationDateForTerminaleGrade missing on cohort " + sessionPhase1.cohort);
   }
+  if (!daysToValidate || !daysToValidateForTerminalGrade) {
+    throw new Error("❌ validationDate & validationDateForTerminaleGrade missing on cohort " + sessionPhase1.cohort);
+  }
   const isTerminale = young?.grade === "Terminale";
+  // cette constante nous permet d'avoir la date de validation d'un séjour en fonction du grade d'un Young
   const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
+  // cette constante nous permet d'avoir le nombre de jour nécessaire à la validation d'un séjour en fonction du grade d'un Young
+  const days = isTerminale ? daysToValidateForTerminalGrade : daysToValidate;
+  const validationDateWithDays = await addingDayToDate(days, dateStart);
   if (young.cohort === "Juin 2023") {
     await updateStatusPhase1WithSpecificCase(young, validationDate, user);
   } else if (young.cohort === "Juillet 2023") {
-    await updateStatusPhase1WithSpecificCaseJuly(young, validationDate, user);
+    await updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithDays, user);
   } else {
     await updateStatusPhase1(young, validationDate, isTerminale, user);
   }
@@ -646,9 +680,10 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
   }
 }
 
-async function updateStatusPhase1WithSpecificCaseJuly(young, validationDate, user) {
+async function updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithDays, user) {
   try {
     const now = new Date();
+    const validationDate = new Date(validationDateWithDays);
     // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
     const isValidationDatePassed = now >= validationDate;
     // Cette constante nous permet de vérifier si un jeune était présent au début du séjour (exception pour cette cohorte : pas besoin de JDM)(basé sur son grade)
@@ -675,6 +710,7 @@ async function updateStatusPhase1WithSpecificCaseJuly(young, validationDate, use
         }
       }
     }
+
     await young.save({ fromUser: user });
   } catch (e) {
     console.log(e);

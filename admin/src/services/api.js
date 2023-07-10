@@ -2,6 +2,7 @@ import fetchRetry from "fetch-retry";
 
 import { capture } from "../sentry";
 import { apiURL } from "../config";
+import { createFormDataForFileUpload } from "snu-lib";
 
 let fetch = window.fetch;
 
@@ -274,16 +275,8 @@ class api {
     });
   }
 
-  uploadFile(path, arr, properties) {
-    const names = arr.map((e) => e.name || e);
-    const files = arr.filter((e) => typeof e === "object");
-    let formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      const safeFilename = encodeURIComponent(files[i].name.replace(/'/g, ""));
-      formData.append(files[i].name, files[i], safeFilename);
-    }
-    let allData = properties ? { names, ...properties } : { names };
-    formData.append("body", JSON.stringify(allData));
+  uploadFiles(path, arr, properties) {
+    const formData = createFormDataForFileUpload(arr, properties);
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
@@ -307,42 +300,6 @@ class api {
         resolve(res);
       } catch (e) {
         capture(e, { extra: { arr: arr, path: path, properties: properties } });
-        reject(e);
-      }
-    });
-  }
-
-  uploadID(youngId, file, metadata = {}) {
-    let formData = new FormData();
-    const safeFilename = encodeURIComponent(file.name.replace(/'/g, ""));
-    formData.append("file", file, safeFilename);
-    for (const [key, value] of Object.entries(metadata)) {
-      formData.append(key, value);
-    }
-
-    return new Promise(async (resolve, reject) => {
-      try {
-        const response = await fetch(`${apiURL}/young/${youngId}/documents/cniFiles`, {
-          retries: 3,
-          retryDelay: 1000,
-          retryOn: [502, 503, 504],
-          mode: "cors",
-          method: "POST",
-          credentials: "include",
-          headers: { Authorization: `JWT ${this.token}` },
-          body: formData,
-        });
-
-        if (response.status === 401) {
-          if (window?.location?.pathname !== "/auth") {
-            window.location.href = "/auth?disconnected=1";
-            return;
-          }
-        }
-        const res = await response.json();
-        resolve(res);
-      } catch (e) {
-        capture(e);
         reject(e);
       }
     });

@@ -9,12 +9,14 @@ const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeR
 const cohesionCenterModel = require("../../models/cohesionCenter");
 const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
 const ReferentModel = require("../../models/referent");
+const CohortModel = require("../../models/cohort");
 const {
   canViewLigneBus,
   canEditLigneBusTeam,
   canEditLigneBusGeneralInfo,
   canEditLigneBusCenter,
   canEditLigneBusPointDeRassemblement,
+  isBusEditionOpen,
   ROLES,
   canViewPatchesHistory,
   formatStringLongDate,
@@ -90,11 +92,18 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
     }).validate({ ...req.params, ...req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canEditLigneBusGeneralInfo(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let { id, busId, departuredDate, returnDate, youngCapacity, totalCapacity, followerCapacity, travelTime, lunchBreak, lunchBreakReturn, delayedForth, delayedBack } = value;
 
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.find({ name: ligne.cohort });
+    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.user.role === ROLES.TRANSPORTER) {
+      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (!canEditLigneBusGeneralInfo(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     youngCapacity = parseInt(youngCapacity);
     totalCapacity = parseInt(totalCapacity);
@@ -165,10 +174,17 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
     }).validate({ ...req.params, ...req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canEditLigneBusTeam(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const ligne = await LigneBusModel.findById(value.id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.find({ name: ligne.cohort });
+    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.user.role === ROLES.TRANSPORTER) {
+      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (!canEditLigneBusTeam(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const NewMember = {
       role: value.role,
       lastName: value.lastname,
@@ -226,6 +242,14 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
     }
     const ligne = await LigneBusModel.findById(value.id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.find({ name: ligne.cohort });
+    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.user.role === ROLES.TRANSPORTER) {
+      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (!canEditLigneBusTeam(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const memberToDelete = ligne.team.id(value.idTeam);
     if (!memberToDelete) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -252,11 +276,18 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canEditLigneBusCenter(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let { id, centerArrivalTime, centerDepartureTime } = value;
 
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.find({ name: ligne.cohort });
+    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.user.role === ROLES.TRANSPORTER) {
+      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (!canEditLigneBusCenter(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     //add some checks
 
@@ -290,12 +321,18 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
     }).validate({ ...req.params, ...req.body });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    if (!canEditLigneBusPointDeRassemblement(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const { id, transportType, meetingHour, busArrivalHour, departureHour, returnHour, meetingPointId, newMeetingPointId } = value;
 
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.find({ name: ligne.cohort });
+    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.user.role === ROLES.TRANSPORTER) {
+      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (!canEditLigneBusPointDeRassemblement(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const ligneToPoint = await LigneToPointModel.findOne({ lineId: id, meetingPointId });
     if (!ligneToPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -372,15 +409,21 @@ router.post("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate
     const meetingPoint = await PointDeRassemblementModel.findById(meetingPointId);
     if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const ligneToPoint = await LigneToPointModel.create({
-      lineId: ligne._id.toString(),
-      meetingPointId: meetingPoint._id.toString(),
-      transportType: "bus",
-      returnHour: "00:00",
-      meetingHour: "00:00",
-      departureHour: "00:00",
-      busArrivalHour: "00:00",
-    });
+    let ligneToPoint = await LigneToPointModel.findOne({ lineId: id, meetingPointId });
+    if (ligneToPoint) {
+      ligneToPoint.set({ deletedAt: undefined });
+      await ligneToPoint.save({ fromUser: req.user });
+    } else {
+      ligneToPoint = await LigneToPointModel.create({
+        lineId: ligne._id.toString(),
+        meetingPointId: meetingPoint._id.toString(),
+        transportType: "bus",
+        returnHour: "00:00",
+        meetingHour: "00:00",
+        departureHour: "00:00",
+        busArrivalHour: "00:00",
+      });
+    }
 
     ligne.set({ meetingPointsIds: [...ligne.meetingPointsIds, meetingPoint._id.toString()] });
     await ligne.save({ fromUser: req.user });
@@ -885,33 +928,75 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     const pdrs = await PointDeRassemblementModel.find({ _id: ligne.meetingPointsIds });
     if (!pdrs?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const center = cohesionCenterModel.findById(ligne.centerId);
+    const center = await cohesionCenterModel.findById(ligne.centerId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const departmentListToNotify = pdrs.map((pdr) => pdr.department);
     departmentListToNotify.push(center.department);
 
-    const users = await ReferentModel.find({ department: { $in: departmentListToNotify } });
-    if (!users?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const regionListToNotify = pdrs.map((pdr) => pdr.region);
+    regionListToNotify.push(center.region);
 
-    const priority_roles = ["manager_department", "assistant_manager_department", "secretariat", "manager_phase2"];
+    const subRoleRefDep = ["manager_department", "assistant_manager_department", "secretariat", "manager_phase2"];
+    const subRoleRefReg = ["coordinator", "assistant_coordinator", "manager_phase2"];
 
-    const usersToNotify = [];
-    for (const dep of departmentListToNotify) {
-      const usersFromDep = users.filter((u) => u.department.includes(dep));
+    //on recherche les refDep des 2 departments avec les bon subRole
+    //ET les ref regionnaux des 2 regions avec les bons subRole
 
-      let usersToNotifyInDep = null;
-      for (const role of priority_roles) {
-        usersToNotifyInDep = usersFromDep.filter((u) => u.subRole === role);
-        if (usersToNotifyInDep.length) {
-          break;
+    const referents = await ReferentModel.find({
+      $or: [
+        {
+          department: { $in: departmentListToNotify },
+          role: "referent_department",
+          subRole: { $in: subRoleRefDep },
+        },
+        {
+          role: "referent_region",
+          subRole: { $in: subRoleRefReg },
+          region: { $in: regionListToNotify },
+        },
+      ],
+    });
+    if (!referents?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    //on prend un ref de chaque departement de la liste trié par subRole
+    //et un ref de chaque region de la liste trié par subRole
+
+    const referentsToNotify = [];
+
+    const getRefListToNotify = (type, list, subRoles) => {
+      for (let i = 0; i < list.length; i++) {
+        //place = soit une region soit un departement
+        const place = list[i];
+        let referentsFromPlace = null;
+        //on filtre les user du departement ou de la region
+        if (type === "region") {
+          referentsFromPlace = referents.filter((u) => u.region === place && u.role === "referent_region");
+        }
+        if (type === "department") {
+          referentsFromPlace = referents.filter((u) => u.department.includes(place) && u.role === "referent_department");
+        }
+        for (const subRole of subRoles) {
+          //on recupere le premier user filtré qui a le bon subRole (le premier subRole du tableau) si il y en a pas le 2eme subRole etc...
+          const referentToNotifyInPlace = referentsFromPlace.find((u) => u.subRole === subRole);
+
+          if (referentToNotifyInPlace) {
+            //si on en trouve un on s'arrete la (on ne veut quún ref par departement/region)
+            referentsToNotify.push(referentToNotifyInPlace);
+            break;
+          }
         }
       }
+    };
 
-      usersToNotify.push(...usersToNotifyInDep);
-    }
+    //on recupere la liste des ref regionnaux a prevenir
+    getRefListToNotify("region", regionListToNotify, subRoleRefReg);
+    //on recupere la liste des ref departementaux a prevenir
+    getRefListToNotify("department", departmentListToNotify, subRoleRefDep);
 
-    const uniqueUsersToNotify = [...new Set(usersToNotify.map((obj) => JSON.stringify(obj)))].map((str) => JSON.parse(str));
+    //on genere le tableau des referents selectionné pour etre notifié
+    const uniqueUsersToNotify = [...new Set(referentsToNotify.map((obj) => JSON.stringify(obj)))].map((str) => JSON.parse(str));
+
     // send notification
     await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.NOTIF_REF, {
       emailTo: uniqueUsersToNotify.map((referent) => ({

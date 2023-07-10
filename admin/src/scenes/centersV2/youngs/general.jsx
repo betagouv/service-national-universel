@@ -7,6 +7,8 @@ import { Filters, ResultTable, Save, SelectedFilters } from "../../../components
 import api from "../../../services/api";
 import { YOUNG_STATUS_COLORS, formatDateFR, getAge, translatePhase1 } from "../../../utils";
 import Panel from "../../volontaires/panel";
+import { COHORTS_BEFORE_JULY_2023 } from "../../../utils";
+import { captureMessage } from "../../../sentry";
 
 export default function General({ updateFilter, focusedSession, filterArray, setHasYoungValidated }) {
   const [young, setYoung] = useState();
@@ -24,6 +26,10 @@ export default function General({ updateFilter, focusedSession, filterArray, set
   }, [selectedFilters]);
 
   const handleClick = async (young) => {
+    if (!young?._id) {
+      captureMessage("Error with young :", { extra: { young } });
+      return;
+    }
     const { ok, data } = await api.get(`/referent/young/${young._id}`);
     if (ok) setYoung(data);
   };
@@ -80,15 +86,15 @@ export default function General({ updateFilter, focusedSession, filterArray, set
                     <tr className="border-y-[1px] border-gray-100 text-xs uppercase text-gray-400">
                       <th className="py-3 pl-4">Volontaire</th>
                       <th className="">Présence à l&apos;arrivée</th>
-                      <th className="">Présence JDM</th>
-                      <th className="">Départ</th>
+                      {COHORTS_BEFORE_JULY_2023.includes(focusedSession?.cohort) ? <th className="">Présence JDM</th> : null}
+                      <th className="">Départ Anticipé</th>
                       <th className="">Fiche Sanitaire</th>
                       <th className="">Statut phase 1</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {data.map((hit) => (
-                      <Line key={hit._id} hit={hit} onClick={() => handleClick(hit)} selected={young?._id === hit._id} />
+                      <Line key={hit._id} hit={hit} onClick={() => handleClick(hit)} selected={young?._id === hit._id} focusedSession={focusedSession} />
                     ))}
                   </tbody>
                 </table>
@@ -107,7 +113,7 @@ export default function General({ updateFilter, focusedSession, filterArray, set
   );
 }
 
-const Line = ({ hit, onClick, selected }) => {
+const Line = ({ hit, onClick, selected, focusedSession }) => {
   const [value, setValue] = useState(null);
 
   useEffect(() => {
@@ -137,13 +143,15 @@ const Line = ({ hit, onClick, selected }) => {
           {value.cohesionStayPresence === "false" && "Absent"}
         </div>
       </td>
-      <td className={`${bgColor}`}>
-        <div className={`text-xs font-normal ${mainTextColor}`}>
-          {!value.presenceJDM && <span className="italic text-gray-400">Non renseignée</span>}
-          {value.presenceJDM === "true" && "Présent"}
-          {value.presenceJDM === "false" && "Absent"}
-        </div>
-      </td>
+      {COHORTS_BEFORE_JULY_2023.includes(focusedSession?.cohort) ? (
+        <td className={`${bgColor}`}>
+          <div className={`text-xs font-normal ${mainTextColor}`}>
+            {!value.presenceJDM && <span className="italic text-gray-400">Non renseignée</span>}
+            {value.presenceJDM === "true" && "Présent"}
+            {value.presenceJDM === "false" && "Absent"}
+          </div>
+        </td>
+      ) : null}
       <td className={`${bgColor}`}>
         <div className={`text-xs font-normal ${mainTextColor}`}>
           {value.departSejourAt ? (
@@ -152,7 +160,7 @@ const Line = ({ hit, onClick, selected }) => {
               <div>{!value.departSejourAt ? "Renseigner un départ" : formatDateFR(value.departSejourAt)}</div>
             </div>
           ) : (
-            <None className="text-gray-500" />
+            <None className="ml-5 text-gray-500" />
           )}
         </div>
       </td>

@@ -63,16 +63,28 @@ export function getCohortDetail(cohortName) {
   return sessions2023.find((c) => c.name === cohortName);
 }
 
-export function isCohortDone(cohortName) {
+// start of the cohort's last day
+export function isCohortDone(cohortName, extraDays = 0) {
   if (["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022"].includes(cohortName)) return true;
   if (isCohortsInitialized()) {
     const cohort = getCohort(cohortName);
     if (cohort && cohort.dateEnd) {
-      return cohort.dateEnd && new Date(cohort.dateEnd).valueOf() < Date.now();
+      const dateEnd = new Date(cohort.dateEnd);
+      dateEnd.setDate(dateEnd.getDate() + extraDays);
+      return dateEnd.valueOf() < Date.now();
     }
     return false;
   }
   return false;
+}
+
+export function isCohortNeedJdm(cohortName) {
+  const needTheJDMPresenceTrue = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Février 2022", "2021", "2022", "2020"];
+  if (needTheJDMPresenceTrue.includes(cohortName)) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 export function getCohortPeriod(cohort) {

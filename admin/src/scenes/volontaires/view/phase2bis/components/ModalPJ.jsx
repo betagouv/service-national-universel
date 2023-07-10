@@ -39,7 +39,7 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, application,
     const filesLength = Object.keys(files).length;
     const arr = Object.values(files).map((value) => value);
     setLoading(true);
-    const res = await api.uploadFile(`/application/${application._id}/file/${selectedOption}`, arr);
+    const res = await api.uploadFiles(`/application/${application._id}/file/${selectedOption}`, arr);
     if (res.code === "FILE_CORRUPTED") {
       return toastr.error(
         "Le fichier semble corrompu",

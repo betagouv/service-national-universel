@@ -2,15 +2,10 @@ const { YOUNG_STATUS, sessions2023, region2zone, oldSessions, getRegionForEligib
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
-const { ENVIRONMENT } = require("../config");
 
 async function getFilteredSessions(young) {
   const region = getRegionForEligibility(young);
-  let sessionsToFilter = sessions2023;
-  if (ENVIRONMENT !== "production") {
-    sessionsToFilter = [...sessions2023, testCohort];
-  }
-  const sessions = sessionsToFilter.filter(
+  const sessions = sessions2023.filter(
     (session) =>
       session.eligibility.zones.includes(region2zone[region]) &&
       session.eligibility.schoolLevels.includes(young.grade) &&
@@ -83,6 +78,14 @@ async function getCohortNamesEndAfter(date) {
   return cohorts.map((cohort) => cohort.name);
 }
 
+async function getCohortDateInfo(cohortName) {
+  try {
+    return CohortModel.findOne({ name: cohortName }, { validationDate: 1, validationDateForTerminaleGrade: 1, daysToValidate: 1, daysToValidateForTerminalGrade: 1, dateStart: 1 });
+  } catch (err) {
+    return {};
+  }
+}
+
 async function getCohortValidationDate(cohortName) {
   try {
     return CohortModel.findOne({ name: cohortName }, { validationDate: 1, validationDateForTerminaleGrade: 1 });
@@ -91,10 +94,12 @@ async function getCohortValidationDate(cohortName) {
   }
 }
 
+
 module.exports = {
   getFilteredSessions,
   getAllSessions,
   getCohortNamesEndAfter,
   getCohortsEndAfter,
+  getCohortDateInfo,
   getCohortValidationDate,
 };

@@ -8,6 +8,7 @@ import api from "../../../../services/api";
 import Pencil from "../../../../assets/icons/Pencil";
 import { capture } from "../../../../sentry";
 import ModalDispense from "../ModalDispense";
+import ModalConfirm from "../../../../components/modals/ModalConfirm";
 
 const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, loading = false, setValues, setYoung, user }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -24,6 +25,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
         fileName: `${young.firstName} ${young.lastName} - certificate 1.pdf`,
       });
       setLoading(false);
+      setModal({ isOpen: false });
       if (!ok) throw new Error(translate(code));
       toastr.success(`Document envoyé à ${young.email}`);
     } catch (e) {
@@ -47,6 +49,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
         fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
       });
       setLoading(false);
+      setModal({ isOpen: false });
       if (!ok) throw new Error(translate(code));
       toastr.success(`Document envoyé à ${young.email}`);
     } catch (e) {
@@ -97,7 +100,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
         <div className="flex items-center justify-center gap-2">
           <div className="text-lg font-medium leading-4">Séjour de cohésion</div>
           <Badge minify text={translatePhase1(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />
-          {canUserDownloadConvocation() && canDownloadYoungDocuments(user, young) && (
+          {canUserDownloadConvocation() && (
             <DocumentSelect
               title="Convocation"
               onClickPdf={handleDownloadConvocationPdfFile}
@@ -133,6 +136,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
         </div>
         <EditTop />
       </div>
+      <ModalConfirm isOpen={modal?.isOpen} title={modal?.title} message={modal?.message} onCancel={() => setModal({ isOpen: false })} onConfirm={modal?.onConfirm} />
       <ModalDispense
         isOpen={modalDispense?.isOpen}
         youngId={young?._id}

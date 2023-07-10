@@ -76,7 +76,8 @@ class Auth {
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-      const sessions = await getFilteredSessions(value);
+      let sessions = await getFilteredSessions(value);
+      if (config.ENVIRONMENT !== "production") sessions.push({ name: "à venir" });
       const session = sessions.find(({ name }) => name === value.cohort);
       if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
@@ -196,33 +197,38 @@ class Auth {
   }
 
   async signin2FA(req, res) {
-    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), token_2fa: Joi.string().required() }).unknown().validate(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    const { email, token_2fa } = value;
-    const user = await this.model.findOne({
-      email,
-      token2FA: token_2fa,
-      token2FAExpires: { $gt: Date.now() },
-    });
-    if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+    try {
+      const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), token_2fa: Joi.string().required() }).unknown().validate(req.body);
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      const { email, token_2fa } = value;
+      const user = await this.model.findOne({
+        email,
+        token2FA: token_2fa,
+        token2FAExpires: { $gt: Date.now() },
+      });
+      if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
 
-    const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
-    user.set({ userIps: [...user.userIps, ip], token2FA: null, token2FAExpires: null });
-    user.set({ loginAttempts: 0 });
-    user.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
-    await user.save();
+      const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
+      user.set({ userIps: [...user.userIps, ip], token2FA: null, token2FAExpires: null });
+      user.set({ loginAttempts: 0 });
+      user.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
+      await user.save();
 
-    const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
-    if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions());
-    else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions());
+      const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
+      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions());
+      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions());
 
-    const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
-    return res.status(200).send({
-      ok: true,
-      token,
-      user: data,
-      data,
-    });
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      return res.status(200).send({
+        ok: true,
+        token,
+        user: data,
+        data,
+      });
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
   }
 
   async logout(req, res) {
@@ -306,7 +312,7 @@ class Auth {
 
     try {
       const user = await this.model.findOne({ email, deletedAt: { $exists: false } });
-      if (!user) return res.status(404).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      if (!user) return res.status(200).send({ ok: true });
 
       const token = await crypto.randomBytes(20).toString("hex");
       user.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_MAX_AGE });

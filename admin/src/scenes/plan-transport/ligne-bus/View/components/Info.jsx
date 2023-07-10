@@ -118,7 +118,7 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
     <div className="w-full rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <div className="text-xl leading-6 text-[#242526]">Informations générales</div>
-        {canEditLigneBusGeneralInfo(user) && isBusEditionOpen(user, cohort) ? (
+        {canEditLigneBusGeneralInfo(user) || isBusEditionOpen(user, cohort) ? (
           <>
             {!editInfo ? (
               <button

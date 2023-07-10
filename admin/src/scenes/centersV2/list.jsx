@@ -42,11 +42,15 @@ export default function List() {
 
   const [firstSession, setFirstSession] = useState(null);
   const getFirstCohortAvailable = () => {
+    let firstSession = null;
     for (const session of COHORTS) {
       if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
-        return setFirstSession(session);
+        firstSession = session;
+        break;
       }
     }
+    if (!firstSession) firstSession = "Juillet 2023";
+    setFirstSession(firstSession);
   };
 
   useEffect(() => {
