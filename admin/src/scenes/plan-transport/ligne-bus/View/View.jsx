@@ -38,6 +38,11 @@ export default function View(props) {
       if (!id) return <div />;
       const { ok, code, data: reponseBus } = await api.get(`/ligne-de-bus/${id}`);
 
+      if (!ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
+      }
+      setData(reponseBus);
+
       let body = {
         query: { bool: { filter: [{ terms: { "ligneId.keyword": [id] } }, { terms: { "status.keyword": ["VALIDATED"] } }, { terms: { "cohort.keyword": [reponseBus.cohort] } }] } },
         size: 0,
@@ -46,10 +51,6 @@ export default function View(props) {
       const { responses } = await api.esQuery("young", body, null, "?showAffectedToRegionOrDep=1");
       setNbYoung(responses[0].hits.total.value);
 
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
-      }
-      setData(reponseBus);
       await getCohortDetails(reponseBus.cohort);
     } catch (e) {
       capture(e);
@@ -151,7 +152,7 @@ export default function View(props) {
     {
       key: "exportDataAller",
       action: async () => {
-        await exportLigneBusJeune(cohort.name, data.busId, "Aller", data.team);
+        await exportLigneBusJeune(cohort.name, data, "Aller", data.team);
       },
       render: (
         <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
@@ -163,7 +164,7 @@ export default function View(props) {
     {
       key: "exportDataRetour",
       action: async () => {
-        await exportLigneBusJeune(cohort.name, data.busId, "Retour", data.team);
+        await exportLigneBusJeune(cohort.name, data, "Retour", data.team);
       },
       render: (
         <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">

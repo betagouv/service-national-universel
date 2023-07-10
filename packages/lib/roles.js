@@ -246,7 +246,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
     region: originalTarget.region || structure?.region,
     // many users have an array like [""] for department
     department:
-      originalTarget.department?.length && originalTarget.department.length !== 1 && originalTarget.department[0] !== "" ? originalTarget.department : [structure?.department],
+      originalTarget.department?.length && originalTarget.department[0] !== "" ? originalTarget.department : [structure?.department],
   };
 
   const isActorAndTargetInTheSameRegion = actor.region === geographicTargetData.region;
@@ -262,7 +262,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
       isReferentModifyingHeadCenterWithoutChangingRole) &&
     (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion || isReferentModifyingHeadCenterWithoutChangingRole : true) &&
     (actor.role === ROLES.REFERENT_DEPARTMENT
-      ? ([ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) || isMe) &&
+      ? ([ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) || isMe) &&
         (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
       : true);
   return authorized;
@@ -359,12 +359,6 @@ const isBusEditionOpen = (actor, cohort) => {
     case ROLES.ADMIN:
       return true;
     case ROLES.TRANSPORTER:
-      return cohort?.busEditionOpenForTransporter;
-    case ROLES.REFERENT_REGION:
-      return cohort?.busEditionOpenForTransporter;
-    case ROLES.REFERENT_DEPARTMENT:
-      return cohort?.busEditionOpenForTransporter;
-    case ROLES.HEAD_CENTER:
       return cohort?.busEditionOpenForTransporter;
     default:
       return false;
@@ -735,19 +729,19 @@ function canExportConvoyeur(actor) {
 }
 
 function canEditLigneBusTeam(actor) {
-  return [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
 function canEditLigneBusGeneralInfo(actor) {
-  return [ROLES.ADMIN, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN].includes(actor.role);
 }
 
 function canEditLigneBusCenter(actor) {
-  return [ROLES.ADMIN, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN].includes(actor.role);
 }
 
 function canEditLigneBusPointDeRassemblement(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function ligneBusCanCreateDemandeDeModification(actor) {

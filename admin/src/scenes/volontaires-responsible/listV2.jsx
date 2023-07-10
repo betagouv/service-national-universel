@@ -33,6 +33,7 @@ import SelectAction from "../../components/SelectAction";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import { currentFilterAsUrl } from "../../components/filters-system-v2/components/filters/utils";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import { captureMessage } from "../../sentry";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -273,6 +274,10 @@ export default function List() {
   };
 
   const handleClick = async (application) => {
+    if (!application?.youngId) {
+      captureMessage("Error with application :", { extra: { application } });
+      return;
+    }
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
     if (ok) setPanel({ application, young: data });
   };

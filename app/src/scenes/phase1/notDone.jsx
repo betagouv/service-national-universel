@@ -71,7 +71,7 @@ export default function NotDone() {
             <b>Votre phase 1 n&apos;est donc pas validée.</b>
           </p>
           <p>Nous vous invitons à vous rapprocher de votre référent départemental pour la suite de votre parcours.</p>
-          {!isCohortDone(young.cohort) && (
+          {!isCohortDone(young.cohort, 3) && (
             <button className="mt-8 rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs font-medium leading-4 hover:border-gray-500" onClick={handleClickModal}>
               Voir mes informations de convocation
             </button>
@@ -106,7 +106,7 @@ export default function NotDone() {
         <div className="thumb" />
       </Hero>
 
-      {modalOpen && !isCohortDone(young.cohort) && <InfoConvocation isOpen={modalOpen} onCancel={() => setModalOpen(false)} title="Information de convocation" />}
+      {modalOpen && !isCohortDone(young.cohort, 3) && <InfoConvocation isOpen={modalOpen} onCancel={() => setModalOpen(false)} title="Information de convocation" />}
     </HeroContainer>
   );
 }

@@ -569,7 +569,7 @@ router.post(
       const { name, tempFilePath, mimetype, size } = file;
       const filetype = await FileType.fromFile(tempFilePath);
       const mimeFromMagicNumbers = filetype ? filetype.mime : "application/pdf";
-      const validTypes = ["image/jpeg", "image/png", "application/pdf"];
+      const validTypes = ["image/jpeg", "image/png", "application/pdf", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
       if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
         fs.unlinkSync(tempFilePath);
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });

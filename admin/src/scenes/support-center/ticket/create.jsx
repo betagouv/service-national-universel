@@ -73,7 +73,7 @@ export default function Create(props) {
               setLoading(true);
               let uploadedFiles;
               if (files.length > 0) {
-                const filesResponse = await api.uploadFile("/zammood/upload", files);
+                const filesResponse = await api.uploadFiles("/zammood/upload", files);
                 if (!filesResponse.ok) {
                   setLoading(false);
                   const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;

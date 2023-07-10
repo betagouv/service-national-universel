@@ -3,7 +3,7 @@ import { toastr } from "react-redux-toastr";
 import FileIcon from "../../../../assets/FileIcon";
 import api from "../../../../services/api";
 import { SENDINBLUE_TEMPLATES, translate } from "../../../../utils";
-import { capture } from "../../../../sentry";
+import { capture, captureMessage } from "../../../../sentry";
 import Select from "../../../../components/TailwindSelect";
 import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
 
@@ -30,6 +30,10 @@ export default function DocumentPhase1(props) {
   };
 
   const updateYoung = async () => {
+    if (!young?.__id) {
+      captureMessage("Error with young :", { extra: { young } });
+      return;
+    }
     const { data } = await api.get(`/referent/young/${young._id}`);
     if (data) setYoung(data);
     const status = getStatusCohesionStayMedical(data);

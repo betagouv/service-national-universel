@@ -215,6 +215,20 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  daysToValidate : {
+    type: Number,
+    documentation: {
+      description: "Nombre de jours nécessaire pour valider le séjour",
+    },
+  },
+
+  daysToValidateForTerminalGrade : {
+    type: Number,
+    documentation: {
+      description: "Nombre de jours pour valider le séjour pour les jeunes étant en Terminale",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

@@ -18,6 +18,7 @@ import SimpleToggle from "../../components/ui/forms/dateForm/SimpleToggle";
 import ToggleDate from "../../components/ui/forms/dateForm/ToggleDate";
 import { BiLoaderAlt } from "react-icons/bi";
 import { settings, uselessSettings } from "./utils";
+import NumberInput from "../../components/ui/forms/NumberInput";
 
 const cohortList = [
   { label: "Février 2023 - C", value: "Février 2023 - C" },
@@ -133,7 +134,7 @@ export default function Settings() {
         </div>
         <div className="flex w-full flex-col gap-8">
           {/* Informations générales */}
-          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pt-8 pb-12 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
             <div className="flex w-full flex-col gap-8">
               <p className="text-lg font-medium leading-5 text-gray-900">Informations générales</p>
               <div className="flex">
@@ -305,7 +306,7 @@ export default function Settings() {
 
           {/* TODO implementer parametres sur la plateforme */}
           {/* Préparation des affectations et des transports (phase 1) */}
-          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pt-8 pb-12 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
             <div className="flex w-full flex-col gap-8">
               <p className="text-lg font-medium leading-5 text-gray-900">Préparation des affectations et des transports (phase 1)</p>
               <div className="flex">
@@ -518,7 +519,7 @@ export default function Settings() {
           </div>
 
           {/* Affectation et pointage (phase 1) */}
-          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pt-8 pb-12 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
             <div className="flex w-full flex-col gap-8">
               <p className="text-lg font-medium leading-5 text-gray-900">Affectation et pointage (phase 1)</p>
               <div className="flex">
@@ -802,22 +803,39 @@ export default function Settings() {
                         <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Par défaut 9e jour après le début du séjour.</p>
                       </ReactTooltip>
                     </div>
-                    <DatePickerInput
-                      mode="single"
-                      label="Volontaires (non Terminales)"
-                      value={data.validationDate}
-                      disabled={isLoading}
-                      readOnly={readOnly}
-                      onChange={(e) => setData({ ...data, validationDate: e })}
-                    />
-                    <DatePickerInput
-                      mode="single"
-                      label="Volontaires (Terminales)"
-                      disabled={isLoading}
-                      readOnly={readOnly}
-                      value={data.validationDateForTerminaleGrade}
-                      onChange={(e) => setData({ ...data, validationDateForTerminaleGrade: e })}
-                    />
+                    {data.name === "Juillet 2023" ? (
+                      <>
+                        <NumberInput
+                          days={data.daysToValidate}
+                          label={"Nombre de jour pour validation(non Terminales)"}
+                          onChange={(e) => setData({ ...data, daysToValidate: e })}
+                        />
+                        <NumberInput
+                          days={data.daysToValidateForTerminalGrade}
+                          label={"Nombre de jour pour validation(Terminales)"}
+                          onChange={(e) => setData({ ...data, daysToValidateForTerminalGrade: e })}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <DatePickerInput
+                          mode="single"
+                          label="Volontaires (non Terminales)"
+                          value={data.validationDate}
+                          disabled={isLoading}
+                          readOnly={readOnly}
+                          onChange={(e) => setData({ ...data, validationDate: e })}
+                        />
+                        <DatePickerInput
+                          mode="single"
+                          label="Volontaires (Terminales)"
+                          disabled={isLoading}
+                          readOnly={readOnly}
+                          value={data.validationDateForTerminaleGrade}
+                          onChange={(e) => setData({ ...data, validationDateForTerminaleGrade: e })}
+                        />
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

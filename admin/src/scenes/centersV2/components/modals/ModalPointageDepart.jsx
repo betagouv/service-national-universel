@@ -12,6 +12,7 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
   const [departSejourAt, setDepartSejourAt] = React.useState("");
   const [departSejourMotifComment, setDepartSejourMotifComment] = React.useState("");
   const [depart, setDepart] = React.useState("");
+  const motifArray = ["Exclusion", "Cas de force majeure (Fermeture du centre, éviction pour raison sanitaitre, rapatriement médical, convocation judiciaire, etc.)", "Autre"];
 
   React.useEffect(() => {
     if (!young) return;
@@ -85,12 +86,13 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
               <option value="" label="Motif du départ" disabled>
                 Motif du départ
               </option>
-              {/* todo mettre motifs en constantes */}
-              {["Exclusion", "Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire", "Autre"].map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
+              {motifArray.map(
+                (d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ),
+              )}
             </select>
           </div>
           <div className={`rounded-lg border-[1px]  py-1 px-2 ${isLoading && "bg-gray-200"}`}>

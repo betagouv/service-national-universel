@@ -1,10 +1,9 @@
 import ModalTailwind from "../../../../components/modals/ModalTailwind";
 import { BiLoaderAlt } from "react-icons/bi";
 
-export default function ModalExportPdfFile({ isOpen, title, message, estimation }) {
-
+export default function ModalExportPdfFile({ isOpen, onClose, title, message, estimation }) {
   return (
-    <ModalTailwind isOpen={isOpen} onClose={() => setIsOpen(false)} className="w-[700px] rounded-xl bg-white">
+    <ModalTailwind isOpen={isOpen} onClose={onClose} className="w-[700px] rounded-xl bg-white">
       <div className="w-full">
         <div className="pb-16 pt-14">
           <div className="flex flex-col items-center justify-center text-center">
@@ -20,4 +19,3 @@ export default function ModalExportPdfFile({ isOpen, title, message, estimation 
     </ModalTailwind>
   );
 }
-
