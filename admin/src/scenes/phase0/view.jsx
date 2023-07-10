@@ -967,7 +967,6 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
         onCorrectionRequestChange={onCorrectionRequestChange}
         type="date"
         disabled={young.latestCNIFileExpirationDate === null}
-        // hidden={young.latestCNIFileExpirationDate === null}
         value={young.latestCNIFileExpirationDate}
         onChange={(value) => onChange("latestCNIFileExpirationDate", value)}
         young={young}>
@@ -989,8 +988,7 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
           correctionRequest={getCorrectionRequest(requests, "latestCNIFileCategory")}
           onCorrectionRequestChange={onCorrectionRequestChange}
           type="select"
-          disabled={young.latestCNIFileCategory === "Deleted"}
-          // hidden={young.latestCNIFileCategory === "Deleted"}
+          disabled={young.latestCNIFileCategory === "deleted"}
           options={categoryOptions}
           onChange={(cat) => onChange("latestCNIFileCategory", cat)}
           young={young}
