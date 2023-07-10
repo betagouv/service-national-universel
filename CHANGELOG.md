@@ -1,3 +1,32 @@
+# [1.308.0](https://github.com/betagouv/service-national-universel/compare/v1.307.1...v1.308.0) (2023-07-10)
+
+
+### Bug Fixes
+
+* **admin:** dynamic settings ([5b1a9f9](https://github.com/betagouv/service-national-universel/commit/5b1a9f991f13a820fb17d312c77d2700c5361e12))
+* **admin, app, kb:** File upload: improve file renaming before calling api ([#2726](https://github.com/betagouv/service-national-universel/issues/2726)) ([8174b6d](https://github.com/betagouv/service-national-universel/commit/8174b6df315472a819853a8a19fe81941a53694b))
+* **admin/app:** correct file upload method name ([3881756](https://github.com/betagouv/service-national-universel/commit/3881756668389e64d91c633712f8a68faec29b03))
+* **api:** add deleted to cni category enum ([7e71f34](https://github.com/betagouv/service-national-universel/commit/7e71f34d196f820b07c0f232097ecc32ea514c3a))
+* **api:** time-schedule accept xls ([d090b24](https://github.com/betagouv/service-national-universel/commit/d090b247cfac17a96c0947fca19e5833ab5171d9))
+* **app, admin:** correct CNI path ([b586ec6](https://github.com/betagouv/service-national-universel/commit/b586ec676b8fbe9a0d8cd82b9da14ab57f114c41))
+* **kb:** add react-icons ([2203efc](https://github.com/betagouv/service-national-universel/commit/2203efc1b0a76d91d5ad219753003fe9dd1c6f8b))
+* **kb:** correctly import upload file function ([96989b9](https://github.com/betagouv/service-national-universel/commit/96989b939a707053b0289a0d833f8c731aace65c))
+* **kb:** import snu-lib ([ac85758](https://github.com/betagouv/service-national-universel/commit/ac85758e0122c142fec0b222ada471ebe098b227))
+* **kb:** remove lib import ([25e64b8](https://github.com/betagouv/service-national-universel/commit/25e64b85030d2dc02e415fd425dbb2fc3e597bea))
+* **kb:** temporarily disable linting on build ([faadcb9](https://github.com/betagouv/service-national-universel/commit/faadcb9b2f0cc7e21b9916baa7aeb18fa3853d85))
+
+
+### Features
+
+* **kb:** new design for homepage ([#2784](https://github.com/betagouv/service-national-universel/issues/2784)) ([5840839](https://github.com/betagouv/service-national-universel/commit/5840839c9348edd1126c2644965e38a2a0337af0))
+* **kb:** New header design (staging only) ([#2783](https://github.com/betagouv/service-national-universel/issues/2783)) ([8130f91](https://github.com/betagouv/service-national-universel/commit/8130f910dfa8e5fff10b301fc1280c44ee925372))
+
+
+### Reverts
+
+* Revert "chore: add kb to turbo repo" ([0873393](https://github.com/betagouv/service-national-universel/commit/0873393ee17d5af3a88d91d839eb5a2b14a18f98))
+* Revert "fix(app/admin): redirection-ouverte (#2792)" ([25c7d3d](https://github.com/betagouv/service-national-universel/commit/25c7d3ddc5a04bc86fa89d49ee87cda3e695064c)), closes [#2792](https://github.com/betagouv/service-national-universel/issues/2792)
+
 ## [1.307.1](https://github.com/betagouv/service-national-universel/compare/v1.307.0...v1.307.1) (2023-07-06)
 
 ### Bug Fixes
