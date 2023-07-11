@@ -14,8 +14,6 @@ import { useHistory } from "react-router-dom";
 import { cohortsInit } from "../../../utils/cohorts";
 import { Link } from "react-router-dom";
 import { environment } from "../../../config";
-import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
-import { capture, captureMessage } from "../../../sentry";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -46,17 +44,12 @@ export default function Signin() {
         return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
       }
       if (young) {
-        if (environment === "development" ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
-        if (redirect) {
-          captureMessage("Invalid redirect url", { extra: { redirect } });
-          toastr.error("Url de redirection invalide : " + redirect);
-        }
+        if (redirect?.startsWith("http")) return (window.location.href = redirect);
         if (token) api.setToken(token);
         dispatch(setYoung(young));
         await cohortsInit();
       }
     } catch (e) {
-      capture(e);
       setPassword("");
       setError({ text: "  E-mail et/ou mot de passe incorrect(s)" });
       if (e.code === "TOO_MANY_REQUESTS") {
