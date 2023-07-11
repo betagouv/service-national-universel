@@ -2,7 +2,7 @@
   "name": "app",
   "version": "1.0.0",
   "scripts": {
-    "dev": "vite --force",
+    "dev": "vite",
     "dev:open": "vite --open",
     "mobile": "vite --host 0.0.0.0",
     "mobile:open": "vite --host",
