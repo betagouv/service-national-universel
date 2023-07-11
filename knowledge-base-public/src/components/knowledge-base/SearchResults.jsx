@@ -7,7 +7,7 @@ export default function SearchResults({ isSearching, items }) {
   }
 
   return (
-    <div className="absolute z-10 mt-1 max-h-[800px] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm">
+    <div className="absolute z-10 mt-1 max-h-[25rem] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm md:max-h-[40rem]">
       {isSearching ? (
         <p className="animate-pulse p-3 text-left font-medium text-gray-500">Recherche en cours...</p>
       ) : (
