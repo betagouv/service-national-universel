@@ -1,4 +1,4 @@
-const { YOUNG_STATUS, sessions2023, region2zone, oldSessions, getRegionForEligibility, regionsListDROMS } = require("snu-lib");
+const { YOUNG_STATUS, sessions2023, region2zone, oldSessions, getRegionForEligibility, regionsListDROMS, START_DATE_PHASE1, END_DATE_PHASE1 } = require("snu-lib");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
@@ -95,6 +95,11 @@ async function getCohortValidationDate(cohortName) {
 }
 
 function getDepartureDateSession(meetingPoint, session, young, cohort) {
+  // Compatibility with legacy sessions
+  if (!sessions2023.map((e) => e.name).includes(young.cohort)) {
+    return START_DATE_PHASE1[young.cohort];
+  }
+
   if (meetingPoint?.departuredDate) {
     return new Date(meetingPoint?.departuredDate);
   }
@@ -112,6 +117,11 @@ function getDepartureDateSession(meetingPoint, session, young, cohort) {
 }
 
 function getReturnDateSession(meetingPoint, session, young, cohort) {
+  // Compatibility with legacy sessions
+  if (!sessions2023.map((e) => e.name).includes(young.cohort)) {
+    return END_DATE_PHASE1[young.cohort];
+  }
+
   if (meetingPoint?.returnDate) {
     return new Date(meetingPoint?.returnDate);
   }
