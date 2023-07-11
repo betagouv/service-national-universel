@@ -65,7 +65,7 @@ export default function PublicMenu() {
       <nav className="hidden md:block">
         <ul className="flex items-center justify-end gap-6">
           <li>
-            <a href="https://www.snu.gouv.fr" className="rounded-md px-2.5 py-2 text-sm font-medium text-white transition-colors hover:bg-white hover:bg-opacity-10">
+            <a href="https://www.snu.gouv.fr" className="rounded-md px-2.5 py-2 text-sm font-medium text-white transition-colors hover:bg-black hover:bg-opacity-20">
               Retour sur le site du SNU
             </a>
           </li>
@@ -73,7 +73,7 @@ export default function PublicMenu() {
           <li>
             <Link
               href={`${adminURL}/auth?redirect=${baseDeConnaissanceURL}/base-de-connaissance/${router?.query?.slug || ""}`}
-              className="rounded-md px-2.5 py-2 text-sm font-medium text-white transition-colors hover:bg-white hover:bg-opacity-10"
+              className="rounded-md px-2.5 py-2 text-sm font-medium text-white transition-colors hover:bg-black hover:bg-opacity-20"
             >
               Espace professionnel
             </Link>
@@ -82,7 +82,7 @@ export default function PublicMenu() {
           <li>
             <Link
               href={`${appURL}/auth?redirect=${baseDeConnaissanceURL}/base-de-connaissance/${router?.query?.slug || ""}`}
-              className="rounded-md px-2.5 py-2 text-sm font-medium text-white transition-colors hover:bg-white hover:bg-opacity-10"
+              className="rounded-md px-2.5 py-2 text-sm font-medium text-white transition-colors hover:bg-black hover:bg-opacity-20"
             >
               Espace volontaire
             </Link>
