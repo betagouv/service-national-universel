@@ -12,7 +12,7 @@ import Footer from "../../../components/footerV2";
 import { BsShieldLock } from "react-icons/bs";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
 import { environment } from "../../../config";
-import { capture, captureMessage } from "../../../sentry";
+import { captureMessage } from "../../../sentry";
 
 export default function Signin() {
   const [disabled, setDisabled] = React.useState(true);
@@ -49,7 +49,6 @@ export default function Signin() {
         dispatch(setYoung(response.user));
       }
     } catch (e) {
-      capture(e);
       setLoading(false);
       toastr.error("(Double authentification) Code non reconnu.", "Merci d'inscrire le dernier code reçu par email");
     }

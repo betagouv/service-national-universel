@@ -16,7 +16,7 @@ import { cohortsInit } from "../../../utils/cohorts";
 import { environment } from "../../../config";
 import { Link } from "react-router-dom";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
-import { capture, captureMessage } from "../../../sentry";
+import { captureMessage } from "../../../sentry";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -57,7 +57,6 @@ export default function Signin() {
         await cohortsInit();
       }
     } catch (e) {
-      capture(e);
       setPassword("");
       setError({ text: "E-mail et/ou mot de passe incorrect(s)" });
       if (e.code === "TOO_MANY_REQUESTS") {

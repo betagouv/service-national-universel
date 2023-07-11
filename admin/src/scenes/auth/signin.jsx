@@ -14,7 +14,7 @@ import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
 import { formatToActualTime } from "snu-lib/date";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
-import { capture, captureMessage } from "../../sentry";
+import { captureMessage } from "../../sentry";
 
 export default function Signin() {
   const history = useHistory();
@@ -70,7 +70,6 @@ export default function Signin() {
                     }
                   } catch (e) {
                     actions.setFieldValue("password", "");
-                    capture(e);
                     console.log("ERROR", e);
                     if (e && ["EMAIL_OR_PASSWORD_INVALID", "USER_NOT_EXISTS", "EMAIL_AND_PASSWORD_REQUIRED"].includes(e.code)) {
                       return setUserIsValid(false);

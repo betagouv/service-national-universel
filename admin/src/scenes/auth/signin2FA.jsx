@@ -11,7 +11,7 @@ import Header from "./components/header";
 import { GoTools } from "react-icons/go";
 import { BsShieldLock } from "react-icons/bs";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
-import { capture, captureMessage } from "../../sentry";
+import { captureMessage } from "../../sentry";
 
 export default function Signin() {
   const dispatch = useDispatch();
@@ -40,7 +40,6 @@ export default function Signin() {
         dispatch(setUser(response.user));
       }
     } catch (e) {
-      capture(e);
       setLoading(false);
       console.log("ERROR", e);
       toastr.error("(Double authentification) Code non reconnu.", "Merci d'inscrire le dernier code reçu par email");

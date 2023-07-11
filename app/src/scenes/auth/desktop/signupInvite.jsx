@@ -14,7 +14,7 @@ import { getPasswordErrorMessage } from "../../../utils";
 import { cohortsInit } from "../../../utils/cohorts";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
 import { environment } from "../../../config";
-import { capture, captureMessage } from "../../../sentry";
+import { captureMessage } from "../../../sentry";
 import { toastr } from "react-redux-toastr";
 
 export default function Signin() {
@@ -57,7 +57,6 @@ export default function Signin() {
         await cohortsInit();
       }
     } catch (e) {
-      capture(e);
       console.log(e);
       if (e.code === "PASSWORD_NOT_VALIDATED") {
         setError({ text: "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole" });

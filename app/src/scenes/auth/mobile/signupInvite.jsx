@@ -16,7 +16,7 @@ import { cohortsInit } from "../../../utils/cohorts";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
 import { environment } from "../../../config";
 import { toastr } from "react-redux-toastr";
-import { capture, captureMessage } from "../../../sentry";
+import { captureMessage } from "../../../sentry";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -58,7 +58,6 @@ export default function Signin() {
         await cohortsInit();
       }
     } catch (e) {
-      capture(e);
       console.log(e);
       if (e.code === "PASSWORD_NOT_VALIDATED") {
         setError({ text: "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole" });
