@@ -1,7 +1,7 @@
-const isValidRedirectUrl = (url) => {
-  const pattern = /^https:\/\/(.*\.)?(snu\.gouv\.fr|beta-snu\.dev)(\/.*)?$|^\/.*/;
+function isValidRedirectUrl(url) {
+  const regex = /^((https?:\/\/)?([\w-]+\.)*(snu\.gouv\.fr|beta-snu\.dev)\/?.*|^[^\/]+$|^\/.*)$/i;
   if (!url) return false;
-  return pattern.test(url);
-};
+  return regex.test(url);
+}
 
 export { isValidRedirectUrl };
