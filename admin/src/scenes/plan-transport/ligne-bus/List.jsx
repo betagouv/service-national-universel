@@ -31,7 +31,7 @@ const cohortList = [
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
   const urlParams = new URLSearchParams(window.location.search);
-  const defaultCohort = user.role === ROLES.HEAD_CENTER && sessionPhase1 ? sessionPhase1.cohort : "Février 2023 - C";
+  const defaultCohort = user.role === ROLES.HEAD_CENTER && sessionPhase1 ? sessionPhase1.cohort : "Juillet 2023";
   const [cohort, setCohort] = React.useState(urlParams.get("cohort") || defaultCohort);
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasValue, setHasValue] = React.useState(false);
