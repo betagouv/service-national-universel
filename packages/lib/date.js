@@ -128,7 +128,7 @@ const COHESION_STAY_END = {
   "Avril 2023 - A": new Date("04/21/2023"),
   "Avril 2023 - B": new Date("04/28/2023"),
   "Juin 2023": new Date("06/23/2023"),
-  "Juillet 2023": new Date("07/13/2023"),
+  "Juillet 2023": new Date("07/17/2023"),
 };
 
 function isIsoDate(str) {
