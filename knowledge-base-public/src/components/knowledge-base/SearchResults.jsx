@@ -31,20 +31,20 @@ export default function SearchResults({ isSearching, items }) {
             <>
               <p className="p-3 text-left font-medium text-gray-500">Aucun résultat ne correspond à votre recherche.</p>
               <hr />
+              <Combobox.Option
+                key="noresult"
+                value="noresult"
+                className={({ active }) => classNames("relative cursor-pointer select-none border-b-2 border-gray-100 p-4", active ? "bg-blue-600 text-white" : "text-gray-900")}
+              >
+                {({ selected }) => (
+                  <div className="flex justify-between">
+                    <p className={classNames("block truncate", selected && "font-semibold")}>Vous avez une question ? Contactez-nous</p>
+                    <ChevronRightIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  </div>
+                )}
+              </Combobox.Option>
             </>
           )}
-          <Combobox.Option
-            key="noresult"
-            value="noresult"
-            className={({ active }) => classNames("relative cursor-pointer select-none border-b-2 border-gray-100 p-4", active ? "bg-blue-600 text-white" : "text-gray-900")}
-          >
-            {({ selected }) => (
-              <div className="flex justify-between">
-                <p className={classNames("block truncate", selected && "font-semibold")}>Vous avez une question ? Contactez-nous</p>
-                <ChevronRightIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-              </div>
-            )}
-          </Combobox.Option>
         </Combobox.Options>
       )}
     </div>
