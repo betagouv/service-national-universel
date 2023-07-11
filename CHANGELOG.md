@@ -1,3 +1,13 @@
+## [1.308.1](https://github.com/betagouv/service-national-universel/compare/v1.308.0...v1.308.1) (2023-07-11)
+
+
+### Bug Fixes
+
+* **admin/app:** bug spam error sentry ([6ff24b9](https://github.com/betagouv/service-national-universel/commit/6ff24b9e4ff931d2549e5cc8b5182da44027e930))
+* **app, admin:** vite - pre-bundle sentry + lib ([c287ad3](https://github.com/betagouv/service-national-universel/commit/c287ad33d05bf2f2dbb232429cb423d5898f1511))
+* add --force argument to vite command ([f63b5b8](https://github.com/betagouv/service-national-universel/commit/f63b5b815ad14fabb68228677038eb173b772fe4))
+* **admin:** Mettre à jour les dates de séjour pour les attestation Phase1 de Juillet  ([#2789](https://github.com/betagouv/service-national-universel/issues/2789)) ([5c3330a](https://github.com/betagouv/service-national-universel/commit/5c3330aefdaa4a0a372b82f87f40e0a41c7c0ac8))
+
 # [1.308.0](https://github.com/betagouv/service-national-universel/compare/v1.307.1...v1.308.0) (2023-07-10)
 
 
