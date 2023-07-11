@@ -1864,7 +1864,7 @@ const Schema = new mongoose.Schema({
 
   latestCNIFileCategory: {
     type: String,
-    enum: ["cniOld", "cniNew", "passport"],
+    enum: ["cniOld", "cniNew", "passport", "deleted"],
     documentation: {
       description: "Catégorie du fichier le plus récent dans files.cniFiles",
     },

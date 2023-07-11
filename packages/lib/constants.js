@@ -475,7 +475,7 @@ const COHESION_STAY_LIMIT_DATE = {
   "Avril 2023 - B": "du 16 au 28 Avril 2023",
   "Avril 2023 - A": "du 9 au 21 Avril 2023",
   "Juin 2023": "du 11 au 23 Juin 2023",
-  "Juillet 2023": "du 4 au 16 Juillet 2023",
+  "Juillet 2023": "du 5 au 17 Juillet 2023",
   "à venir": "à venir",
 };
 
@@ -490,7 +490,7 @@ const COHESION_STAY_START = {
   "Avril 2023 - A": new Date("04/09/2023"),
   "Avril 2023 - B": new Date("04/16/2023"),
   "Juin 2023": new Date("06/11/2023"),
-  "Juillet 2023": new Date("07/04/2023"),
+  "Juillet 2023": new Date("07/05/2023"),
 };
 
 const START_DATE_SESSION_PHASE1 = {
