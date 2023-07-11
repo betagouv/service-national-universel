@@ -1,13 +1,13 @@
 import { Fragment, useRef } from 'react'
 import { useState } from 'react'
+import { useRouter } from 'next/router'
 import useUser from '../../hooks/useUser'
 import API from '../../services/api'
 
 import { Dialog, Transition } from '@headlessui/react'
-import { XCircleIcon, MagnifyingGlassIcon, ArrowLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid'
+import { XCircleIcon, MagnifyingGlassIcon, ChevronLeftIcon } from '@heroicons/react/24/solid'
 import { Combobox } from '@headlessui/react'
-import { useRouter } from 'next/router'
-import Link from 'next/link'
+import SearchResults from './SearchResults'
 
 export default function KnowledgeBaseSearch({ open, setOpen }) {
   const { restriction } = useUser();
@@ -17,10 +17,6 @@ export default function KnowledgeBaseSearch({ open, setOpen }) {
   const [items, setItems] = useState([]);
   const searchTimeout = useRef(null);
   const router = useRouter();
-
-  function classNames(...classes) {
-    return classes.filter(Boolean).join(' ')
-  }
 
   const computeSearch = (e) => {
     const search = e.target.value
@@ -50,7 +46,8 @@ export default function KnowledgeBaseSearch({ open, setOpen }) {
     setOpen(false);
     setSelectedItem(item);
     setItems([]);
-    router.push("/base-de-connaissance/" + item.slug);
+    if (item === "noresult") return router.push("https://moncompte.snu.gouv.fr/public-besoin-d-aide");
+    return router.push("/base-de-connaissance/" + item.slug);
   };
 
   return (
@@ -92,7 +89,7 @@ export default function KnowledgeBaseSearch({ open, setOpen }) {
                     <div className="absolute inset-y-0 left-0 flex items-center">
                       {query ? (
                         <button onClick={() => setOpen(false)} className="ml-3 reset">
-                          <ArrowLeftIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                          <ChevronLeftIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                         </button>
                       ) : (
                         <MagnifyingGlassIcon className="h-5 w5 px-3 text-gray-400" aria-hidden="true" />
@@ -103,44 +100,7 @@ export default function KnowledgeBaseSearch({ open, setOpen }) {
                       <XCircleIcon className="text-gray-400 h-5 w-5" aria-hidden="true" />
                     </Combobox.Button>) : null}
 
-                    <div className="absolute z-10 mt-1 max-h-[800px] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm">
-                      {isSearching ? (
-                        <p className="animate-pulse p-3 text-left font-medium text-gray-500">Recherche en cours...</p>
-                      ) : (
-                        items.length > 0 ? (
-                          <Combobox.Options>
-                            {items.map((item) => (
-                              <Combobox.Option
-                                key={item._id}
-                                value={item}
-                                className={({ active }) =>
-                                  classNames(
-                                    'relative cursor-pointer select-none p-4 border-b-2 border-gray-100',
-                                    active ? 'bg-blue-600 text-white' : 'text-gray-900'
-                                  )
-                                }
-                              >
-                                {({ selected }) => (
-                                  <div className="flex justify-between">
-                                    <p className={classNames('block truncate', selected && 'font-semibold')}>{item.title}</p>
-                                    <ChevronRightIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                                  </div>
-                                )}
-                              </Combobox.Option>
-                            ))}
-                          </Combobox.Options>
-                        ) : (
-                          <>
-                            <p className="p-3 text-left text-gray-500 font-medium">Aucun résultat ne correspond à votre recherche.</p>
-                            <hr />
-                            <div className="p-3">
-                              <Link href="" className="text-blue-600 font-medium">
-                                Vous avez une question ? Contactez-nous
-                              </Link>
-                            </div>
-                          </>
-                        ))}
-                    </div>
+                    {query && <SearchResults isSearching={isSearching} items={items} />}
 
                   </div>
                 </Combobox>

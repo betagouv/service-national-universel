@@ -2,18 +2,17 @@ import Link from "next/link";
 import Navigation from "./navigation/Navigation";
 import KnowledgeBaseSearch from "./knowledge-base/KnowledgeBaseSearch.js";
 import { useEffect, useState } from "react";
+import SearchShortcut from "./SearchShortcut";
 
 export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
 
-  function listenForKeyboardEvent(event) {
-    if (event.key === "k" && (event.ctrlKey || event.metaKey)) {
-      setSearchOpen(!searchOpen);
-    }
-  }
-
   useEffect(() => {
-    document.addEventListener("keydown", listenForKeyboardEvent);
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "k" && (event.ctrlKey || event.metaKey)) {
+        setSearchOpen(!searchOpen);
+      }
+    });
   }, []);
 
   return (
@@ -37,7 +36,11 @@ export default function Header() {
       </div>
 
       <div className="flex items-center gap-4">
-        <button onClick={() => setSearchOpen(true)} className="border-none bg-transparent p-2 shadow-none">
+        <button
+          onClick={() => setSearchOpen(true)}
+          className="flex items-center gap-3 rounded-md border-none bg-transparent px-2.5 py-2 shadow-none transition-colors hover:bg-white hover:bg-opacity-10"
+        >
+          <SearchShortcut />
           <img src="/assets/search.svg" />
         </button>
 
