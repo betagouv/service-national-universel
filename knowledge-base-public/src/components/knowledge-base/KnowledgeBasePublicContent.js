@@ -38,12 +38,12 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
             </div>
           </div>
         </div>
-        {!item || isLoading ? (
+        {(!item || isLoading) && loadingType ? (
           <>{loadingType === "section" ? <KnowledgeBasePublicSection isLoading /> : <KnowledgeBasePublicArticle isLoading />}</>
         ) : (
           <>
-            {item.type === "article" && <KnowledgeBasePublicArticle item={item} isLoading={isLoading} />}
-            {item.type === "section" && <KnowledgeBasePublicSection item={item} isLoading={isLoading} />}
+            {item?.type === "article" && <KnowledgeBasePublicArticle item={item} isLoading={isLoading} />}
+            {item?.type === "section" && <KnowledgeBasePublicSection item={item} isLoading={isLoading} />}
             <KnowledgeBasePublicNoAnswer />
           </>
         )}
