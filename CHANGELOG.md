@@ -1,3 +1,22 @@
+# [1.309.0](https://github.com/betagouv/service-national-universel/compare/v1.308.1...v1.309.0) (2023-07-12)
+
+
+### Bug Fixes
+
+* **api:** add departureDate for Drom-Tom young ([#2800](https://github.com/betagouv/service-national-universel/issues/2800)) ([950de07](https://github.com/betagouv/service-national-universel/commit/950de07582f211516157eb0723f9d3125ba86f5e))
+* **api:** dsnj departure date ([b3c4330](https://github.com/betagouv/service-national-universel/commit/b3c4330966a8ec2d3b3e73cbc8b6c4eb3ff853f0))
+* **kb:** add heroicons import ([fa92446](https://github.com/betagouv/service-national-universel/commit/fa924463817681edc3e24a7de723aa229818a959))
+* **kb:** explicitly pass open prop to transition ([d79711c](https://github.com/betagouv/service-national-universel/commit/d79711c3483f5dcb7af297c33234ff787134fcc5))
+* **kb:** give default value to transition open prop ([234d058](https://github.com/betagouv/service-national-universel/commit/234d058e24243e68771c02ee5cacfb65d721705f))
+* **kb:** old search bar in prod ([0542eaf](https://github.com/betagouv/service-national-universel/commit/0542eaf7e0ac0991e870ffc985ed91219629bb75))
+* **kb:** temporarily disable transition on search bar ([f215a04](https://github.com/betagouv/service-national-universel/commit/f215a041e3ee7f896822b28ba6fcb8cd485b85c8))
+* **lib:** redirection ouverte better logic ([#2801](https://github.com/betagouv/service-national-universel/issues/2801)) ([d241492](https://github.com/betagouv/service-national-universel/commit/d2414920feac8e87ebf9ff952250c2b5d198fc78))
+
+
+### Features
+
+* **kb:** New search bar (staging only) ([#2793](https://github.com/betagouv/service-national-universel/issues/2793)) ([b9b9ac2](https://github.com/betagouv/service-national-universel/commit/b9b9ac2e687a286fe7864585038c3ceac1695077))
+
 ## [1.308.1](https://github.com/betagouv/service-national-universel/compare/v1.308.0...v1.308.1) (2023-07-11)
 
 
