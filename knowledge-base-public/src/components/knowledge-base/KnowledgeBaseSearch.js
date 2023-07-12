@@ -48,9 +48,9 @@ export default function KnowledgeBaseSearch({ open, setOpen }) {
   };
 
   return (
-    <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={setOpen}>
-        <Transition.Child
+    // <Transition.Root show={open} as={Fragment}>
+    <Dialog as="div" className="relative z-10" onClose={setOpen}>
+      {/* <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -58,13 +58,13 @@ export default function KnowledgeBaseSearch({ open, setOpen }) {
           leave="ease-in duration-200"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black bg-opacity-60 transition-opacity" />
-        </Transition.Child>
+        > */}
+      <div className="fixed inset-0 bg-black bg-opacity-60 transition-opacity" />
+      {/* </Transition.Child> */}
 
-        <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex flex-col min-h-full items-end justify-start p-4 text-center sm:items-center">
-            <Transition.Child
+      <div className="fixed inset-0 z-10 overflow-y-auto">
+        <div className="flex flex-col min-h-full items-end justify-start p-4 text-center sm:items-center">
+          {/* <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -72,40 +72,40 @@ export default function KnowledgeBaseSearch({ open, setOpen }) {
               leave="ease-in duration-200"
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            >
-              <Dialog.Panel className="w-full md:w-[40rem] md:mt-44">
-                <Combobox as="div" value={selectedItem} onChange={handleSelect}>
-                  <div className="relative mt-2 w-full">
-                    <Combobox.Input
-                      className="w-full rounded-md border-0 bg-white p-3 px-10 text-gray-800 shadow-sm sm:text-sm sm:leading-6"
-                      onChange={computeSearch}
-                      displayValue={query}
-                      placeholder="Rechercher un article"
-                    />
+            > */}
+          <Dialog.Panel className="w-full md:w-[40rem] md:mt-44">
+            <Combobox as="div" value={selectedItem} onChange={handleSelect}>
+              <div className="relative mt-2 w-full">
+                <Combobox.Input
+                  className="w-full rounded-md border-0 bg-white p-3 px-10 text-gray-800 shadow-sm sm:text-sm sm:leading-6"
+                  onChange={computeSearch}
+                  displayValue={query}
+                  placeholder="Rechercher un article"
+                />
 
-                    <div className="absolute inset-y-0 left-0 flex items-center">
-                      {query ? (
-                        <button onClick={() => setOpen(false)} className="ml-3 reset">
-                          <ChevronLeftIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                        </button>
-                      ) : (
-                        <MagnifyingGlassIcon className="h-5 w5 px-3 text-gray-400" aria-hidden="true" />
-                      )}
-                    </div>
+                <div className="absolute inset-y-0 left-0 flex items-center">
+                  {query ? (
+                    <button onClick={() => setOpen(false)} className="ml-3 reset">
+                      <ChevronLeftIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                    </button>
+                  ) : (
+                    <MagnifyingGlassIcon className="h-5 w5 px-3 text-gray-400" aria-hidden="true" />
+                  )}
+                </div>
 
-                    {query ? (<Combobox.Button onClick={handleDelete} className="absolute inset-y-0 right-0 items-center px-3 focus:outline-none bg-transparent border-none shadow-none">
-                      <XCircleIcon className="text-gray-400 h-5 w-5" aria-hidden="true" />
-                    </Combobox.Button>) : null}
+                {query ? (<Combobox.Button onClick={handleDelete} className="absolute inset-y-0 right-0 items-center px-3 focus:outline-none bg-transparent border-none shadow-none">
+                  <XCircleIcon className="text-gray-400 h-5 w-5" aria-hidden="true" />
+                </Combobox.Button>) : null}
 
-                    {query && <SearchResults isSearching={isSearching} items={items} />}
+                {query && <SearchResults isSearching={isSearching} items={items} />}
 
-                  </div>
-                </Combobox>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
+              </div>
+            </Combobox>
+          </Dialog.Panel>
+          {/* </Transition.Child> */}
         </div>
-      </Dialog>
-    </Transition.Root>
+      </div>
+    </Dialog>
+    // </Transition.Root>
   )
 }
