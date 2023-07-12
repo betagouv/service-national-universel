@@ -5,11 +5,15 @@ const passwordValidator = require("password-validator");
 const sanitizeHtml = require("sanitize-html");
 const YoungModel = require("../models/young");
 const PlanTransportModel = require("../models/PlanDeTransport/planTransport");
+const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
+const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
+const LigneToPointModel = require("../models/PlanDeTransport/ligneToPoint");
 const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
 const ContractObject = require("../models/contract");
 const SessionPhase1 = require("../models/sessionPhase1");
+const { getDepartureDate } = require("snu-lib");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
@@ -620,14 +624,26 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) 
   } = await getCohortDateInfo(sessionPhase1.cohort);
 
   // Ici on regarde si la session à des date spécifique sinon on garde la date de la cohort
-  const dateStart = dateStartForSpecialSession === undefined ? cohortDateStart : dateStartForSpecialSession;
+  const pdr = await PointDeRassemblementModel.findById(young.meetingPointId);
+  let meetingPoint;
+  const bus = await LigneBusModel.findById(young.ligneId);
+  const ligneToPoint = await LigneToPointModel.findOne({ lineId: young.ligneId, meetingPointId: young.meetingPointId, deletedAt: { $exists: false } });
+  if (pdr) {
+    meetingPoint = { ...pdr.toObject(), bus, ligneToPoint };
+  } else {
+    meetingPoint = { bus, ligneToPoint };
+  }
 
-  if (!dateDeValidation || !dateDeValidationTerminale) {
-    throw new Error("❌ validationDate & validationDateForTerminaleGrade missing on cohort " + sessionPhase1.cohort);
+  const departureDate = getDepartureDate(young, sessionPhase1, young.cohort, meetingPoint);
+  let dateStart;
+  if (dateStartForSpecialSession === undefined && departureDate !== dateStart) {
+    dateStart = departureDate;
+  } else if (dateStartForSpecialSession !== undefined) {
+    dateStart = dateStartForSpecialSession;
+  } else {
+    dateStart = cohortDateStart;
   }
-  if (!daysToValidate || !daysToValidateForTerminalGrade) {
-    throw new Error("❌ validationDate & validationDateForTerminaleGrade missing on cohort " + sessionPhase1.cohort);
-  }
+  // const dateStart = dateStartForSpecialSession === undefined ? cohortDateStart : dateStartForSpecialSession;
   const isTerminale = young?.grade === "Terminale";
   // cette constante nous permet d'avoir la date de validation d'un séjour en fonction du grade d'un Young
   const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
@@ -703,7 +719,7 @@ async function updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithD
         // Sinon on ne valide pas sa phase 1.
         if (young?.departSejourMotif) {
           young.set({ statusPhase1: "NOT_DONE" });
-        } else if (young.cohesionStayPresence !== "false") {
+        } else if (young?.cohesionStayPresence !== "false") {
           young.set({ statusPhase1: "AFFECTED" });
         } else {
           young.set({ statusPhase1: "NOT_DONE" });
