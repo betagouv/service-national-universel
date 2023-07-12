@@ -47,7 +47,7 @@ export default function KnowledgeBaseSearch({ open, setOpen }) {
     setSelectedItem(item);
     setItems([]);
     if (item === "noresult") return router.push("https://moncompte.snu.gouv.fr/public-besoin-d-aide");
-    return router.push("/base-de-connaissance/" + item.slug);
+    return router.push(`/base-de-connaissance/${item.slug}?loadingType=article`, undefined, { shallow: true, });
   };
 
   return (
