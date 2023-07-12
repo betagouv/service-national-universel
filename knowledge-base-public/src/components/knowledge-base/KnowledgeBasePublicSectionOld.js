@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import KnowledgeBaseSectionCard from "./KnowledgeBaseSectionCardOld";
-import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
-import LoaderArticle from "../LoaderArticle";
+import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCardOld";
+import LoaderArticle from "../LoaderArticleOld";
 import LoaderSection from "../LoaderSectionOld";
 
 const KnowledgeBasePublicSection = ({ item, isRoot, isLoading }) => {

@@ -1,13 +1,10 @@
-import { Fragment, useRef } from 'react'
-import { useState } from 'react'
-import { useRouter } from 'next/router'
-import useUser from '../../hooks/useUser'
-import API from '../../services/api'
-
-import { Dialog, Transition } from '@headlessui/react'
-import { XCircleIcon, MagnifyingGlassIcon, ChevronLeftIcon } from '@heroicons/react/24/solid'
-import { Combobox } from '@headlessui/react'
-import SearchResults from './SearchResults'
+import { Fragment, useRef, useState } from "react"
+import { useRouter } from "next/router"
+import useUser from "../../hooks/useUser"
+import API from "../../services/api"
+import { Combobox, Dialog, Transition } from "@headlessui/react"
+import { XCircleIcon, MagnifyingGlassIcon, ChevronLeftIcon } from "@heroicons/react/24/solid"
+import SearchResults from "./SearchResults"
 
 export default function KnowledgeBaseSearch({ open, setOpen }) {
   const { restriction } = useUser();

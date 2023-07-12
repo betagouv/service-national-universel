@@ -41,5 +41,8 @@ export default defineConfig(({ command, mode }) => {
       port: 8082,
     },
     plugins: plugins,
+    optimizeDeps: {
+      include: ["@sentry/react", "snu-lib"],
+    },
   };
 });

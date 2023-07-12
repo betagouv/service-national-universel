@@ -10,6 +10,9 @@ import api from "../../../services/api";
 import Error from "../../../components/error";
 import Footer from "../../../components/footerV2";
 import { BsShieldLock } from "react-icons/bs";
+import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
+import { environment } from "../../../config";
+import { captureMessage } from "../../../sentry";
 
 export default function Signin() {
   const [disabled, setDisabled] = React.useState(true);
@@ -38,7 +41,11 @@ export default function Signin() {
       setLoading(false);
       if (response.token) api.setToken(response.token);
       if (response.user) {
-        if (redirect?.startsWith("http")) return (window.location.href = redirect);
+        if (environment === "development" ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
+        if (redirect) {
+          captureMessage("Invalid redirect url", { extra: { redirect } });
+          toastr.error("Url de redirection invalide : " + redirect);
+        }
         dispatch(setYoung(response.user));
       }
     } catch (e) {

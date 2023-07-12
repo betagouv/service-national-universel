@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import Wrapper from "../Wrapper";
 import Breadcrumb from "../BreadCrumb";
-import KnowledgeBasePublicSection from "./KnowledgeBasePublicSection";
+import KnowledgeBasePublicSection from "./KnowledgeBasePublicSectionOld";
 import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 import KnowledgeBasePublicArticle from "./KnowledgeBasePublicArticle";
 
@@ -38,12 +38,12 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
             </div>
           </div>
         </div>
-        {(!item || isLoading) && loadingType ? (
+        {!item || isLoading ? (
           <>{loadingType === "section" ? <KnowledgeBasePublicSection isLoading /> : <KnowledgeBasePublicArticle isLoading />}</>
         ) : (
           <>
-            {item?.type === "article" && <KnowledgeBasePublicArticle item={item} isLoading={isLoading} />}
-            {item?.type === "section" && <KnowledgeBasePublicSection item={item} isLoading={isLoading} />}
+            {item.type === "article" && <KnowledgeBasePublicArticle item={item} isLoading={isLoading} />}
+            {item.type === "section" && <KnowledgeBasePublicSection item={item} isLoading={isLoading} />}
             <KnowledgeBasePublicNoAnswer />
           </>
         )}

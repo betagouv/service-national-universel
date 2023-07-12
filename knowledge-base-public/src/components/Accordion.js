@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import Link from "next/link";
 import slugify from "slugify";
+import FolderIcon from "./FolderIcon";
 
 // accessibility: https://www.w3.org/WAI/ARIA/apg/patterns/accordion/
 
@@ -18,7 +19,7 @@ export const Accordion = ({ title, list = [], className = "", path }) => {
   }
 
   return (
-    <div className={`flex flex-col overflow-hidden rounded-lg bg-white ${className}`}>
+    <div className={`flex w-full max-w-[690px] flex-col overflow-hidden rounded-lg bg-white shadow-md ${className}`}>
       <h3 className="flex">
         <button
           id={slugify(title)}
@@ -40,9 +41,14 @@ export const Accordion = ({ title, list = [], className = "", path }) => {
         className="transition-max-height overflow-auto duration-700 ease-in-out"
       >
         <ul>
-          {list.map(({ title, slug }, index) => (
+          {list.map(({ title, slug, type }, index) => (
             <li className="flex border-t border-gray-200 text-sm font-medium text-gray-900" key={index}>
-              <Link tabIndex={active ? 0 : -1} className="flex-1 px-6 py-4" href={`${path}/${slug}${path === "/base-de-connaissance" ? "?loadingType=section" : ""}`}>
+              <Link
+                tabIndex={active ? 0 : -1}
+                className="flex flex-1 items-center px-6 py-4"
+                href={`${path}/${slug}${path === "/base-de-connaissance" ? "?loadingType=section" : ""}`}
+              >
+                {type === "section" && <FolderIcon />}
                 {title}
               </Link>
             </li>

@@ -15,6 +15,8 @@ import Footer from "../../../components/footerV2";
 import { cohortsInit } from "../../../utils/cohorts";
 import { environment } from "../../../config";
 import { Link } from "react-router-dom";
+import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
+import { captureMessage } from "../../../sentry";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -45,7 +47,11 @@ export default function Signin() {
         return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
       }
       if (young) {
-        if (redirect?.startsWith("http")) return (window.location.href = redirect);
+        if (environment === "development" ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
+        if (redirect) {
+          captureMessage("Invalid redirect url", { extra: { redirect } });
+          toastr.error("Url de redirection invalide : " + redirect);
+        }
         if (token) api.setToken(token);
         dispatch(setYoung(young));
         await cohortsInit();
