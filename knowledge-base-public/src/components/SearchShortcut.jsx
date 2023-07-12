@@ -12,16 +12,11 @@ export default function SearchShortcut() {
     }
   }, []);
 
-  if (platform)
-    return (
-      <div className="hidden gap-1 md:flex">
-        {platform === "Mac" ? (
-          <div className="flex h-5 w-5 items-center justify-center rounded-sm border-[1px] border-white text-xs opacity-30">⌘</div>
-        ) : (
-          <div className="flex h-5 w-7 items-center justify-center rounded-sm border-[1px] border-white text-xs opacity-30">Ctrl</div>
-        )}
-        <div className="flex h-5 w-5 items-center justify-center rounded-sm border-[1px] border-white text-xs opacity-30">K</div>
-      </div>
-    );
+  if (platform === "Mac") {
+    return <p className="hidden gap-1 rounded bg-gray-200 px-1.5 py-0.5 text-xs text-[#32257F] opacity-80 md:flex">⌘K</p>;
+  }
+  if (platform === "PC") {
+    return <p className="hidden gap-1 rounded bg-gray-200 px-1.5 py-0.5 text-xs text-[#32257F] opacity-80 md:flex">Ctrl K</p>;
+  }
   return null;
 }
