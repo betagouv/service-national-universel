@@ -634,8 +634,6 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, cohort, 
   const days = isTerminale ? daysToValidateForTerminalGrade : daysToValidate;
   const validationDateWithDays = await addingDayToDate(days, dateStart);
 
-  console.log({ youngCohort: young.cohort, youngCohort, dateStart, dateStartcohort, sessionPhase1, bus });
-
   if (young.cohort === "Juin 2023") {
     await updateStatusPhase1WithSpecificCase(young, validationDate, user);
   } else if (young.cohort === "Juillet 2023") {
