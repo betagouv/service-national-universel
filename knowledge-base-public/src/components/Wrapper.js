@@ -5,7 +5,7 @@ import useUser from "../hooks/useUser";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import { useSWRConfig } from "swr";
 import API from "../services/api";
-import KnowledgeBaseSearch from "./knowledge-base/KnowledgeBaseSearch";
+import KnowledgeBaseSearch from "./knowledge-base/KnowledgeBaseSearchOld";
 import { useRouter } from "next/router";
 import ProfileButton from "./ProfileButton";
 import { Popover } from "@headlessui/react";
