@@ -6,7 +6,6 @@ const sanitizeHtml = require("sanitize-html");
 const YoungModel = require("../models/young");
 const PlanTransportModel = require("../models/PlanDeTransport/planTransport");
 const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
-const LigneToPointModel = require("../models/PlanDeTransport/ligneToPoint");
 const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
@@ -684,7 +683,6 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
 async function updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithDays, user) {
   try {
     const now = new Date();
-    now.setDate(now.getDate() + 1);
     const validationDate = new Date(validationDateWithDays);
     // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
     const isValidationDatePassed = now >= validationDate;
