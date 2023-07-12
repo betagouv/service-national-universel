@@ -643,7 +643,7 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) 
   } else {
     dateStart = cohortDateStart;
   }
-  // const dateStart = dateStartForSpecialSession === undefined ? cohortDateStart : dateStartForSpecialSession;
+
   const isTerminale = young?.grade === "Terminale";
   // cette constante nous permet d'avoir la date de validation d'un séjour en fonction du grade d'un Young
   const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
