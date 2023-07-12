@@ -622,17 +622,9 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) 
   } = await getCohortDateInfo(sessionPhase1.cohort);
 
   // Ici on regarde si la session à des date spécifique sinon on garde la date de la cohort
-  const pdr = await PointDeRassemblementModel.findById(young.meetingPointId);
-  let meetingPoint;
   const bus = await LigneBusModel.findById(young.ligneId);
-  const ligneToPoint = await LigneToPointModel.findOne({ lineId: young.ligneId, meetingPointId: young.meetingPointId, deletedAt: { $exists: false } });
-  if (pdr) {
-    meetingPoint = { ...pdr.toObject(), bus, ligneToPoint };
-  } else {
-    meetingPoint = { bus, ligneToPoint };
-  }
 
-  const dateStart = getDepartureDate(young, sessionPhase1, young.cohort, meetingPoint);
+  const dateStart = getDepartureDate(young, sessionPhase1, young.cohort, { bus });
   const isTerminale = young?.grade === "Terminale";
   // cette constante nous permet d'avoir la date de validation d'un séjour en fonction du grade d'un Young
   const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
