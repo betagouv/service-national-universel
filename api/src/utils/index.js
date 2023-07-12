@@ -5,9 +5,7 @@ const passwordValidator = require("password-validator");
 const sanitizeHtml = require("sanitize-html");
 const YoungModel = require("../models/young");
 const PlanTransportModel = require("../models/PlanDeTransport/planTransport");
-const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
 const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
-const LigneToPointModel = require("../models/PlanDeTransport/ligneToPoint");
 const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
@@ -687,7 +685,7 @@ async function updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithD
     const isCohesionStayValid = young.cohesionStayPresence === "true";
     // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
     const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt > validationDate);
-
+    console.log(now, validationDateWithDays, isValidationDatePassed, isCohesionStayValid )
     // On valide la phase 1 si toutes les condition sont réunis. Une exception : le jeune a été exclu.
     if (isValidationDatePassed) {
       if (isValidationDatePassed && isCohesionStayValid && isDepartureDateValid) {
