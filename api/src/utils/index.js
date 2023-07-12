@@ -685,7 +685,6 @@ async function updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithD
     const isCohesionStayValid = young.cohesionStayPresence === "true";
     // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
     const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt > validationDate);
-    console.log(now, validationDateWithDays, isValidationDatePassed, isCohesionStayValid )
     // On valide la phase 1 si toutes les condition sont réunis. Une exception : le jeune a été exclu.
     if (isValidationDatePassed) {
       if (isValidationDatePassed && isCohesionStayValid && isDepartureDateValid) {
