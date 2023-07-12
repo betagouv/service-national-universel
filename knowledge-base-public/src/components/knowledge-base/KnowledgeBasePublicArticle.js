@@ -37,7 +37,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
   return (
     <div className="wrapper mx-auto flex w-full flex-shrink flex-grow flex-col overflow-hidden bg-coolGray-100 print:bg-transparent  print:pb-12">
       {item?.updatedAt && (
-        <span className="ml-auto mt-2 mb-4 flex flex-col items-end text-xs italic text-gray-400 print:mt-0 print:mb-2">
+        <span className="mb-4 ml-auto mt-2 flex flex-col items-end text-xs italic text-gray-400 print:mb-2 print:mt-0">
           {/* <em>Article mis à jour le {Intl.DateTimeFormat("fr-FR", { year: "numeric", month: "long", day: "numeric" }).format(new Date(item.updatedAt))}</em> */}
           <button className="noprint mt-2 cursor-pointer border border-gray-300 bg-gray-100 font-normal text-black shadow-none" onClick={window.print}>
             🖨 Imprimer
@@ -45,7 +45,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
         </span>
       )}
       <TextEditor readOnly content={item.content} _id={item._id} slug={item.slug} />
-      <div className="border-[rgba(0, 0, 0, 0.1)] mt-10 mb-12 w-full border-t-2"></div>
+      <div className="border-[rgba(0, 0, 0, 0.1)] mb-12 mt-10 w-full border-t-2"></div>
       <ToastContainer />
       {!hasSubmitted && (
         <>
@@ -57,13 +57,13 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
               <div className="mt-3 flex flex-row">
                 <div
                   id="ThumbsUp"
-                  className="mr-1 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 text-3xl font-medium hover:border-[#9CA3AF]"
+                  className="hover:border-[#9CA3AF] mr-1 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 text-3xl font-medium"
                   onClick={postFeedback}
                 >
                   👍
                 </div>
                 <div
-                  className="ml-1 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 text-3xl font-medium hover:border-[#9CA3AF]"
+                  className="hover:border-[#9CA3AF] ml-1 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 text-3xl font-medium"
                   onClick={() => setFeedback({ ...feedback, isPositive: false })}
                 >
                   👎
@@ -72,7 +72,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
             </div>
           )}
           {!feedback.isPositive && (
-            <div className="flex h-full w-full flex-col items-center justify-center bg-white pr-24 pl-24 pb-10 pt-10">
+            <div className="flex h-full w-full flex-col items-center justify-center bg-white pb-10 pl-24 pr-24 pt-10">
               <h1 className="text-2xl font-light not-italic leading-8 text-gray-600">Aidez-nous à nous améliorer</h1>
               <p className="mt-8 justify-center leading-5 text-gray-600 ">
                 ⚠️ <span className="text-lg font-semibold text-gray-600">Rappel :</span> vous n'obtiendrez pas de réponse à votre question, merci de ne pas inscrire d'informations
@@ -81,7 +81,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
                   <span className="font-semibold text-[#4F46E5] ">cliquez ici.</span>
                 </a>
               </p>
-              <div className="mt-8 mb-2 flex w-full flex-row">
+              <div className="mb-2 mt-8 flex w-full flex-row">
                 <p className="inline-block w-full self-end text-base font-medium leading-5 text-gray-700">Quel était votre question ?</p>
                 <p className="inline-block h-5 w-48 self-end text-end text-xs font-medium leading-5 text-[#6B7280]">125 caractères maximum</p>
               </div>
@@ -93,7 +93,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
                 onChange={(e) => setFeedback({ ...feedback, comment: e.target.value })}
               ></textarea>
               <p
-                className={`relative -mt-8 mr-4 mb-8 self-end text-end text-xs font-medium leading-6 ${
+                className={`relative -mt-8 mb-8 mr-4 self-end text-end text-xs font-medium leading-6 ${
                   !feedback.comment || feedback.comment?.length <= 125 ? "text-[#6B7280]" : "text-[#EF4444]"
                 }`}
               >
@@ -125,7 +125,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
 
 const ArticleLoader = () => (
   <div className="wrapper mx-auto flex w-full flex-shrink flex-grow flex-col overflow-hidden bg-coolGray-100 print:bg-transparent">
-    <div className="relative mt-16  mb-5 h-2 w-full bg-gray-200">
+    <div className="relative mb-5  mt-16 h-2 w-full bg-gray-200">
       <div className="animated-background" />
     </div>
     <div className="relative mb-5  h-2 w-full bg-gray-200">
