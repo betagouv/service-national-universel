@@ -614,13 +614,11 @@ async function addingDayToDate(days, dateStart) {
 
 // @todo : à clean sans les terminales
 async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) {
-  const dateStartForSpecialSession = sessionPhase1.dateStart;
   const {
     daysToValidate: daysToValidate,
     daysToValidateForTerminalGrade: daysToValidateForTerminalGrade,
     validationDate: dateDeValidation,
     validationDateForTerminaleGrade: dateDeValidationTerminale,
-    dateStart: cohortDateStart,
   } = await getCohortDateInfo(sessionPhase1.cohort);
 
   // Ici on regarde si la session à des date spécifique sinon on garde la date de la cohort
@@ -634,16 +632,7 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) 
     meetingPoint = { bus, ligneToPoint };
   }
 
-  const departureDate = getDepartureDate(young, sessionPhase1, young.cohort, meetingPoint);
-  let dateStart;
-  if (dateStartForSpecialSession === undefined && departureDate !== dateStart) {
-    dateStart = departureDate;
-  } else if (dateStartForSpecialSession !== undefined) {
-    dateStart = dateStartForSpecialSession;
-  } else {
-    dateStart = cohortDateStart;
-  }
-
+  const dateStart = getDepartureDate(young, sessionPhase1, young.cohort, meetingPoint);
   const isTerminale = young?.grade === "Terminale";
   // cette constante nous permet d'avoir la date de validation d'un séjour en fonction du grade d'un Young
   const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
