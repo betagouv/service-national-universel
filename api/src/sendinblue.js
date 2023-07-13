@@ -271,6 +271,7 @@ async function sync(obj, type, { force } = { force: false }) {
     if (attributes.TYPE === "REFERENT") listIds.push(47);
     user.statusPhase1 === "WAITING_ACCEPTATION" && listIds.push(106);
     ["referent_region", "referent_department"].includes(user.role) && listIds.push(147);
+    user.role === "supervisor" && listIds.push(1049);
 
     delete attributes.EMAIL;
     delete attributes.PASSWORD;
