@@ -1,3 +1,11 @@
+## [1.309.1](https://github.com/betagouv/service-national-universel/compare/v1.309.0...v1.309.1) (2023-07-13)
+
+
+### Bug Fixes
+
+* **api:** validation date ([832858f](https://github.com/betagouv/service-national-universel/commit/832858f3a7cc879ceabaa041f6e6e0b1f1d6d663))
+* **api:** validation errors due to timezone ([6b9d50b](https://github.com/betagouv/service-national-universel/commit/6b9d50b4173195aeacc382a720a744aded9c29a6))
+
 # [1.309.0](https://github.com/betagouv/service-national-universel/compare/v1.308.1...v1.309.0) (2023-07-12)
 
 
