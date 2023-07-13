@@ -685,6 +685,8 @@ async function updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithD
   try {
     const now = new Date();
     const validationDate = new Date(validationDateWithDays);
+    // due to a bug the timezone may vary between french and UTC time
+    validationDate.setHours(validationDate.getHours() - 2);
     // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
     const isValidationDatePassed = now >= validationDate;
     // Cette constante nous permet de vérifier si un jeune était présent au début du séjour (exception pour cette cohorte : pas besoin de JDM)(basé sur son grade)
