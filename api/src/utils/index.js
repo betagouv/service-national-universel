@@ -681,6 +681,7 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
 }
 
 async function updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithDays, user) {
+  const initialState = young.statusPhase1;
   try {
     const now = new Date();
     const validationDate = new Date(validationDateWithDays);
@@ -689,7 +690,7 @@ async function updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithD
     // Cette constante nous permet de vérifier si un jeune était présent au début du séjour (exception pour cette cohorte : pas besoin de JDM)(basé sur son grade)
     const isCohesionStayValid = young.cohesionStayPresence === "true";
     // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
-    const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt > validationDate);
+    const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt >= validationDate);
     // On valide la phase 1 si toutes les condition sont réunis. Une exception : le jeune a été exclu.
     if (isValidationDatePassed) {
       if (isCohesionStayValid && isDepartureDateValid) {
@@ -708,7 +709,9 @@ async function updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithD
         }
       }
     }
-    await young.save({ fromUser: user });
+    if (initialState !== young.statusPhase1) {
+      await young.save({ fromUser: user });
+    }
   } catch (e) {
     console.log(e);
     capture(e);
