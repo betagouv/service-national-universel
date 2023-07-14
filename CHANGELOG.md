@@ -1,3 +1,16 @@
+# [1.310.0](https://github.com/betagouv/service-national-universel/compare/v1.309.1...v1.310.0) (2023-07-14)
+
+
+### Bug Fixes
+
+* **app:** Bug Sentry ([d66ce6e](https://github.com/betagouv/service-national-universel/commit/d66ce6eabcdce24d1f079a9ff7a665c29a519bf8))
+* **app:** Fic bug on upload files while doing tickets ([4410be7](https://github.com/betagouv/service-national-universel/commit/4410be770640dfaeb86f3cdaa30f317219793d1c))
+
+
+### Features
+
+* **all:** Put 403 back (Baleen fixed it) ([1d33d55](https://github.com/betagouv/service-national-universel/commit/1d33d55f811733e3a977997b401e94af0a63b108))
+
 ## [1.309.1](https://github.com/betagouv/service-national-universel/compare/v1.309.0...v1.309.1) (2023-07-13)
 
 
