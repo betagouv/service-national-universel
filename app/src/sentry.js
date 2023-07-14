@@ -1,6 +1,12 @@
 import { ExtraErrorData, Offline, ReportingObserver } from "@sentry/integrations";
-import { init, reactRouterV5Instrumentation, withSentryRouting, captureException as sentryCaptureException, captureMessage as sentryCaptureMessage } from "@sentry/react";
-import { BrowserTracing } from "@sentry/tracing";
+import {
+  init,
+  BrowserTracing,
+  reactRouterV5Instrumentation,
+  withSentryRouting,
+  captureException as sentryCaptureException,
+  captureMessage as sentryCaptureMessage,
+} from "@sentry/react";
 import { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, apiURL } from "./config";
 import { Route } from "react-router-dom";
 import { createBrowserHistory } from "history";

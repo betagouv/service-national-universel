@@ -6,8 +6,8 @@ const {
   Integrations: NodeIntegrations,
   init,
   Handlers,
+  autoDiscoverNodePerformanceMonitoringIntegrations,
 } = require("@sentry/node");
-const { Integrations: TracingIntegrations } = require("@sentry/tracing");
 const { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE } = require("./config");
 
 const regex = /[0-9a-fA-F]{24}/g;
@@ -34,8 +34,7 @@ function initSentry(app) {
       new RewriteFrames({ root: process.cwd() }),
       new NodeIntegrations.Http({ tracing: true }),
       new NodeIntegrations.Modules(),
-      new TracingIntegrations.Mongo({ useMongoose: true }),
-      new TracingIntegrations.Express({ app }),
+      ...autoDiscoverNodePerformanceMonitoringIntegrations(),
     ],
     tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE || 0.01),
     ignoreErrors: [

@@ -5,9 +5,8 @@ import {
   withSentryRouting,
   captureException as sentryCaptureException,
   captureMessage as sentryCaptureMessage,
-  setContext,
+  BrowserTracing,
 } from "@sentry/react";
-import { BrowserTracing } from "@sentry/tracing";
 import { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, apiURL } from "./config";
 import { Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
