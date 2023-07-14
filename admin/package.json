@@ -73,7 +73,7 @@
     "react-redux": "7.2.9",
     "react-redux-toastr": "^7.6.11",
     "react-router-dom": "5.3.4",
-    "react-select": "4.3.1",
+    "react-select": "5.7.4",
     "react-tooltip": "^4.5.0",
     "reactstrap": "8.10.1",
     "redux": "4.2.0",
