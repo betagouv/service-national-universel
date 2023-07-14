@@ -115,11 +115,11 @@ class api {
     } catch (e) {
       capture(e, { extra: { path: path, body: body } });
     }
-    if (response.status !== 200) {
+    if (response?.status !== 200) {
       throw await response.json();
     }
     try {
-      return response.blob();
+      return response?.blob();
     } catch (e) {
       capture(e, { extra: { path: path, body: body } });
     }
