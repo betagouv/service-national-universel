@@ -214,7 +214,7 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
 
 router.post("/moderator/sejour/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (req.user.role !== ROLES.ADMIN) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role !== ROLES.ADMIN) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const filterFields = ["statusPhase1", "region", "department", "cohorts", "academy", "status"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
@@ -412,7 +412,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
     ];
     const sortFields = [];
 
-    if (!canSearchInElasticSearch(user, "sessionphase1young")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "sessionphase1young")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Context filters
     const contextFilters = [
@@ -432,14 +432,14 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
         return res.status(200).send({ ok: true, data: "no cohort available" });
       }
       if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
-        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
     if (user.role === ROLES.REFERENT_REGION) {
       const centers = await CohesionCenterObject.find({ region: user.region });
       const sessionsPhase1 = await SessionPhase1Object.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
       if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
-        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
 
@@ -447,7 +447,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       const centers = await CohesionCenterObject.find({ department: user.department });
       const sessionsPhase1 = await SessionPhase1Object.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
       if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
-        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
 
@@ -693,7 +693,7 @@ router.post("/aggregate-status/:action(export)", passport.authenticate(["referen
       "departSejourMotif.keyword",
     ];
     const sortFields = [];
-    if (!canSearchInElasticSearch(user, "young")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "young")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     // Context filters
     const contextFilters = [];
 

@@ -84,7 +84,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
 
     // If the young is affected and the cohort is not ended address can't be updated.
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && new Date(currentCohort.dateEnd).valueOf() > Date.now()) {
-      return res.status(418).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
     }
 
     if (
@@ -104,7 +104,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       const isEligible = availableSessions.find((s) => s.name === cohort);
 
       if (!isEligible && status !== YOUNG_STATUS.NOT_ELIGIBLE) {
-        return res.status(418).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+        return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
       }
 
       // Check if cohort goal is reached
@@ -114,12 +114,12 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       }
 
       if (isGoalReached && status === YOUNG_STATUS.VALIDATED) {
-        return res.status(418).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+        return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
       }
 
       // Address should be updated without any other modification.
     } else if ((value.cohort && value.cohort !== young.cohort && value.cohort !== "à venir") || (value.status && value.status !== young.status)) {
-      return res.status(418).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
     }
 
     if (young.department && value.department !== young.department) {

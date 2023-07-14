@@ -59,9 +59,9 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // check if referent is allowed to edit this young --> Todo with cohort
-    if (!canEditPresenceYoung(req.user, young)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canEditPresenceYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    if (young.status === YOUNG_STATUS.WITHDRAWN) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (young.status === YOUNG_STATUS.WITHDRAWN) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // verification nombre de place ?
     const session = await SessionPhase1Model.findById(sessionId);
@@ -71,7 +71,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     const cohort = await CohortModel.findOne({ name: session.cohort });
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canAssignManually(req.user, young, cohort)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canAssignManually(req.user, young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
 
@@ -151,10 +151,10 @@ router.post("/dispense", passport.authenticate("referent", { session: false, fai
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (!canEditPresenceYoung(req.user, young)) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     // passage en dispensé unqiuement si séjour non réalisé
-    if (req.user.role !== ROLES.ADMIN && young.statusPhase1 !== "NOT_DONE") return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role !== ROLES.ADMIN && young.statusPhase1 !== "NOT_DONE") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({ statusPhase1MotifDetail, statusPhase1Motif, statusPhase1: "EXEMPTED" });
     await young.save({ fromUser: req.user });
@@ -186,7 +186,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (!canEditPresenceYoung(req.user, young)) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     young.set({ departSejourAt, departSejourMotif, departSejourMotifComment, departInform: "true" });
@@ -267,7 +267,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (!canEditPresenceYoung(req.user, young)) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     young.set({ departSejourAt: undefined, departSejourMotif: undefined, departSejourMotifComment: undefined, departInform: undefined });
@@ -307,7 +307,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (!canEditPresenceYoung(req.user, young)) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     if ((key === "cohesionStayPresence" || key === "presenceJDM" || key === "isTravelingByPlane") && newValue == "") {

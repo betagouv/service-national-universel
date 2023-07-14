@@ -68,7 +68,7 @@ router.post("/search", passport.authenticate(["referent"], { session: false, fai
     const sortFields = [];
 
     // Authorization
-    if (!canSearchLigneBus(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
     const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
@@ -161,7 +161,7 @@ router.post("/export", passport.authenticate(["referent"], { session: false, fai
     const sortFields = [];
 
     // Authorization
-    if (!canSearchInElasticSearch(req.user, "lignebus")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(req.user, "lignebus")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
     const { queryFilters, page, sort, error, exportFields } = joiElasticSearch({ filterFields, sortFields, body: req.body });

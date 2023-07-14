@@ -137,7 +137,7 @@ describe("Application", () => {
 
       // Failed update (not allowed)
       res = await request(getAppHelper()).put("/application").send({ priority: "1", status: "DONE", _id: secondApplication._id.toString() });
-      expect(res.status).toBe(418);
+      expect(res.status).toBe(403);
 
       // Failed update (wrong young id)
       res = await request(getAppHelper()).put("/application").send({ priority: "1", status: "DONE", _id: application._id.toString(), youngId: secondYoung._id });
@@ -243,7 +243,7 @@ describe("Application", () => {
 
       // Failed request (not allowed)
       res = await request(getAppHelper()).post(`/application/${secondApplication._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`).send({});
-      expect(res.status).toBe(418);
+      expect(res.status).toBe(403);
 
       passport.user = previous;
     });

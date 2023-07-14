@@ -42,7 +42,7 @@ describe("Session Phase 1", () => {
       passport.user.role = ROLES.RESPONSIBLE;
 
       const res = await request(getAppHelper()).post("/session-phase1").send(getNewSessionPhase1Fixture());
-      expect(res.status).toBe(418);
+      expect(res.status).toBe(403);
 
       passport.user.role = ROLES.ADMIN;
     });
@@ -94,7 +94,7 @@ describe("Session Phase 1", () => {
         .send({
           cohort: "2020",
         });
-      expect(res.status).toBe(418);
+      expect(res.status).toBe(403);
       passport.user.role = ROLES.ADMIN;
     });
   });
@@ -121,7 +121,7 @@ describe("Session Phase 1", () => {
       const res = await request(getAppHelper())
         .delete("/session-phase1/" + sessionPhase1._id)
         .send();
-      expect(res.status).toBe(418);
+      expect(res.status).toBe(403);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 403 when youngs are registered to the session", async () => {
@@ -130,7 +130,7 @@ describe("Session Phase 1", () => {
         .delete("/session-phase1/" + sessionPhase1._id)
         .send();
       console.log(res.body);
-      expect(res.status).toBe(418);
+      expect(res.status).toBe(403);
     });
   });
 });

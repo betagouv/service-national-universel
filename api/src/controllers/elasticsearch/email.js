@@ -17,7 +17,7 @@ router.post("/:email/:action(search|export)", passport.authenticate(["referent"]
 
     const { user, body, params } = req;
 
-    if (!canViewEmailHistory(user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewEmailHistory(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
     const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
