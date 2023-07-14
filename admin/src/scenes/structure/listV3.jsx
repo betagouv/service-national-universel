@@ -17,6 +17,8 @@ import { structureExportFields } from "snu-lib/excelExports";
 export default function ListV3() {
   const user = useSelector((state) => state.Auth.user);
 
+  myUndefinedFunction();
+
   return (
     <div className="mb-8">
       <Breadcrumbs items={[{ label: "Centres" }]} />

@@ -8,8 +8,9 @@ import {
   BrowserTracing,
   makeBrowserOfflineTransport,
   makeFetchTransport,
+  Replay,
 } from "@sentry/react";
-import { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, apiURL } from "./config";
+import { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, apiURL, SENTRY_ON_ERROR_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE } from "./config";
 import { Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
 
@@ -38,7 +39,10 @@ function initSentry() {
       new ReportingObserver({
         types: ["crash", "deprecation", "intervention"],
       }),
+      new Replay(),
     ],
+    replaysSessionSampleRate: SENTRY_SESSION_SAMPLE_RATE,
+    replaysOnErrorSampleRate: SENTRY_ON_ERROR_SAMPLE_RATE,
     tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE),
     ignoreErrors: [
       /^No error$/,
