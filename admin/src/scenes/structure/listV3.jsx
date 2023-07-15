@@ -13,7 +13,6 @@ import { BsDownload } from "react-icons/bs";
 import { corpsEnUniforme } from "../../utils";
 import Badge from "../../components/Badge";
 import { structureExportFields } from "snu-lib/excelExports";
-import { replay } from "../../sentry";
 
 export default function ListV3() {
   const user = useSelector((state) => state.Auth.user);

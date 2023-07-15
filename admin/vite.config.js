@@ -38,9 +38,6 @@ export default defineConfig(({ command, mode }) => {
   return {
     build: { sourcemap: mode === "development" ? false : true, outDir: "build", port: 8082 },
     server: {
-      headers: {
-        "Content-Security-Policy": `worker-src 'self' blob:`,
-      },
       port: 8082,
     },
     plugins: plugins,
