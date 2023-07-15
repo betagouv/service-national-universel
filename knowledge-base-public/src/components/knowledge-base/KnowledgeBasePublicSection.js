@@ -36,7 +36,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
     return (
       <>
         <div className="w-full bg-[#32257F] border-t-[1px] border-white border-opacity-20 h-48" />
-        <div className="mx-auto px-4 md:mt-[-100px]">
+        <div className="mx-auto px-4 mt-[-100px]">
           <div className="col-span-full grid-cols-2 gap-2.5 md:grid lg:max-w-screen-95 lg:grid-cols-3 lg:overflow-hidden lg:px-6 2xl:grid-cols-4">
             <h2 className="col-span-2 mb-4 text-xl font-bold text-white md:mx-2 lg:col-span-3 2xl:col-span-4">Thématiques générales</h2>
             {sections.map(({ _id, position, icon, title, slug, children }) => {

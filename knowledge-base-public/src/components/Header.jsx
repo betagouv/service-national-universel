@@ -36,7 +36,7 @@ export default function Header() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => setSearchOpen(true)}
-          className="flex items-center gap-4 rounded-md border-none bg-transparent px-2.5 py-2 shadow-none transition-colors hover:bg-black hover:bg-opacity-20"
+          className="flex flex-none items-center gap-4 rounded-md border-none bg-transparent px-2.5 py-2 shadow-none transition-colors hover:bg-black hover:bg-opacity-20"
         >
           <SearchShortcut />
           <img src="/assets/search.svg" />
