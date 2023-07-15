@@ -8,7 +8,9 @@ const {
   Handlers,
   autoDiscoverNodePerformanceMonitoringIntegrations,
 } = require("@sentry/node");
-const { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE } = require("./config");
+const { ProfilingIntegration } = require("@sentry/profiling-node");
+
+const { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_PROFILE_SAMPLE_RATE } = require("./config");
 
 const regex = /[0-9a-fA-F]{24}/g;
 
@@ -34,9 +36,11 @@ function initSentry(app) {
       new RewriteFrames({ root: process.cwd() }),
       new NodeIntegrations.Http({ tracing: true }),
       new NodeIntegrations.Modules(),
+      new ProfilingIntegration(),
       ...autoDiscoverNodePerformanceMonitoringIntegrations(),
     ],
     tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE || 0.01),
+    profilesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE || 0.1), // Percent of Transactions profiled
     ignoreErrors: [
       /^No error$/,
       /__show__deepen/,

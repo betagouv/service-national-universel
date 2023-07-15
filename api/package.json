@@ -27,6 +27,7 @@
     "@selego/mongoose-elastic": "^1.5.0",
     "@sentry/integrations": "^7.58.1",
     "@sentry/node": "^7.58.1",
+    "@sentry/profiling-node": "^1.1.2",
     "adm-zip": "^0.5.10",
     "aws-sdk": "^2.1248.0",
     "aws4": "^1.11.0",
