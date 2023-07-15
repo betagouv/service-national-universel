@@ -25,7 +25,7 @@ const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
         <title>SNU - Base de connaissance</title>
       </Head>
       <div className="grid grid-cols-1 grid-rows-[auto,180px,auto]">
-        <div className="col-span-full row-span-2 row-start-1 bg-cover bg-center" style={{ backgroundImage: `url('/assets/hero.png')` }}>
+        {/* <div className="col-span-full row-span-2 row-start-1 bg-cover bg-center" style={{ backgroundImage: `url('/assets/hero.png')` }}>
           <div className="h-full bg-snu-purple-900 bg-opacity-95">
             <div className="ml-auto mr-auto max-w-screen-95 px-8 pb-[276px] pt-24">
               <h1 className="mb-6 text-4xl font-bold text-white md:text-5xl lg:text-6xl">Base de connaissance</h1>
@@ -34,7 +34,7 @@ const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
               </h6>
             </div>
           </div>
-        </div>
+        </div> */}
         {(showLoading || !device) && (environment === "production" ? <LoaderHomeOld /> : <LoaderHome />)}
         {!showLoading && (
           <>

@@ -199,7 +199,7 @@ const Wrapper = ({ children }) => {
           </p>
         </div>
       )}
-      <main className="bg-[#F3F4F6] print:bg-transparent">{children}</main>
+      <main className="bg-gray-100 print:bg-transparent">{children}</main>
       <Footer />
     </>
   );
