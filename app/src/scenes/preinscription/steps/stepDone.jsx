@@ -35,6 +35,7 @@ export default function StepDone() {
         dispatch(setYoung(young));
         removePersistedData(true);
       }
+      return history.push("/auth?from=preinscription");
     } catch (e) {
       capture(e);
     }
