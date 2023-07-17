@@ -5,8 +5,8 @@ const {
   Integrations: NodeIntegrations,
   init,
   Handlers,
+  autoDiscoverNodePerformanceMonitoringIntegrations,
 } = require("@sentry/node");
-const { Integrations: TracingIntegrations } = require("@sentry/tracing");
 const { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE } = require("./config");
 
 function initSentry(app) {
@@ -20,8 +20,7 @@ function initSentry(app) {
       new RewriteFrames({ root: process.cwd() }),
       new NodeIntegrations.Http({ tracing: true }),
       new NodeIntegrations.Modules(),
-      new TracingIntegrations.Mongo({ useMongoose: true }),
-      new TracingIntegrations.Express({ app }),
+      ...autoDiscoverNodePerformanceMonitoringIntegrations(),
     ],
     tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE),
     ignoreErrors: [

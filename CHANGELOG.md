@@ -1,3 +1,10 @@
+# [1.311.0](https://github.com/betagouv/service-national-universel/compare/v1.310.0...v1.311.0) (2023-07-15)
+
+
+### Features
+
+* **app:** Add sentry replays ([8114112](https://github.com/betagouv/service-national-universel/commit/8114112844c8737f2d37fcfcafde5346b90e695c))
+
 # [1.310.0](https://github.com/betagouv/service-national-universel/compare/v1.309.1...v1.310.0) (2023-07-14)
 
 
