@@ -19,7 +19,8 @@ const BoxContent = ({ availableFrom, availableUntil, onChangeDate, onDownload, e
   if (availableFrom && availableFrom.setHours(0, 0, 0, 0) < now) {
     return (
       <>
-        <DatePicker className="flex-1" value={availableUntil} disabled label="Disponible jusqu’au" />
+        <DatePicker className="flex-2" value={availableFrom} disabled label="Générée le" />
+        <DatePicker className="flex-2" value={availableUntil} disabled label="Disponible jusqu’au" />
         <PlainButton disabled={isLoading} spinner={isLoading} className="mt-4 w-full" onClick={onDownload}>
           {!isLoading && <Download className="mr-1" />}
           Télécharger
