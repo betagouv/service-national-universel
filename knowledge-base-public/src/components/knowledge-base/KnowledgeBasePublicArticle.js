@@ -3,9 +3,10 @@ import { useMemo, useState } from "react";
 import API from "../../services/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { snuApiUrl } from "../../config";
+import { environment, snuApiUrl } from "../../config";
 import { Button } from "../Buttons";
-import Breadcrumbs from "../breadcrumbs";
+import Breadcrumbs from "../breadcrumb";
+import NewBreadrumbs from "../breadcrumbs";
 
 const defaultFeedback = { isPositive: true };
 
@@ -41,12 +42,18 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
   return (
 
     <div className="wrapper mx-auto flex w-full flex-shrink flex-grow flex-col overflow-hidden bg-coolGray-100 print:bg-transparent  print:pb-12">
-      <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
-      <div className="py-4">
-        <h2 className="mb-6 text-4xl font-bold md:text-5xl print:mb-0 print:text-black">{group?.title}</h2>
-        <h1 className="mb-6 text-4xl font-bold md:text-5xl print:mb-0 print:text-black">{item?.title}</h1>
-        <h6 className="text-base text-snu-purple-100 md:text-lg lg:text-xl print:text-black">{item?.description}</h6>
-      </div>
+      {environment === "production" ? (
+        null
+      ) : (
+        <>
+          <NewBreadrumbs parents={item?.parents || []} path="/base-de-connaissance" />
+          <div className="py-4">
+            <h2 className="mb-6 text-4xl font-bold md:text-5xl print:mb-0 print:text-black">{group?.title}</h2>
+            <h1 className="mb-6 text-4xl font-bold md:text-5xl print:mb-0 print:text-black">{item?.title}</h1>
+            <h6 className="text-base text-snu-purple-100 md:text-lg lg:text-xl print:text-black">{item?.description}</h6>
+          </div>
+        </>
+      )}
       {item?.updatedAt && (
         <span className="mb-4 ml-auto mt-2 flex flex-col items-end text-xs italic text-gray-400 print:mb-2 print:mt-0">
           {/* <em>Article mis à jour le {Intl.DateTimeFormat("fr-FR", { year: "numeric", month: "long", day: "numeric" }).format(new Date(item.updatedAt))}</em> */}
