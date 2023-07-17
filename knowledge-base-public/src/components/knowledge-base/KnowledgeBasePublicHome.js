@@ -47,7 +47,7 @@ const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
         </div>
       )}
 
-      <KnowledgeBasePublicNoAnswer />
+      {/* <KnowledgeBasePublicNoAnswer /> */}
     </Wrapper >
   );
 };

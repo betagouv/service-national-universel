@@ -4,6 +4,7 @@ import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
 import { Accordion } from "../Accordion";
 import LoaderArticle from "../LoaderArticle";
 import Breadcrumbs from "../breadcrumbs";
+import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 
 const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   const [sections, setSections] = useState(item?.children?.filter((c) => c.type === "section") || []);
@@ -35,8 +36,8 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   if (isRoot) {
     return (
       <>
-        <div className="w-full bg-[#32257F] border-t-[1px] border-white border-opacity-20 h-48" />
-        <div className="mx-auto px-4 mt-[-100px]">
+        <div className="h-48 w-full border-t-[1px] border-white border-opacity-20 bg-[#32257F]" />
+        <div className="mx-auto mt-[-100px] px-4">
           <div className="col-span-full grid-cols-2 gap-2.5 md:grid lg:max-w-screen-95 lg:grid-cols-3 lg:overflow-hidden lg:px-6 2xl:grid-cols-4">
             <h2 className="col-span-2 mb-4 text-xl font-bold text-white md:mx-2 lg:col-span-3 2xl:col-span-4">Thématiques générales</h2>
             {sections.map(({ _id, position, icon, title, slug, children }) => {
@@ -65,16 +66,14 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
 
   return (
     <>
-      <div className="w-full bg-[#32257F] border-t-[1px] border-white border-opacity-20 h-48 text-white">
-        <div className="mx-auto md:w-[712px] px-4 mt-14 space-y-1">
+      <div className="h-48 w-full border-t-[1px] border-white border-opacity-20 bg-[#32257F] text-white">
+        <div className="mx-auto mt-14 space-y-1 px-4 md:w-[712px]">
           <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
-          <h1 className="text-3xl leading-9 font-bold">
-            {item?.title}
-          </h1>
+          <h1 className="text-3xl font-bold leading-9">{item?.title}</h1>
         </div>
       </div>
 
-      <div className="flex w-full flex-col items-center justify-center px-4 mt-[-40px]">
+      <div className="mt-[-40px] flex w-full flex-col items-center justify-center px-4">
         {sections.length > 0 && (
           <div key={"sections"} className="mt-3 flex w-full flex-col items-center justify-center">
             {sections.map(({ title, children, _id }) => {
@@ -89,6 +88,9 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
             ))}
           </div>
         )}
+        <div className="mx-auto">
+          <KnowledgeBasePublicNoAnswer />
+        </div>
       </div>
     </>
   );
