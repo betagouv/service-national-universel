@@ -5,8 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { environment, snuApiUrl } from "../../config";
 import { Button } from "../Buttons";
-import Breadcrumbs from "../breadcrumb";
-import NewBreadrumbs from "../breadcrumbs";
+import Breadcrumbs from "../breadcrumbs";
 
 const defaultFeedback = { isPositive: true };
 
@@ -46,7 +45,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
         null
       ) : (
         <>
-          <NewBreadrumbs parents={item?.parents || []} path="/base-de-connaissance" />
+          <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
           <div className="py-4">
             <h2 className="mb-6 text-4xl font-bold md:text-5xl print:mb-0 print:text-black">{group?.title}</h2>
             <h1 className="mb-6 text-4xl font-bold md:text-5xl print:mb-0 print:text-black">{item?.title}</h1>
