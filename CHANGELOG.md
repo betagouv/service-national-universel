@@ -1,3 +1,18 @@
+# [1.312.0](https://github.com/betagouv/service-national-universel/compare/v1.311.0...v1.312.0) (2023-07-17)
+
+
+### Bug Fixes
+
+* **app:** move non eligible page from space ([462e1da](https://github.com/betagouv/service-national-universel/commit/462e1daf10f665c672df91dbc58472d9c7e5aeed))
+* **app:** not eligible blank page ([30289c9](https://github.com/betagouv/service-national-universel/commit/30289c93adbc61c267a3fc4ae88f5793a9450779))
+* **kb:** home prod ([00670e0](https://github.com/betagouv/service-national-universel/commit/00670e08f016f3e8784a4f10340e60232a203b3f))
+
+
+### Features
+
+* **kb:** New breadcrumbs (staging only) ([#2805](https://github.com/betagouv/service-national-universel/issues/2805)) ([97f8b3d](https://github.com/betagouv/service-national-universel/commit/97f8b3dd64c0c9da8a30bb48b882298bca658dff))
+* **kb:** New breadcrumbs and section title (staging only) ([#2804](https://github.com/betagouv/service-national-universel/issues/2804)) ([f26f3a2](https://github.com/betagouv/service-national-universel/commit/f26f3a2c63c98554c1c6ea69aa1cf6c1a9bcbc73))
+
 # [1.311.0](https://github.com/betagouv/service-national-universel/compare/v1.310.0...v1.311.0) (2023-07-15)
 
 
