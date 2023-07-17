@@ -22,7 +22,6 @@ import Help from "../components/Help";
 import MyDocs from "../components/MyDocs";
 import Navbar from "../components/Navbar";
 import StickyButton from "../../../components/inscription/stickyButton";
-const images = import.meta.globEager("../../../assets/IDProof/*");
 
 export default function StepUpload() {
   let { category } = useParams();
