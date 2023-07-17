@@ -32,7 +32,6 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
           <>
             {item?.type === "article" && <KnowledgeBasePublicArticlev2 item={item} isLoading={isLoading} />}
             {item?.type === "section" && <KnowledgeBasePublicSection item={item} isLoading={isLoading} />}
-            {/* <KnowledgeBasePublicNoAnswer /> */}
           </>
         )}
       </div>
