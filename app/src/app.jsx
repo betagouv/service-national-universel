@@ -209,7 +209,7 @@ const Espace = () => {
     else return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}&disconnected=1` : "", pathname: "/auth" }} />;
   }
 
-  if (young.status === YOUNG_STATUS.NOT_ELIGIBLE) return <Redirect to="/noneligible" />;
+  if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
   const forceRedirectReinscription = young.reinscriptionStep2023 && young.reinscriptionStep2023 !== "DONE";
   if (forceRedirectReinscription) return <Redirect to="/reinscription" />;
