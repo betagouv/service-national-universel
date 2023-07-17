@@ -219,7 +219,7 @@ export default function StepUpload() {
             ))}
         </div>
         <div className="mb-4 flex w-full items-center justify-center">
-          <img src={images[`../../assets/IDProof/${ID[category]?.imgFront}`]} alt={ID[category]?.title} />
+          <img src={ID[category]?.imgFront} alt={ID[category]?.title} />
         </div>
         <input type="file" id="file-upload" name="file-upload" accept="image/*" onChange={handleChange} className="hidden" />
         <button className="flex w-full">
@@ -253,9 +253,7 @@ export default function StepUpload() {
               </ErrorMessage>
             ))}
         </div>
-        <div className="mb-4 flex w-full items-center justify-center">
-          {ID[category].imgBack && <img src={images[`../../assets/IDProof/${ID[category]?.imgBack}`]} alt={ID[category]?.title} />}
-        </div>
+        <div className="mb-4 flex w-full items-center justify-center">{ID[category].imgBack && <img src={ID[category]?.imgBack} alt={ID[category]?.title} />}</div>
         <input type="file" id="file-upload" name="file-upload" accept="image/*" onChange={handleChange} className="hidden" />
         <button className="flex w-full">
           <label htmlFor="file-upload" className="flex w-full items-center justify-center bg-[#000091] p-2 text-white">
@@ -306,7 +304,7 @@ export default function StepUpload() {
           </div>
         )}
         <div className="mx-auto w-3/4">
-          <img className="mx-auto my-4" src={images[`../../assets/IDProof/${ID[category]?.imgDate}`]} alt={ID.title} />
+          <img className="mx-auto my-4" src={ID[category]?.imgDate} alt={ID.title} />
         </div>
         <DatePickerList value={date} onChange={(date) => handleChange(date)} />
       </>

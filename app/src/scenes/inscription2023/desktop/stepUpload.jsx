@@ -177,13 +177,13 @@ export default function StepUpload() {
 
       <div className="my-10 flex w-full justify-around">
         <div>
-          <img className="h-64" src={getImgUrl(ID[category].imgFront)} alt={ID[category].title} />
+          <img className="h-64" src={ID[category].imgFront} alt={ID[category].title} />
           <div className="mt-4 text-sm text-center text-gray-500">Recto</div>
         </div>
 
         {ID[category].imgBack && (
           <div>
-            <img className="h-64" src={getImgUrl(ID[category].imgBack)} alt={ID[category].title} />
+            <img className="h-64" src={ID[category].imgBack} alt={ID[category].title} />
             <div className="mt-4 text-sm text-center text-gray-500">Verso</div>
           </div>
         )}
@@ -272,7 +272,7 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
           />
         </div>
         <div className="w-1/2">
-          <img className="mx-auto h-32" src={getImgUrl(ID[category].imgDate)} alt={ID.title} />
+          <img className="mx-auto h-32" src={ID[category].imgDate} alt={ID.title} />
         </div>
       </div>
     </>
