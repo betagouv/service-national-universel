@@ -299,14 +299,19 @@ export default function Inscription() {
 
 const Hit = ({ hit, index, onClick }) => {
   dayjs.extend(relativeTime).locale("fr");
-  const diff = dayjs(new Date(hit.updatedAt)).fromNow();
+  const diffMaj = dayjs(new Date(hit.updatedAt)).fromNow();
+  const diffCreate = dayjs(new Date(hit.createdAt)).fromNow();
 
   return (
     <tr onClick={onClick} className="border-b-[1px] border-y-gray-100 hover:bg-gray-50">
       <td className="pl-4 py-3 w-[5%] tesxt-gray-900 text-base">{index + 1}</td>
       <td className="py-3 w-[35%]">
         <span className="font-bold text-gray-900 leading-6">{hit.status !== "DELETED" ? `${hit.firstName} ${hit.lastName}` : "Compte supprimé"}</span>
-        <p className="text-sm text-gray-600 leading-5">{`Mis à jour ${diff} • ${formatStringLongDate(hit.updatedAt)}`}</p>
+        {hit.updatedAt ? (
+          <p className="text-sm text-gray-600 leading-5">{`Mis à jour ${diffMaj} • ${formatStringLongDate(hit.updatedAt)}`}</p>
+        ) : hit.createdAt ? (
+          <p className="text-sm text-gray-600 leading-5">{`Créée ${diffCreate} • ${formatStringLongDate(hit.createdAt)}`}</p>
+        ) : null}
       </td>
       <td className="text-center">
         <Badge color="#3B82F6" backgroundColor="#EFF6FF" text={hit.cohort} className={hit.status === "DELETED" ? "opacity-50" : ""} />
