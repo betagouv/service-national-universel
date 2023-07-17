@@ -1,4 +1,3 @@
-import { ChevronRightIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 
 const Breadcrumbs = ({ parents, path }) => {
@@ -12,7 +11,7 @@ const Breadcrumbs = ({ parents, path }) => {
         </li>
         {parents.map(({ _id, slug, title }) => (
           <li key={_id} className="flex flex-nowrap items-center gap-1">
-            <ChevronRightIcon className="h-4" />
+            <span className="material-icons">keyboard_arrow_right</span>
             <Link href={`${path}/${slug}`} className="rounded px-2 py-1.5">
               {title}
             </Link>

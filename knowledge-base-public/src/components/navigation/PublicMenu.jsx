@@ -12,7 +12,7 @@ export default function PublicMenu() {
   return (
     <>
       <Popover.Group>
-        <Popover className="relative md:hidden">
+        <Popover className="relative lg:hidden">
           {({ open }) => (
             <>
               <Popover.Button className="rounded-none border-none bg-transparent p-2 shadow-none">
@@ -67,7 +67,7 @@ export default function PublicMenu() {
         </Popover>
       </Popover.Group>
 
-      <nav className="hidden md:block">
+      <nav className="hidden lg:block">
         <ul className="flex items-center justify-end gap-6">
           <li>
             <a href="https://www.snu.gouv.fr" className="rounded-md px-2.5 py-2 text-sm font-medium text-white transition-colors hover:bg-black hover:bg-opacity-20">

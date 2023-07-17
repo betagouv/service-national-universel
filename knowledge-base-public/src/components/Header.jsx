@@ -16,13 +16,13 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="flex items-center justify-between gap-4 bg-[#32257F] px-8 py-4 print:hidden">
+    <header className="flex items-center justify-between gap-4 bg-[#32257F] p-4 print:hidden">
       <Link href="/" className="flex items-center gap-4">
         <div className="flex-none">
           <img className="h-14 w-14" src="/assets/logo-snu.png" alt="Logo du SNU" />
         </div>
 
-        <p className="hidden text-sm font-medium uppercase leading-tight tracking-wide text-white lg:block">
+        <p className="hidden text-sm font-medium uppercase leading-tight tracking-wide text-white md:block">
           service
           <br />
           national
