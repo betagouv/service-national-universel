@@ -74,6 +74,7 @@ export default function App() {
             <Switch>
               {/* Aucune authentification nécessaire */}
               <SentryRoute path="/preinscription" component={PreInscription} />
+              <SentryRoute path="/noneligible" component={NonEligible} />
               <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
               <SentryRoute path="/validate-contract/done" component={ContractDone} />
               <SentryRoute path="/validate-contract" component={Contract} />
@@ -228,7 +229,6 @@ const Espace = () => {
         <Switch>
           <SentryRoute exact path="/" component={Home} />
           <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
-          <SentryRoute path="/noneligible" component={NonEligible} />
           <SentryRoute path="/reinscription" component={ReInscription} />
           <SentryRoute path="/account" component={Account} />
           <SentryRoute path="/phase1" component={Phase1} />
