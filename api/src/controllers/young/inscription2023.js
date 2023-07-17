@@ -90,14 +90,14 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       ...value,
       ...(value.livesInFrance === "true"
         ? {
-            foreignCountry: "",
-            foreignAddress: "",
-            foreignCity: "",
-            foreignZip: "",
-            hostFirstName: "",
-            hostLastName: "",
-            hostRelationship: "",
-          }
+          foreignCountry: "",
+          foreignAddress: "",
+          foreignCity: "",
+          foreignZip: "",
+          hostFirstName: "",
+          hostLastName: "",
+          hostRelationship: "",
+        }
         : {}),
       ...validateCorrectionRequest(young, keyList),
     };
@@ -385,7 +385,7 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },
@@ -517,7 +517,7 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+          cta: `${config.APP_URL} /representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },
