@@ -66,7 +66,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   return (
     <>
       <div className="w-full bg-[#32257F] border-t-[1px] border-white border-opacity-20 h-48 text-white">
-        <div className="mx-auto w-[712px] px-4 mt-14 space-y-1">
+        <div className="mx-auto md:w-[712px] px-4 mt-14 space-y-1">
           <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
           <h1 className="text-3xl leading-9 font-bold">
             {item?.title}
