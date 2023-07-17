@@ -10,7 +10,7 @@ import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 
 const defaultFeedback = { isPositive: true };
 
-const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
+const KnowledgeBasePublicArticleV2 = ({ item, isLoading }) => {
   const [feedback, setFeedback] = useState({ ...defaultFeedback });
   const [hasSubmitted, setSubmitted] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
@@ -195,4 +195,4 @@ const ArticleLoader = () => (
   </div>
 );
 
-export default KnowledgeBasePublicArticle;
+export default KnowledgeBasePublicArticleV2;

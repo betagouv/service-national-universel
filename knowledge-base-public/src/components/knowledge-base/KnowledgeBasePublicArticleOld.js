@@ -9,7 +9,7 @@ import Breadcrumbs from "../breadcrumbs";
 
 const defaultFeedback = { isPositive: true };
 
-const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
+const KnowledgeBasePublicArticleOld = ({ item, isLoading }) => {
   const [feedback, setFeedback] = useState({ ...defaultFeedback });
   const [hasSubmitted, setSubmitted] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
@@ -194,4 +194,4 @@ const ArticleLoader = () => (
   </div>
 );
 
-export default KnowledgeBasePublicArticle;
+export default KnowledgeBasePublicArticleOld;

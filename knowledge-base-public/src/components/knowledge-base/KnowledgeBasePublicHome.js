@@ -26,6 +26,7 @@ const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
       </Head>
 
       {environment === "production" ? (
+        <>
         <div className="grid grid-cols-1 grid-rows-[auto,180px,auto]">
           <div className="col-span-full row-span-2 row-start-1 bg-cover bg-center" style={{ backgroundImage: `url('/assets/hero.png')` }}>
             <div className="h-full bg-snu-purple-900 bg-opacity-95">
@@ -40,6 +41,8 @@ const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
           {(showLoading || !device) && <LoaderHomeOld />}
           {!showLoading && <KnowledgeBasePublicSectionOld isRoot item={item} isLoading={showLoading} />}
         </div>
+        <KnowledgeBasePublicNoAnswer />
+        </>
       ) : (
         <div className="grid grid-cols-1 grid-rows-auto">
           {(showLoading || !device) && <LoaderHome />}
@@ -47,7 +50,6 @@ const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
         </div>
       )}
 
-      {/* <KnowledgeBasePublicNoAnswer /> */}
     </Wrapper >
   );
 };
