@@ -170,6 +170,12 @@ const Schema = new mongoose.Schema({
       description: "E-mail du volontaire",
     },
   },
+  emailVerified: {
+    type: Boolean,
+    documentation: {
+      description: "L'utilisateur a validé son email: 2FA possible",
+    },
+  },
   phone: {
     type: String,
     documentation: {

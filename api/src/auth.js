@@ -21,6 +21,7 @@ class Auth {
     try {
       const { error, value } = Joi.object({
         email: Joi.string().lowercase().trim().email().required(),
+        emailVerified: Joi.boolean().required(),
         firstName: validateFirstName().trim().required(),
         lastName: Joi.string().uppercase().trim().required(),
         password: Joi.string().required(),
@@ -49,6 +50,7 @@ class Auth {
 
       const {
         email,
+        emailVerified,
         firstName,
         lastName,
         password,
@@ -83,6 +85,7 @@ class Auth {
 
       const user = await this.model.create({
         email,
+        emailVerified,
         firstName,
         lastName,
         password,
@@ -159,7 +162,7 @@ class Auth {
 
       const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
       const isKnownIp = await user.compareIps(ip);
-      if (!user.userIps || user.userIps?.length === 0 || !isKnownIp) {
+      if (user.emailVerified !== false && (!user.userIps || user.userIps?.length === 0 || !isKnownIp)) {
         const token2FA = await crypto.randomBytes(20).toString("hex");
         user.set({ token2FA, token2FAExpires: Date.now() + 1000 * 60 * 10 });
         await user.save();

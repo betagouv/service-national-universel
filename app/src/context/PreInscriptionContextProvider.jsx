@@ -10,6 +10,7 @@ const defaultState = {
   lastName: "",
   email: "",
   emailConfirm: "",
+  emailVerified: "",
   password: "",
   confirmPassword: "",
   acceptCGU: "false",
