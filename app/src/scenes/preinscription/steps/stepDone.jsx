@@ -28,7 +28,7 @@ export default function StepDone() {
   async function handleClick() {
     plausibleEvent("Phase0/CTA preinscription - demarrer");
     removePersistedData(true);
-    history.push("/auth");
+    return history.push("/auth?from=preinscription");
   }
 
   return (
