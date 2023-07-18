@@ -6,7 +6,6 @@ import { GrAttachment } from "react-icons/gr";
 import api from "../../../services/api";
 import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
-import { capture } from "../../../sentry";
 import plausibleEvent from "../../../services/plausible";
 import DSFRContainer from "../../../components/inscription/DSFRContainer";
 import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
@@ -27,17 +26,9 @@ export default function StepDone() {
   };
 
   async function handleClick() {
-    try {
-      plausibleEvent("Phase0/CTA preinscription - demarrer");
-      const { user: young, token } = await api.post(`/young/signin`, { email: data.email, password: data.password });
-      if (young) {
-        if (token) api.setToken(token);
-        dispatch(setYoung(young));
-        removePersistedData(true);
-      }
-    } catch (e) {
-      capture(e);
-    }
+    plausibleEvent("Phase0/CTA preinscription - demarrer");
+    removePersistedData(true);
+    history.push("/auth");
   }
 
   return (
