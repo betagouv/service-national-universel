@@ -70,63 +70,75 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
             {feedback.isPositive && (
               <div className="my-12 flex h-[130px] w-full flex-col items-center justify-center bg-[#F3F4F6] print:bg-transparent print:pb-12">
                 <>
-                  <p className="text-[20px] mt-2 font-bold not-italic leading-7 text-gray-900">Cet article vous a été utile ?</p>
+                  <p className="mt-2 text-[20px] font-bold not-italic leading-7 text-gray-900">Cet article vous a été utile ?</p>
                 </>
-                <div className="mt-4 mb-4 flex flex-row">
+                <div className="mb-4 mt-4 flex flex-row">
                   <div
                     id="ThumbsUp"
-                    className="mr-6 flex px-20 h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] border-gray-200 text-3xl font-medium hover:border-[#9CA3AF]"
+                    className="mr-6 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] px-20 text-3xl font-medium hover:border-[#9CA3AF]"
                     onClick={postFeedback}
                   >
-                    <span className="material-icons w-[20px] text-[20px] text-[#2563EB] text-[#374151]">thumb_up</span>
+                    <span className="material-icons w-[20px] text-[20px] text-[#2563EB]">thumb_up</span>
                     <p className="ml-2 text-[16px] text-[#2563EB]">Oui</p>
                   </div>
                   <div
-                    className="ml-1 flex px-20 h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] border-gray-200 text-3xl font-medium hover:border-[#9CA3AF]"
+                    className="ml-1 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] px-20 text-3xl font-medium hover:border-[#9CA3AF]"
                     onClick={() => setFeedback({ ...feedback, isPositive: false })}
                   >
-                    <span className="material-icons w-[20px] text-[20px] text-[#2563EB] text-[#374151]">thumb_down</span>
+                    <span className="material-icons w-[20px] text-[20px] text-[#2563EB]">thumb_down</span>
                     <p className="ml-2 text-[16px] text-[#2563EB]">Non</p>
                   </div>
                 </div>
               </div>
             )}
             {!feedback.isPositive && (
-              <div className="flex h-full w-full flex-col items-center justify-center bg-white pb-10 pl-24 pr-24 pt-10">
-                <h1 className="text-2xl font-light not-italic leading-8 text-gray-600">Aidez-nous à nous améliorer</h1>
-                <p className="mt-8 justify-center leading-5 text-gray-600 ">
-                  ⚠️ <span className="text-lg font-semibold text-gray-600">Rappel :</span> vous n&apos;obtiendrez pas de réponse à votre question, merci de ne pas inscrire
-                  d&apos;informations personnelles. Pour obtenir une aide personnalisée,{" "}
-                  <a href="https://www.snu.gouv.fr/nous-contacter/" className="text-snu-purple-200 " target="_blank" rel="noopener noreferrer">
-                    <span className="font-semibold text-[#4F46E5] ">cliquez ici.</span>
-                  </a>
-                </p>
-                <div className="mb-2 mt-8 flex w-full flex-row">
-                  <p className="inline-block w-full self-end text-base font-medium leading-5 text-gray-700">Quel était votre question ?</p>
-                  <p className="inline-block h-5 w-48 self-end text-end text-xs font-medium leading-5 text-[#6B7280]">125 caractères maximum</p>
+              <div className="mb-6 mt-6 flex h-full w-full flex-col rounded-xl border-[1px] bg-white pt-6">
+                <div className="flex flex-col items-center justify-center px-10">
+                  <h1 className="mt-2 text-[20px] font-bold not-italic leading-7 text-gray-900">Aidez-nous à nous améliorer</h1>
+                  <div className="flex flex-row mt-8 py-4 justify-center bg-[#EFF6FF] px-4 text-[14px] leading-5 text-gray-600 ">
+                    <span className="material-icons w-[20px] text-[20px] text-[#60A5FA] mt-2 mr-4">info</span>
+                    <div>
+                      <span className="text-[#1E40AF]">
+                        Rappel : vous n&apos;obtiendrez pas de réponse à votre question, merci de ne pas inscrire d&apos;informations personnelles. Pour obtenir une aide
+                        personnalisée,
+                      </span>{" "}
+                      <a href="https://www.snu.gouv.fr/nous-contacter/" className="text-snu-purple-200 " target="_blank" rel="noopener noreferrer">
+                        <span className="underline text-[#4F46E5] ">cliquez ici.</span>
+                      </a>
+                    </div>
+                  </div>
+                  <div className="mb-2 mt-8 flex w-full flex-row">
+                    <p className="inline-block w-full self-end text-[12px] font-medium leading-4 text-[#111827]">Quel était votre question ?</p>
+                    <p className="inline-block h-5 w-48 self-end text-end text-xs font-medium leading-5 text-[#6B7280]">125 caractères maximum</p>
+                  </div>
+                  <textarea
+                    className={`h-24 w-full rounded-md border-2 ${
+                      !feedback.comment || feedback.comment?.length <= 125 ? "border-gray-200" : "border-[#EF4444]"
+                    } p-4 text-sm font-normal text-[#4B5563] focus:outline-none`}
+                    placeholder="Ecrivez votre question ici..."
+                    onChange={(e) => setFeedback({ ...feedback, comment: e.target.value })}
+                  ></textarea>
+                  <p
+                    className={`relative -mt-8 mb-8 mr-4 self-end text-end text-xs font-medium leading-6 ${
+                      !feedback.comment || feedback.comment?.length <= 125 ? "text-[#6B7280]" : "text-[#EF4444]"
+                    }`}
+                  >
+                    {feedback.comment?.length || 0}/125
+                  </p>
                 </div>
-                <textarea
-                  className={`h-24 w-full rounded-md border-2 ${
-                    !feedback.comment || feedback.comment?.length <= 125 ? "border-gray-200" : "border-[#EF4444]"
-                  } p-4 text-sm font-normal text-[#4B5563] focus:outline-none`}
-                  placeholder="Ecrivez votre question ici..."
-                  onChange={(e) => setFeedback({ ...feedback, comment: e.target.value })}
-                ></textarea>
-                <p
-                  className={`relative -mt-8 mb-8 mr-4 self-end text-end text-xs font-medium leading-6 ${
-                    !feedback.comment || feedback.comment?.length <= 125 ? "text-[#6B7280]" : "text-[#EF4444]"
-                  }`}
-                >
-                  {feedback.comment?.length || 0}/125
-                </p>
-                <div className="mt-3 flex w-full flex-row">
+                <div className="mt-3 flex flex-row justify-end bg-[#F9FAFB] p-4">
                   <button
-                    className="border-1 mr-1 flex flex-1 items-center justify-center border-gray-200 bg-white text-[#6B7280]"
+                    className="mr-1 items-center justify-center rounded-md border-[1px] border-gray-200 bg-white px-4 text-[14px] font-medium leading-5 text-[#374151]"
                     onClick={() => setFeedback({ ...defaultFeedback })}
                   >
                     Annuler
                   </button>
-                  <Button className="flex-1" onClick={postFeedback} loading={isSubmitting} disabled={feedback.comment?.length > 125}>
+                  <Button
+                    className="rounded-md border-[1px] bg-[#2563EB] border-[#2563EB] px-4 text-[14px] font-medium leading-5 text-[#FFFFFF]"
+                    onClick={postFeedback}
+                    loading={isSubmitting}
+                    disabled={feedback.comment?.length > 125}
+                  >
                     Envoyer
                   </Button>
                 </div>
