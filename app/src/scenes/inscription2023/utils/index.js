@@ -2,6 +2,15 @@ import constants from "snu-lib/constants";
 import translation from "snu-lib/translation";
 import countries from "i18n-iso-countries";
 import * as fr from "i18n-iso-countries/langs/fr.json";
+import cniNewBack from "../../../assets/IDProof/cniNewBack.jpg";
+import cniNewDate from "../../../assets/IDProof/cniNewDate.jpg";
+import cniNewFront from "../../../assets/IDProof/cniNewFront.jpg";
+import cniOldBack from "../../../assets/IDProof/cniOldBack.jpg";
+import cniOldDate from "../../../assets/IDProof/cniOldDate.jpg";
+import cniOldFront from "../../../assets/IDProof/cniOldFront.jpg";
+import passport from "../../../assets/IDProof/passport.jpg";
+import passportDate from "../../../assets/IDProof/passportDate.jpg";
+
 countries.registerLocale(fr);
 const countriesList = countries.getNames("fr", { select: "official" });
 
@@ -68,22 +77,22 @@ export const ID = {
     category: "cniNew",
     title: "Carte Nationale d'Identité",
     subtitle: "Nouveau format (après août 2021)",
-    imgFront: "cniNewFront.jpg",
-    imgBack: "cniNewBack.jpg",
-    imgDate: "cniNewDate.jpg",
+    imgFront: cniNewFront,
+    imgBack: cniNewBack,
+    imgDate: cniNewDate,
   },
   cniOld: {
     category: "cniOld",
     title: "Carte Nationale d'Identité",
     subtitle: "Ancien format",
-    imgFront: "cniOldFront.jpg",
-    imgBack: "cniOldBack.jpg",
-    imgDate: "cniOldDate.jpg",
+    imgFront: cniOldFront,
+    imgBack: cniOldBack,
+    imgDate: cniOldDate,
   },
   passport: {
     category: "passport",
     title: "Passeport",
-    imgFront: "passport.jpg",
-    imgDate: "passportDate.jpg",
+    imgFront: passport,
+    imgDate: passportDate,
   },
 };
