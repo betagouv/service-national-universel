@@ -3,10 +3,7 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import Wrapper from "../Wrapper";
 import KnowledgeBasePublicSection from "./KnowledgeBasePublicSection";
-import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
-import KnowledgeBasePublicArticleOld from "./KnowledgeBasePublicArticleOld";
-import KnowledgeBasePublicArticlev2 from "./KnowledgeBasePublicArticleV2";
-import { environment } from "../../config";
+import KnowledgeBasePublicArticle from "./KnowledgeBasePublicArticle";
 
 const KnowledgeBasePublicContent = ({ item, isLoading }) => {
   const router = useRouter();
@@ -27,10 +24,10 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
       </Head>
       <div className="flex min-h-screen flex-col md:min-h-full">
         {(!item || isLoading) && loadingType ? (
-          <>{loadingType === "section" ? <KnowledgeBasePublicSection isLoading /> : <KnowledgeBasePublicArticlev2 isLoading />}</>
+          <>{loadingType === "section" ? <KnowledgeBasePublicSection isLoading /> : <KnowledgeBasePublicArticle isLoading />}</>
         ) : (
           <>
-            {item?.type === "article" && <KnowledgeBasePublicArticlev2 item={item} isLoading={isLoading} />}
+            {item?.type === "article" && <KnowledgeBasePublicArticle item={item} isLoading={isLoading} />}
             {item?.type === "section" && <KnowledgeBasePublicSection item={item} isLoading={isLoading} />}
           </>
         )}
