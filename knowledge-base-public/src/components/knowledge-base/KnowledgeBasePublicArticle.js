@@ -44,8 +44,8 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
       <section className="mx-auto flex max-w-[792px] flex-shrink flex-grow flex-col overflow-hidden px-4 text-gray-800 print:bg-transparent print:pb-12">
         <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
         <div className="py-4">
-          <h2 className="mb-6 text-[30px] font-bold md:text-5xl print:mb-0 print:text-black">{group?.title}</h2>
-          <h1 className="mb-6 text-[30px] font-bold md:text-5xl print:mb-0 print:text-black">{item?.title}</h1>
+          <h2 className="mb-6 text-3xl font-bold print:mb-0 print:text-black">{group?.title}</h2>
+          <h1 className="mb-6 text-3xl font-bold print:mb-0 print:text-black">{item?.title}</h1>
           <h6 className="text-base text-snu-purple-100 md:text-lg lg:text-xl print:text-black">{item?.description}</h6>
         </div>
         {item?.updatedAt && (
@@ -55,12 +55,14 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
               className="noprint mt-2 hidden cursor-pointer rounded-md border border-gray-300 bg-white px-4 py-3 font-normal text-black shadow-none md:block"
               onClick={window.print}
             >
-              🖨 Imprimer
+              <div className="flex justify-start">
+                <span className="material-icons w-[20px] text-[#374151] mr-3 text-[20px]">printer</span>
+                <p>Imprimer</p>
+              </div>
             </button>
           </span>
         )}
-
-        <div className="border-[rgba(0, 0, 0, 0.1)] mb-6 mt-4 w-full border-t-2"></div>
+        <hr className="mb-6 mt-4" />
         <TextEditor readOnly content={item.content} _id={item._id} slug={item.slug} />
         <ToastContainer />
         {!hasSubmitted && (
@@ -102,14 +104,16 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
                   <p className="inline-block h-5 w-48 self-end text-end text-xs font-medium leading-5 text-[#6B7280]">125 caractères maximum</p>
                 </div>
                 <textarea
-                  className={`h-24 w-full rounded-md border-2 ${!feedback.comment || feedback.comment?.length <= 125 ? "border-gray-200" : "border-[#EF4444]"
-                    } p-4 text-sm font-normal text-[#4B5563] focus:outline-none`}
+                  className={`h-24 w-full rounded-md border-2 ${
+                    !feedback.comment || feedback.comment?.length <= 125 ? "border-gray-200" : "border-[#EF4444]"
+                  } p-4 text-sm font-normal text-[#4B5563] focus:outline-none`}
                   placeholder="Ecrivez votre question ici..."
                   onChange={(e) => setFeedback({ ...feedback, comment: e.target.value })}
                 ></textarea>
                 <p
-                  className={`relative -mt-8 mb-8 mr-4 self-end text-end text-xs font-medium leading-6 ${!feedback.comment || feedback.comment?.length <= 125 ? "text-[#6B7280]" : "text-[#EF4444]"
-                    }`}
+                  className={`relative -mt-8 mb-8 mr-4 self-end text-end text-xs font-medium leading-6 ${
+                    !feedback.comment || feedback.comment?.length <= 125 ? "text-[#6B7280]" : "text-[#EF4444]"
+                  }`}
                 >
                   {feedback.comment?.length || 0}/125
                 </p>
@@ -133,7 +137,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
             <p className={`text-2xl font-light not-italic ${!feedback.isPositive ? "text-[#6B7280]" : "text-[#50B981]"}`}>Merci pour votre contribution !</p>
           </div>
         )}
-        <div className="border-[rgba(0, 0, 0, 0.1)] mt-8 mb-2 w-full border-t-2"></div>
+        <hr className="mb-6 mt-4" />
         <KnowledgeBasePublicNoAnswer />
       </section>
     </div>

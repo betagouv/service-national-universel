@@ -34,7 +34,7 @@ const InlineChromiumBugfix = () => (
 const LinkComponent = ({ attributes, children, element }) => {
   const selected = useSelected();
   return (
-    <a {...attributes} href={element.url} className={`${selected ? "border-2" : ""} text-blue-900 underline`}>
+    <a {...attributes} href={element.url} className={`${selected ? "border-2" : ""} text-blue-600 underline`}>
       <InlineChromiumBugfix />
       {children}
       <InlineChromiumBugfix />
