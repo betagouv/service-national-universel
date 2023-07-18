@@ -11,7 +11,6 @@ import Breadcrumbs from "../breadcrumbs";
 const defaultFeedback = { isPositive: true };
 
 const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
-  console.log("🚀 ~ file: KnowledgeBasePublicArticle.js:14 ~ KnowledgeBasePublicArticle ~ item:", item)
   const [feedback, setFeedback] = useState({ ...defaultFeedback });
   const [hasSubmitted, setSubmitted] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
