@@ -160,7 +160,7 @@ class Auth {
       const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
       const isKnownIp = await user.compareIps(ip);
       if (!user.userIps || user.userIps?.length === 0 || !isKnownIp) {
-        const token2FA = await crypto.randomBytes(20).toString("hex");
+        const token2FA = await crypto.randomInt(1000000);
         user.set({ token2FA, token2FAExpires: Date.now() + 1000 * 60 * 10 });
         await user.save();
 
