@@ -15,6 +15,8 @@ import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
 import { supportURL } from "../../config";
 import plausibleEvent from "../../services/plausible";
+import BannerJuly from "./BannerJuly";
+import ModalForm from "../../components/modals/ModalForm";
 import { useHistory } from "react-router-dom";
 
 const articles = [
@@ -146,6 +148,7 @@ const KnowledgeBaseArticleCard = ({ _id, position, title, slug, path, className 
 export default function Dashboard(props) {
   const [userTickets, setUserTickets] = useState(null);
   const fromPage = new URLSearchParams(props.location.search).get("from");
+  const [isOpen, setIsOpen] = useState(false);
   const history = useHistory();
 
   dayjs.extend(relativeTime).locale("fr");
@@ -237,10 +240,17 @@ export default function Dashboard(props) {
               <LinkButton
                 onClick={() => {
                   plausibleEvent("Besoin d'aide - Contacter quelqu'un");
-                  return history.push(`/besoin-d-aide/ticket?from=${fromPage}`);
+                  setIsOpen(true);
                 }}>
                 Contacter&nbsp;quelqu&apos;un
               </LinkButton>
+              <ModalForm
+                isOpen={isOpen}
+                onClose={() => {
+                  setIsOpen(false);
+                  history.push(`/besoin-d-aide/ticket?from=${fromPage}`);
+                }}
+              />{" "}
             </div>
           </div>
         </div>
@@ -333,6 +343,23 @@ const LinkButton = styled.a`
   transition: opacity 0.3s;
   :hover {
     cursor: pointer;
+    color: #fff;
+    background: #463bad;
+  }
+`;
+
+const InternalLink = styled(NavLink)`
+  max-width: 230px;
+  margin: 0.3rem;
+  background-color: #5245cc;
+  border: none;
+  border-radius: 5px;
+  padding: 12px 25px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  transition: opacity 0.3s;
+  :hover {
     color: #fff;
     background: #463bad;
   }

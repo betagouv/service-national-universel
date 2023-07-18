@@ -72,11 +72,6 @@ export default function TicketCreate(props) {
           initialValues={{ step0: null, step1: null, step2: null, message: "" }}
           validateOnChange={false}
           validateOnBlur={false}
-          onChange={(values) => {
-            if (values.step2?.id === "PHASE_1_WITHDRAWAL") {
-              plausibleEvent("Besoin d'aide - Desistement/Changement de sejour");
-            }
-          }}
           onSubmit={async (values) => {
             try {
               setLoading(true);
