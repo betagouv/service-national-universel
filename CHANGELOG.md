@@ -1,3 +1,16 @@
+# [1.313.0](https://github.com/betagouv/service-national-universel/compare/v1.312.0...v1.313.0) (2023-07-18)
+
+
+### Bug Fixes
+
+* **app:** Coquille dans le front ([#2811](https://github.com/betagouv/service-national-universel/issues/2811)) ([84c6029](https://github.com/betagouv/service-national-universel/commit/84c60292b404cbb999317e47b636fe03df008d30))
+* **app, api:** Réparer l'inscription ([#2808](https://github.com/betagouv/service-national-universel/issues/2808)) ([72339fb](https://github.com/betagouv/service-national-universel/commit/72339fb846bfa85b22d5d64f5e95161390eadb6d))
+
+
+### Features
+
+* **BDF front:** Modification de la page article ([#2809](https://github.com/betagouv/service-national-universel/issues/2809)) ([6048185](https://github.com/betagouv/service-national-universel/commit/6048185c6f16e6a9adc95d7fa4a81733cb8990b5))
+
 # [1.312.0](https://github.com/betagouv/service-national-universel/compare/v1.311.0...v1.312.0) (2023-07-17)
 
 
