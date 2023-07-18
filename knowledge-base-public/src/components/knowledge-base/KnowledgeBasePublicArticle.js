@@ -56,7 +56,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
               onClick={window.print}
             >
               <div className="flex justify-start">
-                <span className="material-icons w-[20px] text-[#374151] mr-3 text-[20px]">printer</span>
+                <span className="material-icons mr-3 w-[20px] text-[20px] text-[#374151]">printer</span>
                 <p>Imprimer</p>
               </div>
             </button>
@@ -68,23 +68,25 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
         {!hasSubmitted && (
           <>
             {feedback.isPositive && (
-              <div className="flex  h-48 w-full flex-col items-center justify-center bg-white print:bg-transparent print:pb-12">
+              <div className="my-12 flex h-[130px] w-full flex-col items-center justify-center bg-[#F3F4F6] print:bg-transparent print:pb-12">
                 <>
-                  <p className="text-2xl font-light not-italic text-gray-600">Cet article vous a été utile ?</p>
+                  <p className="text-[20px] mt-2 font-bold not-italic leading-7 text-gray-900">Cet article vous a été utile ?</p>
                 </>
-                <div className="mt-3 flex flex-row">
+                <div className="mt-4 mb-4 flex flex-row">
                   <div
                     id="ThumbsUp"
-                    className="mr-1 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 text-3xl font-medium hover:border-[#9CA3AF]"
+                    className="mr-6 flex px-20 h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] border-gray-200 text-3xl font-medium hover:border-[#9CA3AF]"
                     onClick={postFeedback}
                   >
-                    👍
+                    <span className="material-icons w-[20px] text-[20px] text-[#2563EB] text-[#374151]">thumb_up</span>
+                    <p className="ml-2 text-[16px] text-[#2563EB]">Oui</p>
                   </div>
                   <div
-                    className="ml-1 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 text-3xl font-medium hover:border-[#9CA3AF]"
+                    className="ml-1 flex px-20 h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] border-gray-200 text-3xl font-medium hover:border-[#9CA3AF]"
                     onClick={() => setFeedback({ ...feedback, isPositive: false })}
                   >
-                    👎
+                    <span className="material-icons w-[20px] text-[20px] text-[#2563EB] text-[#374151]">thumb_down</span>
+                    <p className="ml-2 text-[16px] text-[#2563EB]">Non</p>
                   </div>
                 </div>
               </div>
