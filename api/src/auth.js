@@ -161,7 +161,7 @@ class Auth {
       const isKnownIp = await user.compareIps(ip);
       if (!user.userIps || user.userIps?.length === 0 || !isKnownIp) {
         const token2FA = await crypto.randomInt(1000000);
-        user.set({ token2FA, token2FAExpires: Date.now() + 1000 * 60 * 10 });
+        user.set({ token2FA, attempts2FA: 0, token2FAExpires: Date.now() + 1000 * 60 * 10 });
         await user.save();
 
         await sendTemplate(SENDINBLUE_TEMPLATES.SIGNIN_2FA, {
@@ -203,14 +203,19 @@ class Auth {
       const { email, token_2fa } = value;
       const user = await this.model.findOne({
         email,
-        token2FA: token_2fa,
+        attempts2FA: { $lt: 3 },
         token2FAExpires: { $gt: Date.now() },
       });
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      if (user.token2FA !== token_2fa) {
+        user.set({ attempts2FA: (user.attempts2FA || 0) + 1 });
+        await user.save();
+        return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      }
 
       const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
       user.set({ userIps: [...user.userIps, ip], token2FA: null, token2FAExpires: null });
-      user.set({ loginAttempts: 0 });
+      user.set({ loginAttempts: 0, attempts2FA: 0 });
       user.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
       await user.save();
 
