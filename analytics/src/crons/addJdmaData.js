@@ -7,6 +7,7 @@ const Demarche = require("../models/demarche_JDMA");
 const { JDMA_LOGIN, JDMA_PASSWORD } = require("../config");
 let count = 0;
 let total = 0;
+const ONE_DAY_IN_MS = 86400000; // one day in milliseconds
 
 module.exports.handler = function () {
   // Sync the model with the database, this creates the table if it does not exist
@@ -24,8 +25,31 @@ module.exports.handler = function () {
 
       // Your dates
       const endDate = Date.now();
-      const startDate = endDate - 86400000;
-      const demarcheDate = new Date(startDate).toLocaleDateString("fr-FR");
+      const startDate = endDate - ONE_DAY_IN_MS;
+
+      function formatTimestamp(timestamp) {
+        const date = new Date(timestamp);
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+        const seconds = String(date.getSeconds()).padStart(2, "0");
+        const milliseconds = String(date.getMilliseconds()).padStart(3, "0");
+
+        const offsetMinutes = date.getTimezoneOffset();
+        const offsetSign = offsetMinutes < 0 ? "+" : "-";
+        const offsetHours = Math.floor(Math.abs(offsetMinutes) / 60)
+          .toString()
+          .padStart(2, "0");
+        const offsetMinutesFormatted = (Math.abs(offsetMinutes) % 60).toString().padStart(2, "0");
+
+        const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds} ${offsetSign}${offsetHours}${offsetMinutesFormatted}`;
+
+        return formattedDate;
+      }
+      const demarcheDate = formatTimestamp(startDate);
 
       // Fetch data for each demarche and insert it into the table
       const promises = demarches.map((demarche) => {

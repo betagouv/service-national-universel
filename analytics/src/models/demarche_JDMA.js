@@ -16,7 +16,7 @@ const Demarche = db.define(
     comprehensible_negative: DataTypes.INTEGER,
     comprehensible_neutral: DataTypes.INTEGER,
     comprehensible_positive: DataTypes.INTEGER,
-    demarcheDate: DataTypes.STRING,
+    demarcheDate: DataTypes.DATE,
   },
   {
     defaultScope: {
