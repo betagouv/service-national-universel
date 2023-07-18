@@ -26,29 +26,30 @@ const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
       </Head>
 
       {environment === "production" ? (
-        <div className="grid grid-cols-1 grid-rows-[auto,180px,auto]">
-          <div className="col-span-full row-span-2 row-start-1 bg-cover bg-center" style={{ backgroundImage: `url('/assets/hero.png')` }}>
-            <div className="h-full bg-snu-purple-900 bg-opacity-95">
-              <div className="ml-auto mr-auto max-w-screen-95 px-8 pb-[276px] pt-24">
-                <h1 className="mb-6 text-4xl font-bold text-white md:text-5xl lg:text-6xl">Base de connaissance</h1>
-                <h6 className="max-w-3xl text-base text-snu-purple-100 md:text-lg lg:text-xl">
-                  Retrouvez ici toutes les réponses à vos questions et les tutoriels d&apos;utilisation de la plateforme.
-                </h6>
+        <>
+          <div className="grid grid-cols-1 grid-rows-[auto,180px,auto]">
+            <div className="col-span-full row-span-2 row-start-1 bg-cover bg-center" style={{ backgroundImage: `url('/assets/hero.png')` }}>
+              <div className="h-full bg-snu-purple-900 bg-opacity-95">
+                <div className="ml-auto mr-auto max-w-screen-95 px-8 pb-[276px] pt-24">
+                  <h1 className="mb-6 text-4xl font-bold text-white md:text-5xl lg:text-6xl">Base de connaissance</h1>
+                  <h6 className="max-w-3xl text-base text-snu-purple-100 md:text-lg lg:text-xl">
+                    Retrouvez ici toutes les réponses à vos questions et les tutoriels d&apos;utilisation de la plateforme.
+                  </h6>
+                </div>
               </div>
             </div>
+            {(showLoading || !device) && <LoaderHomeOld />}
+            {!showLoading && <KnowledgeBasePublicSectionOld isRoot item={item} isLoading={showLoading} />}
           </div>
-          {(showLoading || !device) && <LoaderHomeOld />}
-          {!showLoading && <KnowledgeBasePublicSectionOld isRoot item={item} isLoading={showLoading} />}
-        </div>
+          <KnowledgeBasePublicNoAnswer />
+        </>
       ) : (
-        <div className="grid grid-cols-1 grid-rows-auto">
+        <div className="grid-rows-auto grid grid-cols-1">
           {(showLoading || !device) && <LoaderHome />}
           {!showLoading && <KnowledgeBasePublicSection isRoot item={item} device={device} isLoading={showLoading} />}
         </div>
       )}
-
-      <KnowledgeBasePublicNoAnswer />
-    </Wrapper >
+    </Wrapper>
   );
 };
 

@@ -3,14 +3,13 @@ import { useMemo, useState } from "react";
 import API from "../../services/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { snuApiUrl } from "../../config";
+import { environment, snuApiUrl } from "../../config";
 import { Button } from "../Buttons";
-import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 import Breadcrumbs from "../breadcrumbs";
 
 const defaultFeedback = { isPositive: true };
 
-const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
+const KnowledgeBasePublicArticleOld = ({ item, isLoading }) => {
   const [feedback, setFeedback] = useState({ ...defaultFeedback });
   const [hasSubmitted, setSubmitted] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
@@ -40,32 +39,35 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
 
   if (isLoading) return <ArticleLoader />;
   return (
-    <div className="w-full bg-white">
-      <section className="mx-auto flex max-w-[792px] flex-shrink flex-grow flex-col overflow-hidden px-4 text-gray-800 print:bg-transparent print:pb-12">
-        <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
-        <div className="py-4">
-          <h2 className="mb-6 text-3xl font-bold print:mb-0 print:text-black">{group?.title}</h2>
-          <h1 className="mb-6 text-3xl font-bold print:mb-0 print:text-black">{item?.title}</h1>
-          <h6 className="text-base text-snu-purple-100 md:text-lg lg:text-xl print:text-black">{item?.description}</h6>
-        </div>
-        {item?.updatedAt && (
+
+    <div className="wrapper mx-auto flex w-full flex-shrink flex-grow flex-col overflow-hidden bg-coolGray-100 print:bg-transparent  print:pb-12">
+      {environment === "production" ? (
+        null
+      ) : (
+        <>
+          <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
+          <div className="py-4">
+            <h2 className="mb-6 text-4xl font-bold md:text-5xl print:mb-0 print:text-black">{group?.title}</h2>
+            <h1 className="mb-6 text-4xl font-bold md:text-5xl print:mb-0 print:text-black">{item?.title}</h1>
+            <h6 className="text-base text-snu-purple-100 md:text-lg lg:text-xl print:text-black">{item?.description}</h6>
+          </div>
+        </>
+      )}
+      {
+        item?.updatedAt && (
           <span className="mb-4 ml-auto mt-2 flex flex-col items-end text-xs italic text-gray-400 print:mb-2 print:mt-0">
             {/* <em>Article mis à jour le {Intl.DateTimeFormat("fr-FR", { year: "numeric", month: "long", day: "numeric" }).format(new Date(item.updatedAt))}</em> */}
-            <button
-              className="noprint mt-2 hidden cursor-pointer rounded-md border border-gray-300 bg-white px-4 py-3 font-normal text-black shadow-none md:block"
-              onClick={window.print}
-            >
-              <div className="flex justify-start">
-                <span className="material-icons w-[20px] text-[#374151] mr-3 text-[20px]">printer</span>
-                <p>Imprimer</p>
-              </div>
+            <button className="noprint mt-2 cursor-pointer border border-gray-300 bg-gray-100 font-normal text-black shadow-none" onClick={window.print}>
+              🖨 Imprimer
             </button>
           </span>
-        )}
-        <hr className="mb-6 mt-4" />
-        <TextEditor readOnly content={item.content} _id={item._id} slug={item.slug} />
-        <ToastContainer />
-        {!hasSubmitted && (
+        )
+      }
+      <TextEditor readOnly content={item.content} _id={item._id} slug={item.slug} />
+      <div className="border-[rgba(0, 0, 0, 0.1)] mb-12 mt-10 w-full border-t-2"></div>
+      <ToastContainer />
+      {
+        !hasSubmitted && (
           <>
             {feedback.isPositive && (
               <div className="flex  h-48 w-full flex-col items-center justify-center bg-white print:bg-transparent print:pb-12">
@@ -75,13 +77,13 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
                 <div className="mt-3 flex flex-row">
                   <div
                     id="ThumbsUp"
-                    className="mr-1 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 text-3xl font-medium hover:border-[#9CA3AF]"
+                    className="hover:border-[#9CA3AF] mr-1 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 text-3xl font-medium"
                     onClick={postFeedback}
                   >
                     👍
                   </div>
                   <div
-                    className="ml-1 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 text-3xl font-medium hover:border-[#9CA3AF]"
+                    className="hover:border-[#9CA3AF] ml-1 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-2 border-gray-200 text-3xl font-medium"
                     onClick={() => setFeedback({ ...feedback, isPositive: false })}
                   >
                     👎
@@ -93,8 +95,8 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
               <div className="flex h-full w-full flex-col items-center justify-center bg-white pb-10 pl-24 pr-24 pt-10">
                 <h1 className="text-2xl font-light not-italic leading-8 text-gray-600">Aidez-nous à nous améliorer</h1>
                 <p className="mt-8 justify-center leading-5 text-gray-600 ">
-                  ⚠️ <span className="text-lg font-semibold text-gray-600">Rappel :</span> vous n&apos;obtiendrez pas de réponse à votre question, merci de ne pas inscrire
-                  d&apos;informations personnelles. Pour obtenir une aide personnalisée,{" "}
+                  ⚠️ <span className="text-lg font-semibold text-gray-600">Rappel :</span> vous n&apos;obtiendrez pas de réponse à votre question, merci de ne pas inscrire d&apos;informations
+                  personnelles. Pour obtenir une aide personnalisée,{" "}
                   <a href="https://www.snu.gouv.fr/nous-contacter/" className="text-snu-purple-200 " target="_blank" rel="noopener noreferrer">
                     <span className="font-semibold text-[#4F46E5] ">cliquez ici.</span>
                   </a>
@@ -104,16 +106,14 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
                   <p className="inline-block h-5 w-48 self-end text-end text-xs font-medium leading-5 text-[#6B7280]">125 caractères maximum</p>
                 </div>
                 <textarea
-                  className={`h-24 w-full rounded-md border-2 ${
-                    !feedback.comment || feedback.comment?.length <= 125 ? "border-gray-200" : "border-[#EF4444]"
-                  } p-4 text-sm font-normal text-[#4B5563] focus:outline-none`}
+                  className={`h-24 w-full rounded-md border-2 ${!feedback.comment || feedback.comment?.length <= 125 ? "border-gray-200" : "border-[#EF4444]"
+                    } p-4 text-sm font-normal text-[#4B5563] focus:outline-none`}
                   placeholder="Ecrivez votre question ici..."
                   onChange={(e) => setFeedback({ ...feedback, comment: e.target.value })}
                 ></textarea>
                 <p
-                  className={`relative -mt-8 mb-8 mr-4 self-end text-end text-xs font-medium leading-6 ${
-                    !feedback.comment || feedback.comment?.length <= 125 ? "text-[#6B7280]" : "text-[#EF4444]"
-                  }`}
+                  className={`relative -mt-8 mb-8 mr-4 self-end text-end text-xs font-medium leading-6 ${!feedback.comment || feedback.comment?.length <= 125 ? "text-[#6B7280]" : "text-[#EF4444]"
+                    }`}
                 >
                   {feedback.comment?.length || 0}/125
                 </p>
@@ -131,16 +131,16 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
               </div>
             )}
           </>
-        )}
-        {hasSubmitted && (
+        )
+      }
+      {
+        hasSubmitted && (
           <div className="flex h-24 w-full flex-col items-center justify-center bg-white print:bg-transparent print:pb-12">
             <p className={`text-2xl font-light not-italic ${!feedback.isPositive ? "text-[#6B7280]" : "text-[#50B981]"}`}>Merci pour votre contribution !</p>
           </div>
-        )}
-        <hr className="mb-6 mt-4" />
-        <KnowledgeBasePublicNoAnswer />
-      </section>
-    </div>
+        )
+      }
+    </div >
   );
 };
 
@@ -194,4 +194,4 @@ const ArticleLoader = () => (
   </div>
 );
 
-export default KnowledgeBasePublicArticle;
+export default KnowledgeBasePublicArticleOld;

@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import Wrapper from "../Wrapper";
 import KnowledgeBasePublicSection from "./KnowledgeBasePublicSection";
-import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 import KnowledgeBasePublicArticle from "./KnowledgeBasePublicArticle";
 
 const KnowledgeBasePublicContent = ({ item, isLoading }) => {
@@ -30,7 +29,6 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
           <>
             {item?.type === "article" && <KnowledgeBasePublicArticle item={item} isLoading={isLoading} />}
             {item?.type === "section" && <KnowledgeBasePublicSection item={item} isLoading={isLoading} />}
-            <KnowledgeBasePublicNoAnswer />
           </>
         )}
       </div>
