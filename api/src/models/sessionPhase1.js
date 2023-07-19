@@ -133,6 +133,21 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  pedagoProjectFiles: {
+    type: [File],
+    documentation: {
+      description: "Fichiers du projet pédagogique",
+    },
+  },
+  hasPedagoProject: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "La session possède au moins 1 fichier de projet pédagogique.",
+    },
+  },
+
   dateStart: {
     type: Date,
     documentation: {

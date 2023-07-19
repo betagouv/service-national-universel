@@ -116,6 +116,7 @@ const ListSession = ({ firstSession }) => {
     },
     { title: "Places restantes", name: "placesLeft", missingLabel: "Non renseignée" },
     { title: "Emploi du temps", name: "hasTimeSchedule", missingLabel: "Non renseignée", translate: translate },
+    { title: "Projet Pédagogique", name: "hasPedagoProject", missingLabel: "Non renseignée", translate: translate },
   ];
   if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code", missingLabel: "Non renseignée" });
 

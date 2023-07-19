@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Download from "../../../assets/icons/Download";
+import EmptyFileIcon from "../../../assets/icons/EmptyFileIcon";
 import { PlainButton, BorderButton } from "../../phase0/components/Buttons";
-import Cni from "../../../assets/icons/Cni";
-import ModalTimeSchedule from "./modals/ModalTimeSchedule";
+import ModalPedagoProject from "./modals/ModalPedagoProject";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -10,23 +10,23 @@ import queryString from "query-string";
 import { ROLES } from "snu-lib/roles";
 import { useSelector } from "react-redux";
 
-export default function TimeSchedule({ session, className = "", onSessionChanged }) {
+export default function PedagoProject({ session, className = "", onSessionChanged }) {
   const [modalOpened, setModalOpened] = useState(false);
   const currentUser = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
-    const { timeschedule } = queryString.parse(location.search);
-    if (timeschedule === "true") {
+    const { pedagoProject } = queryString.parse(location.search);
+    if (pedagoProject === "true") {
       setModalOpened(true);
     }
   }, []);
 
-  const hasTimeSchedule = session.timeScheduleFiles && session.timeScheduleFiles.length > 0;
+  const hasPedagoProject = session.pedagoProjectFiles && session.pedagoProjectFiles.length > 0;
 
   async function sendReminder() {
     if (session.headCenterId) {
       try {
-        const result = await api.post(`/session-phase1/${session._id}/time-schedule/send-reminder`, {});
+        const result = await api.post(`/session-phase1/${session._id}/pedago-project/send-reminder`, {});
         if (result.ok) {
           toastr.success("Le chef de centre a bien été relancé.");
         } else {
@@ -44,25 +44,25 @@ export default function TimeSchedule({ session, className = "", onSessionChanged
   return (
     <div className={`items-center justify-center ${className}`}>
       <div className="flex items-center rounded-lg bg-gray-50 p-9">
-        <Cni />
+        <EmptyFileIcon />
         <div className="grow-1 mx-7">
           <div className="text-sm font-bold text-[#242526]">
-            Emploi du temps du séjour : <span className="font-normal">{hasTimeSchedule ? "Déposé" : "Non déposé"}</span>
+            Projet pédagogique : <span className="font-normal">{hasPedagoProject ? "Déposé" : "Non déposé"}</span>
           </div>
           <div className="flex gap-2">
-            {!hasTimeSchedule && [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && (
+            {!hasPedagoProject && [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && (
               <BorderButton className="mt-3" onClick={sendReminder} mode={"blue"}>
                 Relancer le chef de centre
               </BorderButton>
             )}
             <PlainButton className="mt-3" onClick={() => setModalOpened(true)}>
               <Download />
-              &#xA0;{hasTimeSchedule ? "Télécharger le(s) document(s)" : "Téléverser"}
+              &#xA0;{hasPedagoProject ? "Télécharger le(s) document(s)" : "Téléverser"}
             </PlainButton>
           </div>
         </div>
       </div>
-      {modalOpened && <ModalTimeSchedule session={session} onCancel={() => setModalOpened(false)} onChanged={onSessionChanged} />}
+      {modalOpened && <ModalPedagoProject session={session} onCancel={() => setModalOpened(false)} onChanged={onSessionChanged} />}
     </div>
   );
 }

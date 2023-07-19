@@ -380,7 +380,7 @@ const SENDINBLUE_TEMPLATES = {
     PARENT2_IMAGERIGHT_REMINDER: "852",
   },
   headCenter: {
-    TIME_SCHEDULE_REMINDER: "697",
+    FILE_SESSION_REMINDER: "1232",
   },
   PLAN_TRANSPORT: {
     MODIFICATION_REFUSEE: "673",
@@ -611,6 +611,8 @@ const FILE_KEYS = [
 ];
 
 const MILITARY_FILE_KEYS = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
+
+const SESSION_FILE_KEYS = ["time-schedule", "pedago-project"];
 
 const ENGAGEMENT_TYPES = [
   "Service Civique",
@@ -854,6 +856,7 @@ export {
   MINISTRES,
   FILE_KEYS,
   MILITARY_FILE_KEYS,
+  SESSION_FILE_KEYS,
   ENGAGEMENT_TYPES,
   UNSS_TYPE,
   ENGAGEMENT_LYCEEN_TYPES,
