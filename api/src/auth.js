@@ -21,7 +21,6 @@ class Auth {
     try {
       const { error, value } = Joi.object({
         email: Joi.string().lowercase().trim().email().required(),
-        emailVerified: Joi.boolean().required(),
         firstName: validateFirstName().trim().required(),
         lastName: Joi.string().uppercase().trim().required(),
         password: Joi.string().required(),
@@ -50,7 +49,6 @@ class Auth {
 
       const {
         email,
-        emailVerified,
         firstName,
         lastName,
         password,
@@ -85,7 +83,6 @@ class Auth {
 
       const user = await this.model.create({
         email,
-        emailVerified,
         firstName,
         lastName,
         password,
@@ -105,6 +102,7 @@ class Auth {
         cohort,
         grade,
         inscriptionStep2023: STEPS2023.COORDONNEES,
+        emailVerified: "false",
       });
       const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_MAX_AGE });
       if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions());
@@ -160,9 +158,16 @@ class Auth {
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       }
 
-      const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
-      const isKnownIp = await user.compareIps(ip);
-      if (user.emailVerified !== false && (!user.userIps || user.userIps?.length === 0 || !isKnownIp)) {
+      const shouldUse2FA = async () => {
+        if (user.emailVerified === "false") return false;
+        const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
+        const isKnownIp = await user.compareIps(ip);
+        return !user.userIps || user.userIps?.length === 0 || !isKnownIp;
+      };
+
+      const use2FA = await shouldUse2FA();
+
+      if (use2FA) {
         const token2FA = await crypto.randomBytes(20).toString("hex");
         user.set({ token2FA, token2FAExpires: Date.now() + 1000 * 60 * 10 });
         await user.save();

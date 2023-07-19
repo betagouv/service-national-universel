@@ -171,9 +171,9 @@ const Schema = new mongoose.Schema({
     },
   },
   emailVerified: {
-    type: Boolean,
+    type: String,
     documentation: {
-      description: "L'utilisateur a validé son email: 2FA possible",
+      description: "L'utilisateur a validé son email : 2FA possible",
     },
   },
   phone: {
