@@ -21,7 +21,7 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    if (!canViewEmailHistory(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (!canViewEmailHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const data = await EmailObject.find({ email }).sort("-date");
     return res.status(200).send({ ok: true, data: data.map((e) => serializeEmail(e)) });
   } catch (error) {
@@ -38,7 +38,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canViewEmailHistory(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewEmailHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Get email from db
     const mail = await EmailObject.findById(value);

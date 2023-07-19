@@ -16,7 +16,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const sortFields = [];
 
     // Authorization
-    if (!canSearchInElasticSearch(req.user, "modificationbus")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(req.user, "modificationbus")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
     const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });

@@ -5,7 +5,7 @@ import useUser from "../hooks/useUser";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import { useSWRConfig } from "swr";
 import API from "../services/api";
-import KnowledgeBaseSearch from "./knowledge-base/KnowledgeBaseSearch";
+import KnowledgeBaseSearch from "./knowledge-base/KnowledgeBaseSearchOld";
 import { useRouter } from "next/router";
 import ProfileButton from "./ProfileButton";
 import { Popover } from "@headlessui/react";
@@ -199,7 +199,7 @@ const Wrapper = ({ children }) => {
           </p>
         </div>
       )}
-      <main className="bg-[#F3F4F6] print:bg-transparent">{children}</main>
+      <main className="bg-gray-100 print:bg-transparent">{children}</main>
       <Footer />
     </>
   );

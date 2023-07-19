@@ -102,7 +102,7 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       ...validateCorrectionRequest(young, keyList),
     };
 
-    if (!canUpdateYoungStatus({ body: update, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: update, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const formatedDate = new Date(update.birthdateAt);
     formatedDate.setUTCHours(11, 0, 0, 0);
@@ -247,7 +247,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       value = { ...value, ...validateCorrectionRequest(young, keyList) };
     }
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
       ...value,
@@ -300,7 +300,7 @@ router.put("/consentement", passport.authenticate("young", { session: false, fai
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
       acceptCGU: "true",
@@ -351,7 +351,7 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       const keyList = Object.keys(representantSchema(false));
       value = { ...value, ...validateCorrectionRequest(young, keyList) };
     }
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set(value);
     await young.save({ fromUser: req.user });
@@ -385,7 +385,7 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },
@@ -406,7 +406,7 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
 router.put("/changeCohort", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023").required(),
+      cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC").required(),
     }).validate(req.body, { stripUnknown: true });
 
     if (error) {
@@ -416,7 +416,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Check inscription goals
     const sessions = await getFilteredSessions(young);
@@ -481,7 +481,7 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
       }
 
       let data = { ...value, ...validateCorrectionRequest(young, ["latestCNIFileExpirationDate", "cniFile"]) };
-      if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       const CNIFileNotValidOnStart = data.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort];
       young.set({ ...data, CNIFileNotValidOnStart });
     }
@@ -517,7 +517,7 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },
@@ -583,7 +583,7 @@ router.put("/profil", passport.authenticate("young", { session: false, failWithE
     const keyList = Object.keys(profilSchema);
     let data = { ...value, ...validateCorrectionRequest(young, keyList) };
 
-    if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set(data);
     await young.save({ fromUser: req.user });

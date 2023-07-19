@@ -1,6 +1,6 @@
 import React from "react";
 import LoaderSection from "../LoaderSectionOld";
-import LoaderArticle from "../LoaderArticle";
+import LoaderArticle from "../LoaderArticleOld";
 
 const LoaderHome = () => {
   return (

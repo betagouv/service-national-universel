@@ -5,11 +5,14 @@ const passwordValidator = require("password-validator");
 const sanitizeHtml = require("sanitize-html");
 const YoungModel = require("../models/young");
 const PlanTransportModel = require("../models/PlanDeTransport/planTransport");
+const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
 const ContractObject = require("../models/contract");
 const SessionPhase1 = require("../models/sessionPhase1");
+const CohortModel = require("../models/cohort");
+const { getDepartureDate } = require("snu-lib");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
@@ -598,8 +601,6 @@ async function addingDayToDate(days, dateStart) {
   try {
     const startDate = new Date(dateStart);
     const newDate = addDays(startDate, days);
-    newDate.setUTCHours(23);
-    newDate.setUTCMinutes(59);
     const formattedValidationDate = newDate.toISOString();
 
     return formattedValidationDate;
@@ -609,31 +610,29 @@ async function addingDayToDate(days, dateStart) {
 }
 
 // @todo : à clean sans les terminales
-async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) {
-  const dateStartForSpecialSession = sessionPhase1.dateStart;
+async function autoValidationSessionPhase1Young({ young, sessionPhase1, cohort, user }) {
+  let youngCohort = cohort;
+  if (!cohort) {
+    youngCohort = await CohortModel.findOne({ name: young.cohort });
+  }
   const {
     daysToValidate: daysToValidate,
     daysToValidateForTerminalGrade: daysToValidateForTerminalGrade,
     validationDate: dateDeValidation,
     validationDateForTerminaleGrade: dateDeValidationTerminale,
-    dateStart: cohortDateStart,
+    dateStart: dateStartcohort,
   } = await getCohortDateInfo(sessionPhase1.cohort);
 
   // Ici on regarde si la session à des date spécifique sinon on garde la date de la cohort
-  const dateStart = dateStartForSpecialSession === undefined ? cohortDateStart : dateStartForSpecialSession;
-
-  if (!dateDeValidation || !dateDeValidationTerminale) {
-    throw new Error("❌ validationDate & validationDateForTerminaleGrade missing on cohort " + sessionPhase1.cohort);
-  }
-  if (!daysToValidate || !daysToValidateForTerminalGrade) {
-    throw new Error("❌ validationDate & validationDateForTerminaleGrade missing on cohort " + sessionPhase1.cohort);
-  }
+  const bus = await LigneBusModel.findById(young.ligneId);
+  const dateStart = getDepartureDate(young, sessionPhase1, youngCohort, { bus });
   const isTerminale = young?.grade === "Terminale";
   // cette constante nous permet d'avoir la date de validation d'un séjour en fonction du grade d'un Young
   const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
   // cette constante nous permet d'avoir le nombre de jour nécessaire à la validation d'un séjour en fonction du grade d'un Young
   const days = isTerminale ? daysToValidateForTerminalGrade : daysToValidate;
   const validationDateWithDays = await addingDayToDate(days, dateStart);
+
   if (young.cohort === "Juin 2023") {
     await updateStatusPhase1WithSpecificCase(young, validationDate, user);
   } else if (young.cohort === "Juillet 2023") {
@@ -641,6 +640,7 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) 
   } else {
     await updateStatusPhase1(young, validationDate, isTerminale, user);
   }
+  return { dateStart, days, validationDateWithDays, dateStartcohort };
 }
 
 async function updateStatusPhase1(young, validationDate, isTerminale, user) {
@@ -681,37 +681,39 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
 }
 
 async function updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithDays, user) {
+  const initialState = young.statusPhase1;
   try {
     const now = new Date();
     const validationDate = new Date(validationDateWithDays);
+    // due to a bug the timezone may vary between french and UTC time
+    validationDate.setHours(validationDate.getHours() - 2);
     // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
     const isValidationDatePassed = now >= validationDate;
     // Cette constante nous permet de vérifier si un jeune était présent au début du séjour (exception pour cette cohorte : pas besoin de JDM)(basé sur son grade)
     const isCohesionStayValid = young.cohesionStayPresence === "true";
     // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
-    const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt > validationDate);
-
+    const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt >= validationDate);
     // On valide la phase 1 si toutes les condition sont réunis. Une exception : le jeune a été exclu.
     if (isValidationDatePassed) {
-      if (isValidationDatePassed && isCohesionStayValid && isDepartureDateValid) {
-        if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
+      if (isCohesionStayValid && isDepartureDateValid) {
+        if (young?.departSejourMotif === "Exclusion") {
           young.set({ statusPhase1: "NOT_DONE" });
         } else {
           young.set({ statusPhase1: "DONE" });
         }
       } else {
         // Sinon on ne valide pas sa phase 1.
-        if (young?.departSejourMotif) {
-          young.set({ statusPhase1: "NOT_DONE" });
-        } else if (young.cohesionStayPresence !== "false") {
+        // Inclut les jeunes avec départs séjour motifs avant le 8ème jour de présence
+        if (!young.cohesionStayPresence) {
           young.set({ statusPhase1: "AFFECTED" });
         } else {
           young.set({ statusPhase1: "NOT_DONE" });
         }
       }
     }
-
-    await young.save({ fromUser: user });
+    if (initialState !== young.statusPhase1) {
+      await young.save({ fromUser: user });
+    }
   } catch (e) {
     console.log(e);
     capture(e);

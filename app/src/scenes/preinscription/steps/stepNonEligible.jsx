@@ -12,7 +12,7 @@ import SignupButtonContainer from "../../../components/inscription/SignupButtonC
 export default function NonEligible() {
   const history = useHistory();
   // eslint-disable-next-line no-unused-vars
-  const [_, __, removePersistedData] = useContext(PreInscriptionContext);
+  const [data, __, removePersistedData] = useContext(PreInscriptionContext);
 
   const engagementPrograms = [
     {
@@ -49,10 +49,28 @@ export default function NonEligible() {
     history.push("/");
   };
 
+  const isEligibleByAge = data.birthDate > new Date(2005, 9, 24) && data.birthDate < new Date(2008, 6, 10);
+
   return (
     <DSFRContainer>
-      <h1 className="text-[22px] font-bold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
-      {_.msg && <div className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">{_.msg}</div>}
+      {isEligibleByAge ? (
+        <>
+          <h1 className="text-[22px] font-bold">Il n’y a pas de séjour proposé dans votre zone géographique.</h1>
+          <p className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">
+            Soyez informé(e) de l’ouverture des inscriptions pour les prochaines sessions SNU via le lien suivant :{" "}
+            <a href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:decoration-2 hover:underline hover:text-gray-800">
+              snu.gouv.fr
+            </a>
+            .
+          </p>
+        </>
+      ) : (
+        <>
+          <h1 className="text-[22px] font-bold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
+          {data.msg && <div className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">{data.msg}</div>}
+        </>
+      )}
+
       <div className="my-4 text-base font-bold">Découvrez d’autres formes d’engagement</div>
       <div className="flex gap-8 overflow-x-auto md:grid md:grid-cols-2">
         {engagementPrograms.map((program, index) => (

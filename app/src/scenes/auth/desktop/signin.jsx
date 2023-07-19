@@ -73,11 +73,12 @@ export default function Signin() {
     if (email && password) setDisabled(false);
     else setDisabled(true);
   }, [email, password]);
+
   return (
     <div className="flex bg-[#F9F6F2] py-6">
-      <div className="mx-auto my-0 basis-[50%] bg-white px-[102px] py-[60px]">
+      <div className="mx-auto w-full bg-white px-[1rem] py-[2rem] shadow-sm md:w-[56rem] md:px-[6rem] md:pt-[4rem]">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <div className="mb-1 text-[32px] font-bold text-[#161616]">Me connecter</div>
+        <div className="mb-2 text-[32px] font-bold text-[#161616]">Me connecter</div>
         <div className="mb-2 flex items-center gap-4">
           <RightArrow />
           <div className="text-[21px] font-bold text-[#161616]">Mon espace volontaire</div>

@@ -72,7 +72,7 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
       schoolType: "",
@@ -134,6 +134,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
           "Avril 2023 - A",
           "Juin 2023",
           "Juillet 2023",
+          "Octobre 2023 - NC",
           "Juillet 2022",
           "Juin 2022",
           "Février 2022",
@@ -144,7 +145,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
           "à venir",
         )
         .required(),
-      cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023").required(),
+      cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC").required(),
       cohortChangeReason: Joi.string().trim().required(),
     }).validate(req.body, { stripUnknown: true });
 
@@ -155,7 +156,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const sessions = await getFilteredSessions(young);
     const session = sessions.find(({ name }) => name === value.cohort);
@@ -202,7 +203,7 @@ router.put("/consentement", passport.authenticate("young", { session: false, fai
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
       acceptCGU: "true",

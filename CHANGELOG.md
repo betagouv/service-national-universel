@@ -1,3 +1,88 @@
+# [1.313.0](https://github.com/betagouv/service-national-universel/compare/v1.312.0...v1.313.0) (2023-07-18)
+
+
+### Bug Fixes
+
+* **app:** Coquille dans le front ([#2811](https://github.com/betagouv/service-national-universel/issues/2811)) ([84c6029](https://github.com/betagouv/service-national-universel/commit/84c60292b404cbb999317e47b636fe03df008d30))
+* **app, api:** Réparer l'inscription ([#2808](https://github.com/betagouv/service-national-universel/issues/2808)) ([72339fb](https://github.com/betagouv/service-national-universel/commit/72339fb846bfa85b22d5d64f5e95161390eadb6d))
+
+
+### Features
+
+* **BDF front:** Modification de la page article ([#2809](https://github.com/betagouv/service-national-universel/issues/2809)) ([6048185](https://github.com/betagouv/service-national-universel/commit/6048185c6f16e6a9adc95d7fa4a81733cb8990b5))
+
+# [1.312.0](https://github.com/betagouv/service-national-universel/compare/v1.311.0...v1.312.0) (2023-07-17)
+
+
+### Bug Fixes
+
+* **app:** move non eligible page from space ([462e1da](https://github.com/betagouv/service-national-universel/commit/462e1daf10f665c672df91dbc58472d9c7e5aeed))
+* **app:** not eligible blank page ([30289c9](https://github.com/betagouv/service-national-universel/commit/30289c93adbc61c267a3fc4ae88f5793a9450779))
+* **kb:** home prod ([00670e0](https://github.com/betagouv/service-national-universel/commit/00670e08f016f3e8784a4f10340e60232a203b3f))
+
+
+### Features
+
+* **kb:** New breadcrumbs (staging only) ([#2805](https://github.com/betagouv/service-national-universel/issues/2805)) ([97f8b3d](https://github.com/betagouv/service-national-universel/commit/97f8b3dd64c0c9da8a30bb48b882298bca658dff))
+* **kb:** New breadcrumbs and section title (staging only) ([#2804](https://github.com/betagouv/service-national-universel/issues/2804)) ([f26f3a2](https://github.com/betagouv/service-national-universel/commit/f26f3a2c63c98554c1c6ea69aa1cf6c1a9bcbc73))
+
+# [1.311.0](https://github.com/betagouv/service-national-universel/compare/v1.310.0...v1.311.0) (2023-07-15)
+
+
+### Features
+
+* **app:** Add sentry replays ([8114112](https://github.com/betagouv/service-national-universel/commit/8114112844c8737f2d37fcfcafde5346b90e695c))
+
+# [1.310.0](https://github.com/betagouv/service-national-universel/compare/v1.309.1...v1.310.0) (2023-07-14)
+
+
+### Bug Fixes
+
+* **app:** Bug Sentry ([d66ce6e](https://github.com/betagouv/service-national-universel/commit/d66ce6eabcdce24d1f079a9ff7a665c29a519bf8))
+* **app:** Fic bug on upload files while doing tickets ([4410be7](https://github.com/betagouv/service-national-universel/commit/4410be770640dfaeb86f3cdaa30f317219793d1c))
+
+
+### Features
+
+* **all:** Put 403 back (Baleen fixed it) ([1d33d55](https://github.com/betagouv/service-national-universel/commit/1d33d55f811733e3a977997b401e94af0a63b108))
+
+## [1.309.1](https://github.com/betagouv/service-national-universel/compare/v1.309.0...v1.309.1) (2023-07-13)
+
+
+### Bug Fixes
+
+* **api:** validation date ([832858f](https://github.com/betagouv/service-national-universel/commit/832858f3a7cc879ceabaa041f6e6e0b1f1d6d663))
+* **api:** validation errors due to timezone ([6b9d50b](https://github.com/betagouv/service-national-universel/commit/6b9d50b4173195aeacc382a720a744aded9c29a6))
+
+# [1.309.0](https://github.com/betagouv/service-national-universel/compare/v1.308.1...v1.309.0) (2023-07-12)
+
+
+### Bug Fixes
+
+* **api:** add departureDate for Drom-Tom young ([#2800](https://github.com/betagouv/service-national-universel/issues/2800)) ([950de07](https://github.com/betagouv/service-national-universel/commit/950de07582f211516157eb0723f9d3125ba86f5e))
+* **api:** dsnj departure date ([b3c4330](https://github.com/betagouv/service-national-universel/commit/b3c4330966a8ec2d3b3e73cbc8b6c4eb3ff853f0))
+* **kb:** add heroicons import ([fa92446](https://github.com/betagouv/service-national-universel/commit/fa924463817681edc3e24a7de723aa229818a959))
+* **kb:** explicitly pass open prop to transition ([d79711c](https://github.com/betagouv/service-national-universel/commit/d79711c3483f5dcb7af297c33234ff787134fcc5))
+* **kb:** give default value to transition open prop ([234d058](https://github.com/betagouv/service-national-universel/commit/234d058e24243e68771c02ee5cacfb65d721705f))
+* **kb:** old search bar in prod ([0542eaf](https://github.com/betagouv/service-national-universel/commit/0542eaf7e0ac0991e870ffc985ed91219629bb75))
+* **kb:** temporarily disable transition on search bar ([f215a04](https://github.com/betagouv/service-national-universel/commit/f215a041e3ee7f896822b28ba6fcb8cd485b85c8))
+* **lib:** redirection ouverte better logic ([#2801](https://github.com/betagouv/service-national-universel/issues/2801)) ([d241492](https://github.com/betagouv/service-national-universel/commit/d2414920feac8e87ebf9ff952250c2b5d198fc78))
+
+
+### Features
+
+* **kb:** New search bar (staging only) ([#2793](https://github.com/betagouv/service-national-universel/issues/2793)) ([b9b9ac2](https://github.com/betagouv/service-national-universel/commit/b9b9ac2e687a286fe7864585038c3ceac1695077))
+
+## [1.308.1](https://github.com/betagouv/service-national-universel/compare/v1.308.0...v1.308.1) (2023-07-11)
+
+
+### Bug Fixes
+
+* **admin/app:** bug spam error sentry ([6ff24b9](https://github.com/betagouv/service-national-universel/commit/6ff24b9e4ff931d2549e5cc8b5182da44027e930))
+* **app, admin:** vite - pre-bundle sentry + lib ([c287ad3](https://github.com/betagouv/service-national-universel/commit/c287ad33d05bf2f2dbb232429cb423d5898f1511))
+* add --force argument to vite command ([f63b5b8](https://github.com/betagouv/service-national-universel/commit/f63b5b815ad14fabb68228677038eb173b772fe4))
+* **admin:** Mettre à jour les dates de séjour pour les attestation Phase1 de Juillet  ([#2789](https://github.com/betagouv/service-national-universel/issues/2789)) ([5c3330a](https://github.com/betagouv/service-national-universel/commit/5c3330aefdaa4a0a372b82f87f40e0a41c7c0ac8))
+
 # [1.308.0](https://github.com/betagouv/service-national-universel/compare/v1.307.1...v1.308.0) (2023-07-10)
 
 

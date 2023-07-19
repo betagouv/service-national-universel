@@ -75,7 +75,7 @@ router.post("/team/:action(search|export)", passport.authenticate(["referent"], 
     const sortFields = [];
 
     // Authorization
-    if (!canSearchInElasticSearch(user, "referent")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
     const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
@@ -128,7 +128,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt", "lastLoginAt"];
 
     // Authorization
-    if (!canSearchInElasticSearch(user, "referent")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
     const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
@@ -180,7 +180,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
 router.post("/structure/:structure", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (!canSearchInElasticSearch(req.user, "referent")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(req.user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const response = await esClient.msearch({
       index: "referent",

@@ -38,7 +38,7 @@ const AccountSpecialSituationsPage = () => {
             )}
             <Checkbox label="J'ai besoin d'un aménagement pour mobilité réduite" name="reducedMobilityAccess" value={values.reducedMobilityAccess} disabled useCheckedAsValue />
             <Checkbox
-              label="J'ai besoin dêtre affecté(e) dans un centre de mon département de résidence"
+              label="J'ai besoin d'être affecté(e) dans un centre de mon département de résidence"
               name="handicapInSameDepartment"
               value={values.handicapInSameDepartment}
               disabled

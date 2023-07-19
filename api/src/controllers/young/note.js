@@ -111,7 +111,7 @@ router.put("/:youngId/:noteId", passport.authenticate("referent", { session: fal
     }
 
     if (updatedNote.referent._id.toString() !== req.user._id.toString()) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const updatedNotes = young.notes.map((currentNote) => {
@@ -156,7 +156,7 @@ router.delete("/:youngId/:noteId", passport.authenticate("referent", { session: 
     }
 
     if (deletedNote.referent._id.toString() !== req.user._id.toString()) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const updatedNotes = young.notes.filter((currentNote) => !(currentNote._id.toString() === noteId));

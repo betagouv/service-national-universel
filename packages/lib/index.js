@@ -38,7 +38,7 @@ function inscriptionModificationOpenForYoungs(cohort, young, env) {
     case "Avril 2023 - B":
       return new Date() < new Date(2023, 1, 28, 23, 59); // before 28 fevrier 2023 23h59
     case "Juin 2023":
-      return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023 - A modifier quand on connaitra la date.
+      return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023.
     case "Juillet 2023":
       if (young && regionAndDepartments.isFromFrenchPolynesia(young)) {
         return new Date() < new Date(2023, 5, 1, 23, 59); // before 1 june 2023
@@ -47,10 +47,12 @@ function inscriptionModificationOpenForYoungs(cohort, young, env) {
         return new Date() < new Date(2023, 4, 21, 23, 59); // before 22 mai 2023
       }
       return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023
+    case "Octobre 2023 - NC":
+      return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023
     case "à venir":
       return false;
     default:
-      return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023
+      return new Date() < new Date(2023, 9, 1, 23, 59); // before 1 september 2023 @todo: A modifier quand on connaitra la date
   }
 }
 

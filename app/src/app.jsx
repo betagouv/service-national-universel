@@ -74,6 +74,7 @@ export default function App() {
             <Switch>
               {/* Aucune authentification nécessaire */}
               <SentryRoute path="/preinscription" component={PreInscription} />
+              <SentryRoute path="/noneligible" component={NonEligible} />
               <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
               <SentryRoute path="/validate-contract/done" component={ContractDone} />
               <SentryRoute path="/validate-contract" component={Contract} />
@@ -209,7 +210,7 @@ const Espace = () => {
     else return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}&disconnected=1` : "", pathname: "/auth" }} />;
   }
 
-  if (young.status === YOUNG_STATUS.NOT_ELIGIBLE) return <Redirect to="/noneligible" />;
+  if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
   const forceRedirectReinscription = young.reinscriptionStep2023 && young.reinscriptionStep2023 !== "DONE";
   if (forceRedirectReinscription) return <Redirect to="/reinscription" />;
@@ -228,7 +229,6 @@ const Espace = () => {
         <Switch>
           <SentryRoute exact path="/" component={Home} />
           <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
-          <SentryRoute path="/noneligible" component={NonEligible} />
           <SentryRoute path="/reinscription" component={ReInscription} />
           <SentryRoute path="/account" component={Account} />
           <SentryRoute path="/phase1" component={Phase1} />
