@@ -6,7 +6,6 @@ const fetch = require("node-fetch");
 const Demarche = require("../models/demarche_JDMA");
 const { JDMA_LOGIN, JDMA_PASSWORD } = require("../config");
 let count = 0;
-let total = 0;
 const ONE_DAY_IN_MS = 86400000; // one day in milliseconds
 
 module.exports.handler = function () {
@@ -15,7 +14,6 @@ module.exports.handler = function () {
     .then(() => {
       console.log("Demarche table has been successfully created, if it did not exist");
 
-      // Your demarches array
       const demarches = [
         { id: 3507, nom: "Inscrire sa structure sur la plateforme du Service National Universel" },
         { id: 3508, nom: "Proposer une mission d'intérêt général sur la plateforme du Service National Universel" },
@@ -23,9 +21,10 @@ module.exports.handler = function () {
         { id: 3504, nom: "Valider sa participation au séjour de cohésion du Service National Universel" },
       ];
 
-      // Your dates
-      const endDate = Date.now();
-      const startDate = endDate - ONE_DAY_IN_MS;
+      // Minus one day is because the API JDMA fetch all the data of the day and the CRON is at 02h
+      const endDate = Date.now() - ONE_DAY_IN_MS;
+      // 1 minute is enough because the range of the date doesn't matter as it gives all the data for the day
+      const startDate = endDate - 60000;
 
       function formatTimestamp(timestamp) {
         const date = new Date(timestamp);
@@ -38,14 +37,10 @@ module.exports.handler = function () {
         const seconds = String(date.getSeconds()).padStart(2, "0");
         const milliseconds = String(date.getMilliseconds()).padStart(3, "0");
 
-        const offsetMinutes = date.getTimezoneOffset();
-        const offsetSign = offsetMinutes < 0 ? "+" : "-";
-        const offsetHours = Math.floor(Math.abs(offsetMinutes) / 60)
-          .toString()
-          .padStart(2, "0");
-        const offsetMinutesFormatted = (Math.abs(offsetMinutes) % 60).toString().padStart(2, "0");
+        const offsetHours = "02";
+        const offsetMinutes = "00";
 
-        const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds} ${offsetSign}${offsetHours}${offsetMinutesFormatted}`;
+        const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds} +${offsetHours}${offsetMinutes}`;
 
         return formattedDate;
       }
@@ -53,7 +48,6 @@ module.exports.handler = function () {
 
       // Fetch data for each demarche and insert it into the table
       const promises = demarches.map((demarche) => {
-        total++;
         const url = `https://observatoire.numerique.gouv.fr/rest/observatoire/avistats/aggregatebyday/demarche/${demarche.id}?media=json&question=easy&question=satisfaction&question=comprehensible&date_start=${startDate}&date_end=${endDate}`;
         const headers = { Authorization: "Basic " + Buffer.from(`${JDMA_LOGIN}:${JDMA_PASSWORD}`).toString("base64") };
 
@@ -81,7 +75,7 @@ module.exports.handler = function () {
       });
       Promise.all(promises)
         .then(() => {
-          slack.success({ title: "JDMA synchronization", text: `${count}/${total} demarches have been successfully synchronized!` });
+          slack.success({ title: "JDMA synchronization", text: `${count}/4 demarches have been successfully synchronized!` });
         })
         .catch((e) => {
           capture(e);
