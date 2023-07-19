@@ -145,7 +145,6 @@ describe("Young", () => {
       await createYoungHelper({ ...fixture, email });
       res = await request(getAppHelper()).post("/young/signup").send({
         email: fixture.email,
-        emailVerified: false,
         firstName: "foo",
         lastName: "bar",
         password: VALID_PASSWORD,
