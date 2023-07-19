@@ -554,11 +554,15 @@ function canViewStructureChildren(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
 }
 
-function canDownloadYoungDocuments(actor, target, _applications) {
-  return (
-    canEditYoung(actor, target) || [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role)
-    // && applications?.length
-  );
+function canDownloadYoungDocuments(actor, target, type = null, _applications) {
+  if (type === "certificate" || type === "convocation") {
+    return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
+  } else {
+    return (
+      canEditYoung(actor, target) || [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role)
+      // && applications?.length
+    );
+  }
 }
 
 function canInviteYoung(actor) {
