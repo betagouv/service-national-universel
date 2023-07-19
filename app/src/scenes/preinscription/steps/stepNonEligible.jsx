@@ -49,7 +49,7 @@ export default function NonEligible() {
     history.push("/");
   };
 
-  const isEligibleByAge = data.birthDate > new Date(2005, 9, 24) && data.birthDate < new Date(2008, 6, 10);
+  const isEligibleByAge = data.birthDate > new Date(2005, 10, 21) && data.birthDate < new Date(2008, 10, 10);
 
   return (
     <DSFRContainer>

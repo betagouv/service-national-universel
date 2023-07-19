@@ -19,7 +19,6 @@ import ToggleDate from "../../components/ui/forms/dateForm/ToggleDate";
 import { BiLoaderAlt } from "react-icons/bi";
 import { settings, uselessSettings } from "./utils";
 import NumberInput from "../../components/ui/forms/NumberInput";
-import { environment } from "../../config";
 
 const cohortList = [
   { label: "Février 2023 - C", value: "Février 2023 - C" },
@@ -30,11 +29,7 @@ const cohortList = [
   { label: "Octobre 2023 - NC", value: "Octobre 2023 - NC" },
 ];
 
-const defaultCohort = environment !== "production" ? "Octobre 2023 - NC" : "Février 2023 - C";
-
-if (environment !== "production") {
-  cohortList.push({ label: "Octobre 2023 - NC", value: "Octobre 2023 - NC" });
-}
+const defaultCohort = "Octobre 2023 - NC";
 
 export default function Settings() {
   const { user } = useSelector((state) => state.Auth);
