@@ -198,6 +198,7 @@ const Schema = new mongoose.Schema({
   cohort: {
     type: String,
     enum: [
+      "Octobre 2023 - NC",
       "Juillet 2023",
       "Juin 2023",
       "Avril 2023 - B",
@@ -219,6 +220,7 @@ const Schema = new mongoose.Schema({
   originalCohort: {
     type: String,
     enum: [
+      "Octobre 2023 - NC",
       "Juillet 2023",
       "Juin 2023",
       "Avril 2023 - B",
