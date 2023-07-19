@@ -49,11 +49,11 @@ export default function NonEligible() {
     history.push("/");
   };
 
-  const isEligible = data.birthDate > new Date(2005, 9, 24) && data.birthDate < new Date(2008, 6, 10);
+  const isEligibleByAge = data.birthDate > new Date(2005, 9, 24) && data.birthDate < new Date(2008, 6, 10);
 
   return (
     <DSFRContainer>
-      {isEligible ? (
+      {isEligibleByAge ? (
         <>
           <h1 className="text-[22px] font-bold">Il n’y a pas de séjour proposé dans votre zone géographique.</h1>
           <p className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">
