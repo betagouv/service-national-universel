@@ -2,7 +2,6 @@ require("dotenv").config({ path: "../../.env" });
 require("../postgresql");
 const { capture } = require("../sentry");
 const slack = require("../slack");
-const fetch = require("node-fetch");
 const Demarche = require("../models/demarche_JDMA");
 const { JDMA_LOGIN, JDMA_PASSWORD } = require("../config");
 let count = 0;
