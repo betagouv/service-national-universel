@@ -49,30 +49,20 @@ export default function NonEligible() {
     history.push("/");
   };
 
-  const after = new Date(2005, 9, 21);
-  const before = new Date(2008, 9, 10);
-
-  const isEligibleByAge = data.birthDate > after && data.birthDate < before;
-
   return (
     <DSFRContainer>
-      {isEligibleByAge ? (
-        <>
-          <h1 className="text-[22px] font-bold">Il n’y a pas de séjour proposé dans votre zone géographique.</h1>
-          <p className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">
-            Soyez informé(e) de l’ouverture des inscriptions pour les prochaines sessions SNU via le lien suivant :{" "}
-            <a href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:decoration-2 hover:underline hover:text-gray-800">
-              snu.gouv.fr
-            </a>
-            .
-          </p>
-        </>
-      ) : (
-        <>
-          <h1 className="text-[22px] font-bold">Vous n’êtes malheureusement pas éligible au SNU.</h1>
-          {data.msg && <div className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">{data.msg}</div>}
-        </>
-      )}
+      <h1 className="text-[22px] font-bold">Nous n'avons pas trouvé de séjour qui correspond à votre situation.</h1>
+      <p className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">
+        Les inscriptions sont actuellement ouvertes pour les volontaires <strong>entre 15 et 17 ans</strong> en <strong>2nde GT</strong> situés{" "}
+        <strong>en Nouvelle-Calédonie ou à Wallis-et-Futuna</strong>.
+      </p>
+      <p className="text-gray-500 mt-4">
+        Soyez informé(e) de l&apos;ouverture des inscriptions pour les prochaines sessions du SNU via le lien suivant :{" "}
+        <a href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:decoration-2 hover:underline hover:text-gray-800">
+          snu.gouv.fr
+        </a>
+        .
+      </p>
 
       <div className="my-4 text-base font-bold">Découvrez d’autres formes d’engagement</div>
       <div className="flex gap-8 overflow-x-auto md:grid md:grid-cols-2">
