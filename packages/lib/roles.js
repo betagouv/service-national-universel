@@ -556,7 +556,7 @@ function canViewStructureChildren(actor) {
 
 function canDownloadYoungDocuments(actor, target, type = null, _applications) {
   if (type === "certificate" || type === "convocation") {
-    return [ROLES.RESPONSIBLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
+    return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
   } else {
     return (
       canEditYoung(actor, target) || [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role)
