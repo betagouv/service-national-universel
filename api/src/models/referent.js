@@ -72,6 +72,13 @@ const Schema = new mongoose.Schema({
       description: "Date limite de validité du token pour 2FA",
     },
   },
+  attempts2FA: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "Tentative de connexion 2FA. Max 3",
+    },
+  },
   acceptCGU: {
     type: String,
     enum: ["true", "false"],
@@ -309,6 +316,7 @@ Schema.plugin(patchHistory, {
     "/invitationToken",
     "/invitationExpires",
     "/loginAttempts",
+    "/attempts2FA",
     "/updatedAt",
     "/userIps",
     "/token2FA",
@@ -329,6 +337,7 @@ Schema.plugin(
       "invitationToken",
       "invitationExpires",
       "loginAttempts",
+      "attempts2FA",
       "updatedAt",
       "lastActivityAt",
       "userIps",
