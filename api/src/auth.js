@@ -4,7 +4,7 @@ const Joi = require("joi");
 
 const { capture } = require("./sentry");
 const config = require("./config");
-const { sendTemplate } = require("./sendinblue");
+const { sendTemplate, regexp_exception_staging } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
 const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent } = require("./utils");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
@@ -159,7 +159,11 @@ class Auth {
       }
 
       const shouldUse2FA = async () => {
+        if (config.ENVIRONMENT === "development") return false;
+        if (config.ENVIRONMENT === "staging" && !user.email.match(regexp_exception_staging)) return false;
+
         if (user.emailVerified === "false") return false;
+
         const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
         const isKnownIp = await user.compareIps(ip);
         return !user.userIps || user.userIps?.length === 0 || !isKnownIp;
