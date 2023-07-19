@@ -43,6 +43,7 @@ export default defineConfig(({ command, mode }) => {
     plugins: plugins,
     optimizeDeps: {
       include: ["@sentry/react", "snu-lib"],
+      force: true,
     },
   };
 });

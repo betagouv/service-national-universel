@@ -40,6 +40,7 @@ export default defineConfig(({ mode }) => {
     build: { sourcemap: mode === "development" ? false : true, outDir: "build" },
     optimizeDeps: {
       include: ["@sentry/react", "snu-lib"],
+      force: true,
     },
   };
 });
