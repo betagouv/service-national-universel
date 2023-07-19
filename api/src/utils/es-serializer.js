@@ -65,6 +65,7 @@ function serializeRamsesSchools(body) {
 function serializeYoungs(body) {
   return serializeHits(body, (hit) => {
     delete hit.sqlId;
+    // ! Not necessary. These data shouldn't be in ES
     delete hit.password;
     delete hit.nextLoginAttemptIn;
     delete hit.forgotPasswordResetToken;
@@ -73,6 +74,7 @@ function serializeYoungs(body) {
     delete hit.invitationExpires;
     delete hit.phase3Token;
     delete hit.loginAttempts;
+    delete hit.attempts2FA;
     return hit;
   });
 }
@@ -89,6 +91,7 @@ function serializeStructures(body) {
 function serializeReferents(body) {
   return serializeHits(body, (hit) => {
     delete hit.sqlId;
+    // ! Not necessary. These data shouldn't be in ES
     delete hit.password;
     delete hit.nextLoginAttemptIn;
     delete hit.forgotPasswordResetToken;
@@ -96,6 +99,7 @@ function serializeReferents(body) {
     delete hit.invitationToken;
     delete hit.invitationExpires;
     delete hit.loginAttempts;
+    delete hit.attempts2FA;
     delete hit.__v;
     return hit;
   });

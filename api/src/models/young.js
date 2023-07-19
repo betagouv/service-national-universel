@@ -216,7 +216,7 @@ const Schema = new mongoose.Schema({
       "2021",
       "2020",
       "2019",
-      "à venir"
+      "à venir",
     ],
     documentation: {
       description: "Cohorte",
@@ -483,6 +483,13 @@ const Schema = new mongoose.Schema({
     type: Date,
     documentation: {
       description: "Date limite de validité du token pour 2FA",
+    },
+  },
+  attempts2FA: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "Tentative de connexion 2FA. Max 3",
     },
   },
   loginAttempts: {
