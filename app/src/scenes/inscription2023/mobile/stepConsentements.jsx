@@ -100,14 +100,14 @@ export default function StepConsentements() {
             </div>
           </div>
         </div>
-        <div className="mt-4 flex items-center justify-end gap-2 pb-4" onClick={() => setModal({ isOpen: true })}>
+        {/* <div className="mt-4 flex items-center justify-end gap-2 pb-4" onClick={() => setModal({ isOpen: true })}>
           <EditPenLight />
           <div className="text-sm font-medium text-[#000091]">Je souhaite modifier mes dates de séjour</div>
-        </div>
+        </div> */}
       </div>
       <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/coordonnee")} onClick={onSubmit} disabled={disabled || loading} />
-      <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
+      {/* <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} /> */}
     </>
   );
 }
