@@ -13,7 +13,6 @@ export default function NonEligible() {
   const history = useHistory();
   // eslint-disable-next-line no-unused-vars
   const [data, __, removePersistedData] = useContext(PreInscriptionContext);
-  console.log("🚀 ~ file: stepNonEligible.jsx:16 ~ NonEligible ~ data:", data);
 
   const engagementPrograms = [
     {
