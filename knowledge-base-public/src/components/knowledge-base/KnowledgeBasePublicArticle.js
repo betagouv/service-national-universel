@@ -68,21 +68,22 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
         {!hasSubmitted && (
           <>
             {feedback.isPositive && (
-              <div className="my-12 flex h-[130px] w-full flex-col items-center justify-center bg-[#F3F4F6] print:bg-transparent print:pb-12">
+              <div className="md:my-12 py-8 flex md:h-[130px] w-full flex-col items-center justify-center bg-[#F3F4F6] print:bg-transparent print:pb-12">
                 <>
                   <p className="mt-2 text-[20px] font-bold not-italic leading-7 text-gray-900">Cet article vous a été utile ?</p>
                 </>
-                <div className="mb-4 mt-4 flex flex-row">
+                <div className="mb-4 mt-4 flex flex-col md:flex-row">
                   <div
                     id="ThumbsUp"
-                    className="mr-6 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] px-20 text-3xl font-medium hover:border-[#9CA3AF]"
+                    className="mb-4 w-full mr-6 flex h-12 md:w-20 cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] px-20 text-3xl font-medium hover:border-[#9CA3AF] md:mb-0"
                     onClick={postFeedback}
                   >
                     <span className="material-icons w-[20px] text-[20px] text-[#2563EB]">thumb_up</span>
                     <p className="ml-2 text-[16px] text-[#2563EB]">Oui</p>
                   </div>
                   <div
-                    className="ml-1 flex h-12 w-20 cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] px-20 text-3xl font-medium hover:border-[#9CA3AF]"
+                  id="ThumbsDown"
+                    className="md:ml-1 flex h-12 w-full md:w-20 cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] px-20 text-3xl font-medium hover:border-[#9CA3AF]"
                     onClick={() => setFeedback({ ...feedback, isPositive: false })}
                   >
                     <span className="material-icons w-[20px] text-[20px] text-[#2563EB]">thumb_down</span>
@@ -95,15 +96,15 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
               <div className="mb-6 mt-6 flex h-full w-full flex-col rounded-xl border-[1px] bg-white pt-6">
                 <div className="flex flex-col items-center justify-center px-10">
                   <h1 className="mt-2 text-[20px] font-bold not-italic leading-7 text-gray-900">Aidez-nous à nous améliorer</h1>
-                  <div className="flex flex-row mt-8 py-4 justify-center bg-[#EFF6FF] px-4 text-[14px] leading-5 text-gray-600 ">
-                    <span className="material-icons w-[20px] text-[20px] text-[#60A5FA] mt-2 mr-4">info</span>
+                  <div className="mt-8 flex flex-row justify-center bg-[#EFF6FF] px-4 py-4 text-[14px] leading-5 text-gray-600 ">
+                    <span className="material-icons mr-4 mt-2 w-[20px] text-[20px] text-[#60A5FA]">info</span>
                     <div>
                       <span className="text-[#1E40AF]">
                         Rappel : vous n&apos;obtiendrez pas de réponse à votre question, merci de ne pas inscrire d&apos;informations personnelles. Pour obtenir une aide
                         personnalisée,
                       </span>{" "}
                       <a href="https://www.snu.gouv.fr/nous-contacter/" className="text-snu-purple-200 " target="_blank" rel="noopener noreferrer">
-                        <span className="underline text-[#4F46E5] ">cliquez ici.</span>
+                        <span className="text-[#4F46E5] underline ">cliquez ici.</span>
                       </a>
                     </div>
                   </div>
@@ -134,7 +135,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
                     Annuler
                   </button>
                   <Button
-                    className="rounded-md border-[1px] bg-[#2563EB] border-[#2563EB] px-4 text-[14px] font-medium leading-5 text-[#FFFFFF]"
+                    className="rounded-md border-[1px] border-[#2563EB] bg-[#2563EB] px-4 text-[14px] font-medium leading-5 text-[#FFFFFF]"
                     onClick={postFeedback}
                     loading={isSubmitting}
                     disabled={feedback.comment?.length > 125}
@@ -147,8 +148,9 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
           </>
         )}
         {hasSubmitted && (
-          <div className="flex h-24 w-full flex-col items-center justify-center bg-white print:bg-transparent print:pb-12">
-            <p className={`text-2xl font-light not-italic ${!feedback.isPositive ? "text-[#6B7280]" : "text-[#50B981]"}`}>Merci pour votre contribution !</p>
+          <div className="flex h-24 mb-6 border-[1px] rounded-lg shadow-md w-full flex-row items-center justify-center bg-white text-[#111827] print:bg-transparent print:pb-12">
+            <span className="material-icons mt-1 mr-2 w-[20px] text-[20px] text-[#111827]">done</span>
+            <p className={`text-xl leading-7 font-bold not-italic "}`}>Merci pour votre contribution</p>
           </div>
         )}
         <hr className="mb-6 mt-4" />
