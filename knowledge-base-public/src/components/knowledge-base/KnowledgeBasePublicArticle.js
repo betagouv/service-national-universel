@@ -68,7 +68,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
         {!hasSubmitted && (
           <>
             {feedback.isPositive && (
-              <div className="md:my-12 py-8 flex md:h-[130px] w-full flex-col items-center justify-center bg-[#F3F4F6] print:bg-transparent print:pb-12">
+              <div className="md:my-8 py-8 flex md:h-[130px] w-full flex-col items-center justify-center bg-[#F3F4F6] print:bg-transparent print:pb-12">
                 <>
                   <p className="mt-2 text-[20px] font-bold not-italic leading-7 text-gray-900">Cet article vous a été utile ?</p>
                 </>
