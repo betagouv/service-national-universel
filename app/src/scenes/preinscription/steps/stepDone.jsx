@@ -1,6 +1,5 @@
 import React from "react";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
-import { useHistory } from "react-router-dom";
 import CompleteInscription from "../../../assets/icons/CompleteInscription";
 import { GrAttachment } from "react-icons/gr";
 import api from "../../../services/api";
@@ -9,22 +8,12 @@ import { setYoung } from "../../../redux/auth/actions";
 import plausibleEvent from "../../../services/plausible";
 import DSFRContainer from "../../../components/inscription/DSFRContainer";
 import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
-import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
 
 export default function StepDone() {
   // eslint-disable-next-line no-unused-vars
   const [data, _, removePersistedData] = React.useContext(PreInscriptionContext);
-  const history = useHistory();
   const dispatch = useDispatch();
-
-  const logout = async () => {
-    await api.post(`/young/logout`);
-    dispatch(setYoung(null));
-    removePersistedData(true);
-    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
-    return history.push("/auth");
-  };
 
   async function handleClick() {
     try {
@@ -58,7 +47,7 @@ export default function StepDone() {
           <div className="text-sm text-[#3A3A3A]">Carte d&apos;identité ou passeport</div>
         </div>
       </div>
-      <SignupButtonContainer onClickNext={handleClick} labelNext="Compléter mon inscription" onClickPrevious={logout} labelPrevious="Plus tard" />
+      <SignupButtonContainer onClickNext={handleClick} labelNext="Compléter mon inscription" />
     </DSFRContainer>
   );
 }
