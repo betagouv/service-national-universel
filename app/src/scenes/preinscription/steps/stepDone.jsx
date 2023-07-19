@@ -10,6 +10,7 @@ import plausibleEvent from "../../../services/plausible";
 import DSFRContainer from "../../../components/inscription/DSFRContainer";
 import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
 import { toastr } from "react-redux-toastr";
+import { capture } from "../../../sentry";
 
 export default function StepDone() {
   // eslint-disable-next-line no-unused-vars
@@ -26,9 +27,17 @@ export default function StepDone() {
   };
 
   async function handleClick() {
-    plausibleEvent("Phase0/CTA preinscription - demarrer");
-    removePersistedData(true);
-    return history.push("/auth?from=preinscription");
+    try {
+      plausibleEvent("Phase0/CTA preinscription - demarrer");
+      const { user: young, token } = await api.post(`/young/signin`, { email: data.email, password: data.password });
+      if (young) {
+        if (token) api.setToken(token);
+        dispatch(setYoung(young));
+        removePersistedData(true);
+      }
+    } catch (e) {
+      capture(e);
+    }
   }
 
   return (

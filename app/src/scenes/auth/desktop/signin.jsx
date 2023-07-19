@@ -16,7 +16,6 @@ import { Link } from "react-router-dom";
 import { environment } from "../../../config";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
 import { captureMessage } from "../../../sentry";
-import PreinscriptionBanner from "../components/preinscriptionBanner";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -31,7 +30,7 @@ export default function Signin() {
   const young = useSelector((state) => state.Auth.young);
 
   const params = queryString.parse(location.search);
-  const { redirect, disconnected, from } = params;
+  const { redirect, disconnected } = params;
 
   React.useEffect(() => {
     if (!young && disconnected === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
@@ -79,9 +78,6 @@ export default function Signin() {
     <div className="flex bg-[#F9F6F2] py-6">
       <div className="mx-auto w-full bg-white px-[1rem] py-[2rem] shadow-sm md:w-[56rem] md:px-[6rem] md:pt-[4rem]">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-
-        {from === "preinscription" && <PreinscriptionBanner />}
-
         <div className="mb-2 text-[32px] font-bold text-[#161616]">Me connecter</div>
         <div className="mb-2 flex items-center gap-4">
           <RightArrow />

@@ -102,6 +102,7 @@ class Auth {
         cohort,
         grade,
         inscriptionStep2023: STEPS2023.COORDONNEES,
+        emailVerified: "false",
       });
       const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_MAX_AGE });
       if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions());
@@ -157,9 +158,14 @@ class Auth {
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       }
 
-      const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
-      const isKnownIp = await user.compareIps(ip);
-      if (!user.userIps || user.userIps?.length === 0 || !isKnownIp) {
+      const shouldUse2FA = async () => {
+        if (user.emailVerified === "false") return false;
+        const ip = (req.headers["x-forwarded-for"] || req.connection.remoteAddress || "").split(",")[0].trim();
+        const isKnownIp = await user.compareIps(ip);
+        return !user.userIps || user.userIps?.length === 0 || !isKnownIp;
+      };
+
+      if (await shouldUse2FA()) {
         const token2FA = await crypto.randomInt(1000000);
         user.set({ token2FA, attempts2FA: 0, token2FAExpires: Date.now() + 1000 * 60 * 10 });
         await user.save();
