@@ -42,7 +42,10 @@ export default function Signin() {
     } catch (e) {
       setLoading(false);
       console.log("ERROR", e);
-      toastr.error("(Double authentification) Code non reconnu.", "Merci d'inscrire le dernier code reçu par email");
+      toastr.error(
+        "(Double authentification) Code non reconnu.",
+        "Merci d'inscrire le dernier code reçu par email. Après 3 tentatives ou plus de 10 minutes, veuillez retenter de vous connecter.",
+      );
     }
   };
 

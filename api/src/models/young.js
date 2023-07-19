@@ -170,6 +170,12 @@ const Schema = new mongoose.Schema({
       description: "E-mail du volontaire",
     },
   },
+  emailVerified: {
+    type: String,
+    documentation: {
+      description: "L'utilisateur a validé son email : 2FA possible",
+    },
+  },
   phone: {
     type: String,
     documentation: {
@@ -198,6 +204,7 @@ const Schema = new mongoose.Schema({
   cohort: {
     type: String,
     enum: [
+      "Octobre 2023 - NC",
       "Juillet 2023",
       "Juin 2023",
       "Avril 2023 - B",
@@ -210,7 +217,7 @@ const Schema = new mongoose.Schema({
       "2021",
       "2020",
       "2019",
-      "à venir"
+      "à venir",
     ],
     documentation: {
       description: "Cohorte",
@@ -219,6 +226,7 @@ const Schema = new mongoose.Schema({
   originalCohort: {
     type: String,
     enum: [
+      "Octobre 2023 - NC",
       "Juillet 2023",
       "Juin 2023",
       "Avril 2023 - B",
@@ -477,6 +485,13 @@ const Schema = new mongoose.Schema({
     type: Date,
     documentation: {
       description: "Date limite de validité du token pour 2FA",
+    },
+  },
+  attempts2FA: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "Tentative de connexion 2FA. Max 3",
     },
   },
   loginAttempts: {

@@ -90,14 +90,14 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       ...value,
       ...(value.livesInFrance === "true"
         ? {
-          foreignCountry: "",
-          foreignAddress: "",
-          foreignCity: "",
-          foreignZip: "",
-          hostFirstName: "",
-          hostLastName: "",
-          hostRelationship: "",
-        }
+            foreignCountry: "",
+            foreignAddress: "",
+            foreignCity: "",
+            foreignZip: "",
+            hostFirstName: "",
+            hostLastName: "",
+            hostRelationship: "",
+          }
         : {}),
       ...validateCorrectionRequest(young, keyList),
     };
@@ -406,7 +406,7 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
 router.put("/changeCohort", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023").required(),
+      cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC").required(),
     }).validate(req.body, { stripUnknown: true });
 
     if (error) {

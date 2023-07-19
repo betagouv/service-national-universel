@@ -24,7 +24,7 @@ export default function Index() {
     region: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
     academy: [],
     department: user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : [],
-    cohorts: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
+    cohorts: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"],
   });
   const [filterArray, setFilterArray] = useState([]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
@@ -64,7 +64,7 @@ export default function Index() {
         name: "Cohorte",
         fullValue: "Toutes",
         options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
-        sort: (e)=> orderCohort(e),
+        sort: (e) => orderCohort(e),
       },
     ].filter((e) => e);
     setFilterArray(filters);
