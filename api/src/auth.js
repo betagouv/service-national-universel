@@ -165,7 +165,7 @@ class Auth {
         return !user.userIps || user.userIps?.length === 0 || !isKnownIp;
       };
 
-      if (shouldUse2FA()) {
+      if (await shouldUse2FA()) {
         const token2FA = await crypto.randomInt(1000000);
         user.set({ token2FA, attempts2FA: 0, token2FAExpires: Date.now() + 1000 * 60 * 10 });
         await user.save();
