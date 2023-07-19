@@ -309,7 +309,6 @@ const region2department = {
   "Saint-Pierre-et-Miquelon": ["Saint-Pierre-et-Miquelon"],
   Mayotte: ["Mayotte"],
   "Terres australes et antarctiques françaises": ["Terres australes et antarctiques françaises"],
-  // "Wallis-et-Futuna": ["Wallis-et-Futuna"],
   "Polynésie française": ["Polynésie française"],
   "Nouvelle-Calédonie": ["Nouvelle-Calédonie", "Wallis-et-Futuna"],
 };

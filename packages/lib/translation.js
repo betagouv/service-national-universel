@@ -423,7 +423,7 @@ const translateCohort = (cohort) => {
     case "Juillet 2023":
       return "du 4 au 16 Juillet 2023";
     case "Octobre 2023 - NC":
-      return "du 14 au 26 Octobre 2023";
+      return "du 9 au 20 Octobre 2023";
     default:
       return cohort;
   }
@@ -453,7 +453,7 @@ const translateCohortTemp = (young) => {
       }
       return "du 5 au 17 Juillet 2023";
     case "Octobre 2023 - NC":
-      return "du 14 au 26 Octobre 2023";
+      return "du 9 au 20 Octobre 2023";
     default:
       return cohort;
   }
