@@ -92,7 +92,7 @@ const sessions2023 = [
       zones: ["NC"],
       schoolLevels: ["2ndeGT"],
       bornAfter: new Date("10/22/2005"),
-      bornBefore: new Date("10/10/2008"),
+      bornBefore: new Date("10/09/2008"),
       inscriptionEndDate: new Date("2023-08-31T22:00:00.000Z"), // 31 aout
       instructionEndDate: new Date("2023-09-15T22:00:00.000Z"), // 15 septembre
     },
