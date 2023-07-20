@@ -76,7 +76,7 @@ export default function Signin() {
 
   return (
     <div className="flex bg-[#F9F6F2] py-6">
-      <div className="mx-auto w-full bg-white px-[1rem] py-[2rem] shadow-sm md:w-[56rem] md:px-[6rem] md:pt-[4rem]">
+      <div className="mx-auto w-full bg-white px-[1rem] py-[2rem] shadow-sm md:w-[56rem] md:px-[6rem] md:pt-[3rem]">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="mb-2 text-[32px] font-bold text-[#161616]">Me connecter</div>
         <div className="mb-2 flex items-center gap-4">
@@ -105,10 +105,10 @@ export default function Signin() {
             Connexion
           </button>
         </div>
-        <hr className="mt-4 border-b-1 text-[#E5E5E5]" />
-        <div className="mt-4 text-[#E5E5E5] space-y-3">
-          <div className="mt-4 mb-2 text-center text-xl font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
-          <p className="text-center text-base text-[#161616] m-3">
+        <hr className="mt-3 border-b-1 text-[#E5E5E5]" />
+        <div className="mt-3 text-[#E5E5E5] space-y-3">
+          <div className="mt-3 mb-2 text-center text-xl font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
+          <p className="text-center text-base text-[#161616] my-3">
             Les inscriptions sont actuellement uniquement ouvertes aux volontaires âgés de 15 à 17 ans et scolarisés en seconde GT en Nouvelle-Calédonie ou à Wallis-et-Futuna.
             <br />
           </p>
@@ -117,7 +117,7 @@ export default function Signin() {
             className="w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-blue-france-sun-113 px-3 py-2 text-blue-france-sun-113 hover:bg-blue-france-sun-113 hover:text-white">
             Pré-inscription
           </Link>
-          <br />
+
           <p className="text-center text-base text-[#161616] m-3">Soyez informé(e) lors de l’ouverture des prochaines inscriptions.</p>
           <a
             className="plausible-event-name=Clic+LP+Inscription w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-[#000091] px-3 py-2 text-[#000091] hover:bg-[#000091] hover:text-white"
