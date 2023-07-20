@@ -166,9 +166,9 @@ class Auth {
 
         const trustToken = req.cookies[`trust_token-${user._id}`];
         if (!trustToken) return true;
-        const isKnownNavigator = jwt.verify(trustToken, config.secret);
+        const isKnownBrowser = jwt.verify(trustToken, config.secret);
 
-        return !isKnownNavigator;
+        return !isKnownBrowser;
       };
 
       if (shouldUse2FA()) {
