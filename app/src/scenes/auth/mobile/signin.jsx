@@ -107,21 +107,18 @@ export default function Signin() {
         <div className="mt-4 text-[#E5E5E5]">
           <div className="mt-4 mb-3 text-center text-[17px] font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
           <p className="text-center text-base text-[#161616] mb-4">
-            Les inscriptions sont clôturées pour le premier semestre 2023. Soyez informé(e) lors de l’ouverture des prochaines inscriptions.
+            Les inscriptions sont actuellement uniquement ouvertes aux volontaires âgés de 15 et 17 ans et scolarisés en seconde GT en Nouvelle-Calédonie ou à Wallis-et-Futuna.
           </p>
+          <Link to="/preinscription">
+            <p className="w-full my-4 text-center p-2 text-blue-france-sun-113 border-[1px] border-blue-france-sun-113 hover:bg-blue-france-sun-113">Pré-inscription</p>
+          </Link>
+          <br />
+          <p className="text-center text-base text-[#161616] mb-4">Soyez informé(e) lors de l’ouverture des prochaines inscriptions.</p>
           <a
             className="plausible-event-name=Clic+LP+Inscription flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-[#000091] p-2 text-[#000091] hover:bg-[#000091] hover:text-white"
             href="https://www.snu.gouv.fr/?utm_source=moncompte&utm_medium=website&utm_campaign=fin+inscriptions+2023&utm_content=cta+notifier#formulaire">
             Recevoir une alerte par email
           </a>
-
-          {environment !== "production" && (
-            <Link to="/preinscription">
-              <p className="w-full my-4 text-center p-2 text-blue-france-sun-113 border-[1px] border-blue-france-sun-113 hover:bg-blue-france-sun-113">
-                Pré-inscription - accès staging
-              </p>
-            </Link>
-          )}
         </div>
       </div>
       <Footer />
