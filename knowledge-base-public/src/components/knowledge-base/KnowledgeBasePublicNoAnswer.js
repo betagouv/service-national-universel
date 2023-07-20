@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Modal from "../Modal";
 import { environment } from "../../config";
+import { HiArrowNarrowRight } from "react-icons/hi";
 
 const KnowledgeBasePublicNoAnswer = ({ className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -45,9 +46,9 @@ const KnowledgeBasePublicNoAnswer = ({ className = "" }) => {
       ) : (
         <>
           <div className="flex h-full w-full flex-row items-center justify-start mt-4 mb-16">
-            <a href="https://moncompte.snu.gouv.fr/public-besoin-d-aide" className="text-[16px] flex flex-row leading-6 text-snu-purple-200" target="_blank" rel="noopener noreferrer">
+            <a href="https://moncompte.snu.gouv.fr/public-besoin-d-aide" className="text-[16px] flex flex-row items-center justify-center leading-6 text-snu-purple-200" target="_blank" rel="noopener noreferrer">
               <p className="text-blue-600">Je n'ai pas trouvé de réponse à ma question</p>
-              <span className="material-icons ml-2 text-[16px] leading-6 text-blue-600">arrow_forward</span>
+              <HiArrowNarrowRight className="ml-2 text-[16px] leading-6 text-blue-600" />
             </a>
           </div>
         </>
