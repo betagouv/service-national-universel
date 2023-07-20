@@ -46,7 +46,6 @@ function FeedbackComponent({ item }) {
                   className="mb-4 mr-6 flex h-12 w-full cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] bg-gray-200 px-16 text-3xl font-medium text-[#2563EB] hover:bg-blue-600 hover:text-white md:mb-0"
                   onClick={postFeedback}
                 >
-                  {/* <span className="material-icons w-[20px] text-[20px]">thumb_up</span> */}
                   <HiThumbUp className="w-[20px] text-[20px]" />
                   <p className="ml-2 text-[16px]">Oui</p>
                 </button>
@@ -55,7 +54,6 @@ function FeedbackComponent({ item }) {
                   className="flex h-12 w-full cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] bg-gray-200 px-16 text-3xl font-medium text-[#2563EB] hover:bg-blue-600 hover:text-white md:ml-1"
                   onClick={() => setFeedback({ ...feedback, isPositive: false })}
                 >
-                  {/* <span className="material-icons w-[20px] text-[20px]">thumb_down</span> */}
                   <HiThumbDown className="w-[20px] text-[20px]" />
                   <p className="ml-2 text-[16px]">Non</p>
                 </button>
