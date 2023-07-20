@@ -327,7 +327,7 @@ const ListCenter = ({ firstSession }) => {
 
   if (!firstSession) return <div></div>;
   return (
-    <div className="flex-column flex-1 flex-wrap bg-white">
+    <div className="flex-column flex-1 flex-wrap bg-white rounded-xl mb-4">
       <div className="mx-4">
         <div className="flex w-full flex-row justify-between">
           <Filters

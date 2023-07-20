@@ -123,7 +123,7 @@ const ListPoints = ({ user }) => {
   ];
 
   return (
-    <div className="flex flex-col rounded-lg bg-white">
+    <div className="flex flex-col rounded-lg bg-white mb-4">
       <div className="mx-4">
         <div className="flex w-full flex-row justify-between">
           <Filters
