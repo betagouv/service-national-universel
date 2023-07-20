@@ -1,5 +1,3 @@
-import Img3 from "../assets/left.svg";
-import Img2 from "../assets/right.svg";
 import DoubleChevronRight from "../assets/icons/DoubleChevronRight";
 import ChevronRightPage from "../assets/icons/ChevronRightPage";
 import DoubleChevronLeft from "../assets/icons/DoubleChevronLeft";
