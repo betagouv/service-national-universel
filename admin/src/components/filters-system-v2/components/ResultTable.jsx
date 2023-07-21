@@ -6,6 +6,17 @@ export default function ResultTable({ render, currentEntryOnPage, pagination = t
 
   return (
     <div>
+      {pagination && (
+        <PaginationServerDriven
+          pageCount={pageCount}
+          currentPage={paramData.page}
+          changePage={(value) => setParamData((old) => ({ ...old, page: value }))}
+          count={paramData?.count}
+          itemsPerPage={size}
+          itemsCount={currentEntryOnPage}
+          className="px-4 pt-3"
+        />
+      )}
       {render}
       {pagination && (
         <PaginationServerDriven
@@ -15,7 +26,7 @@ export default function ResultTable({ render, currentEntryOnPage, pagination = t
           count={paramData?.count}
           itemsPerPage={size}
           itemsCount={currentEntryOnPage}
-          className="p-4"
+          className="px-4 pt-3"
         />
       )}
     </div>
