@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import { environment } from "../../../config";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
 import { captureMessage } from "../../../sentry";
+import plausibleEvent from "../../../services/plausible";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -113,6 +114,7 @@ export default function Signin() {
             <br />
           </p>
           <Link
+            onClick={() => plausibleEvent("Connexion/Lien vers preinscription")}
             to="/preinscription"
             className="w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-blue-france-sun-113 px-3 py-2 text-blue-france-sun-113 hover:bg-blue-france-sun-113 hover:text-white">
             Pré-inscription
