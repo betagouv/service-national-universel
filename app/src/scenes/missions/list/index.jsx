@@ -6,6 +6,6 @@ import MobileView from "./mobile";
 export default function View() {
   const device = useDevice();
 
-  if (device === "desktop") return <DesktopView />;
-  else return <MobileView />;
+  // if (device === "desktop") return <DesktopView />;
+  return <MobileView />;
 }
