@@ -486,7 +486,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const filterFields = getYoungsFilters(user);
 
     const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt"];
-
+    const size = body.size;
     const { youngContextFilters, youngContextError } = await buildYoungContext(user);
     if (youngContextError) {
       return res.status(youngContextError.status).send(youngContextError.body);
@@ -514,8 +514,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       page,
       sort,
       contextFilters,
+      size,
     });
-
     if (req.params.action === "export") {
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
       let data = serializeYoungs(response);
@@ -548,7 +548,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
         const meetingPoints = await allRecords("pointderassemblement", { bool: { must: { ids: { values: meetingPointsIds } } } });
         data = data.map((item) => ({ ...item, meetingPoint: meetingPoints?.find((e) => e._id.toString() === item.meetingPointId) }));
       }
-
       return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });

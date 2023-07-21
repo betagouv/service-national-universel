@@ -11,25 +11,43 @@ import React from "react";
 
 const DEFAULT_DISPLAYED_PAGES = 3;
 
-export default function PaginationServerDriven({ pageCount, currentPage, count, itemsPerPage, itemsCount, className, changePage, displayedPages = DEFAULT_DISPLAYED_PAGES }) {
+export default function PaginationServerDriven({
+  pageCount,
+  currentPage,
+  count,
+  itemsPerPage,
+  itemsCount,
+  className,
+  changePage,
+  displayedPages = DEFAULT_DISPLAYED_PAGES,
+  size,
+  changeSize,
+}) {
   const lastDisplayPage = Math.min(pageCount - 1, Math.max(displayedPages, currentPage));
   const firstDisplayPage = Math.max(lastDisplayPage - displayedPages + 1, 1);
   const lastDisplayItem = currentPage * itemsPerPage + itemsCount;
-  const lastPage = Math.floor(count / 20);
+  const lastPage = Math.floor(count / size);
   const pages = [];
+  const sizeOptions = [
+    { label: "10", value: 10 },
+    { label: "20", value: 20 },
+    { label: "30", value: 30 },
+    { label: "40", value: 40 },
+    { label: "50", value: 50 },
+  ];
   switch (true) {
     case lastDisplayItem === count: //derniere page
       for (let i = firstDisplayPage - 1; i <= lastDisplayPage - 1; ++i) {
         pages.push(<PageButton key={"page-" + i} page={i} changePage={changePage} active={currentPage === i} lastPage={lastPage} />);
       }
       break;
-    case lastDisplayItem > count - 20: // avant derniere page
+    case lastDisplayItem > count - size: // avant derniere page
       for (let i = firstDisplayPage; i <= lastDisplayPage; ++i) {
         pages.push(<PageButton key={"page-" + i} page={i} changePage={changePage} active={currentPage === i} lastPage={lastPage} />);
       }
       break;
 
-    case lastDisplayItem / 20 === 1 || lastDisplayItem / 20 === 2 || lastDisplayItem / 20 === 3: // page 1,2,3
+    case lastDisplayItem / size === 1 || lastDisplayItem / size === 2 || lastDisplayItem / size === 3: // page 1,2,3
       for (let i = firstDisplayPage; i <= lastDisplayPage; ++i) {
         pages.push(<PageButton key={"page-" + i} page={i} changePage={changePage} active={currentPage === i} lastPage={lastPage} />);
       }
@@ -68,7 +86,7 @@ export default function PaginationServerDriven({ pageCount, currentPage, count, 
     if (lastDisplayItem < count && lastDisplayItem + 100 < count) {
       changePage && changePage(currentPage + 5);
     } else {
-      if (count % 20 === 0) {
+      if (count % size === 0) {
         changePage && changePage(lastPage - 1);
       } else {
         changePage && changePage(lastPage);
@@ -77,15 +95,25 @@ export default function PaginationServerDriven({ pageCount, currentPage, count, 
   }
   return (
     <div className={`flex items-center justify-between gap-1 ${className}`}>
+      <div className="text-xs flex gap-1 justify-center items-center text-[#242526]">
+        <select className="min-w-[56px] min-h-[32px] pl-2 border text-gray-600 rounded-md pb-1" value={size} onChange={(e) => changeSize(e.target.value)}>
+          {sizeOptions.map((item) => (
+            <option key={item.label} value={item.value}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+        Éléments par page
+      </div>
       <div className="text-[12px] text-[#242526]">
         {currentPage * itemsPerPage + 1} - {currentPage * itemsPerPage + itemsCount} sur {count === 10000 ? "plus de 10000" : count}
       </div>
       <div className="flex gap-1 items-center justify-center">
-        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-200 rounded-md border-solid">
+        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-size0 rounded-md border-solid">
           <button
             href="#"
             onClick={goToPreviousX5}
-            className={`flex m-auto flex-none w-8 h-8 items-center justify-center border-r border-solid border-gray-200 ${
+            className={`flex m-auto flex-none w-8 h-8 items-center justify-center border-r border-solid border-gray-size0 ${
               currentPage > 0 ? "cursor-pointer" : "cursor-not-allowed"
             }`}>
             <DoubleChevronLeft fill={currentPage > 0 ? "#6B7280" : "#E5E7EB"} />
@@ -94,29 +122,29 @@ export default function PaginationServerDriven({ pageCount, currentPage, count, 
             <ChevronLeftPage fill={currentPage > 0 ? "#6B7280" : "#E5E7EB"} />
           </button>
         </div>
-        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] text-xs text-gray-900 border border-gray-200 rounded-md border-solid">
+        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] text-xs text-gray-900 border border-gray-size0 rounded-md border-solid">
           <PageButton page={0} changePage={changePage} active={currentPage === 0} lastPage={lastPage} />
 
-          {currentPage > 2 ? <div className="flex px-1 text-xs text-gray-400 border-gray-200 border-r border-solid min-h-[32px] items-center">...</div> : null}
+          {currentPage > 2 ? <div className="flex px-1 text-xs text-gray-400 border-gray-size0 border-r border-solid min-h-[32px] items-center">...</div> : null}
 
           {pages}
-          {currentPage < (count % 20 === 0 ? lastPage -3 : lastPage - 2) ? (
-            <div className="flex px-1 text-xs text-gray-400 border-gray-200 border-r border-solid min-h-[32px] items-center">...</div>
+          {currentPage < (count % size === 0 ? lastPage - 3 : lastPage - 2) ? (
+            <div className="flex px-1 text-xs text-gray-400 border-gray-size0 border-r border-solid min-h-[32px] items-center">...</div>
           ) : null}
           <PageButton
-            page={count % 20 === 0 ? lastPage - 1 : lastPage}
+            page={count % size === 0 ? lastPage - 1 : lastPage}
             changePage={changePage}
-            active={currentPage === (count % 20 === 0 ? lastPage - 1 : lastPage)}
+            active={currentPage === (count % size === 0 ? lastPage - 1 : lastPage)}
             lastPage={lastPage}
             isLast={true}
           />
         </div>
 
-        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-200 rounded-md border-solid">
+        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-size0 rounded-md border-solid">
           <button
             href="#"
             onClick={goToNext}
-            className={`flex items-center justify-center flex-none w-8 h-8 m-auto border-r border-solid border-gray-200 ${
+            className={`flex items-center justify-center flex-none w-8 h-8 m-auto border-r border-solid border-gray-size0 ${
               lastDisplayItem < count ? "cursor-pointer" : "cursor-not-allowed"
             }`}>
             <ChevronRightPage fill={lastDisplayItem < count ? "#6B7280" : "#E5E7EB"} />
@@ -137,7 +165,7 @@ function PageButton({ page, changePage, active, lastPage, isLast = false }) {
   const getClass = () => {
     let classTab = [];
     active ? classTab.push("font-bold bg-gray-100") : classTab.push("font-normal"); // la page est active
-    page !== lastPage && !isLast ? classTab.push("border-r border-solid border-gray-200") : null; // page par default
+    page !== lastPage && !isLast ? classTab.push("border-r border-solid border-gray-size0") : null; // page par default
     page === 0 && active ? classTab.push("rounded-l-md") : null; //premiere page active
     (page === lastPage && active) || isLast === true ? classTab.push("rounded-r-md") : null; //derniere page
     const className = classTab.join(" ");

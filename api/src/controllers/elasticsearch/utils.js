@@ -71,7 +71,7 @@ function buildArbitratyNdJson(...args) {
   return args.map((e) => JSON.stringify(e)).join("\n") + "\n";
 }
 
-function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, customQueries, size = 20 }) {
+function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, customQueries, size = 10 }) {
   // We always need a fresh query to avoid side effects.
   const getMainQuery = () => unsafeStrucuredClone({ bool: { must: [{ match_all: {} }], filter: contextFilters } });
   // Search query
@@ -85,7 +85,7 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
     hitsRequestBody.query = hitsSubQuery(hitsRequestBody.query, key, queryFilters[keyWithoutKeyword], customQueries);
   }
   // Aggs request body
-  const aggsRequestBody = { query: getMainQuery(), aggs: aggsSubQuery(filterFields, search, queryFilters, contextFilters, customQueries), size: 0, track_total_hits: true };
+  const aggsRequestBody = { query: getMainQuery(), aggs: aggsSubQuery(filterFields, search, queryFilters, contextFilters, customQueries), size: size, track_total_hits: true };
   return { hitsRequestBody, aggsRequestBody };
 }
 
