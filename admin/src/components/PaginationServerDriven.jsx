@@ -43,7 +43,7 @@ export default function PaginationServerDriven({
         pages.push(<PageButton key={"page-" + i} page={i} changePage={changePage} active={currentPage === i} lastPage={lastPage} />);
       }
       break;
-    case lastDisplayItem > count - size: // avant derniere page
+    case lastDisplayItem >= count - size: // avant derniere page
       for (let i = firstDisplayPage; i <= lastDisplayPage; ++i) {
         pages.push(<PageButton key={"page-" + i} page={i} changePage={changePage} active={currentPage === i} lastPage={lastPage} />);
       }
@@ -116,8 +116,8 @@ export default function PaginationServerDriven({
         </select>
         Éléments par page
       </div>
-      <div className="text-[12px] text-[#242526]">
-        {actualHits} - {totalhits} sur {count === 10000 ? "plus de 10000" : count}
+      <div className="text-[12px] text-[#242526] font-bold">
+        {actualHits} <span className="font-normal">-</span> {totalhits} <span className="font-normal"> sur </span> {count === 10000 ? "plus de 10000" : count}
       </div>
       <div className="flex gap-1 items-center justify-center">
         <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-size0 rounded-md border-solid">
@@ -133,22 +133,24 @@ export default function PaginationServerDriven({
             <ChevronLeftPage fill={currentPage > 0 ? "#6B7280" : "#E5E7EB"} />
           </button>
         </div>
-        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] text-xs text-gray-900 border border-gray-size0 rounded-md border-solid">
+        <div className="flex justify-center items-center min-h-[32px] text-xs text-gray-900 border border-gray-200 rounded-md border-solid">
           <PageButton page={0} changePage={changePage} active={currentPage === 0} lastPage={lastPage} />
 
           {currentPage > 2 ? <div className="flex px-1 text-xs text-gray-400 border-gray-size0 border-r border-solid min-h-[32px] items-center">...</div> : null}
 
           {pages}
-          {currentPage < (count % size === 0 ? lastPage - 3 : lastPage - 2) ? (
-            <div className="flex px-1 text-xs text-gray-400 border-gray-size0 border-r border-solid min-h-[32px] items-center">...</div>
+          {currentPage < (count % 20 === 0 ? lastPage - 3 : lastPage - 2) ? (
+            <div className="flex px-1 text-xs text-gray-400 border-gray-200 border-r border-solid min-h-[32px] items-center">...</div>
           ) : null}
-          <PageButton
-            page={count % size === 0 ? lastPage - 1 : lastPage}
-            changePage={changePage}
-            active={currentPage === (count % size === 0 ? lastPage - 1 : lastPage)}
-            lastPage={lastPage}
-            isLast={true}
-          />
+          {lastPage !== 0 ? (
+            <PageButton
+              page={count % 20 === 0 ? lastPage - 1 : lastPage}
+              changePage={changePage}
+              active={currentPage === (count % 20 === 0 ? lastPage - 1 : lastPage)}
+              lastPage={lastPage}
+              isLast={true}
+            />
+          ) : null}
         </div>
 
         <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-size0 rounded-md border-solid">
