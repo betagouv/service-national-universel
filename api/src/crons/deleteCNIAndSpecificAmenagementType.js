@@ -24,6 +24,7 @@ exports.handler = async () => {
         countTotal++;
         for (const file of young.files.cniFiles) {
           await deleteFile(`/young/${young._id}/cniFiles/${file._id}`);
+          file.remove();
         }
         young.set({ latestCNIFileExpirationDate: null, latestCNIFileCategory: "deleted" });
         if (young.specificAmenagment === "true") {
