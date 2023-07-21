@@ -551,6 +551,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      console.log(response.body);
       return res.status(200).send(response.body);
     }
   } catch (error) {

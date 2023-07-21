@@ -85,7 +85,7 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
     hitsRequestBody.query = hitsSubQuery(hitsRequestBody.query, key, queryFilters[keyWithoutKeyword], customQueries);
   }
   // Aggs request body
-  const aggsRequestBody = { query: getMainQuery(), aggs: aggsSubQuery(filterFields, search, queryFilters, contextFilters, customQueries), size: size, track_total_hits: true };
+  const aggsRequestBody = { query: getMainQuery(), aggs: aggsSubQuery(filterFields, search, queryFilters, contextFilters, customQueries), size: 0, track_total_hits: true };
   return { hitsRequestBody, aggsRequestBody };
 }
 
