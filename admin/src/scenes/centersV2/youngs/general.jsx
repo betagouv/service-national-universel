@@ -20,6 +20,7 @@ export default function General({ updateFilter, focusedSession, filterArray, set
   const [paramData, setParamData] = useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   useEffect(() => {
     updateFilter(selectedFilters);
@@ -47,8 +48,8 @@ export default function General({ updateFilter, focusedSession, filterArray, set
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <div style={{ display: "flex", flexDirection: "column", flex: "1" }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
-          <div className="relative flex-1">
-            <div className="mx-4">
+          <div className="relative flex-1 mb-4 rounded-lg">
+            <div className="mx-4 ron">
               <div className="flex w-full flex-row justify-between">
                 <Filters
                   pageId={pageId}
@@ -63,6 +64,7 @@ export default function General({ updateFilter, focusedSession, filterArray, set
                   setSelectedFilters={setSelectedFilters}
                   paramData={paramData}
                   setParamData={setParamData}
+                  size={size}
                 />
               </div>
               <div className="mt-2 flex flex-row flex-wrap items-center">
@@ -80,6 +82,8 @@ export default function General({ updateFilter, focusedSession, filterArray, set
               paramData={paramData}
               setParamData={setParamData}
               currentEntryOnPage={data?.length}
+              size={size}
+              setSize={setSize}
               render={
                 <table className="mt-6 w-full">
                   <thead className="">

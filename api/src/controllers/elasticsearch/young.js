@@ -416,6 +416,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       "youngPhase1Agreement.keyword",
     ];
     const sortFields = [];
+    const size = body.size;
 
     if (!canSearchInElasticSearch(user, "sessionphase1young")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -468,6 +469,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       page,
       sort: { field: "lastName.keyword", order: "asc" },
       contextFilters,
+      size,
     });
 
     if (["export", "exportBus"].includes(req.params.action)) {
