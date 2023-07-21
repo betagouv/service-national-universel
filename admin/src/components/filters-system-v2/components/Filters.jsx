@@ -104,10 +104,8 @@ export default function Filters({
           count: res.count,
           filters: { ...dataFilter, ...res.newFilters },
         };
-        console.log(res);
         if (paramData.count !== res.count && !firstLoad) newParamData.page = 0;
         setParamData((paramData) => ({ ...paramData, ...newParamData }));
-        //setSize(size);
         setData(res.data);
         if (firstLoad) setFirstLoad(false);
 
@@ -123,7 +121,7 @@ export default function Filters({
   useEffect(() => {
     if (Object.keys(selectedFilters).length === 0) return;
     updateOnParamChange(selectedFilters, paramData, location, route, size);
-  }, [selectedFilters, paramData.page, paramData.sort, location.search, route, size]);
+  }, [selectedFilters, paramData.page, paramData.sort, location, route, size]);
 
   const getDefaultFilters = () => {
     const newFilters = {};

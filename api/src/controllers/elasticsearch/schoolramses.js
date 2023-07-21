@@ -12,9 +12,11 @@ const { serializeRamsesSchools } = require("../../utils/es-serializer");
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
+    const { user, body } = req;
     const searchFields = ["fullName", "city", "zip", "code2022", "typology", "domain"];
     const filterFields = ["region.keyword", "departmentName.keyword", "cohort", "academy"];
     const sortFields = [];
+    const size = body.size;
 
     // Authorization
     if (!canSearchInElasticSearch(req.user, "schoolramses")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -40,6 +42,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       page,
       sort,
       contextFilters,
+      size,
     });
 
     async function getYoungsFromSchoolIds(schoolsIds) {

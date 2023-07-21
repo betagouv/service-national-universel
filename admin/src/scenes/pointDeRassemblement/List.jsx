@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory, useParams, useLocation } from "react-router-dom";
@@ -110,6 +110,7 @@ const ListPoints = ({ user }) => {
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const pageId = "pdrList";
   const [paramData, setParamData] = React.useState({ page: 0 });
+  const [size, setSize] = useState(10);
   const filterArray = [
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
     { title: "Région", name: "region", missingLabel: "Non renseignée", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
@@ -136,6 +137,7 @@ const ListPoints = ({ user }) => {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            size={size}
           />
           <ExportComponent
             title="Exporter"
@@ -181,6 +183,8 @@ const ListPoints = ({ user }) => {
         paramData={paramData}
         setParamData={setParamData}
         currentEntryOnPage={data?.length}
+        size={size}
+        setSize={setSize}
         render={
           <div className="mt-6 mb-2 flex w-full flex-col">
             <hr />
@@ -241,6 +245,7 @@ const ListSessions = ({ user, firstSession }) => {
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const pageId = "pdrListSession";
   const [paramData, setParamData] = React.useState({ page: 0 });
+  const [size, setSize] = useState(10);
   const filterArray = [
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", isSingle: true, defaultValue: [firstSession], allowEmpty: false, sort: (e) => orderCohort(e) },
     {
@@ -296,7 +301,7 @@ const ListSessions = ({ user, firstSession }) => {
   }, [data]);
 
   return (
-    <div className="flex flex-col rounded-lg bg-white">
+    <div className="flex flex-col rounded-lg bg-white mb-4">
       <div className="mx-4">
         <div className="flex w-full flex-row justify-between">
           <Filters
@@ -309,6 +314,7 @@ const ListSessions = ({ user, firstSession }) => {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            size={size}
           />
           <ExportComponent
             title="Exporter"
@@ -356,6 +362,8 @@ const ListSessions = ({ user, firstSession }) => {
         paramData={paramData}
         setParamData={setParamData}
         currentEntryOnPage={data?.length}
+        size={size}
+        setSize={setSize}
         render={
           <div className="mt-6 mb-2 flex w-full flex-col">
             <hr />

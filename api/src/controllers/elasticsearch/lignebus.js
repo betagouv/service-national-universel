@@ -45,6 +45,7 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
 router.post("/search", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
+    const { user, body } = req;
     const searchFields = ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"];
     const filterFields = [
       "busId.keyword",
@@ -66,7 +67,7 @@ router.post("/search", passport.authenticate(["referent"], { session: false, fai
       "lineFillingRate",
     ];
     const sortFields = [];
-
+    const size = body.size;
     // Authorization
     if (!canSearchLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -85,6 +86,7 @@ router.post("/search", passport.authenticate(["referent"], { session: false, fai
       page,
       sort,
       contextFilters,
+      size,
     });
     const response = await esClient.msearch({
       index: "lignebus",

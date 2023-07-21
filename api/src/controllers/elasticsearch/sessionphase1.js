@@ -11,10 +11,11 @@ const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
+    const { user, body } = req;
     const searchFields = ["nameCentre", "cityCentre", "zipCentre", "codeCentre"];
     const filterFields = ["department.keyword", "region.keyword", "cohort.keyword", "code.keyword", "placesLeft", "hasTimeSchedule.keyword", "typology.keyword", "domain.keyword"];
     const sortFields = [];
-
+    const size = body.size;
     // Authorization
     if (!canSearchInElasticSearch(req.user, "sessionphase1")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -26,7 +27,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
 
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
 
     if (req.params.action === "export") {
       const response = await allRecords("sessionphase1", hitsRequestBody.query, esClient, exportFields);

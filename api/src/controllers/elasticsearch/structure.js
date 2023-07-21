@@ -51,7 +51,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "structurePubliqueEtatType.keyword",
     ];
     const sortFields = [];
-
+    const size = body.size;
     // Authorization
     if (!canSearchInElasticSearch(req.user, "structure")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -75,6 +75,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       page,
       sort,
       contextFilters,
+      size,
     });
 
     let structures;

@@ -38,6 +38,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "delayedBack.keyword",
     ];
     const sortFields = [];
+    const size = body.size;
 
     // Authorization
     if (!canSearchLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -81,6 +82,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       page,
       sort,
       contextFilters,
+      size,
     });
     if (req.params.action === "export") {
       const response = await allRecords("plandetransport", hitsRequestBody.query);

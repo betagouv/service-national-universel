@@ -12,13 +12,14 @@ const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
+    const { user, body } = req;
+
     const searchFields = ["name", "city", "zip", "code2022", "typology", "domain"];
     const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "typology.keyword", "domain.keyword"];
     const sortFields = [];
-
     // Authorization
     if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
+    const size = body.size;
     // Body params validation
     const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -29,7 +30,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
 
     // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
 
     if (req.params.action === "export") {
       const response = await allRecords("cohesioncenter", hitsRequestBody.query);

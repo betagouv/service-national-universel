@@ -28,13 +28,15 @@ export default function PaginationServerDriven({
   const lastDisplayItem = currentPage * itemsPerPage + itemsCount;
   const lastPage = Math.floor(count / size);
   const pages = [];
+  const totalhits = currentPage * itemsPerPage + itemsCount;
+  const actualHits = currentPage * itemsPerPage + 1;
   const sizeOptions = [
     { label: "10", value: 10 },
     { label: "20", value: 20 },
-    { label: "30", value: 30 },
     { label: "40", value: 40 },
     { label: "50", value: 50 },
   ];
+
   switch (true) {
     case lastDisplayItem === count: //derniere page
       for (let i = firstDisplayPage - 1; i <= lastDisplayPage - 1; ++i) {
@@ -93,6 +95,15 @@ export default function PaginationServerDriven({
       }
     }
   }
+  React.useEffect(() => {
+    if (totalhits > count) {
+      if (count % size === 0) {
+        changePage && changePage(lastPage - 1);
+      } else {
+        changePage && changePage(lastPage);
+      }
+    }
+  }, [size]);
   return (
     <div className={`flex items-center justify-between gap-1 ${className}`}>
       <div className="text-xs flex gap-1 justify-center items-center text-[#242526]">
@@ -106,7 +117,7 @@ export default function PaginationServerDriven({
         Éléments par page
       </div>
       <div className="text-[12px] text-[#242526]">
-        {currentPage * itemsPerPage + 1} - {currentPage * itemsPerPage + itemsCount} sur {count === 10000 ? "plus de 10000" : count}
+        {actualHits} - {totalhits} sur {count === 10000 ? "plus de 10000" : count}
       </div>
       <div className="flex gap-1 items-center justify-center">
         <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-size0 rounded-md border-solid">
