@@ -18,6 +18,8 @@
   "author": "Selego",
   "license": "ISC",
   "dependencies": {
+    "@sentry/integrations": "^7.58.1",
+    "@sentry/node": "^7.58.1",
     "body-parser": "^1.19.1",
     "cors": "^2.8.5",
     "dotenv": "^11.0.0",
@@ -25,10 +27,15 @@
     "helmet": "^5.0.1",
     "joi": "^17.6.0",
     "jsonwebtoken": "^9.0.0",
+    "node-cron": "^3.0.2",
     "nodemon": "^2.0.15",
     "pg": "^8.7.3",
-    "sequelize": "^6.29.0",
-    "@sentry/integrations": "^7.58.1",
-    "@sentry/node": "^7.58.1"
+    "sequelize": "^6.29.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.0"
   }
 }

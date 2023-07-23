@@ -18,7 +18,7 @@ export default function StepSejour() {
       <div className="my-2 font-semibold">Séjours de cohésion disponibles</div>
       <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
       <div className="my-4">{data.sessions?.map((e) => SessionButton(e))}</div>
-      {data.sessions?.length < 3 && (
+      {/* {data.sessions?.length < 3 && (
         <>
           <div className="py-2 font-semibold">Pourquoi je ne vois pas tous les séjours ?</div>
           <div className="text-sm text-gray-500">
@@ -31,7 +31,7 @@ export default function StepSejour() {
             <Link to="/public-engagements">Consulter d’autres dispositifs d’engagement</Link>
           </div>
         </>
-      )}
+      )} */}
       <SignupButtonContainer onClickPrevious={() => history.push("/preinscription/")} />
     </DSFRContainer>
   );

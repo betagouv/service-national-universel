@@ -5,7 +5,7 @@ import Wrapper from "../Wrapper";
 import Breadcrumb from "../BreadCrumb";
 import KnowledgeBasePublicSection from "./KnowledgeBasePublicSectionOld";
 import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
-import KnowledgeBasePublicArticle from "./KnowledgeBasePublicArticle";
+import KnowledgeBasePublicArticleOld from "./KnowledgeBasePublicArticleOld";
 
 const KnowledgeBasePublicContent = ({ item, isLoading }) => {
   const group = useMemo(() => {
@@ -39,10 +39,10 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
           </div>
         </div>
         {!item || isLoading ? (
-          <>{loadingType === "section" ? <KnowledgeBasePublicSection isLoading /> : <KnowledgeBasePublicArticle isLoading />}</>
+          <>{loadingType === "section" ? <KnowledgeBasePublicSection isLoading /> : <KnowledgeBasePublicArticleOld isLoading />}</>
         ) : (
           <>
-            {item.type === "article" && <KnowledgeBasePublicArticle item={item} isLoading={isLoading} />}
+            {item.type === "article" && <KnowledgeBasePublicArticleOld item={item} isLoading={isLoading} />}
             {item.type === "section" && <KnowledgeBasePublicSection item={item} isLoading={isLoading} />}
             <KnowledgeBasePublicNoAnswer />
           </>

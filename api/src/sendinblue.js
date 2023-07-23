@@ -317,4 +317,18 @@ async function unsync(obj, { force } = { force: false }) {
   }
 }
 
-module.exports = { api, sync, unsync, sendSMS, sendEmail, getEmailsList, getEmailContent, sendTemplate, createContact, updateContact, deleteContact, getContact };
+module.exports = {
+  regexp_exception_staging,
+  api,
+  sync,
+  unsync,
+  sendSMS,
+  sendEmail,
+  getEmailsList,
+  getEmailContent,
+  sendTemplate,
+  createContact,
+  updateContact,
+  deleteContact,
+  getContact,
+};

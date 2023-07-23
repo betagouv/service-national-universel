@@ -11,11 +11,9 @@ import StepConfirm from "./steps/stepConfirm";
 import StepDone from "./steps/stepDone";
 
 import { useSelector } from "react-redux";
-import { inscriptionCreationOpenForYoungs } from "snu-lib";
 import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import Footer from "../../components/footerV2";
 import Header from "../../components/header";
-import { environment } from "../../config";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -41,17 +39,10 @@ const Step = () => {
     return <Redirect to={`/preinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
-  if (!inscriptionCreationOpenForYoungs("", false, environment)) {
-    return <Redirect to="/" />;
-  }
-
   return renderStepResponsive(currentStep);
 };
 
 export default function Index() {
-  // Inscriptions are currently closed in production
-  if (environment === "production") return <Redirect to="/auth" />;
-
   const young = useSelector((state) => state.Auth.young);
   if (young) return <Redirect to="/" />;
 

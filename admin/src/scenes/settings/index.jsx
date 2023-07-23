@@ -26,12 +26,15 @@ const cohortList = [
   { label: "Avril 2023 - B", value: "Avril 2023 - B" },
   { label: "Juin 2023", value: "Juin 2023" },
   { label: "Juillet 2023", value: "Juillet 2023" },
+  { label: "Octobre 2023 - NC", value: "Octobre 2023 - NC" },
 ];
+
+const defaultCohort = "Octobre 2023 - NC";
 
 export default function Settings() {
   const { user } = useSelector((state) => state.Auth);
   const urlParams = new URLSearchParams(window.location.search);
-  const [cohort, setCohort] = React.useState(urlParams.get("cohort") || "Février 2023 - C");
+  const [cohort, setCohort] = React.useState(urlParams.get("cohort") || defaultCohort);
   const [isLoading, setIsLoading] = React.useState(true);
   const readOnly = !isSuperAdmin(user);
   const [noChange, setNoChange] = React.useState(true);

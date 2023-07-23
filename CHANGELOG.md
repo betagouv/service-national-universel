@@ -1,3 +1,51 @@
+# [1.315.0](https://github.com/betagouv/service-national-universel/compare/v1.314.0...v1.315.0) (2023-07-20)
+
+
+### Bug Fixes
+
+* **Admin:** update manual inscription -> young start with the status: "WAITING_VALIDATION" ([#2824](https://github.com/betagouv/service-national-universel/issues/2824)) ([e6bf6cb](https://github.com/betagouv/service-national-universel/commit/e6bf6cb709dd782c88160648858aaa0cc082b9c6))
+* **app:** reduce spacing to make both button visible on signin desktop page ([f893b01](https://github.com/betagouv/service-national-universel/commit/f893b0165f958b2fd3325d2bed4746db73b78043))
+* **app:** typo ([a68b638](https://github.com/betagouv/service-national-universel/commit/a68b638362573123400cfbe67efb894e4f6920b3))
+
+
+### Features
+
+* **app:** add bouton to inscription on auth page ([0d58ecc](https://github.com/betagouv/service-national-universel/commit/0d58eccefe27d96fb198f7ab89705493725df812))
+* **app:** open inscription on production ([ab8dfdf](https://github.com/betagouv/service-national-universel/commit/ab8dfdf1992f15e3086f2f76c63d5ae61f75a000))
+* **app/admin:** Cookie based connection ([#2819](https://github.com/betagouv/service-national-universel/issues/2819)) ([702708e](https://github.com/betagouv/service-national-universel/commit/702708e4e924dece2f607c2bfed42a9891a56f7a))
+
+# [1.314.0](https://github.com/betagouv/service-national-universel/compare/v1.313.0...v1.314.0) (2023-07-19)
+
+
+### Bug Fixes
+
+* **analytics:** ESLINT on analytics ([7f2f328](https://github.com/betagouv/service-national-universel/commit/7f2f328032e13fc2b27517791941a50dcace588a))
+* **app:** empty school object if toggle isAbroad ([28e06db](https://github.com/betagouv/service-national-universel/commit/28e06dbd03f1905ac4fb8b7d192d5b5dcccb03d7))
+* **app, admin:** Vite : force dependency pre-bundling ([ee54338](https://github.com/betagouv/service-national-universel/commit/ee54338400db3a111027e974e3178c8bd3ed27bc))
+* **lib:** eligibilit date ([a56ff5b](https://github.com/betagouv/service-national-universel/commit/a56ff5baa5a4a0fe6c4018f893150a1ca9b9e1db))
+
+
+### Features
+
+* **analytics:** cron jdma ([#2807](https://github.com/betagouv/service-national-universel/issues/2807)) ([d9e9e05](https://github.com/betagouv/service-national-universel/commit/d9e9e05f46cc90292297ff9cde0f00e6266442a8))
+* **analytics:** Feat cron jdma v2 ([#2822](https://github.com/betagouv/service-national-universel/issues/2822)) ([1e12f8b](https://github.com/betagouv/service-national-universel/commit/1e12f8b7d3ec172a15e2029fbefb9ff525e4e113))
+* **api:** Short code 2fa ([#2815](https://github.com/betagouv/service-national-universel/issues/2815)) ([cb71652](https://github.com/betagouv/service-national-universel/commit/cb716523b18632f6e61faefcb018804dd1ee4500))
+* **app:** Préinscription : message de non éligibilité dynamique ([#2817](https://github.com/betagouv/service-national-universel/issues/2817)) ([ad44f35](https://github.com/betagouv/service-national-universel/commit/ad44f357bcb60b5b3a77c100cd1e84ee37a26ea0))
+* **app/admin/lib:** official dates for october ([#2823](https://github.com/betagouv/service-national-universel/issues/2823)) ([ca70f2b](https://github.com/betagouv/service-national-universel/commit/ca70f2b9e5880e37d2ce249800d911bce9b20dfe))
+
+# [1.313.0](https://github.com/betagouv/service-national-universel/compare/v1.312.0...v1.313.0) (2023-07-18)
+
+
+### Bug Fixes
+
+* **app:** Coquille dans le front ([#2811](https://github.com/betagouv/service-national-universel/issues/2811)) ([84c6029](https://github.com/betagouv/service-national-universel/commit/84c60292b404cbb999317e47b636fe03df008d30))
+* **app, api:** Réparer l'inscription ([#2808](https://github.com/betagouv/service-national-universel/issues/2808)) ([72339fb](https://github.com/betagouv/service-national-universel/commit/72339fb846bfa85b22d5d64f5e95161390eadb6d))
+
+
+### Features
+
+* **BDF front:** Modification de la page article ([#2809](https://github.com/betagouv/service-national-universel/issues/2809)) ([6048185](https://github.com/betagouv/service-national-universel/commit/6048185c6f16e6a9adc95d7fa4a81733cb8990b5))
+
 # [1.312.0](https://github.com/betagouv/service-national-universel/compare/v1.311.0...v1.312.0) (2023-07-17)
 
 

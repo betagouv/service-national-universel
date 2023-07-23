@@ -207,7 +207,22 @@ const STRUCTURE_STATUS = {
 
 const DEFAULT_STRUCTURE_NAME = "Ma nouvelle Structure";
 
-const COHORTS = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023"];
+const COHORTS = [
+  "2019",
+  "2020",
+  "2021",
+  "2022",
+  "Février 2022",
+  "Juin 2022",
+  "Juillet 2022",
+  "Février 2023 - C",
+  "Avril 2023 - B",
+  "Avril 2023 - A",
+  "Juin 2023",
+  "Juillet 2023",
+  "Octobre 2023 - NC",
+  "à venir",
+];
 
 const COHORTS_BEFORE_JULY_2023 = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023"];
 
@@ -476,6 +491,7 @@ const COHESION_STAY_LIMIT_DATE = {
   "Avril 2023 - A": "du 9 au 21 Avril 2023",
   "Juin 2023": "du 11 au 23 Juin 2023",
   "Juillet 2023": "du 5 au 17 Juillet 2023",
+  "Octobre 2023 - NC": "du 9 au 20 Octobre 2023",
   "à venir": "à venir",
 };
 
@@ -491,6 +507,7 @@ const COHESION_STAY_START = {
   "Avril 2023 - B": new Date("04/16/2023"),
   "Juin 2023": new Date("06/11/2023"),
   "Juillet 2023": new Date("07/05/2023"),
+  "Octobre 2023 - NC": new Date("10/09/2023"),
 };
 
 const START_DATE_SESSION_PHASE1 = {
@@ -502,6 +519,7 @@ const START_DATE_SESSION_PHASE1 = {
   "Avril 2023 - B": new Date("04/16/2023"),
   "Juin 2023": new Date("06/11/2023"),
   "Juillet 2023": new Date("07/04/2023"),
+  "Octobre 2023 - NC": new Date("10/09/2023"),
 };
 
 const START_DATE_PHASE1 = {
@@ -528,6 +546,7 @@ const PHASE1_YOUNG_ACCESS_LIMIT = {
   "Avril 2023 - B": new Date(2023, 1, 28), // before 28 fevrier 2023 morning
   "Juin 2023": new Date(2023, 3, 19), // before 19 avril 2023 morning
   "Juillet 2023": new Date(2023, 4, 11), // before 11 mai 2023 morning
+  "Octobre 2023 - NC": new Date(2023, 9, 1), // before 1 september 2023 morning  @todo: A modifier quand on connaitra la date
 };
 
 const CONSENTMENT_TEXTS = {
