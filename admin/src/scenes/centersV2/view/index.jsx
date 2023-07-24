@@ -22,6 +22,7 @@ import Loader from "../../../components/Loader";
 import ToggleDate from "../../../components/ui/forms/dateForm/ToggleDate";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import TimeSchedule from "../components/TimeSchedule";
+import PedagoProject from "../components/PedagoProject";
 
 export default function Index({ ...props }) {
   const history = useHistory();
@@ -360,7 +361,10 @@ export default function Index({ ...props }) {
                     </div>
                   </div>
                 </div>
-                <TimeSchedule session={focusedSession} className="p-8" onSessionChanged={onSessionChanged} />
+                <div className="flex mx-4 mt-4 gap-2 pb-4 justify-center">
+                  <PedagoProject session={focusedSession} className="p-1" onSessionChanged={onSessionChanged} />
+                  <TimeSchedule session={focusedSession} className="p-1" onSessionChanged={onSessionChanged} />
+                </div>
               </div>
             )}
           </div>

@@ -1,6 +1,6 @@
 import * as React from "react";
 
-const Cni = (props) => (
+const UploadedFileIcon = (props) => (
   <svg width={85} height={85} viewBox="0 0 85 85" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
     <path
       d="M70.3338 11.3662C72.1184 11.3662 73.5752 12.8407 73.5752 14.6469V80.0855C73.5752 81.8917 72.1184 83.3662 70.3338 83.3662H18.8166C17.032 83.3662 15.5752 81.8917 15.5752 80.0855V14.6469C15.5752 12.8407 17.032 11.3662 18.8166 11.3662H70.3338Z"
@@ -36,4 +36,4 @@ const Cni = (props) => (
   </svg>
 );
 
-export default Cni;
+export default UploadedFileIcon;
