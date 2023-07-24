@@ -105,8 +105,8 @@ class Auth {
         emailVerified: "false",
       });
       const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_MAX_AGE });
-      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions());
-      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions());
+      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(JWT_MAX_AGE));
+      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(JWT_MAX_AGE));
 
       await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
         emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
@@ -192,8 +192,8 @@ class Auth {
       await user.save();
 
       const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
-      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions());
-      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions());
+      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(JWT_MAX_AGE));
+      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(JWT_MAX_AGE));
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       return res.status(200).send({
@@ -231,11 +231,11 @@ class Auth {
       await user.save();
 
       const trustToken = jwt.sign({}, config.secret, { expiresIn: TRUST_TOKEN_MAX_AGE });
-      res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions());
+      res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(TRUST_TOKEN_MAX_AGE));
 
       const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
-      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions());
-      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions());
+      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(JWT_MAX_AGE));
+      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(JWT_MAX_AGE));
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       return res.status(200).send({
@@ -313,8 +313,8 @@ class Auth {
       await user.save();
 
       const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
-      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions());
-      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions());
+      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(JWT_MAX_AGE));
+      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(JWT_MAX_AGE));
 
       return res.status(200).send({ ok: true, user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
     } catch (error) {
