@@ -55,8 +55,9 @@ function PedagoProjectFile({ session, file, onDelete, className = "" }) {
       }
     } catch (err) {
       toastr.error("Une erreur s'est produite lors de la suppression du fichier. Veuillez réessayer dans quelques instants.");
+    } finally {
+      setCommunicating(false);
     }
-    setCommunicating(false);
   }
 
   async function downloadFile() {
@@ -103,7 +104,7 @@ function DropZone({ session, className = "", sessionChanged }) {
   }
 
   function getFileFromInput(e) {
-    if (e && e.target && e.target.files && e.target.files.length > 0) {
+    if (e?.target?.files?.length > 0) {
       uploadFile(e.target.files[0]);
     }
   }

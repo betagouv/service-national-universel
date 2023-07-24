@@ -9,6 +9,7 @@ import api from "../../../services/api";
 import queryString from "query-string";
 import { ROLES } from "snu-lib/roles";
 import { useSelector } from "react-redux";
+import UploadedFileIcon from "../../../assets/icons/UploadedFileIcon";
 
 export default function PedagoProject({ session, className = "", onSessionChanged }) {
   const [modalOpened, setModalOpened] = useState(false);
@@ -24,6 +25,7 @@ export default function PedagoProject({ session, className = "", onSessionChange
   const hasPedagoProject = session.pedagoProjectFiles && session.pedagoProjectFiles.length > 0;
 
   async function sendReminder() {
+    if (!session.headCenterId) return toastr.error("Une erreur est survenue. Veuillez réessayer dans quelques instants.");
     if (session.headCenterId) {
       try {
         const result = await api.post(`/session-phase1/${session._id}/pedago-project/send-reminder`, {});
@@ -44,7 +46,7 @@ export default function PedagoProject({ session, className = "", onSessionChange
   return (
     <div className={`items-center justify-center ${className}`}>
       <div className="flex items-center rounded-lg bg-gray-50 p-9">
-        <EmptyFileIcon />
+        {hasPedagoProject ? <UploadedFileIcon /> : <EmptyFileIcon />}
         <div className="grow-1 mx-7">
           <div className="text-sm font-bold text-[#242526]">
             Projet pédagogique : <span className="font-normal">{hasPedagoProject ? "Déposé" : "Non déposé"}</span>

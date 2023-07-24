@@ -719,16 +719,7 @@ router.get("/:sessionId/:key/:fileId", passport.authenticate(["referent"], { ses
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const file =
-      key === "time-schedule"
-        ? session.timeScheduleFiles
-          ? session.timeScheduleFiles.find((f) => f._id === fileId)
-          : null
-        : key === "pedago-project"
-        ? session.pedagoProjectFiles
-          ? session.pedagoProjectFiles.find((f) => f._id === fileId)
-          : null
-        : null;
+    const file = key === "time-schedule" ? session.timeScheduleFiles.find((f) => f._id === fileId) || null : session.pedagoProjectFiles.find((f) => f._id === fileId) || null;
 
     if (!file) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

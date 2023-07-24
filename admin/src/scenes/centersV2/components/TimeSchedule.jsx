@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Download from "../../../assets/icons/Download";
 import { PlainButton, BorderButton } from "../../phase0/components/Buttons";
-import Cni from "../../../assets/icons/Cni";
+import UploadedFileIcon from "../../../assets/icons/UploadedFileIcon";
 import ModalTimeSchedule from "./modals/ModalTimeSchedule";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
@@ -9,6 +9,7 @@ import api from "../../../services/api";
 import queryString from "query-string";
 import { ROLES } from "snu-lib/roles";
 import { useSelector } from "react-redux";
+import EmptyFileIcon from "../../../assets/icons/EmptyFileIcon";
 
 export default function TimeSchedule({ session, className = "", onSessionChanged }) {
   const [modalOpened, setModalOpened] = useState(false);
@@ -44,7 +45,7 @@ export default function TimeSchedule({ session, className = "", onSessionChanged
   return (
     <div className={`items-center justify-center ${className}`}>
       <div className="flex items-center rounded-lg bg-gray-50 p-9">
-        <Cni />
+        {hasTimeSchedule ? <UploadedFileIcon /> : <EmptyFileIcon />}
         <div className="grow-1 mx-7">
           <div className="text-sm font-bold text-[#242526]">
             Emploi du temps du séjour : <span className="font-normal">{hasTimeSchedule ? "Déposé" : "Non déposé"}</span>
