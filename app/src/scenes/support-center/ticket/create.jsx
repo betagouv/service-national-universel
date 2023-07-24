@@ -110,7 +110,7 @@ export default function TicketCreate(props) {
             }
           }}>
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => {
-            const showForm = (values.step2?.id !== undefined && values.step2.id !== "PHASE_1_WITHDRAWAL") || answerNotFound === true;
+            const showForm = (values.step2?.id !== undefined && !questionModale.includes(values.step2?.id)) || answerNotFound === true;
             return (
               <>
                 <SelectTag
@@ -168,15 +168,14 @@ export default function TicketCreate(props) {
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-3 pt-10">
                       {articles
-                        ?.filter((article) => article.stepId === values.step2?.id) // Filter articles with matching stepId
+                        ?.filter((article) => article.stepId === values.step2?.id)
                         .map((article) => (
                           <a
                             className="bg-white rounded-xl p-3 flex flex-col gap-2 border-2 text-sm hover:border-blue-500 hover:text-gray-800 transition group"
                             href={urlWithScheme(article.url)}
                             target="_blank"
                             rel="noreferrer"
-                            key={article.url} // Use article.url as the key
-                          >
+                            key={article.url}>
                             <p className="flex gap-2 font-semibold">
                               {article.emoji} {article.title}
                             </p>
