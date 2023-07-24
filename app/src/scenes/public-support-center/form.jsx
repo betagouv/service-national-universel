@@ -17,6 +17,7 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
   const [loading, setLoading] = useState(false);
   const [answerNotFound, setAnswerNotFound] = useState(false);
   const { files, addFiles, deleteFile, error } = useFileUpload();
+  const questionModale = ["PHASE_1_WITHDRAWAL", "PHASE_2", "PHASE_2_MISSION", "PHASE_2_JDC", "PHASE_2_LICENSE", "PHASE_3"];
 
   useEffect(() => {
     if (error) {
@@ -80,7 +81,7 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
           }
         }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => {
-          const showForm = (values.step2?.id !== undefined && values.step2?.id !== "PHASE_1_WITHDRAWAL") || answerNotFound;
+          const showForm = (values.step2?.id !== undefined && !questionModale.includes(values.step2?.id)) || answerNotFound;
           return (
             <>
               <Item
@@ -173,23 +174,26 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
                 />
               ) : null}
 
-              {values.step2?.id === "PHASE_1_WITHDRAWAL" && (
+              {questionModale.includes(values.step2?.id) && (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-3 pt-10">
-                    {articles?.map((article) => (
-                      <a
-                        className="bg-white rounded-xl p-3 flex flex-col gap-2 border-2 text-sm hover:border-blue-500 hover:text-gray-800 transition group"
-                        href={urlWithScheme(article.url)}
-                        target="_blank"
-                        rel="noreferrer"
-                        key={article.url}>
-                        <p className="flex gap-2 font-semibold">
-                          {article.emoji} {article.title}
-                        </p>
-                        <p className="">{article.body}</p>
-                        <p className="mt-auto text-right text-blue-600 group-hover:underline underline-offset-4 decoration-2 transition-all">Lire la suite</p>
-                      </a>
-                    ))}
+                    {articles
+                      ?.filter((article) => article.stepId === values.step2?.id) // Filter articles with matching stepId
+                      .map((article) => (
+                        <a
+                          className="bg-white rounded-xl p-3 flex flex-col gap-2 border-2 text-sm hover:border-blue-500 hover:text-gray-800 transition group"
+                          href={urlWithScheme(article.url)}
+                          target="_blank"
+                          rel="noreferrer"
+                          key={article.url} // Use article.url as the key
+                        >
+                          <p className="flex gap-2 font-semibold">
+                            {article.emoji} {article.title}
+                          </p>
+                          <p className="">{article.body}</p>
+                          <p className="mt-auto text-right text-blue-600 group-hover:underline underline-offset-4 decoration-2 transition-all">Lire la suite</p>
+                        </a>
+                      ))}
                   </div>
 
                   <button onClick={handleClick} className="text-blue-600 hover:underline underline-offset-4 decoration-2 mx-3 my-6 text-left">
