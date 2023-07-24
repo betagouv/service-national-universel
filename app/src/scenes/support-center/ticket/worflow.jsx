@@ -204,3 +204,5 @@ export const articles = [
     stepId: "PHASE_3",
   },
 ];
+
+export const questionModale = ["PHASE_1_WITHDRAWAL", "PHASE_2", "PHASE_2_MISSION", "PHASE_2_JDC", "PHASE_2_LICENSE", "PHASE_3"];

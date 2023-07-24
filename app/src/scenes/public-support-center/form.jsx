@@ -9,7 +9,7 @@ import api from "../../services/api";
 import { translate, departmentList, department2region, urlWithScheme } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../inscription2023/components/ErrorMessageOld";
-import { SelectTag, step2Question, step2Technical, step1, articles } from "../support-center/ticket/worflow";
+import { SelectTag, step2Question, step2Technical, step1, articles, questionModale } from "../support-center/ticket/worflow";
 import { capture } from "../../sentry";
 import FileUpload, { useFileUpload } from "../../components/FileUpload";
 
@@ -17,7 +17,6 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
   const [loading, setLoading] = useState(false);
   const [answerNotFound, setAnswerNotFound] = useState(false);
   const { files, addFiles, deleteFile, error } = useFileUpload();
-  const questionModale = ["PHASE_1_WITHDRAWAL", "PHASE_2", "PHASE_2_MISSION", "PHASE_2_JDC", "PHASE_2_LICENSE", "PHASE_3"];
 
   useEffect(() => {
     if (error) {
