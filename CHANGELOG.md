@@ -1,3 +1,16 @@
+# [1.316.0](https://github.com/betagouv/service-national-universel/compare/v1.315.0...v1.316.0) (2023-07-24)
+
+
+### Bug Fixes
+
+* **api:** bug cookie duration ([#2830](https://github.com/betagouv/service-national-universel/issues/2830)) ([392547a](https://github.com/betagouv/service-national-universel/commit/392547a886ff2b5bcfb6d825ca2b7de2dab392a6))
+
+
+### Features
+
+* **admin/api:** permettre au chefs de centre d'importer le projet pédagogique de chaque session ([#2821](https://github.com/betagouv/service-national-universel/issues/2821)) ([4ed77dd](https://github.com/betagouv/service-national-universel/commit/4ed77dda7876def79e08af21efcaa215161acce5))
+* **app:** modif question form + modale bdc ([#2829](https://github.com/betagouv/service-national-universel/issues/2829)) ([866dac8](https://github.com/betagouv/service-national-universel/commit/866dac87f5e2c02f1a9b76c6762f3078e9856239))
+
 # [1.315.0](https://github.com/betagouv/service-national-universel/compare/v1.314.0...v1.315.0) (2023-07-20)
 
 
