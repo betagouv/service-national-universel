@@ -133,7 +133,7 @@ export default function PaginationServerDriven({
             <ChevronLeftPage fill={currentPage > 0 ? "#6B7280" : "#E5E7EB"} />
           </button>
         </div>
-        <div className="flex justify-center items-center min-h-[32px] text-xs text-gray-900 border border-gray-200 rounded-md border-solid">
+        <div className="flex justify-center items-center min-h-[32px] text-xs text-gray-600 border border-gray-200 rounded-md border-solid">
           <PageButton page={0} changePage={changePage} active={currentPage === 0} lastPage={lastPage} />
 
           {currentPage > 2 ? <div className="flex px-1 text-xs text-gray-400 border-gray-size0 border-r border-solid min-h-[32px] items-center">...</div> : null}
@@ -157,7 +157,7 @@ export default function PaginationServerDriven({
           <button
             href="#"
             onClick={goToNext}
-            className={`flex items-center justify-center flex-none w-8 h-8 m-auto border-r border-solid border-gray-size0 ${
+            className={`flex items-center justify-center flex-none w-8 h-8 m-auto border-r border-solid border-gray-200 ${
               lastDisplayItem < count ? "cursor-pointer" : "cursor-not-allowed"
             }`}>
             <ChevronRightPage fill={lastDisplayItem < count ? "#6B7280" : "#E5E7EB"} />
@@ -177,7 +177,7 @@ export default function PaginationServerDriven({
 function PageButton({ page, changePage, active, lastPage, isLast = false }) {
   const getClass = () => {
     let classTab = [];
-    active ? classTab.push("font-bold bg-gray-100") : classTab.push("font-normal"); // la page est active
+    active ? classTab.push("font-bold bg-gray-100 text-gray-900") : classTab.push("font-normal"); // la page est active
     page !== lastPage && !isLast ? classTab.push("border-r border-solid border-gray-size0") : null; // page par default
     page === 0 && active ? classTab.push("rounded-l-md") : null; //premiere page active
     (page === lastPage && active) || isLast === true ? classTab.push("rounded-r-md") : null; //derniere page
