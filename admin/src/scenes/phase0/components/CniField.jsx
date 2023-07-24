@@ -1,4 +1,4 @@
-import Cni from "../../../assets/icons/Cni";
+import UploadedFileIcon from "../../../assets/icons/UploadedFileIcon";
 import { AddButton, DeleteButton, DownloadButton, MiniTitle, MoreButton } from "./commons";
 import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
@@ -83,7 +83,7 @@ export function CniField({
         onMouseEnter={() => setMouseIn(true)}
         onMouseLeave={() => setMouseIn(false)}>
         <div className="shrink-0">
-          <Cni />
+          <UploadedFileIcon />
           <MiniTitle>Pièce d&apos;identité</MiniTitle>
         </div>
         <div className="flex items-center justify-end">
