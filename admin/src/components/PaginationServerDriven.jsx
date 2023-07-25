@@ -87,14 +87,12 @@ export default function PaginationServerDriven({ pageCount, currentPage, count, 
       <div className="flex gap-1 items-center justify-center">
         <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-200 rounded-md border-solid">
           <button
-            href="#"
             onClick={goToPreviousX5}
             className="flex m-auto flex-none w-8 h-8 items-center justify-center border-r border-solid border-gray-200"
             style={currentPage > 0 ? { cursor: "pointer" } : { cursor: "not-allowed" }}>
             <HiChevronDoubleLeft size={16} className={currentPage > 0 ? "text-gray-600" : "text-gray-200"} />
           </button>
           <button
-            href="#"
             onClick={goToPrevious}
             className="flex flex-none w-8 m-auto items-center justify-center"
             style={currentPage > 0 ? { cursor: "pointer" } : { cursor: "not-allowed" }}>
@@ -123,14 +121,12 @@ export default function PaginationServerDriven({ pageCount, currentPage, count, 
 
         <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-200 rounded-md border-solid">
           <button
-            href="#"
             onClick={goToNext}
             className="flex items-center justify-center flex-none w-8 h-8 m-auto border-r border-solid border-gray-200"
             style={lastDisplayItem < count ? { cursor: "pointer" } : { cursor: "not-allowed" }}>
             <HiChevronRight size={16} className={lastDisplayItem < count ? "text-gray-600" : "text-gray-200"} />
           </button>
           <button
-            href="#"
             onClick={goToNextX5}
             className="flex items-center justify-center flex-none w-8 m-auto"
             style={lastDisplayItem < count ? { cursor: "pointer" } : { cursor: "not-allowed" }}>
@@ -153,7 +149,7 @@ function PageButton({ page, changePage, active, lastPage, isLast = false }) {
     return className;
   };
   return (
-    <button href="#" onClick={() => changePage(page)} className={`flex items-center justify-center flex-none w-8 h-8 m-auto ` + getClass()}>
+    <button onClick={() => changePage(page)} className={`flex items-center justify-center flex-none w-8 h-8 m-auto ` + getClass()}>
       {page + 1}
     </button>
   );
