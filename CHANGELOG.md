@@ -1,3 +1,10 @@
+## [1.316.1](https://github.com/betagouv/service-national-universel/compare/v1.316.0...v1.316.1) (2023-07-25)
+
+
+### Bug Fixes
+
+* **lib:** fix display of tickets count ([ef1f60c](https://github.com/betagouv/service-national-universel/commit/ef1f60c5f6436abf929a4ed4197b25fcf9258a3c))
+
 # [1.316.0](https://github.com/betagouv/service-national-universel/compare/v1.315.0...v1.316.0) (2023-07-24)
 
 
