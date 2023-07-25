@@ -91,20 +91,6 @@
   -webkit-font-smoothing: antialiased;
 }
 
-#__next {
-  height: 100vh;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: visible;
-}
-
-* {
-  font-family: Marianne, sans-serif;
-  font-smooth: always;
-  -webkit-font-smoothing: antialiased;
-}
-
 .content {
   max-width: calc(100vw - 3.5rem);
 }
@@ -117,15 +103,6 @@
   direction: ltr;
 }
 
-.show-button-on-hover:hover .button-container {
-  opacity: 1;
-  pointer-events: initial;
-}
-
-.show-button-on-hover .button-container {
-  opacity: 0;
-  pointer-events: none;
-}
 /*
 
 Toastify
@@ -317,18 +294,4 @@ body {
   *::-webkit-scrollbar {
     width: 0 !important;
   }
-}
-
-/*
-
-TICKETS
-
-
-*/
-
-.ticket-message {
-  overflow-wrap: anywhere;
-}
-.ticket-message blockquote {
-  display: none;
 }
