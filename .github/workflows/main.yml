@@ -11,8 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Mirroring
-        uses: pixta-dev/repository-mirroring-action@v1
+        uses: rebasing-xyz/checkout-and-sync@v1
         with:
-          source_repo: "git@github.com:betagouv/service-national-universel.git"
-          target_repo: "git@github.com:michaelgarcia75/snu-mirror.git"
-          ssh_private_key: ${{ secrets.MIROIR_SSH_KEY }}
+          source-repo: "git@github.com:betagouv/service-national-universel.git"
+          destination-repo: "git@github.com:michaelgarcia75/snu-mirror.git"
+          ssh-private-key: ${{ secrets.MIROIR_SSH_KEY }}
