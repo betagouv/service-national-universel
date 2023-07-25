@@ -91,69 +91,6 @@
   -webkit-font-smoothing: antialiased;
 }
 
-#__next {
-  height: 100vh;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: visible;
-}
-
-* {
-  font-family: Marianne, sans-serif;
-  font-smooth: always;
-  -webkit-font-smoothing: antialiased;
-}
-
-@layer base {
-  button,
-  [type="button"],
-  [type="submit"] {
-    padding: 0.5em 3em;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background-color: #5145cc;
-
-    color: white;
-    font-size: 1rem;
-    font-weight: 700;
-
-    border: 2px solid #5145cc;
-    border-radius: 10px;
-    box-shadow: rgb(0 0 0 / 10%) 0px 10px 15px -3px, rgb(0 0 0 / 5%) 0px 4px 6px -2px;
-
-    opacity: 1;
-    cursor: pointer;
-  }
-  button.reset {
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-    padding: 0;
-    display: inline;
-    font-weight: 500;
-  }
-  button.loading {
-    color: transparent;
-  }
-  button:disabled {
-    opacity: 0.5;
-    pointer-events: none;
-    cursor: default;
-  }
-
-  summary::marker {
-    color: #a1a09c;
-  }
-
-  .wrapper {
-    @apply mx-auto max-w-6xl p-4;
-  }
-}
-
 .content {
   max-width: calc(100vw - 3.5rem);
 }
@@ -166,15 +103,6 @@
   direction: ltr;
 }
 
-.show-button-on-hover:hover .button-container {
-  opacity: 1;
-  pointer-events: initial;
-}
-
-.show-button-on-hover .button-container {
-  opacity: 0;
-  pointer-events: none;
-}
 /*
 
 Toastify
@@ -366,18 +294,4 @@ body {
   *::-webkit-scrollbar {
     width: 0 !important;
   }
-}
-
-/*
-
-TICKETS
-
-
-*/
-
-.ticket-message {
-  overflow-wrap: anywhere;
-}
-.ticket-message blockquote {
-  display: none;
 }

@@ -48,7 +48,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
 };
 
 const ArticleLoader = () => (
-  <div className="wrapper mx-auto flex w-full flex-shrink flex-grow flex-col overflow-hidden bg-coolGray-100 print:bg-transparent">
+  <div className="mx-auto max-w-6xl p-4 flex w-full flex-shrink flex-grow flex-col overflow-hidden bg-coolGray-100 print:bg-transparent">
     <div className="relative mb-5  mt-16 h-2 w-full bg-gray-200">
       <div className="animated-background" />
     </div>
