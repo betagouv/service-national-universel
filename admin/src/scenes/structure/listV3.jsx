@@ -100,7 +100,7 @@ const ListStructure = () => {
   ];
 
   return (
-    <div className="flex-column flex-1 flex-wrap bg-white">
+    <div className="flex-column flex-1 flex-wrap bg-white mb-4 rounded-xl">
       <div className="mx-4">
         <div className="flex w-full flex-row justify-between">
           <Filters
