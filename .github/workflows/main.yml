@@ -12,6 +12,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Fetch Git LFS objects
+        run: git lfs fetch --all
+
+      - name: Clean the mirror repository
+        run: |
+          rm -rf /github/workspace/*
 
       - name: Mirroring
         uses: pixta-dev/repository-mirroring-action@v1
