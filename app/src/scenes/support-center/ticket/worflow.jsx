@@ -99,7 +99,7 @@ export const step2Question = {
   PHASE_1: {
     parentId: "QUESTION",
     id: "PHASE_1",
-    label: "Phase 1 - Pendant mon séjour de cohésion",
+    label: "Phase 1 - Mon séjour de cohésion",
     tags: ["TAG_phase_1"],
   },
   PHASE_1_WITHDRAWAL: {
@@ -108,28 +108,28 @@ export const step2Question = {
     label: "Phase 1 - Changer de séjour/se désister",
     tags: ["TAG_phase_1"],
   },
-  PHASE_1_DEPARTURE: {
-    parentId: "QUESTION",
-    id: "PHASE_1_DEPARTURE",
-    label: "Phase 1 - Mon départ en séjour",
-    tags: ["TAG_phase_1"],
-  },
-  PHASE_1_RETURN: {
-    parentId: "QUESTION",
-    id: "PHASE_1_RETURN",
-    label: "Phase 1 - Mon retour de séjour",
-    tags: ["TAG_phase_1"],
-  },
-  PHASE_1_PDR_CHANGE: {
-    parentId: "QUESTION",
-    id: "PHASE_1_PDR_CHANGE",
-    label: "Phase 1 - Changer de point de rassemblement",
-    tags: ["TAG_phase_1"],
-  },
   PHASE_2: {
     parentId: "QUESTION",
     id: "PHASE_2",
-    label: "Phase 2 - Mission d'intérêt général",
+    label: "Phase 2 - Comment trouver une Mission d'intérêt général ?",
+    tags: ["TAG_phase_2"],
+  },
+  PHASE_2_MISSION: {
+    parentId: "QUESTION",
+    id: "PHASE_2_MISSION",
+    label: "Phase 2 - J'ai trouvé une Mission d'intérêt général mais elle n'est pas sur la plateforme comment faire ?",
+    tags: ["TAG_phase_2"],
+  },
+  PHASE_2_CANDIDATURE: {
+    parentId: "QUESTION",
+    id: "PHASE_2_CANDIDATURE",
+    label: "Phase 2 - Je n'ai pas de nouvelle de ma candidature",
+    tags: ["TAG_phase_2"],
+  },
+  PHASE_2_JDC: {
+    parentId: "QUESTION",
+    id: "PHASE_2_JDC",
+    label: "Phase 2 - Ma JDC / Mon CIP",
     tags: ["TAG_phase_2"],
   },
   PHASE_2_LICENSE: {
@@ -159,11 +159,50 @@ export const articles = [
     emoji: "🌲",
     body: "Vous n'êtes plus disponible pendant votre séjour ? Découvrer comment transférer votre inscription sur un autre séjour du SNU.",
     url: `${supportURL}/base-de-connaissance/je-souhaite-changer-les-dates-de-mon-sejour`,
+    stepId: "PHASE_1_WITHDRAWAL",
   },
   {
     title: "Phase 1 : Se désister",
     emoji: "😕",
     body: "Vous n'êtes plus en mesure de participer au séjour ? Vous pouvez vous désister directement depuis votre espace.",
     url: `${supportURL}/base-de-connaissance/je-me-desiste-du-snu`,
+    stepId: "PHASE_1_WITHDRAWAL",
+  },
+  {
+    title: "Phase 2 : Comment trouver une MIG ?",
+    emoji: "🤝",
+    body: "Vous souhaitez des renseignements sur les MIG ?",
+    url: `${supportURL}/base-de-connaissance/comment-trouver-une-mig`,
+    stepId: "PHASE_2",
+  },
+  {
+    title: "Phase 2 : Je ne trouve pas de mission qui m'intéresse",
+    emoji: "😐",
+    body: "Vous ne trouvez pas la MIG qui vous intéresse ?",
+    url: `${supportURL}/base-de-connaissance/je-ne-trouve-pas-de-mission-qui-minteresse`,
+    stepId: "PHASE_2_MISSION",
+  },
+  {
+    title: "Phase 2 : Journée défense et citoyenneté (JDC, recensement, JDM)",
+    emoji: "📣",
+    body: "Tout connaître sur la JDC ?",
+    url: `${supportURL}/base-de-connaissance/journee-defense-et-citoyennete`,
+    stepId: "PHASE_2_JDC",
+  },
+  {
+    title: "Phase 2 : Prise en charge du e-learning et de l'examen du code de la route",
+    emoji: "🚗",
+    body: "Vous vous demandez comment obtenir votre code de la route via le SNU ?",
+    url: `${supportURL}/base-de-connaissance/permis-et-code-de-la-route`,
+    stepId: "PHASE_2_LICENSE",
+  },
+  {
+    title: "Phase 3 : Comment fonctionne la phase 3 ?",
+    emoji: "🌟",
+    body: "Vous souhaitez comprendre le déroulement de la phase 3 du SNU ?",
+    url: `${supportURL}/base-de-connaissance/comment-fonctionne-la-phase-3`,
+    stepId: "PHASE_3",
   },
 ];
+
+export const questionModale = ["PHASE_1_WITHDRAWAL", "PHASE_2", "PHASE_2_MISSION", "PHASE_2_JDC", "PHASE_2_LICENSE", "PHASE_3"];

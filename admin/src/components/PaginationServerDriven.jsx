@@ -1,11 +1,11 @@
-import DoubleChevronRight from "../assets/icons/DoubleChevronRight";
-import ChevronRightPage from "../assets/icons/ChevronRightPage";
-import DoubleChevronLeft from "../assets/icons/DoubleChevronLeft";
-import ChevronLeftPage from "../assets/icons/ChevronLeftPage";
+import { HiChevronDoubleLeft } from "react-icons/hi";
+import { HiChevronDoubleRight } from "react-icons/hi";
+import { HiChevronLeft } from "react-icons/hi";
+import { HiChevronRight } from "react-icons/hi";
+
 /**
  * Ce composant va avec le HistoricServerDriven.
  * Il gère les données de pagination en provenance du serveur.
- * Et il reprend la forme de la pagination des reactlist.
  */
 import React from "react";
 
@@ -86,24 +86,13 @@ export default function PaginationServerDriven({
   function goToNextX5(e) {
     e.preventDefault();
     if (lastDisplayItem < count && lastDisplayItem + 100 < count) {
-      changePage && changePage(currentPage + 5);
-    } else {
-      if (count % size === 0) {
-        changePage && changePage(lastPage - 1);
-      } else {
-        changePage && changePage(lastPage);
-      }
+      return changePage && changePage(currentPage + 5);
     }
+    if (count % size === 0) {
+      return changePage && changePage(lastPage - 1);
+    }
+    return changePage && changePage(lastPage);
   }
-  React.useEffect(() => {
-    if (totalhits > count) {
-      if (count % size === 0) {
-        changePage && changePage(lastPage - 1);
-      } else {
-        changePage && changePage(lastPage);
-      }
-    }
-  }, [size]);
   return (
     <div className={`flex items-center justify-between gap-1 ${className}`}>
       <div className="text-xs flex gap-1 justify-center items-center text-[#242526]">
@@ -120,53 +109,52 @@ export default function PaginationServerDriven({
         {actualHits} <span className="font-normal">-</span> {totalhits} <span className="font-normal"> sur </span> {count === 10000 ? "plus de 10000" : count}
       </div>
       <div className="flex gap-1 items-center justify-center">
-        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-size0 rounded-md border-solid">
+        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-200 rounded-md border-solid">
           <button
-            href="#"
             onClick={goToPreviousX5}
-            className={`flex m-auto flex-none w-8 h-8 items-center justify-center border-r border-solid border-gray-size0 ${
-              currentPage > 0 ? "cursor-pointer" : "cursor-not-allowed"
-            }`}>
-            <DoubleChevronLeft fill={currentPage > 0 ? "#6B7280" : "#E5E7EB"} />
+            className="flex m-auto flex-none w-8 h-8 items-center justify-center border-r border-solid border-gray-200"
+            style={currentPage > 0 ? { cursor: "pointer" } : { cursor: "not-allowed" }}>
+            <HiChevronDoubleLeft size={16} className={currentPage > 0 ? "text-gray-600" : "text-gray-200"} />
           </button>
-          <button href="#" onClick={goToPrevious} className={`flex flex-none w-8 m-auto items-center justify-center ${currentPage > 0 ? "cursor-pointer" : "cursor-not-allowed"}`}>
-            <ChevronLeftPage fill={currentPage > 0 ? "#6B7280" : "#E5E7EB"} />
+          <button
+            onClick={goToPrevious}
+            className="flex flex-none w-8 m-auto items-center justify-center"
+            style={currentPage > 0 ? { cursor: "pointer" } : { cursor: "not-allowed" }}>
+            <HiChevronLeft size={16} className={currentPage > 0 ? "text-gray-600" : "text-gray-200"} />
           </button>
         </div>
         <div className="flex justify-center items-center min-h-[32px] text-xs text-gray-600 border border-gray-200 rounded-md border-solid">
           <PageButton page={0} changePage={changePage} active={currentPage === 0} lastPage={lastPage} />
 
-          {currentPage > 2 ? <div className="flex px-1 text-xs text-gray-400 border-gray-size0 border-r border-solid min-h-[32px] items-center">...</div> : null}
+          {currentPage > 2 ? <div className="flex px-1 text-xs text-gray-400 border-gray-200 border-r border-solid min-h-[32px] items-center">...</div> : null}
 
           {pages}
-          {currentPage < (count % 20 === 0 ? lastPage - 3 : lastPage - 2) ? (
+          {currentPage < (count % size === 0 ? lastPage - 3 : lastPage - 2) ? (
             <div className="flex px-1 text-xs text-gray-400 border-gray-200 border-r border-solid min-h-[32px] items-center">...</div>
           ) : null}
           {lastPage !== 0 ? (
             <PageButton
-              page={count % 20 === 0 ? lastPage - 1 : lastPage}
+              page={count % size === 0 ? lastPage - 1 : lastPage}
               changePage={changePage}
-              active={currentPage === (count % 20 === 0 ? lastPage - 1 : lastPage)}
+              active={currentPage === (count % size === 0 ? lastPage - 1 : lastPage)}
               lastPage={lastPage}
               isLast={true}
             />
           ) : null}
         </div>
 
-        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-size0 rounded-md border-solid">
+        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-200 rounded-md border-solid">
           <button
-            href="#"
             onClick={goToNext}
-            className={`flex items-center justify-center flex-none w-8 h-8 m-auto border-r border-solid border-gray-200 ${
-              lastDisplayItem < count ? "cursor-pointer" : "cursor-not-allowed"
-            }`}>
-            <ChevronRightPage fill={lastDisplayItem < count ? "#6B7280" : "#E5E7EB"} />
+            className="flex items-center justify-center flex-none w-8 h-8 m-auto border-r border-solid border-gray-200"
+            style={lastDisplayItem < count ? { cursor: "pointer" } : { cursor: "not-allowed" }}>
+            <HiChevronRight size={16} className={lastDisplayItem < count ? "text-gray-600" : "text-gray-200"} />
           </button>
           <button
-            href="#"
             onClick={goToNextX5}
-            className={`flex items-center justify-center flex-none w-8 m-auto ${lastDisplayItem < count ? "cursor-pointer" : "cursor-not-allowed"}`}>
-            <DoubleChevronRight fill={lastDisplayItem < count ? "#6B7280" : "#E5E7EB"} />
+            className="flex items-center justify-center flex-none w-8 m-auto"
+            style={lastDisplayItem < count ? { cursor: "pointer" } : { cursor: "not-allowed" }}>
+            <HiChevronDoubleRight size={16} className={lastDisplayItem < count ? "text-gray-600" : "text-gray-200"} />
           </button>
         </div>
       </div>
@@ -178,14 +166,14 @@ function PageButton({ page, changePage, active, lastPage, isLast = false }) {
   const getClass = () => {
     let classTab = [];
     active ? classTab.push("font-bold bg-gray-100 text-gray-900") : classTab.push("font-normal"); // la page est active
-    page !== lastPage && !isLast ? classTab.push("border-r border-solid border-gray-size0") : null; // page par default
+    page !== lastPage && !isLast ? classTab.push("border-r border-solid border-gray-200") : null; // page par default
     page === 0 && active ? classTab.push("rounded-l-md") : null; //premiere page active
     (page === lastPage && active) || isLast === true ? classTab.push("rounded-r-md") : null; //derniere page
     const className = classTab.join(" ");
     return className;
   };
   return (
-    <button href="#" onClick={() => changePage(page)} className={`flex items-center justify-center flex-none w-8 h-8 m-auto ` + getClass()}>
+    <button onClick={() => changePage(page)} className={`flex items-center justify-center flex-none w-8 h-8 m-auto ` + getClass()}>
       {page + 1}
     </button>
   );

@@ -1,3 +1,32 @@
+# [1.316.0](https://github.com/betagouv/service-national-universel/compare/v1.315.0...v1.316.0) (2023-07-24)
+
+
+### Bug Fixes
+
+* **api:** bug cookie duration ([#2830](https://github.com/betagouv/service-national-universel/issues/2830)) ([392547a](https://github.com/betagouv/service-national-universel/commit/392547a886ff2b5bcfb6d825ca2b7de2dab392a6))
+
+
+### Features
+
+* **admin/api:** permettre au chefs de centre d'importer le projet pédagogique de chaque session ([#2821](https://github.com/betagouv/service-national-universel/issues/2821)) ([4ed77dd](https://github.com/betagouv/service-national-universel/commit/4ed77dda7876def79e08af21efcaa215161acce5))
+* **app:** modif question form + modale bdc ([#2829](https://github.com/betagouv/service-national-universel/issues/2829)) ([866dac8](https://github.com/betagouv/service-national-universel/commit/866dac87f5e2c02f1a9b76c6762f3078e9856239))
+
+# [1.315.0](https://github.com/betagouv/service-national-universel/compare/v1.314.0...v1.315.0) (2023-07-20)
+
+
+### Bug Fixes
+
+* **Admin:** update manual inscription -> young start with the status: "WAITING_VALIDATION" ([#2824](https://github.com/betagouv/service-national-universel/issues/2824)) ([e6bf6cb](https://github.com/betagouv/service-national-universel/commit/e6bf6cb709dd782c88160648858aaa0cc082b9c6))
+* **app:** reduce spacing to make both button visible on signin desktop page ([f893b01](https://github.com/betagouv/service-national-universel/commit/f893b0165f958b2fd3325d2bed4746db73b78043))
+* **app:** typo ([a68b638](https://github.com/betagouv/service-national-universel/commit/a68b638362573123400cfbe67efb894e4f6920b3))
+
+
+### Features
+
+* **app:** add bouton to inscription on auth page ([0d58ecc](https://github.com/betagouv/service-national-universel/commit/0d58eccefe27d96fb198f7ab89705493725df812))
+* **app:** open inscription on production ([ab8dfdf](https://github.com/betagouv/service-national-universel/commit/ab8dfdf1992f15e3086f2f76c63d5ae61f75a000))
+* **app/admin:** Cookie based connection ([#2819](https://github.com/betagouv/service-national-universel/issues/2819)) ([702708e](https://github.com/betagouv/service-national-universel/commit/702708e4e924dece2f607c2bfed42a9891a56f7a))
+
 # [1.314.0](https://github.com/betagouv/service-national-universel/compare/v1.313.0...v1.314.0) (2023-07-19)
 
 

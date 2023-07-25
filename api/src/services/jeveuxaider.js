@@ -44,7 +44,7 @@ router.get("/signin", async (req, res) => {
       await user.save();
 
       const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
-      res.cookie("jwt_ref", token, cookieOptions());
+      res.cookie("jwt_ref", token, cookieOptions(JWT_MAX_AGE));
 
       return res.redirect(config.ADMIN_URL);
     }

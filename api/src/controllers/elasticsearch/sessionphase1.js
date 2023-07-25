@@ -13,7 +13,17 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     // Configuration
     const { user, body } = req;
     const searchFields = ["nameCentre", "cityCentre", "zipCentre", "codeCentre"];
-    const filterFields = ["department.keyword", "region.keyword", "cohort.keyword", "code.keyword", "placesLeft", "hasTimeSchedule.keyword", "typology.keyword", "domain.keyword"];
+    const filterFields = [
+      "department.keyword",
+      "region.keyword",
+      "cohort.keyword",
+      "code.keyword",
+      "placesLeft",
+      "hasTimeSchedule.keyword",
+      "typology.keyword",
+      "domain.keyword",
+      "hasPedagoProject.keyword",
+    ];
     const sortFields = [];
     const size = body.size;
     // Authorization
