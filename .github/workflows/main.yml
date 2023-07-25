@@ -1,0 +1,20 @@
+name: Mirroring
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [ closed ]
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mirroring
+        uses: wearerequired/git-mirror-action@master
+        env:
+          GIT_SSH_COMMAND: "ssh -v"
+        with:
+          source-repo: "git@github.com:betagouv/service-national-universel.git"
+          destination-repo: "git@github.com:michaelgarcia75/snu-mirror.git"
+          ssh-private-key: ${{ secrets.MIROIR_SSH_KEY }}
