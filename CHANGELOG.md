@@ -1,3 +1,11 @@
+# [1.317.0](https://github.com/betagouv/service-national-universel/compare/v1.316.1...v1.317.0) (2023-07-26)
+
+
+### Features
+
+* **api/admin:** pouvoir selectionner le nombre d'éléments par page dans les listes ([#2828](https://github.com/betagouv/service-national-universel/issues/2828)) ([bcf20fc](https://github.com/betagouv/service-national-universel/commit/bcf20fc9bda0ce9974e48cfe300b6bcb0a9fdfef))
+* **lib/app:** add 2ndePro to cohort in october ([b309a98](https://github.com/betagouv/service-national-universel/commit/b309a98e44d38efd429ab3796a672cfa4f8d4c55))
+
 ## [1.316.1](https://github.com/betagouv/service-national-universel/compare/v1.316.0...v1.316.1) (2023-07-25)
 
 
