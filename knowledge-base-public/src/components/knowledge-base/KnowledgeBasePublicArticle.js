@@ -18,9 +18,9 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
       <section className="mx-auto flex max-w-[792px] flex-shrink flex-grow flex-col overflow-hidden px-4 text-gray-800 print:bg-transparent print:pb-12">
         <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
         <div className="py-4">
-          <h2 className="mb-6 text-3xl font-bold print:mb-0 print:text-black">{group?.title}</h2>
-          <h1 className="mb-6 text-3xl font-bold print:mb-0 print:text-black">{item?.title}</h1>
-          <h6 className="text-base text-snu-purple-100 md:text-lg lg:text-xl print:text-black">{item?.description}</h6>
+          <h2 className="mb-2 text-[20px] font-bold print:mb-0 print:text-black">{group?.title}</h2>
+          <h1 className="mb-2 text-[24px] font-bold md:text-[30px] print:mb-0 print:text-black">{item?.title}</h1>
+          <h6 className="text-[18px] text-snu-purple-100 md:text-lg lg:text-xl print:text-black">{item?.description}</h6>
         </div>
         {item?.updatedAt && (
           <span className="mb-4 ml-auto mt-2 flex flex-col items-end text-xs italic text-gray-400 print:mb-2 print:mt-0">
@@ -30,8 +30,8 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
               onClick={window.print}
             >
               <div className="flex justify-center">
-                <HiPrinter className="mr-3 w-[20px] text-[20px] text-[#374151]" />
-                <p>Imprimer</p>
+                <HiPrinter className="w-[20px] text-[20px] text-[#374151]" />
+                {/* <p>Imprimer</p> */}
               </div>
             </button>
           </span>
@@ -48,7 +48,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
 };
 
 const ArticleLoader = () => (
-  <div className="mx-auto max-w-6xl p-4 flex w-full flex-shrink flex-grow flex-col overflow-hidden bg-coolGray-100 print:bg-transparent">
+  <div className="mx-auto flex w-full max-w-6xl flex-shrink flex-grow flex-col overflow-hidden bg-coolGray-100 p-4 print:bg-transparent">
     <div className="relative mb-5  mt-16 h-2 w-full bg-gray-200">
       <div className="animated-background" />
     </div>
