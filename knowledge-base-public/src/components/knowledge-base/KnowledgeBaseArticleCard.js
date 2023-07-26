@@ -7,7 +7,7 @@ const KnowledgeBaseArticleCard = ({ title, slug, path, className = "" }) => {
       className={`flex h-[60px] w-full max-w-[690px] flex-col justify-center overflow-hidden rounded-lg bg-white px-4 shadow-md ${className}`}
       href={`${path}/${slug}${path === "/base-de-connaissance" ? "?loadingType=article" : ""}`}
     >
-      <h3 className="text-sm font-medium text-gray-900">{title}</h3>
+      <h3 className="line-clamp-2 text-sm font-medium text-gray-900">{title}</h3>
     </Link>
   );
 };
