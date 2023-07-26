@@ -170,7 +170,6 @@ const ResultBox = ({ mission, updateMission, data, paramData, setParamData, sele
               setParamData={setParamData}
               currentEntryOnPage={data?.length}
               size={data?.length}
-              setSize={"disabled"}
               render={
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gridGap: "1rem" }}>
                   {data.map((hit) => (

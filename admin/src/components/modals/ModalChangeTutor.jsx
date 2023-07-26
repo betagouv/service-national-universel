@@ -108,7 +108,6 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
                   setParamData={setParamData}
                   currentEntryOnPage={data?.length}
                   size={data?.length}
-                  setSize={"disabled"}
                   render={
                     <>
                       <Header

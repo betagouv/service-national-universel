@@ -13,7 +13,6 @@ import { ROLES } from "snu-lib";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { BsDownload } from "react-icons/bs";
-import { useState } from "react";
 
 let filterOptionsCache = null;
 

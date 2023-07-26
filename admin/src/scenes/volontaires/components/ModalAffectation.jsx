@@ -209,7 +209,6 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
               setParamData={setParamData}
               currentEntryOnPage={data?.length}
               size={data?.length}
-              setSize={"disabled"}
               render={
                 <div className="flex w-full flex-col items-center justify-center gap-4">
                   {data.map((hit) => (
