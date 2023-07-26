@@ -90,7 +90,7 @@ const sessions2023 = [
     event: "Phase0/CTA preinscription - sejour octobre NC",
     eligibility: {
       zones: ["NC"],
-      schoolLevels: ["2ndeGT"],
+      schoolLevels: ["2ndeGT", "2ndePro"],
       bornAfter: new Date("10/22/2005"),
       bornBefore: new Date("10/09/2008"),
       inscriptionEndDate: new Date("2023-08-31T22:00:00.000Z"), // 31 aout
