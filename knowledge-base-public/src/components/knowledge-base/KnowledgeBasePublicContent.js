@@ -4,6 +4,7 @@ import Head from "next/head";
 import Wrapper from "../Wrapper";
 import KnowledgeBasePublicSection from "./KnowledgeBasePublicSection";
 import KnowledgeBasePublicArticle from "./KnowledgeBasePublicArticle";
+import React from "react";
 
 const KnowledgeBasePublicContent = ({ item, isLoading }) => {
   const router = useRouter();
@@ -13,7 +14,7 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
   useEffect(() => {
     if (router?.query?.loadingType) {
       setType(router?.query?.loadingType);
-      router.replace(`/base-de-connaissance/${router.query.slug}`, undefined, { shallow: true });
+      router.replace(`/base-de-connaissance/${router.query.slug}${router?.query?.openTheme ? `?openTheme=${router.query.openTheme}` : ""}`, undefined, { shallow: true });
     }
   }, [router?.query?.loadingType]);
 

@@ -5,8 +5,11 @@ import { Accordion } from "../Accordion";
 import LoaderArticle from "../LoaderArticle";
 import Breadcrumbs from "../breadcrumbs";
 import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
+import React from "react";
+import { useRouter } from "next/router";
 
 const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
+  const router = useRouter();
   const [sections, setSections] = useState(item?.children?.filter((c) => c.type === "section") || []);
   const [articles, setArticles] = useState(item?.children?.filter((c) => c.type === "article") || []);
 
@@ -38,8 +41,8 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
       <>
         <div className="h-48 w-full border-t-[1px] border-white border-opacity-20 bg-[#32257F]" />
         <div className="mx-auto mt-[-100px] px-4">
-          <div className="col-span-full grid-cols-2 gap-2.5 md:grid lg:max-w-screen-95 lg:grid-cols-3 lg:overflow-hidden lg:px-6 2xl:grid-cols-4">
-            <h2 className="col-span-2 mb-4 text-xl font-bold text-white md:mx-2 lg:col-span-3 2xl:col-span-4">Thématiques générales</h2>
+          <div className="col-span-full grid-cols-2 gap-2.5 md:grid lg:max-w-screen-95 lg:grid-cols-3 lg:overflow-hidden lg:px-6">
+            <h2 className="col-span-2 mb-4 text-xl font-bold text-white md:mx-2 lg:col-span-3">Thématiques générales</h2>
             {sections.map(({ _id, position, icon, title, slug, children }) => {
               return device === "desktop" ? (
                 <KnowledgeBaseSectionCard
@@ -55,7 +58,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
                   className="mx-2 mb-8"
                 />
               ) : (
-                <>{children && children.length > 0 && <Accordion key={_id} title={title} list={children} className="mb-3" path="/base-de-connaissance" />}</>
+                <>{children && children.length > 0 && <Accordion key={_id} title={title} list={children} className="mb-3" path="/base-de-connaissance" slug={slug} />}</>
               );
             })}
           </div>
@@ -76,9 +79,9 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
       <div className="mt-[-40px] flex w-full flex-col items-center justify-center px-4">
         {sections.length > 0 && (
           <div key={"sections"} className="mt-3 flex w-full flex-col items-center justify-center">
-            {sections.map(({ title, children, _id }) => {
-              return <>{children && children.length > 0 && <Accordion key={_id} title={title} list={children} className="mb-3 w-full" path="/base-de-connaissance" />}</>;
-            })}
+            {sections.map(({ title, children, _id, slug }) => (
+              <Accordion key={_id} title={title} list={children} className="mb-3 w-full" path="/base-de-connaissance" isOpen={router.query.openTheme === slug} slug={slug} />
+            ))}
           </div>
         )}
         {articles.length > 0 && (
