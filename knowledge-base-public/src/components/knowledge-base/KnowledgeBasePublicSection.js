@@ -53,7 +53,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
           </button>
         </div>
 
-        <div className="h-24 w-full bg-[#32257F]" />
+        <div className="h-32 w-full bg-[#32257F]" />
         <div className="mx-auto mt-[-100px] px-4">
           <div className="col-span-full grid-cols-2 gap-2.5 md:grid lg:max-w-screen-95 lg:grid-cols-3 lg:overflow-hidden lg:px-6">
             <h2 className="col-span-2 mb-4 text-xl font-bold text-white md:mx-2 lg:col-span-3">Thématiques générales</h2>
