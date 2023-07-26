@@ -245,8 +245,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
   const geographicTargetData = {
     region: originalTarget.region || structure?.region,
     // many users have an array like [""] for department
-    department:
-      originalTarget.department?.length && originalTarget.department[0] !== "" ? originalTarget.department : [structure?.department],
+    department: originalTarget.department?.length && originalTarget.department[0] !== "" ? originalTarget.department : [structure?.department],
   };
 
   const isActorAndTargetInTheSameRegion = actor.region === geographicTargetData.region;
@@ -666,6 +665,10 @@ function canApplyToPhase2(young) {
   return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= COHESION_STAY_END[young.cohort];
 }
 
+function canCreateAlerteMessage(actor) {
+  return [ROLES.ADMIN];
+}
+
 function canViewTableDeRepartition(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
@@ -861,6 +864,7 @@ export {
   canEditPresenceYoung,
   canShareSessionPhase1,
   canApplyToPhase2,
+  canCreateAlerteMessage,
   canViewTableDeRepartition,
   canEditTableDeRepartitionDepartment,
   canEditTableDeRepartitionRegion,
