@@ -173,7 +173,7 @@ body {
   margin-left: 0;
   margin-right: 0;
   padding-left: 10px;
-  color: #6B7280;
+  color: #aaa;
   font-style: italic;
 }
 
@@ -207,12 +207,12 @@ body {
 }
 
 #text-editor [data-slate-editor] h1 {
-  font-size: 2em;
+  font-size: 2rem;
   font-weight: bold;
 }
 
 #text-editor [data-slate-editor] h2 {
-  font-size: 1.5em;
+  font-size: 1.25em;
   font-weight: bold;
 }
 
