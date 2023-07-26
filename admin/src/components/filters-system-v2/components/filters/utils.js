@@ -2,8 +2,9 @@ import { toastr } from "react-redux-toastr";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
 import { COHESION_STAY_START } from "snu-lib";
+import { ES_NO_LIMIT } from "snu-lib";
 
-export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort) => {
+export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort, size) => {
   try {
     const resAlternative = await api.post(route, {
       page,
@@ -12,6 +13,7 @@ export const buildQuery = async (route, selectedFilters, page = 0, filterArray, 
         return { ...e, [key]: value.filter.map((e) => String(e)) };
       }, {}),
       sort: sort ? { field: sort.field, order: sort.order } : null,
+      size,
     });
 
     const aggs = resAlternative.responses[1].aggregations;

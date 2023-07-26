@@ -57,6 +57,7 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
       "toDate",
     ];
     const sortFields = ["createdAt", "placesLeft", "name.keyword"];
+    const size = body.size;
 
     // Body params validation
     const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
@@ -92,6 +93,7 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
       page,
       sort,
       contextFilters,
+      size,
     });
 
     if (req.params.action === "export") {

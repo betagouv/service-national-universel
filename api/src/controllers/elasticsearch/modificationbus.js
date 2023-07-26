@@ -11,6 +11,8 @@ const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
+    const { user, body } = req;
+    const size = body.size;
     const searchFields = ["lineName", "requestUserName", "requestMessage"];
     const filterFields = ["lineName.keyword", "tagIds.keyword", "status.keyword", "opinion.keyword", "requestUserRole.keyword", "cohort.keyword"];
     const sortFields = [];
@@ -26,7 +28,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     let contextFilters = [];
 
     // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
 
     if (req.params.action === "export") {
       const response = await allRecords("modificationbus", hitsRequestBody.query);

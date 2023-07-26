@@ -39,6 +39,7 @@ export default function Inscription() {
     page: 0,
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
+  const [size, setSize] = useState(10);
   //parentAllowSNU
   const filterArray = [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
@@ -232,6 +233,7 @@ export default function Inscription() {
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
+              size={size}
             />
             <SortOption
               sortOptions={[
@@ -261,6 +263,8 @@ export default function Inscription() {
             paramData={paramData}
             setParamData={setParamData}
             currentEntryOnPage={data?.length}
+            size={size}
+            setSize={setSize}
             render={
               <table className="mt-4 mb-2 w-full table-auto font-marianne">
                 <thead>
@@ -280,7 +284,7 @@ export default function Inscription() {
                 </thead>
                 <tbody>
                   {data.map((hit, i) => (
-                    <Hit key={hit._id} hit={hit} index={i + paramData.page * 20} onClick={() => setYoung(hit)} selected={young?._id === hit._id} />
+                    <Hit key={hit._id} hit={hit} index={i + paramData.page * size} onClick={() => setYoung(hit)} selected={young?._id === hit._id} />
                   ))}
                 </tbody>
               </table>

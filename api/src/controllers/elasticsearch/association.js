@@ -25,6 +25,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const sortFields = [];
 
     const { user, body } = req;
+    const size = body.size;
 
     const options = {
       node: `https://${API_ASSOCIATION_ES_ENDPOINT}`,
@@ -41,7 +42,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     let contextFilters = [];
 
     // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size: 10 });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
 
     const should = ["url", "linkedin", "facebook", "twitter", "donation", "coordonnees_courriel", "coordonnees_telephone"].map((e) => ({
       exists: {
