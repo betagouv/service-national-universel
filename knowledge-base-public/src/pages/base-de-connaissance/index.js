@@ -34,7 +34,7 @@ const Home = ({ fallback }) => {
   return (
     <SWRConfig value={{ fallback }}>
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <meta name="theme-color" content="#32257F" />
         <meta name="description" content="Service National Universel | Base de connaissance" />
         <meta property="og:title" key="og:title" content="Service National Universel | Base de connaissance" />
