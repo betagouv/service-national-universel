@@ -76,7 +76,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
         </div>
       </div>
 
-      <div className="mt-[-40px] flex w-full flex-col items-center justify-center px-4">
+      <div className="mx-auto flex max-w-[730px] mt-[-40px] flex w-full flex-col items-start justify-center px-4">
         {sections.length > 0 && (
           <div key={"sections"} className="mt-3 flex w-full flex-col items-center justify-center">
             {sections.map(({ title, children, _id, slug }) => (
@@ -91,7 +91,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
             ))}
           </div>
         )}
-        <div className="mx-auto">
+        <div className="ml-2">
           <KnowledgeBasePublicNoAnswer />
         </div>
       </div>
