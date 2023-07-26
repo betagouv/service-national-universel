@@ -16,7 +16,7 @@ export default function ResultTable({ render, currentEntryOnPage, pagination = t
           itemsCount={currentEntryOnPage}
           className="px-4 pt-3"
           size={size}
-          changeSize={(value) => setSize(value)}
+          changeSize={setSize !== "disabled" ? (value) => setSize(value) : setSize}
         />
       )}
       {render}
@@ -30,7 +30,7 @@ export default function ResultTable({ render, currentEntryOnPage, pagination = t
           itemsCount={currentEntryOnPage}
           className="px-4 pt-3"
           size={size}
-          changeSize={(value) => setSize(value)}
+          changeSize={setSize !== "disabled" ? (value) => setSize(value) : setSize}
         />
       )}
     </div>

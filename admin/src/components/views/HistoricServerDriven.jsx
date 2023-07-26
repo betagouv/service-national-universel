@@ -51,6 +51,8 @@ export default function HistoricServerDriven({ data, refName, path, pagination, 
               itemsPerPage={pagination.itemsPerPage}
               itemsCount={data.length}
               className="p-4"
+              size={20}
+              changeSize={"disabled"}
             />
             {extraTool}
           </div>
@@ -91,6 +93,8 @@ export default function HistoricServerDriven({ data, refName, path, pagination, 
             itemsPerPage={pagination.itemsPerPage}
             itemsCount={data.length}
             className="p-4"
+            size={20}
+            changeSize={"disabled"}
           />
         </>
       )}

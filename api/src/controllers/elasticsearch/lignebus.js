@@ -67,12 +67,11 @@ router.post("/search", passport.authenticate(["referent"], { session: false, fai
       "lineFillingRate",
     ];
     const sortFields = [];
-    const size = body.size;
     // Authorization
     if (!canSearchLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters

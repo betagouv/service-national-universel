@@ -16,9 +16,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const sortFields = [];
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const size = body.size;
     // Context filters
     let contextFilters = [];
 

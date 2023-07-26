@@ -126,13 +126,12 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const searchFields = ["email.keyword", "firstName.folded", "lastName.folded"];
     const filterFields = ["role.keyword", "subRole.keyword", "region.keyword", "department.keyword", "cohorts.keyword"];
     const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt", "lastLoginAt"];
-    const size = body.size;
 
     // Authorization
     if (!canSearchInElasticSearch(user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     //Query params validation
