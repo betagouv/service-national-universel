@@ -43,7 +43,7 @@ function FeedbackComponent({ item }) {
               <div className="mb-4 mt-4 flex flex-col md:flex-row">
                 <button
                   id="ThumbsUp"
-                  className="mb-4 mr-6 flex h-12 w-full cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] bg-gray-200 px-16 text-3xl font-medium text-[#2563EB] hover:bg-blue-600 hover:text-white md:mb-0"
+                  className="mb-4 mr-6 flex h-12 w-full cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] bg-[#F3F4F6] px-16 text-3xl font-medium text-[#2563EB] hover:bg-blue-600 hover:text-white md:mb-0"
                   onClick={postFeedback}
                 >
                   <HiThumbUp className="w-[20px] text-[20px]" />
@@ -51,7 +51,7 @@ function FeedbackComponent({ item }) {
                 </button>
                 <button
                   id="ThumbsDown"
-                  className="flex h-12 w-full cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] bg-gray-200 px-16 text-3xl font-medium text-[#2563EB] hover:bg-blue-600 hover:text-white md:ml-1"
+                  className="flex h-12 w-full cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] bg-[#F3F4F6] px-16 text-3xl font-medium text-[#2563EB] hover:bg-blue-600 hover:text-white md:ml-1"
                   onClick={() => setFeedback({ ...feedback, isPositive: false })}
                 >
                   <HiThumbDown className="w-[20px] text-[20px]" />
@@ -77,8 +77,8 @@ function FeedbackComponent({ item }) {
                   </div>
                 </div>
                 <div className="mb-2 mt-8 flex w-full flex-row">
-                  <p className="inline-block w-full self-end text-[12px] font-medium leading-4 text-[#111827]">Quel était votre question ?</p>
-                  <p className="inline-block h-5 w-48 self-end text-end text-xs font-medium leading-5 text-[#6B7280]">125 caractères maximum</p>
+                  <p className="inline-block w-full self-center text-[12px] font-medium leading-4 text-[#111827]">Quel était votre question ?</p>
+                  <p className="inline-block w-[50%] h-5 w-48 self-center text-end text-xs font-medium leading-5 text-[#6B7280]">125 caractères maximum</p>
                 </div>
                 <textarea
                   className={`h-24 w-full rounded-md border-2 ${
