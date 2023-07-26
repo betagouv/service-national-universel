@@ -14,7 +14,7 @@ const KnowledgeBasePublicNoAnswer = ({ className = "" }) => {
         target="_blank"
         rel="noopener noreferrer"
       >
-        <p className="text-blue-600">Je n'ai pas trouvé de réponse à ma question →</p>
+        <p className="text-blue-600">Je n&apos;ai pas trouvé de réponse à ma question&nbsp;→</p>
       </a>
     </div>
   );
