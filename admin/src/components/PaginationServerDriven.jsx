@@ -101,10 +101,6 @@ export default function PaginationServerDriven({
     }
     changeSize(newSize);
   }
-  console.log(itemsCount)
-  console.log(itemsPerPage);
-/*   console.log(count);
-  console.log(size) */
 
   return (
     <div className={`flex items-center justify-between gap-1 ${className}`}>
