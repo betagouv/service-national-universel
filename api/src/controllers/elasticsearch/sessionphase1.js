@@ -25,12 +25,11 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "hasPedagoProject.keyword",
     ];
     const sortFields = [];
-    const size = body.size;
     // Authorization
     if (!canSearchInElasticSearch(req.user, "sessionphase1")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error, exportFields } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, sort, error, exportFields, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     let contextFilters = [];

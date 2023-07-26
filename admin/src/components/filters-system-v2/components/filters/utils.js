@@ -4,7 +4,7 @@ import api from "../../../../services/api";
 import { COHESION_STAY_START } from "snu-lib";
 import { ES_NO_LIMIT } from "snu-lib";
 
-export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort, size) => {
+export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort, size = 10) => {
   try {
     const resAlternative = await api.post(route, {
       page,

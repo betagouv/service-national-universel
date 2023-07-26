@@ -15,6 +15,7 @@ export default function ProposeMission({ young, onSend }) {
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({ page: 0 });
   const [data, setData] = useState([]);
+  const [size, setSize] = useState(10);
 
   useEffect(() => {
     getApplications().then((applications) => {
@@ -128,6 +129,8 @@ export default function ProposeMission({ young, onSend }) {
               paramData={paramData}
               setParamData={setParamData}
               currentEntryOnPage={data?.length}
+              size={size}
+              setSize={setSize}
               render={data.map((hit, i) => (
                 <CardMission key={i} mission={hit} onSend={() => handleProposal(hit)} sent={missionIds.includes(hit._id)} />
               ))}

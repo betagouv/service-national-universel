@@ -157,7 +157,6 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
     const searchFields = ["email", "firstName", "lastName", "city", "zip"];
     const filterFields = ["meetingPointId.keyword", "meetingPointName.keyword", "meetingPointCity.keyword", "region.keyword", "department.keyword"];
     const sortFields = [];
-    const size = body.size;
     const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, true);
     if (youngContextError) {
       return res.status(youngContextError.status).send(youngContextError.body);
@@ -172,7 +171,7 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
     ];
 
     // Body params validation
-    const { queryFilters, page, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, exportFields, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Build request body
@@ -325,7 +324,6 @@ router.post("/by-point-de-rassemblement/:meetingPointId/:action(search|export)",
   try {
     // Configuration
     const { user, body } = req;
-    const size = body.size;
     const searchFields = ["email", "firstName", "lastName", "city", "zip"];
     const filterFields = ["cohort.keyword", "region.keyword", "sessionPhase1Id.keyword", "sessionPhase1Name", "sessionPhase1City", "department.keyword", "ligneId.keyword"];
     const sortFields = [];
@@ -344,7 +342,7 @@ router.post("/by-point-de-rassemblement/:meetingPointId/:action(search|export)",
     ];
 
     // Body params validation
-    const { queryFilters, page, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, exportFields, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Build request body
@@ -416,7 +414,6 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       "youngPhase1Agreement.keyword",
     ];
     const sortFields = [];
-    const size = body.size;
 
     if (!canSearchInElasticSearch(user, "sessionphase1young")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -458,7 +455,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
     }
 
     // Body params validation
-    const { queryFilters, page, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, exportFields, error, size } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Build request body
@@ -493,7 +490,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const filterFields = getYoungsFilters(user);
 
     const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt"];
-    const size = body.size;
     const { youngContextFilters, youngContextError } = await buildYoungContext(user);
     if (youngContextError) {
       return res.status(youngContextError.status).send(youngContextError.body);
@@ -510,7 +506,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       query.tab === "volontaire" ? { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST", "DELETED"] } } : null,
     ].filter(Boolean);
     // Body params validation
-    const { queryFilters, page, sort, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body: body });
+    const { queryFilters, page, sort, exportFields, error, size } = joiElasticSearch({ filterFields, sortFields, body: body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Build request body

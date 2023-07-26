@@ -25,7 +25,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const sortFields = [];
 
     const { user, body } = req;
-    const size = body.size;
 
     const options = {
       node: `https://${API_ASSOCIATION_ES_ENDPOINT}`,
@@ -35,7 +34,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (!canSearchAssociation(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters

@@ -12,7 +12,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   try {
     // Configuration
     const { user, body } = req;
-    const size = body.size;
     const searchFields = ["lineName", "requestUserName", "requestMessage"];
     const filterFields = ["lineName.keyword", "tagIds.keyword", "status.keyword", "opinion.keyword", "requestUserRole.keyword", "cohort.keyword"];
     const sortFields = [];
@@ -21,7 +20,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (!canSearchInElasticSearch(req.user, "modificationbus")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters

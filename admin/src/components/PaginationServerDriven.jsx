@@ -104,16 +104,18 @@ export default function PaginationServerDriven({
 
   return (
     <div className={`flex items-center justify-between gap-1 ${className}`}>
-      <div className="text-xs flex gap-2 justify-center items-center text-[#242526]">
-        <select className="min-w-[56px] min-h-[32px] pl-2 border text-gray-600 rounded-md pb-1" value={size} onChange={(e) => checkSize(parseInt(e.target.value))}>
-          {sizeOptions.map((item) => (
-            <option key={item.label} value={item.value}>
-              {item.label}
-            </option>
-          ))}
-        </select>
-        Éléments par page
-      </div>
+      {changeSize ? (
+        <div className="text-xs flex gap-2 justify-center items-center text-[#242526]">
+          <select className="min-w-[56px] min-h-[32px] pl-2 border text-gray-600 rounded-md pb-1" value={size} onChange={(e) => checkSize(parseInt(e.target.value))}>
+            {sizeOptions.map((item) => (
+              <option key={item.label} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+          Éléments par page
+        </div>
+      ) : null}
       <div className="text-[12px] text-[#242526] font-bold">
         {actualHits} <span className="font-normal">-</span> {totalhits} <span className="font-normal"> sur </span> {count === 10000 ? "plus de 10000" : count}
       </div>

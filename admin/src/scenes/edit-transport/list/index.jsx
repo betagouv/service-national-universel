@@ -175,7 +175,7 @@ const ReactiveList = ({ cohort }) => {
       <ResultTable
         paramData={paramData}
         setParamData={setParamData}
-        currentEntryOnPage={lines?.length > 0}
+        currentEntryOnPage={lines?.length}
         size={size}
         setSize={setSize}
         render={

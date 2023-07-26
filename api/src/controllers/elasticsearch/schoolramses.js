@@ -16,13 +16,12 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const searchFields = ["fullName", "city", "zip", "code2022", "typology", "domain"];
     const filterFields = ["region.keyword", "departmentName.keyword", "cohort", "academy"];
     const sortFields = [];
-    const size = body.size;
 
     // Authorization
     if (!canSearchInElasticSearch(req.user, "schoolramses")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters
