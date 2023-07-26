@@ -5,14 +5,14 @@ const Breadcrumbs = ({ parents, path }) => {
     <nav aria-label="Breadcrumb" className="mt-4 text-sm leading-4 print:hidden">
       <ol className="flex flex-wrap items-center">
         <li>
-          <Link href={path} className="rounded py-1.5 pr-2">
+          <Link href={path} className="rounded py-1.5">
             Accueil
           </Link>
         </li>
         {parents.map(({ _id, slug, title }) => (
-          <li key={_id} className="flex flex-nowrap items-center gap-1">
-            <span className="material-icons">keyboard_arrow_right</span>
-            <Link href={`${path}/${slug}`} className="rounded px-2 py-1.5">
+          <li key={_id} className="flex flex-nowrap items-center">
+            <span className="material-icons mt-[4px]">keyboard_arrow_right</span>
+            <Link href={`${path}/${slug}`} className="rounded py-1.5">
               {title}
             </Link>
           </li>
