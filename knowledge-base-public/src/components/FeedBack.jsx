@@ -97,13 +97,13 @@ function FeedbackComponent({ item }) {
               </div>
               <div className="mt-3 flex flex-row justify-end bg-[#F9FAFB] p-4">
                 <button
-                  className="mr-1 items-center justify-center rounded-md border-[1px] border-gray-200 bg-white px-4 text-[14px] font-medium leading-5 text-[#374151]"
+                  className="mr-1 items-center justify-center rounded-md border-[1px] border-gray-200 bg-white px-4 py-1 text-[14px] font-medium leading-5 text-[#374151]"
                   onClick={() => setFeedback({ ...defaultFeedback })}
                 >
                   Annuler
                 </button>
                 <Button
-                  className="rounded-md border-[1px] border-[#2563EB] bg-[#2563EB] px-4 text-[14px] font-medium leading-5 text-[#FFFFFF]"
+                  className="rounded-md border-[1px] border-[#2563EB] bg-[#2563EB] px-4 py-1 text-[14px] font-medium leading-5 text-[#FFFFFF]"
                   onClick={postFeedback}
                   loading={isSubmitting}
                   disabled={feedback.comment?.length > 125}
@@ -116,7 +116,7 @@ function FeedbackComponent({ item }) {
         </>
       )}
       {hasSubmitted && (
-        <div className="mb-6 flex h-24 w-full flex-row items-center justify-center rounded-lg border-[1px] bg-white text-[#111827] shadow-md print:bg-transparent print:pb-12">
+        <div className="mb-12 flex h-24 w-full flex-row items-center justify-center rounded-lg border-[1px] bg-white text-[#111827] shadow-md print:bg-transparent print:pb-12">
           <span className="material-icons mr-2 mt-1 w-[20px] text-[20px] text-[#111827]">done</span>
           <p className="text-xl font-bold not-italic leading-7">Merci pour votre contribution</p>
         </div>
