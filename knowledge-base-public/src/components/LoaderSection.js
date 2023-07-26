@@ -1,7 +1,7 @@
 import React from "react";
 
 const LoaderSection = ({ className = "" }) => (
-  <div className={`md:w-72 ${className}`}>
+  <div className={`w-full max-w-[690px] md:w-72 ${className}`}>
     <div className="relative flex flex-grow flex-col overflow-hidden rounded-lg bg-white shadow-lg">
       <div className="flex h-[60px] w-full items-center justify-center overflow-hidden pl-4 pr-9 md:h-[80px]">
         <div className="mr-4 h-8 w-8 rounded-md bg-gray-200" />

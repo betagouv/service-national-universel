@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import KnowledgeBaseSectionCard from "./KnowledgeBaseSectionCard";
 import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
 import { Accordion } from "../Accordion";
-import LoaderArticle from "../LoaderArticle";
+import LoaderSection from "../LoaderSection";
 import Breadcrumbs from "../breadcrumbs";
 import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 import React from "react";
@@ -24,21 +24,6 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
     setArticles(item?.children?.filter((c) => c.type === "article") || []);
   }, [item]);
 
-  if (isLoading) {
-    return (
-      <>
-        <div className="flex w-full items-center justify-center px-4">
-          <div className="mt-3 flex w-full flex-col items-center justify-center">
-            <LoaderArticle key="loader_article-1" className="mb-3" />
-            <LoaderArticle key="loader_article-2" className="mb-3" />
-            <LoaderArticle key="loader_article-3" className="mb-3" />
-            <LoaderArticle key="loader_article-4" className="mb-3" />
-          </div>
-        </div>
-      </>
-    );
-  }
-
   if (isRoot) {
     return (
       <>
@@ -46,7 +31,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
           <p className="text-center text-3xl font-bold leading-9 text-white">J&apos;ai besoin d&apos;aide</p>
           <button
             onClick={() => setSearchOpen(true)}
-            className={`mx-2 flex max-w-2xl cursor-text gap-4 rounded-lg bg-white p-3 text-gray-600 md:mx-auto md:w-full ${searchOpen && "invisible"}`}
+            className={`mx-4 flex max-w-2xl cursor-text gap-4 rounded-lg bg-white p-3 text-gray-600 md:mx-auto md:w-full ${searchOpen && "invisible"}`}
           >
             <HiSearch className="text-2xl text-gray-500" />
             Rechercher un article
@@ -54,27 +39,36 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
         </div>
 
         <div className="h-32 w-full bg-[#32257F]" />
-        <div className="mx-auto mt-[-100px] px-4">
+        <div className="mx-auto mt-[-100px] w-full px-4 md:w-auto">
           <div className="col-span-full grid-cols-2 gap-2.5 md:grid lg:max-w-screen-95 lg:grid-cols-3 lg:overflow-hidden lg:px-6">
             <h2 className="col-span-2 mb-4 text-xl font-bold text-white md:mx-2 lg:col-span-3">Thématiques générales</h2>
-            {sections.map(({ _id, position, icon, title, slug, children }) => {
-              return device === "desktop" ? (
-                <KnowledgeBaseSectionCard
-                  key={_id}
-                  _id={_id}
-                  path="/base-de-connaissance"
-                  position={position}
-                  icon={icon}
-                  title={title}
-                  slug={slug}
-                  // eslint-disable-next-line react/no-children-prop
-                  children={(children || []).slice(0, 3)}
-                  className="mx-2 mb-8"
-                />
-              ) : (
-                <>{children && children.length > 0 && <Accordion key={_id} title={title} list={children} className="mb-3" path="/base-de-connaissance" slug={slug} />}</>
-              );
-            })}
+            {!isLoading ? (
+              sections.map(({ _id, position, icon, title, slug, children }) => {
+                return device === "desktop" ? (
+                  <KnowledgeBaseSectionCard
+                    key={_id}
+                    _id={_id}
+                    path="/base-de-connaissance"
+                    position={position}
+                    icon={icon}
+                    title={title}
+                    slug={slug}
+                    // eslint-disable-next-line react/no-children-prop
+                    children={(children || []).slice(0, 3)}
+                    className="mx-2 mb-8"
+                  />
+                ) : (
+                  <>{children && children.length > 0 && <Accordion key={_id} title={title} list={children} className="mb-3" path="/base-de-connaissance" slug={slug} />}</>
+                );
+              })
+            ) : (
+              <>
+                <LoaderSection className="mb-3 md:mx-2 md:mb-8" />
+                <LoaderSection className="mb-3 md:mx-2 md:mb-8" />
+                <LoaderSection className="mb-3 md:mx-2 md:mb-8" />
+                <LoaderSection className="mb-3 md:mx-2 md:mb-8" />
+              </>
+            )}
           </div>
         </div>
         <KnowledgeBaseSearch open={searchOpen} setOpen={setSearchOpen} />
