@@ -6,7 +6,7 @@ import { translateRoleBDC } from "../utils/constants";
 import Header from "./Header";
 import Footer from "./Footer";
 
-const Wrapper = ({ children }) => {
+const Wrapper = ({ home, children }) => {
   const { user } = useUser();
   const { setSeeAs, seeAs } = useContext(SeeAsContext);
 
@@ -14,7 +14,7 @@ const Wrapper = ({ children }) => {
 
   return (
     <>
-      <Header />
+      <Header home={home} />
       {!!seeAs && withSeeAs && user?.role !== seeAs && (
         <div className="bg-blue-50 flex items-center justify-center gap-4 p-4 w-full">
           <AiOutlineInfoCircle className="text-blue-500 text-xl flex-none" />

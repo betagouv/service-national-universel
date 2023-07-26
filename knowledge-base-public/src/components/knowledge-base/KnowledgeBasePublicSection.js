@@ -7,11 +7,14 @@ import Breadcrumbs from "../breadcrumbs";
 import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 import React from "react";
 import { useRouter } from "next/router";
+import KnowledgeBaseSearch from "./KnowledgeBaseSearch";
+import { HiSearch } from "react-icons/hi";
 
 const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   const router = useRouter();
   const [sections, setSections] = useState(item?.children?.filter((c) => c.type === "section") || []);
   const [articles, setArticles] = useState(item?.children?.filter((c) => c.type === "article") || []);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     setSections(item?.children?.filter((c) => c.type === "section") || []);
@@ -39,7 +42,15 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   if (isRoot) {
     return (
       <>
-        <div className="h-48 w-full border-t-[1px] border-white border-opacity-20 bg-[#32257F]" />
+        <div className="flex h-44 w-full flex-col justify-center gap-6 border-t-[1px] border-white border-opacity-20 bg-[#32257F]">
+          <p className="text-center text-3xl font-bold leading-9 text-white">J&apos;ai besoin d&apos;aide</p>
+          <button onClick={() => setSearchOpen(true)} className="mx-auto flex w-full max-w-2xl cursor-text gap-4 rounded-lg bg-white p-3 text-gray-600">
+            <HiSearch className="text-2xl text-gray-500" />
+            Rechercher un article
+          </button>
+        </div>
+
+        <div className="h-24 w-full bg-[#32257F]" />
         <div className="mx-auto mt-[-100px] px-4">
           <div className="col-span-full grid-cols-2 gap-2.5 md:grid lg:max-w-screen-95 lg:grid-cols-3 lg:overflow-hidden lg:px-6">
             <h2 className="col-span-2 mb-4 text-xl font-bold text-white md:mx-2 lg:col-span-3">Thématiques générales</h2>
@@ -63,6 +74,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
             })}
           </div>
         </div>
+        <KnowledgeBaseSearch open={searchOpen} setOpen={setSearchOpen} />
       </>
     );
   }

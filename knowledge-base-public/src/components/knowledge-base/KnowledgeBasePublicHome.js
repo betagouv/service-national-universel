@@ -16,7 +16,7 @@ const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
   }, [isLoading]);
 
   return (
-    <Wrapper>
+    <Wrapper home>
       <Head>
         <title>SNU - Base de connaissance</title>
       </Head>
