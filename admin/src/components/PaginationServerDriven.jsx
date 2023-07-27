@@ -27,7 +27,7 @@ export default function PaginationServerDriven({
   const firstDisplayPage = Math.max(lastDisplayPage - displayedPages + 1, 1);
   const lastDisplayItem = currentPage * itemsPerPage + itemsCount;
   const lastPage = Math.floor(count / size);
-  const pages = [];
+  let pages = [];
   const totalhits = currentPage * itemsPerPage + itemsCount;
   const actualHits = currentPage * itemsPerPage + 1;
   const sizeOptions = [
@@ -62,6 +62,9 @@ export default function PaginationServerDriven({
       }
       break;
   }
+
+  pages = pages.filter((item) => item.props.page !== 0 && item.props.page !== lastPage); //on supprime la premiere et derniere page si elles y sont
+
   function goToPrevious(e) {
     e.preventDefault();
     if (currentPage > 0) {
