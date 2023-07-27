@@ -187,12 +187,7 @@ function PageButton({ page, changePage, active, lastPage, isLast = false }) {
     return className;
   };
   return (
-    <div
-      href="#"
-      onClick={() => changePage(page)}
-      className={`ml-[5px] flex min-h-[30px] cursor-pointer items-center justify-center rounded-[3px] border-[1px] border-[transparent] bg-[#f7fafc] py-[3px] px-[10px] text-[12px] text-[#242526] ${
-        active ? "font-bold" : "font-regular"
-      }`}>
+    <button onClick={() => changePage(page)} className={`flex items-center justify-center flex-none w-8 h-8 m-auto ` + getClass()}>
       {page + 1}
     </button>
   );
