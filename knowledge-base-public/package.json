@@ -9,7 +9,7 @@
     "printWidth": 180
   },
   "dependencies": {
-    "@headlessui/react": "1.7.4",
+    "@headlessui/react": "1.7.16",
     "@heroicons/react": "^2.0.18",
     "@sentry/nextjs": "7.17.4",
     "dayjs": "1.11.6",
