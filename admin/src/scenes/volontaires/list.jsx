@@ -28,6 +28,7 @@ export default function VolontaireList() {
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
   const [bus, setBus] = useState(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [size, setSize] = useState(10);
 
   //List state
   const [data, setData] = useState([]);
@@ -37,6 +38,7 @@ export default function VolontaireList() {
     page: 0,
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
+  
 
   const filterArray = getFilterArray(user, bus, sessionsPhase1);
 
@@ -117,6 +119,7 @@ export default function VolontaireList() {
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
+              size={size}
             />
             <SortOption
               sortOptions={[
@@ -146,6 +149,8 @@ export default function VolontaireList() {
             paramData={paramData}
             setParamData={setParamData}
             currentEntryOnPage={data?.length}
+            size={size}
+            setSize={setSize}
             render={
               <table className="mt-4 mb-2 w-full table-auto font-marianne">
                 <thead>

@@ -71,7 +71,7 @@ function buildArbitratyNdJson(...args) {
   return args.map((e) => JSON.stringify(e)).join("\n") + "\n";
 }
 
-function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, customQueries, size = 20 }) {
+function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, customQueries, size = 10 }) {
   // We always need a fresh query to avoid side effects.
   const getMainQuery = () => unsafeStrucuredClone({ bool: { must: [{ match_all: {} }], filter: contextFilters } });
   // Search query
@@ -102,11 +102,12 @@ function joiElasticSearch({ filterFields, sortFields = [], body }) {
       .allow(null)
       .default(null),
     exportFields: Joi.alternatives().try(Joi.array().items(Joi.string()).max(200).allow(null).default(null), Joi.string().valid("*")),
+    size: Joi.number().integer().min(10).max(100).default(10),
   });
 
   const { error, value } = schema.validate({ ...body }, { stripUnknown: true });
   if (error) capture(error);
-  return { queryFilters: value.filters, page: value.page, sort: value.sort, exportFields: value.exportFields, error };
+  return { queryFilters: value.filters, page: value.page, sort: value.sort, exportFields: value.exportFields, size: value.size, error };
 }
 
 module.exports = {

@@ -104,6 +104,7 @@ const ListSession = ({ firstSession }) => {
   const [paramData, setParamData] = React.useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
   const filterArray = [
     { title: "Cohorte", name: "cohort", missingLabel: "Non renseignée", defaultValue: [firstSession], sort: (e) => orderCohort(e) },
     { title: "Région", name: "region", missingLabel: "Non renseignée", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
@@ -139,7 +140,7 @@ const ListSession = ({ firstSession }) => {
 
   if (!firstSession) return <div></div>;
   return (
-    <div className="flex-column flex-1 flex-wrap bg-white">
+    <div className="flex-column flex-1 flex-wrap bg-white mb-4">
       <div className="mx-4">
         <div className="flex w-full flex-row justify-between">
           <Filters
@@ -152,6 +153,7 @@ const ListSession = ({ firstSession }) => {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            size={size}
           />
           <ExportComponent
             title="Exporter"
@@ -237,6 +239,8 @@ const ListSession = ({ firstSession }) => {
         paramData={paramData}
         setParamData={setParamData}
         currentEntryOnPage={data?.length}
+        size={size}
+        setSize={setSize}
         render={
           <div className="mt-6 mb-2 flex w-full flex-col gap-1">
             <hr />
@@ -271,6 +275,7 @@ const ListCenter = ({ firstSession }) => {
   const [paramData, setParamData] = React.useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
   const filterArray = [
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
     {
@@ -328,7 +333,7 @@ const ListCenter = ({ firstSession }) => {
 
   if (!firstSession) return <div></div>;
   return (
-    <div className="flex-column flex-1 flex-wrap bg-white">
+    <div className="flex-column flex-1 flex-wrap bg-white rounded-xl mb-4">
       <div className="mx-4">
         <div className="flex w-full flex-row justify-between">
           <Filters
@@ -341,6 +346,7 @@ const ListCenter = ({ firstSession }) => {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            size={size}
           />
           <ExportComponent
             title="Exporter"
@@ -391,6 +397,8 @@ const ListCenter = ({ firstSession }) => {
         paramData={paramData}
         setParamData={setParamData}
         currentEntryOnPage={data?.length}
+        size={size}
+        setSize={setSize}
         render={
           <div className="mt-6 mb-2 flex w-full flex-col gap-1">
             <hr />

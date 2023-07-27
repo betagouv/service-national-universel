@@ -33,6 +33,7 @@ export default function List() {
   const [paramData, setParamData] = useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   //Filters
   const filterArray = [
@@ -165,6 +166,7 @@ export default function List() {
                   setSelectedFilters={setSelectedFilters}
                   paramData={paramData}
                   setParamData={setParamData}
+                  size={size}
                 />
                 <SortOption
                   sortOptions={[
@@ -195,6 +197,8 @@ export default function List() {
                 paramData={paramData}
                 setParamData={setParamData}
                 currentEntryOnPage={data?.length}
+                size={size}
+                setSize={setSize}
                 render={
                   <Table>
                     <thead>
