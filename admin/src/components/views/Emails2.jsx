@@ -15,6 +15,7 @@ export default function Emails({ email, userType }) {
   const [paramData, setParamData] = useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   //Filters
   const filterArray = [
@@ -43,6 +44,7 @@ export default function Emails({ email, userType }) {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            size={size}
           />
         </div>
         <div className="mt-2 flex flex-row flex-wrap items-center px-4">
@@ -54,6 +56,8 @@ export default function Emails({ email, userType }) {
           paramData={paramData}
           setParamData={setParamData}
           currentEntryOnPage={data?.length}
+          size={size}
+          setSize={setSize}
           render={
             <table className="mt-6 mb-2 w-full table-auto font-marianne">
               <thead>

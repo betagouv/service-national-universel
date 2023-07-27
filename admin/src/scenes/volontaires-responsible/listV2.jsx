@@ -65,6 +65,7 @@ export default function List() {
   const [paramData, setParamData] = useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   //Filters
   const filterArray = [
@@ -543,6 +544,7 @@ export default function List() {
                 setSelectedFilters={setSelectedFilters}
                 paramData={paramData}
                 setParamData={setParamData}
+                size={size}
               />
               {tab !== "all" ? (
                 <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={[{ items: optionsFilteredRole }]} />
@@ -576,6 +578,8 @@ export default function List() {
               paramData={paramData}
               setParamData={setParamData}
               currentEntryOnPage={data?.length}
+              size={size}
+              setSize={setSize}
               render={
                 <Table>
                   <thead>

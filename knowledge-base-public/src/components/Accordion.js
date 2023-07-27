@@ -40,7 +40,7 @@ export const Accordion = ({ title, list = [], className = "", path, isOpen = fal
           className="flex h-[60px] flex-1 cursor-pointer appearance-none items-center rounded-none border-none bg-white px-4 shadow-none"
           onClick={toggleAccordion}
         >
-          <span className="line-clamp-2 flex-1 text-left text-sm font-bold text-gray-900">{title}</span>
+          <span className="line-clamp-2 flex-1 text-left text-base font-semibold text-gray-900">{title}</span>
           <span className={`${rotate} material-icons text-gray-400`}>expand_more</span>
         </button>
       </h3>

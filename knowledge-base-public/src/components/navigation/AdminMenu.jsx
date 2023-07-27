@@ -35,7 +35,7 @@ export default function AdminMenu() {
             </div>
           </Popover.Button>
 
-          <Popover.Panel className="absolute right-0 top-10 z-10 min-w-[208px] lg:min-w-0">
+          <Popover.Panel className="absolute right-0 top-10 z-10 min-w-[208px] shadow-md lg:min-w-0">
             <div className="flex flex-col gap-4 rounded-md border border-gray-300 bg-white px-4 py-3">
               {roles
                 .filter((role) => (user.role === "admin" ? true : categoryAccessibleReferent.includes(role)))
@@ -68,7 +68,7 @@ export default function AdminMenu() {
                 leaveFrom="opacity-100 translate-y-0"
                 leaveTo="opacity-0 translate-y-1"
               >
-                <Popover.Panel className="absolute right-0 top-14 z-10 w-80 overflow-hidden rounded-md bg-white text-gray-800">
+                <Popover.Panel className="absolute right-0 top-14 z-10 w-80 overflow-hidden rounded-md bg-white text-gray-800 shadow-md">
                   <nav>
                     <ul>
                       <li>

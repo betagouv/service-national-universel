@@ -12,15 +12,15 @@ const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
+    const { user, body } = req;
+
     const searchFields = ["name", "city", "zip", "code2022", "typology", "domain"];
     const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "typology.keyword", "domain.keyword"];
     const sortFields = [];
-
     // Authorization
     if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters
@@ -29,7 +29,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
 
     // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
 
     if (req.params.action === "export") {
       const response = await allRecords("cohesioncenter", hitsRequestBody.query);
@@ -77,6 +77,7 @@ router.post("/not-in-cohort/:cohort", passport.authenticate(["referent"], { sess
 router.post("/presence/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
+    const { user, body } = req;
     const searchFields = ["name", "city", "zip", "code2022"];
     const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "academy.keyword", "status", "statusPhase1"];
     const sortFields = [];
@@ -86,7 +87,7 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
     if (!canSearchSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters
@@ -95,7 +96,7 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
 
     // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
 
     async function getAdditionalData(centerIds) {
       const sessionQuery = {

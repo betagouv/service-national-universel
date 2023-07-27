@@ -23,6 +23,7 @@ export default function Mission({ ...props }) {
   const [paramData, setParamData] = useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   React.useEffect(() => {
     (async () => {
@@ -78,6 +79,7 @@ export default function Mission({ ...props }) {
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
+              size={size}
             />
             <SortOption
               sortOptions={[
@@ -106,6 +108,8 @@ export default function Mission({ ...props }) {
             paramData={paramData}
             setParamData={setParamData}
             currentEntryOnPage={data?.length}
+            size={size}
+            setSize={setSize}
             render={
               <div className="mt-6 mb-2 flex w-full flex-col divide-y divide-gray-100 border-y-[1px] border-gray-100">
                 <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 ">
