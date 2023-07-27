@@ -1,69 +1,57 @@
-
 import TextEditor from "../TextEditor";
 import Link from "next/link";
 import useSWR, { useSWRConfig } from "swr";
 import API from "../../services/api";
 import { useMemo, useEffect, useState } from "react";
+import { Accordion } from "../Accordion";
+import { useRouter } from "next/router";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 import Breadcrumbs from "../breadcrumbs";
 import FeedbackComponent from "../FeedBack";
+import NavigationArticle from "../NavigationArticle";
 import { HiPrinter } from "react-icons/hi";
+import { HiChevronLeft } from "react-icons/hi";
 
 const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
-  if (!item || isLoading) return <ArticleLoader />;
-
-  const { cache } = useSWRConfig();
-  const parentId = item.parentId;
-  const [siblingsData, setSiblingsData] = useState([]); // État pour stocker les données des frères et sœurs
   const group = useMemo(() => {
     return item?.group || item?.parents?.[0]?.group;
   }, [item]);
+  // const router = useRouter();
+  // const { cache } = useSWRConfig();
+  // const parentId = item.parentId;
+  // const [siblingsData, setSiblingsData] = useState([]); // État pour stocker les données des frères et sœurs
 
-  useEffect(() => {
-    const fetchSiblings = async () => {
-      try {
-        const response = await API.post({ path: `/knowledge-base/getSiblings`, body: { parentId } });
-        setSiblingsData(response.siblings);
-      } catch (error) {
-        console.error(error);
-        // Gérer les erreurs ici
-      }
-    };
+  // useEffect(() => {
+  //   const fetchSiblings = async () => {
+  //     try {
+  //       const response = await API.post({ path: `/knowledge-base/getSiblings`, body: { parentId } });
+  //       setSiblingsData(response.siblings);
+  //     } catch (error) {
+  //       console.error(error);
+  //       // Gérer les erreurs ici
+  //     }
+  //   };
 
-    fetchSiblings();
-  }, []);
+  //   fetchSiblings();
+  // }, []);
 
-  if (isLoading) return <ArticleLoader />;
+  if (!item || isLoading) return <ArticleLoader />;
   return (
     <div className="w-full bg-white">
-      <section className="mx-auto flex max-w-[792px] flex-shrink flex-grow flex-col overflow-hidden px-4 text-gray-800 print:bg-transparent print:pb-12">
+      <section className="mx-auto flex max-w-[950px] flex-shrink flex-grow flex-col overflow-hidden px-4 text-gray-800 print:bg-transparent print:pb-12">
         <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
-        <div className="flex flex-col md:flex-row">
-          <div className="mr-24 mt-4 max-w-[200px]">
-            <ol className="">
-              {/* <li>
-                <Link href={`/base-de-connaissance/${item.parents[0].slug}`} className="rounded py-1.5 pr-2">
-                  {item.parents[0].title}
-                </Link>
-              </li>
-              {item.siblings[0].map(
-                ({ _id, slug, title, type, status }) =>
-                  type === "article" &&
-                  status === "PUBLISHED" && (
-                    <li key={_id} className={`flex flex-nowrap items-center gap-1 ${item._id === _id ? 'bg-gray-200' : ''}`}>
-                      <Link href={`/base-de-connaissance/${slug}`} className="rounded px-2 py-1.5 text-[12px]" onClick={() => cache.clear()}>
-                        {title}
-                      </Link>
-                    </li>
-                  )
-              )} */}
-              {item.parents.length > 2 && (
-                <>
-                  <li key={item._id} className="rounded py-1.5 pr-2">
-                    <Link href={`/base-de-connaissance/${item.parents[1].slug}`} className="rounded px-2 py-1.5 text-[12px]">
-                      {item.parents[1].title}
+        <div className="flex flex-col align-center md:flex-row">
+          {item.parents.length > 2 && (
+            <div className="md:mr-12 mt-4 max-w-[400px]">
+              <NavigationArticle item={item} />
+              {/* <Accordion key={item._id} title={item.parents[1].title} list={siblingsData[0]} className="mb-3 w-full" path="/base-de-connaissance" isOpen={router.query.openTheme === item.slug} slug={item.slug} />
+              <ol>
+                  <li key={item._id} className="mb-2 flex border-b border-t border-gray-200 py-1.5 pr-2">
+                    <Link href={`/base-de-connaissance/${item.parents[1].slug}`} className="flex flex-row text-center justify-start align-center border-gray-200 px-2 py-1.5">
+                      <HiChevronLeft className="text-[20px] text-gray-400" />
+                      <p className="ml-2 border-l pl-4 text-[12px] font-medium uppercase"> {item.parents[1].title}</p>
                     </Link>
                   </li>
                   {Array.isArray(siblingsData) &&
@@ -79,11 +67,10 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
                           </li>
                         )
                     )}
-                </>
-              )}
-            </ol>
-          </div>
-          <div>
+              </ol> */}
+            </div>
+          )}
+          <div className={item.parents.length > 2 ? "max-w-[700px]" : ""}>
             <div className="flew-row flex justify-between pb-2 pt-4">
               <div className="mr-4">
                 <h2 className="mb-2 text-[24px] font-bold print:mb-0 print:text-black">{group?.title}</h2>
