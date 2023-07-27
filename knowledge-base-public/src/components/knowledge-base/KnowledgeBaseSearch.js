@@ -73,7 +73,7 @@ export default function KnowledgeBaseSearch({ open = false, setOpen }) {
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="w-full md:w-[40rem] md:mt-36">
+              <Dialog.Panel className="w-full md:w-[44rem] md:mt-40">
                 <Combobox as="div" value={selectedItem} onChange={handleSelect}>
                   <div className="relative mt-2 w-full">
                     <Combobox.Input

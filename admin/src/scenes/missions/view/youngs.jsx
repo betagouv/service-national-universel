@@ -59,6 +59,7 @@ export default function Youngs({ mission, applications, updateMission }) {
   const [paramData, setParamData] = useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   //Filters
   const filterArray = [
@@ -373,7 +374,7 @@ export default function Youngs({ mission, applications, updateMission }) {
               count={countAll}
               title="Toutes les candidatures"
               onClick={() => {
-                history.replace(`/mission/${mission._id}/youngs/all?${currentFilterAsUrl(selectedFilters, paramData?.page, filterArray)}`);
+                history.replace(`/mission/${mission._id}/youngs/all?${currentFilterAsUrl(selectedFilters, 0, filterArray)}`);
               }}
               active={currentTab === "all"}
             />
@@ -388,7 +389,7 @@ export default function Youngs({ mission, applications, updateMission }) {
               }
               title="À traiter"
               onClick={() => {
-                history.replace(`/mission/${mission._id}/youngs/pending?${currentFilterAsUrl(selectedFilters, paramData?.page, filterArray)}`);
+                history.replace(`/mission/${mission._id}/youngs/pending?${currentFilterAsUrl(selectedFilters, 0, filterArray)}`);
               }}
               active={currentTab === "pending"}
             />
@@ -396,7 +397,7 @@ export default function Youngs({ mission, applications, updateMission }) {
               count={countFollow}
               title="À suivre"
               onClick={() => {
-                history.replace(`/mission/${mission._id}/youngs/follow?${currentFilterAsUrl(selectedFilters, paramData?.page, filterArray)}`);
+                history.replace(`/mission/${mission._id}/youngs/follow?${currentFilterAsUrl(selectedFilters, 0, filterArray)}`);
               }}
               active={currentTab === "follow"}
             />
@@ -417,6 +418,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                   setSelectedFilters={setSelectedFilters}
                   paramData={paramData}
                   setParamData={setParamData}
+                  size={size}
                 />
                 {currentTab !== "all" ? (
                   <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={[{ items: actionsFilteredByRole }]} />
@@ -450,6 +452,8 @@ export default function Youngs({ mission, applications, updateMission }) {
                 paramData={paramData}
                 setParamData={setParamData}
                 currentEntryOnPage={data?.length}
+                size={size}
+                setSize={setSize}
                 render={
                   <Table>
                     <thead>

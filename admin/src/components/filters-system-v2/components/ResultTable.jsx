@@ -1,7 +1,7 @@
 import React from "react";
 
 import PaginationServerDriven from "../../PaginationServerDriven";
-export default function ResultTable({ render, currentEntryOnPage, pagination = true, paramData, setParamData, size = 20 }) {
+export default function ResultTable({ render, currentEntryOnPage, pagination = true, paramData, setParamData, size = 10, setSize = null }) {
   const pageCount = Math.ceil(paramData?.count / size);
 
   return (
@@ -15,6 +15,8 @@ export default function ResultTable({ render, currentEntryOnPage, pagination = t
           itemsPerPage={size}
           itemsCount={currentEntryOnPage}
           className="px-4 pt-3"
+          size={size}
+          changeSize={setSize}
         />
       )}
       {render}
@@ -27,6 +29,8 @@ export default function ResultTable({ render, currentEntryOnPage, pagination = t
           itemsPerPage={size}
           itemsCount={currentEntryOnPage}
           className="px-4 pt-3"
+          size={size}
+          changeSize={setSize}
         />
       )}
     </div>

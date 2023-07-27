@@ -9,7 +9,7 @@ import api from "../../services/api";
 import { translate, departmentList, department2region, urlWithScheme } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../inscription2023/components/ErrorMessageOld";
-import { SelectTag, step2Question, step2Technical, step1, articles } from "../support-center/ticket/worflow";
+import { SelectTag, step2Question, step2Technical, step1, articles, questionModale } from "../support-center/ticket/worflow";
 import { capture } from "../../sentry";
 import FileUpload, { useFileUpload } from "../../components/FileUpload";
 
@@ -80,7 +80,7 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
           }
         }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => {
-          const showForm = (values.step2?.id !== undefined && values.step2?.id !== "PHASE_1_WITHDRAWAL") || answerNotFound;
+          const showForm = (values.step2?.id !== undefined && !questionModale.includes(values.step2?.id)) || answerNotFound;
           return (
             <>
               <Item
@@ -173,23 +173,25 @@ export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) 
                 />
               ) : null}
 
-              {values.step2?.id === "PHASE_1_WITHDRAWAL" && (
+              {questionModale.includes(values.step2?.id) && (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-3 pt-10">
-                    {articles?.map((article) => (
-                      <a
-                        className="bg-white rounded-xl p-3 flex flex-col gap-2 border-2 text-sm hover:border-blue-500 hover:text-gray-800 transition group"
-                        href={urlWithScheme(article.url)}
-                        target="_blank"
-                        rel="noreferrer"
-                        key={article.url}>
-                        <p className="flex gap-2 font-semibold">
-                          {article.emoji} {article.title}
-                        </p>
-                        <p className="">{article.body}</p>
-                        <p className="mt-auto text-right text-blue-600 group-hover:underline underline-offset-4 decoration-2 transition-all">Lire la suite</p>
-                      </a>
-                    ))}
+                    {articles
+                      ?.filter((article) => article.stepId === values.step2?.id)
+                      .map((article) => (
+                        <a
+                          className="bg-white rounded-xl p-3 flex flex-col gap-2 border-2 text-sm hover:border-blue-500 hover:text-gray-800 transition group"
+                          href={urlWithScheme(article.url)}
+                          target="_blank"
+                          rel="noreferrer"
+                          key={article.url}>
+                          <p className="flex gap-2 font-semibold">
+                            {article.emoji} {article.title}
+                          </p>
+                          <p className="">{article.body}</p>
+                          <p className="mt-auto text-right text-blue-600 group-hover:underline underline-offset-4 decoration-2 transition-all">Lire la suite</p>
+                        </a>
+                      ))}
                   </div>
 
                   <button onClick={handleClick} className="text-blue-600 hover:underline underline-offset-4 decoration-2 mx-3 my-6 text-left">

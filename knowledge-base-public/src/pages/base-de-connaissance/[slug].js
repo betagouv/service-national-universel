@@ -2,13 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { useRouter } from "next/router";
 import API from "../../services/api";
-import KnowledgeBasePublicContentOld from "../../components/knowledge-base/KnowledgeBasePublicContentOld";
 import KnowledgeBasePublicContent from "../../components/knowledge-base/KnowledgeBasePublicContent";
 import useUser from "../../hooks/useUser";
 import Modal from "../../components/Modal";
 import Link from "next/link";
-import { adminURL, appURL, baseDeConnaissanceURL, environment } from "../../config";
-import React from "react";
+import { adminURL, appURL, baseDeConnaissanceURL } from "../../config";
 
 const Content = () => {
   const router = useRouter();
@@ -45,11 +43,7 @@ const Content = () => {
 
   return (
     <>
-      {environment === "production" ? (
-        <KnowledgeBasePublicContentOld item={item} isLoading={!Object.keys(item).length} />
-      ) : (
-        <KnowledgeBasePublicContent item={item} isLoading={!Object.keys(item).length} />
-      )}
+      <KnowledgeBasePublicContent item={item} isLoading={!Object.keys(item).length} />
       <Modal
         isOpen={showLoginModal}
         onRequestClose={() => {
@@ -59,7 +53,7 @@ const Content = () => {
         className="flex flex-col items-start"
       >
         <Link href="/base-de-connaissance">
-          <span className="-mt-6 cursor-pointer text-sm font-medium text-black underline transition-colors hover:text-gray-600">Retour à l'accueil</span>
+          <span className="-mt-6 cursor-pointer text-sm font-medium text-black underline transition-colors hover:text-gray-600">Retour à l&apos;accueil</span>
         </Link>
         <h2 className="mb-16 ml-4 mt-6 text-xl font-bold">Vous devez vous connecter pour accéder à cet article</h2>
         <div className="flex w-full flex-col items-center justify-center gap-3">
@@ -78,8 +72,7 @@ const Content = () => {
 const AuthContent = () => {
   const { isLoading } = useUser();
 
-  if (isLoading) return environment === "production" ? <KnowledgeBasePublicContentOld isLoading /> : <KnowledgeBasePublicContent isLoading />;
-
+  if (isLoading) return <KnowledgeBasePublicContent isLoading />;
   return <Content />;
 };
 

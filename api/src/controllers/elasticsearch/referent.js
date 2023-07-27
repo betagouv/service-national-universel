@@ -73,7 +73,7 @@ router.post("/team/:action(search|export)", passport.authenticate(["referent"], 
     const searchFields = ["email", "firstName", "lastName"];
     const filterFields = ["role.keyword", "subRole.keyword", "region.keyword", "department.keyword"];
     const sortFields = [];
-
+    const size = body.syze;
     // Authorization
     if (!canSearchInElasticSearch(user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -104,7 +104,7 @@ router.post("/team/:action(search|export)", passport.authenticate(["referent"], 
       }
     }
 
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
 
     if (req.params.action === "export") {
       const response = await allRecords("referent", hitsRequestBody.query);
@@ -131,7 +131,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (!canSearchInElasticSearch(user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     //Query params validation
@@ -163,7 +163,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
         : null,
     ].filter(Boolean);
 
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
 
     if (req.params.action === "export") {
       const response = await allRecords("referent", hitsRequestBody.query);

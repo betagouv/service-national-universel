@@ -339,7 +339,7 @@ export default function Create() {
     }
   };
 
-  const sendData = async (status = YOUNG_STATUS.VALIDATED) => {
+  const sendData = async (status = YOUNG_STATUS.WAITING_VALIDATION) => {
     try {
       setLoading(true);
       values.addressVerified = values.addressVerified.toString();

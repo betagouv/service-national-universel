@@ -26,6 +26,7 @@ export default function Filters({
   paramData,
   setParamData,
   defaultUrlParam = false,
+  size,
 }) {
   const [search, setSearch] = useState("");
   const [dataFilter, setDataFilter] = useState([]);
@@ -95,8 +96,8 @@ export default function Filters({
   );
 
   const updateOnParamChange = useCallback(
-    debounce(async (selectedFilters, paramData, location, route) => {
-      buildQuery(route, selectedFilters, paramData?.page, filters, paramData?.sort).then((res) => {
+    debounce(async (selectedFilters, paramData, location, route, size) => {
+      buildQuery(route, selectedFilters, paramData?.page, filters, paramData?.sort, size).then((res) => {
         if (!res) return;
         setDataFilter({ ...dataFilter, ...res.newFilters });
         const newParamData = {
@@ -119,8 +120,8 @@ export default function Filters({
 
   useEffect(() => {
     if (Object.keys(selectedFilters).length === 0) return;
-    updateOnParamChange(selectedFilters, paramData, location, route);
-  }, [selectedFilters, paramData.page, paramData.sort, location.search, route]);
+    updateOnParamChange(selectedFilters, paramData, location, route, size);
+  }, [selectedFilters, paramData.page, paramData.sort, location, route, size]);
 
   const getDefaultFilters = () => {
     const newFilters = {};

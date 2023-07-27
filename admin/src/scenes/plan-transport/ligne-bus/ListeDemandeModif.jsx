@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
@@ -35,6 +35,7 @@ export default function ListeDemandeModif() {
   const pageId = "demande-modification-bus";
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({ page: 0 });
+  const [size, setSize] = useState(10);
 
   const getTags = async () => {
     try {
@@ -126,6 +127,7 @@ export default function ListeDemandeModif() {
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
+              size={size}
             />
           </div>
           <div className="mt-2 flex flex-row flex-wrap items-center px-4">
@@ -142,6 +144,8 @@ export default function ListeDemandeModif() {
             paramData={paramData}
             setParamData={setParamData}
             currentEntryOnPage={data?.length}
+            size={size}
+            setSize={setSize}
             render={
               <div className="mt-6 mb-2 flex w-full flex-col">
                 <hr />

@@ -12,6 +12,7 @@ const { serializeRamsesSchools } = require("../../utils/es-serializer");
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
+    const { user, body } = req;
     const searchFields = ["fullName", "city", "zip", "code2022", "typology", "domain"];
     const filterFields = ["region.keyword", "departmentName.keyword", "cohort", "academy"];
     const sortFields = [];
@@ -20,7 +21,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (!canSearchInElasticSearch(req.user, "schoolramses")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters
@@ -40,6 +41,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       page,
       sort,
       contextFilters,
+      size,
     });
 
     async function getYoungsFromSchoolIds(schoolsIds) {

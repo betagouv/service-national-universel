@@ -43,7 +43,7 @@ router.post("/by-mission/:id/:action(search|export)", passport.authenticate(["yo
     const sortFields = [];
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { error: errorQuery, value: query } = Joi.object({
@@ -72,6 +72,7 @@ router.post("/by-mission/:id/:action(search|export)", passport.authenticate(["yo
       page,
       sort,
       contextFilters,
+      size,
     });
 
     if (req.params.action === "export") {
@@ -104,7 +105,7 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
     const sortFields = [];
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { error: errorQuery, value: query } = Joi.object({
@@ -133,6 +134,7 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
       page,
       sort,
       contextFilters,
+      size,
     });
 
     if (req.params.action === "export") {
@@ -157,7 +159,7 @@ router.post("/by-young/:id/:action(search|export)", passport.authenticate(["refe
     const sortFields = ["priority.keyword"];
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { applicationContextFilters, applicationContextError } = await buildApplicationContext(user);
@@ -176,6 +178,7 @@ router.post("/by-young/:id/:action(search|export)", passport.authenticate(["refe
       page,
       sort,
       contextFilters,
+      size,
     });
 
     if (req.params.action === "export") {
