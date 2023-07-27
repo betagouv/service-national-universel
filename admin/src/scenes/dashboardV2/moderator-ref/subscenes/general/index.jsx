@@ -66,7 +66,7 @@ export default function Index() {
       options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
       sort: (e) => orderCohort(e),
     },
-  ];
+  ].filter((e) => e);
 
   const [selectedFilters, setSelectedFilters] = React.useState({
     cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"],

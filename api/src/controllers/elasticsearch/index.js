@@ -16,5 +16,6 @@ router.use("/application", require("./application"));
 router.use("/referent", require("./referent"));
 router.use("/dashboard", require("./dashboard"));
 router.use("/association", require("./association"));
+router.use("/keynumbers", require("./keynumbers"));
 
 module.exports = router;

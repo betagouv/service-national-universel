@@ -2,12 +2,41 @@ import React, { useState } from "react";
 import Inscription from "./ui/icons/Inscription";
 import CustomFilter from "../moderator-ref/subscenes/general/components/CustomFilter";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
+import { capture } from "../../../sentry";
+import API from "../../../services/api";
+import { ROLES } from "snu-lib";
+
+const Notes = [
+  {
+    _id: "pdt-correction-request-refused",
+    roles: [ROLES.ADMIN, ROLES.REFERENT_REGION],
+    phases: ["sejour"],
+    html: "<strong>demandes de modifications</strong> du plan de transport refusées",
+  },
+];
 
 export default function KeyNumbers() {
   const [open, setOpen] = useState(false);
   const [notesFromDate, setNotesFromDate] = useState(null);
   const [notesToDate, setNotesToDate] = useState(null);
   const [notesPhase, setNotesPhase] = useState("all");
+  const [notes, setNotes] = useState(null);
+  console.log("🚀 ~ file: KeyNumbers.jsx:25 ~ KeyNumbers ~ notes:", notes);
+
+  async function fetchData() {
+    try {
+      const res = await API.post("/elasticsearch/keynumbers", { notesFromDate, notesToDate, notesPhase });
+      if (res.ok) {
+        setNotes(res.data);
+      }
+    } catch (e) {
+      capture(e);
+    }
+  }
+
+  React.useEffect(() => {
+    fetchData();
+  }, [notesFromDate, notesToDate, notesPhase]);
 
   return (
     <div className={`flex w-[30%] flex-col rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!open ? "h-[584px]" : "h-fit"}`}>
