@@ -38,12 +38,12 @@ function FeedbackComponent({ item }) {
       {!hasSubmitted && (
         <>
           {feedback.isPositive && (
-            <div className="flex w-full flex-col items-center justify-center rounded-lg bg-[#F3F4F6] py-8 md:my-8 md:h-[130px] print:bg-transparent print:pb-12">
+            <div className="flex w-full flex-col items-center justify-center rounded-lg bg-[#F3F4F6] mt-8 py-8 md:my-8 md:h-[130px] print:bg-transparent print:pb-12">
               <p className="mt-2 text-[20px] font-bold not-italic leading-7 text-gray-900">Cet article vous a été utile ?</p>
               <div className="mb-4 mt-4 flex flex-col md:flex-row">
                 <button
                   id="ThumbsUp"
-                  className="mb-4 mr-6 flex h-12 w-full cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] bg-gray-200 px-16 text-3xl font-medium text-[#2563EB] hover:bg-blue-600 hover:text-white md:mb-0"
+                  className="mb-4 mr-6 flex h-12 w-full cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] bg-[#F3F4F6] px-16 text-3xl font-medium text-[#2563EB] hover:bg-blue-600 hover:text-white md:mb-0"
                   onClick={postFeedback}
                 >
                   <HiThumbUp className="w-[20px] text-[20px]" />
@@ -51,7 +51,7 @@ function FeedbackComponent({ item }) {
                 </button>
                 <button
                   id="ThumbsDown"
-                  className="flex h-12 w-full cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] bg-gray-200 px-16 text-3xl font-medium text-[#2563EB] hover:bg-blue-600 hover:text-white md:ml-1"
+                  className="flex h-12 w-full cursor-pointer flex-row items-center justify-center rounded-md border-[1px] border-[#2563EB] bg-[#F3F4F6] px-16 text-3xl font-medium text-[#2563EB] hover:bg-blue-600 hover:text-white md:ml-1"
                   onClick={() => setFeedback({ ...feedback, isPositive: false })}
                 >
                   <HiThumbDown className="w-[20px] text-[20px]" />
@@ -77,8 +77,8 @@ function FeedbackComponent({ item }) {
                   </div>
                 </div>
                 <div className="mb-2 mt-8 flex w-full flex-row">
-                  <p className="inline-block w-full self-end text-[12px] font-medium leading-4 text-[#111827]">Quel était votre question ?</p>
-                  <p className="inline-block h-5 w-48 self-end text-end text-xs font-medium leading-5 text-[#6B7280]">125 caractères maximum</p>
+                  <p className="inline-block w-full self-center text-[12px] font-medium leading-4 text-[#111827]">Quel était votre question ?</p>
+                  <p className="inline-block w-[50%] h-5 w-48 self-center text-end text-xs font-medium leading-5 text-[#6B7280]">125 caractères maximum</p>
                 </div>
                 <textarea
                   className={`h-24 w-full rounded-md border-2 ${
@@ -97,13 +97,13 @@ function FeedbackComponent({ item }) {
               </div>
               <div className="mt-3 flex flex-row justify-end bg-[#F9FAFB] p-4">
                 <button
-                  className="mr-1 items-center justify-center rounded-md border-[1px] border-gray-200 bg-white px-4 text-[14px] font-medium leading-5 text-[#374151]"
+                  className="mr-1 items-center justify-center rounded-md border-[1px] border-gray-200 bg-white px-4 py-1 text-[14px] font-medium leading-5 text-[#374151]"
                   onClick={() => setFeedback({ ...defaultFeedback })}
                 >
                   Annuler
                 </button>
                 <Button
-                  className="rounded-md border-[1px] border-[#2563EB] bg-[#2563EB] px-4 text-[14px] font-medium leading-5 text-[#FFFFFF]"
+                  className="rounded-md border-[1px] border-[#2563EB] bg-[#2563EB] px-4 py-1 text-[14px] font-medium leading-5 text-[#FFFFFF]"
                   onClick={postFeedback}
                   loading={isSubmitting}
                   disabled={feedback.comment?.length > 125}
@@ -116,7 +116,7 @@ function FeedbackComponent({ item }) {
         </>
       )}
       {hasSubmitted && (
-        <div className="mb-6 flex h-24 w-full flex-row items-center justify-center rounded-lg border-[1px] bg-white text-[#111827] shadow-md print:bg-transparent print:pb-12">
+        <div className="mb-12 mt-8 flex h-28 w-full flex-row items-center justify-center rounded-lg border-[1px] bg-white text-[#111827] shadow-md print:bg-transparent print:pb-12">
           <span className="material-icons mr-2 mt-1 w-[20px] text-[20px] text-[#111827]">done</span>
           <p className="text-xl font-bold not-italic leading-7">Merci pour votre contribution</p>
         </div>
