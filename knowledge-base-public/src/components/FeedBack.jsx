@@ -38,7 +38,7 @@ function FeedbackComponent({ item }) {
       {!hasSubmitted && (
         <>
           {feedback.isPositive && (
-            <div className="flex w-full flex-col items-center justify-center rounded-lg bg-[#F3F4F6] py-8 md:my-8 md:h-[130px] print:bg-transparent print:pb-12">
+            <div className="flex w-full flex-col items-center justify-center rounded-lg bg-[#F3F4F6] mt-8 py-8 md:my-8 md:h-[130px] print:bg-transparent print:pb-12">
               <p className="mt-2 text-[20px] font-bold not-italic leading-7 text-gray-900">Cet article vous a été utile ?</p>
               <div className="mb-4 mt-4 flex flex-col md:flex-row">
                 <button

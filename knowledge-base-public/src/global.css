@@ -212,6 +212,12 @@ body {
   line-height: 40px;
 }
 
+@media screen and (max-width: 768px) {
+  #text-editor [data-slate-editor] h1 {
+    line-height: 32px;
+  }
+}
+
 #text-editor [data-slate-editor] h2 {
   font-size: 1.25em;
   font-weight: bold;
