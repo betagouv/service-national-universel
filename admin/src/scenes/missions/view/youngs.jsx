@@ -374,7 +374,7 @@ export default function Youngs({ mission, applications, updateMission }) {
               count={countAll}
               title="Toutes les candidatures"
               onClick={() => {
-                history.replace(`/mission/${mission._id}/youngs/all?${currentFilterAsUrl(selectedFilters, paramData?.page, filterArray)}`);
+                history.replace(`/mission/${mission._id}/youngs/all?${currentFilterAsUrl(selectedFilters, 0, filterArray)}`);
               }}
               active={currentTab === "all"}
             />
@@ -389,7 +389,7 @@ export default function Youngs({ mission, applications, updateMission }) {
               }
               title="À traiter"
               onClick={() => {
-                history.replace(`/mission/${mission._id}/youngs/pending?${currentFilterAsUrl(selectedFilters, paramData?.page, filterArray)}`);
+                history.replace(`/mission/${mission._id}/youngs/pending?${currentFilterAsUrl(selectedFilters, 0, filterArray)}`);
               }}
               active={currentTab === "pending"}
             />
@@ -397,7 +397,7 @@ export default function Youngs({ mission, applications, updateMission }) {
               count={countFollow}
               title="À suivre"
               onClick={() => {
-                history.replace(`/mission/${mission._id}/youngs/follow?${currentFilterAsUrl(selectedFilters, paramData?.page, filterArray)}`);
+                history.replace(`/mission/${mission._id}/youngs/follow?${currentFilterAsUrl(selectedFilters, 0, filterArray)}`);
               }}
               active={currentTab === "follow"}
             />
