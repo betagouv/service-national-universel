@@ -209,15 +209,18 @@ body {
 #text-editor [data-slate-editor] h1 {
   font-size: 30px;
   font-weight: bold;
+  line-height: 40px;
 }
 
 #text-editor [data-slate-editor] h2 {
   font-size: 1.25em;
   font-weight: bold;
+  line-height: 27px;
 }
 
 #text-editor [data-slate-editor] h3 {
-  font-size: 18px
+  font-size: 18px;
+  line-height: 24px;
 }
 
 #text-editor ul {

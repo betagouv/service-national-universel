@@ -20,7 +20,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
         <div className="flex flew-row justify-between pt-4 pb-2">
           <div className="mr-4">
             <h2 className="mb-2 text-[24px] font-bold print:mb-0 print:text-black">{group?.title}</h2>
-            <h1 className="mb-2 text-[24px] font-bold md:text-[30px] print:mb-0 print:text-black">{item?.title}</h1>
+            <h1 className="mb-2 text-[24px] leading-8 md:leading-10 font-bold md:text-[30px] print:mb-0 print:text-black">{item?.title}</h1>
             <h6 className="text-[18px] text-snu-purple-100 md:text-[18px] lg:text-xl print:text-black">{item?.description}</h6>
           </div>
           <div>
