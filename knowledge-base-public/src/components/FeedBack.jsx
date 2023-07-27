@@ -116,7 +116,7 @@ function FeedbackComponent({ item }) {
         </>
       )}
       {hasSubmitted && (
-        <div className="mb-12 flex h-24 w-full flex-row items-center justify-center rounded-lg border-[1px] bg-white text-[#111827] shadow-md print:bg-transparent print:pb-12">
+        <div className="mb-12 mt-8 flex h-28 w-full flex-row items-center justify-center rounded-lg border-[1px] bg-white text-[#111827] shadow-md print:bg-transparent print:pb-12">
           <span className="material-icons mr-2 mt-1 w-[20px] text-[20px] text-[#111827]">done</span>
           <p className="text-xl font-bold not-italic leading-7">Merci pour votre contribution</p>
         </div>
