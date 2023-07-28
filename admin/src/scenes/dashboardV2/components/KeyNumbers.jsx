@@ -35,7 +35,7 @@ export default function KeyNumbers() {
       <div className="flex items-center justify-between pb-4">
         <div className="flex items-center gap-3">
           <div className="text-sm font-bold leading-5 text-gray-900">Chiffres clés</div>
-          <div className=" text-medium rounded-full bg-blue-50 px-2.5 py-0.5 text-sm leading-none text-blue-600">22</div>
+          <div className=" text-medium rounded-full bg-blue-50 px-2.5 py-0.5 text-sm leading-none text-blue-600">{notes?.length || 0}</div>
         </div>
         <CustomFilter setFromDate={setNotesFromDate} setToDate={setNotesToDate} notesPhase={notesPhase} setNotesPhase={setNotesPhase} />
       </div>
