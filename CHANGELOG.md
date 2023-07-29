@@ -1,3 +1,10 @@
+## [1.317.1](https://github.com/betagouv/service-national-universel/compare/v1.317.0...v1.317.1) (2023-07-29)
+
+
+### Bug Fixes
+
+* **app:** kb url on local and staging ([df50277](https://github.com/betagouv/service-national-universel/commit/df502774a784fb668c968ab6cc372afdbe8c26a7))
+
 # [1.317.0](https://github.com/betagouv/service-national-universel/compare/v1.316.1...v1.317.0) (2023-07-26)
 
 
