@@ -1,3 +1,4 @@
+const { string } = require("joi");
 const mongoose = require("mongoose");
 const { ROLES_LIST } = require("snu-lib");
 
@@ -12,8 +13,8 @@ const Schema = new mongoose.Schema({
       description: "Niveau de priorité du message.",
     },
   },
-  role: {
-    type: String,
+  to_role: {
+    type: [String],
     enum: ROLES_LIST,
     required: true,
     documentation: {

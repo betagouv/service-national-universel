@@ -146,7 +146,7 @@ export default function PaginationServerDriven({
           {currentPage < (count % size === 0 ? lastPage - 3 : lastPage - 2) ? (
             <div className="flex px-1 text-xs text-gray-400 border-gray-200 border-r border-solid min-h-[32px] items-center">...</div>
           ) : null}
-          {lastPage !== 0 ? (
+          {lastPage !== 0 && lastPage !== firstDisplayPage ? (
             <PageButton
               page={count % size === 0 ? lastPage - 1 : lastPage}
               changePage={changePage}

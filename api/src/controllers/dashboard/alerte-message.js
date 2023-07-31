@@ -9,6 +9,17 @@ const AlerteMessageModel = require("../../models/alerteMessage");
 const { ERRORS } = require("../../utils");
 const { validateId } = require("../../utils/validator");
 
+router.get("/all", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    if (!Object.values(ROLES).includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const data = await AlerteMessageModel.find({});
+    return res.status(200).send({ ok: true, data: data.map(serializeAlerteMessage) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
@@ -28,11 +39,25 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
+// ici on ne prend que les messages destinés à un role précis
+router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    if (!canCreateAlerteMessage(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const data = await AlerteMessageModel.find({ to_role: { $in: [req.user.role] } });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    return res.status(200).send({ ok: true, data: data.map(serializeAlerteMessage) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       priority: Joi.string().required(),
-      role: Joi.array().items(Joi.string()).required(),
+      to_role: Joi.array().items(Joi.string()).required(),
       content: Joi.string().required(),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
@@ -42,11 +67,11 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     }
     if (!canCreateAlerteMessage(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const { priority, role, content } = value;
+    const { priority, to_role, content } = value;
 
     if (content.length > 500) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const message = await AlerteMessageModel.create({ priority, role, content });
+    const message = await AlerteMessageModel.create({ priority, to_role, content });
 
     return res.status(200).send({ ok: true, data: serializeAlerteMessage(message) });
   } catch (error) {
@@ -60,7 +85,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const { error, value } = Joi.object({
       id: Joi.string().required(),
       priority: Joi.string().required(),
-      role: Joi.array().items(Joi.string()).required(),
+      to_role: Joi.array().items(Joi.string()).required(),
       content: Joi.string().required(),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
@@ -70,14 +95,14 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
     if (!canCreateAlerteMessage(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const { priority, role, content } = value;
+    const { priority, to_role, content } = value;
 
     if (content.length > 500) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const message = await AlerteMessageModel.findById(value.id);
     if (!message) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    message.set({ priority: priority, role: role, content: content });
+    message.set({ priority: priority, to_role: to_role, content: content });
     await message.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeAlerteMessage(message) });
   } catch (error) {
