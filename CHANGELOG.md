@@ -1,3 +1,10 @@
+## [1.317.2](https://github.com/betagouv/service-national-universel/compare/v1.317.1...v1.317.2) (2023-07-31)
+
+
+### Bug Fixes
+
+* **api:** dont take transport into account for dsnj export ([1f41432](https://github.com/betagouv/service-national-universel/commit/1f41432c1de71a42c20679817d97cfcc1e904f6b))
+
 ## [1.317.1](https://github.com/betagouv/service-national-universel/compare/v1.317.0...v1.317.1) (2023-07-29)
 
 
