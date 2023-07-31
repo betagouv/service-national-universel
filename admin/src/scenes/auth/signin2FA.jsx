@@ -87,7 +87,7 @@ export default function Signin() {
                   <ul className="self-stretch text-gray-500 text-xs mb-4 text-justify">
                     <li>L'adresse mail que vous utilisez est bien celle indiquée ci-dessus</li>
                     <li>Le mail ne se trouve pas dans vos spam</li>
-                    <li>L'adresse mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
+                    <li>L'adresse mail no_reply-auth@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
                     <li>Votre boite de réception n'est pas saturée</li>
                   </ul>
                 </div>
