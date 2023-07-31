@@ -6,12 +6,12 @@ import Link from "next/link";
 import slugify from "slugify";
 import FolderIcon from "./FolderIcon";
 import { HiChevronLeft } from "react-icons/hi";
-import useDeviceWithResize from "../hooks/useDeviceWithResize";
+import useUser from "../hooks/useUser";
 
 // accessibility: https://www.w3.org/WAI/ARIA/apg/patterns/accordion/
 
-const NavigationArticle = ({ item }) => {
-  const device = useDeviceWithResize();
+const NavigationArticle = ({ item, device }) => {
+  const { restriction } = useUser();
   const router = useRouter();
   const { cache } = useSWRConfig();
   const parentId = item.parentId;
@@ -20,7 +20,7 @@ const NavigationArticle = ({ item }) => {
   useEffect(() => {
     const fetchSiblings = async () => {
       try {
-        const response = await API.post({ path: `/knowledge-base/getSiblings`, body: { parentId } });
+        const response = await API.post({ path: `/knowledge-base/${restriction}/siblings`, body: { parentId } });
         setSiblingsData(response.siblings);
       } catch (error) {
         console.error(error);
@@ -123,11 +123,11 @@ const NavigationArticle = ({ item }) => {
         </li>
         {Array.isArray(siblingsData) &&
           siblingsData.length > 0 &&
-          siblingsData[0].map(
+          siblingsData.map(
             ({ _id, slug, title, type, status }) =>
               type === "article" &&
               status === "PUBLISHED" && (
-                <li key={_id} className={`flex flex-nowrap items-center gap-1 ${_id === item._id ? "bg-gray-200 text-gray-900 rounded-md" : "text-gray-500"}`}>
+                <li key={_id} className={`flex flex-nowrap items-center gap-1 ${_id === item._id ? "rounded-md bg-gray-200 text-gray-900" : "text-gray-500"}`}>
                   <Link href={`/base-de-connaissance/${slug}`} className="rounded px-2 py-1.5" onClick={() => cache.clear()}>
                     <p className="text-[14px] font-medium leading-5">{title}</p>
                   </Link>
@@ -145,7 +145,7 @@ const NavigationArticle = ({ item }) => {
         <Accordion
           key={item._id}
           title={item.parents[1].title}
-          list={siblingsData[0]}
+          list={siblingsData}
           className="mb-3 w-full"
           path="/base-de-connaissance"
           isOpen={router.query.openTheme === item.slug}

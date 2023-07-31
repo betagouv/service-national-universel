@@ -7,10 +7,12 @@ import useUser from "../../hooks/useUser";
 import Modal from "../../components/Modal";
 import Link from "next/link";
 import { adminURL, appURL, baseDeConnaissanceURL } from "../../config";
+import useDevice from "../../hooks/useDevice";
 
 const Content = () => {
   const router = useRouter();
   const slug = useMemo(() => router.query?.slug || "", [router.query?.slug]);
+  const { device } = useDevice();
 
   const { restriction } = useUser();
 
@@ -43,7 +45,7 @@ const Content = () => {
 
   return (
     <>
-      <KnowledgeBasePublicContent item={item} isLoading={!Object.keys(item).length} />
+      <KnowledgeBasePublicContent item={item} isLoading={!Object.keys(item).length} device={device} />
       <Modal
         isOpen={showLoginModal}
         onRequestClose={() => {

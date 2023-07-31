@@ -6,7 +6,7 @@ import KnowledgeBasePublicSection from "./KnowledgeBasePublicSection";
 import KnowledgeBasePublicArticle from "./KnowledgeBasePublicArticle";
 import React from "react";
 
-const KnowledgeBasePublicContent = ({ item, isLoading }) => {
+const KnowledgeBasePublicContent = ({ item, isLoading, device }) => {
   const router = useRouter();
 
   const [loadingType, setType] = useState(router?.query?.loadingType);
@@ -25,10 +25,10 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
       </Head>
       <div className="flex min-h-screen flex-col md:min-h-full">
         {(!item || isLoading) && loadingType ? (
-          <>{loadingType === "section" ? <KnowledgeBasePublicSection isLoading /> : <KnowledgeBasePublicArticle isLoading />}</>
+          <>{loadingType === "section" ? <KnowledgeBasePublicSection isLoading /> : <KnowledgeBasePublicArticle isLoading device={device} />}</>
         ) : (
           <>
-            {item?.type === "article" && <KnowledgeBasePublicArticle item={item} isLoading={isLoading} />}
+            {item?.type === "article" && <KnowledgeBasePublicArticle item={item} isLoading={isLoading} device={device} />}
             {item?.type === "section" && <KnowledgeBasePublicSection item={item} isLoading={isLoading} />}
           </>
         )}
