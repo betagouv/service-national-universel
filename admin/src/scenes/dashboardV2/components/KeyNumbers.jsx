@@ -6,21 +6,23 @@ import { capture } from "../../../sentry";
 import API from "../../../services/api";
 import Sejour from "./ui/icons/Sejour";
 import Engagement from "./ui/icons/Engagement";
+import { toastr } from "react-redux-toastr";
 
 export default function KeyNumbers() {
   const [open, setOpen] = useState(false);
-  const [notesFromDate, setNotesFromDate] = useState(null);
-  const [notesToDate, setNotesToDate] = useState(null);
-  const [notesPhase, setNotesPhase] = useState("all");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [phase, setPhase] = useState("all");
   const [notes, setNotes] = useState(null);
 
   async function fetchData() {
     try {
-      const res = await API.post("/elasticsearch/keynumbers", { notesFromDate, notesToDate, notesPhase });
+      const res = await API.post("/elasticsearch/keynumbers", { startDate, endDate, phase });
       console.log("🚀 ~ file: KeyNumbers.jsx:29 ~ fetchData ~ res:", res);
-      if (res.ok) {
-        setNotes(res.data);
+      if (!res.ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération des chiffres clés", res.error);
       }
+      setNotes(res.data);
     } catch (e) {
       capture(e);
     }
@@ -28,7 +30,7 @@ export default function KeyNumbers() {
 
   React.useEffect(() => {
     fetchData();
-  }, [notesFromDate, notesToDate, notesPhase]);
+  }, [startDate, endDate, phase]);
 
   return (
     <div className={`flex w-[30%] flex-col rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!open ? "h-[584px]" : "h-fit"}`}>
@@ -37,7 +39,7 @@ export default function KeyNumbers() {
           <div className="text-sm font-bold leading-5 text-gray-900">Chiffres clés</div>
           <div className=" text-medium rounded-full bg-blue-50 px-2.5 py-0.5 text-sm leading-none text-blue-600">{notes?.length || 0}</div>
         </div>
-        <CustomFilter setFromDate={setNotesFromDate} setToDate={setNotesToDate} notesPhase={notesPhase} setNotesPhase={setNotesPhase} />
+        <CustomFilter setFromDate={setStartDate} setToDate={setEndDate} notesPhase={phase} setNotesPhase={setPhase} />
       </div>
       <div className="">
         {notes?.map((note) => (
