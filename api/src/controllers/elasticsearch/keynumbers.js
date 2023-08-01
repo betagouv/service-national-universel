@@ -4,13 +4,23 @@ const router = express.Router();
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
-const { ES_NO_LIMIT, canSearchInElasticSearch, ROLES } = require("snu-lib");
+const { ES_NO_LIMIT, ROLES } = require("snu-lib");
+const Joi = require("joi");
 
 router.post("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { value, error } = Joi.object({
+      startDate: Joi.date().required(),
+      endDate: Joi.date().required(),
+      phase: Joi.string().valid("inscription", "sejour", "engagement", "all").required(),
+    }).validate(req.body, { allowUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
     const user = req.user;
-    if (!canSearchInElasticSearch(user, "young")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    const { startDate, endDate, phase } = req.body;
+    const { startDate, endDate, phase } = value;
 
     let notes = [];
 
