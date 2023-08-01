@@ -138,7 +138,7 @@ export default function PaginationServerDriven({
           </button>
         </div>
         <div className="flex justify-center items-center min-h-[32px] text-xs text-gray-600 border border-gray-200 rounded-md border-solid">
-          <PageButton page={0} changePage={changePage} active={currentPage === 0} lastPage={lastPage} />
+          <PageButton page={0} changePage={changePage} active={currentPage === 0} lastPage={lastPage} isLast={lastPage === firstDisplayPage ? true : false} />
 
           {currentPage > 2 ? <div className="flex px-1 text-xs text-gray-400 border-gray-200 border-r border-solid min-h-[32px] items-center">...</div> : null}
 
@@ -146,7 +146,7 @@ export default function PaginationServerDriven({
           {currentPage < (count % size === 0 ? lastPage - 3 : lastPage - 2) ? (
             <div className="flex px-1 text-xs text-gray-400 border-gray-200 border-r border-solid min-h-[32px] items-center">...</div>
           ) : null}
-          {lastPage !== 0 ? (
+          {lastPage !== 0 && lastPage !== firstDisplayPage ? (
             <PageButton
               page={count % size === 0 ? lastPage - 1 : lastPage}
               changePage={changePage}
@@ -188,7 +188,7 @@ function PageButton({ page, changePage, active, lastPage, isLast = false }) {
   };
   return (
     <button onClick={() => changePage(page)} className={`flex items-center justify-center flex-none w-8 h-8 m-auto ` + getClass()}>
-      {page + 1}
+      {(page + 1).toString()}
     </button>
   );
 }
