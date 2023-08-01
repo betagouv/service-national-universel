@@ -73,22 +73,31 @@ async function getYoungNotesPhase1(startDate, endDate) {
       nested: {
         path: "notes",
         query: {
-          range: {
-            "notes.createdAt": {
-              gte: new Date(startDate),
-              lte: new Date(endDate),
-            },
+          bool: {
+            must: [
+              {
+                match: {
+                  "notes.phase": "PHASE_1"
+                },
+              },
+              {
+                range: {
+                  "notes.createdAt": {
+                    gte: new Date(startDate),
+                    lte: new Date(endDate),
+                  },
+                },
+              },
+            ],
           },
         },
       },
-      filter: [{ term: { "Notes.phase": "PHASE_1" } }]
     },
     size: 0,
     track_total_hits: true,
   };
 
   const response = await esClient.search({ index: "young", body });
-  console.log("🚀 ~ file: keynumbers.js:89 ~ getYoungNotesPhase1 ~ response:", response);
   const value = response.body.hits.total.value;
 
   return [
