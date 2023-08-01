@@ -53,7 +53,7 @@ export default function Alerte() {
 
   return (
     <>
-      <Breadcrumbs items={[{ div: "Messages d'alerte" }]} />
+      <Breadcrumbs items={[{ label: "Messages d'alerte" }]} />
       <div className="flex w-full flex-col px-8 pb-8">
         <div className="flex items-center justify-between py-8">
           <div className="text-2xl font-bold leading-7 text-gray-900">Messages d'alerte</div>
@@ -65,7 +65,7 @@ export default function Alerte() {
             &#8239;Créer un nouveau message
           </button>
         </div>
-        {!data?.length && !isNew ? <p>Aucun message d'alerte n'est paramétré pour le moment</p> : null}
+        {!data?.length && !isNew ? <p>Aucun message d'alerte n'est paramétré pour le moment.</p> : null}
         {isNew ? <ModalAlerteMess message={null} isNew={isNew} setIsNew={setIsNew} setMessageList={setData} /> : null}
         {data?.length ? data.map((hit) => <ModalAlerteMess key={hit._id} message={hit} setMessageList={setData} />) : null}
       </div>

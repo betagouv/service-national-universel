@@ -17,6 +17,7 @@ export default function Field({
   isJvaMission = false,
   copy = false,
   autoFocus = false,
+  placeholder = "",
 }) {
   const [copied, setCopied] = React.useState(false);
   const border = (readOnly, error) => {
@@ -58,7 +59,16 @@ export default function Field({
         )}
 
         {type === "textarea" && (
-          <textarea rows={row} readOnly={readOnly || isJvaMission} type="text" name={name} value={value} onChange={handleChange} className={"w-full text-start " + className} />
+          <textarea
+            rows={row}
+            readOnly={readOnly || isJvaMission}
+            type="text"
+            placeholder={placeholder}
+            name={name}
+            value={value}
+            onChange={handleChange}
+            className={"w-full text-start " + className}
+          />
         )}
         {errors[name] && <div className="mt-1 text-red-500">{errors[name]}</div>}
       </div>

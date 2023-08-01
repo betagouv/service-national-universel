@@ -137,7 +137,7 @@ export default function Index() {
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des messages", translate(code));
       }
-      setMessage(response);
+      setMessage(response.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération du bus");

@@ -39,6 +39,12 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
         },
       };
     },
+    placeholder: (styles) => {
+      return {
+        ...styles,
+        color: "#9ca3af",
+      };
+    },
   };
 
   const InputOption = (props) => {
@@ -236,8 +242,8 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                   <Field
                     name={"content"}
                     errors={errors}
-                    className="w-full h-[122px]"
-                    placeholder="Précisez en quelques mot"
+                    className="text-gray-900 h-[122px] w-full"
+                    placeholder="Précisez en quelques mots"
                     handleChange={(e) => setData({ ...data, content: e.target.value })}
                     value={data.content}
                     readOnly={!editInfo}
