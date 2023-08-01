@@ -146,7 +146,7 @@ export default function PaginationServerDriven({
           {currentPage < (count % size === 0 ? lastPage - 3 : lastPage - 2) ? (
             <div className="flex px-1 text-xs text-gray-400 border-gray-200 border-r border-solid min-h-[32px] items-center">...</div>
           ) : null}
-          {lastPage !== 0 && lastPage !== firstDisplayPage ? (
+          {lastPage !== 0 ? (
             <PageButton
               page={count % size === 0 ? lastPage - 1 : lastPage}
               changePage={changePage}
@@ -188,7 +188,7 @@ function PageButton({ page, changePage, active, lastPage, isLast = false }) {
   };
   return (
     <button onClick={() => changePage(page)} className={`flex items-center justify-center flex-none w-8 h-8 m-auto ` + getClass()}>
-      {(page + 1).toString()}
+      {page + 1}
     </button>
   );
 }
