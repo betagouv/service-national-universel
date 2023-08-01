@@ -112,16 +112,11 @@ function filterBusLinesByRole(lines, user) {
 
 export async function exportLigneBus(user, cohort) {
   try {
-    const body = {
-      query: {
-        bool: {
-          must: [{ match_all: {} }, { term: { "cohort.keyword": cohort } }],
-        },
-      },
-    };
-
-    const data = await getAllResults("plandetransport", body);
-    if (!data || !data.length) return toastr.error("Aucune ligne de bus n'a été trouvée");
+    const { ok, data } = await API.post(`/elasticsearch/plandetransport/export`, {
+      filters: { cohort: [cohort] },
+      exportFields: "*",
+    });
+    if (!ok || !data?.length) return toastr.error("Aucune ligne de bus n'a été trouvée");
 
     const ligneBus = filterBusLinesByRole(data, user);
     const ligneIds = ligneBus.map((e) => e._id);
@@ -133,26 +128,10 @@ export async function exportLigneBus(user, cohort) {
       }
     }
 
-    const bodyYoung = {
-      query: {
-        bool: {
-          must: [{ match_all: {} }, { term: { "cohort.keyword": cohort } }, { term: { "status.keyword": "VALIDATED" } }, { terms: { "ligneId.keyword": ligneIds } }],
-          must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
-        },
-      },
-      aggs: {
-        group_by_bus: {
-          terms: {
-            field: "ligneId.keyword",
-            size: ES_NO_LIMIT,
-          },
-        },
-      },
-      track_total_hits: true,
-    };
-
-    const youngs = await getAllResults("young-having-meeting-point-in-geography", bodyYoung);
-    if (!youngs || !youngs.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
+    const { ok: res, data: youngs } = await API.post("/es/young-having-meeting-point-in-geography/export", {
+      filters: { cohort: cohort, ligneId: ligneIds },
+    });
+    if (!res || !youngs?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
 
     let result = {};
 
@@ -252,12 +231,6 @@ function generateExcelWorkbook(data, filename) {
   const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
   const resultData = new Blob([excelBuffer], { type: fileType });
   FileSaver.saveAs(resultData, `${filename}_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`);
-}
-
-async function getAllResults(index, query) {
-  const result = await API.post(`/es/${index}/export`, query);
-  if (!result.data.length) return [];
-  return result.data;
 }
 
 export async function exportLigneBusJeune(cohort, ligne, travel, team) {

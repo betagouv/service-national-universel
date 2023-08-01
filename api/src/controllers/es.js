@@ -313,7 +313,19 @@ router.post("/young-having-meeting-point-in-geography/export", passport.authenti
 
     if (!canSearchInElasticSearch(user, "young-having-meeting-point-in-geography")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const response = await allRecords("young", body.query);
+    const query = {
+      bool: {
+        must: [
+          { match_all: {} },
+          { term: { "cohort.keyword": body.filters.cohort } },
+          { term: { "status.keyword": "VALIDATED" } },
+          { terms: { "ligneId.keyword": body.filters.ligneId } },
+        ],
+        must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
+      },
+    };
+
+    const response = await allRecords("young", query);
     return res.status(200).send({ ok: true, data: serializeYoungs(response) });
   } catch (error) {
     capture(error);

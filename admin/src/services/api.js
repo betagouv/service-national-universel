@@ -43,6 +43,7 @@ class api {
       }
     });
   }
+  
 
   esQuery(index, body, route = null, queryParam = "") {
     const header = { index, type: "_doc" };
