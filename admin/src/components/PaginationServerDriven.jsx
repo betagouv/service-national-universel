@@ -188,7 +188,7 @@ function PageButton({ page, changePage, active, lastPage, isLast = false }) {
   };
   return (
     <button onClick={() => changePage(page)} className={`flex items-center justify-center flex-none w-8 h-8 m-auto ` + getClass()}>
-      {page + 1}
+      {(page + 1).toString()}
     </button>
   );
 }
