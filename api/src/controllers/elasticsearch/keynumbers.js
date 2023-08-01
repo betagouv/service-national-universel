@@ -9,7 +9,7 @@ const { ES_NO_LIMIT, canSearchInElasticSearch, ROLES } = require("snu-lib");
 router.post("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const user = req.user;
-    if (!canSearchInElasticSearch(user, "modificationbus")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (!canSearchInElasticSearch(user, "young")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const { startDate, endDate, phase } = req.body;
 
     let notes = [];
@@ -32,9 +32,6 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
       default:
         break;
     }
-    if (phase === "inscription") {
-      // TODO
-    }
 
     res.status(200).send({ ok: true, data: notes });
   } catch (error) {
@@ -43,8 +40,6 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-module.exports = router;
 
 async function getSejourNotes(startDate, endDate, user) {
   let notes = [];
@@ -75,11 +70,7 @@ async function getYoungNotesPhase1(startDate, endDate) {
         query: {
           bool: {
             must: [
-              {
-                match: {
-                  "notes.phase": "PHASE_1"
-                },
-              },
+              { match: { "notes.phase": "PHASE_1" } },
               {
                 range: {
                   "notes.createdAt": {
@@ -104,8 +95,8 @@ async function getYoungNotesPhase1(startDate, endDate) {
     {
       id: "young-note",
       value,
-      label: `note${value > 1 && "s"} interne${value > 1 && "s"} déposée${value > 1 && "s"} - phase 1`,
-      icon: "where",
+      label: `note${value > 1 ? "s" : ""} interne${value > 1 ? "s" : ""} déposée${value > 1 ? "s" : ""} - phase 1`,
+      icon: "other",
     },
   ];
 }
@@ -139,7 +130,6 @@ async function getTransportCorrectionRequests(startDate, endDate, user) {
   }
 
   const response = await esClient.search({ index: "modificationbus", body });
-
   const refusedCount = response.body.aggregations.group_by_status.buckets.find((e) => e.key === "REJECTED")?.doc_count || 0;
   const validatedCount = response.body.aggregations.group_by_status.buckets.find((e) => e.key === "ACCEPTED")?.doc_count || 0;
 
@@ -147,13 +137,13 @@ async function getTransportCorrectionRequests(startDate, endDate, user) {
     {
       id: "pdt-modificationbuses-refused",
       value: refusedCount,
-      label: `demande${refusedCount > 1 && "s"} de modification du plan de transport refusée${refusedCount > 1 && "s"}`,
+      label: `demande${refusedCount > 1 ? "s" : ""} de modification du plan de transport refusée${refusedCount > 1 ? "s" : ""}`,
       icon: "action",
     },
     {
       id: "pdt-modificationbuses-validated",
       value: validatedCount,
-      label: `demande${validatedCount > 1 && "s"} de modification du plan de transport validée${validatedCount > 1 && "s"}`,
+      label: `demande${validatedCount > 1 ? "s" : ""} de modification du plan de transport validée${validatedCount > 1 ? "s" : ""}`,
       icon: "action",
     },
   ];
@@ -180,7 +170,7 @@ async function getSessions(startDate, endDate) {
     {
       id: "session-creation",
       value,
-      label: `centre${value > 1 && "s"} rattaché${value > 1 && "s"} à une session`,
+      label: `centre${value > 1 ? "s" : ""} rattaché${value > 1 ? "s" : ""} à une session`,
       icon: "where",
     },
   ];
@@ -206,13 +196,16 @@ async function getLineToPoints(startDate, endDate) {
   };
 
   const response = await esClient.search({ index: "lignetopoint", body });
+  const value = response.body.aggregations.group_by_meetingPointId.buckets.length || 0;
 
   return [
     {
       id: "lignebus-creation",
-      value: response.body.aggregations.group_by_meetingPointId.buckets.length,
-      label: "points de rassemblement rattachés à un centre",
+      value,
+      label: `point${value ? "s" : ""} de rassemblement rattaché${value > 1 ? "s" : ""} à un centre`,
       icon: "where",
     },
   ];
 }
+
+module.exports = router;
