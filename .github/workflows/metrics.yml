@@ -1,6 +1,7 @@
 name: Run metrics on the repo
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "23 00 * * *"
 
