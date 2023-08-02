@@ -2,7 +2,6 @@ require("dotenv").config({ path: "./.env-testing" });
 const { faker } = require("@faker-js/faker");
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
-const passport = require("./__mocks__/passport");
 const getNewProgramFixture = require("./fixtures/program");
 const {
   getProgramsHelper,
@@ -18,6 +17,8 @@ const { ROLES } = require("snu-lib");
 const getNewReferentFixture = require("./fixtures/referent");
 const { createReferentHelper } = require("./helpers/referent");
 
+jest.mock("passport");
+const passport = require("passport");
 jest.setTimeout(10_000);
 
 beforeAll(dbConnect);

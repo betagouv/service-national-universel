@@ -13,6 +13,7 @@ module.exports = {
     "prettier/prettier": ["warn"],
     "no-unused-vars": "warn",
     "no-inner-declarations": "warn",
+    "jest/no-conditional-expect": "warn",
   },
   plugins: ["jest", "prettier"],
 };
