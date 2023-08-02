@@ -19,9 +19,11 @@ export default function WaitingReinscription() {
   const [loading, setLoading] = useState(false);
 
   let textPrecision;
-  if (young.status === YOUNG_STATUS.WAITING_LIST && young.cohort === "à venir") textPrecision = "Nous vous tiendrons informé par mail lors de l’ouverture des inscriptions pour les séjours à venir de l’année scolaire 2023-2024.";
+  if (young.status === YOUNG_STATUS.WAITING_LIST && young.cohort === "à venir")
+    textPrecision = "Nous vous tiendrons informé par mail lors de l’ouverture des inscriptions pour les séjours à venir de l’année scolaire 2023-2024.";
   else if (young.status === YOUNG_STATUS.WAITING_LIST) textPrecision = "Vous étiez sur liste complémentaire sur un séjour précédent.";
-  else if (young.cohort === "à venir") textPrecision = "Nous vous tiendrons informé par mail lors de l’ouverture des inscriptions pour les séjours à venir de l’année scolaire 2023-2024.";
+  else if (young.cohort === "à venir")
+    textPrecision = "Nous vous tiendrons informé par mail lors de l’ouverture des inscriptions pour les séjours à venir de l’année scolaire 2023-2024.";
   else if ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED)
     textPrecision = "En 2022, vous n'avez pas pu participer au séjour de cohésion.";
   else return;
