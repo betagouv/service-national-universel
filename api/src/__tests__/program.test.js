@@ -40,7 +40,7 @@ describe("Program", () => {
       const res = await request(getAppHelper()).post("/program").send(programFixture);
       expect(res.statusCode).toEqual(400);
     });
-    it("should return 403 if user is referent department and create a program for another department ", async () => {
+    it("should return 403 if user is referent department and create a program for another department", async () => {
       const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: "foo" });
       const passport = require("passport");
       const previous = passport.user;
@@ -50,7 +50,7 @@ describe("Program", () => {
       expect(res.statusCode).toEqual(403);
       passport.user = previous;
     });
-    it("should return 403 if user is referent region and create a program for another region ", async () => {
+    it("should return 403 if user is referent region and create a program for another region", async () => {
       const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, region: "foo" });
       const passport = require("passport");
       const previous = passport.user;

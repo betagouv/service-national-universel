@@ -8,5 +8,5 @@ async function isPDRChoiceOpenForYoung(young) {
 }
 
 module.exports = {
-  isPDRChoiceOpenForYoung
+  isPDRChoiceOpenForYoung,
 };
