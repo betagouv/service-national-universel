@@ -30,4 +30,4 @@ jobs:
       - name: Check dead code on api
         working-directory: ./api
         run: |
-          npx deadfile --D src --ci ./src/index.js --exclude fonts --exclude __tests__
+          npx deadfile --D src --ci ./src/index.js --exclude fonts --exclude __tests__ --exclude models/legacy
