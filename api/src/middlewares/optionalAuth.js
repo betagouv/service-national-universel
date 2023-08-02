@@ -26,7 +26,9 @@ const optionalAuth = async (req, _, next) => {
         req.user = user;
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    /* empty */
+  }
   next();
 };
 
