@@ -119,7 +119,7 @@ export default function TicketMessage({ ticket: propTicket }) {
           <InputContainer>
             <textarea
               ref={inputRef}
-              row={2}
+              rows={2}
               placeholder="Mon message..."
               className="form-control"
               onChange={(e) => {

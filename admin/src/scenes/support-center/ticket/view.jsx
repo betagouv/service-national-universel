@@ -179,7 +179,7 @@ export default function View(props) {
         <InputContainer>
           <textarea
             ref={inputRef}
-            row={2}
+            rows={2}
             placeholder="Mon message..."
             className="form-control"
             onChange={(e) => {
@@ -210,6 +210,7 @@ const Message = ({ from, date, content, fromMe, files = [] }) => {
         <MessageDate color="#ccc">{date}</MessageDate>
         {files.map((file) => (
           <File
+            key={file.name}
             onClick={() => {
               download(file);
             }}
@@ -227,6 +228,7 @@ const Message = ({ from, date, content, fromMe, files = [] }) => {
         <MessageDate>{date}</MessageDate>
         {files.map((file) => (
           <File
+            key={file.name}
             onClick={() => {
               download(file);
             }}

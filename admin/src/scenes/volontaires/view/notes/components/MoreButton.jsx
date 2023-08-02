@@ -34,7 +34,7 @@ const MoreButton = ({ className, actions = [] }) => {
       </button>
       <div className={`${isMenuOpen ? "block" : "hidden"} absolute right-0 top-11 z-10 rounded-md bg-white shadow-md`}>
         {actions.map(({ label, onClick }) => (
-          <div className="cursor-pointer whitespace-nowrap px-4 py-3 hover:bg-gray-50" onClick={onClick}>
+          <div key={label} className="cursor-pointer whitespace-nowrap px-4 py-3 hover:bg-gray-50" onClick={onClick}>
             {label}
           </div>
         ))}
