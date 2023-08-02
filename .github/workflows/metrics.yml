@@ -1,0 +1,32 @@
+name: Run metrics on the repo
+
+on:
+  schedule:
+    - cron: "23 00 * * *"
+
+jobs:
+  deadline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+
+      - name: Node 18.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18.x
+
+      - name: Check dead code on app
+        working-directory: ./app
+        run: |
+          npx deadfile --D src --ci ./src/index.jsx --exclude fonts --exclude build-only-on-clevercloud.js
+
+      - name: Check dead code on admin
+        working-directory: ./admin
+        run: |
+          npx deadfile --D src --ci ./src/index.jsx --exclude fonts --exclude build-only-on-clevercloud.js
+
+      - name: Check dead code on api
+        working-directory: ./api
+        run: |
+          npx deadfile --D src --ci ./src/index.js --exclude fonts --exclude __tests__
