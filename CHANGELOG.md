@@ -1,3 +1,18 @@
+# [1.318.0](https://github.com/betagouv/service-national-universel/compare/v1.317.2...v1.318.0) (2023-08-02)
+
+
+### Bug Fixes
+
+* **api:** Correct bug on schoolRAMSES ([acc37e9](https://github.com/betagouv/service-national-universel/commit/acc37e9e2ffd92aad3f4404016b6859473b9005b))
+* **lib:** Eslint errors on lib ([c3cfb67](https://github.com/betagouv/service-national-universel/commit/c3cfb676d511eccae6da67d3c8974d03f082831c))
+
+
+### Features
+
+* **all:** Test code on ([8fc3ab1](https://github.com/betagouv/service-national-universel/commit/8fc3ab106a52e3c74b3cc5ab359a50ced82acc06))
+* **github:** Check for deadcode ([0ba5915](https://github.com/betagouv/service-national-universel/commit/0ba5915703ad8ce9097508ccb78fead07d0fa7fd))
+* **github:** Run lint of app and admin in PR ([bcceb85](https://github.com/betagouv/service-national-universel/commit/bcceb8594f07664dc371e6aea33299151e9dffac))
+
 ## [1.317.2](https://github.com/betagouv/service-national-universel/compare/v1.317.1...v1.317.2) (2023-07-31)
 
 
