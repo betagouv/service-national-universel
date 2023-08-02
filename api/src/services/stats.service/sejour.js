@@ -1,49 +1,34 @@
-const { ROLES, ES_NO_LIMIT } = require("snu-lib");
-const esClient = require("../es");
+const { ES_NO_LIMIT, ROLES } = require("snu-lib");
+const esClient = require("../../es");
 
-async function getSejourNotes(startDate, endDate, user) {
-  let notes = [];
-
-  if ([ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user.role)) {
-    notes.push(...(await getTransportCorrectionRequests(startDate, endDate, user)));
-  }
-
-  if (user.role === ROLES.ADMIN) {
-    notes.push(...(await getSessions(startDate, endDate)));
-    notes.push(...(await getLineToPoints(startDate, endDate)));
-  }
-
-  if ([ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN].includes(user.role)) {
-    notes.push(...(await getYoungNotesPhase1(startDate, endDate)));
-  }
-
-  if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
-    notes.push(...(await getTimeSchedule(startDate, endDate, user)));
-  }
-
-  return notes;
-}
-
-async function getYoungNotesPhase1(startDate, endDate) {
+async function getYoungNotesPhase1(startDate, endDate, user) {
+  // ref dep only
   let body = {
     query: {
-      nested: {
-        path: "notes",
-        query: {
-          bool: {
-            must: [
-              { match: { "notes.phase": "PHASE_1" } },
-              {
-                range: {
-                  "notes.createdAt": {
-                    gte: new Date(startDate),
-                    lte: new Date(endDate),
-                  },
+      bool: {
+        filter: [
+          { terms: { "department.keyword": user.department } },
+          {
+            nested: {
+              path: "notes",
+              query: {
+                bool: {
+                  must: [
+                    { match: { "notes.phase": "PHASE_1" } },
+                    {
+                      range: {
+                        "notes.createdAt": {
+                          gte: new Date(startDate),
+                          lte: new Date(endDate),
+                        },
+                      },
+                    },
+                  ],
                 },
               },
-            ],
+            },
           },
-        },
+        ],
       },
     },
     size: 0,
@@ -55,7 +40,7 @@ async function getYoungNotesPhase1(startDate, endDate) {
 
   return [
     {
-      id: "young-note",
+      id: "young-notes",
       value,
       label: `note${value > 1 ? "s" : ""} interne${value > 1 ? "s" : ""} déposée${value > 1 ? "s" : ""} - phase 1`,
       icon: "other",
@@ -63,24 +48,39 @@ async function getYoungNotesPhase1(startDate, endDate) {
   ];
 }
 
-async function getTimeSchedule(startDate, endDate) {
+async function getTimeSchedule(startDate, endDate, user) {
+  // ref dep and ref reg
   let body = {
     query: {
-      nested: {
-        path: "timeScheduleFiles",
-        query: {
-          range: {
-            "timeScheduleFiles.uploadedAt": {
-              gte: new Date(startDate),
-              lte: new Date(endDate),
+      bool: {
+        filter: [
+          {
+            nested: {
+              path: "timeScheduleFiles",
+              query: {
+                range: {
+                  "timeScheduleFiles.uploadedAt": {
+                    gte: new Date(startDate),
+                    lte: new Date(endDate),
+                  },
+                },
+              },
             },
           },
-        },
+        ],
       },
     },
     size: 0,
     track_total_hits: true,
   };
+
+  if (user.role === ROLES.REFERENT_REGION) {
+    body.query.bool.filter.push({ match: { "region.keyword": user.region } });
+  }
+
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    body.query.bool.filter.push({ terms: { "department.keyword": user.department } });
+  }
 
   const response = await esClient.search({ index: "sessionphase1", body });
   const value = response.body.hits.total.value;
@@ -96,13 +96,20 @@ async function getTimeSchedule(startDate, endDate) {
 }
 
 async function getTransportCorrectionRequests(startDate, endDate, user) {
+  // ref reg and admin
   let body = {
     query: {
-      range: {
-        createdAt: {
-          gte: new Date(startDate),
-          lte: new Date(endDate),
-        },
+      bool: {
+        filter: [
+          {
+            range: {
+              createdAt: {
+                gte: new Date(startDate),
+                lte: new Date(endDate),
+              },
+            },
+          },
+        ],
       },
     },
     aggs: {
@@ -115,12 +122,7 @@ async function getTransportCorrectionRequests(startDate, endDate, user) {
   };
 
   if (user.role === ROLES.REFERENT_REGION) {
-    body.query = {
-      ...body.query,
-      bool: {
-        filter: [{ term: { "region.keyword": user.region } }],
-      },
-    };
+    body.query.bool.filter.push({ match: { "region.keyword": user.region } });
   }
 
   const response = await esClient.search({ index: "modificationbus", body });
@@ -144,6 +146,7 @@ async function getTransportCorrectionRequests(startDate, endDate, user) {
 }
 
 async function getSessions(startDate, endDate) {
+  // admin only
   let body = {
     query: {
       range: {
@@ -171,6 +174,7 @@ async function getSessions(startDate, endDate) {
 }
 
 async function getLineToPoints(startDate, endDate) {
+  // admin only
   let body = {
     query: {
       range: {
@@ -203,5 +207,9 @@ async function getLineToPoints(startDate, endDate) {
 }
 
 module.exports = {
-  getSejourNotes,
+  getYoungNotesPhase1,
+  getTimeSchedule,
+  getTransportCorrectionRequests,
+  getSessions,
+  getLineToPoints,
 };

@@ -28,7 +28,7 @@ export default function KeyNumbers() {
   }
 
   React.useEffect(() => {
-    fetchData();
+    if (startDate && endDate) fetchData();
   }, [startDate, endDate, phase]);
 
   return (
