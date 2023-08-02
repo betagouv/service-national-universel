@@ -1,5 +1,22 @@
-var fs = require("fs");
-const files = fs.readdirSync("./src/models");
+const path = require("path");
+const fs = require("fs");
+
+function isDirectory(path) {
+  return fs.statSync(path).isDirectory();
+}
+
+function getFilesRecursively(dirPath) {
+  let files = [];
+  fs.readdirSync(dirPath).forEach((file) => {
+    const absolute = path.join(dirPath, file);
+    if (isDirectory(absolute)) {
+      files = [...files, ...getFilesRecursively(absolute)];
+    } else {
+      files.push(absolute);
+    }
+  });
+  return files;
+}
 
 function buildDoc(model, str, parent = "", debug = false) {
   for (let i = 0; i < Object.keys(model.schema.paths).length; i++) {
@@ -28,20 +45,23 @@ function addSpaces(text) {
   if (text.length > 7) return `${text}  ${"&nbsp;".repeat(17)}`;
 }
 
+const directoryPath = path.join(__dirname, "..", "src", "models");
+const files = getFilesRecursively(directoryPath);
+
 let str = "";
 
 console.log(`🔧  building documentation for ${files.length} models`);
 for (let i = 0; i < files.length; i++) {
-  const model = require(`../models/${files[i]}`);
+  const model = require(path.resolve(directoryPath, files[i]));
   str += `
-    ${model.modelName.toUpperCase()}\n
-  `;
+        ${model.modelName.toUpperCase()}\n
+    `;
   str += `| Name | Type | Description |\n`;
   str += `| ------ | --- | --- |\n`;
   str = buildDoc(model, str);
   console.log(`👉  ${model.modelName}`);
 }
 
-fs.writeFileSync("./docs/MDD.md", str);
+fs.writeFileSync("./MDD.md", str);
 console.log("🔥  done");
 process.exit(0);
