@@ -9,52 +9,52 @@ const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 const { serializeRamsesSchools } = require("../../utils/es-serializer");
 
-async function getYoungsFromSchoolIds(schoolsIds) {
-  const body = {
-    query: {
-      bool: {
-        must: { match_all: {} },
-        filter: [
-          { terms: { "schoolId.keyword": schoolsIds } },
-          req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
-          req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": req.user.region } } : null,
-          queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
-          queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
-        ].filter(Boolean),
-      },
-    },
-    aggs: {
-      school: {
-        terms: { field: "schoolId.keyword", size: ES_NO_LIMIT },
-        aggs: { departments: { terms: { field: "department.keyword" } }, firstUser: { top_hits: { size: 1 } } },
-      },
-    },
-    size: 0,
-    track_total_hits: true,
-  };
-  const responseYoungs = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
-  const reducedSchool = responseYoungs.body.responses[0].aggregations.school.buckets.reduce((acc, school) => {
-    if (school.key === "") return acc;
-    const schoolInfo = school.firstUser?.hits?.hits[0]?._source;
-    const total = school.doc_count;
-    const isThereDep = school.departments?.buckets?.find((f) => f.key === schoolInfo.schoolDepartment) || {};
-    const inDepartment = isThereDep.doc_count || 0;
-    const outDepartment = total - inDepartment;
-    if (!acc[school.key]) {
-      acc[school.key] = {
-        schoolId: school.key,
-        total,
-        inDepartment,
-        outDepartment,
-      };
-    }
-    return acc;
-  }, {});
-  return reducedSchool;
-}
-
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    async function getYoungsFromSchoolIds(schoolsIds) {
+      const body = {
+        query: {
+          bool: {
+            must: { match_all: {} },
+            filter: [
+              { terms: { "schoolId.keyword": schoolsIds } },
+              req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
+              req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": req.user.region } } : null,
+              queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
+              queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
+            ].filter(Boolean),
+          },
+        },
+        aggs: {
+          school: {
+            terms: { field: "schoolId.keyword", size: ES_NO_LIMIT },
+            aggs: { departments: { terms: { field: "department.keyword" } }, firstUser: { top_hits: { size: 1 } } },
+          },
+        },
+        size: 0,
+        track_total_hits: true,
+      };
+      const responseYoungs = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
+      const reducedSchool = responseYoungs.body.responses[0].aggregations.school.buckets.reduce((acc, school) => {
+        if (school.key === "") return acc;
+        const schoolInfo = school.firstUser?.hits?.hits[0]?._source;
+        const total = school.doc_count;
+        const isThereDep = school.departments?.buckets?.find((f) => f.key === schoolInfo.schoolDepartment) || {};
+        const inDepartment = isThereDep.doc_count || 0;
+        const outDepartment = total - inDepartment;
+        if (!acc[school.key]) {
+          acc[school.key] = {
+            schoolId: school.key,
+            total,
+            inDepartment,
+            outDepartment,
+          };
+        }
+        return acc;
+      }, {});
+      return reducedSchool;
+    }
+
     // Configuration
     const { user, body } = req;
     const searchFields = ["fullName", "city", "zip", "code2022", "typology", "domain"];
