@@ -86,13 +86,11 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
               <option value="" label="Motif du départ" disabled>
                 Motif du départ
               </option>
-              {motifArray.map(
-                (d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ),
-              )}
+              {motifArray.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
             </select>
           </div>
           <div className={`rounded-lg border-[1px]  py-1 px-2 ${isLoading && "bg-gray-200"}`}>

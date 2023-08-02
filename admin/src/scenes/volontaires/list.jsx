@@ -38,7 +38,6 @@ export default function VolontaireList() {
     page: 0,
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
-  
 
   const filterArray = getFilterArray(user, bus, sessionsPhase1);
 
