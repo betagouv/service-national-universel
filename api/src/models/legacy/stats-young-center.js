@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
-const esClient = require("../es");
+const esClient = require("../../es");
 
 const MODELNAME = "stats-young-center";
 
