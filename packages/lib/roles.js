@@ -245,8 +245,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
   const geographicTargetData = {
     region: originalTarget.region || structure?.region,
     // many users have an array like [""] for department
-    department:
-      originalTarget.department?.length && originalTarget.department[0] !== "" ? originalTarget.department : [structure?.department],
+    department: originalTarget.department?.length && originalTarget.department[0] !== "" ? originalTarget.department : [structure?.department],
   };
 
   const isActorAndTargetInTheSameRegion = actor.region === geographicTargetData.region;
@@ -435,7 +434,7 @@ const canAssignCohesionCenter = (actor, target) => !FORCE_DISABLED_ASSIGN_COHESI
 const FORCE_DISABLED_ASSIGN_MEETING_POINT = false;
 const canAssignMeetingPoint = (actor, target) => !FORCE_DISABLED_ASSIGN_MEETING_POINT && isReferentOrAdmin(actor) && (!target?.statusPhase1Tmp || !isTemporaryAffected(target));
 
-const canEditPresenceYoung = (actor, _target) => {
+const canEditPresenceYoung = (actor) => {
   // todo affiner les droits
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 };
@@ -554,7 +553,7 @@ function canViewStructureChildren(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
 }
 
-function canDownloadYoungDocuments(actor, target, type = null, _applications) {
+function canDownloadYoungDocuments(actor, target, type = null) {
   if (type === "certificate" || type === "convocation") {
     return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
   } else {

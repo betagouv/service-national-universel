@@ -152,7 +152,7 @@ const getSelectedFilterLabel = (selected, prelabel) => {
   };
   let value = "";
   if (typeof selected === "object") {
-    translated = selected.map((item) => {
+    const translated = selected.map((item) => {
       return translator(item);
     });
     value = translated.join(", ");
