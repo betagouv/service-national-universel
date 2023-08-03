@@ -87,7 +87,7 @@
     "regenerator-runtime": "0.13.9",
     "sib-api-v3-sdk": "^8.5.0",
     "ssh2": "1.11.0",
-    "supertest": "6.3.1",
+    "supertest": "6.3.3",
     "xlsx": "^0.18.5"
   }
 }
