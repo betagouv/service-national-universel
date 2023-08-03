@@ -27,10 +27,11 @@ const keyNumbersByRole = {
  **/
 async function getKeyNumbers(phase, startDate, endDate, user) {
   let notes = [];
-  if (!Array.isArray(keyNumbersByRole[phase][user.role])) return notes; // TODO: remove when engagement and inscription are done
-  for (const fn of keyNumbersByRole[phase][user.role]) {
-    notes.push(...(await fn(startDate, endDate, user)));
-  }
+  const functionsToRun = keyNumbersByRole[phase][user.role];
+  if (!functionsToRun) return notes; // TODO: remove when engagement and inscription are done
+  await Promise.all(functionsToRun.map((fn) => fn(startDate, endDate, user))).then((results) => {
+    notes = results.flat();
+  });
   return notes;
 }
 
