@@ -31,10 +31,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install app
+        run: |
+          npm ci -w api
+        continue-on-error: true
+
       - name: Run ESLint
         working-directory: ./api
         run: |
-          npm ci
           npm run lint:report
         continue-on-error: true
 
