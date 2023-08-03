@@ -4,26 +4,17 @@ import { Transforms, createEditor } from "slate";
 import { withHistory } from "slate-history";
 
 const TextEditor = ({ content, readOnly }) => {
+  console.log("🚀 ~ file: index.js:35 ~ TextEditor ~ content:", content);
   const renderElement = useCallback((props) => <Element {...props} readOnly={readOnly} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
   const editorRef = useRef();
   if (!editorRef.current) editorRef.current = withHistory(withReact(createEditor()));
   const editor = editorRef.current;
 
-  const emptyValue = [
-    {
-      type: 'paragraph"',
-      children: [{ text: "" }],
-    },
-  ];
-
-  // check if content has at least one element with children
-  const value = content?.length && content?.[0]?.children?.length > 0 ? content : emptyValue;
-
   return (
     <>
       <div className={`flex flex-shrink flex-grow flex-col py-2 px-2 ${!readOnly ? "bg-white" : ""} overflow-hidden print:bg-transparent`}>
-        <Slate editor={editor} value={value} onChange={console.log}>
+        <Slate editor={editor} initialValue={content} onChange={console.log}>
           <div id="text-editor" className="flex-shrink flex-grow overflow-auto">
             <Editable readOnly={readOnly} renderElement={renderElement} renderLeaf={renderLeaf} placeholder="Commencez à écrire votre article..." spellCheck autoFocus />
           </div>
@@ -36,7 +27,7 @@ const TextEditor = ({ content, readOnly }) => {
 // Put this at the start and end of an inline component to work around this Chromium bug:
 // https://bugs.chromium.org/p/chromium/issues/detail?id=1249405
 const InlineChromiumBugfix = () => (
-  <span contentEditable={false} className="text-0">
+  <span contentEditable={false} className='text-0'>
     ${String.fromCodePoint(160) /* Non-breaking space */}
   </span>
 );
