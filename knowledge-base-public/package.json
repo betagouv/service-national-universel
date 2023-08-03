@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "next dev -p 8084",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "next lint"
   },
   "prettier": {
     "printWidth": 180
@@ -16,7 +17,7 @@
     "is-email": "1.0.2",
     "is-hotkey": "0.2.0",
     "is-url": "1.2.4",
-    "next": "latest",
+    "next": "^13.4.12",
     "next-plausible": "^3.6.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -36,6 +37,7 @@
     "urijs": "1.19.11"
   },
   "devDependencies": {
+    "@next/eslint-plugin-next": "^13.4.12",
     "autoprefixer": "10.4.13",
     "eslint": "^8.44.0",
     "eslint-plugin-react": "^7.32.2",

@@ -1,22 +1,22 @@
-import { Fragment, useRef, useState } from "react"
-import { useRouter } from "next/router"
-import useUser from "../../hooks/useUser"
-import API from "../../services/api"
-import { Combobox, Dialog, Transition } from "@headlessui/react"
-import { XCircleIcon, MagnifyingGlassIcon, ChevronLeftIcon } from "@heroicons/react/24/solid"
-import SearchResults from "./SearchResults"
+import { Fragment, useRef, useState } from "react";
+import { useRouter } from "next/router";
+import useUser from "../../hooks/useUser";
+import API from "../../services/api";
+import { Combobox, Dialog, Transition } from "@headlessui/react";
+import { XCircleIcon, MagnifyingGlassIcon, ChevronLeftIcon } from "@heroicons/react/24/solid";
+import SearchResults from "./SearchResults";
 
 export default function KnowledgeBaseSearch({ open = false, setOpen }) {
   const { restriction } = useUser();
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null)
+  const [selectedItem, setSelectedItem] = useState(null);
   const [items, setItems] = useState([]);
   const searchTimeout = useRef(null);
   const router = useRouter();
 
   const computeSearch = (e) => {
-    const search = e.target.value
+    const search = e.target.value;
     setQuery(search);
     if (search.length > 0 && !isSearching) setIsSearching(true);
     if (!search.length) {
@@ -44,7 +44,7 @@ export default function KnowledgeBaseSearch({ open = false, setOpen }) {
     setSelectedItem(item);
     setItems([]);
     if (item === "noresult") return router.push("https://moncompte.snu.gouv.fr/public-besoin-d-aide");
-    return router.push(`/base-de-connaissance/${item.slug}?loadingType=article`, undefined, { shallow: true, });
+    return router.push(`/base-de-connaissance/${item.slug}?loadingType=article`, undefined, { shallow: true });
   };
 
   return (
@@ -93,12 +93,13 @@ export default function KnowledgeBaseSearch({ open = false, setOpen }) {
                       )}
                     </div>
 
-                    {query ? (<Combobox.Button onClick={handleDelete} className="absolute inset-y-0 right-0 items-center px-3 focus:outline-none bg-transparent border-none shadow-none">
-                      <XCircleIcon className="text-gray-400 h-5 w-5" aria-hidden="true" />
-                    </Combobox.Button>) : null}
+                    {query ? (
+                      <Combobox.Button onClick={handleDelete} className="absolute inset-y-0 right-0 items-center px-3 focus:outline-none bg-transparent border-none shadow-none">
+                        <XCircleIcon className="text-gray-400 h-5 w-5" aria-hidden="true" />
+                      </Combobox.Button>
+                    ) : null}
 
                     {query && <SearchResults isSearching={isSearching} items={items} />}
-
                   </div>
                 </Combobox>
               </Dialog.Panel>
@@ -107,5 +108,5 @@ export default function KnowledgeBaseSearch({ open = false, setOpen }) {
         </div>
       </Dialog>
     </Transition.Root>
-  )
+  );
 }
