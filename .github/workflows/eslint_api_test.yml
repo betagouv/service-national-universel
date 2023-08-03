@@ -31,7 +31,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-       - name: Run ESLint
+      - name: Run ESLint
         working-directory: ./api
         run: |
           npm ci
