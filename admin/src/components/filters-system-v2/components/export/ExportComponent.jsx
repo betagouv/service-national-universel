@@ -6,7 +6,6 @@ import LoadingButton from "../../../buttons/LoadingButton";
 import LoadingButtonV2 from "../../../buttons/LoadingButtonV2";
 import ModalConfirm from "../../../modals/ModalConfirm";
 import api from "../../../../services/api";
-import { ES_NO_LIMIT } from "snu-lib";
 
 export default function ExportComponent({
   handleClick,
