@@ -11,7 +11,7 @@ module.exports = {
     ecmaVersion: "latest",
     sourceType: "module",
   },
-  plugins: ["react", "@next/next", "prettier"],
+  plugins: ["react", "react-hooks", "@next/next", "prettier"],
   rules: {
     "react/prop-types": 0,
     "prettier/prettier": ["warn"],
