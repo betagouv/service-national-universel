@@ -1,12 +1,21 @@
 import React from "react";
 import styled from "styled-components";
 import LoadingButton from "./LoadingButton";
+import Eye from "../../../../app/src/assets/icons/eye";
+import Duplicate from "../../../../app/src/assets/icons/duplicate";
+import Impersonate from "../../../../app/src/assets/icons/impersonate";
+import Pencil from "../../../../app/src/assets/icons/pencil";
 
-const images = import.meta.globEager("../../assets/panel-icons/*.svg");
+const icons = {
+  eye: Eye,
+  duplicate: Duplicate,
+  impersonate: Impersonate,
+  pencil: Pencil,
+};
 
 export default function PanelActionButton({ icon, title, ...rest }) {
   return (
-    <Button icon={icon ? images[`../../assets/panel-icons/${icon}.svg`]?.default : null} color="#fff" {...rest}>
+    <Button icon={icons[icon]} color="#fff" {...rest}>
       {title}
     </Button>
   );
