@@ -10,10 +10,17 @@ const TextEditor = ({ content, readOnly }) => {
   if (!editorRef.current) editorRef.current = withHistory(withReact(createEditor()));
   const editor = editorRef.current;
 
+  const emptyValue = [
+    {
+      type: "paragraph",
+      children: [{ text: "" }],
+    },
+  ];
+
   return (
     <>
       <div className={`flex flex-shrink flex-grow flex-col py-2 px-2 ${!readOnly ? "bg-white" : ""} overflow-hidden print:bg-transparent`}>
-        <Slate editor={editor} value={content} onChange={console.log}>
+        <Slate editor={editor} value={content || emptyValue} onChange={console.log}>
           <div id="text-editor" className="flex-shrink flex-grow overflow-auto">
             <Editable readOnly={readOnly} renderElement={renderElement} renderLeaf={renderLeaf} placeholder="Commencez à écrire votre article..." spellCheck autoFocus />
           </div>
