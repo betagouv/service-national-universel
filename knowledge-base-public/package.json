@@ -4,7 +4,8 @@
     "dev": "next dev -p 8084",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:report": "next lint . --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
   },
   "prettier": {
     "printWidth": 180

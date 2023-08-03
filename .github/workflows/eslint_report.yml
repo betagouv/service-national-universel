@@ -20,7 +20,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        directory: ["api", "analytics"]
+        directory:
+          [
+            "api",
+            "admin",
+            "app",
+            "send-in-blue",
+            "packages/lib",
+            "pdf",
+            "knowledge-base-public",
+            "analytics",
+          ]
     permissions:
       contents: read
       security-events: write
