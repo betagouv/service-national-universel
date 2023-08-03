@@ -32,7 +32,8 @@ jobs:
       - name: Install app
         run: |
           cd ${{ matrix.directory }}
-          npm ci
+          npm i eslint
+          npm i @microsoft/eslint-formatter-sarif
         continue-on-error: true
 
       - name: Run ESLint

@@ -8,7 +8,8 @@
     "build": "rollup -c",
     "dev": "rollup -c --watch",
     "lint": "eslint . --ext .js,.jsx",
-    "lint:fix": "eslint --ext .js --fix src",
+    "lint:fix": "eslint . --ext .js --fix",
+    "lint:report": "eslint . --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
