@@ -75,6 +75,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^6.1.2",
+    "@microsoft/eslint-formatter-sarif": "^3.0.0",
     "csv-parser": "3.0.0",
     "eslint": "^8.41.0",
     "eslint-config-prettier": "^8.8.0",

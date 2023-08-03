@@ -33,7 +33,7 @@ jobs:
 
       - name: Install app
         run: |
-          npm ci -w api
+          npm ci
         continue-on-error: true
 
       - name: Run ESLint
