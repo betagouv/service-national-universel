@@ -4,7 +4,6 @@ import { Transforms, createEditor } from "slate";
 import { withHistory } from "slate-history";
 
 const TextEditor = ({ content, readOnly }) => {
-  console.log("🚀 ~ file: index.js:35 ~ TextEditor ~ content:", content);
   const renderElement = useCallback((props) => <Element {...props} readOnly={readOnly} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
   const editorRef = useRef();
@@ -27,7 +26,7 @@ const TextEditor = ({ content, readOnly }) => {
 // Put this at the start and end of an inline component to work around this Chromium bug:
 // https://bugs.chromium.org/p/chromium/issues/detail?id=1249405
 const InlineChromiumBugfix = () => (
-  <span contentEditable={false} className='text-0'>
+  <span contentEditable={false} className="text-0">
     ${String.fromCodePoint(160) /* Non-breaking space */}
   </span>
 );
