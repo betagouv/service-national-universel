@@ -21,7 +21,7 @@
     "joi": "^17.9.2",
     "mongoose": "^5.13.20",
     "netmask": "^2.0.2",
-    "nodemon": "^2.0.22"
+    "nodemon": "^3.0.1"
   },
   "devDependencies": {
     "eslint": "^8.46.0",
