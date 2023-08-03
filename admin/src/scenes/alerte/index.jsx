@@ -25,7 +25,7 @@ export default function Alerte() {
       setData(response.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
+      toastr.error("Oups, une erreur est survenue lors de la récupération des messages");
     }
   };
 

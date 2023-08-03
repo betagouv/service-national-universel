@@ -71,20 +71,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
       setSelectedOptions(
         message.to_role.map((role) => ({
           value: role,
-          label:
-            role === "admin"
-              ? "Modérateurs"
-              : role === "referent_department"
-              ? "Référents départementaux"
-              : role === "referent_region"
-              ? "Référents régionnaux"
-              : role === "responsible"
-              ? "Responsables"
-              : role === "supervisor"
-              ? "Superviseurs"
-              : role === "head_center"
-              ? "Chefs de centre"
-              : null,
+          label: options.filter((item) => item.value === role)[0].label,
         })),
       );
     }
@@ -98,7 +85,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
       let errors = {};
 
       if (!data.priority) errors.priority = "Ce champ est obligatoire";
-      if (!data.to_role) errors.to_role = "Ce champ est obligatoire";
+      if (!data.to_role || data.to_role.length === 0) errors.to_role = "Ce champ est obligatoire";
       if (!data.content) errors.content = "Ce champ est obligatoire";
       if (data.content && data.content.length > 500) errors.content = "Ce champs est limité à 500 caractères";
 
@@ -174,22 +161,43 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                       <p className="w-[200px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Niveau de priorité du message.</p>
                     </ReactTooltip>
                   </div>
-                  <div
-                    onClick={() => editInfo && setData({ ...data, priority: "normal" })}
-                    className={`flex flex-row items-center justify-center gap-3 ${editInfo && "cursor-pointer"}`}>
-                    <CheckBox value={data?.priority === "normal"} />
+                  <div className={`flex flex-row items-center justify-center gap-3 ${editInfo && "cursor-pointer"}`}>
+                    <div
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === " " || e.key === "Enter") {
+                          editInfo && setData({ ...data, priority: "normal" });
+                        }
+                      }}
+                      onClick={() => editInfo && setData({ ...data, priority: "normal" })}>
+                      <CheckBox value={data?.priority === "normal"} />
+                    </div>
                     <div className="font-sm text-gray-900">normal</div>
                   </div>
-                  <div
-                    onClick={() => editInfo && setData({ ...data, priority: "important" })}
-                    className={`flex flex-row items-center justify-center gap-3 ${editInfo && "cursor-pointer"}`}>
-                    <CheckBox value={data?.priority === "important"} />
+                  <div className={`flex flex-row items-center justify-center gap-3 ${editInfo && "cursor-pointer"}`}>
+                    <div
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === " " || e.key === "Enter") {
+                          editInfo && setData({ ...data, priority: "important" });
+                        }
+                      }}
+                      onClick={() => editInfo && setData({ ...data, priority: "important" })}>
+                      <CheckBox value={data?.priority === "important"} />
+                    </div>
                     <div className="font-sm text-gray-900">important</div>
                   </div>
-                  <div
-                    onClick={() => editInfo && setData({ ...data, priority: "urgent" })}
-                    className={`flex flex-row items-center justify-center gap-3 ${editInfo && "cursor-pointer"}`}>
-                    <CheckBox value={data?.priority === "urgent"} />
+                  <div className={`flex flex-row items-center justify-center gap-3 ${editInfo && "cursor-pointer"}`}>
+                    <div
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === " " || e.key === "Enter") {
+                          editInfo && setData({ ...data, priority: "urgent" });
+                        }
+                      }}
+                      onClick={() => editInfo && setData({ ...data, priority: "urgent" })}>
+                      <CheckBox value={data?.priority === "urgent"} />
+                    </div>
                     <div className="font-sm text-gray-900">urgent</div>
                   </div>
                 </div>
@@ -308,12 +316,30 @@ const CheckBox = ({ value }) => {
   return (
     <>
       {value ? (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          role="checkbox"
+          aria-label="checkbox-checked"
+          aria-checked={true}
+          tabIndex="0">
           <rect width="16" height="16" rx="8" fill="#2563EB" />
           <circle cx="8" cy="8" r="3" fill="white" />
         </svg>
       ) : (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          role="checkbox"
+          aria-label="checkbox-not-checked"
+          aria-checked={false}
+          tabIndex="0">
           <rect x="0.5" y="0.5" width="15" height="15" rx="7.5" fill="white" />
           <rect x="0.5" y="0.5" width="15" height="15" rx="7.5" stroke="#D1D5DB" />
         </svg>

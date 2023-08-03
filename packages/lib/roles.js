@@ -666,7 +666,11 @@ function canApplyToPhase2(young) {
 }
 
 function canCreateAlerteMessage(actor) {
-  return [ROLES.ADMIN];
+  return [ROLES.ADMIN].includes(actor.role);
+}
+
+function canReadAlerteMessage(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.SUPERVISOR].includes(actor.role);
 }
 
 function canViewTableDeRepartition(actor) {
@@ -865,6 +869,7 @@ export {
   canShareSessionPhase1,
   canApplyToPhase2,
   canCreateAlerteMessage,
+  canReadAlerteMessage,
   canViewTableDeRepartition,
   canEditTableDeRepartitionDepartment,
   canEditTableDeRepartitionRegion,

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
-import { IoWarningOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../../../sentry";
@@ -151,21 +150,6 @@ export default function Index() {
   return (
     <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}>
       <div className="flex flex-col gap-8 mb-4">
-        {/* <InfoMessage
-          bg="bg-blue-800"
-          Icon={HiOutlineInformationCircle}
-          message="Message d’information (white + blue/800), l'instruction des dossiers pour le séjour de février est à finaliser pour ce soir à 23h59."
-        />
-        <InfoMessage
-          bg="bg-yellow-700"
-          Icon={HiOutlineExclamationCircle}
-          message="Message important (white + yellow/700), l'instruction des dossiers pour le séjour de février est à finaliser pour ce soir à 23h59."
-        /> */}
-        {/*         <InfoMessage
-          bg="bg-red-800"
-          Icon={IoWarningOutline}
-          message="Message urgent  (white + red/800), suite à un problème technique, nous vous invitons à revalider les missions que vous aviez validés entre le 3 janvier 15h et le 4 janvier 8h. Veuillez nous excuser pour le désagrément."
-        /> */}
         {message?.length ? message.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
         <div className="flex gap-4">

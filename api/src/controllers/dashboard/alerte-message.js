@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
-const { canCreateAlerteMessage, ROLES } = require("snu-lib");
+const { canCreateAlerteMessage, canReadAlerteMessage, ROLES } = require("snu-lib");
 const { capture } = require("../../sentry");
 const { serializeAlerteMessage } = require("../../utils/serializer");
 const AlerteMessageModel = require("../../models/alerteMessage");
@@ -11,8 +11,9 @@ const { validateId } = require("../../utils/validator");
 
 router.get("/all", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (!Object.values(ROLES).includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const data = await AlerteMessageModel.find({});
+    //seul les modérateurs peuvent voir tous les messages
+    if (!canCreateAlerteMessage(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const data = await AlerteMessageModel.find({ deletedAt: { $exists: false } });
     return res.status(200).send({ ok: true, data: data.map(serializeAlerteMessage) });
   } catch (error) {
     capture(error);
@@ -28,7 +29,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canCreateAlerteMessage(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canReadAlerteMessage(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await AlerteMessageModel.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -42,9 +43,9 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 // ici on ne prend que les messages destinés à un role précis
 router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (!canCreateAlerteMessage(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canReadAlerteMessage(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const data = await AlerteMessageModel.find({ to_role: { $in: [req.user.role] } });
+    const data = await AlerteMessageModel.find({ to_role: { $in: [req.user.role] }, deletedAt: { $exists: false } });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data: data.map(serializeAlerteMessage) });
   } catch (error) {
@@ -124,7 +125,10 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const message = await AlerteMessageModel.findById(id);
     if (!message) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    await message.remove();
+    const now = new Date();
+    message.set({ deletedAt: now });
+    await message.save({ fromUser: req.user });
+
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
