@@ -11,8 +11,10 @@ const auth = require("../middleware/auth");
 
 router.get("/", async (req, res) => {
   try {
-    const logs = await LogModel.findAll();
-    return res.status(200).send({ ok: false, data: logs });
+    // const logs = await LogModel.findAll();
+    // return res.status(200).send({ ok: false, data: logs });
+
+    return res.status(200).send({ ok: true });
   } catch (error) {
     console.log("Error ", error);
     capture(error);
