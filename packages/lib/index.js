@@ -48,7 +48,7 @@ function inscriptionModificationOpenForYoungs(cohort, young, env) {
       }
       return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023
     case "Octobre 2023 - NC":
-      return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023
+      return new Date() < new Date(2023, 9, 30, 23, 59); // before 30 octobre 2023 (date temporaire)
     case "à venir":
       return false;
     default:
