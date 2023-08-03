@@ -57,26 +57,26 @@ const NavigationArticle = ({ item, device }) => {
 
     return (
       <>
-        <Link href={`/base-de-connaissance/${item.parents[1].slug}`} className="justofy-center align-center mb-2 flex flex-row text-center" onClick={() => cache.clear()}>
-          <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-500" />
-          <p className="text-sm leading-5 text-gray-500">Retour</p>
-        </Link>
         <div ref={element} className={`flex w-full max-w-[690px] flex-col justify-start overflow-hidden rounded-md bg-white shadow-md ${className}`}>
           <h3 className="flex">
             <button
               id={slugify(title)}
               aria-controls={`${slugify(title)}_items`}
               aria-expanded={active}
-              className={`flex flex-1 cursor-pointer appearance-none flex-row items-center justify-center rounded-none border-none ${
+              className={`flex flex-1 cursor-pointer appearance-none flex-row items-center justify-between md:justify-center rounded-none border-none ${
                 active ? "bg-white" : "bg-gray-100"
               } px-4 py-4 shadow-none`}
               onClick={toggleAccordion}
             >
+              <Link href={`/base-de-connaissance/${item.parents[1].slug}`} className="justify-center align-center md:mr-2 flex flex-row text-center" onClick={() => cache.clear()}>
+                <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-500" />
+                <p className="text-sm leading-5 text-gray-500 hidden">Retour</p>
+              </Link>
               <div className="mr-2 flex flex-col justify-center">
-                <span className="line-clamp-2 flex-1 text-center text-sm font-medium text-gray-500">Articles liés</span>
+                <span className="line-clamp-2 flex-1 text-center text-sm font-medium text-gray-500 md:hidden">Articles liés</span>
                 <span className="line-clamp-2 flex-1 text-center text-sm font-medium text-gray-900">{title}</span>
               </div>
-              <span className={`${rotate} material-icons text-gray-400`}>expand_more</span>
+              <span className={`${rotate} material-icons text-gray-400 md:hidden`}>expand_more</span>
             </button>
           </h3>
 
@@ -89,8 +89,8 @@ const NavigationArticle = ({ item, device }) => {
           >
             {list && list.length > 0 ? (
               <ul>
-                {list.map(({ title, slug, type }, index) => (
-                  <li className="flex border-gray-200 text-sm font-medium text-gray-900" key={index}>
+                {list.map(({ _id, title, slug, type }, index) => (
+                  <li className={`flex border-gray-200 text-sm font-medium text-gray-900 ${_id === item._id ? "rounded-md bg-gray-200 text-gray-900" : "text-gray-500"}`} key={index}>
                     <Link
                       tabIndex={active ? 0 : -1}
                       className="flex flex-1 items-center px-6 py-4"
@@ -140,7 +140,7 @@ const NavigationArticle = ({ item, device }) => {
 
   return (
     <>
-      {device === "desktop" && <NavigationDesktop item={item} siblingsData={siblingsData} />}
+      {/* {device === "desktop" && <NavigationDesktop item={item} siblingsData={siblingsData} />}
       {device === "mobile" && (
         <Accordion
           key={item._id}
@@ -151,7 +151,16 @@ const NavigationArticle = ({ item, device }) => {
           isOpen={router.query.openTheme === item.slug}
           slug={item.slug}
         />
-      )}
+      )} */}
+      <Accordion
+        key={item._id}
+        title={item.parents[1].title}
+        list={siblingsData}
+        className="mb-3 w-full"
+        path="/base-de-connaissance"
+        isOpen={router.query.openTheme === item.slug}
+        slug={item.slug}
+      />
     </>
   );
 };
