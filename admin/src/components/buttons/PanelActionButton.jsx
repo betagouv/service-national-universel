@@ -1,15 +1,15 @@
 import React from "react";
 import styled from "styled-components";
 import LoadingButton from "./LoadingButton";
-import Eye from "../../../../app/src/assets/icons/eye";
-import Duplicate from "../../../../app/src/assets/icons/duplicate";
-import Impersonate from "../../../../app/src/assets/icons/impersonate";
-import Pencil from "../../../../app/src/assets/icons/pencil";
+import Eye from "../../../../admin/src/assets/icons/Eye";
+// import Duplicate from "../../../../admin/src/assets/icons/";
+// import Impersonate from "../../../../admin/src/assets/icons/Impersonate";
+import Pencil from "../../../../admin/src/assets/icons/Pencil";
 
 const icons = {
   eye: Eye,
-  duplicate: Duplicate,
-  impersonate: Impersonate,
+  // duplicate: Duplicate,
+  // impersonate: Impersonate,
   pencil: Pencil,
 };
 
