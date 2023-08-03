@@ -35,7 +35,7 @@ jobs:
       - name: Build lib
         continue-on-error: false
         run: |
-          npm install -w packages/lib
+          npm ci -w packages/lib
           npm run build -w packages/lib
           rm packages/lib/.gitignore
 
