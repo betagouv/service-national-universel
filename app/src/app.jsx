@@ -26,7 +26,7 @@ import MilitaryPreparation from "./scenes/militaryPreparation";
 import Missions from "./scenes/missions";
 import NonEligible from "./scenes/noneligible";
 import Phase1 from "./scenes/phase1";
-import ChangeSejour from "./scenes/phase1/ChangeSejour";
+import ChangeSejour from "./scenes/phase1/changeSejour";
 import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
 import Preferences from "./scenes/preferences";
