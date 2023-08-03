@@ -1,3 +1,21 @@
+## [1.318.1](https://github.com/betagouv/service-national-universel/compare/v1.318.0...v1.318.1) (2023-08-03)
+
+
+### Bug Fixes
+
+* **app:** Good name ([298de9a](https://github.com/betagouv/service-national-universel/commit/298de9ab9a0fa06665dc31dff384e929c577bee2))
+* **app:** parametrage dates ouverture inscription octobre ([2312899](https://github.com/betagouv/service-national-universel/commit/231289938d0c2cf5f3fc70e6a46fc3591f738fa8))
+* **github:** Fix for eslint ([c8f9ad2](https://github.com/betagouv/service-national-universel/commit/c8f9ad29f77ba7adaa179302cff3517bcad88b6c))
+* **kb:** Error with slate ([98d72c1](https://github.com/betagouv/service-national-universel/commit/98d72c185d2fedd0820148e438f263ffa859ab70))
+* **kb:** Eslint react hooks ([d535828](https://github.com/betagouv/service-national-universel/commit/d535828d5619dccc45d520608d68172ca46cfadc))
+* **kb:** Fix slate error ([4050050](https://github.com/betagouv/service-national-universel/commit/40500506fdc41cac7a7e6a16c2cc7d02d23f6436))
+
+
+### Reverts
+
+* **kb:** Go back to next 13.0.2 ([ea1411f](https://github.com/betagouv/service-national-universel/commit/ea1411f04a23bbe0900b0262cfb9099ed51b3793))
+* **kb:** Put old version of slate ([cf13e93](https://github.com/betagouv/service-national-universel/commit/cf13e93f37cbb9ebab89ad5b45510da0bf981c5e))
+
 # [1.318.0](https://github.com/betagouv/service-national-universel/compare/v1.317.2...v1.318.0) (2023-08-02)
 
 
