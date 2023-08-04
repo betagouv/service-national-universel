@@ -44,7 +44,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
             <h2 className="col-span-2 mb-4 text-xl font-bold text-white md:mx-2 lg:col-span-3">Thématiques générales</h2>
             {!isLoading ? (
               sections.map(({ _id, position, icon, title, slug, children }) => {
-                return device === "desktop" && children && children.length > 0 ? (
+                return device === "desktop" && children?.length ? (
                   <KnowledgeBaseSectionCard
                     key={_id}
                     _id={_id}
@@ -58,7 +58,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
                     className="mx-2 mb-8"
                   />
                 ) : (
-                  <>{children && children.length > 0 && <Accordion key={_id} title={title} list={children} className="mb-3" path="/base-de-connaissance" slug={slug} />}</>
+                  <>{children?.length && <Accordion key={_id} title={title} list={children} className="mb-3" path="/base-de-connaissance" slug={slug} />}</>
                 );
               })
             ) : (
