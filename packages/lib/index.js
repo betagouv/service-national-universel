@@ -2,6 +2,7 @@ import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants
 import translation from "./translation";
 import regionAndDepartments from "./region-and-departments";
 import { ROLES } from "./roles";
+import sanitizeHtml from "sanitize-html";
 
 const isInRuralArea = (v) => {
   if (!v.populationDensity) return null;
@@ -217,8 +218,18 @@ const formatPhoneNumberFR = (tel) => {
   return formatted;
 };
 
+const htmlCleaner = (text) => {
+  return sanitizeHtml(text, {
+    allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "ul"],
+    allowedAttributes: {
+      a: ["href", "target", "rel"],
+    },
+  });
+};
+
 const formatMessageForReadingInnerHTML = (content) => {
-  const message = content.replace(/\\n/g, "<br>").replace(/\\r/g, "<br>");
+  const cleanedMessage = htmlCleaner(content);
+  const message = cleanedMessage.replace(/\\n/g, "<br>").replace(/\\r/g, "<br>");
   return message;
 };
 
@@ -237,6 +248,7 @@ export {
   youngCanChangeSession,
   formatPhoneNumberFR,
   formatMessageForReadingInnerHTML,
+  htmlCleaner,
 };
 export * from "./academy";
 export * from "./colors";

@@ -1,6 +1,5 @@
 import PasswordValidator from "password-validator";
 import React from "react";
-import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
 import { formatStringLongDate, ROLES, translate, translateApplication, translateEngagement, translatePhase1, translatePhase2 } from "snu-lib";
 import api from "../services/api";
@@ -204,15 +203,6 @@ export function classNames(...classes) {
 }
 
 export const ENABLE_PM = true;
-
-export const htmlCleaner = (text) => {
-  return sanitizeHtml(text, {
-    allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "ul"],
-    allowedAttributes: {
-      a: ["href", "target", "rel"],
-    },
-  });
-};
 
 export function urlWithScheme(url) {
   if (!/^https?:\/\//i.test(url)) return `http://${url}`;
