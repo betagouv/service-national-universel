@@ -63,14 +63,14 @@ const NavigationArticle = ({ item, device }) => {
               id={slugify(title)}
               aria-controls={`${slugify(title)}_items`}
               aria-expanded={active}
-              className={`flex flex-1 cursor-pointer appearance-none flex-row items-center justify-between md:justify-center rounded-none border-none ${
+              className={`flex flex-1 cursor-pointer appearance-none flex-row items-center justify-between rounded-none border-none md:justify-center ${
                 active ? "bg-white" : "bg-gray-100"
               } px-4 py-4 shadow-none`}
               onClick={toggleAccordion}
             >
-              <Link href={`/base-de-connaissance/${item.parents[1].slug}`} className="justify-center align-center md:mr-2 flex flex-row text-center" onClick={() => cache.clear()}>
+              <Link href={`/base-de-connaissance/${item.parents[1].slug}`} className="align-center flex flex-row justify-center text-center md:mr-2" onClick={() => cache.clear()}>
                 <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-500" />
-                <p className="text-sm leading-5 text-gray-500 hidden">Retour</p>
+                <p className="hidden text-sm leading-5 text-gray-500">Retour</p>
               </Link>
               <div className="mr-2 flex flex-col justify-center">
                 <span className="line-clamp-2 flex-1 text-center text-sm font-medium text-gray-500 md:hidden">Articles liés</span>
@@ -90,7 +90,10 @@ const NavigationArticle = ({ item, device }) => {
             {list && list.length > 0 ? (
               <ul>
                 {list.map(({ _id, title, slug, type }, index) => (
-                  <li className={`flex border-gray-200 text-sm font-medium text-gray-900 ${_id === item._id ? "rounded-md bg-gray-200 text-gray-900" : "text-gray-500"}`} key={index}>
+                  <li
+                    className={`flex border-gray-200 text-sm font-medium text-gray-900 ${_id === item._id ? "rounded-md bg-gray-200 text-gray-900" : "text-gray-500"}`}
+                    key={index}
+                  >
                     <Link
                       tabIndex={active ? 0 : -1}
                       className="flex flex-1 items-center px-6 py-4"
