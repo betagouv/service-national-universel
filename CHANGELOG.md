@@ -1,3 +1,10 @@
+## [1.318.2](https://github.com/betagouv/service-national-universel/compare/v1.318.1...v1.318.2) (2023-08-04)
+
+
+### Bug Fixes
+
+* **api:** Update getDistance to be more precise ([#2854](https://github.com/betagouv/service-national-universel/issues/2854)) ([e306e4f](https://github.com/betagouv/service-national-universel/commit/e306e4fd286c4ff130843c64c2bf05600bb5a6d2))
+
 ## [1.318.1](https://github.com/betagouv/service-national-universel/compare/v1.318.0...v1.318.1) (2023-08-03)
 
 
