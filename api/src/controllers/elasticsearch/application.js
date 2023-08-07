@@ -182,9 +182,7 @@ router.post("/by-young/:id/:action(search|export)", passport.authenticate(["refe
     });
 
     if (req.params.action === "export") {
-      console.log("hitsRequestBody", exportFields);
       let response = await allRecords("application", hitsRequestBody.query, esClient, exportFields);
-
       let data = serializeApplications(response);
 
       if (exportFields.includes("youngId")) {
