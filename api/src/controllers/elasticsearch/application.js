@@ -9,7 +9,7 @@ const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 const StructureObject = require("../../models/structure");
 const Joi = require("joi");
-const { serializeApplications } = require("../../utils/es-serializer");
+const { serializeApplications, serializeYoungs, serializeMissions, serializeStructures, serializeReferents } = require("../../utils/es-serializer");
 
 async function buildApplicationContext(user) {
   const contextFilters = [];
@@ -188,24 +188,28 @@ router.post("/by-young/:id/:action(search|export)", passport.authenticate(["refe
       if (exportFields.includes("youngId")) {
         const youngIds = [...new Set(data.map((item) => item.youngId))];
         const youngs = await allRecords("young", { bool: { must: { ids: { values: youngIds } } } });
-        data = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
+        const serializedYoungs = serializeYoungs(youngs);
+        data = data.map((item) => ({ ...item, young: serializedYoungs.find((e) => e._id === item.youngId) || {} }));
       }
 
       if (exportFields.includes("missionId")) {
         const missionIds = [...new Set(data.map((item) => item.missionId))];
         const missions = await allRecords("mission", { bool: { must: { ids: { values: missionIds } } } });
-        data = data.map((item) => ({ ...item, mission: missions.find((e) => e._id === item.missionId) || {} }));
+        const serializedMissions = serializeMissions(missions);
+        data = data.map((item) => ({ ...item, mission: serializedMissions.find((e) => e._id === item.missionId) || {} }));
       }
 
       if (exportFields.includes("tutorId")) {
         const tutorIds = [...new Set(data.map((item) => item.tutorId))];
         const tutors = await allRecords("referent", { bool: { must: { ids: { values: tutorIds } } } });
-        data = data.map((item) => ({ ...item, tutor: tutors.find((e) => e._id === item.tutorId) || {} }));
+        const serializedTutors = serializeReferents(tutors);
+        data = data.map((item) => ({ ...item, tutor: serializedTutors.find((e) => e._id === item.tutorId) || {} }));
       }
       if (exportFields.includes("structureId")) {
         const structureIds = [...new Set(data.map((item) => item.structureId))];
         const structures = await allRecords("structure", { bool: { must: { ids: { values: structureIds } } } });
-        data = data.map((item) => ({ ...item, structure: structures.find((e) => e._id === item.structureId) || {} }));
+        const serializedStructures = serializeStructures(structures);
+        data = data.map((item) => ({ ...item, structure: serializedStructures.find((e) => e._id === item.structureId) || {} }));
       }
 
       return res.status(200).send({ ok: true, data });
