@@ -64,7 +64,6 @@ export default function App() {
     <Sentry.ErrorBoundary fallback={myFallback}>
       <Router history={history}>
         <ScrollToTop />
-        {/* <GoogleTags /> */}
         <div className={`${environment === "production" ? "main" : "flex h-screen flex-col justify-between"}`}>
           {maintenance && !localStorage?.getItem("override_maintenance") ? (
             <Switch>
