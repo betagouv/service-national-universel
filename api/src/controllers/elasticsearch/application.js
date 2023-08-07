@@ -159,7 +159,7 @@ router.post("/by-young/:id/:action(search|export)", passport.authenticate(["refe
     const sortFields = ["priority.keyword"];
 
     // Body params validation
-    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, sort, exportFields, error, size } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { applicationContextFilters, applicationContextError } = await buildApplicationContext(user);
@@ -182,10 +182,38 @@ router.post("/by-young/:id/:action(search|export)", passport.authenticate(["refe
     });
 
     if (req.params.action === "export") {
-      const response = await allRecords("application", hitsRequestBody.query);
-      return res.status(200).send({ ok: true, data: serializeApplications(response) });
+      console.log("hitsRequestBody", exportFields);
+      let response = await allRecords("application", hitsRequestBody.query, esClient, exportFields);
+
+      let data = serializeApplications(response);
+
+      if (exportFields.includes("youngId")) {
+        const youngIds = [...new Set(data.map((item) => item.youngId))];
+        const youngs = await allRecords("young", { bool: { must: { ids: { values: youngIds } } } });
+        data = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
+      }
+
+      if (exportFields.includes("missionId")) {
+        const missionIds = [...new Set(data.map((item) => item.missionId))];
+        const missions = await allRecords("mission", { bool: { must: { ids: { values: missionIds } } } });
+        data = data.map((item) => ({ ...item, mission: missions.find((e) => e._id === item.missionId) || {} }));
+      }
+
+      if (exportFields.includes("tutorId")) {
+        const tutorIds = [...new Set(data.map((item) => item.tutorId))];
+        const tutors = await allRecords("referent", { bool: { must: { ids: { values: tutorIds } } } });
+        data = data.map((item) => ({ ...item, tutor: tutors.find((e) => e._id === item.tutorId) || {} }));
+      }
+      if (exportFields.includes("structureId")) {
+        const structureIds = [...new Set(data.map((item) => item.structureId))];
+        const structures = await allRecords("structure", { bool: { must: { ids: { values: structureIds } } } });
+        data = data.map((item) => ({ ...item, structure: structures.find((e) => e._id === item.structureId) || {} }));
+      }
+
+      return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+
       return res.status(200).send(serializeApplications(response.body));
     }
   } catch (error) {
