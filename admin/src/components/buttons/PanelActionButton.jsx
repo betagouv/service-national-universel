@@ -2,14 +2,10 @@ import React from "react";
 import styled from "styled-components";
 import LoadingButton from "./LoadingButton";
 import Eye from "../../../../admin/src/assets/icons/Eye";
-// import Duplicate from "../../../../admin/src/assets/icons/";
-// import Impersonate from "../../../../admin/src/assets/icons/Impersonate";
 import Pencil from "../../../../admin/src/assets/icons/Pencil";
 
 const icons = {
   eye: Eye,
-  // duplicate: Duplicate,
-  // impersonate: Impersonate,
   pencil: Pencil,
 };
 
