@@ -9,6 +9,8 @@ const { buildArbitratyNdJson } = require("./utils");
 const { sessions2023, ROLES, ES_NO_LIMIT } = require("snu-lib");
 const CohortModel = require("../../models/cohort");
 const ApplicationModel = require("../../models/application");
+const Joi = require("joi");
+const { getKeyNumbers } = require("../../services/stats.service");
 
 router.post("/default", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -803,6 +805,28 @@ router.post("/default", passport.authenticate(["referent"], { session: false, fa
         },
       },
     });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/key-numbers", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const schema = Joi.object({
+      startDate: Joi.date().required(),
+      endDate: Joi.date().required(),
+      phase: Joi.string().valid("inscription", "sejour", "engagement", "all").required(),
+    });
+    const { value, error } = schema.validate(req.body, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    const { startDate, endDate, phase } = value;
+    const notes = await getKeyNumbers(phase, startDate, endDate, req.user);
+    res.status(200).send({ ok: true, data: notes });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
