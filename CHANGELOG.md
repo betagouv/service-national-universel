@@ -1,3 +1,10 @@
+# [1.319.0](https://github.com/betagouv/service-national-universel/compare/v1.318.2...v1.319.0) (2023-08-07)
+
+
+### Features
+
+* **admin:** Tableau de bord : Chiffres clé - Séjour ([#2837](https://github.com/betagouv/service-national-universel/issues/2837)) ([3a3385e](https://github.com/betagouv/service-national-universel/commit/3a3385e43e335aff0f936a180d1117b1a454ca57))
+
 ## [1.318.2](https://github.com/betagouv/service-national-universel/compare/v1.318.1...v1.318.2) (2023-08-04)
 
 
