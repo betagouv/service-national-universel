@@ -37,7 +37,7 @@ jobs:
           node-version: 18.x
 
       - name: Start MongoDB 4.0
-        uses: supercharge/mongodb-github-action@1.7.0
+        uses: supercharge/mongodb-github-action@v1.10.0
         with:
           mongodb-version: "4.0"
 
