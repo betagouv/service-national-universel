@@ -45,7 +45,7 @@ export default function KeyNumbers() {
           <Note key={note.id} note={note} />
         ))}
       </div>
-      <div className="mt-4 flex justify-center">
+      <div className="mt-auto p-2 flex justify-center">
         <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setOpen(!open)}>
           <span>{open ? "Voir moins" : "Voir plus"}</span>
           {open ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
