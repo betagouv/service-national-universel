@@ -1,3 +1,10 @@
+# [1.320.0](https://github.com/betagouv/service-national-universel/compare/v1.319.0...v1.320.0) (2023-08-08)
+
+
+### Features
+
+* **lib:** update school level and inscriptionEndDate ([#2861](https://github.com/betagouv/service-national-universel/issues/2861)) ([2c51b7c](https://github.com/betagouv/service-national-universel/commit/2c51b7c238107a45e15a932e2b880affde24b6f1))
+
 # [1.319.0](https://github.com/betagouv/service-national-universel/compare/v1.318.2...v1.319.0) (2023-08-07)
 
 
