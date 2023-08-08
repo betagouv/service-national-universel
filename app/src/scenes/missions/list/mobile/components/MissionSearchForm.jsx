@@ -27,7 +27,6 @@ import VeloSvg from "../../../assets/Velo";
 import VoitureSvg from "../../../assets/Voiture";
 import TrainSvg from "../../../assets/Train";
 import FuseeSvg from "../../../assets/Fusee";
-import { Modal } from "reactstrap"; // TODO: replace with our modal
 import RadioInput from "../../../../../assets/radioInput.svg";
 import RadioUnchecked from "../../../../../assets/radioUnchecked.svg";
 
@@ -35,19 +34,10 @@ import DomainFilter from "./DomainFilter";
 import PeriodeTab from "./PeriodeTab";
 import Select from "./Select.jsx";
 import Toggle from "./Toggle";
+import Modal from "../../../../../components/ui/modals/Modal";
 
 export default function MissionSearchForm({ filters, setFilters }) {
   const young = useSelector((state) => state.Auth.young);
-
-  // domains: filter.DOMAINS, // TODO
-  // distance: filter.DISTANCE, // TODO
-  // location: filter.LOCATION, // TODO
-  // isMilitaryPreparation: [filter.MILITARY_PREPARATION || ""],
-  // period: [filter.PERIOD],
-  // searchbar: [filter.SEARCH || ""],
-  // fromDate: [filter.START_DATE],
-  // toDate: [filter.END_DATE],
-  // hebergement: [filter.hebergement],
 
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
@@ -213,7 +203,7 @@ export default function MissionSearchForm({ filters, setFilters }) {
       </div>
 
       <div className="mb-1 w-full space-y-6 rounded-lg bg-white">
-        <Modal size={"20px"} isOpen={modalControl} toggle={setModalControl}>
+        <Modal isOpen={modalControl} onClose={() => setModalControl(false)} className="bg-gray-50 p-3">
           <div className="rounded-xl bg-gray-50 p-2">
             <div className="mb-3 ml-2 flex items-center justify-between">
               <div
