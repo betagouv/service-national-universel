@@ -100,7 +100,9 @@ router.post("/school/_msearch", passport.authenticate(["young", "referent"], { s
 router.post("/schoolramses/_msearch", async (req, res) => {
   try {
     const { body } = req;
-    const response = await esClient.msearch({ index: "schoolramses", body });
+    const header = { index: "schoolramses", type: "_doc" };
+    const stringifyBody = [header, body].map((e) => `${JSON.stringify(e)}\n`).join("");
+    const response = await esClient.msearch({ index: "schoolramses", body: stringifyBody });
     return res.status(200).send(serializeRamsesSchools(response.body));
   } catch (error) {
     capture(error);
