@@ -95,11 +95,24 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
       size,
     });
 
+    let response;
+    let missions;
+
     if (req.params.action === "export") {
-      const response = await allRecords("mission", hitsRequestBody.query);
+      response = await allRecords("mission", hitsRequestBody.query);
+    } else {
+      response = await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+    }
+
+    // fill info
+    if (req.query.needReferentInfo) {
+      // get referent info for each mission
+      const tutorIds = [...new Set(missions.map((item) => item.tutorId).filter((e) => e))];
+    }
+
+    if (req.params.action === "export") {
       return res.status(200).send({ ok: true, data: serializeMissions(response) });
     } else {
-      const response = await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(serializeMissions(response.body));
     }
   } catch (error) {
