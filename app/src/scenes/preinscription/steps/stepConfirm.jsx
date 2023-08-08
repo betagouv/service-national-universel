@@ -11,6 +11,7 @@ import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import dayjs from "dayjs";
 import DSFRContainer from "../../../components/inscription/DSFRContainer";
 import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
+import InfoMessage from "../components/InfoMessage";
 
 export default function StepConfirm() {
   const [error, setError] = useState({});
@@ -135,10 +136,12 @@ export default function StepConfirm() {
           <p className="text-right text-[#161616]">{data.email}</p>
         </div>
       </div>
+      <hr className="my-3 md:my-4 h-px border-0 md:bg-gray-200" />
+      <InfoMessage>Nous allons vous envoyer un code pour activer votre adresse email renseignée ci-dessus.</InfoMessage>
 
       <SignupButtonContainer
         onClickNext={() => onSubmit()}
-        labelNext="M'inscrire au SNU"
+        labelNext="Recevoir un code d'activation par email"
         onClickPrevious={() => history.push("/preinscription/profil")}
         disabled={Object.values(error).length}
         collapsePrevious={true}

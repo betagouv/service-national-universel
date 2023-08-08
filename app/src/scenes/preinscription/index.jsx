@@ -9,6 +9,7 @@ import StepNonEligible from "./steps/stepNonEligible";
 import StepSejour from "./steps/stepSejour";
 import StepProfil from "./steps/stepProfil";
 import StepConfirm from "./steps/stepConfirm";
+import StepEmailValidation from "./steps/stepEmailValidation";
 import StepDone from "./steps/stepDone";
 
 import { useSelector } from "react-redux";
@@ -58,6 +59,7 @@ export default function Index() {
       <div className="flex flex-col justify-between bg-beige-gris-galet-975">
         <Header />
         <Switch>
+          <SentryRoute path="/preinscription/email-validation" component={StepEmailValidation} />;
           <SentryRoute path="/preinscription/:step" component={Step} />;
           <SentryRoute path="/preinscription" component={Step} />;
         </Switch>
