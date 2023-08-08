@@ -17,7 +17,6 @@ import LoadingButton from "./LoadingButton";
 const images = import.meta.globEager("../../assets/panel-icons/*.svg");
 
 export default function PanelActionButton({ icon, title, ...rest }) {
-  console.log(icon);
   return (
     // <Button icon={icons[icon]} color="#fff" {...rest}>
     <Button icon={icon ? images[`../../assets/panel-icons/${icon}.svg`]?.default : null} color="#fff" {...rest}>
