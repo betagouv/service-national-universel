@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExternalLink } from "react-icons/hi";
 import { Link } from "react-router-dom";
-import { ES_NO_LIMIT } from "snu-lib";
+// import { ES_NO_LIMIT } from "snu-lib";
 import api from "../../../../../../services/api";
 import { currentFilterAsUrl } from "../../../../components/FilterDashBoard";
 
@@ -24,70 +24,78 @@ export default function TabSession({ sessionList, filters }) {
       return;
     }
 
-    const body = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
-      aggs: {
-        session: {
-          terms: { field: "sessionPhase1Id.keyword", size: ES_NO_LIMIT },
-          aggs: {
-            presence: { terms: { field: "cohesionStayPresence.keyword" } },
-            presenceJDM: { terms: { field: "presenceJDM.keyword" } },
-          },
-        },
-      },
-      size: 0,
-    };
+    // const body = {
+    //   query: { bool: { must: { match_all: {} }, filter: [] } },
+    //   aggs: {
+    //     session: {
+    //       terms: { field: "sessionPhase1Id.keyword", size: ES_NO_LIMIT },
+    //       aggs: {
+    //         presence: { terms: { field: "cohesionStayPresence.keyword" } },
+    //         presenceJDM: { terms: { field: "presenceJDM.keyword" } },
+    //       },
+    //     },
+    //   },
+    //   size: 0,
+    // };
 
-    if (filters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filters.status } });
-    if (filters.statusPhase1?.length) body.query.bool.filter.push({ terms: { "statusPhase1.keyword": filters.statusPhase1 } });
+    // if (filters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filters.status } });
+    // if (filters.statusPhase1?.length) body.query.bool.filter.push({ terms: { "statusPhase1.keyword": filters.statusPhase1 } });
 
-    let sessionPhase1Id = sessionList.map((session) => session._id).filter((id) => id);
-    if (sessionPhase1Id.length) body.query.bool.filter.push({ terms: { "sessionPhase1Id.keyword": sessionPhase1Id } });
+    // let sessionPhase1Id = sessionList.map((session) => session._id).filter((id) => id);
+    // if (sessionPhase1Id.length) body.query.bool.filter.push({ terms: { "sessionPhase1Id.keyword": sessionPhase1Id } });
 
-    const { responses } = await api.esQuery("young", body);
-    if (!responses?.length) return setNoResult(true);
+    // const { responses } = await api.esQuery("young", body);
+    // if (!responses?.length) return setNoResult(true);
 
-    const sessionAggreg = responses[0].aggregations.session.buckets.reduce((acc, session) => {
-      acc[session.key] = {
-        total: session.doc_count,
-        presence: session.presence.buckets.reduce((acc, presence) => {
-          acc[presence.key] = presence.doc_count;
-          return acc;
-        }, {}),
-        presenceJDM: session.presenceJDM.buckets.reduce((acc, presenceJDM) => {
-          acc[presenceJDM.key] = presenceJDM.doc_count;
-          return acc;
-        }, {}),
-      };
-      return acc;
-    }, {});
+    // const sessionAggreg = responses[0].aggregations.session.buckets.reduce((acc, session) => {
+    // acc[session.key] = {
+    //   total: session.doc_count,
+    //   presence: session.presence.buckets.reduce((acc, presence) => {
+    //     acc[presence.key] = presence.doc_count;
+    //     return acc;
+    //   }, {}),
+    //   presenceJDM: session.presenceJDM.buckets.reduce((acc, presenceJDM) => {
+    //     acc[presenceJDM.key] = presenceJDM.doc_count;
+    //     return acc;
+    //   }, {}),
+    // };
+    // return acc;
+    // }, {});
 
-    const sessionByCenter = sessionList.reduce((acc, session) => {
-      if (!acc[session.cohesionCenterId]) {
-        acc[session.cohesionCenterId] = {
-          centerId: session.cohesionCenterId,
-          centerName: session.nameCentre,
-          centerCity: session.cityCentre,
-          department: session.department,
-          region: session.region,
-          total: sessionAggreg[session._id]?.total || 0,
-          presence: sessionAggreg[session._id]?.presence?.false || 0,
-          presenceJDM: sessionAggreg[session._id]?.presenceJDM?.false || 0,
-        };
-      } else {
-        acc[session.cohesionCenterId].total += sessionAggreg[session._id]?.total || 0;
-        acc[session.cohesionCenterId].presence += sessionAggreg[session._id]?.presence?.false || 0;
-        acc[session.cohesionCenterId].presenceJDM += sessionAggreg[session._id]?.presenceJDM?.false || 0;
-      }
-      return acc;
-    }, {});
+    // const sessionByCenter = sessionList.reduce((acc, session) => {
+    //   if (!acc[session.cohesionCenterId]) {
+    //     acc[session.cohesionCenterId] = {
+    //       centerId: session.cohesionCenterId,
+    //       centerName: session.nameCentre,
+    //       centerCity: session.cityCentre,
+    //       department: session.department,
+    //       region: session.region,
+    //       total: sessionAggreg[session._id]?.total || 0,
+    //       presence: sessionAggreg[session._id]?.presence?.false || 0,
+    //       presenceJDM: sessionAggreg[session._id]?.presenceJDM?.false || 0,
+    //     };
+    //   } else {
+    //     acc[session.cohesionCenterId].total += sessionAggreg[session._id]?.total || 0;
+    //     acc[session.cohesionCenterId].presence += sessionAggreg[session._id]?.presence?.false || 0;
+    //     acc[session.cohesionCenterId].presenceJDM += sessionAggreg[session._id]?.presenceJDM?.false || 0;
+    //   }
+    //   return acc;
+    // }, {});
+
+    // const res = await api.post("/elasticsearch/young/presence", { filters: { missionId: missions.map((e) => e._id) } });
+    // const aggs = res.responses[0].aggregations;
+    const data = await api.post("/elasticsearch/dashboard/session-data", { filters, sessionList });
+    if (!data) return setNoResult(true);
+
+    const sessionCenter = data;
+    console.log(data, Object.values(data));
 
     setNoResult(false);
     setPage(0);
-    setPageMax(Math.trunc(Object.values(sessionByCenter).length / PAGE_SIZE));
-    setTotal(Object.values(sessionByCenter).length);
+    setPageMax(Math.trunc(Object.values(sessionCenter).length / PAGE_SIZE));
+    setTotal(Object.values(sessionCenter).length);
     //tranform object to array
-    setSessionByCenter(Object.values(sessionByCenter));
+    setSessionByCenter(Object.values(sessionCenter));
     setIsLoading(false);
   };
 
@@ -96,6 +104,10 @@ export default function TabSession({ sessionList, filters }) {
       getYoungsBySession(sessionList);
     }
   }, [sessionList]);
+
+  useEffect(() => {
+    console.log(sessionByCenter);
+  }, [sessionByCenter]);
 
   return (
     <div className="flex w-[60%] flex-col gap-5 rounded-lg bg-white px-8 py-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
