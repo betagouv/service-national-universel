@@ -38,20 +38,18 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       cohesionCenters = response.map((s) => ({ _id: s._id, _source: s }));
     } else {
       const EsResponse = await esClient.msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      console.log("EsResponse", EsResponse);
       response = EsResponse.body;
       cohesionCenters =
         response && response.responses && response.responses.length > 0 && response.responses[0].hits && response.responses[0].hits.hits ? response.responses[0].hits.hits : [];
     }
 
     if (req.query.needSessionPhase1Info) {
-      console.log(cohesionCenters);
       const cohesionCentersIds = cohesionCenters.map((s) => s._id);
       const sessionPhase1s = await allRecords("sessionphase1", { terms: { "cohesionCenterId.keyword": cohesionCentersIds } });
-      console.log("sessionPhase1s", sessionPhase1s);
-      cohesionCenters = cohesionCenters.map((s) => {
-        const sessionsPhase1 = sessionPhase1s.map((sp) => sp.cohesionCenterId === s._id);
-        return { ...s, sessionsPhase1: sessionsPhase1 };
+      cohesionCenters.map((s) => {
+        const sessionsPhase1 = sessionPhase1s.filter((sp) => sp.cohesionCenterId.toString() === s._id.toString());
+        console.log(sessionsPhase1.length);
+        s._source.sessionsPhase1 = sessionsPhase1;
       });
       if (req.params.action === "export") {
         response = cohesionCenters.map((s) => s._source);
@@ -63,6 +61,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (req.params.action === "export") {
       return res.status(200).send({ ok: true, data: response });
     } else {
+      console.log(response.responses[0].hits.hits);
       return res.status(200).send(response);
     }
   } catch (error) {

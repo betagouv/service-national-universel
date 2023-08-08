@@ -353,8 +353,8 @@ const ListCenter = ({ firstSession }) => {
   );
 };
 const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
-  console.log(hit);
-  const orderedSession = sessionsPhase1.sort((a, b) => COHESION_STAY_START[a._source.cohort] - COHESION_STAY_START[b._source.cohort]);
+  const orderedSession = sessionsPhase1.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
+  console.log(orderedSession);
   return (
     <>
       <hr />
@@ -370,9 +370,9 @@ const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
                 <Badge
                   onClick={(e) => {
                     e.stopPropagation();
-                    history.push(`/centre/${sessionPhase1._source.cohesionCenterId}?cohorte=${sessionPhase1._source.cohort}`);
+                    history.push(`/centre/${sessionPhase1.cohesionCenterId}?cohorte=${sessionPhase1.cohort}`);
                   }}
-                  cohort={sessionPhase1._source}
+                  cohort={sessionPhase1.cohort}
                 />
               </div>
             </div>
