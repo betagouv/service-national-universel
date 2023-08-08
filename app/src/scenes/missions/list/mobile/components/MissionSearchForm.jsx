@@ -27,7 +27,7 @@ import VeloSvg from "../../../assets/Velo";
 import VoitureSvg from "../../../assets/Voiture";
 import TrainSvg from "../../../assets/Train";
 import FuseeSvg from "../../../assets/Fusee";
-import { Modal } from "reactstrap";
+import { Modal } from "reactstrap"; // TODO: replace with our modal
 import RadioInput from "../../../../../assets/radioInput.svg";
 import RadioUnchecked from "../../../../../assets/radioUnchecked.svg";
 
@@ -36,8 +36,18 @@ import PeriodeTab from "./PeriodeTab";
 import Select from "./Select.jsx";
 import Toggle from "./Toggle";
 
-export default function MissionSearchForm({ filter, setFilter, hebergement, setHebergement }) {
+export default function MissionSearchForm({ filters, setFilters }) {
   const young = useSelector((state) => state.Auth.young);
+
+  // domains: filter.DOMAINS, // TODO
+  // distance: filter.DISTANCE, // TODO
+  // location: filter.LOCATION, // TODO
+  // isMilitaryPreparation: [filter.MILITARY_PREPARATION || ""],
+  // period: [filter.PERIOD],
+  // searchbar: [filter.SEARCH || ""],
+  // fromDate: [filter.START_DATE],
+  // toDate: [filter.END_DATE],
+  // hebergement: [filter.hebergement],
 
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
@@ -55,7 +65,7 @@ export default function MissionSearchForm({ filter, setFilter, hebergement, setH
   const marginDistance = getMarginDistance(document.getElementById("distanceKm"));
 
   const handleToggleChangeDomain = (domain) => {
-    setFilter((prev) => {
+    setFilters((prev) => {
       const newFilter = { ...prev };
       if (newFilter?.DOMAINS?.includes(domain)) {
         newFilter.DOMAINS = newFilter.DOMAINS.filter((d) => d !== domain);
@@ -67,15 +77,23 @@ export default function MissionSearchForm({ filter, setFilter, hebergement, setH
   };
 
   const handleToggleChangePeriod = (period) => {
-    setFilter((prev) => {
+    setFilters((prev) => {
       const newFilter = { ...prev };
-      if (newFilter?.PERIOD?.includes(period)) {
-        newFilter.PERIOD = newFilter.PERIOD.filter((d) => d !== period);
+      if (newFilter?.subPeriod?.includes(period)) {
+        newFilter.subPeriod = newFilter.subPeriod.filter((d) => d !== period);
       } else {
-        newFilter.PERIOD = [...(newFilter.PERIOD || []), period];
+        newFilter.subPeriod = [...(newFilter.subPeriod || []), period];
       }
       return newFilter;
     });
+  };
+
+  const handleToggleHousing = () => {
+    if (filters.hebergement === "true") {
+      setFilters((prev) => ({ ...prev, hebergement: "false" }));
+    } else {
+      setFilters((prev) => ({ ...prev, hebergement: "true" }));
+    }
   };
 
   React.useEffect(() => {
@@ -108,8 +126,7 @@ export default function MissionSearchForm({ filter, setFilter, hebergement, setH
     (async () => {
       if (!young) return;
       const filterLocation = young?.location || (await getCoordinates({ q: young?.address, postcode: young?.zip }));
-
-      setFilter({ ...filter, LOCATION: filterLocation });
+      setFilters({ ...filters, location: [filterLocation] });
     })();
     getManagerPhase2();
   }, [young]);
@@ -119,18 +136,14 @@ export default function MissionSearchForm({ filter, setFilter, hebergement, setH
     (async () => {
       let location;
       location = await getCoordinates({ q: focusedAddress.address, postcode: focusedAddress.zip });
-      if (location) setFilter((prev) => ({ ...prev, LOCATION: location }));
+      if (location) setFilters((prev) => ({ ...prev, location: [location] }));
     })();
   }, [focusedAddress]);
 
-  React.useEffect(() => {
-    setFilter((prev) => ({ ...prev, HEBERGEMENT: hebergement.toString() }));
-  }, [hebergement]);
-
-  const getMarginDistance = (ele) => {
-    if (ele) return Number((ele.scrollWidth + ((filter?.DISTANCE - DISTANCE_MAX) * ele.scrollWidth) / DISTANCE_MAX) * 0.92);
+  function getMarginDistance(ele) {
+    if (ele) return Number((ele.scrollWidth + ((filters?.distance - DISTANCE_MAX) * ele.scrollWidth) / DISTANCE_MAX) * 0.92);
     return false;
-  };
+  }
 
   const getLabelWhen = (when) => {
     switch (when) {
@@ -185,10 +198,10 @@ export default function MissionSearchForm({ filter, setFilter, hebergement, setH
     <>
       <div className=" mx-4 mb-3 flex items-center justify-between rounded-full border py-1  pl-2.5 pr-1">
         <input
-          value={filter?.SEARCH}
+          value={filters?.searchbar}
           onChange={(e) => {
             e.persist();
-            setFilter((prev) => ({ ...prev, SEARCH: e.target.value }));
+            setFilters((prev) => ({ ...prev, searchbar: e.target.value }));
           }}
           className="w-11/12 text-[11px] "
           type="text"
@@ -231,7 +244,7 @@ export default function MissionSearchForm({ filter, setFilter, hebergement, setH
                       setKeyWordOpen(true);
                     }}>
                     <div className="font-bold">Mot clé</div>
-                    <div className="text-md text-gray-500">{filter?.SEARCH || "Aucun"}</div>
+                    <div className="text-md text-gray-500">{filters?.searchbar || "Aucun"}</div>
                   </div>
                 )}
                 {keyWordOpen && (
@@ -251,7 +264,7 @@ export default function MissionSearchForm({ filter, setFilter, hebergement, setH
                         className="w-2/5 rounded-md bg-blue-600 p-2 text-center text-white "
                         onClick={() => {
                           setKeyWordOpen(!keyWordOpen);
-                          setFilter((prev) => ({ ...prev, SEARCH: keyWord }));
+                          setFilters((prev) => ({ ...prev, searchbar: keyWord }));
                         }}>
                         Valider
                       </div>
@@ -269,7 +282,7 @@ export default function MissionSearchForm({ filter, setFilter, hebergement, setH
                 {!dropdownControlDistanceOpen && (
                   <div className="flex justify-between">
                     <div className="font-bold">Distance maximum</div>
-                    <div className="text-md text-gray-500">{filter?.DISTANCE || 100}km max</div>
+                    <div className="text-md text-gray-500">{filters?.distance || 100}km max</div>
                   </div>
                 )}
                 {dropdownControlDistanceOpen && (
@@ -350,7 +363,7 @@ export default function MissionSearchForm({ filter, setFilter, hebergement, setH
                         )}
                       </div>
                       <div className="mb-3 flex flex-row items-center justify-start">
-                        <Toggle toggled={hebergement} onClick={() => setHebergement((old) => !old)} />
+                        <Toggle toggled={filters.hebergement} onClick={handleToggleHousing} />
                         <div className="ml-4">
                           <div className="text-[12px]">Mission avec hébergement</div>
                           <div className="text-[13px]">Dans toute la France</div>
@@ -362,17 +375,17 @@ export default function MissionSearchForm({ filter, setFilter, hebergement, setH
                           list="distance-list"
                           type="range"
                           className="h-2  w-full cursor-pointer appearance-none items-center rounded-full bg-gray-200"
-                          value={filter?.DISTANCE}
+                          value={filters?.distance}
                           min="1"
                           max={DISTANCE_MAX}
                           step="1"
                           onChange={(e) => {
                             e.persist();
-                            setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
+                            setFilters((prev) => ({ ...prev, distance: e.target.value }));
                           }}
                         />
                         <div className={`absolute  -mt-10 -ml-2 w-full  font-bold ${!marginDistance && " ml-1 flex justify-center"} `} style={{ left: `${marginDistance}px` }}>
-                          {filter?.DISTANCE}km
+                          {filters?.distance}km
                         </div>
                       </div>
                       <div className="mt-2 flex w-full items-center justify-between px-[10px] text-gray-200">
@@ -404,41 +417,46 @@ export default function MissionSearchForm({ filter, setFilter, hebergement, setH
                     <div className="text-center font-bold ">Période</div>
                     <div>
                       <div className="mt-3 flex flex-wrap text-sm">
-                        <PeriodeTab label={getLabelWhen("")} active={!filter?.PERIOD_PARENT} name="" onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: undefined }))} />
+                        <PeriodeTab label={getLabelWhen("")} active={!filters?.period} name="" onClick={() => setFilters((prev) => ({ ...prev, period: [undefined] }))} />
                         <PeriodeTab
                           Icon={Calendar}
                           label={getLabelWhen("CUSTOM")}
-                          active={filter?.PERIOD_PARENT === "CUSTOM"}
+                          active={filters?.period[0] === "CUSTOM"}
                           name="CUSTOM"
-                          onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "CUSTOM" }))}
+                          onClick={() => setFilters((prev) => ({ ...prev, period: "CUSTOM" }))}
                         />
                         <PeriodeTab
                           Icon={AcademicCap}
                           label={getLabelWhen("SCOLAIRE")}
-                          active={filter?.PERIOD_PARENT === "SCOLAIRE"}
+                          active={filters?.period === "SCOLAIRE"}
                           name="SCOLAIRE"
-                          onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "SCOLAIRE" }))}
+                          onClick={() => setFilters((prev) => ({ ...prev, period: "SCOLAIRE" }))}
                         />
                         <PeriodeTab
                           Icon={Sun}
                           label={getLabelWhen("VACANCES")}
-                          active={filter?.PERIOD_PARENT === "VACANCES"}
+                          active={filters?.period === "VACANCES"}
                           name="VACANCES"
-                          onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "VACANCES" }))}
+                          onClick={() => setFilters((prev) => ({ ...prev, period: "VACANCES" }))}
                         />
                       </div>
-                      {filter?.PERIOD_PARENT === "SCOLAIRE" ? (
-                        <Select placeholder={getLabelWhen("SCOLAIRE")} options={MISSION_PERIOD_DURING_SCHOOL} handleChangeValue={handleToggleChangePeriod} value={filter?.PERIOD} />
+                      {filters?.period === "SCOLAIRE" ? (
+                        <Select
+                          placeholder={getLabelWhen("SCOLAIRE")}
+                          options={MISSION_PERIOD_DURING_SCHOOL}
+                          handleChangeValue={handleToggleChangePeriod}
+                          value={filters?.subPeriod}
+                        />
                       ) : null}
-                      {filter?.PERIOD_PARENT === "VACANCES" ? (
+                      {filters?.period === "VACANCES" ? (
                         <Select
                           placeholder={getLabelWhen("VACANCES")}
                           options={MISSION_PERIOD_DURING_HOLIDAYS}
                           handleChangeValue={handleToggleChangePeriod}
-                          value={filter?.PERIOD}
+                          value={filters?.subPeriod}
                         />
                       ) : null}
-                      {filter?.PERIOD_PARENT === "CUSTOM" ? (
+                      {filters?.period === "CUSTOM" ? (
                         <div className="mt-6 flex flex-col items-center justify-center gap-2">
                           <div className="flex flex-wrap items-center justify-center gap-2">
                             <div className="flex items-center gap-2 rounded-lg border-[1px]  py-1 px-2">
@@ -447,10 +465,10 @@ export default function MissionSearchForm({ filter, setFilter, hebergement, setH
                                 required
                                 type="date"
                                 className="w-full cursor-pointer bg-inherit disabled:cursor-not-allowed"
-                                value={filter?.FROM}
+                                value={filters?.fromDate}
                                 onChange={(e) => {
                                   e.persist();
-                                  setFilter((prev) => ({ ...prev, FROM: e.target.value }));
+                                  setFilters((prev) => ({ ...prev, fromDate: e.target.value }));
                                 }}
                               />
                             </div>
@@ -460,16 +478,16 @@ export default function MissionSearchForm({ filter, setFilter, hebergement, setH
                                 required
                                 type="date"
                                 className="w-full cursor-pointer bg-inherit disabled:cursor-not-allowed"
-                                value={filter?.TO}
+                                value={filters?.toDate}
                                 onChange={(e) => {
                                   e.persist();
-                                  setFilter((prev) => ({ ...prev, TO: e.target.value }));
+                                  setFilters((prev) => ({ ...prev, toDate: e.target.value }));
                                 }}
                               />
                             </div>
                           </div>
-                          {filter?.FROM || filter?.TO ? (
-                            <div className="cursor-pointer text-xs text-gray-600 hover:underline" onClick={() => setFilter((prev) => ({ ...prev, TO: "", FROM: "" }))}>
+                          {filters?.fromDate || filters?.toDate ? (
+                            <div className="cursor-pointer text-xs text-gray-600 hover:underline" onClick={() => setFilters((prev) => ({ ...prev, toDate: "", fromDate: "" }))}>
                               Effacer
                             </div>
                           ) : null}
@@ -494,30 +512,30 @@ export default function MissionSearchForm({ filter, setFilter, hebergement, setH
 
         <div className="relative">
           <div className="flex gap-4 overflow-x-scroll px-4">
-            <DomainFilter Icon={Sante} name="HEALTH" label="Santé" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("HEALTH")} />
-            <DomainFilter Icon={Solidarite} name="SOLIDARITY" label="Solidarité" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SOLIDARITY")} />
-            <DomainFilter Icon={Citoyennete} name="CITIZENSHIP" label="Citoyenneté" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("CITIZENSHIP")} />
-            <DomainFilter Icon={Education} name="EDUCATION" label="Éducation" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("EDUCATION")} />
-            <DomainFilter Icon={Sport} name="SPORT" label="Sport" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SPORT")} />
+            <DomainFilter Icon={Sante} name="HEALTH" label="Santé" onClick={handleToggleChangeDomain} active={(filters?.DOMAINS || []).includes("HEALTH")} />
+            <DomainFilter Icon={Solidarite} name="SOLIDARITY" label="Solidarité" onClick={handleToggleChangeDomain} active={(filters?.DOMAINS || []).includes("SOLIDARITY")} />
+            <DomainFilter Icon={Citoyennete} name="CITIZENSHIP" label="Citoyenneté" onClick={handleToggleChangeDomain} active={(filters?.DOMAINS || []).includes("CITIZENSHIP")} />
+            <DomainFilter Icon={Education} name="EDUCATION" label="Éducation" onClick={handleToggleChangeDomain} active={(filters?.DOMAINS || []).includes("EDUCATION")} />
+            <DomainFilter Icon={Sport} name="SPORT" label="Sport" onClick={handleToggleChangeDomain} active={(filters?.DOMAINS || []).includes("SPORT")} />
             <DomainFilter
               Icon={DefenseEtMemoire}
               name="DEFENSE"
               label="Défense et mémoire"
               onClick={handleToggleChangeDomain}
-              active={(filter?.DOMAINS || []).includes("DEFENSE")}
+              active={(filters?.DOMAINS || []).includes("DEFENSE")}
             />
-            <DomainFilter Icon={Environment} name="ENVIRONMENT" label="Environment" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("ENVIRONMENT")} />
-            <DomainFilter Icon={Securite} name="SECURITY" label="Sécurité" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SECURITY")} />
-            <DomainFilter Icon={Culture} name="CULTURE" label="Culture" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("CULTURE")} />
+            <DomainFilter Icon={Environment} name="ENVIRONMENT" label="Environment" onClick={handleToggleChangeDomain} active={(filters?.DOMAINS || []).includes("ENVIRONMENT")} />
+            <DomainFilter Icon={Securite} name="SECURITY" label="Sécurité" onClick={handleToggleChangeDomain} active={(filters?.DOMAINS || []).includes("SECURITY")} />
+            <DomainFilter Icon={Culture} name="CULTURE" label="Culture" onClick={handleToggleChangeDomain} active={(filters?.DOMAINS || []).includes("CULTURE")} />
             <DomainFilter
               Icon={PreparationMilitaire}
               label="Préparations militaires"
-              active={filter?.MILITARY_PREPARATION === "true"}
+              active={filters?.isMilitaryPreparation === "true"}
               onClick={() =>
-                setFilter((prev) => {
+                setFilters((prev) => {
                   const newFilter = { ...prev };
-                  if (newFilter?.MILITARY_PREPARATION === "true") newFilter.MILITARY_PREPARATION = "false";
-                  else newFilter.MILITARY_PREPARATION = "true";
+                  if (newFilter?.isMilitaryPreparation === "true") newFilter.isMilitaryPreparation = "false";
+                  else newFilter.isMilitaryPreparation = "true";
                   return newFilter;
                 })
               }

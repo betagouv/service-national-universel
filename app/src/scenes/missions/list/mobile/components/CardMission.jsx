@@ -7,7 +7,8 @@ import dayjs from "dayjs";
 import Calendar from "../../../../../assets/icons/Calendar";
 import House from "../../../components/HouseIcon";
 
-export default function mission({ mission, youngLocation }) {
+export default function mission({ mission: missionProp, youngLocation }) {
+  const mission = missionProp._source;
   return (
     <Link to={`/mission/${mission._id}`} className="relative z-10 mb-4  flex justify-between overflow-hidden rounded-xl border-[#ffffff] bg-white p-3 pt-4 shadow-nina ">
       <div className="flex flex-1">

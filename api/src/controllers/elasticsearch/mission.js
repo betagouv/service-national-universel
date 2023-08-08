@@ -9,6 +9,7 @@ const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 const StructureObject = require("../../models/structure");
 const { serializeMissions } = require("../../utils/es-serializer");
+const Joi = require("joi");
 
 async function buildMissionContext(user) {
   const contextFilters = [];
@@ -248,6 +249,97 @@ router.post("/propose/:action(search|export)", passport.authenticate(["referent"
     }
   } catch (error) {
     capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/find/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const schema = Joi.object({
+      filters: Joi.object({
+        searchbar: Joi.string().allow(""),
+        domains: Joi.array().items(Joi.string().allow("")),
+        distance: Joi.number().integer().min(0).max(1000),
+        location: Joi.object({
+          lat: Joi.number().min(-90).max(90),
+          lon: Joi.number().min(-180).max(180),
+        }),
+        isMilitaryPreparation: Joi.boolean(),
+        period: Joi.string().allow(""),
+        subPeriod: Joi.array().items(Joi.string().allow("")),
+        fromDate: Joi.date(),
+        toDate: Joi.date(),
+        hebergement: Joi.boolean(),
+      }),
+      page: Joi.number().integer().min(0).max(1000),
+      sort: Joi.string().allow(""),
+    });
+    const { error, value } = schema.validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    let body = {
+      query: {
+        bool: {
+          must: [
+            { script: { script: "doc['pendingApplications'].value < doc['placesLeft'].value * 5" } },
+            { range: { endAt: { gt: "now" } } },
+            { term: { "status.keyword": "VALIDATED" } },
+            { term: { "visibility.keyword": "VISIBLE" } },
+            { range: { placesLeft: { gt: 0 } } },
+          ],
+        },
+      },
+      sort: [{ createdAt: { order: "desc" } }],
+    };
+
+    if (value.searchbar) {
+      body.query.bool.must.push({
+        bool: {
+          should: [
+            {
+              multi_match: {
+                query: value.SEARCH,
+                fields: ["name^10", "structureName^5", "description", "actions", "city"],
+                type: "cross_fields",
+                operator: "and",
+              },
+            },
+            {
+              multi_match: {
+                query: value.SEARCH,
+                fields: ["name^10", "structureName^5", "description", "actions", "city"],
+                type: "phrase",
+                operator: "and",
+              },
+            },
+            {
+              multi_match: {
+                query: value.SEARCH,
+                fields: ["name^10", "structureName^5", "description", "actions", "city"],
+                type: "phrase_prefix",
+                operator: "and",
+              },
+            },
+          ],
+          minimum_should_match: "1",
+        },
+      });
+    }
+
+    if (value.domains?.length) body.query.bool.filter.push({ terms: { "domains.keyword": value.domains } });
+    if (value?.period?.length) body.query.bool.filter.push({ terms: { "period.keyword": value.period } });
+    if (value?.isMilitaryPreparation) body.query.bool.filter.push({ term: { "isMilitaryPreparation.keyword": value?.isMilitaryPreparation } });
+    if (value?.fromDate && Object.keys(value?.fromDate).length) body.query.bool.filter?.push({ range: { startAt: value.fromDate } });
+    if (value?.toDate && Object.keys(value?.toDate).length) body.query.bool.filter.push({ range: { endAt: value.toDate } });
+    console.log("🚀 ~ file: mission.js:290 ~ router.post ~ body:", JSON.stringify(body));
+
+    const results = await esClient.search({ index: "mission", body });
+    console.log("🚀 ~ file: mission.js:337 ~ router.post ~ results:", results)
+
+    return res.status(200).send({ ok: true, data: results.body.hits.hits });
+  } catch (error) {
+    console.log("🚀 ~ file: mission.js:340 ~ router.post ~ error:", error)
+    // capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
