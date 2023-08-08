@@ -77,8 +77,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
   const referentSelectRef = useRef();
 
   async function initReferents() {
-    const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": values.structureId } }] } }, size: ES_NO_LIMIT };
-    const { responses } = await api.esQuery("referent", body);
+    const { responses } = await api.post("/elasticsearch/referent/structure/" + values.structureId);
+
     if (responses?.length) {
       const responseReferents = responses[0].hits.hits.map((hit) => ({ label: hit._source.firstName + " " + hit._source.lastName, value: hit._id, tutor: hit._source }));
       if (!responseReferents.find((ref) => ref.value === values.tutorId)) {
