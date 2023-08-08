@@ -68,50 +68,9 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
   React.useEffect(() => {
     if (selectedCohort) {
       (async () => {
-        const body = {
-          query: { bool: { must: [], must_not: { term: { "cohorts.keyword": selectedCohort } } } },
-          size: ES_NO_LIMIT,
-          track_total_hits: true,
-        };
-        if (search) {
-          body.query.bool.must.push({
-            bool: {
-              should: [
-                {
-                  multi_match: {
-                    query: search,
-                    fields: ["name", "address", "city", "zip", "department", "region", "code"],
-                    type: "cross_fields",
-                    operator: "and",
-                  },
-                },
-                {
-                  multi_match: {
-                    query: search,
-                    fields: ["name", "address", "city", "zip", "department", "region", "code"],
-                    type: "phrase",
-                    operator: "and",
-                  },
-                },
-                {
-                  multi_match: {
-                    query: search,
-                    fields: ["name", "address", "city", "zip", "department", "region", "code"],
-                    type: "phrase_prefix",
-                    operator: "and",
-                  },
-                },
-              ],
-              minimum_should_match: "1",
-            },
-          });
-        }
-        const { responses } = await api.esQuery("pointderassemblement", body);
-        setListPDR(
-          responses[0].hits.hits.map((hit) => {
-            return { ...hit._source, _id: hit._id };
-          }),
-        );
+        const { ok, data } = await api.post("/elasticsearch/pointderassemblement/export", { filters: { cohorts: [selectedCohort], searchbar: [search] } });
+        if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des points de rassemblement");
+        setListPDR(data);
       })();
     }
   }, [search, selectedCohort]);
