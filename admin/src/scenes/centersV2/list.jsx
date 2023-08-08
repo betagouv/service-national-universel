@@ -343,7 +343,7 @@ const ListCenter = ({ firstSession }) => {
               <div className="w-[60%]">Cohortes à venir</div>
             </div>
             {data.map((hit) => (
-              <Hit key={hit._id} hit={hit} history={history} onClick={() => history.push(`/centre/${hit._id}`)} sessionsPhase1={hit.sessionsPhase1} />
+              <Hit key={hit._id} hit={hit} history={history} onClick={() => history.push(`/centre/${hit._id}`)} />
             ))}
             <hr />
           </div>
@@ -352,9 +352,8 @@ const ListCenter = ({ firstSession }) => {
     </div>
   );
 };
-const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
-  const orderedSession = sessionsPhase1.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
-  console.log(orderedSession);
+const Hit = ({ hit, onClick, history }) => {
+  const orderedSession = hit.sessionsPhase1.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
   return (
     <>
       <hr />
@@ -372,7 +371,7 @@ const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
                     e.stopPropagation();
                     history.push(`/centre/${sessionPhase1.cohesionCenterId}?cohorte=${sessionPhase1.cohort}`);
                   }}
-                  cohort={sessionPhase1.cohort}
+                  cohort={sessionPhase1}
                 />
               </div>
             </div>
