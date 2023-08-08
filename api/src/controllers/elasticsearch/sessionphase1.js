@@ -57,14 +57,10 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       if (cohesionCenterIds.length > 0) {
         // --- fill cohesionCenter
         const cohesionCenters = await allRecords("cohesioncenter", { ids: { values: cohesionCenterIds } });
-        sessionphase1.forEach((item) => {
-          if (item._source.cohesionCenterId) {
-            const cohesionCenter = cohesionCenters.find((e) => e._id === item._source.cohesionCenterId);
-            if (cohesionCenter) {
-              item._source.cohesionCenter = cohesionCenter;
-            }
-          }
-        });
+        sessionphase1 = sessionphase1.map((item) => ({
+          ...item,
+          _source: { ...item._source, cohesionCenter: cohesionCenters.find((e) => e._id === item._source.cohesionCenterId) },
+        }));
         // replace hits with new sessionphase1
         if (req.params.action === "export") response = sessionphase1;
         else response.responses[0].hits.hits = sessionphase1;
@@ -75,14 +71,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       if (headCenterIds.length > 0) {
         // --- fill headCenter
         const headCenters = await allRecords("referent", { ids: { values: headCenterIds } });
-        sessionphase1.forEach((item) => {
-          if (item._source.headCenterId) {
-            const headCenter = headCenters.find((e) => e._id === item._source.headCenterId);
-            if (headCenter) {
-              item._source.headCenter = headCenter;
-            }
-          }
-        });
+        sessionphase1 = sessionphase1.map((item) => ({ ...item, _source: { ...item._source, headCenter: headCenters.find((e) => e._id === item._source.headCenterId) } }));
         // replace hits with new sessionphase1
         if (req.params.action === "export") response = sessionphase1;
         else response.responses[0].hits.hits = sessionphase1;
