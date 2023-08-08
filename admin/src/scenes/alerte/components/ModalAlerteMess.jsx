@@ -146,6 +146,8 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
     setSelectedOptions([]);
   };
 
+  console.log(data);
+
   return (
     <div className="flex w-full flex-col gap-8 mb-5">
       <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
@@ -216,20 +218,19 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                     placeholder="Sélectionnez le(s) destinataire(s)"
                     options={options}
                     maxMenuHeight={240}
-                    className="w-full"
                     isMulti
                     isDisabled={!editInfo}
                     closeMenuOnSelect={false}
                     hideSelectedOptions={false}
                     value={selectedOptions}
+                    className="basic-multi-select w-full"
+                    classNamePrefix="select"
                     components={{
                       Option: InputOption,
                     }}
                     onChange={(options) => {
                       setSelectedOptions(options);
-                      if (Array.isArray(options)) {
-                        setData({ ...data, to_role: options.map((opt) => opt.value) });
-                      }
+                      setData({ ...data, to_role: options.map((opt) => opt.value) });
                     }}
                     styles={customStyles}
                   />
@@ -253,7 +254,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                     className="text-gray-900 h-[122px] w-full"
                     placeholder="Précisez en quelques mots"
                     handleChange={(e) => setData({ ...data, content: e.target.value })}
-                    value={data.content}
+                    value={data?.content}
                     readOnly={!editInfo}
                     type={"textarea"}
                   />
@@ -276,6 +277,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                       onClick={() => {
                         setEditInfo(false);
                         handleReset();
+                        if (isNew) setIsNew(false);
                       }}
                       className="border border-gray-300 text-gray-700 text-sm w-[226px] h-10 rounded-lg"
                       disabled={!editInfo || isLoading}>
