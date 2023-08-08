@@ -1246,4 +1246,22 @@ router.put("/young/:id/removeMilitaryFile/:key", passport.authenticate("referent
   }
 });
 
+router.get("/exist/:emal", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ email: Joi.string().email().required() }).validate({ email: req.params.emal }, { stripUnknown: true });
+
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const referent = await ReferentModel.findOne({ email: value.email });
+    if (referent) return res.status(200).send({ ok: true, data: true });
+    else return res.status(200).send({ ok: true, data: false });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;
