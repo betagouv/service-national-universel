@@ -200,7 +200,9 @@ export default function CustomMission({ young, onChange }) {
     return data;
   };
   useEffect(() => {
-    initReferents();
+    if (values.structureId) {
+      initReferents();
+    }
   }, [values.structureId]);
   useEffect(() => {
     if (values.period.length === 0 || (values.period.length === 1 && values.period[0] === "WHENEVER")) {
