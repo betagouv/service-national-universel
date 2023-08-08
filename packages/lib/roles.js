@@ -779,6 +779,10 @@ function isSuperAdmin(actor) {
   return [ROLES.ADMIN].includes(actor.role) && actor.subRole === "god";
 }
 
+function canCheckIfRefExist(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -894,4 +898,5 @@ export {
   isSupervisor,
   canPutSpecificDateOnSessionPhase1,
   isBusEditionOpen,
+  canCheckIfRefExist,
 };
