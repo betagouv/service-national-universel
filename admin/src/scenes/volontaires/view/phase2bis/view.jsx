@@ -408,7 +408,7 @@ export default function Phase2({ young, onChange }) {
                     route={`/elasticsearch/application/by-young/${young._id.toString()}/export`}
                     transform={transform}
                     exportFields={getExportFields()}
-                    exportTitle={`candiatures de ${young.firstName} ${young.lastName}`}
+                    exportTitle={`Candidatures de ${young.firstName} ${young.lastName}`}
                     showTotalHits={true}
                     selectedFilters={{}}
                   />
