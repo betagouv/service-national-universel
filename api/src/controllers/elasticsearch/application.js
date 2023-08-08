@@ -38,27 +38,27 @@ async function populateApplications(applications, exportFields) {
   if (exportFields.includes("youngId")) {
     const youngIds = [...new Set(applications.map((item) => item.youngId))];
     const youngs = await allRecords("young", { bool: { must: { ids: { values: youngIds } } } });
-    const serializedYoungs = serializeYoungs(youngs);
+    const serializedYoungs = youngs.length ? serializeYoungs(youngs) : [];
     applications = applications.map((item) => ({ ...item, young: serializedYoungs.find((e) => e._id === item.youngId) || {} }));
   }
 
   if (exportFields.includes("missionId")) {
     const missionIds = [...new Set(applications.map((item) => item.missionId))];
     const missions = await allRecords("mission", { bool: { must: { ids: { values: missionIds } } } });
-    const serializedMissions = serializeMissions(missions);
+    const serializedMissions = missions.length ? serializeMissions(missions) : [];
     applications = applications.map((item) => ({ ...item, mission: serializedMissions.find((e) => e._id === item.missionId) || {} }));
   }
 
   if (exportFields.includes("tutorId")) {
     const tutorIds = [...new Set(applications.map((item) => item.tutorId))];
     const tutors = await allRecords("referent", { bool: { must: { ids: { values: tutorIds } } } });
-    const serializedTutors = serializeReferents(tutors);
+    const serializedTutors = tutors.length ? serializeReferents(tutors) : [];
     applications = applications.map((item) => ({ ...item, tutor: serializedTutors.find((e) => e._id === item.tutorId) || {} }));
   }
   if (exportFields.includes("structureId")) {
     const structureIds = [...new Set(applications.map((item) => item.structureId))];
     const structures = await allRecords("structure", { bool: { must: { ids: { values: structureIds } } } });
-    const serializedStructures = serializeStructures(structures);
+    const serializedStructures = structures.length ? serializeStructures(structures) : [];
     applications = applications.map((item) => ({ ...item, structure: serializedStructures.find((e) => e._id === item.structureId) || {} }));
   }
 
