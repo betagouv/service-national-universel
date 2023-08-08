@@ -256,23 +256,19 @@ router.post("/propose/:action(search|export)", passport.authenticate(["referent"
 router.post("/find/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const schema = Joi.object({
-      filters: Joi.object({
-        searchbar: Joi.string().allow(""),
-        domains: Joi.array().items(Joi.string().allow("")),
-        distance: Joi.number().integer().min(0).max(1000),
-        location: Joi.object({
-          lat: Joi.number().min(-90).max(90),
-          lon: Joi.number().min(-180).max(180),
-        }),
-        isMilitaryPreparation: Joi.boolean(),
-        period: Joi.string().allow(""),
-        subPeriod: Joi.array().items(Joi.string().allow("")),
-        fromDate: Joi.date(),
-        toDate: Joi.date(),
-        hebergement: Joi.boolean(),
-      }),
-      page: Joi.number().integer().min(0).max(1000),
-      sort: Joi.string().allow(""),
+      searchbar: Joi.string().allow(""),
+      domains: Joi.array().items(Joi.string().allow("")),
+      distance: Joi.number().integer().min(0).max(100).required(),
+      location: Joi.object({
+        lat: Joi.number().min(-90).max(90),
+        lon: Joi.number().min(-180).max(180),
+      }).required(),
+      isMilitaryPreparation: Joi.boolean(),
+      period: Joi.string().allow("", "CUSTOM", "VACANCES", "SCOLAIRE"),
+      subPeriod: Joi.array().items(Joi.string().allow("")),
+      fromDate: Joi.date(),
+      toDate: Joi.date(),
+      hebergement: Joi.boolean(),
     });
     const { error, value } = schema.validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -292,13 +288,37 @@ router.post("/find/", passport.authenticate("young", { session: false, failWithE
       sort: [{ createdAt: { order: "desc" } }],
     };
 
+    if (value.hebergement) {
+      body.query.bool.must.push({
+        bool: {
+          should: [
+            {
+              geo_distance: {
+                distance: `${value.distance}km`,
+                location: value.location,
+              },
+            },
+            { term: { "hebergement.keyword": "true" } },
+          ],
+          minimum_should_match: "1",
+        },
+      });
+    } else {
+      body.query.bool.must.push({
+        geo_distance: {
+          distance: `${value.distance}km`,
+          location: value.location,
+        },
+      });
+    }
+
     if (value.searchbar) {
       body.query.bool.must.push({
         bool: {
           should: [
             {
               multi_match: {
-                query: value.SEARCH,
+                query: value.searchbar,
                 fields: ["name^10", "structureName^5", "description", "actions", "city"],
                 type: "cross_fields",
                 operator: "and",
@@ -306,7 +326,7 @@ router.post("/find/", passport.authenticate("young", { session: false, failWithE
             },
             {
               multi_match: {
-                query: value.SEARCH,
+                query: value.searchbar,
                 fields: ["name^10", "structureName^5", "description", "actions", "city"],
                 type: "phrase",
                 operator: "and",
@@ -314,7 +334,7 @@ router.post("/find/", passport.authenticate("young", { session: false, failWithE
             },
             {
               multi_match: {
-                query: value.SEARCH,
+                query: value.searchbar,
                 fields: ["name^10", "structureName^5", "description", "actions", "city"],
                 type: "phrase_prefix",
                 operator: "and",
@@ -326,20 +346,18 @@ router.post("/find/", passport.authenticate("young", { session: false, failWithE
       });
     }
 
-    if (value.domains?.length) body.query.bool.filter.push({ terms: { "domains.keyword": value.domains } });
-    if (value?.period?.length) body.query.bool.filter.push({ terms: { "period.keyword": value.period } });
-    if (value?.isMilitaryPreparation) body.query.bool.filter.push({ term: { "isMilitaryPreparation.keyword": value?.isMilitaryPreparation } });
-    if (value?.fromDate && Object.keys(value?.fromDate).length) body.query.bool.filter?.push({ range: { startAt: value.fromDate } });
-    if (value?.toDate && Object.keys(value?.toDate).length) body.query.bool.filter.push({ range: { endAt: value.toDate } });
-    console.log("🚀 ~ file: mission.js:290 ~ router.post ~ body:", JSON.stringify(body));
+    if (value.domains?.length) body.query.bool.must.push({ terms: { "domains.keyword": value.domains } });
+    if (value.period) body.query.bool.must.push({ term: { "period.keyword": value.period } });
+    if (value.subPeriod?.length) body.query.bool.must.push({ terms: { "subPeriod.keyword": value.subPeriod } });
+    if (value.isMilitaryPreparation) body.query.bool.must.push({ term: { "isMilitaryPreparation.keyword": String(value.isMilitaryPreparation) } });
+    if (value.fromDate) body.query.bool.must.push({ range: { startAt: { gte: value.fromDate } } });
+    if (value.toDate) body.query.bool.must.push({ range: { endAt: { gte: value.toDate } } });
 
     const results = await esClient.search({ index: "mission", body });
-    console.log("🚀 ~ file: mission.js:337 ~ router.post ~ results:", results)
 
     return res.status(200).send({ ok: true, data: results.body.hits.hits });
   } catch (error) {
-    console.log("🚀 ~ file: mission.js:340 ~ router.post ~ error:", error)
-    // capture(error);
+    capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });

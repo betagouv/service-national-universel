@@ -126,7 +126,7 @@ export default function MissionSearchForm({ filters, setFilters }) {
     (async () => {
       if (!young) return;
       const filterLocation = young?.location || (await getCoordinates({ q: young?.address, postcode: young?.zip }));
-      setFilters({ ...filters, location: [filterLocation] });
+      setFilters({ ...filters, location: filterLocation });
     })();
     getManagerPhase2();
   }, [young]);
@@ -136,7 +136,7 @@ export default function MissionSearchForm({ filters, setFilters }) {
     (async () => {
       let location;
       location = await getCoordinates({ q: focusedAddress.address, postcode: focusedAddress.zip });
-      if (location) setFilters((prev) => ({ ...prev, location: [location] }));
+      if (location) setFilters((prev) => ({ ...prev, location }));
     })();
   }, [focusedAddress]);
 
@@ -417,11 +417,11 @@ export default function MissionSearchForm({ filters, setFilters }) {
                     <div className="text-center font-bold ">Période</div>
                     <div>
                       <div className="mt-3 flex flex-wrap text-sm">
-                        <PeriodeTab label={getLabelWhen("")} active={!filters?.period} name="" onClick={() => setFilters((prev) => ({ ...prev, period: [undefined] }))} />
+                        <PeriodeTab label={getLabelWhen("")} active={!filters?.period} name="" onClick={() => setFilters((prev) => ({ ...prev, period: "" }))} />
                         <PeriodeTab
                           Icon={Calendar}
                           label={getLabelWhen("CUSTOM")}
-                          active={filters?.period[0] === "CUSTOM"}
+                          active={filters?.period === "CUSTOM"}
                           name="CUSTOM"
                           onClick={() => setFilters((prev) => ({ ...prev, period: "CUSTOM" }))}
                         />
@@ -440,23 +440,23 @@ export default function MissionSearchForm({ filters, setFilters }) {
                           onClick={() => setFilters((prev) => ({ ...prev, period: "VACANCES" }))}
                         />
                       </div>
-                      {filters?.period === "SCOLAIRE" ? (
+                      {filters.period === "SCOLAIRE" ? (
                         <Select
                           placeholder={getLabelWhen("SCOLAIRE")}
                           options={MISSION_PERIOD_DURING_SCHOOL}
                           handleChangeValue={handleToggleChangePeriod}
-                          value={filters?.subPeriod}
+                          value={filters.subPeriod}
                         />
                       ) : null}
-                      {filters?.period === "VACANCES" ? (
+                      {filters.period === "VACANCES" ? (
                         <Select
                           placeholder={getLabelWhen("VACANCES")}
                           options={MISSION_PERIOD_DURING_HOLIDAYS}
                           handleChangeValue={handleToggleChangePeriod}
-                          value={filters?.subPeriod}
+                          value={filters.subPeriod}
                         />
                       ) : null}
-                      {filters?.period === "CUSTOM" ? (
+                      {filters.period === "CUSTOM" ? (
                         <div className="mt-6 flex flex-col items-center justify-center gap-2">
                           <div className="flex flex-wrap items-center justify-center gap-2">
                             <div className="flex items-center gap-2 rounded-lg border-[1px]  py-1 px-2">

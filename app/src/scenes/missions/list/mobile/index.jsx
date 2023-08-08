@@ -6,49 +6,51 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import { capture } from "../../../../sentry";
 
-export const debounce = (fn, delay) => {
-  let timeOutId;
-  return function (...args) {
-    if (timeOutId) {
-      clearTimeout(timeOutId);
-    }
-    timeOutId = setTimeout(() => {
-      fn(...args);
-    }, delay);
-  };
-};
-
 export default function List() {
   const young = useSelector((state) => state.Auth.young);
   const [data, setData] = useState([]);
-  console.log("🚀 ~ file: index.jsx:45 ~ List ~ data:", data);
   const [filters, setFilters] = useState({
-    search: "",
     domains: [],
     distance: 50,
     location: young?.location || {},
     isMilitaryPreparation: undefined,
-    period: undefined,
+    period: "",
     subPeriod: [],
     searchbar: "",
     fromDate: new Date(),
     toDate: undefined,
     hebergement: false,
   });
-  console.log("🚀 ~ file: index.jsx:46 ~ List ~ filters:", filters);
-  const [paramData, setParamData] = useState({ page: 0 });
 
-  async function getMissions() {
-    const body = { filters, page: paramData.page, sort: "" };
-    const res = await api.post("/elasticsearch/mission/find", body);
-    setData(res.data);
-  }
+  const debounce = (fn, delay) => {
+    let timeOutId;
+    return function (...args) {
+      if (timeOutId) {
+        clearTimeout(timeOutId);
+      }
+      timeOutId = setTimeout(() => {
+        fn(...args);
+      }, delay);
+    };
+  };
 
-  const updateOnParamChange = useCallback(debounce(getMissions, 250), []);
+  const updateOnFilterChange = useCallback(
+    debounce(async (filters, setData) => {
+      try {
+        if (!filters.location || !filters.distance) return;
+        const res = await api.post("/elasticsearch/mission/find", filters);
+        setData(res.data);
+      } catch (e) {
+        capture(e);
+        toastr.error("Oups, une erreur est survenue lors de la recherche des missions", e);
+      }
+    }, 250),
+    [],
+  );
 
   useEffect(() => {
-    updateOnParamChange(filters, paramData);
-  }, [filters, paramData.page]);
+    updateOnFilterChange(filters, setData);
+  }, [filters]);
 
   return (
     <div className="flex">
@@ -82,7 +84,7 @@ export default function List() {
 
         <div className="p-3">
           {data?.map((mission) => (
-            <CardMission mission={mission} key={mission._id} youngLocation={young?.location} />
+            <CardMission mission={mission._source} key={mission._id} youngLocation={young?.location} />
           ))}
         </div>
       </div>
