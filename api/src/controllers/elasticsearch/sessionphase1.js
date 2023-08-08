@@ -46,36 +46,21 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       response = await allRecords("sessionphase1", hitsRequestBody.query, esClient, exportFields);
       sessionphase1 = response.map((s) => ({ _id: s._id, _source: s }));
     } else {
-      const EsResponse = await esClient.msearch({ index: "sessionphase1", body: buildNdJson({ index: "sessionphase1", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      response = EsResponse.body;
+      const esReponse = await esClient.msearch({ index: "sessionphase1", body: buildNdJson({ index: "sessionphase1", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      response = esReponse.body;
       sessionphase1 =
         response && response.responses && response.responses.length > 0 && response.responses[0].hits && response.responses[0].hits.hits ? response.responses[0].hits.hits : [];
     }
 
     if (req.query.needCohesionCenterInfo) {
-      const cohesionCenterIds = [...new Set(sessionphase1.map((item) => item._source.cohesionCenterId).filter((e) => e))];
-      if (cohesionCenterIds.length > 0) {
-        // --- fill cohesionCenter
-        const cohesionCenters = await allRecords("cohesioncenter", { ids: { values: cohesionCenterIds } });
-        sessionphase1 = sessionphase1.map((item) => ({
-          ...item,
-          _source: { ...item._source, cohesionCenter: cohesionCenters.find((e) => e._id === item._source.cohesionCenterId) },
-        }));
-        // replace hits with new sessionphase1
-        if (req.params.action === "export") response = sessionphase1;
-        else response.responses[0].hits.hits = sessionphase1;
-      }
+      sessionphase1 = populateWithCohesionCenter(sessionphase1);
+      if (req.params.action === "export") response = sessionphase1;
+      else response.responses[0].hits.hits = sessionphase1;
     }
     if (req.query.needHeadCenterInfo) {
-      const headCenterIds = [...new Set(sessionphase1.map((item) => item._source.headCenterId).filter((e) => e))];
-      if (headCenterIds.length > 0) {
-        // --- fill headCenter
-        const headCenters = await allRecords("referent", { ids: { values: headCenterIds } });
-        sessionphase1 = sessionphase1.map((item) => ({ ...item, _source: { ...item._source, headCenter: headCenters.find((e) => e._id === item._source.headCenterId) } }));
-        // replace hits with new sessionphase1
-        if (req.params.action === "export") response = sessionphase1;
-        else response.responses[0].hits.hits = sessionphase1;
-      }
+      sessionphase1 = populateWithHeadCenter(sessionphase1);
+      if (req.params.action === "export") response = sessionphase1;
+      else response.responses[0].hits.hits = sessionphase1;
     }
 
     if (req.params.action === "export") {
@@ -121,5 +106,28 @@ router.post("/young-affectation/:cohort/:action(search|export)", passport.authen
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+const populateWithCohesionCenter = async (sessionphase1) => {
+  const cohesionCenterIds = [...new Set(sessionphase1.map((item) => item._source.cohesionCenterId).filter((e) => e))];
+  if (cohesionCenterIds.length > 0) {
+    // --- fill cohesionCenter
+    const cohesionCenters = await allRecords("cohesioncenter", { ids: { values: cohesionCenterIds } });
+    sessionphase1 = sessionphase1.map((item) => ({
+      ...item,
+      _source: { ...item._source, cohesionCenter: cohesionCenters.find((e) => e._id === item._source.cohesionCenterId) },
+    }));
+  }
+  return sessionphase1;
+};
+
+const populateWithHeadCenter = async (sessionphase1) => {
+  const headCenterIds = [...new Set(sessionphase1.map((item) => item._source.headCenterId).filter((e) => e))];
+  if (headCenterIds.length > 0) {
+    // --- fill headCenter
+    const headCenters = await allRecords("referent", { ids: { values: headCenterIds } });
+    sessionphase1 = sessionphase1.map((item) => ({ ...item, _source: { ...item._source, headCenter: headCenters.find((e) => e._id === item._source.headCenterId) } }));
+  }
+  return sessionphase1;
+};
 
 module.exports = router;
