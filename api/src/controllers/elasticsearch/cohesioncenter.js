@@ -48,7 +48,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       const sessionPhase1s = await allRecords("sessionphase1", { terms: { "cohesionCenterId.keyword": cohesionCentersIds } });
       cohesionCenters.map((s) => {
         const sessionsPhase1 = sessionPhase1s.filter((sp) => sp.cohesionCenterId.toString() === s._id.toString());
-        console.log(sessionsPhase1.length);
         s._source.sessionsPhase1 = sessionsPhase1;
       });
       if (req.params.action === "export") {
@@ -61,7 +60,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (req.params.action === "export") {
       return res.status(200).send({ ok: true, data: response });
     } else {
-      console.log(response.responses[0].hits.hits);
       return res.status(200).send(response);
     }
   } catch (error) {
