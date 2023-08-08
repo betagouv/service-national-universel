@@ -44,7 +44,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     }
 
     if (req.query.needSessionPhase1Info) {
-      cohesionCenters = populateWithSessionPhase1Info(cohesionCenters);
+      cohesionCenters = await populateWithSessionPhase1Info(cohesionCenters);
       if (req.params.action === "export") response = cohesionCenters.map((s) => s._source);
       else response.responses[0].hits.hits = cohesionCenters;
     }

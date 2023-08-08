@@ -53,12 +53,12 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     }
 
     if (req.query.needCohesionCenterInfo) {
-      sessionphase1 = populateWithCohesionCenter(sessionphase1);
+      sessionphase1 = await populateWithCohesionCenter(sessionphase1);
       if (req.params.action === "export") response = sessionphase1;
       else response.responses[0].hits.hits = sessionphase1;
     }
     if (req.query.needHeadCenterInfo) {
-      sessionphase1 = populateWithHeadCenter(sessionphase1);
+      sessionphase1 = await populateWithHeadCenter(sessionphase1);
       if (req.params.action === "export") response = sessionphase1;
       else response.responses[0].hits.hits = sessionphase1;
     }
