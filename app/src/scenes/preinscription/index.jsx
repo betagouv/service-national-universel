@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
 import { Redirect, Switch, useParams } from "react-router-dom";
+import { inscriptionCreationOpenForYoungs } from "snu-lib";
 import PreInscriptionContextProvider, { PreInscriptionContext } from "../../context/PreInscriptionContextProvider";
 import { SentryRoute } from "../../sentry";
 
@@ -14,6 +15,8 @@ import { useSelector } from "react-redux";
 import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import Footer from "../../components/footerV2";
 import Header from "../../components/header";
+
+import { environment } from "../../config";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -37,6 +40,10 @@ const Step = () => {
 
   if (currentStepIndex > eligibleStepIndex) {
     return <Redirect to={`/preinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
+  }
+
+  if (!inscriptionCreationOpenForYoungs("", false, environment)) {
+    return <Redirect to="/" />;
   }
 
   return renderStepResponsive(currentStep);
