@@ -16,22 +16,22 @@ import Environment from "../../../../../assets/mission-domaines/environment";
 import Securite from "../../../../../assets/mission-domaines/securite";
 import Culture from "../../../../../assets/mission-domaines/culture";
 import PreparationMilitaire from "../../../../../assets/mission-domaines/preparation-militaire";
+
 import AcademicCap from "../../../../../assets/icons/AcademicCap";
 import Sun from "../../../../../assets/icons/Sun";
 import Calendar from "../../../../../assets/icons/Calendar";
 import Search from "../../../../../assets/icons/Search";
-
-import { HiOutlineAdjustments, HiOutlineArrowNarrowRight } from "react-icons/hi";
+import DomainFilter from "./DomainFilter";
+import PeriodeTab from "./PeriodeTab";
 import PietonSvg from "../../../assets/Pieton";
 import VeloSvg from "../../../assets/Velo";
 import VoitureSvg from "../../../assets/Voiture";
 import TrainSvg from "../../../assets/Train";
 import FuseeSvg from "../../../assets/Fusee";
+
+import { HiOutlineAdjustments, HiOutlineArrowNarrowRight } from "react-icons/hi";
 import RadioInput from "../../../../../assets/radioInput.svg";
 import RadioUnchecked from "../../../../../assets/radioUnchecked.svg";
-
-import DomainFilter from "./DomainFilter";
-import PeriodeTab from "./PeriodeTab";
 import Select from "./Select.jsx";
 import Toggle from "./Toggle";
 import Modal from "../../../../../components/ui/modals/Modal";
@@ -51,7 +51,6 @@ export default function MissionSearchForm({ filters, setFilters }) {
   const refDropdownControlWhen = React.useRef(null);
 
   const DISTANCE_MAX = 100;
-
   const marginDistance = getMarginDistance(document.getElementById("distanceKm"));
 
   const handleToggleChangeDomain = (domain) => {
@@ -78,15 +77,7 @@ export default function MissionSearchForm({ filters, setFilters }) {
     });
   };
 
-  const handleToggleHousing = () => {
-    if (filters.hebergement === "true") {
-      setFilters((prev) => ({ ...prev, hebergement: "false" }));
-    } else {
-      setFilters((prev) => ({ ...prev, hebergement: "true" }));
-    }
-  };
-
-  React.useEffect(() => {
+  useEffect(() => {
     if (!refDropdownControlDistance) return;
     const handleClickOutside = (event) => {
       if (refDropdownControlDistance?.current && !refDropdownControlDistance.current.contains(event.target)) {
@@ -99,7 +90,7 @@ export default function MissionSearchForm({ filters, setFilters }) {
     };
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!refDropdownControlWhen) return;
     const handleClickOutside = (event) => {
       if (refDropdownControlWhen?.current && !refDropdownControlWhen.current.contains(event.target)) {
@@ -121,7 +112,7 @@ export default function MissionSearchForm({ filters, setFilters }) {
     getManagerPhase2();
   }, [young]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!focusedAddress) return;
     (async () => {
       let location;
@@ -353,7 +344,7 @@ export default function MissionSearchForm({ filters, setFilters }) {
                         )}
                       </div>
                       <div className="mb-3 flex flex-row items-center justify-start">
-                        <Toggle toggled={filters.hebergement} onClick={handleToggleHousing} />
+                        <Toggle toggled={filters.hebergement} onClick={() => setFilters((prev) => ({ ...prev, hebergement: !prev.hebergement }))} />
                         <div className="ml-4">
                           <div className="text-[12px]">Mission avec hébergement</div>
                           <div className="text-[13px]">Dans toute la France</div>
