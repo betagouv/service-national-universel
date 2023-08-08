@@ -36,27 +36,27 @@ async function buildApplicationContext(user) {
 
 async function populateApplications(applications, exportFields) {
   if (exportFields.includes("youngId")) {
-    const youngIds = [...new Set(applications.map((item) => item.youngId))];
+    const youngIds = [...new Set(applications.map((item) => item.youngId))].filter(Boolean);
     const youngs = await allRecords("young", { bool: { must: { ids: { values: youngIds } } } });
     const serializedYoungs = youngs.length ? serializeYoungs(youngs) : [];
     applications = applications.map((item) => ({ ...item, young: serializedYoungs.find((e) => e._id === item.youngId) || {} }));
   }
 
   if (exportFields.includes("missionId")) {
-    const missionIds = [...new Set(applications.map((item) => item.missionId))];
+    const missionIds = [...new Set(applications.map((item) => item.missionId))].filter(Boolean);
     const missions = await allRecords("mission", { bool: { must: { ids: { values: missionIds } } } });
     const serializedMissions = missions.length ? serializeMissions(missions) : [];
     applications = applications.map((item) => ({ ...item, mission: serializedMissions.find((e) => e._id === item.missionId) || {} }));
   }
 
   if (exportFields.includes("tutorId")) {
-    const tutorIds = [...new Set(applications.map((item) => item.tutorId))];
+    const tutorIds = [...new Set(applications.map((item) => item.tutorId))].filter(Boolean);
     const tutors = await allRecords("referent", { bool: { must: { ids: { values: tutorIds } } } });
     const serializedTutors = tutors.length ? serializeReferents(tutors) : [];
     applications = applications.map((item) => ({ ...item, tutor: serializedTutors.find((e) => e._id === item.tutorId) || {} }));
   }
   if (exportFields.includes("structureId")) {
-    const structureIds = [...new Set(applications.map((item) => item.structureId))];
+    const structureIds = [...new Set(applications.map((item) => item.structureId))].filter(Boolean);
     const structures = await allRecords("structure", { bool: { must: { ids: { values: structureIds } } } });
     const serializedStructures = structures.length ? serializeStructures(structures) : [];
     applications = applications.map((item) => ({ ...item, structure: serializedStructures.find((e) => e._id === item.structureId) || {} }));
