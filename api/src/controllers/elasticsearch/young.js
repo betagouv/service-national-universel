@@ -770,4 +770,8 @@ function aggregateStatus(youngs) {
   return Object.values(departments);
 }
 
+const populateYoungsSchoolInfo = async (youngs) => {
+  return youngs;
+};
+
 module.exports = router;

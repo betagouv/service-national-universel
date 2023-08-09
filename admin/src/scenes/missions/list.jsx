@@ -558,7 +558,7 @@ export default function List() {
             <ModalExport
               isOpen={isExportOpen}
               setIsOpen={setIsExportOpen}
-              route="/elasticsearch/mission/export?needReferentInfo=true&needStructureInfo=true"
+              route={"/elasticsearch/mission/export?needReferentInfo=true&needStructureInfo=true"}
               transform={transform}
               exportFields={user.role === ROLES.RESPONSIBLE ? missionExportFields.filter((e) => !e.title.includes("structure")) : missionExportFields}
               exportTitle="missions"
