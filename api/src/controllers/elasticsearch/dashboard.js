@@ -834,80 +834,24 @@ router.post("/key-numbers", passport.authenticate(["referent"], { session: false
   }
 });
 
-// router.post("/session-data", async (req, res) => {
-//   try {
-//     const { filters, sessionList } = req.body;
+router.post("/sessionByCenter",  passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { filters, sessionList } = req.body;
 
-//     const body = {
-//       query: { bool: { must: { match_all: {} }, filter: [] } },
-//       aggs: {
-//         session: {
-//           terms: { field: "sessionPhase1Id.keyword", size: ES_NO_LIMIT },
-//           aggs: {
-//             presence: { terms: { field: "cohesionStayPresence.keyword" } },
-//             presenceJDM: { terms: { field: "presenceJDM.keyword" } },
-//           },
-//         },
-//       },
-//       size: 0,
-//     };
+    const esRequestBody = buildESRequestBody(filters, sessionList);
+    const response = await esClient.search({ index: "young", body: esRequestBody });
+    if (!response?.body?.aggregations?.session) return res.status(404).send({ error: ERRORS.NOT_FOUND });
 
-//     if (filters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filters.status } });
-//     if (filters.statusPhase1?.length) body.query.bool.filter.push({ terms: { "statusPhase1.keyword": filters.statusPhase1 } });
-
-//     let sessionPhase1Id = sessionList.map((session) => session._id).filter((id) => id);
-//     if (sessionPhase1Id.length) body.query.bool.filter.push({ terms: { "sessionPhase1Id.keyword": sessionPhase1Id } });
-
-//     // Perform the Elasticsearch query here using the body above
-//     // Replace with your Elasticsearch client logic
-//     const response = await esClient.search({ index: "young", body });
-//     console.log(body)
-
-//     if (!response?.length) return res.status(404).send({ error: "No results" });
-
-//     const sessionAggreg = response[0].aggregations.session.buckets.reduce((acc, session) => {
-//       acc[session.key] = {
-//         total: session.doc_count,
-//         presence: session.presence.buckets.reduce((acc, presence) => {
-//           acc[presence.key] = presence.doc_count;
-//           return acc;
-//         }, {}),
-//         presenceJDM: session.presenceJDM.buckets.reduce((acc, presenceJDM) => {
-//           acc[presenceJDM.key] = presenceJDM.doc_count;
-//           return acc;
-//         }, {}),
-//       };
-//       return acc;
-//     }, {});
-
-//     const sessionByCenter = sessionList.reduce((acc, session) => {
-//       if (!acc[session.cohesionCenterId]) {
-//         acc[session.cohesionCenterId] = {
-//           centerId: session.cohesionCenterId,
-//           centerName: session.nameCentre,
-//           centerCity: session.cityCentre,
-//           department: session.department,
-//           region: session.region,
-//           total: sessionAggreg[session._id]?.total || 0,
-//           presence: sessionAggreg[session._id]?.presence?.false || 0,
-//           presenceJDM: sessionAggreg[session._id]?.presenceJDM?.false || 0,
-//         };
-//       } else {
-//         acc[session.cohesionCenterId].total += sessionAggreg[session._id]?.total || 0;
-//         acc[session.cohesionCenterId].presence += sessionAggreg[session._id]?.presence?.false || 0;
-//         acc[session.cohesionCenterId].presenceJDM += sessionAggreg[session._id]?.presenceJDM?.false || 0;
-//       }
-//       return acc;
-//     }, {});
-
-//     return res.status(200).send({ sessionAggreg, sessionByCenter });
-//   } catch (error) {
-//     console.error("Erreur dans /session-data:", error);
-//     res.status(500).send({ error: "Server error", details: error.message });
-//   }
-// });
+    const sessionByCenter = processESResponse(response, sessionList);
+    return res.status(200).send(sessionByCenter);
+  } catch (error) {
+    console.error("Erreur dans /session-data:", error);
+    res.status(500).send({ error: ERRORS.SERVER_ERROR, details: error.message });
+  }
+});
 
 const buildESRequestBody = (filters, sessionList) => {
+
   const body = {
     query: { bool: { must: { match_all: {} }, filter: [] } },
     aggs: {
@@ -946,7 +890,6 @@ const processESResponse = (response, sessionList) => {
     return acc;
   }, {});
 
-  // mettre ce process dans le front:
   const sessionByCenter = sessionList.reduce((acc, session) => {
     if (!acc[session.cohesionCenterId]) {
       acc[session.cohesionCenterId] = {
@@ -969,30 +912,5 @@ const processESResponse = (response, sessionList) => {
 
   return Object.values(sessionByCenter);
 };
-
-// passer une liste d'id plutot que toute les session.
-// essayer de mettre ce call dans le parent.
-// aller sur young moderator/sejour
-//  faire un dossier dashboard avec (sesssion ,young, etc..)
-router.post("/session-data", async (req, res) => {
-  try {
-    const { filters, sessionList } = req.body;
-
-    // Validate your request body here similar to joiElasticSearch from your previous code
-
-    const esRequestBody = buildESRequestBody(filters, sessionList);
-    const response = await esClient.search({ index: "young", body: esRequestBody });
-    // console.log(esRequestBody);
-    // console.log(response);
-    // if (!response?.length) return res.status(404).send({ error: ERRORS.NOT_FOUND });
-    if (!response?.body?.aggregations?.session) return res.status(404).send({ error: ERRORS.NOT_FOUND });
-
-    const sessionByCenter = processESResponse(response, sessionList);
-    return res.status(200).send(sessionByCenter);
-  } catch (error) {
-    console.error("Erreur dans /session-data:", error);
-    res.status(500).send({ error: ERRORS.SERVER_ERROR, details: error.message });
-  }
-});
 
 module.exports = router;
