@@ -537,6 +537,19 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
         data = data.map((item) => ({ ...item, center: centers?.find((e) => e._id.toString() === item.cohesionCenterId) }));
       }
 
+      //structure
+      if (exportFields.includes("structureInfo", "structureLocation")) {
+        const structureIds = [...new Set(data.map((item) => item.structureId).filter((e) => e))];
+        const structures = await allRecords("structure", { bool: { must: { ids: { values: structureIds } } } });
+        data = data.map((item) => ({ ...item, structure: structures?.find((e) => e._id.toString() === item.structureId) }));
+      }
+
+      if (exportFields.includes("tutor")) {
+        const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
+        const tutors = await allRecords("referent", { bool: { must: { ids: { values: tutorIds } } } });
+        data = data.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id.toString() === item.tutorId) }));
+      }
+
       //full info bus
       if (exportFields.includes("ligneId")) {
         //get bus

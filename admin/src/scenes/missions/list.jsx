@@ -64,24 +64,6 @@ export default function List() {
 
   async function transform(data, selectedFields) {
     let all = data;
-    if (selectedFields.includes("tutor")) {
-      const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
-      if (tutorIds?.length) {
-        const { responses } = await api.esQuery("referent", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: tutorIds } } });
-        if (responses.length) {
-          const tutors = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = data.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
-        }
-      }
-    }
-    if (["structureInfo", "structureLocation"].some((e) => selectedFields.includes(e))) {
-      const structureIds = [...new Set(data.map((item) => item.structureId).filter((e) => e))];
-      const { responses } = await api.esQuery("structure", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: structureIds } } });
-      if (responses?.length) {
-        const structures = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        all = all.map((item) => ({ ...item, structure: structures?.find((e) => e._id === item.structureId) }));
-      }
-    }
     return all.map((data) => {
       if (!data.domains) data.domains = [];
       if (!data.structure) {
@@ -558,7 +540,7 @@ export default function List() {
             <ModalExport
               isOpen={isExportOpen}
               setIsOpen={setIsExportOpen}
-              route={"/elasticsearch/mission/export?needReferentInfo=true&needStructureInfo=true"}
+              route={"/elasticsearch/mission/export"}
               transform={transform}
               exportFields={user.role === ROLES.RESPONSIBLE ? missionExportFields.filter((e) => !e.title.includes("structure")) : missionExportFields}
               exportTitle="missions"
