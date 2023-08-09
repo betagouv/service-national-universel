@@ -235,7 +235,7 @@ router.post("/count-by-status", passport.authenticate(["young", "referent"], { s
   try {
     const { user, body } = req;
     // Configuration
-    const filterFields = ["missionId.keyword"];
+    const filterFields = ["structureId.keyword"];
 
     // Body params validation
     const { queryFilters, error } = joiElasticSearch({ filterFields, body });
@@ -253,13 +253,13 @@ router.post("/count-by-status", passport.authenticate(["young", "referent"], { s
         },
       },
       aggs: {
-        all: { filter: { terms: { "missionId.keyword": queryFilters.missionId } } },
+        all: { filter: { terms: { "structureId.keyword": queryFilters.structureId } } },
         pending: {
-          filter: { terms: { "missionId.keyword": queryFilters.missionId } },
+          filter: { terms: { "structureId.keyword": queryFilters.structureId } },
           aggs: { pending: { filter: { terms: { "status.keyword": ["WAITING_VALIDATION"] } } } },
         },
         follow: {
-          filter: { terms: { "missionId.keyword": queryFilters.missionId } },
+          filter: { terms: { "structureId.keyword": queryFilters.structureId } },
           aggs: { follow: { filter: { terms: { "status.keyword": ["IN_PROGRESS", "VALIDATED"] } } } },
         },
       },

@@ -138,7 +138,8 @@ export default function List() {
 
   const getApplicationCount = async () => {
     try {
-      const res = await api.post("/elasticsearch/application/count-by-status", { filters: { missionId: missions.map((e) => e._id) } });
+      const structureIds = [...new Set(missions.map((item) => item.structureId))].filter(Boolean);
+      const res = await api.post("/elasticsearch/application/count-by-status", { filters: { structureId: structureIds } });
       const aggs = res.responses[0].aggregations;
       setCountAll(aggs.all.doc_count);
       setCountFollow(aggs.follow.follow.doc_count);
