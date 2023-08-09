@@ -95,12 +95,16 @@ router.post("/tickets", passport.authenticate(["referent", "young"], { session: 
   }
 });
 
-router.post("/ticketscount", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/ticketscount", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
+    let query = {};
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT) query = { department: req.user.department, subject: "J'ai une question", role: "young", canal: "PLATFORM" };
+    if (req.user.role === ROLES.REFERENT_REGION) query = { region: req.user.region, subject: "J'ai une question", role: "young", canal: "PLATFORM" };
+
     const { ok, data } = await zammood.api(`/v0/ticket/count`, {
       method: "POST",
       credentials: "include",
-      body: JSON.stringify(req.body),
+      body: JSON.stringify(query),
     });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
