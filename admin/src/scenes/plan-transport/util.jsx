@@ -3,7 +3,7 @@ import Avion from "../../assets/icons/Avion";
 import Bus from "../../assets/icons/Bus";
 import Fusee from "../../assets/icons/Fusee";
 import Train from "./ligne-bus/components/Icons/Train";
-import { ES_NO_LIMIT, ROLES, translate } from "snu-lib";
+import { ES_NO_LIMIT, ROLES, translate, departmentToAcademy } from "snu-lib";
 import FileSaver from "file-saver";
 import { toastr } from "react-redux-toastr";
 import dayjs from "dayjs";
@@ -112,57 +112,35 @@ function filterBusLinesByRole(lines, user) {
 
 export async function exportLigneBus(user, cohort) {
   try {
-    const { ok, data } = await API.post(`/elasticsearch/plandetransport/export`, {
-      filters: { cohort: [cohort] },
-      exportFields: "*",
-    });
-    if (!ok || !data?.length) return toastr.error("Aucune ligne de bus n'a été trouvée");
+    const { ok, data: youngs } = await API.post(`/elasticsearch/young/bus-in-cohort/${cohort}/export`);
+    if (!ok || !youngs?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
 
-    const ligneBus = filterBusLinesByRole(data, user);
-    const ligneIds = ligneBus.map((e) => e._id);
-
-    let meetingPoints = [];
-    for (const line of ligneBus) {
-      for (const mp of line.pointDeRassemblements) {
-        meetingPoints.push(mp);
-      }
-    }
-
-    const { ok: res, data: youngs } = await API.post("/es/young-having-meeting-point-in-geography/export", {
-      filters: { cohort: cohort, ligneId: ligneIds },
-    });
-    if (!res || !youngs?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
+    console.log(youngs);
 
     let result = {};
 
     for (const young of youngs) {
       const tempYoung = young;
-      const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint.meetingPointId === young.meetingPointId);
-      const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId);
+      const youngMeetingPoint = young.meetingPoint;
+      const youngLigneBus = young.bus;
 
       if (youngMeetingPoint) {
         if (!result[youngLigneBus.busId]) {
           result[youngLigneBus.busId] = {};
           result[youngLigneBus.busId]["youngs"] = [];
-          result[youngLigneBus.busId]["ligneBus"] = [];
-          result[youngLigneBus.busId]["meetingPoint"] = [];
-        }
-        if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint.meetingPointId === youngMeetingPoint.meetingPointId)) {
-          result[youngLigneBus.busId]["meetingPoint"].push(youngMeetingPoint);
-        }
-        if (!result[youngLigneBus.busId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
-          result[youngLigneBus.busId]["ligneBus"].push(youngLigneBus);
         }
         result[youngLigneBus.busId]["youngs"].push(tempYoung);
       }
     }
+
     // Transform data into array of objects before excel converts
     const formatedRep = Object.keys(result).map((key) => {
       return {
         name: key,
         data: result[key].youngs.map((young) => {
-          const meetingPoint = young.meetingPointId && result[key].meetingPoint.find((mp) => mp.meetingPointId === young.meetingPointId);
-          const ligneBus = young.ligneId && result[key].ligneBus.find((lb) => lb._id === young.ligneId);
+          const meetingPoint = young.meetingPoint;
+          const ligneBus = young.bus;
+          const center = young.center;
 
           return {
             _id: young._id,
@@ -172,7 +150,7 @@ export async function exportLigneBus(user, cohort) {
             Email: young.email,
             Téléphone: formatPhoneE164(young.phone, young.phoneZone || getPhoneZoneByDepartment(young.department)),
             Département: young.department,
-            Académie: translate(young.academie),
+            Académie: departmentToAcademy[young.schoolDepartment],
             Région: young.region,
 
             "Statut représentant légal 1": translate(young.parent1Status),
@@ -187,23 +165,23 @@ export async function exportLigneBus(user, cohort) {
             "Email représentant légal 2": young.parent2Email,
             "Téléphone représentant légal 2": formatPhoneE164(young.parent2Phone, young.parent2PhoneZone || getPhoneZoneByDepartment(young.department)),
 
-            "ID centre": ligneBus.centerId,
-            "Code centre (2022)": ligneBus.centerCode,
-            "Nom du centre": ligneBus.centerName,
-            "Adresse du centre": ligneBus.centerAddress,
-            "Ville du centre": ligneBus.centerCity,
-            "Département du centre": ligneBus.centerDepartment,
-            "Région du centre": ligneBus.centerRegion,
+            "ID centre": center._id,
+            "Code centre (2022)": center.code2022,
+            "Nom du centre": center.name,
+            "Adresse du centre": center.adress,
+            "Ville du centre": center.city,
+            "Département du centre": center.department,
+            "Région du centre": center.region,
 
-            "Id du point de rassemblement": meetingPoint.meetingPointId,
+            "Id du point de rassemblement": meetingPoint._id,
             "Nom du point de rassemblement": meetingPoint.name,
             "Adresse point de rassemblement": meetingPoint.address,
             "Ville du point de rassemblement": meetingPoint.city,
             "Département du point de rassemblement": meetingPoint.department,
             "Région du point de rassemblement": meetingPoint.region,
 
-            "Date aller": ligneBus.departureString,
-            "Date retour": ligneBus.returnString,
+            "Date aller": formatDateFRTimezoneUTC(ligneBus.departureDate),
+            "Date retour": formatDateFRTimezoneUTC(ligneBus.returnDate),
 
             "Statut général": translate(young.status),
             "Statut phase 1": translate(young.statusPhase1),

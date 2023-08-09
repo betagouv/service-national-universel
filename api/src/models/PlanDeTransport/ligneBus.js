@@ -82,7 +82,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  departuredDate: {
+  departureDate: {
     type: Date,
     required: true,
     documentation: {
