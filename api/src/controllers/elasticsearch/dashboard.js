@@ -6,7 +6,8 @@ const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { buildArbitratyNdJson } = require("./utils");
-const { sessions2023, ROLES, ES_NO_LIMIT } = require("snu-lib");
+const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
+const { sessions2023, ROLES, ES_NO_LIMIT, YOUNG_STATUS_PHASE1 } = require("snu-lib");
 const CohortModel = require("../../models/cohort");
 const ApplicationModel = require("../../models/application");
 const Joi = require("joi");
@@ -833,83 +834,278 @@ router.post("/key-numbers", passport.authenticate(["referent"], { session: false
   }
 });
 
-router.post("/sessionByCenter",  passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/moderator/sejour", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { filters, sessionList } = req.body;
+    if (req.user.role !== ROLES.ADMIN) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const esRequestBody = buildESRequestBody(filters, sessionList);
+    const filterFields = ["statusPhase1", "region", "department", "cohorts", "academy", "status"];
+    const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const aggsFilter = {};
+    if (queryFilters?.statusPhase1?.length) {
+      aggsFilter.filter = {
+        bool: {
+          must: [],
+          filter: [{ terms: { "statusPhase1.keyword": queryFilters?.statusPhase1?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) } }],
+        },
+      };
+    }
+
+    const body = {
+      query: { bool: { must: { match_all: {} }, filter: [] } },
+      aggs: {
+        statusPhase1: { terms: { field: "statusPhase1.keyword" } },
+        pdr: {
+          ...aggsFilter,
+          aggs: { names: { terms: { field: "hasMeetingInformation.keyword", missing: "NR", size: ES_NO_LIMIT } } },
+        },
+        participation: {
+          ...aggsFilter,
+          aggs: { names: { terms: { field: "youngPhase1Agreement.keyword", size: ES_NO_LIMIT } } },
+        },
+        precense: {
+          ...aggsFilter,
+          aggs: { names: { terms: { field: "cohesionStayPresence.keyword", missing: "NR", size: ES_NO_LIMIT } } },
+        },
+        JDM: {
+          ...aggsFilter,
+          aggs: { names: { terms: { field: "presenceJDM.keyword", missing: "NR", size: ES_NO_LIMIT } } },
+        },
+        depart: {
+          ...aggsFilter,
+          aggs: { names: { terms: { field: "departInform.keyword", size: ES_NO_LIMIT } } },
+        },
+        departMotif: {
+          ...aggsFilter,
+          aggs: { names: { terms: { field: "departSejourMotif.keyword", size: ES_NO_LIMIT } } },
+        },
+      },
+      size: 0,
+      track_total_hits: true,
+    };
+
+    if (queryFilters.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": queryFilters.region } });
+    if (queryFilters.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": queryFilters.department } });
+    if (queryFilters.cohorts?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": queryFilters.cohorts } });
+    if (queryFilters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": queryFilters.academy } });
+    if (queryFilters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": queryFilters.status } });
+
+    const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
+    return res.status(200).send(response.body);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/moderator/sessionAndCenter", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  const buildESRequestBodyForCohesion = (filters) => {
+    const bodyCohesion = {
+      query: { bool: { must: { match_all: {} }, filter: [] } },
+      aggs: {
+        typology: { terms: { field: "typology.keyword", size: ES_NO_LIMIT } },
+        domains: { terms: { field: "domain.keyword", size: ES_NO_LIMIT } },
+        capacity: { sum: { field: "placesTotal" } },
+      },
+      size: ES_NO_LIMIT,
+    };
+
+    if (filters.region?.length) bodyCohesion.query.bool.filter.push({ terms: { "region.keyword": filters.region } });
+    if (filters.department?.length) bodyCohesion.query.bool.filter.push({ terms: { "department.keyword": filters.department } });
+    if (filters.academy?.length) bodyCohesion.query.bool.filter.push({ terms: { "academy.keyword": filters.academy } });
+    if (filters.cohorts?.length) bodyCohesion.query.bool.filter.push({ terms: { "cohorts.keyword": filters.cohorts } });
+
+    return bodyCohesion;
+  };
+  const buildESRequestBodyForSession = (cohesionCenterId, filters) => {
+    const bodySession = {
+      query: { bool: { must: { match_all: {} }, filter: [{ terms: { cohesionCenterId } }] } },
+      aggs: {
+        placesTotal: { sum: { field: "placesTotal" } },
+        placesLeft: { sum: { field: "placesLeft" } },
+        status: { terms: { field: "status.keyword" } },
+        timeSchedule: { terms: { field: "hasTimeSchedule.keyword" } },
+      },
+      size: ES_NO_LIMIT,
+    };
+    if (filters.cohorts?.length) bodySession.query.bool.filter.push({ terms: { "cohort.keyword": filters.cohorts } });
+
+    return bodySession;
+  };
+
+  const buildESRequestBodyForSessionCenter = (filters, sessionList) => {
+    const body = {
+      query: { bool: { must: { match_all: {} }, filter: [] } },
+      aggs: {
+        session: {
+          terms: { field: "sessionPhase1Id.keyword", size: ES_NO_LIMIT },
+          aggs: {
+            presence: { terms: { field: "cohesionStayPresence.keyword" } },
+            presenceJDM: { terms: { field: "presenceJDM.keyword" } },
+          },
+        },
+      },
+      size: 0,
+    };
+
+    if (filters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filters.status } });
+    if (filters.statusPhase1?.length) body.query.bool.filter.push({ terms: { "statusPhase1.keyword": filters.statusPhase1 } });
+    let sessionPhase1Id = sessionList.map((session) => session._id).filter((id) => id);
+    if (sessionPhase1Id.length) body.query.bool.filter.push({ terms: { "sessionPhase1Id.keyword": sessionPhase1Id } });
+
+    return body;
+  };
+
+  const processESResponse = (response, sessionList) => {
+    const sessionAggreg = response.body.aggregations.session.buckets.reduce((acc, session) => {
+      acc[session.key] = {
+        total: session.doc_count,
+        presence: session.presence.buckets.reduce((acc, presence) => {
+          acc[presence.key] = presence.doc_count;
+          return acc;
+        }, {}),
+        presenceJDM: session.presenceJDM.buckets.reduce((acc, presenceJDM) => {
+          acc[presenceJDM.key] = presenceJDM.doc_count;
+          return acc;
+        }, {}),
+      };
+      return acc;
+    }, {});
+
+    const sessionByCenter = sessionList.reduce((acc, session) => {
+      if (!acc[session.cohesionCenterId]) {
+        acc[session.cohesionCenterId] = {
+          centerId: session.cohesionCenterId,
+          centerName: session.nameCentre,
+          centerCity: session.cityCentre,
+          department: session.department,
+          region: session.region,
+          total: sessionAggreg[session._id]?.total || 0,
+          presence: sessionAggreg[session._id]?.presence?.false || 0,
+          presenceJDM: sessionAggreg[session._id]?.presenceJDM?.false || 0,
+        };
+      } else {
+        acc[session.cohesionCenterId].total += sessionAggreg[session._id]?.total || 0;
+        acc[session.cohesionCenterId].presence += sessionAggreg[session._id]?.presence?.false || 0;
+        acc[session.cohesionCenterId].presenceJDM += sessionAggreg[session._id]?.presenceJDM?.false || 0;
+      }
+      return acc;
+    }, {});
+
+    return Object.values(sessionByCenter);
+  };
+
+  try {
+    const { filters } = req.body;
+    const esRequestBodyForCohesion = buildESRequestBodyForCohesion(filters);
+    const responsesCohesion = await esClient.search({ index: "cohesioncenter", body: esRequestBodyForCohesion });
+    console.log(responsesCohesion.body.hits);
+    if (!responsesCohesion?.body?.aggregations) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "1" });
+    let resultCenter = {};
+    resultCenter.typology = responsesCohesion.body.aggregations.typology.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
+    resultCenter.domains = responsesCohesion.body.aggregations.domains.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
+    resultCenter.capacity = responsesCohesion.body.aggregations.capacity.value;
+    resultCenter.totalCenter = responsesCohesion.body.hits.total.value;
+
+    const cohesionCenterId = responsesCohesion.body.hits.hits.map((e) => e._id);
+    const esRequestForSession = buildESRequestBodyForSession(cohesionCenterId, filters);
+    const responsesSession = await esClient.search({ index: "sessionphase1", body: esRequestForSession });
+    if (!responsesSession?.body?.aggregations) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "2" });
+    resultCenter.placesTotalSession = responsesSession.body.aggregations.placesTotal.value;
+    resultCenter.placesLeftSession = responsesSession.body.aggregations.placesLeft.value;
+    resultCenter.status = responsesSession.body.aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
+    resultCenter.timeSchedule = responsesSession.body.aggregations.timeSchedule.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
+    resultCenter.totalSession = responsesSession.body.hits.total.value;
+
+    const sessionList = responsesSession.body.hits.hits.map((e) => ({ ...e._source, _id: e._id }));
+    const esRequestBody = buildESRequestBodyForSessionCenter(filters, sessionList);
     const response = await esClient.search({ index: "young", body: esRequestBody });
-    if (!response?.body?.aggregations?.session) return res.status(404).send({ error: ERRORS.NOT_FOUND });
+    if (!response?.body?.aggregations?.session) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "3" });
 
     const sessionByCenter = processESResponse(response, sessionList);
-    return res.status(200).send(sessionByCenter);
+    return res.status(200).send({ resultCenter, sessionByCenter });
   } catch (error) {
-    console.error("Erreur dans /session-data:", error);
+    console.error("Erreur dans /sessionAndCenter:", error);
     res.status(500).send({ error: ERRORS.SERVER_ERROR, details: error.message });
   }
 });
 
-const buildESRequestBody = (filters, sessionList) => {
+// router.post("/sessionByCenter", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+//   const buildESRequestBody = (filters, sessionList) => {
+//     const body = {
+//       query: { bool: { must: { match_all: {} }, filter: [] } },
+//       aggs: {
+//         session: {
+//           terms: { field: "sessionPhase1Id.keyword", size: ES_NO_LIMIT },
+//           aggs: {
+//             presence: { terms: { field: "cohesionStayPresence.keyword" } },
+//             presenceJDM: { terms: { field: "presenceJDM.keyword" } },
+//           },
+//         },
+//       },
+//       size: 0,
+//     };
 
-  const body = {
-    query: { bool: { must: { match_all: {} }, filter: [] } },
-    aggs: {
-      session: {
-        terms: { field: "sessionPhase1Id.keyword", size: ES_NO_LIMIT },
-        aggs: {
-          presence: { terms: { field: "cohesionStayPresence.keyword" } },
-          presenceJDM: { terms: { field: "presenceJDM.keyword" } },
-        },
-      },
-    },
-    size: 0,
-  };
+//     if (filters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filters.status } });
+//     if (filters.statusPhase1?.length) body.query.bool.filter.push({ terms: { "statusPhase1.keyword": filters.statusPhase1 } });
+//     let sessionPhase1Id = sessionList.map((session) => session._id).filter((id) => id);
+//     if (sessionPhase1Id.length) body.query.bool.filter.push({ terms: { "sessionPhase1Id.keyword": sessionPhase1Id } });
 
-  if (filters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filters.status } });
-  if (filters.statusPhase1?.length) body.query.bool.filter.push({ terms: { "statusPhase1.keyword": filters.statusPhase1 } });
-  let sessionPhase1Id = sessionList.map((session) => session._id).filter((id) => id);
-  if (sessionPhase1Id.length) body.query.bool.filter.push({ terms: { "sessionPhase1Id.keyword": sessionPhase1Id } });
+//     return body;
+//   };
 
-  return body;
-};
+//   const processESResponse = (response, sessionList) => {
+//     const sessionAggreg = response.body.aggregations.session.buckets.reduce((acc, session) => {
+//       acc[session.key] = {
+//         total: session.doc_count,
+//         presence: session.presence.buckets.reduce((acc, presence) => {
+//           acc[presence.key] = presence.doc_count;
+//           return acc;
+//         }, {}),
+//         presenceJDM: session.presenceJDM.buckets.reduce((acc, presenceJDM) => {
+//           acc[presenceJDM.key] = presenceJDM.doc_count;
+//           return acc;
+//         }, {}),
+//       };
+//       return acc;
+//     }, {});
 
-const processESResponse = (response, sessionList) => {
-  const sessionAggreg = response.body.aggregations.session.buckets.reduce((acc, session) => {
-    acc[session.key] = {
-      total: session.doc_count,
-      presence: session.presence.buckets.reduce((acc, presence) => {
-        acc[presence.key] = presence.doc_count;
-        return acc;
-      }, {}),
-      presenceJDM: session.presenceJDM.buckets.reduce((acc, presenceJDM) => {
-        acc[presenceJDM.key] = presenceJDM.doc_count;
-        return acc;
-      }, {}),
-    };
-    return acc;
-  }, {});
+//     const sessionByCenter = sessionList.reduce((acc, session) => {
+//       if (!acc[session.cohesionCenterId]) {
+//         acc[session.cohesionCenterId] = {
+//           centerId: session.cohesionCenterId,
+//           centerName: session.nameCentre,
+//           centerCity: session.cityCentre,
+//           department: session.department,
+//           region: session.region,
+//           total: sessionAggreg[session._id]?.total || 0,
+//           presence: sessionAggreg[session._id]?.presence?.false || 0,
+//           presenceJDM: sessionAggreg[session._id]?.presenceJDM?.false || 0,
+//         };
+//       } else {
+//         acc[session.cohesionCenterId].total += sessionAggreg[session._id]?.total || 0;
+//         acc[session.cohesionCenterId].presence += sessionAggreg[session._id]?.presence?.false || 0;
+//         acc[session.cohesionCenterId].presenceJDM += sessionAggreg[session._id]?.presenceJDM?.false || 0;
+//       }
+//       return acc;
+//     }, {});
 
-  const sessionByCenter = sessionList.reduce((acc, session) => {
-    if (!acc[session.cohesionCenterId]) {
-      acc[session.cohesionCenterId] = {
-        centerId: session.cohesionCenterId,
-        centerName: session.nameCentre,
-        centerCity: session.cityCentre,
-        department: session.department,
-        region: session.region,
-        total: sessionAggreg[session._id]?.total || 0,
-        presence: sessionAggreg[session._id]?.presence?.false || 0,
-        presenceJDM: sessionAggreg[session._id]?.presenceJDM?.false || 0,
-      };
-    } else {
-      acc[session.cohesionCenterId].total += sessionAggreg[session._id]?.total || 0;
-      acc[session.cohesionCenterId].presence += sessionAggreg[session._id]?.presence?.false || 0;
-      acc[session.cohesionCenterId].presenceJDM += sessionAggreg[session._id]?.presenceJDM?.false || 0;
-    }
-    return acc;
-  }, {});
+//     return Object.values(sessionByCenter);
+//   };
+//   try {
+//     const { filters, sessionList } = req.body;
 
-  return Object.values(sessionByCenter);
-};
+//     const esRequestBody = buildESRequestBody(filters, sessionList);
+//     const response = await esClient.search({ index: "young", body: esRequestBody });
+//     if (!response?.body?.aggregations?.session) return res.status(404).send({ error: ERRORS.NOT_FOUND });
+
+//     const sessionByCenter = processESResponse(response, sessionList);
+//     return res.status(200).send(sessionByCenter);
+//   } catch (error) {
+//     console.error("Erreur dans /session-data:", error);
+//     res.status(500).send({ error: ERRORS.SERVER_ERROR, details: error.message });
+//   }
+// });
 
 module.exports = router;

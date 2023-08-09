@@ -6,8 +6,9 @@ import { currentFilterAsUrl } from "../../../../components/FilterDashBoard";
 
 const PAGE_SIZE = 6;
 
-export default function TabSession({ sessionList, filters }) {
-  const [sessionByCenter, setSessionByCenter] = React.useState(null);
+export default function TabSession({sessionByCenter, filters}) {
+  console.log(sessionByCenter, filters);
+  const [sessionData, setSessionData] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [page, setPage] = React.useState(0);
   const [pageMax, setPageMax] = React.useState(0);
@@ -15,31 +16,31 @@ export default function TabSession({ sessionList, filters }) {
   const [total, setTotal] = React.useState(0);
 
   const getYoungsBySession = async () => {
-    if (sessionList.length === 0) {
+    if (sessionByCenter.length === 0) {
       setNoResult(true);
       setPage(0);
       setPageMax(0);
       setTotal(0);
       return;
     }
-    const data = await api.post("/elasticsearch/dashboard/sessionByCenter", { filters, sessionList });
-    if (!data) return setNoResult(true);
-    const sessionCenter = Object.values(data);
+    // const data = await api.post("/elasticsearch/dashboard/sessionByCenter", { filters, sessionList });
+    // if (!data) return setNoResult(true);
+    // const sessionCenter = Object.values(data);
 
     setNoResult(false);
     setPage(0);
-    setPageMax(Math.trunc(sessionCenter.length / PAGE_SIZE));
-    setTotal(sessionCenter.length);
-    setSessionByCenter(sessionCenter);
+    setPageMax(Math.trunc(sessionByCenter.length / PAGE_SIZE));
+    setTotal(sessionByCenter.length);
+    setSessionData(sessionByCenter);
     setIsLoading(false);
   };
 
   useEffect(() => {
-    if (sessionList) {
-      getYoungsBySession(sessionList);
-      console.log(sessionList)
+    if (sessionByCenter) {
+      getYoungsBySession(sessionByCenter);
+      console.log(sessionByCenter)
     }
-  }, [sessionList]);
+  }, [sessionByCenter]);
 
   return (
     <div className="flex w-[60%] flex-col gap-5 rounded-lg bg-white px-8 py-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
@@ -79,7 +80,7 @@ export default function TabSession({ sessionList, filters }) {
               </tr>
             ))
           ) : !noResult ? (
-            sessionByCenter?.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)?.map((center) => (
+            sessionData?.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)?.map((center) => (
               <tr key={center?.centerId} className="flex h-1/6 cursor-default items-center border-b-[1px] border-gray-100 py-3  hover:bg-gray-50">
                 <td className="flex w-[40%] flex-col gap-1">
                   <Link

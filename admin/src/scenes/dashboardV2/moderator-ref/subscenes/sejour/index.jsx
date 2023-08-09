@@ -46,6 +46,7 @@ export default function Index() {
   const [data, setData] = useState({});
   const [dataCenter, setDataCenter] = useState({});
   const [sessionList, setSessionList] = useState(null);
+  const [sessionByCenter, setSessionByCenter] = useState(null);
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
   const academyOptions =
@@ -104,7 +105,7 @@ export default function Index() {
   }, [departmentOptions]);
 
   const queryYoung = async () => {
-    const { responses } = await api.post("/elasticsearch/young/moderator/sejour/", {
+    const { responses } = await api.post("/elasticsearch/dashboard/moderator/sejour/", {
       filters: Object.fromEntries(Object.entries(selectedFilters)),
     });
     if (responses?.length) {
@@ -124,53 +125,59 @@ export default function Index() {
   };
 
   const queryCenter = async () => {
-    const bodyCohesion = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
-      aggs: {
-        typology: { terms: { field: "typology.keyword", size: ES_NO_LIMIT } },
-        domains: { terms: { field: "domain.keyword", size: ES_NO_LIMIT } },
-        capacity: { sum: { field: "placesTotal" } },
-      },
-      size: ES_NO_LIMIT,
-    };
+    // const bodyCohesion = {
+    //   query: { bool: { must: { match_all: {} }, filter: [] } },
+    //   aggs: {
+    //     typology: { terms: { field: "typology.keyword", size: ES_NO_LIMIT } },
+    //     domains: { terms: { field: "domain.keyword", size: ES_NO_LIMIT } },
+    //     capacity: { sum: { field: "placesTotal" } },
+    //   },
+    //   size: ES_NO_LIMIT,
+    // };
 
-    if (selectedFilters.region?.length) bodyCohesion.query.bool.filter.push({ terms: { "region.keyword": selectedFilters.region } });
-    if (selectedFilters.department?.length) bodyCohesion.query.bool.filter.push({ terms: { "department.keyword": selectedFilters.department } });
-    if (selectedFilters.academy?.length) bodyCohesion.query.bool.filter.push({ terms: { "academy.keyword": selectedFilters.academy } });
-    if (selectedFilters.cohorts?.length) bodyCohesion.query.bool.filter.push({ terms: { "cohorts.keyword": selectedFilters.cohorts } });
+    // if (selectedFilters.region?.length) bodyCohesion.query.bool.filter.push({ terms: { "region.keyword": selectedFilters.region } });
+    // if (selectedFilters.department?.length) bodyCohesion.query.bool.filter.push({ terms: { "department.keyword": selectedFilters.department } });
+    // if (selectedFilters.academy?.length) bodyCohesion.query.bool.filter.push({ terms: { "academy.keyword": selectedFilters.academy } });
+    // if (selectedFilters.cohorts?.length) bodyCohesion.query.bool.filter.push({ terms: { "cohorts.keyword": selectedFilters.cohorts } });
 
-    const { responses: responsesCohesion } = await api.esQuery("cohesioncenter", bodyCohesion);
+    // const { responses: responsesCohesion } = await api.esQuery("cohesioncenter", bodyCohesion);
 
-    if (!responsesCohesion.length) return;
-    let resultCenter = {};
-    resultCenter.typology = responsesCohesion[0].aggregations.typology.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-    resultCenter.domains = responsesCohesion[0].aggregations.domains.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-    resultCenter.capacity = responsesCohesion[0].aggregations.capacity.value;
-    resultCenter.totalCenter = responsesCohesion[0].hits.total.value;
+    // if (!responsesCohesion.length) return;
+    // let resultCenter = {};
+    // resultCenter.typology = responsesCohesion[0].aggregations.typology.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
+    // resultCenter.domains = responsesCohesion[0].aggregations.domains.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
+    // resultCenter.capacity = responsesCohesion[0].aggregations.capacity.value;
+    // resultCenter.totalCenter = responsesCohesion[0].hits.total.value;
 
-    const cohesionCenterId = responsesCohesion[0].hits.hits.map((e) => e._id);
-    const bodySession = {
-      query: { bool: { must: { match_all: {} }, filter: [{ terms: { cohesionCenterId } }] } },
-      aggs: {
-        placesTotal: { sum: { field: "placesTotal" } },
-        placesLeft: { sum: { field: "placesLeft" } },
-        status: { terms: { field: "status.keyword" } },
-        timeSchedule: { terms: { field: "hasTimeSchedule.keyword" } },
-      },
-      size: ES_NO_LIMIT,
-    };
+    // const cohesionCenterId = responsesCohesion[0].hits.hits.map((e) => e._id);
+    // const bodySession = {
+    //   query: { bool: { must: { match_all: {} }, filter: [{ terms: { cohesionCenterId } }] } },
+    //   aggs: {
+    //     placesTotal: { sum: { field: "placesTotal" } },
+    //     placesLeft: { sum: { field: "placesLeft" } },
+    //     status: { terms: { field: "status.keyword" } },
+    //     timeSchedule: { terms: { field: "hasTimeSchedule.keyword" } },
+    //   },
+    //   size: ES_NO_LIMIT,
+    // };
 
-    if (selectedFilters.cohorts?.length) bodySession.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohorts } });
-    const { responses: responsesSession } = await api.esQuery("sessionphase1", bodySession);
-    if (responsesSession.length) {
-      setSessionList(responsesSession[0].hits.hits.map((e) => ({ ...e._source, _id: e._id })));
-      resultCenter.placesTotalSession = responsesSession[0].aggregations.placesTotal.value;
-      resultCenter.placesLeftSession = responsesSession[0].aggregations.placesLeft.value;
-      resultCenter.status = responsesSession[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
-      resultCenter.timeSchedule = responsesSession[0].aggregations.timeSchedule.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
-      resultCenter.totalSession = responsesSession[0].hits.total.value;
-    }
+    // if (selectedFilters.cohorts?.length) bodySession.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohorts } });
+    // const { responses: responsesSession } = await api.esQuery("sessionphase1", bodySession);
+    // if (responsesSession.length) {
+    //   setSessionList(responsesSession[0].hits.hits.map((e) => ({ ...e._source, _id: e._id })));
+    //   resultCenter.placesTotalSession = responsesSession[0].aggregations.placesTotal.value;
+    //   resultCenter.placesLeftSession = responsesSession[0].aggregations.placesLeft.value;
+    //   resultCenter.status = responsesSession[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
+    //   resultCenter.timeSchedule = responsesSession[0].aggregations.timeSchedule.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
+    //   resultCenter.totalSession = responsesSession[0].hits.total.value;
+    // }
+    // setDataCenter(resultCenter);
+
+    const { resultCenter, sessionByCenter } = await api.post("/elasticsearch/dashboard/moderator/sessionAndCenter", {
+      filters: Object.fromEntries(Object.entries(selectedFilters)),
+    });
     setDataCenter(resultCenter);
+    setSessionByCenter(sessionByCenter);
   };
 
   useEffect(() => {
@@ -236,7 +243,8 @@ export default function Index() {
         </div>
         <div className="flex gap-4">
           <MoreInfo typology={dataCenter?.typology} domains={dataCenter?.domains} filter={selectedFilters} />
-          <TabSession sessionList={sessionList} filters={selectedFilters} />
+          {/* <TabSession sessionList={sessionList} filters={selectedFilters} /> */}
+          <TabSession sessionByCenter={sessionByCenter} filters={selectedFilters} />
         </div>
       </div>
     </DashboardContainer>
