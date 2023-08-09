@@ -2,7 +2,7 @@ const passport = require("passport");
 const express = require("express");
 const Joi = require("joi");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch, YOUNG_STATUS_PHASE1, ES_NO_LIMIT, youngExportFields } = require("snu-lib");
+const { ROLES, canSearchInElasticSearch, YOUNG_STATUS_PHASE1, ES_NO_LIMIT, youngExportFields, canExportLigneBus } = require("snu-lib");
 const datesub = require("date-fns/sub");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
@@ -525,14 +525,14 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
       //School
       if (exportFields.includes("schoolId")) {
-        const schoolIds = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+        const schoolIds = [...new Set(data.map((item) => item.schoolId).filter(Boolean))];
         const schools = await allRecords("schoolramses", { bool: { must: { ids: { values: schoolIds } } } });
         data = data.map((item) => ({ ...item, school: schools?.find((e) => e._id.toString() === item.schoolId) }));
       }
 
       //center
       if (exportFields.includes("cohesionCenterId")) {
-        const centerIds = [...new Set(data.map((item) => item.cohesionCenterId).filter((e) => e))];
+        const centerIds = [...new Set(data.map((item) => item.cohesionCenterId).filter(Boolean))];
         const centers = await allRecords("cohesioncenter", { bool: { must: { ids: { values: centerIds } } } });
         data = data.map((item) => ({ ...item, center: centers?.find((e) => e._id.toString() === item.cohesionCenterId) }));
       }
@@ -540,7 +540,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       //full info bus
       if (exportFields.includes("ligneId")) {
         //get bus
-        const busIds = [...new Set(data.map((item) => item.ligneId).filter((e) => e))];
+        const busIds = [...new Set(data.map((item) => item.ligneId).filter(Boolean))];
         const bus = await allRecords("lignebus", { bool: { must: { ids: { values: busIds } } } });
         data = data.map((item) => ({ ...item, bus: bus?.find((e) => e._id.toString() === item.ligneId) }));
         //get ligneToPoint
@@ -734,6 +734,54 @@ router.post("/aggregate-status/:action(export)", passport.authenticate(["referen
 
     const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
     const data = aggregateStatus(serializeYoungs(response));
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/bus-in-cohort/:cohort/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    // Configuration
+    const filterFields = [];
+    const sortFields = [];
+
+    if (!canExportLigneBus(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // Body params validation
+    const { queryFilters, error } = joiElasticSearch({ filterFields, sortFields, body: body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const query = {
+      bool: {
+        must: [{ match_all: {} }, { term: { "cohort.keyword": req.params.cohort } }, { term: { "status.keyword": "VALIDATED" } }, { exists: { field: "ligneId.keyword" } }],
+        must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
+      },
+    };
+
+    const response = await allRecords("young", query, esClient);
+    let data = serializeYoungs(response);
+
+    //center
+    const centerIds = [...new Set(data.map((item) => item.cohesionCenterId).filter((e) => e))];
+    const centers = await allRecords("cohesioncenter", { bool: { must: { ids: { values: centerIds } } } });
+    data = data.map((item) => ({ ...item, center: centers?.find((e) => e._id.toString() === item.cohesionCenterId) }));
+
+    //full info bus
+    //get bus
+    const busIds = [...new Set(data.map((item) => item.ligneId).filter((e) => e))];
+    const bus = await allRecords("lignebus", { bool: { must: { ids: { values: busIds } } } });
+    data = data.map((item) => ({ ...item, bus: bus?.find((e) => e._id.toString() === item.ligneId) }));
+    //get ligneToPoint
+    const meetingPointsIds = [...new Set(bus.reduce((prev, item) => [...prev, ...item.meetingPointsIds], []))];
+    const lignesToPoint = await allRecords("lignetopoint", { bool: { must: { terms: { "meetingPointId.keyword": meetingPointsIds } } } });
+    data = data.map((item) => ({ ...item, ligneToPoint: lignesToPoint?.find((e) => e.meetingPointId === item.meetingPointId && e.lineId === item.ligneId) }));
+    //get meetingPoint
+    const meetingPoints = await allRecords("pointderassemblement", { bool: { must: { ids: { values: meetingPointsIds } } } });
+    data = data.map((item) => ({ ...item, meetingPoint: meetingPoints?.find((e) => e._id.toString() === item.meetingPointId) }));
+
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
