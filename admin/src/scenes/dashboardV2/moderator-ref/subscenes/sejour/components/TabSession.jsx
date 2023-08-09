@@ -88,7 +88,7 @@ export default function TabSession({ sessionList, filters }) {
     if (!data) return setNoResult(true);
 
     const sessionCenter = data;
-    console.log(data, Object.values(data));
+    console.log(Object.values(data));
 
     setNoResult(false);
     setPage(0);
@@ -102,6 +102,7 @@ export default function TabSession({ sessionList, filters }) {
   useEffect(() => {
     if (sessionList) {
       getYoungsBySession(sessionList);
+      console.log(sessionList)
     }
   }, [sessionList]);
 

@@ -11,7 +11,7 @@ const CohortModel = require("../../models/cohort");
 const ApplicationModel = require("../../models/application");
 const Joi = require("joi");
 const { getKeyNumbers } = require("../../services/stats.service");
-const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
+// const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 
 router.post("/default", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -834,7 +834,6 @@ router.post("/key-numbers", passport.authenticate(["referent"], { session: false
   }
 });
 
-
 // router.post("/session-data", async (req, res) => {
 //   try {
 //     const { filters, sessionList } = req.body;
@@ -947,6 +946,7 @@ const processESResponse = (response, sessionList) => {
     return acc;
   }, {});
 
+  // mettre ce process dans le front:
   const sessionByCenter = sessionList.reduce((acc, session) => {
     if (!acc[session.cohesionCenterId]) {
       acc[session.cohesionCenterId] = {
@@ -967,9 +967,13 @@ const processESResponse = (response, sessionList) => {
     return acc;
   }, {});
 
-  return  Object.values(sessionByCenter) ;
+  return Object.values(sessionByCenter);
 };
 
+// passer une liste d'id plutot que toute les session.
+// essayer de mettre ce call dans le parent.
+// aller sur young moderator/sejour
+//  faire un dossier dashboard avec (sesssion ,young, etc..)
 router.post("/session-data", async (req, res) => {
   try {
     const { filters, sessionList } = req.body;
@@ -977,15 +981,14 @@ router.post("/session-data", async (req, res) => {
     // Validate your request body here similar to joiElasticSearch from your previous code
 
     const esRequestBody = buildESRequestBody(filters, sessionList);
-    const response = await esClient.search({ index: "young", body: esRequestBody});
+    const response = await esClient.search({ index: "young", body: esRequestBody });
     // console.log(esRequestBody);
     // console.log(response);
     // if (!response?.length) return res.status(404).send({ error: ERRORS.NOT_FOUND });
     if (!response?.body?.aggregations?.session) return res.status(404).send({ error: ERRORS.NOT_FOUND });
 
     const sessionByCenter = processESResponse(response, sessionList);
-    console.log(sessionByCenter);
-    return res.status(200).send({sessionByCenter});
+    return res.status(200).send(sessionByCenter);
   } catch (error) {
     console.error("Erreur dans /session-data:", error);
     res.status(500).send({ error: ERRORS.SERVER_ERROR, details: error.message });
