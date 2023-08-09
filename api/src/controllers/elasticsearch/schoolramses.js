@@ -115,4 +115,59 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   }
 });
 
+router.post("/public/search", async (req, res) => {
+  try {
+    const { body } = req;
+
+    const filterFields = ["country.keyword", "city.keyword"];
+    const { queryFilters } = joiElasticSearch({ filterFields, body });
+
+    const query = {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [],
+        },
+      },
+      size: ES_NO_LIMIT,
+    };
+
+    if (queryFilters?.country) {
+      query.query.bool.filter.push({
+        terms: {
+          "country.keyword": queryFilters.country,
+        },
+      });
+    }
+
+    if (queryFilters?.city) {
+      query.query.bool.filter.push({
+        terms: {
+          "city.keyword": queryFilters.city,
+        },
+      });
+    }
+
+    if (req.query.aggsByCountries) {
+      query.size = 0;
+      query.aggs = {
+        countries: { terms: { field: "country.keyword", size: ES_NO_LIMIT } },
+      };
+    }
+
+    if (req.query.aggsByCities) {
+      query.size = 0;
+      query.aggs = {
+        cities: { terms: { field: "city.keyword", size: ES_NO_LIMIT } },
+      };
+    }
+
+    const response = await esClient.msearch({ index: "schoolramses", body: buildNdJson({ index: "schoolramses", type: "_doc" }, query) });
+    return res.status(200).send(response.body);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;
