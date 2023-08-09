@@ -196,6 +196,10 @@ const ReactiveList = ({ cohort, history }) => {
     },
   ].filter((e) => e);
 
+  React.useEffect(() => {
+    if (!selectedFilters.cohort) setSelectedFilters({ ...selectedFilters, ["cohort"]: { filter: [cohort] } });
+  }, [selectedFilters]);
+
   return (
     <>
       <div className="flex flex-1">
