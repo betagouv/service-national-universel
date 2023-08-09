@@ -253,7 +253,7 @@ export default function CenterYoungIndex() {
   };
 
   const exportData = async () => {
-    const data = await api.post(`/elasticsearch/young/by-session/${focusedSession._id}/export`, {
+    const data = await api.post(`/elasticsearch/young/by-session/${focusedSession._id}/export?needSchoolInfo=true`, {
       filters: Object.entries(filter).reduce((e, [key, value]) => {
         if (value.filter.length === 1 && value.filter[0] === "") return e;
         return { ...e, [key]: value.filter.map((e) => String(e)) };
@@ -593,12 +593,10 @@ const transformData = async ({ data, centerId }) => {
   let all = data;
   const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
   if (schoolsId?.length) {
-    const body = {
+    const { responses } = await api.esQuery("schoolramses", {
       query: { bool: { must: { ids: { values: schoolsId } } } },
       size: ES_NO_LIMIT,
-    };
-    const { responses } = await api.post("/es/schoolramses/_msearch", body);
-
+    });
     if (responses.length) {
       const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
       all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));

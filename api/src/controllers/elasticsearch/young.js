@@ -469,6 +469,34 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       size,
     });
 
+    // if (req.query.needSchoolInfo) {
+    //   let schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+    //   let all = data;
+
+    //   if (schoolsId.length) {
+    //     let schoolResponse;
+
+    //     if (req.params.action === "export") {
+    //       schoolResponse = await allRecords("schoolramses", { bool: { must: { ids: { values: schoolsId } } } });
+    //       const schools = schoolResponse.map((s) => ({ _id: s._id, _source: s }));
+    //       all = data.map((item) => ({ ...item, esSchool: schools.find((e) => e._id === item.schoolId) }));
+    //     } else {
+    //       const esSchoolResponse = await esClient.msearch({
+    //         index: "schoolramses",
+    //         body: buildNdJson({ index: "schoolramses", type: "_doc" }, { bool: { must: { ids: { values: schoolsId } } } }),
+    //       });
+    //       schoolResponse = esSchoolResponse.body;
+
+    //       if (schoolResponse && schoolResponse.responses && schoolResponse.responses.length > 0) {
+    //         const schools = schoolResponse.responses[0]?.hits?.hits;
+    //         if (schools && schools.length) {
+    //           all = data.map((item) => ({ ...item, esSchool: schools.find((e) => e._id === item.schoolId) }));
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
+
     if (["export", "exportBus"].includes(req.params.action)) {
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
       return res.status(200).send({ ok: true, data: serializeYoungs(response) });
