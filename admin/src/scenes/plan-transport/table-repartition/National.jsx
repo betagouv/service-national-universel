@@ -52,45 +52,31 @@ export default function National() {
         await getRepartitionRegion();
 
         //get youngs by region
-        const bodyYoung = {
-          query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": cohort } }, { terms: { "status.keyword": ["VALIDATED"] } }] } },
-          aggs: {
-            region: { terms: { field: "region.keyword" } },
-          },
-          track_total_hits: true,
-          size: 0,
-        };
 
-        const { responses } = await API.esQuery("young", bodyYoung);
-        setYoungsByRegion(responses[0].aggregations.region.buckets);
+        const response = await API.post("/elasticsearch/young/search", {
+          filters: { cohort: [cohort], status: ["VALIDATED"] },
+        });
+        if (!response.responses.length) return toastr.error("Oups, une erreur est survenue lors de la récupération des volontaires");
+        setYoungsByRegion(response.responses[1].aggregations.region.names.buckets);
 
         //get places center by region
-        const bodyCohesionCenter = {
-          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohorts.keyword": [cohort] } }] } },
-          track_total_hits: true,
-          size: ES_NO_LIMIT,
-        };
 
-        const { responses: responsesCenter } = await API.esQuery("cohesioncenter", bodyCohesionCenter);
-        const centerDetail = responsesCenter[0].hits.hits.map((e) => new Object({ ...e._source, _id: e._id }));
+        const { ok, data } = await API.post("/elasticsearch/sessionphase1/export?needCohesionCenterInfo=true", {
+          filters: { cohort: [cohort] },
+        });
+        if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des centres");
 
-        const bodySession = {
-          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohesionCenterId.keyword": centerDetail.map((c) => c._id) } }, { term: { "cohort.keyword": cohort } }] } },
-          track_total_hits: true,
-          size: ES_NO_LIMIT,
-        };
-
-        const { responses: responsesSession } = await API.esQuery("sessionphase1", bodySession);
-        const sessionsDetail = responsesSession[0].hits.hits.map((e) => e._source);
-
-        const sessionPlacesBycohesionCenterRegion = sessionsDetail.reduce((acc, session) => {
-          const region = centerDetail.find((c) => c._id === session.cohesionCenterId).region;
-          if (!acc[region]) acc[region] = 0;
-          acc[region] += session.placesTotal;
+        const sessionPlacesBycohesionCenterRegion = data.reduce((acc, item) => {
+          const { region, placesTotal } = item._source;
+          if (!acc[region]) {
+            acc[region] = 0;
+          }
+          acc[region] += placesTotal;
           return acc;
         }, {});
 
         setPlacesCenterByRegion(sessionPlacesBycohesionCenterRegion);
+
         setLoadingQuery(false);
       } catch (e) {
         capture(e);

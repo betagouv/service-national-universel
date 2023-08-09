@@ -36,45 +36,17 @@ export function InTable({ region, cohort }) {
         });
         const inRegion = filteredData.map((e) => e.fromRegion);
 
-        const bodyYoung = {
-          query: {
-            bool: {
-              must: { match_all: {} },
-              filter: [{ term: { "cohort.keyword": cohort } }, { terms: { "status.keyword": ["VALIDATED"] } }, { terms: { "region.keyword": inRegion } }],
-            },
-          },
-          aggs: {
-            department: { terms: { field: "department.keyword" } },
-          },
-          track_total_hits: true,
-          size: 0,
-        };
+        const { ok: res, data: centers } = await API.post("/elasticsearch/cohesioncenter/export?needSessionPhase1Info=true", {
+          filters: { cohorts: [cohort], region: [region] },
+        });
+        if (!res) return toastr.error("Oups, une erreur est survenue lors de la récupération des centres");
 
-        const { responses } = await API.esQuery("young", bodyYoung);
-        setYoungsByDepartment(responses[0].aggregations.department.buckets);
+        setCenterTotal(centers.length);
 
-        const bodyCohesionCenter = {
-          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohorts.keyword": [cohort] } }, { term: { "region.keyword": region } }] } },
-          track_total_hits: true,
-          size: ES_NO_LIMIT,
-        };
-
-        const { responses: responsesCenter } = await API.esQuery("cohesioncenter", bodyCohesionCenter);
-        const centerDetail = responsesCenter[0].hits.hits.map((e) => new Object({ ...e._source, _id: e._id }));
-        setCenterTotal(centerDetail.length);
-
-        const bodySession = {
-          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohesionCenterId.keyword": centerDetail.map((c) => c._id) } }, { term: { "cohort.keyword": cohort } }] } },
-          track_total_hits: true,
-          size: ES_NO_LIMIT,
-        };
-
-        const { responses: responsesSession } = await API.esQuery("sessionphase1", bodySession);
-        const sessionsDetail = responsesSession[0].hits.hits.map((e) => e._source);
-
-        const placesSessionTotal = sessionsDetail.reduce((acc, session) => {
-          acc += session.placesTotal;
-          return acc;
+        const placesSessionTotal = centers.reduce((acc, item) => {
+          const cohortSessions = item.sessionsPhase1.filter((session) => session.cohort === cohort);
+          const cohortPlacesTotal = cohortSessions.reduce((total, session) => total + session.placesTotal, 0);
+          return acc + cohortPlacesTotal;
         }, 0);
 
         setPlacesTotal(placesSessionTotal);

@@ -525,14 +525,14 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
       //School
       if (exportFields.includes("schoolId")) {
-        const schoolIds = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+        const schoolIds = [...new Set(data.map((item) => item.schoolId).filter(Boolean))];
         const schools = await allRecords("schoolramses", { bool: { must: { ids: { values: schoolIds } } } });
         data = data.map((item) => ({ ...item, school: schools?.find((e) => e._id.toString() === item.schoolId) }));
       }
 
       //center
       if (exportFields.includes("cohesionCenterId")) {
-        const centerIds = [...new Set(data.map((item) => item.cohesionCenterId).filter((e) => e))];
+        const centerIds = [...new Set(data.map((item) => item.cohesionCenterId).filter(Boolean))];
         const centers = await allRecords("cohesioncenter", { bool: { must: { ids: { values: centerIds } } } });
         data = data.map((item) => ({ ...item, center: centers?.find((e) => e._id.toString() === item.cohesionCenterId) }));
       }
@@ -540,7 +540,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       //full info bus
       if (exportFields.includes("ligneId")) {
         //get bus
-        const busIds = [...new Set(data.map((item) => item.ligneId).filter((e) => e))];
+        const busIds = [...new Set(data.map((item) => item.ligneId).filter(Boolean))];
         const bus = await allRecords("lignebus", { bool: { must: { ids: { values: busIds } } } });
         data = data.map((item) => ({ ...item, bus: bus?.find((e) => e._id.toString() === item.ligneId) }));
         //get ligneToPoint
