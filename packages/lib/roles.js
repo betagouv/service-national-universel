@@ -638,8 +638,6 @@ function canSearchInElasticSearch(actor, index) {
     return [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (index === "modificationbus") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-  } else if (index === "young-having-meeting-point-in-geography") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
   } else if (index === "young-by-school") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (index === "young") {

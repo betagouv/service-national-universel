@@ -307,20 +307,6 @@ router.post("/young-having-school-in-region/:view/:action(_msearch|export)", pas
   }
 });
 
-router.post("/young-having-meeting-point-in-geography/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { user, body } = req;
-
-    if (!canSearchInElasticSearch(user, "young-having-meeting-point-in-geography")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const response = await allRecords("young", body.query);
-    return res.status(200).send({ ok: true, data: serializeYoungs(response) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 // cohesionyoung is a special index, so we need to use the index "young" and specify a center ID.
 router.post("/cohesionyoung/:id/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
