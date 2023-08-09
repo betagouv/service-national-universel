@@ -11,7 +11,6 @@ const CohortModel = require("../../models/cohort");
 const ApplicationModel = require("../../models/application");
 const Joi = require("joi");
 const { getKeyNumbers } = require("../../services/stats.service");
-// const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 
 router.post("/default", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {

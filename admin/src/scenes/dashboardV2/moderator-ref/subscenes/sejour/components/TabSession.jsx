@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExternalLink } from "react-icons/hi";
 import { Link } from "react-router-dom";
-// import { ES_NO_LIMIT } from "snu-lib";
 import api from "../../../../../../services/api";
 import { currentFilterAsUrl } from "../../../../components/FilterDashBoard";
 
