@@ -256,19 +256,22 @@ router.post("/propose/:action(search|export)", passport.authenticate(["referent"
 router.post("/find/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const schema = Joi.object({
-      searchbar: Joi.string().allow(""),
-      domains: Joi.array().items(Joi.string().allow("")),
-      distance: Joi.number().integer().min(0).max(100).required(),
-      location: Joi.object({
-        lat: Joi.number().min(-90).max(90),
-        lon: Joi.number().min(-180).max(180),
-      }).required(),
-      isMilitaryPreparation: Joi.boolean(),
-      period: Joi.string().allow("", "CUSTOM", "VACANCES", "SCOLAIRE"),
-      subPeriod: Joi.array().items(Joi.string().allow("")),
-      fromDate: Joi.date(),
-      toDate: Joi.date(),
-      hebergement: Joi.boolean(),
+      filters: Joi.object({
+        searchbar: Joi.string().allow(""),
+        domains: Joi.array().items(Joi.string().allow("")),
+        distance: Joi.number().integer().min(0).max(100).required(),
+        location: Joi.object({
+          lat: Joi.number().min(-90).max(90),
+          lon: Joi.number().min(-180).max(180),
+        }).required(),
+        isMilitaryPreparation: Joi.boolean(),
+        period: Joi.string().allow("", "CUSTOM", "VACANCES", "SCOLAIRE"),
+        subPeriod: Joi.array().items(Joi.string().allow("")),
+        fromDate: Joi.date(),
+        toDate: Joi.date(),
+        hebergement: Joi.boolean(),
+      }),
+      page: Joi.number().integer().min(0).default(0),
     });
     const { error, value } = schema.validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -285,17 +288,19 @@ router.post("/find/", passport.authenticate("young", { session: false, failWithE
           ],
         },
       },
+      from: value.page * 20,
+      size: 20,
       sort: [{ createdAt: { order: "desc" } }],
     };
 
-    if (value.hebergement) {
+    if (value.filters.hebergement) {
       body.query.bool.must.push({
         bool: {
           should: [
             {
               geo_distance: {
-                distance: `${value.distance}km`,
-                location: value.location,
+                distance: `${value.filters.distance}km`,
+                location: value.filters.location,
               },
             },
             { term: { "hebergement.keyword": "true" } },
@@ -306,19 +311,19 @@ router.post("/find/", passport.authenticate("young", { session: false, failWithE
     } else {
       body.query.bool.must.push({
         geo_distance: {
-          distance: `${value.distance}km`,
-          location: value.location,
+          distance: `${value.filters.distance}km`,
+          location: value.filters.location,
         },
       });
     }
 
-    if (value.searchbar) {
+    if (value.filters.searchbar) {
       body.query.bool.must.push({
         bool: {
           should: [
             {
               multi_match: {
-                query: value.searchbar,
+                query: value.filters.searchbar,
                 fields: ["name^10", "structureName^5", "description", "actions", "city"],
                 type: "cross_fields",
                 operator: "and",
@@ -326,7 +331,7 @@ router.post("/find/", passport.authenticate("young", { session: false, failWithE
             },
             {
               multi_match: {
-                query: value.searchbar,
+                query: value.filters.searchbar,
                 fields: ["name^10", "structureName^5", "description", "actions", "city"],
                 type: "phrase",
                 operator: "and",
@@ -334,7 +339,7 @@ router.post("/find/", passport.authenticate("young", { session: false, failWithE
             },
             {
               multi_match: {
-                query: value.searchbar,
+                query: value.filters.searchbar,
                 fields: ["name^10", "structureName^5", "description", "actions", "city"],
                 type: "phrase_prefix",
                 operator: "and",
@@ -346,16 +351,19 @@ router.post("/find/", passport.authenticate("young", { session: false, failWithE
       });
     }
 
-    if (value.domains?.length) body.query.bool.must.push({ terms: { "domains.keyword": value.domains } });
-    if (value.period) body.query.bool.must.push({ term: { "period.keyword": value.period } });
-    if (value.subPeriod?.length) body.query.bool.must.push({ terms: { "subPeriod.keyword": value.subPeriod } });
-    if (value.isMilitaryPreparation) body.query.bool.must.push({ term: { "isMilitaryPreparation.keyword": String(value.isMilitaryPreparation) } });
-    if (value.fromDate) body.query.bool.must.push({ range: { startAt: { gte: value.fromDate } } });
-    if (value.toDate) body.query.bool.must.push({ range: { endAt: { gte: value.toDate } } });
+    if (value.filters.domains?.length) body.query.bool.must.push({ terms: { "domains.keyword": value.filters.domains } });
+    if (value.filters.isMilitaryPreparation) body.query.bool.must.push({ term: { "isMilitaryPreparation.keyword": String(value.filters.isMilitaryPreparation) } });
+
+    if (["DURING_SCHOOL", "DURING_HOLIDAYS"].includes(value.filters.period)) body.query.bool.must.push({ term: { "period.keyword": value.filters.period } });
+    if (value.filters.period === "CUSTOM") {
+      if (value.filters.fromDate) body.query.bool.must.push({ range: { startAt: { gte: value.filters.fromDate } } });
+      if (value.filters.toDate) body.query.bool.must.push({ range: { endAt: { lte: value.filters.toDate } } });
+    }
+    if (value.filters.subPeriod?.length) body.query.bool.must.push({ terms: { "subPeriod.keyword": value.filters.subPeriod } });
 
     const results = await esClient.search({ index: "mission", body });
-
-    return res.status(200).send({ ok: true, data: results.body.hits.hits });
+    if (results.body.error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    return res.status(200).send({ ok: true, data: results.body.hits });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

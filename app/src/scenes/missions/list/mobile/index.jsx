@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect, useState } from "react";
-import CardMission from "./components/CardMission";
 import api from "../../../../services/api";
-import MissionSearchForm from "./components/MissionSearchForm";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import { capture } from "../../../../sentry";
+import { debounce } from "../../../../utils";
+import MissionFilters from "./components/MissionFilters";
+import MissionList from "./components/MissionList";
 
 export default function List() {
   const young = useSelector((state) => state.Auth.young);
-  const [data, setData] = useState([]);
+  const [data, setData] = useState();
   const [filters, setFilters] = useState({
     domains: [],
     distance: 50,
@@ -21,24 +22,13 @@ export default function List() {
     toDate: undefined,
     hebergement: false,
   });
-
-  const debounce = (fn, delay) => {
-    let timeOutId;
-    return function (...args) {
-      if (timeOutId) {
-        clearTimeout(timeOutId);
-      }
-      timeOutId = setTimeout(() => {
-        fn(...args);
-      }, delay);
-    };
-  };
+  const [page, setPage] = useState(0);
 
   const updateOnFilterChange = useCallback(
-    debounce(async (filters, setData) => {
+    debounce(async (filters, page, setData) => {
       try {
         if (!filters.location || !filters.distance) return;
-        const res = await api.post("/elasticsearch/mission/find", filters);
+        const res = await api.post("/elasticsearch/mission/find", { filters, page });
         setData(res.data);
       } catch (e) {
         capture(e);
@@ -49,8 +39,8 @@ export default function List() {
   );
 
   useEffect(() => {
-    updateOnFilterChange(filters, setData);
-  }, [filters]);
+    updateOnFilterChange(filters, page, setData);
+  }, [filters, page]);
 
   return (
     <div className="flex">
@@ -79,14 +69,8 @@ export default function List() {
           </div>
         </div>
         {/* END HEADER */}
-
-        <MissionSearchForm filters={filters} setFilters={setFilters} />
-
-        <div className="p-3">
-          {data?.map((mission) => (
-            <CardMission mission={mission._source} key={mission._id} youngLocation={young?.location} />
-          ))}
-        </div>
+        <MissionFilters filters={filters} setFilters={setFilters} />
+        {data ? <MissionList missions={data.hits} page={page} setPage={setPage} total={data.total.value} /> : null}
       </div>
     </div>
   );

@@ -36,7 +36,7 @@ import Select from "./Select.jsx";
 import Toggle from "./Toggle";
 import Modal from "../../../../../components/ui/modals/Modal";
 
-export default function MissionSearchForm({ filters, setFilters }) {
+export default function MissionFilters({ filters, setFilters }) {
   const young = useSelector((state) => state.Auth.young);
 
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
@@ -128,9 +128,9 @@ export default function MissionSearchForm({ filters, setFilters }) {
 
   const getLabelWhen = (when) => {
     switch (when) {
-      case "SCOLAIRE":
+      case "DURING_SCHOOL":
         return "Période extra-scolaire";
-      case "VACANCES":
+      case "DURING_HOLIDAYS":
         return "Pendant les vacances";
       case "CUSTOM":
         return "Choisir une période";
@@ -408,30 +408,30 @@ export default function MissionSearchForm({ filters, setFilters }) {
                         />
                         <PeriodeTab
                           Icon={AcademicCap}
-                          label={getLabelWhen("SCOLAIRE")}
-                          active={filters?.period === "SCOLAIRE"}
-                          name="SCOLAIRE"
-                          onClick={() => setFilters((prev) => ({ ...prev, period: "SCOLAIRE" }))}
+                          label={getLabelWhen("DURING_SCHOOL")}
+                          active={filters?.period === "DURING_SCHOOL"}
+                          name="DURING_SCHOOL"
+                          onClick={() => setFilters((prev) => ({ ...prev, period: "DURING_SCHOOL" }))}
                         />
                         <PeriodeTab
                           Icon={Sun}
-                          label={getLabelWhen("VACANCES")}
-                          active={filters?.period === "VACANCES"}
-                          name="VACANCES"
-                          onClick={() => setFilters((prev) => ({ ...prev, period: "VACANCES" }))}
+                          label={getLabelWhen("DURING_HOLIDAYS")}
+                          active={filters?.period === "DURING_HOLIDAYS"}
+                          name="DURING_HOLIDAYS"
+                          onClick={() => setFilters((prev) => ({ ...prev, period: "DURING_HOLIDAYS" }))}
                         />
                       </div>
-                      {filters.period === "SCOLAIRE" ? (
+                      {filters.period === "DURING_SCHOOL" ? (
                         <Select
-                          placeholder={getLabelWhen("SCOLAIRE")}
+                          placeholder={getLabelWhen("DURING_SCHOOL")}
                           options={MISSION_PERIOD_DURING_SCHOOL}
                           handleChangeValue={handleToggleChangePeriod}
                           value={filters.subPeriod}
                         />
                       ) : null}
-                      {filters.period === "VACANCES" ? (
+                      {filters.period === "DURING_HOLIDAYS" ? (
                         <Select
-                          placeholder={getLabelWhen("VACANCES")}
+                          placeholder={getLabelWhen("DURING_HOLIDAYS")}
                           options={MISSION_PERIOD_DURING_HOLIDAYS}
                           handleChangeValue={handleToggleChangePeriod}
                           value={filters.subPeriod}

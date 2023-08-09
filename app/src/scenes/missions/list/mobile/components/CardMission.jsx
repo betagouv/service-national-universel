@@ -9,7 +9,7 @@ import House from "../../../components/HouseIcon";
 
 export default function mission({ mission, youngLocation }) {
   return (
-    <Link to={`/mission/${mission._id}`} className="relative z-10 mb-4  flex justify-between overflow-hidden rounded-xl border-[#ffffff] bg-white p-3 pt-4 shadow-nina ">
+    <Link to={`/mission/${mission._id}`} className="relative mb-4 flex justify-between overflow-hidden rounded-xl border-[#ffffff] bg-white p-3 pt-4 shadow-nina ">
       <div className="flex flex-1">
         {/* icon */}
         <div className="mr-3 flex items-center">
