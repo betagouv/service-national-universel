@@ -1247,7 +1247,7 @@ router.put("/young/:id/removeMilitaryFile/:key", passport.authenticate("referent
   }
 });
 
-router.get("/exist/:emal", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/exist/:email", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ email: Joi.string().email().required() }).validate({ email: req.params.emal }, { stripUnknown: true });
 
