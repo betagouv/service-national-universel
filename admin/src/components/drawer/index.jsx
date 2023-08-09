@@ -304,25 +304,18 @@ const Drawer = (props) => {
   }, [history]);
 
   useEffect(() => {
-    try {
-      let query = undefined;
-      if (user.role === ROLES.ADMIN) query = {};
-      else if (user.role === ROLES.REFERENT_DEPARTMENT) query = { department: user.department, subject: "J'ai une question", role: "young", canal: "PLATFORM" };
-      else if (user.role === ROLES.REFERENT_REGION) query = { region: user.region, subject: "J'ai une question", role: "young", canal: "PLATFORM" };
-
-      const getTickets = async (query) => {
-        try {
-          const { data } = await api.post(`/zammood/ticketscount`, query);
-          props.dispatchTickets(data);
-        } catch (error) {
-          console.log(error);
-        }
-      };
-      if (query) getTickets(query);
-    } catch (e) {
-      console.log("Oups, une erreur s'est produite.");
-    }
-  }, []);
+    if (!user) return;
+    const getTickets = async () => {
+      try {
+        const { data } = await api.get("/zammood/ticketscount");
+        props.dispatchTickets(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getTickets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const handleClick = () => {
     if (open) {
