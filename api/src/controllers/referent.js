@@ -72,6 +72,7 @@ const {
   department2region,
   translateCohort,
   formatPhoneNumberFromPhoneZone,
+  canCheckIfRefExist,
 } = require("snu-lib");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
 
@@ -1240,6 +1241,24 @@ router.put("/young/:id/removeMilitaryFile/:key", passport.authenticate("referent
     young.set({ [value.key]: value.filesList });
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/exist/:email", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ email: Joi.string().email().required() }).validate({ email: req.params.emal }, { stripUnknown: true });
+
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    if (!canCheckIfRefExist(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const referent = await ReferentModel.findOne({ email: value.email });
+    if (referent) return res.status(200).send({ ok: true, data: true });
+    else return res.status(200).send({ ok: true, data: false });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
