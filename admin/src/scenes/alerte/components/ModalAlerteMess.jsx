@@ -146,8 +146,6 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
     setSelectedOptions([]);
   };
 
-  console.log(data);
-
   return (
     <div className="flex w-full flex-col gap-8 mb-5">
       <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
@@ -165,40 +163,37 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                   </div>
                   <div className={`flex flex-row items-center justify-center gap-3 ${editInfo && "cursor-pointer"}`}>
                     <div
-                      tabIndex={0}
                       onKeyDown={(e) => {
                         if (e.key === " " || e.key === "Enter") {
                           editInfo && setData({ ...data, priority: "normal" });
                         }
                       }}
                       onClick={() => editInfo && setData({ ...data, priority: "normal" })}>
-                      <CheckBox value={data?.priority === "normal"} />
+                      <CheckBox value={data?.priority === "normal"} editInfo={editInfo} />
                     </div>
                     <div className="font-sm text-gray-900">normal</div>
                   </div>
                   <div className={`flex flex-row items-center justify-center gap-3 ${editInfo && "cursor-pointer"}`}>
                     <div
-                      tabIndex={0}
                       onKeyDown={(e) => {
                         if (e.key === " " || e.key === "Enter") {
                           editInfo && setData({ ...data, priority: "important" });
                         }
                       }}
                       onClick={() => editInfo && setData({ ...data, priority: "important" })}>
-                      <CheckBox value={data?.priority === "important"} />
+                      <CheckBox value={data?.priority === "important"} editInfo={editInfo} />
                     </div>
                     <div className="font-sm text-gray-900">important</div>
                   </div>
                   <div className={`flex flex-row items-center justify-center gap-3 ${editInfo && "cursor-pointer"}`}>
                     <div
-                      tabIndex={0}
                       onKeyDown={(e) => {
                         if (e.key === " " || e.key === "Enter") {
                           editInfo && setData({ ...data, priority: "urgent" });
                         }
                       }}
                       onClick={() => editInfo && setData({ ...data, priority: "urgent" })}>
-                      <CheckBox value={data?.priority === "urgent"} />
+                      <CheckBox value={data?.priority === "urgent"} editInfo={editInfo} />
                     </div>
                     <div className="font-sm text-gray-900">urgent</div>
                   </div>
@@ -286,9 +281,6 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                     <button onClick={onSubmitInfo} className="border border-blue-600 bg-blue-600 text-white text-sm w-[226px] h-10 rounded-lg" disabled={!editInfo || isLoading}>
                       Valider
                     </button>
-                    <button onClick={() => setIsNew(false)} className="border border-red-500 text-red-500 text-sm w-[226px] h-10 rounded-lg" disabled={isLoading}>
-                      Supprimer ce message
-                    </button>
                   </>
                 ) : (
                   <>
@@ -314,7 +306,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
   );
 }
 
-const CheckBox = ({ value }) => {
+const CheckBox = ({ value, editInfo }) => {
   return (
     <>
       {value ? (
@@ -327,7 +319,7 @@ const CheckBox = ({ value }) => {
           role="checkbox"
           aria-label="checkbox-checked"
           aria-checked={true}
-          tabIndex="0">
+          tabIndex={editInfo ? 0 : 1}>
           <rect width="16" height="16" rx="8" fill="#2563EB" />
           <circle cx="8" cy="8" r="3" fill="white" />
         </svg>
@@ -341,7 +333,7 @@ const CheckBox = ({ value }) => {
           role="checkbox"
           aria-label="checkbox-not-checked"
           aria-checked={false}
-          tabIndex="0">
+          tabIndex={editInfo ? 0 : 1}>
           <rect x="0.5" y="0.5" width="15" height="15" rx="7.5" fill="white" />
           <rect x="0.5" y="0.5" width="15" height="15" rx="7.5" stroke="#D1D5DB" />
         </svg>
