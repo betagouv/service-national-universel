@@ -4,7 +4,6 @@ import {
   academyList,
   COHORTS,
   departmentToAcademy,
-  ES_NO_LIMIT,
   region2department,
   regionList,
   ROLES,
