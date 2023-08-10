@@ -48,7 +48,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     } else {
       const esReponse = await esClient.msearch({ index: "sessionphase1", body: buildNdJson({ index: "sessionphase1", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       response = esReponse.body;
-      sessionphase1 = response?.responses[0]?.hits?.hits;
+      sessionphase1 = response?.responses[0]?.hits?.hits || [];
     }
 
     if (req.query.needCohesionCenterInfo) {
