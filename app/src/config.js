@@ -6,7 +6,7 @@ let appURL = "http://localhost:8081";
 // knowledgeBase URL
 let supportURL = "http://localhost:8084";
 let maintenance = false;
-let SENTRY_URL = "https://c5165ba99b4f4f2d8f1d4c0b16a654db@sentry.selego.co/14";
+let SENTRY_URL = "";
 let SENTRY_TRACING_SAMPLE_RATE = 1.0;
 let SENTRY_SESSION_SAMPLE_RATE = 1.0;
 let SENTRY_ON_ERROR_SAMPLE_RATE = 1.0;
