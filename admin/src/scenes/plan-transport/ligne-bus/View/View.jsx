@@ -43,10 +43,9 @@ export default function View(props) {
       }
       setData(reponseBus);
 
-      const response = await api.post("/elasticsearch/young/search", {
-        filters: { ligneId: [id] },
-      });
-      setNbYoung(response.responses[0].hits.total.value);
+      const responseYoungs = await api.post(`/elasticsearch/young/in-bus/${String(id)}/search`, { filters: {} });
+
+      setNbYoung(responseYoungs.responses[0].hits.total.value);
 
       await getCohortDetails(reponseBus.cohort);
     } catch (e) {
