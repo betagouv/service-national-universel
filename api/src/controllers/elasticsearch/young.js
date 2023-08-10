@@ -469,40 +469,42 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       size,
     });
 
+    let response;
+
+    if (["export", "exportBus"].includes(req.params.action)) {
+      const data = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+      let schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+      let all = data;
+
+      if (schoolsId.length) {
+        const schoolResponse = await allRecords("schoolramses", { bool: { must: { ids: { values: schoolsId } } } });
+        const schools = schoolResponse.map((s) => ({ _id: s._id, _source: s }));
+        all = data.map((item) => ({ ...item, esSchool: schools.find((e) => e._id === item.schoolId) }));
+      }
+
+      response = { ok: true, data: serializeYoungs(all) };
+    }
+
     if (req.query.needSchoolInfo) {
       const data = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
       let schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
       let all = data;
-      if (schoolsId.length) {
-        let schoolResponse;
-        if (req.params.action === "export") {
-          schoolResponse = await allRecords("schoolramses", { bool: { must: { ids: { values: schoolsId } } } });
-          const schools = schoolResponse.map((s) => ({ _id: s._id, _source: s }));
-          all = data.map((item) => ({ ...item, esSchool: schools.find((e) => e._id === item.schoolId) }));
-        } else {
-          const esSchoolResponse = await esClient.msearch({
-            index: "schoolramses",
-            body: buildNdJson({ index: "schoolramses", type: "_doc" }, { bool: { must: { ids: { values: schoolsId } } } }),
-          });
-          schoolResponse = esSchoolResponse.body;
 
-          if (schoolResponse && schoolResponse.responses && schoolResponse.responses.length > 0) {
-            const schools = schoolResponse.responses[0]?.hits?.hits;
-            if (schools && schools.length) {
-              all = data.map((item) => ({ ...item, esSchool: schools.find((e) => e._id === item.schoolId) }));
-            }
-          }
-        }
+      if (schoolsId.length) {
+        const schoolResponse = await allRecords("schoolramses", { bool: { must: { ids: { values: schoolsId } } } });
+        const schools = schoolResponse.map((s) => ({ _id: s._id, _source: s }));
+        all = data.map((item) => ({ ...item, esSchool: schools.find((e) => e._id === item.schoolId) }));
       }
-      return res.status(200).send({ ok: true, data: serializeYoungs(all) });
+
+      response = { ok: true, data: serializeYoungs(all) };
     }
 
-    if (["exportBus"].includes(req.params.action)) {
-      const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+    if (["export", "exportBus"].includes(req.params.action)) {
+      return res.status(200).send(response);
     } else {
-      const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(serializeYoungs(response.body));
+      const esResponse = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      response = serializeYoungs(esResponse.body);
+      return res.status(200).send(response);
     }
   } catch (error) {
     capture(error);
