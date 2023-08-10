@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
 import SearchableSelect from "../../../components/SearchableSelect";
 import CreatableSelect from "../../../components/CreatableSelect";
-import { ES_NO_LIMIT } from "snu-lib";
 import Input from "./Input";
 import VerifyAddress from "./VerifyAddress";
 import GhostButton from "./GhostButton";
@@ -31,14 +30,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
 
   useEffect(() => {
     async function getCities() {
-      const body = {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "country.keyword": "FRANCE" } }] } },
-        size: 0,
-        aggs: {
-          cities: { terms: { field: "city.keyword", size: ES_NO_LIMIT } },
-        },
-      };
-      const { responses } = await api.esQuery("schoolramses", body);
+      const { responses } = await api.post("/elasticsearch/schoolramses/public/search?aggsByCities=true", { filters: { country: ["FRANCE"] } });
       setCities(responses[0].aggregations?.cities.buckets.map((e) => e.key).sort());
     }
     getCities();
@@ -80,12 +72,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
   useEffect(() => {
     async function getSchools() {
       if (!city) return;
-      const body = {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "country.keyword": "FRANCE" } }] } },
-        size: ES_NO_LIMIT,
-      };
-      body.query.bool.filter.push({ term: { "city.keyword": city } });
-      const { responses } = await api.esQuery("schoolramses", body);
+      const { responses } = await api.post("/elasticsearch/schoolramses/public/search", { filters: { country: ["FRANCE"], city: [city] } });
       setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
     }
     getSchools();
