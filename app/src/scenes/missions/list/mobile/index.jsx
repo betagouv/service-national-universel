@@ -24,7 +24,7 @@ export default function List() {
     period: young?.period || "",
     subPeriod: [],
     searchbar: "",
-    fromDate: new Date(),
+    fromDate: undefined,
     toDate: undefined,
     hebergement: false,
   });
