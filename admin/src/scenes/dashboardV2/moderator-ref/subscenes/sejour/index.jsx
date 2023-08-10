@@ -105,7 +105,7 @@ export default function Index() {
   }, [departmentOptions]);
 
   const queryCenter = async () => {
-    const { resultCenter, sessionByCenter, resultYoung } = await api.post("/elasticsearch/dashboard/moderator/sejour", {
+    const { resultCenter, sessionByCenter, resultYoung } = await api.post("/elasticsearch/dashboard/sejour/moderator", {
       filters: Object.fromEntries(Object.entries(selectedFilters)),
     });
     setDataCenter(resultCenter);
