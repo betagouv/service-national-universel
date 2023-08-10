@@ -31,12 +31,27 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
 
+    let response;
+    let cohesionCenters = [];
     if (req.params.action === "export") {
-      const response = await allRecords("cohesioncenter", hitsRequestBody.query);
+      response = await allRecords("cohesioncenter", hitsRequestBody.query);
+      cohesionCenters = response.map((s) => ({ _id: s._id, _source: s }));
+    } else {
+      const esReponse = await esClient.msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      response = esReponse.body;
+      cohesionCenters = response?.responses[0]?.hits?.hits || [];
+    }
+
+    if (req.query.needSessionPhase1Info) {
+      cohesionCenters = await populateWithSessionPhase1Info(cohesionCenters);
+      if (req.params.action === "export") response = cohesionCenters.map((s) => s._source);
+      else response.responses[0].hits.hits = cohesionCenters;
+    }
+
+    if (req.params.action === "export") {
       return res.status(200).send({ ok: true, data: response });
     } else {
-      const response = await esClient.msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(response);
     }
   } catch (error) {
     capture(error);
@@ -227,5 +242,16 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+const populateWithSessionPhase1Info = async (cohesionCenters) => {
+  const cohesionCentersIds = cohesionCenters.map((s) => s._id);
+  const sessionPhase1s = await allRecords("sessionphase1", { terms: { "cohesionCenterId.keyword": cohesionCentersIds } });
+  cohesionCenters = cohesionCenters.map((center) => ({
+    ...center,
+    _source: { ...center._source, sessionsPhase1: sessionPhase1s.filter((sp) => sp.cohesionCenterId.toString() === center._id.toString()) },
+  }));
+
+  return cohesionCenters;
+};
 
 module.exports = router;
