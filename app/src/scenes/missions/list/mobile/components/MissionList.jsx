@@ -1,16 +1,27 @@
 import React from "react";
-import { useSelector } from "react-redux";
 import CardMission from "./CardMission";
 import Pagination from "../../../../../components/nav/Pagination";
 
-export default function MissionList({ missions, page, setPage, total }) {
-  const young = useSelector((state) => state.Auth.young);
+export default function MissionList({ missions, page, setPage, total, setSort }) {
   return (
-    <div className="p-3">
-      <Pagination currentPage={page} count={total} pageCount={total} itemsPerPage={20} itemsCount={missions.length} changePage={setPage} className="my-4" />
+    <div>
+      <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+        <p>
+          {total} mission{total > 1 ? "s" : ""}
+        </p>
+        <select name="selectedSort" onChange={(e) => setSort(e.target.value)}>
+          <option value="geo" defaultValue>
+            La plus proche
+          </option>
+          <option value="date">La plus récente</option>
+          <option value="short">La plus courte</option>
+          <option value="long">La plus longue</option>
+        </select>
+      </div>
       {missions?.map((mission) => (
-        <CardMission mission={mission._source} key={mission._id} youngLocation={young?.location} />
+        <CardMission mission={mission} key={mission._id} />
       ))}
+      <Pagination currentPage={page} count={total} pageCount={total} itemsPerPage={20} itemsCount={missions.length} changePage={setPage} />
     </div>
   );
 }

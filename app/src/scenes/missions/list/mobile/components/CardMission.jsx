@@ -6,10 +6,14 @@ import { getDistance } from "../../../../../utils";
 import dayjs from "dayjs";
 import Calendar from "../../../../../assets/icons/Calendar";
 import House from "../../../components/HouseIcon";
+import { useSelector } from "react-redux";
 
-export default function mission({ mission, youngLocation }) {
+export default function mission({ mission: missionProp }) {
+  const mission = missionProp._source;
+  const young = useSelector((state) => state.Auth.young);
+
   return (
-    <Link to={`/mission/${mission._id}`} className="relative mb-4 flex justify-between overflow-hidden rounded-xl border-[#ffffff] bg-white p-3 pt-4 shadow-nina ">
+    <Link to={`/mission/${missionProp._id}`} className="relative mb-4  flex justify-between overflow-hidden rounded-xl border-[#ffffff] bg-white p-3 pt-4 shadow-nina ">
       <div className="flex flex-1">
         {/* icon */}
         <div className="mr-3 flex items-center">
@@ -37,11 +41,11 @@ export default function mission({ mission, youngLocation }) {
               </div>
             </div>
 
-            {youngLocation && mission.location ? (
+            {young.location && mission.location ? (
               <div className="flex items-center justify-end space-x-2">
                 <LocationMarker className="text-gray-400" />
                 <div className="text-xs font-bold text-gray-800">
-                  à {getDistance(youngLocation.lat, youngLocation.lon, mission.location.lat, mission.location.lon).toFixed(1)} km
+                  à {getDistance(young.location.lat, young.location.lon, mission.location.lat, mission.location.lon).toFixed(1)} km
                 </div>
                 {mission?.hebergement === "true" ? (
                   <>

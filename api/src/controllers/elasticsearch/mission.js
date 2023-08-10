@@ -272,9 +272,11 @@ router.post("/find/", passport.authenticate("young", { session: false, failWithE
         hebergement: Joi.boolean(),
       }),
       page: Joi.number().integer().min(0).default(0),
+      sort: Joi.string().allow("geo", "date", "short", "long").default("geo"),
     });
     const { error, value } = schema.validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { filters, page, sort } = value;
 
     let body = {
       query: {
@@ -288,19 +290,24 @@ router.post("/find/", passport.authenticate("young", { session: false, failWithE
           ],
         },
       },
-      from: value.page * 20,
+      from: page * 20,
       size: 20,
-      sort: [{ createdAt: { order: "desc" } }],
+      sort: [],
     };
 
-    if (value.filters.hebergement) {
+    if (sort === "geo") body.sort.push({ _geo_distance: { location: filters.location, order: "asc", unit: "km", mode: "min" } });
+    if (sort === "date") body.sort.push({ createdAt: { order: "desc" } });
+    if (sort === "short") body.sort.push({ "duration.keyword": { order: "asc" } });
+    if (sort === "long") body.sort.push({ "duration.keyword": { order: "desc" } });
+
+    if (filters.hebergement) {
       body.query.bool.must.push({
         bool: {
           should: [
             {
               geo_distance: {
-                distance: `${value.filters.distance}km`,
-                location: value.filters.location,
+                distance: `${filters.distance}km`,
+                location: filters.location,
               },
             },
             { term: { "hebergement.keyword": "true" } },
@@ -311,19 +318,19 @@ router.post("/find/", passport.authenticate("young", { session: false, failWithE
     } else {
       body.query.bool.must.push({
         geo_distance: {
-          distance: `${value.filters.distance}km`,
-          location: value.filters.location,
+          distance: `${filters.distance}km`,
+          location: filters.location,
         },
       });
     }
 
-    if (value.filters.searchbar) {
+    if (filters.searchbar) {
       body.query.bool.must.push({
         bool: {
           should: [
             {
               multi_match: {
-                query: value.filters.searchbar,
+                query: filters.searchbar,
                 fields: ["name^10", "structureName^5", "description", "actions", "city"],
                 type: "cross_fields",
                 operator: "and",
@@ -331,7 +338,7 @@ router.post("/find/", passport.authenticate("young", { session: false, failWithE
             },
             {
               multi_match: {
-                query: value.filters.searchbar,
+                query: filters.searchbar,
                 fields: ["name^10", "structureName^5", "description", "actions", "city"],
                 type: "phrase",
                 operator: "and",
@@ -339,7 +346,7 @@ router.post("/find/", passport.authenticate("young", { session: false, failWithE
             },
             {
               multi_match: {
-                query: value.filters.searchbar,
+                query: filters.searchbar,
                 fields: ["name^10", "structureName^5", "description", "actions", "city"],
                 type: "phrase_prefix",
                 operator: "and",
@@ -351,15 +358,15 @@ router.post("/find/", passport.authenticate("young", { session: false, failWithE
       });
     }
 
-    if (value.filters.domains?.length) body.query.bool.must.push({ terms: { "domains.keyword": value.filters.domains } });
-    if (value.filters.isMilitaryPreparation) body.query.bool.must.push({ term: { "isMilitaryPreparation.keyword": String(value.filters.isMilitaryPreparation) } });
+    if (filters.domains?.length) body.query.bool.must.push({ terms: { "domains.keyword": filters.domains } });
+    if (filters.isMilitaryPreparation) body.query.bool.must.push({ term: { "isMilitaryPreparation.keyword": String(filters.isMilitaryPreparation) } });
 
-    if (["DURING_SCHOOL", "DURING_HOLIDAYS"].includes(value.filters.period)) body.query.bool.must.push({ term: { "period.keyword": value.filters.period } });
-    if (value.filters.period === "CUSTOM") {
-      if (value.filters.fromDate) body.query.bool.must.push({ range: { startAt: { gte: value.filters.fromDate } } });
-      if (value.filters.toDate) body.query.bool.must.push({ range: { endAt: { lte: value.filters.toDate } } });
+    if (["DURING_SCHOOL", "DURING_HOLIDAYS"].includes(filters.period)) body.query.bool.must.push({ term: { "period.keyword": filters.period } });
+    if (filters.period === "CUSTOM") {
+      if (filters.fromDate) body.query.bool.must.push({ range: { startAt: { gte: filters.fromDate } } });
+      if (filters.toDate) body.query.bool.must.push({ range: { endAt: { lte: filters.toDate } } });
     }
-    if (value.filters.subPeriod?.length) body.query.bool.must.push({ terms: { "subPeriod.keyword": value.filters.subPeriod } });
+    if (filters.subPeriod?.length) body.query.bool.must.push({ terms: { "subPeriod.keyword": filters.subPeriod } });
 
     const results = await esClient.search({ index: "mission", body });
     if (results.body.error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

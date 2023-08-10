@@ -2,7 +2,7 @@ import React from "react";
 
 const PeriodeTab = ({ Icon, name, label, onClick, active }) => {
   return (
-    <div className="ml-2 mb-2" onClick={() => onClick(name)}>
+    <button className="ml-2 mb-2" onClick={() => onClick(name)}>
       {active ? (
         <div className="flex cursor-pointer items-center justify-center rounded-full border-[1px]  border-blue-600 py-1 px-2 font-medium text-blue-600 hover:border-blue-500 ">
           {label}
@@ -14,7 +14,7 @@ const PeriodeTab = ({ Icon, name, label, onClick, active }) => {
           {Icon ? <Icon className="ml-1 text-gray-500" /> : null}
         </div>
       )}
-    </div>
+    </button>
   );
 };
 

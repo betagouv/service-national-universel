@@ -1,21 +1,26 @@
 import React, { useCallback, useEffect, useState } from "react";
-import api from "../../../../services/api";
-import { toastr } from "react-redux-toastr";
+import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
+import api from "../../../../services/api";
 import { capture } from "../../../../sentry";
 import { debounce } from "../../../../utils";
 import MissionFilters from "./components/MissionFilters";
 import MissionList from "./components/MissionList";
+import Loader from "../../../../components/Loader";
 
 export default function List() {
   const young = useSelector((state) => state.Auth.young);
   const [data, setData] = useState();
+  const urlParams = new URLSearchParams(window.location.search);
+  const isMilitaryPreparation = urlParams.get("MILITARY_PREPARATION");
+
   const [filters, setFilters] = useState({
-    domains: [],
+    domains: young?.domains || [],
     distance: 50,
     location: young?.location || {},
-    isMilitaryPreparation: undefined,
-    period: "",
+    isMilitaryPreparation: isMilitaryPreparation || false,
+    period: young?.period || "",
     subPeriod: [],
     searchbar: "",
     fromDate: new Date(),
@@ -23,12 +28,13 @@ export default function List() {
     hebergement: false,
   });
   const [page, setPage] = useState(0);
+  const [sort, setSort] = useState("geo");
 
   const updateOnFilterChange = useCallback(
-    debounce(async (filters, page, setData) => {
+    debounce(async (filters, page, sort, setData) => {
       try {
-        if (!filters.location || !filters.distance) return;
-        const res = await api.post("/elasticsearch/mission/find", { filters, page });
+        if (!filters.location?.lat || !filters.distance) return;
+        const res = await api.post("/elasticsearch/mission/find", { filters, page, sort });
         setData(res.data);
       } catch (e) {
         capture(e);
@@ -39,39 +45,35 @@ export default function List() {
   );
 
   useEffect(() => {
-    updateOnFilterChange(filters, page, setData);
-  }, [filters, page]);
+    updateOnFilterChange(filters, page, sort, setData);
+  }, [filters, page, sort]);
 
   return (
-    <div className="flex">
-      <div className="w-full rounded-lg bg-white pb-12">
-        {/* BEGIN HEADER */}
-        <div className="flex justify-between p-3">
-          <div>
-            <h1 className="mb-3 text-2xl font-bold text-gray-800">Trouvez une mission d&apos;intérêt général</h1>
-            <div className="text-sm font-normal text-gray-700">
-              Vous devez réaliser vos 84 heures de mission dans l&apos;année qui suit votre séjour de cohésion.{" "}
-              <a
-                className="font-medium underline hover:text-gray-700 hover:underline"
-                href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"
-                target="_blank"
-                rel="noreferrer">
-                En savoir plus
-              </a>
-              .
-              <br />
-              Astuce : si les missions proposées ne correspondent pas à votre zone géographique, pensez à{" "}
-              <a className="font-medium underline hover:text-gray-700 hover:underline" href="/account" target="_blank" rel="noreferrer">
-                vérifier votre adresse
-              </a>
-              .
-            </div>
-          </div>
-        </div>
-        {/* END HEADER */}
-        <MissionFilters filters={filters} setFilters={setFilters} />
-        {data ? <MissionList missions={data.hits} page={page} setPage={setPage} total={data.total.value} /> : null}
+    <div className="bg-white p-[1rem] md:p-[2rem] md:m-10 md:rounded-xl md:shadow-xl">
+      {/* BEGIN HEADER */}
+      <div className="space-y-6">
+        <h1 className="text-2xl md:text-4xl font-bold text-gray-800">Trouvez une mission d&apos;intérêt général</h1>
+        <p className="text-sm font-normal text-gray-700">
+          Vous devez réaliser vos 84 heures de mission dans l&apos;année qui suit votre séjour de cohésion.{" "}
+          <a
+            className="font-medium underline hover:text-gray-700 hover:underline"
+            href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"
+            target="_blank"
+            rel="noreferrer">
+            En savoir plus
+          </a>
+          .
+          <br />
+          Astuce : si les missions proposées ne correspondent pas à votre zone géographique, pensez à{" "}
+          <Link className="font-medium underline hover:text-gray-700 hover:underline" to="/account">
+            vérifier votre adresse
+          </Link>
+          .
+        </p>
       </div>
+      {/* END HEADER */}
+      <MissionFilters filters={filters} setFilters={setFilters} />
+      {data ? <MissionList missions={data.hits} page={page} setPage={setPage} total={data.total.value} setSort={setSort} /> : <Loader />}
     </div>
   );
 }
