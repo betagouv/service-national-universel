@@ -402,7 +402,7 @@ export default function MissionFilters({ filters, setFilters }) {
                           setFilters((prev) => ({ ...prev, distance: e.target.value }));
                         }}
                       />
-                      <div className={`absolute  -mt-10 -ml-2 w-full  font-bold ${!marginDistance && " ml-1 flex justify-center"} `} style={{ left: `${marginDistance}px` }}>
+                      <div className={`absolute -mt-10 -ml-2 font-bold ${!marginDistance && "ml-1 flex justify-center"} `} style={{ left: `${marginDistance}px` }}>
                         {filters?.distance}km
                       </div>
                     </div>
