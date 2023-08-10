@@ -7,7 +7,6 @@ import { currentFilterAsUrl } from "../../../../components/FilterDashBoard";
 const PAGE_SIZE = 6;
 
 export default function TabSession({sessionByCenter, filters}) {
-  console.log(sessionByCenter, filters);
   const [sessionData, setSessionData] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [page, setPage] = React.useState(0);
@@ -23,9 +22,6 @@ export default function TabSession({sessionByCenter, filters}) {
       setTotal(0);
       return;
     }
-    // const data = await api.post("/elasticsearch/dashboard/sessionByCenter", { filters, sessionList });
-    // if (!data) return setNoResult(true);
-    // const sessionCenter = Object.values(data);
 
     setNoResult(false);
     setPage(0);
@@ -38,7 +34,6 @@ export default function TabSession({sessionByCenter, filters}) {
   useEffect(() => {
     if (sessionByCenter) {
       getYoungsBySession(sessionByCenter);
-      console.log(sessionByCenter)
     }
   }, [sessionByCenter]);
 
