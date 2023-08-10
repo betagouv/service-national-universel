@@ -38,33 +38,6 @@ class api {
       }
     });
   }
-  esQuery(index, body) {
-    const header = { index, type: "_doc" };
-    return fetch(`${apiURL}/es/${index}/_msearch`, {
-      retries: 3,
-      retryDelay: 1000,
-      retryOn: [502, 503, 504],
-      mode: "cors",
-      method: "POST",
-      redirect: "follow",
-      referrer: "no-referrer",
-      headers: { "Content-Type": "application/x-ndjson", Authorization: `JWT ${this.token}` },
-      body: [header, body].map((e) => `${JSON.stringify(e)}\n`).join(""),
-    })
-      .then((response) => {
-        if (response.ok === false && response.status === 401) {
-          if (window?.location?.pathname !== "/auth") window.location.href = "/auth?disconnected=1";
-          // We need to return responses to prevent the promise from rejecting.
-          return { responses: [] };
-        }
-        return response.json();
-      })
-      .catch((e) => {
-        capture(e, { extra: { body: body } });
-        console.error(e);
-        return { responses: [] };
-      });
-  }
 
   getTotal(response) {
     return (response && response.hits && response.hits.total) || 0;
