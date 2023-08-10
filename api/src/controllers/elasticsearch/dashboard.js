@@ -834,72 +834,7 @@ router.post("/key-numbers", passport.authenticate(["referent"], { session: false
   }
 });
 
-// router.post("/moderator/sejour", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
-//   try {
-//     if (req.user.role !== ROLES.ADMIN) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-//     const filterFields = ["statusPhase1", "region", "department", "cohorts", "academy", "status"];
-//     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
-//     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-//     const aggsFilter = {};
-//     if (queryFilters?.statusPhase1?.length) {
-//       aggsFilter.filter = {
-//         bool: {
-//           must: [],
-//           filter: [{ terms: { "statusPhase1.keyword": queryFilters?.statusPhase1?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) } }],
-//         },
-//       };
-//     }
-
-//     const body = {
-//       query: { bool: { must: { match_all: {} }, filter: [] } },
-//       aggs: {
-//         statusPhase1: { terms: { field: "statusPhase1.keyword" } },
-//         pdr: {
-//           ...aggsFilter,
-//           aggs: { names: { terms: { field: "hasMeetingInformation.keyword", missing: "NR", size: ES_NO_LIMIT } } },
-//         },
-//         participation: {
-//           ...aggsFilter,
-//           aggs: { names: { terms: { field: "youngPhase1Agreement.keyword", size: ES_NO_LIMIT } } },
-//         },
-//         precense: {
-//           ...aggsFilter,
-//           aggs: { names: { terms: { field: "cohesionStayPresence.keyword", missing: "NR", size: ES_NO_LIMIT } } },
-//         },
-//         JDM: {
-//           ...aggsFilter,
-//           aggs: { names: { terms: { field: "presenceJDM.keyword", missing: "NR", size: ES_NO_LIMIT } } },
-//         },
-//         depart: {
-//           ...aggsFilter,
-//           aggs: { names: { terms: { field: "departInform.keyword", size: ES_NO_LIMIT } } },
-//         },
-//         departMotif: {
-//           ...aggsFilter,
-//           aggs: { names: { terms: { field: "departSejourMotif.keyword", size: ES_NO_LIMIT } } },
-//         },
-//       },
-//       size: 0,
-//       track_total_hits: true,
-//     };
-
-//     if (queryFilters.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": queryFilters.region } });
-//     if (queryFilters.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": queryFilters.department } });
-//     if (queryFilters.cohorts?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": queryFilters.cohorts } });
-//     if (queryFilters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": queryFilters.academy } });
-//     if (queryFilters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": queryFilters.status } });
-
-//     const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
-//     return res.status(200).send(response.body);
-//   } catch (error) {
-//     capture(error);
-//     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-//   }
-// });
-
-router.post("/moderator/sessionAndCenter", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/moderator/sejour", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   const buildESRequestBodyForYoung = () => {
     const filterFields = ["statusPhase1", "region", "department", "cohorts", "academy", "status"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
@@ -1095,7 +1030,7 @@ router.post("/moderator/sessionAndCenter", passport.authenticate(["referent"], {
     return { resultCenter, responseSession };
   };
 
-  getCenterInfoFromYoungForSejourDashboard = async (responseSession, filters) => {
+  const getCenterInfoFromYoungForSejourDashboard = async (responseSession, filters) => {
     const sessionList = responseSession.body.hits.hits.map((e) => ({ ...e._source, _id: e._id }));
     const esRequestBody = buildESRequestBodyForSessionCenter(filters, sessionList);
     const response = await esClient.search({ index: "young", body: esRequestBody });
