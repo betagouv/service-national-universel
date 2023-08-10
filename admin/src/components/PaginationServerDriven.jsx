@@ -26,7 +26,7 @@ export default function PaginationServerDriven({
   const lastDisplayPage = Math.min(pageCount - 1, Math.max(displayedPages, currentPage));
   const firstDisplayPage = Math.max(lastDisplayPage - displayedPages + 1, 1);
   const lastDisplayItem = currentPage * itemsPerPage + itemsCount;
-  const lastPage = Math.floor(count / size);
+  const lastPage = Math.floor(count / size) || 0;
   let pages = [];
   const totalhits = currentPage * itemsPerPage + itemsCount;
   const actualHits = currentPage * itemsPerPage + 1;
@@ -120,7 +120,7 @@ export default function PaginationServerDriven({
         </div>
       ) : null}
       <div className="text-[12px] text-[#242526] font-bold">
-        {actualHits} <span className="font-normal">-</span> {totalhits} <span className="font-normal"> sur </span> {count === 10000 ? "plus de 10000" : count}
+        {actualHits} <span className="font-normal">-</span> {totalhits} <span className="font-normal"> sur </span> {count === 10000 ? "plus de 10000" : count || 0}
       </div>
       <div className="flex gap-1 items-center justify-center">
         <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-200 rounded-md border-solid">

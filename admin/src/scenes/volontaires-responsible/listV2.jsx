@@ -138,27 +138,9 @@ export default function List() {
 
   const getApplicationCount = async () => {
     try {
-      let body = {
-        query: { bool: { must: { match_all: {} } } },
-        aggs: {
-          all: { filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } } },
-          pending: {
-            filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } },
-            aggs: { pending: { filter: { terms: { "status.keyword": ["WAITING_VALIDATION"] } } } },
-          },
-          follow: {
-            filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } },
-            aggs: { follow: { filter: { terms: { "status.keyword": ["IN_PROGRESS", "VALIDATED"] } } } },
-          },
-        },
-        size: 0,
-        track_total_hits: true,
-      };
-
-      // aggs: { filter: [{ terms: { "missionId.keyword": missions.map((e) => e._id) } }] },
-      const resAggs = await api.esQuery("application", body);
-      if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
-      const aggs = resAggs.responses[0].aggregations;
+      const structureIds = [...new Set(missions.map((item) => item.structureId))].filter(Boolean);
+      const res = await api.post("/elasticsearch/application/count-by-status", { filters: { structureId: structureIds } });
+      const aggs = res.responses[0].aggregations;
       setCountAll(aggs.all.doc_count);
       setCountFollow(aggs.follow.follow.doc_count);
       setCountPending(aggs.pending.pending.doc_count);
@@ -285,52 +267,7 @@ export default function List() {
 
   async function transform(data, values) {
     let all = data;
-    if (values && ["contact", "address", "location", "application", "status", "choices", "representative1", "representative2"].some((e) => values.includes(e))) {
-      const youngIds = [...new Set(data.map((item) => item.youngId))];
-      if (youngIds?.length) {
-        const { responses: responsesYoungs } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
-        if (responsesYoungs.length) {
-          const youngs = responsesYoungs[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = all.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
-        }
-      }
-    }
-
-    if (values && ["missionInfo", "missionLocation"].some((e) => values.includes(e))) {
-      const missionIds = [...new Set(data.map((item) => item.missionId))];
-      if (missionIds?.length) {
-        const { responses: responsesMissions } = await api.esQuery("mission", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: missionIds } } });
-        if (responsesMissions.length) {
-          const missions = responsesMissions[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = all.map((item) => ({ ...item, mission: missions.find((e) => e._id === item.missionId) || {} }));
-        }
-      }
-    }
-
-    if (values && ["missionTutor"].some((e) => values.includes(e))) {
-      const missionTutorIds = [...new Set(data.map((item) => item.tutorId))];
-      if (missionTutorIds?.length) {
-        const { responses: responsesTutors } = await api.esQuery("referent", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: missionTutorIds } } });
-        if (responsesTutors.length) {
-          const missionTutors = responsesTutors[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = all.map((item) => ({ ...item, tutor: missionTutors.find((e) => e._id === item.tutorId) || {} }));
-        }
-      }
-    }
-
-    if (values && ["structureInfo", "structureLocation"].some((e) => values.includes(e))) {
-      const structureIds = [...new Set(data.map((item) => item.structureId))];
-      if (structureIds?.length) {
-        const { responses: responsesStructures } = await api.esQuery("structure", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: structureIds } } });
-        if (responsesStructures.length) {
-          const structures = responsesStructures[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = all.map((item) => ({ ...item, structure: structures.find((e) => e._id === item.structureId) || {} }));
-        }
-      }
-    }
-
     const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
-
     return all.map((data) => {
       if (!data.young) data.young = {};
       if (!data.young.domains) data.young.domains = [];

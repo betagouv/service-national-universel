@@ -1,33 +1,32 @@
-import React, { useEffect, useState, useRef } from "react";
-import YoungHeader from "../../phase0/components/YoungHeader";
+import React, { useEffect, useRef, useState } from "react";
+import ReactLoading from "react-loading";
+import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+import ReactSelect from "react-select";
+import AsyncSelect from "react-select/async";
+import CreatableSelect from "react-select/creatable";
+import { translateApplication } from "snu-lib";
+import validator from "validator";
+import Toggle from "../../../components/Toggle";
+import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
+import { adminURL } from "../../../config";
 import api from "../../../services/api";
+import plausibleEvent from "../../../services/plausible";
 import {
-  ES_NO_LIMIT,
+  COHESION_STAY_END,
+  ENABLE_PM,
   MISSION_DOMAINS,
-  translate,
-  PERIOD,
   MISSION_PERIOD_DURING_HOLIDAYS,
   MISSION_PERIOD_DURING_SCHOOL,
-  regexPhoneFrenchCountries,
-  SENDINBLUE_TEMPLATES,
-  ENABLE_PM,
+  PERIOD,
   ROLES,
-  COHESION_STAY_END,
+  SENDINBLUE_TEMPLATES,
+  regexPhoneFrenchCountries,
+  translate,
 } from "../../../utils";
-import { adminURL } from "../../../config";
 import Field from "../../missions/components/Field";
-import AsyncSelect from "react-select/async";
-import ReactSelect from "react-select";
-import CreatableSelect from "react-select/creatable";
-import validator from "validator";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
-import { toastr } from "react-redux-toastr";
-import Toggle from "../../../components/Toggle";
-import plausibleEvent from "../../../services/plausible";
-import ReactLoading from "react-loading";
-import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
-import { translateApplication } from "snu-lib";
+import YoungHeader from "../../phase0/components/YoungHeader";
 
 export default function CustomMission({ young, onChange }) {
   const history = useHistory();
@@ -54,6 +53,7 @@ export default function CustomMission({ young, onChange }) {
     applicationStatus: "",
     isMilitaryPreparation: "false",
   });
+
   const [newTutor, setNewTutor] = useState({ firstName: "", lastName: "", email: "", phone: "" });
   const [selectedStructure, setSelectedStructure] = useState(null);
   const [creationTutor, setCreationTutor] = useState(false);
@@ -64,10 +64,9 @@ export default function CustomMission({ young, onChange }) {
   const [loading, setLoading] = useState(false);
 
   async function initReferents() {
-    const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": values.structureId } }] } }, size: ES_NO_LIMIT };
-    const { responses } = await api.esQuery("referent", body);
-    if (responses?.length) {
-      const responseReferents = responses[0].hits.hits.map((hit) => ({ label: hit._source.firstName + " " + hit._source.lastName, value: hit._id, tutor: hit._source }));
+    const { data } = await api.post("/elasticsearch/referent/export", { filters: { structureId: [values.structureId] } });
+    if (data?.length) {
+      const responseReferents = data.map((hit) => ({ label: hit.firstName + " " + hit.lastName, value: hit._id, tutor: hit }));
       if (!responseReferents.find((ref) => ref.value === values.tutorId)) {
         if (referentSelectRef.current?.select?.select) referentSelectRef.current.select.select.setValue("");
         setValues({ ...values, tutorId: "", tutorName: "" });
@@ -199,7 +198,9 @@ export default function CustomMission({ young, onChange }) {
     return data;
   };
   useEffect(() => {
-    initReferents();
+    if (values.structureId) {
+      initReferents();
+    }
   }, [values.structureId]);
   useEffect(() => {
     if (values.period.length === 0 || (values.period.length === 1 && values.period[0] === "WHENEVER")) {
@@ -677,45 +678,7 @@ export default function CustomMission({ young, onChange }) {
 }
 
 const fetchStructures = async (inputValue) => {
-  const body = {
-    query: { bool: { must: [] } },
-    size: 50,
-    track_total_hits: true,
-  };
-  if (inputValue) {
-    body.query.bool.must.push({
-      bool: {
-        should: [
-          {
-            multi_match: {
-              query: inputValue,
-              fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
-              type: "cross_fields",
-              operator: "and",
-            },
-          },
-          {
-            multi_match: {
-              query: inputValue,
-              fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
-              type: "phrase",
-              operator: "and",
-            },
-          },
-          {
-            multi_match: {
-              query: inputValue,
-              fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
-              type: "phrase_prefix",
-              operator: "and",
-            },
-          },
-        ],
-        minimum_should_match: "1",
-      },
-    });
-  }
-  const { responses } = await api.esQuery("structure", body);
+  const { responses } = await api.post("/elasticsearch/structure/search", { filters: { searchbar: [inputValue] }, size: 50 });
   return responses[0].hits.hits.map((hit) => {
     return { value: hit._source, _id: hit._id, label: hit._source.name, structure: hit._source };
   });
