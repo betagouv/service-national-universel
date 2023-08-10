@@ -1,3 +1,11 @@
+## [1.320.2](https://github.com/betagouv/service-national-universel/compare/v1.320.1...v1.320.2) (2023-08-10)
+
+
+### Bug Fixes
+
+* **app:** do not init sentry on local ([ea21ab5](https://github.com/betagouv/service-national-universel/commit/ea21ab5889978af831f90cd937261b5ae9639cf5))
+* **app:** remove useless esQuery service ([0abc9a6](https://github.com/betagouv/service-national-universel/commit/0abc9a6eb61977b07ecd09f40df6798aca60d62c))
+
 ## [1.320.1](https://github.com/betagouv/service-national-universel/compare/v1.320.0...v1.320.1) (2023-08-09)
 
 
