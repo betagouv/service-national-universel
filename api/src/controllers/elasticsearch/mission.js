@@ -59,7 +59,7 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
     const sortFields = ["createdAt", "placesLeft", "name.keyword"];
 
     // Body params validation
-    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, sort, error, size, exportFields } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { missionContextFilters, missionContextError } = await buildMissionContext(user);
@@ -100,18 +100,20 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
 
     if (req.params.action === "export") {
       response = await allRecords("mission", hitsRequestBody.query);
+      missions = response.map((e) => e._source);
     } else {
       response = await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
     }
 
-    // fill info
-    if (req.query.needReferentInfo) {
-      // get referent info for each mission
-      const tutorIds = [...new Set(missions.map((item) => item.tutorId).filter((e) => e))];
-    }
-
     if (req.params.action === "export") {
-      return res.status(200).send({ ok: true, data: serializeMissions(response) });
+      // fill the missions with the tutor info
+      if (exportFields.includes("missionTutor")) {
+        const tutorIds = [...new Set(missions.map((item) => item.tutorId).filter((e) => e))];
+        const tutors = await allRecords("referent", { query: { terms: { _id: tutorIds } } });
+        missions = missions.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
+      }
+
+      return res.status(200).send({ ok: true, data: serializeMissions(missions) });
     } else {
       return res.status(200).send(serializeMissions(response.body));
     }
