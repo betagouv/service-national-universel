@@ -39,7 +39,7 @@ const Select = ({ value, options, handleChangeValue, placeholder }) => {
                   onClick={() => {
                     handleChangeValue(option);
                   }}>
-                  <input type="checkbox" className="rounded-xl" checked={(value || []).includes(option)} />
+                  <input type="checkbox" className="rounded-xl" checked={(value || []).includes(option)} readOnly />
                   <div>{translate(option)}</div>
                 </div>
               </div>

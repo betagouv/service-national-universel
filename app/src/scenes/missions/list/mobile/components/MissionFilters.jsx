@@ -290,18 +290,18 @@ export default function MissionFilters({ filters, setFilters }) {
                 </div>
               )}
             </div>
-            <button
-              className="w-full rounded-xl border bg-white py-3.5 px-4"
-              onClick={() => {
-                setDropdownControlDistanceOpen(true);
-                setDropdownControlWhenOpen(false);
-                setKeyWordOpen(false);
-              }}>
+            <div className="rounded-xl border bg-white py-3.5 px-4">
               {!dropdownControlDistanceOpen && (
-                <div className="flex justify-between">
+                <button
+                  onClick={() => {
+                    setDropdownControlDistanceOpen(true);
+                    setDropdownControlWhenOpen(false);
+                    setKeyWordOpen(false);
+                  }}
+                  className="w-full flex justify-between">
                   <div className="font-bold">Distance maximum</div>
                   <div className="text-md text-gray-500">{filters?.distance || 100}km max</div>
-                </div>
+                </button>
               )}
               {dropdownControlDistanceOpen && (
                 <div>
@@ -416,7 +416,7 @@ export default function MissionFilters({ filters, setFilters }) {
                   </div>
                 </div>
               )}
-            </button>
+            </div>
             <div className="rounded-xl border bg-white py-3.5 ">
               {!dropdownControlWhenOpen && (
                 <button
