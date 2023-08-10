@@ -40,7 +40,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
 
-    let sessionphase1;
+    let sessionphase1 = [];
     let response;
     if (req.params.action === "export") {
       response = await allRecords("sessionphase1", hitsRequestBody.query, esClient, exportFields);
@@ -48,8 +48,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     } else {
       const esReponse = await esClient.msearch({ index: "sessionphase1", body: buildNdJson({ index: "sessionphase1", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       response = esReponse.body;
-      sessionphase1 =
-        response && response.responses && response.responses.length > 0 && response.responses[0].hits && response.responses[0].hits.hits ? response.responses[0].hits.hits : [];
+      sessionphase1 = response?.responses[0]?.hits?.hits;
     }
 
     if (req.query.needCohesionCenterInfo) {
