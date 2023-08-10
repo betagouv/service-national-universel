@@ -175,7 +175,6 @@ export default function Index() {
         </div>
         <div className="flex gap-4">
           <MoreInfo typology={dataCenter?.typology} domains={dataCenter?.domains} filter={selectedFilters} />
-          {/* <TabSession sessionList={sessionList} filters={selectedFilters} /> */}
           <TabSession sessionByCenter={sessionByCenter} filters={selectedFilters} />
         </div>
       </div>

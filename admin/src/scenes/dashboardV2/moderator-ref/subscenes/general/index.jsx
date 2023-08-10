@@ -111,7 +111,7 @@ export default function Index() {
 
   React.useEffect(() => {
     const updateStats = async (id) => {
-      const response = await api.post("/elasticsearch/dashboard/general/default", { filters: { meetingPointIds: [id], cohort: [] } });
+      const response = await api.post("/elasticsearch/dashboard/general/todo", { filters: { meetingPointIds: [id], cohort: [] } });
       const s = response.data;
       setStats(s);
     };
