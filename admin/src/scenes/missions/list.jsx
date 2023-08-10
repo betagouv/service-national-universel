@@ -146,35 +146,6 @@ export default function List() {
   async function transformCandidature(data, selectedFields) {
     let all = data;
 
-    // Add structure info
-    let structureCategorie = ["structureInfo", "structureLocation"];
-    if (structureCategorie.some((e) => selectedFields.includes(e))) {
-      const structureIds = [...new Set(data.map((item) => item.structureId).filter((e) => e))];
-      const queryStructure = {
-        query: { ids: { type: "_doc", values: structureIds } },
-        track_total_hits: true,
-        size: ES_NO_LIMIT,
-      };
-
-      let fieldsToExportsStructure = [];
-
-      selectedFields.forEach((selected) => {
-        if (structureCategorie.includes(selected)) {
-          let fields = missionCandidatureExportFields.find((f) => f.id === selected)?.fields;
-          fieldsToExportsStructure = [...fieldsToExportsStructure, ...fields];
-        }
-      });
-
-      const resultStructure = await api.post(`/es/structure/export`, {
-        ...queryStructure,
-        fieldsToExport: fieldsToExportsStructure,
-      });
-
-      if (resultStructure?.data?.length) {
-        all = all.map((item) => ({ ...item, structure: resultStructure?.data?.find((e) => e._id === item.structureId) }));
-      }
-    }
-
     let youngCategorie = ["representative2", "representative1", "location", "address", "imageRight", "contact", "identity", "status"];
     let fieldsToExportsYoung = [];
 

@@ -96,24 +96,28 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
     });
 
     let response;
-    let missions;
 
     if (req.params.action === "export") {
       response = await allRecords("mission", hitsRequestBody.query);
-      missions = response.map((e) => e._source);
     } else {
       response = await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
     }
 
     if (req.params.action === "export") {
       // fill the missions with the tutor info
-      if (exportFields.includes("missionTutor")) {
-        const tutorIds = [...new Set(missions.map((item) => item.tutorId).filter((e) => e))];
-        const tutors = await allRecords("referent", { query: { terms: { _id: tutorIds } } });
-        missions = missions.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
+      if (exportFields.includes("tutorId")) {
+        const tutorIds = [...new Set(response.map((item) => item.tutorId).filter((e) => e))];
+        const tutors = await allRecords("referent", { bool: { must: { ids: { values: tutorIds } } } });
+        response = response.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
       }
+      if (exportFields.includes("structureId")) {
+        const structureIds = [...new Set(response.map((item) => item.structureId).filter((e) => e))];
+        const structures = await allRecords("structure", { bool: { must: { ids: { values: structureIds } } } });
+        response = response.map((item) => ({ ...item, structure: structures?.find((e) => e._id === item.structureId) }));
+      }
+      console.log(response.length);
 
-      return res.status(200).send({ ok: true, data: serializeMissions(missions) });
+      return res.status(200).send({ ok: true, data: serializeMissions(response) });
     } else {
       return res.status(200).send(serializeMissions(response.body));
     }
