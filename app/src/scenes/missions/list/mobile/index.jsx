@@ -17,11 +17,11 @@ export default function List() {
   const isMilitaryPreparation = urlParams.get("MILITARY_PREPARATION");
 
   const [filters, setFilters] = useState({
-    domains: young?.domains || [],
+    domains: [],
     distance: 50,
     location: young?.location || {},
     isMilitaryPreparation: isMilitaryPreparation || false,
-    period: young?.period || "",
+    period: "",
     subPeriod: [],
     searchbar: "",
     fromDate: undefined,

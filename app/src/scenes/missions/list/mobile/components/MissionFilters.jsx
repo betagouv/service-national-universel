@@ -427,7 +427,7 @@ export default function MissionFilters({ filters, setFilters }) {
                     setKeyWordOpen(false);
                   }}>
                   <div className="font-bold">Période</div>
-                  <div className="text-md text-gray-500">N&apos;importe quand</div>
+                  <div className="text-md text-gray-500">{getLabelWhen(filters.period)}</div>
                 </button>
               )}
               {dropdownControlWhenOpen && (
