@@ -146,25 +146,6 @@ export default function List() {
   async function transformCandidature(data, selectedFields) {
     let all = data;
 
-    // Add tutor info
-    if (selectedFields.includes("missionTutor")) {
-      const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
-      if (tutorIds?.length) {
-        const queryTutor = {
-          query: { ids: { type: "_doc", values: tutorIds } },
-          track_total_hits: true,
-          size: ES_NO_LIMIT,
-        };
-        const resultTutor = await api.post(`/es/referent/export`, {
-          ...queryTutor,
-          fieldsToExport: missionCandidatureExportFields.find((f) => f.id === "missionTutor")?.fields,
-        });
-        if (resultTutor?.data?.length) {
-          all = data.map((item) => ({ ...item, tutor: resultTutor?.data?.find((e) => e._id === item.tutorId) }));
-        }
-      }
-    }
-
     // Add structure info
     let structureCategorie = ["structureInfo", "structureLocation"];
     if (structureCategorie.some((e) => selectedFields.includes(e))) {
