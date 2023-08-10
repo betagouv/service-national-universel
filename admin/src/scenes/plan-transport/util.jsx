@@ -111,24 +111,25 @@ function filterBusLinesByRole(lines, user) {
 
 export async function exportLigneBus(user, cohort) {
   try {
-    const { ok, data: youngs } = await API.post(`/elasticsearch/young/bus-in-cohort/${cohort}/export`);
-    if (!ok || !youngs?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
+    const { ok, data: pdt } = await API.post(`/elasticsearch/plandetransport/export?needYoungInfo=true`, { filters: { cohort: [cohort] } });
+    if (!ok || !pdt?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
+    console.log(pdt);
 
     let result = {};
 
-    for (const young of youngs) {
-      const tempYoung = young;
-      const youngMeetingPoint = young.meetingPoint;
-      const youngLigneBus = young.bus;
-
-      if (youngMeetingPoint) {
-        if (!result[youngLigneBus.busId]) {
-          result[youngLigneBus.busId] = {};
-          result[youngLigneBus.busId]["youngs"] = [];
+    for (const ligne of pdt) {
+      if (!ligne.youngs.length) continue;
+      if (!result[ligne.busId]) {
+        result[ligne.busId] = {};
+        result[ligne.busId]["youngs"] = [];
+      }
+      for (const young of ligne.youngs) {
+        if (young.meetingPoint) {
+          result[ligne.busId]["youngs"].push(young);
         }
-        result[youngLigneBus.busId]["youngs"].push(tempYoung);
       }
     }
+    console.log("result", result);
     // Transform data into array of objects before excel converts
     const formatedRep = Object.keys(result).map((key) => {
       return {
@@ -164,19 +165,19 @@ export async function exportLigneBus(user, cohort) {
             "ID centre": center._id,
             "Code centre (2022)": center.code2022,
             "Nom du centre": center.name,
-            "Adresse du centre": center.adress,
+            "Adresse du centre": center.address,
             "Ville du centre": center.city,
             "Département du centre": center.department,
             "Région du centre": center.region,
 
-            "Id du point de rassemblement": meetingPoint._id,
+            "Id du point de rassemblement": young.meetingPointId,
             "Nom du point de rassemblement": meetingPoint.name,
             "Adresse point de rassemblement": meetingPoint.address,
             "Ville du point de rassemblement": meetingPoint.city,
             "Département du point de rassemblement": meetingPoint.department,
             "Région du point de rassemblement": meetingPoint.region,
 
-            "Date aller": formatDateFRTimezoneUTC(ligneBus.departureDate),
+            "Date aller": formatDateFRTimezoneUTC(ligneBus.departuredDate),
             "Date retour": formatDateFRTimezoneUTC(ligneBus.returnDate),
 
             "Statut général": translate(young.status),

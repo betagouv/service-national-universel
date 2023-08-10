@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { canSearchLigneBus } = require("snu-lib");
+const { canSearchLigneBus, isPhoneNumberWellFormated } = require("snu-lib");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
@@ -10,6 +10,7 @@ const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 const { ROLES } = require("snu-lib");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const SessionPhase1Object = require("../../models/sessionPhase1");
+const { serializeYoungs } = require("../../utils/es-serializer");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -43,7 +44,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (!canSearchLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, sort, exportFields, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters
@@ -84,7 +85,55 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       size,
     });
     if (req.params.action === "export") {
-      const response = await allRecords("plandetransport", hitsRequestBody.query);
+      let response = await allRecords("plandetransport", hitsRequestBody.query);
+
+      //get young in bus
+      if (req.query.needYoungInfo) {
+        //get bus
+        const busIds = [...new Set(response.map((item) => item.busId).filter(Boolean))];
+        const bus = await allRecords("lignebus", { bool: { must: [{ terms: { "busId.keyword": busIds } }, { terms: { "cohort.keyword": req.body.filters.cohort } }] } });
+        const ligneIds = [...new Set(bus.map((item) => item._id).filter(Boolean))];
+        //get young
+        const youngs = await allRecords("young", { bool: { must: { terms: { "ligneId.keyword": ligneIds } } } });
+        const youngData = serializeYoungs(youngs);
+        //add ligneId to response
+        response = response.map((item) => {
+          const matchingBus = bus.find((e) => e.busId.toString() === item.busId);
+          return { ...item, ligneId: matchingBus ? matchingBus._id : null };
+        });
+        //add young to each PDT
+        response = response.map((item) => ({
+          ...item,
+          youngs: youngData.filter((e) => e.ligneId.toString() === item.ligneId),
+        }));
+        //add meetingPoint to each young
+        response = response.map((item) => ({
+          ...item,
+          youngs: item.youngs.map((element) => ({
+            ...element,
+            meetingPoint: item.pointDeRassemblements.find((e) => e.meetingPointId === element.meetingPointId),
+          })),
+        }));
+        //get center
+        const centerIds = [...new Set(response.map((item) => item.centerId).filter(Boolean))];
+        const centers = await allRecords("cohesioncenter", { bool: { must: { ids: { values: centerIds } } } });
+        //add center to each young
+        response = response.map((item) => ({
+          ...item,
+          youngs: item.youngs.map((element) => ({
+            ...element,
+            center: centers?.find((e) => e._id.toString() === element.cohesionCenterId),
+          })),
+        }));
+        //add bus to each young
+        response = response.map((item) => ({
+          ...item,
+          youngs: item.youngs.map((element) => ({
+            ...element,
+            bus: bus?.find((e) => e._id.toString() === element.ligneId),
+          })),
+        }));
+      }
       return res.status(200).send({ ok: true, data: response });
     } else {
       const response = await esClient.msearch({ index: "plandetransport", body: buildNdJson({ index: "plandetransport", type: "_doc" }, hitsRequestBody, aggsRequestBody) });

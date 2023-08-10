@@ -173,6 +173,7 @@ router.post("/export", passport.authenticate(["referent"], { session: false, fai
     const { hitsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
 
     const response = await allRecords("lignebus", hitsRequestBody.query, esClient, exportFields);
+    console.log(response);
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
