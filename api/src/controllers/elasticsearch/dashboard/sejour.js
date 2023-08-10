@@ -139,7 +139,6 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
   };
   // à partir de la query pour afficher les Centres on va créer notre objet à retourner au Front.
   const processESResponse = (response, sessionList) => {
-    if (!response?.body?.aggregations) return res.status(404).send({ error: ERRORS.NOT_FOUND, message:"Error in processESResponse"});
     const sessionAggreg = response.body.aggregations.session.buckets.reduce((acc, session) => {
       acc[session.key] = {
         total: session.doc_count,
@@ -225,7 +224,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
     const sessionList = responseSession.body.hits.hits.map((e) => ({ ...e._source, _id: e._id }));
     const esRequestBody = buildESRequestBodyForSessionCenter(filters, sessionList);
     const response = await esClient.search({ index: "young", body: esRequestBody });
-    if (!response?.body?.aggregations?.session) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "3" });
+    if (!response?.body?.aggregations?.session) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterInfoFromYoungForSejourDashboard" });
     const sessionByCenter = processESResponse(response, sessionList);
 
     return sessionByCenter;
