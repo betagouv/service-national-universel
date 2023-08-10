@@ -2,15 +2,16 @@ import React from "react";
 import { Link } from "react-router-dom";
 import LocationMarker from "../../../../../assets/icons/LocationMarker";
 import IconDomain from "../../../components/IconDomain";
-import { getDistance } from "../../../../../utils";
+import { getDistance, translate } from "../../../../../utils";
 import dayjs from "dayjs";
 import Calendar from "../../../../../assets/icons/Calendar";
 import House from "../../../components/HouseIcon";
-import { useSelector } from "react-redux";
 
-export default function mission({ mission: missionProp }) {
+export default function mission({ mission: missionProp, location }) {
   const mission = missionProp._source;
-  const young = useSelector((state) => state.Auth.young);
+  const tags = [];
+  mission.city && tags.push(mission.city + (mission.zip ? ` - ${mission.zip}` : ""));
+  mission.domains.forEach((d) => tags.push(translate(d)));
 
   return (
     <Link to={`/mission/${missionProp._id}`} className="relative mb-4  flex justify-between overflow-hidden rounded-xl border-[#ffffff] bg-white p-3 pt-4 shadow-nina ">
@@ -29,11 +30,17 @@ export default function mission({ mission: missionProp }) {
             <div className="text-base font-bold text-gray-900">{mission?.name}</div>
           </div>
           <div className="mt-2 flex w-full flex-1 flex-row items-center">
-            {/* 
-            
-
-            */}
-            <div className="mx-2 flex flex-1 flex-row items-center justify-start gap-2 text-xs  font-bold text-gray-900">
+            <div className="hidden md:flex flex-wrap gap-3">
+              {tags.map((e, i) => (
+                <div key={i} className="flex items-center justify-center rounded-full border-[1px] border-gray-200 px-4 py-1 text-xs text-gray-600">
+                  {e}
+                </div>
+              ))}
+              {mission?.isMilitaryPreparation === "true" ? (
+                <div className="flex items-center justify-center rounded-full border-[1px] border-gray-200 bg-blue-900 px-4 py-1 text-xs text-white">Préparation militaire</div>
+              ) : null}
+            </div>
+            <div className="mx-3 flex flex-1 flex-row items-center justify-start gap-2 text-xs  font-bold text-gray-900">
               <Calendar width={10} heigth={16} className=" min-h-[20px] min-w-[14px] text-gray-400" />
               <div className="flex flex-row flex-wrap gap-1">
                 <div className="whitespace-nowrap">du {dayjs(mission.startAt).format("DD/MM/YYYY")}</div>
@@ -41,12 +48,10 @@ export default function mission({ mission: missionProp }) {
               </div>
             </div>
 
-            {young.location && mission.location ? (
+            {location && mission.location ? (
               <div className="flex items-center justify-end space-x-2">
                 <LocationMarker className="text-gray-400" />
-                <div className="text-xs font-bold text-gray-800">
-                  à {getDistance(young.location.lat, young.location.lon, mission.location.lat, mission.location.lon).toFixed(1)} km
-                </div>
+                <div className="text-xs font-bold text-gray-800">à {getDistance(location.lat, location.lon, mission.location.lat, mission.location.lon).toFixed(1)} km</div>
                 {mission?.hebergement === "true" ? (
                   <>
                     {mission.hebergementPayant === "true" ? (

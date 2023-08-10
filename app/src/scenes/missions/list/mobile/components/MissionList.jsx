@@ -2,7 +2,7 @@ import React from "react";
 import CardMission from "./CardMission";
 import Pagination from "../../../../../components/nav/Pagination";
 
-export default function MissionList({ missions, page, setPage, total, setSort }) {
+export default function MissionList({ missions, page, setPage, total, location, setSort }) {
   return (
     <div>
       <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
@@ -19,7 +19,7 @@ export default function MissionList({ missions, page, setPage, total, setSort })
         </select>
       </div>
       {missions?.map((mission) => (
-        <CardMission mission={mission} key={mission._id} />
+        <CardMission mission={mission} location={location} key={mission._id} />
       ))}
       <Pagination currentPage={page} count={total} pageCount={total} itemsPerPage={20} itemsCount={missions.length} changePage={setPage} />
     </div>

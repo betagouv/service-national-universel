@@ -27,7 +27,7 @@ export default function Pagination({ pageCount, currentPage, count, itemsPerPage
   }
 
   return (
-    <div className="flex gap-2 my-4 items-center justify-between">
+    <div className="flex gap-2 mt-8 items-center justify-between">
       <div className="text-[12px] text-[#242526]">
         {currentPage * itemsPerPage + 1} - {currentPage * itemsPerPage + itemsCount} sur {count === 10000 ? "plus de 10000" : count}
       </div>
