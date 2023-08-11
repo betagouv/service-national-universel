@@ -20,7 +20,6 @@ import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import PanelV2 from "../../components/PanelV2";
 
 export default function UserPanel({ onChange, value }) {
-  if (!value) return <div />;
   const [structure, setStructure] = useState();
   const user = useSelector((state) => state.Auth.user);
   const dispatch = useDispatch();
@@ -35,7 +34,7 @@ export default function UserPanel({ onChange, value }) {
 
   useEffect(() => {
     (async () => {
-      if (!value.structureId) return;
+      if (!value?.structureId) return;
       const { ok, data, code } = await api.get(`/structure/${value.structureId}?withMissions=true&withTeam=true&withReferents=true`);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
       return setStructure(data);
@@ -99,6 +98,8 @@ export default function UserPanel({ onChange, value }) {
       return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
     }
   };
+
+  if (!value) return <div />;
   return (
     <PanelV2 open={value ? true : false} onClose={onChange} title={`${value.firstName} ${value.lastName}`}>
       <Panel>

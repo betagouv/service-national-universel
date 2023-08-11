@@ -224,14 +224,14 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
       else promises.push(async () => [structure]);
 
       const [responseWithMissions, responseWithReferents, responseWithTeam] = await Promise.all(promises);
-      const populatedSructures = [structure].map((item, index) => ({
+      const populatedStructures = [structure].map((item, index) => ({
         ...item,
         missions: responseWithMissions[index]?.missions || [],
         referents: responseWithReferents[index]?.referents || [],
         team: responseWithTeam[index]?.team || [],
       }));
 
-      structure = populatedSructures[0];
+      structure = populatedStructures[0];
     }
 
     return res.status(200).send({ ok: true, data: structure });
