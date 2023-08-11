@@ -24,11 +24,11 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
         bool: {
           must: { match_all: {} },
           filter: [
-            queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : [],
-            queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : [],
-            queryFilters.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : [],
-            queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : [],
-            queryFilters.status?.length ? { terms: { "status.keyword": queryFilters.status } } : [],
+            queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+            queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+            queryFilters.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
+            queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
+            queryFilters.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
           ].filter(Boolean),
         },
       },
@@ -72,10 +72,10 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
         bool: {
           must: { match_all: {} },
           filter: [
-            filters.region?.length ? [{ terms: { "region.keyword": filters.region } }] : [],
-            filters.department?.length ? [{ terms: { "department.keyword": filters.department } }] : [],
-            filters.academy?.length ? [{ terms: { "academy.keyword": filters.academy } }] : [],
-            filters.cohorts?.length ? [{ terms: { "cohorts.keyword": filters.cohorts } }] : [],
+            filters.region?.length ? { terms: { "region.keyword": filters.region } } : null,
+            filters.department?.length ? { terms: { "department.keyword": filters.department } } : null,
+            filters.academy?.length ? { terms: { "academy.keyword": filters.academy } } : null,
+            filters.cohorts?.length ? { terms: { "cohorts.keyword": filters.cohorts } } : null,
           ].filter(Boolean),
         },
       },
@@ -95,7 +95,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
       query: {
         bool: {
           must: { match_all: {} },
-          filter: [{ terms: { cohesionCenterId } }, filters.cohorts?.length ? [{ terms: { "cohort.keyword": filters.cohorts } }] : []].filter(Boolean),
+          filter: [{ terms: { cohesionCenterId } }, filters.cohorts?.length ? { terms: { "cohort.keyword": filters.cohorts } } : null].filter(Boolean),
         },
       },
       aggs: {
@@ -117,9 +117,9 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
         bool: {
           must: { match_all: {} },
           filter: [
-            filters.status?.length ? [{ terms: { "status.keyword": filters.status } }] : [],
-            filters.statusPhase1?.length ? [{ terms: { "statusPhase1.keyword": filters.statusPhase1 } }] : [],
-            sessionPhase1Id.length ? [{ terms: { "sessionPhase1Id.keyword": sessionPhase1Id } }] : [],
+            filters.status?.length ? { terms: { "status.keyword": filters.status } } : null,
+            filters.statusPhase1?.length ? { terms: { "statusPhase1.keyword": filters.statusPhase1 } } : null,
+            sessionPhase1Id.length ? { terms: { "sessionPhase1Id.keyword": sessionPhase1Id } } : null,
           ].filter(Boolean),
         },
       },
@@ -199,7 +199,8 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
   const getCenterAndSessionInfoForSejourDashboard = async (filters) => {
     const esRequestBodyForCohesion = buildESRequestBodyForCohesion(filters);
     const responseCohesion = await esClient.search({ index: "cohesioncenter", body: esRequestBodyForCohesion });
-    if (!responseCohesion?.body?.aggregations || !responseCohesion?.body?.hits) return res.status(404).send({ error: ERRORS.NOT_FOUND, message:"Error in getCenterAndSessionInfoForSejourDashboard"});
+    if (!responseCohesion?.body?.aggregations || !responseCohesion?.body?.hits)
+      return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterAndSessionInfoForSejourDashboard" });
     let resultCenter = {};
     resultCenter.typology = responseCohesion.body.aggregations.typology.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
     resultCenter.domains = responseCohesion.body.aggregations.domains.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
@@ -209,7 +210,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
     const cohesionCenterId = responseCohesion.body.hits.hits.map((e) => e._id);
     const esRequestForSession = buildESRequestBodyForSession(cohesionCenterId, filters);
     const responseSession = await esClient.search({ index: "sessionphase1", body: esRequestForSession });
-    if (!responseSession?.body?.aggregations) return res.status(404).send({ error: ERRORS.NOT_FOUND, message:"Error in getCenterAndSessionInfoForSejourDashboard" });
+    if (!responseSession?.body?.aggregations) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterAndSessionInfoForSejourDashboard" });
     resultCenter.placesTotalSession = responseSession.body.aggregations.placesTotal.value;
     resultCenter.placesLeftSession = responseSession.body.aggregations.placesLeft.value;
     resultCenter.status = responseSession.body.aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
@@ -220,7 +221,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
   };
   // Dans cette fonction on utilise notre Query Session Center afin de créer notre objet pour afficher les centres sur le Front.
   const getCenterInfoFromYoungForSejourDashboard = async (responseSession, filters) => {
-    if (!responseSession?.body?.hits) return res.status(404).send({ error: ERRORS.NOT_FOUND, message:"Error in getCenterInfoFromYoungForSejourDashboard"});
+    if (!responseSession?.body?.hits) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterInfoFromYoungForSejourDashboard" });
     const sessionList = responseSession.body.hits.hits.map((e) => ({ ...e._source, _id: e._id }));
     const esRequestBody = buildESRequestBodyForSessionCenter(filters, sessionList);
     const response = await esClient.search({ index: "young", body: esRequestBody });
