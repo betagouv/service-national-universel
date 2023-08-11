@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { translate, ROLES, ES_NO_LIMIT, copyToClipboard, canUpdateReferent, canDeleteReferent, formatPhoneNumberFR, department2region } from "../../utils";
+import { translate, ROLES, copyToClipboard, canUpdateReferent, canDeleteReferent, formatPhoneNumberFR, department2region } from "../../utils";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -23,14 +23,8 @@ export default function UserPanel({ onChange, value }) {
   if (!value) return <div />;
 
   const [structure, setStructure] = useState();
-  console.log("🚀 ~ file: panel.jsx:26 ~ UserPanel ~ structure:", structure);
   const count = structure?.missions?.length || 0;
   const placesLeft = structure?.missions?.reduce((acc, e) => acc + e.placesLeft, 0);
-
-  // elastic search
-  // const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
-  const [referentsDepartment, setReferentsDepartment] = useState([]);
-  const [teamMembers, setTeamMembers] = useState([]);
 
   const user = useSelector((state) => state.Auth.user);
   const dispatch = useDispatch();
@@ -41,54 +35,13 @@ export default function UserPanel({ onChange, value }) {
   const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
 
   useEffect(() => {
-    setStructure(null);
-    // setMissionsInfo({ count: "-", placesTotal: "-" });
-    setTeamMembers([]);
-    setReferentsDepartment([]);
     (async () => {
       if (!value.structureId) return;
       const { ok, data, code } = await api.get(`/structure/${value.structureId}?withMissions=true&withTeam=true&withReferents=true`); // TODO: populate missions, team members and referents
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
       return setStructure(data);
     })();
-
-    // (async () => {
-    //   if (!value.structureId) return;
-    //   const { responses: missionResponses } = await api.esQuery("mission", {
-    //     query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value.structureId } }] } },
-    //   });
-    //   if (missionResponses.length) {
-    //     setMissionsInfo({
-    //       count: missionResponses[0].hits.hits.length,
-    //       placesTotal: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
-    //       placesLeft: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
-    //     });
-    //   }
-    // })();
   }, [value]);
-
-  useEffect(() => {
-    if (!structure) return;
-    (async () => {
-      const { responses: referentResponses } = await api.esQuery("referent", {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
-        size: ES_NO_LIMIT,
-      });
-      if (referentResponses.length) {
-        setTeamMembers(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
-      }
-    })();
-
-    if (!structure?.department) return;
-    (async () => {
-      const { responses: referentDepartementResponses } = await api.esQuery("referent", {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "department.keyword": structure.department } }, { term: { "role.keyword": "referent_department" } }] } },
-      });
-      if (referentDepartementResponses.length) {
-        setReferentsDepartment(referentDepartementResponses[0].hits.hits.map((e) => ({ _id: e._id, ...e._source })));
-      }
-    })();
-  }, [structure]);
 
   const handleImpersonate = async () => {
     try {
@@ -196,12 +149,12 @@ export default function UserPanel({ onChange, value }) {
               <Details title="Dép." value={structure?.department} />
               <div className="detail" style={{ alignItems: "flex-start" }}>
                 <div className="detail-title">Référents Dép. :</div>
-                {!referentsDepartment.length ? (
+                {!structure.referents?.length ? (
                   <div className="detail-text">Aucun référent trouvé</div>
                 ) : (
                   <div className="detail-text">
                     <ul>
-                      {referentsDepartment.map((referent) => (
+                      {structure.referents.map((referent) => (
                         <li key={referent._id} style={{ display: "flex", alignItems: "center" }}>
                           {referent.email}
                           <IconCopy
@@ -218,12 +171,12 @@ export default function UserPanel({ onChange, value }) {
               </div>
               <div className="detail" style={{ alignItems: "flex-start" }}>
                 <div className="detail-title">Équipe :</div>
-                {!teamMembers.length ? (
+                {!structure?.team?.length ? (
                   <div className="detail-text">Aucun compte trouvé</div>
                 ) : (
                   <div className="detail-text">
                     <ul>
-                      {teamMembers.map((member) => (
+                      {structure.team.map((member) => (
                         <TeamMember key={member._id}>
                           {`${member.firstName} ${member.lastName}`}
                           <Link to={`/user/${member._id}`}>

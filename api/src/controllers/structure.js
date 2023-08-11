@@ -19,6 +19,7 @@ const {
   isSupervisor,
   isAdmin,
   SENDINBLUE_TEMPLATES,
+  ES_NO_LIMIT
 } = require("snu-lib");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
@@ -191,13 +192,42 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     if (req.query.withMissions) {
       const res = await esClient.search({
         index: "mission",
-        body: {
-          query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": data._id } }] } },
-        },
+        body: { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": data._id } }] } }, size: ES_NO_LIMIT },
       });
       const missions = res.body.hits.hits.map((hit) => hit._source);
       structure = { ...structure, missions };
     }
+
+    if (req.query.withReferents) {
+      const res = await esClient.search({
+        index: "referent",
+        body: {
+          query: { bool: { must: { match_all: {} }, filter: [{ term: { "department.keyword": structure.department } }, { term: { "role.keyword": "referent_department" } }] } },
+          size: ES_NO_LIMIT,
+        },
+      });
+      const referents = res.body.hits.hits.map((hit) => hit._source);
+      structure = { ...structure, referents };
+    }
+
+    if (req.query.withTeam) {
+      const res = await esClient.search({
+        index: "referent",
+        body: { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } }, size: ES_NO_LIMIT },
+      });
+      const team = res.body.hits.hits.map((hit) => hit._source);
+      structure = { ...structure, team };
+    }
+
+    // (async () => {
+    //   const { responses: referentResponses } = await api.esQuery("referent", {
+    //     query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
+    //     size: ES_NO_LIMIT,
+    //   });
+    //   if (referentResponses.length) {
+    //     setTeamMembers(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+    //   }
+    // })();
 
     return res.status(200).send({ ok: true, data: structure });
   } catch (error) {
