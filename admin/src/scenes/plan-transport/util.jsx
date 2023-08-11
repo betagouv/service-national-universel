@@ -114,7 +114,6 @@ export async function exportLigneBus(user, cohort) {
     const { ok, data: ligneBus } = await API.post(`/elasticsearch/lignebus/export?needYoungInfo=true&needCohesionCenterInfo=true&needMeetingPointsInfo=true`, {
       filters: { cohort: [cohort] },
     });
-    console.log(ligneBus);
     if (!ok || !ligneBus?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
 
     let result = {};

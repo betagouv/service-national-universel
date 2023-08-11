@@ -9,6 +9,7 @@ const { ES_NO_LIMIT, canSearchLigneBus, canSearchInElasticSearch } = require("sn
 const { allRecords } = require("../../es/utils");
 const { serializeYoungs } = require("../../utils/es-serializer");
 const { default: isBoolean } = require("validator/lib/isBoolean");
+const { Response } = require("aws-sdk");
 
 router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -176,28 +177,24 @@ router.post("/export", passport.authenticate(["referent"], { session: false, fai
 
     let response = await allRecords("lignebus", hitsRequestBody.query, esClient, exportFields);
 
-    if (req.query.needYoungInfo && req.query.needCohesionCenterInfo && req.query.needMeetingPointsInfo) {
-      const [responseWithYoungInfo, responseWithCenterInfo, responseWithMeetingPoints] = await Promise.all([
-        populateWithYoungInfo(response),
-        populateWithCohesionCenterInfo(response),
-        populateWithMeetingPointsInfo(response),
-      ]);
+    let promise = [];
+    if (req.query.needYoungInfo) {
+      promise.push(populateWithYoungInfo(response));
+    }
+    if (req.query.needCohesionCenterInfo) {
+      promise.push(populateWithCohesionCenterInfo(response));
+    }
+    if (req.query.needMeetingPointsInfo) {
+      promise.push(populateWithMeetingPointsInfo(response));
+    }
+    if (promise.length) {
+      const [responseWithYoungInfo, responseWithCenterInfo, responseWithMeetingPoints] = await Promise.all(promise);
 
       response = responseWithYoungInfo.map((item, index) => ({
         ...item,
         center: responseWithCenterInfo[index].center,
         meetingPoints: responseWithMeetingPoints[index].meetingPoints,
       }));
-    } else {
-      if (req.query.needYoungInfo) {
-        response = await populateWithYoungInfo(response);
-      }
-      if (req.query.needCohesionCenterInfo) {
-        response = await populateWithCohesionCenterInfo(response);
-      }
-      if (req.query.needMeetingPointsInfo) {
-        response = await populateWithMeetingPointsInfo(response);
-      }
     }
 
     return res.status(200).send({ ok: true, data: response });
