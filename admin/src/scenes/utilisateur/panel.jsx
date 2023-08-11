@@ -23,9 +23,6 @@ export default function UserPanel({ onChange, value }) {
   if (!value) return <div />;
 
   const [structure, setStructure] = useState();
-  const count = structure?.missions?.length || 0;
-  const placesLeft = structure?.missions?.reduce((acc, e) => acc + e.placesLeft, 0);
-
   const user = useSelector((state) => state.Auth.user);
   const dispatch = useDispatch();
   const history = useHistory();
@@ -34,10 +31,13 @@ export default function UserPanel({ onChange, value }) {
   const [modalUniqueResponsable, setModalUniqueResponsable] = useState({ isOpen: false });
   const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
 
+  const missionCount = structure?.missions?.length || 0;
+  const placesLeft = structure?.missions?.reduce((acc, e) => acc + e.placesLeft, 0);
+
   useEffect(() => {
     (async () => {
       if (!value.structureId) return;
-      const { ok, data, code } = await api.get(`/structure/${value.structureId}?withMissions=true&withTeam=true&withReferents=true`); // TODO: populate missions, team members and referents
+      const { ok, data, code } = await api.get(`/structure/${value.structureId}?withMissions=true&withTeam=true&withReferents=true`);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
       return setStructure(data);
     })();
@@ -188,10 +188,10 @@ export default function UserPanel({ onChange, value }) {
                   </div>
                 )}
               </div>
-              <Details title="Missions dispo." value={count} />
+              <Details title="Missions dispo." value={missionCount} />
               <Details title="Places restantes" value={placesLeft} />
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "10px" }}>
-                {count > 0 ? (
+                {missionCount > 0 ? (
                   <Link to={`/structure/${structure._id}/missions`}>
                     <Button className="btn-missions">Consulter toutes les missions</Button>
                   </Link>

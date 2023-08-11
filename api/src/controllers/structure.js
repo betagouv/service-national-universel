@@ -19,17 +19,40 @@ const {
   isSupervisor,
   isAdmin,
   SENDINBLUE_TEMPLATES,
-  ES_NO_LIMIT
 } = require("snu-lib");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
 const { validateId, validateStructure, validateStructureManager } = require("../utils/validator");
 const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
-const esClient = require("../es");
+const { serializeMissions, serializeReferents } = require("../utils/es-serializer");
+const { allRecords } = require("../es/utils");
 
 const setAndSave = async (data, keys, fromUser) => {
   data.set({ ...keys });
   await data.save({ fromUser });
+};
+
+const populateWithMissions = async (structures) => {
+  const structureIds = [...new Set(structures.map((item) => item._id))].filter(Boolean);
+  const missions = await allRecords("mission", { bool: { filter: [{ terms: { "structureId.keyword": structureIds } }] } });
+  const serializedMissions = serializeMissions(missions);
+  return structures.map((item) => ({ ...item, missions: serializedMissions.filter((e) => e.structureId === item._id.toString()) }));
+};
+
+const populateWithReferents = async (structures) => {
+  const departments = [...new Set(structures.map((item) => item.department))].filter(Boolean);
+  const referents = await allRecords("referent", {
+    bool: { must: [{ terms: { "department.keyword": departments } }, { term: { "role.keyword": "referent_department" } }] },
+  });
+  const serializedReferents = serializeReferents(referents);
+  return structures.map((item) => ({ ...item, referents: serializedReferents.filter((e) => item.department.includes(e.department)) }));
+};
+
+const populateWithTeam = async (structures) => {
+  const structureIds = [...new Set(structures.map((item) => item._id))].filter(Boolean);
+  const referents = await allRecords("referent", { bool: { filter: [{ terms: { "structureId.keyword": structureIds } }] } });
+  const serializedReferents = serializeReferents(referents);
+  return structures.map((item) => ({ ...item, team: serializedReferents.filter((e) => e.structureId === item._id.toString()) }));
 };
 
 // Update "network name" to ease search ("Affilié à un réseau national" filter).
@@ -184,53 +207,28 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
 
     if (!canViewStructures(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    let data = await StructureObject.findById(checkedId);
+    const data = await StructureObject.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     let structure = serializeStructure(data, req.user);
 
     // Populate
     if (req.query.withMissions) {
-      const res = await esClient.search({
-        index: "mission",
-        body: { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": data._id } }] } }, size: ES_NO_LIMIT },
-      });
-      const missions = res.body.hits.hits.map((hit) => hit._source);
-      structure = { ...structure, missions };
+      const populatedStructures = await populateWithMissions([structure]);
+      structure = populatedStructures[0];
     }
-
-    if (req.query.withReferents) {
-      const res = await esClient.search({
-        index: "referent",
-        body: {
-          query: { bool: { must: { match_all: {} }, filter: [{ term: { "department.keyword": structure.department } }, { term: { "role.keyword": "referent_department" } }] } },
-          size: ES_NO_LIMIT,
-        },
-      });
-      const referents = res.body.hits.hits.map((hit) => hit._source);
-      structure = { ...structure, referents };
+    if (req.query.withReferents && structure.department) {
+      const populatedStructures = await populateWithReferents([structure]);
+      structure = populatedStructures[0];
     }
 
     if (req.query.withTeam) {
-      const res = await esClient.search({
-        index: "referent",
-        body: { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } }, size: ES_NO_LIMIT },
-      });
-      const team = res.body.hits.hits.map((hit) => hit._source);
-      structure = { ...structure, team };
+      const populatedStructures = await populateWithTeam([structure]);
+      structure = populatedStructures[0];
     }
-
-    // (async () => {
-    //   const { responses: referentResponses } = await api.esQuery("referent", {
-    //     query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
-    //     size: ES_NO_LIMIT,
-    //   });
-    //   if (referentResponses.length) {
-    //     setTeamMembers(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
-    //   }
-    // })();
 
     return res.status(200).send({ ok: true, data: structure });
   } catch (error) {
+    console.log("🚀 ~ file: structure.js:230 ~ router.get ~ error:", error)
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
