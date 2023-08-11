@@ -211,18 +211,27 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     let structure = serializeStructure(data, req.user);
 
-    if (req.query.withMissions) {
-      const populatedStructures = await populateWithMissions([structure]);
-      structure = populatedStructures[0];
-    }
-    if (req.query.withReferents && structure.department) {
-      const populatedStructures = await populateWithReferents([structure]);
-      structure = populatedStructures[0];
-    }
+    if (req.query.withMissions || req.query.withReferents || req.query.withTeam) {
+      let promises = [];
 
-    if (req.query.withTeam) {
-      const populatedStructures = await populateWithTeam([structure]);
-      structure = populatedStructures[0];
+      if (req.query.withMissions) promises.push(populateWithMissions([structure]));
+      else promises.push(async () => [structure]);
+
+      if (req.query.withReferents && structure.department) promises.push(populateWithReferents([structure]));
+      else promises.push(async () => [structure]);
+
+      if (req.query.withTeam) promises.push(populateWithTeam([structure]));
+      else promises.push(async () => [structure]);
+
+      const [responseWithMissions, responseWithReferents, responseWithTeam] = await Promise.all(promises);
+      const populatedSructures = [structure].map((item, index) => ({
+        ...item,
+        missions: responseWithMissions[index]?.missions || [],
+        referents: responseWithReferents[index]?.referents || [],
+        team: responseWithTeam[index]?.team || [],
+      }));
+
+      structure = populatedSructures[0];
     }
 
     return res.status(200).send({ ok: true, data: structure });
