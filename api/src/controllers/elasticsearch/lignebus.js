@@ -195,7 +195,12 @@ router.post("/export", passport.authenticate(["referent"], { session: false, fai
 
 const populateWithYoungInfo = async (ligneBus) => {
   const ligneIds = [...new Set(ligneBus.map((item) => item._id).filter(Boolean))];
-  const youngs = await allRecords("young", { bool: { must: { terms: { "ligneId.keyword": ligneIds } } } });
+  const youngs = await allRecords("young", {
+    bool: {
+      must: [{ terms: { "ligneId.keyword": ligneIds } }, { term: { "status.keyword": "VALIDATED" } }],
+      must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
+    },
+  });
   const youngData = serializeYoungs(youngs);
 
   ligneBus = ligneBus.map((item) => ({
