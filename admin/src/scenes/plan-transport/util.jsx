@@ -111,13 +111,12 @@ function filterBusLinesByRole(lines, user) {
 
 export async function exportLigneBus(user, cohort) {
   try {
-    const { ok, data: pdt } = await API.post(`/elasticsearch/plandetransport/export?needYoungInfo=true`, { filters: { cohort: [cohort] } });
-    if (!ok || !pdt?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
-    console.log(pdt);
+    const { ok, data: ligneBus } = await API.post(`/elasticsearch/lignebus/export?needYoungInfo=true`, { filters: { cohort: [cohort] } });
+    if (!ok || !ligneBus?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
 
     let result = {};
 
-    for (const ligne of pdt) {
+    for (const ligne of ligneBus) {
       if (!ligne.youngs.length) continue;
       if (!result[ligne.busId]) {
         result[ligne.busId] = {};
@@ -129,7 +128,7 @@ export async function exportLigneBus(user, cohort) {
         }
       }
     }
-    console.log("result", result);
+
     // Transform data into array of objects before excel converts
     const formatedRep = Object.keys(result).map((key) => {
       return {
