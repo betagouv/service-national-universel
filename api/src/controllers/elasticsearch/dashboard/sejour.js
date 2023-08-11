@@ -24,11 +24,11 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
         bool: {
           must: { match_all: {} },
           filter: [
-            queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
-            queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
-            queryFilters.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
-            queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
-            queryFilters.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
+            ...(queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : []),
+            ...(queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : []),
+            ...(queryFilters.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : []),
+            ...(queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : []),
+            ...(queryFilters.status?.length ? { terms: { "status.keyword": queryFilters.status } } : []),
           ].filter(Boolean),
         },
       },
@@ -244,7 +244,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
 
     return res.status(200).send({ resultCenter, sessionByCenter, resultYoung });
   } catch (error) {
-    capture(error.message);
+    capture(error);
     res.status(500).send({ error: ERRORS.SERVER_ERROR });
   }
 });
