@@ -95,7 +95,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
       query: {
         bool: {
           must: { match_all: {} },
-          filter: [{ terms: { cohesionCenterId } }, ...(filters.cohorts?.length ? [{ terms: { "cohort.keyword": filters.cohorts } }] : [])].filter(Boolean),
+          filter: [{ terms: { cohesionCenterId } }, filters.cohorts?.length ? [{ terms: { "cohort.keyword": filters.cohorts } }] : []].filter(Boolean),
         },
       },
       aggs: {
