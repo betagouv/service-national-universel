@@ -24,6 +24,7 @@ const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
 const { validateId, validateStructure, validateStructureManager } = require("../utils/validator");
 const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
+const esClient = require("../es");
 
 const setAndSave = async (data, keys, fromUser) => {
   data.set({ ...keys });
@@ -182,10 +183,23 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
 
     if (!canViewStructures(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const data = await StructureObject.findById(checkedId);
+    let data = await StructureObject.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    let structure = serializeStructure(data, req.user);
 
-    return res.status(200).send({ ok: true, data: serializeStructure(data, req.user) });
+    // Populate
+    if (req.query.withMissions) {
+      const res = await esClient.search({
+        index: "mission",
+        body: {
+          query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": data._id } }] } },
+        },
+      });
+      const missions = res.body.hits.hits.map((hit) => hit._source);
+      structure = { ...structure, missions };
+    }
+
+    return res.status(200).send({ ok: true, data: structure });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

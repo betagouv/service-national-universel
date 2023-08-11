@@ -21,10 +21,17 @@ import PanelV2 from "../../components/PanelV2";
 
 export default function UserPanel({ onChange, value }) {
   if (!value) return <div />;
+
   const [structure, setStructure] = useState();
-  const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
+  console.log("🚀 ~ file: panel.jsx:26 ~ UserPanel ~ structure:", structure);
+  const count = structure?.missions?.length || 0;
+  const placesLeft = structure?.missions?.reduce((acc, e) => acc + e.placesLeft, 0);
+
+  // elastic search
+  // const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
   const [referentsDepartment, setReferentsDepartment] = useState([]);
   const [teamMembers, setTeamMembers] = useState([]);
+
   const user = useSelector((state) => state.Auth.user);
   const dispatch = useDispatch();
   const history = useHistory();
@@ -35,28 +42,29 @@ export default function UserPanel({ onChange, value }) {
 
   useEffect(() => {
     setStructure(null);
-    setMissionsInfo({ count: "-", placesTotal: "-" });
+    // setMissionsInfo({ count: "-", placesTotal: "-" });
     setTeamMembers([]);
     setReferentsDepartment([]);
     (async () => {
       if (!value.structureId) return;
-      const { ok, data, code } = await api.get(`/structure/${value.structureId}`);
+      const { ok, data, code } = await api.get(`/structure/${value.structureId}?withMissions=true&withTeam=true&withReferents=true`); // TODO: populate missions, team members and referents
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
       return setStructure(data);
     })();
-    (async () => {
-      if (!value.structureId) return;
-      const { responses: missionResponses } = await api.esQuery("mission", {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value.structureId } }] } },
-      });
-      if (missionResponses.length) {
-        setMissionsInfo({
-          count: missionResponses[0].hits.hits.length,
-          placesTotal: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
-          placesLeft: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
-        });
-      }
-    })();
+
+    // (async () => {
+    //   if (!value.structureId) return;
+    //   const { responses: missionResponses } = await api.esQuery("mission", {
+    //     query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value.structureId } }] } },
+    //   });
+    //   if (missionResponses.length) {
+    //     setMissionsInfo({
+    //       count: missionResponses[0].hits.hits.length,
+    //       placesTotal: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
+    //       placesLeft: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
+    //     });
+    //   }
+    // })();
   }, [value]);
 
   useEffect(() => {
@@ -227,10 +235,10 @@ export default function UserPanel({ onChange, value }) {
                   </div>
                 )}
               </div>
-              <Details title="Missions dispo." value={missionsInfo.count} />
-              <Details title="Places restantes" value={missionsInfo.placesLeft} />
+              <Details title="Missions dispo." value={count} />
+              <Details title="Places restantes" value={placesLeft} />
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "10px" }}>
-                {missionsInfo.count > 0 ? (
+                {count > 0 ? (
                   <Link to={`/structure/${structure._id}/missions`}>
                     <Button className="btn-missions">Consulter toutes les missions</Button>
                   </Link>
