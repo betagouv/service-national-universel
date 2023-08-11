@@ -105,17 +105,7 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
 
     if (req.params.action === "export") {
       // fill the missions with the tutor info
-      if (exportFields.includes("tutorId")) {
-        const tutorIds = [...new Set(response.map((item) => item.tutorId).filter((e) => e))];
-        const tutors = await allRecords("referent", { bool: { must: { ids: { values: tutorIds } } } });
-        response = response.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
-      }
-      if (exportFields.includes("structureId")) {
-        const structureIds = [...new Set(response.map((item) => item.structureId).filter((e) => e))];
-        const structures = await allRecords("structure", { bool: { must: { ids: { values: structureIds } } } });
-        response = response.map((item) => ({ ...item, structure: structures?.find((e) => e._id === item.structureId) }));
-      }
-      console.log(response.length);
+      response = await fillMissions(response, exportFields);
 
       return res.status(200).send({ ok: true, data: serializeMissions(response) });
     } else {
@@ -315,5 +305,19 @@ router.post("/by-tutor/:id/:action(search|export)", passport.authenticate(["refe
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+const fillMissions = async (missions, exportFields) => {
+  if (exportFields.includes("tutorId")) {
+    const tutorIds = [...new Set(missions.map((item) => item.tutorId).filter((e) => e))];
+    const tutors = await allRecords("referent", { bool: { must: { ids: { values: tutorIds } } } });
+    missions = missions.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
+  }
+  if (exportFields.includes("structureId")) {
+    const structureIds = [...new Set(missions.map((item) => item.structureId).filter((e) => e))];
+    const structures = await allRecords("structure", { bool: { must: { ids: { values: structureIds } } } });
+    missions = missions.map((item) => ({ ...item, structure: structures?.find((e) => e._id === item.structureId) }));
+  }
+  return missions;
+};
 
 module.exports = router;
