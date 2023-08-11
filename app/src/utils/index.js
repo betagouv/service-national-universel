@@ -1,7 +1,6 @@
 import PasswordValidator from "password-validator";
 import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, sessions2023 } from "snu-lib";
 export * from "snu-lib";
-import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
 import { isCohortDone } from "./cohorts";
 function addOneDay(date) {
@@ -90,15 +89,6 @@ export function isYoungCanApplyToPhase2Missions(young) {
 export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];
 
 export const ENABLE_PM = true;
-
-export const htmlCleaner = (text) => {
-  return sanitizeHtml(text, {
-    allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "ul"],
-    allowedAttributes: {
-      a: ["href", "target", "rel"],
-    },
-  });
-};
 
 export function urlWithScheme(url) {
   if (!/^https?:\/\//i.test(url)) return `http://${url}`;

@@ -9,7 +9,6 @@ import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 import {
   formatStringDateTimezoneUTC,
-  htmlCleaner,
   translate,
   translateApplication,
   copyToClipboard,
@@ -39,6 +38,7 @@ import ChevronDown from "../../assets/icons/ChevronDown";
 import Download from "../../assets/icons/Download";
 import { capture } from "../../sentry";
 import House from "./components/HouseIcon";
+import { htmlCleaner } from "snu-lib";
 
 export default function viewDesktop() {
   const [mission, setMission] = useState();

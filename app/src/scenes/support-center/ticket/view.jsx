@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import * as FileSaver from "file-saver";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, translateState, translate, htmlCleaner } from "../../../utils";
+import { formatStringLongDate, colors, translateState, translate } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -17,7 +17,7 @@ import FileUpload, { useFileUpload } from "../../../components/FileUpload";
 
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
-import { formatMessageForReadingInnerHTML } from "snu-lib";
+import { formatMessageForReadingInnerHTML, htmlCleaner } from "snu-lib";
 
 const updateHeightElement = (e) => {
   e.style.height = "inherit";
