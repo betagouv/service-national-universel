@@ -21,7 +21,6 @@ import PanelV2 from "../../components/PanelV2";
 
 export default function UserPanel({ onChange, value }) {
   if (!value) return <div />;
-
   const [structure, setStructure] = useState();
   const user = useSelector((state) => state.Auth.user);
   const dispatch = useDispatch();

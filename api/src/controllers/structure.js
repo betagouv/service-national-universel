@@ -211,7 +211,6 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     let structure = serializeStructure(data, req.user);
 
-    // Populate
     if (req.query.withMissions) {
       const populatedStructures = await populateWithMissions([structure]);
       structure = populatedStructures[0];
@@ -228,7 +227,6 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
 
     return res.status(200).send({ ok: true, data: structure });
   } catch (error) {
-    console.log("🚀 ~ file: structure.js:230 ~ router.get ~ error:", error)
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
