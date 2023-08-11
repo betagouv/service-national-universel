@@ -178,13 +178,13 @@ router.post("/export", passport.authenticate(["referent"], { session: false, fai
     let response = await allRecords("lignebus", hitsRequestBody.query, esClient, exportFields);
 
     let promise = [];
-    if (req.query.needYoungInfo) {
+    if (req.query?.needYoungInfo) {
       promise.push(populateWithYoungInfo(response));
     }
-    if (req.query.needCohesionCenterInfo) {
+    if (req.query?.needCohesionCenterInfo) {
       promise.push(populateWithCohesionCenterInfo(response));
     }
-    if (req.query.needMeetingPointsInfo) {
+    if (req.query?.needMeetingPointsInfo) {
       promise.push(populateWithMeetingPointsInfo(response));
     }
     if (promise.length) {
@@ -216,7 +216,7 @@ const populateWithYoungInfo = async (ligneBus) => {
 
   ligneBus = ligneBus.map((item) => ({
     ...item,
-    youngs: youngData.filter((e) => e.ligneId.toString() === item._id),
+    youngs: youngData?.filter((e) => e.ligneId.toString() === item._id),
   }));
   return ligneBus;
 };
@@ -238,7 +238,7 @@ const populateWithMeetingPointsInfo = async (ligneBus) => {
 
   ligneBus = ligneBus.map((item) => ({
     ...item,
-    meetingPoints: meetingPoints.filter((e) => item.meetingPointsIds.includes(e._id.toString())),
+    meetingPoints: meetingPoints?.filter((e) => item.meetingPointsIds.includes(e._id.toString())),
   }));
 
   return ligneBus;
