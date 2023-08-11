@@ -1,3 +1,10 @@
+## [1.320.3](https://github.com/betagouv/service-national-universel/compare/v1.320.2...v1.320.3) (2023-08-11)
+
+
+### Bug Fixes
+
+* **app/admin/lib:** audit injection xss ([#2855](https://github.com/betagouv/service-national-universel/issues/2855)) ([e9d67c5](https://github.com/betagouv/service-national-universel/commit/e9d67c565b86a0cc6ba8c17ce90cd34411676586))
+
 ## [1.320.2](https://github.com/betagouv/service-national-universel/compare/v1.320.1...v1.320.2) (2023-08-10)
 
 
