@@ -472,31 +472,19 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
     let response;
 
     if (["export", "exportBus"].includes(req.params.action)) {
-      const data = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-      let schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-      let all = data;
+      if (req.query.needSchoolInfo) {
+        const data = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+        let schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+        let all = data;
 
-      if (schoolsId.length) {
-        const schoolResponse = await allRecords("schoolramses", { bool: { must: { ids: { values: schoolsId } } } });
-        const schools = schoolResponse.map((s) => ({ _id: s._id, _source: s }));
-        all = data.map((item) => ({ ...item, esSchool: schools.find((e) => e._id === item.schoolId) }));
+        if (schoolsId.length) {
+          const schoolResponse = await allRecords("schoolramses", { bool: { must: { ids: { values: schoolsId } } } });
+          const schools = schoolResponse.map((s) => ({ _id: s._id, _source: s }));
+          all = data.map((item) => ({ ...item, esSchool: schools.find((e) => e._id === item.schoolId) }));
+        }
+
+        response = { ok: true, data: serializeYoungs(all) };
       }
-
-      response = { ok: true, data: serializeYoungs(all) };
-    }
-
-    if (req.query.needSchoolInfo) {
-      const data = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-      let schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-      let all = data;
-
-      if (schoolsId.length) {
-        const schoolResponse = await allRecords("schoolramses", { bool: { must: { ids: { values: schoolsId } } } });
-        const schools = schoolResponse.map((s) => ({ _id: s._id, _source: s }));
-        all = data.map((item) => ({ ...item, esSchool: schools.find((e) => e._id === item.schoolId) }));
-      }
-
-      response = { ok: true, data: serializeYoungs(all) };
     }
 
     if (["export", "exportBus"].includes(req.params.action)) {
