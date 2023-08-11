@@ -111,7 +111,9 @@ function filterBusLinesByRole(lines, user) {
 
 export async function exportLigneBus(user, cohort) {
   try {
-    const { ok, data: ligneBus } = await API.post(`/elasticsearch/lignebus/export?needYoungInfo=true`, { filters: { cohort: [cohort] } });
+    const { ok, data: ligneBus } = await API.post(`/elasticsearch/lignebus/export?needYoungInfo=true&needCohesionCenterInfo=true&needMeetingPointsInfo=true`, {
+      filters: { cohort: [cohort] },
+    });
     if (!ok || !ligneBus?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
 
     let result = {};
@@ -123,6 +125,12 @@ export async function exportLigneBus(user, cohort) {
         result[ligne.busId]["youngs"] = [];
       }
       for (const young of ligne.youngs) {
+        young.bus = {
+          departuredDate: ligne.departuredDate,
+          returnDate: ligne.returnDate,
+        };
+        young.center = ligne.center;
+        young.meetingPoint = ligne.meetingPoints.find((e) => e._id === young.meetingPointId);
         if (young.meetingPoint) {
           result[ligne.busId]["youngs"].push(young);
         }

@@ -8,6 +8,7 @@ const { buildNdJson, joiElasticSearch, buildRequestBody } = require("./utils");
 const { ES_NO_LIMIT, canSearchLigneBus, canSearchInElasticSearch } = require("snu-lib");
 const { allRecords } = require("../../es/utils");
 const { serializeYoungs } = require("../../utils/es-serializer");
+const { default: isBoolean } = require("validator/lib/isBoolean");
 
 router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -173,13 +174,19 @@ router.post("/export", passport.authenticate(["referent"], { session: false, fai
 
     const { hitsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
 
-    let ligneBus = await allRecords("lignebus", hitsRequestBody.query, esClient, exportFields);
+    let response = await allRecords("lignebus", hitsRequestBody.query, esClient, exportFields);
 
     if (req.query.needYoungInfo) {
-      ligneBus = await populateWithYoungInfo(ligneBus);
+      response = await populateWithYoungInfo(response);
+    }
+    if (req.query.needCohesionCenterInfo) {
+      response = await populateWithCohesionCenterInfo(response);
+    }
+    if (req.query.needMeetingPointsInfo) {
+      response = await populateWithMeetingPointsInfo(response);
     }
 
-    return res.status(200).send({ ok: true, data: ligneBus });
+    return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -190,24 +197,34 @@ const populateWithYoungInfo = async (ligneBus) => {
   const ligneIds = [...new Set(ligneBus.map((item) => item._id).filter(Boolean))];
   const youngs = await allRecords("young", { bool: { must: { terms: { "ligneId.keyword": ligneIds } } } });
   const youngData = serializeYoungs(youngs);
-  const centerIds = [...new Set(youngData.map((item) => item.cohesionCenterId).filter(Boolean))];
-  const centers = await allRecords("cohesioncenter", { bool: { must: { ids: { values: centerIds } } } });
-  const meetingPointsIds = [...new Set(youngData.map((item) => item.meetingPointId).filter(Boolean))];
-  const meetingPoints = await allRecords("pointderassemblement", { bool: { must: { ids: { values: meetingPointsIds } } } });
 
   ligneBus = ligneBus.map((item) => ({
     ...item,
     youngs: youngData.filter((e) => e.ligneId.toString() === item._id),
   }));
+  return ligneBus;
+};
+
+const populateWithCohesionCenterInfo = async (ligneBus) => {
+  const centerIds = [...new Set(ligneBus.map((item) => item.centerId).filter(Boolean))];
+  const centers = await allRecords("cohesioncenter", { bool: { must: { ids: { values: centerIds } } } });
+
   ligneBus = ligneBus.map((item) => ({
     ...item,
-    youngs: item.youngs.map((element) => ({
-      ...element,
-      bus: ligneBus.find((e) => e._id.toString() === element.ligneId),
-      center: centers?.find((e) => e._id.toString() === element.cohesionCenterId),
-      meetingPoint: meetingPoints?.find((e) => e._id.toString() === element.meetingPointId),
-    })),
+    center: centers?.find((e) => e._id.toString() === item.centerId),
   }));
+  return ligneBus;
+};
+
+const populateWithMeetingPointsInfo = async (ligneBus) => {
+  const meetingPointsIds = [...new Set(ligneBus.reduce((prev, item) => [...prev, ...item.meetingPointsIds], []).filter(Boolean))];
+  const meetingPoints = await allRecords("pointderassemblement", { bool: { must: { ids: { values: meetingPointsIds } } } });
+
+  ligneBus = ligneBus.map((item) => ({
+    ...item,
+    meetingPoints: meetingPoints.filter((e) => item.meetingPointsIds.includes(e._id.toString())),
+  }));
+
   return ligneBus;
 };
 
