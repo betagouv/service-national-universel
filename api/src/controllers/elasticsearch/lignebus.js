@@ -176,14 +176,28 @@ router.post("/export", passport.authenticate(["referent"], { session: false, fai
 
     let response = await allRecords("lignebus", hitsRequestBody.query, esClient, exportFields);
 
-    if (req.query.needYoungInfo) {
-      response = await populateWithYoungInfo(response);
-    }
-    if (req.query.needCohesionCenterInfo) {
-      response = await populateWithCohesionCenterInfo(response);
-    }
-    if (req.query.needMeetingPointsInfo) {
-      response = await populateWithMeetingPointsInfo(response);
+    if (req.query.needYoungInfo && req.query.needCohesionCenterInfo && req.query.needMeetingPointsInfo) {
+      const [responseWithYoungInfo, responseWithCenterInfo, responseWithMeetingPoints] = await Promise.all([
+        populateWithYoungInfo(response),
+        populateWithCohesionCenterInfo(response),
+        populateWithMeetingPointsInfo(response),
+      ]);
+
+      response = responseWithYoungInfo.map((item, index) => ({
+        ...item,
+        center: responseWithCenterInfo[index].center,
+        meetingPoints: responseWithMeetingPoints[index].meetingPoints,
+      }));
+    } else {
+      if (req.query.needYoungInfo) {
+        response = await populateWithYoungInfo(response);
+      }
+      if (req.query.needCohesionCenterInfo) {
+        response = await populateWithCohesionCenterInfo(response);
+      }
+      if (req.query.needMeetingPointsInfo) {
+        response = await populateWithMeetingPointsInfo(response);
+      }
     }
 
     return res.status(200).send({ ok: true, data: response });
