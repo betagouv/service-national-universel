@@ -24,10 +24,35 @@ const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
 const { validateId, validateStructure, validateStructureManager } = require("../utils/validator");
 const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
+const { serializeMissions, serializeReferents } = require("../utils/es-serializer");
+const { allRecords } = require("../es/utils");
 
 const setAndSave = async (data, keys, fromUser) => {
   data.set({ ...keys });
   await data.save({ fromUser });
+};
+
+const populateWithMissions = async (structures) => {
+  const structureIds = [...new Set(structures.map((item) => item._id))].filter(Boolean);
+  const missions = await allRecords("mission", { bool: { filter: [{ terms: { "structureId.keyword": structureIds } }] } });
+  const serializedMissions = serializeMissions(missions);
+  return structures.map((item) => ({ ...item, missions: serializedMissions.filter((e) => e.structureId === item._id.toString()) }));
+};
+
+const populateWithReferents = async (structures) => {
+  const departments = [...new Set(structures.map((item) => item.department))].filter(Boolean);
+  const referents = await allRecords("referent", {
+    bool: { must: [{ terms: { "department.keyword": departments } }, { term: { "role.keyword": "referent_department" } }] },
+  });
+  const serializedReferents = serializeReferents(referents);
+  return structures.map((item) => ({ ...item, referents: serializedReferents.filter((e) => item.department.includes(e.department)) }));
+};
+
+const populateWithTeam = async (structures) => {
+  const structureIds = [...new Set(structures.map((item) => item._id))].filter(Boolean);
+  const referents = await allRecords("referent", { bool: { filter: [{ terms: { "structureId.keyword": structureIds } }] } });
+  const serializedReferents = serializeReferents(referents);
+  return structures.map((item) => ({ ...item, team: serializedReferents.filter((e) => e.structureId === item._id.toString()) }));
 };
 
 // Update "network name" to ease search ("Affilié à un réseau national" filter).
@@ -184,8 +209,32 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
 
     const data = await StructureObject.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    let structure = serializeStructure(data, req.user);
 
-    return res.status(200).send({ ok: true, data: serializeStructure(data, req.user) });
+    if (req.query.withMissions || req.query.withReferents || req.query.withTeam) {
+      let promises = [];
+
+      if (req.query.withMissions) promises.push(populateWithMissions([structure]));
+      else promises.push(async () => [structure]);
+
+      if (req.query.withReferents && structure.department) promises.push(populateWithReferents([structure]));
+      else promises.push(async () => [structure]);
+
+      if (req.query.withTeam) promises.push(populateWithTeam([structure]));
+      else promises.push(async () => [structure]);
+
+      const [responseWithMissions, responseWithReferents, responseWithTeam] = await Promise.all(promises);
+      const populatedStructures = [structure].map((item, index) => ({
+        ...item,
+        missions: responseWithMissions[index]?.missions || [],
+        referents: responseWithReferents[index]?.referents || [],
+        team: responseWithTeam[index]?.team || [],
+      }));
+
+      structure = populatedStructures[0];
+    }
+
+    return res.status(200).send({ ok: true, data: structure });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
