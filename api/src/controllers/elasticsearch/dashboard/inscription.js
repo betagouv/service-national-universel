@@ -30,7 +30,17 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const body = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [
+            queryFilters.region?.length ? { terms: { "schoolRegion.keyword": queryFilters.region } } : null,
+            queryFilters.department?.length ? { terms: { "schoolDepartment.keyword": queryFilters.department } } : null,
+            queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
+            queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
+          ].filter(Boolean),
+        },
+      },
       aggs: {
         school: {
           terms: { field: "schoolId.keyword", size: 500 },
@@ -40,10 +50,6 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
       size: 0,
       track_total_hits: true,
     };
-    if (queryFilters.region?.length) body.query.bool.filter.push({ terms: { "schoolRegion.keyword": queryFilters.region } });
-    if (queryFilters.department?.length) body.query.bool.filter.push({ terms: { "schoolDepartment.keyword": queryFilters.department } });
-    if (queryFilters.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": queryFilters.cohort } });
-    if (queryFilters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": queryFilters.academy } });
 
     const result = await esClient.search({ index: "young", body: body });
     const response = result.body;
@@ -87,7 +93,17 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const body = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [
+            queryFilters?.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
+            queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
+            queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+            queryFilters?.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
+          ].filter(Boolean),
+        },
+      },
       aggs: {
         age: {
           terms: {
@@ -170,8 +186,6 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
       },
       size: 0,
     };
-    if (queryFilters?.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": queryFilters.cohort } });
-    if (queryFilters?.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": queryFilters.academy } });
     if (queryFilters?.region?.length)
       body.query.bool.filter.push({
         bool: {
@@ -181,9 +195,7 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
           ],
         },
       });
-    if (queryFilters?.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": queryFilters.department } });
-    if (queryFilters?.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": queryFilters.status } });
-
+      
     const result = await esClient.search({ index: "young", body: body });
     const response = result.body;
     return res.status(200).send(response);
