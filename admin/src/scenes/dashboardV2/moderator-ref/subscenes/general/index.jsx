@@ -519,16 +519,12 @@ function filterByRegionAndDepartement(e, filters, user) {
 
 const getInscriptionGoals = async () => {
   let dataMerged = [];
-  const query = {
-    query: { bool: { must: { match_all: {} } } },
-    size: ES_NO_LIMIT,
-  };
-  const { responses } = await api.esQuery("inscriptiongoal", query);
-  if (!responses?.length) {
+  const responses = await api.post("/elasticsearch/dashboard/inscription/inscriptionGoal");
+  if (!responses?.hits?.hits) {
     toastr.error("Une erreur est survenue");
     return [];
   }
-  const result = responses[0].hits.hits;
+  const result = responses.hits.hits;
   result.map((e) => {
     const { department, region, academy, cohort, max } = e._source;
     dataMerged[department] = { cohort, department, region, academy, max: (dataMerged[department]?.max ? dataMerged[department].max : 0) + max };
@@ -538,55 +534,9 @@ const getInscriptionGoals = async () => {
 };
 
 async function getCurrentInscriptions(filters) {
-  const body = {
-    query: { bool: { must: { match_all: {} }, filter: [] } },
-    aggs: {
-      status: {
-        terms: {
-          field: "status.keyword",
-          size: ES_NO_LIMIT,
-        },
-        aggs: {
-          statusPhase1: {
-            terms: {
-              field: "statusPhase1.keyword",
-              size: ES_NO_LIMIT,
-            },
-          },
-          statusPhase2: {
-            terms: {
-              field: "statusPhase2.keyword",
-              size: ES_NO_LIMIT,
-            },
-          },
-          statusPhase3: {
-            terms: {
-              field: "statusPhase3.keyword",
-              size: ES_NO_LIMIT,
-            },
-          },
-        },
-      },
-    },
-    size: 0,
-  };
-
-  if (filters?.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filters.cohort } });
-  if (filters?.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filters.academy } });
-  if (filters?.region?.length)
-    body.query.bool.filter.push({
-      bool: {
-        should: [
-          { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": filters.region } }] } },
-          { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": filters.region } }] } },
-        ],
-      },
-    });
-  if (filters?.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filters.department } });
-
-  const { responses } = await api.esQuery("young", body);
-  if (!responses?.length) return {};
-  let result = responses[0].aggregations.status.buckets.reduce((acc, status) => {
+  const responses = await api.post("/elasticsearch/dashboard/inscription/youngForInscription", {filters: filters} );
+  if (!responses?.aggregations?.status?.buckets) return {};
+  let result = responses.aggregations.status.buckets.reduce((acc, status) => {
     acc[status.key] = {
       total: status.doc_count,
       phase1: status.statusPhase1.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {}),
@@ -599,51 +549,9 @@ async function getCurrentInscriptions(filters) {
 }
 
 async function getInAndOutCohort(filters) {
-  const cohortList = filters?.cohort?.length ? filters.cohort : COHORTS;
-
-  const aggs = cohortList.reduce((acc, cohort) => {
-    acc["in&" + cohort] = {
-      filter: {
-        bool: {
-          must: [{ term: { "cohort.keyword": cohort } }, { term: { "status.keyword": "VALIDATED" } }, { exists: { field: "originalCohort.keyword" } }],
-          must_not: [{ term: { "originalCohort.keyword": cohort } }],
-          filter: [],
-        },
-      },
-    };
-    acc["out&" + cohort] = {
-      filter: {
-        bool: {
-          must: [{ term: { "originalCohort.keyword": cohort } }, { term: { "status.keyword": "VALIDATED" } }, { exists: { field: "originalCohort.keyword" } }],
-          must_not: [{ term: { "cohort.keyword": cohort } }],
-          filter: [],
-        },
-      },
-    };
-    return acc;
-  }, {});
-
-  const body = {
-    query: { bool: { must: { match_all: {} }, filter: [] } },
-    aggs,
-    size: 0,
-  };
-
-  if (filters?.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filters.academy } });
-  if (filters?.region?.length)
-    body.query.bool.filter.push({
-      bool: {
-        should: [
-          { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": filters.region } }] } },
-          { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": filters.region } }] } },
-        ],
-      },
-    });
-  if (filters?.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filters.department } });
-
-  const { responses } = await api.esQuery("young", body);
-  if (!responses?.length) return {};
-  const aggreg = responses[0].aggregations;
+  const responses = await api.post("/elasticsearch/dashboard/inscription/getInAndOutCohort", {filters: filters} );
+  if (!responses?.aggregations) return {};
+  const aggreg = responses.aggregations;
   let result = Object.keys(aggreg).reduce((acc, cohort) => {
     const type = cohort.split("&")[0];
     acc[type] = acc[type] ? acc[type] + aggreg[cohort].doc_count : aggreg[cohort].doc_count;

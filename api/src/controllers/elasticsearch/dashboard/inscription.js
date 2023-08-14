@@ -5,7 +5,7 @@ const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch } = require("../utils");
-const { ROLES, ES_NO_LIMIT, YOUNG_STATUS_PHASE1 } = require("snu-lib");
+const { ES_NO_LIMIT } = require("snu-lib");
 
 router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -70,7 +70,6 @@ router.post("/youngsReport", async (req, res) => {
     };
 
     const responses = await esClient.search({ index: "young", body: body });
-    console.log(responses.body.aggregations.status);
     if (responses.body && responses.body.hits && responses.body.hits.hits) {
       return res.status(200).json(responses.body);
     } else {

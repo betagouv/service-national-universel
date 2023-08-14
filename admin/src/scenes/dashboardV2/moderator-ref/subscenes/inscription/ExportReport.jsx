@@ -71,7 +71,6 @@ export default function ExportReport({ filter }) {
       // get all the department if there is no filter specified, else get only the department filtered
       ?.filter((number) => !filter?.department?.length || filter?.department?.includes(departmentLookUp[number]))
       ?.sort((a, b) => a - b);
-    console.log(keys);
     for (let i = 0; i < keys.length; i++) {
       const dptCode = keys[i];
       const dptName = departmentLookUp[dptCode];
@@ -79,10 +78,8 @@ export default function ExportReport({ filter }) {
       const academy = departmentToAcademy[dptName];
 
       const responses = await api.post("/elasticsearch/dashboard/inscription/youngsReport", { filters: filter, department: dptName });
-      console.log(responses);
       if (responses) {
         const status = api.getAggregations(responses);
-        console.log(status)
         const goal = inscriptionGoals.filter((g) => g.department === dptName)?.reduce((p, c) => p + (c.max || 0), 0);
         const line = [academy, region, dptCode, dptName, goal, ...Object.values(YOUNG_STATUS).map((filterStatus) => status[filterStatus] || 0)];
         lines.push(line);
