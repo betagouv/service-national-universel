@@ -25,7 +25,6 @@ function renderStepResponsive(step) {
   if (step === STEPS.SEJOUR) return <StepSejour />;
   if (step === STEPS.PROFIL) return <StepProfil />;
   if (step === STEPS.CONFIRM) return <StepConfirm />;
-  if (step === STEPS.DONE) return <StepDone />;
 }
 
 const Step = () => {
@@ -50,18 +49,28 @@ const Step = () => {
   return renderStepResponsive(currentStep);
 };
 
-export default function Index() {
+export function PreInscriptionPublic() {
   const young = useSelector((state) => state.Auth.young);
-  if (young) return <Redirect to="/" />;
+  if (young) return <Redirect to="/preinscription/email-validation" />;
+  //@todo if email already validated redirect to inscription
 
+  return (
+    <Switch>
+      <SentryRoute path="/preinscription/:step" component={Step} />;
+      <SentryRoute path="/preinscription" component={Step} />;
+    </Switch>
+  );
+}
+
+export default function PreInscription() {
   return (
     <PreInscriptionContextProvider>
       <div className="flex flex-col justify-between bg-beige-gris-galet-975">
         <Header />
         <Switch>
           <SentryRoute path="/preinscription/email-validation" component={StepEmailValidation} />;
-          <SentryRoute path="/preinscription/:step" component={Step} />;
-          <SentryRoute path="/preinscription" component={Step} />;
+          <SentryRoute path="/preinscription/done" component={StepDone} />;
+          <SentryRoute path="/preinscription/" component={PreInscriptionPublic} />;
         </Switch>
         <Footer />
       </div>

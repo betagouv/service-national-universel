@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
+import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 
 // import api from "../../../services/api";
-
+import plausibleEvent from "../../../services/plausible";
 import DSFRContainer from "../../../components/inscription/DSFRContainer";
 import Input from "../../../components/inscription/input";
 import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
@@ -12,16 +13,17 @@ import DidNotReceiveActivationCodeModal from "../components/DidNotReceiveActivat
 import ModifyEmailModal from "../components/ModifyEmailModal";
 
 export default function StepEmailValidation() {
-  // eslint-disable-next-line no-unused-vars
-  const [data, _] = React.useContext(PreInscriptionContext);
+  const history = useHistory();
+  const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState("");
   const [code, setCode] = useState("");
-  const [isDidNotReceiveCodeModalOpen, setDidNotReceiveCodeModalOpen] = useState(true);
+  const [isDidNotReceiveCodeModalOpen, setDidNotReceiveCodeModalOpen] = useState(false);
   const [isModifyEmailModalOpen, setModifyEmailOpen] = useState(false);
 
   async function handleClick() {
     try {
-      console.log("TODO: call api to activate account");
+      plausibleEvent("Phase0/CTA preinscription - validation email");
+      history.push("/preinscription/done");
     } catch (e) {
       capture(e);
     }
@@ -33,7 +35,7 @@ export default function StepEmailValidation() {
       <ModifyEmailModal isOpen={isModifyEmailModalOpen} onClose={() => setModifyEmailOpen(false)} />
       <h1 className="text-2xl font-semibold text-[#161616]">Entrer le code d'activation</h1>
       <p className="mt-4 text-[#3A3A3A]">
-        Pour valider la création de votre compte volontaire, vous devez entrer le code d’activation reçu sur la boîte mail <strong>{data.email}</strong>
+        Pour valider la création de votre compte volontaire, vous devez entrer le code d’activation reçu sur la boîte mail <strong>{young?.email}</strong>
         <InlineButton onClick={() => {}} className="ml-1" />
       </p>
       <div className="mt-8 flex flex-col gap-1">
@@ -44,8 +46,8 @@ export default function StepEmailValidation() {
       <InlineButton className="mt-3" onClick={() => {}}>
         Je n'ai rien reçu
       </InlineButton>
-
-      <SignupButtonContainer onClickNext={handleClick} disabled={!code} labelNext="Activer mon compte volontaire" />
+      {/* disabled !code */}
+      <SignupButtonContainer onClickNext={handleClick} disabled={false} labelNext="Activer mon compte volontaire" />
     </DSFRContainer>
   );
 }

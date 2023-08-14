@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { formatDateFR, translate, translateGrade } from "snu-lib";
+import { setYoung } from "../../../redux/auth/actions";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
-import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import dayjs from "dayjs";
 import DSFRContainer from "../../../components/inscription/DSFRContainer";
 import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
 import InfoMessage from "../components/InfoMessage";
 
 export default function StepConfirm() {
+  const dispatch = useDispatch();
   const [error, setError] = useState({});
-  const [data, setData, removePersistedData] = React.useContext(PreInscriptionContext);
+  const [data, removePersistedData] = React.useContext(PreInscriptionContext);
 
   const history = useHistory();
 
@@ -56,12 +58,17 @@ export default function StepConfirm() {
 
     try {
       // eslint-disable-next-line no-unused-vars
-      const { user, code, ok } = await api.post("/young/signup", values);
+      const { code, ok } = await api.post("/young/signup", values);
       if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
       plausibleEvent("Phase0/CTA preinscription - inscription");
-      setData({ ...data, step: PREINSCRIPTION_STEPS.DONE });
-      removePersistedData();
-      history.push("/preinscription/done");
+      const { user: young, token } = await api.post(`/young/signin`, { email: data.email, password: data.password });
+      if (young) {
+        if (token) api.setToken(token);
+        dispatch(setYoung(young));
+        removePersistedData();
+      }
+      // after connection young is automatically redirected to /preinscription/email-validation
+      history.push("/preinscription/email-validation");
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED")
         setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (prénom, nom et date de naissance)." });
