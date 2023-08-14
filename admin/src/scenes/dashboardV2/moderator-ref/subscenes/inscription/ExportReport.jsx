@@ -78,19 +78,11 @@ export default function ExportReport({ filter }) {
       const region = department2region[dptName];
       const academy = departmentToAcademy[dptName];
 
-      const body = {
-        query: {
-          bool: {
-            must: { match_all: {} },
-            filter: [{ terms: { "cohort.keyword": filter?.cohort } }, { term: { "department.keyword": dptName } }],
-          },
-        },
-        aggs: { status: { terms: { field: "status.keyword" } } },
-        size: 0,
-      };
-      const { responses } = await api.esQuery("young", body);
-      if (responses.length) {
-        const status = api.getAggregations(responses[0]);
+      const responses = await api.post("/elasticsearch/dashboard/inscription/youngsReport", { filters: filter, department: dptName });
+      console.log(responses);
+      if (responses) {
+        const status = api.getAggregations(responses);
+        console.log(status)
         const goal = inscriptionGoals.filter((g) => g.department === dptName)?.reduce((p, c) => p + (c.max || 0), 0);
         const line = [academy, region, dptCode, dptName, goal, ...Object.values(YOUNG_STATUS).map((filterStatus) => status[filterStatus] || 0)];
         lines.push(line);
