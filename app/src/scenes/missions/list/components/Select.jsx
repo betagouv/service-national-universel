@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { translate } from "snu-lib";
-import ChevronDown from "../../../../../assets/icons/ChevronDown";
+import ChevronDown from "../../../../assets/icons/ChevronDown";
 
 const Select = ({ value, options, handleChangeValue, placeholder }) => {
   const [open, setOpen] = useState(false);

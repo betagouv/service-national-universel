@@ -1,11 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import LocationMarker from "../../../../../assets/icons/LocationMarker";
-import IconDomain from "../../../components/IconDomain";
-import { getDistance, translate } from "../../../../../utils";
+import LocationMarker from "../../../../assets/icons/LocationMarker";
+import IconDomain from "../../components/IconDomain";
+import { getDistance, translate } from "../../../../utils";
 import dayjs from "dayjs";
-import Calendar from "../../../../../assets/icons/Calendar";
-import House from "../../../components/HouseIcon";
+import Calendar from "../../../../assets/icons/Calendar";
+import House from "../../components/HouseIcon";
 
 export default function mission({ mission: missionProp, location }) {
   const mission = missionProp._source;
