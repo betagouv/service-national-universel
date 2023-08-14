@@ -16,6 +16,7 @@ const NavigationArticle = ({ item, device }) => {
   const { cache } = useSWRConfig();
   const parentId = item.parentId;
   const [siblingsData, setSiblingsData] = useState([]); // État pour stocker les données des frères et sœurs
+  const [isDesktop, setIsDesktop] = useState(true);
 
   useEffect(() => {
     const fetchSiblings = async () => {
@@ -26,11 +27,8 @@ const NavigationArticle = ({ item, device }) => {
         console.error(error);
       }
     };
-
     fetchSiblings();
   }, [item]);
-
-  const [isDesktop, setIsDesktop] = useState(true);
 
   useEffect(() => {
     setIsDesktop(window.innerWidth > 768);
@@ -46,8 +44,8 @@ const NavigationArticle = ({ item, device }) => {
   }, []);
 
   const Accordion = ({ title, list = [], className = "", path, isOpen = false, slug: slugTheme }) => {
-    const [active, setActive] = useState(isDesktop); // Initialiser avec isDesktop
-    const [height, setHeight] = useState(isDesktop ? "auto" : "0px"); // Initialiser avec la hauteur appropriée selon isDesktop
+    const [active, setActive] = useState(isDesktop);
+    const [height, setHeight] = useState(isDesktop ? "auto" : "0px");
     const [rotate, setRotate] = useState(isDesktop ? "transform duration-700 ease rotate-180" : "transform duration-700 ease");
     const element = useRef(null);
     const contentSpace = useRef(null);
