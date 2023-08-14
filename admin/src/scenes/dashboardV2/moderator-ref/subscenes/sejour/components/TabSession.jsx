@@ -1,14 +1,13 @@
 import React, { useEffect } from "react";
 import { HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExternalLink } from "react-icons/hi";
 import { Link } from "react-router-dom";
-import { ES_NO_LIMIT } from "snu-lib";
 import api from "../../../../../../services/api";
 import { currentFilterAsUrl } from "../../../../components/FilterDashBoard";
 
 const PAGE_SIZE = 6;
 
-export default function TabSession({ sessionList, filters }) {
-  const [sessionByCenter, setSessionByCenter] = React.useState(null);
+export default function TabSession({sessionByCenter, filters}) {
+  const [sessionData, setSessionData] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [page, setPage] = React.useState(0);
   const [pageMax, setPageMax] = React.useState(0);
@@ -16,7 +15,7 @@ export default function TabSession({ sessionList, filters }) {
   const [total, setTotal] = React.useState(0);
 
   const getYoungsBySession = async () => {
-    if (sessionList.length === 0) {
+    if (sessionByCenter.length === 0) {
       setNoResult(true);
       setPage(0);
       setPageMax(0);
@@ -24,78 +23,19 @@ export default function TabSession({ sessionList, filters }) {
       return;
     }
 
-    const body = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
-      aggs: {
-        session: {
-          terms: { field: "sessionPhase1Id.keyword", size: ES_NO_LIMIT },
-          aggs: {
-            presence: { terms: { field: "cohesionStayPresence.keyword" } },
-            presenceJDM: { terms: { field: "presenceJDM.keyword" } },
-          },
-        },
-      },
-      size: 0,
-    };
-
-    if (filters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filters.status } });
-    if (filters.statusPhase1?.length) body.query.bool.filter.push({ terms: { "statusPhase1.keyword": filters.statusPhase1 } });
-
-    let sessionPhase1Id = sessionList.map((session) => session._id).filter((id) => id);
-    if (sessionPhase1Id.length) body.query.bool.filter.push({ terms: { "sessionPhase1Id.keyword": sessionPhase1Id } });
-
-    const { responses } = await api.esQuery("young", body);
-    if (!responses?.length) return setNoResult(true);
-
-    const sessionAggreg = responses[0].aggregations.session.buckets.reduce((acc, session) => {
-      acc[session.key] = {
-        total: session.doc_count,
-        presence: session.presence.buckets.reduce((acc, presence) => {
-          acc[presence.key] = presence.doc_count;
-          return acc;
-        }, {}),
-        presenceJDM: session.presenceJDM.buckets.reduce((acc, presenceJDM) => {
-          acc[presenceJDM.key] = presenceJDM.doc_count;
-          return acc;
-        }, {}),
-      };
-      return acc;
-    }, {});
-
-    const sessionByCenter = sessionList.reduce((acc, session) => {
-      if (!acc[session.cohesionCenterId]) {
-        acc[session.cohesionCenterId] = {
-          centerId: session.cohesionCenterId,
-          centerName: session.nameCentre,
-          centerCity: session.cityCentre,
-          department: session.department,
-          region: session.region,
-          total: sessionAggreg[session._id]?.total || 0,
-          presence: sessionAggreg[session._id]?.presence?.false || 0,
-          presenceJDM: sessionAggreg[session._id]?.presenceJDM?.false || 0,
-        };
-      } else {
-        acc[session.cohesionCenterId].total += sessionAggreg[session._id]?.total || 0;
-        acc[session.cohesionCenterId].presence += sessionAggreg[session._id]?.presence?.false || 0;
-        acc[session.cohesionCenterId].presenceJDM += sessionAggreg[session._id]?.presenceJDM?.false || 0;
-      }
-      return acc;
-    }, {});
-
     setNoResult(false);
     setPage(0);
-    setPageMax(Math.trunc(Object.values(sessionByCenter).length / PAGE_SIZE));
-    setTotal(Object.values(sessionByCenter).length);
-    //tranform object to array
-    setSessionByCenter(Object.values(sessionByCenter));
+    setPageMax(Math.trunc(sessionByCenter.length / PAGE_SIZE));
+    setTotal(sessionByCenter.length);
+    setSessionData(sessionByCenter);
     setIsLoading(false);
   };
 
   useEffect(() => {
-    if (sessionList) {
-      getYoungsBySession(sessionList);
+    if (sessionByCenter) {
+      getYoungsBySession(sessionByCenter);
     }
-  }, [sessionList]);
+  }, [sessionByCenter]);
 
   return (
     <div className="flex w-[60%] flex-col gap-5 rounded-lg bg-white px-8 py-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
@@ -135,7 +75,7 @@ export default function TabSession({ sessionList, filters }) {
               </tr>
             ))
           ) : !noResult ? (
-            sessionByCenter?.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)?.map((center) => (
+            sessionData?.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)?.map((center) => (
               <tr key={center?.centerId} className="flex h-1/6 cursor-default items-center border-b-[1px] border-gray-100 py-3  hover:bg-gray-50">
                 <td className="flex w-[40%] flex-col gap-1">
                   <Link

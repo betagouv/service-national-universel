@@ -2,17 +2,17 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { capture } = require("../../sentry");
-const esClient = require("../../es");
-const { ERRORS } = require("../../utils");
-const { buildArbitratyNdJson } = require("./utils");
+const { capture } = require("../../../sentry");
+const esClient = require("../../../es");
+const { ERRORS } = require("../../../utils");
+const { buildArbitratyNdJson } = require("../utils");
 const { sessions2023, ROLES, ES_NO_LIMIT } = require("snu-lib");
-const CohortModel = require("../../models/cohort");
-const ApplicationModel = require("../../models/application");
+const CohortModel = require("../../../models/cohort");
+const ApplicationModel = require("../../../models/application");
 const Joi = require("joi");
-const { getKeyNumbers } = require("../../services/stats.service");
+const { getKeyNumbers } = require("../../../services/stats.service");
 
-router.post("/default", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/todo", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const cohorts = await CohortModel.find({});
     const cohortsNotFinished = cohorts.filter((c) => new Date(c.dateEnd) > Date.now()).map((e) => e.name);
