@@ -30,11 +30,25 @@ const NavigationArticle = ({ item, device }) => {
     fetchSiblings();
   }, [item]);
 
-  const Accordion = ({ title, list = [], className = "", path, isOpen = false, slug: slugTheme }) => {
-    const [active, setActive] = useState(false);
-    const [height, setHeight] = useState("0px");
-    const [rotate, setRotate] = useState("transform duration-700 ease");
+  const [isDesktop, setIsDesktop] = useState(true);
 
+  useEffect(() => {
+    setIsDesktop(window.innerWidth > 768);
+
+    function handleResize() {
+      setIsDesktop(window.innerWidth > 768);
+    }
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  const Accordion = ({ title, list = [], className = "", path, isOpen = false, slug: slugTheme }) => {
+    const [active, setActive] = useState(isDesktop); // Initialiser avec isDesktop
+    const [height, setHeight] = useState(isDesktop ? "auto" : "0px"); // Initialiser avec la hauteur appropriée selon isDesktop
+    const [rotate, setRotate] = useState(isDesktop ? "transform duration-700 ease rotate-180" : "transform duration-700 ease");
     const element = useRef(null);
     const contentSpace = useRef(null);
 
@@ -44,7 +58,9 @@ const NavigationArticle = ({ item, device }) => {
           element?.current?.scrollIntoView({ behavior: "smooth" });
         }, 500);
         setTimeout(() => {
-          toggleAccordion();
+          setActive(true);
+          setHeight(`${contentSpace?.current?.scrollHeight}px`);
+          setRotate("transform duration-700 ease rotate-180");
         }, 1000);
       }
     }, [isOpen]);
@@ -115,31 +131,31 @@ const NavigationArticle = ({ item, device }) => {
     );
   };
 
-  const NavigationDesktop = ({ item, siblingsData }) => {
-    return (
-      <ol>
-        <li key={item._id} className="mb-2 flex border-b border-t border-gray-200 py-1.5 pr-2">
-          <Link href={`/base-de-connaissance/${item.parents[1].slug}`} className="align-center flex flex-row justify-start border-gray-200 px-2 py-1.5 text-center">
-            <HiChevronLeft className="text-[20px] text-gray-400" />
-            <p className="ml-2 border-l pl-4 text-[12px] font-medium uppercase"> {item.parents[1].title}</p>
-          </Link>
-        </li>
-        {Array.isArray(siblingsData) &&
-          siblingsData.length > 0 &&
-          siblingsData.map(
-            ({ _id, slug, title, type, status }) =>
-              type === "article" &&
-              status === "PUBLISHED" && (
-                <li key={_id} className={`flex flex-nowrap items-center gap-1 ${_id === item._id ? "rounded-md bg-gray-200 text-gray-900" : "text-gray-500"}`}>
-                  <Link href={`/base-de-connaissance/${slug}`} className="rounded px-2 py-1.5" onClick={() => cache.clear()}>
-                    <p className="text-[14px] font-medium leading-5">{title}</p>
-                  </Link>
-                </li>
-              )
-          )}
-      </ol>
-    );
-  };
+  //   const NavigationDesktop = ({ item, siblingsData }) => {
+  //     return (
+  //       <ol>
+  //         <li key={item._id} className="mb-2 flex border-b border-t border-gray-200 py-1.5 pr-2">
+  //           <Link href={`/base-de-connaissance/${item.parents[1].slug}`} className="align-center flex flex-row justify-start border-gray-200 px-2 py-1.5 text-center">
+  //             <HiChevronLeft className="text-[20px] text-gray-400" />
+  //             <p className="ml-2 border-l pl-4 text-[12px] font-medium uppercase"> {item.parents[1].title}</p>
+  //           </Link>
+  //         </li>
+  //         {Array.isArray(siblingsData) &&
+  //           siblingsData.length > 0 &&
+  //           siblingsData.map(
+  //             ({ _id, slug, title, type, status }) =>
+  //               type === "article" &&
+  //               status === "PUBLISHED" && (
+  //                 <li key={_id} className={`flex flex-nowrap items-center gap-1 ${_id === item._id ? "rounded-md bg-gray-200 text-gray-900" : "text-gray-500"}`}>
+  //                   <Link href={`/base-de-connaissance/${slug}`} className="rounded px-2 py-1.5" onClick={() => cache.clear()}>
+  //                     <p className="text-[14px] font-medium leading-5">{title}</p>
+  //                   </Link>
+  //                 </li>
+  //               )
+  //           )}
+  //       </ol>
+  //     );
+  //   };
 
   return (
     <>
