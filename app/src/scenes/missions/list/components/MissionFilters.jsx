@@ -814,7 +814,7 @@ export default function MissionFilters({ filters, setFilters }) {
           </div>
           {/* END MODAL CONTROL WHEN */}
         </div>
-        <div className="flex flex-wrap justify-between gap-2">
+        <div className="flex flex-wrap justify-start xl:justify-between gap-2">
           <DomainFilter Icon={Sante} name="HEALTH" label="Santé" onClick={handleToggleChangeDomain} active={filters.domains.includes("HEALTH")} />
           <DomainFilter Icon={Solidarite} name="SOLIDARITY" label="Solidarité" onClick={handleToggleChangeDomain} active={filters.domains.includes("SOLIDARITY")} />
           <DomainFilter Icon={Citoyennete} name="CITIZENSHIP" label="Citoyenneté" onClick={handleToggleChangeDomain} active={filters.domains.includes("CITIZENSHIP")} />

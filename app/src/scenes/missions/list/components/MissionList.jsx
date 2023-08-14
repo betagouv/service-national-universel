@@ -2,7 +2,7 @@ import React from "react";
 import CardMission from "./CardMission";
 import Pagination from "../../../../components/nav/Pagination";
 
-export default function MissionList({ data, location, page, setPage, setSort }) {
+export default function MissionList({ data, location, page, setPage, size, setSize, setSort }) {
   return (
     <div>
       <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
@@ -13,7 +13,7 @@ export default function MissionList({ data, location, page, setPage, setSort }) 
           <option value="geo" defaultValue>
             La plus proche
           </option>
-          <option value="date">La plus récente</option>
+          <option value="recent">La plus récente</option>
           <option value="short">La plus courte</option>
           <option value="long">La plus longue</option>
         </select>
@@ -21,7 +21,14 @@ export default function MissionList({ data, location, page, setPage, setSort }) 
       {data?.hits?.map((mission) => (
         <CardMission mission={mission} location={location} key={mission._id} />
       ))}
-      <Pagination currentPage={page} count={data.total.value} pageCount={data.total.value} itemsPerPage={20} itemsCount={data.hits.length} changePage={setPage} />
+      <Pagination
+        currentPageNumber={page}
+        setCurrentPageNumber={setPage}
+        itemsCountTotal={data.total.value}
+        itemsCountOnCurrentPage={data.hits.length}
+        size={size}
+        setSize={setSize}
+      />
     </div>
   );
 }

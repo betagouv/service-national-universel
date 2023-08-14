@@ -29,13 +29,14 @@ export default function List() {
     hebergement: false,
   });
   const [page, setPage] = useState(0);
+  const [size, setSize] = useState(20);
   const [sort, setSort] = useState("geo");
 
   const updateOnFilterChange = useCallback(
-    debounce(async (filters, page, sort, setData) => {
+    debounce(async (filters, page, size, sort, setData) => {
       try {
         if (!filters.location?.lat || !filters.distance) return;
-        const res = await api.post("/elasticsearch/mission/young/propose", { filters, page, sort });
+        const res = await api.post("/elasticsearch/mission/young/propose", { filters, page, size, sort });
         setData(res.data);
       } catch (e) {
         capture(e);
@@ -46,8 +47,8 @@ export default function List() {
   );
 
   useEffect(() => {
-    updateOnFilterChange(filters, page, sort, setData);
-  }, [filters, page, sort]);
+    updateOnFilterChange(filters, page, size, sort, setData);
+  }, [filters, page, size, sort]);
 
   return (
     <div className="bg-white p-[1rem] md:p-[3rem] md:m-10 md:rounded-xl md:shadow-xl">
@@ -82,7 +83,7 @@ export default function List() {
       </div>
       {/* END HEADER */}
       <MissionFilters filters={filters} setFilters={setFilters} />
-      {data ? <MissionList data={data} location={filters.location} page={page} setPage={setPage} setSort={setSort} /> : <Loader />}
+      {data ? <MissionList data={data} location={filters.location} page={page} setPage={setPage} size={size} setSize={setSize} setSort={setSort} /> : <Loader />}
     </div>
   );
 }

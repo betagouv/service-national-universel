@@ -273,11 +273,12 @@ router.post("/young/propose/", passport.authenticate("young", { session: false, 
         hebergement: Joi.boolean(),
       }),
       page: Joi.number().integer().min(0).default(0),
-      sort: Joi.string().allow("geo", "date", "short", "long").default("geo"),
+      size: Joi.number().integer().min(0).default(20),
+      sort: Joi.string().allow("geo", "recent", "short", "long").default("geo"),
     });
     const { error, value } = schema.validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { filters, page, sort } = value;
+    const { filters, page, size, sort } = value;
 
     let body = {
       query: {
@@ -292,13 +293,13 @@ router.post("/young/propose/", passport.authenticate("young", { session: false, 
         },
       },
       from: page * 20,
-      size: 20,
+      size,
       sort: [],
     };
 
     if (sort === "geo") body.sort.push({ _geo_distance: { location: filters.location, order: "asc", unit: "km", mode: "min" } });
     if (sort === "date") body.sort.push({ createdAt: { order: "desc" } });
-    if (sort === "short") body.sort.push({ "duration.keyword": { order: "asc" } });
+    if (sort === "recent") body.sort.push({ "duration.keyword": { order: "asc" } });
     if (sort === "long") body.sort.push({ "duration.keyword": { order: "desc" } });
 
     if (filters.hebergement) {
