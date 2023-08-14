@@ -1,3 +1,138 @@
+## [1.320.3](https://github.com/betagouv/service-national-universel/compare/v1.320.2...v1.320.3) (2023-08-11)
+
+
+### Bug Fixes
+
+* **app/admin/lib:** audit injection xss ([#2855](https://github.com/betagouv/service-national-universel/issues/2855)) ([e9d67c5](https://github.com/betagouv/service-national-universel/commit/e9d67c565b86a0cc6ba8c17ce90cd34411676586))
+
+## [1.320.2](https://github.com/betagouv/service-national-universel/compare/v1.320.1...v1.320.2) (2023-08-10)
+
+
+### Bug Fixes
+
+* **app:** do not init sentry on local ([ea21ab5](https://github.com/betagouv/service-national-universel/commit/ea21ab5889978af831f90cd937261b5ae9639cf5))
+* **app:** remove useless esQuery service ([0abc9a6](https://github.com/betagouv/service-national-universel/commit/0abc9a6eb61977b07ecd09f40df6798aca60d62c))
+
+## [1.320.1](https://github.com/betagouv/service-national-universel/compare/v1.320.0...v1.320.1) (2023-08-09)
+
+
+### Bug Fixes
+
+* **admin, api:** tickets count ([#2865](https://github.com/betagouv/service-national-universel/issues/2865)) ([3305ac2](https://github.com/betagouv/service-national-universel/commit/3305ac25cc68c860716d7545a74fc05aef899039))
+* **admin/api:** es count by status ([#2867](https://github.com/betagouv/service-national-universel/issues/2867)) ([ff4020f](https://github.com/betagouv/service-national-universel/commit/ff4020f1e10aec2695b381c8cf2e0528bed5a1d4))
+
+# [1.320.0](https://github.com/betagouv/service-national-universel/compare/v1.319.0...v1.320.0) (2023-08-08)
+
+
+### Features
+
+* **lib:** update school level and inscriptionEndDate ([#2861](https://github.com/betagouv/service-national-universel/issues/2861)) ([2c51b7c](https://github.com/betagouv/service-national-universel/commit/2c51b7c238107a45e15a932e2b880affde24b6f1))
+
+# [1.319.0](https://github.com/betagouv/service-national-universel/compare/v1.318.2...v1.319.0) (2023-08-07)
+
+
+### Features
+
+* **admin:** Tableau de bord : Chiffres clé - Séjour ([#2837](https://github.com/betagouv/service-national-universel/issues/2837)) ([3a3385e](https://github.com/betagouv/service-national-universel/commit/3a3385e43e335aff0f936a180d1117b1a454ca57))
+
+## [1.318.2](https://github.com/betagouv/service-national-universel/compare/v1.318.1...v1.318.2) (2023-08-04)
+
+
+### Bug Fixes
+
+* **api:** Update getDistance to be more precise ([#2854](https://github.com/betagouv/service-national-universel/issues/2854)) ([e306e4f](https://github.com/betagouv/service-national-universel/commit/e306e4fd286c4ff130843c64c2bf05600bb5a6d2))
+
+## [1.318.1](https://github.com/betagouv/service-national-universel/compare/v1.318.0...v1.318.1) (2023-08-03)
+
+
+### Bug Fixes
+
+* **app:** Good name ([298de9a](https://github.com/betagouv/service-national-universel/commit/298de9ab9a0fa06665dc31dff384e929c577bee2))
+* **app:** parametrage dates ouverture inscription octobre ([2312899](https://github.com/betagouv/service-national-universel/commit/231289938d0c2cf5f3fc70e6a46fc3591f738fa8))
+* **github:** Fix for eslint ([c8f9ad2](https://github.com/betagouv/service-national-universel/commit/c8f9ad29f77ba7adaa179302cff3517bcad88b6c))
+* **kb:** Error with slate ([98d72c1](https://github.com/betagouv/service-national-universel/commit/98d72c185d2fedd0820148e438f263ffa859ab70))
+* **kb:** Eslint react hooks ([d535828](https://github.com/betagouv/service-national-universel/commit/d535828d5619dccc45d520608d68172ca46cfadc))
+* **kb:** Fix slate error ([4050050](https://github.com/betagouv/service-national-universel/commit/40500506fdc41cac7a7e6a16c2cc7d02d23f6436))
+
+
+### Reverts
+
+* **kb:** Go back to next 13.0.2 ([ea1411f](https://github.com/betagouv/service-national-universel/commit/ea1411f04a23bbe0900b0262cfb9099ed51b3793))
+* **kb:** Put old version of slate ([cf13e93](https://github.com/betagouv/service-national-universel/commit/cf13e93f37cbb9ebab89ad5b45510da0bf981c5e))
+
+# [1.318.0](https://github.com/betagouv/service-national-universel/compare/v1.317.2...v1.318.0) (2023-08-02)
+
+
+### Bug Fixes
+
+* **api:** Correct bug on schoolRAMSES ([acc37e9](https://github.com/betagouv/service-national-universel/commit/acc37e9e2ffd92aad3f4404016b6859473b9005b))
+* **lib:** Eslint errors on lib ([c3cfb67](https://github.com/betagouv/service-national-universel/commit/c3cfb676d511eccae6da67d3c8974d03f082831c))
+
+
+### Features
+
+* **all:** Test code on ([8fc3ab1](https://github.com/betagouv/service-national-universel/commit/8fc3ab106a52e3c74b3cc5ab359a50ced82acc06))
+* **github:** Check for deadcode ([0ba5915](https://github.com/betagouv/service-national-universel/commit/0ba5915703ad8ce9097508ccb78fead07d0fa7fd))
+* **github:** Run lint of app and admin in PR ([bcceb85](https://github.com/betagouv/service-national-universel/commit/bcceb8594f07664dc371e6aea33299151e9dffac))
+
+## [1.317.2](https://github.com/betagouv/service-national-universel/compare/v1.317.1...v1.317.2) (2023-07-31)
+
+
+### Bug Fixes
+
+* **api:** dont take transport into account for dsnj export ([1f41432](https://github.com/betagouv/service-national-universel/commit/1f41432c1de71a42c20679817d97cfcc1e904f6b))
+
+## [1.317.1](https://github.com/betagouv/service-national-universel/compare/v1.317.0...v1.317.1) (2023-07-29)
+
+
+### Bug Fixes
+
+* **app:** kb url on local and staging ([df50277](https://github.com/betagouv/service-national-universel/commit/df502774a784fb668c968ab6cc372afdbe8c26a7))
+
+# [1.317.0](https://github.com/betagouv/service-national-universel/compare/v1.316.1...v1.317.0) (2023-07-26)
+
+
+### Features
+
+* **api/admin:** pouvoir selectionner le nombre d'éléments par page dans les listes ([#2828](https://github.com/betagouv/service-national-universel/issues/2828)) ([bcf20fc](https://github.com/betagouv/service-national-universel/commit/bcf20fc9bda0ce9974e48cfe300b6bcb0a9fdfef))
+* **lib/app:** add 2ndePro to cohort in october ([b309a98](https://github.com/betagouv/service-national-universel/commit/b309a98e44d38efd429ab3796a672cfa4f8d4c55))
+
+## [1.316.1](https://github.com/betagouv/service-national-universel/compare/v1.316.0...v1.316.1) (2023-07-25)
+
+
+### Bug Fixes
+
+* **lib:** fix display of tickets count ([ef1f60c](https://github.com/betagouv/service-national-universel/commit/ef1f60c5f6436abf929a4ed4197b25fcf9258a3c))
+
+# [1.316.0](https://github.com/betagouv/service-national-universel/compare/v1.315.0...v1.316.0) (2023-07-24)
+
+
+### Bug Fixes
+
+* **api:** bug cookie duration ([#2830](https://github.com/betagouv/service-national-universel/issues/2830)) ([392547a](https://github.com/betagouv/service-national-universel/commit/392547a886ff2b5bcfb6d825ca2b7de2dab392a6))
+
+
+### Features
+
+* **admin/api:** permettre au chefs de centre d'importer le projet pédagogique de chaque session ([#2821](https://github.com/betagouv/service-national-universel/issues/2821)) ([4ed77dd](https://github.com/betagouv/service-national-universel/commit/4ed77dda7876def79e08af21efcaa215161acce5))
+* **app:** modif question form + modale bdc ([#2829](https://github.com/betagouv/service-national-universel/issues/2829)) ([866dac8](https://github.com/betagouv/service-national-universel/commit/866dac87f5e2c02f1a9b76c6762f3078e9856239))
+
+# [1.315.0](https://github.com/betagouv/service-national-universel/compare/v1.314.0...v1.315.0) (2023-07-20)
+
+
+### Bug Fixes
+
+* **Admin:** update manual inscription -> young start with the status: "WAITING_VALIDATION" ([#2824](https://github.com/betagouv/service-national-universel/issues/2824)) ([e6bf6cb](https://github.com/betagouv/service-national-universel/commit/e6bf6cb709dd782c88160648858aaa0cc082b9c6))
+* **app:** reduce spacing to make both button visible on signin desktop page ([f893b01](https://github.com/betagouv/service-national-universel/commit/f893b0165f958b2fd3325d2bed4746db73b78043))
+* **app:** typo ([a68b638](https://github.com/betagouv/service-national-universel/commit/a68b638362573123400cfbe67efb894e4f6920b3))
+
+
+### Features
+
+* **app:** add bouton to inscription on auth page ([0d58ecc](https://github.com/betagouv/service-national-universel/commit/0d58eccefe27d96fb198f7ab89705493725df812))
+* **app:** open inscription on production ([ab8dfdf](https://github.com/betagouv/service-national-universel/commit/ab8dfdf1992f15e3086f2f76c63d5ae61f75a000))
+* **app/admin:** Cookie based connection ([#2819](https://github.com/betagouv/service-national-universel/issues/2819)) ([702708e](https://github.com/betagouv/service-national-universel/commit/702708e4e924dece2f607c2bfed42a9891a56f7a))
+
 # [1.314.0](https://github.com/betagouv/service-national-universel/compare/v1.313.0...v1.314.0) (2023-07-19)
 
 

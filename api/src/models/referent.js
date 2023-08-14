@@ -52,6 +52,7 @@ const Schema = new mongoose.Schema({
       description: "tentative de connexion. Max 15",
     },
   },
+  // ! To delete if trust_token works
   userIps: {
     type: [String],
     default: [],
@@ -248,28 +249,9 @@ Schema.pre("save", async function (next) {
   return next();
 });
 
-Schema.pre("save", async function (next) {
-  if (this.isModified("userIps") || this.isNew) {
-    const _userIps = [];
-    for (let ip of this.userIps) {
-      const hashedIp = await bcrypt.hash(ip, 10);
-      _userIps.push(hashedIp);
-    }
-    this.userIps = _userIps;
-  }
-  return next();
-});
-
 Schema.methods.comparePassword = async function (p) {
   const user = await OBJ.findById(this._id).select("password");
   return bcrypt.compare(p, user.password || "");
-};
-
-Schema.methods.compareIps = async function (ip) {
-  const user = await OBJ.findById(this._id).select("userIps");
-  const promises = user.userIps.map((_ip) => bcrypt.compare(ip, _ip));
-  const responses = await Promise.all(promises);
-  return responses.some((e) => e);
 };
 
 //Sync with Sendinblue

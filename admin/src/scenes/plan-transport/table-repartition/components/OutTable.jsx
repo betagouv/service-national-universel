@@ -70,50 +70,32 @@ export function OutTable({ cohort, region, user }) {
         }
 
         //get youngs by department
-        const bodyYoung = {
-          query: {
-            bool: {
-              must: { match_all: {} },
-              filter: [{ term: { "cohort.keyword": cohort } }, { terms: { "status.keyword": ["VALIDATED"] } }, { term: { "region.keyword": region } }],
-            },
-          },
-          aggs: {
-            department: { terms: { field: "department.keyword" } },
-          },
-          track_total_hits: true,
-          size: 0,
-        };
-
-        const { responses } = await API.esQuery("young", bodyYoung);
-        setYoungsByDepartment(responses[0].aggregations.department.buckets);
-        setYoungsTotal(responses[0].hits.total.value);
+        const response = await API.post("/elasticsearch/young/search", {
+          filters: { cohort: [cohort], status: ["VALIDATED"], region: [region] },
+        });
+        if (!response.responses.length) return toastr.error("Oups, une erreur est survenue lors de la récupération des volontaires");
+        setYoungsByDepartment(response.responses[1].aggregations.department.names.buckets);
+        setYoungsTotal(response.responses[0].hits.total.value);
 
         //get places center by host region
-        const bodyCohesionCenter = {
-          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohorts.keyword": [cohort] } }, { terms: { "region.keyword": regionAccueil } }] } },
-          track_total_hits: true,
-          size: ES_NO_LIMIT,
-        };
+        const { ok: res, data: centers } = await API.post("/elasticsearch/cohesioncenter/export?needSessionPhase1Info=true", {
+          filters: { cohorts: [cohort], region: regionAccueil },
+        });
+        if (!res) return toastr.error("Oups, une erreur est survenue lors de la récupération des centres");
 
-        const { responses: responsesCenter } = await API.esQuery("cohesioncenter", bodyCohesionCenter);
-        const centerDetail = responsesCenter[0].hits.hits.map((e) => new Object({ ...e._source, _id: e._id }));
-        setCenterTotal(centerDetail.length);
+        setCenterTotal(centers.length);
 
-        const bodySession = {
-          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohesionCenterId.keyword": centerDetail.map((c) => c._id) } }, { term: { "cohort.keyword": cohort } }] } },
-          track_total_hits: true,
-          size: ES_NO_LIMIT,
-        };
-
-        const { responses: responsesSession } = await API.esQuery("sessionphase1", bodySession);
-        const sessionsDetail = responsesSession[0].hits.hits.map((e) => e._source);
-
-        const sessionPlacesBycohesionCenterDepartment = sessionsDetail.reduce((acc, session) => {
-          const department = centerDetail.find((c) => c._id === session.cohesionCenterId).department;
-          if (!acc[department]) acc[department] = 0;
-          acc[department] += session.placesTotal;
-          return acc;
-        }, {});
+        const sessionPlacesBycohesionCenterDepartment = {};
+        centers.forEach((center) => {
+          center.sessionsPhase1.forEach((session) => {
+            if (session.cohort === cohort) {
+              if (!sessionPlacesBycohesionCenterDepartment[center.department]) {
+                sessionPlacesBycohesionCenterDepartment[center.department] = 0;
+              }
+              sessionPlacesBycohesionCenterDepartment[center.department] += session.placesTotal;
+            }
+          });
+        });
 
         setPlacesCenterByDepartment(sessionPlacesBycohesionCenterDepartment);
 

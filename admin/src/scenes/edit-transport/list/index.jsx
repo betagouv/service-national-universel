@@ -93,6 +93,7 @@ const ReactiveList = ({ cohort }) => {
   const [youngs, setYoungs] = useState();
   const [allLines, setAllLines] = useState();
   const history = useHistory();
+  const [size, setSize] = useState(10);
 
   useEffect(() => {
     try {
@@ -147,6 +148,7 @@ const ReactiveList = ({ cohort }) => {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            size={size}
           />
         </div>
         {youngs && !youngs.length ? (
@@ -173,7 +175,9 @@ const ReactiveList = ({ cohort }) => {
       <ResultTable
         paramData={paramData}
         setParamData={setParamData}
-        currentEntryOnPage={lines?.length > 0}
+        currentEntryOnPage={lines?.length}
+        size={size}
+        setSize={setSize}
         render={
           <div className="overflow-x-scroll w-full mt-2">
             <table className="top-0 w-full divide-y divide-gray-100" style={{ borderCollapse: "separate", borderSpacing: "0 0.1em" }}>

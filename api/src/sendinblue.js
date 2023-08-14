@@ -300,20 +300,19 @@ async function syncContact(email, attributes, listIds) {
   }
 }
 
-async function unsync(obj, { force } = { force: false }) {
-  if (ENVIRONMENT !== "production" && !force) return console.log("no unsync sendinblue");
-  try {
-    if (obj.hasOwnProperty("parent1Email") && obj.parent1Email) {
-      await deleteContact(obj.parent1Email);
-    }
-    if (obj.hasOwnProperty("parent2Email") && obj.parent2Email) {
-      await deleteContact(obj.parent2Email);
-    }
+async function unsync(obj, options = { force: false }) {
+  if (ENVIRONMENT !== "production" && !options.force) {
+    console.log("no unsync sendinblue");
+    return;
+  }
 
-    await deleteContact(obj.email);
-  } catch (e) {
-    console.log("Can't delete in sendinblue", obj.email);
-    capture(e);
+  const emails = [obj.parent1Email, obj.parent2Email, obj.email].filter(Boolean);
+
+  try {
+    await Promise.all(emails.map(deleteContact));
+  } catch (error) {
+    console.log("Can't delete in sendinblue", emails);
+    capture(error);
   }
 }
 

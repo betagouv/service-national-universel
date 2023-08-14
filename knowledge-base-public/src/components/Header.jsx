@@ -1,19 +1,10 @@
 import Link from "next/link";
 import Navigation from "./navigation/Navigation";
 import KnowledgeBaseSearch from "./knowledge-base/KnowledgeBaseSearch.js";
-import { useEffect, useState } from "react";
-import SearchShortcut from "./SearchShortcut";
+import { useState } from "react";
 
-export default function Header() {
+export default function Header({ home }) {
   const [searchOpen, setSearchOpen] = useState(false);
-
-  useEffect(() => {
-    document.addEventListener("keydown", function (event) {
-      if (event.key === "k" && (event.ctrlKey || event.metaKey)) {
-        setSearchOpen(!searchOpen);
-      }
-    });
-  }, []);
 
   return (
     <header className="flex items-center justify-between gap-4 bg-[#32257F] p-4 print:hidden">
@@ -34,13 +25,14 @@ export default function Header() {
       </Link>
 
       <div className="flex items-center gap-4">
-        <button
-          onClick={() => setSearchOpen(true)}
-          className="flex flex-none items-center gap-4 rounded-md border-none bg-transparent px-2.5 py-2 shadow-none transition-colors hover:bg-black hover:bg-opacity-20"
-        >
-          <SearchShortcut />
-          <img src="/assets/search.svg" />
-        </button>
+        {!home && (
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="flex flex-none items-center gap-4 rounded-md border-none bg-transparent px-2.5 py-2 shadow-none transition-colors hover:bg-black hover:bg-opacity-20"
+          >
+            <img src="/assets/search.svg" />
+          </button>
+        )}
 
         <Navigation />
       </div>

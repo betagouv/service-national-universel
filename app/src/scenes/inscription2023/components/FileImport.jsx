@@ -11,7 +11,7 @@ export default function FileImport({ id, file, setFile, setError, onChange }) {
 
   return (
     <>
-      <div className="my-4 text-sm text-gray-500">Formats supportés : jpg, png, pdf. Pour les PDF, taille maximum  : 5 Mo.</div>
+      <div className="my-4 text-sm text-gray-500">Formats supportés : jpg, png, pdf. Pour les PDF, taille maximum : 5 Mo.</div>
       <input type="file" id={id} name={id} accept=".png, .jpg, .jpeg, .pdf" onChange={handleChange} className="hidden" />
       <div className="my-4 flex w-full">
         <div>

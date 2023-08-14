@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
@@ -32,6 +32,7 @@ export default function ListPDR(props) {
   const pageId = "listYoungPDR";
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({ page: 0 });
+  const [size, setSize] = useState(10);
 
   const fetchData = async () => {
     try {
@@ -225,6 +226,7 @@ export default function ListPDR(props) {
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
+              size={size}
             />
           </div>
           <button className="text-grey-700 flex h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium" onClick={() => setIsExportOpen(true)}>
@@ -250,6 +252,8 @@ export default function ListPDR(props) {
           paramData={paramData}
           setParamData={setParamData}
           currentEntryOnPage={data?.length}
+          size={size}
+          setSize={setSize}
           render={
             <div className="mt-6 mb-2 flex w-full flex-col">
               <hr />

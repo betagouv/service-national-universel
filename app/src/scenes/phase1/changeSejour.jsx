@@ -17,7 +17,7 @@ import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from
 import { capture } from "../../sentry";
 import { calculateAge, regionsListDROMS, translateCohortTemp } from "snu-lib";
 
-export default function changeSejour() {
+export default function ChangeSejour() {
   const young = useSelector((state) => state.Auth.young);
   const [newSejour, setNewSejour] = useState("");
   const [motif, setMotif] = useState("");

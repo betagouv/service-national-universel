@@ -64,7 +64,7 @@ describe("Meeting point", () => {
         .send({ cohort: "Février 2023 - C" });
       expect(res.status).toBe(403);
     });
-    it("should return 200 ", async () => {
+    it("should return 200", async () => {
       const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
       const res = await request(getAppHelper())
         .put("/point-de-rassemblement/delete/cohort/" + pointDeRassemblement._id)
@@ -88,7 +88,7 @@ describe("Meeting point", () => {
         .send();
       expect(res.status).toBe(403);
     });
-    it("should return 200 ", async () => {
+    it("should return 200", async () => {
       const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
       const res = await request(getAppHelper())
         .delete("/point-de-rassemblement/" + pointDeRassemblement._id)

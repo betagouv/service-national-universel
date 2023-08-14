@@ -1,6 +1,8 @@
 require("dotenv").config({ path: "./../../../.env-prod" });
 require("../../mongo");
 
+// ! To migrate into scripts dir to not be tagged as dead code
+
 const { generateYoungsExport, generateCohesionCentersExport } = require("./utils");
 
 const CohortModel = require("../../models/cohort");

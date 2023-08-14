@@ -98,7 +98,6 @@ export default function Create(props) {
               console.log(e);
               capture(e);
               toastr.error("Oups, une erreur est survenue", translate(e.code));
-            } finally {
             }
           }}>
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (

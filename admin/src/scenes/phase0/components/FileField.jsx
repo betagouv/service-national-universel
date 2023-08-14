@@ -1,4 +1,4 @@
-import Cni from "../../../assets/icons/Cni";
+import UploadedFileIcon from "../../../assets/icons/UploadedFileIcon";
 import { DownloadButton, MiniTitle, MoreButton } from "./commons";
 import React, { useEffect, useRef, useState } from "react";
 import { download } from "snu-lib";
@@ -127,7 +127,7 @@ export function FileField({ young, label, className = "", onChange, mode, status
     <>
       <div ref={optionsRef} className={`mb-[15px] flex items-center justify-between rounded-[7px] bg-[#F9FAFB] p-[30px] ${className}`}>
         <div className="shrink-0">
-          <Cni />
+          <UploadedFileIcon />
         </div>
         <MiniTitle className="grow text-left">{label}</MiniTitle>
         <div className="relative ml-[8px] flex items-center justify-end">

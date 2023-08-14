@@ -20,9 +20,10 @@ beforeAll(dbConnect);
 afterAll(dbClose);
 
 describe("Referent", () => {
+  let res;
   describe("POST /referent/signin", () => {
     it("should return 400 when no email, no password or wrong email", async () => {
-      let res = await request(getAppHelper()).post("/referent/signin");
+      res = await request(getAppHelper()).post("/referent/signin");
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/referent/signin").send({ email: "foo@bar.fr" });
@@ -52,7 +53,7 @@ describe("Referent", () => {
   });
   describe("POST /referent/signup", () => {
     it("should return 400 when no email, no password, wrong email, no firstname or no lastname", async () => {
-      let res = await request(getAppHelper()).post("/referent/signup");
+      res = await request(getAppHelper()).post("/referent/signup");
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/referent/signup").send({ email: "foo@bar.fr" });
@@ -111,7 +112,7 @@ describe("Referent", () => {
       const fixture = getNewReferentFixture();
       const email = fixture.email.toLowerCase();
       await createReferentHelper({ ...fixture, email });
-      let res = await request(getAppHelper()).post("/referent/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", phone: "0606060606" });
+      res = await request(getAppHelper()).post("/referent/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", phone: "0606060606" });
       expect(res.status).toBe(400);
     });
   });
@@ -145,7 +146,7 @@ describe("Referent", () => {
 
   describe("POST /referent/reset_password", () => {
     it("should return return 400 when missing password", async () => {
-      let res = await request(getAppHelper()).post("/referent/reset_password");
+      res = await request(getAppHelper()).post("/referent/reset_password");
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/referent/reset_password").send({ password: "bar" });
@@ -208,7 +209,7 @@ describe("Referent", () => {
 
   describe("POST /referent/forgot_password", () => {
     it("should return return 404 when missing email", async () => {
-      let res = await request(getAppHelper()).post("/referent/forgot_password");
+      res = await request(getAppHelper()).post("/referent/forgot_password");
       expect(res.status).toBe(404);
     });
     it("should return 200 when user does not exist", async () => {
@@ -225,7 +226,7 @@ describe("Referent", () => {
 
   describe("POST /referent/forgot_password_reset", () => {
     it("should return return 400 when missing token or password", async () => {
-      let res = await request(getAppHelper()).post("/referent/forgot_password_reset").send({ token: "foo" });
+      res = await request(getAppHelper()).post("/referent/forgot_password_reset").send({ token: "foo" });
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/referent/forgot_password_reset").send({ password: "bar" });

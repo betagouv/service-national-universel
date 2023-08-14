@@ -24,7 +24,7 @@ const OBJ = db.define(
     defaultScope: {
       attributes: { exclude: ["createdAt", "updatedAt", "raw_data"] },
     },
-  }
+  },
 );
 
 module.exports = OBJ;

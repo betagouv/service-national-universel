@@ -60,10 +60,8 @@ export default function Create() {
       onSubmit={async (values) => {
         try {
           setIsLoading(true);
-
-          const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "email.keyword": values.email } }] } } };
-          const { responses } = await api.esQuery("referent", body);
-          if (responses.length && responses[0].hits.hits.length) {
+          const { data: exist } = await api.get(`/referent/exist/${values.email}`);
+          if (exist) {
             toastr.warning("Utilisateur déjà inscrit", "Merci de vérifier si la structure existe déjà sur la plateforme");
             setIsLoading(false);
             return;

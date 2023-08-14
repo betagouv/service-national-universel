@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
@@ -29,6 +29,7 @@ export default function ListBus(props) {
   const pageId = "listYoungBus";
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({ page: 0 });
+  const [size, setSize] = useState(10);
 
   const fetchData = async () => {
     try {
@@ -160,7 +161,6 @@ export default function ListBus(props) {
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
   ];
-
   if (loading) return <Loader />;
 
   return (
@@ -187,6 +187,7 @@ export default function ListBus(props) {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            size={size}
           />
           <button className="text-grey-700 flex h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium" onClick={() => setIsExportOpen(true)}>
             <BsDownload className="text-gray-400" />
@@ -211,6 +212,8 @@ export default function ListBus(props) {
           paramData={paramData}
           setParamData={setParamData}
           currentEntryOnPage={data?.length}
+          size={size}
+          setSize={setSize}
           render={
             <div className="mt-6 mb-2 flex w-full flex-col">
               <hr />

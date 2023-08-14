@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { ES_NO_LIMIT } from "snu-lib";
 import CreatableSelect from "../../../components/CreatableSelect";
 import api from "../../../services/api";
 
@@ -12,14 +11,7 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
 
   useEffect(() => {
     async function getCountries() {
-      const body = {
-        query: { bool: { must: { match_all: {} }, filter: [] } },
-        size: 0,
-        aggs: {
-          countries: { terms: { field: "country.keyword", size: ES_NO_LIMIT } },
-        },
-      };
-      const { responses } = await api.esQuery("schoolramses", body);
+      const { responses } = await api.post("/elasticsearch/schoolramses/public/search?aggsByCountries=true");
       setCountries(
         responses[0].aggregations.countries.buckets
           .filter((e) => e.key !== "FRANCE")
@@ -27,6 +19,7 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
           .sort(),
       );
     }
+
     getCountries();
   }, []);
 
@@ -48,12 +41,8 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
   useEffect(() => {
     async function getSchools() {
       if (!country) return;
-      const body = {
-        query: { bool: { must: { match_all: {} }, filter: [] } },
-        size: ES_NO_LIMIT,
-      };
-      body.query.bool.filter.push({ term: { "country.keyword": country } });
-      const { responses } = await api.esQuery("schoolramses", body);
+
+      const { responses } = await api.post("/elasticsearch/schoolramses/public/search", { filters: { country: [country] } });
       setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
     }
     getSchools();

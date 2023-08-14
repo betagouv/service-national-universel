@@ -2,9 +2,10 @@ import Img3 from "../assets/close_icon.png";
 import Img2 from "../assets/pencil.svg";
 import React from "react";
 import styled from "styled-components";
-import { copyToClipboard, htmlCleaner } from "../utils";
+import { copyToClipboard } from "../utils";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle } from "react-icons/hi";
+import { htmlCleaner } from "snu-lib";
 
 export const Info = ({ children, title }) => {
   return (

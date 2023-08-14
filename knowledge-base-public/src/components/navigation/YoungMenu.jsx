@@ -37,7 +37,7 @@ export default function YoungMenu() {
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
             >
-              <Popover.Panel className="absolute right-0 top-14 z-10 w-80 overflow-hidden rounded-md bg-white text-gray-800">
+              <Popover.Panel className="absolute right-0 top-14 z-10 w-80 overflow-hidden rounded-md bg-white text-gray-800 shadow-md">
                 <nav>
                   <ul>
                     <li>

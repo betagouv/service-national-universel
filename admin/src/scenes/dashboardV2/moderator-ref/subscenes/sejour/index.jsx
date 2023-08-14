@@ -4,7 +4,6 @@ import {
   academyList,
   COHORTS,
   departmentToAcademy,
-  ES_NO_LIMIT,
   region2department,
   regionList,
   ROLES,
@@ -46,6 +45,7 @@ export default function Index() {
   const [data, setData] = useState({});
   const [dataCenter, setDataCenter] = useState({});
   const [sessionList, setSessionList] = useState(null);
+  const [sessionByCenter, setSessionByCenter] = useState(null);
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
   const academyOptions =
@@ -103,78 +103,16 @@ export default function Index() {
     setFilterArray(filters);
   }, [departmentOptions]);
 
-  const queryYoung = async () => {
-    const { responses } = await api.post("/elasticsearch/young/moderator/sejour/", {
+  const queryCenter = async () => {
+    const { resultCenter, sessionByCenter, resultYoung } = await api.post("/elasticsearch/dashboard/sejour/moderator", {
       filters: Object.fromEntries(Object.entries(selectedFilters)),
     });
-    if (responses?.length) {
-      let result = {};
-      result.statusPhase1 = responses[0].aggregations.statusPhase1.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-      result.statusPhase1Total = responses[0].hits.total.value;
-      result.pdrTotal = responses[0].aggregations.pdr.doc_count;
-      result.participation = responses[0].aggregations.participation.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-      result.participationTotal = responses[0].aggregations.participation.doc_count;
-      result.presence = responses[0].aggregations.precense.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-      result.JDM = responses[0].aggregations.JDM.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-      result.depart = responses[0].aggregations.depart.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-      result.departTotal = responses[0].aggregations.depart.doc_count;
-      result.departMotif = responses[0].aggregations.departMotif.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-      setData(result);
-    }
-  };
-
-  const queryCenter = async () => {
-    const bodyCohesion = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
-      aggs: {
-        typology: { terms: { field: "typology.keyword", size: ES_NO_LIMIT } },
-        domains: { terms: { field: "domain.keyword", size: ES_NO_LIMIT } },
-        capacity: { sum: { field: "placesTotal" } },
-      },
-      size: ES_NO_LIMIT,
-    };
-
-    if (selectedFilters.region?.length) bodyCohesion.query.bool.filter.push({ terms: { "region.keyword": selectedFilters.region } });
-    if (selectedFilters.department?.length) bodyCohesion.query.bool.filter.push({ terms: { "department.keyword": selectedFilters.department } });
-    if (selectedFilters.academy?.length) bodyCohesion.query.bool.filter.push({ terms: { "academy.keyword": selectedFilters.academy } });
-    if (selectedFilters.cohorts?.length) bodyCohesion.query.bool.filter.push({ terms: { "cohorts.keyword": selectedFilters.cohorts } });
-
-    const { responses: responsesCohesion } = await api.esQuery("cohesioncenter", bodyCohesion);
-
-    if (!responsesCohesion.length) return;
-    let resultCenter = {};
-    resultCenter.typology = responsesCohesion[0].aggregations.typology.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-    resultCenter.domains = responsesCohesion[0].aggregations.domains.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-    resultCenter.capacity = responsesCohesion[0].aggregations.capacity.value;
-    resultCenter.totalCenter = responsesCohesion[0].hits.total.value;
-
-    const cohesionCenterId = responsesCohesion[0].hits.hits.map((e) => e._id);
-    const bodySession = {
-      query: { bool: { must: { match_all: {} }, filter: [{ terms: { cohesionCenterId } }] } },
-      aggs: {
-        placesTotal: { sum: { field: "placesTotal" } },
-        placesLeft: { sum: { field: "placesLeft" } },
-        status: { terms: { field: "status.keyword" } },
-        timeSchedule: { terms: { field: "hasTimeSchedule.keyword" } },
-      },
-      size: ES_NO_LIMIT,
-    };
-
-    if (selectedFilters.cohorts?.length) bodySession.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohorts } });
-    const { responses: responsesSession } = await api.esQuery("sessionphase1", bodySession);
-    if (responsesSession.length) {
-      setSessionList(responsesSession[0].hits.hits.map((e) => ({ ...e._source, _id: e._id })));
-      resultCenter.placesTotalSession = responsesSession[0].aggregations.placesTotal.value;
-      resultCenter.placesLeftSession = responsesSession[0].aggregations.placesLeft.value;
-      resultCenter.status = responsesSession[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
-      resultCenter.timeSchedule = responsesSession[0].aggregations.timeSchedule.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
-      resultCenter.totalSession = responsesSession[0].hits.total.value;
-    }
     setDataCenter(resultCenter);
+    setSessionByCenter(sessionByCenter);
+    setData(resultYoung);
   };
 
   useEffect(() => {
-    queryYoung();
     queryCenter();
     if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
     else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
@@ -236,7 +174,7 @@ export default function Index() {
         </div>
         <div className="flex gap-4">
           <MoreInfo typology={dataCenter?.typology} domains={dataCenter?.domains} filter={selectedFilters} />
-          <TabSession sessionList={sessionList} filters={selectedFilters} />
+          <TabSession sessionByCenter={sessionByCenter} filters={selectedFilters} />
         </div>
       </div>
     </DashboardContainer>

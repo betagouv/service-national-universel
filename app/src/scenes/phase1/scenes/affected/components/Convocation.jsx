@@ -6,8 +6,8 @@ import { useHistory } from "react-router-dom";
 import dayjs from "dayjs";
 import { supportURL } from "../../../../../config";
 import api from "../../../../../services/api";
-import { translate, htmlCleaner } from "../../../../../utils";
-import { getMeetingHour, getReturnHour, transportDatesToString } from "snu-lib";
+import { translate } from "../../../../../utils";
+import { getMeetingHour, getReturnHour, transportDatesToString, htmlCleaner } from "snu-lib";
 
 import Loader from "../../../../../components/Loader";
 import { Hero, Content } from "../../../../../components/Content";

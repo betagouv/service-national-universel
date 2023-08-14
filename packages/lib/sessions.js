@@ -90,10 +90,10 @@ const sessions2023 = [
     event: "Phase0/CTA preinscription - sejour octobre NC",
     eligibility: {
       zones: ["NC"],
-      schoolLevels: ["2ndeGT"],
+      schoolLevels: ["NOT_SCOLARISE", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "CAP"],
       bornAfter: new Date("10/22/2005"),
       bornBefore: new Date("10/09/2008"),
-      inscriptionEndDate: new Date("2023-08-31T22:00:00.000Z"), // 31 aout
+      inscriptionEndDate: new Date("2023-09-15T13:00:00.000Z"), // 15 septembre minuit heure de NC
       instructionEndDate: new Date("2023-09-15T22:00:00.000Z"), // 15 septembre
     },
   },

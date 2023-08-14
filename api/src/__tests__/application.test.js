@@ -12,6 +12,8 @@ const { createReferentHelper } = require("./helpers/referent");
 const { notExistingYoungId, createYoungHelper, getYoungByIdHelper } = require("./helpers/young");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 
+// ! Only  it.only("should update young phase2NumberHoursEstimated and phase2NumberHoursDone" is run in CI
+
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
   sendEmail: () => Promise.resolve(),

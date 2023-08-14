@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -113,6 +113,7 @@ const ReactiveList = ({ cohort, history }) => {
   const [paramData, setParamData] = React.useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   const filterArray = [
     { title: "Numéro de la ligne", name: "busId", parentGroup: "Bus", missingLabel: "Non renseigné" },
@@ -195,6 +196,10 @@ const ReactiveList = ({ cohort, history }) => {
     },
   ].filter((e) => e);
 
+  React.useEffect(() => {
+    if (!selectedFilters.cohort) setSelectedFilters({ ...selectedFilters, ["cohort"]: { filter: [cohort] } });
+  }, [selectedFilters]);
+
   return (
     <>
       <div className="flex flex-1">
@@ -215,6 +220,7 @@ const ReactiveList = ({ cohort, history }) => {
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
+              size={size}
             />
           </div>
           <div className="flex items-center gap-2">
@@ -345,6 +351,8 @@ const ReactiveList = ({ cohort, history }) => {
           paramData={paramData}
           setParamData={setParamData}
           currentEntryOnPage={data?.length}
+          size={size}
+          setSize={setSize}
           render={
             <div className="mt-6 mb-2 flex w-full flex-col">
               <hr />
