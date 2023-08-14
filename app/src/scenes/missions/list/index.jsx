@@ -35,7 +35,7 @@ export default function List() {
     debounce(async (filters, page, sort, setData) => {
       try {
         if (!filters.location?.lat || !filters.distance) return;
-        const res = await api.post("/elasticsearch/mission/find", { filters, page, sort });
+        const res = await api.post("/elasticsearch/mission/young/propose", { filters, page, sort });
         setData(res.data);
       } catch (e) {
         capture(e);

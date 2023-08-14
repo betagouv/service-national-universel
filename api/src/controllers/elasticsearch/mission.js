@@ -253,7 +253,7 @@ router.post("/propose/:action(search|export)", passport.authenticate(["referent"
   }
 });
 
-router.post("/find/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.post("/young/propose/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const schema = Joi.object({
       filters: Joi.object({

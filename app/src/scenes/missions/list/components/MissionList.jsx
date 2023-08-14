@@ -2,12 +2,12 @@ import React from "react";
 import CardMission from "./CardMission";
 import Pagination from "../../../../components/nav/Pagination";
 
-export default function MissionList({ data, page, setPage, total, location, setSort }) {
+export default function MissionList({ data, location, page, setPage, setSort }) {
   return (
     <div>
       <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
         <p>
-          {total} mission{total > 1 ? "s" : ""}
+          {data?.total?.value} mission{data?.total?.value > 1 ? "s" : ""}
         </p>
         <select name="selectedSort" onChange={(e) => setSort(e.target.value)}>
           <option value="geo" defaultValue>
