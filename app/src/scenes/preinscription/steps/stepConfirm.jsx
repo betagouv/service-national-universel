@@ -57,7 +57,6 @@ export default function StepConfirm() {
     if (values.schooled === "true") values.grade = data.scolarity;
 
     try {
-      // eslint-disable-next-line no-unused-vars
       const { code, ok } = await api.post("/young/signup", values);
       if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
       plausibleEvent("Phase0/CTA preinscription - inscription");
@@ -65,7 +64,8 @@ export default function StepConfirm() {
       if (young) {
         if (token) api.setToken(token);
         dispatch(setYoung(young));
-        removePersistedData();
+        // @todo should not be commented
+        // removePersistedData();
       }
       // after connection young is automatically redirected to /preinscription/email-validation
       history.push("/preinscription/email-validation");

@@ -6,11 +6,11 @@ import PrimaryButton from "../../../components/ui/dsfr/PrimaryButton";
 import InlinButton from "./InlineButton";
 import Cross from "../../../assets/icons/Cross";
 
-const DidNotReceiveActivationCodeModal = ({ onClose, isOpen }) => {
+const DidNotReceiveActivationCodeModal = ({ onClose, isOpen, onRequestNewToken, onRequestEmailModification }) => {
   return (
-    <Modal className="w-full bg-white md:w-[540px]" isOpen={isOpen} onClose={() => {}}>
+    <Modal className="w-full bg-white md:w-[540px]" isOpen={isOpen} onClose={onClose}>
       <div className="flex justify-end text-[#000091]">
-        <button onClick={() => {}} className="flex p-3 items-center">
+        <button onClick={onClose} className="flex p-3 items-center">
           <span className="text-sm">Fermer</span>
           <Cross className="ml-1 mt-[2px]" />
         </button>
@@ -24,7 +24,7 @@ const DidNotReceiveActivationCodeModal = ({ onClose, isOpen }) => {
           <li>
             <InformationSquare className="inline mb-1 mr-1" />
             L'adresse e-mail que vous utilisez est bien celle que vous avez renseigné
-            <InlinButton className="ml-1 text-[#0063CB]" onClick={() => {}}>
+            <InlinButton className="ml-1 text-[#0063CB]" onClick={onRequestEmailModification}>
               Modifier mon adresse e-mail
             </InlinButton>
           </li>
@@ -44,7 +44,7 @@ const DidNotReceiveActivationCodeModal = ({ onClose, isOpen }) => {
       </div>
       <hr className="h-px border-0 md:bg-gray-200" />
       <div className="p-4 flex justify-end">
-        <PrimaryButton onClick={() => {}}>Recevoir un nouveau code d’activation</PrimaryButton>
+        <PrimaryButton onClick={onRequestNewToken}>Recevoir un nouveau code d’activation</PrimaryButton>
       </div>
     </Modal>
   );

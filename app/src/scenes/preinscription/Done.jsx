@@ -1,12 +1,12 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
-import CompleteInscription from "../../../assets/icons/CompleteInscription";
+import CompleteInscription from "../../assets/icons/CompleteInscription";
 import { GrAttachment } from "react-icons/gr";
-import plausibleEvent from "../../../services/plausible";
-import DSFRContainer from "../../../components/inscription/DSFRContainer";
-import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
-import { capture } from "../../../sentry";
+import plausibleEvent from "../../services/plausible";
+import DSFRContainer from "../../components/inscription/DSFRContainer";
+import SignupButtonContainer from "../../components/inscription/SignupButtonContainer";
+import { capture } from "../../sentry";
 
 export default function StepDone() {
   const young = useSelector((state) => state.Auth.young);

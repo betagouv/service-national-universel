@@ -10,7 +10,7 @@ const ModifyEmailModal = ({ onClose, isOpen }) => {
   const [emailConfirmation, setEmailConfirmation] = useState("");
   const [error, setError] = useState("");
   return (
-    <Modal className="p-4 md:p-6 w-full bg-white md:w-[540px]" isOpen={isOpen} onClose={() => {}}>
+    <Modal className="p-4 md:p-6 w-full bg-white md:w-[540px]" isOpen={isOpen} onClose={onClose}>
       <h1 className="mb-3 text-2xl font-semibold text-[#161616]">
         <ArrowRightBlue className="inline mr-2" /> Modifier mon adresse e-mail
       </h1>
@@ -26,7 +26,7 @@ const ModifyEmailModal = ({ onClose, isOpen }) => {
       </div>
       <hr className="h-px border-0 md:bg-gray-200" />
       <div className="flex flex-col md:flex-row justify-end gap-3 mt-4">
-        <SecondaryButton className="flex-2" onClick={() => {}}>
+        <SecondaryButton className="flex-2" onClick={onClose}>
           Annuler
         </SecondaryButton>
         <PrimaryButton className="flex-1" onClick={() => {}}>

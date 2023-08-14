@@ -9,8 +9,8 @@ import StepNonEligible from "./steps/stepNonEligible";
 import StepSejour from "./steps/stepSejour";
 import StepProfil from "./steps/stepProfil";
 import StepConfirm from "./steps/stepConfirm";
-import StepEmailValidation from "./steps/stepEmailValidation";
-import StepDone from "./steps/stepDone";
+import EmailValidation from "./EmailValidation";
+import Done from "./Done";
 
 import { useSelector } from "react-redux";
 import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
@@ -51,8 +51,8 @@ const Step = () => {
 
 export function PreInscriptionPublic() {
   const young = useSelector((state) => state.Auth.young);
-  if (young) return <Redirect to="/preinscription/email-validation" />;
-  //@todo if email already validated redirect to inscription
+  if (young && young.emailVerified === "false") return <Redirect to="/preinscription/email-validation" />;
+  if (young) return <Redirect to="/inscription" />;
 
   return (
     <Switch>
@@ -68,8 +68,9 @@ export default function PreInscription() {
       <div className="flex flex-col justify-between bg-beige-gris-galet-975">
         <Header />
         <Switch>
-          <SentryRoute path="/preinscription/email-validation" component={StepEmailValidation} />;
-          <SentryRoute path="/preinscription/done" component={StepDone} />;
+          {/* @todo review navigation: user needs to be connected for email-validation and done pages */}
+          <SentryRoute path="/preinscription/email-validation" component={EmailValidation} />;
+          <SentryRoute path="/preinscription/done" component={Done} />;
           <SentryRoute path="/preinscription/" component={PreInscriptionPublic} />;
         </Switch>
         <Footer />
