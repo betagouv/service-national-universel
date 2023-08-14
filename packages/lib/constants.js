@@ -881,9 +881,8 @@ const TEMPLATE_DESCRIPTIONS = {
   1270: "Clôture instruction - dossier non finalisé - plus éligible au SNU",
   1269: "Jeunes restés en waiting validation après clôture instruction + encore éligibles SNU",
   1268: "Jeunes restés en waiting validation après clôture instruction + non éligibles SNU",
-  1241: "Jeunes restés en waiting correction après clôture instruction + encore éligibles SNU",
   1267: "Jeunes restés en waiting correction après clôture instruction + non éligibles SNU",
-  1262: "Changement manuel ou automatique de l'affectation et / ou du PDR",
+  1272: "Changement manuel ou automatique de l'affectation et / ou du PDR",
   1307: "Quand un volontaire ou un référent change de séjour - A ne pas envoyer si le représentant légal n'a pas encore donné son consentement",
   1241: "Un modérateur, référent régional ou référent départemental demande au RL une modification du droit à l'image",
 };
