@@ -82,6 +82,7 @@ const Schema = new mongoose.Schema({
   },
   period: {
     type: [String],
+    enum: ["WHENEVER", "DURING_HOLIDAYS", "DURING_SCHOOL"],
     documentation: {
       description: "Période de la mission (pendant les vacances scolaires, pendant l'année scolaire)",
     },
