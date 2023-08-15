@@ -160,7 +160,7 @@ async function getSessions(startDate, endDate) {
     track_total_hits: true,
   };
 
-  const response = await esClient.search({ index: "session", body });
+  const response = await esClient.search({ index: "sessionphase1", body });
   const value = response.body.hits.total.value;
 
   return [
