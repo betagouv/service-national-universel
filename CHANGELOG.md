@@ -1,3 +1,11 @@
+## [1.320.4](https://github.com/betagouv/service-national-universel/compare/v1.320.3...v1.320.4) (2023-08-15)
+
+
+### Bug Fixes
+
+* **api:** fix session index for key numbers ([3787d04](https://github.com/betagouv/service-national-universel/commit/3787d04c8ab82feece98f5e8f36f0d5b97e42a51))
+* **app, api:** fix military preparation search ([a80c0f1](https://github.com/betagouv/service-national-universel/commit/a80c0f1d522405e05420d31dd296e2843994472f))
+
 ## [1.320.3](https://github.com/betagouv/service-national-universel/compare/v1.320.2...v1.320.3) (2023-08-11)
 
 
