@@ -223,15 +223,8 @@ export default function MissionFilters({ filters, setFilters }) {
             <DomainFilter
               Icon={PreparationMilitaire}
               label="Préparations militaires"
-              active={filters?.isMilitaryPreparation === "true"}
-              onClick={() =>
-                setFilters((prev) => {
-                  const newFilter = { ...prev };
-                  if (newFilter?.isMilitaryPreparation === "true") newFilter.isMilitaryPreparation = "false";
-                  else newFilter.isMilitaryPreparation = "true";
-                  return newFilter;
-                })
-              }
+              active={filters?.isMilitaryPreparation}
+              onClick={() => setFilters((prev) => ({ ...prev, isMilitaryPreparation: !prev.isMilitaryPreparation }))}
             />
           </div>
         </div>
@@ -827,8 +820,8 @@ export default function MissionFilters({ filters, setFilters }) {
           <DomainFilter
             Icon={PreparationMilitaire}
             label="Préparations militaires"
-            active={filters.isMilitaryPreparation === "true"}
-            onClick={() => setFilters((prev) => ({ ...prev, isMilitaryPreparation: !filters.isMilitaryPreparation }))}
+            active={filters.isMilitaryPreparation}
+            onClick={() => setFilters((prev) => ({ ...prev, isMilitaryPreparation: !prev.isMilitaryPreparation }))}
           />
         </div>
       </div>

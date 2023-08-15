@@ -254,7 +254,7 @@ router.post("/propose/:action(search|export)", passport.authenticate(["referent"
   }
 });
 
-router.post("/young/propose/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.post("/young/search/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const schema = Joi.object({
       filters: Joi.object({
@@ -277,7 +277,10 @@ router.post("/young/propose/", passport.authenticate("young", { session: false, 
       sort: Joi.string().allow("geo", "recent", "short", "long").default("geo"),
     });
     const { error, value } = schema.validate(req.body, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
     const { filters, page, size, sort } = value;
 
     let body = {

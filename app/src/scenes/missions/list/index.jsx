@@ -14,7 +14,7 @@ export default function List() {
   const young = useSelector((state) => state.Auth.young);
   const [data, setData] = useState();
   const urlParams = new URLSearchParams(window.location.search);
-  const isMilitaryPreparation = urlParams.get("MILITARY_PREPARATION");
+  const isMilitaryPreparation = Boolean(urlParams.get("MILITARY_PREPARATION"));
 
   const [filters, setFilters] = useState({
     domains: [],
@@ -36,7 +36,7 @@ export default function List() {
     debounce(async (filters, page, size, sort, setData) => {
       try {
         if (!filters.location?.lat || !filters.distance) return;
-        const res = await api.post("/elasticsearch/mission/young/propose", { filters, page, size, sort });
+        const res = await api.post("/elasticsearch/mission/young/search", { filters, page, size, sort });
         setData(res.data);
       } catch (e) {
         capture(e);
