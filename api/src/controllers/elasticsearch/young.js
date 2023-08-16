@@ -484,6 +484,9 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
         }
 
         response = { ok: true, data: serializeYoungs(all) };
+      } else {
+        const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+        return res.status(200).send({ ok: true, data: serializeYoungs(response) });
       }
     }
 
