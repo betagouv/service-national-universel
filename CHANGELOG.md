@@ -1,3 +1,10 @@
+## [1.320.5](https://github.com/betagouv/service-national-universel/compare/v1.320.4...v1.320.5) (2023-08-16)
+
+
+### Bug Fixes
+
+* **admin/api:** update export image-right ([#2881](https://github.com/betagouv/service-national-universel/issues/2881)) ([f2b9caa](https://github.com/betagouv/service-national-universel/commit/f2b9caaaa2fff544e6dad6f755987ea4ea84be7e))
+
 ## [1.320.4](https://github.com/betagouv/service-national-universel/compare/v1.320.3...v1.320.4) (2023-08-15)
 
 
