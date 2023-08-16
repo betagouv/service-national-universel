@@ -654,7 +654,7 @@ describe("Young", () => {
   });
 
   describe("POST /young/:id/:email/:template", () => {
-    const validTemplate = "170";
+    const validTemplate = "1229";
     it("should return 400 if template not found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const res = await request(getAppHelper()).post(`/young/${young._id}/email/test/`).send();
