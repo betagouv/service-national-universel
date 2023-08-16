@@ -51,7 +51,7 @@ export default function List() {
   }, [filters, page, size, sort]);
 
   return (
-    <div className="bg-white p-[1rem] md:p-[3rem] md:m-10 md:rounded-xl md:shadow-xl">
+    <div className="bg-white p-[1rem] md:p-[3rem] md:m-10 md:pb-[2rem] md:rounded-xl md:shadow-xl">
       {/* BEGIN HEADER */}
       <div className="space-y-6">
         <h1 className="text-2xl md:text-4xl font-bold text-gray-800">Trouvez une mission d&apos;intérêt général</h1>
