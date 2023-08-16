@@ -19,20 +19,16 @@ export default function Pagination({ currentPageNumber, setCurrentPageNumber, it
     if (currentPageNumber > 0) setCurrentPageNumber(currentPageNumber - 1);
   }
   function goToPreviousX5() {
-    if (currentPageNumber > 4) setCurrentPageNumber(currentPageNumber - 5);
-    else setCurrentPageNumber(0);
+    if (currentPageNumber > 4) return setCurrentPageNumber(currentPageNumber - 5);
+    return setCurrentPageNumber(0);
   }
   function goToNext() {
     if (lastDisplayItem < itemsCountTotal) setCurrentPageNumber(currentPageNumber + 1);
   }
   function goToNextX5() {
-    if (lastDisplayItem < itemsCountTotal && lastDisplayItem + 100 < itemsCountTotal) {
-      setCurrentPageNumber(currentPageNumber + 5);
-    } else if (itemsCountTotal % size === 0) {
-      setCurrentPageNumber(lastPage - 1);
-    } else {
-      setCurrentPageNumber(lastPage);
-    }
+    if (lastDisplayItem < itemsCountTotal && lastDisplayItem + 100 < itemsCountTotal) return setCurrentPageNumber(currentPageNumber + 5);
+    if (itemsCountTotal % size === 0) return setCurrentPageNumber(lastPage - 1);
+    return setCurrentPageNumber(lastPage);
   }
 
   return (
