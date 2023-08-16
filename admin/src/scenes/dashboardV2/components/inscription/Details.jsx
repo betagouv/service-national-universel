@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
-import { ES_NO_LIMIT, translate, YOUNG_SITUATIONS, YOUNG_STATUS } from "snu-lib";
+import { translate, YOUNG_SITUATIONS, YOUNG_STATUS } from "snu-lib";
 import api from "../../../../services/api";
 import { FilterComponent } from "../FilterDashBoard";
 import { BarChart, FullDoughnut, graphColors, Legend, Legends } from "../graphs";

@@ -4,7 +4,7 @@ import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
 import { IoWarningOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { COHORTS, ES_NO_LIMIT, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
+import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
 import api from "../../../../../services/api";
 import { getLink as getOldLink } from "../../../../../utils";
 import DashboardContainer from "../../../components/DashboardContainer";
