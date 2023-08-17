@@ -74,7 +74,11 @@ module.exports.handler = function () {
       });
       Promise.all(promises)
         .then(() => {
-          slack.success({ title: "JDMA synchronization", text: `${count}/4 demarches have been successfully synchronized!` });
+          if (count === 4) {
+            slack.success({ title: "JDMA synchronization", text: `${count}/4 demarches have been successfully synchronized!` });
+          } else {
+            slack.error({ title: "JDMA synchronization - INCOMPLETE", text: `Only ${count}/4 demarches were synchronized. Some failed.` });
+          }
         })
         .catch((e) => {
           capture(e);
