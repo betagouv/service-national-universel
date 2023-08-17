@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../services/api";
+import { setYoung } from "../../redux/auth/actions";
 import plausibleEvent from "../../services/plausible";
 import DSFRContainer from "../../components/inscription/DSFRContainer";
 import Input from "../../components/inscription/input";
@@ -15,6 +16,7 @@ import DidNotReceiveActivationCodeModal from "./components/DidNotReceiveActivati
 import ModifyEmailModal from "./components/ModifyEmailModal";
 
 export default function StepEmailValidation() {
+  const dispatch = useDispatch();
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState("");
@@ -24,6 +26,9 @@ export default function StepEmailValidation() {
 
   async function handleClick() {
     try {
+      if (!emailValidationToken) {
+        return setError("Merci d'entrer le code d'activation ");
+      }
       const { code, ok, token, user } = await api.post("/young/email-validation", { token_email_validation: emailValidationToken });
       console.log({ code, ok, token, user });
       if (!ok) {
@@ -45,7 +50,24 @@ export default function StepEmailValidation() {
         setError(`Une erreur s'est produite : ${translate(code)}`);
       } else {
         toastr.success("Un nouveau code d'activation vous a été envoyé par e-mail", "");
-        setDidNotReceiveCodeModalOpen(false);
+        setModifyEmailOpen(false);
+      }
+    } catch (e) {
+      capture(e);
+      setError(`Une erreur s'est produite : ${translate(e.code)}`);
+    }
+  }
+
+  async function handleRequestEmailChange(email) {
+    try {
+      const { code, ok, user } = await api.post("/young/signup/email", { email });
+      if (!ok) {
+        toastr.error(`Une erreur s'est produite : ${translate(code)}`, "");
+      } else {
+        console.log({ user });
+        dispatch(setYoung(user));
+
+        toastr.success("Votre adresse mail a bien été mise à jour et un code d'activation vous a été envoyé à cette adresse", "");
       }
     } catch (e) {
       capture(e);
@@ -64,16 +86,21 @@ export default function StepEmailValidation() {
           setModifyEmailOpen(true);
         }}
       />
-      <ModifyEmailModal isOpen={isModifyEmailModalOpen} onClose={() => setModifyEmailOpen(false)} />
+      <ModifyEmailModal isOpen={isModifyEmailModalOpen} onClose={() => setModifyEmailOpen(false)} onEmailChange={handleRequestEmailChange} />
       <h1 className="text-2xl font-semibold text-[#161616]">Entrer le code d'activation</h1>
       <p className="mt-4 text-[#3A3A3A]">
         Pour valider la création de votre compte volontaire, vous devez entrer le code d’activation reçu sur la boîte mail <strong>{young?.email}</strong>
-        <InlineButton onClick={() => {}} className="ml-1" />
+        <InlineButton
+          onClick={() => {
+            setModifyEmailOpen(true);
+          }}
+          className="ml-1"
+        />
       </p>
       <div className="mt-8 flex flex-col gap-1">
         <label>Code d'activation reçu par e-mail</label>
         <Input value={emailValidationToken} onChange={setEmailValidationToken} />
-        {error && <span className="text-sm text-red-500">{error}</span>}
+        <div className="h-2">{error && <span className="text-sm text-red-500">{error}</span>}</div>
       </div>
       <InlineButton
         className="mt-3"
@@ -82,7 +109,7 @@ export default function StepEmailValidation() {
         }}>
         Je n'ai rien reçu
       </InlineButton>
-      <SignupButtonContainer onClickNext={handleClick} disabled={!emailValidationToken} labelNext="Activer mon compte volontaire" />
+      <SignupButtonContainer onClickNext={handleClick} labelNext="Activer mon compte volontaire" />
     </DSFRContainer>
   );
 }

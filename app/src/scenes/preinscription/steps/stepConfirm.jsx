@@ -58,8 +58,11 @@ export default function StepConfirm() {
 
     try {
       const { code, ok } = await api.post("/young/signup", values);
-      if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
-      plausibleEvent("Phase0/CTA preinscription - inscription");
+      if (!ok) {
+        setError({ text: `Une erreur s'est produite : ${translate(code)}` });
+      } else {
+        plausibleEvent("Phase0/CTA preinscription - inscription");
+      }
       const { user: young, token } = await api.post(`/young/signin`, { email: data.email, password: data.password });
       if (young) {
         if (token) api.setToken(token);

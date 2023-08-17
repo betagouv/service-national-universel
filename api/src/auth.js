@@ -152,22 +152,20 @@ class Auth {
         email: req.user.email,
         emailVerified: "false",
       });
+
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
 
       const tokenEmailValidation = await crypto.randomInt(1000000);
       user.set({ email: value.email, tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10 });
+      await user.save();
 
       //  await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
       //    emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
       //    params: { tokenEmailValidation },
       //  });
 
-      const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.secret, { expiresIn: JWT_MAX_AGE });
-      res.cookie("jwt_young", token, cookieOptions(JWT_MAX_AGE));
-
       return res.status(200).send({
         ok: true,
-        token,
         user: serializeYoung(user, user),
       });
     } catch (error) {
