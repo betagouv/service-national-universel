@@ -1,8 +1,8 @@
 import Link from "next/link";
 
-const Breadcrumbs = ({ parents, path }) => {
+const Breadcrumbs = ({ parents, path, className = "text-gray-500" }) => {
   return (
-    <nav aria-label="Breadcrumb" className="mt-4 text-xs leading-4 text-gray-500 print:hidden">
+    <nav aria-label="Breadcrumb" className={`mt-4 text-xs leading-4 print:hidden ${className}`}>
       <ol className="flex flex-wrap items-center">
         <li>
           <Link href={path} className="rounded py-1.5">
