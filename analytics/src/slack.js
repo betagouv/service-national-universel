@@ -1,4 +1,5 @@
 require("dotenv").config({ path: "../.env" });
+const fetch = require("node-fetch");
 
 const { SLACK_BOT_TOKEN, SLACK_BOT_CHANNEL, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
