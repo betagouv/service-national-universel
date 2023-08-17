@@ -1,9 +1,9 @@
 import Img4 from "../../assets/observe.svg";
 import Img3 from "../../assets/left.svg";
 import Img2 from "../../assets/right.svg";
-import React from "react";
+import React, { useCallback } from "react";
 import { Col, Container, CustomInput, Row } from "reactstrap";
-import { ReactiveBase, ReactiveList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
+// import { ReactiveBase, ReactiveList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 
 import MissionCard from "./components/missionCard";
@@ -11,83 +11,119 @@ import MissionCard from "./components/missionCard";
 import { apiURL } from "../../config";
 
 import api from "../../services/api";
+import { debounce } from "../../utils";
+import { capture } from "../../sentry";
+import { toastr } from "react-redux-toastr";
 
 const FILTERS = ["DOMAIN", "SEARCH"];
 
 export default function MissionsComponent() {
+  const [filters, setFilters] = React.useState({});
+  const [page, setPage] = React.useState(0);
+  const [size, setSize] = React.useState(20);
+  const [sort, setSort] = React.useState("geo");
+  const [data, setData] = React.useState([]);
+
+  const updateOnFilterChange = useCallback(
+    debounce(async (filters, page, size, sort, setData) => {
+      try {
+        if (!filters.location?.lat || !filters.distance) return;
+        const res = await api.post("/elasticsearch/missionapi/young/search", { filters, page, size, sort });
+        setData(res.data);
+      } catch (e) {
+        capture(e);
+        toastr.error("Oups, une erreur est survenue lors de la recherche des missions", e);
+      }
+    }, 250),
+    [],
+  );
+
   return (
     <div>
       <Missions>
-        <ReactiveBase url={`${apiURL}/es`} app="missionapi" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-          {/* <Modifybutton to="/preferences">Modifier mes préférences</Modifybutton> */}
-          <Heading>
-            <p>TROUVEZ UNE MISSION DE BÉNÉVOLAT</p>
-            <h1>Missions disponibles près de chez vous ou à distance</h1>
-          </Heading>
-          <Filters style={{ marginBottom: 20 }}>
-            <SearchBox md={4}>
-              <DataSearch innerClass={{ input: "form-control" }} placeholder="Recherche..." autosuggest={false} componentId="SEARCH" dataField={["title", "organisation"]} />
-            </SearchBox>
-            <Col md={4}>
-              <CustomInput type="select" id="dist" defaultValue="">
-                <option value="null" disabled>
-                  Rayon de recherche maximum
-                </option>
-                <option value="2">Distance max. 2km</option>
-                <option value="5">Distance max. 5km</option>
-                <option value="20">Distance max. 20km</option>
-                <option value="10">Distance max. 10km</option>
-                <option value="50">Distance max. 50km</option>
-                <option value="100">Distance max. 100km</option>
-                {/* <option value="-1">France entière : préparations militaires uniquement</option> */}
-              </CustomInput>
-            </Col>
-            <DomainsFilter md={4}>
-              <SingleDropdownList
-                selectAllLabel="Tous les domaines"
-                URLParams={true}
-                componentId="DOMAIN"
-                placeholder="Filtrer par domaines"
-                dataField="domain.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
-                showSearch={false}
-              />
-            </DomainsFilter>
-          </Filters>
-          <ReactiveList
-            componentId="result"
-            react={{ and: FILTERS }}
-            pagination={true}
-            size={25}
-            showLoader={true}
-            loader="Chargement..."
-            innerClass={{ pagination: "pagination" }}
-            dataField="created_at"
-            // defaultQuery={function (value, props) {
-            //   if (!young.location || !young.location.lat || !young.location.lon) return { query: { match_all: {} } };
-            //   return {
-            //     query: { match_all: {} },
-            //     sort: [
-            //       {
-            //         _geo_distance: {
-            //           location: [young.location.lon, young.location.lat],
-            //           order: "asc",
-            //           unit: "km",
-            //           mode: "min",
-            //         },
-            //       },
-            //     ],
-            //   };
-            // }}
-            renderResultStats={() => {
-              return <div />;
-              // return <div className="results">{`${numberOfResults} résultats trouvés en ${time}ms`}</div>;
-            }}
-            render={({ data }) => {
-              return data.map((e, i) => <MissionCard mission={e} key={i} image={Img4} />);
-            }}
-          />
-        </ReactiveBase>
+        {/* <ReactiveBase url={`${apiURL}/es`} app="missionapi" headers={{ Authorization: `JWT ${api.getToken()}` }}> */}
+        {/* <Modifybutton to="/preferences">Modifier mes préférences</Modifybutton> */}
+        <Heading>
+          <p>TROUVEZ UNE MISSION DE BÉNÉVOLAT</p>
+          <h1>Missions disponibles près de chez vous ou à distance</h1>
+        </Heading>
+        <Filters style={{ marginBottom: 20 }}>
+          <SearchBox md={4}>
+            <input type="text" placeholder="Recherche..." onChange={(e) => setFilters({ ...filters, search: e.target.value })} />
+          </SearchBox>
+          <Col md={4}>
+            <CustomInput type="select" id="dist" defaultValue="" onChange={(e) => setFilters({ ...filters, distance: e.target.value })}>
+              <option value="null" disabled>
+                Rayon de recherche maximum
+              </option>
+              <option value="2">Distance max. 2km</option>
+              <option value="5">Distance max. 5km</option>
+              <option value="20">Distance max. 20km</option>
+              <option value="10">Distance max. 10km</option>
+              <option value="50">Distance max. 50km</option>
+              <option value="100">Distance max. 100km</option>
+              {/* <option value="-1">France entière : préparations militaires uniquement</option> */}
+            </CustomInput>
+          </Col>
+          <DomainsFilter md={4}>
+            <CustomInput type="select" id="dist" defaultValue="" onChange={(e) => setFilters({ ...filters, domain: e.target.value })}>
+              <option value="">Filtrer par domaines</option>
+              <option value="HEALTH">Santé</option>
+              <option value="CITIZENSHIP">Citoyenneté</option>
+              <option value="SOLIDARITY">Solidarité</option>
+              <option value="SPORT">Sport</option>
+              <option value="EDUCATION">Éducation</option>
+              <option value="CULTURE">Culture</option>
+              <option value="ENVIRONMENT">Environnement</option>
+              <option value="INTERGENERATIONAL">Intergénérationnel</option>
+              <option value="OTHER">Autre</option>
+            </CustomInput>
+            {/* <SingleDropdownList
+              selectAllLabel="Tous les domaines"
+              URLParams={true}
+              componentId="DOMAIN"
+              placeholder="Filtrer par domaines"
+              dataField="domain.keyword"
+              react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
+              showSearch={false}
+            /> */}
+          </DomainsFilter>
+        </Filters>
+
+        {/* <ReactiveList
+          componentId="result"
+          react={{ and: FILTERS }}
+          pagination={true}
+          size={25}
+          showLoader={true}
+          loader="Chargement..."
+          innerClass={{ pagination: "pagination" }}
+          dataField="created_at"
+          // defaultQuery={function (value, props) {
+          //   if (!young.location || !young.location.lat || !young.location.lon) return { query: { match_all: {} } };
+          //   return {
+          //     query: { match_all: {} },
+          //     sort: [
+          //       {
+          //         _geo_distance: {
+          //           location: [young.location.lon, young.location.lat],
+          //           order: "asc",
+          //           unit: "km",
+          //           mode: "min",
+          //         },
+          //       },
+          //     ],
+          //   };
+          // }}
+          renderResultStats={() => {
+            return <div />;
+            // return <div className="results">{`${numberOfResults} résultats trouvés en ${time}ms`}</div>;
+          }}
+          render={({ data }) => {
+            return data.map((e, i) => <MissionCard mission={e} key={i} image={Img4} />);
+          }}
+        /> */}
+        {/* </ReactiveBase> */}
       </Missions>
     </div>
   );
