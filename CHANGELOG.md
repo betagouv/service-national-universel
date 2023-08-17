@@ -1,3 +1,17 @@
+# [1.321.0](https://github.com/betagouv/service-national-universel/compare/v1.320.5...v1.321.0) (2023-08-17)
+
+
+### Bug Fixes
+
+* **analytics:** bug packages ([84f551b](https://github.com/betagouv/service-national-universel/commit/84f551bd0b5235f5ccd9365c5f6db69f8934319e))
+* **analytics:** cron jdma slack msg ([#2882](https://github.com/betagouv/service-national-universel/issues/2882)) ([74e435d](https://github.com/betagouv/service-national-universel/commit/74e435d64bfcb07ed9571df0381fefa9e1219a97))
+* **bdc:** change breadcrumb color on thematique page ([#2884](https://github.com/betagouv/service-national-universel/issues/2884)) ([347ce64](https://github.com/betagouv/service-national-universel/commit/347ce64f9f547322a117017b7e42c2689dfe8f33))
+
+
+### Features
+
+* **admin:** Simplifier le systeme de pagination [#2880](https://github.com/betagouv/service-national-universel/issues/2880) ([dd0e7b6](https://github.com/betagouv/service-national-universel/commit/dd0e7b6502a08edb42042bddee83955be6ae5834))
+
 ## [1.320.5](https://github.com/betagouv/service-national-universel/compare/v1.320.4...v1.320.5) (2023-08-16)
 
 
