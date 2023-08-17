@@ -104,7 +104,6 @@ export default function Filters({
           count: res.count,
           filters: { ...dataFilter, ...res.newFilters },
         };
-        console.log(!firstLoad);
         if (paramData.count !== res.count && !firstLoad) newParamData.page = 0;
         setParamData((paramData) => ({ ...paramData, ...newParamData }));
         setData(res.data);
@@ -116,7 +115,7 @@ export default function Filters({
         if (location.search !== search) window.history.replaceState({ path: pathname + search }, "", pathname + search);
       });
     }, 250),
-    [],
+    [firstLoad],
   );
 
   useEffect(() => {
