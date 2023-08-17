@@ -1,8 +1,6 @@
 import React from "react";
-import { HiChevronDoubleLeft } from "react-icons/hi";
-import { HiChevronDoubleRight } from "react-icons/hi";
-import { HiChevronLeft } from "react-icons/hi";
-import { HiChevronRight } from "react-icons/hi";
+import { HiChevronDoubleLeft, HiChevronDoubleRight, HiChevronLeft, HiChevronRight } from "react-icons/hi";
+import { getPages, sizeOptions } from "../../utils/pagination.utils";
 
 export default function Pagination({ currentPageNumber, setCurrentPageNumber, itemsCountTotal, itemsCountOnCurrentPage, size = 20, setSize }) {
   const displayedPages = 3;
@@ -11,83 +9,26 @@ export default function Pagination({ currentPageNumber, setCurrentPageNumber, it
   const firstDisplayPage = Math.max(lastDisplayPage - displayedPages + 1, 1);
   const lastDisplayItem = currentPageNumber * size + itemsCountOnCurrentPage;
   const lastPage = Math.floor(itemsCountTotal / size) || 0;
-  let pages = [];
-  const actualHits = currentPageNumber * size + 1;
-  const totalhits = currentPageNumber * size + itemsCountOnCurrentPage;
-  const sizeOptions = [
-    { label: "10", value: 10 },
-    { label: "20", value: 20 },
-    { label: "40", value: 40 },
-    { label: "50", value: 50 },
-  ];
-
-  switch (true) {
-    case lastDisplayItem === itemsCountTotal: //derniere page
-      for (let i = firstDisplayPage - 1; i <= lastDisplayPage - 1; ++i) {
-        pages.push(<PageButton key={"page-" + i} page={i} setCurrentPageNumber={setCurrentPageNumber} active={currentPageNumber === i} lastPage={lastPage} />);
-      }
-      break;
-
-    case lastDisplayItem >= itemsCountTotal - size: // avant derniere page
-      for (let i = firstDisplayPage; i <= lastDisplayPage; ++i) {
-        pages.push(<PageButton key={"page-" + i} page={i} setCurrentPageNumber={setCurrentPageNumber} active={currentPageNumber === i} lastPage={lastPage} />);
-      }
-      break;
-
-    case lastDisplayItem / size === 1 || lastDisplayItem / size === 2 || lastDisplayItem / size === 3: // page 1,2,3
-      for (let i = firstDisplayPage; i <= lastDisplayPage; ++i) {
-        pages.push(<PageButton key={"page-" + i} page={i} setCurrentPageNumber={setCurrentPageNumber} active={currentPageNumber === i} lastPage={lastPage} />);
-      }
-      break;
-
-    default:
-      for (let i = firstDisplayPage + 1; i <= lastDisplayPage + 1; ++i) {
-        // page par default
-        pages.push(<PageButton key={"page-" + i} page={i} setCurrentPageNumber={setCurrentPageNumber} active={currentPageNumber === i} lastPage={lastPage} />);
-      }
-      break;
-  }
-
-  pages = pages.filter((item) => item.props.page !== 0 && item.props.page !== lastPage); //on supprime la premiere et derniere page si elles y sont
-
-  function goToPrevious(e) {
-    e.preventDefault();
-    if (currentPageNumber > 0) {
-      setCurrentPageNumber && setCurrentPageNumber(currentPageNumber - 1);
-    }
-  }
-  function goToPreviousX5(e) {
-    e.preventDefault();
-    if (currentPageNumber > 4) {
-      setCurrentPageNumber && setCurrentPageNumber(currentPageNumber - 5);
-    } else {
-      setCurrentPageNumber && setCurrentPageNumber(0);
-    }
-  }
-
-  function goToNext(e) {
-    e.preventDefault();
-    if (lastDisplayItem < itemsCountTotal) {
-      setCurrentPageNumber && setCurrentPageNumber(currentPageNumber + 1);
-    }
-  }
-  function goToNextX5(e) {
-    e.preventDefault();
-    if (lastDisplayItem < itemsCountTotal && lastDisplayItem + 100 < itemsCountTotal) {
-      return setCurrentPageNumber && setCurrentPageNumber(currentPageNumber + 5);
-    }
-    if (itemsCountTotal % size === 0) {
-      return setCurrentPageNumber && setCurrentPageNumber(lastPage - 1);
-    }
-    return setCurrentPageNumber && setCurrentPageNumber(lastPage);
-  }
+  const pages = getPages(lastDisplayItem, firstDisplayPage, lastDisplayPage, itemsCountTotal, lastPage, size);
 
   function checkSize(newSize) {
-    if (currentPageNumber * newSize > itemsCountTotal) {
-      let newLastPage = Math.floor(itemsCountTotal / newSize);
-      setCurrentPageNumber(newLastPage);
-    }
+    if (currentPageNumber * newSize > itemsCountTotal) setCurrentPageNumber(Math.floor(itemsCountTotal / newSize));
     setSize(newSize);
+  }
+  function goToPrevious() {
+    if (currentPageNumber > 0) setCurrentPageNumber(currentPageNumber - 1);
+  }
+  function goToPreviousX5() {
+    if (currentPageNumber > 4) return setCurrentPageNumber(currentPageNumber - 5);
+    return setCurrentPageNumber(0);
+  }
+  function goToNext() {
+    if (lastDisplayItem < itemsCountTotal) setCurrentPageNumber(currentPageNumber + 1);
+  }
+  function goToNextX5() {
+    if (lastDisplayItem < itemsCountTotal && lastDisplayItem + 100 < itemsCountTotal) return setCurrentPageNumber(currentPageNumber + 5);
+    if (itemsCountTotal % size === 0) return setCurrentPageNumber(lastPage - 1);
+    return setCurrentPageNumber(lastPage);
   }
 
   return (
@@ -104,12 +45,12 @@ export default function Pagination({ currentPageNumber, setCurrentPageNumber, it
           Éléments par page
         </div>
       ) : null}
-      <div className="text-[12px] text-[#242526] font-bold">
-        {actualHits} <span className="font-normal">-</span> {totalhits} <span className="font-normal"> sur </span>{" "}
+      <div className="text-xs text-gray-800 font-bold">
+        {currentPageNumber * size + 1} <span className="font-normal">-</span> {currentPageNumber * size + itemsCountOnCurrentPage} <span className="font-normal"> sur </span>{" "}
         {itemsCountTotal === 10000 ? "plus de 10000" : itemsCountTotal || 0}
       </div>
       <div className="flex gap-1 items-center justify-center">
-        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-200 rounded-md border-solid">
+        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-xs border border-gray-200 rounded-md border-solid">
           <button
             onClick={goToPreviousX5}
             className="flex m-auto flex-none w-8 h-8 items-center justify-center border-r border-solid border-gray-200"
@@ -124,17 +65,13 @@ export default function Pagination({ currentPageNumber, setCurrentPageNumber, it
           </button>
         </div>
         <div className="flex justify-center items-center min-h-[32px] text-xs text-gray-600 border border-gray-200 rounded-md border-solid">
-          <PageButton
-            page={0}
-            setCurrentPageNumber={setCurrentPageNumber}
-            active={currentPageNumber === 0}
-            lastPage={lastPage}
-            isLast={lastPage === firstDisplayPage ? true : false}
-          />
+          <PageButton page={0} setCurrentPageNumber={setCurrentPageNumber} active={currentPageNumber === 0} lastPage={lastPage} isLast={lastPage === firstDisplayPage} />
 
           {currentPageNumber > 2 ? <div className="flex px-1 text-xs text-gray-400 border-gray-200 border-r border-solid min-h-[32px] items-center">...</div> : null}
 
-          {pages}
+          {pages.map((i) => (
+            <PageButton key={i} page={i} setCurrentPageNumber={setCurrentPageNumber} active={currentPageNumber === i} lastPage={lastPage} />
+          ))}
           {currentPageNumber < (itemsCountTotal % size === 0 ? lastPage - 3 : lastPage - 2) ? (
             <div className="flex px-1 text-xs text-gray-400 border-gray-200 border-r border-solid min-h-[32px] items-center">...</div>
           ) : null}
@@ -149,7 +86,7 @@ export default function Pagination({ currentPageNumber, setCurrentPageNumber, it
           ) : null}
         </div>
 
-        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-[12px] border border-gray-200 rounded-md border-solid">
+        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-xs border border-gray-200 rounded-md border-solid">
           <button
             onClick={goToNext}
             className="flex items-center justify-center flex-none w-8 h-8 m-auto border-r border-solid border-gray-200"
@@ -172,14 +109,14 @@ function PageButton({ page, setCurrentPageNumber, active, lastPage, isLast = fal
   const getClass = () => {
     let classTab = [];
     active ? classTab.push("font-bold bg-gray-100 text-gray-900") : classTab.push("font-normal"); // la page est active
-    page !== lastPage && !isLast ? classTab.push("border-r border-solid border-gray-200") : null; // page par default
+    page !== lastPage && !isLast ? classTab.push("border-r border-solid border-gray-200") : null; // page par defaut
     page === 0 && active ? classTab.push("rounded-l-md") : null; //premiere page active
     (page === lastPage && active) || isLast === true ? classTab.push("rounded-r-md") : null; //derniere page
     const className = classTab.join(" ");
     return className;
   };
   return (
-    <button onClick={() => setCurrentPageNumber(page)} className={`flex items-center justify-center flex-none w-8 h-8 m-auto ` + getClass()}>
+    <button onClick={() => setCurrentPageNumber(page)} className={`flex items-center justify-center flex-none w-8 h-8 m-auto` + getClass()}>
       {(page + 1).toString()}
     </button>
   );
