@@ -161,46 +161,7 @@ export default function Phase2({ young, onChange }) {
 
   async function transform(data, values) {
     let all = data;
-    if (["contact", "address", "location", "application", "status", "choices", "representative1", "representative2"].some((e) => values.includes(e))) {
-      const youngIds = [...new Set(data.map((item) => item.youngId))];
-      if (youngIds?.length) {
-        const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
-        if (responses.length) {
-          const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
-        }
-      }
-    }
-    if (["missionInfo", "missionLocation"].some((e) => values.includes(e))) {
-      const missionIds = [...new Set(data.map((item) => item.missionId))];
-      if (missionIds?.length) {
-        const { responses } = await api.esQuery("mission", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: missionIds } } });
-        if (responses.length) {
-          const missions = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = all.map((item) => ({ ...item, mission: missions.find((e) => e._id === item.missionId) || {} }));
-        }
-      }
-    }
-    if (values.includes("missionTutor")) {
-      const tutorIds = [...new Set(data.map((item) => item.tutorId))];
-      if (tutorIds?.length) {
-        const { responses } = await api.esQuery("referent", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: tutorIds } } });
-        if (responses.length) {
-          const tutors = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = all.map((item) => ({ ...item, tutor: tutors.find((e) => e._id === item.tutorId) || {} }));
-        }
-      }
-    }
-    if (values.includes("structureInfo")) {
-      const structureIds = [...new Set(data.map((item) => item.structureId))];
-      if (structureIds?.length) {
-        const { responses } = await api.esQuery("structure", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: structureIds } } });
-        if (responses.length) {
-          const structures = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = all.map((item) => ({ ...item, structure: structures.find((e) => e._id === item.structureId) || {} }));
-        }
-      }
-    }
+
     return all.map((data) => {
       if (!data.young) data.young = {};
       if (!data.young.domains) data.young.domains = [];
@@ -325,7 +286,7 @@ export default function Phase2({ young, onChange }) {
       const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalences`);
       if (ok) return setEquivalences(data);
     })();
-  }, []);
+  }, [young]);
 
   function getExportFields() {
     if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
@@ -447,7 +408,7 @@ export default function Phase2({ young, onChange }) {
                     route={`/elasticsearch/application/by-young/${young._id.toString()}/export`}
                     transform={transform}
                     exportFields={getExportFields()}
-                    exportTitle={`candiatures de ${young.firstName} ${young.lastName}`}
+                    exportTitle={`Candidatures de ${young.firstName} ${young.lastName}`}
                     showTotalHits={true}
                     selectedFilters={{}}
                   />

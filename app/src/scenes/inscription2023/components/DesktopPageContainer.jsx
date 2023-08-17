@@ -49,9 +49,15 @@ export default function DesktopPageContainer({
                 </button>
               )}
               {modeCorrection ? (
-                <Button onClick={onCorrection} disabled={disabled} children={childrenContinueButton} />
+                <Button onClick={onCorrection} disabled={disabled}>
+                  {childrenContinueButton}
+                </Button>
               ) : (
-                onSubmit && <Button onClick={onSubmit} disabled={disabled} children={childrenContinueButton} />
+                onSubmit && (
+                  <Button onClick={onSubmit} disabled={disabled}>
+                    {childrenContinueButton}
+                  </Button>
+                )
               )}
             </div>
           </div>

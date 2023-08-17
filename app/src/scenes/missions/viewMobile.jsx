@@ -23,7 +23,6 @@ import {
   APPLICATION_STATUS,
   copyToClipboard,
   formatStringDateTimezoneUTC,
-  htmlCleaner,
   isYoungCanApplyToPhase2Missions,
   SENDINBLUE_TEMPLATES,
   translate,
@@ -40,6 +39,7 @@ import ModalPJ from "./components/ModalPJ";
 import House from "./components/HouseIcon";
 import AlertPrimary from "../../components/ui/alerts/AlertPrimary";
 import InformationCircle from "../../assets/icons/InformationCircle";
+import { htmlCleaner } from "snu-lib";
 
 export default function viewMobile() {
   const [mission, setMission] = useState();

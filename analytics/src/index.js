@@ -37,7 +37,7 @@ app.get("/", async (req, res) => {
   }
 });
 
-app.get("/testsentry", async (req, res) => {
+app.get("/testsentry", async () => {
   try {
     throw new Error("Intentional error");
   } catch (error) {

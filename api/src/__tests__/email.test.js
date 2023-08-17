@@ -10,17 +10,18 @@ beforeAll(dbConnect);
 afterAll(dbClose);
 
 describe("Email", () => {
+  let res;
   describe("GET /email", () => {
     it("should return 400 if email param is missing", async () => {
-      let res = await request(getAppHelper()).get("/email");
+      res = await request(getAppHelper()).get("/email");
       expect(res.status).toBe(400);
     });
     it("should return 400 if email param is not an email", async () => {
-      let res = await request(getAppHelper()).get("/email?email=test");
+      res = await request(getAppHelper()).get("/email?email=test");
       expect(res.status).toBe(400);
     });
     it("should return 200 if email param is an email", async () => {
-      let res = await request(getAppHelper()).get("/email?email=test@example.org");
+      res = await request(getAppHelper()).get("/email?email=test@example.org");
       expect(res.status).toBe(200);
     });
     it("should reject if not ADMIN, REFERENT_DEPARTMENT, REFERENT_REGION", async () => {
@@ -28,7 +29,7 @@ describe("Email", () => {
       const { ADMIN, REFERENT_DEPARTMENT, REFERENT_REGION, ...unauthorizedRoles } = ROLES;
       for (const role of Object.values(unauthorizedRoles)) {
         passport.user.role = role;
-        let res = await request(getAppHelper()).get("/email?email=test@example.org");
+        res = await request(getAppHelper()).get("/email?email=test@example.org");
         expect(res.statusCode).toEqual(403);
       }
       passport.user.role = ADMIN;

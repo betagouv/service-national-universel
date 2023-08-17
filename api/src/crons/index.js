@@ -5,11 +5,8 @@ const apiEngagement = require("./syncApiEngagement");
 const missionOutdated = require("./missionOutdated");
 const computeGoalsInscription = require("./computeGoalsInscription");
 const noticePushMission = require("./noticePushMission");
-//const missionEnd = require("./missionEnd");
 const contratRelance = require("./contratRelance");
 const applicationPending = require("./applicationPending");
-//const newMissionReminder = require("./newMissionReminder");
-//const syncYoungStatsMetabase = require("./syncYoungStatsMetabase");
 const jeVeuxAiderDaily = require("./JeVeuxAiderDaily");
 const loginAttempts = require("./loginAttempts");
 const syncReferentSupport = require("./syncReferentSupport");
@@ -65,27 +62,9 @@ const everyHours = (x) => `0 */${x} * * *`;
 
 // See: https://www.clever-cloud.com/doc/administrate/cron/#deduplicating-crons (INSTANCE_NUMBER)
 if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
-  // every monday at 0800
-  // cron.schedule("0 8 * * 1", function () {
-  //   capture("START CRON RECAP REGION");
-  //   sendRecapRegion();
-  // });
-  // cron.schedule("0 9 * * 1", function () {
-  //   newMissionReminder.handler();
-  // });
-
   cron.schedule("0 9 * * 1", function () {
     applicationPending.handler();
   });
-
-  // cron.schedule("0 9 * * 1", function () {
-  //   missionEnd.handler();
-  // });
-
-  // desactivate for now because useless
-  // cron.schedule("0 1 * * *", function () {
-  //   syncYoungStatsMetabase.handler();
-  // });
 
   cron.schedule("0 9 * * 1", function () {
     noticePushMission.handler();

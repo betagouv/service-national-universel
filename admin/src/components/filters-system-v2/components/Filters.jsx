@@ -104,6 +104,7 @@ export default function Filters({
           count: res.count,
           filters: { ...dataFilter, ...res.newFilters },
         };
+        console.log(!firstLoad);
         if (paramData.count !== res.count && !firstLoad) newParamData.page = 0;
         setParamData((paramData) => ({ ...paramData, ...newParamData }));
         setData(res.data);

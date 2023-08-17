@@ -44,7 +44,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
             <h2 className="col-span-2 mb-4 text-xl font-bold text-white md:mx-2 lg:col-span-3">Thématiques générales</h2>
             {!isLoading ? (
               sections.map(({ _id, position, icon, title, slug, children }) => {
-                return device === "desktop" ? (
+                return device === "desktop" && children?.length ? (
                   <KnowledgeBaseSectionCard
                     key={_id}
                     _id={_id}
@@ -58,7 +58,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
                     className="mx-2 mb-8"
                   />
                 ) : (
-                  <>{children && children.length > 0 && <Accordion key={_id} title={title} list={children} className="mb-3" path="/base-de-connaissance" slug={slug} />}</>
+                  <>{children?.length && <Accordion key={_id} title={title} list={children} className="mb-3" path="/base-de-connaissance" slug={slug} />}</>
                 );
               })
             ) : (
@@ -80,12 +80,12 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
     <>
       <div className="min-h-60 md:min-h-48 w-full border-t-[1px] border-white border-opacity-20 bg-[#32257F] pb-[50px] text-white">
         <div className="mx-auto mt-6 space-y-1 px-4 md:w-[712px]">
-          <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
+          <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" className="text-white" />
           <h1 className="text-3xl font-bold leading-9">{item?.title}</h1>
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-[730px] mt-[-40px] flex w-full flex-col items-start justify-center px-4">
+      <div className="mx-auto mt-[-40px] flex w-full max-w-[730px] flex-col items-start justify-center px-4">
         {sections.length > 0 && (
           <div key={"sections"} className="mt-3 flex w-full flex-col items-center justify-center">
             {sections.map(({ title, children, _id, slug }) => (

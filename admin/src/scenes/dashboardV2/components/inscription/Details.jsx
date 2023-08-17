@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
-import { ES_NO_LIMIT, translate, YOUNG_SITUATIONS, YOUNG_STATUS } from "snu-lib";
+import { translate, YOUNG_SITUATIONS, YOUNG_STATUS } from "snu-lib";
 import api from "../../../../services/api";
 import { FilterComponent } from "../FilterDashBoard";
 import { BarChart, FullDoughnut, graphColors, Legend, Legends } from "../graphs";
@@ -26,8 +26,6 @@ export default function Details({ selectedFilters }) {
       options: Object.keys(YOUNG_STATUS).map((status) => ({ key: status, label: translate(status) })),
     },
   ];
-
-  console.log(qpv);
 
   async function fetchDetailInscriptions() {
     const res = await getDetailInscriptions({ ...selectedFilters, ...selectedFiltersBottom });
@@ -219,112 +217,15 @@ export default function Details({ selectedFilters }) {
 }
 
 async function getDetailInscriptions(filters) {
-  const body = {
-    query: { bool: { must: { match_all: {} }, filter: [] } },
-    aggs: {
-      age: {
-        terms: {
-          field: "birthdateAt",
-          size: ES_NO_LIMIT,
-        },
-      },
-      gender: {
-        terms: {
-          field: "gender.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      grade: {
-        terms: {
-          field: "grade.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      situation: {
-        terms: {
-          field: "situation.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      qpv: {
-        terms: {
-          field: "qpv.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      rural: {
-        terms: {
-          field: "isRegionRural.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      handicap: {
-        terms: {
-          field: "handicap.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      allergies: {
-        terms: {
-          field: "allergies.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      handicapInSameDepartment: {
-        terms: {
-          field: "handicapInSameDepartment.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      reducedMobilityAccess: {
-        terms: {
-          field: "reducedMobilityAccess.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      ppsBeneficiary: {
-        terms: {
-          field: "ppsBeneficiary.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      paiBeneficiary: {
-        terms: {
-          field: "paiBeneficiary.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      specificAmenagment: {
-        terms: {
-          field: "specificAmenagment.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-    },
-    size: 0,
-  };
-  if (filters?.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filters.cohort } });
-  if (filters?.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filters.academy } });
-  if (filters?.region?.length)
-    body.query.bool.filter.push({
-      bool: {
-        should: [
-          { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": filters.region } }] } },
-          { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": filters.region } }] } },
-        ],
-      },
-    });
-  if (filters?.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filters.department } });
-  if (filters?.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filters.status } });
-  const { responses } = await api.esQuery("young", body);
-  if (!responses.length) return;
+  const responses = await api.post("/elasticsearch/dashboard/inscription/inscriptionInfo", { filters: filters });
+  if (!responses?.aggregations) return;
   // get keys of aggregations
-  const keys = Object.keys(responses[0].aggregations);
+  const keys = Object.keys(responses.aggregations);
   const obj = {};
   keys.forEach((key) => {
     // for each key, get the buckets
     obj[key] = {};
-    responses[0].aggregations[key].buckets.forEach((e) => {
+    responses.aggregations[key].buckets.forEach((e) => {
       // for each bucket, get the key and the doc_count
       obj[key][e.key] = e.doc_count;
     });

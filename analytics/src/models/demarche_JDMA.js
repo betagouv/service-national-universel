@@ -22,7 +22,7 @@ const Demarche = db.define(
     defaultScope: {
       attributes: { exclude: ["createdAt", "updatedAt"] },
     },
-  }
+  },
 );
 
 module.exports = Demarche;

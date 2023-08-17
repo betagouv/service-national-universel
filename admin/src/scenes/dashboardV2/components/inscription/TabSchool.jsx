@@ -24,36 +24,16 @@ export default function TabSchool({ filters }) {
     setTotal(0);
     setPageMax(0);
     setIsLoading(true);
-
-    const body = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
-      aggs: {
-        school: {
-          terms: { field: "schoolId.keyword", size: 500 },
-          aggs: { departments: { terms: { field: "department.keyword" } }, firstUser: { top_hits: { size: 1 } } },
-        },
-      },
-      size: 0,
-      track_total_hits: true,
-    };
-    if (filters.region?.length) body.query.bool.filter.push({ terms: { "schoolRegion.keyword": filters.region } });
-    if (filters.department?.length) body.query.bool.filter.push({ terms: { "schoolDepartment.keyword": filters.department } });
-    if (filters.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filters.cohort } });
-    if (filters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filters.academy } });
-
-    let route = "young";
-    if (user.role === ROLES.REFERENT_DEPARTMENT) route = "young-having-school-in-department/inscriptions";
-    if (user.role === ROLES.REFERENT_REGION) route = "young-having-school-in-region/inscriptions";
-
-    const { responses } = await api.esQuery("young", body, route);
-    if (!responses?.length) return setNoResult(true);
-    if (setNoResult(responses[0].aggregations.school.buckets.length === 0)) {
+    
+    const responses = await api.post("/elasticsearch/dashboard/inscription/youngBySchool", {filters: filters} );
+    if (!responses?.aggregations) return setNoResult(true);
+    if (setNoResult(responses.aggregations.school.buckets.length === 0)) {
       setNoResult(true);
       setIsLoading(false);
       return;
     }
 
-    let reducedSchool = responses[0]?.aggregations?.school?.buckets?.reduce((acc, school) => {
+    let reducedSchool = responses?.aggregations?.school?.buckets?.reduce((acc, school) => {
       if (school.key === "") return acc;
       const schoolInfo = school.firstUser?.hits?.hits[0]?._source;
       const total = school.doc_count;

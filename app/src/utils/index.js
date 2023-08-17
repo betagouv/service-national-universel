@@ -1,7 +1,6 @@
 import PasswordValidator from "password-validator";
 import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, sessions2023 } from "snu-lib";
 export * from "snu-lib";
-import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
 import { isCohortDone } from "./cohorts";
 function addOneDay(date) {
@@ -91,15 +90,6 @@ export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];
 
 export const ENABLE_PM = true;
 
-export const htmlCleaner = (text) => {
-  return sanitizeHtml(text, {
-    allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "ul"],
-    allowedAttributes: {
-      a: ["href", "target", "rel"],
-    },
-  });
-};
-
 export function urlWithScheme(url) {
   if (!/^https?:\/\//i.test(url)) return `http://${url}`;
   return url;
@@ -127,25 +117,27 @@ export function slugifyFileName(str) {
   return slugify(str, { replacement: "-", remove: /[*+~.()'"!:@]/g });
 }
 
-export const getDistance = (lat1, lon1, lat2, lon2) => {
-  if (lat1 === lat2 && lon1 === lon2) {
-    return 0;
-  } else {
-    let radlat1 = (Math.PI * lat1) / 180;
-    let radlat2 = (Math.PI * lat2) / 180;
-    let theta = lon1 - lon2;
-    let radtheta = (Math.PI * theta) / 180;
-    let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-    if (dist > 1) {
-      dist = 1;
-    }
-    dist = Math.acos(dist);
-    dist = (dist * 180) / Math.PI;
-    dist = dist * 60 * 1.1515;
 
-    return dist;
-  }
-};
+function toRadians(degrees) {
+  return degrees * Math.PI / 180;
+}
+
+// Calculer la distance haversine entre deux points géographiques
+export function getDistance (lat1, lon1, lat2, lon2) {
+  const earthRadiusKm = 6371; // Rayon de la Terre en kilomètres
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = earthRadiusKm * c;
+
+  return distance;
+}
 
 export const regexPhoneFrenchCountries = /^((00|\+)(33|590|594|262|596|269|687|689|508|681)|0)[1-9]?(\d{8})$/;
 

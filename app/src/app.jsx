@@ -26,7 +26,7 @@ import MilitaryPreparation from "./scenes/militaryPreparation";
 import Missions from "./scenes/missions";
 import NonEligible from "./scenes/noneligible";
 import Phase1 from "./scenes/phase1";
-import changeSejour from "./scenes/phase1/changeSejour";
+import ChangeSejour from "./scenes/phase1/changeSejour";
 import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
 import Preferences from "./scenes/preferences";
@@ -64,7 +64,6 @@ export default function App() {
     <Sentry.ErrorBoundary fallback={myFallback}>
       <Router history={history}>
         <ScrollToTop />
-        {/* <GoogleTags /> */}
         <div className={`${environment === "production" ? "main" : "flex h-screen flex-col justify-between"}`}>
           {maintenance && !localStorage?.getItem("override_maintenance") ? (
             <Switch>
@@ -240,7 +239,7 @@ const Espace = () => {
           <SentryRoute path="/candidature" component={Candidature} />
           {environment === "development" && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
           <SentryRoute path="/diagoriente" component={Diagoriente} />
-          {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
+          {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={ChangeSejour} /> : null}
           {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
           <Redirect to="/" />
         </Switch>

@@ -3,7 +3,6 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import RightArrow from "../../../assets/icons/RightArrow";
 import Input from "../../../components/inscription/input";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
@@ -91,7 +90,7 @@ export default function Signin() {
           <ul className="text-[#0063CB] text-xs mb-2 list-disc">
             <li className="ml-3 mb-1">L'adresse mail que vous utilisez est bien celle indiquée ci-dessus</li>
             <li className="ml-3 mb-1">Le mail ne se trouve pas dans vos spam</li>
-            <li className="ml-3 mb-1">L'adresse mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
+            <li className="ml-3 mb-1">L'adresse mail no_reply-auth@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
             <li className="ml-3 mb-1">Votre boite de réception n'est pas saturée</li>
           </ul>
         </div>

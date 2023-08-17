@@ -798,7 +798,7 @@ router.post("/:sessionId/:key/send-reminder", passport.authenticate(["referent"]
   }
 });
 
-router.post("/:sessionId/image-rights", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // --- validate
     const { error, value } = Joi.object({
@@ -809,7 +809,6 @@ router.post("/:sessionId/image-rights", passport.authenticate(["referent"], { se
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     const { sessionId } = value;
-
     // --- rights
     const session = await SessionPhase1.findById(sessionId);
     if (!session) {
@@ -818,10 +817,8 @@ router.post("/:sessionId/image-rights", passport.authenticate(["referent"], { se
     if (!canSendImageRightsForSessionPhase1(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-
     // --- found youngs
     const youngs = await YoungModel.find({ sessionPhase1Id: session._id }).sort({ lastName: 1, firstName: 1 });
-
     // --- start zip file
     let zip = new Zip();
 

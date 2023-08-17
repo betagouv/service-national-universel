@@ -12,9 +12,9 @@ export default function JDMNotDone({ cohort }) {
         Réalisez votre JDC et <br />
         obtenez votre certificat !
       </p>
-        <p className="text-center text-xs leading-relaxed text-gray-500">
-          Vous devez réaliser votre JDC car <strong>vous n&apos;avez pas participé</strong> à la Journée défense et mémoire (JDM) lors de votre séjour de cohésion.
-        </p>
+      <p className="text-center text-xs leading-relaxed text-gray-500">
+        Vous devez réaliser votre JDC car <strong>vous n&apos;avez pas participé</strong> à la Journée défense et mémoire (JDM) lors de votre séjour de cohésion.
+      </p>
     </div>
   );
 }

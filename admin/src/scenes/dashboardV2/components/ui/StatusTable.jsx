@@ -3,15 +3,17 @@ import React from "react";
 import { LoadingBar } from "./loading";
 
 export default function StatusTable({ statuses, className = "", onStatusClicked = () => {}, loading = false, nocols = false }) {
-  const columns = nocols ?
-    { left: statuses, right: [] } :
-    statuses ? {
-      left: statuses.slice(0, Math.ceil(statuses.length / 2)),
-      right: statuses.slice(Math.ceil(statuses.length / 2)),
-    } : {
-      left: [],
-      right: [],
-    };
+  const columns = nocols
+    ? { left: statuses, right: [] }
+    : statuses
+    ? {
+        left: statuses.slice(0, Math.ceil(statuses.length / 2)),
+        right: statuses.slice(Math.ceil(statuses.length / 2)),
+      }
+    : {
+        left: [],
+        right: [],
+      };
 
   return (
     <div className={`flex justify-center items-center ${className}`}>

@@ -42,7 +42,7 @@ jobs:
           mongodb-version: "4.0"
 
       - name: Install packages
-        run: npm install
+        run: npm ci
 
       - name: Lint code
         working-directory: ${{ env.SUBFOLDER_NAME }}
@@ -80,7 +80,7 @@ jobs:
       - name: Build lib
         continue-on-error: false
         run: |
-          npm install -w packages/lib
+          npm ci -w packages/lib
           npm run build -w packages/lib
           rm packages/lib/.gitignore
 

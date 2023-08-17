@@ -19,7 +19,6 @@
  *                                                              => Récupération du détail d'un département (les centres du départemetn avec les groupes y arrivant)
  */
 
-// eslint-disable-next-line import/no-unused-modules
 const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();

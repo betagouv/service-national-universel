@@ -1,0 +1,830 @@
+import React, { useEffect, useState } from "react";
+import { MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../../utils";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import ReactTooltip from "react-tooltip";
+import { capture } from "../../../../sentry";
+import API from "../../../../services/api";
+import { apiAdress } from "../../../../services/api-adresse";
+
+import Sante from "../../../../assets/mission-domaines/sante";
+import Solidarite from "../../../../assets/mission-domaines/solidarite";
+import Citoyennete from "../../../../assets/mission-domaines/citoyennete";
+import Education from "../../../../assets/mission-domaines/education";
+import Sport from "../../../../assets/mission-domaines/sport";
+import DefenseEtMemoire from "../../../../assets/mission-domaines/defense-et-memoire";
+import Environment from "../../../../assets/mission-domaines/environment";
+import Securite from "../../../../assets/mission-domaines/securite";
+import Culture from "../../../../assets/mission-domaines/culture";
+import PreparationMilitaire from "../../../../assets/mission-domaines/preparation-militaire";
+
+import AcademicCap from "../../../../assets/icons/AcademicCap";
+import Sun from "../../../../assets/icons/Sun";
+import Calendar from "../../../../assets/icons/Calendar";
+import Search from "../../../../assets/icons/Search";
+import DomainFilter from "./DomainFilter";
+import PeriodeTab from "./PeriodeTab";
+import PeriodeItem from "./PeriodItem";
+import PietonSvg from "../../assets/Pieton";
+import VeloSvg from "../../assets/Velo";
+import VoitureSvg from "../../assets/Voiture";
+import TrainSvg from "../../assets/Train";
+import FuseeSvg from "../../assets/Fusee";
+import InfobulleIcon from "../../../../assets/infobulleIcon.svg";
+
+import { HiOutlineAdjustments, HiOutlineArrowNarrowRight } from "react-icons/hi";
+import RadioInput from "../../../../assets/radioInput.svg";
+import RadioUnchecked from "../../../../assets/radioUnchecked.svg";
+import Select from "./Select.jsx";
+import Toggle from "./Toggle";
+import Modal from "../../../../components/ui/modals/Modal";
+
+export default function MissionFilters({ filters, setFilters }) {
+  const young = useSelector((state) => state.Auth.young);
+
+  const [referentManagerPhase2, setReferentManagerPhase2] = useState();
+  const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
+  const [dropdownControlWhenOpen, setDropdownControlWhenOpen] = React.useState(false);
+  const [focusedAddress, setFocusedAddress] = React.useState({ address: young?.address, zip: young?.zip });
+  const [modalControl, setModalControl] = React.useState(false);
+  const [keyWordOpen, setKeyWordOpen] = React.useState(false);
+  const [keyWord, setKeyWord] = React.useState("");
+  const [showMoreDetails, setShowMoreDetails] = useState(false);
+  const refDropdownControlDistance = React.useRef(null);
+  const refDropdownControlWhen = React.useRef(null);
+
+  const DISTANCE_MAX = 100;
+  const marginDistance = getMarginDistance(document.getElementById("distanceKm"));
+
+  const handleToggleChangeDomain = (domain) => {
+    setFilters((prev) => {
+      const newFilter = { ...prev };
+      if (filters.domains?.includes(domain)) {
+        newFilter.domains = newFilter.domains.filter((d) => d !== domain);
+      } else {
+        newFilter.domains = [...(newFilter.domains || []), domain];
+      }
+      return newFilter;
+    });
+  };
+
+  const handleToggleChangePeriod = (period) => {
+    setFilters((prev) => {
+      const newFilter = { ...prev };
+      if (newFilter?.subPeriod?.includes(period)) {
+        newFilter.subPeriod = newFilter.subPeriod.filter((d) => d !== period);
+      } else {
+        newFilter.subPeriod = [...(newFilter.subPeriod || []), period];
+      }
+      return newFilter;
+    });
+  };
+
+  useEffect(() => {
+    if (!refDropdownControlDistance) return;
+    const handleClickOutside = (event) => {
+      if (refDropdownControlDistance?.current && !refDropdownControlDistance.current.contains(event.target)) {
+        setDropdownControlDistanceOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!refDropdownControlWhen) return;
+    const handleClickOutside = (event) => {
+      if (refDropdownControlWhen?.current && !refDropdownControlWhen.current.contains(event.target)) {
+        setDropdownControlWhenOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!young) return;
+    const getLocation = async () => {
+      try {
+        if (filters.location?.lat && filters.location?.lon) return;
+        const location = await getCoordinates({ q: young?.address, postcode: young?.zip });
+        setFilters({ ...filters, location });
+      } catch (e) {
+        capture(e);
+      }
+    };
+    const getManagerPhase2 = async () => {
+      try {
+        if (referentManagerPhase2?.email) return;
+        const { ok, data } = await API.get(`/referent/manager_phase2/${young.department}`);
+        if (ok) setReferentManagerPhase2(data);
+      } catch (e) {
+        capture(e);
+      }
+    };
+    getLocation();
+    getManagerPhase2();
+  }, [young]);
+
+  useEffect(() => {
+    if (!focusedAddress) return;
+    (async () => {
+      let location;
+      location = await getCoordinates({ q: focusedAddress.address, postcode: focusedAddress.zip });
+      if (location) setFilters((prev) => ({ ...prev, location }));
+    })();
+  }, [focusedAddress]);
+
+  function getMarginDistance(ele) {
+    if (ele) return Number((ele.scrollWidth + ((filters?.distance - DISTANCE_MAX) * ele.scrollWidth) / DISTANCE_MAX) * 0.92);
+    return false;
+  }
+
+  const getLabelWhen = (when) => {
+    switch (when) {
+      case "DURING_SCHOOL":
+        return "Période extra-scolaire";
+      case "DURING_HOLIDAYS":
+        return "Pendant les vacances";
+      case "CUSTOM":
+        return "Choisir une période";
+      default:
+        return "N'importe quand";
+    }
+  };
+
+  const callSingleAddressAPI = async (q, postcode) => {
+    try {
+      const res = await apiAdress(q, { postcode });
+      return res?.features[0];
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  };
+
+  const getCoordinates = async ({ q, postcode }) => {
+    try {
+      let adresse = await callSingleAddressAPI(q, postcode);
+      if (!adresse) {
+        console.warn("Utilisation du zip code seul");
+        adresse = await callSingleAddressAPI(postcode);
+        if (!adresse) throw "Erreur en utilisant l'api d'adresse";
+      }
+      const coordinates = adresse?.geometry?.coordinates;
+      return { lat: coordinates[1], lon: coordinates[0] };
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  };
+
+  return (
+    <>
+      {/* Mobile */}
+      <div className="mx-auto space-y-4 my-4 md:hidden rounded-xl">
+        <div className="max-w-3xl mx-auto flex bg-white items-center justify-between rounded-full border py-1 pl-2.5 pr-1">
+          <input
+            value={filters?.searchbar}
+            onChange={(e) => {
+              e.persist();
+              setFilters((prev) => ({ ...prev, searchbar: e.target.value }));
+            }}
+            className="w-11/12 text-xs"
+            type="text"
+            placeholder="Mot clé • N'importe quand • Distance max 100km..."
+          />
+          <button className="flex h-10 w-10 rounded-full bg-blue-600" onClick={() => setModalControl(true)}>
+            <HiOutlineAdjustments className="m-auto text-white" />
+          </button>
+        </div>
+
+        <div className="relative">
+          <div className="flex gap-4 mx-auto overflow-x-scroll md:justify-center mt-6">
+            <DomainFilter Icon={Sante} name="HEALTH" label="Santé" onClick={handleToggleChangeDomain} active={(filters?.domains || []).includes("HEALTH")} />
+            <DomainFilter Icon={Solidarite} name="SOLIDARITY" label="Solidarité" onClick={handleToggleChangeDomain} active={(filters?.domains || []).includes("SOLIDARITY")} />
+            <DomainFilter Icon={Citoyennete} name="CITIZENSHIP" label="Citoyenneté" onClick={handleToggleChangeDomain} active={(filters?.domains || []).includes("CITIZENSHIP")} />
+            <DomainFilter Icon={Education} name="EDUCATION" label="Éducation" onClick={handleToggleChangeDomain} active={(filters?.domains || []).includes("EDUCATION")} />
+            <DomainFilter Icon={Sport} name="SPORT" label="Sport" onClick={handleToggleChangeDomain} active={(filters?.domains || []).includes("SPORT")} />
+            <DomainFilter
+              Icon={DefenseEtMemoire}
+              name="DEFENSE"
+              label="Défense et mémoire"
+              onClick={handleToggleChangeDomain}
+              active={(filters?.domains || []).includes("DEFENSE")}
+            />
+            <DomainFilter Icon={Environment} name="ENVIRONMENT" label="Environment" onClick={handleToggleChangeDomain} active={(filters?.domains || []).includes("ENVIRONMENT")} />
+            <DomainFilter Icon={Securite} name="SECURITY" label="Sécurité" onClick={handleToggleChangeDomain} active={(filters?.domains || []).includes("SECURITY")} />
+            <DomainFilter Icon={Culture} name="CULTURE" label="Culture" onClick={handleToggleChangeDomain} active={(filters?.domains || []).includes("CULTURE")} />
+            <DomainFilter
+              Icon={PreparationMilitaire}
+              label="Préparations militaires"
+              active={filters?.isMilitaryPreparation}
+              onClick={() => setFilters((prev) => ({ ...prev, isMilitaryPreparation: !prev.isMilitaryPreparation }))}
+            />
+          </div>
+        </div>
+
+        <Modal isOpen={modalControl} onClose={() => setModalControl(false)} className="bg-gray-50 p-3 md:w-[40rem]">
+          <div className="rounded-xl bg-gray-50 p-2">
+            <div className="mb-3 ml-2 flex items-center justify-between">
+              <button
+                className="text-xs py-2 text-gray-500"
+                onClick={() => {
+                  setModalControl(false);
+                  setShowMoreDetails(false);
+                }}>
+                Fermer
+              </button>
+              <div>Filtrez</div>
+              <button
+                className="flex h-10 w-10 rounded-full bg-blue-600 "
+                onClick={() => {
+                  setModalControl(false);
+                }}>
+                <Search className="m-auto  text-white " />
+              </button>
+            </div>
+            <div className="flex flex-col space-y-5">
+              <div className="rounded-xl border bg-white py-3.5 px-4">
+                {!keyWordOpen && (
+                  <button
+                    className="w-full flex justify-between"
+                    onClick={() => {
+                      setDropdownControlDistanceOpen(false);
+                      setDropdownControlWhenOpen(false);
+                      setKeyWordOpen(true);
+                    }}>
+                    <div className="font-bold">Mot clé</div>
+                    <div className="text-md text-gray-500">{filters?.searchbar || "Aucun"}</div>
+                  </button>
+                )}
+                {keyWordOpen && (
+                  <div>
+                    <div className="text-center font-bold ">Mot clé</div>
+                    <input
+                      value={keyWord}
+                      onChange={(e) => {
+                        setKeyWord(e.target.value);
+                      }}
+                      className="my-3 w-full flex-1 rounded-md border border-gray-300 py-1.5  pl-3 text-sm text-gray-700 placeholder:text-gray-400"
+                      type="text"
+                      placeholder="Rechercher par mot clé..."
+                    />
+                    <div className="flex justify-end ">
+                      <div
+                        className="w-2/5 rounded-md bg-blue-600 p-2 text-center text-white "
+                        onClick={() => {
+                          setKeyWordOpen(!keyWordOpen);
+                          setFilters((prev) => ({ ...prev, searchbar: keyWord }));
+                        }}>
+                        Valider
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="rounded-xl border bg-white py-3.5 px-4">
+                {!dropdownControlDistanceOpen && (
+                  <button
+                    onClick={() => {
+                      setDropdownControlDistanceOpen(true);
+                      setDropdownControlWhenOpen(false);
+                      setKeyWordOpen(false);
+                    }}
+                    className="w-full flex justify-between">
+                    <div className="font-bold">Distance maximum</div>
+                    <div className="text-md text-gray-500">{filters?.distance || 100}km max</div>
+                  </button>
+                )}
+                {dropdownControlDistanceOpen && (
+                  <div>
+                    <div className="mb-2 text-center font-bold ">Distance maximum</div>
+
+                    <div className="text-center text-xs text-gray-500">
+                      Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré.{" "}
+                      {showMoreDetails === false ? (
+                        <button
+                          className="text-blue-500"
+                          onClick={() => {
+                            setShowMoreDetails(true);
+                          }}>
+                          En savoir plus
+                        </button>
+                      ) : (
+                        <>
+                          <span>
+                            Il existe des offres de missions accessibles pour vous sous conditions partout en France, notamment certaines préparations militaires. Si vous souhaitez
+                            connaitre ces offres et y accéder, contactez tout de suite votre référent phase 2 :
+                          </span>{" "}
+                          <a href={`mailto:${referentManagerPhase2?.email}`}>{referentManagerPhase2?.email}</a>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="flex w-full flex-col space-y-2 py-2 px-2">
+                      <div className="my-3 flex justify-around">
+                        <div className="flex items-center gap-2">
+                          <input
+                            id="main-address"
+                            name="main-address"
+                            type="radio"
+                            checked={focusedAddress?.address !== young?.mobilityNearRelativeAddress}
+                            onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
+                            className="hidden"
+                          />
+                          <label htmlFor="main-address" className="mr-2">
+                            {focusedAddress?.address === young.address ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
+                          </label>
+                          <label htmlFor="main-address" className="cursor-pointer">
+                            <span className="text-xs leading-[15px] text-gray-700">Autour de mon adresse principale</span>
+                            <br />
+                            <span className="text-[13px] text-gray-700">{young.city}</span>
+                          </label>
+                        </div>
+                        {young?.mobilityNearRelativeCity ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              id="second-address"
+                              name="address"
+                              type="radio"
+                              checked={focusedAddress?.address === young?.mobilityNearRelativeAddress}
+                              onChange={() => setFocusedAddress({ address: young?.mobilityNearRelativeAddress, zip: young?.mobilityNearRelativeZip })}
+                              className="hidden"
+                            />
+                            <label htmlFor="second-address" className="mr-2">
+                              {focusedAddress?.address === young.mobilityNearRelativeAddress ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
+                            </label>
+                            <label htmlFor="second-address" className="cursor-pointer">
+                              <span className="text-xs text-gray-700">Autour de l&apos;adresse d&apos; un proche</span>
+                              <br />
+                              <span className="text-[13px] text-gray-700">{young?.mobilityNearRelativeCity}</span>
+                            </label>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <input id="second-address" name="address" type="radio" value={young.city} disabled />
+                            <label htmlFor="second-address">
+                              <span className="text-xs text-gray-400">Autour de l&apos;adresse d&apos; un proche</span>
+                              <br />
+                              <Link to="/preferences" className="text-[13px] text-blue-600 underline hover:underline">
+                                Renseigner une adresse
+                              </Link>
+                            </label>
+                          </div>
+                        )}
+                      </div>
+                      <div className="mb-3 flex flex-row items-center justify-start">
+                        <Toggle toggled={filters.hebergement} onClick={() => setFilters((prev) => ({ ...prev, hebergement: !prev.hebergement }))} />
+                        <div className="ml-4">
+                          <div className="text-[12px]">Mission avec hébergement</div>
+                          <div className="text-[13px]">Dans toute la France</div>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <input
+                          id="distanceKm"
+                          list="distance-list"
+                          type="range"
+                          className="h-2  w-full cursor-pointer appearance-none items-center rounded-full bg-gray-200"
+                          value={filters?.distance}
+                          min="1"
+                          max={DISTANCE_MAX}
+                          step="1"
+                          onChange={(e) => {
+                            e.persist();
+                            setFilters((prev) => ({ ...prev, distance: e.target.value }));
+                          }}
+                        />
+                        <div className={`absolute -mt-10 -ml-2 font-bold ${!marginDistance && "ml-1 flex justify-center"} `} style={{ left: `${marginDistance}px` }}>
+                          {filters?.distance}km
+                        </div>
+                      </div>
+                      <div className="mt-2 flex w-full items-center justify-between px-[10px] text-gray-200">
+                        <PietonSvg />
+                        <VeloSvg />
+                        <VoitureSvg />
+                        <TrainSvg />
+                        <FuseeSvg />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="rounded-xl border bg-white py-3.5 ">
+                {!dropdownControlWhenOpen && (
+                  <button
+                    className="w-full flex justify-between px-4"
+                    onClick={() => {
+                      setDropdownControlDistanceOpen(false);
+                      setDropdownControlWhenOpen(true);
+                      setKeyWordOpen(false);
+                    }}>
+                    <div className="font-bold">Période</div>
+                    <div className="text-md text-gray-500">{getLabelWhen(filters.period)}</div>
+                  </button>
+                )}
+                {dropdownControlWhenOpen && (
+                  <div>
+                    <div className="text-center font-bold ">Période</div>
+                    <div>
+                      <div className="mt-3 flex flex-wrap text-sm">
+                        <PeriodeTab label={getLabelWhen("")} active={!filters?.period} name="" onClick={() => setFilters((prev) => ({ ...prev, period: "" }))} />
+                        <PeriodeTab
+                          Icon={Calendar}
+                          label={getLabelWhen("CUSTOM")}
+                          active={filters?.period === "CUSTOM"}
+                          name="CUSTOM"
+                          onClick={() => setFilters((prev) => ({ ...prev, period: "CUSTOM" }))}
+                        />
+                        <PeriodeTab
+                          Icon={AcademicCap}
+                          label={getLabelWhen("DURING_SCHOOL")}
+                          active={filters?.period === "DURING_SCHOOL"}
+                          name="DURING_SCHOOL"
+                          onClick={() => setFilters((prev) => ({ ...prev, period: "DURING_SCHOOL" }))}
+                        />
+                        <PeriodeTab
+                          Icon={Sun}
+                          label={getLabelWhen("DURING_HOLIDAYS")}
+                          active={filters?.period === "DURING_HOLIDAYS"}
+                          name="DURING_HOLIDAYS"
+                          onClick={() => setFilters((prev) => ({ ...prev, period: "DURING_HOLIDAYS" }))}
+                        />
+                      </div>
+                      {filters.period === "DURING_SCHOOL" ? (
+                        <Select
+                          placeholder={getLabelWhen("DURING_SCHOOL")}
+                          options={MISSION_PERIOD_DURING_SCHOOL}
+                          handleChangeValue={handleToggleChangePeriod}
+                          value={filters.subPeriod}
+                        />
+                      ) : null}
+                      {filters.period === "DURING_HOLIDAYS" ? (
+                        <Select
+                          placeholder={getLabelWhen("DURING_HOLIDAYS")}
+                          options={MISSION_PERIOD_DURING_HOLIDAYS}
+                          handleChangeValue={handleToggleChangePeriod}
+                          value={filters.subPeriod}
+                        />
+                      ) : null}
+                      {filters.period === "CUSTOM" ? (
+                        <div className="mt-6 flex flex-col items-center justify-center gap-2">
+                          <div className="flex flex-wrap items-center justify-center gap-2">
+                            <div className="flex items-center gap-2 rounded-lg border-[1px]  py-1 px-2">
+                              <label className="m-0 w-full text-left text-gray-500">Du</label>
+                              <input
+                                required
+                                type="date"
+                                className="w-full cursor-pointer bg-inherit disabled:cursor-not-allowed"
+                                value={filters?.fromDate}
+                                onChange={(e) => {
+                                  e.persist();
+                                  setFilters((prev) => ({ ...prev, fromDate: e.target.value }));
+                                }}
+                              />
+                            </div>
+                            <div className="flex items-center gap-2 rounded-lg border-[1px]  py-1 px-2">
+                              <label className="m-0 w-full text-left text-gray-500">Au</label>
+                              <input
+                                required
+                                type="date"
+                                className="w-full cursor-pointer bg-inherit disabled:cursor-not-allowed"
+                                value={filters?.toDate}
+                                onChange={(e) => {
+                                  e.persist();
+                                  setFilters((prev) => ({ ...prev, toDate: e.target.value }));
+                                }}
+                              />
+                            </div>
+                          </div>
+                          {filters?.fromDate || filters?.toDate ? (
+                            <div className="cursor-pointer text-xs text-gray-600 hover:underline" onClick={() => setFilters((prev) => ({ ...prev, toDate: "", fromDate: "" }))}>
+                              Effacer
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <Link to="/preferences">
+              <div className="mx-3 mt-4 flex items-center justify-between pb-20">
+                <div>
+                  <div className="font-bold">Gagnez du temps</div>
+                  <div className="text-xs text-gray-600">Renseignez vos préférences pour les prochaines fois</div>
+                </div>
+                <HiOutlineArrowNarrowRight className="w-5 text-gray-500" />
+              </div>
+            </Link>
+          </div>
+        </Modal>
+      </div>
+
+      {/* Desktop */}
+      <div className="hidden md:block my-4 space-y-6 rounded-xl bg-gray-50 p-10">
+        {/* search bar */}
+        <div className="relative flex justify-center">
+          <div className="flex w-9/12 items-center overflow-hidden rounded-full border-[1px] border-gray-300 bg-white  p-1.5">
+            <input
+              value={filters.searchbar}
+              onChange={(e) => {
+                e.persist();
+                setFilters((prev) => ({ ...prev, searchbar: e.target.value }));
+              }}
+              className="w-full flex-1 p-1 px-3 text-sm text-gray-700 placeholder:text-gray-400"
+              type="text"
+              placeholder="Rechercher une mission..."
+            />
+            <div
+              className="flex w-full flex-1 cursor-pointer items-center border-l-[1px] border-gray-300 p-1 px-3 text-sm text-gray-700 placeholder:text-gray-400"
+              onClick={() => setDropdownControlDistanceOpen((e) => !e)}>
+              Distance max. {filters.distance}km
+            </div>
+            <div
+              className="flex w-full flex-1 cursor-pointer items-center border-l-[1px] border-gray-300 p-1 px-3 text-sm text-gray-700 placeholder:text-gray-400"
+              onClick={() => setDropdownControlWhenOpen((e) => !e)}>
+              {getLabelWhen(filters.period)}
+            </div>
+            <div className="flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-full bg-blue-600 hover:bg-blue-500">
+              <Search className="text-white" />
+            </div>
+          </div>
+          {/* BEGIN MODAL CONTROL DISTANCE */}
+          <div
+            ref={refDropdownControlDistance}
+            className={`${
+              dropdownControlDistanceOpen ? "block" : "hidden"
+            } absolute top-[calc(100%+8px)] left-0 z-20 w-full overflow-hidden rounded-lg bg-white p-3 shadow transition`}>
+            <div className="flex items-center justify-center">
+              <div className="text-gray-00 mr-1 text-sm font-bold"> Distance maximum </div>
+              <div>
+                <img src={InfobulleIcon} data-tip data-for="info" />
+                <ReactTooltip delayHide={3000} clickable={true} id="info" className="w-[527px] bg-white opacity-100 shadow-xl" arrowColor="white">
+                  <div className="mb-2 text-left text-[15px] text-[#414458]">Visibilité des missions</div>
+                  <div className="text-left text-[12px] text-[#83869A]">
+                    Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. Il existe des offres de missions accessibles pour vous sous
+                    conditions partout en France, notamment certaines préparations militaires. Si vous souhaitez connaître ces offres et y accéder, contactez tout de suite votre
+                    référent phase 2 : <a href={`mailto:${referentManagerPhase2?.email}`}>{referentManagerPhase2?.email}</a>
+                  </div>
+                </ReactTooltip>
+              </div>
+            </div>
+
+            <div className="flex w-full flex-col space-y-2 py-2 px-4">
+              <div className="my-3 flex flex-row justify-around">
+                <div className="flex w-1/2 flex-col items-center justify-center">
+                  <div className="w-3/4">
+                    <div className="flex w-full items-center gap-2">
+                      <input
+                        id="main-address"
+                        name="main-address"
+                        type="radio"
+                        checked={focusedAddress?.address !== young?.mobilityNearRelativeAddress}
+                        onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
+                        className="hidden"
+                      />
+                      <label htmlFor="main-address" className="mr-2">
+                        {focusedAddress?.address === young.address ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
+                      </label>
+                      <label htmlFor="main-address" className="cursor-pointer">
+                        <span className="text-[13px] text-gray-700">Autour de mon adresse principale</span>
+                        <br />
+                        <span className="text-[15px] text-gray-700">{young.city}</span>
+                      </label>
+                    </div>
+                    {young?.mobilityNearRelativeCity ? (
+                      <div className="flex w-full items-center gap-2">
+                        <input
+                          id="second-address"
+                          name="address"
+                          type="radio"
+                          checked={focusedAddress?.address === young?.mobilityNearRelativeAddress}
+                          onChange={() => setFocusedAddress({ address: young?.mobilityNearRelativeAddress, zip: young?.mobilityNearRelativeZip })}
+                          className="hidden"
+                        />
+                        <label htmlFor="second-address" className="mr-2">
+                          {focusedAddress?.address === young.mobilityNearRelativeAddress ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
+                        </label>
+                        <label htmlFor="second-address" className="cursor-pointer">
+                          <span className="text-[13px] text-gray-700">Autour de l&apos;adresse d&apos;un proche</span>
+                          <br />
+                          <span className="text-[15px] text-gray-700">{young?.mobilityNearRelativeCity}</span>
+                        </label>
+                      </div>
+                    ) : (
+                      <div className="flex w-full items-center gap-2">
+                        <label className="mr-2">
+                          <img src={RadioUnchecked} />
+                        </label>
+                        <label htmlFor="second-address">
+                          <span className="text-[13px] text-gray-400">Autour de l&apos;adresse d&apos;un proche</span>
+                          <br />
+                          <Link to="/preferences" className="text-[15px] text-blue-600 underline hover:underline">
+                            Renseigner une adresse
+                          </Link>
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex w-1/2 flex-col items-center justify-center">
+                  <div className="flex w-3/4 flex-row items-center justify-center">
+                    <Toggle toggled={filters.hebergement} onClick={() => setFilters((prev) => ({ ...prev, hebergement: !prev.hebergement }))} />
+                    <div className="ml-4">
+                      <div className="text-[13px]">Mission avec hébergement</div>
+                      <div className="text-[15px]">Dans toute la France</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="relative">
+                <input
+                  list="distance-list"
+                  type="range"
+                  className="distanceKm h-2 w-full cursor-pointer appearance-none items-center  rounded-full bg-gray-200"
+                  min="1"
+                  max={DISTANCE_MAX}
+                  step="1"
+                  onChange={(e) => {
+                    e.persist();
+                    setFilters((prev) => ({ ...prev, distance: e.target.value }));
+                  }}
+                />
+                <div className={`absolute -ml-2 -mt-10 w-full font-bold ${!marginDistance && " ml-1 flex justify-center"} `} style={{ left: `${marginDistance}px` }}>
+                  {filters.distance}km
+                </div>
+              </div>
+              <div className="mt-4 flex w-full items-center justify-between px-[10px] text-gray-200">
+                <PietonSvg />
+                <VeloSvg />
+                <VoitureSvg />
+                <TrainSvg />
+                <FuseeSvg />
+              </div>
+            </div>
+          </div>
+          {/* END MODAL CONTROL DISTANCE */}
+
+          {/* BEGIN MODAL CONTROL WHEN */}
+          <div
+            ref={refDropdownControlWhen}
+            className={`${
+              dropdownControlWhenOpen ? "block" : "hidden"
+            } absolute top-[calc(100%+8px)] left-0 z-20 w-full overflow-hidden rounded-lg bg-white p-3 shadow transition`}>
+            <div className="text-gray-00 text-center text-sm font-bold">Période de réalisation de la mission</div>
+            <div className="flex w-full flex-col py-2 px-4">
+              <div className="mt-4 flex w-full justify-center gap-2 px-[10px] text-sm font-medium text-gray-700">
+                <PeriodeTab label={getLabelWhen("")} active={!filters.period} name="" onClick={() => setFilters((prev) => ({ ...prev, period: undefined }))} />
+                <PeriodeTab
+                  Icon={AcademicCap}
+                  label={getLabelWhen("DURING_SCHOOL")}
+                  active={filters.period === "DURING_SCHOOL"}
+                  name="DURING_SCHOOL"
+                  onClick={() => setFilters((prev) => ({ ...prev, period: "DURING_SCHOOL" }))}
+                />
+                <PeriodeTab
+                  Icon={Sun}
+                  label={getLabelWhen("DURING_HOLIDAYS")}
+                  active={filters.period === "DURING_HOLIDAYS"}
+                  name="DURING_HOLIDAYS"
+                  onClick={() => setFilters((prev) => ({ ...prev, period: "DURING_HOLIDAYS" }))}
+                />
+                <PeriodeTab
+                  Icon={Calendar}
+                  label={getLabelWhen("CUSTOM")}
+                  active={filters.period === "CUSTOM"}
+                  name="CUSTOM"
+                  onClick={() => setFilters((prev) => ({ ...prev, period: "CUSTOM" }))}
+                />
+              </div>
+              {filters.period === "DURING_SCHOOL" ? (
+                <div className="mt-6 flex flex-col items-center justify-center gap-2">
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_SCHOOL.EVENING}
+                      onClick={handleToggleChangePeriod}
+                      active={filters.subPeriod.includes(MISSION_PERIOD_DURING_SCHOOL.EVENING)}
+                    />
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_SCHOOL.END_DAY}
+                      onClick={handleToggleChangePeriod}
+                      active={filters.subPeriod.includes(MISSION_PERIOD_DURING_SCHOOL.END_DAY)}
+                    />
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_SCHOOL.WEEKEND}
+                      onClick={handleToggleChangePeriod}
+                      active={filters.subPeriod.includes(MISSION_PERIOD_DURING_SCHOOL.WEEKEND)}
+                    />
+                  </div>
+                  {filters.subPeriod.length ? (
+                    <div className="cursor-pointer text-xs text-gray-600 hover:underline" onClick={() => setFilters((prev) => ({ ...prev, subPeriod: [] }))}>
+                      Effacer
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+              {filters.period === "DURING_HOLIDAYS" ? (
+                <div className="mt-6 flex flex-col items-center justify-center gap-2">
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_HOLIDAYS.SUMMER}
+                      onClick={handleToggleChangePeriod}
+                      active={filters.subPeriod.includes(MISSION_PERIOD_DURING_HOLIDAYS.SUMMER)}
+                    />
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_HOLIDAYS.AUTUMN}
+                      onClick={handleToggleChangePeriod}
+                      active={filters.subPeriod.includes(MISSION_PERIOD_DURING_HOLIDAYS.AUTUMN)}
+                    />
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_HOLIDAYS.DECEMBER}
+                      onClick={handleToggleChangePeriod}
+                      active={filters.subPeriod.includes(MISSION_PERIOD_DURING_HOLIDAYS.DECEMBER)}
+                    />
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_HOLIDAYS.WINTER}
+                      onClick={handleToggleChangePeriod}
+                      active={filters.subPeriod.includes(MISSION_PERIOD_DURING_HOLIDAYS.WINTER)}
+                    />
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_HOLIDAYS.SPRING}
+                      onClick={handleToggleChangePeriod}
+                      active={filters.subPeriod.includes(MISSION_PERIOD_DURING_HOLIDAYS.SPRING)}
+                    />
+                  </div>
+                  {filters.subPeriod.length ? (
+                    <div className="cursor-pointer text-xs text-gray-600 hover:underline" onClick={() => setFilters((prev) => ({ ...prev, subPeriod: [] }))}>
+                      Effacer
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+              {filters.period === "CUSTOM" ? (
+                <div className="mt-6 flex flex-col items-center justify-center gap-2">
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <div className="flex items-center gap-2 rounded-lg border-[1px]  py-1 px-2">
+                      <label className="m-0 w-full text-left text-gray-500">Du</label>
+                      <input
+                        required
+                        type="date"
+                        className="w-full cursor-pointer bg-inherit disabled:cursor-not-allowed"
+                        value={filters.fromDate}
+                        onChange={(e) => {
+                          e.persist();
+                          setFilters((prev) => ({ ...prev, FROM: e.target.value }));
+                        }}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 rounded-lg border-[1px]  py-1 px-2">
+                      <label className="m-0 w-full text-left text-gray-500">Au</label>
+                      <input
+                        required
+                        type="date"
+                        className="w-full cursor-pointer bg-inherit disabled:cursor-not-allowed"
+                        value={filters.toDate}
+                        onChange={(e) => {
+                          e.persist();
+                          setFilters((prev) => ({ ...prev, TO: e.target.value }));
+                        }}
+                      />
+                    </div>
+                  </div>
+                  {filters.fromDate || filters.toDate ? (
+                    <div className="cursor-pointer text-xs text-gray-600 hover:underline" onClick={() => setFilters((prev) => ({ ...prev, fromDate: null, toDate: null }))}>
+                      Effacer
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          </div>
+          {/* END MODAL CONTROL WHEN */}
+        </div>
+        <div className="flex flex-wrap justify-start xl:justify-between gap-2">
+          <DomainFilter Icon={Sante} name="HEALTH" label="Santé" onClick={handleToggleChangeDomain} active={filters.domains.includes("HEALTH")} />
+          <DomainFilter Icon={Solidarite} name="SOLIDARITY" label="Solidarité" onClick={handleToggleChangeDomain} active={filters.domains.includes("SOLIDARITY")} />
+          <DomainFilter Icon={Citoyennete} name="CITIZENSHIP" label="Citoyenneté" onClick={handleToggleChangeDomain} active={filters.domains.includes("CITIZENSHIP")} />
+          <DomainFilter Icon={Education} name="EDUCATION" label="Éducation" onClick={handleToggleChangeDomain} active={filters.domains.includes("EDUCATION")} />
+          <DomainFilter Icon={Sport} name="SPORT" label="Sport" onClick={handleToggleChangeDomain} active={filters.domains.includes("SPORT")} />
+          <DomainFilter Icon={DefenseEtMemoire} name="DEFENSE" label="Défense et mémoire" onClick={handleToggleChangeDomain} active={filters.domains.includes("DEFENSE")} />
+          <DomainFilter Icon={Environment} name="ENVIRONMENT" label="Environment" onClick={handleToggleChangeDomain} active={filters.domains.includes("ENVIRONMENT")} />
+          <DomainFilter Icon={Securite} name="SECURITY" label="Sécurité" onClick={handleToggleChangeDomain} active={filters.domains.includes("SECURITY")} />
+          <DomainFilter Icon={Culture} name="CULTURE" label="Culture" onClick={handleToggleChangeDomain} active={filters.domains.includes("CULTURE")} />
+          <DomainFilter
+            Icon={PreparationMilitaire}
+            label="Préparations militaires"
+            active={filters.isMilitaryPreparation}
+            onClick={() => setFilters((prev) => ({ ...prev, isMilitaryPreparation: !prev.isMilitaryPreparation }))}
+          />
+        </div>
+      </div>
+    </>
+  );
+}

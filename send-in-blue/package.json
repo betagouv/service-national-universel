@@ -6,19 +6,28 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint . --ext .js --fix",
+    "lint:report": "eslint . --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@sentry/integrations": "^7.58.1",
-    "@sentry/node": "^7.58.1",
-    "body-parser": "^1.20.0",
-    "dotenv": "^16.0.0",
-    "express": "^4.18.1",
-    "joi": "^17.6.0",
-    "mongoose": "^5.13.9",
+    "@sentry/integrations": "^7.61.0",
+    "@sentry/node": "^7.61.0",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "joi": "^17.9.2",
+    "mongoose": "^5.13.20",
     "netmask": "^2.0.2",
-    "nodemon": "^2.0.18"
+    "nodemon": "^3.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.46.0",
+    "eslint-config-prettier": "^8.10.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.1"
   }
 }

@@ -111,8 +111,10 @@ export default function Consentement({ step, parentId }) {
     if (validate("email", "empty", validator.isEmpty(data.email, { ignore_whitespace: true }))) {
       validate("email", "invalid", !validator.isEmail(data.email));
     }
-    if (validate("phone", "empty", validator.isEmpty(data.phone, { ignore_whitespace: true }))
-      || validate("phoneZone", "empty", validator.isEmpty(data.phoneZone, { ignore_whitespace: true }))) {
+    if (
+      validate("phone", "empty", validator.isEmpty(data.phone, { ignore_whitespace: true })) ||
+      validate("phoneZone", "empty", validator.isEmpty(data.phoneZone, { ignore_whitespace: true }))
+    ) {
       validate("phone", "invalid", !isPhoneNumberWellFormated(data.phone, data.phoneZone));
     }
 

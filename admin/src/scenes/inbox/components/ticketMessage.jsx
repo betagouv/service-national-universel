@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, ticketStateNameById, translateState, translate, htmlCleaner } from "../../../utils";
+import { formatStringLongDate, colors, ticketStateNameById, translateState, translate } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -13,6 +13,7 @@ import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
 import { capture } from "../../../sentry";
+import { htmlCleaner } from "snu-lib";
 
 const updateHeightElement = (e) => {
   e.style.height = "inherit";
@@ -119,7 +120,7 @@ export default function TicketMessage({ ticket: propTicket }) {
           <InputContainer>
             <textarea
               ref={inputRef}
-              row={2}
+              rows={2}
               placeholder="Mon message..."
               className="form-control"
               onChange={(e) => {
