@@ -40,7 +40,7 @@ async function getYoungNotesPhase1(startDate, endDate, user) {
 
   return [
     {
-      id: "young-notes",
+      id: "young-notes-phase1",
       value,
       label: `note${value > 1 ? "s" : ""} interne${value > 1 ? "s" : ""} déposée${value > 1 ? "s" : ""} - phase 1`,
       icon: "other",
@@ -90,7 +90,7 @@ async function getTimeSchedule(startDate, endDate, user) {
       id: "time-schedule",
       value,
       label: `emploi${value > 1 ? "s" : ""} du temps déposé${value > 1 ? "s" : ""}`,
-      icon: "action",
+      icon: "where",
     },
   ];
 }
@@ -134,13 +134,13 @@ async function getTransportCorrectionRequests(startDate, endDate, user) {
       id: "pdt-modificationbuses-refused",
       value: refusedCount,
       label: `demande${refusedCount > 1 ? "s" : ""} de modification du plan de transport refusée${refusedCount > 1 ? "s" : ""}`,
-      icon: "action",
+      icon: "where",
     },
     {
       id: "pdt-modificationbuses-validated",
       value: validatedCount,
       label: `demande${validatedCount > 1 ? "s" : ""} de modification du plan de transport validée${validatedCount > 1 ? "s" : ""}`,
-      icon: "action",
+      icon: "where",
     },
   ];
 }
