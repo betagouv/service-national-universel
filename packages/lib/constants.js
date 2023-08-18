@@ -235,7 +235,7 @@ const INTEREST_MISSION_LIMIT_DATE = {
 const ES_NO_LIMIT = 10_000;
 
 const SENDINBLUE_TEMPLATES = {
-  SIGNIN_2FA: "1144",
+  SIGNIN_2FA: "1317",
   FORGOT_PASSWORD: "1308",
 
   invitationReferent: {
