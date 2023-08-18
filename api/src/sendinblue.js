@@ -4,7 +4,6 @@ const queryString = require("querystring");
 const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
-const { rateLimiterContactSIB } = require("./rateLimiters");
 
 const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
@@ -293,7 +292,7 @@ async function sync(obj, type, { force } = { force: false }) {
 
 async function syncContact(email, attributes, listIds) {
   try {
-    const res = await rateLimiterContactSIB.call(() => createContact({ email, attributes, listIds, updateEnabled: true }));
+    const res = await createContact({ email, attributes, listIds, updateEnabled: true });
     if (!res || res?.code) throw new Error(JSON.stringify({ res, email, attributes, listIds }));
     return;
   } catch (e) {
