@@ -1,6 +1,15 @@
 const { ROLES } = require("snu-lib");
 const { getYoungNotesPhase1, getTimeSchedule, getTransportCorrectionRequests, getSessions, getLineToPoints } = require("./sejour");
-const { getNewMissions, getNewStructures, getYoungNotesPhase2, getYoungPhase2Validated, getYoungStartPhase2InTime } = require("./engagement");
+const {
+  getNewMissions,
+  getNewStructures,
+  getYoungNotesPhase2,
+  getYoungPhase2Validated,
+  getYoungStartPhase2InTime,
+  getApplicationsCanceled,
+  getMissionsWaitingForValidation,
+  getYoungsWhoStartedOrFinishedMissions,
+} = require("./engagement");
 
 const keyNumbersByRole = {
   sejour: {
@@ -10,13 +19,18 @@ const keyNumbersByRole = {
   },
   inscription: {},
   engagement: {
-    [ROLES.REFERENT_DEPARTMENT]: [getNewMissions, getNewStructures, getYoungNotesPhase2],
+    [ROLES.REFERENT_DEPARTMENT]: [getNewMissions, getNewStructures, getYoungNotesPhase2, getYoungsWhoStartedOrFinishedMissions],
     [ROLES.REFERENT_REGION]: [getYoungPhase2Validated, getYoungStartPhase2InTime],
+    [ROLES.RESPONSIBLE]: [getApplicationsCanceled, getYoungsWhoStartedOrFinishedMissions],
+    [ROLES.SUPERVISOR]: [getApplicationsCanceled, getYoungsWhoStartedOrFinishedMissions],
+    [ROLES.ADMIN]: [getMissionsWaitingForValidation, getYoungsWhoStartedOrFinishedMissions],
   },
   all: {
-    [ROLES.REFERENT_DEPARTMENT]: [getYoungNotesPhase1, getTimeSchedule, getNewMissions, getNewStructures, getYoungNotesPhase2],
+    [ROLES.REFERENT_DEPARTMENT]: [getYoungNotesPhase1, getTimeSchedule, getNewMissions, getNewStructures, getYoungNotesPhase2, getYoungsWhoStartedOrFinishedMissions],
     [ROLES.REFERENT_REGION]: [getTimeSchedule, getTransportCorrectionRequests, getYoungPhase2Validated, getYoungStartPhase2InTime],
-    [ROLES.ADMIN]: [getTransportCorrectionRequests, getSessions, getLineToPoints],
+    [ROLES.ADMIN]: [getTransportCorrectionRequests, getSessions, getLineToPoints, getMissionsWaitingForValidation, getYoungsWhoStartedOrFinishedMissions],
+    [ROLES.RESPONSIBLE]: [getApplicationsCanceled, getYoungsWhoStartedOrFinishedMissions],
+    [ROLES.SUPERVISOR]: [getApplicationsCanceled, getYoungsWhoStartedOrFinishedMissions],
   },
 };
 
