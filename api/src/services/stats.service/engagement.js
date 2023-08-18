@@ -200,7 +200,7 @@ async function getYoungStartPhase2InTime(startDate, endDate, user) {
         },
       },
     },
-    size: ES_NO_LIMIT,
+    size: 0,
     track_total_hits: true,
   };
 
@@ -221,7 +221,6 @@ async function getYoungStartPhase2InTime(startDate, endDate, user) {
         return minYoungContractValidationDate >= new Date(startDate) && minYoungContractValidationDate <= new Date(endDate);
       }
     }
-    //return minYoungContractValidationDate >= new Date(startDate) && minYoungContractValidationDate <= new Date(endDate);
   });
 
   return [
