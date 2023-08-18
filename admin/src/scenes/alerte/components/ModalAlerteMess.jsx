@@ -56,18 +56,6 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
     );
   };
 
-  React.useEffect(() => {
-    if (message) {
-      setData({
-        _id: message._id,
-        priority: message.priority,
-        to_role: message.to_role,
-        content: message.content,
-        createdAt: message.createdAt,
-      });
-    }
-  }, [editInfo]);
-
   const onSubmitInfo = async () => {
     try {
       setIsLoading(true);
@@ -267,6 +255,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                     <button
                       onClick={() => {
                         setEditInfo(false);
+                        setData(message);
                         if (isNew) setIsNew(false);
                       }}
                       className="border border-gray-300 text-gray-700 text-sm w-[226px] h-10 rounded-lg"
