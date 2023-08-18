@@ -60,7 +60,7 @@ export default function Create() {
       onSubmit={async (values) => {
         try {
           setIsLoading(true);
-          const { data: exist } = await api.get(`/referent/exist/${values.email}`);
+          const { data: exist } = await api.get(`/referent/exist/${encodeURIComponent(values.email)}`);
           if (exist) {
             toastr.warning("Utilisateur déjà inscrit", "Merci de vérifier si la structure existe déjà sur la plateforme");
             setIsLoading(false);
