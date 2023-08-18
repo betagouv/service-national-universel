@@ -1247,16 +1247,18 @@ router.put("/young/:id/removeMilitaryFile/:key", passport.authenticate("referent
   }
 });
 
-router.get("/exist/:email", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/exist", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ email: Joi.string().email().required() }).validate({ email: req.params.email }, { stripUnknown: true });
+    const { error, value } = Joi.object({ email: Joi.string().email() }).validate(req.body, { stripUnknown: true });
 
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+    const where = {};
+    if (value.email) where.email = value.email;
     if (!canCheckIfRefExist(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const referent = await ReferentModel.findOne({ email: value.email });
+    const referent = await ReferentModel.findOne(where);
     if (referent) return res.status(200).send({ ok: true, data: true });
     else return res.status(200).send({ ok: true, data: false });
   } catch (error) {
