@@ -235,8 +235,6 @@ async function updateContact(id, { attributes, emailBlacklisted, smsBlacklisted,
 }
 
 async function sync(obj, type, { force } = { force: false }) {
-  const res = await rateLimiterContactSIB.call(() => console.log("TEST"));
-
   if (ENVIRONMENT !== "production" && !force) return console.log("no sync sendinblue");
   try {
     const user = JSON.parse(JSON.stringify(obj));
