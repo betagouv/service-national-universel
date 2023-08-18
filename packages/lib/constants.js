@@ -604,7 +604,7 @@ const MINISTRES = [
     template: "certificates/certificateTemplate_juillet_2022.png",
   },
   {
-    date_end: "01-01-2100", // ! Changer ici à l'ajout d'un nouveau
+    date_end: "08-18-2023",
     ministres: [
       "Pap Ndiaye, Ministre de l’Éducation Nationale et de la Jeunesse",
       "Sébastien Lecornu, Ministre des Armées",
@@ -613,6 +613,10 @@ const MINISTRES = [
     ],
     template: "certificates/certificateTemplate2023.png",
   },
+  {
+    date_end: "08-18-2100", // ! Changer ici à l'ajout d'un nouveau
+    template: "certificates/certificateTemplate2023-08-18.png",
+  }
 ];
 
 const FILE_KEYS = [
