@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
-import { IoWarningOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { capture } from "../../../../../sentry";
+import { translate } from "snu-lib";
 import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
 import api from "../../../../../services/api";
 import { getLink as getOldLink } from "../../../../../utils";
@@ -27,6 +28,7 @@ export default function Index() {
   const [inAndOutCohort, setInAndOutCohort] = useState();
 
   const [stats, setStats] = useState({});
+  const [message, setMessage] = useState([]);
 
   const [departmentOptions, setDepartmentOptions] = useState([]);
 
@@ -118,24 +120,28 @@ export default function Index() {
     updateStats();
   }, []);
 
+  const getMessage = async () => {
+    try {
+      const { ok, code, data: response } = await api.get(`/alerte-message`);
+
+      if (!ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération des messages", translate(code));
+      }
+      setMessage(response.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
+    }
+  };
+
+  React.useEffect(() => {
+    getMessage();
+  }, []);
+
   return (
     <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}>
-      <div className="flex flex-col gap-8">
-        {/* <InfoMessage
-          bg="bg-blue-800"
-          Icon={HiOutlineInformationCircle}
-          message="Message d’information (white + blue/800), l'instruction des dossiers pour le séjour de février est à finaliser pour ce soir à 23h59."
-        />
-        <InfoMessage
-          bg="bg-yellow-700"
-          Icon={HiOutlineExclamationCircle}
-          message="Message important (white + yellow/700), l'instruction des dossiers pour le séjour de février est à finaliser pour ce soir à 23h59."
-        /> */}
-        <InfoMessage
-          bg="bg-red-800"
-          Icon={IoWarningOutline}
-          message="Message urgent  (white + red/800), suite à un problème technique, nous vous invitons à revalider les missions que vous aviez validés entre le 3 janvier 15h et le 4 janvier 8h. Veuillez nous excuser pour le désagrément."
-        />
+      <div className="flex flex-col gap-8 mb-4">
+        {message?.length ? message.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
         <div className="flex gap-4">
           <Actus stats={stats} />

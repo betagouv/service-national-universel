@@ -663,6 +663,14 @@ function canApplyToPhase2(young) {
   return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= COHESION_STAY_END[young.cohort];
 }
 
+function canCreateAlerteMessage(actor) {
+  return [ROLES.ADMIN].includes(actor.role);
+}
+
+function canReadAlerteMessage(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.SUPERVISOR].includes(actor.role);
+}
+
 function canViewTableDeRepartition(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
@@ -862,6 +870,8 @@ export {
   canEditPresenceYoung,
   canShareSessionPhase1,
   canApplyToPhase2,
+  canCreateAlerteMessage,
+  canReadAlerteMessage,
   canViewTableDeRepartition,
   canEditTableDeRepartitionDepartment,
   canEditTableDeRepartitionRegion,
