@@ -615,6 +615,12 @@ const MINISTRES = [
   },
   {
     date_end: "08-18-2100", // ! Changer ici à l'ajout d'un nouveau
+    ministres: [
+      "Gabriel Attal, Ministre de l’Éducation Nationale et de la Jeunesse",
+      "Sébastien Lecornu, Ministre des Armées",
+      "Prisca Thevenot, Secrétaire d'État auprès du ministre des Armées et du ministre de 'Éducation nationale et de la Jeunesse , \
+      chargée de la Jeunesse et du Service national universel",
+    ],
     template: "certificates/certificateTemplate2023-08-18.png",
   }
 ];
