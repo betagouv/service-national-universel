@@ -1,3 +1,19 @@
+# [1.322.0](https://github.com/betagouv/service-national-universel/compare/v1.321.0...v1.322.0) (2023-08-18)
+
+
+### Bug Fixes
+
+* **api:** fix mission sorting order options ([260ff70](https://github.com/betagouv/service-national-universel/commit/260ff7077e468c23643b8f2b57ca03bd78e9aef2))
+* **api:** fix params in /exist toute ([3689a98](https://github.com/betagouv/service-national-universel/commit/3689a981e4e5c94780511c395b6f9333a884718b))
+* **api:** rate limiter sendinblue syncErrors ([#2856](https://github.com/betagouv/service-national-universel/issues/2856)) ([6b2fb45](https://github.com/betagouv/service-national-universel/commit/6b2fb45766bf9b20560779d295bc608bde2230d3))
+* **appi, admin:** fix /referent/exist route ([#2888](https://github.com/betagouv/service-national-universel/issues/2888)) ([e3d97b5](https://github.com/betagouv/service-national-universel/commit/e3d97b563230daa5820d00b7b4f9f22ed8786d42))
+* **lib:** ajouter les noms des ministres ([c27b821](https://github.com/betagouv/service-national-universel/commit/c27b8212edd23ccfe47336de3fa478eeb22fd800))
+
+
+### Features
+
+* **admin:** paramétrage de l'alerte du tableau de bord ([#2842](https://github.com/betagouv/service-national-universel/issues/2842)) ([1ff3e44](https://github.com/betagouv/service-national-universel/commit/1ff3e44472bfd849468bd21fb584d304c2a9a3fa))
+
 # [1.321.0](https://github.com/betagouv/service-national-universel/compare/v1.320.5...v1.321.0) (2023-08-17)
 
 
