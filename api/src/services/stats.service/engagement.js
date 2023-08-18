@@ -19,6 +19,7 @@ async function getNewMissions(startDate, endDate, user) {
         ],
       },
     },
+    //to avoid duplicata
     aggs: {
       group_by_description: {
         terms: { field: "description.keyword", size: ES_NO_LIMIT },
@@ -118,7 +119,7 @@ async function getYoungNotesPhase2(startDate, endDate, user) {
       id: "young-notes-phase2",
       value: value,
       label: `note${value > 1 ? "s" : ""} interne${value > 1 ? "s" : ""} déposée${value > 1 ? "s" : ""} - phase 2`,
-      icon: "other",
+      icon: "action",
     },
   ];
 }
@@ -166,7 +167,7 @@ async function getYoungStartPhase2InTime(startDate, endDate, user) {
       bool: {
         filter: [
           { term: { "region.keyword": user.region } },
-          { terms: { "statusPhase2.keyword": [YOUNG_STATUS_PHASE2.VALIDATED, YOUNG_STATUS_PHASE2.WAITING_REALISATION] } },
+          { terms: { "statusPhase2.keyword": [YOUNG_STATUS_PHASE2.VALIDATED, YOUNG_STATUS_PHASE2.IN_PROGRESS] } },
           { terms: { "statusPhase2Contract.keyword": [CONTRACT_STATUS.VALIDATED] } },
         ],
       },
@@ -180,7 +181,7 @@ async function getYoungStartPhase2InTime(startDate, endDate, user) {
   const youngsIds = youngs.map((young) => young._id);
   const youngsCohort = youngs.map((young) => ({
     _id: young._id,
-    cohort: young.cohort,
+    cohort: young._source.cohort,
   }));
 
   let body2 = {
@@ -208,16 +209,26 @@ async function getYoungStartPhase2InTime(startDate, endDate, user) {
   let value = response2.body.aggregations.group_by_youngId.buckets;
 
   value = value.filter((bucket) => {
-    const minYoungContractValidationDate = new Date(bucket.minYoungContractValidationDate.value_as_string);
+    const minYoungContractValidationDate = new Date(bucket.minYoungContractValidationDate.value);
+    const correspondingYoung = youngsCohort.find((young) => young._id === bucket.key);
 
-    return minYoungContractValidationDate >= new Date(startDate) && minYoungContractValidationDate <= new Date(endDate);
+    //check si la date de validation de contract est moins d'un an après la date de validation de phase 1 du jeune
+    if (correspondingYoung) {
+      const oneYearInMilliseconds = 365 * 24 * 60 * 60 * 1000;
+      const cohortEnd = COHESION_STAY_END[correspondingYoung.cohort];
+
+      if (minYoungContractValidationDate - cohortEnd < oneYearInMilliseconds) {
+        return minYoungContractValidationDate >= new Date(startDate) && minYoungContractValidationDate <= new Date(endDate);
+      }
+    }
+    //return minYoungContractValidationDate >= new Date(startDate) && minYoungContractValidationDate <= new Date(endDate);
   });
 
   return [
     {
       id: "young-phase2-validated-in-time",
       value: value.length,
-      label: ` volontaire${value.length > 1 ? "s" : ""} ayant commencé leur mission d’intérêt général dans le délai imparti`,
+      label: ` volontaire${value.length > 1 ? "s" : ""} ayant commencé ${value.length === 1 ? "sa" : "leur"} mission d’intérêt général dans le délai imparti`,
       icon: "action",
     },
   ];
