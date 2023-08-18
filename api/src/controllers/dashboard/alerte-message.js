@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
-const { canCreateAlerteMessage, canReadAlerteMessage, ROLES } = require("snu-lib");
+const { ROLES, canReadAlerteMessage, canCreateAlerteMessage } = require("snu-lib");
 const { capture } = require("../../sentry");
 const { serializeAlerteMessage } = require("../../utils/serializer");
 const AlerteMessageModel = require("../../models/alerteMessage");
@@ -87,7 +87,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       id: Joi.string().required(),
       priority: Joi.string().required(),
       to_role: Joi.array().items(Joi.string()).required(),
-      content: Joi.string().required(),
+      content: Joi.string().required().max(500),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
     if (error) {
@@ -97,8 +97,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!canCreateAlerteMessage(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { priority, to_role, content } = value;
-
-    if (content.length > 500) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const message = await AlerteMessageModel.findById(value.id);
     if (!message) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

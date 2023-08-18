@@ -22,7 +22,7 @@ export default function Alerte() {
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des messages", translate(code));
       }
-      setData(response.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      setData(response);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération des messages");
@@ -32,10 +32,6 @@ export default function Alerte() {
   React.useEffect(() => {
     getMessage();
   }, []);
-
-  React.useEffect(() => {
-    setData([...data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
-  }, [isNew]);
 
   if (user.role !== ROLES.ADMIN)
     return (
@@ -67,7 +63,9 @@ export default function Alerte() {
         </div>
         {!data?.length && !isNew ? <p>Aucun message d'alerte n'est paramétré pour le moment.</p> : null}
         {isNew ? <ModalAlerteMess message={null} isNew={isNew} setIsNew={setIsNew} setMessageList={setData} /> : null}
-        {data?.length ? data.map((hit) => <ModalAlerteMess key={hit._id} message={hit} setMessageList={setData} />) : null}
+        {data?.length
+          ? data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((hit) => <ModalAlerteMess key={hit._id} message={hit} setMessageList={setData} />)
+          : null}
       </div>
     </>
   );

@@ -10,11 +10,10 @@ import { capture } from "../../../sentry";
 import Field from "../../../components/forms/Field";
 
 export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageList }) {
-  const [editInfo, setEditInfo] = React.useState(false);
+  const [editInfo, setEditInfo] = React.useState(isNew);
   const [isLoading, setIsLoading] = React.useState(false);
   const [errors, setErrors] = React.useState({});
-  const [selectedOptions, setSelectedOptions] = React.useState([]);
-  const [data, setData] = React.useState({});
+  const [data, setData] = React.useState(message || {});
 
   const options = [
     { value: ROLES.ADMIN, label: "Modérateurs" },
@@ -58,9 +57,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
   };
 
   React.useEffect(() => {
-    if (isNew) {
-      setEditInfo(true);
-    } else {
+    if (message) {
       setData({
         _id: message._id,
         priority: message.priority,
@@ -68,14 +65,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
         content: message.content,
         createdAt: message.createdAt,
       });
-      setSelectedOptions(
-        message.to_role.map((role) => ({
-          value: role,
-          label: options.filter((item) => item.value === role)[0].label,
-        })),
-      );
     }
-    setErrors({});
   }, [editInfo]);
 
   const onSubmitInfo = async () => {
@@ -115,6 +105,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
       }
       setEditInfo(false);
       setIsLoading(false);
+      setErrors({});
       if (isNew) setIsNew(false);
     } catch (e) {
       capture(e);
@@ -142,8 +133,11 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
     }
   };
 
-  const handleReset = () => {
-    setSelectedOptions([]);
+  const handleDelete = () => {
+    const shouldDelete = window.confirm("Êtes-vous sûr de vouloir supprimer ce message?");
+    if (shouldDelete) {
+      DeleteInfo();
+    }
   };
 
   return (
@@ -217,14 +211,16 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                     isDisabled={!editInfo}
                     closeMenuOnSelect={false}
                     hideSelectedOptions={false}
-                    value={selectedOptions}
+                    value={data.to_role?.map((role) => ({
+                      value: role,
+                      label: options.filter((item) => item.value === role)[0].label,
+                    }))}
                     className="basic-multi-select w-full"
                     classNamePrefix="select"
                     components={{
                       Option: InputOption,
                     }}
                     onChange={(options) => {
-                      setSelectedOptions(options);
                       setData({ ...data, to_role: options.map((opt) => opt.value) });
                     }}
                     styles={customStyles}
@@ -271,7 +267,6 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                     <button
                       onClick={() => {
                         setEditInfo(false);
-                        handleReset();
                         if (isNew) setIsNew(false);
                       }}
                       className="border border-gray-300 text-gray-700 text-sm w-[226px] h-10 rounded-lg"
@@ -292,7 +287,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                       disabled={isLoading}>
                       Modifier
                     </button>
-                    <button onClick={DeleteInfo} className="border border-red-500 text-red-500 text-sm w-[226px] h-10 rounded-lg" disabled={isLoading}>
+                    <button onClick={handleDelete} className="border border-red-500 text-red-500 text-sm w-[226px] h-10 rounded-lg" disabled={isLoading}>
                       Supprimer ce message
                     </button>
                   </>

@@ -1,7 +1,6 @@
 import React from "react";
 import { IoWarningOutline } from "react-icons/io5";
-import { HiOutlineInformationCircle } from "react-icons/hi";
-import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { HiOutlineInformationCircle, HiOutlineExclamationCircle } from "react-icons/hi";
 
 export default function InfoMessage({ bg = "", Icon = null, message = "", data = null }) {
   if (data) {
@@ -26,8 +25,8 @@ export default function InfoMessage({ bg = "", Icon = null, message = "", data =
     message = data.content;
   }
   return (
-    <div className={`flex items-center gap-4 rounded-lg ${bg} p-4 text-base leading-5 text-white`}>
-      <Icon className="h-10 w-10 text-white" />
+    <div className={`flex items-center gap-4 rounded-xl ${bg} p-4 text-base leading-5 text-white`}>
+      <Icon className="h-10 w-10 text-white stroke-[1.5px]" />
       <span>{message}</span>
     </div>
   );
