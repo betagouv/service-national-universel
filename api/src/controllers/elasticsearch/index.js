@@ -11,6 +11,7 @@ router.use("/pointderassemblement", require("./pointderassemblement"));
 router.use("/lignebus", require("./lignebus"));
 router.use("/schoolramses", require("./schoolramses"));
 router.use("/mission", require("./mission"));
+router.use("/missionapi", require("./missionapi"));
 router.use("/email", require("./email"));
 router.use("/application", require("./application"));
 router.use("/referent", require("./referent"));

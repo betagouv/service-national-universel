@@ -6,6 +6,8 @@ let cohorts = null;
 let cohortsCachedAt = null;
 
 export async function cohortsInit() {
+  if (isCohortsInitialized()) return;
+  if (["phase1", "phase2", "mission"].includes(window.location.pathname)) return;
   try {
     const result = await api.get("/cohort");
     if (result.status === 401) {
