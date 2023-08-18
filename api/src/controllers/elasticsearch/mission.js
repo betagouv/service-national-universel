@@ -301,8 +301,8 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
     };
 
     if (sort === "geo") body.sort.push({ _geo_distance: { location: filters.location, order: "asc", unit: "km", mode: "min" } });
-    if (sort === "date") body.sort.push({ createdAt: { order: "desc" } });
-    if (sort === "recent") body.sort.push({ "duration.keyword": { order: "asc" } });
+    if (sort === "recent") body.sort.push({ createdAt: { order: "desc" } });
+    if (sort === "short") body.sort.push({ "duration.keyword": { order: "asc" } });
     if (sort === "long") body.sort.push({ "duration.keyword": { order: "desc" } });
 
     if (filters.hebergement) {
