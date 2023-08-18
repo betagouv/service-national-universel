@@ -3,37 +3,32 @@ const express = require("express");
 const router = express.Router();
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
-const { ERRORS, isYoung, isReferent } = require("../../utils");
-const { allRecords } = require("../../es/utils");
-const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
-const StructureObject = require("../../models/structure");
-const { serializeMissions } = require("../../utils/es-serializer");
+const { ERRORS } = require("../../utils");
 const Joi = require("joi");
+const { MISSION_DOMAINS } = require("snu-lib");
 
-const body = {
-  query: { match_all: {} },
-  size: 0,
-  _source: { includes: ["*"], excludes: [] },
-  aggs: { "domain.keyword": { terms: { field: "domain.keyword", size: 100, order: { _count: "desc" } } } },
-};
+const domainOptions = [
+  MISSION_DOMAINS.SOLIDARITY,
+  MISSION_DOMAINS.EDUCATION,
+  MISSION_DOMAINS.HEALTH,
+  MISSION_DOMAINS.ENVIRONMENT,
+  MISSION_DOMAINS.SPORT,
+  MISSION_DOMAINS.SECURITY,
+  MISSION_DOMAINS.CITIZENSHIP,
+  MISSION_DOMAINS.CULTURE,
+];
 
 router.post("/young/search/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const schema = Joi.object({
       filters: Joi.object({
-        searchbar: Joi.string().allow(""),
-        domains: Joi.array().items(Joi.string().allow("")),
+        search: Joi.string().allow(""),
+        domain: Joi.string().allow(...domainOptions),
         distance: Joi.number().integer().min(0).max(100).required(),
         location: Joi.object({
           lat: Joi.number().min(-90).max(90),
           lon: Joi.number().min(-180).max(180),
         }).required(),
-        isMilitaryPreparation: Joi.boolean(),
-        period: Joi.string().allow("", "CUSTOM", "VACANCES", "SCOLAIRE"),
-        subPeriod: Joi.array().items(Joi.string().allow("")),
-        fromDate: Joi.date(),
-        toDate: Joi.date(),
-        hebergement: Joi.boolean(),
       }),
       page: Joi.number().integer().min(0).default(0),
       size: Joi.number().integer().min(0).default(20),
@@ -50,11 +45,9 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
       query: {
         bool: {
           must: [
-            { script: { script: "doc['pendingApplications'].value < doc['placesLeft'].value * 5" } },
             { range: { endAt: { gt: "now" } } },
-            { term: { "status.keyword": "VALIDATED" } },
-            { term: { "visibility.keyword": "VISIBLE" } },
-            { range: { placesLeft: { gt: 0 } } },
+            { range: { places: { gt: 0 } } },
+            { geo_distance: { distance: `${filters.distance}km`, location: filters.location } },
           ],
         },
       },
@@ -68,37 +61,13 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
     if (sort === "short") body.sort.push({ "duration.keyword": { order: "asc" } });
     if (sort === "long") body.sort.push({ "duration.keyword": { order: "desc" } });
 
-    if (filters.hebergement) {
-      body.query.bool.must.push({
-        bool: {
-          should: [
-            {
-              geo_distance: {
-                distance: `${filters.distance}km`,
-                location: filters.location,
-              },
-            },
-            { term: { "hebergement.keyword": "true" } },
-          ],
-          minimum_should_match: "1",
-        },
-      });
-    } else {
-      body.query.bool.must.push({
-        geo_distance: {
-          distance: `${filters.distance}km`,
-          location: filters.location,
-        },
-      });
-    }
-
-    if (filters.searchbar) {
+    if (filters.search) {
       body.query.bool.must.push({
         bool: {
           should: [
             {
               multi_match: {
-                query: filters.searchbar,
+                query: filters.search,
                 fields: ["name^10", "structureName^5", "description", "actions", "city"],
                 type: "cross_fields",
                 operator: "and",
@@ -106,7 +75,7 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
             },
             {
               multi_match: {
-                query: filters.searchbar,
+                query: filters.search,
                 fields: ["name^10", "structureName^5", "description", "actions", "city"],
                 type: "phrase",
                 operator: "and",
@@ -114,7 +83,7 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
             },
             {
               multi_match: {
-                query: filters.searchbar,
+                query: filters.search,
                 fields: ["name^10", "structureName^5", "description", "actions", "city"],
                 type: "phrase_prefix",
                 operator: "and",
@@ -126,15 +95,7 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
       });
     }
 
-    if (filters.domains?.length) body.query.bool.must.push({ terms: { "domains.keyword": filters.domains } });
-    if (filters.isMilitaryPreparation) body.query.bool.must.push({ term: { "isMilitaryPreparation.keyword": String(filters.isMilitaryPreparation) } });
-
-    if (["DURING_SCHOOL", "DURING_HOLIDAYS"].includes(filters.period)) body.query.bool.must.push({ term: { "period.keyword": filters.period } });
-    if (filters.period === "CUSTOM") {
-      if (filters.fromDate) body.query.bool.must.push({ range: { startAt: { gte: filters.fromDate } } });
-      if (filters.toDate) body.query.bool.must.push({ range: { endAt: { lte: filters.toDate } } });
-    }
-    if (filters.subPeriod?.length) body.query.bool.must.push({ terms: { "subPeriod.keyword": filters.subPeriod } });
+    if (filters.domain) body.query.bool.must.push({ term: { "domain.keyword": filters.domain } });
 
     const results = await esClient.search({ index: "mission", body });
     if (results.body.error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

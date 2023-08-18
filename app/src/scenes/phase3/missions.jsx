@@ -1,28 +1,32 @@
+import React, { useCallback, useEffect } from "react";
 import Img4 from "../../assets/observe.svg";
 import Img3 from "../../assets/left.svg";
 import Img2 from "../../assets/right.svg";
-import React, { useCallback } from "react";
-import { Col, Container, CustomInput, Row } from "reactstrap";
-// import { ReactiveBase, ReactiveList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
-
-import MissionCard from "./components/missionCard";
-
-import { apiURL } from "../../config";
-
 import api from "../../services/api";
 import { debounce } from "../../utils";
 import { capture } from "../../sentry";
 import { toastr } from "react-redux-toastr";
-
-const FILTERS = ["DOMAIN", "SEARCH"];
+import { useSelector } from "react-redux";
+import { Col, Container, CustomInput, Row } from "reactstrap";
+import MissionCard from "./components/missionCard";
 
 export default function MissionsComponent() {
-  const [filters, setFilters] = React.useState({});
+  const young = useSelector((state) => state.Auth.young);
+  const [filters, setFilters] = React.useState({
+    search: "",
+    location: {
+      lat: young?.location?.lat,
+      lon: young?.location?.lon,
+    },
+    distance: 50,
+    domains: [],
+  });
   const [page, setPage] = React.useState(0);
   const [size, setSize] = React.useState(20);
   const [sort, setSort] = React.useState("geo");
   const [data, setData] = React.useState([]);
+  console.log("🚀 ~ file: missions.jsx:34 ~ MissionsComponent ~ data:", data);
 
   const updateOnFilterChange = useCallback(
     debounce(async (filters, page, size, sort, setData) => {
@@ -38,11 +42,13 @@ export default function MissionsComponent() {
     [],
   );
 
+  useEffect(() => {
+    updateOnFilterChange(filters, page, size, sort, setData);
+  }, [filters, page, size, sort]);
+
   return (
     <div>
       <Missions>
-        {/* <ReactiveBase url={`${apiURL}/es`} app="missionapi" headers={{ Authorization: `JWT ${api.getToken()}` }}> */}
-        {/* <Modifybutton to="/preferences">Modifier mes préférences</Modifybutton> */}
         <Heading>
           <p>TROUVEZ UNE MISSION DE BÉNÉVOLAT</p>
           <h1>Missions disponibles près de chez vous ou à distance</h1>
@@ -52,17 +58,16 @@ export default function MissionsComponent() {
             <input type="text" placeholder="Recherche..." onChange={(e) => setFilters({ ...filters, search: e.target.value })} />
           </SearchBox>
           <Col md={4}>
-            <CustomInput type="select" id="dist" defaultValue="" onChange={(e) => setFilters({ ...filters, distance: e.target.value })}>
+            <CustomInput type="select" id="dist" defaultValue="50" onChange={(e) => setFilters({ ...filters, distance: e.target.value })}>
               <option value="null" disabled>
                 Rayon de recherche maximum
               </option>
-              <option value="2">Distance max. 2km</option>
-              <option value="5">Distance max. 5km</option>
-              <option value="20">Distance max. 20km</option>
-              <option value="10">Distance max. 10km</option>
-              <option value="50">Distance max. 50km</option>
-              <option value="100">Distance max. 100km</option>
-              {/* <option value="-1">France entière : préparations militaires uniquement</option> */}
+              <option value={2}>Distance max. 2km</option>
+              <option value={5}>Distance max. 5km</option>
+              <option value={20}>Distance max. 20km</option>
+              <option value={10}>Distance max. 10km</option>
+              <option value={50}>Distance max. 50km</option>
+              <option value={100}>Distance max. 100km</option>
             </CustomInput>
           </Col>
           <DomainsFilter md={4}>
@@ -78,52 +83,10 @@ export default function MissionsComponent() {
               <option value="INTERGENERATIONAL">Intergénérationnel</option>
               <option value="OTHER">Autre</option>
             </CustomInput>
-            {/* <SingleDropdownList
-              selectAllLabel="Tous les domaines"
-              URLParams={true}
-              componentId="DOMAIN"
-              placeholder="Filtrer par domaines"
-              dataField="domain.keyword"
-              react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
-              showSearch={false}
-            /> */}
           </DomainsFilter>
         </Filters>
 
-        {/* <ReactiveList
-          componentId="result"
-          react={{ and: FILTERS }}
-          pagination={true}
-          size={25}
-          showLoader={true}
-          loader="Chargement..."
-          innerClass={{ pagination: "pagination" }}
-          dataField="created_at"
-          // defaultQuery={function (value, props) {
-          //   if (!young.location || !young.location.lat || !young.location.lon) return { query: { match_all: {} } };
-          //   return {
-          //     query: { match_all: {} },
-          //     sort: [
-          //       {
-          //         _geo_distance: {
-          //           location: [young.location.lon, young.location.lat],
-          //           order: "asc",
-          //           unit: "km",
-          //           mode: "min",
-          //         },
-          //       },
-          //     ],
-          //   };
-          // }}
-          renderResultStats={() => {
-            return <div />;
-            // return <div className="results">{`${numberOfResults} résultats trouvés en ${time}ms`}</div>;
-          }}
-          render={({ data }) => {
-            return data.map((e, i) => <MissionCard mission={e} key={i} image={Img4} />);
-          }}
-        /> */}
-        {/* </ReactiveBase> */}
+        {data.length ? data?.map((e) => <MissionCard mission={e} key={e._id} image={Img4} />) : null}
       </Missions>
     </div>
   );
