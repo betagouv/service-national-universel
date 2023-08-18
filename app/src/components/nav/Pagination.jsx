@@ -32,7 +32,7 @@ export default function Pagination({ currentPageNumber, setCurrentPageNumber, it
   }
 
   return (
-    <div className="flex items-center justify-between gap-1">
+    <div className="flex flex-wrap items-center justify-between gap-1">
       {setSize ? (
         <div className="text-xs flex gap-2 justify-center items-center text-[#242526]">
           <select className="min-w-[56px] min-h-[32px] pl-2 border text-gray-600 rounded-md pb-1" value={size} onChange={(e) => checkSize(parseInt(e.target.value))}>

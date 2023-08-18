@@ -4,12 +4,13 @@ import Img3 from "../../assets/left.svg";
 import Img2 from "../../assets/right.svg";
 import styled from "styled-components";
 import api from "../../services/api";
-import { debounce } from "../../utils";
+import { JVA_MISSION_DOMAINS, debounce } from "../../utils";
 import { capture } from "../../sentry";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import { Col, Container, CustomInput, Row } from "reactstrap";
 import MissionCard from "./components/missionCard";
+import Pagination from "../../components/nav/Pagination";
 
 export default function MissionsComponent() {
   const young = useSelector((state) => state.Auth.young);
@@ -20,18 +21,19 @@ export default function MissionsComponent() {
       lon: young?.location?.lon,
     },
     distance: 50,
-    domains: [],
+    domain: "",
   });
   const [page, setPage] = React.useState(0);
   const [size, setSize] = React.useState(20);
   const [sort, setSort] = React.useState("geo");
-  const [data, setData] = React.useState([]);
-  console.log("🚀 ~ file: missions.jsx:34 ~ MissionsComponent ~ data:", data);
+  const [data, setData] = React.useState({});
+
+  const domainOptions = Object.entries(JVA_MISSION_DOMAINS).map(([key, value]) => ({ value: key, label: value }));
 
   const updateOnFilterChange = useCallback(
     debounce(async (filters, page, size, sort, setData) => {
       try {
-        if (!filters.location?.lat || !filters.distance) return;
+        if (!filters.location?.lat) return;
         const res = await api.post("/elasticsearch/missionapi/young/search", { filters, page, size, sort });
         setData(res.data);
       } catch (e) {
@@ -55,7 +57,12 @@ export default function MissionsComponent() {
         </Heading>
         <Filters style={{ marginBottom: 20 }}>
           <SearchBox md={4}>
-            <input type="text" placeholder="Recherche..." onChange={(e) => setFilters({ ...filters, search: e.target.value })} />
+            <input
+              type="text"
+              placeholder="Recherche..."
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+              className="w-full text-sm p-2 border-gray-300 border-[1px] rounded-sm"
+            />
           </SearchBox>
           <Col md={4}>
             <CustomInput type="select" id="dist" defaultValue="50" onChange={(e) => setFilters({ ...filters, distance: e.target.value })}>
@@ -73,20 +80,41 @@ export default function MissionsComponent() {
           <DomainsFilter md={4}>
             <CustomInput type="select" id="dist" defaultValue="" onChange={(e) => setFilters({ ...filters, domain: e.target.value })}>
               <option value="">Filtrer par domaines</option>
-              <option value="HEALTH">Santé</option>
-              <option value="CITIZENSHIP">Citoyenneté</option>
-              <option value="SOLIDARITY">Solidarité</option>
-              <option value="SPORT">Sport</option>
-              <option value="EDUCATION">Éducation</option>
-              <option value="CULTURE">Culture</option>
-              <option value="ENVIRONMENT">Environnement</option>
-              <option value="INTERGENERATIONAL">Intergénérationnel</option>
-              <option value="OTHER">Autre</option>
+              {domainOptions.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </CustomInput>
           </DomainsFilter>
         </Filters>
 
-        {data.length ? data?.map((e) => <MissionCard mission={e} key={e._id} image={Img4} />) : null}
+        {data?.total ? (
+          <>
+            <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+              <p>
+                {data?.total.value} mission{data?.total.value > 1 ? "s" : ""}
+              </p>
+              <select name="selectedSort" onChange={(e) => setSort(e.target.value)}>
+                <option value="geo" defaultValue>
+                  La plus proche
+                </option>
+                <option value="recent">La plus récente</option>
+              </select>
+            </div>
+            {data?.hits.map((e) => (
+              <MissionCard mission={e._source} key={e._id} image={Img4} />
+            ))}
+            <Pagination
+              currentPageNumber={page}
+              setCurrentPageNumber={setPage}
+              itemsCountTotal={data.total.value}
+              itemsCountOnCurrentPage={data.hits.length}
+              size={size}
+              setSize={setSize}
+            />
+          </>
+        ) : null}
       </Missions>
     </div>
   );

@@ -5,25 +5,14 @@ const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const Joi = require("joi");
-const { MISSION_DOMAINS } = require("snu-lib");
-
-const domainOptions = [
-  MISSION_DOMAINS.SOLIDARITY,
-  MISSION_DOMAINS.EDUCATION,
-  MISSION_DOMAINS.HEALTH,
-  MISSION_DOMAINS.ENVIRONMENT,
-  MISSION_DOMAINS.SPORT,
-  MISSION_DOMAINS.SECURITY,
-  MISSION_DOMAINS.CITIZENSHIP,
-  MISSION_DOMAINS.CULTURE,
-];
+const { JVA_MISSION_DOMAINS } = require("snu-lib");
 
 router.post("/young/search/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const schema = Joi.object({
       filters: Joi.object({
         search: Joi.string().allow(""),
-        domain: Joi.string().allow(...domainOptions),
+        domain: Joi.string().allow(...Object.keys(JVA_MISSION_DOMAINS), ""),
         distance: Joi.number().integer().min(0).max(100).required(),
         location: Joi.object({
           lat: Joi.number().min(-90).max(90),
@@ -44,11 +33,7 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
     let body = {
       query: {
         bool: {
-          must: [
-            { range: { endAt: { gt: "now" } } },
-            { range: { places: { gt: 0 } } },
-            { geo_distance: { distance: `${filters.distance}km`, location: filters.location } },
-          ],
+          must: [{ range: { endAt: { gt: "now" } } }, { range: { places: { gt: 0 } } }, { geo_distance: { distance: `${filters.distance}km`, location: filters.location } }],
         },
       },
       from: page * 20,
@@ -58,8 +43,6 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
 
     if (sort === "geo") body.sort.push({ _geo_distance: { location: filters.location, order: "asc", unit: "km", mode: "min" } });
     if (sort === "recent") body.sort.push({ createdAt: { order: "desc" } });
-    if (sort === "short") body.sort.push({ "duration.keyword": { order: "asc" } });
-    if (sort === "long") body.sort.push({ "duration.keyword": { order: "desc" } });
 
     if (filters.search) {
       body.query.bool.must.push({
@@ -97,7 +80,7 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
 
     if (filters.domain) body.query.bool.must.push({ term: { "domain.keyword": filters.domain } });
 
-    const results = await esClient.search({ index: "mission", body });
+    const results = await esClient.search({ index: "missionapi", body });
     if (results.body.error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     return res.status(200).send({ ok: true, data: results.body.hits });
   } catch (error) {
