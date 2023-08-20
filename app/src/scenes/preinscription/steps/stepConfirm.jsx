@@ -67,8 +67,7 @@ export default function StepConfirm() {
       if (young) {
         if (token) api.setToken(token);
         dispatch(setYoung(young));
-        // @todo should not be commented
-        // removePersistedData();
+        removePersistedData();
       }
       // after connection young is automatically redirected to /preinscription/email-validation
       history.push("/preinscription/email-validation");

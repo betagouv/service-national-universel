@@ -150,6 +150,9 @@ const MandatoryLogIn = () => {
         if (token) api.setToken(token);
         if (ok && user) {
           dispatch(setYoung(user));
+          const forceEmailValidation =
+            user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && inscriptionModificationOpenForYoungs(user.cohort, user, environment);
+          if (forceEmailValidation) return history.push("/preinscription");
           await cohortsInit();
         }
       } catch (e) {

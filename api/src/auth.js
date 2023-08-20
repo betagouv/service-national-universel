@@ -313,8 +313,7 @@ class Auth {
       }
 
       user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, emailVerified: "true" });
-      console.log(user.emailVerified, user.tokenEmailValidation, user.tokenEmailValidationExpires, user.attemptsEmailValidation);
-      // await user.save();
+      await user.save();
 
       const trustToken = jwt.sign({}, config.secret, { expiresIn: TRUST_TOKEN_MAX_AGE });
       res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(TRUST_TOKEN_MAX_AGE));

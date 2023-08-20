@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Redirect, Switch, useParams } from "react-router-dom";
+import { Redirect, Switch, useHistory, useParams } from "react-router-dom";
 import { inscriptionCreationOpenForYoungs } from "snu-lib";
 import PreInscriptionContextProvider, { PreInscriptionContext } from "../../context/PreInscriptionContextProvider";
 import { SentryRoute } from "../../sentry";
@@ -50,10 +50,6 @@ const Step = () => {
 };
 
 export function PreInscriptionPublic() {
-  const young = useSelector((state) => state.Auth.young);
-  if (young && young.emailVerified === "false") return <Redirect to="/preinscription/email-validation" />;
-  if (young) return <Redirect to="/inscription" />;
-
   return (
     <Switch>
       <SentryRoute path="/preinscription/:step" component={Step} />;
@@ -63,6 +59,11 @@ export function PreInscriptionPublic() {
 }
 
 export default function PreInscription() {
+  const history = useHistory();
+  const young = useSelector((state) => state.Auth.young);
+  if (young && young.emailVerified === "false") return history.push("/preinscription/email-validation");
+  if (young) return history.push("/inscription2023");
+
   return (
     <PreInscriptionContextProvider>
       <div className="flex flex-col justify-between bg-beige-gris-galet-975">

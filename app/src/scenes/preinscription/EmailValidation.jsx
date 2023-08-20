@@ -30,13 +30,13 @@ export default function StepEmailValidation() {
         return setError("Merci d'entrer le code d'activation ");
       }
       const { code, ok, token, user } = await api.post("/young/email-validation", { token_email_validation: emailValidationToken });
-      console.log({ code, ok, token, user });
       if (!ok) {
         setError(`Une erreur s'est produite : ${translate(code)}`);
       }
-      // if (value) api.setToken(token);
-      // plausibleEvent("Phase0/CTA preinscription - validation email");
-      // history.push("/preinscription/done");
+      if (token) api.setToken(token);
+      if (user) dispatch(setYoung(user));
+      plausibleEvent("Phase0/CTA preinscription - validation email");
+      history.push("/preinscription/done");
     } catch (e) {
       capture(e);
       setError(`Une erreur s'est produite : ${translate(e.code)}`);
@@ -54,7 +54,7 @@ export default function StepEmailValidation() {
       }
     } catch (e) {
       capture(e);
-      setError(`Une erreur s'est produite : ${translate(e.code)}`);
+      toastr.error(`Une erreur s'est produite : ${translate(e.code)}`, "");
     }
   }
 
@@ -64,14 +64,13 @@ export default function StepEmailValidation() {
       if (!ok) {
         toastr.error(`Une erreur s'est produite : ${translate(code)}`, "");
       } else {
-        console.log({ user });
         dispatch(setYoung(user));
 
         toastr.success("Votre adresse mail a bien été mise à jour et un code d'activation vous a été envoyé à cette adresse", "");
       }
     } catch (e) {
       capture(e);
-      setError(`Une erreur s'est produite : ${translate(e.code)}`);
+      toastr.error(`Une erreur s'est produite : ${translate(e.code)}`, "");
     }
   }
 
@@ -100,7 +99,16 @@ export default function StepEmailValidation() {
       <div className="mt-8 flex flex-col gap-1">
         <label>Code d'activation reçu par e-mail</label>
         <Input value={emailValidationToken} onChange={setEmailValidationToken} />
-        <div className="h-2">{error && <span className="text-sm text-red-500">{error}</span>}</div>
+        <div className="h-2">
+          {error && (
+            <span className="text-sm text-red-500">
+              {error}{" "}
+              <InlineButton className="ml-1 text-sm text-red-500 hover:text-red-700" onClick={handleRequestNewToken}>
+                Recevoir un nouveau code
+              </InlineButton>
+            </span>
+          )}
+        </div>
       </div>
       <InlineButton
         className="mt-3"
