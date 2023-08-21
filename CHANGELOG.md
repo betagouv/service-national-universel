@@ -1,3 +1,12 @@
+## [1.322.1](https://github.com/betagouv/service-national-universel/compare/v1.322.0...v1.322.1) (2023-08-21)
+
+
+### Bug Fixes
+
+* **admin/app:** Fix redirect when id null ([#2891](https://github.com/betagouv/service-national-universel/issues/2891)) ([5e936cb](https://github.com/betagouv/service-national-universel/commit/5e936cbda96ef0ff4f87ffe51fc64cebe0de8578))
+* **all:** Sentry infinite loop for capture ([7704ddb](https://github.com/betagouv/service-national-universel/commit/7704ddb9e557f6f3728e1fa3e9c257770973e6ec))
+* **api:** fix joi validation in doc correction route ([2b4e5c6](https://github.com/betagouv/service-national-universel/commit/2b4e5c6d40af6054808213c476c09df381382037))
+
 # [1.322.0](https://github.com/betagouv/service-national-universel/compare/v1.321.0...v1.322.0) (2023-08-18)
 
 
