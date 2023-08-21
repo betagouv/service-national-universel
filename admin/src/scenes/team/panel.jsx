@@ -1,80 +1,24 @@
-import Img3 from "../../assets/link.svg";
-import Img from "../../assets/copy.svg";
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { translate, ROLES, ES_NO_LIMIT, copyToClipboard, canUpdateReferent, canDeleteReferent, formatPhoneNumberFR } from "../../utils";
+import { translate, ROLES, canUpdateReferent, canDeleteReferent, formatPhoneNumberFR } from "../../utils";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
-import styled from "styled-components";
+
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import plausibleEvent from "../../services/plausible";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 
 export default function UserPanel({ onChange, value }) {
-  if (!value) return <div />;
-  const [structure, setStructure] = useState();
-  const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
-  const [referentsDepartment, setReferentsDepartment] = useState([]);
-  const [teamMembers, setTeamMembers] = useState([]);
   const user = useSelector((state) => state.Auth.user);
   const dispatch = useDispatch();
   const history = useHistory();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
-
-  useEffect(() => {
-    setStructure(null);
-    setMissionsInfo({ count: "-", placesTotal: "-" });
-    setTeamMembers([]);
-    setReferentsDepartment([]);
-    (async () => {
-      if (!value.structureId) return;
-      const { ok, data, code } = await api.get(`/structure/${value.structureId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
-      return setStructure(data);
-    })();
-    (async () => {
-      if (!value.structureId) return;
-      const { responses: missionResponses } = await api.esQuery("mission", {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value.structureId } }] } },
-      });
-      if (missionResponses.length) {
-        setMissionsInfo({
-          count: missionResponses[0].hits.hits.length,
-          placesTotal: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
-          placesLeft: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
-        });
-      }
-    })();
-  }, [value]);
-
-  useEffect(() => {
-    if (!structure) return;
-    (async () => {
-      const { responses: referentResponses } = await api.esQuery("referent", {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
-        size: ES_NO_LIMIT,
-      });
-      if (referentResponses.length) {
-        setTeamMembers(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
-      }
-    })();
-
-    if (!structure?.department) return;
-    (async () => {
-      const { responses: referentDepartementResponses } = await api.esQuery("referent", {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "department.keyword": structure.department } }, { term: { "role.keyword": "referent_department" } }] } },
-      });
-      if (referentDepartementResponses.length) {
-        setReferentsDepartment(referentDepartementResponses[0].hits.hits.map((e) => ({ _id: e._id, ...e._source })));
-      }
-    })();
-  }, [structure]);
 
   const handleImpersonate = async () => {
     try {
@@ -114,6 +58,8 @@ export default function UserPanel({ onChange, value }) {
       return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
     }
   };
+
+  if (!value) return <div />;
   return (
     <Panel>
       <div className="info">
@@ -121,18 +67,13 @@ export default function UserPanel({ onChange, value }) {
           <div className="title">{`${value.firstName} ${value.lastName}`}</div>
           <div className="close" onClick={onChange} />
         </div>
-        {canUpdateReferent({ actor: user, originalTarget: value, structure: structure }) && (
+        {canUpdateReferent({ actor: user, originalTarget: value }) && (
           <div style={{ display: "flex", flexWrap: "wrap" }}>
             <Link to={`/user/${value._id}`}>
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
             {user.role === ROLES.ADMIN ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
             {canDeleteReferent({ actor: user, originalTarget: value }) ? <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" /> : null}
-            {structure ? (
-              <Link to={`/structure/${structure._id}`} onClick={() => plausibleEvent("Utilisateurs/Profil CTA - Voir structure")}>
-                <PanelActionButton icon="eye" title="Voir la structure" />
-              </Link>
-            ) : null}
           </div>
         )}
       </div>
@@ -147,78 +88,6 @@ export default function UserPanel({ onChange, value }) {
         <Details title="Tel fixe" value={formatPhoneNumberFR(value.phone)} />
         <Details title="Tel Mobile" value={formatPhoneNumberFR(value.mobile)} />
       </Info>
-      {structure ? (
-        <React.Fragment>
-          <Info title="Structure">
-            <div className="detail">
-              <div className="detail-title">Nom :</div>
-              <div style={{ display: "flex" }}>
-                <div className="detail-text">{structure.name}</div>
-                <Link to={`/structure/${structure._id}`}>
-                  <IconLink />
-                </Link>
-              </div>
-            </div>
-            <Details title="Région" value={structure?.region} />
-            <Details title="Dép." value={structure?.department} />
-            <div className="detail" style={{ alignItems: "flex-start" }}>
-              <div className="detail-title">Référents Dép. :</div>
-              {!referentsDepartment.length ? (
-                <div className="detail-text">Aucun référent trouvé</div>
-              ) : (
-                <div className="detail-text">
-                  <ul>
-                    {referentsDepartment.map((referent) => (
-                      <li key={referent._id} style={{ display: "flex", alignItems: "center" }}>
-                        {referent.email}
-                        <IconCopy
-                          onClick={() => {
-                            copyToClipboard(referent.email);
-                            toastr.success(`'${referent.email}' a été copié dans le presse papier.`);
-                          }}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-            <div className="detail" style={{ alignItems: "flex-start" }}>
-              <div className="detail-title">Équipe :</div>
-              {!teamMembers.length ? (
-                <div className="detail-text">Aucun compte trouvé</div>
-              ) : (
-                <div className="detail-text">
-                  <ul>
-                    {teamMembers.map((member) => (
-                      <TeamMember key={member._id}>
-                        {`${member.firstName} ${member.lastName}`}
-                        <Link to={`/user/${member._id}`}>
-                          <IconLink />
-                        </Link>
-                      </TeamMember>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-            <Details title="Missions dispo." value={missionsInfo.count} />
-            <Details title="Places restantes" value={missionsInfo.placesLeft} />
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "10px" }}>
-              {missionsInfo.count > 0 ? (
-                <Link to={`/structure/${value._id}/missions`}>
-                  <Button className="btn-missions">Consulter toutes les missions</Button>
-                </Link>
-              ) : null}
-            </div>
-          </Info>
-        </React.Fragment>
-      ) : null}
-      {/* <div>
-        {Object.keys(value).map((e) => {
-          return <div>{`${e}:${value[e]}`}</div>;
-        })}
-      </div> */}
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}
@@ -233,52 +102,3 @@ export default function UserPanel({ onChange, value }) {
     </Panel>
   );
 }
-
-const Button = styled.button`
-  margin: 0 0.5rem;
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 5px;
-  font-size: 12px;
-  min-width: 100px;
-  font-weight: 400;
-  cursor: pointer;
-  background-color: #fff;
-  &.btn-missions {
-    color: #646b7d;
-    border: 1px solid #dcdfe6;
-    font-size: 14px;
-    padding: 5px 15px;
-    :hover {
-      color: rgb(49, 130, 206);
-      border-color: rgb(193, 218, 240);
-      background-color: rgb(234, 243, 250);
-    }
-  }
-`;
-
-const IconLink = styled.div`
-  margin: 0 0.5rem;
-  width: 18px;
-  height: 18px;
-  background: ${`url(${Img3})`};
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 15px 15px;
-`;
-
-const IconCopy = styled.div`
-  cursor: pointer;
-  margin: 0 0.5rem;
-  width: 15px;
-  height: 15px;
-  background: ${`url(${Img})`};
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 15px 15px;
-`;
-
-const TeamMember = styled.li`
-  display: flex;
-  align-items: center;
-`;
