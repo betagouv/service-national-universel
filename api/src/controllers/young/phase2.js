@@ -9,7 +9,7 @@ const YoungModel = require("../../models/young");
 const ReferentModel = require("../../models/referent");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const ApplicationModel = require("../../models/application");
-const { ERRORS, getCcOfYoung, cancelPendingApplications } = require("../../utils");
+const { ERRORS, getCcOfYoung, cancelPendingApplications, updateYoungPhase2Hours, updateStatusPhase2 } = require("../../utils");
 const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, APPLICATION_STATUS, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");
@@ -178,15 +178,11 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
         const applications_v2 = await ApplicationModel.find({ youngId: young._id });
         young.set({ phase2ApplicationStatus: applications_v2.map((e) => e.status) });
       }
-      if (young.statusPhase2 === "VALIDATED" && ["WAITING_CORRECTION", "REFUSED"].includes(value.status) && young.phase2NumberHoursDone !== "84") {
-        const activeApplications = applications.filter((application) => ["WAITING_VERIFICATION", "WAITING_VALIDATION", "IN_PROGRESS", "VALIDATED"].includes(application.status));
-
-        //Le status phase deux est set a In_Progress si on a des candidateure active
-        if (activeApplications.length) {
-          young.set({ statusPhase2: "IN_PROGRESS" });
-        } else {
-          young.set({ statusPhase2: "WAITING_REALISATION" });
-        }
+      if (young.statusPhase2 === "VALIDATED" && ["WAITING_CORRECTION", "REFUSED"].includes(value.status)) {
+        // Dans ces fonctions on va mettre à jour le nombre d'heure de MIG si des missions sont VALIDATED
+        // ensuite on va valider ou non le status en regardant le nombre d'heure effectué et si des missions sont encore actives
+        await updateYoungPhase2Hours(young, req.user);
+        await updateStatusPhase2(young, req.user);
       }
     }
 
