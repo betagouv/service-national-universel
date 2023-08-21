@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch, useHistory } from "react-router-dom";
+import { Redirect, Switch, useHistory } from "react-router-dom";
 import { permissionPhase3 } from "../../utils";
 import { useSelector } from "react-redux";
 
@@ -21,7 +21,16 @@ export default function Index() {
     <div>
       <Switch>
         <SentryRoute path="/phase3/valider" component={Valider} />
-        <SentryRoute path="/phase3/mission/:id" component={Mission} />
+        <SentryRoute
+          path="/phase3/mission/:id"
+          render={({ match }) => {
+            const { id } = match.params;
+            if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+              return <Redirect to="/phase3/mission" />;
+            }
+            return <SentryRoute component={Mission} />;
+          }}
+        />
         <SentryRoute path="/phase3/mission" component={Missions} />
         <SentryRoute path="/phase3" component={Home} />
       </Switch>
