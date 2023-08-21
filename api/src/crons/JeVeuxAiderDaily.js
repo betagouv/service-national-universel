@@ -204,7 +204,7 @@ const sync = async (result) => {
         actions: mission.description,
         structureId: structure.id,
         structureName: structure.name,
-        status: MISSION_STATUS.WAITING_VALIDATION, // Why?
+        status: MISSION_STATUS.WAITING_VALIDATION,
         tutorId: referentMission.id,
         tutorName: getTutorName(referentMission),
         zip: mission.address.zip,
