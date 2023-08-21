@@ -32,7 +32,7 @@ export default function WaitingRealisation() {
           lat: young?.location?.lat,
           lon: young?.location?.lon,
         },
-        distance: 50,
+        distance: 0,
       };
       const res = await api.post("/elasticsearch/missionapi/young/search", { filters, page: 0, size: 3, sort: "geo" });
       if (!res?.data) return toastr.error("Oups, une erreur est survenue lors de la recherche des missions");

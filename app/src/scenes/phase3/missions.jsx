@@ -34,7 +34,7 @@ export default function MissionsComponent() {
   const updateOnFilterChange = useCallback(
     debounce(async (filters, page, size, sort, setData) => {
       try {
-        if (!filters.location?.lat) return;
+        if (!young) return;
         const res = await api.post("/elasticsearch/missionapi/young/search", { filters, page, size, sort });
         if (!res?.data) {
           toastr.error("Oups, une erreur est survenue lors de la recherche des missions");
@@ -76,10 +76,11 @@ export default function MissionsComponent() {
               </option>
               <option value={2}>Distance max. 2km</option>
               <option value={5}>Distance max. 5km</option>
-              <option value={20}>Distance max. 20km</option>
               <option value={10}>Distance max. 10km</option>
+              <option value={20}>Distance max. 20km</option>
               <option value={50}>Distance max. 50km</option>
               <option value={100}>Distance max. 100km</option>
+              <option value={0}>Pas de limite de distance</option>
             </CustomInput>
           </Col>
           <DomainsFilter md={4}>

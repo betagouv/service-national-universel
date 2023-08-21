@@ -13,7 +13,7 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
       filters: Joi.object({
         search: Joi.string().allow(""),
         domain: Joi.string().allow(...Object.keys(JVA_MISSION_DOMAINS), ""),
-        distance: Joi.number().integer().min(0).max(100).required(),
+        distance: Joi.number().integer().min(0).max(100),
         location: Joi.object({
           lat: Joi.number().min(-90).max(90),
           lon: Joi.number().min(-180).max(180),
@@ -33,7 +33,7 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
     let body = {
       query: {
         bool: {
-          must: [{ range: { endAt: { gt: "now" } } }, { range: { places: { gt: 0 } } }, { geo_distance: { distance: `${filters.distance}km`, location: filters.location } }],
+          must: [{ range: { endAt: { gt: "now" } } }, { range: { places: { gt: 0 } } }],
         },
       },
       from: page * 20,
@@ -79,6 +79,7 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
     }
 
     if (filters.domain) body.query.bool.must.push({ term: { "domain.keyword": filters.domain } });
+    if (filters.distance) body.query.bool.must.push({ geo_distance: { distance: `${filters.distance}km`, location: filters.location } });
 
     const results = await esClient.search({ index: "missionapi", body });
     if (results.body.error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
