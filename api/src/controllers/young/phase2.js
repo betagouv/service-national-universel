@@ -178,7 +178,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
         const applications_v2 = await ApplicationModel.find({ youngId: young._id });
         young.set({ phase2ApplicationStatus: applications_v2.map((e) => e.status) });
       }
-      if (young.statusPhase2 === "VALIDATED" && ["WAITING_CORRECTION", "REFUSED"].includes(value.status)) {
+      if (young.statusPhase2 === "VALIDATED" && ["WAITING_CORRECTION", "REFUSED"].includes(value.status) && young.phase2NumberHoursDone !== "84") {
         const activeApplications = applications.filter((application) => ["WAITING_VERIFICATION", "WAITING_VALIDATION", "IN_PROGRESS", "VALIDATED"].includes(application.status));
 
         //Le status phase deux est set a In_Progress si on a des candidateure active
