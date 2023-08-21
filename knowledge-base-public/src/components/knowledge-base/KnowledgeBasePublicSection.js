@@ -93,7 +93,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
             <p className="text-base font-bold leading-6 text-gray-900 py-2">Articles les plus consultés</p>
           </div>
           <div className="flex flex-row">
-            {topArticles.slice(0, 3).map(({ _id, title, slug }) => (
+            {topArticles.slice(0, 3).map(({ title, slug }) => (
               <div className="m-2 flex w-1/3 flex-col justify-center overflow-hidden rounded-lg bg-white p-4 shadow-md">
                 <h3 className="mb-8 line-clamp-2 text-sm leading-5 font-bold text-gray-900">{title}</h3>
                 <Link className={``} href={`/base-de-connaissance/${slug}`}>
