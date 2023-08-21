@@ -25,7 +25,7 @@ export default function Index({ ...props }) {
   useEffect(() => {
     (async () => {
       const id = props.match && props.match.params && props.match.params.id;
-      if (!/^[0-9a-fA-F]{24}$/.test(id)) return <Redirect to="/mission" />;
+      if (!id) return <div />;
 
       const missionResponse = await api.get(`/mission/${id}`);
       if (!missionResponse.ok) {
