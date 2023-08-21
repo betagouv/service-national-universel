@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Switch } from "react-router-dom";
+import { Redirect, Switch } from "react-router-dom";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../../sentry";
 
@@ -24,7 +24,7 @@ export default function Index({ ...props }) {
 
   const getYoung = async () => {
     const id = props.match && props.match.params && props.match.params.id;
-    if (!id) return <div />;
+    if (!/^[0-9a-fA-F]{24}$/.test(id)) return <Redirect to="/volontaire" />;
     const { data } = await api.get(`/referent/young/${id}`);
     setYoung(data);
     setDocumentTitle(`${data?.firstName} ${data?.lastName}`);

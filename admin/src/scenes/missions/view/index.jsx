@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Switch, useHistory } from "react-router-dom";
+import { Redirect, Switch, useHistory } from "react-router-dom";
 import { SentryRoute } from "../../../sentry";
 
 import { toastr } from "react-redux-toastr";
@@ -25,7 +25,7 @@ export default function Index({ ...props }) {
   useEffect(() => {
     (async () => {
       const id = props.match && props.match.params && props.match.params.id;
-      if (!id) return <div />;
+      if (!/^[0-9a-fA-F]{24}$/.test(id)) return <Redirect to="/mission" />;
 
       const missionResponse = await api.get(`/mission/${id}`);
       if (!missionResponse.ok) {
