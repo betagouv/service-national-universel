@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Redirect, Switch, useHistory } from "react-router-dom";
+import { Switch, useHistory } from "react-router-dom";
 import { SentryRoute } from "../../../sentry";
 
 import { toastr } from "react-redux-toastr";
