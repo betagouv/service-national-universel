@@ -4,7 +4,8 @@ import Img3 from "../../assets/left.svg";
 import Img2 from "../../assets/right.svg";
 import styled from "styled-components";
 import api from "../../services/api";
-import { JVA_MISSION_DOMAINS, debounce } from "../../utils";
+import { debounce } from "../../utils";
+import { JVA_MISSION_DOMAINS } from "snu-lib";
 import { capture } from "../../sentry";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
@@ -35,6 +36,10 @@ export default function MissionsComponent() {
       try {
         if (!filters.location?.lat) return;
         const res = await api.post("/elasticsearch/missionapi/young/search", { filters, page, size, sort });
+        if (!res?.data) {
+          toastr.error("Oups, une erreur est survenue lors de la recherche des missions");
+          return;
+        }
         setData(res.data);
       } catch (e) {
         capture(e);
