@@ -111,10 +111,10 @@ class Auth {
         tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10,
       });
 
-      //  await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
-      //    emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
-      //    params: { tokenEmailValidation },
-      //  });
+      await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
+        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
+        params: { registration_code: tokenEmailValidation },
+      });
 
       const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt_young", token, cookieOptions(JWT_MAX_AGE));
@@ -159,10 +159,10 @@ class Auth {
       user.set({ email: value.email, tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10 });
       await user.save();
 
-      //  await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
-      //    emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
-      //    params: { tokenEmailValidation },
-      //  });
+      await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
+        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: value.email }],
+        params: { registration_code: tokenEmailValidation },
+      });
 
       return res.status(200).send({
         ok: true,
@@ -348,10 +348,10 @@ class Auth {
       user.set({ tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10 });
       await user.save();
 
-      //  await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
-      //    emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
-      //    params: { tokenEmailValidation },
-      //  });
+      await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
+        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: req.user.email }],
+        params: { registration_code: tokenEmailValidation },
+      });
 
       return res.status(200).send({
         ok: true,

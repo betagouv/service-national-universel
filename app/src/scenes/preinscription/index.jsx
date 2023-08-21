@@ -49,33 +49,52 @@ const Step = () => {
   return renderStepResponsive(currentStep);
 };
 
-export function PreInscriptionPublic() {
+const PreInscriptionPublic = () => {
   return (
     <Switch>
       <SentryRoute path="/preinscription/:step" component={Step} />;
       <SentryRoute path="/preinscription" component={Step} />;
     </Switch>
   );
-}
+};
 
-export default function PreInscription() {
-  const history = useHistory();
-  const young = useSelector((state) => state.Auth.young);
-  if (young && young.emailVerified === "false") return history.push("/preinscription/email-validation");
-  if (young) return history.push("/inscription2023");
-
+const PreInscriptionWrapper = ({ children }) => {
   return (
     <PreInscriptionContextProvider>
       <div className="flex flex-col justify-between bg-beige-gris-galet-975">
         <Header />
-        <Switch>
-          {/* @todo review navigation: user needs to be connected for email-validation and done pages */}
-          <SentryRoute path="/preinscription/email-validation" component={EmailValidation} />;
-          <SentryRoute path="/preinscription/done" component={Done} />;
-          <SentryRoute path="/preinscription/" component={PreInscriptionPublic} />;
-        </Switch>
+        {children}
         <Footer />
       </div>
     </PreInscriptionContextProvider>
+  );
+};
+
+export default function PreInscription() {
+  const history = useHistory();
+  const young = useSelector((state) => state.Auth.young);
+  if (!young)
+    return (
+      <PreInscriptionWrapper>
+        <PreInscriptionPublic />
+      </PreInscriptionWrapper>
+    );
+  if (young && young.emailVerified === "false") {
+    return (
+      <PreInscriptionWrapper>
+        <EmailValidation />
+      </PreInscriptionWrapper>
+    );
+  }
+  if (young) return history.push("/inscription2023");
+
+  return (
+    <PreInscriptionWrapper>
+      <Switch>
+        <SentryRoute path="/preinscription/email-validation" component={EmailValidation} />;
+        <SentryRoute path="/preinscription/done" component={Done} />;
+        <SentryRoute path="/preinscription/" component={PreInscriptionPublic} />;
+      </Switch>
+    </PreInscriptionWrapper>
   );
 }
