@@ -1,4 +1,4 @@
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -12,9 +12,11 @@ import Panel, { Info, Details } from "../../components/Panel";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import plausibleEvent from "../../services/plausible";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
+import { captureEvent } from "@sentry/react";
 
 export default function UserPanel({ onChange, value }) {
   const user = useSelector((state) => state.Auth.user);
+  if (user?.structureId) captureEvent("Team member has a structureId", { user: user._id, structureId: user.structureId });
   const dispatch = useDispatch();
   const history = useHistory();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
