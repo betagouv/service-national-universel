@@ -76,7 +76,7 @@ function initSentry() {
 function capture(err, contexte) {
   console.log("capture", err);
   if (!err) {
-    captureMessage("Error not defined");
+    sentryCaptureMessage("Error not defined");
     return;
   }
 
@@ -93,7 +93,7 @@ function capture(err, contexte) {
 function captureMessage(mess, contexte) {
   console.log("captureMessage", mess);
   if (!mess) {
-    captureMessage("Error not defined");
+    sentryCaptureMessage("Error not defined");
     return;
   }
 
