@@ -8,6 +8,7 @@ import GhostButton from "./GhostButton";
 import { FiChevronLeft } from "react-icons/fi";
 import validator from "validator";
 import ErrorMessage from "./ErrorMessage";
+import { toastr } from "react-redux-toastr";
 
 const addressValidationInfo = "Pour valider votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.";
 const addressValidationSuccess = "L'adresse a été vérifiée";
@@ -31,6 +32,10 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
   useEffect(() => {
     async function getCities() {
       const { responses } = await api.post("/elasticsearch/schoolramses/public/search?aggsByCities=true", { filters: { country: ["FRANCE"] } });
+      if (!responses[0].aggregations?.cities.buckets.length) {
+        toastr.error("Erreur", "Impossible de récupérer les établissements");
+        return;
+      }
       setCities(responses[0].aggregations?.cities.buckets.map((e) => e.key).sort());
     }
     getCities();
@@ -168,7 +173,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
     <>
       <SearchableSelect
         label="Commune de l'établissement"
-        options={cities.map((c) => ({ value: c, label: c }))}
+        options={cities?.map((c) => ({ value: c, label: c }))}
         onChange={(value) => {
           setCity(value);
           setManualSchool({ city: value, addressVerified: undefined });
