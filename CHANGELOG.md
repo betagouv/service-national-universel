@@ -1,3 +1,10 @@
+## [1.322.2](https://github.com/betagouv/service-national-universel/compare/v1.322.1...v1.322.2) (2023-08-22)
+
+
+### Bug Fixes
+
+* **app:** fix mission filters modal on mobile ([7287bbb](https://github.com/betagouv/service-national-universel/commit/7287bbbc477c611db0c66c73ee3e81d63da2a259))
+
 ## [1.322.1](https://github.com/betagouv/service-national-universel/compare/v1.322.0...v1.322.1) (2023-08-21)
 
 
