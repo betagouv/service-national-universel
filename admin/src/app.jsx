@@ -8,6 +8,7 @@ import Auth from "./scenes/auth";
 import Validate from "./scenes/validate";
 import Profil from "./scenes/profil";
 import Settings from "./scenes/settings";
+import Alerte from "./scenes/alerte";
 import Dashboard from "./scenes/dashboard";
 import DashboardVisitor from "./scenes/dashboard-visitor";
 import DashboardResponsible from "./scenes/dashboard-responsible";
@@ -208,6 +209,7 @@ const Home = () => {
           <Switch>
             <RestrictedRoute path="/structure" component={Structure} />
             <RestrictedRoute path="/settings" component={Settings} />
+            <RestrictedRoute path="/alerte" component={Alerte} />
             <RestrictedRoute path="/profil" component={Profil} />
             <RestrictedRoute path="/volontaire" component={renderVolontaire} />
             <RestrictedRoute path="/etablissement" component={Etablissement} />

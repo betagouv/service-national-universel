@@ -1,3 +1,42 @@
+## [1.322.1](https://github.com/betagouv/service-national-universel/compare/v1.322.0...v1.322.1) (2023-08-21)
+
+
+### Bug Fixes
+
+* **admin/app:** Fix redirect when id null ([#2891](https://github.com/betagouv/service-national-universel/issues/2891)) ([5e936cb](https://github.com/betagouv/service-national-universel/commit/5e936cbda96ef0ff4f87ffe51fc64cebe0de8578))
+* **all:** Sentry infinite loop for capture ([7704ddb](https://github.com/betagouv/service-national-universel/commit/7704ddb9e557f6f3728e1fa3e9c257770973e6ec))
+* **api:** fix joi validation in doc correction route ([2b4e5c6](https://github.com/betagouv/service-national-universel/commit/2b4e5c6d40af6054808213c476c09df381382037))
+
+# [1.322.0](https://github.com/betagouv/service-national-universel/compare/v1.321.0...v1.322.0) (2023-08-18)
+
+
+### Bug Fixes
+
+* **api:** fix mission sorting order options ([260ff70](https://github.com/betagouv/service-national-universel/commit/260ff7077e468c23643b8f2b57ca03bd78e9aef2))
+* **api:** fix params in /exist toute ([3689a98](https://github.com/betagouv/service-national-universel/commit/3689a981e4e5c94780511c395b6f9333a884718b))
+* **api:** rate limiter sendinblue syncErrors ([#2856](https://github.com/betagouv/service-national-universel/issues/2856)) ([6b2fb45](https://github.com/betagouv/service-national-universel/commit/6b2fb45766bf9b20560779d295bc608bde2230d3))
+* **appi, admin:** fix /referent/exist route ([#2888](https://github.com/betagouv/service-national-universel/issues/2888)) ([e3d97b5](https://github.com/betagouv/service-national-universel/commit/e3d97b563230daa5820d00b7b4f9f22ed8786d42))
+* **lib:** ajouter les noms des ministres ([c27b821](https://github.com/betagouv/service-national-universel/commit/c27b8212edd23ccfe47336de3fa478eeb22fd800))
+
+
+### Features
+
+* **admin:** paramétrage de l'alerte du tableau de bord ([#2842](https://github.com/betagouv/service-national-universel/issues/2842)) ([1ff3e44](https://github.com/betagouv/service-national-universel/commit/1ff3e44472bfd849468bd21fb584d304c2a9a3fa))
+
+# [1.321.0](https://github.com/betagouv/service-national-universel/compare/v1.320.5...v1.321.0) (2023-08-17)
+
+
+### Bug Fixes
+
+* **analytics:** bug packages ([84f551b](https://github.com/betagouv/service-national-universel/commit/84f551bd0b5235f5ccd9365c5f6db69f8934319e))
+* **analytics:** cron jdma slack msg ([#2882](https://github.com/betagouv/service-national-universel/issues/2882)) ([74e435d](https://github.com/betagouv/service-national-universel/commit/74e435d64bfcb07ed9571df0381fefa9e1219a97))
+* **bdc:** change breadcrumb color on thematique page ([#2884](https://github.com/betagouv/service-national-universel/issues/2884)) ([347ce64](https://github.com/betagouv/service-national-universel/commit/347ce64f9f547322a117017b7e42c2689dfe8f33))
+
+
+### Features
+
+* **admin:** Simplifier le systeme de pagination [#2880](https://github.com/betagouv/service-national-universel/issues/2880) ([dd0e7b6](https://github.com/betagouv/service-national-universel/commit/dd0e7b6502a08edb42042bddee83955be6ae5834))
+
 ## [1.320.5](https://github.com/betagouv/service-national-universel/compare/v1.320.4...v1.320.5) (2023-08-16)
 
 

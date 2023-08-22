@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch } from "react-router-dom";
+import { Redirect, Switch } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
@@ -14,7 +14,16 @@ export default function Index() {
     <Switch>
       <SentryRoute path="/mission/create/:structureId" component={Edit} />
       <SentryRoute path="/mission/create" component={Edit} />
-      <SentryRoute path="/mission/:id" component={View} />
+      <SentryRoute
+        path="/mission/:id"
+        render={({ match }) => {
+          const { id } = match.params;
+          if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+            return <Redirect to="/mission" />;
+          }
+          return <SentryRoute component={View} />;
+        }}
+      />
       <SentryRoute path="/mission" component={List} />
     </Switch>
   );

@@ -124,16 +124,6 @@ export default function Youngs({ mission, applications, updateMission }) {
 
   async function transform(data, values) {
     let all = data;
-    if (values && ["identity", "contact", "address", "location", "application", "status", "choices", "representative1", "representative2"].some((e) => values.includes(e))) {
-      const youngIds = [...new Set(data.map((item) => item.youngId))];
-      if (youngIds?.length) {
-        const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
-        if (responses.length) {
-          const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
-        }
-      }
-    }
     return all.map((data) => {
       if (!data.young) data.young = {};
       if (!data.young.domains) data.young.domains = [];

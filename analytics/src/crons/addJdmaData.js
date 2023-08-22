@@ -4,10 +4,10 @@ const { capture } = require("../sentry");
 const slack = require("../slack");
 const Demarche = require("../models/demarche_JDMA");
 const { JDMA_LOGIN, JDMA_PASSWORD } = require("../config");
-let count = 0;
 const ONE_DAY_IN_MS = 86400000; // one day in milliseconds
 
 module.exports.handler = function () {
+  let count = 0;
   // Sync the model with the database, this creates the table if it does not exist
   Demarche.sync()
     .then(() => {

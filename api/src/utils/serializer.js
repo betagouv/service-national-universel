@@ -143,6 +143,10 @@ function serializeArray(arr, user, serialize) {
   return arr.map((s) => serialize(s, user));
 }
 
+function serializeAlerteMessage(message) {
+  return message.toObject();
+}
+
 // return only the initialValue's properties that are in the whitelist 'keys'
 const subObject = (initialValue, keys) =>
   keys.reduce((o, k) => {
@@ -164,4 +168,5 @@ module.exports = {
   serializeMeetingPoint,
   serializeEmail,
   serializeContract,
+  serializeAlerteMessage,
 };

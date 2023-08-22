@@ -74,7 +74,7 @@ router.post("/by-mission/:id/:action(search|export)", passport.authenticate(["yo
     const sortFields = [];
 
     // Body params validation
-    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, sort, error, size, exportFields } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { error: errorQuery, value: query } = Joi.object({
@@ -107,8 +107,10 @@ router.post("/by-mission/:id/:action(search|export)", passport.authenticate(["yo
     });
 
     if (req.params.action === "export") {
-      const response = await allRecords("application", hitsRequestBody.query);
-      return res.status(200).send({ ok: true, data: serializeApplications(response) });
+      const response = await allRecords("application", hitsRequestBody.query, esClient, exportFields);
+      let data = serializeApplications(response);
+      data = await populateApplications(data, exportFields);
+      return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(serializeApplications(response.body));

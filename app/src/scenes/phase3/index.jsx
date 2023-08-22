@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch, useHistory } from "react-router-dom";
+import { Redirect, Switch, useHistory } from "react-router-dom";
 import { permissionPhase3 } from "../../utils";
 import { useSelector } from "react-redux";
 

@@ -115,7 +115,7 @@ export default function Filters({
         if (location.search !== search) window.history.replaceState({ path: pathname + search }, "", pathname + search);
       });
     }, 250),
-    [],
+    [firstLoad],
   );
 
   useEffect(() => {

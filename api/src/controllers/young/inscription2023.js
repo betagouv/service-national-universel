@@ -470,11 +470,11 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
     }
 
     if (type === "correction") {
-      const fileSchema = {
-        latestCNIFileExpirationDate: Joi.date().required(),
-        latestCNIFileCategory: Joi.string().trim().required(),
-      };
-      const { error, value } = Joi.object(fileSchema).validate(req.body, { stripUnknown: true });
+      const fileSchema = Joi.object({
+        latestCNIFileExpirationDate: Joi.date(),
+        latestCNIFileCategory: Joi.string().trim(),
+      }).or("latestCNIFileExpirationDate", "latestCNIFileCategory");
+      const { error, value } = fileSchema.validate(req.body, { stripUnknown: true });
       if (error) {
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });

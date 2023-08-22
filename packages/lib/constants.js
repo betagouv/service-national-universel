@@ -247,7 +247,7 @@ const INTEREST_MISSION_LIMIT_DATE = {
 const ES_NO_LIMIT = 10_000;
 
 const SENDINBLUE_TEMPLATES = {
-  SIGNIN_2FA: "1144",
+  SIGNIN_2FA: "1317",
   FORGOT_PASSWORD: "1308",
 
   invitationReferent: {
@@ -616,7 +616,7 @@ const MINISTRES = [
     template: "certificates/certificateTemplate_juillet_2022.png",
   },
   {
-    date_end: "01-01-2100", // ! Changer ici à l'ajout d'un nouveau
+    date_end: "08-18-2023",
     ministres: [
       "Pap Ndiaye, Ministre de l’Éducation Nationale et de la Jeunesse",
       "Sébastien Lecornu, Ministre des Armées",
@@ -625,6 +625,16 @@ const MINISTRES = [
     ],
     template: "certificates/certificateTemplate2023.png",
   },
+  {
+    date_end: "08-18-2100", // ! Changer ici à l'ajout d'un nouveau
+    ministres: [
+      "Gabriel Attal, Ministre de l’Éducation Nationale et de la Jeunesse",
+      "Sébastien Lecornu, Ministre des Armées",
+      "Prisca Thevenot, Secrétaire d'État auprès du ministre des Armées et du ministre de 'Éducation nationale et de la Jeunesse , \
+      chargée de la Jeunesse et du Service national universel",
+    ],
+    template: "certificates/certificateTemplate2023-08-18.png",
+  }
 ];
 
 const FILE_KEYS = [
