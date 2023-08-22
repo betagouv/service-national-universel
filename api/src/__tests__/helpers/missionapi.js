@@ -1,4 +1,4 @@
-const MissionObject = require("../../models/missionapi");
+const MissionObject = require("../../models/missionAPI");
 
 async function getMissionsApiHelper(params = {}) {
   return await MissionObject.find(params);
