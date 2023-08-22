@@ -6,14 +6,14 @@ import { useHistory } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
-import validator from "validator";
 import AddressInput from "../../components/addressInput";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import MultiSelect from "../../components/Multiselect";
 import api from "../../services/api";
-import { ENABLE_PM, legalStatus, regexPhoneFrenchCountries, ROLES, SENDINBLUE_TEMPLATES, sousTypesStructure, translate, typesStructure } from "../../utils";
+import { ENABLE_PM, legalStatus, ROLES, SENDINBLUE_TEMPLATES, sousTypesStructure, translate, typesStructure } from "../../utils";
+import { isPossiblePhoneNumber } from "libphonenumber-js";
 
 export default function Create() {
   const user = useSelector((state) => state.Auth.user);
@@ -367,8 +367,7 @@ export default function Create() {
                       onChange={handleChange}
                       placeholder="06/02 00 00 00 00"
                       validate={(v) =>
-                        (!v && requiredMessage) ||
-                        (!validator.matches(v, regexPhoneFrenchCountries) && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
+                        (!v && requiredMessage) || (!isPossiblePhoneNumber(v, "FR") && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
                       }
                     />
                     <ErrorMessage errors={errors} touched={touched} name="phone" />

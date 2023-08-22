@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useHistory } from "react-router-dom";
-import { useSelector } from "react-redux";
 import ReactSelect from "react-select";
 import AsyncSelect from "react-select/async";
 import CreatableSelect from "react-select/creatable";
@@ -8,17 +7,7 @@ import validator from "validator";
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
 import InfoCircleMission from "../../../assets/icons/InfoCircleMission";
 
-import {
-  translate,
-  ROLES,
-  MISSION_DOMAINS,
-  PERIOD,
-  MISSION_PERIOD_DURING_HOLIDAYS,
-  MISSION_PERIOD_DURING_SCHOOL,
-  ES_NO_LIMIT,
-  regexPhoneFrenchCountries,
-  SENDINBLUE_TEMPLATES,
-} from "../../../utils";
+import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, SENDINBLUE_TEMPLATES } from "../../../utils";
 import MissionView from "./wrapper";
 import Pencil from "../../../assets/icons/Pencil";
 import Field from "../components/Field";
@@ -33,6 +22,7 @@ import { adminURL } from "../../../config";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import { MISSION_STATUS } from "snu-lib";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
+import { isPossiblePhoneNumber } from "libphonenumber-js";
 
 export default function DetailsView({ mission, setMission, getMission }) {
   const [values, setValues] = useState(mission);
@@ -199,7 +189,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
       if (!newTutor.lastName) error.lastName = "Ce champ est obligatoire";
       if (!validator.isEmail(newTutor.email)) error.email = "L'email est incorrect";
       if (!newTutor.phone) error.phone = "Ce champ est obligatoire";
-      if (!validator.matches(newTutor.phone, regexPhoneFrenchCountries)) error.phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
+      if (!isPossiblePhoneNumber(newTutor.phone, "FR")) error.phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
       setErrors(error);
       if (Object.keys(error).length > 0) return setLoading(false);
 

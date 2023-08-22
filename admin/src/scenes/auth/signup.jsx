@@ -15,8 +15,9 @@ import Header from "./components/header";
 import { requiredMessage } from "../../components/errorMessage";
 import { adminURL } from "../../config";
 import { capture } from "../../sentry";
-import { getDepartmentByZip, getRegionByZip, legalStatus, regexPhoneFrenchCountries, sousTypesStructure, translate, typesStructure } from "../../utils";
+import { getDepartmentByZip, getRegionByZip, legalStatus, sousTypesStructure, translate, typesStructure } from "../../utils";
 import ModalInfo from "../../components/modals/ModalInfo";
+import { isPossiblePhoneNumber } from "libphonenumber-js";
 
 export default function Signup() {
   const dispatch = useDispatch();
@@ -160,8 +161,7 @@ export default function Signup() {
                       onChange={handleChange}
                       placeholder="06/02 00 00 00 00"
                       validate={(v) =>
-                        (!v && requiredMessage) ||
-                        (!validator.matches(v, regexPhoneFrenchCountries) && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
+                        (!v && requiredMessage) || (!isPossiblePhoneNumber(v, "FR") && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
                       }
                     />
                     <p className="text-xs text-red-500">{errors.user?.phone}</p>
