@@ -21,12 +21,12 @@ import {
   PERIOD,
   ROLES,
   SENDINBLUE_TEMPLATES,
-  regexPhoneFrenchCountries,
   translate,
 } from "../../../utils";
 import Field from "../../missions/components/Field";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import YoungHeader from "../../phase0/components/YoungHeader";
+import { isPossiblePhoneNumber } from "libphonenumber-js";
 
 export default function CustomMission({ young, onChange }) {
   const history = useHistory();
@@ -84,7 +84,7 @@ export default function CustomMission({ young, onChange }) {
       if (!newTutor.lastName) error.lastName = "Ce champ est obligatoire";
       if (!validator.isEmail(newTutor.email)) error.email = "L'email est incorrect";
       if (!newTutor.phone) error.phone = "Ce champ est obligatoire";
-      if (!validator.matches(newTutor.phone, regexPhoneFrenchCountries)) error.phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
+      if (!isPossiblePhoneNumber(newTutor.phone, "FR")) error.phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
       setErrors(error);
       if (Object.keys(error).length > 0) return setLoading(false);
 
