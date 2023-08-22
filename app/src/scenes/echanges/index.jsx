@@ -16,8 +16,25 @@ import { toastr } from "react-redux-toastr";
 
 const Echanges = () => {
   const user = useSelector((state) => state.Auth.young);
-  const location = useLocation();
-  const userTickets = location.state.userTickets;
+    // const location = useLocation();
+    // const userTickets = location.state.userTickets;
+  const [userTickets, setUserTickets] = useState(null);
+
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const { ok, data } = await API.get(`/zammood/tickets`);
+        if (!ok) {
+          console.log("API response not OK");
+          return setUserTickets([]);
+        }
+        setUserTickets(data);
+      } catch (error) {
+        console.log("Error fetching tickets:", error);
+      }
+    };
+    fetchTickets();
+  }, []);
 
   dayjs.extend(relativeTime).locale("fr");
 
