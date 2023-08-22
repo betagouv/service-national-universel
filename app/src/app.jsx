@@ -10,6 +10,7 @@ import Navbar from "./components/layout/navbar";
 import Loader from "./components/Loader";
 import ModalResumePhase1ForWithdrawn from "./components/modals/ModalResumePhase1ForWithdrawn";
 import Account from "./scenes/account";
+import Echanges from "./scenes/echanges";
 import AllEngagements from "./scenes/all-engagements/index";
 import Auth from "./scenes/auth";
 import Candidature from "./scenes/candidature";
@@ -231,6 +232,7 @@ const Espace = () => {
           <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
           <SentryRoute path="/reinscription" component={ReInscription} />
           <SentryRoute path="/account" component={Account} />
+          <SentryRoute path="/echanges" component={Echanges} />
           <SentryRoute path="/phase1" component={Phase1} />
           <SentryRoute path="/phase2" component={Phase2} />
           <SentryRoute path="/phase3" component={Phase3} />

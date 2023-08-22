@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import useDevice from "../../../hooks/useDeviceWithResize";
-
+import API from "../../../services/api";
 import Close from "./assets/Close";
 import Hamburger from "./assets/Hamburger";
 import Logo from "./components/Logo";
@@ -11,14 +11,30 @@ import UserMenu from "./components/UserMenu";
 
 export default function Navbar() {
   const device = useDevice();
+  const [userTickets, setUserTickets] = useState([]);
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const { ok, data } = await API.get(`/zammood/tickets`);
+        if (!ok) {
+          console.log("API response not OK");
+          return setUserTickets([]);
+        }
+        setUserTickets(data);
+      } catch (error) {
+        console.log("Error fetching tickets:", error);
+      }
+    };
+    fetchTickets();
+  }, []);
 
   if (device === "mobile") {
-    return <MobileNavbar />;
+    return <MobileNavbar userTickets={userTickets} />;
   }
-  return <DesktopNavbar />;
+  return <DesktopNavbar userTickets={userTickets} />;
 }
 
-function MobileNavbar() {
+function MobileNavbar({userTickets}) {
   const ref = React.useRef();
   const user = useSelector((state) => state.Auth.young);
   const [drawer, setDrawer] = React.useState({ open: false, content: null });
@@ -31,7 +47,7 @@ function MobileNavbar() {
   }, []);
 
   function openDrawer(Content) {
-    setDrawer({ open: true, content: <Content onClose={onClose} /> });
+    setDrawer({ open: true, content: <Content onClose={onClose} userTickets={userTickets} /> });
   }
 
   function onClose() {
@@ -72,7 +88,7 @@ function MobileDrawer({ open, onClose, content }) {
   );
 }
 
-function DesktopNavbar() {
+function DesktopNavbar({ userTickets }) {
   return (
     <header className="z-50 hidden h-screen w-64 flex-col justify-start bg-[#212B44] text-sm text-[#D2DAEF] md:flex">
       <div className="h-24 flex-none border-b-[1px] border-[#2A3655]">
@@ -84,7 +100,7 @@ function DesktopNavbar() {
       </div>
 
       <div className="flex-none">
-        <UserCard />
+        <UserCard userTickets={userTickets} />
       </div>
     </header>
   );

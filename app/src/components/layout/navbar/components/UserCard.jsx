@@ -1,15 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import API from "../../../../services/api";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
 import { setYoung } from "../../../../redux/auth/actions";
-import API from "../../../../services/api";
 import { permissionPhase2 } from "../../../../utils";
 import { toastr } from "react-redux-toastr";
 
-export default function User() {
+export default function User({ userTickets }) {
   const user = useSelector((state) => state.Auth.young);
   const [open, setOpen] = React.useState(false);
+  // const [userTickets, setUserTickets] = useState(null);
   const menuRef = React.useRef();
   const buttonRef = React.useRef();
 
@@ -56,12 +57,12 @@ export default function User() {
           <ChevronDown />
         </button>
       </div>
-      <Menu open={open} menuRef={menuRef} user={user} onClose={onClose} />
+      <Menu open={open} menuRef={menuRef} user={user} onClose={onClose} userTickets={userTickets} />
     </>
   );
 }
 
-function Menu({ open, menuRef, user, onClose }) {
+function Menu({ open, menuRef, user, onClose, userTickets }) {
   const dispatch = useDispatch();
   const history = useHistory();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -82,7 +83,7 @@ function Menu({ open, menuRef, user, onClose }) {
   return (
     <nav
       className={`absolute left-4 bottom-20 z-10 flex w-56 flex-col justify-around overflow-hidden rounded-lg bg-white shadow transition-all duration-200 ease-in-out ${
-        open ? (permissionPhase2(user) ? "h-28" : "h-20") : "h-0"
+        open ? (permissionPhase2(user) ? "h-auto" : "h-20") : "h-0"
       }`}
       ref={menuRef}>
       <Link to="/account" onClick={onClose} className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
@@ -91,6 +92,17 @@ function Menu({ open, menuRef, user, onClose }) {
       {permissionPhase2(user) && (
         <Link to="/preferences" onClick={onClose} className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
           Mes préférences de mission
+        </Link>
+      )}
+      {userTickets.length > 0 && (
+        <Link
+          to={{
+            pathname: "/echanges",
+            state: { userTickets },
+          }}
+          onClick={onClose}
+          className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
+          Mes échanges
         </Link>
       )}
       <button
