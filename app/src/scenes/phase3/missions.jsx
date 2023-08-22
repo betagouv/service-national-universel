@@ -35,7 +35,7 @@ export default function MissionsComponent() {
     debounce(async (filters, page, size, sort, setData) => {
       try {
         if (!young) return;
-        const res = await api.post("/elasticsearch/missionapi/young/search", { filters, page, size, sort });
+        const res = await api.post("/elasticsearch/missionapi/search", { filters, page, size, sort });
         if (!res?.data) {
           toastr.error("Oups, une erreur est survenue lors de la recherche des missions");
           return;

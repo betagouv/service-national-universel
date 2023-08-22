@@ -7,7 +7,7 @@ const { ERRORS } = require("../../utils");
 const Joi = require("joi");
 const { JVA_MISSION_DOMAINS } = require("snu-lib");
 
-router.post("/young/search/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.post("/search/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const schema = Joi.object({
       filters: Joi.object({

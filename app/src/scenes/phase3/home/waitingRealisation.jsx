@@ -34,7 +34,7 @@ export default function WaitingRealisation() {
         },
         distance: 0,
       };
-      const res = await api.post("/elasticsearch/missionapi/young/search", { filters, page: 0, size: 3, sort: "geo" });
+      const res = await api.post("/elasticsearch/missionapi/search", { filters, page: 0, size: 3, sort: "geo" });
       if (!res?.data) return toastr.error("Oups, une erreur est survenue lors de la recherche des missions");
       setData(res.data);
     })();
