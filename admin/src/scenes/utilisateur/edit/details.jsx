@@ -31,6 +31,7 @@ import ConfirmationModal from "../../phase0/components/ConfirmationModal";
 import CustomSelect from "../composants/CustomSelect";
 import { roleOptions, MODE_DEFAULT, MODE_EDITION, formatSessionOptions, getSubRoleOptions } from "../utils";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
+import { isPossiblePhoneNumber } from "libphonenumber-js";
 
 export default function Details({ user, setUser, currentUser }) {
   const [structures, setStructures] = useState([]);
@@ -201,12 +202,12 @@ export default function Details({ user, setUser, currentUser }) {
       isValid = false;
     }
 
-    if (trimmedPhone && !trimmedPhone.match(/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/gim)) {
+    if (trimmedPhone && !isPossiblePhoneNumber(trimmedPhone, "FR")) {
       errors.phone = "Le téléphone doit être un numéro de téléphone valide";
       isValid = false;
     }
 
-    if (trimmedMobile && !validator.isMobilePhone(trimmedMobile, ["fr-FR", "fr-GF", "fr-GP", "fr-MQ", "fr-RE"])) {
+    if (trimmedMobile && !isPossiblePhoneNumber(trimmedMobile, "FR")) {
       errors.mobile = "Le téléphone doit être un numéro de téléphone mobile valide. Exemple : +33 6 42 42 42 42.";
       isValid = false;
     }
