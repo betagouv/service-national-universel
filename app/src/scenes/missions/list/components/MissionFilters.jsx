@@ -81,32 +81,6 @@ export default function MissionFilters({ filters, setFilters }) {
   };
 
   useEffect(() => {
-    if (!refDropdownControlDistance) return;
-    const handleClickOutside = (event) => {
-      if (refDropdownControlDistance?.current && !refDropdownControlDistance.current.contains(event.target)) {
-        setDropdownControlDistanceOpen(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside, true);
-    return () => {
-      document.removeEventListener("click", handleClickOutside, true);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!refDropdownControlWhen) return;
-    const handleClickOutside = (event) => {
-      if (refDropdownControlWhen?.current && !refDropdownControlWhen.current.contains(event.target)) {
-        setDropdownControlWhenOpen(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside, true);
-    return () => {
-      document.removeEventListener("click", handleClickOutside, true);
-    };
-  }, []);
-
-  useEffect(() => {
     if (!young) return;
     const getLocation = async () => {
       try {
@@ -230,6 +204,7 @@ export default function MissionFilters({ filters, setFilters }) {
         </div>
 
         <Modal isOpen={modalControl} onClose={() => setModalControl(false)} className="bg-gray-50 p-3 md:w-[40rem]">
+          {/* Header */}
           <div className="rounded-xl bg-gray-50 p-2">
             <div className="mb-3 ml-2 flex items-center justify-between">
               <button
@@ -249,7 +224,11 @@ export default function MissionFilters({ filters, setFilters }) {
                 <Search className="m-auto  text-white " />
               </button>
             </div>
+
+            {/* Form */}
             <div className="flex flex-col space-y-5">
+
+              {/* Keyword */}
               <div className="rounded-xl border bg-white py-3.5 px-4">
                 {!keyWordOpen && (
                   <button
@@ -288,6 +267,8 @@ export default function MissionFilters({ filters, setFilters }) {
                   </div>
                 )}
               </div>
+
+              {/* Distance */}
               <div className="rounded-xl border bg-white py-3.5 px-4">
                 {!dropdownControlDistanceOpen && (
                   <button
@@ -415,6 +396,8 @@ export default function MissionFilters({ filters, setFilters }) {
                   </div>
                 )}
               </div>
+
+              {/* When */}
               <div className="rounded-xl border bg-white py-3.5 ">
                 {!dropdownControlWhenOpen && (
                   <button
@@ -514,6 +497,8 @@ export default function MissionFilters({ filters, setFilters }) {
                 )}
               </div>
             </div>
+
+            {/* Footer */}
             <Link to="/preferences">
               <div className="mx-3 mt-4 flex items-center justify-between pb-20">
                 <div>
