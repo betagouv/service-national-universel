@@ -228,14 +228,14 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                 </div>
                 <div className="flex w-full gap-4">
                   <Field
-                    name={"content"}
+                    name="content"
                     errors={errors}
                     className="text-gray-900 h-[122px] w-full"
                     placeholder="Précisez en quelques mots"
                     handleChange={(e) => setData({ ...data, content: e.target.value })}
                     value={data?.content}
                     readOnly={!editInfo}
-                    type={"textarea"}
+                    type="textarea"
                   />
                 </div>
               </div>

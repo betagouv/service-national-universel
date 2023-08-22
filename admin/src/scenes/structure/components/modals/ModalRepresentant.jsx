@@ -5,7 +5,7 @@ import { HiOutlineTrash } from "react-icons/hi";
 import Warning from "../../../../assets/icons/Warning";
 import ModalTailwind from "../../../../components/modals/ModalTailwind";
 import ModalConfirmDelete from "../../../centersV2/components/ModalConfirmDelete";
-import Field from "../../../missions/components/Field";
+import Field from "@/components/ui/forms/Field";
 import Button from "../Button";
 
 export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelete, structure }) {
@@ -15,8 +15,6 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
   const [errors, setErrors] = useState({});
   const regex = /^((00|\+)(33|590|594|262|596|269|687|689|508|681)|0)[1-9](\d{8})$/gm;
   const regexPF = /^((00|\+)(33|590|594|262|596|269|687|689|508|681))(\d{8})$/gm;
-
-  const handleChange = (e) => setData({ ...data, [e.target.name]: e.target.value });
 
   const handleSubmit = async () => {
     const errors = {};
@@ -74,11 +72,11 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, onDelet
           <div className="text-sm text-blue-800">Attention : les contrats envoyés et signés ne seront pas impactés par cette modification.</div>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Prénom" name="firstName" value={data.firstName} handleChange={handleChange} errors={errors} />
-          <Field label="Nom" name="lastName" value={data.lastName} handleChange={handleChange} errors={errors} />
-          <Field label="Téléphone" name="mobile" value={data.mobile} handleChange={handleChange} errors={errors} />
-          <Field label="Adresse email" name="email" value={data.email} handleChange={handleChange} errors={errors} />
-          <Field label="Rôle" name="role" value={data.role} handleChange={handleChange} errors={errors} />
+          <Field label="Prénom" name="firstName" value={data.firstName} onChange={(value, name) => setData({ ...data, [name]: value })} error={errors?.firstName} />
+          <Field label="Nom" name="lastName" value={data.lastName} onChange={(value, name) => setData({ ...data, [name]: value })} error={errors?.lastName} />
+          <Field label="Téléphone" name="mobile" value={data.mobile} onChange={(value, name) => setData({ ...data, [name]: value })} error={errors?.mobile} />
+          <Field label="Adresse email" name="email" value={data.email} onChange={(value, name) => setData({ ...data, [name]: value })} error={errors?.email} />
+          <Field label="Rôle" name="role" value={data.role} onChange={(value, name) => setData({ ...data, [name]: value })} error={errors?.role} />
           <div className="flex h-full flex-col items-end">
             {structure.structureManager && (
               <button disabled={isLoading} className="mt-auto rounded-lg bg-[#ffffff] px-4 py-2 text-red-500 transition hover:bg-[#fef2f2]" onClick={handleDelete}>

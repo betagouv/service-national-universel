@@ -1,6 +1,4 @@
-import dayjs from "dayjs";
-import "dayjs/locale/fr";
-import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "@/utils/dayjs.utils";
 import React from "react";
 import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -17,7 +15,6 @@ import { ROLES, translate } from "../../../utils";
 
 const getSubtitle = (user) => {
   const createdAt = new Date(user.createdAt);
-  dayjs.extend(relativeTime).locale("fr");
   const diff = dayjs(createdAt).fromNow();
   return `Inscrit(e) ${diff} - ${createdAt.toLocaleDateString()}`;
 };

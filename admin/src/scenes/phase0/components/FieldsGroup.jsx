@@ -3,7 +3,7 @@ import { MiniTitle } from "./commons";
 import CorrectionRequest from "./CorrectionRequest";
 import Field from "./Field";
 import CorrectedRequest from "./CorrectedRequest";
-import DatePickerList from "./DatePickerList";
+import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
 
 export function FieldsGroup({
   name,
@@ -52,9 +52,8 @@ export function FieldsGroup({
   return (
     <>
       {mode === "edition" && type === "date" ? (
-        <div className={`relative rounded-[6px] border-[1px] border-[#D1D5DB] bg-white py-[9px] px-[13px] ${className}`}>
-          {title && <label className="text-[12px] font-normal leading-[16px] text-[#6B7280]">{title}</label>}
-          <DatePickerList value={value ? new Date(value) : null} onChange={(date) => onChange(new Date(date))} />
+        <div className={className}>
+          <DatePickerInput label={title} value={value} onChange={(date) => onChange(date)} />
           {correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} young={young} />}
         </div>
       ) : (

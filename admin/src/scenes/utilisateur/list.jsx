@@ -4,8 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 
 import { Listbox, Transition } from "@headlessui/react";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "@/utils/dayjs.utils";
 import { BsDownload } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
 import { formatLongDateFR, getDepartmentNumber } from "snu-lib";
@@ -215,7 +214,6 @@ export default function List() {
 
 const Hit = ({ hit, onClick, user, structure }) => {
   const displayActionButton = canUpdateReferent({ actor: user, originalTarget: hit, structure });
-  dayjs.extend(relativeTime).locale("fr");
 
   return (
     <tr onClick={onClick} className="border-b-[1px] border-y-gray-100 hover:bg-gray-50">

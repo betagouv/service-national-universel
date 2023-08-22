@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import Field from "./Field";
 import { YOUNG_STATUS } from "snu-lib";
 
@@ -43,7 +43,7 @@ export default function CorrectedRequest({ young, correctionRequest, className, 
           <div className="absolute left-[0px] right-[0px] top-[calc(100%+8px)] z-10 rounded-[8px] bg-white px-[50px] pt-[24px] pb-[8px] shadow-[0px_2px_26px_1px_rgba(0,0,0,0.17)]">
             <div className="mb-[3px] text-center text-[14px] font-bold leading-[20px] text-[#242526]">Ma demande de correction</div>
             <div className="mb-[16px] text-center text-[11px] font-medium uppercase leading-[16px] text-[#6B7280]">
-              envoyée le {dayjs(correctionRequest.sentAt).locale("fr").format("DD/MM/YYYY")}
+              envoyée le {dayjs(correctionRequest.sentAt).format("DD/MM/YYYY")}
             </div>
             {correctionRequest.reason && <Field label="Motif" value={translateReason(correctionRequest.reason)} mode="readonly" className="mb-[16px]" />}
             {correctionRequest.message && <Field value={paragraphize(correctionRequest.message)} mode="readonly" className="mb-[16px]" />}

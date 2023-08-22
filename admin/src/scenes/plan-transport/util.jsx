@@ -6,7 +6,7 @@ import Train from "./ligne-bus/components/Icons/Train";
 import { ES_NO_LIMIT, ROLES, translate, formatDateFRTimezoneUTC, departmentToAcademy } from "snu-lib";
 import FileSaver from "file-saver";
 import { toastr } from "react-redux-toastr";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import API from "../../services/api";
 import * as XLSX from "xlsx";
 import { formatPhoneE164 } from "../../utils/formatPhoneE164";
