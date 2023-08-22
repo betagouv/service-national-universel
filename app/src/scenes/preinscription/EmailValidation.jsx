@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useHistory, Redirect } from "react-router-dom";
 import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 
@@ -23,6 +23,8 @@ export default function StepEmailValidation() {
   const [emailValidationToken, setEmailValidationToken] = useState("");
   const [isDidNotReceiveCodeModalOpen, setDidNotReceiveCodeModalOpen] = useState(false);
   const [isModifyEmailModalOpen, setModifyEmailOpen] = useState(false);
+
+  if (young && young.emailVerified === "true") return <Redirect to="/inscription2023" />;
 
   async function handleClick() {
     try {

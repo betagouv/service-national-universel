@@ -50,10 +50,24 @@ const Step = () => {
 };
 
 const PreInscriptionPublic = () => {
+  const young = useSelector((state) => state.Auth.young);
+  if (young && young.emailVerified === "false") return <Redirect to="/preinscription/email-validation" />;
+  if (young) return <Redirect to="/inscription2023" />;
   return (
     <Switch>
       <SentryRoute path="/preinscription/:step" component={Step} />;
       <SentryRoute path="/preinscription" component={Step} />;
+    </Switch>
+  );
+};
+
+const PreInscriptionPrivate = () => {
+  const young = useSelector((state) => state.Auth.young);
+  if (!young) return <Redirect to="/preinscription" />;
+  return (
+    <Switch>
+      <SentryRoute path="/preinscription/email-validation" component={EmailValidation} />;
+      <SentryRoute path="/preinscription/done" component={Done} />;
     </Switch>
   );
 };
@@ -71,28 +85,10 @@ const PreInscriptionWrapper = ({ children }) => {
 };
 
 export default function PreInscription() {
-  const history = useHistory();
-  const young = useSelector((state) => state.Auth.young);
-  if (!young)
-    return (
-      <PreInscriptionWrapper>
-        <PreInscriptionPublic />
-      </PreInscriptionWrapper>
-    );
-  if (young && young.emailVerified === "false") {
-    return (
-      <PreInscriptionWrapper>
-        <EmailValidation />
-      </PreInscriptionWrapper>
-    );
-  }
-  if (young) return history.push("/inscription2023");
-
   return (
     <PreInscriptionWrapper>
       <Switch>
-        <SentryRoute path="/preinscription/email-validation" component={EmailValidation} />;
-        <SentryRoute path="/preinscription/done" component={Done} />;
+        <SentryRoute path={["/preinscription/email-validation", "/preinscription/done"]} component={PreInscriptionPrivate} />;
         <SentryRoute path="/preinscription/" component={PreInscriptionPublic} />;
       </Switch>
     </PreInscriptionWrapper>

@@ -111,10 +111,12 @@ class Auth {
         tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10,
       });
 
-      await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
-        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
-        params: { registration_code: tokenEmailValidation },
-      });
+      if (config.ENVIRONMENT !== "production") {
+        await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
+          emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
+          params: { registration_code: tokenEmailValidation },
+        });
+      }
 
       const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt_young", token, cookieOptions(JWT_MAX_AGE));
