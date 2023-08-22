@@ -25,7 +25,6 @@ function getAppHelper() {
   app.use("/waiting-list", require("../../controllers/waiting-list"));
   app.use("/inscription-goal", require("../../controllers/inscription-goal"));
   app.use("/es", require("../../controllers/es"));
-  app.use("/elasticsearch", require("../../controllers/elasticsearch"));
 
   return app;
 }
