@@ -7,10 +7,9 @@ import { setYoung } from "../../../../redux/auth/actions";
 import { permissionPhase2 } from "../../../../utils";
 import { toastr } from "react-redux-toastr";
 
-export default function User({ userTickets }) {
+export default function User({ ticketsInfo }) {
   const user = useSelector((state) => state.Auth.young);
   const [open, setOpen] = React.useState(false);
-  // const [userTickets, setUserTickets] = useState(null);
   const menuRef = React.useRef();
   const buttonRef = React.useRef();
 
@@ -57,12 +56,12 @@ export default function User({ userTickets }) {
           <ChevronDown />
         </button>
       </div>
-      <Menu open={open} menuRef={menuRef} user={user} onClose={onClose} userTickets={userTickets} />
+      <Menu open={open} menuRef={menuRef} user={user} onClose={onClose} ticketsInfo={ticketsInfo} />
     </>
   );
 }
 
-function Menu({ open, menuRef, user, onClose, userTickets }) {
+function Menu({ open, menuRef, user, onClose, ticketsInfo }) {
   const dispatch = useDispatch();
   const history = useHistory();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -94,12 +93,9 @@ function Menu({ open, menuRef, user, onClose, userTickets }) {
           Mes préférences de mission
         </Link>
       )}
-      {userTickets.length > 0 && (
+      {ticketsInfo.hasMessage === true && (
         <Link
-          to={{
-            pathname: "/echanges",
-            state: { userTickets },
-          }}
+          to="/echanges"
           onClick={onClose}
           className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
           Mes échanges

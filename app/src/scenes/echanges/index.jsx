@@ -16,8 +16,6 @@ import { toastr } from "react-redux-toastr";
 
 const Echanges = () => {
   const user = useSelector((state) => state.Auth.young);
-    // const location = useLocation();
-    // const userTickets = location.state.userTickets;
   const [userTickets, setUserTickets] = useState(null);
 
   useEffect(() => {
@@ -55,7 +53,7 @@ const Echanges = () => {
 
   return (
     <div className="pt-12 md:px-10">
-      <div className="px-4 md:px-0">
+      <div className="px-[1rem] md:px-[0rem]">
         <h4 className="text-3xl leading-9 font-bold text-gray-900 mb-4">Mes échanges</h4>
         <p className="text-base leading-6 font-normal text-gray-600 mb-4">Retrouvez ici vos échanges avec le support ou votre référent.</p>
       </div>
@@ -72,7 +70,8 @@ const Echanges = () => {
           userTickets
             .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
             .map((ticket) => (
-              <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`} key={ticket._id} className="border-b flex justify-between p-6 hover:bg-gray-100">
+              <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`}
+               key={ticket._id} className="border-b flex justify-between p-6 hover:bg-gray-100">
                 <div className="flex w-full justify-between items-center">
                   <span className="text-sm leading-5 font-normal text-gray-500 w-1/4 md:w-1/5">{ticket.number}</span>
                   <span className="text-sm leading-5 font-normal text-gray-500 w-1/4 md:w-2/5">{renderSubject(ticket)}</span>

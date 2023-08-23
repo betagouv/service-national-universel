@@ -8,7 +8,7 @@ import MenuButton from "./MenuButton";
 import { permissionPhase2 } from "../../../../utils";
 import { toastr } from "react-redux-toastr";
 
-export default function UserMenu({ onClose, userTickets }) {
+export default function UserMenu({ onClose, ticketsInfo }) {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.young);
   const history = useHistory();
@@ -39,13 +39,10 @@ export default function UserMenu({ onClose, userTickets }) {
       <ul>
         <MenuLink onClose={onClose} to="/account" text="Mon Profil" />
         {permissionPhase2(user) && <MenuLink onClose={onClose} to="/preferences" text="Mes préférences de mission" />}
-        {userTickets.length > 0 && (
+        {ticketsInfo.hasMessage == true && (
           <MenuLink
             onClose={onClose}
-            to={{
-              pathname: "/echanges",
-              state: { userTickets },
-            }}
+            to="/echanges"
             text="Mes échanges"
           />
         )}

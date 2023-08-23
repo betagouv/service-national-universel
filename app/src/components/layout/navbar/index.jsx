@@ -11,16 +11,18 @@ import UserMenu from "./components/UserMenu";
 
 export default function Navbar() {
   const device = useDevice();
-  const [userTickets, setUserTickets] = useState([]);
+  const [ticketsInfo, setTicketsInfo] = useState({});
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const { ok, data } = await API.get(`/zammood/tickets`);
+        // const { ok, data } = await API.get(`/zammood/tickets`);
+        const { ok, data } = await API.get(`/zammood/ticketsInfo`);
         if (!ok) {
           console.log("API response not OK");
-          return setUserTickets([]);
+          return setTicketsInfo([]);
         }
-        setUserTickets(data);
+        const { hasMessage, hasNewStatus } = data; // Décomposition ici
+        setTicketsInfo({ hasMessage, hasNewStatus }); // Mettre à jour l'état ici
       } catch (error) {
         console.log("Error fetching tickets:", error);
       }
@@ -29,12 +31,12 @@ export default function Navbar() {
   }, []);
 
   if (device === "mobile") {
-    return <MobileNavbar userTickets={userTickets} />;
+    return <MobileNavbar ticketsInfo={ticketsInfo} />;
   }
-  return <DesktopNavbar userTickets={userTickets} />;
+  return <DesktopNavbar ticketsInfo={ticketsInfo} />;
 }
 
-function MobileNavbar({userTickets}) {
+function MobileNavbar({ ticketsInfo }) {
   const ref = React.useRef();
   const user = useSelector((state) => state.Auth.young);
   const [drawer, setDrawer] = React.useState({ open: false, content: null });
@@ -47,7 +49,7 @@ function MobileNavbar({userTickets}) {
   }, []);
 
   function openDrawer(Content) {
-    setDrawer({ open: true, content: <Content onClose={onClose} userTickets={userTickets} /> });
+    setDrawer({ open: true, content: <Content onClose={onClose} ticketsInfo={ticketsInfo} /> });
   }
 
   function onClose() {
@@ -88,7 +90,7 @@ function MobileDrawer({ open, onClose, content }) {
   );
 }
 
-function DesktopNavbar({ userTickets }) {
+function DesktopNavbar({ ticketsInfo }) {
   return (
     <header className="z-50 hidden h-screen w-64 flex-col justify-start bg-[#212B44] text-sm text-[#D2DAEF] md:flex">
       <div className="h-24 flex-none border-b-[1px] border-[#2A3655]">
@@ -100,7 +102,7 @@ function DesktopNavbar({ userTickets }) {
       </div>
 
       <div className="flex-none">
-        <UserCard userTickets={userTickets} />
+        <UserCard ticketsInfo={ticketsInfo} />
       </div>
     </header>
   );
