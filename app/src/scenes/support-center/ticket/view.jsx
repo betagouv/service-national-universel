@@ -150,7 +150,7 @@ export default function TicketView(props) {
   return (
     <Container>
       <BackButtonContainer>
-        <BackButton to={`/besoin-d-aide`}>{"<"} Retour à mes demandes</BackButton>
+        <BackButton to={`/echanges`}>{"<"} Retour à mes demandes</BackButton>
       </BackButtonContainer>
       <div style={{ padding: 0, display: "flex", flexDirection: "column", height: "calc(100vh - 180px)" }}>
         {ticket && messages ? (
