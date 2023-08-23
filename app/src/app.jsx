@@ -72,7 +72,6 @@ export default function App() {
           ) : (
             <Switch>
               {/* Aucune authentification nécessaire */}
-              {/* preinscription step before account creation */}
               <SentryRoute path="/noneligible" component={NonEligible} />
               <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
               <SentryRoute path="/validate-contract/done" component={ContractDone} />

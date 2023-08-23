@@ -1,4 +1,5 @@
 import React from "react";
+import { useHistory } from "react-router-dom";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import CompleteInscription from "../../../assets/icons/CompleteInscription";
 import { GrAttachment } from "react-icons/gr";
@@ -14,6 +15,7 @@ export default function StepDone() {
   // eslint-disable-next-line no-unused-vars
   const [data, _, removePersistedData] = React.useContext(PreInscriptionContext);
   const dispatch = useDispatch();
+  const history = useHistory();
 
   async function handleClick() {
     try {
@@ -23,6 +25,7 @@ export default function StepDone() {
         if (token) api.setToken(token);
         dispatch(setYoung(young));
         removePersistedData(true);
+        history.push("/inscription2023");
       }
     } catch (e) {
       capture(e);

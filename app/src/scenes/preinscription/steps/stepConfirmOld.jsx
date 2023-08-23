@@ -59,7 +59,7 @@ export default function StepConfirm() {
       if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
       plausibleEvent("Phase0/CTA preinscription - inscription");
       setData({ ...data, step: PREINSCRIPTION_STEPS.DONE });
-      removePersistedData();
+      // removePersistedData();
       history.push("/preinscription/done");
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED")
