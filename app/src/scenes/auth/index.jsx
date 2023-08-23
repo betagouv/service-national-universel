@@ -18,7 +18,7 @@ import useDevice from "../../hooks/useDevice";
 
 import Header from "../../components/header";
 import HeaderMenu from "../../components/headerMenu";
-import Footer from "../../components/footerV2";
+import Footer from "@/components/dsfr/components/Footer";
 
 const Render = ({ screen }) => {
   const device = useDevice();

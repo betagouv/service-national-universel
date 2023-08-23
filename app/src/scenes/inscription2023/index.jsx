@@ -28,7 +28,7 @@ import MobileCorrectionProfil from "./mobile/correction/stepProfil";
 import useDevice from "../../hooks/useDevice";
 
 import HeaderMenu from "../../components/headerMenu";
-import Footer from "./../../components/footerV2";
+import Footer from "@/components/dsfr/components/Footer";
 import Header from "./../../components/header";
 import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import { YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";

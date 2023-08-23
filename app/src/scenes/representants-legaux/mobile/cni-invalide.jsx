@@ -3,7 +3,7 @@ import "dayjs/locale/fr";
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { COHESION_STAY_START, translate } from "snu-lib";
-import Footer from "../../../components/footerV2";
+import Footer from "@/components/dsfr/components/Footer";
 import StickyButton from "../../../components/inscription/stickyButton";
 import Loader from "../../../components/Loader";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";

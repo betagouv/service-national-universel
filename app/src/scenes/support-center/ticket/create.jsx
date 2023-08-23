@@ -25,7 +25,7 @@ export default function TicketCreate(props) {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
 
-  const fromPage = new URLSearchParams(props.location.search).get("from");
+  const fromPage = new URLSearchParams(props.location.search).get("from ");
 
   useEffect(() => {
     if (error) {

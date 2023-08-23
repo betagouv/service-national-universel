@@ -8,7 +8,7 @@ import RightArrow from "../../../assets/icons/RightArrow";
 import api from "../../../services/api";
 import { getPasswordErrorMessage, translate } from "../../../utils";
 import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
+import Footer from "@/components/dsfr/components/Footer";
 
 export default function Reset() {
   const [loading, setLoading] = React.useState(false);

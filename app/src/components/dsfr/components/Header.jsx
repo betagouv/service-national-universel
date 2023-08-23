@@ -1,17 +1,17 @@
 import React from "react";
 import LogoFr from "../assets/fr.png";
 import SNU from "../assets/logo-snu.png";
-import Menu from "../assets/icons/Burger";
-import Help from "../assets/icons/QuestionMarkBlue";
+import Menu from "../../../assets/icons/Burger";
+import Help from "../../../assets/icons/QuestionMarkBlue";
 import File from "../assets/file.svg";
-import HeaderMenu from "./headerMenu";
+import HeaderMenu from "../../headerMenu";
 import { Link, useLocation, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setYoung } from "../redux/auth/actions";
-import api from "../services/api";
+import { setYoung } from "../../../redux/auth/actions";
+import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 
-const Header = () => {
+const Header = ({ title }) => {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
@@ -34,7 +34,7 @@ const Header = () => {
           <img src={SNU} alt="Logo du SNU" className="w-16" />
           <div className="hidden lg:block">
             <h1 className="text-xl font-bold">Service National Universel</h1>
-            {pathname !== "/auth" && !pathname.startsWith("/auth/") ? <div className="text-sm">Inscription du volontaire</div> : null}
+            <div className="text-sm">{title}</div>
           </div>
         </div>
         <div

@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import Loader from "../../../components/Loader";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import StickyButton from "../../../components/inscription/stickyButton";
-import Footer from "../../../components/footerV2";
+import Footer from "@/components/dsfr/components/Footer";
 const images = import.meta.globEager("../../../assets/programmes-engagement/*");
 
 const EngagementsProgramMobile = () => {

@@ -2,10 +2,9 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { COHESION_STAY_LIMIT_DATE } from "snu-lib";
-import EditPenLight from "../../../assets/icons/EditPenLight";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
+import Footer from "@/components/dsfr/components/Footer";
 import CheckBox from "../../../components/inscription/checkbox";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { supportURL } from "../../../config";
@@ -14,7 +13,6 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
-import ModalSejour from "../components/ModalSejour";
 import Navbar from "../components/Navbar";
 
 export default function StepConsentements() {

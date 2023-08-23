@@ -21,7 +21,7 @@ import api from "../../../../services/api";
 import { translate } from "../../../../utils";
 import DatePickerList from "../../components/DatePickerList";
 
-import Footer from "../../../../components/footerV2";
+import Footer from "@/components/dsfr/components/Footer";
 import StickyButton from "../../../../components/inscription/stickyButton";
 import ModalSejourCorrection from "../../components/ModalSejourCorrection";
 import Navbar from "../../components/Navbar";

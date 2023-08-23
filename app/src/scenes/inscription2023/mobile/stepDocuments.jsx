@@ -9,7 +9,7 @@ import api from "../../../services/api";
 
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
+import Footer from "@/components/dsfr/components/Footer";
 import Help from "../components/Help";
 import Navbar from "../components/Navbar";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";

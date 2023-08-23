@@ -10,7 +10,7 @@ import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.j
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
 import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
+import Footer from "@/components/dsfr/components/Footer";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";

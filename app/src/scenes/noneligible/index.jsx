@@ -9,7 +9,7 @@ import DesktopNonEligible from "../reinscription/desktop/stepNonEligible";
 import useDevice from "../../hooks/useDevice";
 
 import HeaderMenu from "../../components/headerMenu";
-import Footer from "./../../components/footerV2";
+import Footer from "@/components/dsfr/components/Footer";
 import Header from "./../../components/header";
 import { YOUNG_STATUS } from "snu-lib";
 

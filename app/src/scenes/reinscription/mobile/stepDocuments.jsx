@@ -11,7 +11,7 @@ import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Navbar from "../components/Navbar";
 import StickyButton from "../../../components/inscription/stickyButton";
-import Footer from "../../../components/footerV2";
+import Footer from "@/components/dsfr/components/Footer";
 import Error from "../../../components/error";
 import Help from "../../inscription2023/components/Help";
 import MyDocs from "../../inscription2023/components/MyDocs";

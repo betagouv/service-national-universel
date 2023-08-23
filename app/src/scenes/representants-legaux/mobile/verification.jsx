@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import "dayjs/locale/fr";
@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import Check from "../components/Check";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { supportURL } from "../../../config";
-import Footer from "../../../components/footerV2";
+import Footer from "@/components/dsfr/components/Footer";
 
 export default function Verification({ step, parentId }) {
   const history = useHistory();

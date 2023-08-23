@@ -14,7 +14,7 @@ import api from "../../../services/api";
 import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
-import Footer from "../../../components/footerV2";
+import Footer from "@/components/dsfr/components/Footer";
 import EditPen from "../../../assets/icons/EditPen";
 import StickyButton from "../../../components/inscription/stickyButton";
 import ConsentDone from "../../../assets/icons/ConsentDone";
