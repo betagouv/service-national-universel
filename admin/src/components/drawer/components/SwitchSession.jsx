@@ -1,12 +1,12 @@
-import React, { Fragment, useRef } from "react";
-import Separator from "./Separator";
 import { Popover, Transition } from "@headlessui/react";
-import { useDispatch, useSelector } from "react-redux";
-import Selector from "../icons/Selector";
-import Check from "../icons/Check";
-import Switch from "../icons/Switch";
-import { setSessionPhase1 } from "../../../redux/auth/actions";
+import React, { Fragment, useRef } from "react";
+import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { setSessionPhase1 } from "../../../redux/auth/actions";
+import Check from "../icons/Check";
+import Selector from "../icons/Selector";
+import Switch from "../icons/Switch";
+import Separator from "./Separator";
 
 export default function SwitchSession({ sideBarOpen, sessionsList, sessionPhase1 }) {
   const dispatch = useDispatch();
