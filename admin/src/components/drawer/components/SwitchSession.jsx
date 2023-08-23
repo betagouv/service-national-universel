@@ -1,0 +1,118 @@
+import React, { Fragment, useRef } from "react";
+import Separator from "./Separator";
+import { Popover, Transition } from "@headlessui/react";
+import { useDispatch, useSelector } from "react-redux";
+import Selector from "../icons/Selector";
+import Check from "../icons/Check";
+import Switch from "../icons/Switch";
+import { setSessionPhase1 } from "../../../redux/auth/actions";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+
+export default function SwitchSession({ sideBarOpen, sessionsList, sessionPhase1 }) {
+  const dispatch = useDispatch();
+  const history = useHistory();
+  const buttonRef = useRef(null);
+  const timeoutDuration = 200;
+  let timeout;
+
+  const closePopover = () => {
+    return buttonRef.current?.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+  };
+
+  const onMouseEnter = (open) => {
+    clearTimeout(timeout);
+    if (open) return;
+    return buttonRef.current?.click();
+  };
+
+  const onMouseLeave = (open) => {
+    if (!open) return;
+    timeout = setTimeout(() => closePopover(), timeoutDuration);
+  };
+
+  const changeSession = (session) => {
+    dispatch(setSessionPhase1(session));
+    closePopover();
+    localStorage?.setItem("active_session_chef_de_centre", JSON.stringify(session));
+    // on retourne au dashboard !
+    history.push("/");
+  };
+
+  if (!sessionPhase1 || !sessionsList.length) return null;
+
+  return (
+    <div className="mb-1">
+      <Popover className="relative focus:outline-none">
+        {({ open }) => {
+          return (
+            <>
+              <div onMouseLeave={onMouseLeave.bind(null, open)}>
+                <Popover.Button ref={buttonRef} onMouseEnter={onMouseEnter.bind(null, open)} onMouseLeave={onMouseLeave.bind(null, open)} className="focus:outline-none">
+                  <div
+                    onClick={() => {}}
+                    className={`group flex items-center ${sideBarOpen ? "h-[66px] pl-[20px] py-[15px] pr-[10px]" : "py-[23px] px-[34px]"} hover:bg-[#1B1F42] ${
+                      sideBarOpen ? "w-[250px]" : "w-[88px]"
+                    }`}>
+                    {sideBarOpen && (
+                      <div className="flex flex-col gap-1 flex-1">
+                        <span className="text-sm text-left leading-5 font-bold h-[20px] text-[#EEEFF5]">{sessionPhase1?.cohort}</span>
+                        <span className="text-xs text-left leading-none !h-3 truncate text-[#EEEFF5]">{sessionPhase1?.cohesionCenter?.name || "Mon espace chef de centre"}</span>
+                      </div>
+                    )}
+                    <div className={`${sideBarOpen && "pl-[6px]"} flex items-center justify-center`}>
+                      <Selector className={`text-[#EEEFF5]/50 group-hover:text-[#EEEFF5]/70`} />
+                    </div>
+                  </div>
+                </Popover.Button>
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-200"
+                  enterFrom="opacity-0 translate-y-1"
+                  enterTo="opacity-100 translate-y-0"
+                  leave="transition ease-in duration-150"
+                  leaveFrom="opacity-100 translate-y-0"
+                  leaveTo="opacity-0 translate-y-1">
+                  <Popover.Panel className="absolute transform left-[100%] top-1/3 -translate-y-[30%]">
+                    <div
+                      className="ml-4 px-[1px] py-[1px] bg-white shadow-md rounded-lg w-[275px] z-20"
+                      onMouseEnter={onMouseEnter.bind(null, open)}
+                      onMouseLeave={onMouseLeave.bind(null, open)}>
+                      {sessionsList?.map((session, i) => {
+                        const active = session?.cohort === sessionPhase1?.cohort;
+                        const isLast = i === sessionsList.length - 1;
+                        const isFirst = i === 0;
+                        return (
+                          <div key={"change-session" + session?.cohort}>
+                            <button
+                              className={`group flex items-center h-[62px] py-[14px] pl-[15px] pr-[13px] w-full hover:bg-[#EEEFF5] ${isFirst && "rounded-t-md"} ${
+                                isLast && "rounded-b-md"
+                              }`}
+                              onClick={() => changeSession(session)}>
+                              {active ? <Check className="text-green-500" /> : <Switch className="text-[#30345B]" />}
+                              <div className="flex flex-col ml-[9px] gap-[2px] flex-1">
+                                <span className={`h-[20px] text-left text-sm text-[#1B1F42] leading-5 ${active && "font-bold"}`}>{session.cohort}</span>
+                                <span className={`h-[12px] text-left text-xs text-[#7F83A7] leading-none ${active && "font-medium"}`}>{session.cohesionCenter?.name}</span>
+                              </div>
+                            </button>
+                            {!isLast && <div className="bg-gray-100 h-[1px] mx-auto w-[247px]" />}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Popover.Panel>
+                </Transition>
+              </div>
+            </>
+          );
+        }}
+      </Popover>
+      <Separator open={sideBarOpen} />
+    </div>
+  );
+}

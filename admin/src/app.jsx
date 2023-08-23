@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Switch, Redirect, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import { setUser, setSessionPhase1 } from "./redux/auth/actions";
+import { setUser, setSessionPhase1, setTickets } from "./redux/auth/actions";
 import Auth from "./scenes/auth";
 import Validate from "./scenes/validate";
 import Profil from "./scenes/profil";
@@ -61,6 +61,7 @@ import Team from "./scenes/team";
 import * as Sentry from "@sentry/react";
 
 import useDocumentTitle from "./hooks/useDocumentTitle";
+import SideBar from "./components/drawer/SideBar";
 
 initSentry();
 initApi();
@@ -87,20 +88,20 @@ export default function App() {
             {/* Authentification nécessaire */}
             <SentryRoute path="/" component={Home} />
           </Switch>
-          <Footer />
+          {environment === "production" ? <Footer /> : null}
         </div>
       </Router>
     </Sentry.ErrorBoundary>
   );
 }
 
-const Home = () => {
+const Home = (props) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loading, setLoading] = useState(true);
 
-  const [drawerVisible, setDrawerVisible] = useState(false);
+  const [drawerVisible, setDrawerVisible] = useState(true);
 
   // pour les chefs de centre, il faut afficher une seul session à la fois si il y en a plusieurs (peu importe le centre de cohésion)
   const [sessionPhase1List, setSessionPhase1List] = useState(null);
@@ -137,7 +138,8 @@ const Home = () => {
         if (!res.ok || !res.user) {
           api.setToken(null);
           dispatch(setUser(null));
-          return setLoading(false);
+          setLoading(false);
+          return (window.location.href = "/auth?disconnected=1");
         }
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
@@ -202,48 +204,51 @@ const Home = () => {
 
   return (
     <div>
-      <Header onClickBurger={() => setDrawerVisible((e) => !e)} drawerVisible={drawerVisible} sessionsList={sessionPhase1List} />
+      {environment === "production" ? <Header onClickBurger={() => setDrawerVisible((e) => !e)} drawerVisible={drawerVisible} sessionsList={sessionPhase1List} /> : null}
       <div className="flex">
-        <Drawer open={drawerVisible} onOpen={setDrawerVisible} />
-        <div className={drawerVisible ? `flex-1 ml-[220px] min-h-screen` : `flex-1 lg:ml-[220px] min-h-screen`}>
-          <Switch>
-            <RestrictedRoute path="/structure" component={Structure} />
-            <RestrictedRoute path="/settings" component={Settings} />
-            <RestrictedRoute path="/alerte" component={Alerte} />
-            <RestrictedRoute path="/profil" component={Profil} />
-            <RestrictedRoute path="/volontaire" component={renderVolontaire} />
-            <RestrictedRoute path="/etablissement" component={Etablissement} />
-            <RestrictedRoute path="/mission" component={Missions} />
-            <RestrictedRoute path="/inscription" component={Inscription} />
-            <RestrictedRoute path="/user" component={Utilisateur} />
-            <RestrictedRoute path="/contenu" component={Content} />
-            <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
-            <RestrictedRoute path="/centre" component={Center} />
-            <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
-            <RestrictedRoute path="/association" component={Association} />
-            <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
-            <RestrictedRoute path="/boite-de-reception" component={Inbox} />
-            <RestrictedRoute path="/equipe" component={Team} />
-            <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
-            {/* Plan de transport */}
-            {user?.role === "admin" && user?.subRole === "god" ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
-            {/* Table de répartition */}
-            <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
-            {/* Ligne de bus */}
-            <RestrictedRoute path="/ligne-de-bus" component={LigneBus} />
-            {/* Schéma de répartition */}
-            <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
-            <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
-            <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
-            {/* Only for developper eyes... */}
-            {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
-            {/* DASHBOARD */}
-            {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
-            {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
-            {environment === "production" && <RestrictedRoute path="/" component={renderDashboard} />}
-            {environment !== "production" && <RestrictedRoute path="/dashboard" component={renderDashboardV2} />}
-            {environment !== "production" && <RestrictedRoute path="/" component={renderDashboardV2} />}
-          </Switch>
+        {environment === "production" ? <Drawer open={drawerVisible} onOpen={setDrawerVisible} /> : <SideBar sessionsList={sessionPhase1List} />}
+        <div className="flex flex-col w-full">
+          <div className={environment === "prodcution" ? (drawerVisible ? `flex-1 ml-[220px] min-h-screen` : `flex-1 lg:ml-[220px] min-h-screen`) : `flex-1  min-h-screen`}>
+            <Switch>
+              <RestrictedRoute path="/structure" component={Structure} />
+              <RestrictedRoute path="/settings" component={Settings} />
+              <RestrictedRoute path="/alerte" component={Alerte} />
+              <RestrictedRoute path="/profil" component={Profil} />
+              <RestrictedRoute path="/volontaire" component={renderVolontaire} />
+              <RestrictedRoute path="/etablissement" component={Etablissement} />
+              <RestrictedRoute path="/mission" component={Missions} />
+              <RestrictedRoute path="/inscription" component={Inscription} />
+              <RestrictedRoute path="/user" component={Utilisateur} />
+              <RestrictedRoute path="/contenu" component={Content} />
+              <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
+              <RestrictedRoute path="/centre" component={Center} />
+              <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
+              <RestrictedRoute path="/association" component={Association} />
+              <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
+              <RestrictedRoute path="/boite-de-reception" component={Inbox} />
+              <RestrictedRoute path="/equipe" component={Team} />
+              <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
+              {/* Plan de transport */}
+              {user?.role === "admin" && user?.subRole === "god" ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
+              {/* Table de répartition */}
+              <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
+              {/* Ligne de bus */}
+              <RestrictedRoute path="/ligne-de-bus" component={LigneBus} />
+              {/* Schéma de répartition */}
+              <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
+              <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
+              <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
+              {/* Only for developper eyes... */}
+              {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
+              {/* DASHBOARD */}
+              {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
+              {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
+              {environment === "production" && <RestrictedRoute path="/" component={renderDashboard} />}
+              {environment !== "production" && <RestrictedRoute path="/dashboard" component={renderDashboardV2} />}
+              {environment !== "production" && <RestrictedRoute path="/" component={renderDashboardV2} />}
+            </Switch>
+          </div>
+          {environment !== "production" ? <Footer /> : null}
         </div>
       </div>
       <ModalCGU

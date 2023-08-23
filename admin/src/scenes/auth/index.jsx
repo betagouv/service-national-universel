@@ -14,6 +14,8 @@ import SignupInvite from "./signupInvite";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import Loader from "../../components/Loader";
+import { environment } from "../../config";
+import FooterComponent from "../../components/footer";
 
 export default function AuthIndex() {
   useDocumentTitle("Connexion");
@@ -45,7 +47,7 @@ export default function AuthIndex() {
   if (loading) return <Loader />;
 
   return (
-    <div className="flex flex-1 bg-white">
+    <div className="flex flex-1 flex-col bg-white">
       <Switch>
         <SentryRoute path="/auth/reset" component={Reset} />
         <SentryRoute path="/auth/forgot" component={Forgot} />
@@ -56,6 +58,7 @@ export default function AuthIndex() {
         <SentryRoute exact path="/auth" component={Signin} />
         <Redirect to={parentPath} /> {/* This will redirect to the parent path if no other Routes match */}
       </Switch>
+      {environment !== "production" ? <FooterComponent /> : null}
     </div>
   );
 }
