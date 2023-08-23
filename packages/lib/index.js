@@ -49,7 +49,7 @@ function inscriptionModificationOpenForYoungs(cohort, young, env) {
       }
       return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023
     case "Octobre 2023 - NC":
-      return new Date() < new Date(2023, 8, 30, 23, 59); // before 15 septembre 2023
+      return new Date() < new Date(Date.UTC(2023, 8, 15, 12, 59)); // before 15 septembre 2023, 23h59 heure de Nouméa
     case "à venir":
       return false;
     default:
