@@ -2,7 +2,7 @@ import { Popover, Transition } from "@headlessui/react";
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { Link, useHistory } from "react-router-dom";
 import { ROLES, translate } from "snu-lib";
 import { setUser } from "../../../redux/auth/actions";
 import api from "../../../services/api";
@@ -18,8 +18,8 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [from, setFrom] = useState();
   const dispatch = useDispatch();
-  const history = useHistory();
   const buttonRef = useRef(null);
+  const history = useHistory();
   const timeoutDuration = 200;
   let timeout;
 
@@ -124,7 +124,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                       onMouseEnter={onMouseEnter.bind(null, open)}
                       onMouseLeave={onMouseLeave.bind(null, open)}>
                       {/* Header */}
-                      <button className="group flex items-center h-[62px] rounded-t-md py-[14px] pl-[15px] pr-[13px] hover:bg-[#EEEFF5]" onClick={() => history.push("/profil")}>
+                      <Link className="group flex items-center h-[62px] rounded-t-md py-[14px] pl-[15px] pr-[13px] hover:bg-[#EEEFF5]" to={"/profil"}>
                         <div className="flex items-center justify-center w-[26px] h-[26px]">
                           <User className="text-[#30345B]" />
                         </div>
@@ -132,21 +132,19 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                           <span className="text-sm leading-5 h-[20px] text-left text-[#1B1F42] align-middle">Mon Profil</span>
                           <span className="text-xs -leading-2 text-left text-[#7F83A7] truncate w-[210px] overflow-visible align-middle">{user.email}</span>
                         </div>
-                      </button>
+                      </Link>
                       <div className="bg-[#EEEFF5] h-[1px] mx-auto w-[247px] 1mb-1" />
                       {/* Body */}
                       <div className="flex flex-col !py-1 px-[3px]">
                         {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
-                          <NavItem Icon={AddUser} title="Inviter un nouvel utilisateur" onClick={() => setOpenInvite(true)} />
+                          <NavItemAction Icon={AddUser} title="Inviter un nouvel utilisateur" onClick={() => setOpenInvite(true)} />
                         )}
                         {[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && user.structureId && (
-                          <NavItem Icon={AddUser} title="Inviter un nouvel utilisateur" onClick={() => history.push(`/structure/${user.structureId}`)} />
+                          <NavItem Icon={AddUser} title="Inviter un nouvel utilisateur" link={`/structure/${user.structureId}`} />
                         )}
-                        {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Settings} title="Paramétrages dynamiques" onClick={() => history.push("/settings")} />}
-                        {[ROLES.ADMIN].includes(user.role) && user.subRole === "god" && (
-                          <NavItem Icon={Message} title="Messages d'alerte" onClick={() => history.push("/alerte")} />
-                        )}
-                        <NavItem Icon={Support} title="Besoin d'aide ?" onClick={() => history.push(`/besoin-d-aide?from=${from}`)} />
+                        {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Settings} title="Paramétrages dynamiques" link="/settings" />}
+                        {[ROLES.ADMIN].includes(user.role) && user.subRole === "god" && <NavItem Icon={Message} title="Messages d'alerte" link={"/alerte"} />}
+                        <NavItem Icon={Support} title="Besoin d'aide ?" link={`/besoin-d-aide?from=${from}`} />
                         {/* <NavItem />
                     <NavItem />
                     <NavItem /> */}
@@ -171,7 +169,18 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
   );
 }
 
-const NavItem = ({ Icon, title, onClick }) => {
+const NavItem = ({ Icon, title, link }) => {
+  return (
+    <Link className="group flex items-center h-[42px] rounded-md py-[10px] pl-[14px] pr-[13px] hover:bg-[#EEEFF5]" to={link}>
+      <div className="flex items-center justify-center w-[22px] h-[22px]">
+        <Icon className="text-[#30345B]" />
+      </div>
+      <span className="ml-[11px] text-sm leading-5 h-[20px] text-left text-[#1B1F42] align-middle">{title}</span>
+    </Link>
+  );
+};
+
+const NavItemAction = ({ Icon, title, onClick }) => {
   return (
     <button className="group flex items-center h-[42px] rounded-md py-[10px] pl-[14px] pr-[13px] hover:bg-[#EEEFF5]" onClick={onClick}>
       <div className="flex items-center justify-center w-[22px] h-[22px]">

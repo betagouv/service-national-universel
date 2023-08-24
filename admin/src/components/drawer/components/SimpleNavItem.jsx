@@ -28,7 +28,6 @@ export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link }
 
   const onMouseLeave = (open) => {
     if (sideBarOpen) return;
-    clearTimeout(timeout);
     if (!open) return;
     timeout = setTimeout(() => closePopover(), timeoutDuration);
   };

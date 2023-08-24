@@ -2,12 +2,10 @@ import { Popover, Transition } from "@headlessui/react";
 import React, { Fragment, useRef } from "react";
 import { BsDot } from "react-icons/bs";
 import { HiChevronDown } from "react-icons/hi";
-import { useHistory } from "react-router-dom";
-import Separator from "./Separator";
 import { Link } from "react-router-dom";
+import Separator from "./Separator";
 
 export default function MultiNavItem({ sideBarOpen, Icon, items, path, title, currentOpen, setCurrentOpen }) {
-  const history = useHistory();
   const dropDownOpen = currentOpen === title;
   const navActive = items.some((item) => item.link.split("/")[1] === path) && (!dropDownOpen || !sideBarOpen);
 
