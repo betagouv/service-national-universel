@@ -1,5 +1,4 @@
 import fetchRetry from "fetch-retry";
-import { AbortController } from "abort-controller";
 import { apiURL } from "../config";
 import { createFormDataForFileUpload } from "snu-lib";
 import { capture } from "../sentry";
