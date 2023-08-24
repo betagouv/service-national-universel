@@ -35,7 +35,7 @@ const Echanges = () => {
   }, []);
 
   dayjs.extend(relativeTime).locale("fr");
-
+  console.log(userTickets)
   const renderSubject = (ticket) => {
     const subject = ticket.subject;
     const isNew = ticket.status === "NEW";

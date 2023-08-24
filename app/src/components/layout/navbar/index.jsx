@@ -21,8 +21,8 @@ export default function Navbar() {
           console.log("API response not OK");
           return setTicketsInfo([]);
         }
-        const { hasMessage, hasNewStatus } = data; // Décomposition ici
-        setTicketsInfo({ hasMessage, hasNewStatus }); // Mettre à jour l'état ici
+        const { hasMessage, hasNewStatus, newStatusCount } = data; // Décomposition ici
+        setTicketsInfo({ hasMessage, hasNewStatus, newStatusCount }); // Mettre à jour l'état ici
       } catch (error) {
         console.log("Error fetching tickets:", error);
       }
@@ -69,7 +69,12 @@ function MobileNavbar({ ticketsInfo }) {
       <Logo />
 
       <button onClick={() => openDrawer(UserMenu)} className="flex justify-end pr-4">
-        <p className="flex h-9 w-9 items-center justify-center rounded-full bg-[#344264] text-center capitalize text-[#768BAC]">{user?.firstName[0] + user?.lastName[0]}</p>
+        <div className="relative">
+          <p className="flex h-9 w-9 items-center justify-center rounded-full bg-[#344264] text-center capitalize text-[#768BAC]">{user.firstName[0] + user.lastName[0]}</p>
+          {ticketsInfo.hasNewStatus && (
+            <span className="absolute top-[0px] right-[1px] w-2.5 h-2.5 bg-blue-600 rounded-full text-white border border-[#212B44] text-xs flex items-center justify-center"></span>
+          )}
+        </div>
       </button>
 
       <MobileDrawer open={drawer.open} onClose={onClose} content={drawer.content} />
