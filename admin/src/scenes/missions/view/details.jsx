@@ -23,6 +23,7 @@ import ExternalLink from "../../../assets/icons/ExternalLink";
 import { MISSION_STATUS } from "snu-lib";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
+import { useSelector } from "react-redux";
 
 export default function DetailsView({ mission, setMission, getMission }) {
   const [values, setValues] = useState(mission);
