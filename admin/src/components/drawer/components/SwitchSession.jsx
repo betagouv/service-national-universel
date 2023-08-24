@@ -78,7 +78,7 @@ export default function SwitchSession({ sideBarOpen, sessionsList, sessionPhase1
                   leave="transition ease-in duration-150"
                   leaveFrom="opacity-100 translate-y-0"
                   leaveTo="opacity-0 translate-y-1">
-                  <Popover.Panel className="absolute transform left-[100%] top-1/3 -translate-y-[30%]">
+                  <Popover.Panel className="absolute transform left-[100%] bottom-0 translate-y-[70%]">
                     <div
                       className="ml-4 px-[1px] py-[1px] bg-white shadow-md rounded-lg w-[275px] z-20"
                       onMouseEnter={onMouseEnter.bind(null, open)}

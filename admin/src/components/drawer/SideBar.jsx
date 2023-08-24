@@ -142,7 +142,7 @@ const SideBar = (props) => {
   const godItems = [Dashboard, Volontaire, Inscriptions, SejoursGod, Engagement, Utilisateurs];
   const adminItems = [Dashboard, Volontaire, Inscriptions, SejoursAdmin, Engagement, Utilisateurs];
   const refItems = [Dashboard, Volontaire, Inscriptions, SejoursRef, Engagement, Admisnistrateur];
-  const headCenterItems = [Session, Dashboard, VolontaireHeadCenter, CentresHeadCenter, Contenus, Utilisateurs];
+  const headCenterItems = [Dashboard, VolontaireHeadCenter, CentresHeadCenter, Contenus, Utilisateurs];
   const transporteurItems = [Point, Centre, Schema, PlanDeTransport];
   const responsableItems = [Dashboard, Candidature, Structure, Missions];
   const supervisorItems = [Dashboard, Candidature, Network, StructureSupervisor, Missions, Utilisateurs];
