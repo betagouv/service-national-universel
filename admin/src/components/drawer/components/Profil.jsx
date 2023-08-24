@@ -48,6 +48,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
   };
 
   const onMouseLeave = (open) => {
+    clearTimeout(timeout);
     if (!open) return;
     timeout = setTimeout(() => closePopover(), timeoutDuration);
   };
