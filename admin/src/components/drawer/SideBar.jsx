@@ -139,9 +139,9 @@ const SideBar = (props) => {
   );
 
   //Components to display depending on user role
-  const godItems = [Tickets, Dashboard, Volontaire, Inscriptions, SejoursGod, Engagement, Utilisateurs];
-  const adminItems = [Tickets, Dashboard, Volontaire, Inscriptions, SejoursAdmin, Engagement, Utilisateurs];
-  const refItems = [Tickets, Dashboard, Volontaire, Inscriptions, SejoursRef, Engagement, Admisnistrateur];
+  const godItems = [Dashboard, Volontaire, Inscriptions, SejoursGod, Engagement, Utilisateurs];
+  const adminItems = [Dashboard, Volontaire, Inscriptions, SejoursAdmin, Engagement, Utilisateurs];
+  const refItems = [Dashboard, Volontaire, Inscriptions, SejoursRef, Engagement, Admisnistrateur];
   const headCenterItems = [Session, Dashboard, VolontaireHeadCenter, CentresHeadCenter, Contenus, Utilisateurs];
   const transporteurItems = [Point, Centre, Schema, PlanDeTransport];
   const responsableItems = [Dashboard, Candidature, Structure, Missions];
@@ -178,9 +178,11 @@ const SideBar = (props) => {
       <div className="flex flex-col h-full justify-between">
         <div className="flex flex-col">
           <Header open={open} setOpen={setOpen} />
-          <div className="flex flex-col items-center">
-            {getItems().map((Componant, index) => (
-              <Componant key={"nav-item" + index} />
+          {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && <Tickets />}
+          {[ROLES.HEAD_CENTER].includes(user?.role) && <Session />}
+          <div className="flex flex-col items-center !mt-1">
+            {getItems().map((Component, index) => (
+              <Component key={"nav-item" + index} />
             ))}
           </div>
         </div>

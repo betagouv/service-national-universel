@@ -46,7 +46,7 @@ export default function ZammoodBox({ newTickets, openedTickets, sideBarOpen }) {
   const textStyle0 = "text-[#7F83A7]";
 
   return (
-    <div className="mb-1">
+    <div className="">
       <Popover className="relative focus:outline-none">
         {({ open }) => {
           return (

@@ -47,7 +47,7 @@ export default function SwitchSession({ sideBarOpen, sessionsList, sessionPhase1
   if (!sessionPhase1 || !sessionsList.length) return null;
 
   return (
-    <div className="mb-1">
+    <div>
       <Popover className="relative focus:outline-none">
         {({ open }) => {
           return (

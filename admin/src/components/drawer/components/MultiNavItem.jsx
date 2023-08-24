@@ -76,16 +76,16 @@ export default function MultiNavItem({ sideBarOpen, Icon, items, path, title, cu
                         <p className="pl-6 pt-2 pr-2 pb-[2px] h-[30px] text-xs leading-5 font-medium uppercase text-[#3E426A] whitespace-nowrap">{title}</p>
                         <div className="flex flex-col py-[6px]">
                           {items.map((item) => {
-                            const actif = item.link.split("/")[1] === path;
+                            const active = item.link.split("/")[1] === path;
                             return (
                               <button
                                 key={item.link}
                                 onClick={() => history.push(item.link)}
-                                className={`flex items-center pl-[1px] pr-[8px] py-[7px] h-[34px] rounded-md ${actif ? "bg-[#EEEFF5]" : "hover:bg-[#EEEFF5]"}`}>
+                                className={`flex items-center pl-[1px] pr-[8px] py-[7px] h-[34px] rounded-md ${active ? "bg-[#EEEFF5]" : "hover:bg-[#EEEFF5]"}`}>
                                 <div className="w-[22px] h-[22px] flex items-center justify-center">
-                                  <BsDot className={`ml-2 text-[#7F83A7] ${actif ? "!w-6 !h-6 text-[#30345B]" : "!w-3 !h-3 hover:text-[#30345B]"}`} />
+                                  <BsDot className={`ml-2 text-[#7F83A7] ${active ? "!w-6 !h-6 text-[#30345B]" : "!w-3 !h-3 hover:text-[#30345B]"}`} />
                                 </div>
-                                <p className={`pl-2 text-sm leading-5 text-[#3E426A] ${actif ? "text-[#1B1F42] font-medium" : "hover:text-[#1B1F42]"}`}>{item.title}</p>
+                                <p className={`pl-2 text-sm leading-5 text-[#3E426A] ${active ? "text-[#1B1F42] font-medium" : "hover:text-[#1B1F42]"}`}>{item.title}</p>
                               </button>
                             );
                           })}
