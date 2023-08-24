@@ -4,7 +4,7 @@ import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import plausibleEvent from "../../../services/plausible";
 import { formatStringDate } from "snu-lib";
-import Footer from "@/components/dsfr/components/Footer";
+import Footer from "@/components/dsfr/layout/Footer";
 import { useDispatch, useSelector } from "react-redux";
 import api from "../../../services/api";
 import { capture } from "../../../sentry";

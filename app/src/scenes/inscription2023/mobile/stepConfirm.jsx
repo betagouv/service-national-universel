@@ -9,7 +9,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Error from "../../../components/error";
-import Footer from "@/components/dsfr/components/Footer";
+import Footer from "@/components/dsfr/layout/Footer";
 import plausibleEvent from "../../../services/plausible";
 import { supportURL } from "../../../config";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";

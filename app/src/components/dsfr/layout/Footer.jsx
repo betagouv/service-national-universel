@@ -1,7 +1,7 @@
 import React from "react";
-import LogoFr from "../assets/fr.png";
-import LinkTo from "../../../assets/icons/LinkTo";
-import SNU from "../assets/logo-snu.png";
+import LogoFr from "@/assets/fr.png";
+import LinkTo from "@/assets/icons/LinkTo";
+import SNU from "@/assets/logo-snu.png";
 
 const Footer = () => {
   return (

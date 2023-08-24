@@ -3,7 +3,7 @@ import { useHistory } from "react-router-dom";
 import validator from "validator";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
-import DSFRContainer from "../../../components/inscription/DSFRContainer";
+import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import CheckBox from "../../../components/inscription/checkbox";
 import Input from "../../../components/inscription/input";
 import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";

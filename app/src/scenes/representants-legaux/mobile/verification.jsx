@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import Check from "../components/Check";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { supportURL } from "../../../config";
-import Footer from "@/components/dsfr/components/Footer";
+import Footer from "@/components/dsfr/layout/Footer";
 
 export default function Verification({ step, parentId }) {
   const history = useHistory();

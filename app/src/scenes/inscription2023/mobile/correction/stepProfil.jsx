@@ -4,7 +4,7 @@ import { useHistory, useParams } from "react-router-dom";
 import { translate, YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
-import Footer from "@/components/dsfr/components/Footer";
+import Footer from "@/components/dsfr/layout/Footer";
 import StickyButton from "../../../../components/inscription/stickyButton";
 import { setYoung } from "../../../../redux/auth/actions";
 import { capture } from "../../../../sentry";

@@ -1,7 +1,7 @@
 import React from "react";
-import { appURL } from "../../config";
-import Navbar from "../../scenes/preinscription/components/navbar";
-import QuestionMarkBlueCircle from "../../assets/icons/QuestionMarkBlueCircle";
+import { appURL } from "../../../config";
+import Navbar from "../../../scenes/preinscription/components/navbar";
+import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 
 export default function DSFRContainer({ title, subtitle, children, onSave, supportLink = `${appURL}/public-besoin-d-aide/` }) {
   return (

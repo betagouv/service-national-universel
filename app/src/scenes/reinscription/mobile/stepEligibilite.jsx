@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import validator from "validator";
 import IconFrance from "../../../assets/IconFrance";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import Footer from "@/components/dsfr/components/Footer";
+import Footer from "@/components/dsfr/layout/Footer";
 import CheckBox from "../../../components/inscription/checkbox";
 import Input from "../../../components/inscription/input";
 import StickyButton from "../../../components/inscription/stickyButton";

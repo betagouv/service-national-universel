@@ -9,7 +9,7 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import dayjs from "dayjs";
-import DSFRContainer from "../../../components/inscription/DSFRContainer";
+import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
 
 export default function StepConfirm() {

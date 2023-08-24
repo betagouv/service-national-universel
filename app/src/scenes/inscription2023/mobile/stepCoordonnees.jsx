@@ -12,7 +12,7 @@ import Input from "../components/Input";
 import Select from "../components/Select";
 import ErrorMessage from "../components/ErrorMessage";
 import Navbar from "../components/Navbar";
-import Footer from "@/components/dsfr/components/Footer";
+import Footer from "@/components/dsfr/layout/Footer";
 import Help from "../components/Help";
 import {
   youngSchooledSituationOptions,

@@ -17,8 +17,8 @@ import { SentryRoute } from "../../sentry";
 import useDevice from "../../hooks/useDevice";
 
 import Header from "../../components/header";
-import HeaderMenu from "../../components/headerMenu";
-import Footer from "@/components/dsfr/components/Footer";
+import HeaderMenu from "../../components/dsfr/nav/Menu";
+import Footer from "@/components/dsfr/layout/Footer";
 
 const Render = ({ screen }) => {
   const device = useDevice();

@@ -6,7 +6,7 @@ import api from "../../../services/api";
 import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import plausibleEvent from "../../../services/plausible";
-import DSFRContainer from "../../../components/inscription/DSFRContainer";
+import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
 import { capture } from "../../../sentry";
 

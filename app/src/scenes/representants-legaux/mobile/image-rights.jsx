@@ -13,7 +13,7 @@ import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";
 import ErrorMessage from "../../inscription2023/components/ErrorMessage";
 import api from "../../../services/api";
-import Footer from "@/components/dsfr/components/Footer";
+import Footer from "@/components/dsfr/layout/Footer";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { regexPhoneFrenchCountries } from "../../../utils";
 import AuthorizeBlock from "../components/AuthorizeBlock";

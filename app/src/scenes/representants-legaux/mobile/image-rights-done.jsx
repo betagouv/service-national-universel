@@ -1,6 +1,6 @@
 import React from "react";
 import ConsentDone from "../../../assets/icons/ConsentDone";
-import Footer from "@/components/dsfr/components/Footer";
+import Footer from "@/components/dsfr/layout/Footer";
 
 export default function ImageRightsDone() {
   return (

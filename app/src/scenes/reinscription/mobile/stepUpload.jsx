@@ -12,7 +12,7 @@ import { ID } from "../../inscription2023/utils";
 
 import DatePickerList from "../../preinscription/components/DatePickerList";
 import Error from "../../../components/error";
-import Footer from "@/components/dsfr/components/Footer";
+import Footer from "@/components/dsfr/layout/Footer";
 import Help from "../../inscription2023/components/Help";
 import Navbar from "../components/Navbar";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";

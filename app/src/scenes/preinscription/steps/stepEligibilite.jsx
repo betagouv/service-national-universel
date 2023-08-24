@@ -17,7 +17,7 @@ import SearchableSelect from "../../../components/SearchableSelect";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import DatePickerList from "../components/DatePickerList";
-import DSFRContainer from "../../../components/inscription/DSFRContainer";
+import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
 
 export default function StepEligibilite() {

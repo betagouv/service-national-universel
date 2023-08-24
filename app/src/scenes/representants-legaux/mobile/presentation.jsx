@@ -4,7 +4,7 @@ import { COHESION_STAY_LIMIT_DATE } from "snu-lib/constants";
 import CalendarBig from "../../../assets/icons/CalendarBig";
 import CheckCircleStroke from "../../../assets/icons/CheckCircleStroke";
 import LinkTo from "../../../assets/icons/LinkTo";
-import Footer from "@/components/dsfr/components/Footer";
+import Footer from "@/components/dsfr/layout/Footer";
 import Loader from "../../../components/Loader";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import { isReturningParent } from "../commons";

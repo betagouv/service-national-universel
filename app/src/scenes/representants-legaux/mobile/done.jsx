@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import ConsentDone from "../../../assets/icons/ConsentDone";
-import Footer from "@/components/dsfr/components/Footer";
+import Footer from "@/components/dsfr/layout/Footer";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 
 export default function Done({ parentId }) {

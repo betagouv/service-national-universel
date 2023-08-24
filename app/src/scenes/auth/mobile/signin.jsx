@@ -11,7 +11,7 @@ import Input from "../../../components/inscription/input";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import Error from "../../../components/error";
-import Footer from "@/components/dsfr/components/Footer";
+import Footer from "@/components/dsfr/layout/Footer";
 import { cohortsInit } from "../../../utils/cohorts";
 import { environment } from "../../../config";
 import { Link } from "react-router-dom";
