@@ -37,6 +37,26 @@ router.get("/tickets", passport.authenticate(["referent", "young"], { session: f
   }
 });
 
+router.get("/ticketsInfo", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { ok, data } = await zammood.api(`/v0/ticket?email=${encodeURIComponent(req.user.email)}`, { method: "GET", credentials: "include" });
+    if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const hasMessage = typeof data === "object" && data !== null;
+
+    // Check if there are any tickets with status "NEW"
+    const hasNewStatus = Array.isArray(data) ? data.some((ticket) => ticket.status === "NEW") : false;
+
+    // Count the number of tickets with status "NEW"
+    const newStatusCount = Array.isArray(data) ? data.filter((ticket) => ticket.status === "NEW").length : 0;
+
+    return res.status(200).send({ ok: true, data: { hasMessage, hasNewStatus, newStatusCount } });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/signin", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { ok, data, token } = await zammood.api(`/v0/sso/signin?email=${req.user.email}`, { method: "GET", credentials: "include" });

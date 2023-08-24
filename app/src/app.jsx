@@ -29,6 +29,7 @@ import Phase1 from "./scenes/phase1";
 import ChangeSejour from "./scenes/phase1/changeSejour";
 import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
+import Echanges from "./scenes/echanges";
 import Preferences from "./scenes/preferences";
 import PreInscription from "./scenes/preinscription";
 import PublicSupport from "./scenes/public-support-center";
@@ -236,6 +237,7 @@ const Espace = () => {
           <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
           <SentryRoute path="/reinscription" component={ReInscription} />
           <SentryRoute path="/account" component={Account} />
+          <SentryRoute path="/echanges" component={Echanges} />
           <SentryRoute path="/phase1" component={Phase1} />
           <SentryRoute path="/phase2" component={Phase2} />
           <SentryRoute path="/phase3" component={Phase3} />

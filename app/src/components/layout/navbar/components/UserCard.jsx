@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
@@ -7,7 +7,7 @@ import API from "../../../../services/api";
 import { permissionPhase2 } from "../../../../utils";
 import { toastr } from "react-redux-toastr";
 
-export default function User() {
+export default function User({ ticketsInfo }) {
   const user = useSelector((state) => state.Auth.young);
   const [open, setOpen] = React.useState(false);
   const menuRef = React.useRef();
@@ -43,7 +43,12 @@ export default function User() {
     <>
       <div className="relative flex h-16 w-full cursor-default items-center justify-between border-t-[1px] border-[#1A243C] px-3 md:p-6 ">
         <Link to="/account" className="flex gap-3">
-          <p className="flex h-9 w-9 items-center justify-center rounded-full bg-[#344264] text-center capitalize text-[#768BAC]">{user.firstName[0] + user.lastName[0]}</p>
+          <div className="relative">
+            <p className="flex h-9 w-9 items-center justify-center rounded-full bg-[#344264] text-center capitalize text-[#768BAC]">{user.firstName[0] + user.lastName[0]}</p>
+            {ticketsInfo.hasNewStatus && (
+              <span className="absolute top-[0px] right-[1px] w-2.5 h-2.5 bg-blue-600 rounded-full text-white border-[1px] border-[#212B44] text-xs flex items-center justify-center"></span>
+            )}
+          </div>
           <div>
             <p className="font-semibold hover:text-[#D2DAEF]">{user.firstName}</p>
             <p className="text-xs text-[#768BAC]">Volontaire</p>
@@ -56,12 +61,12 @@ export default function User() {
           <ChevronDown />
         </button>
       </div>
-      <Menu open={open} menuRef={menuRef} user={user} onClose={onClose} />
+      <Menu open={open} menuRef={menuRef} user={user} onClose={onClose} ticketsInfo={ticketsInfo} />
     </>
   );
 }
 
-function Menu({ open, menuRef, user, onClose }) {
+function Menu({ open, menuRef, user, onClose, ticketsInfo }) {
   const dispatch = useDispatch();
   const history = useHistory();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -82,7 +87,7 @@ function Menu({ open, menuRef, user, onClose }) {
   return (
     <nav
       className={`absolute left-4 bottom-20 z-10 flex w-56 flex-col justify-around overflow-hidden rounded-lg bg-white shadow transition-all duration-200 ease-in-out ${
-        open ? (permissionPhase2(user) ? "h-28" : "h-20") : "h-0"
+        open ? (permissionPhase2(user) ? "h-auto" : "h-20") : "h-0"
       }`}
       ref={menuRef}>
       <Link to="/account" onClick={onClose} className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
@@ -91,6 +96,12 @@ function Menu({ open, menuRef, user, onClose }) {
       {permissionPhase2(user) && (
         <Link to="/preferences" onClick={onClose} className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
           Mes préférences de mission
+        </Link>
+      )}
+      {ticketsInfo.hasMessage === true && (
+        <Link to="/echanges" onClick={onClose} className="flex items-center justify-between gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
+          <p>Mes échanges</p>
+          {ticketsInfo.hasNewStatus === true && <p className="text-sm leading-5 text-white bg-blue-600 px-2 py-0.5 rounded-full font-medium">{ticketsInfo.newStatusCount}</p>}
         </Link>
       )}
       <button
