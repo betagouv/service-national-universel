@@ -142,7 +142,9 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                           <NavItem Icon={AddUser} title="Inviter un nouvel utilisateur" onClick={() => history.push(`/structure/${user.structureId}`)} />
                         )}
                         {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Settings} title="Paramétrages dynamiques" onClick={() => history.push("/settings")} />}
-                        {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Message} title="Messages d'alerte" onClick={() => history.push("/alerte")} />}
+                        {[ROLES.ADMIN].includes(user.role) && user.subRole === "god" && (
+                          <NavItem Icon={Message} title="Messages d'alerte" onClick={() => history.push("/alerte")} />
+                        )}
                         <NavItem Icon={Support} title="Besoin d'aide ?" onClick={() => history.push(`/besoin-d-aide?from=${from}`)} />
                         {/* <NavItem />
                     <NavItem />
