@@ -4,6 +4,7 @@ import { BsDot } from "react-icons/bs";
 import { HiChevronDown } from "react-icons/hi";
 import { useHistory } from "react-router-dom";
 import Separator from "./Separator";
+import { Link } from "react-router-dom";
 
 export default function MultiNavItem({ sideBarOpen, Icon, items, path, title, currentOpen, setCurrentOpen }) {
   const history = useHistory();
@@ -78,15 +79,15 @@ export default function MultiNavItem({ sideBarOpen, Icon, items, path, title, cu
                           {items.map((item) => {
                             const active = item.link.split("/")[1] === path;
                             return (
-                              <button
+                              <Link
                                 key={item.link}
-                                onClick={() => history.push(item.link)}
+                                to={item.link}
                                 className={`flex items-center pl-[1px] pr-[8px] py-[7px] h-[34px] rounded-md ${active ? "bg-[#EEEFF5]" : "hover:bg-[#EEEFF5]"}`}>
                                 <div className="w-[22px] h-[22px] flex items-center justify-center">
                                   <BsDot className={`ml-2 text-[#7F83A7] ${active ? "!w-6 !h-6 text-[#30345B]" : "!w-3 !h-3 hover:text-[#30345B]"}`} />
                                 </div>
                                 <p className={`pl-2 text-sm leading-5 text-[#3E426A] ${active ? "text-[#1B1F42] font-medium" : "hover:text-[#1B1F42]"}`}>{item.title}</p>
-                              </button>
+                              </Link>
                             );
                           })}
                         </div>
@@ -106,15 +107,15 @@ export default function MultiNavItem({ sideBarOpen, Icon, items, path, title, cu
             {items.map((item) => {
               const actif = item.link.split("/")[1] === path;
               return (
-                <button
+                <Link
                   key={item.link}
-                  onClick={() => history.push(item.link)}
+                  to={item.link}
                   className={`flex items-center pl-[20px] pr-[6px] py-[6px] h-9 text-[#D0D2E2] rounded-md ${actif ? "bg-[#0C1035]" : "hover:bg-[#1B1F42]"}`}>
                   <div className="!w-6 !h-6 flex items-center justify-center">
                     <BsDot className={`ml-2 text-[#B3B5CD] ${actif ? "!w-4 !h-4 text-[#D0D2E2]" : "!w-3 !h-3 hover:text-[#B3B5CD]"}`} />
                   </div>
                   <p className={`pl-2 text-sm leading-5 text-[#D0D2E2] ${actif ? "text-[#EEEFF5]" : "hover:text-[#EEEFF5]"}`}>{item.title}</p>
-                </button>
+                </Link>
               );
             })}
           </div>

@@ -1,6 +1,7 @@
 import { Popover, Transition } from "@headlessui/react";
 import React, { Fragment, useRef } from "react";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { Link } from "react-router-dom/cjs/react-router-dom";
+import { useHistory } from "react-router-dom";
 
 export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link }) {
   const history = useHistory();
@@ -27,6 +28,7 @@ export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link }
 
   const onMouseLeave = (open) => {
     if (sideBarOpen) return;
+    clearTimeout(timeout);
     if (!open) return;
     timeout = setTimeout(() => closePopover(), timeoutDuration);
   };
@@ -37,7 +39,7 @@ export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link }
           <>
             <div onMouseLeave={onMouseLeave.bind(null, open)}>
               <Popover.Button ref={buttonRef} onMouseEnter={onMouseEnter.bind(null, open)} onMouseLeave={onMouseLeave.bind(null, open)} className="focus:outline-none ">
-                <div
+                <Link
                   onClick={() => history.push(link)}
                   className={`group flex items-center py-[10px] pl-[11px] rounded-lg  h-[52px] cursor-pointer 
                    ${sideBarOpen ? "!pr-2  w-[238px]" : "w-[76px]"} ${active ? "bg-[#0C1035]" : "hover:bg-[#1B1F42]"} `}>
@@ -49,7 +51,7 @@ export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link }
                     }`}>
                     {title}
                   </p>
-                </div>
+                </Link>
               </Popover.Button>
               {!sideBarOpen && (
                 <Transition
@@ -61,13 +63,14 @@ export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link }
                   leaveFrom="opacity-100 translate-y-0"
                   leaveTo="opacity-0 translate-y-1">
                   <Popover.Panel className="absolute transform left-[100%] bottom-1/2 translate-y-[50%]">
-                    <button
-                      onClick={() => history.push(link)}
+                    <div
                       className="ml-4 px-4 py-[6px] bg-white shadow-md rounded-lg w-fit z-20"
                       onMouseEnter={onMouseEnter.bind(null, open)}
                       onMouseLeave={onMouseLeave.bind(null, open)}>
-                      <p className="text-xs leading-5 font-medium uppercase text-[#3E426A] whitespace-nowrap">{title}</p>
-                    </button>
+                      <Link to={link} className="flex items-center w-full ">
+                        <p className="text-xs leading-5 font-medium uppercase text-[#3E426A] whitespace-nowrap">{title}</p>
+                      </Link>
+                    </div>
                   </Popover.Panel>
                 </Transition>
               )}
