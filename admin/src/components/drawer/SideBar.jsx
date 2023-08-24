@@ -51,7 +51,7 @@ const SideBar = (props) => {
 
   //Fetch tickets count
   useEffect(() => {
-    if (!user) return;
+    if (!user || ![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role)) return;
     const getTickets = async () => {
       try {
         const { data } = await api.get("/zammood/ticketscount");

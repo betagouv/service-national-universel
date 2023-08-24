@@ -147,7 +147,7 @@ export default function LigneDeBus({ hit, cohort }) {
           <div className="text-sm flex-1 whitespace-nowrap opacity-75">{hit.lignesToPoint[0]?.meetingPoint?.department}</div>
         </td>
         <td>
-          <div className="text-sm flex-1 whitespace-nowrap opacity-75">{hit.center.department}</div>
+          <div className="text-sm flex-1 whitespace-nowrap opacity-75">{hit?.center?.department}</div>
         </td>
         <td>
           <div className="h-full">
@@ -165,10 +165,10 @@ export default function LigneDeBus({ hit, cohort }) {
         <td className="px-1">
           <div className="flex-1">
             <div className="flex gap-2">
-              <TooltipCenter key={hit.center._id} name={hit.center.name} region={hit.center.region} department={hit.center.department}>
+              <TooltipCenter key={hit.center?._id} name={hit.center?.name} region={hit.center?.region} department={hit.center?.department}>
                 <div className="flex items-center justify-center gap-2 px-2 py-1 text-sm font-normal">
-                  {hit.center.code2022 || hit.center.name}
-                  <a className="group text-sm font-medium " href={`/centre/${hit.center._id.toString()}`} onClick={(e) => e.stopPropagation()} target="_blank" rel="noreferrer">
+                  {hit.center?.code2022 || hit.center?.name}
+                  <a className="group text-sm font-medium " href={`/centre/${hit.center?._id?.toString()}`} onClick={(e) => e.stopPropagation()} target="_blank" rel="noreferrer">
                     <IoOpenOutline className="text-gray-500 group-hover:text-blue-600" />
                   </a>
                 </div>
