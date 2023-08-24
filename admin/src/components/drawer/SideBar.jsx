@@ -188,7 +188,9 @@ const SideBar = (props) => {
         </div>
         <Profil sideBarOpen={open} user={user} setOpenInvite={setOpenInvite} />
       </div>
-      <InviteHeader role={user.role} label="Inviter un nouvel utilisateur" open={openInvite} setOpen={() => setOpenInvite(false)} />
+      {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
+        <InviteHeader role={user.role} label="Inviter un nouvel utilisateur" open={openInvite} setOpen={() => setOpenInvite(false)} />
+      )}
     </div>
   );
 };
