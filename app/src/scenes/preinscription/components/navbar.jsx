@@ -6,8 +6,7 @@ import { getStepFromUrlParam, PREINSCRIPTION_STEPS_LIST } from "../../../utils/n
 
 const Navbar = () => {
   const { step } = useParams();
-  // const currentStep = getStepFromUrlParam(step, PREINSCRIPTION_STEPS_LIST) || "ELIGIBILITE";
-  const currentStep = getStepFromUrlParam(step, PREINSCRIPTION_STEPS_LIST);
+  const currentStep = getStepFromUrlParam(step, PREINSCRIPTION_STEPS_LIST) || "ELIGIBILITE";
 
   return ["ELIGIBILITE", "SEJOUR", "PROFIL"].includes(currentStep) ? (
     <div className="mx-auto flex w-full flex-col justify-center px-[1rem] py-[1rem] md:w-[56rem] md:px-[6rem] md:py-[2rem]">

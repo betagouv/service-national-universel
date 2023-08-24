@@ -21,7 +21,7 @@ const SECRET_VALUE_KEYS = [
   { key: "confirmPassword", values: [] },
   { key: "acceptCGU", values: [] },
   { key: "rulesYoung", values: [] },
-  { key: "step", values: [PREINSCRIPTION_STEPS.CONFIRM], fallbackValue: PREINSCRIPTION_STEPS.PROFIL },
+  { key: "step", values: [PREINSCRIPTION_STEPS.CONFIRM, PREINSCRIPTION_STEPS.DONE], fallbackValue: PREINSCRIPTION_STEPS.PROFIL },
 ];
 const LOCAL_STORAGE_KEY = "preinscription";
 
@@ -40,7 +40,7 @@ const getDefaultState = () => {
 const PreInscriptionContextProvider = ({ children }) => {
   const [value, setValue] = useState(getDefaultState());
 
-  const updateValue = (value = defaultState) => {
+  const updateValue = (value) => {
     setValue(value);
 
     // remove secret values before persisting into local storage
@@ -56,9 +56,11 @@ const PreInscriptionContextProvider = ({ children }) => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(valuesToPersist));
   };
 
-  const removePersistedValue = () => {
+  const removePersistedValue = (resetAll) => {
     localStorage.removeItem(LOCAL_STORAGE_KEY);
-    setValue(defaultState);
+    if (resetAll) {
+      setValue(defaultState);
+    }
   };
 
   return <PreInscriptionContext.Provider value={[value, updateValue, removePersistedValue]}>{children}</PreInscriptionContext.Provider>;

@@ -1,7 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Redirect, Router, Switch, useLocation, useHistory } from "react-router-dom";
+import { Redirect, Router, Switch, useLocation } from "react-router-dom";
 
 import { setYoung } from "./redux/auth/actions";
 
@@ -72,13 +72,14 @@ export default function App() {
           ) : (
             <Switch>
               {/* Aucune authentification nécessaire */}
+              <SentryRoute path="/preinscription" component={PreInscription} />
               <SentryRoute path="/noneligible" component={NonEligible} />
               <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
               <SentryRoute path="/validate-contract/done" component={ContractDone} />
               <SentryRoute path="/validate-contract" component={Contract} />
               <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
               {/* Authentification accessoire */}
-              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/preinscription"]} component={() => <OptionalLogIn />} />
+              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements"]} component={() => <OptionalLogIn />} />
               {/* Authentification nécessaire */}
               <SentryRoute path="/" component={() => <MandatoryLogIn />} />
             </Switch>
@@ -126,14 +127,12 @@ const OptionalLogIn = () => {
       <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
       <SentryRoute path="/auth" component={Auth} />
       <SentryRoute path="/public-engagements" component={AllEngagements} />
-      <SentryRoute path="/preinscription" component={PreInscription} />
       <Redirect to="/" />
     </Switch>
   );
 };
 
 const MandatoryLogIn = () => {
-  const history = useHistory();
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
 
@@ -144,16 +143,11 @@ const MandatoryLogIn = () => {
         if (!ok) {
           api.setToken(null);
           dispatch(setYoung(null));
-          return history.push("/auth");
+          return <Redirect to="/auth" />;
         }
         if (token) api.setToken(token);
         if (ok && user) {
           dispatch(setYoung(user));
-          if (environment !== "production") {
-            const forceEmailValidation =
-              user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && inscriptionModificationOpenForYoungs(user.cohort, user, environment);
-            if (forceEmailValidation) return history.push("/preinscription");
-          }
           await cohortsInit();
         }
       } catch (e) {

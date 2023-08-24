@@ -495,26 +495,6 @@ const Schema = new mongoose.Schema({
       description: "Tentative de connexion 2FA. Max 3",
     },
   },
-  tokenEmailValidation: {
-    type: String,
-    default: "",
-    documentation: {
-      description: "Token servant à la validation d'email",
-    },
-  },
-  tokenEmailValidationExpires: {
-    type: Date,
-    documentation: {
-      description: "Date limite de validité du token pour validation d'email",
-    },
-  },
-  attemptsEmailValidation: {
-    type: Number,
-    default: 0,
-    documentation: {
-      description: "Tentative de validation d'email. Max 3",
-    },
-  },
   loginAttempts: {
     type: Number,
     default: 0,
