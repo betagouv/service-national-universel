@@ -1,10 +1,8 @@
 import { Popover, Transition } from "@headlessui/react";
 import React, { Fragment, useRef } from "react";
 import { Link } from "react-router-dom/cjs/react-router-dom";
-import { useHistory } from "react-router-dom";
 
 export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link }) {
-  const history = useHistory();
   const buttonRef = useRef(null);
   const timeoutDuration = 200;
   let timeout;
