@@ -149,12 +149,14 @@ const AccountGeneralPage = () => {
                 </FormRow>
                 <ChangeAddressButton onClick={() => setChangeAddressModalOpen(true)} className="mb-2" />
               </section>
-              <section>
-                <SectionTitle>Pièce d&apos;identité</SectionTitle>
-                <div className="flex flex-col gap-2">
-                  {young.files.cniFiles && young.files.cniFiles.map((cniFile) => <IdCardReader key={cniFile._id} cniFile={cniFile} young={young} />)}
-                </div>
-              </section>
+              {young?.files.cniFiles.length > 0 && (
+                <section>
+                  <SectionTitle>Pièce d&apos;identité</SectionTitle>
+                  <div className="flex flex-col gap-2">
+                    {young.files.cniFiles && young.files.cniFiles.map((cniFile) => <IdCardReader key={cniFile._id} cniFile={cniFile} young={young} />)}
+                  </div>
+                </section>
+              )}
             </div>
           </div>
 
