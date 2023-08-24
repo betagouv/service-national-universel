@@ -236,6 +236,7 @@ const ES_NO_LIMIT = 10_000;
 
 const SENDINBLUE_TEMPLATES = {
   SIGNIN_2FA: "1317",
+  SIGNUP_EMAIL_VALIDATION: "1316",
   FORGOT_PASSWORD: "1308",
 
   invitationReferent: {
@@ -622,7 +623,7 @@ const MINISTRES = [
       chargée de la Jeunesse et du Service national universel",
     ],
     template: "certificates/certificateTemplate2023-08-18.png",
-  }
+  },
 ];
 
 const FILE_KEYS = [
