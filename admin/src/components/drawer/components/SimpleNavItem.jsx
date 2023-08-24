@@ -39,7 +39,7 @@ export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link }
             <div onMouseLeave={onMouseLeave.bind(null, open)}>
               <Popover.Button ref={buttonRef} onMouseEnter={onMouseEnter.bind(null, open)} onMouseLeave={onMouseLeave.bind(null, open)} className="focus:outline-none ">
                 <Link
-                  onClick={() => history.push(link)}
+                  to={link}
                   className={`group flex items-center py-[10px] pl-[11px] rounded-lg  h-[52px] cursor-pointer 
                    ${sideBarOpen ? "!pr-2  w-[238px]" : "w-[76px]"} ${active ? "bg-[#0C1035]" : "hover:bg-[#1B1F42]"} `}>
                   <div className={`rounded-md w-[3px] h-[20px]  ${active ? "bg-[#EEEFF5]" : "bg-inherit"}`} />
