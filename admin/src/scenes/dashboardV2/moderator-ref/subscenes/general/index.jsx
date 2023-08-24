@@ -143,7 +143,7 @@ export default function Index() {
       <div className="flex flex-col gap-8 mb-4">
         {message?.length ? message.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
-        <div className="flex gap-4">
+        <div className="flex w-full gap-4">
           <Actus stats={stats} />
           <KeyNumbers />
         </div>
@@ -540,7 +540,7 @@ const getInscriptionGoals = async () => {
 };
 
 async function getCurrentInscriptions(filters) {
-  const responses = await api.post("/elasticsearch/dashboard/inscription/youngForInscription", {filters: filters} );
+  const responses = await api.post("/elasticsearch/dashboard/inscription/youngForInscription", { filters: filters });
   if (!responses?.aggregations?.status?.buckets) return {};
   let result = responses.aggregations.status.buckets.reduce((acc, status) => {
     acc[status.key] = {
@@ -555,7 +555,7 @@ async function getCurrentInscriptions(filters) {
 }
 
 async function getInAndOutCohort(filters) {
-  const responses = await api.post("/elasticsearch/dashboard/inscription/getInAndOutCohort", {filters: filters} );
+  const responses = await api.post("/elasticsearch/dashboard/inscription/getInAndOutCohort", { filters: filters });
   if (!responses?.aggregations) return {};
   const aggreg = responses.aggregations;
   let result = Object.keys(aggreg).reduce((acc, cohort) => {

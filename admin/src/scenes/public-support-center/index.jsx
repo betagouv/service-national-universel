@@ -8,9 +8,10 @@ import api from "../../services/api";
 
 //import { HeroContainer } from "../../components/Content";
 import { colors, urlWithScheme } from "../../utils";
-import { adminURL, supportURL } from "../../config";
+import { adminURL, environment, supportURL } from "../../config";
 import plausibleEvent from "../../services/plausible";
 import ZammoodForm from "./form";
+import FooterComponent from "../../components/footer";
 
 const articles = [
   {
@@ -234,6 +235,7 @@ export default function PublicSupportCenter(props) {
         {open && <ZammoodForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} fromPage={fromPage} />}
         {successMessage && <p style={{ color: "#6B7280" }}>{successMessage}</p>}
       </Container>
+      {environment !== "production" ? <FooterComponent /> : null}
     </div>
   );
 }
