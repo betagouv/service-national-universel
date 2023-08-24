@@ -46,7 +46,7 @@ export default function User({ ticketsInfo }) {
           <div className="relative">
             <p className="flex h-9 w-9 items-center justify-center rounded-full bg-[#344264] text-center capitalize text-[#768BAC]">{user.firstName[0] + user.lastName[0]}</p>
             {ticketsInfo.hasNewStatus && (
-              <span className="absolute top-[0px] right-[1px] w-2.5 h-2.5 bg-blue-600 rounded-full text-white border border-[#212B44] text-xs flex items-center justify-center"></span>
+              <span className="absolute top-[0px] right-[1px] w-2.5 h-2.5 bg-blue-600 rounded-full text-white border-[1px] border-[#212B44] text-xs flex items-center justify-center"></span>
             )}
           </div>
           <div>
