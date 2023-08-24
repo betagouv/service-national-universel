@@ -208,7 +208,7 @@ const Home = (props) => {
       <div className="flex">
         {environment === "production" ? <Drawer open={drawerVisible} onOpen={setDrawerVisible} /> : <SideBar sessionsList={sessionPhase1List} />}
         <div className="flex flex-col w-full">
-          <div className={environment === "prodcution" ? (drawerVisible ? `flex-1 ml-[220px] min-h-screen` : `flex-1 lg:ml-[220px] min-h-screen`) : `flex-1  min-h-screen`}>
+          <div className={environment === "production" ? (drawerVisible ? `flex-1 ml-[220px] min-h-screen` : `flex-1 lg:ml-[220px] min-h-screen`) : `flex-1  min-h-screen`}>
             <Switch>
               <RestrictedRoute path="/structure" component={Structure} />
               <RestrictedRoute path="/settings" component={Settings} />
