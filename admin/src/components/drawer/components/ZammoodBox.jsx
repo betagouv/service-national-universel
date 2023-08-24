@@ -3,9 +3,11 @@ import React, { Fragment, useRef } from "react";
 import Separator from "./Separator";
 import Mail from "../icons/Mail";
 import api from "../../../services/api";
+import { useHistory } from "react-router-dom";
 
 export default function ZammoodBox({ newTickets, openedTickets, sideBarOpen }) {
   const buttonRef = useRef(null);
+  const history = useHistory();
   const timeoutDuration = 200;
   let timeout;
 
