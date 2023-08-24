@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Modal from "../../../components/ui/modals/Modal";
 import ArrowRightBlue from "../../../assets/icons/ArrowRightBlue";
-import InformationSquare from "../../../assets/icons/InformationSquare";
+import { BsInfoSquareFill } from "react-icons/bs";
+import { HiX } from "react-icons/hi";
 import PrimaryButton from "../../../components/ui/dsfr/PrimaryButton";
 import InlinButton from "./InlineButton";
-import Cross from "../../../assets/icons/Cross";
 
 const DidNotReceiveActivationCodeModal = ({ onClose, isOpen, onRequestNewToken, onRequestEmailModification }) => {
   return (
@@ -12,7 +12,7 @@ const DidNotReceiveActivationCodeModal = ({ onClose, isOpen, onRequestNewToken, 
       <div className="flex justify-end text-[#000091]">
         <button onClick={onClose} className="flex p-3 items-center">
           <span className="text-sm">Fermer</span>
-          <Cross className="ml-1 mt-[2px]" />
+          <HiX className="ml-1 mt-[2px]" />
         </button>
       </div>
       <div className="p-4 md:p-6 !pt-0">
@@ -22,22 +22,22 @@ const DidNotReceiveActivationCodeModal = ({ onClose, isOpen, onRequestNewToken, 
         <span className="text-[#3A3A3A]">Si vous ne recevez pas le mail, nous vous invitons à vérifier que :</span>
         <ul className="mt-4 list-none text-[#0063CB] flex flex-col gap-1">
           <li>
-            <InformationSquare className="inline mb-1 mr-1" />
+            <BsInfoSquareFill className="inline mb-1 mr-1" />
             L'adresse e-mail que vous utilisez est bien celle que vous avez renseigné
             <InlinButton className="ml-1 text-[#0063CB]" onClick={onRequestEmailModification}>
               Modifier mon adresse e-mail
             </InlinButton>
           </li>
           <li>
-            <InformationSquare className="inline mb-1 mr-1" />
+            <BsInfoSquareFill className="inline mb-1 mr-1" />
             Le mail ne se trouve pas dans vos spam
           </li>
           <li>
-            <InformationSquare className="inline mb-1 mr-1" />
+            <BsInfoSquareFill className="inline mb-1 mr-1" />
             L'adresse e-mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boîte mail
           </li>
           <li>
-            <InformationSquare className="inline mb-1 mr-1" />
+            <BsInfoSquareFill className="inline mb-1 mr-1" />
             Votre boite de réception n'est pas saturée
           </li>
         </ul>
