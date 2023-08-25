@@ -7,7 +7,7 @@ export default function DSFRContainer({ title, subtitle, children, supportLink }
       {title && (
         <>
           <div className="flex items-center justify-between">
-            <h1 className="m-0 text-xl font-bold">{title}</h1>
+            <h1 className="m-0 text-2xl font-bold">{title}</h1>
             {supportLink ? (
               <a href={supportLink} target="_blank" rel="noreferrer">
                 <QuestionMarkBlueCircle />

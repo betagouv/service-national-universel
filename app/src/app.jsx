@@ -80,8 +80,7 @@ export default function App() {
               <SentryRoute path="/validate-contract" component={Contract} />
               <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
               {/* Authentification accessoire */}
-              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements"]} component={() => <OptionalLogIn />} />
-              <SentryRoute path="/contact" component={ContactForm} />
+              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/contact"]} component={() => <OptionalLogIn />} />
               {/* Authentification nécessaire */}
               <SentryRoute path="/" component={() => <MandatoryLogIn />} />
             </Switch>
@@ -129,6 +128,7 @@ const OptionalLogIn = () => {
       <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
       <SentryRoute path="/auth" component={Auth} />
       <SentryRoute path="/public-engagements" component={AllEngagements} />
+      <SentryRoute path="/contact" component={ContactForm} />
       <Redirect to="/" />
     </Switch>
   );
