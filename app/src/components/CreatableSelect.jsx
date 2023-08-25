@@ -1,6 +1,6 @@
 import React from "react";
 import Select from "react-select/creatable";
-import ErrorMessage from "../scenes/inscription2023/components/ErrorMessage";
+import ErrorMessage from "./dsfr/forms/ErrorMessage";
 
 const CreatableSelect = ({ label, options, value, onChange, placeholder = "Sélectionner une option", error = "", onCreateOption = null, correction = "" }) => {
   return (

@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import plausibleEvent from "../../../services/plausible";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
+import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import { capture } from "../../../sentry";
 
 export default function StepDone() {

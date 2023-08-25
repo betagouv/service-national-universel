@@ -10,7 +10,7 @@ import Loader from "../../../components/Loader";
 import Navbar from "../components/Navbar";
 import dayjs from "dayjs";
 import Check from "../components/Check";
-import StickyButton from "../../../components/inscription/stickyButton";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import { supportURL } from "../../../config";
 
 export default function Verification({ step, parentId }) {

@@ -29,7 +29,7 @@ const Render = ({ screen }) => {
     if (screen === "2fa") return device === "desktop" ? <DesktopSignin2FA /> : <MobileSignin2FA />;
   }
 
-  return <DSFRLayout title="Connexion">{renderScreen(screen)}</DSFRLayout>;
+  return <DSFRLayout>{renderScreen(screen)}</DSFRLayout>;
 };
 
 export default function Index() {

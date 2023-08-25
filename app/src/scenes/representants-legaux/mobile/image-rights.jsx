@@ -4,16 +4,16 @@ import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegaux
 import Loader from "../../../components/Loader";
 import FranceConnectButton from "../../inscription2023/components/FranceConnectButton";
 import Input from "../../inscription2023/components/Input";
-import ResponsiveRadioButton from "../../inscription2023/components/RadioButton";
+import ResponsiveRadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
-import Toggle from "../../../components/inscription/toggle";
+import Toggle from "../../../components/dsfr/forms/toggle";
 import { translate } from "snu-lib";
 import { FRANCE, ABROAD, translateError, stringToBoolean, isReturningParentForImageRights, API_CONSENT_IMAGE_RIGHTS } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";
-import ErrorMessage from "../../inscription2023/components/ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import api from "../../../services/api";
-import StickyButton from "../../../components/inscription/stickyButton";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import { regexPhoneFrenchCountries } from "../../../utils";
 import AuthorizeBlock from "../components/AuthorizeBlock";
 

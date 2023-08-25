@@ -10,15 +10,15 @@ import plausibleEvent from "../../../services/plausible";
 import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 
 import IconFrance from "../../../assets/IconFrance";
-import CheckBox from "../../../components/inscription/checkbox";
-import Input from "../../../components/inscription/input";
-import Toggle from "../../../components/inscription/toggle";
-import SearchableSelect from "../../../components/SearchableSelect";
+import CheckBox from "../../../components/dsfr/forms/checkbox";
+import Input from "../../../components/dsfr/forms/input";
+import Toggle from "../../../components/dsfr/forms/toggle";
+import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
-import DatePickerList from "../components/DatePickerList";
+import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
+import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);

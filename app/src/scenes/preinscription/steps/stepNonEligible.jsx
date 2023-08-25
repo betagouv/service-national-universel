@@ -7,7 +7,7 @@ import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-ge
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
+import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 
 export default function NonEligible() {
   const history = useHistory();

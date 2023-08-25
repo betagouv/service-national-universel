@@ -1,5 +1,5 @@
 import React from "react";
-import ErrorMessage from "./ErrorMessage";
+import ErrorMessage from "../../forms/ErrorMessage";
 
 const RadioButton = ({ options, label, description = "", onChange, value: currentValue, error, correction = "" }) => {
   return (

@@ -13,14 +13,14 @@ import { getCorrectionsForStepUpload } from "../../../utils/navigation";
 import { ID } from "../utils";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 
-import CheckBox from "../../../components/inscription/checkbox";
-import DatePickerList from "../../preinscription/components/DatePickerList";
+import CheckBox from "../../../components/dsfr/forms/checkbox";
+import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
 import Error from "../../../components/error";
-import ErrorMessage from "../components/ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import Help from "../components/Help";
 import MyDocs from "../components/MyDocs";
 import Navbar from "../components/Navbar";
-import StickyButton from "../../../components/inscription/stickyButton";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 
 export default function StepUpload() {
   let { category } = useParams();

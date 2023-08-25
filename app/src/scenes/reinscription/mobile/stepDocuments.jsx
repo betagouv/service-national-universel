@@ -10,7 +10,7 @@ import { supportURL } from "../../../config";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Navbar from "../components/Navbar";
-import StickyButton from "../../../components/inscription/stickyButton";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import Error from "../../../components/error";
 import Help from "../../inscription2023/components/Help";
 import MyDocs from "../../inscription2023/components/MyDocs";

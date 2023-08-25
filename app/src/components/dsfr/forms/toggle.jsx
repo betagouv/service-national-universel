@@ -1,5 +1,5 @@
 import React from "react";
-import Check from "../../assets/icons/Check2";
+import Check from "@/assets/icons/Check2";
 
 export default function Toggle({ toggled, onClick }) {
   return toggled ? (

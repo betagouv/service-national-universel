@@ -15,7 +15,7 @@ import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
 import EditPen from "../../../assets/icons/EditPen";
-import StickyButton from "../../../components/inscription/stickyButton";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import ConsentDone from "../../../assets/icons/ConsentDone";
 
 const engagementPrograms = [

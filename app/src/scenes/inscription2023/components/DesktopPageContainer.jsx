@@ -3,7 +3,7 @@ import React from "react";
 import Navbar from "../components/Navbar";
 
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import Button from "../components/Button";
+import Button from "../../../components/dsfr/ui/buttons/Button";
 import Help from "./Help";
 import { appURL } from "../../../config";
 
