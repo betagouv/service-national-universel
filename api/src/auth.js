@@ -159,7 +159,7 @@ class Auth {
       }
 
       const shouldUse2FA = () => {
-        // if (config.ENVIRONMENT === "development") return false;
+        if (config.ENVIRONMENT === "development") return false;
         if (config.ENVIRONMENT === "staging" && !user.email.match(regexp_exception_staging)) return false;
 
         if (user.emailVerified === "false") return false;

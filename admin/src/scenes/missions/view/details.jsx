@@ -23,6 +23,7 @@ import ExternalLink from "../../../assets/icons/ExternalLink";
 import { MISSION_STATUS } from "snu-lib";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
+import { useSelector } from "react-redux";
 
 export default function DetailsView({ mission, setMission, getMission }) {
   const [values, setValues] = useState(mission);
@@ -32,6 +33,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
   const [referents, setReferents] = useState([]);
   const [creationTutor, setCreationTutor] = useState(false);
   const [selectedStructure, setSelectedStructure] = useState(null);
+  const { user } = useSelector((state) => state.Auth);
 
   const [editingBottom, setEdittingBottom] = useState(false);
   const [loadingBottom, setLoadingBottom] = useState(false);
@@ -122,7 +124,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
   const onSubmitBottom = () => {
     setLoadingBottom(true);
     const error = {};
-    if (values.startAt < new Date()) error.startAt = "La date est incorrect";
+    if (values.startAt < new Date() && ![ROLES.ADMIN].includes(user.role)) error.startAt = "La date est incorrect";
     if (values.startAt > values.endAt) error.endAt = "La date de fin est incorrect";
     if (values.placesTotal === "" || isNaN(values.placesTotal) || values.placesTotal < 0) error.placesTotal = "Le nombre de places est incorrect";
     if (values.placesTotal < mission.placesTotal && mission.placesLeft - (mission.placesTotal - values.placesTotal) < 0)

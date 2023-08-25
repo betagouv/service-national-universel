@@ -1,65 +1,66 @@
-import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { BrowserRouter as Router, Switch, Redirect, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-router-dom";
 
-import { setUser, setSessionPhase1 } from "./redux/auth/actions";
-import Auth from "./scenes/auth";
-import Validate from "./scenes/validate";
-import Profil from "./scenes/profil";
-import Settings from "./scenes/settings";
-import Alerte from "./scenes/alerte";
-import Dashboard from "./scenes/dashboard";
-import DashboardVisitor from "./scenes/dashboard-visitor";
-import DashboardResponsible from "./scenes/dashboard-responsible";
-import DashboardHeadCenter from "./scenes/dashboard-head-center";
-import Structure from "./scenes/structure";
-import Missions from "./scenes/missions";
-import Volontaires from "./scenes/volontaires";
-import VolontairesResponsible from "./scenes/volontaires-responsible";
-import VolontairesHeadCenter from "./scenes/volontaires-head-center";
-import Utilisateur from "./scenes/utilisateur";
-import Content from "./scenes/content";
-import Goal from "./scenes/goal";
-import Center from "./scenes/centersV2";
-import Inscription from "./scenes/inscription";
-import PointDeRassemblement from "./scenes/pointDeRassemblement";
-import SupportCenter from "./scenes/support-center";
-import Association from "./scenes/association";
-import Inbox from "./scenes/inbox";
+import { setSessionPhase1, setUser } from "./redux/auth/actions";
 import CGU from "./scenes/CGU";
-import PublicSupport from "./scenes/public-support-center";
-import SessionShareIndex from "./scenes/session-phase1/index";
-import TableDeRepartition from "./scenes/plan-transport/table-repartition";
-import SchemaDeRepartition from "./scenes/plan-transport/schema-repartition";
-import LigneBus from "./scenes/plan-transport/ligne-bus";
-import EditTransport from "./scenes/edit-transport";
-import DSNJExport from "./scenes/dsnj-export";
+import Alerte from "./scenes/alerte";
+import Association from "./scenes/association";
+import Auth from "./scenes/auth";
+import Center from "./scenes/centersV2";
+import Content from "./scenes/content";
+import Dashboard from "./scenes/dashboard";
+import DashboardHeadCenter from "./scenes/dashboard-head-center";
+import DashboardResponsible from "./scenes/dashboard-responsible";
+import DashboardVisitor from "./scenes/dashboard-visitor";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
+import DSNJExport from "./scenes/dsnj-export";
+import EditTransport from "./scenes/edit-transport";
+import Goal from "./scenes/goal";
+import Inbox from "./scenes/inbox";
+import Inscription from "./scenes/inscription";
+import Missions from "./scenes/missions";
+import LigneBus from "./scenes/plan-transport/ligne-bus";
+import SchemaDeRepartition from "./scenes/plan-transport/schema-repartition";
+import TableDeRepartition from "./scenes/plan-transport/table-repartition";
+import PointDeRassemblement from "./scenes/pointDeRassemblement";
+import Profil from "./scenes/profil";
+import PublicSupport from "./scenes/public-support-center";
 import Etablissement from "./scenes/school";
+import SessionShareIndex from "./scenes/session-phase1/index";
+import Settings from "./scenes/settings";
+import Structure from "./scenes/structure";
+import SupportCenter from "./scenes/support-center";
+import Utilisateur from "./scenes/utilisateur";
+import Validate from "./scenes/validate";
+import Volontaires from "./scenes/volontaires";
+import VolontairesHeadCenter from "./scenes/volontaires-head-center";
+import VolontairesResponsible from "./scenes/volontaires-responsible";
 
 //DashboardV2
+import DashboardHeadCenterV2 from "./scenes/dashboardV2/head-center";
 import DashboardV2 from "./scenes/dashboardV2/moderator-ref";
 import DashboardResponsibleV2 from "./scenes/dashboardV2/responsible";
-import DashboardHeadCenterV2 from "./scenes/dashboardV2/head-center";
 import DashboardVisitorV2 from "./scenes/dashboardV2/visitor";
 
-import Drawer from "./components/drawer";
-import Header from "./components/header";
-import Footer from "./components/footer";
 import Loader from "./components/Loader";
+import Drawer from "./components/drawer";
+import Footer from "./components/footer";
+import Header from "./components/header";
 
+import { SentryRoute, capture, history, initSentry } from "./sentry";
 import api, { initApi } from "./services/api";
-import { initSentry, SentryRoute, history, capture } from "./sentry";
 
 import { adminURL, environment } from "./config";
-import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
+import { COHESION_STAY_END, ROLES, ROLES_LIST } from "./utils";
 
-import "./index.css";
-import ModalCGU from "./components/modals/ModalCGU";
-import Team from "./scenes/team";
 import * as Sentry from "@sentry/react";
+import ModalCGU from "./components/modals/ModalCGU";
+import "./index.css";
+import Team from "./scenes/team";
 
+import SideBar from "./components/drawer/SideBar";
 import useDocumentTitle from "./hooks/useDocumentTitle";
 
 initSentry();
@@ -87,20 +88,20 @@ export default function App() {
             {/* Authentification nécessaire */}
             <SentryRoute path="/" component={Home} />
           </Switch>
-          <Footer />
+          {environment === "production" ? <Footer /> : null}
         </div>
       </Router>
     </Sentry.ErrorBoundary>
   );
 }
 
-const Home = () => {
+const Home = (props) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loading, setLoading] = useState(true);
 
-  const [drawerVisible, setDrawerVisible] = useState(false);
+  const [drawerVisible, setDrawerVisible] = useState(true);
 
   // pour les chefs de centre, il faut afficher une seul session à la fois si il y en a plusieurs (peu importe le centre de cohésion)
   const [sessionPhase1List, setSessionPhase1List] = useState(null);
@@ -137,7 +138,8 @@ const Home = () => {
         if (!res.ok || !res.user) {
           api.setToken(null);
           dispatch(setUser(null));
-          return setLoading(false);
+          setLoading(false);
+          return (window.location.href = "/auth?disconnected=1");
         }
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
@@ -202,48 +204,51 @@ const Home = () => {
 
   return (
     <div>
-      <Header onClickBurger={() => setDrawerVisible((e) => !e)} drawerVisible={drawerVisible} sessionsList={sessionPhase1List} />
+      {environment === "production" ? <Header onClickBurger={() => setDrawerVisible((e) => !e)} drawerVisible={drawerVisible} sessionsList={sessionPhase1List} /> : null}
       <div className="flex">
-        <Drawer open={drawerVisible} onOpen={setDrawerVisible} />
-        <div className={drawerVisible ? `flex-1 ml-[220px] min-h-screen` : `flex-1 lg:ml-[220px] min-h-screen`}>
-          <Switch>
-            <RestrictedRoute path="/structure" component={Structure} />
-            <RestrictedRoute path="/settings" component={Settings} />
-            <RestrictedRoute path="/alerte" component={Alerte} />
-            <RestrictedRoute path="/profil" component={Profil} />
-            <RestrictedRoute path="/volontaire" component={renderVolontaire} />
-            <RestrictedRoute path="/etablissement" component={Etablissement} />
-            <RestrictedRoute path="/mission" component={Missions} />
-            <RestrictedRoute path="/inscription" component={Inscription} />
-            <RestrictedRoute path="/user" component={Utilisateur} />
-            <RestrictedRoute path="/contenu" component={Content} />
-            <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
-            <RestrictedRoute path="/centre" component={Center} />
-            <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
-            <RestrictedRoute path="/association" component={Association} />
-            <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
-            <RestrictedRoute path="/boite-de-reception" component={Inbox} />
-            <RestrictedRoute path="/equipe" component={Team} />
-            <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
-            {/* Plan de transport */}
-            {user?.role === "admin" && user?.subRole === "god" ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
-            {/* Table de répartition */}
-            <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
-            {/* Ligne de bus */}
-            <RestrictedRoute path="/ligne-de-bus" component={LigneBus} />
-            {/* Schéma de répartition */}
-            <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
-            <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
-            <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
-            {/* Only for developper eyes... */}
-            {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
-            {/* DASHBOARD */}
-            {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
-            {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
-            {environment === "production" && <RestrictedRoute path="/" component={renderDashboard} />}
-            {environment !== "production" && <RestrictedRoute path="/dashboard" component={renderDashboardV2} />}
-            {environment !== "production" && <RestrictedRoute path="/" component={renderDashboardV2} />}
-          </Switch>
+        {environment === "production" ? <Drawer open={drawerVisible} onOpen={setDrawerVisible} /> : <SideBar sessionsList={sessionPhase1List} />}
+        <div className="flex flex-col w-full">
+          <div className={environment === "production" ? (drawerVisible ? `flex-1 ml-[220px] min-h-screen` : `flex-1 lg:ml-[220px] min-h-screen`) : `flex-1  min-h-screen`}>
+            <Switch>
+              <RestrictedRoute path="/structure" component={Structure} />
+              <RestrictedRoute path="/settings" component={Settings} />
+              <RestrictedRoute path="/alerte" component={Alerte} />
+              <RestrictedRoute path="/profil" component={Profil} />
+              <RestrictedRoute path="/volontaire" component={renderVolontaire} />
+              <RestrictedRoute path="/etablissement" component={Etablissement} />
+              <RestrictedRoute path="/mission" component={Missions} />
+              <RestrictedRoute path="/inscription" component={Inscription} />
+              <RestrictedRoute path="/user" component={Utilisateur} />
+              <RestrictedRoute path="/contenu" component={Content} />
+              <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
+              <RestrictedRoute path="/centre" component={Center} />
+              <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
+              <RestrictedRoute path="/association" component={Association} />
+              <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
+              <RestrictedRoute path="/boite-de-reception" component={Inbox} />
+              <RestrictedRoute path="/equipe" component={Team} />
+              <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
+              {/* Plan de transport */}
+              {user?.role === "admin" && user?.subRole === "god" ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
+              {/* Table de répartition */}
+              <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
+              {/* Ligne de bus */}
+              <RestrictedRoute path="/ligne-de-bus" component={LigneBus} />
+              {/* Schéma de répartition */}
+              <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
+              <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
+              <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
+              {/* Only for developper eyes... */}
+              {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
+              {/* DASHBOARD */}
+              {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
+              {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
+              {environment === "production" && <RestrictedRoute path="/" component={renderDashboard} />}
+              {environment !== "production" && <RestrictedRoute path="/dashboard" component={renderDashboardV2} />}
+              {environment !== "production" && <RestrictedRoute path="/" component={renderDashboardV2} />}
+            </Switch>
+          </div>
+          {environment !== "production" ? <Footer /> : null}
         </div>
       </div>
       <ModalCGU

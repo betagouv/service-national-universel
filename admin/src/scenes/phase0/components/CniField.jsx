@@ -253,7 +253,13 @@ function CniModal({ young, onClose, mode, blockUpload }) {
               </div>
             ))
           ) : (
-            <div className="text-center text-[14px] text-[#6B7280]">Aucune pièce d&apos;identité</div>
+            young?.latestCNIFileCategory === 'deleted' ? (
+              <div className="text-center text-[14px] text-[#6B7280]">
+                Pour des raisons de sécurité, les documents ont été supprimés
+              </div>
+            ) : (
+              <div className="text-center text-[14px] text-[#6B7280]">Aucune pièce d&apos;identité</div>
+            )
           )}
           {error && <div className="mt-[16px] text-[12px] leading-[1.4em] text-[#EF4444]">{error}</div>}
           {mode === "edition" && (
