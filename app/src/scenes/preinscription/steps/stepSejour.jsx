@@ -8,17 +8,20 @@ import { supportURL } from "../../../config";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import plausibleEvent from "../../../services/plausible";
 import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
+import ProgressBar from "../components/ProgressBar";
 
 export default function StepSejour() {
   const history = useHistory();
   const [data] = React.useContext(PreInscriptionContext);
 
   return (
-    <DSFRContainer title="Choisissez la date du séjour">
-      <div className="my-2 font-semibold">Séjours de cohésion disponibles</div>
-      <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
-      <div className="my-4">{data.sessions?.map((e) => SessionButton(e))}</div>
-      {/* {data.sessions?.length < 3 && (
+    <>
+      <ProgressBar />
+      <DSFRContainer title="Choisissez la date du séjour">
+        <div className="my-2 font-semibold">Séjours de cohésion disponibles</div>
+        <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
+        <div className="my-4">{data.sessions?.map((e) => SessionButton(e))}</div>
+        {/* {data.sessions?.length < 3 && (
         <>
           <div className="py-2 font-semibold">Pourquoi je ne vois pas tous les séjours ?</div>
           <div className="text-sm text-gray-500">
@@ -32,8 +35,9 @@ export default function StepSejour() {
           </div>
         </>
       )} */}
-      <SignupButtonContainer onClickPrevious={() => history.push("/preinscription/")} />
-    </DSFRContainer>
+        <SignupButtonContainer onClickPrevious={() => history.push("/preinscription/")} />
+      </DSFRContainer>
+    </>
   );
 }
 
