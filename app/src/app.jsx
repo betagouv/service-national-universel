@@ -49,6 +49,7 @@ import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu
 import { history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
 import { cohortsInit } from "./utils/cohorts";
+import ContactForm from "./scenes/contact";
 
 initSentry();
 initApi();
@@ -80,6 +81,7 @@ export default function App() {
               <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
               {/* Authentification accessoire */}
               <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements"]} component={() => <OptionalLogIn />} />
+              <SentryRoute path="/contact" component={ContactForm} />
               {/* Authentification nécessaire */}
               <SentryRoute path="/" component={() => <MandatoryLogIn />} />
             </Switch>
