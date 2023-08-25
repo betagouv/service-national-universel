@@ -14,7 +14,6 @@ import api from "../../../services/api";
 import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
-import Footer from "@/components/dsfr/layout/Footer";
 import EditPen from "../../../assets/icons/EditPen";
 import StickyButton from "../../../components/inscription/stickyButton";
 import ConsentDone from "../../../assets/icons/ConsentDone";
@@ -132,7 +131,6 @@ export default function StepWaitingConsent() {
               <p className="mt-2 text-base text-[#161616]">Vous pouvez désormais accéder à votre compte volontaire.</p>
             </div>
           </div>
-          <Footer marginBottom="mb-[88px]" />
           <StickyButton text={"Accéder à mon compte volontaire"} onClick={() => handleDone()} />
         </>
       ) : (
@@ -181,7 +179,6 @@ export default function StepWaitingConsent() {
               </button>
             </div>
           </div>
-          <Footer marginBottom="mb-[88px]" />
         </>
       )}
     </>
@@ -250,7 +247,6 @@ export default function StepWaitingConsent() {
           </button>
         </div>
       </div>
-      <Footer marginBottom="mb-[88px]" />
     </>
   );
 }

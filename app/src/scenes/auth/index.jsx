@@ -16,13 +16,10 @@ import DesktopSignin2FA from "./desktop/signin2FA";
 import { SentryRoute } from "../../sentry";
 import useDevice from "../../hooks/useDevice";
 
-import Header from "../../components/header";
-import HeaderMenu from "../../components/dsfr/nav/Menu";
-import Footer from "@/components/dsfr/layout/Footer";
+import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 
 const Render = ({ screen }) => {
   const device = useDevice();
-  const [isOpen, setIsOpen] = React.useState(false);
 
   function renderScreen(screen) {
     if (screen === "invite") return device === "desktop" ? <DesktopSignupInvite /> : <MobileSignupInvite />;
@@ -32,14 +29,7 @@ const Render = ({ screen }) => {
     if (screen === "2fa") return device === "desktop" ? <DesktopSignin2FA /> : <MobileSignin2FA />;
   }
 
-  return (
-    <div>
-      <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-      <Header setIsOpen={setIsOpen} />
-      {renderScreen(screen)}
-      {device === "desktop" && <Footer marginBottom={"0px"} />}
-    </div>
-  );
+  return <DSFRLayout title="Connexion">{renderScreen(screen)}</DSFRLayout>;
 };
 
 export default function Index() {

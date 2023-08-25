@@ -15,7 +15,6 @@ import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";
 import ErrorMessage from "../../inscription2023/components/ErrorMessage";
 import api from "../../../services/api";
-import Footer from "@/components/dsfr/layout/Footer";
 import StickyButton from "../../../components/inscription/stickyButton";
 import plausibleEvent from "../../../services/plausible";
 import AuthorizeBlock from "../components/AuthorizeBlock";
@@ -433,7 +432,6 @@ export default function Consentement({ step, parentId }) {
           {errors.global && <ErrorMessage className="mb-[32px]">{errors.global}</ErrorMessage>}
         </div>
       </div>
-      <Footer marginBottom="mb-[88px]" />
       <StickyButton onClickPrevious={onPrevious} onClick={onSubmit} disabled={saving} text="Je valide" />
     </>
   );

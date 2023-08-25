@@ -7,7 +7,6 @@ import Input from "../../../components/inscription/input";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import Error from "../../../components/error";
-import Footer from "@/components/dsfr/layout/Footer";
 import { BsShieldLock } from "react-icons/bs";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
 import { environment } from "../../../config";
@@ -95,7 +94,6 @@ export default function Signin() {
           </ul>
         </div>
       </div>
-      <Footer />
     </>
   );
 }

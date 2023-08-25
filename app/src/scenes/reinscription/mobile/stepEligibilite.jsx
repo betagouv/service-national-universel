@@ -5,7 +5,6 @@ import { useHistory } from "react-router-dom";
 import validator from "validator";
 import IconFrance from "../../../assets/IconFrance";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import Footer from "@/components/dsfr/layout/Footer";
 import CheckBox from "../../../components/inscription/checkbox";
 import Input from "../../../components/inscription/input";
 import StickyButton from "../../../components/inscription/stickyButton";
@@ -258,7 +257,6 @@ export default function StepEligibilite() {
           </>
         )}
       </div>
-      <Footer marginBottom={"mb-[88px]"} />
       <StickyButton text="Continuer" onClick={() => onSubmit()} disabled={loading} />
     </>
   );

@@ -6,7 +6,6 @@ import { YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
-import Footer from "@/components/dsfr/layout/Footer";
 import CheckBox from "../../../components/inscription/checkbox";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { supportURL } from "../../../config";
@@ -273,7 +272,6 @@ export default function StepRepresentants() {
         {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} young={young} /> : null}
       </div>
       <Help />
-      <Footer marginBottom="mb-[88px]" />
       {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
         <StickyButton text="Corriger" onClickPrevious={() => history.push("/")} onClick={onCorrection} disabled={loading} />
       ) : (

@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import ConsentDone from "../../../assets/icons/ConsentDone";
-import Footer from "@/components/dsfr/layout/Footer";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 
 export default function Done({ parentId }) {
@@ -41,7 +40,6 @@ export default function Done({ parentId }) {
           <p className="mt-2 text-base text-[#161616]">Vous pouvez à présent fermer cette page.</p>
         </div>
       </div>
-      <Footer />
     </>
   );
 }

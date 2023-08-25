@@ -12,7 +12,6 @@ import dayjs from "dayjs";
 import Check from "../components/Check";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { supportURL } from "../../../config";
-import Footer from "@/components/dsfr/layout/Footer";
 
 export default function Verification({ step, parentId }) {
   const history = useHistory();
@@ -117,7 +116,6 @@ export default function Verification({ step, parentId }) {
           </>
         )}
       </div>
-      <Footer marginBottom={"mb-[88px]"} />
       <StickyButton text={"Suivant"} onClick={() => onNext()} onClickPrevious={onPrevious} disabled={saving} />
     </>
   );

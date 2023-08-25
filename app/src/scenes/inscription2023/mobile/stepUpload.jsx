@@ -17,7 +17,6 @@ import CheckBox from "../../../components/inscription/checkbox";
 import DatePickerList from "../../preinscription/components/DatePickerList";
 import Error from "../../../components/error";
 import ErrorMessage from "../components/ErrorMessage";
-import Footer from "@/components/dsfr/layout/Footer";
 import Help from "../components/Help";
 import MyDocs from "../components/MyDocs";
 import Navbar from "../components/Navbar";
@@ -172,7 +171,6 @@ export default function StepUpload() {
         {renderStep(step)}
       </div>
       <Help />
-      <Footer marginBottom="mb-[88px]" />
       {step === "verify" && (
         <StickyButton
           text="Continuer"

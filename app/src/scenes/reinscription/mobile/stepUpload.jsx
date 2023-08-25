@@ -12,7 +12,6 @@ import { ID } from "../../inscription2023/utils";
 
 import DatePickerList from "../../preinscription/components/DatePickerList";
 import Error from "../../../components/error";
-import Footer from "@/components/dsfr/layout/Footer";
 import Help from "../../inscription2023/components/Help";
 import Navbar from "../components/Navbar";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
@@ -136,7 +135,6 @@ export default function StepUpload() {
         )}
       </div>
       <Help />
-      <Footer marginBottom="mb-[88px]" />
       <StickyButton text={loading ? "Scan antivirus en cours" : "Me réinscrire au SNU"} onClick={onSubmit} disabled={!date || loading} />
     </>
   );

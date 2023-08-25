@@ -9,7 +9,6 @@ import api from "../../../services/api";
 
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
-import Footer from "@/components/dsfr/layout/Footer";
 import Help from "../components/Help";
 import Navbar from "../components/Navbar";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
@@ -112,7 +111,6 @@ export default function StepDocuments() {
         ))}
       </div>
       <Help />
-      <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/representants")} onClick={onSubmit} disabled={disabled} />
     </>
   );

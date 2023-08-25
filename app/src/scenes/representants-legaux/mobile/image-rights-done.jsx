@@ -1,6 +1,5 @@
 import React from "react";
 import ConsentDone from "../../../assets/icons/ConsentDone";
-import Footer from "@/components/dsfr/layout/Footer";
 
 export default function ImageRightsDone() {
   return (
@@ -15,7 +14,6 @@ export default function ImageRightsDone() {
           <p className="mt-2 text-base text-[#161616]">Vous pouvez à présent fermer cette page.</p>
         </div>
       </div>
-      <Footer />
     </>
   );
 }

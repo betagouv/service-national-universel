@@ -9,7 +9,6 @@ import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Error from "../../../components/error";
-import Footer from "@/components/dsfr/layout/Footer";
 import plausibleEvent from "../../../services/plausible";
 import { supportURL } from "../../../config";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
@@ -147,7 +146,6 @@ export default function StepConfirm() {
           ) : null}
         </div>
       </div>
-      <Footer marginBottom="mb-[88px]" />
       <div className="fixed bottom-0 z-50 w-full">
         <div className="flex flex-col gap-1 bg-white p-4 shadow-ninaInverted ">
           <div className="flex flex-row gap-2">

@@ -12,7 +12,6 @@ import Input from "../components/Input";
 import Select from "../components/Select";
 import ErrorMessage from "../components/ErrorMessage";
 import Navbar from "../components/Navbar";
-import Footer from "@/components/dsfr/layout/Footer";
 import Help from "../components/Help";
 import {
   youngSchooledSituationOptions,
@@ -767,7 +766,6 @@ export default function StepCoordonnees() {
         )}
       </div>
       <Help />
-      <Footer marginBottom="mb-[88px]" />
       {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
         <StickyButton text="Corriger" onClickPrevious={() => history.push("/")} onClick={onCorrection} disabled={loading} />
       ) : (

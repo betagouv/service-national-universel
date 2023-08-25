@@ -4,7 +4,6 @@ import { useHistory } from "react-router-dom";
 import { COHESION_STAY_LIMIT_DATE } from "snu-lib";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
-import Footer from "@/components/dsfr/layout/Footer";
 import CheckBox from "../../../components/inscription/checkbox";
 import StickyButton from "../../../components/inscription/stickyButton";
 import { supportURL } from "../../../config";
@@ -21,7 +20,6 @@ export default function StepConsentements() {
   const [disabled, setDisabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState({});
-  const [modal, setModal] = React.useState({ isOpen: false });
   const dispatch = useDispatch();
   const [data, setData] = React.useState({
     consentment1: young?.consentment === "true",
@@ -103,7 +101,6 @@ export default function StepConsentements() {
           <div className="text-sm font-medium text-[#000091]">Je souhaite modifier mes dates de séjour</div>
         </div> */}
       </div>
-      <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/coordonnee")} onClick={onSubmit} disabled={disabled || loading} />
       {/* <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} /> */}
     </>

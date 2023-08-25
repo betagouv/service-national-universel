@@ -4,7 +4,6 @@ import { COHESION_STAY_LIMIT_DATE } from "snu-lib/constants";
 import CalendarBig from "../../../assets/icons/CalendarBig";
 import CheckCircleStroke from "../../../assets/icons/CheckCircleStroke";
 import LinkTo from "../../../assets/icons/LinkTo";
-import Footer from "@/components/dsfr/layout/Footer";
 import Loader from "../../../components/Loader";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import { isReturningParent } from "../commons";
@@ -47,7 +46,6 @@ export default function Presentation({ step, parentId }) {
             <div>Le jeune dont vous êtes représentant légal {translateNonNecessary(young.status)} au SNU. Votre accord n&apos;est plus requis.</div>
           </div>
         </div>
-        <Footer marginBottom="mb-[135px]" />
       </>
     );
   return (
@@ -121,7 +119,6 @@ export default function Presentation({ step, parentId }) {
           </div>
         </div>
       </div>
-      <Footer marginBottom="mb-[135px]" />
     </>
   );
 }

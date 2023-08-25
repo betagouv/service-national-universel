@@ -11,7 +11,6 @@ import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Navbar from "../components/Navbar";
 import StickyButton from "../../../components/inscription/stickyButton";
-import Footer from "@/components/dsfr/layout/Footer";
 import Error from "../../../components/error";
 import Help from "../../inscription2023/components/Help";
 import MyDocs from "../../inscription2023/components/MyDocs";
@@ -78,7 +77,6 @@ export default function StepDocuments() {
         <MyDocs />
       </div>
       <Help />
-      <Footer marginBottom={"mb-[88px]"} />
       <StickyButton
         text="Me réinscrire au SNU"
         onClick={onSubmit}
