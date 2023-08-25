@@ -13,7 +13,7 @@ const TextEditor = ({ content, readOnly }) => {
   return (
     <>
       <div className={`flex flex-shrink flex-grow flex-col py-2 px-2 ${!readOnly ? "bg-white" : ""} overflow-hidden print:bg-transparent`}>
-        <Slate editor={editor} initialValue={content} onChange={console.log}>
+        <Slate editor={editor} value={content} onChange={console.log}>
           <div id="text-editor" className="flex-shrink flex-grow overflow-auto">
             <Editable readOnly={readOnly} renderElement={renderElement} renderLeaf={renderLeaf} placeholder="Commencez à écrire votre article..." spellCheck autoFocus />
           </div>
