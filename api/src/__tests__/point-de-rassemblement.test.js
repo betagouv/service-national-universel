@@ -185,9 +185,8 @@ describe("Meeting point", () => {
     it("should return 200 and the meeting points and ligne bus for authorized user", async () => {
       const centerId = "123";
       const cohortId = "456";
-      const token = "abc";
 
-      const res = await request(getAppHelper()).get(`/point-de-rassemblement/center/${centerId}/cohort/${cohortId}`).set("Authorization", `Bearer ${token}`).send();
+      const res = await request(getAppHelper()).get(`/point-de-rassemblement/center/${centerId}/cohort/${cohortId}`).send();
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
@@ -203,9 +202,8 @@ describe("Meeting point", () => {
 
       const centerId = "123";
       const cohortId = "456";
-      const token = "abc";
 
-      const res = await request(getAppHelper()).get(`/point-de-rassemblement/center/${centerId}/cohort/${cohortId}`).set("Authorization", `Bearer ${token}`).send();
+      const res = await request(getAppHelper()).get(`/point-de-rassemblement/center/${centerId}/cohort/${cohortId}`).send();
 
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
@@ -403,7 +401,7 @@ describe("Meeting point", () => {
     it("should return true if schema exists for the given id", async () => {
       jest.spyOn(SchemaDeRepartitionModel, "findOne").mockResolvedValue({ gatheringPlaces: "id" });
 
-      const response = await request(getAppHelper()).get("/point-de-rassemblement/id/in-schema").set("Authorization", "Bearer valid_token");
+      const response = await request(getAppHelper()).get("/point-de-rassemblement/id/in-schema").send();
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(response.body.data).toBe(true);
@@ -412,7 +410,7 @@ describe("Meeting point", () => {
     it("should return false if schema does not exist for the given id", async () => {
       jest.spyOn(SchemaDeRepartitionModel, "findOne").mockResolvedValue(null);
 
-      const response = await request(getAppHelper()).get("/point-de-rassemblement/id/in-schema").set("Authorization", "Bearer valid_token");
+      const response = await request(getAppHelper()).get("/point-de-rassemblement/id/in-schema").send();
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(response.body.data).toBe(false);
@@ -446,9 +444,7 @@ describe("Meeting point", () => {
         code: code,
       });
 
-      const token = "valid_token";
-
-      const res = await request(getAppHelper()).get(`/point-de-rassemblement/${pointDeRassemblement._id}`).set("Authorization", `Bearer ${token}`);
+      const res = await request(getAppHelper()).get(`/point-de-rassemblement/${pointDeRassemblement._id}`).send();
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
@@ -457,9 +453,7 @@ describe("Meeting point", () => {
     });
 
     it("should return 400 when the ID parameter is invalid", async () => {
-      const token = "valid_token"; // replace with a valid JWT token
-
-      const res = await request(getAppHelper()).get("/point-de-rassemblement/invalid_id").set("Authorization", `Bearer ${token}`);
+      const res = await request(getAppHelper()).get("/point-de-rassemblement/invalid_id").send();
 
       expect(res.status).toBe(400);
       expect(res.body.ok).toBe(false);
@@ -467,11 +461,7 @@ describe("Meeting point", () => {
     });
 
     it("should return 404 when the meeting point does not exist", async () => {
-      const token = "valid_token"; // replace with a valid JWT token
-
-      const res = await request(getAppHelper())
-        .get("/point-de-rassemblement/123456789012345678901234") // replace with a non-existing ID
-        .set("Authorization", `Bearer ${token}`);
+      const res = await request(getAppHelper()).get("/point-de-rassemblement/123456789012345678901234").send();
 
       expect(res.status).toBe(404);
       expect(res.body.ok).toBe(false);
@@ -479,15 +469,13 @@ describe("Meeting point", () => {
     });
 
     it("should return 500 when an error occurs", async () => {
-      const token = "valid_token"; // replace with a valid JWT token
-
       jest.spyOn(PointDeRassemblementModel, "findOne").mockImplementation(() => {
         throw new Error("Database error");
       });
 
       const res = await request(getAppHelper())
         .get("/point-de-rassemblement/123456789012345678901234") // replace with a valid ID
-        .set("Authorization", `Bearer ${token}`);
+        .send();
 
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);

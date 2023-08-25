@@ -38,19 +38,19 @@ describe("Meeting Point", () => {
 
   describe("GET meeting-point/:meetingPointId", () => {
     it("should return 404 and NOT_FOUND code if meetingPointId is not existing", async () => {
-      res = await request(getAppHelper()).get(`/ligne-to-point/meeting-point/${notExistingMeetingPointId}`).set("Authorization", "Bearer valid_token");
+      res = await request(getAppHelper()).get(`/ligne-to-point/meeting-point/${notExistingMeetingPointId}`).send();
       expect(res.status).toBe(404);
       expect(res.body).toStrictEqual({ ok: false, code: "NOT_FOUND" });
     });
 
     it("should return 404 if meetingPoint is not found", async () => {
       await PointDeRassemblementModel.deleteMany();
-      res = await request(getAppHelper()).get(`/ligne-to-point/meeting-point/${ligneToPoint.meetingPointId}`).set("Authorization", "Bearer valid_token");
+      res = await request(getAppHelper()).get(`/ligne-to-point/meeting-point/${ligneToPoint.meetingPointId}`).send();
       expect(res.status).toBe(404);
     });
 
     it("should return the ligneToPoint and meetingPoint data if everything is valid", async () => {
-      res = await request(getAppHelper()).get(`/ligne-to-point/meeting-point/${ligneToPoint.meetingPointId}`).set("Authorization", "Bearer valid_token");
+      res = await request(getAppHelper()).get(`/ligne-to-point/meeting-point/${ligneToPoint.meetingPointId}`).send();
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
       expect(res.body.data).toEqual(
@@ -63,7 +63,7 @@ describe("Meeting Point", () => {
       );
     });
     it("should return 400 and INVALID_PARAMS code if meetingPointId is not the good format", async () => {
-      res = await request(getAppHelper()).get("/ligne-to-point/meeting-point/123").set("Authorization", "Bearer valid_token"); // Sending a number
+      res = await request(getAppHelper()).get("/ligne-to-point/meeting-point/123").send();
       expect(res.status).toBe(400);
       expect(res.body).toStrictEqual({ ok: false, code: "INVALID_PARAMS" });
     });
@@ -72,7 +72,7 @@ describe("Meeting Point", () => {
       // Force a server error here e.g. by using a mock to throw an error when a model method is called
       jest.spyOn(LigneToPointModel, "findOne").mockRejectedValue(new Error("Mock server error"));
 
-      res = await request(getAppHelper()).get(`/ligne-to-point/meeting-point/${ligneToPoint.meetingPointId}`).set("Authorization", "Bearer valid_token");
+      res = await request(getAppHelper()).get(`/ligne-to-point/meeting-point/${ligneToPoint.meetingPointId}`).send();
       expect(res.status).toBe(500);
       expect(res.body).toStrictEqual({ ok: false, code: "SERVER_ERROR" });
 
@@ -83,20 +83,20 @@ describe("Meeting Point", () => {
   describe("DELETE /:id", () => {
     // Modifier la route pour valider id: Joi.string().length(24).hex().required() et mettre un id trop cour en param ????
     it("should return 400 and INVALID_PARAMS code if id is not provided", async () => {
-      res = await request(getAppHelper()).delete("/ligne-to-point/123").set("Authorization", "Bearer valid_token");
+      res = await request(getAppHelper()).delete("/ligne-to-point/123").send();
       expect(res.status).toBe(400);
       expect(res.body).toStrictEqual({ ok: false, code: "INVALID_PARAMS" });
     });
 
     it("should return 404 and NOT_FOUND code if id does not exist", async () => {
-      res = await request(getAppHelper()).delete(`/ligne-to-point/${notExistingMeetingPointId}`).set("Authorization", "Bearer valid_token");
+      res = await request(getAppHelper()).delete(`/ligne-to-point/${notExistingMeetingPointId}`).send();
       expect(res.status).toBe(404);
       expect(res.body).toStrictEqual({ ok: false, code: "NOT_FOUND" });
     });
 
     it("should return 500 and SERVER_ERROR code on server error", async () => {
       jest.spyOn(LigneToPointModel, "findById").mockRejectedValue(new Error("Mock server error"));
-      res = await request(getAppHelper()).delete(`/ligne-to-point/${ligneToPoint._id}`).set("Authorization", "Bearer valid_token");
+      res = await request(getAppHelper()).delete(`/ligne-to-point/${ligneToPoint._id}`).send();
       expect(res.status).toBe(500);
       expect(res.body).toStrictEqual({ ok: false, code: "SERVER_ERROR" });
 
