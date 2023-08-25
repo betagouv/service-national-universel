@@ -20,7 +20,7 @@ router.post("/region", passport.authenticate("referent", { session: false, failW
 
     const { cohort, fromRegion, toRegion } = value;
     const exist = await tableDeRepartition.findOne(value);
-    if (exist) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXIST });
+    if (exist) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
     await tableDeRepartition.create({ cohort, fromRegion, toRegion });
     return res.status(200).send({ ok: true });
   } catch (error) {
