@@ -8,6 +8,8 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(relativeTime).extend(advancedFormat).extend(utc).extend(timezone);
 dayjs.locale(fr);
 
+// ! ISO format exemple : "2011-10-05T14:48:00.000Z"
+
 dayjs.prototype.isoToUtc = function (iso) {
   if (!iso || typeof iso?.getMonth === "function") return dayjs(iso).toUtc(); // prevent if empty or not iso
   const date = new Date(iso.split("T").shift());
