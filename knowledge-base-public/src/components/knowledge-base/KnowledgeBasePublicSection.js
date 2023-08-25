@@ -46,7 +46,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
             <h2 className="col-span-2 mb-4 text-xl font-bold text-white md:mx-2 lg:col-span-3">Thématiques générales</h2>
             {!isLoading ? (
               sections.map(({ _id, position, icon, title, slug, children }) => {
-                return device === "desktop" && children?.length ? (
+                return device === "desktop" ? (
                   <KnowledgeBaseSectionCard
                     key={_id}
                     _id={_id}
@@ -60,7 +60,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
                     className="mx-2 mb-8"
                   />
                 ) : (
-                  <>{children?.length && <Accordion key={_id} title={title} list={children} className="mb-3" path="/base-de-connaissance" slug={slug} />}</>
+                  <>{children && children.length > 0 && <Accordion key={_id} title={title} list={children} className="mb-3" path="/base-de-connaissance" slug={slug} />}</>
                 );
               })
             ) : (
@@ -82,20 +82,20 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
     <>
       <div className="min-h-60 md:min-h-48 w-full border-t-[1px] border-white border-opacity-20 bg-[#32257F] pb-[50px] text-white">
         <div className="mx-auto mt-6 space-y-1 px-4 md:w-[712px]">
-          <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" className="text-white" />
+          <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
           <h1 className="text-3xl font-bold leading-9">{item?.title}</h1>
         </div>
       </div>
       <div className="mx-auto mt-[-40px] flex w-full max-w-[730px] flex-col items-center justify-center px-4">
-        <div className="px-auto mt-6 flex w-full max-w-[730px] flex-col rounded-lg bg-[#E3E3FB] px-2 pb-4 pt-2">
+        <div className="flex flex-col w-full max-w-[730px] rounded-lg bg-[#E3E3FB] px-2 pb-4 pt-2 mt-6 px-auto">
           <div className="flex flex-row">
-            <HiStar className="ml-1.5 mr-2 mt-2.5 text-xl text-gray-900" />
-            <p className="py-2 text-base font-bold leading-6 text-gray-900">Articles les plus consultés</p>
+            <HiStar className="text-xl mt-2.5 mr-2 ml-1.5 text-gray-900" />
+            <p className="text-base font-bold leading-6 text-gray-900 py-2">Articles les plus consultés</p>
           </div>
           <div className="flex flex-row">
-            {topArticles.slice(0, 3).map(({ _id, title, slug }) => (
+            {topArticles.slice(0, 3).map(({ title, slug }) => (
               <div className="m-2 flex w-1/3 flex-col justify-center overflow-hidden rounded-lg bg-white p-4 shadow-md">
-                <h3 className="mb-8 line-clamp-2 text-sm font-bold leading-5 text-gray-900">{title}</h3>
+                <h3 className="mb-8 line-clamp-2 text-sm leading-5 font-bold text-gray-900">{title}</h3>
                 <Link className={``} href={`/base-de-connaissance/${slug}`}>
                   <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p>
                 </Link>
