@@ -20,6 +20,7 @@ import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
+import { appURL } from "@/config";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -122,7 +123,7 @@ export default function StepEligibilite() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer title="Vérifiez votre éligibilité au SNU">
+      <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={`${appURL}/public-besoin-d-aide/`}>
         <div className="space-y-5">
           <div className="flex-start flex flex-col">
             <div className="flex items-center">
