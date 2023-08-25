@@ -99,7 +99,7 @@ export default function Verification({ step, parentId }) {
 
         {parentId === 1 && (
           <>
-            <div className="border-t-solid flex items-center border-t-[1px] border-t-[#E5E5E5] pt-[32px]">
+            <div className="border-t-solid flex items-center border-t-[1px] border-t-[#E5E5E5] pt-[32px] mb-32">
               <Check checked={certified} onChange={(e) => setCertified(e)}>
                 Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez{" "}
                 <a

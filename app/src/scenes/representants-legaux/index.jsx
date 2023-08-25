@@ -80,7 +80,7 @@ const Step = ({ step }) => {
   return (
     <div className="flex h-screen flex-col justify-between bg-white md:!bg-[#f9f6f2]">
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-      <Header setIsOpen={setIsOpen} />
+      <Header setIsOpen={setIsOpen} title="Inscription du volontaire" />
       {renderStep(step)}
       {device === "desktop" ? <Footer /> : null}
     </div>

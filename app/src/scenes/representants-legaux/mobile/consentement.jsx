@@ -350,7 +350,7 @@ export default function Consentement({ step, parentId }) {
             </div>
           )}
           {(data.allowSNU || parentId === 2) && (
-            <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px]">
+            <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px] mb-32">
               {/*<AuthorizeBlock
                 title="Utilisation d’autotests COVID"
                 value={data.allowCovidAutotest}

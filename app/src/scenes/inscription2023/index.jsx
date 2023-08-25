@@ -69,7 +69,7 @@ const Step = ({ young: { inscriptionStep2023 } }) => {
     return <Redirect to={`/inscription2023/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
-  return <DSFRLayout title="Inscription au Service National Universel">{renderStep(currentStep, device)}</DSFRLayout>;
+  return <DSFRLayout title="Inscription du volontaire">{renderStep(currentStep, device)}</DSFRLayout>;
 };
 
 function renderStepCorrection(step, device) {
@@ -91,7 +91,7 @@ const StepCorrection = () => {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
-  return <DSFRLayout title="Inscription au Service National Universel">{renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST), device)}</DSFRLayout>;
+  return <DSFRLayout title="Inscription du volontaire">{renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST), device)}</DSFRLayout>;
 };
 
 export default function Index() {
