@@ -50,6 +50,7 @@ import { history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
 import { cohortsInit } from "./utils/cohorts";
 import ContactForm from "./scenes/contact";
+import Thanks from "./scenes/contact/Thanks";
 
 initSentry();
 initApi();
@@ -80,7 +81,7 @@ export default function App() {
               <SentryRoute path="/validate-contract" component={Contract} />
               <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
               {/* Authentification accessoire */}
-              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/contact"]} component={() => <OptionalLogIn />} />
+              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/contact", "/merci"]} component={() => <OptionalLogIn />} />
               {/* Authentification nécessaire */}
               <SentryRoute path="/" component={() => <MandatoryLogIn />} />
             </Switch>
@@ -129,6 +130,7 @@ const OptionalLogIn = () => {
       <SentryRoute path="/auth" component={Auth} />
       <SentryRoute path="/public-engagements" component={AllEngagements} />
       <SentryRoute path="/contact" component={ContactForm} />
+      <SentryRoute path="/merci" component={Thanks} />
       <Redirect to="/" />
     </Switch>
   );

@@ -10,7 +10,7 @@ export default function Textarea({ label, value, onChange, rows = 5, error = "",
           correction || error ? "border-[#CE0500]" : "border-[#3A3A3A]"
         } rounded-t-[4px]`}
         style={{ fontFamily: "Marianne" }}
-        name={name}
+        name={label}
         value={value}
         onChange={onChange}
         rows={rows}
