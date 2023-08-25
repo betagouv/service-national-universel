@@ -77,7 +77,7 @@ export default function StepProfil() {
 
   return (
     <>
-      <ProgressBar />
+      <ProgressBar supportLink={`${appURL}/public-besoin-d-aide/`}/>
       <DSFRContainer title="Créez votre compte">
         <div className="space-y-5">
           <div className="flex flex-col gap-1">
