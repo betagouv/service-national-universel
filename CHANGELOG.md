@@ -1,3 +1,10 @@
+## [1.323.1](https://github.com/betagouv/service-national-universel/compare/v1.323.0...v1.323.1) (2023-08-25)
+
+
+### Bug Fixes
+
+* **api:** disable 2fa for dev mode ([a4e3d08](https://github.com/betagouv/service-national-universel/commit/a4e3d08fcb867cb592076381a3a116c304f6d10e))
+
 # [1.323.0](https://github.com/betagouv/service-national-universel/compare/v1.322.2...v1.323.0) (2023-08-24)
 
 
