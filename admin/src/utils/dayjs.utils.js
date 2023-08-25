@@ -25,9 +25,9 @@ dayjs.prototype.toUtc = function () {
   return this;
 };
 
-dayjs.prototype.toUtcWithTime = function (hours, mintues, seconds) {
+dayjs.prototype.toUtcWithTime = function (hours, minutes, seconds) {
   this.$d = new Date(
-    Date.UTC(this.$d.getFullYear(), this.$d.getMonth(), this.$d.getDate(), hours || this.$d.getHours(), mintues || this.$d.getMinutes(), seconds || this.$d.getSeconds()),
+    Date.UTC(this.$d.getFullYear(), this.$d.getMonth(), this.$d.getDate(), hours || this.$d.getHours(), minutes || this.$d.getMinutes(), seconds || this.$d.getSeconds()),
   );
   return this;
 };
