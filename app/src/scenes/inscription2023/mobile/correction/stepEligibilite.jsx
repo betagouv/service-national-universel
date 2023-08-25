@@ -4,14 +4,14 @@ import { useHistory, useParams } from "react-router-dom";
 import validator from "validator";
 import IconFrance from "../../../../assets/IconFrance";
 import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
-import CheckBox from "../../../../components/inscription/checkbox";
-import Toggle from "../../../../components/inscription/toggle";
+import CheckBox from "../../../../components/dsfr/forms/checkbox";
+import Toggle from "../../../../components/dsfr/forms/toggle";
 import plausibleEvent from "../../../../services/plausible";
 import { getCorrectionByStep } from "../../../../utils/navigation";
 import SchoolInFrance from "../../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../../inscription2023/components/ShoolOutOfFrance";
 import Input from "../../components/Input";
-import Select from "../../components/Select";
+import Select from "../../../../components/dsfr/forms/Select";
 
 import { useDispatch, useSelector } from "react-redux";
 import { YOUNG_STATUS } from "snu-lib";
@@ -21,8 +21,8 @@ import api from "../../../../services/api";
 import { translate } from "../../../../utils";
 import DatePickerList from "../../components/DatePickerList";
 
-import Footer from "../../../../components/footerV2";
-import StickyButton from "../../../../components/inscription/stickyButton";
+import Footer from "@/components/dsfr/layout/Footer";
+import StickyButton from "../../../../components/dsfr/ui/buttons/stickyButton";
 import ModalSejourCorrection from "../../components/ModalSejourCorrection";
 import Navbar from "../../components/Navbar";
 

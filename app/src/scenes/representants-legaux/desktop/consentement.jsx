@@ -6,19 +6,19 @@ import Navbar from "../components/Navbar";
 import FranceConnectButton from "../../inscription2023/components/FranceConnectButton";
 import Input from "../../inscription2023/components/Input";
 // TODO: mettre le Toggle dans les components génériques
-import Toggle from "../../../components/inscription/toggle";
+import Toggle from "../../../components/dsfr/forms/toggle";
 import { COHESION_STAY_LIMIT_DATE, getAge, translate } from "snu-lib";
 import RadioButton from "../components/RadioButton";
 import Check from "../components/Check";
 import { FRANCE, ABROAD, translateError, API_CONSENT, isReturningParent, CDN_BASE_URL } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";
-import ErrorMessage from "../../inscription2023/components/ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import api from "../../../services/api";
 import { BorderButton, PlainButton } from "../components/Buttons";
 import plausibleEvent from "../../../services/plausible";
 import AuthorizeBlock from "../components/AuthorizeBlock";
-import PhoneField from "../../inscription2023/components/PhoneField";
+import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib/phone-number";
 import { getDataForConsentStep } from "../utils";
 

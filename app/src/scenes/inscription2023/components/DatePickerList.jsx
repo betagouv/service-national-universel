@@ -1,5 +1,5 @@
 import React from "react";
-import ErrorMessage from "./ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import DatePicker, { registerLocale } from "react-datepicker";
 import fr from "date-fns/locale/fr";
 import "react-datepicker/dist/react-datepicker.css";

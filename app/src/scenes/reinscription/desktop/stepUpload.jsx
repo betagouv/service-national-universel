@@ -9,7 +9,7 @@ import { ID } from "../../inscription2023/utils";
 import { supportURL } from "../../../config";
 import { formatDateFR, sessions2023 } from "snu-lib";
 
-import DatePickerList from "../../preinscription/components/DatePickerList";
+import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
 import DesktopPageContainer from "../../inscription2023/components/DesktopPageContainer";
 import Error from "../../../components/error";
 import plausibleEvent from "../../../services/plausible";

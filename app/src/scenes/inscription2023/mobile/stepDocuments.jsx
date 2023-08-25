@@ -9,13 +9,12 @@ import api from "../../../services/api";
 
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
 import Help from "../components/Help";
 import Navbar from "../components/Navbar";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import StickyButton from "../../../components/inscription/stickyButton";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import MyDocs from "../components/MyDocs";
-import ErrorMessage from "../components/ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import Info from "../../../components/info";
 
 export default function StepDocuments() {
@@ -112,7 +111,6 @@ export default function StepDocuments() {
         ))}
       </div>
       <Help />
-      <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/representants")} onClick={onSubmit} disabled={disabled} />
     </>
   );

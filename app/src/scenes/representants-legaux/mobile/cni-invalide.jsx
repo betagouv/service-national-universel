@@ -3,8 +3,7 @@ import "dayjs/locale/fr";
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { COHESION_STAY_START, translate } from "snu-lib";
-import Footer from "../../../components/footerV2";
-import StickyButton from "../../../components/inscription/stickyButton";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import Loader from "../../../components/Loader";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import api from "../../../services/api";
@@ -79,7 +78,6 @@ export default function CniInvalide() {
           </Check>
         </div>
       </div>
-      <Footer marginBottom="mb-[88px]" />
       <StickyButton onClick={onSubmit} disabled={saving} text="Valider ma déclaration" />
     </>
   );

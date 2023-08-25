@@ -1,6 +1,6 @@
 import RadioButton from "./RadioButton";
 import { booleanToString } from "../commons";
-import ErrorMessage from "../../inscription2023/components/ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import React from "react";
 
 export default function AuthorizeBlock({ title, value, onChange, children, className, error }) {

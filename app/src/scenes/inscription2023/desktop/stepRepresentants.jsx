@@ -6,7 +6,7 @@ import { YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
-import CheckBox from "../../../components/inscription/checkbox";
+import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
@@ -18,8 +18,8 @@ import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 import Help from "../components/Help";
 import Input from "../components/Input";
 import Navbar from "../components/Navbar";
-import PhoneField from "../components/PhoneField";
-import RadioButton from "../components/RadioButton";
+import PhoneField from "../../../components/dsfr/forms/PhoneField";
+import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 
 const parentsStatus = [
   { label: "Mère", value: "mother" },

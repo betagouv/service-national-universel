@@ -10,12 +10,12 @@ import { ID } from "../utils";
 import { supportURL } from "../../../config";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 
-import DatePickerList from "../../preinscription/components/DatePickerList";
+import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
 import DesktopPageContainer from "../components/DesktopPageContainer";
 import Error from "../../../components/error";
-import ErrorMessage from "../components/ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
-import FileImport from "../components/FileImport";
+import FileImport from "../../../components/dsfr/forms/FileImport";
 import { getCorrectionsForStepUpload } from "../../../utils/navigation";
 
 export default function StepUpload() {

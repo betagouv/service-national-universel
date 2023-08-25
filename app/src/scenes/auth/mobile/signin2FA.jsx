@@ -3,11 +3,10 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import Input from "../../../components/inscription/input";
+import Input from "../../../components/dsfr/forms/input";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
 import { BsShieldLock } from "react-icons/bs";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
 import { environment } from "../../../config";
@@ -95,7 +94,6 @@ export default function Signin() {
           </ul>
         </div>
       </div>
-      <Footer />
     </>
   );
 }

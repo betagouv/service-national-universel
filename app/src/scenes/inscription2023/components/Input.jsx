@@ -1,5 +1,5 @@
 import React from "react";
-import ErrorMessage from "./ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 
 export default function Input({ value, placeholder = "", label, onChange, type = "text", error = "", className = "", correction = "", list = "" }) {
   return (
