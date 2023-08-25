@@ -1,10 +1,10 @@
 import React from "react";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { formatStringDate } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
-import { supportURL } from "../../../config";
+import { appURL } from "../../../config";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import plausibleEvent from "../../../services/plausible";
 import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
@@ -17,7 +17,7 @@ export default function StepSejour() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer title="Choisissez la date du séjour">
+      <DSFRContainer title="Choisissez la date du séjour" supportLink={`${appURL}/public-besoin-d-aide/`}>
         <div className="my-2 font-semibold">Séjours de cohésion disponibles</div>
         <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
         <div className="my-4">{data.sessions?.map((e) => SessionButton(e))}</div>

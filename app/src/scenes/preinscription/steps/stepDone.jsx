@@ -10,6 +10,7 @@ import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import { capture } from "../../../sentry";
 import ProgressBar from "../components/ProgressBar";
+import { appURL } from "@/config";
 
 export default function StepDone() {
   // eslint-disable-next-line no-unused-vars
@@ -33,7 +34,7 @@ export default function StepDone() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer>
+      <DSFRContainer supportLink={`${appURL}/public-besoin-d-aide/`}>
         <h1 className="text-2xl font-semibold text-[#161616]">Bienvenue {data.firstName} ! Vous avez complété votre pré-inscription.</h1>
         <p className="mt-4 text-sm text-[#3A3A3A]">
           Vous pouvez dès à présent <strong>compléter</strong> votre inscription ou <strong>la reprendre à tout moment</strong> depuis le mail envoyé à {data.email}, ou depuis
