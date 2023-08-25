@@ -1,13 +1,21 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import Unlock from "@/assets/icons/Unlock";
+import { useForm } from "react-hook-form";
 import { HiArrowRight } from "react-icons/hi";
 import QuestionBubble from "@/assets/icons/QuestionBubble";
+import Unlock from "@/assets/icons/Unlock";
 
 export default function LoggedInForm() {
   const [role, setRole] = useState("young");
   const [category, setCategory] = useState("");
   const [subject, setSubject] = useState("");
+
+  const { register, handleSubmit, errors } = useForm();
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    console.log("submit");
+  };
 
   return (
     <>
@@ -36,6 +44,10 @@ export default function LoggedInForm() {
           </Link>
         </div>
       </div>
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {/* Todo */}
+      </form>
     </>
   );
 }
