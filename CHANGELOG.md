@@ -1,3 +1,10 @@
+## [1.323.2](https://github.com/betagouv/service-national-universel/compare/v1.323.1...v1.323.2) (2023-08-26)
+
+
+### Bug Fixes
+
+* **app:** fix header import in representants-legaux ([1f994a6](https://github.com/betagouv/service-national-universel/commit/1f994a6102ba309c9deaf1e6bd02295ba22157da))
+
 ## [1.323.1](https://github.com/betagouv/service-national-universel/compare/v1.323.0...v1.323.1) (2023-08-25)
 
 
