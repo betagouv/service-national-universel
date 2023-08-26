@@ -24,7 +24,7 @@ import MobileTokenInvalide from "./mobile/token-invalide";
 import MobileImageRights from "./mobile/image-rights";
 import MobileImageRightsDone from "./mobile/image-rights-done";
 
-import Header from "@/components/dsfr/layout/header";
+import Header from "@/components/dsfr/layout/Header";
 import HeaderMenu from "@/components/dsfr/nav/Menu";
 import Footer from "@/components/dsfr/layout/Footer";
 import FranceConnectCallback from "./components/FranceConnectCallback";
