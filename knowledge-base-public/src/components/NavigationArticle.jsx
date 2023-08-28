@@ -7,6 +7,7 @@ import slugify from "slugify";
 import FolderIcon from "./FolderIcon";
 import { HiChevronLeft } from "react-icons/hi";
 import useUser from "../hooks/useUser";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 
 // accessibility: https://www.w3.org/WAI/ARIA/apg/patterns/accordion/
 
@@ -37,6 +38,7 @@ const NavigationArticle = ({ item, device }) => {
 
     const element = useRef(null);
     const contentSpace = useRef(null);
+    const isDesktop = useMediaQuery("(min-width: 768px)"); //md
 
     useEffect(() => {
       if (isOpen) {
@@ -69,7 +71,7 @@ const NavigationArticle = ({ item, device }) => {
               onClick={toggleAccordion}
             >
               <Link href={`/base-de-connaissance/${item.parents[1].slug}`} className="align-center flex flex-row justify-center text-center md:mr-2" onClick={() => cache.clear()}>
-                <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-400 md:border-r md:border-gray-200 md:mr-2" />
+                <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-400 md:mr-2 md:border-r md:border-gray-200" />
                 <p className="hidden text-sm leading-5 text-gray-500">Retour</p>
               </Link>
               <div className="mr-2 flex flex-col justify-center">
@@ -84,7 +86,7 @@ const NavigationArticle = ({ item, device }) => {
             id={`${slugify(title)}_items`}
             aria-labelledby={slugify(title)}
             ref={contentSpace}
-            style={{ maxHeight: `${height}` }}
+            style={{ maxHeight: isDesktop ? "auto" : `${height}` }}
             className="transition-max-height overflow-auto duration-700 ease-in-out"
           >
             {list && list.length > 0 ? (
