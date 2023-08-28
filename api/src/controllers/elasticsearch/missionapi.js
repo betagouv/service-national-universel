@@ -17,7 +17,7 @@ router.post("/search/", passport.authenticate("young", { session: false, failWit
         location: Joi.object({
           lat: Joi.number().min(-90).max(90),
           lon: Joi.number().min(-180).max(180),
-        }).required(),
+        }),
       }),
       page: Joi.number().integer().min(0).default(0),
       size: Joi.number().integer().min(0).default(20),

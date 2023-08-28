@@ -36,10 +36,7 @@ export default function MissionsComponent() {
       try {
         if (!young) return;
         const res = await api.post("/elasticsearch/missionapi/search", { filters, page, size, sort });
-        if (!res?.data) {
-          toastr.error("Oups, une erreur est survenue lors de la recherche des missions");
-          return;
-        }
+        if (!res?.data) return toastr.error("Oups, une erreur est survenue lors de la recherche des missions");
         setData(res.data);
       } catch (e) {
         capture(e);
