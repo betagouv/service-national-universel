@@ -5,7 +5,6 @@ import { useSelector } from "react-redux";
 
 import Home from "./home";
 import Missions from "./missions";
-import Mission from "./mission";
 import Valider from "./valider";
 import { SentryRoute } from "../../sentry";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
@@ -21,16 +20,6 @@ export default function Index() {
     <div>
       <Switch>
         <SentryRoute path="/phase3/valider" component={Valider} />
-        <SentryRoute
-          path="/phase3/mission/:id"
-          render={({ match }) => {
-            const { id } = match.params;
-            if (!/^[0-9a-fA-F]{24}$/.test(id)) {
-              return <Redirect to="/phase3/mission" />;
-            }
-            return <SentryRoute component={Mission} />;
-          }}
-        />
         <SentryRoute path="/phase3/mission" component={Missions} />
         <SentryRoute path="/phase3" component={Home} />
       </Switch>

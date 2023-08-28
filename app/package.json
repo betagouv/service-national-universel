@@ -31,7 +31,6 @@
     "vite": "^4.3.9"
   },
   "dependencies": {
-    "@appbaseio/reactivesearch": "3.42.1",
     "@headlessui/react": "^1.7.13",
     "@heroicons/react": "^2.0.16",
     "@sentry/integrations": "^7.58.1",

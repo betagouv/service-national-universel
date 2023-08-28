@@ -74,17 +74,6 @@ router.post("/mission/:action(_msearch|export)", passport.authenticate(["young",
 });
 
 // Routes accessible by young only
-router.post("/missionapi/_msearch", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { body } = req;
-    const response = await esClient.msearch({ index: "missionapi", body });
-    return res.status(200).send(response.body);
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/school/_msearch", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { body, user } = req;
