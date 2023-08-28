@@ -1,3 +1,21 @@
+# [1.324.0](https://github.com/betagouv/service-national-universel/compare/v1.323.2...v1.324.0) (2023-08-28)
+
+
+### Bug Fixes
+
+* **admin:** add transport tab for head Center ([94c56f7](https://github.com/betagouv/service-national-universel/commit/94c56f74724387a8ecc3384be2ed9262f850b3e2))
+* **admin:** items order + content badge position ([eea2b18](https://github.com/betagouv/service-national-universel/commit/eea2b18958a03fc20f85fa641c68bd0608dfa65e))
+* **admin:** navbar navigation ScrollOnTop ([290fe27](https://github.com/betagouv/service-national-universel/commit/290fe27563d4a72a2cf770d9d974f0c104196386))
+* **admin:** simplify sidebar popover logic + fix closing problem ([3e43791](https://github.com/betagouv/service-national-universel/commit/3e437912dc84f0f5ab94e8e20bd7b2d23ec891a7))
+* **api:** allow null value for expiration date ([8ff981a](https://github.com/betagouv/service-national-universel/commit/8ff981adb8b03bb9d13d7feb697f8bd4e2164984))
+
+
+### Features
+
+* **admin:** resize sidebar on breakpoint ([60b0767](https://github.com/betagouv/service-national-universel/commit/60b07675e717a1c0d260e291329e2d08b8a634f2))
+* **admin:** review design sidebar ([280146e](https://github.com/betagouv/service-national-universel/commit/280146e86d4e84e47163ba6b076a4a6d87feb597))
+* added a few insights to ease onboarding ([#2895](https://github.com/betagouv/service-national-universel/issues/2895)) ([c6b36e2](https://github.com/betagouv/service-national-universel/commit/c6b36e2f71302436fb47b24bc04cd280da150398))
+
 ## [1.323.2](https://github.com/betagouv/service-national-universel/compare/v1.323.1...v1.323.2) (2023-08-26)
 
 
