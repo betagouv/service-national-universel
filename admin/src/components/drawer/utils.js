@@ -4,6 +4,10 @@ export const itemsSejourGod = [
     link: "/centre",
   },
   {
+    title: "Point de rassemblement",
+    link: "/point-de-rassemblement/liste/liste-points",
+  },
+  {
     title: "Table de répartition",
     link: "/table-repartition",
   },
@@ -11,10 +15,7 @@ export const itemsSejourGod = [
     title: "Schéma de répartition",
     link: "/schema-repartition",
   },
-  {
-    title: "Point de rassemblement",
-    link: "/point-de-rassemblement/liste/liste-points",
-  },
+
   {
     title: "Plan de transport",
     link: "/ligne-de-bus",
@@ -36,16 +37,16 @@ export const itemsSejourAdmin = [
     link: "/centre",
   },
   {
+    title: "Point de rassemblement",
+    link: "/point-de-rassemblement/liste/liste-points",
+  },
+  {
     title: "Table de répartition",
     link: "/table-repartition",
   },
   {
     title: "Schéma de répartition",
     link: "/schema-repartition",
-  },
-  {
-    title: "Point de rassemblement",
-    link: "/point-de-rassemblement/liste/liste-points",
   },
   {
     title: "Plan de transport",
@@ -63,16 +64,16 @@ export const itemsSejourRef = [
     link: "/centre",
   },
   {
+    title: "Point de rassemblement",
+    link: "/point-de-rassemblement/liste/liste-points",
+  },
+  {
     title: "Table de répartition",
     link: "/table-repartition",
   },
   {
     title: "Schéma de répartition",
     link: "/schema-repartition",
-  },
-  {
-    title: "Point de rassemblement",
-    link: "/point-de-rassemblement/liste/liste-points",
   },
   {
     title: "Plan de transport",
