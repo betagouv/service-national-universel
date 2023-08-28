@@ -76,6 +76,7 @@ export default function App() {
   return (
     <Sentry.ErrorBoundary fallback={myFallback}>
       <Router history={history}>
+        <ScrollToTop />
         <div className="main">
           <Switch>
             {/* Aucune authentification nécessaire */}
@@ -293,3 +294,16 @@ const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) 
   }
   return <SentryRoute {...rest} render={(props) => <Component {...props} />} />;
 };
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    if (document.getElementsByTagName) {
+      const inputElements = document.getElementsByTagName("input");
+      for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
+    }
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
