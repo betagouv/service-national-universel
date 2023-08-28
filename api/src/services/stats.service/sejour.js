@@ -43,7 +43,7 @@ async function getYoungNotesPhase1(startDate, endDate, user) {
       id: "young-notes",
       value,
       label: `note${value > 1 ? "s" : ""} interne${value > 1 ? "s" : ""} déposée${value > 1 ? "s" : ""} - phase 1`,
-      icon: "other",
+      icon: "where",
     },
   ];
 }

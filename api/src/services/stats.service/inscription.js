@@ -1,0 +1,290 @@
+const { ES_NO_LIMIT, ROLES, COHORTS, YOUNG_STATUS, YOUNG_PHASE } = require("snu-lib");
+const esClient = require("../../es");
+
+async function getYoungNotesPhase0(startDate, endDate, user) {
+  // ref dep only
+  let body = {
+    query: {
+      bool: {
+        filter: [
+          { terms: { "department.keyword": user.department } },
+          {
+            nested: {
+              path: "notes",
+              query: {
+                bool: {
+                  must: [
+                    { match: { "notes.phase": "INSCRIPTION" } },
+                    {
+                      range: {
+                        "notes.createdAt": {
+                          gte: new Date(startDate),
+                          lte: new Date(endDate),
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+    size: 0,
+    track_total_hits: true,
+  };
+
+  const response = await esClient.search({ index: "young", body });
+  const value = response.body.hits.total.value;
+
+  return [
+    {
+      id: "young-notes-phase0",
+      value,
+      label: `note${value > 1 ? "s" : ""} interne${value > 1 ? "s" : ""} déposée${value > 1 ? "s" : ""} - phase 1`,
+      icon: "other",
+    },
+  ];
+}
+
+async function getYoungRegisteredWithParticularSituation(startDate, endDate, user) {
+  // ref reg only
+  let body = {
+    query: {
+      bool: {
+        filter: [
+          { term: { "region.keyword": user.region } },
+          {
+            range: {
+              inscriptionDoneDate: {
+                gte: new Date(startDate),
+                lte: new Date(endDate),
+              },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      group_by_handicap: {
+        terms: { field: "handicap.keyword", size: ES_NO_LIMIT },
+      },
+      group_by_qpv: {
+        terms: { field: "qpv.keyword", size: ES_NO_LIMIT },
+      },
+      group_by_isRegionRural: {
+        terms: { field: "isRegionRural.keyword", size: ES_NO_LIMIT },
+      },
+    },
+    size: 0,
+    track_total_hits: true,
+  };
+
+  const response = await esClient.search({ index: "young", body });
+
+  let handicap = response.body.aggregations.group_by_handicap.buckets.filter((bucket) => bucket.key === "true")[0].doc_count;
+  let qpv = response.body.aggregations.group_by_qpv.buckets.filter((bucket) => bucket.key === "true")[0].doc_count;
+  let rural = response.body.aggregations.group_by_isRegionRural.buckets.filter((bucket) => bucket.key === "true")[0].doc_count;
+
+  return [
+    {
+      id: "young-rural-registration",
+      value: handicap,
+      label: ` volontaire${handicap > 1 ? "s" : ""} inscrit${handicap > 1 ? "s" : ""} en zones rurales`,
+      icon: "other",
+    },
+    {
+      id: "young-QPV-registration",
+      value: qpv,
+      label: ` volontaire${qpv > 1 ? "s" : ""} inscrit${qpv > 1 ? "s" : ""} en quartiers prioritaires`,
+      icon: "other",
+    },
+    {
+      id: "young-rural-registration",
+      value: rural,
+      label: ` volontaire${rural > 1 ? "s" : ""} inscrit${rural > 1 ? "s" : ""} en zones rurales`,
+      icon: "other",
+    },
+  ];
+}
+
+async function getDepartmentRegistrationGoal(startDate, endDate, user) {
+  // ref reg only
+  const cohort = COHORTS[COHORTS.length - 2];
+  let body = {
+    query: {
+      bool: {
+        filter: [
+          { term: { "region.keyword": user.region } },
+          { term: { "cohort.keyword": cohort } },
+          {
+            range: {
+              fillingRate: {
+                gte: 100,
+              },
+            },
+          },
+        ],
+      },
+    },
+    size: ES_NO_LIMIT,
+    track_total_hits: true,
+  };
+
+  const response = await esClient.search({ index: "inscriptiongoal", body });
+  const data = response.body.hits.hits;
+
+  const result = data.map((item) => ({
+    id: `${item._source.department}-registration-goal`,
+    label: `Le département ${item._source.department} a atteint son objectif d’inscription sur le séjour de ${item._source.cohort}`,
+    icon: "other",
+  }));
+  if (result.length) {
+    return result;
+  } else {
+    return [];
+  }
+}
+
+async function getRegisterFileOpen(startDate, endDate, user) {
+  // ref reg, ref dep, admin
+  let body = {
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              createdAt: {
+                gte: new Date(startDate),
+                lte: new Date(endDate),
+              },
+            },
+          },
+        ],
+      },
+    },
+    size: 0,
+    track_total_hits: true,
+  };
+  if (user.role === ROLES.REFERENT_REGION) {
+    body.query.bool.filter.push({ match: { "region.keyword": user.region } });
+  }
+
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    body.query.bool.filter.push({ terms: { "department.keyword": user.department } });
+  }
+
+  const response = await esClient.search({ index: "young", body });
+  const value = response.body.hits.total.value;
+
+  return [
+    {
+      id: "register-file-open",
+      value: value,
+      label: ` dossier${value > 1 ? "s" : ""} d'inscription ouvert${value > 1 ? "s" : ""}`,
+      icon: "other",
+    },
+  ];
+}
+
+async function getAbandonedRegistration(startDate, endDate, user) {
+  // ref reg only
+  let body = {
+    query: {
+      bool: {
+        filter: [
+          { term: { "region.keyword": user.region } },
+          { term: { "phase.keyword": YOUNG_PHASE.INSCRIPTION } },
+          { term: { "status.keyword": YOUNG_STATUS.ABANDONED } },
+          {
+            range: {
+              lastStatusAt: {
+                gte: new Date(startDate),
+                lte: new Date(endDate),
+              },
+            },
+          },
+        ],
+      },
+    },
+    size: 0,
+    track_total_hits: true,
+  };
+
+  const response = await esClient.search({ index: "young", body });
+  const value = response.body.hits.total.value;
+
+  return [
+    {
+      id: "abandoned-registration",
+      value: value,
+      label: ` inscription${value > 1 ? "s" : ""} abandonnée${value > 1 ? "s" : ""}`,
+      icon: "other",
+    },
+  ];
+}
+
+async function test(startDate, endDate, user) {
+  // ref reg only
+  let body = {
+    aggs: {
+      group_by_timeSchedule: {
+        filter: {
+          nested: {
+            path: "timeScheduleFiles",
+            query: {
+              range: {
+                "timeScheduleFiles.uploadedAt": {
+                  gte: new Date(startDate),
+                  lte: new Date(endDate),
+                },
+              },
+            },
+          },
+        },
+      },
+      group_by_pedagoProject: {
+        filter: {
+          nested: {
+            path: "pedagoProjectFiles",
+            query: {
+              range: {
+                "pedagoProjectFiles.uploadedAt": {
+                  gte: new Date(startDate),
+                  lte: new Date(endDate),
+                },
+              },
+            },
+          },
+        },
+      },
+      size: 0,
+      track_total_hits: true,
+    },
+  };
+
+  if (user.role === ROLES.REFERENT_REGION) {
+    body.query.bool.filter.push({ match: { "region.keyword": user.region } });
+  }
+
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    body.query.bool.filter.push({ terms: { "department.keyword": user.department } });
+  }
+
+  const response = await esClient.search({ index: "sessionphase1", body });
+  console.log(response.body.aggregations);
+  const time = response.body.aggregations.group_by_timeSchedule.buckets;
+  const project = response.body.aggregations.group_by_pedagoProject.buckets;
+
+  return [];
+}
+
+module.exports = {
+  getYoungNotesPhase0,
+  getYoungRegisteredWithParticularSituation,
+  getDepartmentRegistrationGoal,
+  getRegisterFileOpen,
+  getAbandonedRegistration,
+  test,
+};
