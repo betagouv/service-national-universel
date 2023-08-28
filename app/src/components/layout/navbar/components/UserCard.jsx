@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
@@ -86,7 +86,7 @@ function Menu({ open, menuRef, user, onClose, ticketsInfo }) {
 
   return (
     <nav
-      className={`absolute left-4 bottom-20 z-10 flex w-56 flex-col justify-around overflow-hidden rounded-lg bg-white shadow transition-all duration-200 ease-in-out ${
+      className={`absolute left-4 bottom-20 z-10 flex w-64 flex-col justify-around overflow-hidden rounded-lg bg-white shadow transition-all duration-200 ease-in-out ${
         open ? (permissionPhase2(user) ? "h-auto" : "h-20") : "h-0"
       }`}
       ref={menuRef}>
@@ -101,7 +101,7 @@ function Menu({ open, menuRef, user, onClose, ticketsInfo }) {
       {ticketsInfo.hasMessage === true && (
         <Link to="/echanges" onClick={onClose} className="flex items-center justify-between gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
           <p>Mes échanges</p>
-          {ticketsInfo.hasNewStatus === true && <p className="text-sm leading-5 text-white bg-blue-600 px-2 py-0.5 rounded-full font-medium">{ticketsInfo.newStatusCount}</p>}
+          {ticketsInfo.hasNewStatus === true && <p className="text-xs leading-5 text-white bg-blue-600 px-2 py-0 rounded-full font-medium">{ticketsInfo.newStatusCount}</p>}
         </Link>
       )}
       <button

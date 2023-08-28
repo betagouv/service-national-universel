@@ -1,41 +1,36 @@
 import React, { useEffect, useState } from "react";
-import { Switch, useHistory, useLocation } from "react-router-dom";
 import { NavLink } from "react-router-dom";
-import { SentryRoute } from "../../sentry";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import API from "../../services/api";
-import styled from "styled-components";
 import Loader from "../../components/Loader";
-import MailCloseIcon from "../../components/MailCloseIcon";
-import MailOpenIcon from "../../components/MailOpenIcon";
 import relativeTime from "dayjs/plugin/relativeTime";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
-import { colors, translateState, urlWithScheme } from "../../utils";
+import { translateState } from "../../utils";
 import { toastr } from "react-redux-toastr";
 
 const Echanges = () => {
   const user = useSelector((state) => state.Auth.young);
-  const [userTickets, setUserTickets] = useState(null);
+  const [userTickets, setUserTickets] = useState([]);
 
   useEffect(() => {
     const fetchTickets = async () => {
       try {
         const { ok, data } = await API.get(`/zammood/tickets`);
         if (!ok) {
-          console.log("API response not OK");
+          toastr.error("Erreur pendant la récupération des Tickets");
           return setUserTickets([]);
         }
         setUserTickets(data);
       } catch (error) {
-        console.log("Error fetching tickets:", error);
+        toastr.error("Erreur pendant la récupération des échanges");
       }
     };
     fetchTickets();
   }, []);
 
   dayjs.extend(relativeTime).locale("fr");
-  console.log(userTickets)
+
   const renderSubject = (ticket) => {
     const subject = ticket.subject;
     const isNew = ticket.status === "NEW";
@@ -58,11 +53,12 @@ const Echanges = () => {
         <p className="text-base leading-6 font-normal text-gray-600 mb-4">Retrouvez ici vos échanges avec le support ou votre référent.</p>
       </div>
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <section className="border-b px-6 py-3 flex justify-between text-xs leading-4 font-medium tracking-wider uppercase text-gray-500">
-          <span className="truncate md:w-1/5">Nº demande</span>
-          <span className="w-1/4 md:w-2/5">Sujet</span>
-          <span className="w-1/4 md:w-1/5">État</span>
-          <span className="w-1/4 md:w-1/5 truncate">Dernière mise à jour</span>
+        <section className="border-b py-4 px-2 md:px-4 flex justify-between text-xs leading-4 font-medium tracking-wider uppercase text-gray-500">
+          <span className="w-1/7 md:w-1/5 truncate hidden md:block">Nº demande</span>
+          <span className="w-1/7 md:w-1/5 truncate md:hidden">Nº</span>
+          <span className="w-2/5 md:w-3/5">Sujet</span>
+          <span className="w-1/5 md:w-1/5">État</span>
+          <span className="w-1/6 md:w-1/5 truncate">Dernière mise à jour</span>
         </section>
         {!userTickets ? (
           <Loader />
@@ -70,12 +66,11 @@ const Echanges = () => {
           userTickets
             .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
             .map((ticket) => (
-              <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`}
-               key={ticket._id} className="border-b flex justify-between p-6 hover:bg-gray-100">
+              <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`} key={ticket._id} className="border-b flex justify-between py-4 px-2 md:py-6 md:px-4  hover:bg-gray-100">
                 <div className="flex w-full justify-between items-center">
-                  <span className="text-sm leading-5 font-normal text-gray-500 w-1/4 md:w-1/5">{ticket.number}</span>
-                  <span className="text-sm leading-5 font-normal text-gray-500 w-1/4 md:w-2/5">{renderSubject(ticket)}</span>
-                  <div className="w-1/4 md:w-1/5 flex justify-start">
+                  <span className="text-sm leading-5 font-normal text-gray-500 w-1/7 md:w-1/5">{ticket.number}</span>
+                  <span className="text-sm leading-5 font-normal text-gray-500 w-2/5 md:w-3/5">{renderSubject(ticket)}</span>
+                  <div className="w-1/5 md:w-1/5 flex justify-start">
                     <span
                       className={`capitalize py-1 px-2 text-sm leading-5 rounded-2xl inline-block ${
                         ticket.status === "NEW" ? "text-[#27AF66] border border-[#A4D8BC] bg-[#A4D8BC]" : "text-gray-500 bg-gray-50 border border-gray-500"
@@ -83,7 +78,7 @@ const Echanges = () => {
                       {translateState(ticket.status)}
                     </span>
                   </div>
-                  <span className="text-sm leading-5 font-normal text-gray-500 truncate w-1/4 md:w-1/5">{dayjs(new Date(ticket.updatedAt)).fromNow()}</span>
+                  <span className="text-sm leading-5 font-normal text-gray-500 truncate w-1/6 md:w-1/5">{dayjs(new Date(ticket.updatedAt)).fromNow()}</span>
                 </div>
               </NavLink>
             ))
