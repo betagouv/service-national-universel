@@ -27,7 +27,7 @@ export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link }
                   <div className={`rounded-md w-[3px] h-[20px]  ${active ? "bg-[#EEEFF5]" : "bg-inherit"}`} />
                   <Icon className={`ml-[9px]  w-[30px] h-[30px] text-[#EEEFF5]/70 group-hover:text-[#EEEFF5] ${active && "!text-[#EEEFF5]"}`} />
                   <p
-                    className={`truncate flex-1 pl-[15px] w-full text-left text-[#EEEFF5]/80 group-hover:text-[#EEEFF5] ${sideBarOpen ? "block" : "hidden"} ${
+                    className={`truncate flex-1 pl-[15px] text-base w-full text-left text-[#EEEFF5]/80 group-hover:text-[#EEEFF5] ${sideBarOpen ? "block" : "hidden"} ${
                       active && "!text-[#EEEFF5]"
                     }`}>
                     {title}
@@ -47,7 +47,7 @@ export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link }
                   onEnter={() => setPopoverOpen(true)}
                   onExited={() => setPopoverOpen(false)}>
                   <Popover.Panel className="absolute transform left-[100%] bottom-1/2 translate-y-[50%]">
-                    <div className="ml-4 px-4 py-[6px] bg-white shadow-md rounded-lg w-fit z-20">
+                    <div className="!ml-[14px] px-4 py-[6px] bg-white shadow-md rounded-lg w-fit z-20">
                       <Link to={link} className="flex items-center w-full ">
                         <p className="text-xs leading-5 font-medium uppercase text-[#3E426A] whitespace-nowrap">{title}</p>
                       </Link>

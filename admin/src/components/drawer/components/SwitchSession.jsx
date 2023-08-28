@@ -67,8 +67,8 @@ export default function SwitchSession({ sideBarOpen, sessionsList, sessionPhase1
                   show={isPopoverOpen}
                   onEnter={() => setPopoverOpen(true)}
                   onExited={() => setPopoverOpen(false)}>
-                  <Popover.Panel className="absolute transform left-[100%] bottom-0 translate-y-[70%]">
-                    <div className="ml-4 px-[1px] py-[1px] bg-white shadow-md rounded-lg w-[275px] z-20">
+                  <Popover.Panel className="absolute transform left-[100%] top-0 ">
+                    <div className="!ml-2 px-[1px] py-[1px] bg-white shadow-md rounded-lg w-[275px] z-20">
                       {sessionsList?.map((session, i) => {
                         const active = session?.cohort === sessionPhase1?.cohort;
                         const isLast = i === sessionsList.length - 1;

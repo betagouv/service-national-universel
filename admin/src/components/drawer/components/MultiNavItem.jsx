@@ -33,12 +33,16 @@ export default function MultiNavItem({ sideBarOpen, Icon, items, path, title, cu
                     <div className={`rounded-md w-[3px] h-[20px]  ${navActive ? "bg-[#EEEFF5]" : "bg-inherit"}`} />
                     <Icon className={`ml-[9px]  w-[30px] h-[30px] text-[#EEEFF5]/70 group-hover:text-[#EEEFF5] ${navActive && "!text-[#EEEFF5]"}`} />
                     <p
-                      className={`truncate flex-1 pl-[15px] w-full text-left text-[#EEEFF5]/80 group-hover:text-[#EEEFF5] ${sideBarOpen ? "block" : "hidden"} ${
+                      className={`truncate text-base flex-1 pl-[15px] w-full text-left text-[#EEEFF5]/80 group-hover:text-[#EEEFF5] ${sideBarOpen ? "block" : "hidden"} ${
                         navActive && "!text-[#EEEFF5]"
                       }`}>
                       {title}
                     </p>
-                    {sideBarOpen && <HiChevronDown className={`ml-2 text-[#EEEFF5]/50 w-5 h-5 ${dropDownOpen && "rotate-180"}`} />}
+                    {sideBarOpen && (
+                      <HiChevronDown
+                        className={`ml-2 text-[#EEEFF5]/50  ${navActive ? "text-[#EEEFF5]/80" : "group-hover:text-[#EEEFF5]/70"}  w-5 h-5 ${dropDownOpen && "rotate-180"}`}
+                      />
+                    )}
                   </div>
                 </Popover.Button>
                 {!sideBarOpen && (
@@ -54,7 +58,7 @@ export default function MultiNavItem({ sideBarOpen, Icon, items, path, title, cu
                     onEnter={() => setPopoverOpen(true)}
                     onExited={() => setPopoverOpen(false)}>
                     <Popover.Panel className="absolute transform left-[100%] bottom-1/2 translate-y-[50%] ">
-                      <div className="ml-4 px-[3px] py-[3px] bg-white shadow-md rounded-lg w-[225px] z-20">
+                      <div className="!ml-[14px] px-[3px] py-[3px] bg-white shadow-md rounded-lg w-[225px] z-20">
                         <p className="pl-6 pt-2 pr-2 pb-[2px] h-[30px] text-xs leading-5 font-medium uppercase text-[#3E426A] whitespace-nowrap">{title}</p>
                         <div className="flex flex-col py-[6px]">
                           {items.map((item) => {
@@ -63,11 +67,11 @@ export default function MultiNavItem({ sideBarOpen, Icon, items, path, title, cu
                               <Link
                                 key={item.link}
                                 to={item.link}
-                                className={`flex items-center pl-[1px] pr-[8px] py-[7px] h-[34px] rounded-md ${active ? "bg-[#EEEFF5]" : "hover:bg-[#EEEFF5]"}`}>
+                                className={`group flex items-center pl-[1px] pr-[8px] py-[7px] h-[34px] rounded-md ${active ? "bg-[#EEEFF5]" : "hover:bg-[#EEEFF5]"}`}>
                                 <div className="w-[22px] h-[22px] flex items-center justify-center">
                                   <BsDot className={`ml-2 text-[#7F83A7] ${active ? "!w-6 !h-6 text-[#30345B]" : "!w-3 !h-3 hover:text-[#30345B]"}`} />
                                 </div>
-                                <p className={`pl-2 text-sm leading-5 text-[#3E426A] ${active ? "text-[#1B1F42] font-medium" : "hover:text-[#1B1F42]"}`}>{item.title}</p>
+                                <p className={`pl-2 text-sm leading-5 text-[#3E426A] ${active ? "text-[#1B1F42] font-medium" : "group-hover:text-[#1B1F42]"}`}>{item.title}</p>
                               </Link>
                             );
                           })}
@@ -91,11 +95,11 @@ export default function MultiNavItem({ sideBarOpen, Icon, items, path, title, cu
                 <Link
                   key={item.link}
                   to={item.link}
-                  className={`flex items-center pl-[20px] pr-[6px] py-[6px] h-9 text-[#D0D2E2] rounded-md ${actif ? "bg-[#0C1035]" : "hover:bg-[#1B1F42]"}`}>
+                  className={`group flex items-center pl-[20px] pr-[6px] py-[6px] h-9 text-[#D0D2E2] rounded-md ${actif ? "bg-[#0C1035]" : "hover:bg-[#1B1F42]"}`}>
                   <div className="!w-6 !h-6 flex items-center justify-center">
                     <BsDot className={`ml-2 text-[#B3B5CD] ${actif ? "!w-4 !h-4 text-[#D0D2E2]" : "!w-3 !h-3 hover:text-[#B3B5CD]"}`} />
                   </div>
-                  <p className={`pl-2 text-sm leading-5 text-[#D0D2E2] ${actif ? "text-[#EEEFF5]" : "hover:text-[#EEEFF5]"}`}>{item.title}</p>
+                  <p className={`pl-2 text-sm leading-5 text-[#D0D2E2] ${actif ? "text-[#EEEFF5]" : "group-hover:text-[#EEEFF5]"}`}>{item.title}</p>
                 </Link>
               );
             })}

@@ -72,7 +72,7 @@ export default function ZammoodBox({ newTickets, openedTickets, sideBarOpen }) {
                     onEnter={() => setPopoverOpen(true)}
                     onExited={() => setPopoverOpen(false)}>
                     <Popover.Panel className="absolute transform left-[100%] bottom-1/2 translate-y-[50%]">
-                      <button onClick={connectToZammood} className="ml-4 px-4 py-[6px] bg-white shadow-md rounded-lg w-fit z-20">
+                      <button onClick={connectToZammood} className="!ml-2 px-4 py-[6px] bg-white shadow-md rounded-lg w-fit z-20">
                         <p className="text-xs leading-5 font-medium uppercase text-[#3E426A] whitespace-nowrap">Boîte de reception</p>
                       </button>
                     </Popover.Panel>
@@ -90,8 +90,8 @@ export default function ZammoodBox({ newTickets, openedTickets, sideBarOpen }) {
 
 const Badge = ({ count, containerStyle, textStyle }) => {
   return (
-    <div className={`flex items-center justify-center !h-6 rounded-xl pt-[3px] pb-[5px] px-[10px] border-[1px]  ${containerStyle}`}>
-      <span className={`align-middle ${textStyle}`}>{count}</span>
+    <div className={`flex items-center justify-center !h-6 rounded-xl py-[4px] px-[10px] border-[1px]  ${containerStyle}`}>
+      <span className={`align-middle ${textStyle} text-[13px]`}>{count}</span>
     </div>
   );
 };

@@ -13,6 +13,7 @@ import Settings from "../icons/Settings";
 import Support from "../icons/Support";
 import User from "../icons/User";
 import VericalDot from "../icons/VerticalDot";
+import Separator from "./Separator";
 
 export default function Profil({ sideBarOpen, user, setOpenInvite }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -67,7 +68,8 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
     }
   };
   return (
-    <>
+    <div>
+      <Separator open={sideBarOpen} />
       <Popover className="relative focus:outline-none">
         {() => {
           return (
@@ -81,11 +83,9 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                       <span className="text-lg font-medium text-[#0C1035] leading-6 align-middle !pb-0.5">{getInitials(user.firstName + " " + user.lastName)}</span>
                     </div>
                     {sideBarOpen && (
-                      <div className="!ml-3 flex flex-col gap-[2px]">
-                        <span className=" text-left text-sm leading-5 font-semibold h-[20px] truncate uppercase text-[#EEEFF5] w-[150px]">{translate(user.role)}</span>
-                        {getDepRegion(user) && (
-                          <span className=" text-left text-xs leading-5 font-semibold h-[20px] truncate text-[#EEEFF5]/80 w-[150px]">{getDepRegion(user)}</span>
-                        )}
+                      <div className="!ml-3 flex flex-col">
+                        <span className=" text-left text-xs leading-5 font-semibold h-[20px] truncate uppercase text-[#EEEFF5] w-[150px]">{translate(user.role)}</span>
+                        {getDepRegion(user) && <span className=" text-left text-xs leading-5 font-normal h-[20px] truncate text-[#EEEFF5]/80 w-[150px]">{getDepRegion(user)}</span>}
                       </div>
                     )}
                     <div className="flex items-center justify-center !ml-1 w-[20px] h-[20px]">
@@ -106,7 +106,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                   onEnter={() => setPopoverOpen(true)}
                   onExited={() => setPopoverOpen(false)}>
                   <Popover.Panel className="absolute transform left-[100%] bottom-1/2 ">
-                    <div className="ml-4 px-[1px] py-[1px] bg-white shadow-md rounded-lg w-[275px] z-20 flex flex-col">
+                    <div className="!ml-2 px-[1px] py-[1px] bg-white shadow-md rounded-lg w-[275px] z-20 flex flex-col">
                       {/* Header */}
                       <Link className="group flex items-center h-[62px] rounded-t-md py-[14px] pl-[15px] pr-[13px] hover:bg-[#EEEFF5]" to={"/profil"}>
                         <div className="flex items-center justify-center w-[26px] h-[26px]">
@@ -149,7 +149,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
           );
         }}
       </Popover>
-    </>
+    </div>
   );
 }
 
