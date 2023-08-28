@@ -50,33 +50,6 @@ class api {
     });
   }
 
-  getTotal(response) {
-    return (response && response.hits && response.hits.total) || 0;
-  }
-
-  getHits(response) {
-    return (response && response.hits && response.hits.hits) || [];
-  }
-
-  getAggregations(response) {
-    try {
-      if (!response || !response.aggregations) return {};
-      const keys = Object.keys(response.aggregations);
-      if (!keys.length) return {};
-
-      if (response.aggregations[keys[0]].value !== undefined) return response.aggregations[keys[0]].value;
-
-      let obj = {};
-      for (let i = 0; i < response.aggregations[keys[0]].buckets.length; i++) {
-        obj[response.aggregations[keys[0]].buckets[i].key] = response.aggregations[keys[0]].buckets[i].doc_count;
-      }
-      return obj;
-    } catch (e) {
-      capture(e);
-      return;
-    }
-  }
-
   openpdf(path, body) {
     return new Promise(async (resolve, reject) => {
       try {
