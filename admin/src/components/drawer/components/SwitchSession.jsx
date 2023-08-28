@@ -1,5 +1,5 @@
 import { Popover, Transition } from "@headlessui/react";
-import React, { Fragment, useRef } from "react";
+import React, { Fragment, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { setSessionPhase1 } from "../../../redux/auth/actions";
@@ -11,34 +11,20 @@ import Separator from "./Separator";
 export default function SwitchSession({ sideBarOpen, sessionsList, sessionPhase1 }) {
   const dispatch = useDispatch();
   const history = useHistory();
-  const buttonRef = useRef(null);
-  const timeoutDuration = 200;
-  let timeout;
 
-  const closePopover = () => {
-    return buttonRef.current?.dispatchEvent(
-      new KeyboardEvent("keydown", {
-        key: "Escape",
-        bubbles: true,
-        cancelable: true,
-      }),
-    );
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+
+  const onMouseEnter = () => {
+    setPopoverOpen(true);
   };
 
-  const onMouseEnter = (open) => {
-    clearTimeout(timeout);
-    if (open) return;
-    return buttonRef.current?.click();
-  };
-
-  const onMouseLeave = (open) => {
-    if (!open) return;
-    timeout = setTimeout(() => closePopover(), timeoutDuration);
+  const onMouseLeave = () => {
+    setPopoverOpen(false);
   };
 
   const changeSession = (session) => {
     dispatch(setSessionPhase1(session));
-    closePopover();
+    setPopoverOpen(false);
     localStorage?.setItem("active_session_chef_de_centre", JSON.stringify(session));
     // on retourne au dashboard !
     history.push("/");
@@ -49,11 +35,11 @@ export default function SwitchSession({ sideBarOpen, sessionsList, sessionPhase1
   return (
     <div>
       <Popover className="relative focus:outline-none">
-        {({ open }) => {
+        {() => {
           return (
             <>
-              <div onMouseLeave={onMouseLeave.bind(null, open)}>
-                <Popover.Button ref={buttonRef} onMouseEnter={onMouseEnter.bind(null, open)} onMouseLeave={onMouseLeave.bind(null, open)} className="focus:outline-none">
+              <div onMouseLeave={onMouseLeave}>
+                <Popover.Button onMouseEnter={onMouseEnter} className="focus:outline-none">
                   <div
                     onClick={() => {}}
                     className={`group flex items-center ${sideBarOpen ? "h-[66px] pl-[20px] py-[15px] pr-[10px]" : "py-[23px] px-[34px]"} hover:bg-[#1B1F42] ${
@@ -77,12 +63,12 @@ export default function SwitchSession({ sideBarOpen, sessionsList, sessionPhase1
                   enterTo="opacity-100 translate-y-0"
                   leave="transition ease-in duration-150"
                   leaveFrom="opacity-100 translate-y-0"
-                  leaveTo="opacity-0 translate-y-1">
+                  leaveTo="opacity-0 translate-y-1"
+                  show={isPopoverOpen}
+                  onEnter={() => setPopoverOpen(true)}
+                  onExited={() => setPopoverOpen(false)}>
                   <Popover.Panel className="absolute transform left-[100%] bottom-0 translate-y-[70%]">
-                    <div
-                      className="ml-4 px-[1px] py-[1px] bg-white shadow-md rounded-lg w-[275px] z-20"
-                      onMouseEnter={onMouseEnter.bind(null, open)}
-                      onMouseLeave={onMouseLeave.bind(null, open)}>
+                    <div className="ml-4 px-[1px] py-[1px] bg-white shadow-md rounded-lg w-[275px] z-20">
                       {sessionsList?.map((session, i) => {
                         const active = session?.cohort === sessionPhase1?.cohort;
                         const isLast = i === sessionsList.length - 1;

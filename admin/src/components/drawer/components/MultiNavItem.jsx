@@ -1,5 +1,5 @@
 import { Popover, Transition } from "@headlessui/react";
-import React, { Fragment, useRef } from "react";
+import React, { Fragment, useState } from "react";
 import { BsDot } from "react-icons/bs";
 import { HiChevronDown } from "react-icons/hi";
 import { Link } from "react-router-dom";
@@ -8,41 +8,24 @@ import Separator from "./Separator";
 export default function MultiNavItem({ sideBarOpen, Icon, items, path, title, currentOpen, setCurrentOpen }) {
   const dropDownOpen = currentOpen === title;
   const navActive = items.some((item) => item.link.split("/")[1] === path) && (!dropDownOpen || !sideBarOpen);
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
 
-  const buttonRef = useRef(null);
-  const timeoutDuration = 200;
-  let timeout;
-
-  const closePopover = () => {
-    return buttonRef.current?.dispatchEvent(
-      new KeyboardEvent("keydown", {
-        key: "Escape",
-        bubbles: true,
-        cancelable: true,
-      }),
-    );
+  const onMouseEnter = () => {
+    setPopoverOpen(true);
   };
 
-  const onMouseEnter = (open) => {
-    if (sideBarOpen) return;
-    clearTimeout(timeout);
-    if (open) return;
-    return buttonRef.current?.click();
+  const onMouseLeave = () => {
+    setPopoverOpen(false);
   };
 
-  const onMouseLeave = (open) => {
-    if (sideBarOpen) return;
-    if (!open) return;
-    timeout = setTimeout(() => closePopover(), timeoutDuration);
-  };
   return (
     <>
       <Popover className="relative focus:outline-none">
-        {({ open }) => {
+        {() => {
           return (
             <>
-              <div onMouseLeave={onMouseLeave.bind(null, open)}>
-                <Popover.Button ref={buttonRef} onMouseEnter={onMouseEnter.bind(null, open)} onMouseLeave={onMouseLeave.bind(null, open)} className="focus:outline-none ">
+              <div onMouseLeave={onMouseLeave}>
+                <Popover.Button onMouseEnter={onMouseEnter} className="focus:outline-none ">
                   <div
                     onClick={() => (currentOpen === title ? setCurrentOpen("") : setCurrentOpen(title))}
                     className={`group flex items-center py-[10px] pl-[11px] rounded-lg  h-[52px] cursor-pointer 
@@ -66,12 +49,12 @@ export default function MultiNavItem({ sideBarOpen, Icon, items, path, title, cu
                     enterTo="opacity-100 translate-y-0"
                     leave="transition ease-in duration-150"
                     leaveFrom="opacity-100 translate-y-0"
-                    leaveTo="opacity-0 translate-y-1">
+                    leaveTo="opacity-0 translate-y-1"
+                    show={isPopoverOpen}
+                    onEnter={() => setPopoverOpen(true)}
+                    onExited={() => setPopoverOpen(false)}>
                     <Popover.Panel className="absolute transform left-[100%] bottom-1/2 translate-y-[50%] ">
-                      <div
-                        className="ml-4 px-[3px] py-[3px] bg-white shadow-md rounded-lg w-[225px] z-20"
-                        onMouseEnter={onMouseEnter.bind(null, open)}
-                        onMouseLeave={onMouseLeave.bind(null, open)}>
+                      <div className="ml-4 px-[3px] py-[3px] bg-white shadow-md rounded-lg w-[225px] z-20">
                         <p className="pl-6 pt-2 pr-2 pb-[2px] h-[30px] text-xs leading-5 font-medium uppercase text-[#3E426A] whitespace-nowrap">{title}</p>
                         <div className="flex flex-col py-[6px]">
                           {items.map((item) => {

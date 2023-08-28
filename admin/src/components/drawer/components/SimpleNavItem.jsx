@@ -1,41 +1,25 @@
 import { Popover, Transition } from "@headlessui/react";
-import React, { Fragment, useRef } from "react";
+import React, { Fragment, useState } from "react";
 import { Link } from "react-router-dom/cjs/react-router-dom";
 
 export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link }) {
-  const buttonRef = useRef(null);
-  const timeoutDuration = 200;
-  let timeout;
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
 
-  const closePopover = () => {
-    return buttonRef.current?.dispatchEvent(
-      new KeyboardEvent("keydown", {
-        key: "Escape",
-        bubbles: true,
-        cancelable: true,
-      }),
-    );
+  const onMouseEnter = () => {
+    setPopoverOpen(true);
   };
 
-  const onMouseEnter = (open) => {
-    if (sideBarOpen) return;
-    clearTimeout(timeout);
-    if (open) return;
-    return buttonRef.current?.click();
+  const onMouseLeave = () => {
+    setPopoverOpen(false);
   };
 
-  const onMouseLeave = (open) => {
-    if (sideBarOpen) return;
-    if (!open) return;
-    timeout = setTimeout(() => closePopover(), timeoutDuration);
-  };
   return (
     <Popover className="relative focus:outline-none">
-      {({ open }) => {
+      {() => {
         return (
           <>
-            <div onMouseLeave={onMouseLeave.bind(null, open)}>
-              <Popover.Button ref={buttonRef} onMouseEnter={onMouseEnter.bind(null, open)} onMouseLeave={onMouseLeave.bind(null, open)} className="focus:outline-none ">
+            <div onMouseLeave={onMouseLeave}>
+              <Popover.Button onMouseEnter={onMouseEnter} className="focus:outline-none ">
                 <Link
                   to={link}
                   className={`group flex items-center py-[10px] pl-[11px] rounded-lg  h-[52px] cursor-pointer 
@@ -58,12 +42,12 @@ export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link }
                   enterTo="opacity-100 translate-y-0"
                   leave="transition ease-in duration-150"
                   leaveFrom="opacity-100 translate-y-0"
-                  leaveTo="opacity-0 translate-y-1">
+                  leaveTo="opacity-0 translate-y-1"
+                  show={isPopoverOpen}
+                  onEnter={() => setPopoverOpen(true)}
+                  onExited={() => setPopoverOpen(false)}>
                   <Popover.Panel className="absolute transform left-[100%] bottom-1/2 translate-y-[50%]">
-                    <div
-                      className="ml-4 px-4 py-[6px] bg-white shadow-md rounded-lg w-fit z-20"
-                      onMouseEnter={onMouseEnter.bind(null, open)}
-                      onMouseLeave={onMouseLeave.bind(null, open)}>
+                    <div className="ml-4 px-4 py-[6px] bg-white shadow-md rounded-lg w-fit z-20">
                       <Link to={link} className="flex items-center w-full ">
                         <p className="text-xs leading-5 font-medium uppercase text-[#3E426A] whitespace-nowrap">{title}</p>
                       </Link>

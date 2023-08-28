@@ -1,37 +1,21 @@
 import { Popover, Transition } from "@headlessui/react";
-import React, { Fragment, useRef } from "react";
-import Separator from "./Separator";
-import Mail from "../icons/Mail";
-import api from "../../../services/api";
+import React, { Fragment, useState } from "react";
 import { useHistory } from "react-router-dom";
+import api from "../../../services/api";
+import Mail from "../icons/Mail";
+import Separator from "./Separator";
 
 export default function ZammoodBox({ newTickets, openedTickets, sideBarOpen }) {
-  const buttonRef = useRef(null);
   const history = useHistory();
-  const timeoutDuration = 200;
-  let timeout;
 
-  const closePopover = () => {
-    return buttonRef.current?.dispatchEvent(
-      new KeyboardEvent("keydown", {
-        key: "Escape",
-        bubbles: true,
-        cancelable: true,
-      }),
-    );
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+
+  const onMouseEnter = () => {
+    setPopoverOpen(true);
   };
 
-  const onMouseEnter = (open) => {
-    if (sideBarOpen) return;
-    clearTimeout(timeout);
-    if (open) return;
-    return buttonRef.current?.click();
-  };
-
-  const onMouseLeave = (open) => {
-    if (sideBarOpen) return;
-    if (!open) return;
-    timeout = setTimeout(() => closePopover(), timeoutDuration);
+  const onMouseLeave = () => {
+    setPopoverOpen(false);
   };
 
   const connectToZammood = async () => {
@@ -50,11 +34,11 @@ export default function ZammoodBox({ newTickets, openedTickets, sideBarOpen }) {
   return (
     <div className="">
       <Popover className="relative focus:outline-none">
-        {({ open }) => {
+        {() => {
           return (
             <>
-              <div onMouseLeave={onMouseLeave.bind(null, open)}>
-                <Popover.Button ref={buttonRef} onMouseEnter={onMouseEnter.bind(null, open)} onMouseLeave={onMouseLeave.bind(null, open)} className="focus:outline-none ">
+              <div onMouseLeave={onMouseLeave}>
+                <Popover.Button onMouseEnter={onMouseEnter} className="focus:outline-none ">
                   <div
                     onClick={connectToZammood}
                     className={`group flex items-center h-[66px] pl-[29px] py-[18px] !pr-3 hover:bg-[#1B1F42]  ${sideBarOpen ? "!pr-2  w-[250px]" : "w-[88px]"}`}>
@@ -83,13 +67,12 @@ export default function ZammoodBox({ newTickets, openedTickets, sideBarOpen }) {
                     enterTo="opacity-100 translate-y-0"
                     leave="transition ease-in duration-150"
                     leaveFrom="opacity-100 translate-y-0"
-                    leaveTo="opacity-0 translate-y-1">
+                    leaveTo="opacity-0 translate-y-1"
+                    show={isPopoverOpen}
+                    onEnter={() => setPopoverOpen(true)}
+                    onExited={() => setPopoverOpen(false)}>
                     <Popover.Panel className="absolute transform left-[100%] bottom-1/2 translate-y-[50%]">
-                      <button
-                        onClick={connectToZammood}
-                        className="ml-4 px-4 py-[6px] bg-white shadow-md rounded-lg w-fit z-20"
-                        onMouseEnter={onMouseEnter.bind(null, open)}
-                        onMouseLeave={onMouseLeave.bind(null, open)}>
+                      <button onClick={connectToZammood} className="ml-4 px-4 py-[6px] bg-white shadow-md rounded-lg w-fit z-20">
                         <p className="text-xs leading-5 font-medium uppercase text-[#3E426A] whitespace-nowrap">Boîte de reception</p>
                       </button>
                     </Popover.Panel>
