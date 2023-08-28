@@ -5,6 +5,7 @@
   "main": "common-js/index.cjs",
   "module": "index.js",
   "scripts": {
+    "postinstall": "npm run build",
     "build": "rollup -c",
     "dev": "rollup -c --watch",
     "lint": "eslint . --ext .js,.jsx",
