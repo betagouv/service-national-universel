@@ -18,6 +18,19 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   const [topArticles, setTopArticle] = useState((item?.children?.filter((c) => c.type === "article") || []).sort((a, b) => b.read - a.read));
   const [searchOpen, setSearchOpen] = useState(false);
 
+  const [isSectionOpen, setIsSectionOpen] = useState(false);
+  const [rotate, setRotate] = useState("transform duration-700 ease");
+
+  const toggleAccordion = () => {
+    setIsSectionOpen((prevState) => !prevState);
+    setRotate(isSectionOpen ? "transform duration-700 ease" : "transform duration-700 ease rotate-180");
+  };
+
+  useEffect(() => {
+    // Assuming you'd like to open the accordion automatically under some condition
+    toggleAccordion();
+  }, []); // Add dependencies if needed
+
   useEffect(() => {
     setSections(item?.children?.filter((c) => c.type === "section") || []);
   }, [item]);
@@ -87,16 +100,47 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
         </div>
       </div>
       <div className="mx-auto mt-[-40px] flex w-full max-w-[730px] flex-col items-center justify-center px-4">
-        <div className="flex flex-col w-full max-w-[730px] rounded-lg bg-[#E3E3FB] px-2 pb-4 pt-2 mt-6 px-auto">
+        {/* <div className="px-auto mt-6 flex w-full max-w-[730px] flex-col rounded-lg bg-[#E3E3FB] px-2 pb-4 pt-2">
           <div className="flex flex-row">
-            <HiStar className="text-xl mt-2.5 mr-2 ml-1.5 text-gray-900" />
-            <p className="text-base font-bold leading-6 text-gray-900 py-2">Articles les plus consultés</p>
+            <HiStar className="ml-1.5 mr-2 mt-2.5 text-xl text-gray-900" />
+            <p className="py-2 text-base font-bold leading-6 text-gray-900">Articles les plus consultés</p>
+          </div>
+          <div className="flex flex-col md:flex-row">
+            {topArticles.slice(0, 3).map(({ title, slug }) => (
+              <div className="m-2 flex flex-col justify-center overflow-hidden rounded-lg bg-white p-4 shadow-md">
+                <h3 className="mb-8 line-clamp-2 text-sm leading-5 font-bold text-gray-900">{title}</h3>
+                <Link className={``} href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
+                  <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p>
+                </Link>
+              </div>
+            ))}
           </div>
           <div className="flex flex-row">
             {topArticles.slice(0, 3).map(({ title, slug }) => (
               <div className="m-2 flex w-1/3 flex-col justify-center overflow-hidden rounded-lg bg-white p-4 shadow-md">
-                <h3 className="mb-8 line-clamp-2 text-sm leading-5 font-bold text-gray-900">{title}</h3>
-                <Link className={``} href={`/base-de-connaissance/${slug}`}>
+                <h3 className="mb-8 line-clamp-2 text-sm font-bold leading-5 text-gray-900">{title}</h3>
+                <Link className={``} href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
+                  <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div> */}
+        <div className="px-auto mt-6 flex w-full max-w-[730px] flex-col rounded-lg bg-[#E3E3FB] px-2 pb-4 pt-2">
+          <div className="flex cursor-pointer flex-row items-center justify-between" onClick={toggleAccordion}>
+            <div className="flex flex-row">
+              <HiStar className="ml-1.5 mr-2 mt-2.5 text-xl text-gray-900" />
+              <p className="py-2 text-base font-bold leading-6 text-gray-900">Articles les plus consultés</p>
+            </div>
+            <span className={`inline-flex ${rotate} material-icons text-gray-400 md:hidden`} style={{ transformOrigin: "center" }}>
+              expand_more
+            </span>
+          </div>
+          <div className={`transition-max-height flex flex-col duration-700 md:flex-row ${isSectionOpen ? "max-h-screen" : "max-h-0 overflow-hidden"}`}>
+            {topArticles.slice(0, 3).map(({ _id, title, slug }) => (
+              <div key={_id} className="m-2 flex flex-col justify-center overflow-hidden rounded-lg bg-white p-4 shadow-md md:w-1/3">
+                <h3 className="mb-8 line-clamp-2 text-sm font-bold leading-5 text-gray-900">{title}</h3>
+                <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
                   <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p>
                 </Link>
               </div>
