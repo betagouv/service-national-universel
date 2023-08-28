@@ -1,36 +1,40 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { HiArrowRight } from "react-icons/hi";
-import QuestionBubble from "@/assets/icons/QuestionBubble";
-import Unlock from "@/assets/icons/Unlock";
-import Select from "@/components/dsfr/forms/Select";
-import { formOptions } from "../contact.utils";
-import { Article } from "./Article";
-import Button from "@/components/dsfr/ui/buttons/Button";
-import Textarea from "@/components/dsfr/forms/Textarea";
-import SecondaryButton from "@/components/dsfr/ui/buttons/SecondaryButton";
-import FileImport from "@/components/dsfr/forms/FileImport";
-import plausibleEvent from "@/services/plausible";
+import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
+import plausibleEvent from "@/services/plausible";
 import API from "@/services/api";
 import { capture } from "@/sentry";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { roles, categories, articleSummaries, questions } from "../contact.utils";
 
-export default function LoggedInForm() {
+import Article from "./Article";
+import Button from "@/components/dsfr/ui/buttons/Button";
+import FileImport from "@/components/dsfr/forms/FileImport";
+import { HiArrowRight } from "react-icons/hi";
+import QuestionBubble from "@/assets/icons/QuestionBubbleReimport";
+import SecondaryButton from "@/components/dsfr/ui/buttons/SecondaryButton";
+import Select from "@/components/dsfr/forms/Select";
+import Textarea from "@/components/dsfr/forms/Textarea";
+import Unlock from "@/assets/icons/Unlock";
+
+export default function ContactForm() {
   const history = useHistory();
+  const fromPage = new URLSearchParams(window.location.search).get("from ");
 
-  const [step0, setStep0] = useState(null);
-  const [step1, setStep1] = useState(null);
-  const [step2, setStep2] = useState(null);
-  const [message, setMessage] = useState("");
-  const [files, setFiles] = useState([]);
+  // Form state
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const step2Options = formOptions.step1.find((option) => option.value === step1)?.subOptions || [];
-  const articles = step2Options.find((option) => option.value === step2)?.articles || [];
-  const fromPage = new URLSearchParams(window.location.search).get("from ");
+  // Form data
+  const [role, setRole] = useState(null);
+  const [category, setCategory] = useState(null);
+  const [question, setQuestion] = useState(null);
+  const [message, setMessage] = useState("");
+  const [files, setFiles] = useState([]);
+
+  // Derived state
+  const categoryOptions = questions.filter((e) => e.category === category);
+  const articles = articleSummaries.filter((e) => categoryOptions.find((e) => e.value === question)?.articles?.includes(e.slug));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,15 +51,15 @@ export default function LoggedInForm() {
         uploadedFiles = filesResponse.uploadFiles;
       }
 
-      const subject = `${formOptions.step1.find((option) => option.value === step1)?.label} - ${step2Options.find((option) => option.value === step2)?.label}`;
+      const subject = `${categories.find((e) => e.value === category)?.label} - ${categoryOptions.find((e) => e.value === question)?.label}`;
 
       const response = await API.post("/zammood/ticket", {
         message,
         subject,
         fromPage,
-        subjectStep0: step0,
-        subjectStep1: step1,
-        subjectStep2: step2,
+        subjectStep0: role,
+        subjectStep1: category,
+        subjectStep2: question,
         files: uploadedFiles,
       });
       if (!response.ok) {
@@ -73,12 +77,12 @@ export default function LoggedInForm() {
 
   return (
     <>
-      <div className="my-8 flex gap-4 items-center w-full border-[1px] text-sm">
-        <div className="flex-none flex items-center justify-center w-24 h-24">
+      <div className="my-8 flex gap-4 p-2 items-center w-full border-[1px] text-sm">
+        <div className="flex-none flex items-center justify-center w-12 md:w-24 h-24">
           <Unlock />
         </div>
         <div>
-          <p>Débloquez votre accès gratuit au code de la route</p>
+          <p className="leading-relaxed">Débloquez votre accès gratuit au code de la route</p>
           <Link to="/phase1" className="text-blue-france-sun-113 underline underline-offset-4">
             En savoir plus
             <HiArrowRight className="inline-block ml-2" />
@@ -86,11 +90,11 @@ export default function LoggedInForm() {
         </div>
       </div>
 
-      <div className="my-8 flex gap-4 items-center w-full border-[1px] text-sm">
-        <div className="flex-none flex items-center justify-center w-24 h-24">
+      <div className="my-8 flex gap-4 p-2 items-center w-full border-[1px] text-sm">
+        <div className="flex-none flex items-center justify-center w-12 md:w-24 h-24">
           <QuestionBubble />
         </div>
-        <div className="p-2">
+        <div>
           <p className="leading-relaxed">Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?</p>
           <Link to="/phase1" className="text-blue-france-sun-113 underline underline-offset-4">
             En savoir plus
@@ -99,9 +103,9 @@ export default function LoggedInForm() {
         </div>
       </div>
 
-      <Select label="Je suis" options={formOptions.step0} value={step0} onChange={setStep0} />
-      {step0 && <Select label="Ma demande" options={formOptions.step1} value={step1} onChange={setStep1} />}
-      {step1 && <Select label="Sujet" options={step2Options} value={step2} onChange={setStep2} />}
+      <Select label="Je suis" options={roles} value={role} onChange={setRole} />
+      {role && <Select label="Ma demande" options={categories} value={category} onChange={setCategory} />}
+      {category && <Select label="Sujet" options={categoryOptions} value={question} onChange={setQuestion} />}
       {articles.length > 0 && (
         <>
           <h2 className="text-xl font-semibold mb-4">Solutions proposées</h2>
@@ -112,7 +116,7 @@ export default function LoggedInForm() {
           </div>
           {!showForm && (
             <SecondaryButton
-              className="my-8"
+              className="my-8 w-full md:w-auto"
               onClick={() => {
                 setShowForm(true);
                 plausibleEvent("Besoin d'aide - Je n'ai pas trouve de reponse");
@@ -123,9 +127,10 @@ export default function LoggedInForm() {
         </>
       )}
 
-      {step2 && (articles.length === 0 || showForm) && (
+      {question && (articles.length === 0 || showForm) && (
         <form onSubmit={handleSubmit}>
           <Textarea label="Votre message" value={message} onChange={(e) => setMessage(e.target.value)} />
+          <p>Ajouter un fichier</p>
           <FileImport id="file" file={files[0]} setFile={(file) => setFiles([file])} />
           <hr />
           <Button type="submit" className="my-8 ml-auto" disabled={!message || loading}>

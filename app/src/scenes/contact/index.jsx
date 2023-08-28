@@ -2,10 +2,10 @@ import React from "react";
 import { useSelector } from "react-redux";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import LoggedInForm from "./components/LoggedInForm";
-import LoggedOutForm from "./components/LoggedOutForm";
+import ContactForm from "./components/contactForm";
+import PublicContactForm from "./components/PublicContactForm";
 
-export default function ContactForm() {
+export default function Contact() {
   const young = useSelector((state) => state.Auth.young);
 
   return (
@@ -14,7 +14,7 @@ export default function ContactForm() {
         <p className="leading-relaxed">
           Contactez nos équipes. Nous travaillons du lundi au vendredi de 9h00 à 18h00 et traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
         </p>
-        {young ? <LoggedInForm /> : <LoggedOutForm />}
+        {young ? <ContactForm /> : <PublicContactForm />}
       </DSFRContainer>
     </DSFRLayout>
   );

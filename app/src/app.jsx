@@ -49,7 +49,7 @@ import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu
 import { history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
 import { cohortsInit } from "./utils/cohorts";
-import ContactForm from "./scenes/contact";
+import Contact from "./scenes/contact";
 import Thanks from "./scenes/contact/Thanks";
 
 initSentry();
@@ -129,7 +129,7 @@ const OptionalLogIn = () => {
       <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
       <SentryRoute path="/auth" component={Auth} />
       <SentryRoute path="/public-engagements" component={AllEngagements} />
-      <SentryRoute path="/contact" component={ContactForm} />
+      <SentryRoute path="/contact" component={Contact} />
       <SentryRoute path="/merci" component={Thanks} />
       <Redirect to="/" />
     </Switch>
