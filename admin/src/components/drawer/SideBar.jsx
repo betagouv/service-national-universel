@@ -24,6 +24,7 @@ import InviteHeader from "../header/invite";
 import LocationIcon from "./icons/Location";
 import ClipboardIcon from "./icons/Clipboard";
 import { centerHeadCenterRegex, itemsAdministrateur, itemsEngagement, itemsSejourAdmin, itemsSejourGod, itemsSejourRef, volontaireHeadCenterRegex } from "./utils";
+import useDevice from "../../hooks/useDevice";
 
 //Css !important becuse of bootstrap override
 
@@ -32,6 +33,7 @@ const SideBar = (props) => {
   const location = useLocation();
   const exactPath = location.pathname;
   const path = location.pathname.split("/")[1];
+  const device = useDevice();
 
   //State
   const [open, setOpen] = React.useState(false);
@@ -48,6 +50,11 @@ const SideBar = (props) => {
     if (localStorage?.getItem("sideBarOpen") === "true") setOpen(true);
     else setOpen(false);
   }, []);
+
+  //Close the sidebar if the device becomes mobile
+  useEffect(() => {
+    if (device === "mobile") setOpen(false);
+  }, [device]);
 
   //Fetch tickets count
   useEffect(() => {
