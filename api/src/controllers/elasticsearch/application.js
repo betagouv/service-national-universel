@@ -35,6 +35,8 @@ async function buildApplicationContext(user) {
 }
 
 async function populateApplications(applications, exportFields) {
+  if (!applications || !applications.length) return applications;
+
   if (exportFields.includes("youngId")) {
     const youngIds = [...new Set(applications.map((item) => item.youngId))].filter(Boolean);
     const youngs = await allRecords("young", { bool: { must: { ids: { values: youngIds } } } });
@@ -217,14 +219,12 @@ router.post("/by-young/:id/:action(search|export)", passport.authenticate(["refe
     });
 
     if (req.params.action === "export") {
-      let response = await allRecords("application", hitsRequestBody.query, esClient, exportFields);
+      const response = await allRecords("application", hitsRequestBody.query, esClient, exportFields);
       let data = serializeApplications(response);
       data = await populateApplications(data, exportFields);
-
       return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-
       return res.status(200).send(serializeApplications(response.body));
     }
   } catch (error) {
