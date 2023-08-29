@@ -17,6 +17,18 @@ const NavigationArticle = ({ item }) => {
   const { cache } = useSWRConfig();
   const parentId = item.parentId;
   const [siblingsData, setSiblingsData] = useState([]); // État pour stocker les données des frères et sœurs
+  const title = item.parents[1].title;
+  const list = siblingsData;
+  const path = "/base-de-connaissance";
+  const isOpen = router.query.openTheme === item.slug;
+
+  const [active, setActive] = useState(false);
+  const [height, setHeight] = useState("0px");
+  const [rotate, setRotate] = useState("transform duration-700 ease");
+
+  const element = useRef(null);
+  const contentSpace = useRef(null);
+  const isDesktop = useMediaQuery("(min-width: 768px)"); //md
 
   useEffect(() => {
     const fetchSiblings = async () => {
@@ -31,105 +43,88 @@ const NavigationArticle = ({ item }) => {
     fetchSiblings();
   }, [item]);
 
-  const Accordion = ({ title, list = [], className = "", path, isOpen = false, slug: slugTheme }) => {
-    const [active, setActive] = useState(false);
-    const [height, setHeight] = useState("0px");
-    const [rotate, setRotate] = useState("transform duration-700 ease");
-
-    const element = useRef(null);
-    const contentSpace = useRef(null);
-    const isDesktop = useMediaQuery("(min-width: 768px)"); //md
-
-    useEffect(() => {
-      if (isOpen) {
-        setTimeout(() => {
-          element?.current?.scrollIntoView({ behavior: "smooth" });
-        }, 500);
-        setTimeout(() => {
-          toggleAccordion();
-        }, 1000);
-      }
-    }, [isOpen]);
-
-    function toggleAccordion() {
-      setActive((prevState) => !prevState);
-      setHeight(active ? "0px" : `${contentSpace?.current?.scrollHeight}px`);
-      setRotate(active ? "transform duration-700 ease" : "transform duration-700 ease rotate-180");
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
+        element?.current?.scrollIntoView({ behavior: "smooth" });
+      }, 500);
+      setTimeout(() => {
+        toggleAccordion();
+      }, 1000);
     }
+  }, [isOpen]);
 
-    return (
-      <>
-        <div ref={element} className={`flex flex-col justify-start overflow-hidden rounded-md bg-white shadow-md md:rounded-none md:shadow-none ${className}`}>
-          <h3 className="flex md:border-b md:border-t">
-            <button
-              id={slugify(title)}
-              aria-controls={`${slugify(title)}_items`}
-              aria-expanded={active}
-              className={`flex w-full flex-1 cursor-pointer appearance-none flex-row items-center justify-center rounded-none border-none md:justify-between ${
-                active ? "bg-white md:bg-white" : "bg-gray-100 md:bg-white"
-              } py-4 pr-11 shadow-none md:py-[0.5rem]`}
-              onClick={toggleAccordion}
-            >
-              <Link href={`/base-de-connaissance/${item.parents[1].slug}`} className="align-center flex flex-row justify-between text-center md:mr-2" onClick={() => cache.clear()}>
-                <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-400 md:mr-4 md:border-r md:border-gray-200" />
-                <p className="hidden text-sm leading-5 text-gray-500">Retour</p>
-              </Link>
-              <div className="mr-2 flex flex-col justify-center">
-                <span className="line-clamp-2 flex-1 text-center text-sm font-medium text-gray-500 md:hidden">Articles liés</span>
-                <span className="line-clamp-2 flex-1 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-900">{title}</span>
-              </div>
-              <span className={`${rotate} material-icons text-gray-400 md:hidden`}>expand_more</span>
-            </button>
-          </h3>
-
-          <div
-            id={`${slugify(title)}_items`}
-            aria-labelledby={slugify(title)}
-            ref={contentSpace}
-            style={{ maxHeight: isDesktop ? "auto" : `${height}` }}
-            className="transition-max-height overflow-auto duration-700 ease-in-out"
-          >
-            {list && list.length > 0 ? (
-              <ul>
-                {list.map(({ _id, title, slug, type }, index) => (
-                  <li
-                    className={`flex border-gray-200 text-sm font-medium leading-5 text-gray-600 ${
-                      _id === item._id ? "rounded-md bg-gray-200 text-gray-900 md:rounded-none" : "text-gray-600"
-                    }`}
-                    key={index}
-                  >
-                    <Link
-                      tabIndex={active ? 0 : -1}
-                      className="flex flex-1 items-center px-6 py-4"
-                      href={`${path}/${type === "section" ? slugTheme : slug}${type === "section" ? `?loadingType=section&openTheme=${slug}` : ""}`}
-                      onClick={() => cache.clear()}
-                    >
-                      {type === "section" && <FolderIcon />}
-                      <span className="line-clamp-2">{title}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="px-6 pb-4 text-sm font-medium text-gray-400">Articles en cours de rédaction ⏳</div>
-            )}
-          </div>
-        </div>
-      </>
-    );
-  };
+  function toggleAccordion() {
+    setActive((prevState) => !prevState);
+    setHeight(active ? "0px" : `${contentSpace?.current?.scrollHeight}px`);
+    setRotate(active ? "transform duration-700 ease" : "transform duration-700 ease rotate-180");
+  }
 
   return (
     <>
-      <Accordion
-        key={item._id}
-        title={item.parents[1].title}
-        list={siblingsData}
-        className="mb-3 w-full"
-        path="/base-de-connaissance"
-        isOpen={router.query.openTheme === item.slug}
-        slug={item.slug}
-      />
+      <Link href={`/base-de-connaissance/${item.parents[1].slug}`} className=" align-center mb-2 flex flex-row justify-start text-center md:hidden" onClick={() => cache.clear()}>
+        <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-500" />
+        <p className="text-sm leading-5 text-gray-500">Retour</p>
+      </Link>
+      <div ref={element} className={`flex flex-col justify-start overflow-hidden rounded-md bg-white shadow-md md:rounded-none md:shadow-none`}>
+        <h3 className="flex md:border-b md:border-t">
+          <button
+            id={slugify(title)}
+            aria-controls={`${slugify(title)}_items`}
+            aria-expanded={active}
+            className={`flex w-full flex-1 cursor-pointer appearance-none flex-row items-center justify-center rounded-none border-none md:justify-between ${
+              active ? "bg-white md:bg-white" : "bg-gray-100 md:bg-white"
+            } py-4 shadow-none md:py-[0.5rem] md:pr-12`}
+            onClick={toggleAccordion}
+          >
+            <Link
+              href={`/base-de-connaissance/${item.parents[1].slug}`}
+              className="align-center flex hidden flex-row justify-between text-center md:mr-2 md:block"
+              onClick={() => cache.clear()}
+            >
+              <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-400 md:mr-4 md:border-r md:border-gray-200" />
+            </Link>
+            <div className="mr-2 flex flex-col justify-center">
+              <span className="line-clamp-2 flex-1 text-center text-sm font-medium text-gray-500 md:hidden">Articles liés</span>
+              <span className="line-clamp-2 flex-1 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-900">{title}</span>
+            </div>
+            <span className={`${rotate} material-icons text-gray-400 md:hidden`}>expand_more</span>
+          </button>
+        </h3>
+
+        <div
+          id={`${slugify(title)}_items`}
+          aria-labelledby={slugify(title)}
+          ref={contentSpace}
+          style={{ ...(isDesktop ? {} : { maxHeight: `${height}` }) }}
+          className="transition-max-height overflow-auto duration-700 ease-in-out"
+        >
+          {list && list.length > 0 ? (
+            <ul>
+              {list.map(({ _id, title, slug, type }, index) => (
+                <li
+                  className={`flex border-gray-200 text-sm font-medium leading-5 text-gray-600 ${
+                    _id === item._id ? "rounded-md bg-gray-200 text-gray-900 md:rounded-none" : "text-gray-600"
+                  }`}
+                  key={index}
+                >
+                  <Link
+                    tabIndex={active ? 0 : -1}
+                    className="flex flex-1 items-center px-6 py-4"
+                    href={`${path}/${type === "section" ? slugTheme : slug}${type === "section" ? `?loadingType=section&openTheme=${slug}` : ""}`}
+                    onClick={() => cache.clear()}
+                  >
+                    {type === "section" && <FolderIcon />}
+                    <span className="line-clamp-2">{title}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="px-6 pb-4 text-sm font-medium text-gray-400">Articles en cours de rédaction ⏳</div>
+          )}
+        </div>
+      </div>
     </>
   );
 };

@@ -24,7 +24,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
               <NavigationArticle item={item} />
             </div>
           )}
-          <div className={item.parents.length > 2 ? "min-w-[550px]" : ""}>
+          <div className={item.parents.length > 2 ? "max-w-[750px]" : ""}>
             <div className="flew-row flex justify-between pb-2 pt-4">
               <div className="mr-4">
                 <h2 className="mb-2 text-[24px] font-bold print:mb-0 print:text-black">{group?.title}</h2>
