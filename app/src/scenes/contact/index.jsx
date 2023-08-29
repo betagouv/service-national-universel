@@ -4,10 +4,14 @@ import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import ContactForm from "./components/contactForm";
 import PublicContactForm from "./components/PublicContactForm";
+import { environment } from "@/config";
+import { Redirect } from "react-router-dom/cjs/react-router-dom";
 
 export default function Contact() {
   const young = useSelector((state) => state.Auth.young);
+  // TODO: fetch questions and articles from API
 
+  if (environment === "production") return <Redirect to="/public-besoin-d-aide" />;
   return (
     <DSFRLayout title="Formulaire de contact">
       <DSFRContainer title="Je n'ai pas trouvé de réponse à ma question">

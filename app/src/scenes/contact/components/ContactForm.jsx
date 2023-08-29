@@ -2,24 +2,21 @@ import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
-import plausibleEvent from "@/services/plausible";
 import API from "@/services/api";
 import { capture } from "@/sentry";
-import { roles, categories, articleSummaries, questions } from "../contact.utils";
+import { articleSummaries, questions, categories } from "../contact.utils";
 
-import Article from "./Article";
 import Button from "@/components/dsfr/ui/buttons/Button";
 import FileImport from "@/components/dsfr/forms/FileImport";
 import { HiArrowRight } from "react-icons/hi";
 import QuestionBubble from "@/assets/icons/QuestionBubbleReimport";
-import SecondaryButton from "@/components/dsfr/ui/buttons/SecondaryButton";
 import Select from "@/components/dsfr/forms/Select";
 import Textarea from "@/components/dsfr/forms/Textarea";
 import Unlock from "@/assets/icons/Unlock";
+import Solutions from "./Solutions";
 
 export default function ContactForm() {
   const history = useHistory();
-  const fromPage = new URLSearchParams(window.location.search).get("from ");
 
   // Form state
   const [showForm, setShowForm] = useState(false);
@@ -33,8 +30,8 @@ export default function ContactForm() {
   const [files, setFiles] = useState([]);
 
   // Derived state
-  const categoryOptions = questions.filter((e) => e.category === category);
-  const articles = articleSummaries.filter((e) => categoryOptions.find((e) => e.value === question)?.articles?.includes(e.slug));
+  const questionOptions = questions.filter((e) => e.category === category && e.roles.includes("young"));
+  const articles = articleSummaries.filter((e) => questionOptions.find((e) => e.value === question)?.articles?.includes(e.slug));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,12 +48,10 @@ export default function ContactForm() {
         uploadedFiles = filesResponse.uploadFiles;
       }
 
-      const subject = `${categories.find((e) => e.value === category)?.label} - ${categoryOptions.find((e) => e.value === question)?.label}`;
-
       const response = await API.post("/zammood/ticket", {
         message,
-        subject,
-        fromPage,
+        subject: `${categories.find((e) => e.value === category)?.label} - ${questionOptions.find((e) => e.value === question)?.label}`,
+        fromPage: new URLSearchParams(window.location.search).get("from "),
         subjectStep0: role,
         subjectStep1: category,
         subjectStep2: question,
@@ -68,10 +63,9 @@ export default function ContactForm() {
       }
       history.push("/merci");
     } catch (e) {
+      setLoading(false);
       capture(e);
       toastr.error("Oups, une erreur est survenue", translate(e.code));
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -103,29 +97,18 @@ export default function ContactForm() {
         </div>
       </div>
 
-      <Select label="Je suis" options={roles} value={role} onChange={setRole} />
+      <Select
+        label="Je suis"
+        options={[
+          { label: "Un volontaire", value: "young" },
+          { label: "Un représentant légal", value: "parent" },
+        ]}
+        value={role}
+        onChange={setRole}
+      />
       {role && <Select label="Ma demande" options={categories} value={category} onChange={setCategory} />}
-      {category && <Select label="Sujet" options={categoryOptions} value={question} onChange={setQuestion} />}
-      {articles.length > 0 && (
-        <>
-          <h2 className="text-xl font-semibold mb-4">Solutions proposées</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            {articles.map((e) => (
-              <Article key={e.slug} article={e} />
-            ))}
-          </div>
-          {!showForm && (
-            <SecondaryButton
-              className="my-8 w-full md:w-auto"
-              onClick={() => {
-                setShowForm(true);
-                plausibleEvent("Besoin d'aide - Je n'ai pas trouve de reponse");
-              }}>
-              Ecrire au support
-            </SecondaryButton>
-          )}
-        </>
-      )}
+      {category && <Select label="Sujet" options={questionOptions} value={question} onChange={setQuestion} />}
+      {articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
 
       {question && (articles.length === 0 || showForm) && (
         <form onSubmit={handleSubmit}>
