@@ -30,6 +30,8 @@ const translate = (value) => {
       return "Validée";
     case "DELETED":
       return "Supprimée";
+    case "deleted":
+        return "Supprimée";
     case "WAITING_LIST":
       return "Sur liste complémentaire";
     case "NOT_AUTORISED":
