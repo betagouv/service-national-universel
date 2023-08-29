@@ -86,7 +86,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
           <h1 className="text-3xl font-bold leading-9">{item?.title}</h1>
         </div>
       </div>
-      <div className="mx-auto mt-[-40px] flex w-full max-w-[730px] flex-col items-center justify-center px-4">
+      <div className="mx-auto mt-[-50px] flex w-full max-w-[730px] flex-col items-center justify-center px-4">
         <div className="px-auto mt-6 flex w-full max-w-[730px] flex-col rounded-lg bg-[#E3E3FB] px-2 pb-4 pt-2">
           <div className="flex cursor-pointer flex-row items-center justify-between">
             <div className="flex flex-row">
@@ -96,7 +96,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
           </div>
           <div className={`transition-max-height flex flex-row gap-2 overflow-x-auto duration-700 md:overflow-x-hidden`}>
             {topArticles.slice(0, 3).map(({ _id, title, slug }) => (
-              <div key={_id} className="m-2 flex min-h-[100px] min-w-[60%] flex-col justify-center rounded-lg bg-white p-4 shadow-md md:min-h-0 md:min-w-0 md:flex-grow">
+              <div key={_id} className="m-2 flex min-h-[100px] min-w-[60%] md:min-w-[30%] flex-col justify-center rounded-lg bg-white p-4 shadow-md md:min-h-0 md:min-w-0 md:flex-grow">
                 <h3 className="mb-8 line-clamp-2 text-sm font-bold leading-5 text-gray-900">{title}</h3>
                 <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
                   <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p>
