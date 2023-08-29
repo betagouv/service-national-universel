@@ -110,7 +110,7 @@ const SideBar = (props) => {
     <SimpleNavItem
       sideBarOpen={open}
       Icon={LocationIcon}
-      title="Point de rassemblement"
+      title="Points de rassemblement"
       link="/point-de-rassemblement/liste/liste-points"
       active={path === "point-de-rassemblement"}
     />
@@ -125,7 +125,7 @@ const SideBar = (props) => {
     />
   );
   const CentresHeadCenter = () => (
-    <SimpleNavItem sideBarOpen={open} Icon={SejourIcon} title="Centres" link={`/centre/${sessionPhase1?.cohesionCenterId}`} active={centerHeadCenterRegex.test(exactPath)} />
+    <SimpleNavItem sideBarOpen={open} Icon={SejourIcon} title="Centre" link={`/centre/${sessionPhase1?.cohesionCenterId}`} active={centerHeadCenterRegex.test(exactPath)} />
   );
 
   //MultiNavLinks

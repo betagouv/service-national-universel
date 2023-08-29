@@ -4,7 +4,7 @@ export const itemsSejourGod = [
     link: "/centre",
   },
   {
-    title: "Point de rassemblement",
+    title: "Points de rassemblement",
     link: "/point-de-rassemblement/liste/liste-points",
   },
   {
@@ -37,7 +37,7 @@ export const itemsSejourAdmin = [
     link: "/centre",
   },
   {
-    title: "Point de rassemblement",
+    title: "Points de rassemblement",
     link: "/point-de-rassemblement/liste/liste-points",
   },
   {
@@ -64,7 +64,7 @@ export const itemsSejourRef = [
     link: "/centre",
   },
   {
-    title: "Point de rassemblement",
+    title: "Points de rassemblement",
     link: "/point-de-rassemblement/liste/liste-points",
   },
   {
