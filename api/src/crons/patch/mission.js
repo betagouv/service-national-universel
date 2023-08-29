@@ -1,3 +1,4 @@
+require("dotenv").config({ path: "./../../../.env-prod" });
 require("../../mongo");
 
 const { ObjectId } = require("mongodb");
@@ -112,5 +113,19 @@ exports.handler = async () => {
   } catch (e) {
     slack.error({ title: "❌ Mission Logs", text: e });
     capture(e);
+  }
+};
+
+// Script de rattrapage manuel
+// commande terminal : node -e "require('./mission').manualHandler('2023-08-17', '2023-08-18')"
+exports.manualHandler = async (startDate, endDate) => {
+  try {
+    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+
+    await findAll(MissionPatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
+
+    console.log(result);
+  } catch (e) {
+    console.log(e);
   }
 };
