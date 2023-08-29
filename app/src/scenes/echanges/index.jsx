@@ -3,12 +3,14 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 import API from "../../services/api";
 import Loader from "../../components/Loader";
-import relativeTime from "dayjs/plugin/relativeTime";
-import dayjs from "dayjs";
 import "dayjs/locale/fr";
 import { translateState } from "../../utils";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../sentry";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 const Echanges = () => {
   const user = useSelector((state) => state.Auth.young);
@@ -31,7 +33,11 @@ const Echanges = () => {
     fetchTickets();
   }, []);
 
-  dayjs.extend(relativeTime).locale("fr");
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
+  dayjs.extend(relativeTime);
+  dayjs.locale("fr");
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const renderSubject = (ticket) => {
     const subject = ticket.subject;
@@ -80,7 +86,7 @@ const Echanges = () => {
                       {translateState(ticket.status)}
                     </span>
                   </div>
-                  <span className="text-sm leading-5 font-normal text-gray-500 truncate w-1/6 md:w-1/5">{dayjs(new Date(ticket.updatedAt)).fromNow()}</span>
+                  <span className="text-sm leading-5 font-normal text-gray-500 truncate w-1/6 md:w-1/5">{dayjs.utc(new Date(ticket.updatedAt)).tz(userTimezone).fromNow()}</span>
                 </div>
               </NavLink>
             ))
