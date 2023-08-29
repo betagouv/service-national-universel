@@ -509,10 +509,7 @@ export async function transformVolontairesSchool(data) {
   let all = data;
   const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
   if (schoolsId?.length) {
-    const { responses } = await api.esQuery("schoolramses", {
-      query: { bool: { must: { ids: { values: schoolsId } } } },
-      size: ES_NO_LIMIT,
-    });
+    const { responses } = await api.post("/elasticsearch/schoolramses/public/search", { filters: { ids: schoolsId } });
     if (responses.length) {
       const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
       all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
@@ -543,10 +540,7 @@ export async function transformInscription(data) {
   let all = data;
   const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
   if (schoolsId?.length) {
-    const { responses } = await api.esQuery("schoolramses", {
-      query: { bool: { must: { ids: { values: schoolsId } } } },
-      size: ES_NO_LIMIT,
-    });
+    const { responses } = await api.post("/elasticsearch/schoolramses/public/search", { filters: { ids: schoolsId } });
     if (responses.length) {
       const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
       all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));

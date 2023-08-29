@@ -119,7 +119,7 @@ router.post("/public/search", async (req, res) => {
   try {
     const { body } = req;
 
-    const filterFields = ["country.keyword", "city.keyword"];
+    const filterFields = ["country.keyword", "city.keyword", "ids"];
     const { queryFilters } = joiElasticSearch({ filterFields, body });
 
     const query = {
@@ -131,6 +131,8 @@ router.post("/public/search", async (req, res) => {
       },
       size: ES_NO_LIMIT,
     };
+
+    if (queryFilters?.ids) query.query.bool.must = { ids: { values: queryFilters.ids } };
 
     if (queryFilters?.country) {
       query.query.bool.filter.push({
