@@ -13,7 +13,10 @@ const formatWeekdayName = (day) => {
 
 export default function DatePicker({ value, onChange, disabled, fromYear, toYear, mode = "single" }) {
   const defaultMonth = mode === "single" ? (value ? new Date(value) : new Date()) : value?.from ? new Date(value.from) : new Date();
-  const selected = mode === "single" ? new Date(value) : { from: value?.from ? new Date(value?.from) : undefined, to: value?.to ? new Date(value?.to) : undefined };
+  const selected =
+    mode === "single"
+      ? dayjs().isoToUtcWithTime(value).toDate()
+      : { from: value?.from ? dayjs().isoToUtcWithTime(value?.from).toDate() : undefined, to: value?.to ? dayjs().isoToUtcWithTime(value?.to).toDate() : undefined };
 
   return (
     <DayPicker
@@ -21,7 +24,8 @@ export default function DatePicker({ value, onChange, disabled, fromYear, toYear
       formatters={{ formatWeekdayName, formatMonthCaption }}
       mode={mode}
       captionLayout="dropdown-buttons"
-      showOutsideDays={true}
+      showOutsideDays
+      weekStartsOn={1}
       defaultMonth={defaultMonth}
       fromYear={fromYear}
       toYear={toYear}

@@ -31,7 +31,7 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
                   <input
                     className={`w-full bg-white text-sm ${disabled ? "text-gray-400" : "text-gray-900"}`}
                     disabled={true}
-                    value={value ? dayjs(value).toUtc().format("DD/MM/YYYY") : ""}
+                    value={value ? dayjs().isoToUtcWithTime(value).format("DD/MM/YYYY") : ""}
                     placeholder={placeholder}
                   />
                 </div>
@@ -52,15 +52,7 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
             leaveTo="opacity-0 translate-y-1">
             <Popover.Panel className="absolute left-0 z-10 pt-2">
               <div className="flex flex-auto rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5 ">
-                <DatePicker
-                  mode={mode}
-                  fromYear={new Date().getFullYear() - 70}
-                  toYear={new Date().getFullYear() + 10}
-                  value={dayjs(value || new Date())
-                    .toUtc()
-                    .toDate()}
-                  onChange={onChange}
-                />
+                <DatePicker mode={mode} fromYear={new Date().getFullYear() - 70} toYear={new Date().getFullYear() + 10} value={value || new Date()} onChange={onChange} />
               </div>
             </Popover.Panel>
           </Transition>
