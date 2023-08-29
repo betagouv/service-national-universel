@@ -59,19 +59,19 @@ const NavigationArticle = ({ item, device }) => {
 
     return (
       <>
-        <div ref={element} className={`flex w-full max-w-[690px] flex-col justify-start overflow-hidden rounded-md bg-white shadow-md ${className}`}>
-          <h3 className="flex">
+        <div ref={element} className={`flex flex-col justify-start overflow-hidden rounded-md md:rounded-none bg-white shadow-md md:shadow-none ${className}`}>
+          <h3 className="flex md:border-t md:border-b">
             <button
               id={slugify(title)}
               aria-controls={`${slugify(title)}_items`}
               aria-expanded={active}
-              className={`flex flex-1 cursor-pointer appearance-none flex-row items-center justify-between rounded-none border-none md:justify-center ${
-                active ? "bg-white" : "bg-gray-100"
-              } px-4 py-4 shadow-none`}
+              className={`flex flex-1 cursor-pointer appearance-none flex-row items-center w-full justify-center rounded-none border-none md:justify-between ${
+                active ? "bg-white md:bg-white" : "bg-gray-100 md:bg-white"
+              } pr-11 py-4 md:py-[0.5rem] shadow-none`}
               onClick={toggleAccordion}
             >
-              <Link href={`/base-de-connaissance/${item.parents[1].slug}`} className="align-center flex flex-row justify-center text-center md:mr-2" onClick={() => cache.clear()}>
-                <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-400 md:mr-2 md:border-r md:border-gray-200" />
+              <Link href={`/base-de-connaissance/${item.parents[1].slug}`} className="align-center flex flex-row justify-between text-center md:mr-2" onClick={() => cache.clear()}>
+                <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-400 md:mr-4 md:border-r md:border-gray-200" />
                 <p className="hidden text-sm leading-5 text-gray-500">Retour</p>
               </Link>
               <div className="mr-2 flex flex-col justify-center">
@@ -93,7 +93,7 @@ const NavigationArticle = ({ item, device }) => {
               <ul>
                 {list.map(({ _id, title, slug, type }, index) => (
                   <li
-                    className={`flex border-gray-200 text-sm font-medium text-gray-900 ${_id === item._id ? "rounded-md bg-gray-200 text-gray-900" : "text-gray-500"}`}
+                    className={`flex border-gray-200 text-sm leading-5 font-medium text-gray-600 ${_id === item._id ? "rounded-md md:rounded-none bg-gray-200 text-gray-900" : "text-gray-600"}`}
                     key={index}
                   >
                     <Link
