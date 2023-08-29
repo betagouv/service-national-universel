@@ -18,7 +18,7 @@ if (environment === "staging") {
   supportURL = "https://app-9266b532-ff6e-4a6a-aeeb-e6ff7bb67f60.cleverapps.io";
   SENTRY_URL = "https://c5165ba99b4f4f2d8f1d4c0b16a654db@sentry.selego.co/14";
   SENTRY_TRACING_SAMPLE_RATE = 1.0;
-  SENTRY_SESSION_SAMPLE_RATE = 1.0;
+  SENTRY_SESSION_SAMPLE_RATE = 0.1;
   SENTRY_ON_ERROR_SAMPLE_RATE = 1.0;
 }
 if (environment === "production") {
@@ -28,7 +28,7 @@ if (environment === "production") {
   supportURL = "https://support.snu.gouv.fr";
   SENTRY_URL = "https://d09670865360498e9567369808de4064@sentry.selego.co/13";
   SENTRY_TRACING_SAMPLE_RATE = 0.01;
-  SENTRY_SESSION_SAMPLE_RATE = 0.01;
+  SENTRY_SESSION_SAMPLE_RATE = 0.005;
   SENTRY_ON_ERROR_SAMPLE_RATE = 1.0;
 }
 const S3PREFIX = "";
