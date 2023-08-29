@@ -20,11 +20,11 @@ const KnowledgeBasePublicArticle = ({ item, isLoading, device }) => {
         <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
         <div className="align-center flex flex-col md:flex-row">
           {item.parents.length > 2 && (
-            <div className="mt-4 w-full md:w-[250px] md:mr-12">
+            <div className="mt-4 w-full md:w-[300px] md:mr-12">
               <NavigationArticle item={item} device={device} />
             </div>
           )}
-          <div className={item.parents.length > 2 ? "max-w-[700px]" : ""}>
+          <div className={item.parents.length > 2 ? "max-w-[650px]" : ""}>
             <div className="flew-row flex justify-between pb-2 pt-4">
               <div className="mr-4">
                 <h2 className="mb-2 text-[24px] font-bold print:mb-0 print:text-black">{group?.title}</h2>

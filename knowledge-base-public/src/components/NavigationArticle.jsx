@@ -76,7 +76,7 @@ const NavigationArticle = ({ item, device }) => {
               </Link>
               <div className="mr-2 flex flex-col justify-center">
                 <span className="line-clamp-2 flex-1 text-center text-sm font-medium text-gray-500 md:hidden">Articles liés</span>
-                <span className="line-clamp-2 flex-1 text-center text-sm font-medium text-gray-900">{title}</span>
+                <span className="line-clamp-2 flex-1 text-center text-xs leading-4 font-medium tracking-wider uppercase text-gray-900">{title}</span>
               </div>
               <span className={`${rotate} material-icons text-gray-400 md:hidden`}>expand_more</span>
             </button>
