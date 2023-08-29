@@ -8,6 +8,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/fr";
 import { translateState } from "../../utils";
 import { toastr } from "react-redux-toastr";
+import { capture } from "../../sentry";
 
 const Echanges = () => {
   const user = useSelector((state) => state.Auth.young);
@@ -23,7 +24,8 @@ const Echanges = () => {
         }
         setUserTickets(data);
       } catch (error) {
-        toastr.error("Erreur pendant la récupération des échanges");
+        capture(e);
+        toastr.error("Le fichier n'a pas pu être téléchargé");
       }
     };
     fetchTickets();
@@ -53,7 +55,7 @@ const Echanges = () => {
         <p className="text-base leading-6 font-normal text-gray-600 mb-4">Retrouvez ici vos échanges avec le support ou votre référent.</p>
       </div>
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <section className="border-b py-4 px-2 md:px-4 flex justify-between text-xs leading-4 font-medium tracking-wider uppercase text-gray-500">
+        <section className="border-b py-[2rem] px-[1rem] md:px-[2rem] flex justify-between text-xs leading-4 font-medium tracking-wider uppercase text-gray-500">
           <span className="w-1/7 md:w-1/5 truncate hidden md:block">Nº demande</span>
           <span className="w-1/7 md:w-1/5 truncate md:hidden">Nº</span>
           <span className="w-2/5 md:w-3/5">Sujet</span>
@@ -66,7 +68,7 @@ const Echanges = () => {
           userTickets
             .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
             .map((ticket) => (
-              <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`} key={ticket._id} className="border-b flex justify-between py-4 px-2 md:py-6 md:px-4  hover:bg-gray-100">
+              <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`} key={ticket._id} className="border-b flex justify-between py-[2rem] px-[1rem] md:px-[2rem] hover:bg-gray-100">
                 <div className="flex w-full justify-between items-center">
                   <span className="text-sm leading-5 font-normal text-gray-500 w-1/7 md:w-1/5">{ticket.number}</span>
                   <span className="text-sm leading-5 font-normal text-gray-500 w-2/5 md:w-3/5">{renderSubject(ticket)}</span>

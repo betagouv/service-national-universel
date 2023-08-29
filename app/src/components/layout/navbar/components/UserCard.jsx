@@ -45,7 +45,7 @@ export default function User({ ticketsInfo }) {
         <Link to="/account" className="flex gap-3">
           <div className="relative">
             <p className="flex h-9 w-9 items-center justify-center rounded-full bg-[#344264] text-center capitalize text-[#768BAC]">{user.firstName[0] + user.lastName[0]}</p>
-            {ticketsInfo.hasNewStatus && (
+            {ticketsInfo.newStatusCount > 0 && (
               <span className="absolute top-[0px] right-[1px] w-2.5 h-2.5 bg-blue-600 rounded-full text-white border-[1px] border-[#212B44] text-xs flex items-center justify-center"></span>
             )}
           </div>
@@ -101,7 +101,7 @@ function Menu({ open, menuRef, user, onClose, ticketsInfo }) {
       {ticketsInfo.hasMessage === true && (
         <Link to="/echanges" onClick={onClose} className="flex items-center justify-between gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
           <p>Mes échanges</p>
-          {ticketsInfo.hasNewStatus === true && <p className="text-xs leading-5 text-white bg-blue-600 px-2 py-0 rounded-full font-medium">{ticketsInfo.newStatusCount}</p>}
+          {ticketsInfo.newStatusCount > 0 && <p className="text-xs leading-5 text-white bg-blue-600 px-2 py-0 rounded-full font-medium">{ticketsInfo.newStatusCount}</p>}
         </Link>
       )}
       <button

@@ -9,6 +9,7 @@ import Logo from "./components/Logo";
 import NavigationMenu from "./components/NavigationMenu";
 import UserCard from "./components/UserCard";
 import UserMenu from "./components/UserMenu";
+import { capture } from "../../../sentry";
 
 export default function Navbar() {
   const device = useDevice();
@@ -21,10 +22,10 @@ export default function Navbar() {
           console.log("API response not OK");
           return setTicketsInfo([]);
         }
-        const { hasMessage, hasNewStatus, newStatusCount } = data;
-        setTicketsInfo({ hasMessage, hasNewStatus, newStatusCount });
+        const { hasMessage, newStatusCount } = data;
+        setTicketsInfo({ hasMessage, newStatusCount });
       } catch (error) {
-        console.log("Error fetching tickets:", error);
+        capture(e);
       }
     };
     fetchTickets();
@@ -71,7 +72,7 @@ function MobileNavbar({ ticketsInfo }) {
       <button onClick={() => openDrawer(UserMenu)} className="flex justify-end pr-4">
         <div className="relative">
           <p className="flex h-9 w-9 items-center justify-center rounded-full bg-[#344264] text-center capitalize text-[#768BAC]">{user.firstName[0] + user.lastName[0]}</p>
-          {ticketsInfo.hasNewStatus && (
+          {ticketsInfo.newStatusCount > 0 && (
             <span className="absolute top-[0px] right-[1px] w-2.5 h-2.5 bg-blue-600 rounded-full text-white border-[1px] border-[#212B44] text-xs flex items-center justify-center"></span>
           )}
         </div>
