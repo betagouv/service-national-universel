@@ -42,7 +42,7 @@ async function getYoungNotesPhase0(startDate, endDate, user) {
     {
       id: "young-notes-phase0",
       value,
-      label: `note${value > 1 ? "s" : ""} interne${value > 1 ? "s" : ""} déposée${value > 1 ? "s" : ""} - phase 1`,
+      label: `note${value > 1 ? "s" : ""} interne${value > 1 ? "s" : ""} déposée${value > 1 ? "s" : ""} - phase 0`,
       icon: "other",
     },
   ];
@@ -83,15 +83,15 @@ async function getYoungRegisteredWithParticularSituation(startDate, endDate, use
 
   const response = await esClient.search({ index: "young", body });
 
-  let handicap = response.body.aggregations.group_by_handicap.buckets.filter((bucket) => bucket.key === "true")[0].doc_count;
-  let qpv = response.body.aggregations.group_by_qpv.buckets.filter((bucket) => bucket.key === "true")[0].doc_count;
-  let rural = response.body.aggregations.group_by_isRegionRural.buckets.filter((bucket) => bucket.key === "true")[0].doc_count;
+  let handicap = response.body.aggregations.group_by_handicap.buckets.find((bucket) => bucket.key === "true")?.doc_count || 0;
+  let qpv = response.body.aggregations.group_by_qpv.buckets.find((bucket) => bucket.key === "true")?.doc_count || 0;
+  let rural = response.body.aggregations.group_by_isRegionRural.buckets.find((bucket) => bucket.key === "true")?.doc_count || 0;
 
   return [
     {
       id: "young-rural-registration",
       value: handicap,
-      label: ` volontaire${handicap > 1 ? "s" : ""} inscrit${handicap > 1 ? "s" : ""} en zones rurales`,
+      label: ` volontaire${handicap > 1 ? "s" : ""} inscrit${handicap > 1 ? "s" : ""} en situation de handicap`,
       icon: "other",
     },
     {
@@ -225,66 +225,10 @@ async function getAbandonedRegistration(startDate, endDate, user) {
   ];
 }
 
-async function test(startDate, endDate, user) {
-  // ref reg only
-  let body = {
-    aggs: {
-      group_by_timeSchedule: {
-        filter: {
-          nested: {
-            path: "timeScheduleFiles",
-            query: {
-              range: {
-                "timeScheduleFiles.uploadedAt": {
-                  gte: new Date(startDate),
-                  lte: new Date(endDate),
-                },
-              },
-            },
-          },
-        },
-      },
-      group_by_pedagoProject: {
-        filter: {
-          nested: {
-            path: "pedagoProjectFiles",
-            query: {
-              range: {
-                "pedagoProjectFiles.uploadedAt": {
-                  gte: new Date(startDate),
-                  lte: new Date(endDate),
-                },
-              },
-            },
-          },
-        },
-      },
-      size: 0,
-      track_total_hits: true,
-    },
-  };
-
-  if (user.role === ROLES.REFERENT_REGION) {
-    body.query.bool.filter.push({ match: { "region.keyword": user.region } });
-  }
-
-  if (user.role === ROLES.REFERENT_DEPARTMENT) {
-    body.query.bool.filter.push({ terms: { "department.keyword": user.department } });
-  }
-
-  const response = await esClient.search({ index: "sessionphase1", body });
-  console.log(response.body.aggregations);
-  const time = response.body.aggregations.group_by_timeSchedule.buckets;
-  const project = response.body.aggregations.group_by_pedagoProject.buckets;
-
-  return [];
-}
-
 module.exports = {
   getYoungNotesPhase0,
   getYoungRegisteredWithParticularSituation,
   getDepartmentRegistrationGoal,
   getRegisterFileOpen,
   getAbandonedRegistration,
-  test,
 };

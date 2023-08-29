@@ -158,13 +158,13 @@ async function getTransportCorrectionRequests(startDate, endDate, user) {
       id: "pdt-modificationbuses-refused",
       value: refusedCount,
       label: `demande${refusedCount > 1 ? "s" : ""} de modification du plan de transport refusée${refusedCount > 1 ? "s" : ""}`,
-      icon: "action",
+      icon: "where",
     },
     {
       id: "pdt-modificationbuses-validated",
       value: validatedCount,
       label: `demande${validatedCount > 1 ? "s" : ""} de modification du plan de transport validée${validatedCount > 1 ? "s" : ""}`,
-      icon: "action",
+      icon: "where",
     },
   ];
 }

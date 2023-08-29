@@ -9,14 +9,7 @@ const {
   getMissionsChangeStatus,
 } = require("./engagement");
 const { getYoungNotesPhase1, getTimeScheduleAndPedagoProject, getTransportCorrectionRequests, getSessions, getLineToPoints } = require("./sejour");
-const {
-  getYoungNotesPhase0,
-  getYoungRegisteredWithParticularSituation,
-  getDepartmentRegistrationGoal,
-  getRegisterFileOpen,
-  getAbandonedRegistration,
-  test,
-} = require("./inscription");
+const { getYoungNotesPhase0, getYoungRegisteredWithParticularSituation, getDepartmentRegistrationGoal, getRegisterFileOpen, getAbandonedRegistration } = require("./inscription");
 
 const keyNumbersByRole = {
   sejour: {
@@ -68,7 +61,6 @@ const keyNumbersByRole = {
       getYoungsWhoStartedOrFinishedMissions,
       getMissionsChangeStatus,
       getRegisterFileOpen,
-      test,
     ],
   },
 };
