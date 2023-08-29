@@ -447,4 +447,4 @@ export const CDN_BASE_URL =
 
 export const getRandomId = () => `${Math.floor(Math.random() * 100000)}-${Date.now()}`;
 
-export const desktopBreakpoint = 1300;
+export const desktopBreakpoint = 1024;

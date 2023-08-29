@@ -99,7 +99,7 @@ export default function MultiNavItem({ sideBarOpen, Icon, items, path, title, cu
                   <div className="!w-6 !h-6 flex items-center justify-center">
                     <BsDot className={`ml-2 text-[#B3B5CD] ${actif ? "!w-4 !h-4 text-[#D0D2E2]" : "!w-3 !h-3 hover:text-[#B3B5CD]"}`} />
                   </div>
-                  <p className={`pl-2 text-sm leading-5 text-[#D0D2E2] ${actif ? "text-[#EEEFF5]" : "group-hover:text-[#EEEFF5]"}`}>{item.title}</p>
+                  <p className={`pl-2 text-sm leading-5 text-[#D0D2E2]/80 ${actif ? "text-[#EEEFF5]" : "group-hover:text-[#EEEFF5]"}`}>{item.title}</p>
                 </Link>
               );
             })}
