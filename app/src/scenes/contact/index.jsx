@@ -2,10 +2,10 @@ import React from "react";
 import { useSelector } from "react-redux";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import ContactForm from "./components/contactForm";
+import ContactForm from "./components/ContactForm";
 import PublicContactForm from "./components/PublicContactForm";
 import { environment } from "@/config";
-import { Redirect } from "react-router-dom/cjs/react-router-dom";
+import { Redirect } from "react-router-dom";
 
 export default function Contact() {
   const young = useSelector((state) => state.Auth.young);
