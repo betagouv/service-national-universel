@@ -8,7 +8,7 @@ import FeedbackComponent from "../FeedBack";
 import NavigationArticle from "../NavigationArticle";
 import { HiPrinter } from "react-icons/hi";
 
-const KnowledgeBasePublicArticle = ({ item, isLoading, device }) => {
+const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
   const group = useMemo(() => {
     return item?.group || item?.parents?.[0]?.group;
   }, [item]);
@@ -21,7 +21,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading, device }) => {
         <div className="align-center flex flex-col md:flex-row">
           {item.parents.length > 2 && (
             <div className="mt-4 w-full md:max-w-[200px] md:mr-12">
-              <NavigationArticle item={item} device={device} />
+              <NavigationArticle item={item} />
             </div>
           )}
           <div className={item.parents.length > 2 ? "min-w-[550px]" : ""}>

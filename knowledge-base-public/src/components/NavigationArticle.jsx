@@ -11,7 +11,7 @@ import { useMediaQuery } from "../hooks/useMediaQuery";
 
 // accessibility: https://www.w3.org/WAI/ARIA/apg/patterns/accordion/
 
-const NavigationArticle = ({ item, device }) => {
+const NavigationArticle = ({ item }) => {
   const { restriction } = useUser();
   const router = useRouter();
   const { cache } = useSWRConfig();
