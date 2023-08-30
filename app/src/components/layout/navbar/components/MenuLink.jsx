@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import StatusPill from "./StatusPill";
 
-export default function MenuItem({ to, enabled = true, icon, text, status, onClose }) {
+export default function MenuItem({ to, enabled = true, icon, text, status, onClose, ticketCount }) {
   const isActive = location.pathname.includes(to) && (to !== "/" || location.pathname === "/");
 
   if (enabled) {
@@ -16,6 +16,7 @@ export default function MenuItem({ to, enabled = true, icon, text, status, onClo
           activeClassName="bg-[#344264] text-[#67A4FF] hover:bg-[#344264] hover:text-[#67A4FF]">
           {icon && <div className={`w-5 ${isActive ? "text-[#67A4FF]" : "text-[#7A90C3]"}`}>{icon}</div>}
           {text && <span>{text}</span>}
+          {ticketCount > 0 && <span className="text-xs leading-5 text-white bg-blue-600 px-2 py-0 rounded-full font-medium mr-4">{ticketCount}</span>}
           {status && <StatusPill status={status} />}
         </NavLink>
       </li>
