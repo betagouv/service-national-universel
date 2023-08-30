@@ -53,7 +53,6 @@ const ModifyEmailModal = ({ onClose, isOpen, onEmailChange }) => {
 
     if (!Object.keys(errors).length) {
       onEmailChange(email.trim());
-      _onClose();
     }
   };
 

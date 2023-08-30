@@ -114,21 +114,12 @@ class Auth {
       if (config.ENVIRONMENT !== "production") {
         await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
           emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
-          params: { registration_code: tokenEmailValidation },
+          params: { registration_code: tokenEmailValidation, cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}` },
         });
       }
 
       const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt_young", token, cookieOptions(JWT_MAX_AGE));
-
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
-        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
-        params: {
-          firstName: user.firstName,
-          lastName: user.lastName,
-          cta: `${config.APP_URL}/inscription2023?utm_campaign=transactionnel+compte+créé&utm_source=notifauto&utm_medium=mail+219+accéder`,
-        },
-      });
 
       return res.status(200).send({
         ok: true,
@@ -157,13 +148,22 @@ class Auth {
 
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
 
+      const existingUser = await this.model.findOne({
+        email: value.email,
+      });
+
+      if (existingUser) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
+
       const tokenEmailValidation = await crypto.randomInt(1000000);
       user.set({ email: value.email, tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10 });
       await user.save();
 
       await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
         emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: value.email }],
-        params: { registration_code: tokenEmailValidation },
+        params: {
+          registration_code: tokenEmailValidation,
+          params: { registration_code: tokenEmailValidation, cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}` },
+        },
       });
 
       return res.status(200).send({
@@ -328,6 +328,15 @@ class Auth {
       user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, emailVerified: "true" });
       await user.save();
 
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
+        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
+        params: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          cta: `${config.APP_URL}/inscription2023?utm_campaign=transactionnel+compte+créé&utm_source=notifauto&utm_medium=mail+219+accéder`,
+        },
+      });
+
       const trustToken = jwt.sign({}, config.secret, { expiresIn: TRUST_TOKEN_MAX_AGE });
       res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(TRUST_TOKEN_MAX_AGE));
 
@@ -363,7 +372,10 @@ class Auth {
 
       await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
         emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: req.user.email }],
-        params: { registration_code: tokenEmailValidation },
+        params: {
+          registration_code: tokenEmailValidation,
+          params: { registration_code: tokenEmailValidation, cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}` },
+        },
       });
 
       return res.status(200).send({

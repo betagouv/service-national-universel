@@ -149,10 +149,10 @@ export default function StepConfirm() {
           </div>
         </div>
         <hr className="my-3 md:my-4 h-px border-0 md:bg-gray-200" />
-        <InfoMessage>Nous allons vous envoyer un code pour activer votre adresse email renseignée ci-dessus.</InfoMessage>
+        <InfoMessage>Nous allons vous envoyer un code pour activer votre adresse e-mail.</InfoMessage>
         <SignupButtonContainer
           onClickNext={() => onSubmit()}
-          labelNext="Recevoir un code d'activation par email"
+          labelNext="Recevoir un code d'activation par e-mail"
           onClickPrevious={() => history.push("/preinscription/profil")}
           disabled={Object.values(error).length}
           collapsePrevious={true}

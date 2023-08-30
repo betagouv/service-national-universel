@@ -17,7 +17,7 @@ const DidNotReceiveActivationCodeModal = ({ onClose, isOpen, onRequestNewToken, 
       </div>
       <div className="p-4 md:p-6 !pt-0">
         <h1 className="mb-3 text-2xl font-semibold text-[#161616]">
-          <ArrowRightBlue className="inline mr-2" /> Je n'ai rien reçu le code d'activation par e-mail
+          <ArrowRightBlue className="inline mr-2" /> Je n'ai pas reçu le code d'activation par e-mail
         </h1>
         <span className="text-[#3A3A3A]">Si vous ne recevez pas le mail, nous vous invitons à vérifier que :</span>
         <ul className="mt-4 list-none text-[#0063CB] flex flex-col gap-1">
