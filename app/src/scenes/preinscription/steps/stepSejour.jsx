@@ -17,7 +17,7 @@ export default function StepSejour() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer title="Choisissez la date du séjour" supportLink={`${appURL}/public-besoin-d-aide/`}>
+      <DSFRContainer title="Choisissez la date du séjour" supportLink={`https://support.snu.gouv.fr/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire`}>
         <div className="my-2 font-semibold">Séjours de cohésion disponibles</div>
         <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
         <div className="my-4">{data.sessions?.map((e) => SessionButton(e))}</div>

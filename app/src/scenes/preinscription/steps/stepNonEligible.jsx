@@ -54,7 +54,7 @@ export default function NonEligible() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer supportLink={`${appURL}/public-besoin-d-aide/`}>
+      <DSFRContainer supportLink={`https://support.snu.gouv.fr/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire`}>
         <h1 className="text-[22px] font-bold">Nous n'avons pas trouvé de séjour qui correspond à votre situation.</h1>
         <p className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">
           Les inscriptions sont actuellement uniquement ouvertes aux volontaires <strong>âgés de 15 à 17 ans</strong> et <strong>scolarisés en seconde</strong>{" "}
