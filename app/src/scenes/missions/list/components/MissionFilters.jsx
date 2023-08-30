@@ -81,18 +81,28 @@ export default function MissionFilters({ filters, setFilters }) {
     });
   };
 
+  const getLocation = async (q, postcode) => {
+    try {
+      let res = await apiAdress(q, { postcode });
+      if (res?.features?.length) {
+        const location = { lat: res?.features[0]?.geometry?.coordinates[1], lon: res?.features[0]?.geometry?.coordinates[0] };
+        return setFilters((prev) => ({ ...prev, location }));
+      }
+      // if no result, try with zip code only
+      res = await apiAdress(postcode, { postcode });
+      if (res?.features?.length) {
+        const location = { lat: res?.features[0]?.geometry?.coordinates[1], lon: res?.features[0]?.geometry?.coordinates[0] };
+        return setFilters((prev) => ({ ...prev, location }));
+      }
+      toastr.error("Impossible de trouver des coordonnées valides");
+      return null;
+    } catch (e) {
+      capture(e);
+    }
+  };
+
   useEffect(() => {
     if (!young) return;
-    const getLocation = async () => {
-      try {
-        if (filters.location?.lat && filters.location?.lon) return;
-        const location = await getCoordinates({ q: young?.address, postcode: young?.zip });
-        if (!location) toastr.error("Impossible de trouver des coordonnées valides");
-        setFilters({ ...filters, location });
-      } catch (e) {
-        capture(e);
-      }
-    };
     const getManagerPhase2 = async () => {
       try {
         if (referentManagerPhase2?.email) return;
@@ -102,17 +112,13 @@ export default function MissionFilters({ filters, setFilters }) {
         capture(e);
       }
     };
-    getLocation();
+    if (!filters.location?.lat || filters.location?.lon) getLocation(young?.address, young?.zip);
     getManagerPhase2();
   }, [young]);
 
   useEffect(() => {
     if (!focusedAddress) return;
-    (async () => {
-      const location = await getCoordinates({ q: focusedAddress.address, postcode: focusedAddress.zip });
-      if (!location) toastr.error("Impossible de trouver des coordonnées valides");
-      if (location) setFilters((prev) => ({ ...prev, location }));
-    })();
+    getLocation(focusedAddress?.address, focusedAddress?.zip);
   }, [focusedAddress]);
 
   function getMarginDistance(ele) {
@@ -130,30 +136,6 @@ export default function MissionFilters({ filters, setFilters }) {
         return "Choisir une période";
       default:
         return "N'importe quand";
-    }
-  };
-
-  const callSingleAddressAPI = async (q, postcode) => {
-    try {
-      const res = await apiAdress(q, { postcode });
-      return res?.features[0];
-    } catch (e) {
-      capture(e);
-    }
-  };
-
-  const getCoordinates = async ({ q, postcode }) => {
-    try {
-      let adresse = await callSingleAddressAPI(q, postcode);
-      if (!adresse) {
-        console.warn("Utilisation du zip code seul");
-        adresse = await callSingleAddressAPI(postcode, postcode);
-      }
-      if (!adresse) return null;
-      const coordinates = adresse?.geometry?.coordinates;
-      return { lat: coordinates[1], lon: coordinates[0] };
-    } catch (e) {
-      capture(e);
     }
   };
 
