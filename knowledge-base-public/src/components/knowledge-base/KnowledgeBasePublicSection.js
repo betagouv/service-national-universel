@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import KnowledgeBaseSectionCard from "./KnowledgeBaseSectionCard";
 import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
 import { Accordion } from "../Accordion";
@@ -8,13 +8,44 @@ import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 import React from "react";
 import { useRouter } from "next/router";
 import KnowledgeBaseSearch from "./KnowledgeBaseSearch";
-import { HiSearch } from "react-icons/hi";
+import { HiSearch, HiStar } from "react-icons/hi";
+import Link from "next/link";
+import { environment } from "../../config";
 
 const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   const router = useRouter();
   const [sections, setSections] = useState(item?.children?.filter((c) => c.type === "section") || []);
   const [articles, setArticles] = useState(item?.children?.filter((c) => c.type === "article") || []);
+  const topArticles = (item?.children?.filter((c) => c.type === "article") || []).sort((a, b) => b.read - a.read);
   const [searchOpen, setSearchOpen] = useState(false);
+
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    function handleScroll() {
+      const el = scrollRef.current;
+      if (el) {
+        const isScrollEnd = el.scrollWidth - el.scrollLeft === el.clientWidth;
+
+        if (isScrollEnd) {
+          el.style.borderRight = "none";
+        } else {
+          el.style.borderRight = "1px solid #ccc"; // Remplacez #ccc par la couleur de votre choix
+        }
+      }
+    }
+
+    const el = scrollRef.current;
+    if (el) {
+      el.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      if (el) {
+        el.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     setSections(item?.children?.filter((c) => c.type === "section") || []);
@@ -23,6 +54,8 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   useEffect(() => {
     setArticles(item?.children?.filter((c) => c.type === "article") || []);
   }, [item]);
+
+  console.log(environment)
 
   if (isRoot) {
     return (
@@ -44,7 +77,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
             <h2 className="col-span-2 mb-4 text-xl font-bold text-white md:mx-2 lg:col-span-3">Thématiques générales</h2>
             {!isLoading ? (
               sections.map(({ _id, position, icon, title, slug, children }) => {
-                return device === "desktop" && children?.length ? (
+                return device === "desktop" ? (
                   <KnowledgeBaseSectionCard
                     key={_id}
                     _id={_id}
@@ -58,7 +91,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
                     className="mx-2 mb-8"
                   />
                 ) : (
-                  <>{children?.length && <Accordion key={_id} title={title} list={children} className="mb-3" path="/base-de-connaissance" slug={slug} />}</>
+                  <>{children && children.length > 0 && <Accordion key={_id} title={title} list={children} className="mb-3" path="/base-de-connaissance" slug={slug} />}</>
                 );
               })
             ) : (
@@ -80,12 +113,36 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
     <>
       <div className="min-h-60 md:min-h-48 w-full border-t-[1px] border-white border-opacity-20 bg-[#32257F] pb-[50px] text-white">
         <div className="mx-auto mt-6 space-y-1 px-4 md:w-[712px]">
-          <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" className="text-white" />
+          <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
           <h1 className="text-3xl font-bold leading-9">{item?.title}</h1>
         </div>
       </div>
-
-      <div className="mx-auto mt-[-40px] flex w-full max-w-[730px] flex-col items-start justify-center px-4">
+      <div className="mx-auto mt-[-50px] flex w-full max-w-[730px] flex-col items-center justify-center px-4">
+        {environment !== "developpement" && (
+          <>
+            <div className="px-auto mt-6 flex w-full max-w-[730px] flex-col rounded-lg bg-[#E3E3FB] pb-4 pt-2 shadow-md md:px-2">
+              <div className="ml-2 flex cursor-pointer flex-row items-center justify-between md:ml-[0px]">
+                <div className="flex flex-row">
+                  <HiStar className="ml-1.5 mr-2 mt-2.5 text-xl text-gray-900" />
+                  <p className="py-2 text-base font-bold leading-6 text-gray-900">Articles les plus consultés</p>
+                </div>
+              </div>
+              <div className={`transition-max-height flex flex-row overflow-x-auto duration-700 md:gap-2`}>
+                {topArticles.slice(0, 3).map(({ _id, title, slug }) => (
+                  <div
+                    key={_id}
+                    className="mx-3.5 my-2 flex min-h-[130px] min-w-[200px] flex-col justify-between rounded-lg border-[1px] border-gray-300 bg-white px-4 py-2 md:m-2 md:min-w-[30%] md:max-w-[30%] md:flex-grow"
+                  >
+                    <h3 className="mb-4 text-sm font-bold leading-5 text-gray-900">{title}</h3>
+                    <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
+                      <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
         {sections.length > 0 && (
           <div key={"sections"} className="mt-3 flex w-full flex-col items-center justify-center">
             {sections.map(({ title, children, _id, slug }) => (
