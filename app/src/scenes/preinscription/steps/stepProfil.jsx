@@ -77,8 +77,8 @@ export default function StepProfil() {
 
   return (
     <>
-      <ProgressBar supportLink={`https://support.snu.gouv.fr/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire`}/>
-      <DSFRContainer title="Créez votre compte">
+      <ProgressBar/>
+      <DSFRContainer supportLink={`https://support.snu.gouv.fr/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire`} title="Créez votre compte">
         <div className="space-y-5">
           <div className="flex flex-col gap-1">
             <label>Prénom du volontaire</label>
