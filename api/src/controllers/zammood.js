@@ -41,9 +41,7 @@ router.get("/ticketsInfo", passport.authenticate(["referent", "young"], { sessio
   try {
     const { ok, data } = await zammood.api(`/v0/ticket?email=${encodeURIComponent(req.user.email)}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const hasMessage = typeof data === "object" && data !== null;
-
+    const hasMessage = Array.isArray(data) && data.length > 0;
     // Count the number of tickets with status "NEW"
     const newStatusCount = Array.isArray(data) ? data.filter((ticket) => ticket.status === "NEW").length : 0;
 
