@@ -2,6 +2,7 @@ import fetchRetry from "fetch-retry";
 import { apiURL } from "../config";
 import { createFormDataForFileUpload } from "snu-lib";
 import { capture } from "../sentry";
+import { ERRORS } from "snu-lib/errors";
 
 let fetch = window.fetch;
 
@@ -103,8 +104,14 @@ class api {
             return;
           }
         }
-        const res = await response.json();
-        resolve(res);
+
+        try {
+          const res = await response.json();
+          resolve(res);
+        } catch (e) {
+          capture(e, { extra: { path: path, responseText: await response.text() } });
+          resolve({ ok: false, code: ERRORS.SERVER_ERROR });
+        }
       } catch (e) {
         if (e.name === "AbortError") {
           console.log("Fetch request was manually reloaded, ignoring error.");
