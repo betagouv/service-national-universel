@@ -25,7 +25,7 @@ export default function Navbar() {
         const { hasMessage, newStatusCount } = data;
         setTicketsInfo({ hasMessage, newStatusCount });
       } catch (error) {
-        capture(e);
+        capture(error);
       }
     };
     fetchTickets();
