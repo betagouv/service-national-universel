@@ -1,3 +1,17 @@
+# [1.326.0](https://github.com/betagouv/service-national-universel/compare/v1.325.0...v1.326.0) (2023-08-30)
+
+
+### Bug Fixes
+
+* **admin:** field with html for mission ([66936b4](https://github.com/betagouv/service-national-universel/commit/66936b49afd58ee5e7ad6d4a133755dd7365134d))
+* **app:** load cohort on phase2 and phase3 pages as well ([40d1884](https://github.com/betagouv/service-national-universel/commit/40d1884e8548ae7389b37a2472b8fe8ee6d2d44d))
+* **app:** typo error ([0d6d66c](https://github.com/betagouv/service-national-universel/commit/0d6d66c3e6b79673ef33859e00c5739583cbaecb))
+
+
+### Features
+
+* **api:** add 2fa redirection ([#2913](https://github.com/betagouv/service-national-universel/issues/2913)) ([6df1da3](https://github.com/betagouv/service-national-universel/commit/6df1da33db7398d922a7b165205fa388cf01bdaf))
+
 # [1.325.0](https://github.com/betagouv/service-national-universel/compare/v1.324.0...v1.325.0) (2023-08-29)
 
 
