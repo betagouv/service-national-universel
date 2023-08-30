@@ -47,7 +47,7 @@ export default function NonEligible() {
     },
   ];
   const onClickButton = () => {
-    removePersistedData(true);
+    removePersistedData();
     history.push("/");
   };
 
