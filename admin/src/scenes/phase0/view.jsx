@@ -937,7 +937,7 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
   let cniYear = "";
 
   if (young.latestCNIFileExpirationDate) {
-    const date = dayjs().isoToUtc(young.latestCNIFileExpirationDate);
+    const date = dayjs(young.latestCNIFileExpirationDate).toUtcLocally();
     cniDay = date.date();
     cniMonth = date.format("MMMM");
     cniYear = date.year();
@@ -2162,7 +2162,7 @@ function HonorCertificate({ young }) {
   if (young && young.cohort && young.latestCNIFileExpirationDate) {
     const cohortDate = START_DATE_SESSION_PHASE1[young.cohort];
     if (cohortDate) {
-      cniExpired = dayjs().isoToUtc(young.latestCNIFileExpirationDate).valueOf() < dayjs(cohortDate).toUtc().valueOf();
+      cniExpired = dayjs(young.latestCNIFileExpirationDate).toUtc().valueOf() < dayjs(cohortDate).toUtc().valueOf();
     }
   }
 

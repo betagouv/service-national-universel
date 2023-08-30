@@ -12,11 +12,11 @@ const formatWeekdayName = (day) => {
 };
 
 export default function DatePicker({ value, onChange, disabled, fromYear, toYear, mode = "single" }) {
-  const defaultMonth = mode === "single" ? (value ? new Date(value) : new Date()) : value?.from ? new Date(value.from) : new Date();
+  const defaultMonth = mode === "single" ? dayjs(value).toUtcLocally().toDate() : dayjs(value?.from).toUtcLocally().toDate();
   const selected =
     mode === "single"
-      ? dayjs().isoToUtcWithTime(value).toDate()
-      : { from: value?.from ? dayjs().isoToUtcWithTime(value?.from).toDate() : undefined, to: value?.to ? dayjs().isoToUtcWithTime(value?.to).toDate() : undefined };
+      ? dayjs(value).toUtcLocally().toDate()
+      : { from: value?.from ? dayjs(value?.from).toUtcLocally().toDate() : undefined, to: value?.to ? dayjs(value?.to).toUtcLocally().toDate() : undefined };
 
   return (
     <DayPicker
