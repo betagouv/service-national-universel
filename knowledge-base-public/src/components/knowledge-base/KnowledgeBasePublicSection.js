@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import KnowledgeBaseSearch from "./KnowledgeBaseSearch";
 import { HiSearch, HiStar } from "react-icons/hi";
 import Link from "next/link";
+import { environment } from "../../config";
 
 const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   const router = useRouter();
@@ -53,6 +54,8 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   useEffect(() => {
     setArticles(item?.children?.filter((c) => c.type === "article") || []);
   }, [item]);
+
+  console.log(environment)
 
   if (isRoot) {
     return (
@@ -115,24 +118,31 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
         </div>
       </div>
       <div className="mx-auto mt-[-50px] flex w-full max-w-[730px] flex-col items-center justify-center px-4">
-        <div className="px-auto mt-6 flex w-full max-w-[730px] flex-col rounded-lg bg-[#E3E3FB] md:px-2 pb-4 pt-2 shadow-md">
-          <div className="flex cursor-pointer flex-row items-center justify-between ml-2 md:ml-[0px]">
-            <div className="flex flex-row">
-              <HiStar className="ml-1.5 mr-2 mt-2.5 text-xl text-gray-900" />
-              <p className="py-2 text-base font-bold leading-6 text-gray-900">Articles les plus consultés</p>
-            </div>
-          </div>
-          <div className={`transition-max-height flex flex-row md:gap-2 overflow-x-auto duration-700`}>
-            {topArticles.slice(0, 3).map(({ _id, title, slug }) => (
-              <div key={_id} className="mx-3.5 my-2 md:m-2 flex min-h-[130px] min-w-[200px] flex-col justify-between rounded-lg bg-white px-4 py-2 md:min-w-[30%] md:max-w-[30%] md:flex-grow border-[1px] border-gray-300">
-                <h3 className="mb-4 text-sm font-bold leading-5 text-gray-900">{title}</h3>
-                <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
-                  <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p>
-                </Link>
+        {environment !== "developpement" && (
+          <>
+            <div className="px-auto mt-6 flex w-full max-w-[730px] flex-col rounded-lg bg-[#E3E3FB] pb-4 pt-2 shadow-md md:px-2">
+              <div className="ml-2 flex cursor-pointer flex-row items-center justify-between md:ml-[0px]">
+                <div className="flex flex-row">
+                  <HiStar className="ml-1.5 mr-2 mt-2.5 text-xl text-gray-900" />
+                  <p className="py-2 text-base font-bold leading-6 text-gray-900">Articles les plus consultés</p>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
+              <div className={`transition-max-height flex flex-row overflow-x-auto duration-700 md:gap-2`}>
+                {topArticles.slice(0, 3).map(({ _id, title, slug }) => (
+                  <div
+                    key={_id}
+                    className="mx-3.5 my-2 flex min-h-[130px] min-w-[200px] flex-col justify-between rounded-lg border-[1px] border-gray-300 bg-white px-4 py-2 md:m-2 md:min-w-[30%] md:max-w-[30%] md:flex-grow"
+                  >
+                    <h3 className="mb-4 text-sm font-bold leading-5 text-gray-900">{title}</h3>
+                    <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
+                      <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
         {sections.length > 0 && (
           <div key={"sections"} className="mt-3 flex w-full flex-col items-center justify-center">
             {sections.map(({ title, children, _id, slug }) => (
