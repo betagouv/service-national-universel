@@ -27,6 +27,7 @@ const apiAdress = async (query, filters = {}, options = {}) => {
   }
 };
 
+// TODO: remove this function, seems unused
 const putLocation = async (city, zip) => {
   try {
     if (!city && !zip) return;

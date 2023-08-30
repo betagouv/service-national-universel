@@ -38,6 +38,7 @@ import RadioUnchecked from "../../../../assets/radioUnchecked.svg";
 import Select from "./Select.jsx";
 import Toggle from "./Toggle";
 import Modal from "../../../../components/ui/modals/Modal";
+import { toastr } from "react-redux-toastr";
 
 export default function MissionFilters({ filters, setFilters }) {
   const young = useSelector((state) => state.Auth.young);
@@ -86,6 +87,7 @@ export default function MissionFilters({ filters, setFilters }) {
       try {
         if (filters.location?.lat && filters.location?.lon) return;
         const location = await getCoordinates({ q: young?.address, postcode: young?.zip });
+        if (!location) toastr.error("Impossible de trouver des coordonnées valides");
         setFilters({ ...filters, location });
       } catch (e) {
         capture(e);
@@ -107,8 +109,8 @@ export default function MissionFilters({ filters, setFilters }) {
   useEffect(() => {
     if (!focusedAddress) return;
     (async () => {
-      let location;
-      location = await getCoordinates({ q: focusedAddress.address, postcode: focusedAddress.zip });
+      const location = await getCoordinates({ q: focusedAddress.address, postcode: focusedAddress.zip });
+      if (!location) toastr.error("Impossible de trouver des coordonnées valides");
       if (location) setFilters((prev) => ({ ...prev, location }));
     })();
   }, [focusedAddress]);
@@ -136,8 +138,7 @@ export default function MissionFilters({ filters, setFilters }) {
       const res = await apiAdress(q, { postcode });
       return res?.features[0];
     } catch (e) {
-      console.error(e);
-      return null;
+      capture(e);
     }
   };
 
@@ -146,14 +147,13 @@ export default function MissionFilters({ filters, setFilters }) {
       let adresse = await callSingleAddressAPI(q, postcode);
       if (!adresse) {
         console.warn("Utilisation du zip code seul");
-        adresse = await callSingleAddressAPI(postcode);
-        if (!adresse) throw "Erreur en utilisant l'api d'adresse";
+        adresse = await callSingleAddressAPI(postcode, postcode);
       }
+      if (!adresse) return null;
       const coordinates = adresse?.geometry?.coordinates;
       return { lat: coordinates[1], lon: coordinates[0] };
     } catch (e) {
-      console.error(e);
-      return null;
+      capture(e);
     }
   };
 
@@ -227,7 +227,6 @@ export default function MissionFilters({ filters, setFilters }) {
 
             {/* Form */}
             <div className="flex flex-col space-y-5">
-
               {/* Keyword */}
               <div className="rounded-xl border bg-white py-3.5 px-4">
                 {!keyWordOpen && (
