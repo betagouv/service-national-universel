@@ -17,6 +17,7 @@ class Auth {
     this.model = model;
   }
 
+  // route is currrently only used for young signup
   async signUp(req, res) {
     try {
       const { error, value } = Joi.object({
@@ -81,6 +82,8 @@ class Auth {
       const session = sessions.find(({ name }) => name === value.cohort);
       if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
+      const tokenEmailValidation = await crypto.randomInt(1000000);
+
       const user = await this.model.create({
         email,
         firstName,
@@ -103,10 +106,20 @@ class Auth {
         grade,
         inscriptionStep2023: STEPS2023.COORDONNEES,
         emailVerified: "false",
+        tokenEmailValidation,
+        attemptsEmailValidation: 0,
+        tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10,
       });
-      const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_MAX_AGE });
-      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(JWT_MAX_AGE));
-      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(JWT_MAX_AGE));
+
+      if (config.ENVIRONMENT !== "production") {
+        await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
+          emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
+          params: { registration_code: tokenEmailValidation },
+        });
+      }
+
+      const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.secret, { expiresIn: JWT_MAX_AGE });
+      res.cookie("jwt_young", token, cookieOptions(JWT_MAX_AGE));
 
       await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
         emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
@@ -125,6 +138,39 @@ class Auth {
     } catch (error) {
       console.log("Error ", error);
       if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  }
+
+  async changeEmailDuringSignUp(req, res) {
+    try {
+      const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required() }).validate(req.body, { stripUnknown: true });
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+      const user = await this.model.findOne({
+        email: req.user.email,
+        emailVerified: "false",
+      });
+
+      if (!user) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+
+      const tokenEmailValidation = await crypto.randomInt(1000000);
+      user.set({ email: value.email, tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10 });
+      await user.save();
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
+        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: value.email }],
+        params: { registration_code: tokenEmailValidation },
+      });
+
+      return res.status(200).send({
+        ok: true,
+        user: serializeYoung(user, user),
+      });
+    } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
@@ -246,6 +292,74 @@ class Auth {
         token,
         user: data,
         data,
+      });
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  }
+
+  async validateEmail(req, res) {
+    try {
+      const { error, value } = Joi.object({ token_email_validation: Joi.string().required() }).unknown().validate(req.body);
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      const { token_email_validation } = value;
+      const user = await this.model.findOne({
+        email: req.user.email,
+        attemptsEmailValidation: { $lt: 3 },
+        tokenEmailValidationExpires: { $gt: Date.now() },
+        emailVerified: "false",
+      });
+      if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      if (user.tokenEmailValidation !== token_email_validation) {
+        user.set({ attemptsEmailValidation: (user.attemptsEmailValidation || 0) + 1 });
+        await user.save();
+        return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      }
+
+      user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, emailVerified: "true" });
+      await user.save();
+
+      const trustToken = jwt.sign({}, config.secret, { expiresIn: TRUST_TOKEN_MAX_AGE });
+      res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(TRUST_TOKEN_MAX_AGE));
+
+      const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
+      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(JWT_MAX_AGE));
+      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(JWT_MAX_AGE));
+
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      return res.status(200).send({
+        ok: true,
+        token,
+        user: data,
+        data,
+      });
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  }
+
+  async requestNewEmailValidationToken(req, res) {
+    try {
+      const user = await this.model.findOne({
+        email: req.user.email,
+        emailVerified: "false",
+      });
+      if (!user) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+
+      const tokenEmailValidation = await crypto.randomInt(1000000);
+
+      user.set({ tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10 });
+      await user.save();
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
+        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: req.user.email }],
+        params: { registration_code: tokenEmailValidation },
+      });
+
+      return res.status(200).send({
+        ok: true,
       });
     } catch (error) {
       capture(error);
