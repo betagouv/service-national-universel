@@ -2,9 +2,10 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Redirect, Router, Switch, useLocation, useHistory } from "react-router-dom";
+
 import { setYoung } from "./redux/auth/actions";
 import { toastr } from "react-redux-toastr";
-import { Redirect, Router, Switch, useLocation } from "react-router-dom";
 import * as Sentry from "@sentry/react";
 
 import Account from "./scenes/account";
@@ -70,14 +71,13 @@ export default function App() {
           ) : (
             <Switch>
               {/* Aucune authentification nécessaire */}
-              <SentryRoute path="/preinscription" component={PreInscription} />
               <SentryRoute path="/noneligible" component={NonEligible} />
               <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
               <SentryRoute path="/validate-contract/done" component={ContractDone} />
               <SentryRoute path="/validate-contract" component={Contract} />
               <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
               {/* Authentification accessoire */}
-              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/besoin-d-aide", "/merci"]} component={() => <OptionalLogIn />} />
+              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/besoin-d-aide", "/merci", "/preinscription"]} component={() => <OptionalLogIn />} />
               {/* Authentification nécessaire */}
               <SentryRoute path="/" component={() => <MandatoryLogIn />} />
             </Switch>
@@ -127,6 +127,7 @@ const OptionalLogIn = () => {
       <SentryRoute path="/auth" component={Auth} />
       <SentryRoute path="/public-engagements" component={AllEngagements} />
       <SentryRoute path="/merci" component={Thanks} />
+      <SentryRoute path="/preinscription" component={PreInscription} />
       <Redirect to="/" />
     </Switch>
   );
@@ -135,6 +136,7 @@ const OptionalLogIn = () => {
 const MandatoryLogIn = () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+  const history = useHistory();
 
   useEffect(() => {
     async function fetchData() {
@@ -148,6 +150,11 @@ const MandatoryLogIn = () => {
         if (token) api.setToken(token);
         if (ok && user) {
           dispatch(setYoung(user));
+          if (environment !== "production") {
+            const forceEmailValidation =
+              user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && inscriptionModificationOpenForYoungs(user.cohort, user, environment);
+            if (forceEmailValidation) return history.push("/preinscription");
+          }
           await cohortsInit();
         }
       } catch (e) {
