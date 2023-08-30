@@ -105,11 +105,12 @@ class api {
           }
         }
 
+        const clonedResponse = response.clone();
         try {
           const res = await response.json();
           resolve(res);
         } catch (e) {
-          capture(e, { extra: { path: path, responseText: await response.text() } });
+          capture(e, { extra: { path: path, responseText: await clonedResponse.text() } });
           resolve({ ok: false, code: ERRORS.SERVER_ERROR });
         }
       } catch (e) {
