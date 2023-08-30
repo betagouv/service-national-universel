@@ -1,6 +1,6 @@
 import React from "react";
 import DatePickerList from "../../phase0/components/DatePickerList";
-import { copyToClipboard } from "../../../utils";
+import { copyToClipboard, htmlCleaner } from "../../../utils";
 import { HiCheckCircle } from "react-icons/hi";
 import { BiCopy } from "react-icons/bi";
 
@@ -40,9 +40,12 @@ export default function Field({ name, label, value, className = "", type = "text
           />
         )}
 
-        {type === "textarea" && (
-          <textarea rows={row} readOnly={readOnly || isJvaMission} type="text" name={name} value={value} onChange={handleChange} className={"w-full text-start " + className} />
-        )}
+        {type === "textarea" &&
+          (readOnly ? (
+            <div className={"w-full h-[84px] text-start overflow-x-auto " + className} dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }} />
+          ) : (
+            <textarea rows={row} readOnly={readOnly || isJvaMission} type="text" name={name} value={value} onChange={handleChange} className={"w-full text-start " + className} />
+          ))}
         {errors[name] && <div className="mt-2 text-red-500">{errors[name]}</div>}
       </div>
     </div>
