@@ -31,7 +31,7 @@ const translate = (value) => {
     case "DELETED":
       return "Supprimée";
     case "deleted":
-        return "Supprimée";
+      return "Supprimée";
     case "WAITING_LIST":
       return "Sur liste complémentaire";
     case "NOT_AUTORISED":
@@ -236,6 +236,8 @@ const translate = (value) => {
       return "Ressource introuvable";
     case "PASSWORD_TOKEN_EXPIRED_OR_INVALID":
       return "Lien expiré ou token invalide";
+    case "EMAIL_VALIDATION_TOKEN_EXPIRED_OR_INVALID":
+      return "Le code d'activation saisi n'est pas valide ou a expiré";
     case "USER_ALREADY_REGISTERED":
       return "Utilisateur déjà inscrit";
     case "PASSWORD_NOT_VALIDATED":

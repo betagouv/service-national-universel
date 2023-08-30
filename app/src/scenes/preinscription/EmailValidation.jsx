@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory, Redirect } from "react-router-dom";
+import { useHistory, Redirect, useLocation } from "react-router-dom";
 import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
+import queryString from "query-string";
 
 import api from "../../services/api";
 import { setYoung } from "../../redux/auth/actions";
@@ -18,9 +19,11 @@ import ModifyEmailModal from "./components/ModifyEmailModal";
 export default function StepEmailValidation() {
   const dispatch = useDispatch();
   const history = useHistory();
+  const { search } = useLocation();
+  const { token } = queryString.parse(search);
   const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState("");
-  const [emailValidationToken, setEmailValidationToken] = useState("");
+  const [emailValidationToken, setEmailValidationToken] = useState(token || "");
   const [isDidNotReceiveCodeModalOpen, setDidNotReceiveCodeModalOpen] = useState(false);
   const [isModifyEmailModalOpen, setModifyEmailOpen] = useState(false);
 
@@ -51,8 +54,10 @@ export default function StepEmailValidation() {
       if (!ok) {
         setError(`Une erreur s'est produite : ${translate(code)}`);
       } else {
-        toastr.success("Un nouveau code d'activation vous a été envoyé par e-mail", "");
+        toastr.success("Un nouveau code d'activation vous a été envoyé par e-mail", "", { timeOut: 6000 });
         setModifyEmailOpen(false);
+        setDidNotReceiveCodeModalOpen(false);
+        setEmailValidationToken("");
       }
     } catch (e) {
       capture(e);
@@ -67,8 +72,8 @@ export default function StepEmailValidation() {
         toastr.error(`Une erreur s'est produite : ${translate(code)}`, "");
       } else {
         dispatch(setYoung(user));
-
-        toastr.success("Votre adresse mail a bien été mise à jour et un code d'activation vous a été envoyé à cette adresse", "");
+        setModifyEmailOpen(false);
+        toastr.success("Votre adresse mail a bien été mise à jour et un code d'activation vous a été envoyé à cette adresse", "", { timeOut: 6000 });
       }
     } catch (e) {
       capture(e);
