@@ -178,7 +178,10 @@ class Auth {
 
         await sendTemplate(SENDINBLUE_TEMPLATES.SIGNIN_2FA, {
           emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
-          params: { token2FA },
+          params: {
+            token2FA,
+            cta: isYoung(user) ? `${config.APP_URL}/auth/2fa?email=${encodeURIComponent(user.email)}` : `${config.ADMIN_URL}/auth/2fa?email=${encodeURIComponent(user.email)}`,
+          },
         });
 
         return res.status(200).send({
