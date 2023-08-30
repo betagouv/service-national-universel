@@ -37,6 +37,7 @@ import Phase3 from "./scenes/phase3";
 import Echanges from "./scenes/echanges";
 import Preferences from "./scenes/preferences";
 import PreInscription from "./scenes/preinscription";
+import PublicSupport from "./scenes/public-support-center";
 import ReInscription from "./scenes/reinscription";
 import RepresentantsLegaux from "./scenes/representants-legaux";
 import Thanks from "./scenes/contact/Thanks";
