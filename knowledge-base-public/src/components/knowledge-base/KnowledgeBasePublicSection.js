@@ -23,15 +23,13 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
 
   const articleFromSection = [];
   sections.map(({ children }) => {
-    console.log(children);
-    for (const e in children) {
-      console.log(e);
-      if (children[e].type === "article") {
-        articleFromSection.push(children[e]);
+    for (const index in children) {
+      if (children[index].type === "article") {
+        articleFromSection.push(children[index]);
       }
     }
   });
-  const Top5Articles = articleFromSection.sort((a, b) => b.read - a.read)
+  const Top5Articles = articleFromSection.sort((a, b) => b.read - a.read);
 
   useEffect(() => {
     function handleScroll() {
@@ -79,19 +77,16 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
             <HiSearch className="text-2xl text-gray-500" />
             Rechercher un article
           </button>
-          <div className={`transition-max-height flex flex-row overflow-x-auto duration-700 md:gap-2`}>
-                {Top5Articles.slice(0, 5).map(({ _id, title, slug }) => (
-                  <div
-                    key={_id}
-                    className="mx-3.5 my-2 flex min-h-[130px] min-w-[200px] flex-col justify-between rounded-lg border-[1px] border-gray-300 bg-white px-4 py-2 md:m-2 md:min-w-[30%] md:max-w-[30%] md:flex-grow"
-                  >
-                    <h3 className="mb-4 text-sm font-bold leading-5 text-gray-900">{title}</h3>
-                    <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
-                      <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p>
-                    </Link>
-                  </div>
-                ))}
+          <div className={`flex flex-row`}>
+            {Top5Articles.slice(0, 5).map(({ _id, title, slug }) => (
+              <div key={_id} className="">
+                <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
+                  <h3 className="mb-4 text-sm font-bold leading-5 text-gray-900">{title}</h3>
+                  {/* <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p> */}
+                </Link>
               </div>
+            ))}
+          </div>
         </div>
 
         <div className="h-32 w-full bg-[#32257F]" />
