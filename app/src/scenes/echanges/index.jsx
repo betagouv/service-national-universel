@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import API from "../../services/api";
 import Loader from "../../components/Loader";
 import "dayjs/locale/fr";
-import { translateState } from "../../utils";
+// import { translateState } from "../../utils";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../sentry";
 import dayjs from "dayjs";
@@ -15,6 +15,50 @@ import relativeTime from "dayjs/plugin/relativeTime";
 const Echanges = () => {
   const user = useSelector((state) => state.Auth.young);
   const [userTickets, setUserTickets] = useState([]);
+
+  //   Temporaire ils faut trouver un moyen de mieux gérer les status
+  const renderStatus = (status) => {
+    let classes;
+    let translatedStatus;
+
+    switch (status) {
+      case "open":
+      case "OPEN":
+        classes = "text-[#27AF66] border border-[#A4D8BC] bg-[#A4D8BC] font-bold";
+        translatedStatus = "Ouvert";
+        break;
+      case "new":
+      case "NEW":
+        classes = "text-blue-600 border border-blue-300 bg-blue-300 font-bold";
+        translatedStatus = "Envoyé";
+        break;
+      case "closed":
+      case "CLOSED":
+        classes = "text-gray-400 border border-gray-300 bg-gray-300 font-normal";
+        translatedStatus = "Résolu";
+        break;
+      case "pending reminder":
+      case "PENDING REMINDER":
+        classes = "text-gray-400 border border-gray-300 bg-gray-300 font-normal";
+        translatedStatus = "En attente";
+        break;
+      case "pending closure":
+      case "PENDING CLOSURE":
+        classes = "text-gray-400 border border-gray-300 bg-gray-300 font-normal";
+        translatedStatus = "En attente";
+        break;
+      case "pending":
+      case "PENDING":
+        classes = "text-gray-400 border border-gray-300 bg-gray-300 font-normal";
+        translatedStatus = "En attente";
+        break;
+      default:
+        classes = "text-gray-500 bg-gray-50 border border-gray-500 font-normal";
+        translatedStatus = status;
+    }
+
+    return <span className={`capitalize py-1 px-2 text-sm leading-5 rounded-2xl inline-block ${classes}`}>{translatedStatus}</span>;
+  };
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -41,7 +85,7 @@ const Echanges = () => {
 
   const renderSubject = (ticket) => {
     const subject = ticket.subject;
-    const isNew = ticket.status === "NEW";
+    const isNew = ticket.status === "OPEN";
     const index = subject.indexOf(" - ");
     const firstPart = index !== -1 ? subject.substring(0, index) : subject;
     const secondPart = index !== -1 ? subject.substring(index + 3) : null;
@@ -78,14 +122,7 @@ const Echanges = () => {
                 <div className="flex w-full justify-between items-center">
                   <span className="text-sm leading-5 font-normal text-gray-500 w-1/7 md:w-1/5">{ticket.number}</span>
                   <span className="text-sm leading-5 font-normal text-gray-500 w-2/5 md:w-3/5">{renderSubject(ticket)}</span>
-                  <div className="w-1/5 md:w-1/5 flex justify-start">
-                    <span
-                      className={`capitalize py-1 px-2 text-sm leading-5 rounded-2xl inline-block ${
-                        ticket.status === "NEW" ? "text-[#27AF66] border border-[#A4D8BC] bg-[#A4D8BC]" : "text-gray-500 bg-gray-50 border border-gray-500"
-                      }`}>
-                      {translateState(ticket.status)}
-                    </span>
-                  </div>
+                  <div className="w-1/5 md:w-1/5 flex justify-start">{renderStatus(ticket.status)}</div>
                   <span className="text-sm leading-5 font-normal text-gray-500 truncate w-1/6 md:w-1/5">{dayjs.utc(new Date(ticket.updatedAt)).tz(userTimezone).fromNow()}</span>
                 </div>
               </NavLink>

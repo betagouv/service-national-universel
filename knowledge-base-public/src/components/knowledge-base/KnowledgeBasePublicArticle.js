@@ -19,17 +19,17 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
     <div className="w-full bg-white">
       <section className="mx-auto flex max-w-[950px] flex-shrink flex-grow flex-col overflow-hidden px-4 text-gray-800 print:bg-transparent print:pb-12">
         <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
-        <div className="align-center flex flex-col md:flex-row">
+        <div className={`align-center flex flex-col ${item.parents.length > 2 ? 'md:flex-row' : ''}`}>
           {environment !== "production" && (
             <>
               {item.parents.length > 2 && (
-                <div className="mt-4 w-full md:mr-12 md:max-w-[200px]">
+                <div className="mt-4 w-full md:mr-12 md:max-w-[30%]">
                   <NavigationArticle item={item} />
                 </div>
               )}
             </>
           )}
-          <div className={item.parents.length > 2 ? "max-w-[750px]" : ""}>
+          <div className={item.parents.length > 2 ? "max-w-[70%]" : ""}>
             <div className="flew-row flex justify-between pb-2 pt-4">
               <div className="mr-4">
                 <h2 className="mb-2 text-[24px] font-bold print:mb-0 print:text-black">{group?.title}</h2>
