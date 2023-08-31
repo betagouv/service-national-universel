@@ -89,6 +89,7 @@ const NavigationArticle = ({ item }) => {
               <span className="line-clamp-2 flex-1 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-900">{title}</span>
             </div>
             <span className={`${rotate} material-icons text-gray-400 md:hidden`}>expand_more</span>
+            <span className={`text-gray-400`}></span>
           </button>
         </h3>
 

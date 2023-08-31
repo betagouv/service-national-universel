@@ -23,13 +23,13 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
           {environment !== "production" && (
             <>
               {item.parents.length > 2 && (
-                <div className="mt-4 w-full md:mr-12 md:max-w-[35%]">
+                <div className="mt-4 w-full md:mr-12 md:max-w-[30%]">
                   <NavigationArticle item={item} />
                 </div>
               )}
             </>
           )}
-          <div className={item.parents.length > 2 ? "max-w-[65%]" : ""}>
+          <div className={item.parents.length > 2 ? "max-w-[70%]" : ""}>
             <div className="flew-row flex justify-between pb-2 pt-4">
               <div className="mr-4">
                 <h2 className="mb-2 text-[24px] font-bold print:mb-0 print:text-black">{group?.title}</h2>
