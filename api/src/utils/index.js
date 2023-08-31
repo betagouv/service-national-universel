@@ -142,6 +142,28 @@ function listFiles(path) {
   });
 }
 
+function deleteFilesByList(filesList) {
+  return new Promise((resolve, reject) => {
+    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+    const params = { Bucket: BUCKET_NAME, Delete:{Objects: filesList}};
+    s3bucket.deleteObjects(params, (err, data) => {
+      if (err) return reject(`error in callback:${err}`);
+      resolve(data);
+    });
+  });
+}
+
+function getMetaDataFile(path) {
+  return new Promise((resolve, reject) => {
+    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+    const params = { Bucket: BUCKET_NAME, Key: path };
+    s3bucket.headObject(params, (err, data) => {
+      if (err) return reject(`error in callback:${err}`);
+      resolve(data);
+    });
+  });
+}
+
 function getSignedUrl(path) {
   const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
   return s3bucket.getSignedUrl("getObject", {
@@ -973,4 +995,6 @@ module.exports = {
   updateYoungApplicationFilesType,
   updateHeadCenter,
   getTransporter,
+  getMetaDataFile,
+  deleteFilesByList
 };
