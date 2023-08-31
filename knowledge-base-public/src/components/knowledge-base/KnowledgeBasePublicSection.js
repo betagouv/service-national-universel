@@ -118,7 +118,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
         </div>
       </div>
       <div className="mx-auto mt-[-50px] flex w-full max-w-[730px] flex-col items-center justify-center px-4">
-        {environment !== "production" && articles.length > 5 && (
+        {environment !== "production" && articles.length > 5 && item.parents.length > 0 &&(
           <>
             <div className="px-auto mt-6 flex w-full max-w-[730px] flex-col rounded-lg bg-[#E3E3FB] pb-4 pt-2 shadow-md md:px-2">
               <div className="ml-2 flex cursor-pointer flex-row items-center justify-between md:ml-[0px]">
