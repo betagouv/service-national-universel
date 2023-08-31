@@ -78,7 +78,7 @@ const NavigationArticle = ({ item }) => {
             aria-expanded={active}
             className={`flex w-full flex-1 cursor-pointer appearance-none flex-row items-center justify-center md:justify-between md:rounded-md md:border-none ${
               active ? "bg-white md:bg-white" : "bg-gray-100 md:bg-white"
-            } py-4 shadow-none md:py-[0.5rem] md:pr-[3rem]`}
+            } py-4 shadow-none md:py-[0.5rem] md:pr-[2rem]`}
             onClick={toggleAccordion}
           >
             <Link href={`/base-de-connaissance/${item.parents[0].slug}`} className="align-center flex hidden flex-row justify-between text-center md:mr-2 md:block">
