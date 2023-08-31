@@ -247,14 +247,14 @@ router.post("/application-accepted_refused/count", async (req, res) => {
 
     let result = await db.query(
       `
-      select value from "public"."logs_by_day_application_status_change_event"
+      select value from "public"."logs_by_day_application_status_change_event" l
       where value in (:status)
-      and "date" between :startDate and :endDate::date + 1
-      and candidature_id in (
-        select candidature_id
-        from "public"."logs_by_day_application_status_change_event"
-        where value = 'WAITING_VALIDATION'
-        and candidature_mission_department in (:department)
+      and "date" BETWEEN :startDate and :endDate::date + 1
+      and exists (
+      select 1 from "public"."logs_by_day_application_status_change_event" l2
+      where value = 'WAITING_VALIDATION'
+      and candidature_mission_department in (:department)
+      and l2.candidature_id = l.candidature_id
       );`,
       {
         type: db.QueryTypes.SELECT,
