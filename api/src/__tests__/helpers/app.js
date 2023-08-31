@@ -25,6 +25,7 @@ function getAppHelper() {
   app.use("/waiting-list", require("../../controllers/waiting-list"));
   app.use("/inscription-goal", require("../../controllers/inscription-goal"));
   app.use("/es", require("../../controllers/es"));
+  app.use("/ligne-to-point", require("../../controllers/planDeTransport/ligne-to-point"));
 
   return app;
 }
