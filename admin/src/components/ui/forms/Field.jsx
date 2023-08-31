@@ -4,6 +4,7 @@ import SimpleSelect from "@/components/ui/forms/SimpleSelect";
 import { copyToClipboard } from "@/utils";
 import { HiCheckCircle } from "react-icons/hi";
 import { BiCopy } from "react-icons/bi";
+import { htmlCleaner } from "snu-lib";
 
 export default function Field({
   // Common
@@ -68,19 +69,22 @@ export default function Field({
           />
         )}
 
-        {type === "textarea" && (
-          <textarea
-            rows={row}
-            readOnly={readOnly}
-            type="text"
-            name={name}
-            placeholder={placeholder}
-            value={value}
-            onChange={(e) => onChange(e.target.value, name, e)}
-            className={`w-full text-start ${bgColor} ` + className}
-            maxLength={maxLength}
-          />
-        )}
+        {type === "textarea" &&
+          (readOnly ? (
+            <div className={"w-full h-[84px] text-start overflow-x-auto " + className} dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }} />
+          ) : (
+            <textarea
+              rows={row}
+              readOnly={readOnly}
+              type="text"
+              name={name}
+              placeholder={placeholder}
+              value={value}
+              onChange={(e) => onChange(e.target.value, name, e)}
+              className={`w-full text-start ${bgColor} ` + className}
+              maxLength={maxLength}
+            />
+          ))}
 
         {type === "select" && (
           <SimpleSelect
