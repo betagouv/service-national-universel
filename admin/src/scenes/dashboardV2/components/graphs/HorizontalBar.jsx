@@ -13,7 +13,7 @@ export default function HorizontalBar({ title, values, labels, showTooltips = fa
       const total = values.reduce((value, originalValue) => value + originalValue, 0);
 
       setTotal(total);
-      setTotalPercent(goal === 0 ? "-" : Math.round((total / goal) * 100) + "%");
+      setTotalPercent(goal === 0 ? "100%" : Math.round((total / goal) * 100) + "%");
 
       const localGoal = goal === 0 ? total : goal;
 
@@ -65,7 +65,7 @@ export default function HorizontalBar({ title, values, labels, showTooltips = fa
         </div>
       </div>
       <div className="relative">
-        <div className="h-[31px] rounded-full bg-gray-100">
+        <div className="h-[31px] rounded-full flex justify-start bg-gray-100">
           {bars.map((bar, idx) => {
             return bar.width > 0 ? (
               <div
@@ -77,13 +77,13 @@ export default function HorizontalBar({ title, values, labels, showTooltips = fa
             ) : null;
           })}
         </div>
-        {x100 && (
+        {x100 ? (
           <div className="absolute top-[-4px] bottom-[-4px] z-20 w-[5px] rounded-full border-[1px] border-white bg-red-600" style={{ left: x100 + "%" }}>
             <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 rounded-[4px] border-[1px] border-white bg-red-600 py-[2px] px-1 text-[8px] font-bold text-white">
               100%
             </div>
           </div>
-        )}
+        ) : null}
       </div>
       <div className="mt-4 mr-8 flex justify-between last:mr-0">
         {bars.map((bar, idx) => (
