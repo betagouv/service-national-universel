@@ -53,6 +53,7 @@ const NavigationArticle = ({ item }) => {
       }, 1000);
     }
   }, [isOpen]);
+  
 
   function toggleAccordion() {
     setActive((prevState) => !prevState);
@@ -60,23 +61,24 @@ const NavigationArticle = ({ item }) => {
     setRotate(active ? "transform duration-700 ease" : "transform duration-700 ease rotate-180");
   }
 
-//   console.log(item.parents[0].slug)
-
   return (
     <>
       <Link href={`/base-de-connaissance/${item.parents[0].slug}`} className=" align-center mb-2 flex flex-row justify-start text-center md:hidden">
         <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-500" />
         <p className="text-sm leading-5 text-gray-500">Retour</p>
       </Link>
-      <div ref={element} className={`flex flex-col border-[1px] rounded-md md:border-none md:rounded-none justify-start overflow-hidden rounded-md bg-white shadow-md md:rounded-none md:shadow-none`}>
+      <div
+        ref={element}
+        className={`flex flex-col justify-start overflow-hidden rounded-md rounded-md border-[1px] bg-white shadow-md md:rounded-none md:rounded-none md:border-none md:shadow-none`}
+      >
         <h3 className="flex md:border-b md:border-t">
           <button
             id={slugify(title)}
             aria-controls={`${slugify(title)}_items`}
             aria-expanded={active}
-            className={`flex w-full flex-1 cursor-pointer appearance-none flex-row items-center justify-center md:rounded-none md:border-none md:justify-between ${
+            className={`flex w-full flex-1 cursor-pointer appearance-none flex-row items-center justify-center md:justify-between md:rounded-md md:border-none ${
               active ? "bg-white md:bg-white" : "bg-gray-100 md:bg-white"
-            } py-4 shadow-none md:py-[0.5rem] md:pr-12`}
+            } py-4 shadow-none md:py-[0.5rem] md:pr-8`}
             onClick={toggleAccordion}
           >
             <Link href={`/base-de-connaissance/${item.parents[0].slug}`} className="align-center flex hidden flex-row justify-between text-center md:mr-2 md:block">
@@ -99,23 +101,26 @@ const NavigationArticle = ({ item }) => {
         >
           {list && list.length > 0 ? (
             <ul>
-              {list.map(({ _id, title, slug, type }, index) => (
-                <li
-                  className={`flex border-gray-200 text-sm font-medium leading-5 text-gray-600 ${
-                    _id === item._id ? "rounded-md bg-gray-200 text-gray-900 md:rounded-none" : "text-gray-600"
-                  }`}
-                  key={index}
-                >
-                  <Link
-                    tabIndex={active ? 0 : -1}
-                    className="flex flex-1 items-center px-6 py-4"
-                    href={`${path}/${type === "section" ? slugTheme : slug}${type === "section" ? `?loadingType=section&openTheme=${slug}` : ""}`}
+              {list
+                .slice()
+                .sort((a, b) => a.position - b.position)
+                .map(({ _id, title, slug, type }, index) => (
+                  <li
+                    className={`flex border-gray-200 text-sm font-medium leading-5 text-gray-600 ${
+                      _id === item._id ? "rounded-md bg-gray-200 text-gray-900" : "text-gray-600"
+                    }`}
+                    key={_id}
                   >
-                    {type === "section" && <FolderIcon />}
-                    <span className="line-clamp-2">{title}</span>
-                  </Link>
-                </li>
-              ))}
+                    <Link
+                      tabIndex={active ? 0 : -1}
+                      className="flex flex-1 items-center px-6 py-4"
+                      href={`${path}/${type === "section" ? slugTheme : slug}${type === "section" ? `?loadingType=section&openTheme=${slug}` : ""}`}
+                    >
+                      {type === "section" && <FolderIcon />}
+                      <span className="line-clamp-2">{title}</span>
+                    </Link>
+                  </li>
+                ))}
             </ul>
           ) : (
             <div className="px-6 pb-4 text-sm font-medium text-gray-400">Articles en cours de rédaction ⏳</div>
