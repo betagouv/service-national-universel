@@ -1,5 +1,39 @@
-const { ES_NO_LIMIT, ROLES, YOUNG_STATUS_PHASE2, CONTRACT_STATUS, COHESION_STAY_END, APPLICATION_STATUS, MISSION_STATUS } = require("snu-lib");
+const { ES_NO_LIMIT, ROLES, YOUNG_STATUS_PHASE2, CONTRACT_STATUS, COHESION_STAY_END, APPLICATION_STATUS, MISSION_STATUS, formatDateForPostGre } = require("snu-lib");
 const esClient = require("../../es");
+const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+
+async function getAccessToken(endpoint, apiKey) {
+  const response = await fetch(`${endpoint}/auth/token`, {
+    method: "GET",
+    redirect: "follow",
+    headers: {
+      Accept: "application/json, text/plain, */*",
+      "User-Agent": "*",
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+    },
+  });
+
+  const data = await response.json();
+  if (data.ok == true && data.token) {
+    return data.token;
+  } else {
+    throw new Error("Couldn't retrieve auth token");
+  }
+}
+
+function postParams(token) {
+  return {
+    method: "POST",
+    redirect: "follow",
+    headers: {
+      Accept: "application/json, text/plain, */*",
+      "User-Agent": "*",
+      "Content-Type": "application/json",
+      "x-access-token": token,
+    },
+  };
+}
 
 async function getNewMissions(startDate, endDate, user) {
   // ref dep only
@@ -233,81 +267,140 @@ async function getYoungStartPhase2InTime(startDate, endDate, user) {
   ];
 }
 
-async function getApplicationsCanceled(startDate, endDate, user) {
-  // Responsible && Supervisor only
+async function getApplicationsChangeStatus(startDate, endDate, user) {
+  // ref dep only
+  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
   let body = {
-    query: {
-      bool: {
-        filter: [
-          { terms: { "status.keyword": APPLICATION_STATUS.CANCEL } },
-          {
-            range: {
-              updatedAt: {
-                gte: new Date(startDate),
-                lte: new Date(endDate),
-              },
-            },
-          },
-        ],
-      },
-    },
-    size: 0,
-    track_total_hits: true,
+    startDate: formatDateForPostGre(startDate),
+    endDate: formatDateForPostGre(endDate),
+    status: [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.CANCEL],
+    department: user.department,
   };
 
-  if (user.role === ROLES.SUPERVISOR) {
-    body.query.bool.filter.push({ match: { "tutorId.keyword": user._id } });
-  }
-  if (user.role === ROLES.RESPONSIBLE) {
-    body.query.bool.filter.push({ match: { "structureId.keyword": user.structureId } });
-  }
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-change-status/count`, {
+    ...postParams(token),
+    body: JSON.stringify(body),
+  });
 
-  const response = await esClient.search({ index: "application", body });
-  const value = response.body.hits.total.value;
+  const result = await response.json();
+  const data = result?.data;
+  let resultArray = {
+    [APPLICATION_STATUS.CANCEL]: 0,
+    [APPLICATION_STATUS.WAITING_VALIDATION]: 0,
+  };
+
+  for (const item of data) {
+    const value = item.value;
+    if (Object.prototype.hasOwnProperty.call(resultArray, value)) {
+      resultArray[value]++;
+    }
+  }
+  const validatedValue = resultArray[APPLICATION_STATUS.WAITING_VALIDATION];
+  const refusedValue = resultArray[APPLICATION_STATUS.CANCEL];
 
   return [
     {
-      id: "applications-canceled",
-      value: value,
-      label: ` candidature${value > 1 ? "s" : ""} annulée${value > 1 ? "s" : ""}`,
+      id: "applications-validated",
+      value: validatedValue,
+      label: ` proposition${validatedValue > 1 ? "s" : ""} de missions acceptée${validatedValue > 1 ? "s" : ""} par des volontaires`,
+      icon: "action",
+    },
+    {
+      id: "applications-refused",
+      value: refusedValue,
+      label: ` proposition${refusedValue > 1 ? "s" : ""} de missions refusée${refusedValue > 1 ? "s" : ""} par des volontaires`,
       icon: "action",
     },
   ];
 }
 
-async function getMissionsWaitingForValidation(startDate, endDate, user) {
-  // moderator only
+async function getApplicationsCanceledOrValidated(startDate, endDate, user) {
+  // responsible && supervisor && ref dep && admin
+  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
   let body = {
-    query: {
-      bool: {
-        filter: [
-          { term: { "status.keyword": MISSION_STATUS.WAITING_VALIDATION } },
-          {
-            range: {
-              updatedAt: {
-                gte: new Date(startDate),
-                lte: new Date(endDate),
+    startDate: formatDateForPostGre(startDate),
+    endDate: formatDateForPostGre(endDate),
+  };
+  switch (user.role) {
+    case ROLES.SUPERVISOR:
+    case ROLES.RESPONSIBLE:
+      body.structureId = user.structureId;
+      body.status = APPLICATION_STATUS.CANCEL;
+      break;
+
+    case ROLES.REFERENT_DEPARTMENT:
+      body.department = user.department;
+      body.status = APPLICATION_STATUS.VALIDATED;
+      break;
+
+    case ROLES.ADMIN:
+      body.status = APPLICATION_STATUS.VALIDATED;
+      break;
+    default:
+      null;
+  }
+
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-change-status-canceled-validated/count`, {
+    ...postParams(token),
+    body: JSON.stringify(body),
+  });
+
+  const result = await response.json();
+  let value = 0;
+  if (user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_DEPARTMENT) {
+    const applicationId = result?.data.map((e) => e.candidature_id);
+    let body = {
+      query: {
+        bool: {
+          filter: [
+            { terms: { "applicationId.keyword": applicationId } },
+            { term: { "youngContractStatus.keyword": CONTRACT_STATUS.VALIDATED } },
+            {
+              range: {
+                youngContractValidationDate: {
+                  gte: new Date(startDate),
+                  lte: new Date(endDate),
+                },
               },
             },
-          },
-        ],
+          ],
+        },
       },
-    },
-    size: 0,
-    track_total_hits: true,
-  };
 
-  const response = await esClient.search({ index: "mission", body });
-  const value = response.body.hits.total.value;
+      size: 0,
+      track_total_hits: true,
+    };
 
-  return [
-    {
-      id: "missions-waiting-for-validation",
-      value: value,
-      label: ` mission${value > 1 ? "s" : ""} soumise${value > 1 ? "s" : ""} à validation`,
-      icon: "action",
-    },
-  ];
+    const response = await esClient.search({ index: "contract", body: body });
+    value = response.body.hits.total.value;
+  }
+
+  switch (user.role) {
+    case ROLES.SUPERVISOR:
+    case ROLES.RESPONSIBLE:
+      value = result?.data[0]?.count;
+      return [
+        {
+          id: "applications-canceled",
+          value: value,
+          label: ` candidature${value > 1 ? "s" : ""} annulée${value > 1 ? "s" : ""}`,
+          icon: "action",
+        },
+      ];
+
+    case ROLES.REFERENT_DEPARTMENT:
+    case ROLES.ADMIN:
+      return [
+        {
+          id: "applications-validated",
+          value: value,
+          label: ` conrat${value > 1 ? "s" : ""} d'engagement signé${value > 1 ? "s" : ""}`,
+          icon: "action",
+        },
+      ];
+    default:
+      return [];
+  }
 }
 
 async function getYoungsWhoStartedOrFinishedMissions(startDate, endDate, user) {
@@ -333,64 +426,40 @@ async function getYoungsWhoStartedOrFinishedMissions(startDate, endDate, user) {
   let body2 = {
     query: {
       bool: {
-        filter: [
-          { terms: { "youngId.keyword": youngsIds } },
-          { term: { "youngContractStatus.keyword": CONTRACT_STATUS.VALIDATED } },
-          {
-            range: {
-              missionStartAt: {
-                gte: new Date(startDate),
-                lte: new Date(endDate),
-              },
-            },
-          },
-        ],
+        filter: [{ terms: { "youngId.keyword": youngsIds } }, { term: { "youngContractStatus.keyword": CONTRACT_STATUS.VALIDATED } }],
       },
     },
-    size: ES_NO_LIMIT,
+    aggs: {
+      missionStartAtDocs: {
+        filter: {
+          range: {
+            missionStartAt: {
+              gte: new Date(startDate),
+              lte: new Date(endDate),
+            },
+          },
+        },
+      },
+      missionEndAtDocs: {
+        filter: {
+          range: {
+            missionEndAt: {
+              gte: new Date(startDate),
+              lte: new Date(endDate),
+            },
+          },
+        },
+      },
+    },
+    size: 0,
     track_total_hits: true,
   };
-
-  if (user.role === ROLES.SUPERVISOR) {
-    body2.query.bool.filter.push({ match: { "tutorId.keyword": user._id } });
-  }
-  if (user.role === ROLES.RESPONSIBLE) {
+  if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
     body2.query.bool.filter.push({ match: { "structureId.keyword": user.structureId } });
   }
-
   const response2 = await esClient.search({ index: "contract", body: body2 });
-  const startedMissions = response2.body.hits.total.value;
-
-  let body3 = {
-    query: {
-      bool: {
-        filter: [
-          { terms: { "youngId.keyword": youngsIds } },
-          { term: { "youngContractStatus.keyword": CONTRACT_STATUS.VALIDATED } },
-          {
-            range: {
-              missionEndAt: {
-                gte: new Date(startDate),
-                lte: new Date(endDate),
-              },
-            },
-          },
-        ],
-      },
-    },
-    size: ES_NO_LIMIT,
-    track_total_hits: true,
-  };
-
-  if (user.role === ROLES.SUPERVISOR) {
-    body3.query.bool.filter.push({ match: { "tutorId.keyword": user._id } });
-  }
-  if (user.role === ROLES.RESPONSIBLE) {
-    body3.query.bool.filter.push({ match: { "structureId.keyword": user.structureId } });
-  }
-
-  const response3 = await esClient.search({ index: "contract", body: body2 });
-  const finishedMissions = response3.body.hits.total.value;
+  const startedMissions = response2.body.aggregations.missionStartAtDocs.doc_count;
+  const finishedMissions = response2.body.aggregations.missionEndAtDocs.doc_count;
 
   return [
     {
@@ -408,13 +477,116 @@ async function getYoungsWhoStartedOrFinishedMissions(startDate, endDate, user) {
   ];
 }
 
+async function getMissionsChangeStatus(startDate, endDate, user) {
+  //ref dep,responsable,supervisor,admin
+  let body = {
+    startDate: formatDateForPostGre(startDate),
+    endDate: formatDateForPostGre(endDate),
+  };
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    body.status = [MISSION_STATUS.WAITING_CORRECTION, MISSION_STATUS.VALIDATED, MISSION_STATUS.REFUSED, MISSION_STATUS.CANCEL];
+    body.department = user.department;
+  }
+  if (user.role === ROLES.SUPERVISOR) {
+    body.status = [MISSION_STATUS.VALIDATED, MISSION_STATUS.REFUSED, MISSION_STATUS.CANCEL];
+    body.tutorId = user._id;
+  }
+  if (user.role === ROLES.RESPONSIBLE) {
+    body.status = [MISSION_STATUS.VALIDATED, MISSION_STATUS.REFUSED, MISSION_STATUS.CANCEL];
+    body.structureId = user.structureId;
+  }
+  if (user.role === ROLES.ADMIN) {
+    body.status = [MISSION_STATUS.WAITING_CORRECTION, MISSION_STATUS.WAITING_VALIDATION, MISSION_STATUS.VALIDATED, MISSION_STATUS.REFUSED, MISSION_STATUS.CANCEL];
+  }
+
+  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/mission-change-status/count`, {
+    ...postParams(token),
+    body: JSON.stringify(body),
+  });
+  const result = await response.json();
+  const data = result?.data;
+  let resultArray = {
+    [MISSION_STATUS.WAITING_CORRECTION]: 0,
+    [MISSION_STATUS.WAITING_VALIDATION]: 0,
+    [MISSION_STATUS.VALIDATED]: 0,
+    [MISSION_STATUS.REFUSED]: 0,
+    [MISSION_STATUS.CANCEL]: 0,
+  };
+
+  for (const item of data) {
+    const value = item.evenement_valeur;
+    if (Object.prototype.hasOwnProperty.call(resultArray, value)) {
+      resultArray[value]++;
+    }
+  }
+  const correctionValue = resultArray[MISSION_STATUS.WAITING_CORRECTION];
+  const validationValue = resultArray[MISSION_STATUS.WAITING_VALIDATION];
+  const validatedValue = resultArray[MISSION_STATUS.VALIDATED];
+  const refusedValue = resultArray[MISSION_STATUS.REFUSED];
+  const canceledValue = resultArray[MISSION_STATUS.CANCEL];
+
+  const returnArray = {
+    [MISSION_STATUS.WAITING_CORRECTION]: {
+      id: "missions-waiting-for-correction",
+      value: correctionValue,
+      label: ` mission${correctionValue > 1 ? "s" : ""} mise${correctionValue > 1 ? "s" : ""} en correction`,
+      icon: "action",
+    },
+    [MISSION_STATUS.WAITING_VALIDATION]: {
+      id: "missions-waiting-for-validation",
+      value: validationValue,
+      label: ` mission${validationValue > 1 ? "s" : ""} soumise${validationValue > 1 ? "s" : ""} a validation`,
+      icon: "action",
+    },
+    [MISSION_STATUS.VALIDATED]: {
+      id: "missions-validated",
+      value: validatedValue,
+      label: ` mission${validatedValue > 1 ? "s" : ""} validée${validatedValue > 1 ? "s" : ""}`,
+      icon: "action",
+    },
+    [MISSION_STATUS.REFUSED]: {
+      id: "missions-refused",
+      value: refusedValue,
+      label: ` mission${refusedValue > 1 ? "s" : ""} refusée${refusedValue > 1 ? "s" : ""}`,
+      icon: "action",
+    },
+    [MISSION_STATUS.CANCEL]: {
+      id: "missions-canceled",
+      value: canceledValue,
+      label: ` abandon${canceledValue > 1 ? "s" : ""} mission${canceledValue > 1 ? "s" : ""}`,
+      icon: "action",
+    },
+  };
+
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    return [returnArray[MISSION_STATUS.WAITING_CORRECTION], returnArray[MISSION_STATUS.VALIDATED], returnArray[MISSION_STATUS.REFUSED], returnArray[MISSION_STATUS.CANCEL]];
+  }
+  if (user.role === ROLES.SUPERVISOR) {
+    return [returnArray[MISSION_STATUS.VALIDATED], returnArray[MISSION_STATUS.REFUSED], returnArray[MISSION_STATUS.CANCEL]];
+  }
+  if (user.role === ROLES.RESPONSIBLE) {
+    return [returnArray[MISSION_STATUS.VALIDATED], returnArray[MISSION_STATUS.REFUSED], returnArray[MISSION_STATUS.CANCEL]];
+  }
+  if (user.role === ROLES.ADMIN) {
+    return [
+      returnArray[MISSION_STATUS.WAITING_CORRECTION],
+      returnArray[MISSION_STATUS.WAITING_VALIDATION],
+      returnArray[MISSION_STATUS.VALIDATED],
+      returnArray[MISSION_STATUS.REFUSED],
+      returnArray[MISSION_STATUS.CANCEL],
+    ];
+  }
+}
+
 module.exports = {
   getNewMissions,
   getNewStructures,
   getYoungNotesPhase2,
   getYoungPhase2Validated,
   getYoungStartPhase2InTime,
-  getApplicationsCanceled,
-  getMissionsWaitingForValidation,
+  getApplicationsChangeStatus,
   getYoungsWhoStartedOrFinishedMissions,
+  getMissionsChangeStatus,
+  getApplicationsCanceledOrValidated,
 };

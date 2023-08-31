@@ -2,7 +2,7 @@ require("dotenv").config({ path: "../.env" });
 const { Sequelize } = require("sequelize");
 const { POSTGRESQL } = require("./config");
 
-const db = new Sequelize(POSTGRESQL, {
+const db = new Sequelize("postgresql://upz0fnlx4epnn85yblhe:MalFhLKIoK5QLxm8NkH1@bo2ecjgnczw1hu8uvnme-postgresql.services.clever-cloud.com:5606/bo2ecjgnczw1hu8uvnme", {
   logging: false,
 });
 
