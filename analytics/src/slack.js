@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "../.env" });
+require("dotenv").config();
 
 const { SLACK_BOT_TOKEN, SLACK_BOT_CHANNEL, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");

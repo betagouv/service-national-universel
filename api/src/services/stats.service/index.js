@@ -6,10 +6,12 @@ const {
   getYoungNotesPhase2,
   getYoungPhase2Validated,
   getYoungStartPhase2InTime,
-  getApplicationsCanceledOrValidated,
+  getApplicationsChangeStatus,
   getYoungsWhoStartedOrFinishedMissions,
   getMissionsChangeStatus,
-  getApplicationsChangeStatus,
+  getProposedMissionsAcceptedOrRefusedByYoung,
+  getMissionsOnTerm,
+  getContractsSigned,
 } = require("./engagement");
 
 const keyNumbersByRole = {
@@ -26,13 +28,15 @@ const keyNumbersByRole = {
       getYoungNotesPhase2,
       getYoungsWhoStartedOrFinishedMissions,
       getMissionsChangeStatus,
+      getProposedMissionsAcceptedOrRefusedByYoung,
       getApplicationsChangeStatus,
-      getApplicationsCanceledOrValidated,
+      getMissionsOnTerm,
+      getContractsSigned,
     ],
     [ROLES.REFERENT_REGION]: [getYoungPhase2Validated, getYoungStartPhase2InTime],
-    [ROLES.RESPONSIBLE]: [getApplicationsCanceledOrValidated, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
-    [ROLES.SUPERVISOR]: [getApplicationsCanceledOrValidated, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
-    [ROLES.ADMIN]: [getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus, getApplicationsCanceledOrValidated],
+    [ROLES.RESPONSIBLE]: [getApplicationsChangeStatus, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus, getMissionsOnTerm],
+    [ROLES.SUPERVISOR]: [getApplicationsChangeStatus, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus, getMissionsOnTerm],
+    [ROLES.ADMIN]: [getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus, getApplicationsChangeStatus, getContractsSigned],
   },
   all: {
     [ROLES.REFERENT_DEPARTMENT]: [
@@ -43,8 +47,10 @@ const keyNumbersByRole = {
       getYoungNotesPhase2,
       getYoungsWhoStartedOrFinishedMissions,
       getMissionsChangeStatus,
+      getProposedMissionsAcceptedOrRefusedByYoung,
       getApplicationsChangeStatus,
-      getApplicationsCanceledOrValidated,
+      getMissionsOnTerm,
+      getContractsSigned,
     ],
     [ROLES.REFERENT_REGION]: [getTimeSchedule, getTransportCorrectionRequests, getYoungPhase2Validated, getYoungStartPhase2InTime],
     [ROLES.ADMIN]: [
@@ -53,10 +59,11 @@ const keyNumbersByRole = {
       getLineToPoints,
       getYoungsWhoStartedOrFinishedMissions,
       getMissionsChangeStatus,
-      getApplicationsCanceledOrValidated,
+      getApplicationsChangeStatus,
+      getContractsSigned,
     ],
-    [ROLES.RESPONSIBLE]: [getApplicationsCanceledOrValidated, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
-    [ROLES.SUPERVISOR]: [getApplicationsCanceledOrValidated, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
+    [ROLES.RESPONSIBLE]: [getApplicationsChangeStatus, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus, getMissionsOnTerm],
+    [ROLES.SUPERVISOR]: [getApplicationsChangeStatus, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus, getMissionsOnTerm],
   },
 };
 
