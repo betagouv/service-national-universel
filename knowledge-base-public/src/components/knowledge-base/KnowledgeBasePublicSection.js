@@ -21,6 +21,18 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
 
   const scrollRef = useRef(null);
 
+  const articleFromSection = [];
+  sections.map(({ children }) => {
+    console.log(children);
+    for (const e in children) {
+      console.log(e);
+      if (children[e].type === "article") {
+        articleFromSection.push(children[e]);
+      }
+    }
+  });
+  const Top5Articles = articleFromSection.sort((a, b) => b.read - a.read)
+
   useEffect(() => {
     function handleScroll() {
       const el = scrollRef.current;
@@ -50,12 +62,10 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   useEffect(() => {
     setSections(item?.children?.filter((c) => c.type === "section") || []);
   }, [item]);
-  
+
   useEffect(() => {
     setArticles(item?.children?.filter((c) => c.type === "article") || []);
   }, [item]);
-
-  console.log(articles);
 
   if (isRoot) {
     return (
@@ -69,6 +79,19 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
             <HiSearch className="text-2xl text-gray-500" />
             Rechercher un article
           </button>
+          <div className={`transition-max-height flex flex-row overflow-x-auto duration-700 md:gap-2`}>
+                {Top5Articles.slice(0, 5).map(({ _id, title, slug }) => (
+                  <div
+                    key={_id}
+                    className="mx-3.5 my-2 flex min-h-[130px] min-w-[200px] flex-col justify-between rounded-lg border-[1px] border-gray-300 bg-white px-4 py-2 md:m-2 md:min-w-[30%] md:max-w-[30%] md:flex-grow"
+                  >
+                    <h3 className="mb-4 text-sm font-bold leading-5 text-gray-900">{title}</h3>
+                    <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
+                      <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p>
+                    </Link>
+                  </div>
+                ))}
+              </div>
         </div>
 
         <div className="h-32 w-full bg-[#32257F]" />
@@ -113,12 +136,12 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
     <>
       <div className="min-h-60 md:min-h-48 w-full border-t-[1px] border-white border-opacity-20 bg-[#32257F] pb-[50px] text-white">
         <div className="mx-auto mt-6 space-y-1 px-4 md:w-[712px]">
-          <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" className="text-white"/>
+          <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" className="text-white" />
           <h1 className="text-3xl font-bold leading-9">{item?.title}</h1>
         </div>
       </div>
       <div className="mx-auto mt-[-50px] flex w-full max-w-[730px] flex-col items-center justify-center px-4">
-        {environment !== "production" && articles.length > 5 && item.parents.length > 0 &&(
+        {environment !== "production" && articles.length > 5 && item.parents.length > 0 && (
           <>
             <div className="px-auto mt-6 flex w-full max-w-[730px] flex-col rounded-lg bg-[#E3E3FB] pb-4 pt-2 shadow-md md:px-2">
               <div className="ml-2 flex cursor-pointer flex-row items-center justify-between md:ml-[0px]">
