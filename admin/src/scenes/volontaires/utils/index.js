@@ -507,14 +507,6 @@ export async function transformVolontaires(data, values) {
 
 export async function transformVolontairesSchool(data) {
   let all = data;
-  const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-  if (schoolsId?.length) {
-    const { responses } = await api.post("/elasticsearch/schoolramses/public/search", { filters: { ids: schoolsId } });
-    if (responses.length) {
-      const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-      all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-    }
-  }
   return all.map((data) => {
     return {
       _id: data._id,
@@ -524,12 +516,12 @@ export async function transformVolontairesSchool(data) {
       Département: data.department,
       Situation: translate(data.situation),
       Niveau: translate(data.grade),
-      "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-      "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-      "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-      "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-      "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-      "UAI de l'établissement": data.esSchool?.uai,
+      "Type d'établissement": translate(data.school?.type || data.schoolType),
+      "Nom de l'établissement": data.school?.fullName || data.schoolName,
+      "Code postal de l'établissement": data.school?.postcode || data.schoolZip,
+      "Ville de l'établissement": data.school?.city || data.schoolCity,
+      "Département de l'établissement": departmentLookUp[data.school?.department] || data.schoolDepartment,
+      "UAI de l'établissement": data.school?.uai,
       "Statut général": translate(data.status),
       "Statut Phase 1": translate(data.statusPhase1),
     };
@@ -538,14 +530,6 @@ export async function transformVolontairesSchool(data) {
 
 export async function transformInscription(data) {
   let all = data;
-  const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-  if (schoolsId?.length) {
-    const { responses } = await api.post("/elasticsearch/schoolramses/public/search", { filters: { ids: schoolsId } });
-    if (responses.length) {
-      const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-      all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-    }
-  }
   return all.map((data) => {
     return {
       _id: data._id,
@@ -577,12 +561,12 @@ export async function transformInscription(data) {
       "Pays - étranger": data.foreignCountry,
       Situation: translate(data.situation),
       Niveau: data.grade,
-      "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-      "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-      "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-      "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-      "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-      "UAI de l'établissement": data.esSchool?.uai,
+      "Type d'établissement": translate(data.school?.type || data.schoolType),
+      "Nom de l'établissement": data.school?.fullName || data.schoolName,
+      "Code postal de l'établissement": data.school?.postcode || data.schoolZip,
+      "Ville de l'établissement": data.school?.city || data.schoolCity,
+      "Département de l'établissement": departmentLookUp[data.school?.department] || data.schoolDepartment,
+      "UAI de l'établissement": data.school?.uai,
       "Quartier Prioritaire de la ville": translate(data.qpv),
       "Zone Rurale": translate(isInRuralArea(data)),
       Handicap: translate(data.handicap),
