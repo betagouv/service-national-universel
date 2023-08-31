@@ -60,28 +60,26 @@ const NavigationArticle = ({ item }) => {
     setRotate(active ? "transform duration-700 ease" : "transform duration-700 ease rotate-180");
   }
 
+//   console.log(item.parents[0].slug)
+
   return (
     <>
-      <Link href={`/base-de-connaissance/${item.parents[1].slug}`} className=" align-center mb-2 flex flex-row justify-start text-center md:hidden" onClick={() => cache.clear()}>
+      <Link href={`/base-de-connaissance/${item.parents[0].slug}`} className=" align-center mb-2 flex flex-row justify-start text-center md:hidden">
         <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-500" />
         <p className="text-sm leading-5 text-gray-500">Retour</p>
       </Link>
-      <div ref={element} className={`flex flex-col justify-start overflow-hidden rounded-md bg-white shadow-md md:rounded-none md:shadow-none`}>
+      <div ref={element} className={`flex flex-col border-[1px] rounded-md md:border-none md:rounded-none justify-start overflow-hidden rounded-md bg-white shadow-md md:rounded-none md:shadow-none`}>
         <h3 className="flex md:border-b md:border-t">
           <button
             id={slugify(title)}
             aria-controls={`${slugify(title)}_items`}
             aria-expanded={active}
-            className={`flex w-full flex-1 cursor-pointer appearance-none flex-row items-center justify-center rounded-none border-none md:justify-between ${
+            className={`flex w-full flex-1 cursor-pointer appearance-none flex-row items-center justify-center md:rounded-none md:border-none md:justify-between ${
               active ? "bg-white md:bg-white" : "bg-gray-100 md:bg-white"
             } py-4 shadow-none md:py-[0.5rem] md:pr-12`}
             onClick={toggleAccordion}
           >
-            <Link
-              href={`/base-de-connaissance/${item.parents[1].slug}`}
-              className="align-center flex hidden flex-row justify-between text-center md:mr-2 md:block"
-              onClick={() => cache.clear()}
-            >
+            <Link href={`/base-de-connaissance/${item.parents[0].slug}`} className="align-center flex hidden flex-row justify-between text-center md:mr-2 md:block">
               <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-400 md:mr-4 md:border-r md:border-gray-200" />
             </Link>
             <div className="mr-2 flex flex-col justify-center">
@@ -112,7 +110,6 @@ const NavigationArticle = ({ item }) => {
                     tabIndex={active ? 0 : -1}
                     className="flex flex-1 items-center px-6 py-4"
                     href={`${path}/${type === "section" ? slugTheme : slug}${type === "section" ? `?loadingType=section&openTheme=${slug}` : ""}`}
-                    onClick={() => cache.clear()}
                   >
                     {type === "section" && <FolderIcon />}
                     <span className="line-clamp-2">{title}</span>

@@ -43,7 +43,7 @@ router.get("/ticketsInfo", passport.authenticate(["referent", "young"], { sessio
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const hasMessage = Array.isArray(data) && data.length > 0;
     // Count the number of tickets with status "NEW"
-    const newStatusCount = Array.isArray(data) ? data.filter((ticket) => ticket.status === "NEW").length : 0;
+    const newStatusCount = Array.isArray(data) ? data.filter((ticket) => ticket.status === "OPEN").length : 0;
 
     return res.status(200).send({ ok: true, data: { hasMessage, newStatusCount } });
   } catch (error) {
