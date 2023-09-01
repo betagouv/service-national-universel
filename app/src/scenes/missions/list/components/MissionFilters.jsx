@@ -94,7 +94,7 @@ export default function MissionFilters({ filters, setFilters }) {
       if (res?.features?.length) {
         return { lat: res?.features[0]?.geometry?.coordinates[1], lon: res?.features[0]?.geometry?.coordinates[0] };
       }
-      toastr.error("Erreur avec la base adresse nationale", "Impossible de trouver des coordonnées valides pour votre adresse");
+      toastr.error("Erreur avec la base adresse nationale", "Impossible de trouver des coordonnées GPS.", { timeOut: 10_000 });
       return null;
     } catch (e) {
       capture(e);
@@ -311,7 +311,7 @@ export default function MissionFilters({ filters, setFilters }) {
                             id="main-address"
                             name="main-address"
                             type="radio"
-                            checked={filters.location === young?.location}
+                            checked={filters.location === youngLocation}
                             onChange={() => setFilters((prev) => ({ ...prev, location: youngLocation }))}
                             className="hidden"
                           />
@@ -568,7 +568,7 @@ export default function MissionFilters({ filters, setFilters }) {
                         id="main-address"
                         name="main-address"
                         type="radio"
-                        checked={filters.location === young?.location}
+                        checked={filters.location === youngLocation}
                         onChange={() => setFilters((prev) => ({ ...prev, location: youngLocation }))}
                         className="hidden"
                       />
