@@ -1,6 +1,6 @@
 const { ROLES } = require("snu-lib");
 const { getYoungNotesPhase1, getTimeSchedule, getTransportCorrectionRequests, getSessions, getLineToPoints } = require("./sejour");
-
+const { getYoungNotesPhase2 } = require("./engagement");
 const keyNumbersByRole = {
   sejour: {
     [ROLES.REFERENT_DEPARTMENT]: [getYoungNotesPhase1, getTimeSchedule],
@@ -8,9 +8,11 @@ const keyNumbersByRole = {
     [ROLES.ADMIN]: [getTransportCorrectionRequests, getSessions, getLineToPoints],
   },
   inscription: {},
-  engagement: {},
+  engagement: {
+    [ROLES.REFERENT_DEPARTMENT]: [getYoungNotesPhase2],
+  },
   all: {
-    [ROLES.REFERENT_DEPARTMENT]: [getYoungNotesPhase1, getTimeSchedule],
+    [ROLES.REFERENT_DEPARTMENT]: [getYoungNotesPhase1, getTimeSchedule, getYoungNotesPhase2],
     [ROLES.REFERENT_REGION]: [getTimeSchedule, getTransportCorrectionRequests],
     [ROLES.ADMIN]: [getTransportCorrectionRequests, getSessions, getLineToPoints],
   },
