@@ -9,7 +9,15 @@ const {
   getMissionsChangeStatus,
 } = require("./engagement");
 const { getYoungNotesPhase1, getTimeScheduleAndPedagoProject, getTransportCorrectionRequests, getSessions, getLineToPoints } = require("./sejour");
-const { getYoungNotesPhase0, getYoungRegisteredWithParticularSituation, getDepartmentRegistrationGoal, getRegisterFileOpen, getAbandonedRegistration } = require("./inscription");
+const {
+  getYoungNotesPhase0,
+  getYoungRegisteredWithParticularSituation,
+  getDepartmentRegistrationGoal,
+  getRegisterFileOpen,
+  getAbandonedRegistration,
+  getYoungValidatedFromOtherStatus,
+  getYoungWhoChangedCohort,
+} = require("./inscription");
 
 const keyNumbersByRole = {
   sejour: {
@@ -18,9 +26,16 @@ const keyNumbersByRole = {
     [ROLES.ADMIN]: [getTransportCorrectionRequests, getSessions, getLineToPoints],
   },
   inscription: {
-    [ROLES.REFERENT_DEPARTMENT]: [getYoungNotesPhase0, getRegisterFileOpen],
-    [ROLES.REFERENT_REGION]: [getYoungRegisteredWithParticularSituation, getDepartmentRegistrationGoal, getRegisterFileOpen, getAbandonedRegistration],
-    [ROLES.ADMIN]: [getRegisterFileOpen],
+    [ROLES.REFERENT_DEPARTMENT]: [getYoungNotesPhase0, getRegisterFileOpen, getYoungValidatedFromOtherStatus, getYoungWhoChangedCohort],
+    [ROLES.REFERENT_REGION]: [
+      getYoungRegisteredWithParticularSituation,
+      getDepartmentRegistrationGoal,
+      getRegisterFileOpen,
+      getAbandonedRegistration,
+      getYoungValidatedFromOtherStatus,
+      getYoungWhoChangedCohort,
+    ],
+    [ROLES.ADMIN]: [getRegisterFileOpen, getYoungValidatedFromOtherStatus, getYoungWhoChangedCohort],
   },
   engagement: {
     [ROLES.REFERENT_DEPARTMENT]: [getNewStructures, getYoungNotesPhase2, getMissionsOnTerm, getContractsSigned, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
@@ -41,6 +56,8 @@ const keyNumbersByRole = {
       getRegisterFileOpen,
       getYoungsWhoStartedOrFinishedMissions,
       getMissionsChangeStatus,
+      getYoungValidatedFromOtherStatus,
+      getYoungWhoChangedCohort,
     ],
     [ROLES.REFERENT_REGION]: [
       getTimeScheduleAndPedagoProject,
@@ -50,6 +67,8 @@ const keyNumbersByRole = {
       getDepartmentRegistrationGoal,
       getRegisterFileOpen,
       getAbandonedRegistration,
+      getYoungValidatedFromOtherStatus,
+      getYoungWhoChangedCohort,
     ],
     [ROLES.SUPERVISOR]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
     [ROLES.RESPONSIBLE]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
@@ -61,6 +80,8 @@ const keyNumbersByRole = {
       getYoungsWhoStartedOrFinishedMissions,
       getMissionsChangeStatus,
       getRegisterFileOpen,
+      getYoungValidatedFromOtherStatus,
+      getYoungWhoChangedCohort,
     ],
   },
 };

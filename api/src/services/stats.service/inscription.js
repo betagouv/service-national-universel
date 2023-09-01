@@ -123,7 +123,7 @@ async function getYoungRegisteredWithParticularSituation(startDate, endDate, use
 
   return [
     {
-      id: "young-rural-registration",
+      id: "young-handicap-registration",
       value: handicap,
       label: ` volontaire${handicap > 1 ? "s" : ""} inscrit${handicap > 1 ? "s" : ""} en situation de handicap`,
       icon: "other",
@@ -259,13 +259,65 @@ async function getAbandonedRegistration(startDate, endDate, user) {
   ];
 }
 
-async function getYoungVaildatedonWaitingList(startDate, endDate, user) {
-  // ref dep only
+async function getYoungValidatedFromOtherStatus(startDate, endDate, user) {
+  // ref dep && ref reg && admin
   const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
   let body = {
     startDate: formatDateForPostGre(startDate),
     endDate: formatDateForPostGre(endDate),
-    status: YOUNG_STATUS.VALIDATED,
+    toStatus: YOUNG_STATUS.VALIDATED,
+    fromStatus: [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_VALIDATION],
+  };
+
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    body.department = user.department;
+  }
+  if (user.role === ROLES.REFERENT_REGION) {
+    body.region = user.region;
+  }
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-validated-from/count`, {
+    ...postParams(token),
+    body: JSON.stringify(body),
+  });
+
+  const result = await response.json();
+  const data = result?.data;
+  let resultArray = {
+    [YOUNG_STATUS.WAITING_VALIDATION]: 0,
+    [YOUNG_STATUS.WAITING_LIST]: 0,
+  };
+
+  for (const item of data) {
+    const value = item.evenement_valeur;
+    if (Object.prototype.hasOwnProperty.call(resultArray, value)) {
+      resultArray[value]++;
+    }
+  }
+  const waitingValue = resultArray[YOUNG_STATUS.WAITING_LIST];
+  const mainValue = resultArray[YOUNG_STATUS.WAITING_VALIDATION];
+
+  return [
+    {
+      id: "young-validated-waitingList",
+      value: waitingValue,
+      label: ` dossier${waitingValue > 1 ? "s" : ""} d'inscription validé${waitingValue > 1 ? "s" : ""} sur liste complémentaire`,
+      icon: "other",
+    },
+    {
+      id: "young-validated-waitingList",
+      value: mainValue,
+      label: ` dossier${mainValue > 1 ? "s" : ""} d'inscription validé${mainValue > 1 ? "s" : ""} sur liste principale`,
+      icon: "other",
+    },
+  ];
+}
+
+async function getYoungWhoChangedCohort(startDate, endDate, user) {
+  // ref dep && ref reg && admin
+  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  let body = {
+    startDate: formatDateForPostGre(startDate),
+    endDate: formatDateForPostGre(endDate),
   };
 
   if (user.role === ROLES.REFERENT_DEPARTMENT) {
@@ -275,20 +327,19 @@ async function getYoungVaildatedonWaitingList(startDate, endDate, user) {
     body.region = user.region;
   }
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-validated-waitingList/count`, {
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-cohort/count`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
 
   const result = await response.json();
-  console.log(result);
-  const value = result?.data;
+  const value = result?.data.count;
 
   return [
     {
-      id: "young-validated-waitingList",
+      id: "young-chnaged-cohort",
       value: value,
-      label: ` dossier${value > 1 ? "s" : ""} d'inscription validé${value > 1 ? "s" : ""} sur liste complémentaire`,
+      label: ` changement${value > 1 ? "s" : ""} de cohorte`,
       icon: "other",
     },
   ];
@@ -300,4 +351,6 @@ module.exports = {
   getDepartmentRegistrationGoal,
   getRegisterFileOpen,
   getAbandonedRegistration,
+  getYoungValidatedFromOtherStatus,
+  getYoungWhoChangedCohort,
 };
