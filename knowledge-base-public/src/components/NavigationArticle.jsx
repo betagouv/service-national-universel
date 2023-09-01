@@ -20,7 +20,6 @@ const NavigationArticle = ({ item }) => {
   const title = item.parents[1].title;
   const list = siblingsData;
   const path = "/base-de-connaissance";
-  const isOpen = router.query.openTheme === item.slug;
 
   const [active, setActive] = useState(false);
   const [height, setHeight] = useState("0px");
@@ -43,18 +42,6 @@ const NavigationArticle = ({ item }) => {
     fetchSiblings();
   }, [item]);
 
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        element?.current?.scrollIntoView({ behavior: "smooth" });
-      }, 500);
-      setTimeout(() => {
-        toggleAccordion();
-      }, 1000);
-    }
-  }, [isOpen]);
-  
-
   function toggleAccordion() {
     setActive((prevState) => !prevState);
     setHeight(active ? "0px" : `${contentSpace?.current?.scrollHeight}px`);
@@ -63,7 +50,7 @@ const NavigationArticle = ({ item }) => {
 
   return (
     <>
-      <Link href={`/base-de-connaissance/${item.parents[0].slug}`} className=" align-center mb-2 flex flex-row justify-start text-center md:hidden">
+      <Link href={`/base-de-connaissance/${item.parents[0].slug}?openTheme=${item.parents[1].slug}`} className=" align-center mb-2 flex flex-row justify-start text-center md:hidden">
         <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-500" />
         <p className="text-sm leading-5 text-gray-500">Retour</p>
       </Link>
@@ -78,10 +65,10 @@ const NavigationArticle = ({ item }) => {
             aria-expanded={active}
             className={`flex w-full flex-1 cursor-pointer appearance-none flex-row items-center justify-center md:justify-between md:rounded-md md:border-none ${
               active ? "bg-white md:bg-white" : "bg-gray-100 md:bg-white"
-            } py-4 shadow-none md:py-[0.5rem] md:pr-[2rem]`}
+            } py-4 px-4 shadow-none md:py-[0.5rem] md:pr-[2rem]`}
             onClick={toggleAccordion}
           >
-            <Link href={`/base-de-connaissance/${item.parents[0].slug}`} className="align-center flex hidden flex-row justify-between text-center md:mr-2 md:block">
+            <Link href={`/base-de-connaissance/${item.parents[0].slug}?openTheme=${item.parents[1].slug}`} className="align-center flex hidden flex-row justify-between text-center md:mr-2 md:block">
               <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-400 md:mr-4 md:border-r md:border-gray-200" />
             </Link>
             <div className="mr-2 flex flex-col justify-center">
@@ -107,9 +94,7 @@ const NavigationArticle = ({ item }) => {
                 .sort((a, b) => a.position - b.position)
                 .map(({ _id, title, slug, type }, index) => (
                   <li
-                    className={`flex border-gray-200 text-sm font-medium leading-5 text-gray-600 ${
-                      _id === item._id ? "rounded-md bg-gray-200 text-gray-900" : "text-gray-600"
-                    }`}
+                    className={`flex border-gray-200 text-sm font-medium leading-5 text-gray-600 ${_id === item._id ? "rounded-md bg-gray-200 text-gray-900" : "text-gray-600"}`}
                     key={_id}
                   >
                     <Link

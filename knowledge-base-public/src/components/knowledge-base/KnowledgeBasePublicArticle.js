@@ -29,7 +29,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
               )}
             </>
           )}
-          <div className={item.parents.length > 2 ? "max-w-[70%]" : ""}>
+          <div className={item.parents.length > 2 ? "md:max-w-[70%]" : ""}>
             <div className="flew-row flex justify-between pb-2 pt-4">
               <div className="mr-4">
                 <h2 className="mb-2 text-[24px] font-bold print:mb-0 print:text-black">{group?.title}</h2>
