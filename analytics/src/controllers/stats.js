@@ -52,7 +52,7 @@ router.post("/young-status/count", async (req, res) => {
         {
           type: db.QueryTypes.SELECT,
           replacements: { region: value.region, status: value.status, cohort: value.cohort, startDate: value.startDate, endDate: value.endDate },
-        }
+        },
       );
     } else if (value.department?.length) {
       result = await db.query(
@@ -63,7 +63,7 @@ router.post("/young-status/count", async (req, res) => {
         {
           type: db.QueryTypes.SELECT,
           replacements: { department: value.department, status: value.status, cohort: value.cohort, startDate: value.startDate, endDate: value.endDate },
-        }
+        },
       );
     } else {
       result = await db.query(
@@ -74,7 +74,7 @@ router.post("/young-status/count", async (req, res) => {
         {
           type: db.QueryTypes.SELECT,
           replacements: { status: value.status, cohort: value.cohort, startDate: value.startDate, endDate: value.endDate },
-        }
+        },
       );
     }
     return res.status(200).send({ ok: true, data: result[0] });
@@ -116,7 +116,7 @@ router.post("/young-cohort/count", async (req, res) => {
         {
           type: db.QueryTypes.SELECT,
           replacements: { region: value.region, cohort: value.cohort, startDate: value.startDate, endDate: value.endDate },
-        }
+        },
       );
     } else if (value.department?.length) {
       result = await db.query(
@@ -127,7 +127,7 @@ router.post("/young-cohort/count", async (req, res) => {
         {
           type: db.QueryTypes.SELECT,
           replacements: { department: value.department, cohort: value.cohort, startDate: value.startDate, endDate: value.endDate },
-        }
+        },
       );
     } else {
       result = await db.query(
@@ -137,7 +137,7 @@ router.post("/young-cohort/count", async (req, res) => {
         {
           type: db.QueryTypes.SELECT,
           replacements: { cohort: value.cohort, startDate: value.startDate, endDate: value.endDate },
-        }
+        },
       );
     }
     return res.status(200).send({ ok: true, data: result[0] });
@@ -176,7 +176,7 @@ router.post("/application-contract-signed/count", async (req, res) => {
         {
           type: db.QueryTypes.SELECT,
           replacements: { department: value.department, status: value.status, startDate: value.startDate, endDate: value.endDate },
-        }
+        },
       );
     } else {
       result = await db.query(
@@ -187,7 +187,7 @@ router.post("/application-contract-signed/count", async (req, res) => {
         {
           type: db.QueryTypes.SELECT,
           replacements: { status: value.status, startDate: value.startDate, endDate: value.endDate },
-        }
+        },
       );
     }
 
@@ -195,6 +195,72 @@ router.post("/application-contract-signed/count", async (req, res) => {
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: "Error in application-contract-signed" });
+  }
+});
+
+router.post("/mission-change-status/count", async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      status: Joi.array().items(Joi.string().valid("DRAFT", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED", "CANCEL", "ARCHIVED").required()),
+      department: Joi.array().items(Joi.string()),
+      structureId: Joi.string(),
+      startDate: Joi.string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .required(),
+      endDate: Joi.string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .required(),
+    })
+      .oxor("department", "structureId")
+      .validate(req.body);
+
+    if (error) {
+      console.log(error);
+      return res.status(400).send({ ok: false, code: "INVALID_PARAMS" });
+    }
+
+    let result;
+    if (value.department?.length) {
+      result = await db.query(
+        `
+        select evenement_valeur from "public"."log_missions"
+        where evenement_nom = 'STATUS_MISSION_CHANGE' and evenement_valeur in (:status)
+        and mission_departement in (:department)
+        and "date" between :startDate and :endDate::date + 1;`,
+        {
+          type: db.QueryTypes.SELECT,
+          replacements: { status: value.status, startDate: value.startDate, endDate: value.endDate, department: value.department },
+        },
+      );
+    } else if (value.structureId) {
+      result = await db.query(
+        `
+        select evenement_valeur from "public"."log_missions"
+        where evenement_nom = 'STATUS_MISSION_CHANGE' and evenement_valeur in (:status)
+        and mission_structureId = structureId
+        and "date" between :startDate and :endDate::date + 1;`,
+        {
+          type: db.QueryTypes.SELECT,
+          replacements: { structureId: value.structureId, status: value.status, startDate: value.startDate, endDate: value.endDate },
+        },
+      );
+    } else {
+      result = await db.query(
+        `
+        select evenement_valeur from "public"."log_missions"
+        where evenement_nom = 'STATUS_MISSION_CHANGE' and evenement_valeur in (:status)
+        and "date" between :startDate and :endDate::date + 1;`,
+        {
+          type: db.QueryTypes.SELECT,
+          replacements: { status: value.status, startDate: value.startDate, endDate: value.endDate },
+        },
+      );
+    }
+
+    return res.status(200).send({ ok: true, data: result });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: "Error in mission-change-status" });
   }
 });
 

@@ -327,6 +327,104 @@ async function getYoungsWhoStartedOrFinishedMissions(startDate, endDate, user) {
   ];
 }
 
+async function getMissionsChangeStatus(startDate, endDate, user) {
+  //ref dep,responsable,supervisor,admin
+  let body = {
+    startDate: formatDateForPostGre(startDate),
+    endDate: formatDateForPostGre(endDate),
+  };
+  switch (user.role) {
+    case ROLES.REFERENT_DEPARTMENT:
+      body.status = [MISSION_STATUS.WAITING_CORRECTION, MISSION_STATUS.VALIDATED, MISSION_STATUS.REFUSED];
+      body.department = user.department;
+      break;
+
+    case ROLES.SUPERVISOR:
+    case ROLES.RESPONSIBLE:
+      body.status = [MISSION_STATUS.VALIDATED, MISSION_STATUS.REFUSED];
+      body.structureId = user.structureId;
+      break;
+
+    case ROLES.ADMIN:
+      body.status = [MISSION_STATUS.WAITING_CORRECTION, MISSION_STATUS.WAITING_VALIDATION, MISSION_STATUS.VALIDATED, MISSION_STATUS.REFUSED];
+      break;
+
+    default:
+      break;
+  }
+
+  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/mission-change-status/count`, {
+    ...postParams(token),
+    body: JSON.stringify(body),
+  });
+  const result = await response.json();
+  const data = result?.data;
+  let resultArray = {
+    [MISSION_STATUS.WAITING_CORRECTION]: 0,
+    [MISSION_STATUS.WAITING_VALIDATION]: 0,
+    [MISSION_STATUS.VALIDATED]: 0,
+    [MISSION_STATUS.REFUSED]: 0,
+  };
+
+  for (const item of data) {
+    const value = item.evenement_valeur;
+    if (Object.prototype.hasOwnProperty.call(resultArray, value)) {
+      resultArray[value]++;
+    }
+  }
+  const correctionValue = resultArray[MISSION_STATUS.WAITING_CORRECTION];
+  const validationValue = resultArray[MISSION_STATUS.WAITING_VALIDATION];
+  const validatedValue = resultArray[MISSION_STATUS.VALIDATED];
+  const refusedValue = resultArray[MISSION_STATUS.REFUSED];
+
+  const returnArray = {
+    [MISSION_STATUS.WAITING_CORRECTION]: {
+      id: "missions-waiting-for-correction",
+      value: correctionValue,
+      label: ` mission${correctionValue > 1 ? "s" : ""} mise${correctionValue > 1 ? "s" : ""} en correction`,
+      icon: "action",
+    },
+    [MISSION_STATUS.WAITING_VALIDATION]: {
+      id: "missions-waiting-for-validation",
+      value: validationValue,
+      label: ` mission${validationValue > 1 ? "s" : ""} soumise${validationValue > 1 ? "s" : ""} a validation`,
+      icon: "action",
+    },
+    [MISSION_STATUS.VALIDATED]: {
+      id: "missions-validated",
+      value: validatedValue,
+      label: ` mission${validatedValue > 1 ? "s" : ""} validée${validatedValue > 1 ? "s" : ""}`,
+      icon: "action",
+    },
+    [MISSION_STATUS.REFUSED]: {
+      id: "missions-refused",
+      value: refusedValue,
+      label: ` mission${refusedValue > 1 ? "s" : ""} refusée${refusedValue > 1 ? "s" : ""}`,
+      icon: "action",
+    },
+  };
+  switch (user.role) {
+    case ROLES.REFERENT_DEPARTMENT:
+      return [returnArray[MISSION_STATUS.WAITING_CORRECTION], returnArray[MISSION_STATUS.VALIDATED], returnArray[MISSION_STATUS.REFUSED]];
+
+    case ROLES.SUPERVISOR:
+    case ROLES.RESPONSIBLE:
+      return [returnArray[MISSION_STATUS.VALIDATED], returnArray[MISSION_STATUS.REFUSED]];
+
+    case ROLES.ADMIN:
+      return [
+        returnArray[MISSION_STATUS.WAITING_CORRECTION],
+        returnArray[MISSION_STATUS.WAITING_VALIDATION],
+        returnArray[MISSION_STATUS.VALIDATED],
+        returnArray[MISSION_STATUS.REFUSED],
+      ];
+
+    default:
+      return [];
+  }
+}
+
 module.exports = {
   getYoungNotesPhase2,
   getNewStructures,
@@ -334,4 +432,5 @@ module.exports = {
   getMissionsOnTerm,
   getContractsSigned,
   getYoungsWhoStartedOrFinishedMissions,
+  getMissionsChangeStatus,
 };
