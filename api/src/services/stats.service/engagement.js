@@ -582,6 +582,79 @@ async function getProposedMissionsAcceptedOrRefusedByYoung(startDate, endDate, u
   ];
 }
 
+async function getYoungStartPhase2InTime(startDate, endDate, user) {
+  // ref reg only
+  let body = {
+    query: {
+      bool: {
+        filter: [
+          { term: { "region.keyword": user.region } },
+          { terms: { "statusPhase2.keyword": [YOUNG_STATUS_PHASE2.VALIDATED, YOUNG_STATUS_PHASE2.IN_PROGRESS] } },
+          { terms: { "statusPhase2Contract.keyword": [CONTRACT_STATUS.VALIDATED] } },
+        ],
+      },
+    },
+    size: ES_NO_LIMIT,
+    track_total_hits: true,
+  };
+
+  const response = await esClient.search({ index: "young", body });
+  const youngs = response.body.hits.hits;
+  const youngsIds = youngs.map((young) => young._id);
+  const youngsCohort = youngs.map((young) => ({
+    _id: young._id,
+    cohort: young._source.cohort,
+  }));
+
+  let body2 = {
+    query: {
+      bool: {
+        filter: [{ terms: { "youngId.keyword": youngsIds } }, { term: { "youngContractStatus.keyword": CONTRACT_STATUS.VALIDATED } }],
+      },
+    },
+    aggs: {
+      group_by_youngId: {
+        terms: { field: "youngId.keyword", size: ES_NO_LIMIT },
+        aggs: {
+          minYoungContractValidationDate: {
+            min: { field: "youngContractValidationDate" },
+          },
+        },
+      },
+    },
+    size: 0,
+    track_total_hits: true,
+  };
+
+  const response2 = await esClient.search({ index: "contract", body: body2 });
+
+  let value = response2.body.aggregations.group_by_youngId.buckets;
+
+  value = value.filter((bucket) => {
+    const minYoungContractValidationDate = new Date(bucket.minYoungContractValidationDate.value);
+    const correspondingYoung = youngsCohort.find((young) => young._id === bucket.key);
+
+    //check si la date de validation de contract est moins d'un an après la date de validation de phase 1 du jeune
+    if (correspondingYoung) {
+      const oneYearInMilliseconds = 365 * 24 * 60 * 60 * 1000;
+      const cohortEnd = COHESION_STAY_END[correspondingYoung.cohort];
+
+      if (minYoungContractValidationDate - cohortEnd < oneYearInMilliseconds) {
+        return minYoungContractValidationDate >= new Date(startDate) && minYoungContractValidationDate <= new Date(endDate);
+      }
+    }
+  });
+
+  return [
+    {
+      id: "young-phase2-validated-in-time",
+      value: value.length,
+      label: ` volontaire${value.length > 1 ? "s" : ""} ayant commencé ${value.length === 1 ? "sa" : "leur"} mission d’intérêt général dans le délai imparti`,
+      icon: "action",
+    },
+  ];
+}
+
 module.exports = {
   getYoungNotesPhase2,
   getNewStructures,
@@ -593,4 +666,5 @@ module.exports = {
   getApplicationsChangeStatus,
   getNewMissions,
   getProposedMissionsAcceptedOrRefusedByYoung,
+  getYoungStartPhase2InTime,
 };
