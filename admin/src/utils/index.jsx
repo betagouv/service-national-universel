@@ -334,45 +334,7 @@ export const getInitials = (word) =>
     .toUpperCase();
 
 export const getNetworkOptions = async (inputValue) => {
-  const body = {
-    query: { bool: { must: [{ term: { isNetwork: { value: "true" } } }] } },
-    size: 50,
-    track_total_hits: true,
-  };
-  if (inputValue) {
-    body.query.bool.must.push({
-      bool: {
-        should: [
-          {
-            multi_match: {
-              query: inputValue,
-              fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
-              type: "cross_fields",
-              operator: "and",
-            },
-          },
-          {
-            multi_match: {
-              query: inputValue,
-              fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
-              type: "phrase",
-              operator: "and",
-            },
-          },
-          {
-            multi_match: {
-              query: inputValue,
-              fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
-              type: "phrase_prefix",
-              operator: "and",
-            },
-          },
-        ],
-        minimum_should_match: "1",
-      },
-    });
-  }
-  const { responses } = await api.esQuery("structure", body);
+  const { responses } = await api.post("/elasticsearch/structure/search/", { filters: { searchbar: [inputValue], isNetwork: ["true"] } });
   return responses[0].hits.hits.map((hit) => {
     return { value: hit._source, _id: hit._id, label: hit._source.name, structure: hit._source };
   });
