@@ -1,5 +1,5 @@
 const { ROLES } = require("snu-lib");
-const { getNewStructures, getYoungNotesPhase2, getYoungPhase2Validated, getMissionsOnTerm, getContractsSigned } = require("./engagement");
+const { getNewStructures, getYoungNotesPhase2, getYoungPhase2Validated, getMissionsOnTerm, getContractsSigned, getYoungsWhoStartedOrFinishedMissions } = require("./engagement");
 const { getYoungNotesPhase1, getTimeScheduleAndPedagoProject, getTransportCorrectionRequests, getSessions, getLineToPoints } = require("./sejour");
 
 const keyNumbersByRole = {
@@ -10,18 +10,26 @@ const keyNumbersByRole = {
   },
   inscription: {},
   engagement: {
-    [ROLES.REFERENT_DEPARTMENT]: [getNewStructures, getYoungNotesPhase2, getMissionsOnTerm, getContractsSigned],
+    [ROLES.REFERENT_DEPARTMENT]: [getNewStructures, getYoungNotesPhase2, getMissionsOnTerm, getContractsSigned, getYoungsWhoStartedOrFinishedMissions],
     [ROLES.REFERENT_REGION]: [getYoungPhase2Validated],
-    [ROLES.SUPERVISOR]: [getMissionsOnTerm],
-    [ROLES.RESPONSIBLE]: [getMissionsOnTerm],
-    [ROLES.ADMIN]: [getContractsSigned],
+    [ROLES.SUPERVISOR]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions],
+    [ROLES.RESPONSIBLE]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions],
+    [ROLES.ADMIN]: [getContractsSigned, getYoungsWhoStartedOrFinishedMissions],
   },
   all: {
-    [ROLES.REFERENT_DEPARTMENT]: [getYoungNotesPhase1, getTimeScheduleAndPedagoProject, getNewStructures, getYoungNotesPhase2, getMissionsOnTerm, getContractsSigned],
+    [ROLES.REFERENT_DEPARTMENT]: [
+      getYoungNotesPhase1,
+      getTimeScheduleAndPedagoProject,
+      getNewStructures,
+      getYoungNotesPhase2,
+      getMissionsOnTerm,
+      getContractsSigned,
+      getYoungsWhoStartedOrFinishedMissions,
+    ],
     [ROLES.REFERENT_REGION]: [getTimeScheduleAndPedagoProject, getTransportCorrectionRequests, getYoungPhase2Validated],
-    [ROLES.SUPERVISOR]: [getMissionsOnTerm],
-    [ROLES.RESPONSIBLE]: [getMissionsOnTerm],
-    [ROLES.ADMIN]: [getTransportCorrectionRequests, getSessions, getLineToPoints, getContractsSigned],
+    [ROLES.SUPERVISOR]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions],
+    [ROLES.RESPONSIBLE]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions],
+    [ROLES.ADMIN]: [getTransportCorrectionRequests, getSessions, getLineToPoints, getContractsSigned, getYoungsWhoStartedOrFinishedMissions],
   },
 };
 
