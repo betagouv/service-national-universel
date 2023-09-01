@@ -9,6 +9,7 @@ const {
   getMissionsChangeStatus,
   getApplicationsChangeStatus,
   getNewMissions,
+  getProposedMissionsAcceptedOrRefusedByYoung,
 } = require("./engagement");
 const { getYoungNotesPhase1, getTimeScheduleAndPedagoProject, getTransportCorrectionRequests, getSessions, getLineToPoints } = require("./sejour");
 const {
@@ -63,6 +64,7 @@ const keyNumbersByRole = {
       getMissionsChangeStatus,
       getApplicationsChangeStatus,
       getNewMissions,
+      getProposedMissionsAcceptedOrRefusedByYoung,
     ],
     [ROLES.REFERENT_REGION]: [getYoungPhase2Validated],
     [ROLES.SUPERVISOR]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus, getApplicationsChangeStatus],
@@ -85,6 +87,7 @@ const keyNumbersByRole = {
       getYoungWhoChangedCohort,
       getApplicationsChangeStatus,
       getNewMissions,
+      getProposedMissionsAcceptedOrRefusedByYoung,
     ],
     [ROLES.REFERENT_REGION]: [
       getTimeScheduleAndPedagoProject,
