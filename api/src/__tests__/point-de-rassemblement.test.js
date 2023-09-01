@@ -19,6 +19,7 @@ const SchemaDeRepartitionModel = require("../models/PlanDeTransport/schemaDeRepa
 const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
 const LigneToPointModel = require("../models/PlanDeTransport/ligneToPoint");
 const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
+const YoungModel = require("../models/young");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
