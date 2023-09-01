@@ -153,8 +153,55 @@ async function getYoungPhase2Validated(startDate, endDate, user) {
   ];
 }
 
+async function getMissionsOnTerm(startDate, endDate, user) {
+  // ref dep && responsible && supervisor
+  let body = {
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              endAt: {
+                gte: new Date(startDate),
+                lte: new Date(endDate),
+              },
+            },
+          },
+        ],
+      },
+    },
+    size: 0,
+    track_total_hits: true,
+  };
+  switch (user.role) {
+    case ROLES.RESPONSIBLE:
+    case ROLES.SUPERVISOR:
+      body.query.bool.filter.push({ match: { "structureId.keyword": user.structureId } });
+      break;
+
+    case ROLES.REFERENT_DEPARTMENT:
+      body.query.bool.filter.push({ terms: { "department.keyword": user.department } });
+      break;
+    default:
+      break;
+  }
+
+  const response = await esClient.search({ index: "mission", body });
+  const value = response.body.hits.total.value;
+
+  return [
+    {
+      id: "missions-on-term",
+      value: value,
+      label: ` mission${value > 1 ? "s" : ""} arrivée${value > 1 ? "s" : ""} à échéance`,
+      icon: "action",
+    },
+  ];
+}
+
 module.exports = {
   getYoungNotesPhase2,
   getNewStructures,
   getYoungPhase2Validated,
+  getMissionsOnTerm,
 };
