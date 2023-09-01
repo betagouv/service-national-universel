@@ -88,7 +88,7 @@ async function getTimeScheduleAndPedagoProject(startDate, endDate, user) {
         },
       },
     },
-    size: ES_NO_LIMIT,
+    size: 0,
     track_total_hits: true,
   };
 
@@ -100,21 +100,14 @@ async function getTimeScheduleAndPedagoProject(startDate, endDate, user) {
   }
 
   const response = await esClient.search({ index: "sessionphase1", body });
-  const time = response.body.aggregations.group_by_timeSchedule.doc_count;
-  const project = response.body.aggregations.group_by_pedagoProject.doc_count;
+  const value = response.body.hits.total.value;
 
   return [
     {
       id: "time-schedule",
-      value: time,
-      label: ` emploi${time > 1 ? "s" : ""} du temps déposé${time > 1 ? "s" : ""}`,
-      icon: "where",
-    },
-    {
-      id: "pedago-project",
-      value: project,
-      label: ` projet${project > 1 ? "s" : ""} pédagogique${project > 1 ? "s" : ""} déposé${project > 1 ? "s" : ""}`,
-      icon: "where",
+      value,
+      label: `emploi${value > 1 ? "s" : ""} du temps déposé${value > 1 ? "s" : ""}`,
+      icon: "action",
     },
   ];
 }

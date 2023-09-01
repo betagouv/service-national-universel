@@ -102,6 +102,16 @@ function dateForDatePicker(d) {
   return new Date(d).toISOString().split("T")[0];
 }
 
+const formatDateForPostGre = (date) => {
+  if (!date) return "-";
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = (d.getMonth() + 1).toString().padStart(2, "0");
+  const day = d.getDate().toString().padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
 function getAge(d) {
   const now = new Date();
   now.setHours(0, 0, 0, 0);

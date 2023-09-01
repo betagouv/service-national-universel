@@ -1,5 +1,39 @@
-const { ES_NO_LIMIT, ROLES, COHORTS, YOUNG_STATUS, YOUNG_PHASE } = require("snu-lib");
+const { ES_NO_LIMIT, ROLES, COHORTS, YOUNG_STATUS, YOUNG_PHASE, formatDateForPostGre } = require("snu-lib");
 const esClient = require("../../es");
+const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+
+async function getAccessToken(endpoint, apiKey) {
+  const response = await fetch(`${endpoint}/auth/token`, {
+    method: "GET",
+    redirect: "follow",
+    headers: {
+      Accept: "application/json, text/plain, */*",
+      "User-Agent": "*",
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+    },
+  });
+
+  const data = await response.json();
+  if (data.ok == true && data.token) {
+    return data.token;
+  } else {
+    throw new Error("Couldn't retrieve auth token");
+  }
+}
+
+function postParams(token) {
+  return {
+    method: "POST",
+    redirect: "follow",
+    headers: {
+      Accept: "application/json, text/plain, */*",
+      "User-Agent": "*",
+      "Content-Type": "application/json",
+      "x-access-token": token,
+    },
+  };
+}
 
 async function getYoungNotesPhase0(startDate, endDate, user) {
   // ref dep only
@@ -220,6 +254,41 @@ async function getAbandonedRegistration(startDate, endDate, user) {
       id: "abandoned-registration",
       value: value,
       label: ` inscription${value > 1 ? "s" : ""} abandonnée${value > 1 ? "s" : ""}`,
+      icon: "other",
+    },
+  ];
+}
+
+async function getYoungVaildatedonWaitingList(startDate, endDate, user) {
+  // ref dep only
+  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  let body = {
+    startDate: formatDateForPostGre(startDate),
+    endDate: formatDateForPostGre(endDate),
+    status: YOUNG_STATUS.VALIDATED,
+  };
+
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    body.department = user.department;
+  }
+  if (user.role === ROLES.REFERENT_REGION) {
+    body.region = user.region;
+  }
+
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-validated-waitingList/count`, {
+    ...postParams(token),
+    body: JSON.stringify(body),
+  });
+
+  const result = await response.json();
+  console.log(result);
+  const value = result?.data;
+
+  return [
+    {
+      id: "young-validated-waitingList",
+      value: value,
+      label: ` dossier${value > 1 ? "s" : ""} d'inscription validé${value > 1 ? "s" : ""} sur liste complémentaire`,
       icon: "other",
     },
   ];
