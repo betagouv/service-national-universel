@@ -7,6 +7,7 @@ const {
   getContractsSigned,
   getYoungsWhoStartedOrFinishedMissions,
   getMissionsChangeStatus,
+  getApplicationsChangeStatus,
 } = require("./engagement");
 const { getYoungNotesPhase1, getTimeScheduleAndPedagoProject, getTransportCorrectionRequests, getSessions, getLineToPoints } = require("./sejour");
 const {
@@ -52,11 +53,19 @@ const keyNumbersByRole = {
     [ROLES.ADMIN]: [getRegisterFileOpen, getYoungWithdrawnAfterValidated, getYoungValidatedFromWaitingStatus, getYoungWhoChangedCohort],
   },
   engagement: {
-    [ROLES.REFERENT_DEPARTMENT]: [getNewStructures, getYoungNotesPhase2, getMissionsOnTerm, getContractsSigned, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
+    [ROLES.REFERENT_DEPARTMENT]: [
+      getNewStructures,
+      getYoungNotesPhase2,
+      getMissionsOnTerm,
+      getContractsSigned,
+      getYoungsWhoStartedOrFinishedMissions,
+      getMissionsChangeStatus,
+      getApplicationsChangeStatus,
+    ],
     [ROLES.REFERENT_REGION]: [getYoungPhase2Validated],
-    [ROLES.SUPERVISOR]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
-    [ROLES.RESPONSIBLE]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
-    [ROLES.ADMIN]: [getContractsSigned, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
+    [ROLES.SUPERVISOR]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus, getApplicationsChangeStatus],
+    [ROLES.RESPONSIBLE]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus, getApplicationsChangeStatus],
+    [ROLES.ADMIN]: [getContractsSigned, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus, getApplicationsChangeStatus],
   },
   all: {
     [ROLES.REFERENT_DEPARTMENT]: [
@@ -72,6 +81,7 @@ const keyNumbersByRole = {
       getMissionsChangeStatus,
       getYoungValidatedFromWaitingStatus,
       getYoungWhoChangedCohort,
+      getApplicationsChangeStatus,
     ],
     [ROLES.REFERENT_REGION]: [
       getTimeScheduleAndPedagoProject,
@@ -84,8 +94,8 @@ const keyNumbersByRole = {
       getYoungValidatedFromWaitingStatus,
       getYoungWhoChangedCohort,
     ],
-    [ROLES.SUPERVISOR]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
-    [ROLES.RESPONSIBLE]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
+    [ROLES.SUPERVISOR]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus, getApplicationsChangeStatus],
+    [ROLES.RESPONSIBLE]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus, getApplicationsChangeStatus],
     [ROLES.ADMIN]: [
       getTransportCorrectionRequests,
       getSessions,
@@ -96,6 +106,7 @@ const keyNumbersByRole = {
       getRegisterFileOpen,
       getYoungValidatedFromWaitingStatus,
       getYoungWhoChangedCohort,
+      getApplicationsChangeStatus,
     ],
   },
 };
