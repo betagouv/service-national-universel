@@ -7,7 +7,7 @@ import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
 import Input from "../../../components/dsfr/forms/input";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
-import { appURL } from "../../../config";
+import { appURL, bdcURL } from "../../../config";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import plausibleEvent from "../../../services/plausible";
 import { getPasswordErrorMessage } from "../../../utils";
@@ -78,7 +78,7 @@ export default function StepProfil() {
   return (
     <>
       <ProgressBar/>
-      <DSFRContainer supportLink={`https://support.snu.gouv.fr/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire`} title="Créez votre compte">
+      <DSFRContainer supportLink={`${bdcURL}/je-me-preinscris-et-cree-mon-compte-volontaire`} title="Créez votre compte">
         <div className="space-y-5">
           <div className="flex flex-col gap-1">
             <label>Prénom du volontaire</label>

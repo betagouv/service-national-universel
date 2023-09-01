@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
-import { appURL } from "@/config";
+import { bdcURL } from "@/config";
 
 export default function StepConfirm() {
   const [error, setError] = useState({});
@@ -76,7 +76,7 @@ export default function StepConfirm() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer title="Ces informations sont-elles correctes ?" supportLink={"https://support.snu.gouv.fr/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}>
+      <DSFRContainer title="Ces informations sont-elles correctes ?" supportLink={`${bdcURL}/je-me-preinscris-et-cree-mon-compte-volontaire`}>
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
 
         <div className="space-y-4">
