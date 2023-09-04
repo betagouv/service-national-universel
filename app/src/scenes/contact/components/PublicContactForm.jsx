@@ -66,7 +66,7 @@ export default function PublicContactForm() {
         lastName,
         email,
         department,
-        subjectStep0: role,
+        role,
         subjectStep1: category,
         subjectStep2: question,
         region: department2region[department],
