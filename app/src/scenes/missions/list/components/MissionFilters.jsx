@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
-import { apiAdress } from "../../../../services/api-adresse";
+import { putLocation } from "../../../../services/api-adresse";
 
 import Sante from "../../../../assets/mission-domaines/sante";
 import Solidarite from "../../../../assets/mission-domaines/solidarite";
@@ -83,24 +83,6 @@ export default function MissionFilters({ filters, setFilters }) {
     });
   };
 
-  async function fetchLocation(query, postcode, signal) {
-    try {
-      let res = await apiAdress(query, { postcode }, { signal });
-      if (res?.features?.length) {
-        return { lat: res?.features[0]?.geometry?.coordinates[1], lon: res?.features[0]?.geometry?.coordinates[0] };
-      }
-      // if no result, try with zip code only
-      res = await apiAdress(postcode, { postcode }, { signal });
-      if (res?.features?.length) {
-        return { lat: res?.features[0]?.geometry?.coordinates[1], lon: res?.features[0]?.geometry?.coordinates[0] };
-      }
-      toastr.error("Erreur avec la base adresse nationale", "Impossible de trouver des coordonnées GPS.", { timeOut: 10_000 });
-      return null;
-    } catch (e) {
-      capture(e);
-    }
-  }
-
   useEffect(() => {
     if (!young) return;
 
@@ -115,7 +97,8 @@ export default function MissionFilters({ filters, setFilters }) {
     };
     const getYoungLocation = async () => {
       try {
-        const res = await fetchLocation(young?.address, young?.zip, abortController.signal);
+        const res = await putLocation(young?.address, young?.zip, abortController.signal);
+        if (!res) return toastr.error("Erreur avec la base adresse nationale", "Impossible de trouver les coordonnées du volontaire.", { timeOut: 10_000 });
         if (res) setYoungLocation(res);
       } catch (e) {
         capture(e);
@@ -123,7 +106,8 @@ export default function MissionFilters({ filters, setFilters }) {
     };
     const getRelativeLocation = async () => {
       try {
-        const res = await fetchLocation(`${young?.mobilityNearRelativeAddress} ${young?.mobilityNearRelativeCity}`, young?.mobilityNearRelativeZip, abortController.signal);
+        const res = await putLocation(`${young?.mobilityNearRelativeAddress} ${young?.mobilityNearRelativeCity}`, young?.mobilityNearRelativeZip, abortController.signal);
+        if (!res) return toastr.error("Erreur avec la base adresse nationale", "Impossible de trouver les coordonnées du proche.", { timeOut: 10_000 });
         if (res) setRelativeLocation(res);
       } catch (e) {
         capture(e);
