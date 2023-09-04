@@ -15,7 +15,7 @@ const keyNumbersByRole = {
   },
   all: {
     [ROLES.REFERENT_DEPARTMENT]: [getYoungNotesPhase1, getTimeScheduleAndPedagoProject, getNewStructures, getYoungNotesPhase2],
-    [ROLES.REFERENT_REGION]: [getTimeScheduleAndPedagoProject, getTransportCorrectionRequests, getYoungNotesPhase2],
+    [ROLES.REFERENT_REGION]: [getTimeScheduleAndPedagoProject, getTransportCorrectionRequests, getYoungPhase2Validated],
     [ROLES.ADMIN]: [getTransportCorrectionRequests, getSessions, getLineToPoints],
   },
 };
