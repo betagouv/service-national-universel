@@ -24,7 +24,10 @@ export const itemsSejourGod = [
     title: "Edit Plan de transport",
     link: "/edit-transport",
   },
-
+  {
+    title: "Objectifs",
+    link: "/objectifs",
+  },
   {
     title: "Export DSNJ",
     link: "/dsnj-export",
@@ -51,6 +54,10 @@ export const itemsSejourAdmin = [
   {
     title: "Plan de transport",
     link: "/ligne-de-bus",
+  },
+  {
+    title: "Objectifs",
+    link: "/objectifs",
   },
   {
     title: "Export DSNJ",

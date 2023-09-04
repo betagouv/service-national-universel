@@ -105,7 +105,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const mission = await MissionObject.findById(checkedId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

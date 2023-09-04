@@ -51,7 +51,7 @@ export default function ContactForm() {
           const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
           return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(translationKey), { timeOut: 5000 });
         }
-        uploadedFiles = filesResponse.uploadFiles;
+        uploadedFiles = filesResponse.data;
       }
 
       const response = await API.post("/zammood/ticket", {

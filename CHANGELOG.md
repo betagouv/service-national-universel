@@ -1,3 +1,37 @@
+## [1.327.1](https://github.com/betagouv/service-national-universel/compare/v1.327.0...v1.327.1) (2023-09-01)
+
+
+### Bug Fixes
+
+* **api:** validate email during contract edition ([af0d52b](https://github.com/betagouv/service-national-universel/commit/af0d52bac4910dce59b80c9b74af825dec98a33f))
+
+# [1.327.0](https://github.com/betagouv/service-national-universel/compare/v1.326.0...v1.327.0) (2023-08-31)
+
+
+### Bug Fixes
+
+* **admin:** dashboard horizontalbar with 0 objective ([#2920](https://github.com/betagouv/service-national-universel/issues/2920)) ([fcbab44](https://github.com/betagouv/service-national-universel/commit/fcbab44f8daa18e08d1ec7eaa8c7453fd26c3339))
+* **admin:** new sidebar -> we forgot the objectives tab ! ([21d8222](https://github.com/betagouv/service-national-universel/commit/21d82221ff222385e8a3a84afc3616602f5107e6))
+
+
+### Features
+
+* **test:** creation unit test lignetopoint/pointderassemblement ([#2905](https://github.com/betagouv/service-national-universel/issues/2905)) ([9d04ee3](https://github.com/betagouv/service-national-universel/commit/9d04ee3561c692c56732239603602f306441a2bc))
+
+# [1.326.0](https://github.com/betagouv/service-national-universel/compare/v1.325.0...v1.326.0) (2023-08-30)
+
+
+### Bug Fixes
+
+* **admin:** field with html for mission ([66936b4](https://github.com/betagouv/service-national-universel/commit/66936b49afd58ee5e7ad6d4a133755dd7365134d))
+* **app:** load cohort on phase2 and phase3 pages as well ([40d1884](https://github.com/betagouv/service-national-universel/commit/40d1884e8548ae7389b37a2472b8fe8ee6d2d44d))
+* **app:** typo error ([0d6d66c](https://github.com/betagouv/service-national-universel/commit/0d6d66c3e6b79673ef33859e00c5739583cbaecb))
+
+
+### Features
+
+* **api:** add 2fa redirection ([#2913](https://github.com/betagouv/service-national-universel/issues/2913)) ([6df1da3](https://github.com/betagouv/service-national-universel/commit/6df1da33db7398d922a7b165205fa388cf01bdaf))
+
 # [1.325.0](https://github.com/betagouv/service-national-universel/compare/v1.324.0...v1.325.0) (2023-08-29)
 
 
