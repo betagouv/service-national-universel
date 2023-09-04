@@ -10,16 +10,34 @@ import { useRouter } from "next/router";
 import KnowledgeBaseSearch from "./KnowledgeBaseSearch";
 import { HiSearch, HiStar } from "react-icons/hi";
 import Link from "next/link";
-import { environment } from "../../config";
 
 const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   const router = useRouter();
   const [sections, setSections] = useState(item?.children?.filter((c) => c.type === "section") || []);
   const [articles, setArticles] = useState(item?.children?.filter((c) => c.type === "article") || []);
-  const topArticles = (item?.children?.filter((c) => c.type === "article") || []).sort((a, b) => b.read - a.read);
+  // const topArticles = (item?.children?.filter((c) => c.type === "article") || []).sort((a, b) => b.read - a.read);
   const [searchOpen, setSearchOpen] = useState(false);
-
   const scrollRef = useRef(null);
+
+  const getAllArticles = (children) => {
+    let articles = [];
+
+    if (!children || !Array.isArray(children)) {
+      return articles;
+    }
+
+    for (let child of children) {
+      if (child.type === "article") {
+        articles.push(child);
+      }
+      if (child.type === "section" && Array.isArray(child.children)) {
+        articles = articles.concat(getAllArticles(child.children));
+      }
+    }
+
+    return articles;
+  };
+  const topArticles = getAllArticles(item?.children).sort((a, b) => b.read - a.read);
 
   useEffect(() => {
     function handleScroll() {
@@ -116,7 +134,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
         </div>
       </div>
       <div className="mx-auto mt-[-50px] flex w-full max-w-[730px] flex-col items-center justify-center px-4">
-        {articles.length >= 5 && item.parents.length > 0 && (
+        {articles.length >= 5 && !item.parents[1] && (
           <>
             <div className="px-auto mt-6 flex w-full max-w-[730px] flex-col rounded-lg bg-[#E3E3FB] pb-4 pt-2 shadow-md md:px-2">
               <div className="ml-2 flex cursor-pointer flex-row items-center justify-between md:ml-[0px]">
