@@ -35,6 +35,41 @@ function postParams(token) {
   };
 }
 
+async function getNewStructures(startDate, endDate, user) {
+  // ref dep only
+  let body = {
+    query: {
+      bool: {
+        filter: [
+          { terms: { "department.keyword": user.department } },
+          {
+            range: {
+              createdAt: {
+                gte: new Date(startDate),
+                lte: new Date(endDate),
+              },
+            },
+          },
+        ],
+      },
+    },
+    size: 0,
+    track_total_hits: true,
+  };
+
+  const response = await esClient.search({ index: "structure", body });
+  const value = response.body.hits.total.value;
+
+  return [
+    {
+      id: "new-structures",
+      value: value,
+      label: ` nouvelle${value > 1 ? "s" : ""} structure${value > 1 ? "s" : ""} inscrite${value > 1 ? "s" : ""}`,
+      icon: "action",
+    },
+  ];
+}
+
 async function getYoungNotesPhase2(startDate, endDate, user) {
   // ref dep only
   let body = {
@@ -84,4 +119,5 @@ async function getYoungNotesPhase2(startDate, endDate, user) {
 
 module.exports = {
   getYoungNotesPhase2,
+  getNewStructures,
 };
