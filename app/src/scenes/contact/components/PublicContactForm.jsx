@@ -110,7 +110,7 @@ export default function PublicContactForm() {
           <label className="mt-8">Prénom du volontaire</label>
           <Input value={lastName} onChange={setLastName} required />
 
-          <label className="mt-8">Email du volontaire</label>
+          <label className="mt-8">E-mail du volontaire</label>
           <Input label="Votre email" type="email" value={email} onChange={setEmail} required />
 
           <br />
