@@ -15,7 +15,6 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   const router = useRouter();
   const [sections, setSections] = useState(item?.children?.filter((c) => c.type === "section") || []);
   const [articles, setArticles] = useState(item?.children?.filter((c) => c.type === "article") || []);
-  // const topArticles = (item?.children?.filter((c) => c.type === "article") || []).sort((a, b) => b.read - a.read);
   const [searchOpen, setSearchOpen] = useState(false);
   const scrollRef = useRef(null);
 
