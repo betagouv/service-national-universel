@@ -1,3 +1,23 @@
+## [1.327.1](https://github.com/betagouv/service-national-universel/compare/v1.327.0...v1.327.1) (2023-09-01)
+
+
+### Bug Fixes
+
+* **api:** validate email during contract edition ([af0d52b](https://github.com/betagouv/service-national-universel/commit/af0d52bac4910dce59b80c9b74af825dec98a33f))
+
+# [1.327.0](https://github.com/betagouv/service-national-universel/compare/v1.326.0...v1.327.0) (2023-08-31)
+
+
+### Bug Fixes
+
+* **admin:** dashboard horizontalbar with 0 objective ([#2920](https://github.com/betagouv/service-national-universel/issues/2920)) ([fcbab44](https://github.com/betagouv/service-national-universel/commit/fcbab44f8daa18e08d1ec7eaa8c7453fd26c3339))
+* **admin:** new sidebar -> we forgot the objectives tab ! ([21d8222](https://github.com/betagouv/service-national-universel/commit/21d82221ff222385e8a3a84afc3616602f5107e6))
+
+
+### Features
+
+* **test:** creation unit test lignetopoint/pointderassemblement ([#2905](https://github.com/betagouv/service-national-universel/issues/2905)) ([9d04ee3](https://github.com/betagouv/service-national-universel/commit/9d04ee3561c692c56732239603602f306441a2bc))
+
 # [1.326.0](https://github.com/betagouv/service-national-universel/compare/v1.325.0...v1.326.0) (2023-08-30)
 
 
