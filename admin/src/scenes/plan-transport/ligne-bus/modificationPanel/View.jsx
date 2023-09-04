@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -195,7 +195,7 @@ export default function View({ open, setOpen, modification, getModification, tag
                   {getInitials(modification?.requestUserName)}
                 </div>
                 <div className="text-xs text-gray-800">
-                  {modification?.requestUserName}, {dayjs(modification.createdAt).locale("fr").format("DD/MM/YYYY • HH:mm")}
+                  {modification?.requestUserName}, {dayjs(modification.createdAt).format("DD/MM/YYYY • HH:mm")}
                 </div>
               </div>
             </div>
@@ -223,7 +223,7 @@ export default function View({ open, setOpen, modification, getModification, tag
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
                       <div className="text-base font-medium text-gray-800">{user._id === modification.statusUserId ? "Vous" : modification?.statusUserName}</div>
-                      <div className="text-sm text-gray-500">{dayjs(modification.statusDate).locale("fr").format("DD/MM/YYYY • HH:mm")}</div>
+                      <div className="text-sm text-gray-500">{dayjs(modification.statusDate).format("DD/MM/YYYY • HH:mm")}</div>
                     </div>
                     <div className="whitespace-pre-wrap text-sm leading-5 text-gray-800">
                       {modification.status === "ACCEPTED" ? "A accepté la demande de modification" : "A refusé la demande de modification"}
@@ -246,7 +246,7 @@ export default function View({ open, setOpen, modification, getModification, tag
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
                       <div className="text-base font-medium text-gray-800">{user._id === message.userId ? "Vous" : message?.userName}</div>
-                      <div className="text-sm text-gray-500">{dayjs(message.date).locale("fr").format("DD/MM/YYYY • HH:mm")}</div>
+                      <div className="text-sm text-gray-500">{dayjs(message.date).format("DD/MM/YYYY • HH:mm")}</div>
                     </div>
                     <div className="whitespace-pre-wrap text-sm leading-5 text-gray-800">
                       {message.type === "message" ? message?.message : message.opinion === "true" ? "A donné un avis favorable" : "A donné un avis défavorable"}

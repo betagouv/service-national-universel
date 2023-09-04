@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import validator from "validator";
-import "dayjs/locale/fr";
 
 import { translate } from "../../utils";
 import api from "../../services/api";
@@ -10,13 +9,13 @@ import { useHistory } from "react-router-dom";
 
 import { translateGrade, GRADES, getAge, COHESION_STAY_LIMIT_DATE, ES_NO_LIMIT, YOUNG_STATUS } from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import MiniSwitch from "../phase0/components/MiniSwitch";
 import RadioButton from "../phase0/components/RadioButton";
 import { Spinner } from "reactstrap";
 
 //Identite
-import Field from "./components/Field";
+import Field from "@/components/ui/forms/Field";
 import { CniField } from "../phase0/components/CniField";
 import SchoolEditor from "../phase0/components/SchoolEditor";
 import VerifyAddress from "../phase0/components/VerifyAddress";
@@ -359,7 +358,7 @@ export default function Create() {
 
   React.useEffect(() => {
     if (!values.temporaryDate) return;
-    setFieldValue("birthdateAt", dayjs(values.temporaryDate).locale("fr").format("YYYY-MM-DD"));
+    setFieldValue("birthdateAt", dayjs(values.temporaryDate).format("YYYY-MM-DD"));
   }, [values.temporaryDate]);
 
   React.useEffect(() => {
@@ -444,10 +443,10 @@ export default function Create() {
           <div className="flex-[1_0_50%] pl-14 pr-8">
             <div className="ml-5 mb-4 flex items-start justify-start">
               <div onClick={() => setSelectedRepresentant(1)} className={`cursor-pointer pb-4 ${selectedRepresentant === 1 && "border-b-4 text-[#3B82F6]"} mr-9 border-[#3B82F6]`}>
-                Représentant légal 1
+                Représentant légal&nbsp;1
               </div>
               <div onClick={() => setSelectedRepresentant(2)} className={`cursor-pointer pb-4 ${selectedRepresentant === 2 && "border-b-4 text-[#3B82F6]"} mr-9 border-[#3B82F6]`}>
-                Représentant légal 2
+                Représentant légal&nbsp;2
               </div>
             </div>
             {selectedRepresentant === 1 ? (
@@ -537,7 +536,7 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
       <Field
         name={parent === "1" ? "parent1Status" : "parent2Status"}
         label="Statut"
-        errors={errors}
+        error={parent === "1" ? errors?.parent1Status : errors?.parent2Status}
         type="select"
         value={parent === "1" ? values.parent1Status : values.parent2Status}
         options={[
@@ -547,40 +546,41 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
         ]}
         transformer={translate}
         className="mb-4"
-        handleChange={setFieldValue}
+        onChange={(value, key) => setFieldValue(key, value)}
       />
       <div className="mb-4 flex items-start justify-between">
         <Field
           name={parent === "1" ? "parent1LastName" : "parent2LastName"}
           label="Nom"
-          errors={errors}
+          error={parent === "1" ? errors?.parent1LastName : errors?.parent2LastName}
           value={parent === "1" ? values.parent1LastName : values.parent2LastName}
           transformer={translate}
           className="mr-2 flex-[1_1_50%]"
-          handleChange={handleChange}
+          onChange={(value, name) => handleChange({ target: { name, value } })}
         />
         <Field
           name={parent === "1" ? "parent1FirstName" : "parent2FirstName"}
           label="Prénom"
-          errors={errors}
+          error={parent === "1" ? errors?.parent1FistName : errors?.parent2FistName}
           value={parent === "1" ? values.parent1FirstName : values.parent2FirstName}
           transformer={translate}
           className="flex-[1_1_50%]"
-          handleChange={handleChange}
+          onChange={(value, name) => handleChange({ target: { name, value } })}
         />
       </div>
       <Field
         name={parent === "1" ? "parent1Email" : "parent2Email"}
         label="Email"
-        errors={errors}
+        error={parent === "1" ? errors?.parent1Email : errors?.parent2Email}
         value={parent === "1" ? values.parent1Email : values.parent2Email}
         transformer={translate}
         className="mb-4"
-        handleChange={handleChange}
+        onChange={(value, name) => handleChange({ target: { name, value } })}
       />
       <PhoneField
         name={`parent${parent}Phone`}
         mode="edition"
+        className="mb-4"
         error={errors[`parent${parent}Phone`]}
         value={values[`parent${parent}Phone`]}
         placeholder={PHONE_ZONES[values[`parent${parent}PhoneZone`]]?.example}
@@ -591,7 +591,7 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
       <Field
         name={parent === "1" ? "parent1OwnAddress" : "parent2OwnAddress"}
         label="Adresse différente de celle du volontaire"
-        errors={errors}
+        error={parent === "1" ? errors?.parent1OwnAddress : errors?.parent2OwnAddress}
         type="select"
         value={parent === "1" ? values.parent1OwnAddress : values.parent2OwnAddress}
         options={[
@@ -600,7 +600,7 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
         ]}
         transformer={translate}
         className="mb-4"
-        handleChange={setFieldValue}
+        onChange={(value, key) => setFieldValue(key, value)}
       />
       {(parent === "1" ? values.parent1OwnAddress : values.parent2OwnAddress) === "true" && (
         <>
@@ -608,40 +608,40 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
           <Field
             name={parent === "1" ? "parent1Address" : "parent2Address"}
             label="Adresse"
-            errors={errors}
+            error={parent === "1" ? errors?.parent1Address : errors?.parent2Address}
             value={parent === "1" ? values.parent1Address : values.parent2Address}
             transformer={translate}
             className="flex-[1_1_50%]"
-            handleChange={handleChange}
+            onChange={(value, name) => handleChange({ target: { name, value } })}
           />
           <div className="my-4 flex items-start justify-between">
             <Field
               name={parent === "1" ? "parent1Zip" : "parent2Zip"}
               label="Code postal"
-              errors={errors}
+              error={parent === "1" ? errors?.parent1Zip : errors?.parent2Zip}
               value={parent === "1" ? values.parent1Zip : values.parent2Zip}
               transformer={translate}
               className="mr-2 flex-[1_1_50%]"
-              handleChange={handleChange}
+              onChange={(value, name) => handleChange({ target: { name, value } })}
             />
             <Field
               name={parent === "1" ? "parent1City" : "parent2City"}
               label="Ville"
-              errors={errors}
+              error={parent === "1" ? errors?.parent1City : errors?.parent2City}
               value={parent === "1" ? values.parent1City : values.parent2City}
               transformer={translate}
               className="flex-[1_1_50%]"
-              handleChange={handleChange}
+              onChange={(value, name) => handleChange({ target: { name, value } })}
             />
           </div>
           <Field
             name={parent === "1" ? "parent1Country" : "parent2Country"}
             label="Pays"
-            errors={errors}
+            error={parent === "1" ? errors?.parent1Country : errors?.parent2Country}
             value={parent === "1" ? values.parent1Country : values.parent2Country}
             transformer={translate}
             className="flex-[1_1_50%]"
-            handleChange={handleChange}
+            onChange={(value, name) => handleChange({ target: { name, value } })}
           />
         </>
       )}
@@ -681,9 +681,6 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
   };
 
   const gradeOptions = Object.keys(GRADES).map((g) => ({ value: g, label: translateGrade(g) }));
-  const onParticuliereChange = (key, value) => {
-    setFieldValue(key, value);
-  };
 
   return (
     <>
@@ -693,24 +690,24 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
         name="grade"
         label="Classe"
         type="select"
-        errors={errors}
+        error={errors?.grade}
         value={values.grade}
         transformer={translate}
         className="flex-[1_1_50%]"
         options={gradeOptions}
-        handleChange={onChangeGrade}
+        onChange={(value, key) => onChangeGrade(key, value)}
       />
       {values.schooled !== "" && (
         <Field
           name="situation"
           label="Statut"
           type="select"
-          errors={errors}
+          error={errors?.situation}
           value={values.situation}
           transformer={translate}
           className="mt-4 flex-[1_1_50%]"
           options={values.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions}
-          handleChange={onChangeSituation}
+          onChange={(value, key) => onChangeSituation(key, value)}
         />
       )}
 
@@ -721,15 +718,15 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
       )}
       <div className="mt-8">
         <div className="mt-8 mb-2 text-xs font-medium leading-snug text-[#242526]">Situations particulières</div>
-        <FieldSituationsParticulieres name="specificSituations" young={values} mode={"edition"} onChange={onParticuliereChange} />
+        <FieldSituationsParticulieres name="specificSituations" young={values} mode={"edition"} onChange={(value, key) => setFieldValue(key, value)} />
         {values.specificAmenagment === "true" && (
           <Field
             name="specificAmenagmentType"
             label="Nature de l'aménagement spécifique"
-            errors={errors}
+            error={errors?.specificAmenagmentType}
             value={values.specificAmenagmentType}
             mode="edition"
-            handleChange={handleChange}
+            onChange={(value, name) => handleChange({ target: { name, value } })}
           />
         )}
       </div>
@@ -803,40 +800,40 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
         name="temporaryDate"
         label="Date de naissance"
         type="date"
-        errors={errors}
+        error={errors?.temporaryDate}
         value={values.temporaryDate}
         transformer={translate}
         className="mb-4"
-        setFielValue={setFieldValue}
+        onChange={(date, key) => setFieldValue(key, date)}
       />
       <div className="mb-4 flex items-start justify-between">
         <Field
           name="birthCity"
           label="Ville de naissance"
-          errors={errors}
+          error={errors?.birthCity}
           value={values.birthCity}
           transformer={translate}
           className="mr-2 flex-[1_1_50%]"
-          handleChange={handleChange}
+          onChange={(value, name) => handleChange({ target: { name, value } })}
         />
         <Field
           name="birthCityZip"
           label="Code postal de naissance"
-          errors={errors}
+          error={errors?.birthCityZip}
           value={values.birthCityZip}
           transformer={translate}
           className="flex-[1_1_50%]"
-          handleChange={handleChange}
+          onChange={(value, name) => handleChange({ target: { name, value } })}
         />
       </div>
       <Field
         name="birthCountry"
         label="Pays de naissance"
-        errors={errors}
+        error={errors?.birthCountry}
         value={values.birthCountry}
         transformer={translate}
         className="flex-[1_1_50%]"
-        handleChange={handleChange}
+        onChange={(value, name) => handleChange({ target: { name, value } })}
       />
       <div className="mt-8 mb-2 flex items-center justify-between">
         <div className="text-xs font-medium leading-snug text-[#242526]">Adresse</div>
@@ -860,11 +857,11 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
       <Field
         name={liveInFrance ? "address" : "foreignAddress"}
         label="Adresse"
-        errors={errors}
+        error={liveInFrance ? errors?.address : errors?.foreignAddress}
         value={liveInFrance ? values.address : values.foreignAddress}
         transformer={translate}
         className="mb-4"
-        handleChange={handleAdressChange}
+        onChange={(value, name) => handleAdressChange({ target: { name, value } })}
       />
       {!liveInFrance && (
         <Field
@@ -872,32 +869,32 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
           type="select"
           options={countries ? countries.map((c) => ({ value: c, label: c })) : []}
           label="Pays"
-          errors={errors}
+          error={errors?.foreignCountry}
           filterOnType
           value={values.foreignCountry}
           transformer={translate}
           className="mb-4"
-          handleChange={setFieldValue}
+          onChange={(value, key) => setFieldValue(key, value)}
         />
       )}
       <div className="mb-4 flex items-start justify-between">
         <Field
           name={liveInFrance ? "zip" : "foreignZip"}
           label="Code postal"
-          errors={errors}
+          error={liveInFrance ? errors?.zip : errors?.foreignZip}
           value={liveInFrance ? values.zip : values.foreignZip}
           transformer={translate}
           className="mr-2 flex-[1_1_50%]"
-          handleChange={handleAdressChange}
+          onChange={(value, name) => handleAdressChange({ target: { name, value } })}
         />
         <Field
           name={liveInFrance ? "city" : "foreignCity"}
           label="Ville"
-          errors={errors}
+          error={liveInFrance ? errors?.city : errors?.foreignCity}
           value={liveInFrance ? values.city : values.foreignCity}
           transformer={translate}
           className="flex-[1_1_50%]"
-          handleChange={handleAdressChange}
+          onChange={(value, name) => handleAdressChange({ target: { name, value } })}
         />
       </div>
       {liveInFrance ? (
@@ -933,8 +930,22 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
             À noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
           </p>
           <div className="my-4 flex items-start justify-between">
-            <Field className="mr-2 flex-[1_1_50%]" name="hostFirstName" value={values.hostFirstName} label="Prénom de l’hébergeur" handleChange={handleChange} errors={errors} />
-            <Field className="flex-[1_1_50%]" name="hostLastName" value={values.hostLastName} label="Nom de l’hébergeur" handleChange={handleChange} errors={errors} />
+            <Field
+              className="mr-2 flex-[1_1_50%]"
+              name="hostFirstName"
+              value={values.hostFirstName}
+              label="Prénom de l’hébergeur"
+              onChange={(value, name) => handleChange({ target: { name, value } })}
+              error={errors?.hostFirstName}
+            />
+            <Field
+              className="flex-[1_1_50%]"
+              name="hostLastName"
+              value={values.hostLastName}
+              label="Nom de l’hébergeur"
+              onChange={(value, name) => handleChange({ target: { name, value } })}
+              error={errors?.hostLastName}
+            />
           </div>
           <Field
             options={hostRelationshipOptions}
@@ -943,13 +954,29 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
             type="select"
             label="Précisez votre lien avec l’hébergeur"
             className="mb-4"
-            handleChange={setFieldValue}
-            errors={errors}
+            onChange={(value, key) => setFieldValue(key, value)}
+            error={errors?.hostRelationship}
           />
-          <Field value={values.address} name="address" label="Son adresse" handleChange={handleAdressChange} errors={errors} />
+          <Field value={values.address} name="address" label="Son adresse" onChange={(value, name) => handleAdressChange({ target: { name, value } })} error={errors?.address} />
           <div className="my-4 flex items-start justify-between">
-            <Field name="zip" label="Code postal" errors={errors} value={values.zip} transformer={translate} className="mr-2 flex-[1_1_50%]" handleChange={handleAdressChange} />
-            <Field name="city" label="Ville" errors={errors} value={values.city} transformer={translate} className="flex-[1_1_50%]" handleChange={handleAdressChange} />
+            <Field
+              name="zip"
+              label="Code postal"
+              error={errors?.zip}
+              value={values.zip}
+              transformer={translate}
+              className="mr-2 flex-[1_1_50%]"
+              onChange={(value, name) => handleAdressChange({ target: { name, value } })}
+            />
+            <Field
+              name="city"
+              label="Ville"
+              error={errors?.city}
+              value={values.city}
+              transformer={translate}
+              className="flex-[1_1_50%]"
+              onChange={(value, name) => handleAdressChange({ target: { name, value } })}
+            />
           </div>
           <VerifyAddress
             address={values.address}
@@ -997,21 +1024,45 @@ function Identite({ values, handleChange, errors, setFieldValue, cohort }) {
     <>
       <div className="mb-2 text-xs font-medium leading-snug text-[#242526]">Identité et contact</div>
       <div className="mb-4 flex items-start justify-between">
-        <Field name="lastName" label="Nom" errors={errors} value={values.lastName} transformer={translate} className="mr-2 flex-[1_1_50%]" handleChange={handleChange} />
-        <Field name="firstName" label="Prénom" errors={errors} value={values.firstName} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
+        <Field
+          name="lastName"
+          label="Nom"
+          error={errors?.lastName}
+          value={values.lastName}
+          transformer={translate}
+          className="mr-2 flex-[1_1_50%]"
+          onChange={(value, name) => handleChange({ target: { name, value } })}
+        />
+        <Field
+          name="firstName"
+          label="Prénom"
+          error={errors?.firstName}
+          value={values.firstName}
+          transformer={translate}
+          className="flex-[1_1_50%]"
+          onChange={(value, name) => handleChange({ target: { name, value } })}
+        />
       </div>
       <Field
         name="gender"
         label="Sexe"
-        errors={errors}
+        error={errors?.gender}
         value={values.gender}
         className="mb-4"
         type="select"
         options={genderOptions}
         transformer={translate}
-        handleChange={setFieldValue}
+        onChange={(value, key) => setFieldValue(key, value)}
       />
-      <Field name="email" label="Email" errors={errors} value={values.email} className="mb-4" transformer={translate} handleChange={handleChange} />
+      <Field
+        name="email"
+        label="Email"
+        error={errors?.email}
+        value={values.email}
+        className="mb-4"
+        transformer={translate}
+        onChange={(value, name) => handleChange({ target: { name, value } })}
+      />
       <PhoneField
         name="phone"
         mode="edition"
@@ -1043,11 +1094,11 @@ function Identite({ values, handleChange, errors, setFieldValue, cohort }) {
             name="latestCNIFileExpirationDate"
             label="Date d'expiration de la pièce d'identité"
             type="date"
-            errors={errors}
+            error={errors?.latestCNIFileExpirationDate}
             value={values.latestCNIFileExpirationDate}
             transformer={translate}
             className="mb-4"
-            setFielValue={setFieldValue}
+            onChange={(date, key) => setFieldValue(key, date)}
           />
           {values.latestCNIFileExpirationDate !== null && cohort?.dateStart && new Date(values.latestCNIFileExpirationDate).getTime() < new Date(cohort?.dateStart).getTime() && (
             <div className="w-100 flew-row mt-4 flex items-center justify-between">
@@ -1201,7 +1252,7 @@ function SectionConsentements({ young, setFieldValue, errors }) {
               {young.parent1FirstName} {young.parent1LastName}
             </span>
           </div>
-          <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+          <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent1ValidationDate).format("DD/MM/YYYY HH:mm")}</div>
         </div>
         <div className="flex-column flex">
           <RadioButton value={young.parentAllowSNU} options={authorizationOptions} onChange={() => handleConsentementChange("parentAllowSNU")} />
@@ -1283,7 +1334,7 @@ function SectionConsentements({ young, setFieldValue, errors }) {
                   {young.parent2FirstName} {young.parent2LastName}
                 </span>
               </div>
-              <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+              <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent2ValidationDate).format("DD/MM/YYYY HH:mm")}</div>
             </div>
             <div className="mt-[16px] flex items-center justify-between">
               <div className="grow text-[14px] leading-[20px] text-[#374151]">

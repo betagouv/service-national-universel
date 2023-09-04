@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import PencilAlt from "../../../assets/icons/PencilAlt";
 import CorrectionRequest from "./CorrectionRequest";
 import CorrectedRequest from "./CorrectedRequest";
-import SimpleSelect from "./SimpleSelect";
+import SimpleSelect from "@/components/ui/forms/SimpleSelect";
 import SectionContext from "../context/SectionContext";
 import { copyToClipboard } from "../../../utils";
 import { HiCheckCircle } from "react-icons/hi";

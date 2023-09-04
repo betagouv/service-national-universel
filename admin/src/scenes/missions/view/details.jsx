@@ -10,7 +10,7 @@ import InfoCircleMission from "../../../assets/icons/InfoCircleMission";
 import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, SENDINBLUE_TEMPLATES } from "../../../utils";
 import MissionView from "./wrapper";
 import Pencil from "../../../assets/icons/Pencil";
-import Field from "../components/Field";
+import Field from "@/components/ui/forms/Field";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import Toggle from "../../../components/Toggle";
 
@@ -319,14 +319,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     Donnez un nom à votre mission. Privilégiez une phrase précisant l&apos;action du volontaire. Ex : « Je fais les courses de produits pour mes voisins les plus
                     fragiles »
                   </div>
-                  <Field
-                    name="name"
-                    errors={errors}
-                    readOnly={!editing}
-                    handleChange={(e) => setValues({ ...values, name: e.target.value })}
-                    label="Nom de la mission"
-                    value={values.name}
-                  />
+                  <Field name="name" error={errors?.name} readOnly={!editing} onChange={(name) => setValues({ ...values, name })} label="Nom de la mission" value={values.name} />
                 </div>
                 <div className="mt-4">
                   <div className="mb-2 text-xs font-medium">Structure rattachée</div>
@@ -387,37 +380,34 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <div className="mt-8 mb-4 text-lg font-medium text-gray-900">Lieu où se déroule la mission</div>
                   <div className="mb-2 text-xs font-medium">Adresse</div>
                   <Field
-                    errors={errors}
                     readOnly={!editing}
-                    isJvaMission={mission?.isJvaMission === "true"}
+                    bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                     label="Adresse"
                     name="address"
-                    handleChange={(e) => {
-                      setValues({ ...values, address: e.target.value, addressVerified: false });
+                    onChange={(address) => {
+                      setValues({ ...values, address, addressVerified: false });
                     }}
                     value={values.address}
                     error={errors?.address}
                   />
                   <div className="my-4 flex flex-row justify-between gap-3">
                     <Field
-                      errors={errors}
                       readOnly={!editing}
-                      isJvaMission={mission?.isJvaMission === "true"}
+                      bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                       label="Code postal"
                       className="w-[50%]"
                       name="zip"
-                      handleChange={(e) => setValues({ ...values, zip: e.target.value, addressVerified: false })}
+                      onChange={(zip) => setValues({ ...values, zip, addressVerified: false })}
                       value={values.zip}
                       error={errors?.zip}
                     />
                     <Field
-                      errors={errors}
                       readOnly={!editing}
-                      isJvaMission={mission?.isJvaMission === "true"}
+                      bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                       label="Ville"
                       name="city"
                       className="w-[50%]"
-                      handleChange={(e) => setValues({ ...values, city: e.target.value, addressVerified: false })}
+                      onChange={(city) => setValues({ ...values, city, addressVerified: false })}
                       value={values.city}
                       error={errors?.city}
                     />
@@ -488,44 +478,40 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       <div className="mb-2 text-xs font-medium">Identité et contact</div>
                       <div className="mb-4 flex flex-row justify-between gap-3">
                         <Field
-                          errors={errors}
                           readOnly={!editing}
                           label="Nom"
                           className="w-[50%]"
                           name="lastName"
-                          handleChange={(e) => setNewTutor({ ...newTutor, lastName: e.target.value })}
+                          onChange={(lastName) => setNewTutor({ ...newTutor, lastName })}
                           value={newTutor.lastName}
-                          error={errors}
+                          error={errors?.lastName}
                         />
                         <Field
-                          errors={errors}
                           readOnly={!editing}
                           label="Prénom"
                           name="firstName"
                           className="w-[50%]"
-                          handleChange={(e) => setNewTutor({ ...newTutor, firstName: e.target.value })}
+                          onChange={(firstName) => setNewTutor({ ...newTutor, firstName })}
                           value={newTutor.firstName}
-                          error={errors}
+                          error={errors?.firstName}
                         />
                       </div>
                       <Field
-                        errors={errors}
                         readOnly={!editing}
                         label="Email"
                         name="email"
-                        handleChange={(e) => setNewTutor({ ...newTutor, email: e.target.value })}
+                        onChange={(email) => setNewTutor({ ...newTutor, email })}
                         value={newTutor.email}
-                        error={errors}
+                        error={errors?.email}
                       />
                       <Field
-                        errors={errors}
                         readOnly={!editing}
                         label="Téléphone"
                         name="phone"
                         className="my-4"
-                        handleChange={(e) => setNewTutor({ ...newTutor, phone: e.target.value })}
+                        onChange={(phone) => setNewTutor({ ...newTutor, phone })}
                         value={newTutor.phone}
-                        error={errors}
+                        error={errors?.phone}
                       />
                       <div className="flex w-full justify-end">
                         <div className="inline-block cursor-pointer rounded bg-blue-600 py-2.5 px-4 text-sm font-medium text-white" onClick={sendInvitation}>
@@ -558,10 +544,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   </div>
                   <div className="mb-2 text-xs font-medium">Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</div>
                   <Field
-                    errors={errors}
+                    error={errors?.duration}
                     readOnly={!editing}
                     name="duration"
-                    handleChange={(e) => setValues({ ...values, duration: e.target.value })}
+                    onChange={(duration) => setValues({ ...values, duration })}
                     label="Heure(s)"
                     value={translate(values.duration)}
                   />
@@ -577,12 +563,12 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     </div>
                   </div>
                   <Field
-                    errors={errors}
+                    error={errors?.description}
                     readOnly={!editing}
                     name="description"
                     type="textarea"
                     row={4}
-                    handleChange={(e) => setValues({ ...values, description: e.target.value })}
+                    onChange={(description) => setValues({ ...values, description })}
                     label="Décrivez votre mission"
                     value={translate(values.description)}
                   />
@@ -598,12 +584,12 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     </div>
                   </div>
                   <Field
-                    errors={errors}
+                    error={errors?.actions}
                     readOnly={!editing}
                     type="textarea"
                     name="actions"
                     row={4}
-                    handleChange={(e) => setValues({ ...values, actions: e.target.value })}
+                    onChange={(actions) => setValues({ ...values, actions })}
                     label="Listez les actions confiées au(x) volontaires"
                     value={translate(values.actions)}
                   />
@@ -620,7 +606,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     readOnly={!editing}
                     type="textarea"
                     row={4}
-                    handleChange={(e) => setValues({ ...values, contraintes: e.target.value })}
+                    onChange={(contraintes) => setValues({ ...values, contraintes })}
                     label="Précisez les informations complémentaires à préciser au volontaire."
                     value={translate(values.contraintes)}
                   />
@@ -706,25 +692,23 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <div className="mb-2 text-xs font-medium">Dates de la mission</div>
                   <div className="my-2 flex flex-row justify-between gap-3">
                     <Field
-                      errors={errorsBottom}
                       name="startAt"
                       readOnly={!editingBottom}
                       label="Date de début"
                       type="date"
                       className="w-[50%]"
-                      handleChange={(e) => setValues({ ...values, startAt: e })}
+                      onChange={(startAt) => setValues({ ...values, startAt })}
                       value={values.startAt}
                       error={errors?.startAt}
                     />
                     <Field
-                      errors={errorsBottom}
                       readOnly={!editingBottom}
-                      isJvaMission={mission?.isJvaMission === "true"}
+                      bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                       label="Date de fin"
                       name="endAt"
                       className="w-[50%]"
                       type="date"
-                      handleChange={(e) => setValues({ ...values, endAt: e })}
+                      onChange={(endAt) => setValues({ ...values, endAt })}
                       value={values.endAt}
                       error={errors?.endAt}
                     />
@@ -737,13 +721,13 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     </div>
                   </div>
                   <Field
-                    errors={errorsBottom}
+                    error={errorsBottom?.frequence}
                     readOnly={!editingBottom}
-                    isJvaMission={mission?.isJvaMission === "true"}
+                    bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                     name="frequence"
                     type="textarea"
                     row={4}
-                    handleChange={(e) => setValues({ ...values, frequence: e.target.value })}
+                    onChange={(frequence) => setValues({ ...values, frequence })}
                     label="Fréquence estimée de la mission"
                     value={values.frequence}
                   />
@@ -792,10 +776,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   </div>
                   <Field
                     name="placesTotal"
-                    errors={errorsBottom}
+                    error={errorsBottom?.placesTotal}
                     readOnly={!editingBottom}
                     isJvaMission={mission?.isJvaMission === "true"}
-                    handleChange={(e) => setValues({ ...values, placesTotal: e.target.value })}
+                    onChange={(placesTotal) => setValues({ ...values, placesTotal })}
                     value={values.placesTotal}
                   />
                 </div>

@@ -6,7 +6,7 @@ import MissionsStatuts from "./MissionsStatuts";
 import MissionsDetail from "./MissionsDetail";
 import MissionsYoungPreferences from "./MissionsYoungPreferences";
 import DatePicker from "../../../../../../components/ui/forms/DatePicker";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import { Popover, Transition } from "@headlessui/react";
 
 export default function SectionMissions({ filters }) {

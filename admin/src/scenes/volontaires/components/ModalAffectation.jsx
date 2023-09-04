@@ -1,5 +1,4 @@
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
+import dayjs from "@/utils/dayjs.utils";
 import React, { useCallback, useEffect, useState } from "react";
 import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
 import { toastr } from "react-redux-toastr";
@@ -17,7 +16,6 @@ import api from "../../../services/api";
 import { debounce, formatStringDateWithDayTimezoneUTC, translate } from "../../../utils";
 import RightArrow from "./RightArrow";
 import MeetingInfo from "./phase1/MeetingInfo";
-dayjs.extend(utc);
 
 const LIST_PAGE_LIMIT = 3;
 

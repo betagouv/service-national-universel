@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import { Modal } from "reactstrap";
 
 import React from "react";
@@ -19,7 +19,7 @@ const NoteDisplayModal = ({ notes, isOpen, onClose, user }) => {
                 <div className="mb-2">
                   <span className="font-bold">{isAuthor ? "Moi-même" : `${referent.firstName} ${referent.lastName}`}</span>
                   {!isAuthor && <span className="font-bold capitalize">{` ${referent.role}`}</span>}
-                  <span>{` (le ${dayjs(createdAt).locale("fr").format("DD/MM/YYYY HH:mm")})`}</span>
+                  <span>{` (le ${dayjs(createdAt).format("DD/MM/YYYY HH:mm")})`}</span>
                 </div>
                 <div className="mb-3 flex items-center justify-between rounded-lg bg-[#F3F4F6] py-3 px-3">
                   <div className="mr-2 flex self-start">

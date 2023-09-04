@@ -3,7 +3,7 @@ import Toggle from "../../../Toggle";
 import DateIcon from "../../../../assets/icons/DateIcon";
 import { Popover, Transition } from "@headlessui/react";
 import DatePicker from "../DatePicker";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
 
@@ -30,10 +30,10 @@ export default function ToggleDate({ value, onChange, range, onChangeRange, disa
       </div>
       <div className="flex items-center justify-between">
         <p className="text-left text-xs text-gray-500">
-          Début : <strong>{range?.from ? dayjs(range?.from).locale("fr").format("DD/MM/YYYY") : ""}</strong>
+          Début : <strong>{range?.from ? dayjs(range?.from).format("DD/MM/YYYY") : ""}</strong>
         </p>
         <p className="text-left text-xs text-gray-500">
-          Fin : <strong>{range?.to ? dayjs(range?.to).locale("fr").format("DD/MM/YYYY") : ""}</strong>
+          Fin : <strong>{range?.to ? dayjs(range?.to).format("DD/MM/YYYY") : ""}</strong>
         </p>
         <Popover className="relative">
           {({ open }) => (

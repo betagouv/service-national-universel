@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -202,7 +202,7 @@ const Line = ({ modification, tagsOptions, user }) => {
       <div className="flex items-center gap-6 py-4 px-4 hover:bg-gray-50">
         <div className="flex w-[35%] cursor-pointer flex-col gap-1" onClick={() => history.push(`/ligne-de-bus/${modification.lineId}?demande=${modification._id.toString()}`)}>
           <div className="text-start text-sm text-[#242526] line-clamp-3">{modification.requestMessage}</div>
-          <div className="text-sm text-[#738297]">{dayjs(modification.createdAt).locale("fr").format("DD/MM/YYYY • HH:mm")}</div>
+          <div className="text-sm text-[#738297]">{dayjs(modification.createdAt).format("DD/MM/YYYY • HH:mm")}</div>
         </div>
         <div className="flex w-[12%] items-center gap-2">
           <div className="text-base font-medium text-[#242526]">{modification.lineName}</div>

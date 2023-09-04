@@ -3,7 +3,7 @@ import { Modal } from "reactstrap";
 import React from "react";
 import { PlainButton, BorderButton } from "../../../../plan-transport/components/Buttons";
 import danger from "../../../../../assets/danger.svg";
-import Field from "../../../../phase0/components/Field";
+import Field from "@/components/ui/forms/Field";
 
 import { phaseOptions, getPhaseLabel } from "../utils";
 
@@ -13,16 +13,24 @@ const NoteEditModal = ({ isOpen, onClose, isLoading, onSave, note, updateNote })
       <div className="flex w-[512px] flex-col items-center p-6">
         <div className="mb-4 text-xl font-medium">Ajouter une note interne</div>
         <Field
+          name="phase"
           value={note.phase}
-          onChange={updateNote("phase")}
+          onChange={(value, key) => updateNote(key, value)}
           className="mb-4 w-[100%]"
           label="Ma note concerne..."
-          mode="edition"
           type="select"
           options={phaseOptions}
           transformer={getPhaseLabel}
         />
-        <Field value={note.note} onChange={updateNote("note")} className="mb-4 w-[100%]" label="Rédigez votre note ici." mode="edition" type="textarea" maxLength={500} />
+        <Field
+          name="note"
+          value={note.note}
+          onChange={(value, key) => updateNote(key, value)}
+          className="mb-4 w-[100%]"
+          label="Rédigez votre note ici."
+          type="textarea"
+          maxLength={500}
+        />
         <div className="mb-4 text-[13px]">
           <div className="flex">
             <img src={danger} alt="icon danger" />

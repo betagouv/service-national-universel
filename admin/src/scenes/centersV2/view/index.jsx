@@ -16,7 +16,7 @@ import { COHESION_STAY_START, canPutSpecificDateOnSessionPhase1, isSessionEditio
 
 import Field from "../components/Field";
 
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import Loader from "../../../components/Loader";
 import ToggleDate from "../../../components/ui/forms/dateForm/ToggleDate";
@@ -333,10 +333,7 @@ export default function Index({ ...props }) {
                             focusedCohortData ? (
                               <p>
                                 Les dates de cette session diffèrent des dates officielles :{" "}
-                                <strong>{`${dayjs(focusedCohortData.dateStart).locale("fr").format("DD")} - ${dayjs(focusedCohortData.dateEnd)
-                                  .locale("fr")
-                                  .format("DD MMMM YYYY")}`}</strong>
-                                .
+                                <strong>{`${dayjs(focusedCohortData.dateStart).format("DD")} - ${dayjs(focusedCohortData.dateEnd).format("DD MMMM YYYY")}`}</strong>.
                               </p>
                             ) : null
                           }

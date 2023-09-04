@@ -1,3 +1,5 @@
+const MONTHS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+
 const formatDay = (date) => {
   if (!date) return "-";
   return new Date(date).toISOString().split("T")[0];
@@ -165,6 +167,7 @@ const formatDateForPostGre = (date) => {
 };
 
 export {
+  MONTHS,
   formatDay,
   formatDateFR,
   formatToActualTime,
