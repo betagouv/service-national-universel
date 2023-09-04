@@ -36,10 +36,8 @@ import Phase3 from "./scenes/phase3";
 import Echanges from "./scenes/echanges";
 import Preferences from "./scenes/preferences";
 import PreInscription from "./scenes/preinscription";
-import PublicSupport from "./scenes/public-support-center";
 import ReInscription from "./scenes/reinscription";
 import RepresentantsLegaux from "./scenes/representants-legaux";
-import SupportCenter from "./scenes/support-center";
 import Thanks from "./scenes/contact/Thanks";
 
 import { environment, maintenance } from "./config";
@@ -79,7 +77,7 @@ export default function App() {
               <SentryRoute path="/validate-contract" component={Contract} />
               <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
               {/* Authentification accessoire */}
-              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/contact", "/merci"]} component={() => <OptionalLogIn />} />
+              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/besoin-d-aide", "/merci"]} component={() => <OptionalLogIn />} />
               {/* Authentification nécessaire */}
               <SentryRoute path="/" component={() => <MandatoryLogIn />} />
             </Switch>
@@ -124,10 +122,10 @@ const OptionalLogIn = () => {
 
   return (
     <Switch>
-      <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+      <SentryRoute path="/besoin-d-aide" component={Contact} />
+      <SentryRoute path="/public-besoin-d-aide" component={Contact} />
       <SentryRoute path="/auth" component={Auth} />
       <SentryRoute path="/public-engagements" component={AllEngagements} />
-      <SentryRoute path="/contact" component={Contact} />
       <SentryRoute path="/merci" component={Thanks} />
       <Redirect to="/" />
     </Switch>
@@ -229,7 +227,7 @@ const Espace = () => {
       <main className="mt-16 md:mt-0 md:ml-[16rem]">
         <Switch>
           <SentryRoute exact path="/" component={Home} />
-          <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
+          <SentryRoute path="/besoin-d-aide" component={Contact} />
           <SentryRoute path="/reinscription" component={ReInscription} />
           <SentryRoute path="/account" component={Account} />
           <SentryRoute path="/echanges" component={Echanges} />
