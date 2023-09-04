@@ -77,7 +77,7 @@ export default function App() {
               <SentryRoute path="/validate-contract" component={Contract} />
               <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
               {/* Authentification accessoire */}
-              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/besoin-d-aide", "/merci"]} component={() => <OptionalLogIn />} />
+              <SentryRoute path={["/auth", "/public-engagements", "/besoin-d-aide", "/public-besoin-d-aide", "/merci"]} component={() => <OptionalLogIn />} />
               {/* Authentification nécessaire */}
               <SentryRoute path="/" component={() => <MandatoryLogIn />} />
             </Switch>
@@ -122,10 +122,10 @@ const OptionalLogIn = () => {
 
   return (
     <Switch>
-      <SentryRoute path="/besoin-d-aide" component={Contact} />
-      <SentryRoute path="/public-besoin-d-aide" component={Contact} />
       <SentryRoute path="/auth" component={Auth} />
       <SentryRoute path="/public-engagements" component={AllEngagements} />
+      <SentryRoute path="/besoin-d-aide" component={Contact} />
+      <SentryRoute path="/public-besoin-d-aide" component={Contact} />
       <SentryRoute path="/merci" component={Thanks} />
       <Redirect to="/" />
     </Switch>
@@ -227,7 +227,6 @@ const Espace = () => {
       <main className="mt-16 md:mt-0 md:ml-[16rem]">
         <Switch>
           <SentryRoute exact path="/" component={Home} />
-          <SentryRoute path="/besoin-d-aide" component={Contact} />
           <SentryRoute path="/reinscription" component={ReInscription} />
           <SentryRoute path="/account" component={Account} />
           <SentryRoute path="/echanges" component={Echanges} />
