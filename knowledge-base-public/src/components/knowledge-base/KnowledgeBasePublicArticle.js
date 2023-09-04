@@ -7,7 +7,6 @@ import Breadcrumbs from "../breadcrumbs";
 import FeedbackComponent from "../FeedBack";
 import NavigationArticle from "../NavigationArticle";
 import { HiPrinter } from "react-icons/hi";
-import { environment } from "../../config";
 
 const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
   const group = useMemo(() => {
@@ -19,15 +18,11 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
     <div className="w-full bg-white">
       <section className="mx-auto flex max-w-[950px] flex-shrink flex-grow flex-col overflow-hidden px-4 text-gray-800 print:bg-transparent print:pb-12">
         <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
-        <div className={`align-center flex flex-col ${item.parents.length > 2 ? 'md:flex-row' : ''}`}>
-          {environment !== "production" && (
-            <>
-              {item.parents.length > 2 && (
-                <div className="mt-4 w-full md:mr-12 md:max-w-[30%]">
-                  <NavigationArticle item={item} />
-                </div>
-              )}
-            </>
+        <div className={`align-center flex flex-col ${item.parents.length > 2 ? "md:flex-row" : ""}`}>
+          {item.parents.length > 2 && (
+            <div className="mt-4 w-full md:mr-12 md:max-w-[30%]">
+              <NavigationArticle item={item} />
+            </div>
           )}
           <div className={item.parents.length > 2 ? "max-w-[70%]" : ""}>
             <div className="flew-row flex justify-between pb-2 pt-4">
