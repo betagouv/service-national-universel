@@ -7,10 +7,10 @@ const keyNumbersByRole = {
     [ROLES.REFERENT_REGION]: [getTimeSchedule, getTransportCorrectionRequests],
     [ROLES.ADMIN]: [getTransportCorrectionRequests, getSessions, getLineToPoints],
   },
-  inscription: {
+  inscription: {},
+  engagement: {
     [ROLES.REFERENT_DEPARTMENT]: [getNewStructures],
   },
-  engagement: {},
   all: {
     [ROLES.REFERENT_DEPARTMENT]: [getYoungNotesPhase1, getTimeSchedule, getNewStructures],
     [ROLES.REFERENT_REGION]: [getTimeSchedule, getTransportCorrectionRequests],
