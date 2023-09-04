@@ -103,7 +103,7 @@ export const questions = [
     category: "TECHNICAL",
     value: "CONNECTION",
     label: "Pour me connecter",
-    roles: ["public", "young"],
+    roles: ["public"],
   },
   {
     category: "TECHNICAL",

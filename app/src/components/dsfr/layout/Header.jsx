@@ -60,7 +60,7 @@ const Header = ({ title }) => {
           <div
             className="cursor-pointer border border-gray-500 py-1 px-2 hover:bg-[#000091] hover:text-white"
             onClick={() => {
-              if (!young) history.push("/auth");
+              if (!young) history.push("/auth?redirect=" + pathname);
               else logout();
             }}>
             {!young ? <div> Se connecter </div> : <div> Se déconnecter </div>}
