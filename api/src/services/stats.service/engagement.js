@@ -117,7 +117,44 @@ async function getYoungNotesPhase2(startDate, endDate, user) {
   ];
 }
 
+async function getYoungPhase2Validated(startDate, endDate, user) {
+  // ref reg only
+  let body = {
+    query: {
+      bool: {
+        filter: [
+          { term: { "region.keyword": user.region } },
+          { term: { "statusPhase2.keyword": YOUNG_STATUS_PHASE2.VALIDATED } },
+          {
+            range: {
+              statusPhase2ValidatedAt: {
+                gte: new Date(startDate),
+                lte: new Date(endDate),
+              },
+            },
+          },
+        ],
+      },
+    },
+    size: 0,
+    track_total_hits: true,
+  };
+
+  const response = await esClient.search({ index: "young", body });
+  const value = response.body.hits.total.value;
+
+  return [
+    {
+      id: "young-phase2-validated",
+      value: value,
+      label: ` volontaire${value > 1 ? "s" : ""} ayant validé leur phase 2`,
+      icon: "action",
+    },
+  ];
+}
+
 module.exports = {
   getYoungNotesPhase2,
   getNewStructures,
+  getYoungPhase2Validated,
 };
