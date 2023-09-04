@@ -66,10 +66,10 @@ export default function PublicContactForm() {
         lastName,
         email,
         department,
+        subjectStep0: role,
         subjectStep1: category,
         subjectStep2: question,
         region: department2region[department],
-        role: "young exterior",
         fromPage: new URLSearchParams(window.location.search).get("from "),
         files: uploadedFiles,
       });

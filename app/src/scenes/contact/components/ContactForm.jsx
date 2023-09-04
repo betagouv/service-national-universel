@@ -119,7 +119,6 @@ export default function ContactForm() {
       {question && (articles.length === 0 || showForm) && (
         <form onSubmit={handleSubmit}>
           <Textarea label="Votre message" value={message} onChange={(e) => setMessage(e.target.value)} />
-          <p>Ajouter un fichier</p>
           <FileUpload disabled={loading} files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
           <hr />
           <Button type="submit" className="my-8 ml-auto" disabled={!message || loading}>
