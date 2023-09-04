@@ -116,6 +116,18 @@ const MISSION_DOMAINS = {
   MILITARY: "MILITARY",
 };
 
+const JVA_MISSION_DOMAINS = {
+  education: "éducation",
+  "solidarite-insertion": "solidarité/insertion",
+  environnement: "environnement",
+  sport: "sport",
+  "vivre-ensemble": "vivre-ensemble",
+  "culture-loisirs": "culture/loisirs",
+  sante: "santé",
+  "benevolat-competences": "bénévolat/compétences",
+  "prevention-protection": "prévention/protection",
+}
+
 const YOUNG_SITUATIONS = {
   GENERAL_SCHOOL: "GENERAL_SCHOOL",
   PROFESSIONAL_SCHOOL: "PROFESSIONAL_SCHOOL",
@@ -923,6 +935,7 @@ export {
   PROFESSIONNAL_PROJECT,
   PROFESSIONNAL_PROJECT_PRECISION,
   MISSION_DOMAINS,
+  JVA_MISSION_DOMAINS,
   YOUNG_SITUATIONS,
   FORMAT,
   ROLES,
@@ -979,6 +992,7 @@ export default {
   PROFESSIONNAL_PROJECT,
   PROFESSIONNAL_PROJECT_PRECISION,
   MISSION_DOMAINS,
+  JVA_MISSION_DOMAINS,
   YOUNG_SITUATIONS,
   FORMAT,
   ROLES,

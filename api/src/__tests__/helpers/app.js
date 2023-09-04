@@ -26,6 +26,7 @@ function getAppHelper() {
   app.use("/inscription-goal", require("../../controllers/inscription-goal"));
   app.use("/es", require("../../controllers/es"));
   app.use("/table-de-repartition", require("../../controllers/planDeTransport/table-de-repartition"));
+  app.use("/ligne-to-point", require("../../controllers/planDeTransport/ligne-to-point"));
 
   return app;
 }

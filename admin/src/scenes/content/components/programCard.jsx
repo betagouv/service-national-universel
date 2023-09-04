@@ -169,6 +169,7 @@ const Description = styled.div`
 `;
 
 const Card = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   background-color: #fff;

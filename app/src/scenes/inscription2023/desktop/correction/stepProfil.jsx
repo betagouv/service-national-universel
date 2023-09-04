@@ -9,7 +9,7 @@ import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
 import plausibleEvent from "../../../../services/plausible";
 import { getCorrectionByStep } from "../../../../utils/navigation";
-import Button from "../../components/Button";
+import Button from "../../../../components/dsfr/ui/buttons/Button";
 import Input from "../../components/Input";
 
 export default function StepProfil() {

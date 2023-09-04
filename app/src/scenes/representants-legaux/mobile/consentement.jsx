@@ -5,22 +5,21 @@ import Loader from "../../../components/Loader";
 import Navbar from "../components/Navbar";
 import FranceConnectButton from "../../inscription2023/components/FranceConnectButton";
 import Input from "../../inscription2023/components/Input";
-import ResponsiveRadioButton from "../../inscription2023/components/RadioButton";
+import ResponsiveRadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
-import Toggle from "../../../components/inscription/toggle";
+import Toggle from "../../../components/dsfr/forms/toggle";
 import { COHESION_STAY_LIMIT_DATE, getAge, translate } from "snu-lib";
 import Check from "../components/Check";
 import { FRANCE, ABROAD, translateError, API_CONSENT, isReturningParent, CDN_BASE_URL } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";
-import ErrorMessage from "../../inscription2023/components/ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import api from "../../../services/api";
-import Footer from "../../../components/footerV2";
-import StickyButton from "../../../components/inscription/stickyButton";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import plausibleEvent from "../../../services/plausible";
 import AuthorizeBlock from "../components/AuthorizeBlock";
 import { getDataForConsentStep } from "../utils";
-import PhoneField from "../../inscription2023/components/PhoneField";
+import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib/phone-number";
 
 export default function Consentement({ step, parentId }) {
@@ -351,7 +350,7 @@ export default function Consentement({ step, parentId }) {
             </div>
           )}
           {(data.allowSNU || parentId === 2) && (
-            <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px]">
+            <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px] mb-32">
               {/*<AuthorizeBlock
                 title="Utilisation d’autotests COVID"
                 value={data.allowCovidAutotest}
@@ -433,7 +432,6 @@ export default function Consentement({ step, parentId }) {
           {errors.global && <ErrorMessage className="mb-[32px]">{errors.global}</ErrorMessage>}
         </div>
       </div>
-      <Footer marginBottom="mb-[88px]" />
       <StickyButton onClickPrevious={onPrevious} onClick={onSubmit} disabled={saving} text="Je valide" />
     </>
   );

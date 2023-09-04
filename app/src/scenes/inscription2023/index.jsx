@@ -27,9 +27,7 @@ import MobileCorrectionProfil from "./mobile/correction/stepProfil";
 
 import useDevice from "../../hooks/useDevice";
 
-import HeaderMenu from "../../components/headerMenu";
-import Footer from "./../../components/footerV2";
-import Header from "./../../components/header";
+import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import { YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
 import FutureCohort from "./FutureCohort";
@@ -49,7 +47,6 @@ function renderStep(step, device) {
 
 const Step = ({ young: { inscriptionStep2023 } }) => {
   const device = useDevice();
-  const [isOpen, setIsOpen] = React.useState(false);
   const { step } = useParams();
 
   const requestedStep = getStepFromUrlParam(step, STEP_LIST);
@@ -72,14 +69,7 @@ const Step = ({ young: { inscriptionStep2023 } }) => {
     return <Redirect to={`/inscription2023/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
-  return (
-    <div className="flex h-screen flex-col justify-between bg-white md:!bg-[#f9f6f2]">
-      <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-      <Header setIsOpen={setIsOpen} />
-      {renderStep(currentStep, device)}
-      {device === "desktop" && <Footer marginBottom={"0px"} />}
-    </div>
-  );
+  return <DSFRLayout title="Inscription du volontaire">{renderStep(currentStep, device)}</DSFRLayout>;
 };
 
 function renderStepCorrection(step, device) {
@@ -95,21 +85,13 @@ function renderStepCorrection(step, device) {
 
 const StepCorrection = () => {
   const device = useDevice();
-  const [isOpen, setIsOpen] = React.useState(false);
   const { step } = useParams();
 
   if (renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST), device) === false) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
-  return (
-    <div className="flex h-screen flex-col justify-between bg-white md:!bg-[#f9f6f2]">
-      <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-      <Header setIsOpen={setIsOpen} />
-      {renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST), device)}
-      {device === "desktop" && <Footer />}
-    </div>
-  );
+  return <DSFRLayout title="Inscription du volontaire">{renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST), device)}</DSFRLayout>;
 };
 
 export default function Index() {

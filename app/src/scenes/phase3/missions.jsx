@@ -1,93 +1,123 @@
+import React, { useCallback, useEffect } from "react";
 import Img4 from "../../assets/observe.svg";
 import Img3 from "../../assets/left.svg";
 import Img2 from "../../assets/right.svg";
-import React from "react";
-import { Col, Container, CustomInput, Row } from "reactstrap";
-import { ReactiveBase, ReactiveList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
-
-import MissionCard from "./components/missionCard";
-
-import { apiURL } from "../../config";
-
 import api from "../../services/api";
-
-const FILTERS = ["DOMAIN", "SEARCH"];
+import { debounce } from "../../utils";
+import { JVA_MISSION_DOMAINS } from "snu-lib";
+import { capture } from "../../sentry";
+import { toastr } from "react-redux-toastr";
+import { useSelector } from "react-redux";
+import { Col, Container, CustomInput, Row } from "reactstrap";
+import MissionCard from "./components/missionCard";
+import Pagination from "../../components/nav/Pagination";
 
 export default function MissionsComponent() {
+  const young = useSelector((state) => state.Auth.young);
+  const [filters, setFilters] = React.useState({
+    search: "",
+    location: {
+      lat: young?.location?.lat,
+      lon: young?.location?.lon,
+    },
+    distance: 50,
+    domain: "",
+  });
+  const [page, setPage] = React.useState(0);
+  const [size, setSize] = React.useState(20);
+  const [sort, setSort] = React.useState("geo");
+  const [data, setData] = React.useState({});
+
+  const domainOptions = Object.entries(JVA_MISSION_DOMAINS).map(([key, value]) => ({ value: key, label: value }));
+
+  const updateOnFilterChange = useCallback(
+    debounce(async (filters, page, size, sort, setData) => {
+      try {
+        if (!young) return;
+        const res = await api.post("/elasticsearch/missionapi/search", { filters, page, size, sort });
+        if (!res?.data) return toastr.error("Oups, une erreur est survenue lors de la recherche des missions");
+        setData(res.data);
+      } catch (e) {
+        capture(e);
+        toastr.error("Oups, une erreur est survenue lors de la recherche des missions", e);
+      }
+    }, 250),
+    [],
+  );
+
+  useEffect(() => {
+    updateOnFilterChange(filters, page, size, sort, setData);
+  }, [filters, page, size, sort]);
+
   return (
     <div>
       <Missions>
-        <ReactiveBase url={`${apiURL}/es`} app="missionapi" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-          {/* <Modifybutton to="/preferences">Modifier mes préférences</Modifybutton> */}
-          <Heading>
-            <p>TROUVEZ UNE MISSION DE BÉNÉVOLAT</p>
-            <h1>Missions disponibles près de chez vous ou à distance</h1>
-          </Heading>
-          <Filters style={{ marginBottom: 20 }}>
-            <SearchBox md={4}>
-              <DataSearch innerClass={{ input: "form-control" }} placeholder="Recherche..." autosuggest={false} componentId="SEARCH" dataField={["title", "organisation"]} />
-            </SearchBox>
-            <Col md={4}>
-              <CustomInput type="select" id="dist" defaultValue="">
-                <option value="null" disabled>
-                  Rayon de recherche maximum
+        <Heading>
+          <p>TROUVEZ UNE MISSION DE BÉNÉVOLAT</p>
+          <h1>Missions disponibles près de chez vous ou à distance</h1>
+        </Heading>
+        <Filters style={{ marginBottom: 20 }}>
+          <SearchBox md={4}>
+            <input
+              type="text"
+              placeholder="Recherche..."
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+              className="w-full text-sm p-2 border-gray-300 border-[1px] rounded-sm"
+            />
+          </SearchBox>
+          <Col md={4}>
+            <CustomInput type="select" id="dist" defaultValue="50" onChange={(e) => setFilters({ ...filters, distance: e.target.value })}>
+              <option value="null" disabled>
+                Rayon de recherche maximum
+              </option>
+              <option value={2}>Distance max. 2km</option>
+              <option value={5}>Distance max. 5km</option>
+              <option value={10}>Distance max. 10km</option>
+              <option value={20}>Distance max. 20km</option>
+              <option value={50}>Distance max. 50km</option>
+              <option value={100}>Distance max. 100km</option>
+              <option value={0}>Pas de limite de distance</option>
+            </CustomInput>
+          </Col>
+          <DomainsFilter md={4}>
+            <CustomInput type="select" id="dist" defaultValue="" onChange={(e) => setFilters({ ...filters, domain: e.target.value })}>
+              <option value="">Filtrer par domaines</option>
+              {domainOptions.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
                 </option>
-                <option value="2">Distance max. 2km</option>
-                <option value="5">Distance max. 5km</option>
-                <option value="20">Distance max. 20km</option>
-                <option value="10">Distance max. 10km</option>
-                <option value="50">Distance max. 50km</option>
-                <option value="100">Distance max. 100km</option>
-                {/* <option value="-1">France entière : préparations militaires uniquement</option> */}
-              </CustomInput>
-            </Col>
-            <DomainsFilter md={4}>
-              <SingleDropdownList
-                selectAllLabel="Tous les domaines"
-                URLParams={true}
-                componentId="DOMAIN"
-                placeholder="Filtrer par domaines"
-                dataField="domain.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
-                showSearch={false}
-              />
-            </DomainsFilter>
-          </Filters>
-          <ReactiveList
-            componentId="result"
-            react={{ and: FILTERS }}
-            pagination={true}
-            size={25}
-            showLoader={true}
-            loader="Chargement..."
-            innerClass={{ pagination: "pagination" }}
-            dataField="created_at"
-            // defaultQuery={function (value, props) {
-            //   if (!young.location || !young.location.lat || !young.location.lon) return { query: { match_all: {} } };
-            //   return {
-            //     query: { match_all: {} },
-            //     sort: [
-            //       {
-            //         _geo_distance: {
-            //           location: [young.location.lon, young.location.lat],
-            //           order: "asc",
-            //           unit: "km",
-            //           mode: "min",
-            //         },
-            //       },
-            //     ],
-            //   };
-            // }}
-            renderResultStats={() => {
-              return <div />;
-              // return <div className="results">{`${numberOfResults} résultats trouvés en ${time}ms`}</div>;
-            }}
-            render={({ data }) => {
-              return data.map((e, i) => <MissionCard mission={e} key={i} image={Img4} />);
-            }}
-          />
-        </ReactiveBase>
+              ))}
+            </CustomInput>
+          </DomainsFilter>
+        </Filters>
+
+        {data?.total ? (
+          <>
+            <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+              <p>
+                {data?.total.value} mission{data?.total.value > 1 ? "s" : ""}
+              </p>
+              <select name="selectedSort" onChange={(e) => setSort(e.target.value)}>
+                <option value="geo" defaultValue>
+                  La plus proche
+                </option>
+                <option value="recent">La plus récente</option>
+              </select>
+            </div>
+            {data?.hits.map((e) => (
+              <MissionCard mission={e._source} key={e._id} image={Img4} />
+            ))}
+            <Pagination
+              currentPageNumber={page}
+              setCurrentPageNumber={setPage}
+              itemsCountTotal={data.total.value}
+              itemsCountOnCurrentPage={data.hits.length}
+              size={size}
+              setSize={setSize}
+            />
+          </>
+        ) : null}
       </Missions>
     </div>
   );

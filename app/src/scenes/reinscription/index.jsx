@@ -23,11 +23,9 @@ import DesktopUpload from "./desktop/stepUpload";
 import useDevice from "../../hooks/useDevice";
 
 import { reInscriptionModificationOpenForYoungs } from "snu-lib";
-import HeaderMenu from "../../components/headerMenu";
-import Footer from "./../../components/footerV2";
-import Header from "./../../components/header";
 import { getStepFromUrlParam, STEPS, STEP_LIST } from "./utils/navigation";
 import FutureCohort from "../inscription2023/FutureCohort";
+import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 
 const getStepUrl = (name) => {
   return STEP_LIST.find((step) => step.name === name)?.url;
@@ -47,7 +45,6 @@ function renderStep(step, device) {
 
 const Step = ({ young: { reinscriptionStep2023: eligibleStep } }) => {
   const device = useDevice();
-  const [isOpen, setIsOpen] = React.useState(false);
   const { step } = useParams();
 
   if (!eligibleStep) return <Redirect to={`/`} />;
@@ -68,14 +65,7 @@ const Step = ({ young: { reinscriptionStep2023: eligibleStep } }) => {
     return <Redirect to={`/reinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
-  return (
-    <div className="flex h-screen flex-col justify-between bg-white md:!bg-[#f9f6f2]">
-      <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-      <Header setIsOpen={setIsOpen} />
-      {renderStep(currentStep, device)}
-      {device === "desktop" && <Footer marginBottom={"0px"} />}
-    </div>
-  );
+  return <DSFRLayout title="Réinscription">{renderStep(currentStep, device)}</DSFRLayout>;
 };
 
 export default function Index() {

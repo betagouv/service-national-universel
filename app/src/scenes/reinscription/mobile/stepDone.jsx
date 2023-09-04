@@ -10,8 +10,7 @@ import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.j
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
 import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
-import StickyButton from "../../../components/inscription/stickyButton";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -131,7 +130,6 @@ export default function StepWaitingConsent() {
               </p>
             </div>
           </div>
-          <Footer marginBottom="mb-[88px]" />
           <StickyButton text="Revenir à mon compte volontaire" onClick={handleDone} />
         </>
       ) : (
@@ -170,7 +168,6 @@ export default function StepWaitingConsent() {
               </button>
             </div>
           </div>
-          <Footer marginBottom="mb-[88px]" />
         </>
       )}
     </>
@@ -239,7 +236,6 @@ export default function StepWaitingConsent() {
           </button>
         </div>
       </div>
-      <Footer marginBottom="mb-[88px]" />
     </>
   );
 }

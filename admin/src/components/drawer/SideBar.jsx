@@ -24,6 +24,7 @@ import InviteHeader from "../header/invite";
 import LocationIcon from "./icons/Location";
 import ClipboardIcon from "./icons/Clipboard";
 import { centerHeadCenterRegex, itemsAdministrateur, itemsEngagement, itemsSejourAdmin, itemsSejourGod, itemsSejourRef, volontaireHeadCenterRegex } from "./utils";
+import useDevice from "../../hooks/useDevice";
 
 //Css !important becuse of bootstrap override
 
@@ -32,6 +33,7 @@ const SideBar = (props) => {
   const location = useLocation();
   const exactPath = location.pathname;
   const path = location.pathname.split("/")[1];
+  const device = useDevice();
 
   //State
   const [open, setOpen] = React.useState(false);
@@ -48,6 +50,11 @@ const SideBar = (props) => {
     if (localStorage?.getItem("sideBarOpen") === "true") setOpen(true);
     else setOpen(false);
   }, []);
+
+  //Close the sidebar if the device becomes mobile
+  useEffect(() => {
+    if (device === "mobile") setOpen(false);
+  }, [device]);
 
   //Fetch tickets count
   useEffect(() => {
@@ -103,7 +110,7 @@ const SideBar = (props) => {
     <SimpleNavItem
       sideBarOpen={open}
       Icon={LocationIcon}
-      title="Point de rassemblement"
+      title="Points de rassemblement"
       link="/point-de-rassemblement/liste/liste-points"
       active={path === "point-de-rassemblement"}
     />
@@ -118,7 +125,7 @@ const SideBar = (props) => {
     />
   );
   const CentresHeadCenter = () => (
-    <SimpleNavItem sideBarOpen={open} Icon={SejourIcon} title="Centres" link={`/centre/${sessionPhase1?.cohesionCenterId}`} active={centerHeadCenterRegex.test(exactPath)} />
+    <SimpleNavItem sideBarOpen={open} Icon={SejourIcon} title="Centre" link={`/centre/${sessionPhase1?.cohesionCenterId}`} active={centerHeadCenterRegex.test(exactPath)} />
   );
 
   //MultiNavLinks
@@ -142,7 +149,7 @@ const SideBar = (props) => {
   const godItems = [Dashboard, Volontaire, Inscriptions, SejoursGod, Engagement, Utilisateurs];
   const adminItems = [Dashboard, Volontaire, Inscriptions, SejoursAdmin, Engagement, Utilisateurs];
   const refItems = [Dashboard, Volontaire, Inscriptions, SejoursRef, Engagement, Admisnistrateur];
-  const headCenterItems = [Dashboard, VolontaireHeadCenter, CentresHeadCenter, Contenus, Utilisateurs];
+  const headCenterItems = [Dashboard, VolontaireHeadCenter, CentresHeadCenter, PlanDeTransport, Contenus, Utilisateurs];
   const transporteurItems = [Point, Centre, Schema, PlanDeTransport];
   const responsableItems = [Dashboard, Candidature, Structure, Missions];
   const supervisorItems = [Dashboard, Candidature, Network, StructureSupervisor, Missions, Utilisateurs];

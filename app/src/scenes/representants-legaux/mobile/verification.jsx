@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import "dayjs/locale/fr";
@@ -10,9 +10,8 @@ import Loader from "../../../components/Loader";
 import Navbar from "../components/Navbar";
 import dayjs from "dayjs";
 import Check from "../components/Check";
-import StickyButton from "../../../components/inscription/stickyButton";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import { supportURL } from "../../../config";
-import Footer from "../../../components/footerV2";
 
 export default function Verification({ step, parentId }) {
   const history = useHistory();
@@ -100,7 +99,7 @@ export default function Verification({ step, parentId }) {
 
         {parentId === 1 && (
           <>
-            <div className="border-t-solid flex items-center border-t-[1px] border-t-[#E5E5E5] pt-[32px]">
+            <div className="border-t-solid flex items-center border-t-[1px] border-t-[#E5E5E5] pt-[32px] mb-32">
               <Check checked={certified} onChange={(e) => setCertified(e)}>
                 Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez{" "}
                 <a
@@ -117,7 +116,6 @@ export default function Verification({ step, parentId }) {
           </>
         )}
       </div>
-      <Footer marginBottom={"mb-[88px]"} />
       <StickyButton text={"Suivant"} onClick={() => onNext()} onClickPrevious={onPrevious} disabled={saving} />
     </>
   );

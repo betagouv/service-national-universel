@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
-import SearchableSelect from "../../../components/SearchableSelect";
+import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import CreatableSelect from "../../../components/CreatableSelect";
 import Input from "./Input";
 import VerifyAddress from "./VerifyAddress";
-import GhostButton from "./GhostButton";
+import GhostButton from "../../../components/dsfr/ui/buttons/GhostButton";
 import { FiChevronLeft } from "react-icons/fi";
 import validator from "validator";
-import ErrorMessage from "./ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import { toastr } from "react-redux-toastr";
 
 const addressValidationInfo = "Pour valider votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.";

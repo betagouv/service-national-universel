@@ -10,7 +10,7 @@ import Loader from "../../components/Loader";
 import { Box } from "../../components/box";
 import { VioletButton } from "../../components/Content";
 import Badge from "../../components/Badge";
-import { APPLICATION_STATUS_COLORS, formatDateFR } from "../../utils";
+import { APPLICATION_STATUS_COLORS, formatDateFR, htmlCleaner } from "../../utils";
 
 export default function Index() {
   const [context, setContext] = useState(null);
@@ -525,7 +525,12 @@ const ContractContainer = styled.div`
 
 const ContractField = ({ name, context, type }) => {
   if (type === "date" && context[name]) return <SuperSpan> {formatDateFR(context[name]) || "…"} </SuperSpan>;
-  return <SuperSpan> {context[name] || "…"} </SuperSpan>;
+  return (
+    <span>
+      {" "}
+      <SuperSpan dangerouslySetInnerHTML={{ __html: htmlCleaner(context[name]) }} />{" "}
+    </span>
+  );
 };
 
 const SuperSpan = styled.span`

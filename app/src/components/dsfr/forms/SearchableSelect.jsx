@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import Select from "react-select";
-import ErrorMessage from "../scenes/inscription2023/components/ErrorMessage";
+import ErrorMessage from "./ErrorMessage";
 
 const SearchableSelect = ({
   label,

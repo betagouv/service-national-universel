@@ -1,6 +1,6 @@
-import CheckBox from "../../../components/inscription/checkbox";
+import CheckBox from "../../../components/dsfr/forms/checkbox";
 import React, { useState } from "react";
-import ErrorMessage from "../../inscription2023/components/ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 
 export default function Check({ checked, onChange, className = "", children, error }) {
   const [over, setOver] = useState(false);

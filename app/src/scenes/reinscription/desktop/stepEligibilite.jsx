@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import Toggle from "../../../components/inscription/toggle";
-import Input from "../../../components/inscription/input";
+import Toggle from "../../../components/dsfr/forms/toggle";
+import Input from "../../../components/dsfr/forms/input";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import { toastr } from "react-redux-toastr";
 import IconFrance from "../../../assets/IconFrance";
@@ -9,12 +9,12 @@ import validator from "validator";
 import plausibleEvent from "../../../services/plausible";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
-import SearchableSelect from "../../../components/SearchableSelect";
-import CheckBox from "../../../components/inscription/checkbox";
+import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
+import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { useDispatch, useSelector } from "react-redux";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import DatePickerList from "../../preinscription/components/DatePickerList";
+import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
 import { setYoung } from "../../../redux/auth/actions";
 import { translate } from "../../../utils";
 

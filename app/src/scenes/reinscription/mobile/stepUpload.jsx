@@ -10,13 +10,12 @@ import { formatDateFR, sessions2023 } from "snu-lib";
 import { translate } from "../../../utils";
 import { ID } from "../../inscription2023/utils";
 
-import DatePickerList from "../../preinscription/components/DatePickerList";
+import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
 import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
 import Help from "../../inscription2023/components/Help";
 import Navbar from "../components/Navbar";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import StickyButton from "../../../components/inscription/stickyButton";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 
 export default function StepUpload() {
   const { category } = useParams();
@@ -136,7 +135,6 @@ export default function StepUpload() {
         )}
       </div>
       <Help />
-      <Footer marginBottom="mb-[88px]" />
       <StickyButton text={loading ? "Scan antivirus en cours" : "Me réinscrire au SNU"} onClick={onSubmit} disabled={!date || loading} />
     </>
   );

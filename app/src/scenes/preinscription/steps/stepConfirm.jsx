@@ -9,8 +9,10 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import dayjs from "dayjs";
-import DSFRContainer from "../../../components/inscription/DSFRContainer";
-import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
+import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
+import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
+import ProgressBar from "../components/ProgressBar";
+import { bdcURL } from "@/config";
 
 export default function StepConfirm() {
   const [error, setError] = useState({});
@@ -72,77 +74,80 @@ export default function StepConfirm() {
   };
 
   return (
-    <DSFRContainer title="Ces informations sont-elles correctes ?">
-      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
+    <>
+      <ProgressBar />
+      <DSFRContainer title="Ces informations sont-elles correctes ?" supportLink={`${bdcURL}/je-me-preinscris-et-cree-mon-compte-volontaire`}>
+        {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
 
-      <div className="space-y-4">
-        <div className="my-2 flex flex-row items-center justify-between">
-          <p className="text-lg font-semibold text-[#161616]">Mon éligibilité</p>
-          <Link to="./eligibilite">
-            <EditPen />
-          </Link>
-        </div>
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-[#666666]">Niveau de scolarité&nbsp;:</p>
-          <p className="text-right text-[#161616]">{translateGrade(data.scolarity)}</p>
-        </div>
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-[#666666]">Date de naissance&nbsp;:</p>
-          <p className="text-right text-[#161616]">{formatDateFR(data.birthDate)}</p>
-        </div>
-        {data.school ? (
-          <>
-            {data.school?.country && (
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-[#666666]">Pays de l&apos;établissement&nbsp;:</p>
-                <p className="text-right capitalize text-[#161616]">{data.school?.country?.toLowerCase()}</p>
-              </div>
-            )}
-            {data.school?.city && (
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-[#666666]">Commune de l&apos;établissement&nbsp;:</p>
-                <p className="text-right text-[#161616]">{data.school.city}</p>
-              </div>
-            )}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-[#666666]">Nom de l&apos;établissement&nbsp;:</p>
-              <p className="truncate text-right text-[#161616]">{data.school.fullName}</p>
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-[#666666]">Code postal&nbsp;:</p>
-            <p className="text-base text-[#161616]">{data.zip}</p>
+        <div className="space-y-4">
+          <div className="my-2 flex flex-row items-center justify-between">
+            <p className="text-lg font-semibold text-[#161616]">Mon éligibilité</p>
+            <Link to="./eligibilite">
+              <EditPen />
+            </Link>
           </div>
-        )}
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-[#666666]">Niveau de scolarité&nbsp;:</p>
+            <p className="text-right text-[#161616]">{translateGrade(data.scolarity)}</p>
+          </div>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-[#666666]">Date de naissance&nbsp;:</p>
+            <p className="text-right text-[#161616]">{formatDateFR(data.birthDate)}</p>
+          </div>
+          {data.school ? (
+            <>
+              {data.school?.country && (
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-[#666666]">Pays de l&apos;établissement&nbsp;:</p>
+                  <p className="text-right capitalize text-[#161616]">{data.school?.country?.toLowerCase()}</p>
+                </div>
+              )}
+              {data.school?.city && (
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-[#666666]">Commune de l&apos;établissement&nbsp;:</p>
+                  <p className="text-right text-[#161616]">{data.school.city}</p>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-[#666666]">Nom de l&apos;établissement&nbsp;:</p>
+                <p className="truncate text-right text-[#161616]">{data.school.fullName}</p>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-[#666666]">Code postal&nbsp;:</p>
+              <p className="text-base text-[#161616]">{data.zip}</p>
+            </div>
+          )}
 
-        <div className="my-16 flex items-center justify-between pt-8">
-          <p className="text-lg font-semibold text-[#161616]">Mes informations personnelles</p>
-          <Link to="profil">
-            <EditPen />
-          </Link>
+          <div className="my-16 flex items-center justify-between pt-8">
+            <p className="text-lg font-semibold text-[#161616]">Mes informations personnelles</p>
+            <Link to="profil">
+              <EditPen />
+            </Link>
+          </div>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-[#666666]">Prénom&nbsp;:</p>
+            <p className="text-right text-[#161616]">{data.firstName}</p>
+          </div>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-[#666666]">Nom&nbsp;:</p>
+            <p className="text-right text-[#161616]">{data.lastName}</p>
+          </div>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-[#666666]">Email&nbsp;:</p>
+            <p className="text-right text-[#161616]">{data.email}</p>
+          </div>
         </div>
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-[#666666]">Prénom&nbsp;:</p>
-          <p className="text-right text-[#161616]">{data.firstName}</p>
-        </div>
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-[#666666]">Nom&nbsp;:</p>
-          <p className="text-right text-[#161616]">{data.lastName}</p>
-        </div>
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-[#666666]">Email&nbsp;:</p>
-          <p className="text-right text-[#161616]">{data.email}</p>
-        </div>
-      </div>
 
-      <SignupButtonContainer
-        onClickNext={() => onSubmit()}
-        labelNext="M'inscrire au SNU"
-        onClickPrevious={() => history.push("/preinscription/profil")}
-        disabled={Object.values(error).length}
-        collapsePrevious={true}
-      />
-    </DSFRContainer>
+        <SignupButtonContainer
+          onClickNext={() => onSubmit()}
+          labelNext="M'inscrire au SNU"
+          onClickPrevious={() => history.push("/preinscription/profil")}
+          disabled={Object.values(error).length}
+          collapsePrevious={true}
+        />
+      </DSFRContainer>
+    </>
   );
 }

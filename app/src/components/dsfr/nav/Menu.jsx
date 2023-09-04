@@ -1,12 +1,12 @@
 import React from "react";
-import Close from "../assets/CloseBlue.svg";
-import File from "../assets/file.svg";
-import Help from "../assets/icons/QuestionMarkBlue";
-import Login from "../assets/icons/Login";
+import Close from "@/assets/CloseBlue.svg";
+import File from "@/assets/file.svg";
+import Help from "@/assets/icons/QuestionMarkBlue";
+import Login from "@/assets/icons/Login";
 import { Link, useLocation, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setYoung } from "../redux/auth/actions";
-import api from "../services/api";
+import { setYoung } from "../../../redux/auth/actions";
+import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 
 const ModalMenu = ({ isOpen, setIsOpen }) => {

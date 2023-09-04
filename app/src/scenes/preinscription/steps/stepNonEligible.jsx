@@ -6,8 +6,10 @@ import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
-import DSFRContainer from "../../../components/inscription/DSFRContainer";
-import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
+import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
+import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
+import ProgressBar from "../components/ProgressBar";
+import { bdcURL } from "@/config";
 
 export default function NonEligible() {
   const history = useHistory();
@@ -50,37 +52,40 @@ export default function NonEligible() {
   };
 
   return (
-    <DSFRContainer>
-      <h1 className="text-[22px] font-bold">Nous n'avons pas trouvé de séjour qui correspond à votre situation.</h1>
-      <p className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">
-        Les inscriptions sont actuellement uniquement ouvertes aux volontaires <strong>âgés de 15 à 17 ans</strong> et <strong>scolarisés en seconde</strong>{" "}
-        <strong>en Nouvelle-Calédonie ou à Wallis-et-Futuna</strong>.
-      </p>
-      <p className="text-gray-500 mt-4">
-        Soyez informé(e) de l&apos;ouverture des inscriptions pour les prochaines sessions du SNU via le lien suivant :{" "}
-        <a href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:decoration-2 hover:underline hover:text-gray-800">
-          snu.gouv.fr
-        </a>
-        .
-      </p>
+    <>
+      <ProgressBar />
+      <DSFRContainer supportLink={`${bdcURL}/je-me-preinscris-et-cree-mon-compte-volontaire`}>
+        <h1 className="text-[22px] font-bold">Nous n'avons pas trouvé de séjour qui correspond à votre situation.</h1>
+        <p className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">
+          Les inscriptions sont actuellement uniquement ouvertes aux volontaires <strong>âgés de 15 à 17 ans</strong> et <strong>scolarisés en seconde</strong>{" "}
+          <strong>en Nouvelle-Calédonie ou à Wallis-et-Futuna</strong>.
+        </p>
+        <p className="text-gray-500 mt-4">
+          Soyez informé(e) de l&apos;ouverture des inscriptions pour les prochaines sessions du SNU via le lien suivant :{" "}
+          <a href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:decoration-2 hover:underline hover:text-gray-800">
+            snu.gouv.fr
+          </a>
+          .
+        </p>
 
-      <div className="my-4 text-base font-bold">Découvrez d’autres formes d’engagement</div>
-      <div className="flex gap-8 overflow-x-auto md:grid md:grid-cols-2">
-        {engagementPrograms.map((program, index) => (
-          <CardEngagement program={program} key={index} />
-        ))}
-      </div>
-      <dic className="mt-6 flex justify-center">
-        <button
-          className="hove mx-auto my-4 w-full border-[1px] border-blue-france-sun-113 p-2 text-center text-blue-france-sun-113 hover:border-blue-france-sun-113-hover hover:text-blue-france-sun-113-hover md:w-96"
-          onClick={() => {
-            history.push("/public-engagements");
-          }}>
-          Voir plus de formes d’engagement
-        </button>
-      </dic>
-      <SignupButtonContainer onClickNext={onClickButton} labelNext="Revenir à l'accueil" />
-    </DSFRContainer>
+        <div className="my-4 text-base font-bold">Découvrez d’autres formes d’engagement</div>
+        <div className="flex gap-8 overflow-x-auto md:grid md:grid-cols-2">
+          {engagementPrograms.map((program, index) => (
+            <CardEngagement program={program} key={index} />
+          ))}
+        </div>
+        <dic className="mt-6 flex justify-center">
+          <button
+            className="hove mx-auto my-4 w-full border-[1px] border-blue-france-sun-113 p-2 text-center text-blue-france-sun-113 hover:border-blue-france-sun-113-hover hover:text-blue-france-sun-113-hover md:w-96"
+            onClick={() => {
+              history.push("/public-engagements");
+            }}>
+            Voir plus de formes d’engagement
+          </button>
+        </dic>
+        <SignupButtonContainer onClickNext={onClickButton} labelNext="Revenir à l'accueil" />
+      </DSFRContainer>
+    </>
   );
 }
 

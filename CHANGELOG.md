@@ -1,3 +1,83 @@
+## [1.327.1](https://github.com/betagouv/service-national-universel/compare/v1.327.0...v1.327.1) (2023-09-01)
+
+
+### Bug Fixes
+
+* **api:** validate email during contract edition ([af0d52b](https://github.com/betagouv/service-national-universel/commit/af0d52bac4910dce59b80c9b74af825dec98a33f))
+
+# [1.327.0](https://github.com/betagouv/service-national-universel/compare/v1.326.0...v1.327.0) (2023-08-31)
+
+
+### Bug Fixes
+
+* **admin:** dashboard horizontalbar with 0 objective ([#2920](https://github.com/betagouv/service-national-universel/issues/2920)) ([fcbab44](https://github.com/betagouv/service-national-universel/commit/fcbab44f8daa18e08d1ec7eaa8c7453fd26c3339))
+* **admin:** new sidebar -> we forgot the objectives tab ! ([21d8222](https://github.com/betagouv/service-national-universel/commit/21d82221ff222385e8a3a84afc3616602f5107e6))
+
+
+### Features
+
+* **test:** creation unit test lignetopoint/pointderassemblement ([#2905](https://github.com/betagouv/service-national-universel/issues/2905)) ([9d04ee3](https://github.com/betagouv/service-national-universel/commit/9d04ee3561c692c56732239603602f306441a2bc))
+
+# [1.326.0](https://github.com/betagouv/service-national-universel/compare/v1.325.0...v1.326.0) (2023-08-30)
+
+
+### Bug Fixes
+
+* **admin:** field with html for mission ([66936b4](https://github.com/betagouv/service-national-universel/commit/66936b49afd58ee5e7ad6d4a133755dd7365134d))
+* **app:** load cohort on phase2 and phase3 pages as well ([40d1884](https://github.com/betagouv/service-national-universel/commit/40d1884e8548ae7389b37a2472b8fe8ee6d2d44d))
+* **app:** typo error ([0d6d66c](https://github.com/betagouv/service-national-universel/commit/0d6d66c3e6b79673ef33859e00c5739583cbaecb))
+
+
+### Features
+
+* **api:** add 2fa redirection ([#2913](https://github.com/betagouv/service-national-universel/issues/2913)) ([6df1da3](https://github.com/betagouv/service-national-universel/commit/6df1da33db7398d922a7b165205fa388cf01bdaf))
+
+# [1.325.0](https://github.com/betagouv/service-national-universel/compare/v1.324.0...v1.325.0) (2023-08-29)
+
+
+### Bug Fixes
+
+* **api/crons:** modif rattrapage logs manuel ([29e61f2](https://github.com/betagouv/service-national-universel/commit/29e61f2a5e0c30ddac88b6dadf9aff626e210758))
+* **app:** contract with balise ([a7d4dd1](https://github.com/betagouv/service-national-universel/commit/a7d4dd1ba5a77f3ffb4d5190109812edada26d5a))
+* **app:** fix contact form filename case ([7905f58](https://github.com/betagouv/service-national-universel/commit/7905f5802845057a6ad5e493f55e343b29de2266))
+
+
+### Features
+
+* **app:** Refonte du formulaire de contact ([#2907](https://github.com/betagouv/service-national-universel/issues/2907)) ([8f35ae3](https://github.com/betagouv/service-national-universel/commit/8f35ae39abbee322d748ed155d8125068fd7cba7))
+
+# [1.324.0](https://github.com/betagouv/service-national-universel/compare/v1.323.2...v1.324.0) (2023-08-28)
+
+
+### Bug Fixes
+
+* **admin:** add transport tab for head Center ([94c56f7](https://github.com/betagouv/service-national-universel/commit/94c56f74724387a8ecc3384be2ed9262f850b3e2))
+* **admin:** items order + content badge position ([eea2b18](https://github.com/betagouv/service-national-universel/commit/eea2b18958a03fc20f85fa641c68bd0608dfa65e))
+* **admin:** navbar navigation ScrollOnTop ([290fe27](https://github.com/betagouv/service-national-universel/commit/290fe27563d4a72a2cf770d9d974f0c104196386))
+* **admin:** simplify sidebar popover logic + fix closing problem ([3e43791](https://github.com/betagouv/service-national-universel/commit/3e437912dc84f0f5ab94e8e20bd7b2d23ec891a7))
+* **api:** allow null value for expiration date ([8ff981a](https://github.com/betagouv/service-national-universel/commit/8ff981adb8b03bb9d13d7feb697f8bd4e2164984))
+
+
+### Features
+
+* **admin:** resize sidebar on breakpoint ([60b0767](https://github.com/betagouv/service-national-universel/commit/60b07675e717a1c0d260e291329e2d08b8a634f2))
+* **admin:** review design sidebar ([280146e](https://github.com/betagouv/service-national-universel/commit/280146e86d4e84e47163ba6b076a4a6d87feb597))
+* added a few insights to ease onboarding ([#2895](https://github.com/betagouv/service-national-universel/issues/2895)) ([c6b36e2](https://github.com/betagouv/service-national-universel/commit/c6b36e2f71302436fb47b24bc04cd280da150398))
+
+## [1.323.2](https://github.com/betagouv/service-national-universel/compare/v1.323.1...v1.323.2) (2023-08-26)
+
+
+### Bug Fixes
+
+* **app:** fix header import in representants-legaux ([1f994a6](https://github.com/betagouv/service-national-universel/commit/1f994a6102ba309c9deaf1e6bd02295ba22157da))
+
+## [1.323.1](https://github.com/betagouv/service-national-universel/compare/v1.323.0...v1.323.1) (2023-08-25)
+
+
+### Bug Fixes
+
+* **api:** disable 2fa for dev mode ([a4e3d08](https://github.com/betagouv/service-national-universel/commit/a4e3d08fcb867cb592076381a3a116c304f6d10e))
+
 # [1.323.0](https://github.com/betagouv/service-national-universel/compare/v1.322.2...v1.323.0) (2023-08-24)
 
 

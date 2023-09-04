@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import RightArrow from "../../../assets/icons/RightArrow";
-import Input from "../../../components/inscription/input";
+import Input from "../../../components/dsfr/forms/input";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import Error from "../../../components/error";

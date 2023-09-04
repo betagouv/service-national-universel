@@ -45,7 +45,9 @@ const renderFromHtml = async (html, options) => {
 
 const getBrowserAndPage = async (options) => {
   try {
-    const browser = await puppeteer.launch(options?.launch ?? {});
+    const browser = await puppeteer.launch(
+      options?.launch ?? { headless: "new" }
+    );
     const page = await browser.newPage();
 
     if (options?.emulateMedia) {

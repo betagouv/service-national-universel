@@ -5,13 +5,13 @@ import Loader from "../../../components/Loader";
 import FranceConnectButton from "../../inscription2023/components/FranceConnectButton";
 import Input from "../../inscription2023/components/Input";
 // TODO: mettre le Toggle dans les components génériques
-import Toggle from "../../../components/inscription/toggle";
+import Toggle from "../../../components/dsfr/forms/toggle";
 import { translate } from "snu-lib";
 import RadioButton from "../components/RadioButton";
 import { FRANCE, ABROAD, translateError, stringToBoolean, isReturningParentForImageRights, API_CONSENT_IMAGE_RIGHTS } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";
-import ErrorMessage from "../../inscription2023/components/ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import api from "../../../services/api";
 import { PlainButton } from "../components/Buttons";
 import { regexPhoneFrenchCountries } from "../../../utils";

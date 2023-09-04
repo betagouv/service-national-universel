@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 import { translate, YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
-import Footer from "../../../../components/footerV2";
-import StickyButton from "../../../../components/inscription/stickyButton";
+import Footer from "@/components/dsfr/layout/Footer";
+import StickyButton from "../../../../components/dsfr/ui/buttons/stickyButton";
 import { setYoung } from "../../../../redux/auth/actions";
 import { capture } from "../../../../sentry";
 import API from "../../../../services/api";

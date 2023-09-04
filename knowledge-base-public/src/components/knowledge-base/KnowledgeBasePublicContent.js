@@ -25,7 +25,7 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
       </Head>
       <div className="flex min-h-screen flex-col md:min-h-full">
         {(!item || isLoading) && loadingType ? (
-          <>{loadingType === "section" ? <KnowledgeBasePublicSection isLoading /> : <KnowledgeBasePublicArticle isLoading />}</>
+          <>{loadingType === "section" ? <KnowledgeBasePublicSection isLoading /> : <KnowledgeBasePublicArticle isLoading/>}</>
         ) : (
           <>
             {item?.type === "article" && <KnowledgeBasePublicArticle item={item} isLoading={isLoading} />}

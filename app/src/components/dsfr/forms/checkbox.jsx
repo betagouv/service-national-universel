@@ -1,5 +1,5 @@
 import React from "react";
-import Check from "../../assets/icons/Check";
+import Check from "@/assets/icons/Check";
 
 export default function CheckBox({ checked, onChange, label = "", description = "", className = "", disabled = false }) {
   return (

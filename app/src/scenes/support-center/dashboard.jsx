@@ -146,7 +146,7 @@ const KnowledgeBaseArticleCard = ({ _id, position, title, slug, path, className 
 
 export default function Dashboard(props) {
   const [userTickets, setUserTickets] = useState(null);
-  const fromPage = new URLSearchParams(props.location.search).get("from");
+  const fromPage = new URLSearchParams(props.location.search).get("from ");
   const [isOpen, setIsOpen] = useState(false);
   const history = useHistory();
 

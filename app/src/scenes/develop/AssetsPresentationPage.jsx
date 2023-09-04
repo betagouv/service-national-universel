@@ -72,7 +72,6 @@ import Rubberstampvalidedsvg_6 from "../../assets/rubberStampValided.svg";
 import Savesvg_6 from "../../assets/save.svg";
 import Smalllogosvg_6 from "../../assets/small-logo.svg";
 import Tabrulesyoungpng_6 from "../../assets/tabRulesYoung.png";
-import Ticksvg_7 from "../../assets/tick.svg";
 import Toolspng_7 from "../../assets/tools.png";
 import Trophysvg_7 from "../../assets/trophy.svg";
 import Validatedphase2png_7 from "../../assets/validatedPhase2.png";
@@ -416,10 +415,6 @@ export default function AssetsPresentationPage() {
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="tabrulesyoung.png">
             <img src={Tabrulesyoungpng_6} alt="tabRulesYoung.png" crossOrigin="anonymous" className="" />
             <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">tabRulesYoung.png</div>
-          </div>
-          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="tick.svg">
-            <img src={Ticksvg_7} alt="tick.svg" crossOrigin="anonymous" className="" />
-            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">tick.svg</div>
           </div>
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="tools.png">
             <img src={Toolspng_7} alt="tools.png" crossOrigin="anonymous" className="" />

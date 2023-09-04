@@ -5,9 +5,8 @@ import { COHESION_STAY_LIMIT_DATE } from "snu-lib";
 import EditPenLight from "../../../assets/icons/EditPenLight";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
-import CheckBox from "../../../components/inscription/checkbox";
-import StickyButton from "../../../components/inscription/stickyButton";
+import CheckBox from "../../../components/dsfr/forms/checkbox";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
@@ -105,7 +104,6 @@ export default function StepConsentements() {
           <div className="text-sm font-medium text-[#000091]">Je souhaite modifier mes dates de séjour</div>
         </div>
       </div>
-      <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/reinscription/eligibilite")} onClick={onSubmit} disabled={disabled || loading} />
       <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
     </>

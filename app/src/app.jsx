@@ -1,50 +1,50 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./index.css";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Redirect, Router, Switch, useLocation } from "react-router-dom";
-
 import { setYoung } from "./redux/auth/actions";
+import { toastr } from "react-redux-toastr";
+import { Redirect, Router, Switch, useLocation } from "react-router-dom";
+import * as Sentry from "@sentry/react";
 
-import Footer from "./components/footer";
-import Navbar from "./components/layout/navbar";
-import Loader from "./components/Loader";
-import ModalResumePhase1ForWithdrawn from "./components/modals/ModalResumePhase1ForWithdrawn";
 import Account from "./scenes/account";
 import AllEngagements from "./scenes/all-engagements/index";
 import Auth from "./scenes/auth";
 import Candidature from "./scenes/candidature";
 import CGU from "./scenes/CGU";
+import ChangeSejour from "./scenes/phase1/changeSejour";
+import Contact from "./scenes/contact";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
 import Diagoriente from "./scenes/diagoriente";
 import Engagement from "./scenes/engagement";
+import Footer from "./components/footer";
 import Home from "./scenes/home";
 import Inscription2023 from "./scenes/inscription2023";
+import Loader from "./components/Loader";
 import Maintenance from "./scenes/maintenance";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Missions from "./scenes/missions";
+import ModalCGU from "./components/modals/ModalCGU";
+import ModalResumePhase1ForWithdrawn from "./components/modals/ModalResumePhase1ForWithdrawn";
+import Navbar from "./components/layout/navbar";
 import NonEligible from "./scenes/noneligible";
 import Phase1 from "./scenes/phase1";
-import ChangeSejour from "./scenes/phase1/changeSejour";
 import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
+import Echanges from "./scenes/echanges";
 import Preferences from "./scenes/preferences";
 import PreInscription from "./scenes/preinscription";
 import PublicSupport from "./scenes/public-support-center";
 import ReInscription from "./scenes/reinscription";
 import RepresentantsLegaux from "./scenes/representants-legaux";
 import SupportCenter from "./scenes/support-center";
+import Thanks from "./scenes/contact/Thanks";
 
-import ModalCGU from "./components/modals/ModalCGU";
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
-
-import { toastr } from "react-redux-toastr";
-import "./index.css";
 import { canYoungResumePhase1, ENABLE_PM, YOUNG_STATUS } from "./utils";
-
-import * as Sentry from "@sentry/react";
 import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
@@ -79,7 +79,7 @@ export default function App() {
               <SentryRoute path="/validate-contract" component={Contract} />
               <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
               {/* Authentification accessoire */}
-              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements"]} component={() => <OptionalLogIn />} />
+              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/contact", "/merci"]} component={() => <OptionalLogIn />} />
               {/* Authentification nécessaire */}
               <SentryRoute path="/" component={() => <MandatoryLogIn />} />
             </Switch>
@@ -127,6 +127,8 @@ const OptionalLogIn = () => {
       <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
       <SentryRoute path="/auth" component={Auth} />
       <SentryRoute path="/public-engagements" component={AllEngagements} />
+      <SentryRoute path="/contact" component={Contact} />
+      <SentryRoute path="/merci" component={Thanks} />
       <Redirect to="/" />
     </Switch>
   );
@@ -230,6 +232,7 @@ const Espace = () => {
           <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
           <SentryRoute path="/reinscription" component={ReInscription} />
           <SentryRoute path="/account" component={Account} />
+          <SentryRoute path="/echanges" component={Echanges} />
           <SentryRoute path="/phase1" component={Phase1} />
           <SentryRoute path="/phase2" component={Phase2} />
           <SentryRoute path="/phase3" component={Phase3} />

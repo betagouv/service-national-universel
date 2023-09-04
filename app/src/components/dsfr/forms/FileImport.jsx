@@ -1,7 +1,7 @@
 import React from "react";
 import { resizeImage } from "../../../services/file.service";
 
-export default function FileImport({ id, file, setFile, setError, onChange }) {
+export default function FileImport({ id, file, setFile, setError = () => {}, onChange }) {
   async function handleChange(e) {
     const image = await resizeImage(e.target.files[0]);
     setFile(image);

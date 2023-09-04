@@ -6,6 +6,7 @@ let cohorts = null;
 let cohortsCachedAt = null;
 
 export async function cohortsInit() {
+  if (isCohortsInitialized()) return;
   try {
     const result = await api.get("/cohort");
     if (result.status === 401) {

@@ -38,8 +38,19 @@ const everyHours = (x) => `0 */${x} * * *`;
 // ! A jour du 16 juin 2023 (Source ChatGPT)
 // Voici les heures de déclenchement de chaque cron dans le fichier fourni (en UTC):
 
-// applicationPending.handler() : tous les lundis à 9h00
+// Crons de nuit :
 // deleteInactiveRefs.handler() : tous les jours à minuit
+// syncReferentSupport.handler() : tous les jours à 2h45
+// syncContactSupport.handler() : tous les jours à 1h15
+// structurePatches.handler() : tous les jours à 1h30
+// missionPatches.handler() : tous les jours à 2h00
+// applicationPatches.handler() : tous les jours à 2h30
+// youngPatches.handler() : tous les jours à 3h00
+// dsnjExport.handler() : tous les jours à 3h30
+// refreshMaterializedViews.handler() : tous les jours à 5h00
+
+// Crons qui peuvent être de  jour :
+// applicationPending.handler() : tous les lundis à 9h00
 // noticePushMission.handler() : tous les lundis à 9h00
 // apiEngagement.handler() : toutes les 6 heures
 // jeVeuxAiderDaily.handler() : toutes les 6 heures
@@ -48,16 +59,8 @@ const everyHours = (x) => `0 */${x} * * *`;
 // applicationOutaded.handler() : tous les jours à 7h00
 // computeGoalsInscription.handler() : toutes les heures
 // loginAttempts.handler() : tous les jours à 1h00
-// syncReferentSupport.handler() : tous les jours à 2h45
-// syncContactSupport.handler() : tous les jours à 1h15
-// structurePatches.handler() : tous les jours à 1h30
-// missionPatches.handler() : tous les jours à 2h00
-// applicationPatches.handler() : tous les jours à 2h30
-// youngPatches.handler() : tous les jours à 3h00
-// dsnjExport.handler() : tous les jours à 3h30
 // parentConsentementReminder.handler() : tous les jours à 8h27
 // reminderImageRightsParent2.handler() : tous les jours à 10h00
-// refreshMaterializedViews.handler() : tous les jours à 5h00
 // clotureMissionReminder.handler() : tous les jours à 14h02
 
 // See: https://www.clever-cloud.com/doc/administrate/cron/#deduplicating-crons (INSTANCE_NUMBER)

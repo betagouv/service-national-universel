@@ -129,16 +129,6 @@ describe("Es", () => {
       passport.user.role = ROLES.ADMIN;
     });
   });
-  describe("POST /es/missionapi/_msearch", () => {
-    describe("POST /es/missionapi/_msearch", () => {
-      it("Should call msearch with correct index", async () => {
-        const body = buildMsearchQuery("missionapi", matchAll);
-        const res = await msearch("missionapi", body);
-        expect(res.statusCode).toEqual(200);
-        expect(esClient.msearch).toHaveBeenCalledWith({ body, index: "missionapi" });
-      });
-    });
-  });
   describe("POST /es/school/_msearch", () => {
     describe("POST /es/school/_msearch", () => {
       it("Should call msearch with correct index", async () => {

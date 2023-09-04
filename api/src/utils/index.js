@@ -142,6 +142,28 @@ function listFiles(path) {
   });
 }
 
+function deleteFilesByList(filesList) {
+  return new Promise((resolve, reject) => {
+    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+    const params = { Bucket: BUCKET_NAME, Delete: { Objects: filesList } };
+    s3bucket.deleteObjects(params, (err, data) => {
+      if (err) return reject(`error in callback:${err}`);
+      resolve(data);
+    });
+  });
+}
+
+function getMetaDataFile(path) {
+  return new Promise((resolve, reject) => {
+    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+    const params = { Bucket: BUCKET_NAME, Key: path };
+    s3bucket.headObject(params, (err, data) => {
+      if (err) return reject(`error in callback:${err}`);
+      resolve(data);
+    });
+  });
+}
+
 function getSignedUrl(path) {
   const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
   return s3bucket.getSignedUrl("getObject", {
@@ -799,33 +821,38 @@ const getReferentManagerPhase2 = async (department) => {
 };
 
 const updateYoungApplicationFilesType = async (application, user) => {
-  const young = await YoungModel.findById(application.youngId);
-  const applications = await ApplicationModel.find({ youngId: application.youngId });
+  try {
+    const young = await YoungModel.findById(application.youngId);
+    const applications = await ApplicationModel.find({ youngId: application.youngId });
 
-  const listFiles = [];
-  applications.map(async (application) => {
-    const currentListFiles = [];
-    if (application.contractAvenantFiles.length > 0) {
-      currentListFiles.push("contractAvenantFiles");
-      listFiles.indexOf("contractAvenantFiles") === -1 && listFiles.push("contractAvenantFiles");
-    }
-    if (application.justificatifsFiles.length > 0) {
-      currentListFiles.push("justificatifsFiles");
-      listFiles.indexOf("justificatifsFiles") === -1 && listFiles.push("justificatifsFiles");
-    }
-    if (application.feedBackExperienceFiles.length > 0) {
-      currentListFiles.push("feedBackExperienceFiles");
-      listFiles.indexOf("feedBackExperienceFiles") === -1 && listFiles.push("feedBackExperienceFiles");
-    }
-    if (application.othersFiles.length > 0) {
-      currentListFiles.push("othersFiles");
-      listFiles.indexOf("othersFiles") === -1 && listFiles.push("othersFiles");
-    }
-    application.set({ filesType: currentListFiles });
-    await application.save({ fromUser: user });
-  });
-  young.set({ phase2ApplicationFilesType: listFiles });
-  await young.save({ fromUser: user });
+    const listFiles = [];
+    applications.map(async (application) => {
+      const currentListFiles = [];
+      if (application.contractAvenantFiles.length > 0) {
+        currentListFiles.push("contractAvenantFiles");
+        listFiles.indexOf("contractAvenantFiles") === -1 && listFiles.push("contractAvenantFiles");
+      }
+      if (application.justificatifsFiles.length > 0) {
+        currentListFiles.push("justificatifsFiles");
+        listFiles.indexOf("justificatifsFiles") === -1 && listFiles.push("justificatifsFiles");
+      }
+      if (application.feedBackExperienceFiles.length > 0) {
+        currentListFiles.push("feedBackExperienceFiles");
+        listFiles.indexOf("feedBackExperienceFiles") === -1 && listFiles.push("feedBackExperienceFiles");
+      }
+      if (application.othersFiles.length > 0) {
+        currentListFiles.push("othersFiles");
+        listFiles.indexOf("othersFiles") === -1 && listFiles.push("othersFiles");
+      }
+      application.set({ filesType: currentListFiles });
+      await application.save({ fromUser: user });
+    });
+    young.set({ phase2ApplicationFilesType: listFiles });
+    await young.save({ fromUser: user });
+  } catch (e) {
+    capture(e);
+    console.log(e);
+  }
 };
 
 const updateHeadCenter = async (headCenterId, user) => {
@@ -973,4 +1000,6 @@ module.exports = {
   updateYoungApplicationFilesType,
   updateHeadCenter,
   getTransporter,
+  getMetaDataFile,
+  deleteFilesByList,
 };

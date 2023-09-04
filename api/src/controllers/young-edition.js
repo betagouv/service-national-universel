@@ -71,7 +71,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
         .trim()
         .valid(...PHONE_ZONES_NAMES_ARR)
         .allow("", null),
-      latestCNIFileExpirationDate: Joi.date(),
+      latestCNIFileExpirationDate: Joi.date().allow(null),
       latestCNIFileCategory: Joi.string().trim(),
       birthdateAt: Joi.date(),
       birthCity: Joi.string().trim(),

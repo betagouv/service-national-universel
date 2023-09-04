@@ -27,4 +27,4 @@ La branche `main` est automatiquement livré sur l'environnement de production �
 
 Plus d'information sur la plateforme du Service National Universel et l'engagement civique ici : [https://beta.gouv.fr/startups/snu.html](https://beta.gouv.fr/startups/snu.html)
 
-Pour contacter l’équipe: contact@snu.gouv.fr
+Pour contacter l’équipe: <contact@snu.gouv.fr>

@@ -5,14 +5,14 @@ import validator from "validator";
 import dayjs from "dayjs";
 import IconFrance from "../../../../assets/IconFrance";
 import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
-import CheckBox from "../../../../components/inscription/checkbox";
-import Toggle from "../../../../components/inscription/toggle";
+import CheckBox from "../../../../components/dsfr/forms/checkbox";
+import Toggle from "../../../../components/dsfr/forms/toggle";
 import plausibleEvent from "../../../../services/plausible";
 import { getCorrectionByStep } from "../../../../utils/navigation";
 import SchoolInFrance from "../../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../../inscription2023/components/ShoolOutOfFrance";
 import Input from "../../components/Input";
-import Select from "../../components/Select";
+import Select from "../../../../components/dsfr/forms/Select";
 
 import { useDispatch, useSelector } from "react-redux";
 import { YOUNG_STATUS } from "snu-lib";

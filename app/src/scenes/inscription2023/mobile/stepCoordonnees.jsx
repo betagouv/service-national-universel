@@ -7,12 +7,11 @@ import plausibleEvent from "../../../services/plausible";
 
 import validator from "validator";
 
-import RadioButton from "../components/RadioButton";
+import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import Input from "../components/Input";
-import Select from "../components/Select";
-import ErrorMessage from "../components/ErrorMessage";
+import Select from "../../../components/dsfr/forms/Select";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import Navbar from "../components/Navbar";
-import Footer from "../../../components/footerV2";
 import Help from "../components/Help";
 import {
   youngSchooledSituationOptions,
@@ -26,10 +25,10 @@ import {
 
 import api from "../../../services/api";
 import VerifyAddress from "../components/VerifyAddress";
-import SearchableSelect from "../../../components/SearchableSelect";
-import StickyButton from "../../../components/inscription/stickyButton";
-import Toggle from "../../../components/inscription/toggle";
-import CheckBox from "../../../components/inscription/checkbox";
+import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
+import Toggle from "../../../components/dsfr/forms/toggle";
+import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
 import { debounce, translate } from "../../../utils";
 import { capture } from "../../../sentry";
@@ -39,7 +38,7 @@ import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { apiAdress } from "../../../services/api-adresse";
 import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
-import PhoneField from "../components/PhoneField";
+import PhoneField from "../../../components/dsfr/forms/PhoneField";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -767,7 +766,6 @@ export default function StepCoordonnees() {
         )}
       </div>
       <Help />
-      <Footer marginBottom="mb-[88px]" />
       {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
         <StickyButton text="Corriger" onClickPrevious={() => history.push("/")} onClick={onCorrection} disabled={loading} />
       ) : (
