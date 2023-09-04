@@ -1,3 +1,10 @@
+## [1.327.1](https://github.com/betagouv/service-national-universel/compare/v1.327.0...v1.327.1) (2023-09-01)
+
+
+### Bug Fixes
+
+* **api:** validate email during contract edition ([af0d52b](https://github.com/betagouv/service-national-universel/commit/af0d52bac4910dce59b80c9b74af825dec98a33f))
+
 # [1.327.0](https://github.com/betagouv/service-national-universel/compare/v1.326.0...v1.327.0) (2023-08-31)
 
 

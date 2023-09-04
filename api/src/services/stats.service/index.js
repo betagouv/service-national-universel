@@ -1,19 +1,21 @@
 const { ROLES } = require("snu-lib");
-const { getYoungNotesPhase1, getTimeSchedule, getTransportCorrectionRequests, getSessions, getLineToPoints } = require("./sejour");
-const { getYoungPhase2Validated } = require("./engagement");
+const { getNewStructures, getYoungNotesPhase2, getYoungPhase2Validated } = require("./engagement");
+const { getYoungNotesPhase1, getTimeScheduleAndPedagoProject, getTransportCorrectionRequests, getSessions, getLineToPoints } = require("./sejour");
+
 const keyNumbersByRole = {
   sejour: {
-    [ROLES.REFERENT_DEPARTMENT]: [getYoungNotesPhase1, getTimeSchedule],
-    [ROLES.REFERENT_REGION]: [getTimeSchedule, getTransportCorrectionRequests],
+    [ROLES.REFERENT_DEPARTMENT]: [getYoungNotesPhase1, getTimeScheduleAndPedagoProject],
+    [ROLES.REFERENT_REGION]: [getTimeScheduleAndPedagoProject, getTransportCorrectionRequests],
     [ROLES.ADMIN]: [getTransportCorrectionRequests, getSessions, getLineToPoints],
   },
   inscription: {},
   engagement: {
+    [ROLES.REFERENT_DEPARTMENT]: [getNewStructures, getYoungNotesPhase2],
     [ROLES.REFERENT_REGION]: [getYoungPhase2Validated],
   },
   all: {
-    [ROLES.REFERENT_DEPARTMENT]: [getYoungNotesPhase1, getTimeSchedule],
-    [ROLES.REFERENT_REGION]: [getTimeSchedule, getTransportCorrectionRequests, getYoungPhase2Validated],
+    [ROLES.REFERENT_DEPARTMENT]: [getYoungNotesPhase1, getTimeScheduleAndPedagoProject, getNewStructures, getYoungNotesPhase2],
+    [ROLES.REFERENT_REGION]: [getTimeScheduleAndPedagoProject, getTransportCorrectionRequests, getYoungNotesPhase2],
     [ROLES.ADMIN]: [getTransportCorrectionRequests, getSessions, getLineToPoints],
   },
 };
