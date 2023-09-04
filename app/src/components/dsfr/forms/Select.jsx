@@ -39,7 +39,10 @@ export default function Select({ label, options, value, placeholder = "Sélectio
             correction || error ? "border-[#CE0500]" : "border-[#3A3A3A]"
           } rounded-t-[4px]`}
           style={{ fontFamily: "Marianne" }}
-          onClick={() => setOpen((e) => !e)}>
+          onClick={(e) => {
+            e.preventDefault();
+            setOpen((e) => !e);
+          }}>
           <div className="flex items-center gap-2 overflow-hidden">
             {Icon ? Icon : null}
             <span className="truncate whitespace-nowrap text-base ">{options.find((option) => option.value === value)?.label || placeholder}</span>
