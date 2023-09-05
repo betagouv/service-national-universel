@@ -9,7 +9,7 @@ import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
-import { bdcURL } from "@/config";
+import { supportURL } from "@/config";
 
 export default function NonEligible() {
   const history = useHistory();
@@ -54,7 +54,7 @@ export default function NonEligible() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer supportLink={`${bdcURL}/je-me-preinscris-et-cree-mon-compte-volontaire`}>
+      <DSFRContainer supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <h1 className="text-[22px] font-bold">Nous n'avons pas trouvé de séjour qui correspond à votre situation.</h1>
         <p className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">
           Les inscriptions sont actuellement uniquement ouvertes aux volontaires <strong>âgés de 15 à 17 ans</strong> et <strong>scolarisés en seconde</strong>{" "}

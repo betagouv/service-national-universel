@@ -1,11 +1,10 @@
 import React from "react";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import humanCooperation from "../../../assets/humanCooperation.svg";
-import { appURL } from "../../../config";
 
-export default function Help() {
+export default function Help({ supportLink }) {
   return (
-    <a href={`${appURL}/besoin-d-aide?from=/`} target="_blank" rel="noreferrer" className="hover:text-[#161616]">
+    <a href={supportLink} target="_blank" rel="noreferrer" className="hover:text-[#161616]">
       <div className="bg-[#F9F6F2] px-4 pt-4 pb-12 text-[#161616] md:hidden">
         <div className="flex justify-end">
           <img src={humanCooperation} alt="" />
