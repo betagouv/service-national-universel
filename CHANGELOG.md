@@ -1,3 +1,10 @@
+## [1.328.1](https://github.com/betagouv/service-national-universel/compare/v1.328.0...v1.328.1) (2023-09-05)
+
+
+### Bug Fixes
+
+* **lib:** add missing dep number for saint-barthelemy ([51d918f](https://github.com/betagouv/service-national-universel/commit/51d918fd0eee7ce1f41814f3c3b9918faf2f80cc))
+
 # [1.328.0](https://github.com/betagouv/service-national-universel/compare/v1.327.1...v1.328.0) (2023-09-04)
 
 
