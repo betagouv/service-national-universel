@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import useDevice from "../../../hooks/useDeviceWithResize";
-
 import API from "../../../services/api";
+import { capture } from "../../../sentry";
+import { supportURL } from "@/config";
+
 import Close from "./assets/Close";
 import Hamburger from "./assets/Hamburger";
+import { HiOutlineQuestionMarkCircle } from "react-icons/hi";
 import Logo from "./components/Logo";
 import NavigationMenu from "./components/NavigationMenu";
 import UserCard from "./components/UserCard";
 import UserMenu from "./components/UserMenu";
-import { capture } from "../../../sentry";
-import { supportURL } from "@/config";
-import { HiOutlineQuestionMarkCircle } from "react-icons/hi";
 
 export default function Navbar() {
   const device = useDevice();

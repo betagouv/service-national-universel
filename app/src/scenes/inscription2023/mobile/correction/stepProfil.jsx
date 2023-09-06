@@ -12,6 +12,7 @@ import API from "../../../../services/api";
 import plausibleEvent from "../../../../services/plausible";
 import { getCorrectionByStep } from "../../../../utils/navigation";
 import Input from "../../components/Input";
+import { supportURL } from "@/config";
 
 export default function StepProfil() {
   const young = useSelector((state) => state.Auth.young);
@@ -92,7 +93,7 @@ export default function StepProfil() {
       <div className="bg-white px-4 pt-4 pb-12">
         <div className="flex w-full items-center justify-between">
           <h1 className="text-xl text-[#161616]">Mon profil</h1>
-          <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
+          <a href={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
           </a>
         </div>

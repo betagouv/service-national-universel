@@ -55,7 +55,7 @@ export default function StepSejour() {
       <div className="bg-white p-4">
         <div className="flex w-full items-center justify-between">
           <h1 className="text-2xl font-semibold">Choisissez la date du séjour</h1>
-          <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
+          <a href={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
           </a>
         </div>
