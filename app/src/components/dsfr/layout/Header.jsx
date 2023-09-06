@@ -2,15 +2,13 @@ import React from "react";
 import LogoFr from "@/assets/fr.png";
 import SNU from "@/assets/logo-snu.png";
 import Burger from "@/assets/icons/Burger";
-import Help from "@/assets/icons/QuestionMarkBlue";
-import File from "@/assets/file.svg";
 import Menu from "../nav/Menu";
 import { Link, useLocation, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { appURL, supportURL } from "@/config";
+import { supportURL } from "@/config";
 import { HiOutlineClipboard, HiOutlineQuestionMarkCircle, HiOutlineUserCircle } from "react-icons/hi";
 
 const Header = ({ title }) => {
@@ -50,7 +48,6 @@ const Header = ({ title }) => {
         <nav className="hidden h-8 md:flex gap-4 text-sm text-blue-france-sun-113">
           {location.pathname.includes("inscription") ? (
             <a href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer" className="flex items-center py-1 px-2 gap-2 hover:bg-gray-100 hover:text-blue-france-sun-113">
-              {/* <img src={File} alt="" /> */}
               <HiOutlineClipboard className="text-base" />
               Programme
             </a>
@@ -64,7 +61,6 @@ const Header = ({ title }) => {
           )}
 
           <a href={supportURL} target="_blank" rel="noreferrer" className="flex items-center py-1 px-2 gap-2 hover:bg-gray-100 hover:text-blue-france-sun-113">
-            {/* <Help /> */}
             <HiOutlineQuestionMarkCircle className="text-base" />
             Besoin d&apos;aide
           </a>

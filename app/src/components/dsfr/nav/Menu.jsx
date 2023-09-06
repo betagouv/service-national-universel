@@ -1,8 +1,5 @@
 import React from "react";
 import Close from "@/assets/CloseBlue.svg";
-import File from "@/assets/file.svg";
-import Help from "@/assets/icons/QuestionMarkBlue";
-import Login from "@/assets/icons/Login";
 import { Link, useLocation, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
@@ -37,8 +34,27 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
             <img src={Close} className="w-3" />
           </div>
 
+          {pathname.includes("inscription") ? (
+            <a href="https://www.snu.gouv.fr/" className="flex items-center py-3 gap-2" target="_blank" rel="noreferrer">
+              <HiOutlineClipboard className="text-lg" />
+              Le programme
+            </a>
+          ) : (
+            young && (
+              <Link to="/" className="flex items-center py-3 gap-2">
+                <HiOutlineUserCircle className="text-lg" />
+                Mon compte volontaire
+              </Link>
+            )
+          )}
+
+          <a href={supportURL} className="flex items-center py-3 gap-2">
+            <HiOutlineQuestionMarkCircle className="text-lg" />
+            Besoin d&apos;aide ?
+          </a>
+
           <button
-            className="flex items-center py-3 gap-2"
+            className="flex items-center py-3 ml-4 gap-2"
             onClick={() => {
               if (!young) {
                 history.push("/auth");
@@ -46,32 +62,8 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
                 logout();
               }
             }}>
-            {/* <Login /> */}
-            <HiOutlineUserCircle className="text-lg" />
             {!young ? "Se connecter" : "Se déconnecter"}
           </button>
-
-          {pathname.includes("inscription") ? (
-            <a href="https://www.snu.gouv.fr/" className="flex items-center py-3 gap-2" target="_blank" rel="noreferrer">
-              {/* <img src={File} /> */}
-              <HiOutlineClipboard className="text-lg" />
-              Le programme
-            </a>
-          ) : (
-            young && (
-              <Link to="/" className="flex items-center py-3 gap-2">
-                {/* <img src={File} /> */}
-                <HiOutlineUserCircle className="text-lg" />
-                Mon compte volontaire
-              </Link>
-            )
-          )}
-
-          <a href={supportURL} className="flex items-center pt-3 gap-2">
-            {/* <Help /> */}
-            <HiOutlineQuestionMarkCircle className="text-lg" />
-            Besoin d&apos;aide ?
-          </a>
         </div>
       </div>
     )
