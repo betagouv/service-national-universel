@@ -49,7 +49,10 @@ function aggsSubQuery(keys, aggsSearchQuery, queryFilters, contextFilters, custo
     } else {
       aggs[key] = { filter, aggs: { names: { histogram: { field: key, interval: 1, min_doc_count: 1 } } } };
     }
+    //add agg for count all of documents that maths the query
+    aggs.total = { filter: { bool: { must: [], filter } }, aggs: { total: { value_count: { field: "_id" } } } };
   }
+
   return aggs;
 }
 
@@ -86,6 +89,7 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
   }
   // Aggs request body
   const aggsRequestBody = { query: getMainQuery(), aggs: aggsSubQuery(filterFields, search, queryFilters, contextFilters, customQueries), size: 0, track_total_hits: true };
+
   return { hitsRequestBody, aggsRequestBody };
 }
 
