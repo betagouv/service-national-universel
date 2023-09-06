@@ -5,13 +5,6 @@ import { Link } from "react-router-dom";
 import { supportURL } from "@/config";
 
 export default function Footer() {
-  console.log("location.pathname: ", location.pathname);
-  if (
-    ["/preinscription", "/auth", "/inscription2023", "/reinscription", "/representants-legaux", "/public-engagements", "/inscription", "/noneligible"].includes(location.pathname)
-  ) {
-    return null;
-  }
-
   return (
     <FooterContainer>
       <Container>
