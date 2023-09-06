@@ -13,7 +13,7 @@ import Panel from "../../volontaires/panel";
 import * as XLSX from "xlsx";
 import { toastr } from "react-redux-toastr";
 import * as FileSaver from "file-saver";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import Download from "../../../assets/icons/Download";
 
 const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022"];

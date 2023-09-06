@@ -1,5 +1,5 @@
 import React from "react";
-import DatePickerList from "../../scenes/phase0/components/DatePickerList";
+import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
 import { copyToClipboard } from "../../utils";
 import { HiCheckCircle } from "react-icons/hi";
 import { BiCopy } from "react-icons/bi";
@@ -26,6 +26,13 @@ export default function Field({
     return "border-gray-300 focus-within:border-blue-500";
   };
 
+  if (type === "date")
+    return (
+      <div className={className}>
+        <DatePickerInput label={label} placeholder={placeholder} value={value} onChange={(date) => handleChange(date, name)} disabled={readOnly || isJvaMission} />
+      </div>
+    );
+
   return (
     <div className={className}>
       <div className={`relative w-full rounded-md border-[1px] px-2.5 py-2 ${border(readOnly, errors[name])}`} key={name}>
@@ -43,9 +50,6 @@ export default function Field({
             </div>
           )}
         </div>
-        {type === "date" && (
-          <DatePickerList disabled={readOnly || isJvaMission} fromEdition={false} value={value ? new Date(value) : null} onChange={(date) => handleChange(new Date(date))} />
-        )}
         {["text", "tel"].includes(type) && (
           <input
             readOnly={(readOnly || isJvaMission) && "readonly"}

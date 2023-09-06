@@ -25,9 +25,7 @@ import { getCohortByName, getCohorts } from "../../../services/cohort.service";
 import ReactTooltip from "react-tooltip";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import Puzzle from "../../../assets/icons/Puzzle";
-import dayjs from "dayjs";
-import advancedFormat from "dayjs/plugin/advancedFormat";
-dayjs.extend(advancedFormat);
+import dayjs from "@/utils/dayjs.utils";
 
 const ExcelFileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
 
@@ -150,8 +148,8 @@ export default function SchemaRepartition({ region, department }) {
     let from;
 
     if (cohort) {
-      const start = dayjs(cohort.dateStart).locale("fr");
-      const end = dayjs(cohort.dateEnd).locale("fr");
+      const start = dayjs(cohort.dateStart);
+      const end = dayjs(cohort.dateEnd);
 
       if (start.year() === end.year()) {
         if (start.month() === end.month()) {

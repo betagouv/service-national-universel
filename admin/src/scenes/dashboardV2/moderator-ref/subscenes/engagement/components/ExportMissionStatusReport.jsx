@@ -7,7 +7,7 @@ import { MISSION_STATUS, REFERENT_ROLES, region2department, translate } from "sn
 import { useSelector } from "react-redux";
 import ButtonSecondary from "../../../../../../components/ui/buttons/ButtonSecondary";
 import api from "../../../../../../services/api";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 
 export default function ExportMissionStatusReport({ filter }) {
   const [loading, setLoading] = useState(false);

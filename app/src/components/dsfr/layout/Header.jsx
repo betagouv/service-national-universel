@@ -2,8 +2,6 @@ import React from "react";
 import LogoFr from "@/assets/fr.png";
 import SNU from "@/assets/logo-snu.png";
 import Burger from "@/assets/icons/Burger";
-import Help from "@/assets/icons/QuestionMarkBlue";
-import File from "@/assets/file.svg";
 import Menu from "../nav/Menu";
 import { Link, useLocation, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,6 +9,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { supportURL } from "@/config";
+import { HiOutlineClipboard, HiOutlineQuestionMarkCircle, HiOutlineUserCircle } from "react-icons/hi";
 
 const Header = ({ title }) => {
   const history = useHistory();
@@ -45,27 +44,35 @@ const Header = ({ title }) => {
           }}>
           <Burger />
         </div>
-        <nav className="hidden h-8 text-sm text-[#000091] md:flex">
-          <a
-            className="flex cursor-pointer items-center space-x-1 border-r border-r-gray-300 pr-3 hover:font-bold hover:text-[#000091]"
-            href="https://www.snu.gouv.fr/"
-            target="_blank"
-            rel="noreferrer">
-            <img src={File} alt="" />
-            <div>Programme</div>
+
+        <nav className="hidden h-8 md:flex gap-4 text-sm text-blue-france-sun-113">
+          {location.pathname.includes("inscription") ? (
+            <a href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer" className="flex items-center py-1 px-2 gap-2 hover:bg-gray-100 hover:text-blue-france-sun-113">
+              <HiOutlineClipboard className="text-base" />
+              Programme
+            </a>
+          ) : (
+            young && (
+              <Link to="/" className="flex items-center py-1 px-2 gap-2 hover:bg-gray-100 hover:text-blue-france-sun-113">
+                <HiOutlineUserCircle className="text-base" />
+                Mon compte volontaire
+              </Link>
+            )
+          )}
+
+          <a href={supportURL} target="_blank" rel="noreferrer" className="flex items-center py-1 px-2 gap-2 hover:bg-gray-100 hover:text-blue-france-sun-113">
+            <HiOutlineQuestionMarkCircle className="text-base" />
+            Besoin d&apos;aide
           </a>
-          <a href={supportURL} target="_blank" rel="noreferrer" className="flex cursor-pointer items-center space-x-1 py-1 px-3 hover:font-bold hover:text-[#000091]">
-            <Help />
-            <div>Besoin d&apos;aide</div>
-          </a>
-          <div
-            className="cursor-pointer border border-gray-500 py-1 px-2 hover:bg-[#000091] hover:text-white"
+
+          <button
+            className="border border-gray-500 py-1 px-2 hover:bg-gray-100"
             onClick={() => {
               if (!young) history.push("/auth?redirect=" + pathname);
               else logout();
             }}>
-            {!young ? <div> Se connecter </div> : <div> Se déconnecter </div>}
-          </div>
+            {!young ? "Se connecter" : "Se déconnecter"}
+          </button>
         </nav>
       </header>
     </>

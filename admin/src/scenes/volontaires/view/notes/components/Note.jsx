@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import React from "react";
 import MoreButton from "./MoreButton";
 import { getPhaseLabel } from "../utils";
@@ -22,7 +22,7 @@ const Note = ({ note: { note, phase, createdAt, referent }, isAuthor, actions })
           <div className="mt-1">
             <span className="font-bold">{isAuthor ? "Moi-même" : `${referent.firstName} ${referent.lastName}`}</span>
             {!isAuthor && <span className="font-bold capitalize">{` ${referent.role}`}</span>}
-            <span>{` (le ${dayjs(createdAt).locale("fr").format("DD/MM/YYYY HH:mm")})`}</span>
+            <span>{` (le ${dayjs(createdAt).format("DD/MM/YYYY HH:mm")})`}</span>
           </div>
         </div>
 

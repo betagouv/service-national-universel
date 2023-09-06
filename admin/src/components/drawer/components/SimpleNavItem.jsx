@@ -2,7 +2,7 @@ import { Popover, Transition } from "@headlessui/react";
 import React, { Fragment, useState } from "react";
 import { Link } from "react-router-dom/cjs/react-router-dom";
 
-export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link }) {
+export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link, setCurrentOpen }) {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const onMouseEnter = () => {
@@ -22,6 +22,7 @@ export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link }
               <Popover.Button onMouseEnter={onMouseEnter} className="focus:outline-none ">
                 <Link
                   to={link}
+                  onClick={() => setCurrentOpen("")}
                   className={`group flex items-center py-[10px] pl-[11px] rounded-lg  h-[52px] cursor-pointer 
                    ${sideBarOpen ? "!pr-2  w-[238px]" : "w-[76px]"} ${active ? "bg-[#0C1035]" : "hover:bg-[#1B1F42]"} `}>
                   <div className={`rounded-md w-[3px] h-[20px]  ${active ? "bg-[#EEEFF5]" : "bg-inherit"}`} />
@@ -48,7 +49,7 @@ export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link }
                   onExited={() => setPopoverOpen(false)}>
                   <Popover.Panel className="absolute transform left-[100%] bottom-1/2 translate-y-[50%]">
                     <div className="!ml-[14px] px-4 py-[6px] bg-white shadow-md rounded-lg w-fit z-20">
-                      <Link to={link} className="flex items-center w-full ">
+                      <Link to={link} onClick={() => setCurrentOpen("")} className="flex items-center w-full ">
                         <p className="text-xs leading-5 font-medium uppercase text-[#3E426A] whitespace-nowrap">{title}</p>
                       </Link>
                     </div>

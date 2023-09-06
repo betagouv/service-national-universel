@@ -1,6 +1,4 @@
 import dayjs from "dayjs";
-import "dayjs/locale/fr";
-import relativeTime from "dayjs/plugin/relativeTime";
 import React, { Fragment, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -302,7 +300,6 @@ export default function Inscription() {
 }
 
 const Hit = ({ hit, index, onClick }) => {
-  dayjs.extend(relativeTime).locale("fr");
   const diffMaj = dayjs(new Date(hit.updatedAt)).fromNow();
   const diffCreate = dayjs(new Date(hit.createdAt)).fromNow();
 

@@ -1,5 +1,5 @@
 import { Popover, Transition } from "@headlessui/react";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import React, { Fragment } from "react";
 import DateIcon from "../../../../assets/icons/DateIcon";
 import DatePicker from "../DatePicker";
@@ -8,7 +8,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function DatePickerWrapper({ label, value, onChange, disabled = false, error, mode, placeholder = "Date", readOnly = false }) {
+export default function DatePickerWrapper({ label, value, onChange, disabled = false, error, mode, placeholder, readOnly = false, className }) {
   return (
     <Popover className="relative w-full">
       {({ open }) => (
@@ -22,7 +22,7 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
               "w-full cursor-pointer rounded-lg outline-none ",
             )}>
             <div
-              className={`flex w-full items-center justify-between rounded-lg border-[1px] bg-white py-2 px-2.5 ${disabled ? "border-gray-200" : "border-gray-300"} ${
+              className={`flex w-full items-center justify-between rounded-lg border-[1px] bg-white py-2 px-2.5 ${className} ${disabled ? "border-gray-200" : "border-gray-300"} ${
                 error ? "border-red-500" : ""
               }`}>
               <div className="flex flex-1 flex-col">
@@ -31,7 +31,7 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
                   <input
                     className={`w-full bg-white text-sm ${disabled ? "text-gray-400" : "text-gray-900"}`}
                     disabled={true}
-                    value={value ? dayjs(value).format("DD/MM/YYYY") : ""}
+                    value={value ? dayjs(value).toUtcLocally().format("DD/MM/YYYY") : ""}
                     placeholder={placeholder}
                   />
                 </div>
@@ -52,7 +52,7 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
             leaveTo="opacity-0 translate-y-1">
             <Popover.Panel className="absolute left-0 z-10 pt-2">
               <div className="flex flex-auto rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5 ">
-                <DatePicker mode={mode} fromYear={2022} toYear={2030} value={value} onChange={onChange} />
+                <DatePicker mode={mode} fromYear={new Date().getFullYear() - 70} toYear={new Date().getFullYear() + 10} value={value || new Date()} onChange={onChange} />
               </div>
             </Popover.Panel>
           </Transition>

@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import relativeTime from "dayjs/plugin/relativeTime";
-import dayjs from "dayjs";
-import "dayjs/locale/fr";
+import dayjs from "@/utils/dayjs.utils";
 import { useSelector } from "react-redux";
 import { HiSearch, HiX } from "react-icons/hi";
 
@@ -21,8 +19,6 @@ const Dashboard = (props) => {
   const [articles, setArticles] = useState(null);
   const [kbRole, setKbRole] = useState(null);
   const user = useSelector((state) => state.Auth.user);
-
-  dayjs.extend(relativeTime).locale("fr");
 
   const from = new URLSearchParams(props.location.search).get("from");
 

@@ -103,6 +103,7 @@ const departmentLookUp = {
   974: "La Réunion",
   975: "Saint-Pierre-et-Miquelon",
   976: "Mayotte",
+  977: "Saint-Barthélemy",
   978: "Saint-Martin",
   984: "Terres australes et antarctiques françaises",
   986: "Wallis-et-Futuna",
