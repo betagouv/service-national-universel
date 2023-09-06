@@ -8,6 +8,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
+import { HiOutlineClipboard, HiOutlineQuestionMarkCircle, HiOutlineUserCircle } from "react-icons/hi";
+import { supportURL } from "@/config";
 
 const ModalMenu = ({ isOpen, setIsOpen }) => {
   const history = useHistory();
@@ -24,18 +26,19 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
   const { pathname } = useLocation();
   return (
     isOpen && (
-      <div className={`fixed  top-0 z-[100]  w-screen text-sm font-medium text-[#000091] shadow-lg`}>
+      <div className="fixed top-0 z-[100] w-screen text-blue-france-sun-113 shadow-lg">
         <div className="w-full bg-white px-3 py-3">
           <div
-            className="mb-8 flex w-full items-center justify-end space-x-2"
+            className="mb-8 flex gap-2 w-full items-center justify-end"
             onClick={() => {
               setIsOpen(false);
             }}>
-            <div>Fermer</div>
+            Fermer
             <img src={Close} className="w-3" />
           </div>
-          <div
-            className="flex items-center space-x-2 border-b border-b-[#E5E5E5] py-3"
+
+          <button
+            className="flex items-center py-3 gap-2"
             onClick={() => {
               if (!young) {
                 history.push("/auth");
@@ -43,18 +46,32 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
                 logout();
               }
             }}>
-            <Login />
-            {!young ? <div> Se connecter </div> : <div> Se déconnecter </div>}
-          </div>
+            {/* <Login /> */}
+            <HiOutlineUserCircle className="text-lg" />
+            {!young ? "Se connecter" : "Se déconnecter"}
+          </button>
 
-          <a className="flex items-center space-x-2 border-b border-b-[#E5E5E5] py-3" href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer">
-            <img src={File} />
-            <div>Le programme</div>
+          {pathname.includes("inscription") ? (
+            <a href="https://www.snu.gouv.fr/" className="flex items-center py-3 gap-2" target="_blank" rel="noreferrer">
+              {/* <img src={File} /> */}
+              <HiOutlineClipboard className="text-lg" />
+              Le programme
+            </a>
+          ) : (
+            young && (
+              <Link to="/" className="flex items-center py-3 gap-2">
+                {/* <img src={File} /> */}
+                <HiOutlineUserCircle className="text-lg" />
+                Mon compte volontaire
+              </Link>
+            )
+          )}
+
+          <a href={supportURL} className="flex items-center pt-3 gap-2">
+            {/* <Help /> */}
+            <HiOutlineQuestionMarkCircle className="text-lg" />
+            Besoin d&apos;aide ?
           </a>
-          <Link className="flex items-center space-x-2 pt-3" to={`/public-besoin-d-aide?from=${pathname}`}>
-            <Help />
-            <div>Besoin d&apos;aide ?</div>
-          </Link>
         </div>
       </div>
     )
