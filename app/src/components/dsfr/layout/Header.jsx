@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
+import { supportURL } from "@/config";
 
 const Header = ({ title }) => {
   const history = useHistory();
@@ -53,10 +54,10 @@ const Header = ({ title }) => {
             <img src={File} alt="" />
             <div>Programme</div>
           </a>
-          <Link className="flex cursor-pointer items-center space-x-1 py-1 px-3 hover:font-bold hover:text-[#000091]" to={`/public-besoin-d-aide?from=${pathname}`}>
+          <a href={supportURL} target="_blank" rel="noreferrer" className="flex cursor-pointer items-center space-x-1 py-1 px-3 hover:font-bold hover:text-[#000091]">
             <Help />
-            <div>Besoin d&apos;aide</div>{" "}
-          </Link>
+            <div>Besoin d&apos;aide</div>
+          </a>
           <div
             className="cursor-pointer border border-gray-500 py-1 px-2 hover:bg-[#000091] hover:text-white"
             onClick={() => {
