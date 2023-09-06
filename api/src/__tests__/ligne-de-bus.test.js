@@ -13,11 +13,16 @@ const SchemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepart
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createYoungHelper } = require("./helpers/young");
 const getNewYoungFixture = require("./fixtures/young");
-const getNewPointDeRassemblementFixture = require("./fixtures/PlanDeTransport/pointDeRassemblement");
-const { createPointDeRassemblementHelper, createPointDeRassemblementWithBus } = require("./helpers/PlanDeTransport/pointDeRassemblement");
+const { createPointDeRassemblementWithBus } = require("./helpers/PlanDeTransport/pointDeRassemblement");
 
 jest.setTimeout(100000);
 beforeAll(dbConnect);
+
+const mockModelMethodWithError = (model, method) => {
+  jest.spyOn(model, method).mockImplementation(() => {
+    throw new Error("test error");
+  });
+};
 afterAll(dbClose);
 
 describe("Meeting point", () => {
@@ -78,9 +83,7 @@ describe("Meeting point", () => {
     });
 
     it("should return 500 when there's an error", async () => {
-      jest.spyOn(LigneBusModel, "find").mockImplementation(() => {
-        throw new Error("test error");
-      });
+      mockModelMethodWithError(LigneBusModel, "find");
 
       let res;
       try {
@@ -622,9 +625,7 @@ describe("Meeting point", () => {
       passport.user = previous;
     });
     it("should return 500 when there's an error", async () => {
-      jest.spyOn(LigneBusModel, "find").mockImplementation(() => {
-        throw new Error("test error");
-      });
+      mockModelMethodWithError(LigneBusModel, "find");
 
       let res;
       try {
