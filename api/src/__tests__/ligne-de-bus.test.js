@@ -47,7 +47,6 @@ describe("Meeting point", () => {
         cohort: "Février 2023 - C",
       });
       const code = Math.random().toString(36).substring(2, 8);
-      // Create a meeting point and bus data
       const PointDeRassemblement = {
         code: code,
         cohorts: ["Février 2023 - C"],
@@ -65,8 +64,7 @@ describe("Meeting point", () => {
       const { ligneToPoint } = await createPointDeRassemblementWithBus(PointDeRassemblement, "centerId", "sessionId");
 
       const res = await request(getAppHelper()).get("/ligne-de-bus/all");
-      //   console.log("BUS", res.body.data.ligneBus);
-      // check the response
+
       expect(res.body.data.meetingPoints.length).toBe(1);
       expect(res.body.data.meetingPoints[0].code).toBe(PointDeRassemblement.code);
       expect(res.body.data.meetingPoints[0].cohorts).toEqual(PointDeRassemblement.cohorts);
@@ -84,7 +82,6 @@ describe("Meeting point", () => {
 
     it("should return 500 when there's an error", async () => {
       mockModelMethodWithError(LigneBusModel, "find");
-
       let res;
       try {
         res = await request(getAppHelper()).get("/ligne-de-bus/all").send();
@@ -92,7 +89,6 @@ describe("Meeting point", () => {
         console.error(error);
       }
 
-      // check the response
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
       expect(res.body.code).toBe("SERVER_ERROR");
@@ -200,7 +196,7 @@ describe("Meeting point", () => {
       passport.user = user;
       const ligneBus = await LigneBusModel.create({
         name: "Ligne 1",
-        centerDepartureTime: new Date(), // set a new Date object
+        centerDepartureTime: new Date(),
         centerArrivalTime: new Date(),
         centerId: mongoose.Types.ObjectId(),
         sessionId: "session_id",
@@ -626,15 +622,13 @@ describe("Meeting point", () => {
     });
     it("should return 500 when there's an error", async () => {
       mockModelMethodWithError(LigneBusModel, "find");
-
       let res;
       try {
-        res = await request(getAppHelper()).get("/ligne-de-bus/all").send();
+        res = await request(getAppHelper()).get(`/ligne-de-bus/${mongoose.Types.ObjectId()}/data-for-check`).send();
       } catch (error) {
         console.error(error);
       }
 
-      // check the response
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
       expect(res.body.code).toBe("SERVER_ERROR");
