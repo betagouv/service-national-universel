@@ -102,7 +102,10 @@ export default function PaginationServerDriven({ currentPageNumber, setCurrentPa
           ) : null}
         </div>
 
-        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-xs border border-gray-200 rounded-md border-solid">
+        <div
+          className={`group relative flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-xs border border-gray-200 rounded-md border-solid ${
+            lastDisplayItem < itemCountToDisplay ? "cursor-pointer" : "cursor-not-allowed"
+          }`}>
           <button
             onClick={goToNext}
             className="flex items-center justify-center flex-none w-8 h-8 m-auto border-r border-solid border-gray-200"
@@ -115,6 +118,11 @@ export default function PaginationServerDriven({ currentPageNumber, setCurrentPa
             style={lastDisplayItem < itemCountToDisplay ? { cursor: "pointer" } : { cursor: "not-allowed" }}>
             <HiChevronDoubleRight size={16} className={lastDisplayItem < itemCountToDisplay ? "text-gray-600" : "text-gray-200"} />
           </button>
+          {currentPageNumber === lastPage - 1 ? (
+            <div className="absolute hidden group-hover:flex text-xs border border-gray-200 font-normal rounded-md border-solid w-40 text-center py-2 px-2 text-gray-400 bg-white right-0 bottom-0 transform translate-y-[110%]">
+              Pour voir plus de résultats, veuillez affiner votre recherche.
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
