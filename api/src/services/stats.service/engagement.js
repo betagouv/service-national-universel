@@ -211,7 +211,7 @@ async function getContractsSigned(startDate, endDate, user) {
     body.department = user.department;
   }
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-contract-signed/count`, {
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-contract-signed`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
@@ -354,7 +354,7 @@ async function getMissionsChangeStatus(startDate, endDate, user) {
   }
 
   const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/mission-change-status/count`, {
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/mission-change-status`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
@@ -446,7 +446,7 @@ async function getApplicationsChangeStatus(startDate, endDate, user) {
       break;
   }
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-change-status/count`, {
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-change-status`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
@@ -545,7 +545,7 @@ async function getProposedMissionsAcceptedOrRefusedByYoung(startDate, endDate, u
     department: user.department,
   };
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-accepted-refused/count`, {
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-accepted-refused`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });

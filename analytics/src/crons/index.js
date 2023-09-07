@@ -1,9 +1,8 @@
 require("dotenv").config();
-
 const cron = require("node-cron");
-const { ENVIRONMENT } = require("../config");
 
-const addJdmaData = require("./addJdmaData");
+const { ENVIRONMENT } = require("../config");
+const addJdmaData = require("./add-jdma-data.job");
 
 // doubt ? -> https://crontab.guru/
 
