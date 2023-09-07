@@ -17,7 +17,7 @@ export const buildQuery = async (route, selectedFilters, page = 0, filterArray, 
 
     const aggs = resAlternative.responses[1].aggregations;
     const data = resAlternative.responses[0].hits.hits.map((h) => ({ ...h._source, _id: h._id, sort: h?.sort }));
-    const count = resAlternative.responses[1].aggregations.count.total.value;
+    const count = resAlternative.responses[1].aggregations?.count?.total?.value || resAlternative.responses[0].hits?.total?.value || 0;
     const newFilters = {};
 
     // map a travers les aggregations pour recuperer les filtres
