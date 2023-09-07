@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Button from "../../../components/dsfr/ui/buttons/Button";
 import Help from "./Help";
-import { appURL } from "../../../config";
+import { supportURL } from "../../../config";
 
 export default function DesktopPageContainer({
   title,
@@ -15,7 +15,7 @@ export default function DesktopPageContainer({
   onSubmit,
   onClickPrevious,
   disabled,
-  questionMarckLink = `${appURL}public-besoin-d-aide/`,
+  supportLink = supportURL,
   childrenContinueButton = "Continuer",
   modeCorrection = false,
   onCorrection,
@@ -29,7 +29,7 @@ export default function DesktopPageContainer({
           <div className="my-0 bg-white px-[102px] py-[60px]">
             <div className="mt-2 flex w-full items-center justify-between">
               <h1 className="text-xl font-bold">{title}</h1>
-              <a className="hover:scale-105" href={questionMarckLink} target="_blank" rel="noreferrer">
+              <a className="hover:scale-105" href={supportLink} target="_blank" rel="noreferrer">
                 <QuestionMarkBlueCircle />
               </a>
             </div>
@@ -62,7 +62,7 @@ export default function DesktopPageContainer({
             </div>
           </div>
           <div className="mt-8 bg-white">
-            <Help />
+            <Help supportLink={supportLink} />
           </div>
         </div>
       </div>

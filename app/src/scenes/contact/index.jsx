@@ -1,8 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { Redirect } from "react-router-dom";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
-import { environment } from "@/config";
 
 import ContactForm from "./components/ContactForm";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
@@ -15,7 +13,6 @@ export default function Contact() {
 
   // TODO: fetch questions and articles from API
 
-  if (environment === "production") return <Redirect to="/public-besoin-d-aide" />;
   return (
     <DSFRLayout title="Formulaire de contact">
       <DSFRContainer title="Je n'ai pas trouvé de réponse à ma question">

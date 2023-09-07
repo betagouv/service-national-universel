@@ -12,6 +12,7 @@ import { translate } from "../../../utils";
 import { getCorrectionsForStepUpload } from "../../../utils/navigation";
 import { ID } from "../utils";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
+import { supportURL } from "@/config";
 
 import CheckBox from "../../../components/dsfr/forms/checkbox";
 import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
@@ -156,6 +157,7 @@ export default function StepUpload() {
       setLoading(false);
     }
   }
+  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
 
   return (
     <>
@@ -170,7 +172,7 @@ export default function StepUpload() {
         )}
         {renderStep(step)}
       </div>
-      <Help />
+      <Help supportLink={supportLink} />
       {step === "verify" && (
         <StickyButton
           text="Continuer"
