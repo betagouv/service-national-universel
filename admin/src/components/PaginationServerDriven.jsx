@@ -23,7 +23,7 @@ export default function PaginationServerDriven({ currentPageNumber, setCurrentPa
   const pages = getPages(lastDisplayItem, firstDisplayPage, lastDisplayPage, itemCountToDisplay, lastPage, size);
 
   function checkSize(newSize) {
-    if (currentPageNumber * newSize > itemCountToDisplay) setCurrentPageNumber(Math.floor(itemCountToDisplay / newSize));
+    if (currentPageNumber * newSize > itemCountToDisplay) setCurrentPageNumber(Math.floor(itemCountToDisplay / newSize) - 1);
     setSize(newSize);
   }
 
