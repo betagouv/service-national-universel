@@ -16,7 +16,6 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
 import {
   APPLICATION_STATUS,
-  ES_NO_LIMIT,
   ROLES,
   formatDateFRTimezoneUTC,
   formatLongDateUTC,
