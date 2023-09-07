@@ -1,3 +1,16 @@
+# [1.329.0](https://github.com/betagouv/service-national-universel/compare/v1.328.1...v1.329.0) (2023-09-07)
+
+
+### Bug Fixes
+
+* **app:** abandon mission validate phase 2 [#2951](https://github.com/betagouv/service-national-universel/issues/2951) ([3a49dbd](https://github.com/betagouv/service-national-universel/commit/3a49dbd559f7a23bbe7c1ab789d69949a88f8a85))
+
+
+### Features
+
+* **admin/api:** add total hit value for elasticSearch list ([#2948](https://github.com/betagouv/service-national-universel/issues/2948)) ([797b8c2](https://github.com/betagouv/service-national-universel/commit/797b8c22b68176a7d2ecc7bad9ae0b0901b7d1f9))
+* **app, bdc:** Nouveau workflow contact support ([#2940](https://github.com/betagouv/service-national-universel/issues/2940)) ([d86d525](https://github.com/betagouv/service-national-universel/commit/d86d525c4f128ee0b89a69bb252b8a253aceb905))
+
 ## [1.328.1](https://github.com/betagouv/service-national-universel/compare/v1.328.0...v1.328.1) (2023-09-05)
 
 
