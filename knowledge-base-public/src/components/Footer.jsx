@@ -8,7 +8,7 @@ export default function Footer() {
         <Link href="/sitemap">
           <span className="shrink-0 cursor-pointer text-xs">Plan du site</span>
         </Link>
-
+        <span className="hidden text-base text-[#E5E5E5] md:block">|</span>
         <Link href="https://www.snu.gouv.fr/mentions-legales-10">
           <span className="shrink-0 cursor-pointer text-xs">Mentions légales</span>
         </Link>
