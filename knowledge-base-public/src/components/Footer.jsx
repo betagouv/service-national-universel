@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="print:hidden">
       <div className="flex flex-col md:flex-row max-w-full flex-wrap md:items-center justify-center gap-4 p-3 border-t border-b px-4">
-        <Link href="/sitemap">
+        <Link href="/base-de-connaissance/sitemap">
           <span className="shrink-0 cursor-pointer text-xs">Plan du site</span>
         </Link>
         <span className="hidden text-base text-[#E5E5E5] md:block">|</span>
