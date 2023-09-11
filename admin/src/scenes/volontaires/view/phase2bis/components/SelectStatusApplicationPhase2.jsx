@@ -11,7 +11,7 @@ export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback, dro
   const [application, setApplication] = useState(null);
   const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
   const [modalRefuse, setModalRefuse] = useState({ isOpen: false, onConfirm: null });
-  const [modalWithHours, setModalWithHours] = useState({ isOpen: false, onConfirm: null });
+  const [modalDone, setModalDone] = useState({ isOpen: false, onConfirm: null });
   const [dropDownOpen, setDropDownOpen] = useState(false);
   const ref = React.useRef(null);
 
@@ -85,7 +85,7 @@ export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback, dro
 
   const handleClickStatus = (status) => {
     if (status === APPLICATION_STATUS.REFUSED) setModalRefuse({ isOpen: true });
-    else if ([APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON].includes(status)) setModalWithHours({ isOpen: true, status });
+    else if (status === APPLICATION_STATUS.DONE) setModalDone({ isOpen: true });
     else setStatus(status);
   };
 
@@ -145,16 +145,16 @@ export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback, dro
         }}
       />
       <ModalConfirmWithMessage
-        isOpen={modalWithHours.isOpen}
+        isOpen={modalDone.isOpen}
         title="Validation de réalisation de mission"
         message={`Merci de valider le nombre d'heures effectuées par ${application.youngFirstName} pour la mission ${application.missionName}.`}
-        onChange={() => setModalWithHours({ isOpen: false, onConfirm: null })}
+        onChange={() => setModalDone({ isOpen: false, onConfirm: null })}
         type="missionduration"
         defaultInput={application.missionDuration}
         placeholder="Nombre d'heures"
         onConfirm={(duration) => {
-          setStatus(modalWithHours.status, null, duration);
-          setModalWithHours({ isOpen: false, onConfirm: null, status: null });
+          setStatus(APPLICATION_STATUS.DONE, null, duration);
+          setModalDone({ isOpen: false, onConfirm: null });
         }}
       />
       <ModalConfirm

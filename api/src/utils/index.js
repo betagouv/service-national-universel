@@ -409,12 +409,12 @@ async function updateYoungPhase2Hours(young, fromUser) {
   try {
     const applications = await ApplicationModel.find({
       youngId: young._id,
-      status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE", "ABANDON"] },
+      status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] },
     });
     young.set({
       phase2NumberHoursDone: String(
         applications
-          .filter((application) => ["DONE", "ABANDON"].includes(application.status))
+          .filter((application) => application.status === "DONE")
           .map((application) => Number(application.missionDuration || 0))
           .reduce((acc, current) => acc + current, 0),
       ),
