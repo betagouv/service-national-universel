@@ -85,7 +85,7 @@
     "nodemon": "^3.0.1",
     "pg": "8.8.0",
     "react-is": "17.0.2",
-    "regenerator-runtime": "0.14.0",
+    "regenerator-runtime": "0.13.9",
     "sib-api-v3-sdk": "^8.5.0",
     "ssh2": "1.11.0",
     "supertest": "6.3.3",
