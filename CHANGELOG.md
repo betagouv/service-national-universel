@@ -1,3 +1,27 @@
+# [1.330.0](https://github.com/betagouv/service-national-universel/compare/v1.329.0...v1.330.0) (2023-09-11)
+
+
+### Bug Fixes
+
+* **analytics:** rename equivalence mig route ([9d7a2dc](https://github.com/betagouv/service-national-universel/commit/9d7a2dc1d921650dd723daf062c5c40c2c13bcd1))
+* **app:** fix classname in app ([20f83dd](https://github.com/betagouv/service-national-universel/commit/20f83dd81ef4d272b4aa4e11e54c35eb2f8f7a78))
+* **app:** temporarily remove local storage maintenance override ([aaf3f52](https://github.com/betagouv/service-national-universel/commit/aaf3f525bce79659382a266608ca6315c10b5fae))
+* upgrade @sentry/integrations from 7.61.0 to 7.64.0 ([#2943](https://github.com/betagouv/service-national-universel/issues/2943)) ([d42c879](https://github.com/betagouv/service-national-universel/commit/d42c87955e160b2371c3b410781e7959353f16eb))
+* upgrade @sentry/nextjs from 7.61.0 to 7.64.0 ([#2945](https://github.com/betagouv/service-national-universel/issues/2945)) ([8664f61](https://github.com/betagouv/service-national-universel/commit/8664f611ad9ecea1bab1ed246c8f33ad83911dfe))
+
+
+### Features
+
+* **analytics:** creation missionEquivalence route & model ([85ada20](https://github.com/betagouv/service-national-universel/commit/85ada20fff269a9ee2e1840a8c6534f4b4d6bd83))
+
+
+### Reverts
+
+* Revert "feat(admin/api): change process for abandon application #2914" ([14b57a3](https://github.com/betagouv/service-national-universel/commit/14b57a3696f176072dd3b1adb1c63cadeaae84dd)), closes [#2914](https://github.com/betagouv/service-national-universel/issues/2914)
+* Revert "chore(deps): update dependency @swc/core to v1.3.83 (#2706)" ([eb664b2](https://github.com/betagouv/service-national-universel/commit/eb664b2bc67a990a01a1e27db72d5149529ae3fd)), closes [#2706](https://github.com/betagouv/service-national-universel/issues/2706)
+* Revert "chore(deps): update dependency tailwindcss to v3.3.3 (#2853)" ([d964ccd](https://github.com/betagouv/service-national-universel/commit/d964ccda7e8560d9837c185d7754b179c1e74b49)), closes [#2853](https://github.com/betagouv/service-national-universel/issues/2853)
+* Revert "fix(deps): update dependency regenerator-runtime to v0.14.0 (#2021)" ([537b759](https://github.com/betagouv/service-national-universel/commit/537b75935049604b9d462227549d53b8e7ebc62b)), closes [#2021](https://github.com/betagouv/service-national-universel/issues/2021)
+
 # [1.329.0](https://github.com/betagouv/service-national-universel/compare/v1.328.1...v1.329.0) (2023-09-07)
 
 
