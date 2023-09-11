@@ -14,6 +14,7 @@ const syncContactSupport = require("./syncContactSupport");
 const applicationOutaded = require("./applicationWaitingAcceptationOutdated");
 const deleteInactiveRefs = require("./deleteInactiveRefs");
 const applicationPatches = require("./patch/application");
+const missionEquivalencePatches = require("./patch/missionEquivalence");
 const missionPatches = require("./patch/mission");
 const structurePatches = require("./patch/structure");
 const youngPatches = require("./patch/young");
@@ -43,6 +44,7 @@ const everyHours = (x) => `0 */${x} * * *`;
 // syncReferentSupport.handler() : tous les jours à 2h45
 // syncContactSupport.handler() : tous les jours à 1h15
 // structurePatches.handler() : tous les jours à 1h30
+// missionEquivalencePatches.handler() : tous les jours à 1h45
 // missionPatches.handler() : tous les jours à 2h00
 // applicationPatches.handler() : tous les jours à 2h30
 // youngPatches.handler() : tous les jours à 3h00
@@ -120,6 +122,10 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule("30 1 * * *", () => {
     structurePatches.handler();
+  });
+
+  cron.schedule("45 1 * * *", () => {
+    missionEquivalencePatches.handler();
   });
 
   cron.schedule("0 2 * * *", () => {

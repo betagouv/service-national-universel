@@ -35,7 +35,7 @@ async function processPatch(patch, count, total) {
 
         if (eventName) {
           result.event[eventName] = result.event[eventName] + 1 || 1;
-          await createLog(patch, actualMissionEquivalence, eventName, op.value);
+          // await createLog(patch, actualMissionEquivalence, eventName, op.value);
         }
       }
     }
@@ -45,37 +45,37 @@ async function processPatch(patch, count, total) {
   }
 }
 
-async function createLog(patch, actualMissionEquivalence, event, value) {
-  const missionEquivalenceInfos = await actualMissionEquivalence.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
-  let missionEquivalence = rebuildMissionEquivalence(missionEquivalenceInfos);
-  const structure = await StructureModel.findOne({ name: actualMissionEquivalence.structureName });
+// async function createLog(patch, actualMissionEquivalence, event, value) {
+//   const missionEquivalenceInfos = await actualMissionEquivalence.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
+//   let missionEquivalence = rebuildMissionEquivalence(missionEquivalenceInfos);
+//   const structure = await StructureModel.findOne({ name: actualMissionEquivalence.structureName });
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/missionEquivalence`, {
-    method: "POST",
-    redirect: "follow",
-    headers: {
-      Accept: "application/json, text/plain, */*",
-      "User-Agent": "*",
-      "Content-Type": "application/json",
-      "x-access-token": token,
-    },
-    body: JSON.stringify({
-      evenement_nom: event,
-      evenement_type: "missionEquivalence",
-      evenement_valeur: value || "",
-      candidature_id: actualMissionEquivalence._id,
-      candidature_user_id: actualMissionEquivalence.youngId,
-      candidature_structure_name: actualMissionEquivalence.structureName,
-      candidature_structure_id: structure?._id || "",
-      candidature_status: missionEquivalence.status || actualMissionEquivalence.status,
-      date: patch.date,
-      raw_data: missionEquivalence,
-    }),
-  });
+//   const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log//mission-equivalence`, {
+//     method: "POST",
+//     redirect: "follow",
+//     headers: {
+//       Accept: "application/json, text/plain, */*",
+//       "User-Agent": "*",
+//       "Content-Type": "application/json",
+//       "x-access-token": token,
+//     },
+//     body: JSON.stringify({
+//       evenement_nom: event,
+//       evenement_type: "missionEquivalence",
+//       evenement_valeur: value || "",
+//       candidature_id: actualMissionEquivalence._id,
+//       candidature_user_id: actualMissionEquivalence.youngId,
+//       candidature_structure_name: actualMissionEquivalence.structureName,
+//       candidature_structure_id: structure?._id || "",
+//       candidature_status: missionEquivalence.status || actualMissionEquivalence.status,
+//       date: patch.date,
+//       raw_data: missionEquivalence,
+//     }),
+//   });
 
-  const successResponse = checkResponseStatus(response);
-  return successResponse.json();
-}
+//   const successResponse = checkResponseStatus(response);
+//   return successResponse.json();
+// }
 
 const rebuildMissionEquivalence = (missionEquivalenceInfos) => {
   let missionEquivalence = {};
