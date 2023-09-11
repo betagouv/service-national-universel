@@ -28,6 +28,10 @@ const apiAdress = async (query, filters = {}, options = {}) => {
 };
 
 const putLocation = async (query, postcode, signal) => {
+  if (!postcode) {
+    capture(new Error("No postcode"), { extra: { query: query } });
+    return null;
+  }
   let res = await apiAdress(query, { postcode }, { signal });
   if (res?.features?.length) {
     return { lat: res?.features[0]?.geometry?.coordinates[1], lon: res?.features[0]?.geometry?.coordinates[0] };
