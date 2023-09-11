@@ -259,7 +259,7 @@ async function getAbandonedRegistration(startDate, endDate, user) {
   ];
 }
 
-async function getYoungValidatedFromOtherStatus(startDate, endDate, user) {
+async function getYoungValidatedFromWaitingStatus(startDate, endDate, user) {
   // ref dep && ref reg && admin
   const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
   let body = {
@@ -312,6 +312,88 @@ async function getYoungValidatedFromOtherStatus(startDate, endDate, user) {
   ];
 }
 
+async function getYoungWithdrawnAfterValidated(startDate, endDate, user) {
+  // ref dep && ref reg && admin
+  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  let body = {
+    startDate: formatDateForPostGre(startDate),
+    endDate: formatDateForPostGre(endDate),
+    toStatus: YOUNG_STATUS.WITHDRAWN,
+    fromStatus: [YOUNG_STATUS.VALIDATED],
+  };
+
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    body.department = user.department;
+  }
+  if (user.role === ROLES.REFERENT_REGION) {
+    body.region = user.region;
+  }
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-validated-from/count`, {
+    ...postParams(token),
+    body: JSON.stringify(body),
+  });
+
+  const result = await response.json();
+  const value = result?.data.count;
+
+  return [
+    {
+      id: "young-withdrawn-validated",
+      value,
+      label: ` désistement${value > 1 ? "s" : ""} de volontaire${value > 1 ? "s" : ""}`,
+      icon: "other",
+    },
+  ];
+}
+
+async function getYoungAbandonedBeforeValidated(startDate, endDate, user) {
+  // ref dep only
+  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  let body = {
+    startDate: formatDateForPostGre(startDate),
+    endDate: formatDateForPostGre(endDate),
+    toStatus: YOUNG_STATUS.ABANDONED,
+    fromStatus: [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_VALIDATION],
+    department: user.department,
+  };
+
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-validated-from/count`, {
+    ...postParams(token),
+    body: JSON.stringify(body),
+  });
+
+  const result = await response.json();
+  const data = result?.data;
+  let resultArray = {
+    [YOUNG_STATUS.WAITING_VALIDATION]: 0,
+    [YOUNG_STATUS.WAITING_LIST]: 0,
+  };
+
+  for (const item of data) {
+    const value = item.evenement_valeur;
+    if (Object.prototype.hasOwnProperty.call(resultArray, value)) {
+      resultArray[value]++;
+    }
+  }
+  const waitingValue = resultArray[YOUNG_STATUS.WAITING_LIST];
+  const mainValue = resultArray[YOUNG_STATUS.WAITING_VALIDATION];
+
+  return [
+    {
+      id: "young-abandoned-waitingList",
+      value: waitingValue,
+      label: ` abandon${waitingValue > 1 ? "s" : ""} d'inscription sur liste complémentaire`,
+      icon: "other",
+    },
+    {
+      id: "young-abandoned-waitingList",
+      value: mainValue,
+      label: ` abandon${mainValue > 1 ? "s" : ""} d'inscription sur liste principale`,
+      icon: "other",
+    },
+  ];
+}
+
 async function getYoungWhoChangedCohort(startDate, endDate, user) {
   // ref dep && ref reg && admin
   const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
@@ -337,9 +419,73 @@ async function getYoungWhoChangedCohort(startDate, endDate, user) {
 
   return [
     {
-      id: "young-chnaged-cohort",
+      id: "young-changed-cohort",
       value: value,
       label: ` changement${value > 1 ? "s" : ""} de cohorte`,
+      icon: "other",
+    },
+  ];
+}
+
+async function getYoungWhoMovedOutFromDepartment(startDate, endDate, user) {
+  // ref dep
+  if (user.role !== ROLES.REFERENT_DEPARTMENT) {
+    throw new Error("User must be a department referent");
+  }
+
+  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  let body = {
+    type: "DEPARTURE",
+    department: user.department,
+    startDate: formatDateForPostGre(startDate),
+    endDate: formatDateForPostGre(endDate),
+  };
+
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-moved`, {
+    ...postParams(token),
+    body: JSON.stringify(body),
+  });
+
+  const result = await response.json();
+  const value = result?.data.count;
+
+  return [
+    {
+      id: "young-moved-out",
+      value: value,
+      label: ` déménagement${value > 1 ? "s" : ""} de volontaire${value > 1 ? "s" : ""} en dehors du département`,
+      icon: "other",
+    },
+  ];
+}
+
+async function getYoungWhoMovedInFromDepartment(startDate, endDate, user) {
+  // ref dep
+  if (user.role !== ROLES.REFERENT_DEPARTMENT) {
+    throw new Error("User must be a department referent");
+  }
+
+  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  let body = {
+    type: "ARRIVAL",
+    department: user.department,
+    startDate: formatDateForPostGre(startDate),
+    endDate: formatDateForPostGre(endDate),
+  };
+
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-moved`, {
+    ...postParams(token),
+    body: JSON.stringify(body),
+  });
+
+  const result = await response.json();
+  const value = result?.data.count;
+
+  return [
+    {
+      id: "young-moved-in",
+      value: value,
+      label: ` déménagement${value > 1 ? "s" : ""} de volontaire${value > 1 ? "s" : ""} dans votre département`,
       icon: "other",
     },
   ];
@@ -351,6 +497,10 @@ module.exports = {
   getDepartmentRegistrationGoal,
   getRegisterFileOpen,
   getAbandonedRegistration,
-  getYoungValidatedFromOtherStatus,
+  getYoungValidatedFromWaitingStatus,
+  getYoungWithdrawnAfterValidated,
+  getYoungAbandonedBeforeValidated,
   getYoungWhoChangedCohort,
+  getYoungWhoMovedOutFromDepartment,
+  getYoungWhoMovedInFromDepartment,
 };
