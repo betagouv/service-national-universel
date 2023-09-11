@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const { db } = require("../postgresql");
 
 const OBJ = db.define(
-  "log_missionEquivalence",
+  "log_mission_equivalences",
   {
     evenement_nom: DataTypes.TEXT,
     evenement_valeur: DataTypes.TEXT,

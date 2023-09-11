@@ -160,7 +160,7 @@ router.post("/application", auth, async (req, res) => {
   }
 });
 
-router.post("/missionEquivalence", auth, async (req, res) => {
+router.post("/mission-equivalence", auth, async (req, res) => {
   try {
     const { error, value } = Joi.object({
       evenement_nom: Joi.string().trim().required(),
