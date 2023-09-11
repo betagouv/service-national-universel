@@ -37,7 +37,7 @@
     "@sentry/react": "^7.58.1",
     "@sentry/vite-plugin": "^2.2.0",
     "autoprefixer": "^10.4.13",
-    "bootstrap": "4.6.1",
+    "bootstrap": "4.6.2",
     "browser-image-resizer": "^2.4.1",
     "core-js": "^3.30.2",
     "dayjs": "1.11.6",
