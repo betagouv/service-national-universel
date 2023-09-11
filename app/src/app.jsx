@@ -63,7 +63,7 @@ export default function App() {
       <Router history={history}>
         <ScrollToTop />
         <div className="flex h-screen flex-col justify-between">
-          {maintenance && !localStorage?.getItem("override_maintenance") ? (
+          {maintenance ? (
             <Switch>
               <SentryRoute path="/" component={Maintenance} />
             </Switch>
