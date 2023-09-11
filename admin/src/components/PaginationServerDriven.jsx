@@ -9,16 +9,21 @@ import React from "react";
 
 export default function PaginationServerDriven({ currentPageNumber, setCurrentPageNumber, itemsCountTotal, itemsCountOnCurrentPage, size = 10, setSize }) {
   const displayedPages = 3;
-  const pageCount = Math.ceil(itemsCountTotal / size);
+  const itemsCountMax = 10000;
+  let itemCountToDisplay = 0;
+  if (itemsCountTotal > itemsCountMax) itemCountToDisplay = itemsCountMax;
+  else itemCountToDisplay = itemsCountTotal;
+
+  const pageCount = Math.ceil(itemCountToDisplay / size);
   const lastDisplayPage = Math.min(pageCount - 1, Math.max(displayedPages, currentPageNumber));
   const firstDisplayPage = Math.max(lastDisplayPage - displayedPages + 1, 1);
   const lastDisplayItem = currentPageNumber * size + itemsCountOnCurrentPage;
-  const lastPage = Math.floor(itemsCountTotal / size) || 0;
+  const lastPage = Math.floor(itemCountToDisplay / size) || 0;
 
-  const pages = getPages(lastDisplayItem, firstDisplayPage, lastDisplayPage, itemsCountTotal, lastPage, size);
+  const pages = getPages(lastDisplayItem, firstDisplayPage, lastDisplayPage, itemCountToDisplay, lastPage, size);
 
   function checkSize(newSize) {
-    if (currentPageNumber * newSize > itemsCountTotal) setCurrentPageNumber(Math.floor(itemsCountTotal / newSize));
+    if (currentPageNumber * newSize > itemCountToDisplay) setCurrentPageNumber(Math.floor(itemCountToDisplay / newSize) - 1);
     setSize(newSize);
   }
 
@@ -31,11 +36,11 @@ export default function PaginationServerDriven({ currentPageNumber, setCurrentPa
   }
 
   function goToNext() {
-    if (lastDisplayItem < itemsCountTotal) setCurrentPageNumber(currentPageNumber + 1);
+    if (lastDisplayItem < itemCountToDisplay) setCurrentPageNumber(currentPageNumber + 1);
   }
   function goToNextX5() {
-    if (lastDisplayItem < itemsCountTotal && lastDisplayItem + 100 < itemsCountTotal) return setCurrentPageNumber(currentPageNumber + 5);
-    if (itemsCountTotal % size === 0) return setCurrentPageNumber(lastPage - 1);
+    if (lastDisplayItem < itemCountToDisplay && lastDisplayItem + 100 < itemCountToDisplay) return setCurrentPageNumber(currentPageNumber + 5);
+    if (itemCountToDisplay % size === 0) return setCurrentPageNumber(lastPage - 1);
     return setCurrentPageNumber(lastPage);
   }
 
@@ -55,7 +60,7 @@ export default function PaginationServerDriven({ currentPageNumber, setCurrentPa
       ) : null}
       <div className="text-xs text-gray-800 font-bold">
         {currentPageNumber * size + 1} <span className="font-normal">-</span> {currentPageNumber * size + itemsCountOnCurrentPage} <span className="font-normal"> sur </span>{" "}
-        {itemsCountTotal === 10000 ? "plus de 10000" : itemsCountTotal || 0}
+        {itemsCountTotal || 0}
       </div>
       <div className="flex gap-1 items-center justify-center">
         <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-xs border border-gray-200 rounded-md border-solid">
@@ -83,33 +88,41 @@ export default function PaginationServerDriven({ currentPageNumber, setCurrentPa
             <PageButton key={i} page={i} setCurrentPageNumber={setCurrentPageNumber} active={currentPageNumber === i} lastPage={lastPage} />
           ))}
 
-          {currentPageNumber < (itemsCountTotal % size === 0 ? lastPage - 3 : lastPage - 2) && currentPageNumber + 4 < lastPage ? (
+          {currentPageNumber < (itemCountToDisplay % size === 0 ? lastPage - 3 : lastPage - 2) && currentPageNumber + 4 < lastPage ? (
             <div className="flex px-1 text-xs text-gray-400 border-gray-200 border-r border-solid min-h-[32px] items-center">...</div>
           ) : null}
           {lastPage !== 0 && lastPage !== firstDisplayPage ? (
             <PageButton
-              page={itemsCountTotal % size === 0 ? lastPage - 1 : lastPage}
+              page={itemCountToDisplay % size === 0 ? lastPage - 1 : lastPage}
               setCurrentPageNumber={setCurrentPageNumber}
-              active={currentPageNumber === (itemsCountTotal % size === 0 ? lastPage - 1 : lastPage)}
+              active={currentPageNumber === (itemCountToDisplay % size === 0 ? lastPage - 1 : lastPage)}
               lastPage={lastPage}
               isLast={true}
             />
           ) : null}
         </div>
 
-        <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-xs border border-gray-200 rounded-md border-solid">
+        <div
+          className={`group relative flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-xs border border-gray-200 rounded-md border-solid ${
+            lastDisplayItem < itemCountToDisplay ? "cursor-pointer" : "cursor-not-allowed"
+          }`}>
           <button
             onClick={goToNext}
             className="flex items-center justify-center flex-none w-8 h-8 m-auto border-r border-solid border-gray-200"
-            style={lastDisplayItem < itemsCountTotal ? { cursor: "pointer" } : { cursor: "not-allowed" }}>
-            <HiChevronRight size={16} className={lastDisplayItem < itemsCountTotal ? "text-gray-600" : "text-gray-200"} />
+            style={lastDisplayItem < itemCountToDisplay ? { cursor: "pointer" } : { cursor: "not-allowed" }}>
+            <HiChevronRight size={16} className={lastDisplayItem < itemCountToDisplay ? "text-gray-600" : "text-gray-200"} />
           </button>
           <button
             onClick={goToNextX5}
             className="flex items-center justify-center flex-none w-8 m-auto"
-            style={lastDisplayItem < itemsCountTotal ? { cursor: "pointer" } : { cursor: "not-allowed" }}>
-            <HiChevronDoubleRight size={16} className={lastDisplayItem < itemsCountTotal ? "text-gray-600" : "text-gray-200"} />
+            style={lastDisplayItem < itemCountToDisplay ? { cursor: "pointer" } : { cursor: "not-allowed" }}>
+            <HiChevronDoubleRight size={16} className={lastDisplayItem < itemCountToDisplay ? "text-gray-600" : "text-gray-200"} />
           </button>
+          {currentPageNumber === lastPage - 1 ? (
+            <div className="absolute hidden group-hover:flex text-xs border border-gray-200 font-normal rounded-md border-solid w-40 text-center py-2 px-2 text-gray-400 bg-white right-0 bottom-0 transform translate-y-[110%]">
+              Pour voir plus de résultats, veuillez affiner votre recherche.
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

@@ -57,7 +57,7 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
             className="flex items-center py-3 ml-4 gap-2"
             onClick={() => {
               if (!young) {
-                history.push("/auth");
+                history.push("/auth?redirect=" + pathname);
               } else {
                 logout();
               }

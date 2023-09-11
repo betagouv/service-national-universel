@@ -537,7 +537,7 @@ export default function StepCoordonnees() {
       childrenContinueButton={young.status === YOUNG_STATUS.WAITING_CORRECTION ? "Corriger" : "Continuer"}
       onCorrection={onCorrection}
       disabled={loading}
-      questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`}>
+      supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`}>
       <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />
       {!wasBornInFranceBool && (
         <SearchableSelect

@@ -5,18 +5,18 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 import * as FileSaver from "file-saver";
 
-import api from "../../../services/api";
-import { formatStringLongDate, colors, translateState, translate } from "../../../utils";
-import Loader from "../../../components/Loader";
-import LoadingButton from "../../../components/buttons/LoadingButton";
-import SendIcon from "../../../components/SendIcon";
-import MailCloseIcon from "../../../components/MailCloseIcon";
-import MailOpenIcon from "../../../components/MailOpenIcon";
-import SuccessIcon from "../../../components/SuccessIcon";
-import FileUpload, { useFileUpload } from "../../../components/FileUpload";
+import API from "@/services/api";
+import { formatStringLongDate, colors, translateState, translate } from "@/utils";
+import Loader from "@/components/Loader";
+import LoadingButton from "@/components/buttons/LoadingButton";
+import SendIcon from "@/components/SendIcon";
+import MailCloseIcon from "@/components/MailCloseIcon";
+import MailOpenIcon from "@/components/MailOpenIcon";
+import SuccessIcon from "@/components/SuccessIcon";
+import FileUpload, { useFileUpload } from "@/components/FileUpload";
 
 import { toastr } from "react-redux-toastr";
-import { capture } from "../../../sentry";
+import { capture } from "@/sentry";
 import { formatMessageForReadingInnerHTML, htmlCleaner } from "snu-lib";
 
 const updateHeightElement = (e) => {
@@ -27,7 +27,7 @@ const updateHeightElement = (e) => {
 const download = async (file) => {
   try {
     const s3Id = file.path.split("/")[1];
-    const { ok, data } = await api.get(`/zammood/s3file/${s3Id}`);
+    const { ok, data } = await API.get(`/zammood/s3file/${s3Id}`);
     if (!ok) throw new Error("Le fichier n'a pas pu être téléchargé");
     FileSaver.saveAs(new Blob([new Uint8Array(data.data)], { type: "image/*" }), file.name);
   } catch (e) {
@@ -56,7 +56,7 @@ export default function TicketView(props) {
     try {
       const id = props.match?.params?.id;
       if (!id) return setTicket(null);
-      const { data, ok } = await api.get(`/zammood/ticket/${id}?`);
+      const { data, ok } = await API.get(`/zammood/ticket/${id}?`);
       if (!ok) return;
       setTicket(data.ticket);
       const zammoodMessages = data?.messages
@@ -88,7 +88,7 @@ export default function TicketView(props) {
       if (!message) return setSending(false);
       let uploadedFiles;
       if (files.length > 0) {
-        const filesResponse = await api.uploadFiles("/zammood/upload", files);
+        const filesResponse = await API.uploadFiles("/zammood/upload", files);
         if (!filesResponse.ok) {
           setSending(false);
           const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
@@ -97,7 +97,7 @@ export default function TicketView(props) {
         uploadedFiles = filesResponse.data;
       }
       const id = props.match?.params?.id;
-      const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage, files: uploadedFiles });
+      const { ok, code } = await API.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage, files: uploadedFiles });
       if (!ok) {
         capture(code);
         setSending(false);

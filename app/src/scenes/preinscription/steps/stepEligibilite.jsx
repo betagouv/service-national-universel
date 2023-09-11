@@ -20,7 +20,7 @@ import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
-import { appURL } from "@/config";
+import { supportURL } from "@/config";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -123,7 +123,7 @@ export default function StepEligibilite() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={"https://support.snu.gouv.fr/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}>
+      <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <div className="space-y-5">
           <div className="flex-start flex flex-col">
             <div className="flex items-center">
