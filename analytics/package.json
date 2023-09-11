@@ -21,7 +21,7 @@
   "author": "Selego",
   "license": "ISC",
   "dependencies": {
-    "@sentry/integrations": "^7.61.0",
+    "@sentry/integrations": "^7.64.0",
     "@sentry/node": "^7.61.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
