@@ -275,7 +275,7 @@ async function getYoungValidatedFromWaitingStatus(startDate, endDate, user) {
   if (user.role === ROLES.REFERENT_REGION) {
     body.region = user.region;
   }
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-validated-from/count`, {
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-validated-from`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
@@ -304,7 +304,7 @@ async function getYoungValidatedFromWaitingStatus(startDate, endDate, user) {
       icon: "other",
     },
     {
-      id: "young-validated-waitingList",
+      id: "young-validated-mainList",
       value: mainValue,
       label: ` dossier${mainValue > 1 ? "s" : ""} d'inscription validé${mainValue > 1 ? "s" : ""} sur liste principale`,
       icon: "other",
@@ -328,13 +328,13 @@ async function getYoungWithdrawnAfterValidated(startDate, endDate, user) {
   if (user.role === ROLES.REFERENT_REGION) {
     body.region = user.region;
   }
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-validated-from/count`, {
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-validated-from`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
 
   const result = await response.json();
-  const value = result?.data.count;
+  const value = result?.data.length;
 
   return [
     {
@@ -357,7 +357,7 @@ async function getYoungAbandonedBeforeValidated(startDate, endDate, user) {
     department: user.department,
   };
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-validated-from/count`, {
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-validated-from`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
@@ -386,7 +386,7 @@ async function getYoungAbandonedBeforeValidated(startDate, endDate, user) {
       icon: "other",
     },
     {
-      id: "young-abandoned-waitingList",
+      id: "young-abandoned-mainList",
       value: mainValue,
       label: ` abandon${mainValue > 1 ? "s" : ""} d'inscription sur liste principale`,
       icon: "other",
@@ -429,14 +429,14 @@ async function getYoungWhoChangedCohort(startDate, endDate, user) {
 
 async function getYoungWhoMovedOutFromDepartment(startDate, endDate, user) {
   // ref dep
-  if (user.role !== ROLES.REFERENT_DEPARTMENT) {
+  if (user.role !== ROLES.REFERENT_DEPARTMENT || !user.department?.length) {
     throw new Error("User must be a department referent");
   }
 
   const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
   let body = {
     type: "DEPARTURE",
-    department: user.department,
+    department: user.department[0],
     startDate: formatDateForPostGre(startDate),
     endDate: formatDateForPostGre(endDate),
   };
@@ -447,7 +447,7 @@ async function getYoungWhoMovedOutFromDepartment(startDate, endDate, user) {
   });
 
   const result = await response.json();
-  const value = result?.data.count;
+  const value = result?.data.length;
 
   return [
     {
@@ -461,14 +461,14 @@ async function getYoungWhoMovedOutFromDepartment(startDate, endDate, user) {
 
 async function getYoungWhoMovedInFromDepartment(startDate, endDate, user) {
   // ref dep
-  if (user.role !== ROLES.REFERENT_DEPARTMENT) {
+  if (user.role !== ROLES.REFERENT_DEPARTMENT || !user.department?.length) {
     throw new Error("User must be a department referent");
   }
 
   const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
   let body = {
     type: "ARRIVAL",
-    department: user.department,
+    department: user.department[0],
     startDate: formatDateForPostGre(startDate),
     endDate: formatDateForPostGre(endDate),
   };
@@ -479,7 +479,7 @@ async function getYoungWhoMovedInFromDepartment(startDate, endDate, user) {
   });
 
   const result = await response.json();
-  const value = result?.data.count;
+  const value = result?.data.length;
 
   return [
     {
