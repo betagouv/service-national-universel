@@ -1,4 +1,5 @@
-require("dotenv").config({ path: "../../.env" });
+require("dotenv").config();
+
 require("../postgresql");
 const { capture } = require("../sentry");
 const slack = require("../slack");

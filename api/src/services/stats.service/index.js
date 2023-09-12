@@ -9,6 +9,19 @@ const {
   getMissionsChangeStatus,
 } = require("./engagement");
 const { getYoungNotesPhase1, getTimeScheduleAndPedagoProject, getTransportCorrectionRequests, getSessions, getLineToPoints } = require("./sejour");
+const {
+  getYoungNotesPhase0,
+  getYoungRegisteredWithParticularSituation,
+  getDepartmentRegistrationGoal,
+  getRegisterFileOpen,
+  getAbandonedRegistration,
+  getYoungValidatedFromWaitingStatus,
+  getYoungWithdrawnAfterValidated,
+  getYoungAbandonedBeforeValidated,
+  getYoungWhoChangedCohort,
+  getYoungWhoMovedOutFromDepartment,
+  getYoungWhoMovedInFromDepartment,
+} = require("./inscription");
 
 const keyNumbersByRole = {
   sejour: {
@@ -16,7 +29,28 @@ const keyNumbersByRole = {
     [ROLES.REFERENT_REGION]: [getTimeScheduleAndPedagoProject, getTransportCorrectionRequests],
     [ROLES.ADMIN]: [getTransportCorrectionRequests, getSessions, getLineToPoints],
   },
-  inscription: {},
+  inscription: {
+    [ROLES.REFERENT_DEPARTMENT]: [
+      getYoungNotesPhase0,
+      getRegisterFileOpen,
+      getYoungWithdrawnAfterValidated,
+      getYoungAbandonedBeforeValidated,
+      getYoungWhoChangedCohort,
+      getYoungValidatedFromWaitingStatus,
+      getYoungWhoMovedOutFromDepartment,
+      getYoungWhoMovedInFromDepartment,
+    ],
+    [ROLES.REFERENT_REGION]: [
+      getYoungRegisteredWithParticularSituation,
+      getDepartmentRegistrationGoal,
+      getRegisterFileOpen,
+      getYoungWithdrawnAfterValidated,
+      getAbandonedRegistration,
+      getYoungValidatedFromWaitingStatus,
+      getYoungWhoChangedCohort,
+    ],
+    [ROLES.ADMIN]: [getRegisterFileOpen, getYoungWithdrawnAfterValidated, getYoungValidatedFromWaitingStatus, getYoungWhoChangedCohort],
+  },
   engagement: {
     [ROLES.REFERENT_DEPARTMENT]: [getNewStructures, getYoungNotesPhase2, getMissionsOnTerm, getContractsSigned, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
     [ROLES.REFERENT_REGION]: [getYoungPhase2Validated],
@@ -32,13 +66,37 @@ const keyNumbersByRole = {
       getYoungNotesPhase2,
       getMissionsOnTerm,
       getContractsSigned,
+      getYoungNotesPhase0,
+      getRegisterFileOpen,
       getYoungsWhoStartedOrFinishedMissions,
       getMissionsChangeStatus,
+      getYoungValidatedFromWaitingStatus,
+      getYoungWhoChangedCohort,
     ],
-    [ROLES.REFERENT_REGION]: [getTimeScheduleAndPedagoProject, getTransportCorrectionRequests, getYoungPhase2Validated],
+    [ROLES.REFERENT_REGION]: [
+      getTimeScheduleAndPedagoProject,
+      getTransportCorrectionRequests,
+      getYoungPhase2Validated,
+      getYoungRegisteredWithParticularSituation,
+      getDepartmentRegistrationGoal,
+      getRegisterFileOpen,
+      getAbandonedRegistration,
+      getYoungValidatedFromWaitingStatus,
+      getYoungWhoChangedCohort,
+    ],
     [ROLES.SUPERVISOR]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
     [ROLES.RESPONSIBLE]: [getMissionsOnTerm, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
-    [ROLES.ADMIN]: [getTransportCorrectionRequests, getSessions, getLineToPoints, getContractsSigned, getYoungsWhoStartedOrFinishedMissions, getMissionsChangeStatus],
+    [ROLES.ADMIN]: [
+      getTransportCorrectionRequests,
+      getSessions,
+      getLineToPoints,
+      getContractsSigned,
+      getYoungsWhoStartedOrFinishedMissions,
+      getMissionsChangeStatus,
+      getRegisterFileOpen,
+      getYoungValidatedFromWaitingStatus,
+      getYoungWhoChangedCohort,
+    ],
   },
 };
 
