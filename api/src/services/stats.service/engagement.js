@@ -253,10 +253,85 @@ async function getContractsSigned(startDate, endDate, user) {
   ];
 }
 
+async function getYoungsWhoStartedOrFinishedMissions(startDate, endDate, user) {
+  // moderator / ref dep / supervisor / responsible
+  let body = {
+    query: {
+      bool: {
+        filter: [{ term: { "statusPhase2.keyword": YOUNG_STATUS_PHASE2.IN_PROGRESS } }, { terms: { "statusPhase2Contract.keyword": [CONTRACT_STATUS.VALIDATED] } }],
+      },
+    },
+    size: ES_NO_LIMIT,
+    track_total_hits: true,
+  };
+
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    body.query.bool.filter.push({ terms: { "department.keyword": user.department } });
+  }
+
+  const response = await esClient.search({ index: "young", body });
+  const youngs = response.body.hits.hits;
+  const youngsIds = youngs.map((young) => young._id);
+
+  let body2 = {
+    query: {
+      bool: {
+        filter: [{ terms: { "youngId.keyword": youngsIds } }, { term: { "youngContractStatus.keyword": CONTRACT_STATUS.VALIDATED } }],
+      },
+    },
+    aggs: {
+      missionStartAtDocs: {
+        filter: {
+          range: {
+            missionStartAt: {
+              gte: new Date(startDate),
+              lte: new Date(endDate),
+            },
+          },
+        },
+      },
+      missionEndAtDocs: {
+        filter: {
+          range: {
+            missionEndAt: {
+              gte: new Date(startDate),
+              lte: new Date(endDate),
+            },
+          },
+        },
+      },
+    },
+    size: 0,
+    track_total_hits: true,
+  };
+  if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
+    body2.query.bool.filter.push({ match: { "structureId.keyword": user.structureId } });
+  }
+  const response2 = await esClient.search({ index: "contract", body: body2 });
+  const startedMissions = response2.body.aggregations.missionStartAtDocs.doc_count;
+  const finishedMissions = response2.body.aggregations.missionEndAtDocs.doc_count;
+
+  return [
+    {
+      id: "young-who-started-missions",
+      value: startedMissions,
+      label: ` volontaire${startedMissions > 1 ? "s" : ""} ayant commencé une mission`,
+      icon: "action",
+    },
+    {
+      id: "young-who-finished-missions",
+      value: finishedMissions,
+      label: ` volontaire${finishedMissions > 1 ? "s" : ""} ayant terminé une mission`,
+      icon: "action",
+    },
+  ];
+}
+
 module.exports = {
   getYoungNotesPhase2,
   getNewStructures,
   getYoungPhase2Validated,
   getMissionsOnTerm,
   getContractsSigned,
+  getYoungsWhoStartedOrFinishedMissions,
 };
