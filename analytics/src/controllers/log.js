@@ -173,6 +173,7 @@ router.post("/mission-equivalence", auth, async (req, res) => {
       candidature_status: Joi.string().allow(null, ""),
       date: Joi.string(),
       raw_data: Joi.object(),
+      type_engagement: Joi.string().allow(null, ""),
     }).validate(req.body);
 
     if (error) {
