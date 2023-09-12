@@ -4,9 +4,23 @@ const { capture } = require("../../sentry");
 const ES_NO_LIMIT = 10000;
 
 function searchSubQuery([value], fields) {
+  const words = value?.split(" ");
+
+  const shouldClauses = words.map((word) => {
+    return {
+      multi_match: {
+        query: word,
+        fields,
+        type: "cross_fields",
+        operator: "and",
+      },
+    };
+  });
+
   return {
     bool: {
       should: [
+        ...shouldClauses,
         { multi_match: { query: value, fields, type: "cross_fields", operator: "and" } },
         { multi_match: { query: value, fields, type: "phrase", operator: "and" } },
         { multi_match: { query: value, fields: fields.map((e) => e.replace(".keyword", "")), type: "phrase_prefix", operator: "and" } },
