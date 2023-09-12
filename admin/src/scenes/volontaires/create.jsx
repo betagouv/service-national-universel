@@ -776,14 +776,7 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
   };
   const [countries, setCountries] = React.useState([]);
   async function loadCountries() {
-    const body = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
-      size: 0,
-      aggs: {
-        countries: { terms: { field: "country.keyword", size: ES_NO_LIMIT } },
-      },
-    };
-    const { responses } = await api.esQuery("schoolramses", body);
+    const { responses } = await api.post("/elasticsearch/schoolramses/public/search?aggsByCountries=true");
     if (responses && responses.length > 0) {
       setCountries(
         responses[0].aggregations.countries.buckets
