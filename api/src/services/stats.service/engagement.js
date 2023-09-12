@@ -425,6 +425,75 @@ async function getMissionsChangeStatus(startDate, endDate, user) {
   }
 }
 
+async function getApplicationsChangeStatus(startDate, endDate, user) {
+  // responsible && supervisor && ref dep && admin
+  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  let body = {
+    startDate: formatDateForPostGre(startDate),
+    endDate: formatDateForPostGre(endDate),
+    status: [APPLICATION_STATUS.CANCEL, APPLICATION_STATUS.ABANDON],
+  };
+  switch (user.role) {
+    case ROLES.SUPERVISOR:
+    case ROLES.RESPONSIBLE:
+      body.structureId = user.structureId;
+      break;
+
+    case ROLES.REFERENT_DEPARTMENT:
+      body.department = user.department;
+      break;
+    default:
+      break;
+  }
+
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-change-status/count`, {
+    ...postParams(token),
+    body: JSON.stringify(body),
+  });
+
+  const result = await response.json();
+  const data = result?.data;
+  let resultArray = {
+    [APPLICATION_STATUS.CANCEL]: 0,
+    [APPLICATION_STATUS.ABANDON]: 0,
+  };
+
+  for (const item of data) {
+    const value = item.value;
+    if (Object.prototype.hasOwnProperty.call(resultArray, value)) {
+      resultArray[value]++;
+    }
+  }
+  const canceledValue = resultArray[APPLICATION_STATUS.CANCEL];
+  const abandonValue = resultArray[APPLICATION_STATUS.ABANDON];
+
+  switch (user.role) {
+    case ROLES.SUPERVISOR:
+    case ROLES.RESPONSIBLE:
+      return [
+        {
+          id: "applications-canceled",
+          value: canceledValue,
+          label: ` candidature${canceledValue > 1 ? "s" : ""} annulée${canceledValue > 1 ? "s" : ""}`,
+          icon: "action",
+        },
+      ];
+
+    case ROLES.REFERENT_DEPARTMENT:
+    case ROLES.ADMIN:
+      return [
+        {
+          id: "missions-abandonned",
+          value: abandonValue,
+          label: ` missions${abandonValue > 1 ? "s" : ""} abandonnée${abandonValue > 1 ? "s" : ""}`,
+          icon: "action",
+        },
+      ];
+    default:
+      return [];
+  }
+}
+
 module.exports = {
   getYoungNotesPhase2,
   getNewStructures,
@@ -433,4 +502,5 @@ module.exports = {
   getContractsSigned,
   getYoungsWhoStartedOrFinishedMissions,
   getMissionsChangeStatus,
+  getApplicationsChangeStatus,
 };

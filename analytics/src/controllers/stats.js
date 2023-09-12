@@ -419,4 +419,70 @@ router.post("/young-moved", async (req, res) => {
   }
 });
 
+router.post("/application-change-status/count", async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      status: Joi.array().items(Joi.string().valid("WAITING_VALIDATION", "WAITING_ACCEPTATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION").required()),
+      structureId: Joi.string(),
+      department: Joi.array().items(Joi.string()),
+      startDate: Joi.string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .required(),
+      endDate: Joi.string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .required(),
+    })
+      .oxor("department", "structureId")
+      .validate(req.body);
+
+    if (error) {
+      console.log(error);
+      return res.status(400).send({ ok: false, code: "INVALID_PARAMS" });
+    }
+
+    let result;
+    if (value.structureId) {
+      result = await db.query(
+        `
+        select value from "public"."logs_by_day_application_status_change_event"
+        where candidature_structure_id = :structureId
+        and value in (:status)
+        and "date" between :startDate and :endDate::date + 1;`,
+        {
+          type: db.QueryTypes.SELECT,
+          replacements: { structureId: value.structureId, status: value.status, startDate: value.startDate, endDate: value.endDate },
+        },
+      );
+    } else if (value.department?.length) {
+      result = await db.query(
+        `
+        select value from "public"."logs_by_day_application_status_change_event"
+        where candidature_mission_department in (:department)
+        and value in (:status)
+        and "date" between :startDate and :endDate::date + 1;`,
+        {
+          type: db.QueryTypes.SELECT,
+          replacements: { department: value.department, status: value.status, startDate: value.startDate, endDate: value.endDate },
+        },
+      );
+    } else {
+      result = await db.query(
+        `
+        select value from "public"."logs_by_day_application_status_change_event"
+        where value in (:status)
+        and "date" between :startDate and :endDate::date + 1;`,
+        {
+          type: db.QueryTypes.SELECT,
+          replacements: { status: value.status, startDate: value.startDate, endDate: value.endDate },
+        },
+      );
+    }
+
+    return res.status(200).send({ ok: true, data: result });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: "Error in application-change-status" });
+  }
+});
+
 module.exports = router;
