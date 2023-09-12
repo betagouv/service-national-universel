@@ -165,7 +165,7 @@ export default function StepUpload() {
       onCorrection={onCorrect}
       disabled={!isEnabled}
       loading={loading}
-      questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
+      supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {corrections
         ?.filter(({ field }) => field === "cniFile")
         .map((e) => (

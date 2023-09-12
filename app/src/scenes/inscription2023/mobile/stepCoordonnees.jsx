@@ -529,13 +529,15 @@ export default function StepCoordonnees() {
     setErrors({ addressVerified: undefined });
   };
 
+  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`;
+
   return (
     <>
       <Navbar onSave={onSave} />
       <div className="bg-white p-4 text-[#161616]">
         <div className="mt-2 flex w-full items-center justify-between">
           <h1 className="text-xl font-bold">Déclaration sur l’honneur</h1>
-          <a href={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`} target="_blank" rel="noreferrer">
+          <a href={supportLink} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
           </a>
         </div>
@@ -765,7 +767,7 @@ export default function StepCoordonnees() {
           </>
         )}
       </div>
-      <Help />
+      <Help supportLink={supportLink} />
       {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
         <StickyButton text="Corriger" onClickPrevious={() => history.push("/")} onClick={onCorrection} disabled={loading} />
       ) : (

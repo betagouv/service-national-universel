@@ -153,8 +153,110 @@ async function getYoungPhase2Validated(startDate, endDate, user) {
   ];
 }
 
+async function getMissionsOnTerm(startDate, endDate, user) {
+  // ref dep && responsible && supervisor
+  let body = {
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              endAt: {
+                gte: new Date(startDate),
+                lte: new Date(endDate),
+              },
+            },
+          },
+        ],
+      },
+    },
+    size: 0,
+    track_total_hits: true,
+  };
+  switch (user.role) {
+    case ROLES.RESPONSIBLE:
+    case ROLES.SUPERVISOR:
+      body.query.bool.filter.push({ match: { "structureId.keyword": user.structureId } });
+      break;
+
+    case ROLES.REFERENT_DEPARTMENT:
+      body.query.bool.filter.push({ terms: { "department.keyword": user.department } });
+      break;
+    default:
+      break;
+  }
+
+  const response = await esClient.search({ index: "mission", body });
+  const value = response.body.hits.total.value;
+
+  return [
+    {
+      id: "missions-on-term",
+      value: value,
+      label: ` mission${value > 1 ? "s" : ""} arrivée${value > 1 ? "s" : ""} à échéance`,
+      icon: "action",
+    },
+  ];
+}
+
+async function getContractsSigned(startDate, endDate, user) {
+  // ref dep && admin
+  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  let body = {
+    startDate: formatDateForPostGre(startDate),
+    endDate: formatDateForPostGre(endDate),
+    status: APPLICATION_STATUS.VALIDATED,
+  };
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    body.department = user.department;
+  }
+
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-contract-signed/count`, {
+    ...postParams(token),
+    body: JSON.stringify(body),
+  });
+
+  const result = await response.json();
+  const applicationId = result?.data.map((e) => e.candidature_id);
+  let body2 = {
+    query: {
+      bool: {
+        filter: [
+          { terms: { "applicationId.keyword": applicationId } },
+          { term: { "youngContractStatus.keyword": CONTRACT_STATUS.VALIDATED } },
+          {
+            range: {
+              youngContractValidationDate: {
+                gte: new Date(startDate),
+                lte: new Date(endDate),
+              },
+            },
+          },
+        ],
+      },
+    },
+
+    size: 0,
+    track_total_hits: true,
+  };
+
+  const response2 = await esClient.search({ index: "contract", body: body2 });
+  const value = response2.body.hits.total.value;
+
+  return [
+    {
+      id: "contract-signed",
+      value: value,
+      label: ` contrat${value > 1 ? "s" : ""} d'engagement signé${value > 1 ? "s" : ""}`,
+      icon: "action",
+    },
+  ];
+}
+
 module.exports = {
   getYoungNotesPhase2,
   getNewStructures,
   getYoungPhase2Validated,
+  getMissionsOnTerm,
+  getContractsSigned,
 };

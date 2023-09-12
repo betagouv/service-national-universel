@@ -68,7 +68,7 @@ export default function StepUpload() {
       childrenContinueButton={"Me réinscrire au SNU"}
       disabled={!date}
       loading={loading}
-      questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
+      supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       <div className="my-16 flex w-full justify-around">
         <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />

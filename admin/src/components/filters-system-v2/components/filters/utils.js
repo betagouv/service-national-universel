@@ -1,8 +1,7 @@
 import { toastr } from "react-redux-toastr";
+import { COHESION_STAY_START } from "snu-lib";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
-import { COHESION_STAY_START } from "snu-lib";
-import { ES_NO_LIMIT } from "snu-lib";
 
 export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort, size = 10) => {
   try {
@@ -18,7 +17,7 @@ export const buildQuery = async (route, selectedFilters, page = 0, filterArray, 
 
     const aggs = resAlternative.responses[1].aggregations;
     const data = resAlternative.responses[0].hits.hits.map((h) => ({ ...h._source, _id: h._id, sort: h?.sort }));
-    const count = resAlternative.responses[0].hits.total.value;
+    const count = resAlternative.responses[1].aggregations?.count?.total?.value || resAlternative.responses[0].hits?.total?.value || 0;
     const newFilters = {};
 
     // map a travers les aggregations pour recuperer les filtres

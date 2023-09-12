@@ -65,12 +65,8 @@ export default function StepConfirm() {
     <>
       <div className="bg-white p-4 text-[#161616]">
         {error?.text && <Error {...error} onClose={() => setError({})} />}
-        <div className="mt-2 flex w-full items-center justify-between">
-          <h1 className="text-xl font-bold">Vous y êtes presque...</h1>
-          <a href={`${supportURL}/base-de-connaissance/je-minscris-et-donne-mon-consentement`} target="_blank" rel="noreferrer">
-            <QuestionMarkBlueCircle />
-          </a>
-        </div>
+        <h1 className="text-xl font-bold mt-2">Vous y êtes presque...</h1>
+
         <div className="mt-2 text-sm text-[#666666]">
           Vous êtes sur le point de soumettre votre dossier à l’administration du SNU. Veuillez vérifier vos informations avant de valider votre demande d’inscription.
         </div>

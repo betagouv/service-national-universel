@@ -30,7 +30,10 @@ export default function DatePicker({ value, onChange, disabled, fromYear, toYear
       fromYear={fromYear}
       toYear={toYear}
       selected={selected}
-      onSelect={(date) => onChange(dayjs(date).toUtc().toDate())}
+      onSelect={(date) => {
+        if (mode === "range") return onChange({ from: dayjs(date.from).toUtc().toDate(), to: dayjs(date.to).toUtc().toDate() });
+        onChange(dayjs(date).toUtc().toDate());
+      }}
     />
   );
 }

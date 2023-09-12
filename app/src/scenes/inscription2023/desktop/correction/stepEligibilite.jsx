@@ -23,6 +23,7 @@ import { translate } from "../../../../utils";
 import DatePickerList from "../../components/DatePickerList";
 
 import ModalSejourCorrection from "../../components/ModalSejourCorrection";
+import { supportURL } from "@/config";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useState({});
@@ -204,7 +205,7 @@ export default function StepEligibilite() {
         <div className="mx-auto my-0 basis-[70%] bg-white px-[102px] py-[60px] drop-shadow-md">
           <div className="flex w-full items-center justify-between">
             <h1 className="text-xl text-[#161616]">Vérifiez votre éligibilité au SNU</h1>
-            <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
+            <a href={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"} target="_blank" rel="noreferrer">
               <QuestionMarkBlueCircle />
             </a>
           </div>

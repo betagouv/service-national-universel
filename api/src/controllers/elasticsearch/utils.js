@@ -49,6 +49,8 @@ function aggsSubQuery(keys, aggsSearchQuery, queryFilters, contextFilters, custo
     } else {
       aggs[key] = { filter, aggs: { names: { histogram: { field: key, interval: 1, min_doc_count: 1 } } } };
     }
+    //add agg for count all of documents that maths the query
+    aggs.count = { filter: { bool: { must: [], filter } }, aggs: { total: { value_count: { field: "_id" } } } };
   }
   return aggs;
 }
