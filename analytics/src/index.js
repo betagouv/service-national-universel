@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "../.env" });
+require("dotenv").config();
 
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
