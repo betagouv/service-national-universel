@@ -36,9 +36,10 @@ exports.handler = async () => {
   process.exit(0);
 };
 
-async function processYoung(youngId, stream) {
+async function processYoung(youngId, stream, countTotal, countModified) {
   try {
     // console.log("Processing young with ID: ", youngId);
+    countTotal ++
     const young = await YoungModel.findById(youngId);
     const copyOfYoung = JSON.parse(JSON.stringify(young));
     let fileStatus = "";
@@ -51,6 +52,7 @@ async function processYoung(youngId, stream) {
       console.log("Deleting files: ", CNIFileArray);
       await deleteFilesByList(CNIFileArray);
       fileStatus = "DELETED";
+      countModified ++
     } catch (error) {
       fileStatus = "NOT_FOUND";
       console.log(error);
