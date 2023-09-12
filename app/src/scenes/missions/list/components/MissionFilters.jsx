@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
-import { apiAdress } from "../../../../services/api-adresse";
+import { putLocation } from "../../../../services/api-adresse";
 
 import Sante from "../../../../assets/mission-domaines/sante";
 import Solidarite from "../../../../assets/mission-domaines/solidarite";
@@ -38,6 +38,7 @@ import RadioUnchecked from "../../../../assets/radioUnchecked.svg";
 import Select from "./Select.jsx";
 import Toggle from "./Toggle";
 import Modal from "../../../../components/ui/modals/Modal";
+import { toastr } from "react-redux-toastr";
 
 export default function MissionFilters({ filters, setFilters }) {
   const young = useSelector((state) => state.Auth.young);
@@ -45,13 +46,15 @@ export default function MissionFilters({ filters, setFilters }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
   const [dropdownControlWhenOpen, setDropdownControlWhenOpen] = React.useState(false);
-  const [focusedAddress, setFocusedAddress] = React.useState({ address: young?.address, zip: young?.zip });
   const [modalControl, setModalControl] = React.useState(false);
   const [keyWordOpen, setKeyWordOpen] = React.useState(false);
   const [keyWord, setKeyWord] = React.useState("");
   const [showMoreDetails, setShowMoreDetails] = useState(false);
   const refDropdownControlDistance = React.useRef(null);
   const refDropdownControlWhen = React.useRef(null);
+
+  const [youngLocation, setYoungLocation] = useState(young?.location || null);
+  const [relativeLocation, setRelativeLocation] = useState();
 
   const DISTANCE_MAX = 100;
   const marginDistance = getMarginDistance(document.getElementById("distanceKm"));
@@ -82,36 +85,41 @@ export default function MissionFilters({ filters, setFilters }) {
 
   useEffect(() => {
     if (!young) return;
-    const getLocation = async () => {
-      try {
-        if (filters.location?.lat && filters.location?.lon) return;
-        const location = await getCoordinates({ q: young?.address, postcode: young?.zip });
-        setFilters({ ...filters, location });
-      } catch (e) {
-        capture(e);
-      }
-    };
+
+    const abortController = new AbortController();
     const getManagerPhase2 = async () => {
       try {
-        if (referentManagerPhase2?.email) return;
         const { ok, data } = await API.get(`/referent/manager_phase2/${young.department}`);
         if (ok) setReferentManagerPhase2(data);
       } catch (e) {
         capture(e);
       }
     };
-    getLocation();
-    getManagerPhase2();
-  }, [young]);
+    const getYoungLocation = async () => {
+      try {
+        const res = await putLocation(young?.address, young?.zip, abortController.signal);
+        if (!res) return toastr.error("Erreur avec la base adresse nationale", "Impossible de trouver les coordonnées du volontaire.", { timeOut: 10_000 });
+        if (res) setYoungLocation(res);
+      } catch (e) {
+        capture(e);
+      }
+    };
+    const getRelativeLocation = async () => {
+      try {
+        const res = await putLocation(`${young?.mobilityNearRelativeAddress} ${young?.mobilityNearRelativeCity}`, young?.mobilityNearRelativeZip, abortController.signal);
+        if (!res) return toastr.error("Erreur avec la base adresse nationale", "Impossible de trouver les coordonnées du proche.", { timeOut: 10_000 });
+        if (res) setRelativeLocation(res);
+      } catch (e) {
+        capture(e);
+      }
+    };
 
-  useEffect(() => {
-    if (!focusedAddress) return;
-    (async () => {
-      let location;
-      location = await getCoordinates({ q: focusedAddress.address, postcode: focusedAddress.zip });
-      if (location) setFilters((prev) => ({ ...prev, location }));
-    })();
-  }, [focusedAddress]);
+    getManagerPhase2();
+    if (!youngLocation) getYoungLocation();
+    if (young.mobilityNearRelativeZip) getRelativeLocation();
+
+    return () => abortController.abort();
+  }, [young]);
 
   function getMarginDistance(ele) {
     if (ele) return Number((ele.scrollWidth + ((filters?.distance - DISTANCE_MAX) * ele.scrollWidth) / DISTANCE_MAX) * 0.92);
@@ -128,32 +136,6 @@ export default function MissionFilters({ filters, setFilters }) {
         return "Choisir une période";
       default:
         return "N'importe quand";
-    }
-  };
-
-  const callSingleAddressAPI = async (q, postcode) => {
-    try {
-      const res = await apiAdress(q, { postcode });
-      return res?.features[0];
-    } catch (e) {
-      console.error(e);
-      return null;
-    }
-  };
-
-  const getCoordinates = async ({ q, postcode }) => {
-    try {
-      let adresse = await callSingleAddressAPI(q, postcode);
-      if (!adresse) {
-        console.warn("Utilisation du zip code seul");
-        adresse = await callSingleAddressAPI(postcode);
-        if (!adresse) throw "Erreur en utilisant l'api d'adresse";
-      }
-      const coordinates = adresse?.geometry?.coordinates;
-      return { lat: coordinates[1], lon: coordinates[0] };
-    } catch (e) {
-      console.error(e);
-      return null;
     }
   };
 
@@ -227,7 +209,6 @@ export default function MissionFilters({ filters, setFilters }) {
 
             {/* Form */}
             <div className="flex flex-col space-y-5">
-
               {/* Keyword */}
               <div className="rounded-xl border bg-white py-3.5 px-4">
                 {!keyWordOpen && (
@@ -314,12 +295,12 @@ export default function MissionFilters({ filters, setFilters }) {
                             id="main-address"
                             name="main-address"
                             type="radio"
-                            checked={focusedAddress?.address !== young?.mobilityNearRelativeAddress}
-                            onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
+                            checked={filters.location === youngLocation}
+                            onChange={() => setFilters((prev) => ({ ...prev, location: youngLocation }))}
                             className="hidden"
                           />
                           <label htmlFor="main-address" className="mr-2">
-                            {focusedAddress?.address === young.address ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
+                            {filters.location === youngLocation ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
                           </label>
                           <label htmlFor="main-address" className="cursor-pointer">
                             <span className="text-xs leading-[15px] text-gray-700">Autour de mon adresse principale</span>
@@ -327,18 +308,18 @@ export default function MissionFilters({ filters, setFilters }) {
                             <span className="text-[13px] text-gray-700">{young.city}</span>
                           </label>
                         </div>
-                        {young?.mobilityNearRelativeCity ? (
+                        {young?.mobilityNearRelativeZip ? (
                           <div className="flex items-center gap-2">
                             <input
                               id="second-address"
                               name="address"
                               type="radio"
-                              checked={focusedAddress?.address === young?.mobilityNearRelativeAddress}
-                              onChange={() => setFocusedAddress({ address: young?.mobilityNearRelativeAddress, zip: young?.mobilityNearRelativeZip })}
+                              checked={filters.location === relativeLocation}
+                              onChange={() => setFilters((prev) => ({ ...prev, location: relativeLocation }))}
                               className="hidden"
                             />
                             <label htmlFor="second-address" className="mr-2">
-                              {focusedAddress?.address === young.mobilityNearRelativeAddress ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
+                              {filters.location === relativeLocation ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
                             </label>
                             <label htmlFor="second-address" className="cursor-pointer">
                               <span className="text-xs text-gray-700">Autour de l&apos;adresse d&apos; un proche</span>
@@ -571,12 +552,12 @@ export default function MissionFilters({ filters, setFilters }) {
                         id="main-address"
                         name="main-address"
                         type="radio"
-                        checked={focusedAddress?.address !== young?.mobilityNearRelativeAddress}
-                        onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
+                        checked={filters.location === youngLocation}
+                        onChange={() => setFilters((prev) => ({ ...prev, location: youngLocation }))}
                         className="hidden"
                       />
                       <label htmlFor="main-address" className="mr-2">
-                        {focusedAddress?.address === young.address ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
+                        {filters.location === youngLocation ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
                       </label>
                       <label htmlFor="main-address" className="cursor-pointer">
                         <span className="text-[13px] text-gray-700">Autour de mon adresse principale</span>
@@ -590,12 +571,12 @@ export default function MissionFilters({ filters, setFilters }) {
                           id="second-address"
                           name="address"
                           type="radio"
-                          checked={focusedAddress?.address === young?.mobilityNearRelativeAddress}
-                          onChange={() => setFocusedAddress({ address: young?.mobilityNearRelativeAddress, zip: young?.mobilityNearRelativeZip })}
+                          checked={filters.location === relativeLocation}
+                          onChange={() => setFilters((prev) => ({ ...prev, location: relativeLocation }))}
                           className="hidden"
                         />
                         <label htmlFor="second-address" className="mr-2">
-                          {focusedAddress?.address === young.mobilityNearRelativeAddress ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
+                          {filters.location === relativeLocation ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
                         </label>
                         <label htmlFor="second-address" className="cursor-pointer">
                           <span className="text-[13px] text-gray-700">Autour de l&apos;adresse d&apos;un proche</span>
