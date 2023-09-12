@@ -6,25 +6,25 @@ const ES_NO_LIMIT = 10000;
 function searchSubQuery([value], fields) {
   const words = value?.split(" ");
 
-  const shouldClauses = words.map((word) => {
-    return {
-      multi_match: {
-        query: word,
-        fields,
-        type: "cross_fields",
-        operator: "and",
+  const shouldClauses = words.map((word, index) => {
+    return [
+      {
+        multi_match: {
+          query: word,
+          fields,
+          type: "cross_fields",
+          operator: "and",
+          boost: words.length - index,
+        },
       },
-    };
+      { multi_match: { query: word, fields, type: "phrase", operator: "and", boost: words.length - index } },
+      { multi_match: { query: word, fields: fields.map((e) => e.replace(".keyword", "")), type: "phrase_prefix", operator: "and", boost: words.length - index } },
+    ];
   });
 
   return {
     bool: {
-      should: [
-        ...shouldClauses,
-        { multi_match: { query: value, fields, type: "cross_fields", operator: "and" } },
-        { multi_match: { query: value, fields, type: "phrase", operator: "and" } },
-        { multi_match: { query: value, fields: fields.map((e) => e.replace(".keyword", "")), type: "phrase_prefix", operator: "and" } },
-      ],
+      should: shouldClauses.flat(),
       minimum_should_match: 1,
     },
   };
