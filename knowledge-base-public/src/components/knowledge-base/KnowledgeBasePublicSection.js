@@ -11,25 +11,56 @@ import KnowledgeBaseSearch from "./KnowledgeBaseSearch";
 import { HiSearch, HiStar } from "react-icons/hi";
 import Link from "next/link";
 import { environment } from "../../config";
+import useUser from "../../hooks/useUser";
+import API from "../../services/api";
+import { separateEmojiAndText } from "../../utils/index";
 
 const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
+  const { restriction } = useUser();
   const router = useRouter();
   const [sections, setSections] = useState(item?.children?.filter((c) => c.type === "section") || []);
   const [articles, setArticles] = useState(item?.children?.filter((c) => c.type === "article") || []);
+  const [top5Article, setTop5Article] = useState([]);
   const topArticles = (item?.children?.filter((c) => c.type === "article") || []).sort((a, b) => b.read - a.read);
   const [searchOpen, setSearchOpen] = useState(false);
 
   const scrollRef = useRef(null);
 
-  const articleFromSection = [];
-  sections.map(({ children }) => {
-    for (const index in children) {
-      if (children[index].type === "article") {
-        articleFromSection.push(children[index]);
+  // const articleFromSection = [];
+  // sections.map(({ children }) => {
+  //   for (const index in children) {
+  //     if (children[index].type === "article") {
+  //       articleFromSection.push(children[index]);
+  //     }
+  //   }
+  // });
+  // const Top5Articles = articleFromSection.sort((a, b) => b.read - a.read);
+
+  useEffect(() => {
+    const fetchTop5 = async () => {
+      try {
+        const response = await API.get({ path: `/knowledge-base/${restriction}/top5Article` });
+        const rawData = response.data;
+        const processedData = rawData.map((article) => {
+          const { _id, title, slug } = article;
+          const [emoji, text] = separateEmojiAndText(title);
+          return {
+            _id,
+            title,
+            slug,
+            emoji,
+            text,
+          };
+        });
+
+        setTop5Article(processedData);
+      } catch (error) {
+        console.error(error);
       }
-    }
-  });
-  const Top5Articles = articleFromSection.sort((a, b) => b.read - a.read);
+    };
+
+    fetchTop5();
+  }, [item]);
 
   useEffect(() => {
     function handleScroll() {
@@ -68,7 +99,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   if (isRoot) {
     return (
       <>
-        <div className="flex h-44 w-full flex-col justify-center gap-6 border-t-[1px] border-white border-opacity-20 bg-[#32257F]">
+        <div className="flex h-40 w-full flex-col justify-end gap-6 border-t-[1px] border-white border-opacity-20 bg-[#32257F]">
           <p className="text-center text-3xl font-bold leading-9 text-white">J&apos;ai besoin d&apos;aide</p>
           <button
             onClick={() => setSearchOpen(true)}
@@ -77,12 +108,13 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
             <HiSearch className="text-2xl text-gray-500" />
             Rechercher un article
           </button>
-          <div className={`flex flex-row`}>
-            {Top5Articles.slice(0, 5).map(({ _id, title, slug }) => (
-              <div key={_id} className="">
-                <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
-                  <h3 className="mb-4 text-sm font-bold leading-5 text-gray-900">{title}</h3>
-                  {/* <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p> */}
+        </div>
+        <div className="flex justify-center bg-[#32257F]">
+          <div className="mx-auto flex flex-row flex-wrap justify-center mt-4">
+            {top5Article.map(({ _id, slug, text }) => (
+              <div key={_id} className="m-1 rounded-2xl bg-blue-100 py-1 px-2">
+                <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${text}`} alt={`Lire l'article ${text}`}>
+                  <h3 className="text-sm text-blue-800 font-medium leading-5">{text}</h3>
                 </Link>
               </div>
             ))}
