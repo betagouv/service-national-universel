@@ -14,11 +14,10 @@ function searchSubQuery([value], fields) {
           fields,
           type: "cross_fields",
           operator: "and",
-          boost: words.length - index,
         },
       },
-      { multi_match: { query: word, fields, type: "phrase", operator: "and", boost: words.length - index } },
-      { multi_match: { query: word, fields: fields.map((e) => e.replace(".keyword", "")), type: "phrase_prefix", operator: "and", boost: words.length - index } },
+      { multi_match: { query: word, fields, type: "phrase", operator: "and" } },
+      { multi_match: { query: word, fields: fields.map((e) => e.replace(".keyword", "")), type: "phrase_prefix", operator: "and" } },
     ];
   });
 
