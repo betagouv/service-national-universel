@@ -14,6 +14,7 @@ const OBJ = db.define(
     candidature_status: DataTypes.TEXT,
     date: DataTypes.DATE,
     raw_data: DataTypes.JSONB,
+    type_engagement: DataTypes.TEXT,
   },
   {
     defaultScope: {
