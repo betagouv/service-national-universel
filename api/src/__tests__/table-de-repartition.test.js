@@ -33,10 +33,7 @@ describe("Table de répartition", () => {
     });
 
     it("should return 409 when tableDeRepartition already exists", async () => {
-      const res1 = await request(getAppHelper())
-        .post("/table-de-repartition/region")
-        .set("Authorization", `Bearer ${referent.token}`)
-        .send({ cohort: "Février 2023 - C", fromRegion: "Paris441112", toRegion: "HOHOs1321" });
+      const res1 = await request(getAppHelper()).post("/table-de-repartition/region").send({ cohort: "Février 2023 - C", fromRegion: "Paris441112", toRegion: "HOHOs1321" });
       expect(res1.status).toBe(200);
 
       const res2 = await request(getAppHelper()).post("/table-de-repartition/region").send({ cohort: "Février 2023 - C", fromRegion: "Paris441112", toRegion: "HOHOs1321" });
@@ -104,7 +101,7 @@ describe("Table de répartition", () => {
       });
 
       // Send a POST request to the route with the valid parameters and authorization token
-      const res = await request(getAppHelper()).post("/table-de-repartition/department").set("Authorization", `Bearer ${referent.token}`).send({
+      const res = await request(getAppHelper()).post("/table-de-repartition/department").send({
         cohort: "Février 2023 - C",
         fromRegion: "Paris14621",
         toRegion: "HOH2136",
