@@ -8,7 +8,6 @@ import ContactSupportModalContent from "./ContactSupportModalContent";
 import ChangedDepartmentInfoModalContent from "./ChangedDepartmentInfoModalContent";
 import ChooseCohortModalContent from "./ChooseCohortModalContent";
 import { updateYoung } from "../../../../../../services/young.service";
-import API from "../../../../../../services/api";
 import { capture } from "../../../../../../sentry";
 import { getCohortPeriod, isCohortDone } from "../../../../../../utils/cohorts";
 import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, calculateAge, translateCohort } from "snu-lib";
@@ -50,7 +49,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
   const getCohort = async () => {
     try {
       setLoading(true);
-      const { ok, data } = await API.get(`/cohort/${young.cohort}`);
+      const { ok, data } = await api.get(`/cohort/${young.cohort}`);
       if (ok) setCurrentCohort(data);
       else throw new Error(`cohort ${young.cohort} not found`);
     } catch (e) {

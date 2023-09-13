@@ -17,8 +17,9 @@ import SectionTitle from "../../components/SectionTitle";
 import Withdrawal from "./components/Withdrawal";
 import FormRow from "../../../../components/forms/layout/FormRow";
 import ButtonLight from "../../../../components/ui/buttons/ButtonLight";
-import ChangeAddressButton from "./components/ChangeAddressButton";
 import ChangeAddressModal from "./components/ChangeAddressModal";
+import ChangeEmailModal from "./components/ChangeEmailModal";
+import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 
 const getInitialFormValues = (young) => ({
   lastName: young.lastName || "",
@@ -41,6 +42,7 @@ const AccountGeneralPage = () => {
   const [errors, setErrors] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChangeAddressModalOpen, setChangeAddressModalOpen] = useState(false);
+  const [isChangeEmailModalOpen, setChangeEmailModalOpen] = useState(true);
 
   const validateForm = () => {
     const foundErrors = {};
@@ -99,6 +101,7 @@ const AccountGeneralPage = () => {
     <>
       <div className="overflow-hidden bg-white shadow-sm lg:rounded-lg">
         <ChangeAddressModal isOpen={isChangeAddressModalOpen} onClose={() => setChangeAddressModalOpen(false)} young={young} />
+        <ChangeEmailModal isOpen={isChangeEmailModalOpen} onClose={() => setChangeEmailModalOpen(false)} young={young} />
         <form onSubmit={handleSubmitGeneralForm}>
           <div className="grid grid-cols-1 lg:grid-cols-3">
             <div className="hidden py-6 pl-6 lg:col-start-1 lg:block">
@@ -130,7 +133,11 @@ const AccountGeneralPage = () => {
                   placeholder="example@example.com"
                   value={formValues.email}
                   onChange={handleChangeValue("email")}
+                  disabled
                 />
+                <InlineButton onClick={() => setChangeEmailModalOpen(true)} className="text-gray-500 hover:text-gray-700 text-sm font-medium mb-2">
+                  Modifier mon adresse email
+                </InlineButton>{" "}
                 <InputPhone
                   label="Téléphone"
                   name="phone"
@@ -147,7 +154,9 @@ const AccountGeneralPage = () => {
                   <Input label="Code Postal" name="zip" value={young.zip} className="basis-1/2" disabled />
                   <Input label="Ville" name="city" value={young.city} className="basis-1/2" disabled />
                 </FormRow>
-                <ChangeAddressButton onClick={() => setChangeAddressModalOpen(true)} className="mb-2" />
+                <InlineButton onClick={() => setChangeAddressModalOpen(true)} className="text-gray-500 hover:text-gray-700 text-sm font-medium mb-2">
+                  J’ai changé d’adresse
+                </InlineButton>
               </section>
               {young?.files.cniFiles.length > 0 && (
                 <section>

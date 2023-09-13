@@ -4,7 +4,7 @@ import ArrowRightBlue from "../../../assets/icons/ArrowRightBlue";
 import { BsInfoSquareFill } from "react-icons/bs";
 import { HiX } from "react-icons/hi";
 import PrimaryButton from "../../../components/dsfr/ui/buttons/PrimaryButton";
-import InlinButton from "./InlineButton";
+import InlinButton from "../../../components/dsfr/ui/buttons/InlineButton";
 
 const DidNotReceiveActivationCodeModal = ({ onClose, isOpen, onRequestNewToken, onRequestEmailModification }) => {
   return (

@@ -12,7 +12,7 @@ import DSFRContainer from "../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../components/dsfr/ui/buttons/SignupButtonContainer";
 import Input from "../../components/dsfr/forms/input";
 import { capture } from "../../sentry";
-import InlineButton from "./components/InlineButton";
+import InlineButton from "../../components/dsfr/ui/buttons/InlineButton";
 import DidNotReceiveActivationCodeModal from "./components/DidNotReceiveActivationCodeModal";
 import ModifyEmailModal from "./components/ModifyEmailModal";
 
