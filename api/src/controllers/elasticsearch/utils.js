@@ -93,7 +93,11 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
   const search = (queryFilters.searchbar || []).filter((e) => e.trim()).length ? searchSubQuery(queryFilters.searchbar, searchFields) : null;
   // Hits request body
   const hitsRequestBody = { query: getMainQuery(), size, from: page * size, sort: buildSort(sort) };
-  if (search) hitsRequestBody.query.bool.must.push(search);
+  if (search) {
+    hitsRequestBody.query.bool.must.push(search);
+    // We want to sort by score if there a search.
+    delete hitsRequestBody.sort;
+  }
   for (const key of filterFields) {
     const keyWithoutKeyword = key.replace(".keyword", "");
     if (!queryFilters[keyWithoutKeyword]?.length) continue;
