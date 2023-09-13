@@ -23,6 +23,7 @@ const parentConsentementReminder = require("./parentConsentementReminder");
 const reminderImageRightsParent2 = require("./reminderImageRightsParent2");
 const dsnjExport = require("./dsnjExport");
 const clotureMissionReminder = require("./clotureInscriptionReminder");
+const deleteCNIAdnSpecificAmenagementType = require("./deleteCNIAndSpecificAmenagementType");
 
 // doubt ? -> https://crontab.guru/
 
@@ -70,7 +71,12 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   cron.schedule("0 9 * * 1", function () {
     applicationPending.handler();
   });
-
+  
+// Une fois par mois, le 1er du mois à 9h30
+  cron.schedule("30 9 1 * *", () => {
+    deleteCNIAdnSpecificAmenagementType.handler();
+  });
+  
   cron.schedule("0 9 * * 1", function () {
     noticePushMission.handler();
   });
