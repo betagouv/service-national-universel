@@ -494,6 +494,47 @@ async function getApplicationsChangeStatus(startDate, endDate, user) {
   }
 }
 
+async function getNewMissions(startDate, endDate, user) {
+  // ref dep only
+  let body = {
+    query: {
+      bool: {
+        filter: [
+          { terms: { "department.keyword": user.department } },
+          {
+            range: {
+              createdAt: {
+                gte: new Date(startDate),
+                lte: new Date(endDate),
+              },
+            },
+          },
+        ],
+      },
+    },
+    //to avoid duplicata
+    aggs: {
+      group_by_description: {
+        terms: { field: "description.keyword", size: ES_NO_LIMIT },
+      },
+    },
+    size: 0,
+    track_total_hits: true,
+  };
+
+  const response = await esClient.search({ index: "mission", body });
+  const value = response.body.aggregations.group_by_description.buckets.length;
+
+  return [
+    {
+      id: "new-missions",
+      value: value,
+      label: ` nouvelle${value > 1 ? "s" : ""} mission${value > 1 ? "s" : ""} déposée${value > 1 ? "s" : ""}`,
+      icon: "action",
+    },
+  ];
+}
+
 module.exports = {
   getYoungNotesPhase2,
   getNewStructures,
@@ -503,4 +544,5 @@ module.exports = {
   getYoungsWhoStartedOrFinishedMissions,
   getMissionsChangeStatus,
   getApplicationsChangeStatus,
+  getNewMissions,
 };
