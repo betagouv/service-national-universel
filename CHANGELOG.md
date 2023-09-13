@@ -1,3 +1,27 @@
+# [1.332.0](https://github.com/betagouv/service-national-universel/compare/v1.331.0...v1.332.0) (2023-09-13)
+
+
+### Bug Fixes
+
+* **app:** fix form validation on public contact form ([1f5f570](https://github.com/betagouv/service-national-universel/commit/1f5f570c17eda3c8dec1ef4c8f110c889c610803))
+* **app:** wording ([0d3584c](https://github.com/betagouv/service-national-universel/commit/0d3584ce5c727340f88810097c2ed7a813f9f283))
+* **deps:** update dependency @elastic/elasticsearch to v7.17.12 ([#2960](https://github.com/betagouv/service-national-universel/issues/2960)) ([6d3fa6b](https://github.com/betagouv/service-national-universel/commit/6d3fa6b821ac96cbde18994d03b3c29d6284796f))
+* **deps:** update dependency @headlessui/react to v1.7.17 ([#2961](https://github.com/betagouv/service-national-universel/issues/2961)) ([7437bc0](https://github.com/betagouv/service-national-universel/commit/7437bc09601e4ceff8f1d80f3a800b96198b3db0))
+* **deps:** update dependency @headlessui/react to v1.7.17 ([#2962](https://github.com/betagouv/service-national-universel/issues/2962)) ([ed3b961](https://github.com/betagouv/service-national-universel/commit/ed3b9613baceef5136abd5c5458b9dcc785e9c3d))
+* **deps:** update dependency @rollup/plugin-commonjs to v25.0.4 ([#2963](https://github.com/betagouv/service-national-universel/issues/2963)) ([cccaef8](https://github.com/betagouv/service-national-universel/commit/cccaef8102f9982ddc83754e5d0309adffbc1aaf))
+* **deps:** update dependency autoprefixer to v10.4.15 ([#2964](https://github.com/betagouv/service-national-universel/issues/2964)) ([0e95e69](https://github.com/betagouv/service-national-universel/commit/0e95e690fd15a09499afd0d7fd1ad6cf3dc7852a))
+* **deps:** update dependency bootstrap to v4.6.2 ([#2966](https://github.com/betagouv/service-national-universel/issues/2966)) ([f80e2bb](https://github.com/betagouv/service-national-universel/commit/f80e2bb02b2874ed08ea937a3280877a2bc34d06))
+* **deps:** update dependency dayjs to v1.11.9 ([#2967](https://github.com/betagouv/service-national-universel/issues/2967)) ([1dc5426](https://github.com/betagouv/service-national-universel/commit/1dc54262f6be256baf037da09a50502cfca350a5))
+* **deps:** update dependency jsonwebtoken to v9.0.2 ([#2977](https://github.com/betagouv/service-national-universel/issues/2977)) ([2a5cfc9](https://github.com/betagouv/service-national-universel/commit/2a5cfc9466ff4ea513adcf15e348cffcee6153eb))
+
+
+### Features
+
+* **admin:** ajout des Key Numbers engagement sur le dashboard ([#2923](https://github.com/betagouv/service-national-universel/issues/2923)) ([c04303f](https://github.com/betagouv/service-national-universel/commit/c04303f5dba9142115a86fbf2598e2ebacd227fe))
+* **admin:** ajout du Key number engagement new missions ([#2927](https://github.com/betagouv/service-national-universel/issues/2927)) ([6e9b5c2](https://github.com/betagouv/service-national-universel/commit/6e9b5c2fab9a0a9130ac568e866e26239fa2866d))
+* **admin:** ajout Key Number engagement young proposed mission ([#2932](https://github.com/betagouv/service-national-universel/issues/2932)) ([43b2be4](https://github.com/betagouv/service-national-universel/commit/43b2be46f79271429f201d0c97333c691f5d944d))
+* **admin:** ajout Key Number engagement young start Phase2 in time ([#2931](https://github.com/betagouv/service-national-universel/issues/2931)) ([0423b1f](https://github.com/betagouv/service-national-universel/commit/0423b1f8022e1f457f0950491cf154c30e413583))
+
 # [1.331.0](https://github.com/betagouv/service-national-universel/compare/v1.330.0...v1.331.0) (2023-09-12)
 
 
