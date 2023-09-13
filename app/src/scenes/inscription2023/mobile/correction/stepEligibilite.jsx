@@ -8,8 +8,8 @@ import CheckBox from "../../../../components/dsfr/forms/checkbox";
 import Toggle from "../../../../components/dsfr/forms/toggle";
 import plausibleEvent from "../../../../services/plausible";
 import { getCorrectionByStep } from "../../../../utils/navigation";
-import SchoolInFrance from "../../../inscription2023/components/ShoolInFrance";
-import SchoolOutOfFrance from "../../../inscription2023/components/ShoolOutOfFrance";
+import SchoolInFrance from "../../components/ShoolInFrance";
+import SchoolOutOfFrance from "../../components/ShoolOutOfFrance";
 import Input from "../../components/Input";
 import Select from "../../../../components/dsfr/forms/Select";
 
