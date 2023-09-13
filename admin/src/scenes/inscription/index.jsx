@@ -242,6 +242,7 @@ export default function Inscription() {
                 { label: "Date de création (récent > ancien)", field: "createdAt", order: "desc" },
                 { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
               ]}
+              selectedFilters={selectedFilters}
               paramData={paramData}
               setParamData={setParamData}
             />
