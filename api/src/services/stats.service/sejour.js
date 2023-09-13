@@ -40,9 +40,80 @@ async function getYoungNotesPhase1(startDate, endDate, user) {
 
   return [
     {
-      id: "young-notes-phase1",
+      id: "young-notes",
       value,
       label: `note${value > 1 ? "s" : ""} interne${value > 1 ? "s" : ""} déposée${value > 1 ? "s" : ""} - phase 1`,
+      icon: "where",
+    },
+  ];
+}
+
+async function getTimeScheduleAndPedagoProject(startDate, endDate, user) {
+  // ref dep and ref reg
+  let body = {
+    query: {
+      bool: {
+        filter: [],
+      },
+    },
+    aggs: {
+      group_by_timeSchedule: {
+        filter: {
+          nested: {
+            path: "timeScheduleFiles",
+            query: {
+              range: {
+                "timeScheduleFiles.uploadedAt": {
+                  gte: new Date(startDate),
+                  lte: new Date(endDate),
+                },
+              },
+            },
+          },
+        },
+      },
+      group_by_pedagoProject: {
+        filter: {
+          nested: {
+            path: "pedagoProjectFiles",
+            query: {
+              range: {
+                "pedagoProjectFiles.uploadedAt": {
+                  gte: new Date(startDate),
+                  lte: new Date(endDate),
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    size: 0,
+    track_total_hits: true,
+  };
+
+  if (user.role === ROLES.REFERENT_REGION) {
+    body.query.bool.filter.push({ match: { "region.keyword": user.region } });
+  }
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    body.query.bool.filter.push({ terms: { "department.keyword": user.department } });
+  }
+
+  const response = await esClient.search({ index: "sessionphase1", body });
+  const time = response.body.aggregations.group_by_timeSchedule.doc_count;
+  const project = response.body.aggregations.group_by_pedagoProject.doc_count;
+
+  return [
+    {
+      id: "time-schedule",
+      value: time,
+      label: ` emploi${time > 1 ? "s" : ""} du temps déposé${time > 1 ? "s" : ""}`,
+      icon: "where",
+    },
+    {
+      id: "pedago-project",
+      value: project,
+      label: ` projet${project > 1 ? "s" : ""} pédagogique${project > 1 ? "s" : ""} déposé${project > 1 ? "s" : ""}`,
       icon: "where",
     },
   ];
@@ -154,77 +225,6 @@ async function getLineToPoints(startDate, endDate) {
       id: "lignebus-creation",
       value,
       label: `point${value ? "s" : ""} de rassemblement rattaché${value > 1 ? "s" : ""} à un centre`,
-      icon: "where",
-    },
-  ];
-}
-
-async function getTimeScheduleAndPedagoProject(startDate, endDate, user) {
-  // ref dep and ref reg
-  let body = {
-    query: {
-      bool: {
-        filter: [],
-      },
-    },
-    aggs: {
-      group_by_timeSchedule: {
-        filter: {
-          nested: {
-            path: "timeScheduleFiles",
-            query: {
-              range: {
-                "timeScheduleFiles.uploadedAt": {
-                  gte: new Date(startDate),
-                  lte: new Date(endDate),
-                },
-              },
-            },
-          },
-        },
-      },
-      group_by_pedagoProject: {
-        filter: {
-          nested: {
-            path: "pedagoProjectFiles",
-            query: {
-              range: {
-                "pedagoProjectFiles.uploadedAt": {
-                  gte: new Date(startDate),
-                  lte: new Date(endDate),
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    size: ES_NO_LIMIT,
-    track_total_hits: true,
-  };
-
-  if (user.role === ROLES.REFERENT_REGION) {
-    body.query.bool.filter.push({ match: { "region.keyword": user.region } });
-  }
-  if (user.role === ROLES.REFERENT_DEPARTMENT) {
-    body.query.bool.filter.push({ terms: { "department.keyword": user.department } });
-  }
-
-  const response = await esClient.search({ index: "sessionphase1", body });
-  const time = response.body.aggregations.group_by_timeSchedule.doc_count;
-  const project = response.body.aggregations.group_by_pedagoProject.doc_count;
-
-  return [
-    {
-      id: "time-schedule",
-      value: time,
-      label: ` emploi${time > 1 ? "s" : ""} du temps déposé${time > 1 ? "s" : ""}`,
-      icon: "where",
-    },
-    {
-      id: "pedago-project",
-      value: project,
-      label: ` projet${project > 1 ? "s" : ""} pédagogique${project > 1 ? "s" : ""} déposé${project > 1 ? "s" : ""}`,
       icon: "where",
     },
   ];
