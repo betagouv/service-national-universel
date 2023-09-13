@@ -541,11 +541,11 @@ async function getProposedMissionsAcceptedOrRefusedByYoung(startDate, endDate, u
   let body = {
     startDate: formatDateForPostGre(startDate),
     endDate: formatDateForPostGre(endDate),
-    status: [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.CANCEL],
+    status: [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED],
     department: user.department,
   };
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-accepted_refused/count`, {
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-accepted-refused/count`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
@@ -553,8 +553,8 @@ async function getProposedMissionsAcceptedOrRefusedByYoung(startDate, endDate, u
   const result = await response.json();
   const data = result?.data;
   let resultArray = {
-    [APPLICATION_STATUS.CANCEL]: 0,
-    [APPLICATION_STATUS.WAITING_VALIDATION]: 0,
+    [APPLICATION_STATUS.VALIDATED]: 0,
+    [APPLICATION_STATUS.REFUSED]: 0,
   };
 
   for (const item of data) {
@@ -563,8 +563,8 @@ async function getProposedMissionsAcceptedOrRefusedByYoung(startDate, endDate, u
       resultArray[value]++;
     }
   }
-  const validatedValue = resultArray[APPLICATION_STATUS.WAITING_VALIDATION];
-  const refusedValue = resultArray[APPLICATION_STATUS.CANCEL];
+  const validatedValue = resultArray[APPLICATION_STATUS.VALIDATED];
+  const refusedValue = resultArray[APPLICATION_STATUS.REFUSED];
 
   return [
     {

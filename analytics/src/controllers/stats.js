@@ -485,10 +485,10 @@ router.post("/application-change-status/count", async (req, res) => {
   }
 });
 
-router.post("/application-accepted_refused/count", async (req, res) => {
+router.post("/application-accepted-refused/count", async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      status: Joi.array().items(Joi.string().valid("WAITING_VALIDATION", "WAITING_ACCEPTATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION").required()),
+      status: Joi.array().items(Joi.string().valid("VALIDATED", "REFUSED").required()),
       department: Joi.array().items(Joi.string()),
       startDate: Joi.string()
         .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -509,10 +509,10 @@ router.post("/application-accepted_refused/count", async (req, res) => {
       where value in (:status)
       and "date" BETWEEN :startDate and :endDate::date + 1
       and exists (
-      select 1 from "public"."logs_by_day_application_status_change_event" l2
-      where value = 'WAITING_VALIDATION'
-      and candidature_mission_department in (:department)
-      and l2.candidature_id = l.candidature_id
+        select 1 from "public"."logs_by_day_application_status_change_event" l2
+        where value = 'WAITING_VALIDATION'
+        and candidature_mission_department in (:department)
+        and l2.candidature_id = l.candidature_id
       );`,
       {
         type: db.QueryTypes.SELECT,
@@ -523,7 +523,7 @@ router.post("/application-accepted_refused/count", async (req, res) => {
     return res.status(200).send({ ok: true, data: result });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: "Error in application-accepted_refused" });
+    res.status(500).send({ ok: false, code: "Error in application-accepted-refused" });
   }
 });
 
