@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "dev": "nodemon src/index.js --watch ../packages/lib/common-js/index.cjs --watch ./src ./src/index.js",
     "lint": "eslint . --ext .js,.jsx",
     "lint:fix": "eslint --ext .js --fix src",
     "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
