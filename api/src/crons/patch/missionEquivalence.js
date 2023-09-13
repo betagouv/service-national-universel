@@ -8,7 +8,6 @@ const { capture } = require("../../sentry");
 const slack = require("../../slack");
 
 const StructureModel = require("../../models/structure");
-
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const MissionEquivalencePatchModel = require("./models/missionEquivalencePatch");
 
