@@ -535,6 +535,53 @@ async function getNewMissions(startDate, endDate, user) {
   ];
 }
 
+async function getProposedMissionsAcceptedOrRefusedByYoung(startDate, endDate, user) {
+  // ref dep only
+  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  let body = {
+    startDate: formatDateForPostGre(startDate),
+    endDate: formatDateForPostGre(endDate),
+    status: [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED],
+    department: user.department,
+  };
+
+  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-accepted-refused/count`, {
+    ...postParams(token),
+    body: JSON.stringify(body),
+  });
+
+  const result = await response.json();
+  const data = result?.data;
+  let resultArray = {
+    [APPLICATION_STATUS.VALIDATED]: 0,
+    [APPLICATION_STATUS.REFUSED]: 0,
+  };
+
+  for (const item of data) {
+    const value = item.value;
+    if (Object.prototype.hasOwnProperty.call(resultArray, value)) {
+      resultArray[value]++;
+    }
+  }
+  const validatedValue = resultArray[APPLICATION_STATUS.VALIDATED];
+  const refusedValue = resultArray[APPLICATION_STATUS.REFUSED];
+
+  return [
+    {
+      id: "applications-validated",
+      value: validatedValue,
+      label: ` proposition${validatedValue > 1 ? "s" : ""} de missions acceptée${validatedValue > 1 ? "s" : ""} par des volontaires`,
+      icon: "action",
+    },
+    {
+      id: "applications-refused",
+      value: refusedValue,
+      label: ` proposition${refusedValue > 1 ? "s" : ""} de missions refusée${refusedValue > 1 ? "s" : ""} par des volontaires`,
+      icon: "action",
+    },
+  ];
+}
+
 module.exports = {
   getYoungNotesPhase2,
   getNewStructures,
@@ -545,4 +592,5 @@ module.exports = {
   getMissionsChangeStatus,
   getApplicationsChangeStatus,
   getNewMissions,
+  getProposedMissionsAcceptedOrRefusedByYoung,
 };
