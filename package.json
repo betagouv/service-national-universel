@@ -16,7 +16,9 @@
     "packages/*",
     "app",
     "admin",
-    "api"
+    "api",
+    "analytics",
+    "knowledge-base-public"
   ],
   "engines": {
     "node": "^18.16.0",
