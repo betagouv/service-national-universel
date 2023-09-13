@@ -10,14 +10,13 @@ import { ID } from "../utils";
 import { supportURL } from "../../../config";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 
-import DatePickerList from "../../preinscription/components/DatePickerList";
+import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
 import DesktopPageContainer from "../components/DesktopPageContainer";
 import Error from "../../../components/error";
-import ErrorMessage from "../components/ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
-import FileImport from "../components/FileImport";
+import FileImport from "../../../components/dsfr/forms/FileImport";
 import { getCorrectionsForStepUpload } from "../../../utils/navigation";
-const images = import.meta.globEager("../../../assets/IDProof/*");
 
 export default function StepUpload() {
   let { category } = useParams();
@@ -75,7 +74,7 @@ export default function StepUpload() {
     }
 
     if (recto) {
-      const res = await api.uploadID(young._id, recto, { category, expirationDate, side: "recto" });
+      const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, recto, { category, expirationDate, side: "recto" });
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -85,7 +84,7 @@ export default function StepUpload() {
     }
 
     if (verso) {
-      const res = await api.uploadID(young._id, verso, { category, expirationDate, side: "verso" });
+      const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, verso, { category, expirationDate, side: "verso" });
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -150,6 +149,11 @@ export default function StepUpload() {
     }
   }
 
+  const getImgUrl = (filename) => {
+    const path = new URL("../../../assets/IDProof/", import.meta.url);
+    return `${path}/${filename}`;
+  };
+
   if (!category) return <div>Loading</div>;
 
   return (
@@ -161,7 +165,7 @@ export default function StepUpload() {
       onCorrection={onCorrect}
       disabled={!isEnabled}
       loading={loading}
-      questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
+      supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {corrections
         ?.filter(({ field }) => field === "cniFile")
         .map((e) => (
@@ -173,13 +177,13 @@ export default function StepUpload() {
 
       <div className="my-10 flex w-full justify-around">
         <div>
-          <img className="h-64" src={images[`../../assets/IDProof/${ID[category].imgFront}`]?.default} alt={ID[category].title} />
+          <img className="h-64" src={ID[category].imgFront} alt={ID[category].title} />
           <div className="mt-4 text-sm text-center text-gray-500">Recto</div>
         </div>
 
         {ID[category].imgBack && (
           <div>
-            <img className="h-64" src={images[`../../assets/IDProof/${ID[category].imgBack}`]?.default} alt={ID[category].title} />
+            <img className="h-64" src={ID[category].imgBack} alt={ID[category].title} />
             <div className="mt-4 text-sm text-center text-gray-500">Verso</div>
           </div>
         )}
@@ -233,6 +237,10 @@ export default function StepUpload() {
 
 function ExpirationDate({ date, setDate, onChange, corrections, category }) {
   const young = useSelector((state) => state.Auth.young);
+  const getImgUrl = (filename) => {
+    const path = new URL("../../../assets/IDProof/", import.meta.url);
+    return `${path}/${filename}`;
+  };
 
   return (
     <>
@@ -264,7 +272,7 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
           />
         </div>
         <div className="w-1/2">
-          <img className="mx-auto h-32" src={images[`../../../assets/IDProof/${ID[category].imgDate}`]} alt={ID.title} />
+          <img className="mx-auto h-32" src={ID[category].imgDate} alt={ID.title} />
         </div>
       </div>
     </>

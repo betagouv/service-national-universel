@@ -58,7 +58,7 @@ function ipAllowListMiddleware(req, res, next) {
       allowedIpList.includes(ip))
   )
     return next();
-  return res.status(418).send({ ok: false, code: "INVALID_IP" });
+  return res.status(403).send({ ok: false, code: "INVALID_IP" });
 }
 
 const app = express();

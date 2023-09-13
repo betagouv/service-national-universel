@@ -1,7 +1,7 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 import RightArrow from "../../../assets/icons/RightArrow";
-import Input from "../../../components/inscription/input";
+import Input from "../../../components/dsfr/forms/input";
 import api from "../../../services/api";
 import Error from "../../../components/error";
 

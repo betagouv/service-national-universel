@@ -1,14 +1,7 @@
-import * as React from "react"
+import * as React from "react";
 
 const ChevronRight = (props) => (
-  <svg
-    width={6}
-    height={10}
-    viewBox="0 0 6 10"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    {...props}
-  >
+  <svg width={6} height={10} viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
     <path
       fillRule="evenodd"
       clipRule="evenodd"
@@ -16,6 +9,6 @@ const ChevronRight = (props) => (
       fill="currentColor"
     />
   </svg>
-)
+);
 
-export default ChevronRight
+export default ChevronRight;

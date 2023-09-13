@@ -116,6 +116,18 @@ const MISSION_DOMAINS = {
   MILITARY: "MILITARY",
 };
 
+const JVA_MISSION_DOMAINS = {
+  education: "éducation",
+  "solidarite-insertion": "solidarité/insertion",
+  environnement: "environnement",
+  sport: "sport",
+  "vivre-ensemble": "vivre-ensemble",
+  "culture-loisirs": "culture/loisirs",
+  sante: "santé",
+  "benevolat-competences": "bénévolat/compétences",
+  "prevention-protection": "prévention/protection",
+}
+
 const YOUNG_SITUATIONS = {
   GENERAL_SCHOOL: "GENERAL_SCHOOL",
   PROFESSIONAL_SCHOOL: "PROFESSIONAL_SCHOOL",
@@ -207,7 +219,22 @@ const STRUCTURE_STATUS = {
 
 const DEFAULT_STRUCTURE_NAME = "Ma nouvelle Structure";
 
-const COHORTS = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023"];
+const COHORTS = [
+  "2019",
+  "2020",
+  "2021",
+  "2022",
+  "Février 2022",
+  "Juin 2022",
+  "Juillet 2022",
+  "Février 2023 - C",
+  "Avril 2023 - B",
+  "Avril 2023 - A",
+  "Juin 2023",
+  "Juillet 2023",
+  "Octobre 2023 - NC",
+  "à venir",
+];
 
 const COHORTS_BEFORE_JULY_2023 = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023"];
 
@@ -220,8 +247,8 @@ const INTEREST_MISSION_LIMIT_DATE = {
 const ES_NO_LIMIT = 10_000;
 
 const SENDINBLUE_TEMPLATES = {
-  SIGNIN_2FA: "1144",
-  FORGOT_PASSWORD: "157",
+  SIGNIN_2FA: "1317",
+  FORGOT_PASSWORD: "1308",
 
   invitationReferent: {
     [ROLES.REFERENT_DEPARTMENT]: "158",
@@ -236,17 +263,17 @@ const SENDINBLUE_TEMPLATES = {
     NEW_STRUCTURE: "160",
     NEW_STRUCTURE_MEMBER: "163",
   },
-  INVITATION_YOUNG: "166",
+  INVITATION_YOUNG: "1283",
 
   //session phase 1
   SHARE_SESSION_PHASE1: "419",
 
   //PHASE 2
-  ATTACHEMENT_PHASE_2_APPLICATION: "571",
+  ATTACHEMENT_PHASE_2_APPLICATION: "1299",
 
   // contract
-  VALIDATE_CONTRACT: "176",
-  REVALIDATE_CONTRACT: "175",
+  VALIDATE_CONTRACT: "1288",
+  REVALIDATE_CONTRACT: "1287",
 
   referent: {
     WELCOME_REF_DEP: "378",
@@ -301,86 +328,83 @@ const SENDINBLUE_TEMPLATES = {
     INSTRUCTION_END_REMINDER: 874,
   },
   young: {
-    CHANGE_COHORT: "325",
-    WAITING_LIST: "601",
-    WITHDRAWN: "61",
-    // le contenu est specifique a la reinscription, il faudrait faire un message plus générique a terme
-    ARCHIVED: "269",
-
-    INSCRIPTION_STARTED: "219",
-    INSCRIPTION_VALIDATED: "167",
-    INSCRIPTION_REACTIVATED: "168",
-    INSCRIPTION_WAITING_CORRECTION: "169",
-    INSCRIPTION_REMIND_CORRECTION: "169",
-    INSCRIPTION_WAITING_LIST: "171",
-    INSCRIPTION_REFUSED: "172",
+    CHANGE_COHORT: "1291",
+    WAITING_LIST: "1215",
+    WITHDRAWN: "1248",
+    INSCRIPTION_STARTED: "1277",
+    INSCRIPTION_VALIDATED: "1284",
+    INSCRIPTION_REACTIVATED: "1247",
+    INSCRIPTION_WAITING_CORRECTION: "1285",
+    INSCRIPTION_REMIND_CORRECTION: "1285",
+    INSCRIPTION_WAITING_LIST: "1286",
+    INSCRIPTION_REFUSED: "1246",
     INSTRUCTION_END_WAITING_VALIDATION_ELIGIBLE: "978",
-    INSTRUCTION_END_WAITING_VALIDATION_NOT_ELIGIBLE: "656",
+    INSTRUCTION_END_WAITING_VALIDATION_NOT_ELIGIBLE: "1268",
     INSTRUCTION_END_WAITING_CORRECTION_ELIGIBLE: "936",
-    INSTRUCTION_END_WAITING_CORRECTION_NOT_ELIGIBLE: "658",
-    PARENT_CONSENTED: "612",
-    PARENT_DID_NOT_CONSENT: "613",
-    PARENT2_DID_NOT_CONSENT: "634",
-    PHASE1_AFFECTATION: "663",
+    INSTRUCTION_END_WAITING_CORRECTION_NOT_ELIGIBLE: "1267",
+    PARENT_CONSENTED: "1303",
+    PARENT_DID_NOT_CONSENT: "1304",
+    PARENT2_DID_NOT_CONSENT: "1243",
+    PHASE1_AFFECTATION: "1272",
 
     // MIG
-    REFUSE_APPLICATION: "152",
-    CANCEL_APPLICATION: "180",
-    VALIDATE_APPLICATION: "151",
-    MISSION_PROPOSITION: "170",
-    MISSION_CANCEL: "261",
-    MISSION_ARCHIVED: "227",
-    MISSION_ARCHIVED_AUTO: "289",
-    PHASE_2_VALIDATED: "154",
-    MISSION_PROPOSITION_AUTO: "237",
+    REFUSE_APPLICATION: "1253",
+    CANCEL_APPLICATION: "1262",
+    VALIDATE_APPLICATION: "1257",
+    MISSION_PROPOSITION: "1229",
+    MISSION_CANCEL: "1236",
+    MISSION_ARCHIVED: "1274",
+    MISSION_ARCHIVED_AUTO: "1289",
+    PHASE_2_VALIDATED: "1256",
+    MISSION_PROPOSITION_AUTO: "1234",
 
     // PREPA MILITAIRE
-    MILITARY_PREPARATION_DOCS_VALIDATED: "145",
-    MILITARY_PREPARATION_DOCS_CORRECTION: "146",
-    MILITARY_PREPARATION_DOCS_REFUSED: "147",
+    MILITARY_PREPARATION_DOCS_VALIDATED: "1258",
+    MILITARY_PREPARATION_DOCS_CORRECTION: "1259",
+    MILITARY_PREPARATION_DOCS_REFUSED: "1260",
 
     //PHASE 3
-    VALIDATE_PHASE3: "200",
+    VALIDATE_PHASE3: "1280",
 
-    DOCUMENT: "182",
-    CONTRACT_VALIDATED: "183",
+    DOCUMENT: "1310",
+    CONTRACT_VALIDATED: "1282",
 
     // Personal and situation changes
     DEPARTMENT_IN: "215",
     DEPARTMENT_OUT: "216",
 
     //Phase 1 pj
-    PHASE_1_PJ_WAITING_VERIFICATION: "348",
-    PHASE_1_PJ_WAITING_CORRECTION: "349",
-    PHASE_1_PJ_VALIDATED: "350",
-    PHASE_1_FOLLOW_UP_MEDICAL_FILE: "354",
-    PHASE_1_AFFECTATION: "421",
+    PHASE_1_PJ_WAITING_VERIFICATION: "1239",
+    PHASE_1_PJ_WAITING_CORRECTION: "1293",
+    PHASE_1_PJ_VALIDATED: "1294",
+    PHASE_1_FOLLOW_UP_MEDICAL_FILE: "1297",
+    PHASE_1_AFFECTATION: "1298",
 
     //send a download link to the young
-    LINK: "410",
+    LINK: "1231",
 
     //EQUIVALENCE
-    EQUIVALENCE_REFUSED: "342",
-    EQUIVALENCE_VALIDATED: "343",
-    EQUIVALENCE_WAITING_VERIFICATION: "344",
-    EQUIVALENCE_WAITING_CORRECTION: "346",
+    EQUIVALENCE_REFUSED: "1249",
+    EQUIVALENCE_VALIDATED: "1251",
+    EQUIVALENCE_WAITING_VERIFICATION: "1292",
+    EQUIVALENCE_WAITING_CORRECTION: "1250",
 
-    APPLICATION_CANCEL_1_WEEK_NOTICE: "198",
-    APPLICATION_CANCEL_13_DAY_NOTICE: "594",
+    APPLICATION_CANCEL_1_WEEK_NOTICE: "1281",
+    APPLICATION_CANCEL_13_DAY_NOTICE: "1230",
   },
-  YOUNG_ARRIVED_IN_CENTER_TO_REPRESENTANT_LEGAL: "302",
+  YOUNG_ARRIVED_IN_CENTER_TO_REPRESENTANT_LEGAL: "1290",
   parent: {
-    OUTDATED_ID_PROOF: "610",
-    PARENT1_CONSENT: "605",
-    PARENT2_CONSENT: "609",
-    PARENT1_CONSENT_REMINDER: "621",
-    PARENT_YOUNG_COHORT_CHANGE: "665",
-    PARENT1_RESEND_IMAGERIGHT: "671",
-    PARENT2_RESEND_IMAGERIGHT: "671",
-    PARENT2_IMAGERIGHT_REMINDER: "852",
+    OUTDATED_ID_PROOF: "1302",
+    PARENT1_CONSENT: "1300",
+    PARENT2_CONSENT: "1301",
+    PARENT1_CONSENT_REMINDER: "1305",
+    PARENT_YOUNG_COHORT_CHANGE: "1307",
+    PARENT1_RESEND_IMAGERIGHT: "1241",
+    PARENT2_RESEND_IMAGERIGHT: "1241",
+    PARENT2_IMAGERIGHT_REMINDER: "1309",
   },
   headCenter: {
-    TIME_SCHEDULE_REMINDER: "697",
+    FILE_SESSION_REMINDER: "1232",
   },
   PLAN_TRANSPORT: {
     MODIFICATION_REFUSEE: "673",
@@ -475,7 +499,8 @@ const COHESION_STAY_LIMIT_DATE = {
   "Avril 2023 - B": "du 16 au 28 Avril 2023",
   "Avril 2023 - A": "du 9 au 21 Avril 2023",
   "Juin 2023": "du 11 au 23 Juin 2023",
-  "Juillet 2023": "du 4 au 16 Juillet 2023",
+  "Juillet 2023": "du 5 au 17 Juillet 2023",
+  "Octobre 2023 - NC": "du 9 au 20 Octobre 2023",
   "à venir": "à venir",
 };
 
@@ -490,7 +515,8 @@ const COHESION_STAY_START = {
   "Avril 2023 - A": new Date("04/09/2023"),
   "Avril 2023 - B": new Date("04/16/2023"),
   "Juin 2023": new Date("06/11/2023"),
-  "Juillet 2023": new Date("07/04/2023"),
+  "Juillet 2023": new Date("07/05/2023"),
+  "Octobre 2023 - NC": new Date("10/09/2023"),
 };
 
 const START_DATE_SESSION_PHASE1 = {
@@ -502,6 +528,7 @@ const START_DATE_SESSION_PHASE1 = {
   "Avril 2023 - B": new Date("04/16/2023"),
   "Juin 2023": new Date("06/11/2023"),
   "Juillet 2023": new Date("07/04/2023"),
+  "Octobre 2023 - NC": new Date("10/09/2023"),
 };
 
 const START_DATE_PHASE1 = {
@@ -528,6 +555,7 @@ const PHASE1_YOUNG_ACCESS_LIMIT = {
   "Avril 2023 - B": new Date(2023, 1, 28), // before 28 fevrier 2023 morning
   "Juin 2023": new Date(2023, 3, 19), // before 19 avril 2023 morning
   "Juillet 2023": new Date(2023, 4, 11), // before 11 mai 2023 morning
+  "Octobre 2023 - NC": new Date(2023, 9, 1), // before 1 september 2023 morning  @todo: A modifier quand on connaitra la date
 };
 
 const CONSENTMENT_TEXTS = {
@@ -588,7 +616,7 @@ const MINISTRES = [
     template: "certificates/certificateTemplate_juillet_2022.png",
   },
   {
-    date_end: "01-01-2100", // ! Changer ici à l'ajout d'un nouveau
+    date_end: "08-18-2023",
     ministres: [
       "Pap Ndiaye, Ministre de l’Éducation Nationale et de la Jeunesse",
       "Sébastien Lecornu, Ministre des Armées",
@@ -597,6 +625,16 @@ const MINISTRES = [
     ],
     template: "certificates/certificateTemplate2023.png",
   },
+  {
+    date_end: "08-18-2100", // ! Changer ici à l'ajout d'un nouveau
+    ministres: [
+      "Gabriel Attal, Ministre de l’Éducation Nationale et de la Jeunesse",
+      "Sébastien Lecornu, Ministre des Armées",
+      "Prisca Thevenot, Secrétaire d'État auprès du ministre des Armées et du ministre de 'Éducation nationale et de la Jeunesse , \
+      chargée de la Jeunesse et du Service national universel",
+    ],
+    template: "certificates/certificateTemplate2023-08-18.png",
+  }
 ];
 
 const FILE_KEYS = [
@@ -611,6 +649,8 @@ const FILE_KEYS = [
 ];
 
 const MILITARY_FILE_KEYS = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
+
+const SESSION_FILE_KEYS = ["time-schedule", "pedago-project"];
 
 const ENGAGEMENT_TYPES = [
   "Service Civique",
@@ -796,6 +836,77 @@ const TEMPLATE_DESCRIPTIONS = {
   697: "Quand un référent / modérateur clique sur le bouton “relance” pour demander au chef de centre de téléverser l’EDT de son séjour",
   935: "Jeunes restés en waiting validation après clôture instruction + encore éligibles SNU",
   936: "Jeunes restés en waiting correction après clôture instruction + encore éligibles SNU",
+  1248: "Statut parcours SNU : désisté",
+  1261: 'Statut inscription "en attente de validation',
+  1258: "Dossier d'éligibilité aux PM validé",
+  1259: "Mise en attente de correction du dossier d'éligibilité aux PM",
+  1260: "Refus de documents pour une préparation militaire",
+  1257: 'Statut pour la mission "validée',
+  1253: "Statut candidature ⇒ refusée",
+  1256: "Validation de la phase 2 Félicitations pour votre engagement : vous avez validé la phase 2 du SNU !",
+  1308: "Click sur Démarche de réinitialisation de mot de passe",
+  1283: "Création manuelle d'une inscription",
+  1284: "Phase 0 : validée",
+  1247: "Création manuelle d'un volontaire par un référent",
+  1285: "Statut inscription ⇒ en attente de correction",
+  1229: "Mission proposée à un volontaire par un tiers",
+  1286: "Passage sur liste complémentaire à l'instruction du dossier",
+  1246: "Statut inscription ⇒ refusée",
+  1287: "Click sur Enregistrer les modifications alors que le contrat était déjà envoyé et validé par le signataire.",
+  1288: `Click depuis le contrat sur "Enregistrer et envoyer à toutes les parties -prenantes" OU click sur "Renvoyer le lien du contrat d'engagement`,
+  1262: "Statut candidature ⇒ annulée par le volontaire",
+  1310: "Clic sur le lien : je m'envoi un document depuis la plateforme",
+  1282: "Toutes les parties-prenantes ont validé le contrat d'engagement (statut contrat : Validé)",
+  1281: "Relance quand le volontaire n'a pas accepté ou décliné la mission au bout de 7 jours",
+  1280: "Validation de la phase 3",
+  1279: "Statut de PM : En attente de vérification d'éligibilité",
+  1278: "Réponse reçue sur un ticket",
+  1277: "Fin de la pré-inscription avant le passage à l'inscription",
+  1276: 'Relance - inscription "En cours" depuis 3, 7, 20 jours (délai challengeable) - scenario : https://automation.sendinblue.com/scenarios/3#',
+  1275: 'Statut inscription "en attente de correction" depuis 3, 7, 20 jours (délai challengeable) - Scenario : https://automation.sendinblue.com/scenarios/7#',
+  1274: "Statut de la mission ⇒ archivée, envoi à tous les candidats dont le statut n'est pas : Validée ou Effectuée",
+  1273: "Clic sur le bouton : relancer le volontaire pour téléversement des pièces PM (Par référent ou admin)",
+  1234: "Email 1 fois par semaine si au moins 1 mission dans un périmètre de 20Km autour du jeune.",
+  1236: "Statut de la mission ⇒ annulée, envoi à tous les candidats dont le statut n'est pas : Validée ou Effectuée",
+  1233: "Relance après changement de statut phase 1→ effectuée (relance M1, M3 et M6)",
+  1263: "Relance après changement de statut phase 2 → effectuée (relance M1, M6 et M12)",
+  1289: "Une mission est archivée automatiquement à la fin de sa date de validité",
+  1290: "Le volontaire est noté présent par le chef de centre",
+  1291: "Changement de cohorte par un volontaire",
+  1240: 'Relance - inscription "En cours" - scenario : https://www.notion.so/eb431335b0dc43f5aff6fe2dba3ae649',
+  1249: "Demande d'équivalence MIG refusée",
+  1251: "Demande d'équivalence MIG a été acceptée",
+  1292: "Volontaire a demandé la vérification de son dossier équivalence MIG",
+  1250: "Le référent demande la correction du dossier équivalence MIG",
+  1239: "Un volontaire a téléversé un document sur son compte volontaire",
+  1293: "Demande de correction sur un document",
+  1294: "Un document déposé a bien été validé",
+  1296: "Demande du référent de rajouter des documents clic sur le bouton relance volontaire",
+  1297: "Le référent clique sur le bouton relance pour demander la fiche sanitaire au volontaire",
+  1231: "Bouton mail valider son séjour",
+  1298: "Un jeune en liste complémentaire surbooking passe en affecté",
+  1299: "",
+  1230: "J+13 après la proposition de mission si le statut de la candidature est toujours waiting_validation",
+  1215: "Quand un jeune laisse son adresse mail sur la page inscription hors période d'inscription https://moncompte.snu.gouv.fr/inscription",
+  1255: "Réception d'une demande (quel que soit le canal) sur le support",
+  1300: "Clic sur le bouton Confirmer à la fin de la préinscription",
+  1301: "",
+  1302: "Si l'ID du jeune est / sera périmée au moment du séjour",
+  1238: "Pré-inscription terminée - Clic sur M'inscrire au SNU",
+  1303: "Quand le représentant légal clique sur Donner mon consentement",
+  1304: "Quand le représentant légal ne donne pas son consentement",
+  1245: "Clic sur le bouton s'inscrire au SNU et attente du consentement du représentant légal",
+  1305: "Relance à J+7 du dernier envoi du template 605",
+  1244: "Quand le représentant légal clique sur Donner mon consentement",
+  1243: "Quand le représentant légal ne donne pas son consentement",
+  1271: "Clôture des instructions - dossier non finalisé - basculement autre cohorte",
+  1270: "Clôture instruction - dossier non finalisé - plus éligible au SNU",
+  1269: "Jeunes restés en waiting validation après clôture instruction + encore éligibles SNU",
+  1268: "Jeunes restés en waiting validation après clôture instruction + non éligibles SNU",
+  1267: "Jeunes restés en waiting correction après clôture instruction + non éligibles SNU",
+  1272: "Changement manuel ou automatique de l'affectation et / ou du PDR",
+  1307: "Quand un volontaire ou un référent change de séjour - A ne pas envoyer si le représentant légal n'a pas encore donné son consentement",
+  1241: "Un modérateur, référent régional ou référent départemental demande au RL une modification du droit à l'image",
 };
 
 const MIME_TYPES = {
@@ -824,6 +935,7 @@ export {
   PROFESSIONNAL_PROJECT,
   PROFESSIONNAL_PROJECT_PRECISION,
   MISSION_DOMAINS,
+  JVA_MISSION_DOMAINS,
   YOUNG_SITUATIONS,
   FORMAT,
   ROLES,
@@ -854,6 +966,7 @@ export {
   MINISTRES,
   FILE_KEYS,
   MILITARY_FILE_KEYS,
+  SESSION_FILE_KEYS,
   ENGAGEMENT_TYPES,
   UNSS_TYPE,
   ENGAGEMENT_LYCEEN_TYPES,
@@ -879,6 +992,7 @@ export default {
   PROFESSIONNAL_PROJECT,
   PROFESSIONNAL_PROJECT_PRECISION,
   MISSION_DOMAINS,
+  JVA_MISSION_DOMAINS,
   YOUNG_SITUATIONS,
   FORMAT,
   ROLES,

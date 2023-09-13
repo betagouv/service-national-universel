@@ -2,6 +2,7 @@ import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants
 import translation from "./translation";
 import regionAndDepartments from "./region-and-departments";
 import { ROLES } from "./roles";
+import sanitizeHtml from "sanitize-html";
 
 const isInRuralArea = (v) => {
   if (!v.populationDensity) return null;
@@ -16,7 +17,7 @@ function isEndOfInscriptionManagement2021() {
 //force redeploy
 
 function inscriptionModificationOpenForYoungs(cohort, young, env) {
-  if (env !== undefined && env !== "production") return true;
+  // if (env !== undefined && env !== "production") return true; // only use when inscriptions are closed on production
 
   switch (cohort) {
     case "2019":
@@ -38,7 +39,7 @@ function inscriptionModificationOpenForYoungs(cohort, young, env) {
     case "Avril 2023 - B":
       return new Date() < new Date(2023, 1, 28, 23, 59); // before 28 fevrier 2023 23h59
     case "Juin 2023":
-      return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023 - A modifier quand on connaitra la date.
+      return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023.
     case "Juillet 2023":
       if (young && regionAndDepartments.isFromFrenchPolynesia(young)) {
         return new Date() < new Date(2023, 5, 1, 23, 59); // before 1 june 2023
@@ -47,15 +48,17 @@ function inscriptionModificationOpenForYoungs(cohort, young, env) {
         return new Date() < new Date(2023, 4, 21, 23, 59); // before 22 mai 2023
       }
       return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023
+    case "Octobre 2023 - NC":
+      return new Date() < new Date(Date.UTC(2023, 8, 15, 12, 59)); // before 15 septembre 2023, 23h59 heure de Nouméa
     case "à venir":
       return false;
     default:
-      return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023
+      return new Date() < new Date(2023, 8, 30, 23, 59); // before 15 septembre 2023
   }
 }
 
 function inscriptionCreationOpenForYoungs(cohort, allowed = false, env) {
-  if ((env !== undefined && env !== "production") || allowed) return true;
+  // if ((env !== undefined && env !== "production") || allowed) return true; //only use when inscriptions are closed on production
   switch (cohort) {
     case "Février 2022":
       return new Date() < new Date(2022, 0, 10); // before 10 janvier 2022 morning
@@ -65,7 +68,7 @@ function inscriptionCreationOpenForYoungs(cohort, allowed = false, env) {
     case "Juillet 2022":
       return new Date() < new Date(2022, 4, 2); // before 2 mai 2022 morning
     default:
-      return new Date() < new Date(2023, 4, 11); // before 11 mai 2023 morning
+      return new Date() < new Date(2023, 8, 30, 23, 59); // before 15 septembre 2023 morning
   }
 }
 
@@ -150,7 +153,7 @@ const getSelectedFilterLabel = (selected, prelabel) => {
   };
   let value = "";
   if (typeof selected === "object") {
-    translated = selected.map((item) => {
+    const translated = selected.map((item) => {
       return translator(item);
     });
     value = translated.join(", ");
@@ -215,8 +218,18 @@ const formatPhoneNumberFR = (tel) => {
   return formatted;
 };
 
+const htmlCleaner = (text) => {
+  return sanitizeHtml(text, {
+    allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "ul"],
+    allowedAttributes: {
+      a: ["href", "target", "rel"],
+    },
+  });
+};
+
 const formatMessageForReadingInnerHTML = (content) => {
-  const message = content.replace(/\\n/g, "<br>").replace(/\\r/g, "<br>");
+  const cleanedMessage = htmlCleaner(content);
+  const message = cleanedMessage.replace(/\\n/g, "<br>").replace(/\\r/g, "<br>");
   return message;
 };
 
@@ -235,6 +248,7 @@ export {
   youngCanChangeSession,
   formatPhoneNumberFR,
   formatMessageForReadingInnerHTML,
+  htmlCleaner,
 };
 export * from "./academy";
 export * from "./colors";

@@ -61,7 +61,7 @@ export default function ApplyModal({ value, onChange, onSend, onCancel }) {
       }
     } catch (e) {
       capture(e);
-      onCancel();
+      onCancel?.();
       return toastr.error("Oups, une erreur est survenue lors de la candidature");
     }
     plausibleEvent("Phase2/CTA - Confirmer candidature");

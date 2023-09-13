@@ -6,23 +6,31 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint . --ext .js --fix",
+    "lint:report": "eslint . --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.20.1",
-    "dotenv": "^16.0.3",
+    "@sentry/integrations": "^7.61.0",
+    "@sentry/node": "^7.61.0",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "nodemon": "^2.0.20",
-    "puppeteer": "^19.2.2",
-    "@sentry/integrations": "^7.56.0",
-    "@sentry/node": "^7.56.0",
-    "@sentry/tracing": "^7.56.0"
+    "nodemon": "^3.0.1",
+    "puppeteer": "^19.11.1"
   },
   "engines": {
     "node": "^18.16.0",
     "npm": "^9.5.1",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
+  },
+  "devDependencies": {
+    "eslint": "^8.46.0",
+    "eslint-config-prettier": "^8.10.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.1"
   }
 }

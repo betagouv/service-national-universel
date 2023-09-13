@@ -1,5 +1,5 @@
-import dayjs from "dayjs";
-import React from "react";
+import dayjs from "@/utils/dayjs.utils";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
@@ -20,6 +20,7 @@ const cohortList = [
   { label: "Séjour du <b>16 au 28 Avril 2023</b>", value: "Avril 2023 - B" },
   { label: "Séjour du <b>11 au 23 Juin 2023</b>", value: "Juin 2023" },
   { label: "Séjour du <b>4 au 16 Juillet 2023</b>", value: "Juillet 2023" },
+  { label: "Séjour du <b>9 au 20 Octobre 2023</b>", value: "Octobre 2023 - NC" },
 ];
 
 export default function ListeDemandeModif() {
@@ -34,6 +35,7 @@ export default function ListeDemandeModif() {
   const pageId = "demande-modification-bus";
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({ page: 0 });
+  const [size, setSize] = useState(10);
 
   const getTags = async () => {
     try {
@@ -125,6 +127,7 @@ export default function ListeDemandeModif() {
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
+              size={size}
             />
           </div>
           <div className="mt-2 flex flex-row flex-wrap items-center px-4">
@@ -141,6 +144,8 @@ export default function ListeDemandeModif() {
             paramData={paramData}
             setParamData={setParamData}
             currentEntryOnPage={data?.length}
+            size={size}
+            setSize={setSize}
             render={
               <div className="mt-6 mb-2 flex w-full flex-col">
                 <hr />
@@ -197,7 +202,7 @@ const Line = ({ modification, tagsOptions, user }) => {
       <div className="flex items-center gap-6 py-4 px-4 hover:bg-gray-50">
         <div className="flex w-[35%] cursor-pointer flex-col gap-1" onClick={() => history.push(`/ligne-de-bus/${modification.lineId}?demande=${modification._id.toString()}`)}>
           <div className="text-start text-sm text-[#242526] line-clamp-3">{modification.requestMessage}</div>
-          <div className="text-sm text-[#738297]">{dayjs(modification.createdAt).locale("fr").format("DD/MM/YYYY • HH:mm")}</div>
+          <div className="text-sm text-[#738297]">{dayjs(modification.createdAt).format("DD/MM/YYYY • HH:mm")}</div>
         </div>
         <div className="flex w-[12%] items-center gap-2">
           <div className="text-base font-medium text-[#242526]">{modification.lineName}</div>

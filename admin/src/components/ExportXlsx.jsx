@@ -6,7 +6,7 @@ import LoadingButton from "./buttons/LoadingButton";
 import LoadingButtonV2 from "./buttons/LoadingButtonV2";
 import ModalConfirm from "./modals/ModalConfirm";
 import api from "../services/api";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 
 export default function ExportComponent({
   handleClick,

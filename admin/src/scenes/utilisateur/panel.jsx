@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { translate, ROLES, ES_NO_LIMIT, copyToClipboard, canUpdateReferent, canDeleteReferent, formatPhoneNumberFR, department2region } from "../../utils";
+import { translate, ROLES, copyToClipboard, canUpdateReferent, canDeleteReferent, formatPhoneNumberFR, department2region } from "../../utils";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -20,11 +20,7 @@ import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import PanelV2 from "../../components/PanelV2";
 
 export default function UserPanel({ onChange, value }) {
-  if (!value) return <div />;
   const [structure, setStructure] = useState();
-  const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
-  const [referentsDepartment, setReferentsDepartment] = useState([]);
-  const [teamMembers, setTeamMembers] = useState([]);
   const user = useSelector((state) => state.Auth.user);
   const dispatch = useDispatch();
   const history = useHistory();
@@ -33,54 +29,17 @@ export default function UserPanel({ onChange, value }) {
   const [modalUniqueResponsable, setModalUniqueResponsable] = useState({ isOpen: false });
   const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
 
+  const missionCount = structure?.missions?.length || 0;
+  const placesLeft = structure?.missions?.reduce((acc, e) => acc + e.placesLeft, 0);
+
   useEffect(() => {
-    setStructure(null);
-    setMissionsInfo({ count: "-", placesTotal: "-" });
-    setTeamMembers([]);
-    setReferentsDepartment([]);
     (async () => {
-      if (!value.structureId) return;
-      const { ok, data, code } = await api.get(`/structure/${value.structureId}`);
+      if (!value?.structureId) return;
+      const { ok, data, code } = await api.get(`/structure/${value.structureId}?withMissions=true&withTeam=true&withReferents=true`);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
       return setStructure(data);
     })();
-    (async () => {
-      if (!value.structureId) return;
-      const { responses: missionResponses } = await api.esQuery("mission", {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value.structureId } }] } },
-      });
-      if (missionResponses.length) {
-        setMissionsInfo({
-          count: missionResponses[0].hits.hits.length,
-          placesTotal: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
-          placesLeft: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
-        });
-      }
-    })();
   }, [value]);
-
-  useEffect(() => {
-    if (!structure) return;
-    (async () => {
-      const { responses: referentResponses } = await api.esQuery("referent", {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
-        size: ES_NO_LIMIT,
-      });
-      if (referentResponses.length) {
-        setTeamMembers(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
-      }
-    })();
-
-    if (!structure?.department) return;
-    (async () => {
-      const { responses: referentDepartementResponses } = await api.esQuery("referent", {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "department.keyword": structure.department } }, { term: { "role.keyword": "referent_department" } }] } },
-      });
-      if (referentDepartementResponses.length) {
-        setReferentsDepartment(referentDepartementResponses[0].hits.hits.map((e) => ({ _id: e._id, ...e._source })));
-      }
-    })();
-  }, [structure]);
 
   const handleImpersonate = async () => {
     try {
@@ -139,6 +98,8 @@ export default function UserPanel({ onChange, value }) {
       return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
     }
   };
+
+  if (!value) return <div />;
   return (
     <PanelV2 open={value ? true : false} onClose={onChange} title={`${value.firstName} ${value.lastName}`}>
       <Panel>
@@ -188,12 +149,12 @@ export default function UserPanel({ onChange, value }) {
               <Details title="Dép." value={structure?.department} />
               <div className="detail" style={{ alignItems: "flex-start" }}>
                 <div className="detail-title">Référents Dép. :</div>
-                {!referentsDepartment.length ? (
+                {!structure.referents?.length ? (
                   <div className="detail-text">Aucun référent trouvé</div>
                 ) : (
                   <div className="detail-text">
                     <ul>
-                      {referentsDepartment.map((referent) => (
+                      {structure.referents.map((referent) => (
                         <li key={referent._id} style={{ display: "flex", alignItems: "center" }}>
                           {referent.email}
                           <IconCopy
@@ -210,12 +171,12 @@ export default function UserPanel({ onChange, value }) {
               </div>
               <div className="detail" style={{ alignItems: "flex-start" }}>
                 <div className="detail-title">Équipe :</div>
-                {!teamMembers.length ? (
+                {!structure?.team?.length ? (
                   <div className="detail-text">Aucun compte trouvé</div>
                 ) : (
                   <div className="detail-text">
                     <ul>
-                      {teamMembers.map((member) => (
+                      {structure.team.map((member) => (
                         <TeamMember key={member._id}>
                           {`${member.firstName} ${member.lastName}`}
                           <Link to={`/user/${member._id}`}>
@@ -227,10 +188,10 @@ export default function UserPanel({ onChange, value }) {
                   </div>
                 )}
               </div>
-              <Details title="Missions dispo." value={missionsInfo.count} />
-              <Details title="Places restantes" value={missionsInfo.placesLeft} />
+              <Details title="Missions dispo." value={missionCount} />
+              <Details title="Places restantes" value={placesLeft} />
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "10px" }}>
-                {missionsInfo.count > 0 ? (
+                {missionCount > 0 ? (
                   <Link to={`/structure/${structure._id}/missions`}>
                     <Button className="btn-missions">Consulter toutes les missions</Button>
                   </Link>

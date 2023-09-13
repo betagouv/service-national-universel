@@ -8,6 +8,8 @@
     "test": "turbo build --filter='./packages/lib' && turbo run test --filter=api"
   },
   "dependencies": {
+    "libphonenumber-js": "^1.10.41",
+    "sanitize-html": "^2.11.0",
     "turbo": "^1.9.4"
   },
   "workspaces": [

@@ -16,6 +16,7 @@ npm install
 
 ### Développement local
 
+Prérequis: `npm i` à la racine
 Lancer la commande `npm run dev` pour accéder à l'application via l'URL `http://localhost:3000`.
 
 ### Développement de l'API

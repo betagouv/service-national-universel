@@ -18,6 +18,7 @@ import ModalMultiPointagePresenceJDM from "../components/modals/ModalMultiPointa
 import ModalPointageDepart from "../components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../components/modals/ModalPointagePresenceArrivee";
 import ModalPointagePresenceJDM from "../components/modals/ModalPointagePresenceJDM";
+import { captureMessage } from "../../../sentry";
 
 export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSession, filterArray, setHasYoungValidated }) {
   const history = useHistory();
@@ -39,6 +40,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
   const [paramData, setParamData] = useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   useEffect(() => {
     updateFilter(selectedFilters);
@@ -59,6 +61,10 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
   }, [youngSelected]);
 
   const handleClick = async (young) => {
+    if (!young?._id) {
+      captureMessage("Error with young :", { extra: { young } });
+      return;
+    }
     const { ok, data } = await api.get(`/referent/young/${young._id}`);
     if (ok) setYoung(data);
   };
@@ -84,7 +90,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <div style={{ display: "flex", flexDirection: "column", flex: "1" }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
-          <div className="relative flex-1">
+          <div className="relative flex-1 mb-4 rounded-lg">
             <div className="mx-4 flex flex-col">
               <div className="flex w-full flex-row justify-between">
                 <div className="flex items-center gap-2">
@@ -102,6 +108,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
                     setSelectedFilters={setSelectedFilters}
                     paramData={paramData}
                     setParamData={setParamData}
+                    size={size}
                   />
                   <div>
                     {youngSelected?.length > 0 ? (
@@ -315,6 +322,8 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
               paramData={paramData}
               setParamData={setParamData}
               currentEntryOnPage={data?.length}
+              size={size}
+              setSize={setSize}
               render={
                 <table className="mt-6 w-full">
                   <thead className="">

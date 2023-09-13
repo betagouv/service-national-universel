@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
+import path from "path";
 
 // eslint-disable-next-line no-unused-vars
 export default defineConfig(({ command, mode }) => {
@@ -41,5 +42,12 @@ export default defineConfig(({ command, mode }) => {
       port: 8082,
     },
     plugins: plugins,
+    optimizeDeps: {
+      include: ["@sentry/react", "snu-lib"],
+      force: true,
+    },
+    resolve: {
+      alias: [{ find: "@", replacement: path.resolve(__dirname, "src") }],
+    },
   };
 });

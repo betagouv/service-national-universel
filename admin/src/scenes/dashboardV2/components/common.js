@@ -1,5 +1,5 @@
 import { academyToDepartments, department2region, departmentList, departmentToAcademy, region2department, ROLES } from "snu-lib";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 
 export const getFilteredDepartment = (setSelectedFilters, selectedFilters, setDepartmentOptions, user) => {
   const departmentOptions = user.role === ROLES.REFERENT_REGION ? region2department[user.region] : departmentList;

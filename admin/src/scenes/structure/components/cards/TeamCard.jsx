@@ -12,9 +12,8 @@ export default function TeamCard({ structure }) {
 
   const getTeam = async (structureId) => {
     try {
-      const query = { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structureId } }] } };
-      const { responses } = await API.esQuery("referent", { query, size: ES_NO_LIMIT });
-      if (responses.length) return responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+      const { data } = await API.post("/elasticsearch/referent/export", { filters: { structureId: [structureId] } });
+      return data;
     } catch (e) {
       console.log(e);
     }

@@ -6,7 +6,7 @@ import ChevronDown from "../../assets/icons/ChevronDown";
 import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import {
   COHESION_STAY_LIMIT_DATE,
   COHESION_STAY_START,
@@ -350,8 +350,8 @@ function FooterSent({ young, requests, reminding, onRemindRequests }) {
       }
     }
   }
-  const sentAt = sentDate ? dayjs(sentDate).locale("fr").format("DD/MM/YYYY à HH:mm") : null;
-  const remindedAt = remindedDate ? dayjs(remindedDate).locale("fr").format("DD/MM/YYYY à HH:mm") : null;
+  const sentAt = sentDate ? dayjs(sentDate).format("DD/MM/YYYY à HH:mm") : null;
+  const remindedAt = remindedDate ? dayjs(remindedDate).format("DD/MM/YYYY à HH:mm") : null;
 
   return (
     <div className="fixed bottom-0 left-[220px] right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)]">
@@ -574,7 +574,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
 
   useEffect(() => {
     if (data && data.birthdateAt) {
-      const date = dayjs(data.birthdateAt).locale("fr");
+      const date = dayjs(data.birthdateAt);
       setBirthDate({ day: date.date(), month: date.format("MMMM"), year: date.year() });
     }
   }, [data]);
@@ -937,7 +937,7 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
   let cniYear = "";
 
   if (young.latestCNIFileExpirationDate) {
-    const date = dayjs(young.latestCNIFileExpirationDate).locale("fr");
+    const date = dayjs(young.latestCNIFileExpirationDate).toUtcLocally();
     cniDay = date.date();
     cniMonth = date.format("MMMM");
     cniYear = date.year();
@@ -966,6 +966,7 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
         correctionRequest={getCorrectionRequest(requests, "latestCNIFileExpirationDate")}
         onCorrectionRequestChange={onCorrectionRequestChange}
         type="date"
+        disabled={young.latestCNIFileExpirationDate === null}
         value={young.latestCNIFileExpirationDate}
         onChange={(value) => onChange("latestCNIFileExpirationDate", value)}
         young={young}>
@@ -987,6 +988,7 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
           correctionRequest={getCorrectionRequest(requests, "latestCNIFileCategory")}
           onCorrectionRequestChange={onCorrectionRequestChange}
           type="select"
+          disabled={young.latestCNIFileCategory === "deleted"}
           options={categoryOptions}
           onChange={(cat) => onChange("latestCNIFileCategory", cat)}
           young={young}
@@ -1742,7 +1744,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
             </span>
           </div>
           {young.parent1ValidationDate && (
-            <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+            <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent1ValidationDate).format("DD/MM/YYYY HH:mm")}</div>
           )}
         </div>
         <div className="flex items-center gap-8">
@@ -1895,7 +1897,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                 </span>
               </div>
               {young.parent2ValidationDate && (
-                <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+                <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent2ValidationDate).format("DD/MM/YYYY HH:mm")}</div>
               )}
             </div>
             {young.parent1AllowImageRights === "true" && (
@@ -2160,7 +2162,7 @@ function HonorCertificate({ young }) {
   if (young && young.cohort && young.latestCNIFileExpirationDate) {
     const cohortDate = START_DATE_SESSION_PHASE1[young.cohort];
     if (cohortDate) {
-      cniExpired = new Date(young.latestCNIFileExpirationDate).valueOf() < cohortDate.valueOf();
+      cniExpired = dayjs(young.latestCNIFileExpirationDate).toUtc().valueOf() < dayjs(cohortDate).toUtc().valueOf();
     }
   }
 

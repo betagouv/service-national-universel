@@ -9,7 +9,7 @@ const YoungModel = require("../../models/young");
 const ReferentModel = require("../../models/referent");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const ApplicationModel = require("../../models/application");
-const { ERRORS, getCcOfYoung, cancelPendingApplications } = require("../../utils");
+const { ERRORS, getCcOfYoung, cancelPendingApplications, updateYoungPhase2Hours, updateStatusPhase2 } = require("../../utils");
 const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, APPLICATION_STATUS, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");
@@ -51,7 +51,7 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
 
     const isYoung = req.user.constructor.modelName === "young";
 
-    if (isYoung && !canApplyToPhase2(young)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isYoung && !canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     //Pas plus de 3 demandes d'équivalence + creation possible seulement si le statut des ancienne equiv est "REFUSED"
     const equivalences = await MissionEquivalenceModel.find({ youngId: value.id });
@@ -164,7 +164,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (!canApplyToPhase2(young)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -179,14 +179,10 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
         young.set({ phase2ApplicationStatus: applications_v2.map((e) => e.status) });
       }
       if (young.statusPhase2 === "VALIDATED" && ["WAITING_CORRECTION", "REFUSED"].includes(value.status)) {
-        const activeApplications = applications.filter((application) => ["WAITING_VERIFICATION", "WAITING_VALIDATION", "IN_PROGRESS", "VALIDATED"].includes(application.status));
-
-        //Le status phase deux est set a In_Progress si on a des candidateure active
-        if (activeApplications.length) {
-          young.set({ statusPhase2: "IN_PROGRESS" });
-        } else {
-          young.set({ statusPhase2: "WAITING_REALISATION" });
-        }
+        // Dans ces fonctions on va mettre à jour le nombre d'heure de MIG si des missions sont VALIDATED
+        // ensuite on va valider ou non le status en regardant le nombre d'heure effectué et si des missions sont encore actives
+        await updateYoungPhase2Hours(young, req.user);
+        await updateStatusPhase2(young, req.user);
       }
     }
 
@@ -296,7 +292,7 @@ router.put("/preference", passport.authenticate("referent", { session: false, fa
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (!canEditYoung(req.user, young)) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     young.set(checkedBody);
     await young.save({ fromUser: req.user });

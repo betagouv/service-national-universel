@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
 import { Redirect, Switch, useParams } from "react-router-dom";
+import { inscriptionCreationOpenForYoungs } from "snu-lib";
 import PreInscriptionContextProvider, { PreInscriptionContext } from "../../context/PreInscriptionContextProvider";
 import { SentryRoute } from "../../sentry";
 
@@ -11,10 +12,9 @@ import StepConfirm from "./steps/stepConfirm";
 import StepDone from "./steps/stepDone";
 
 import { useSelector } from "react-redux";
-import { inscriptionCreationOpenForYoungs } from "snu-lib";
 import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
-import Footer from "../../components/footerV2";
-import Header from "../../components/header";
+import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
+
 import { environment } from "../../config";
 
 function renderStepResponsive(step) {
@@ -49,22 +49,17 @@ const Step = () => {
 };
 
 export default function Index() {
-  // Inscriptions are currently closed in production
-  if (environment === "production") return <Redirect to="/auth" />;
-
   const young = useSelector((state) => state.Auth.young);
   if (young) return <Redirect to="/" />;
 
   return (
     <PreInscriptionContextProvider>
-      <div className="flex flex-col justify-between bg-beige-gris-galet-975">
-        <Header />
+      <DSFRLayout title="Inscription du volontaire">
         <Switch>
           <SentryRoute path="/preinscription/:step" component={Step} />;
           <SentryRoute path="/preinscription" component={Step} />;
         </Switch>
-        <Footer />
-      </div>
+      </DSFRLayout>
     </PreInscriptionContextProvider>
   );
 }

@@ -6,13 +6,16 @@ import { formatToActualTime } from "snu-lib/date";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import RightArrow from "../../../assets/icons/RightArrow";
-import Input from "../../../components/inscription/input";
+import Input from "../../../components/dsfr/forms/input";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
 import { getPasswordErrorMessage } from "../../../utils";
 import { cohortsInit } from "../../../utils/cohorts";
+import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
+import { environment } from "../../../config";
+import { toastr } from "react-redux-toastr";
+import { captureMessage } from "../../../sentry";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -44,7 +47,11 @@ export default function Signin() {
       const invitationToken = urlParams.get("token");
       const { data: young, token } = await api.post(`/young/signup_invite`, { email, password, invitationToken: invitationToken });
       if (young) {
-        if (redirect?.startsWith("http")) return (window.location.href = redirect);
+        if (environment === "development" ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
+        if (redirect) {
+          captureMessage("Invalid redirect url", { extra: { redirect } });
+          toastr.error("Url de redirection invalide : " + redirect);
+        }
         if (token) api.setToken(token);
         dispatch(setYoung(young));
         await cohortsInit();
@@ -127,7 +134,6 @@ export default function Signin() {
           Connexion
         </button>
       </div>
-      <Footer />
     </>
   );
 }

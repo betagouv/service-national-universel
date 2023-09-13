@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
-import { IoWarningOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { COHORTS, ES_NO_LIMIT, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
+import { capture } from "../../../../../sentry";
+import { translate } from "snu-lib";
+import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
 import api from "../../../../../services/api";
 import { getLink as getOldLink } from "../../../../../utils";
 import DashboardContainer from "../../../components/DashboardContainer";
@@ -15,70 +16,62 @@ import InfoMessage from "../../../components/ui/InfoMessage";
 import Engagement from "../../../components/ui/icons/Engagement";
 import Inscription from "../../../components/ui/icons/Inscription";
 import Sejour from "../../../components/ui/icons/Sejour";
-import CustomFilter from "./components/CustomFilter";
 import VolontaireSection from "./components/VolontaireSection";
 import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
+import KeyNumbers from "../../../components/KeyNumbers";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
-  const [fullKeyNumber, setFullKeyNumber] = useState(false);
 
   const [inscriptionGoals, setInscriptionGoals] = useState();
   const [volontairesData, setVolontairesData] = useState();
   const [inAndOutCohort, setInAndOutCohort] = useState();
 
-  // eslint-disable-next-line no-unused-vars
-  const [notesFromDate, setNotesFromDate] = useState(null);
-  // eslint-disable-next-line no-unused-vars
-  const [notesToDate, setNotesToDate] = useState(null);
-  const [notesPhase, setNotesPhase] = useState("all");
   const [stats, setStats] = useState({});
+  const [message, setMessage] = useState([]);
 
-  const [filterArray, setFilterArray] = useState([]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
+
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
   const academyOptions =
     user.role === ROLES.REFERENT_REGION
       ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
       : academyList.map((a) => ({ key: a, label: a }));
 
-  useEffect(() => {
-    let filters = [
-      ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
-        ? {
-            id: "region",
-            name: "Région",
-            fullValue: "Toutes",
-            options: regionOptions,
-          }
-        : null,
-      ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
-        ? {
-            id: "academy",
-            name: "Académie",
-            fullValue: "Toutes",
-            options: academyOptions,
-          }
-        : null,
-      {
-        id: "department",
-        name: "Département",
-        fullValue: "Tous",
-        options: departmentOptions,
-      },
-      {
-        id: "cohort",
-        name: "Cohorte",
-        fullValue: "Toutes",
-        options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
-        sort: (e) => orderCohort(e),
-      },
-    ].filter((e) => e);
-    setFilterArray(filters);
-  }, [departmentOptions]);
+  const filterArray = [
+    ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+      ? {
+          id: "region",
+          name: "Région",
+          fullValue: "Toutes",
+          options: regionOptions,
+        }
+      : null,
+    ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+      ? {
+          id: "academy",
+          name: "Académie",
+          fullValue: "Toutes",
+          options: academyOptions,
+        }
+      : null,
+    {
+      id: "department",
+      name: "Département",
+      fullValue: "Tous",
+      options: departmentOptions,
+    },
+    {
+      id: "cohort",
+      name: "Cohorte",
+      fullValue: "Toutes",
+      options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
+      sort: (e) => orderCohort(e),
+    },
+  ].filter((e) => e);
 
   const [selectedFilters, setSelectedFilters] = React.useState({
-    cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
+    cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"],
   });
 
   async function fetchInscriptionGoals() {
@@ -120,63 +113,39 @@ export default function Index() {
 
   React.useEffect(() => {
     const updateStats = async (id) => {
-      const response = await api.post("/elasticsearch/dashboard/default", { filters: { meetingPointIds: [id], cohort: [] } });
+      const response = await api.post("/elasticsearch/dashboard/general/todo", { filters: { meetingPointIds: [id], cohort: [] } });
       const s = response.data;
       setStats(s);
     };
     updateStats();
   }, []);
 
+  const getMessage = async () => {
+    try {
+      const { ok, code, data: response } = await api.get(`/alerte-message`);
+
+      if (!ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération des messages", translate(code));
+      }
+      setMessage(response.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
+    }
+  };
+
+  React.useEffect(() => {
+    getMessage();
+  }, []);
+
   return (
     <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}>
-      <div className="flex flex-col gap-8">
-        {/* <InfoMessage
-          bg="bg-blue-800"
-          Icon={HiOutlineInformationCircle}
-          message="Message d’information (white + blue/800), l'instruction des dossiers pour le séjour de février est à finaliser pour ce soir à 23h59."
-        />
-        <InfoMessage
-          bg="bg-yellow-700"
-          Icon={HiOutlineExclamationCircle}
-          message="Message important (white + yellow/700), l'instruction des dossiers pour le séjour de février est à finaliser pour ce soir à 23h59."
-        /> */}
-        <InfoMessage
-          bg="bg-red-800"
-          Icon={IoWarningOutline}
-          message="Message urgent  (white + red/800), suite à un problème technique, nous vous invitons à revalider les missions que vous aviez validés entre le 3 janvier 15h et le 4 janvier 8h. Veuillez nous excuser pour le désagrément."
-        />
+      <div className="flex flex-col gap-8 mb-4">
+        {message?.length ? message.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
-        <div className="flex gap-4">
+        <div className="flex w-full gap-4">
           <Actus stats={stats} />
-          <div className={`flex w-[30%]  flex-col rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!fullKeyNumber ? "h-[584px]" : "h-fit"}`}>
-            <div className="flex items-center justify-between pb-4">
-              <div className="flex items-center gap-3">
-                <div className="text-sm font-bold leading-5 text-gray-900">Chiffres clés</div>
-                <div className=" text-medium rounded-full bg-blue-50 px-2.5 py-0.5 text-sm leading-none text-blue-600">22</div>
-              </div>
-              <CustomFilter setFromDate={setNotesFromDate} setToDate={setNotesToDate} notesPhase={notesPhase} setNotesPhase={setNotesPhase} />
-            </div>
-            <div className="flex h-full flex-col justify-between">
-              {Array.from(Array(22).keys())
-                .slice(0, fullKeyNumber ? 22 : 7)
-                .map((i) => (
-                  <div key={`keyNumber` + i} className={`flex items-center gap-4 border-t-[1px] border-gray-200 ${fullKeyNumber ? "py-3" : "h-full"}`}>
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100">
-                      <Inscription />
-                    </div>
-                    <div className="text-sm text-gray-900">
-                      3 abandons de <strong>missions</strong>
-                    </div>
-                  </div>
-                ))}
-            </div>
-            <div className="mt-4 flex justify-center">
-              <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setFullKeyNumber(!fullKeyNumber)}>
-                <span>{fullKeyNumber ? "Voir moins" : "Voir plus"}</span>
-                {fullKeyNumber ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
-              </button>
-            </div>
-          </div>
+          <KeyNumbers />
         </div>
         <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">Inscriptions</h1>
@@ -556,16 +525,12 @@ function filterByRegionAndDepartement(e, filters, user) {
 
 const getInscriptionGoals = async () => {
   let dataMerged = [];
-  const query = {
-    query: { bool: { must: { match_all: {} } } },
-    size: ES_NO_LIMIT,
-  };
-  const { responses } = await api.esQuery("inscriptiongoal", query);
-  if (!responses?.length) {
+  const responses = await api.post("/elasticsearch/dashboard/inscription/inscriptionGoal");
+  if (!responses?.hits?.hits) {
     toastr.error("Une erreur est survenue");
     return [];
   }
-  const result = responses[0].hits.hits;
+  const result = responses.hits.hits;
   result.map((e) => {
     const { department, region, academy, cohort, max } = e._source;
     dataMerged[department] = { cohort, department, region, academy, max: (dataMerged[department]?.max ? dataMerged[department].max : 0) + max };
@@ -575,55 +540,9 @@ const getInscriptionGoals = async () => {
 };
 
 async function getCurrentInscriptions(filters) {
-  const body = {
-    query: { bool: { must: { match_all: {} }, filter: [] } },
-    aggs: {
-      status: {
-        terms: {
-          field: "status.keyword",
-          size: ES_NO_LIMIT,
-        },
-        aggs: {
-          statusPhase1: {
-            terms: {
-              field: "statusPhase1.keyword",
-              size: ES_NO_LIMIT,
-            },
-          },
-          statusPhase2: {
-            terms: {
-              field: "statusPhase2.keyword",
-              size: ES_NO_LIMIT,
-            },
-          },
-          statusPhase3: {
-            terms: {
-              field: "statusPhase3.keyword",
-              size: ES_NO_LIMIT,
-            },
-          },
-        },
-      },
-    },
-    size: 0,
-  };
-
-  if (filters?.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filters.cohort } });
-  if (filters?.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filters.academy } });
-  if (filters?.region?.length)
-    body.query.bool.filter.push({
-      bool: {
-        should: [
-          { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": filters.region } }] } },
-          { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": filters.region } }] } },
-        ],
-      },
-    });
-  if (filters?.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filters.department } });
-
-  const { responses } = await api.esQuery("young", body);
-  if (!responses?.length) return {};
-  let result = responses[0].aggregations.status.buckets.reduce((acc, status) => {
+  const responses = await api.post("/elasticsearch/dashboard/inscription/youngForInscription", { filters: filters });
+  if (!responses?.aggregations?.status?.buckets) return {};
+  let result = responses.aggregations.status.buckets.reduce((acc, status) => {
     acc[status.key] = {
       total: status.doc_count,
       phase1: status.statusPhase1.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {}),
@@ -636,51 +555,9 @@ async function getCurrentInscriptions(filters) {
 }
 
 async function getInAndOutCohort(filters) {
-  const cohortList = filters?.cohort?.length ? filters.cohort : COHORTS;
-
-  const aggs = cohortList.reduce((acc, cohort) => {
-    acc["in&" + cohort] = {
-      filter: {
-        bool: {
-          must: [{ term: { "cohort.keyword": cohort } }, { term: { "status.keyword": "VALIDATED" } }, { exists: { field: "originalCohort.keyword" } }],
-          must_not: [{ term: { "originalCohort.keyword": cohort } }],
-          filter: [],
-        },
-      },
-    };
-    acc["out&" + cohort] = {
-      filter: {
-        bool: {
-          must: [{ term: { "originalCohort.keyword": cohort } }, { term: { "status.keyword": "VALIDATED" } }, { exists: { field: "originalCohort.keyword" } }],
-          must_not: [{ term: { "cohort.keyword": cohort } }],
-          filter: [],
-        },
-      },
-    };
-    return acc;
-  }, {});
-
-  const body = {
-    query: { bool: { must: { match_all: {} }, filter: [] } },
-    aggs,
-    size: 0,
-  };
-
-  if (filters?.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filters.academy } });
-  if (filters?.region?.length)
-    body.query.bool.filter.push({
-      bool: {
-        should: [
-          { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": filters.region } }] } },
-          { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": filters.region } }] } },
-        ],
-      },
-    });
-  if (filters?.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filters.department } });
-
-  const { responses } = await api.esQuery("young", body);
-  if (!responses?.length) return {};
-  const aggreg = responses[0].aggregations;
+  const responses = await api.post("/elasticsearch/dashboard/inscription/getInAndOutCohort", { filters: filters });
+  if (!responses?.aggregations) return {};
+  const aggreg = responses.aggregations;
   let result = Object.keys(aggreg).reduce((acc, cohort) => {
     const type = cohort.split("&")[0];
     acc[type] = acc[type] ? acc[type] + aggreg[cohort].doc_count : aggreg[cohort].doc_count;

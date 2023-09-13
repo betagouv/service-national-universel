@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch } from "react-router-dom";
+import { Redirect, Switch } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../sentry";
 
@@ -11,7 +11,16 @@ export default function User() {
 
   return (
     <Switch>
-      <SentryRoute path="/user/:id" component={Edit} />
+      <SentryRoute
+        path="/user/:id"
+        render={({ match }) => {
+          const { id } = match.params;
+          if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+            return <Redirect to="/user" />;
+          }
+          return <SentryRoute component={Edit} />;
+        }}
+      />
       <SentryRoute path="/user" component={List} />
     </Switch>
   );

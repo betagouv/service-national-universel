@@ -12,17 +12,16 @@ import { translate } from "../../../utils";
 import { getCorrectionsForStepUpload } from "../../../utils/navigation";
 import { ID } from "../utils";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
+import { supportURL } from "@/config";
 
-import CheckBox from "../../../components/inscription/checkbox";
-import DatePickerList from "../../preinscription/components/DatePickerList";
+import CheckBox from "../../../components/dsfr/forms/checkbox";
+import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
 import Error from "../../../components/error";
-import ErrorMessage from "../components/ErrorMessage";
-import Footer from "../../../components/footerV2";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import Help from "../components/Help";
 import MyDocs from "../components/MyDocs";
 import Navbar from "../components/Navbar";
-import StickyButton from "../../../components/inscription/stickyButton";
-const images = import.meta.globEager("../../../assets/IDProof/*");
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 
 export default function StepUpload() {
   let { category } = useParams();
@@ -85,7 +84,7 @@ export default function StepUpload() {
 
   async function uploadFiles() {
     if (recto) {
-      const res = await api.uploadID(young._id, recto, { category, expirationDate, side: "recto" });
+      const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, recto, { category, expirationDate, side: "recto" });
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -95,7 +94,7 @@ export default function StepUpload() {
     }
 
     if (verso) {
-      const res = await api.uploadID(young._id, verso, { category, expirationDate, side: "verso" });
+      const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, verso, { category, expirationDate, side: "verso" });
       if (!res.ok) {
         capture(res.code);
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
@@ -158,6 +157,7 @@ export default function StepUpload() {
       setLoading(false);
     }
   }
+  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
 
   return (
     <>
@@ -172,8 +172,7 @@ export default function StepUpload() {
         )}
         {renderStep(step)}
       </div>
-      <Help />
-      <Footer marginBottom="mb-[88px]" />
+      <Help supportLink={supportLink} />
       {step === "verify" && (
         <StickyButton
           text="Continuer"
@@ -219,7 +218,7 @@ export default function StepUpload() {
             ))}
         </div>
         <div className="mb-4 flex w-full items-center justify-center">
-          <img src={images[`../../assets/IDProof/${ID[category]?.imgFront}`]} alt={ID[category]?.title} />
+          <img src={ID[category]?.imgFront} alt={ID[category]?.title} />
         </div>
         <input type="file" id="file-upload" name="file-upload" accept="image/*" onChange={handleChange} className="hidden" />
         <button className="flex w-full">
@@ -253,9 +252,7 @@ export default function StepUpload() {
               </ErrorMessage>
             ))}
         </div>
-        <div className="mb-4 flex w-full items-center justify-center">
-          {ID[category].imgBack && <img src={images[`../../assets/IDProof/${ID[category]?.imgBack}`]} alt={ID[category]?.title} />}
-        </div>
+        <div className="mb-4 flex w-full items-center justify-center">{ID[category].imgBack && <img src={ID[category]?.imgBack} alt={ID[category]?.title} />}</div>
         <input type="file" id="file-upload" name="file-upload" accept="image/*" onChange={handleChange} className="hidden" />
         <button className="flex w-full">
           <label htmlFor="file-upload" className="flex w-full items-center justify-center bg-[#000091] p-2 text-white">
@@ -306,7 +303,7 @@ export default function StepUpload() {
           </div>
         )}
         <div className="mx-auto w-3/4">
-          <img className="mx-auto my-4" src={images[`../../assets/IDProof/${ID[category]?.imgDate}`]} alt={ID.title} />
+          <img className="mx-auto my-4" src={ID[category]?.imgDate} alt={ID.title} />
         </div>
         <DatePickerList value={date} onChange={(date) => handleChange(date)} />
       </>

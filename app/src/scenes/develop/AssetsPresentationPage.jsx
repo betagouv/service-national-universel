@@ -6,22 +6,15 @@
    ------------------------------------------------------ */
 
 import React, { useState, useEffect } from "react";
-import Close_1 from "../../assets/Close.jsx";
+import { HiX } from "react-icons/hi";
+
 import Closebluesvg_1 from "../../assets/CloseBlue.svg";
-import Fileicon_1 from "../../assets/FileIcon.jsx";
-import Iceberg_1 from "../../assets/Iceberg.jsx";
-import Iconfrance_1 from "../../assets/IconFrance.jsx";
-import Questionmark_1 from "../../assets/QuestionMark.jsx";
-import Roundwarning_1 from "../../assets/RoundWarning.jsx";
-import Voiture_1 from "../../assets/Voiture.jsx";
-import Yellowwarning_1 from "../../assets/YellowWarning.jsx";
 import Arrowrightbluesvg_2 from "../../assets/arrowRightBlue.svg";
 import Attachmentsvg_2 from "../../assets/attachment.svg";
 import Avatarjpg_2 from "../../assets/avatar.jpg";
 import Biganglebluesvg_2 from "../../assets/big-angle-blue.svg";
 import Biganglesvg_2 from "../../assets/big-angle.svg";
 import Burgersvg_2 from "../../assets/burger.svg";
-import Calendar_1 from "../../assets/calendar.jsx";
 import Cancelpng_2 from "../../assets/cancel.png";
 import Clicksvg_2 from "../../assets/click.svg";
 import Clocksvg_2 from "../../assets/clock.svg";
@@ -31,8 +24,9 @@ import Editiconsvg_2 from "../../assets/editIcon.svg";
 import Externallinksvg_2 from "../../assets/external-link.svg";
 import Eyeslashsvg_2 from "../../assets/eye-slash.svg";
 import Eyesvg_2 from "../../assets/eye.svg";
-import Filesvg_2 from "../../assets/file.svg";
 import Frpng_2 from "../../assets/fr.png";
+import Hero2png_2 from "../../assets/hero-2.png";
+import Herobannerpng_2 from "../../assets/hero-banner.png";
 import Heropng_2 from "../../assets/hero.png";
 import Homesvg_2 from "../../assets/home.svg";
 import Homephase2desktoppng_2 from "../../assets/homePhase2Desktop.png";
@@ -77,12 +71,11 @@ import Rubberstampvalidedsvg_6 from "../../assets/rubberStampValided.svg";
 import Savesvg_6 from "../../assets/save.svg";
 import Smalllogosvg_6 from "../../assets/small-logo.svg";
 import Tabrulesyoungpng_6 from "../../assets/tabRulesYoung.png";
-import Ticksvg_6 from "../../assets/tick.svg";
-import Toolspng_6 from "../../assets/tools.png";
-import Trophysvg_6 from "../../assets/trophy.svg";
-import Validatedphase2png_6 from "../../assets/validatedPhase2.png";
-import Validatedphase2mobilepng_6 from "../../assets/validatedPhase2Mobile.png";
-import Warningpng_6 from "../../assets/warning.png";
+import Toolspng_7 from "../../assets/tools.png";
+import Trophysvg_7 from "../../assets/trophy.svg";
+import Validatedphase2png_7 from "../../assets/validatedPhase2.png";
+import Validatedphase2mobilepng_7 from "../../assets/validatedPhase2Mobile.png";
+import Warningpng_7 from "../../assets/warning.png";
 import Cninewbackjpg_2 from "../../assets/IDProof/cniNewBack.jpg";
 import Cninewdatejpg_2 from "../../assets/IDProof/cniNewDate.jpg";
 import Cninewfrontjpg_2 from "../../assets/IDProof/cniNewFront.jpg";
@@ -91,64 +84,6 @@ import Cniolddatejpg_2 from "../../assets/IDProof/cniOldDate.jpg";
 import Cnioldfrontjpg_2 from "../../assets/IDProof/cniOldFront.jpg";
 import Passportjpg_2 from "../../assets/IDProof/passport.jpg";
 import Passportdatejpg_2 from "../../assets/IDProof/passportDate.jpg";
-import Academiccap_3 from "../../assets/icons/AcademicCap.jsx";
-import Addimage_3 from "../../assets/icons/AddImage.jsx";
-import Arrowrightbluesquare_3 from "../../assets/icons/ArrowRightBlueSquare.jsx";
-import Arrowupright_3 from "../../assets/icons/ArrowUpRight.jsx";
-import Bin_3 from "../../assets/icons/Bin.jsx";
-import Burger_3 from "../../assets/icons/Burger.jsx";
-import Calendar_3 from "../../assets/icons/Calendar.jsx";
-import Calendarbig_3 from "../../assets/icons/CalendarBig.jsx";
-import Check_3 from "../../assets/icons/Check.jsx";
-import Check2_3 from "../../assets/icons/Check2.jsx";
-import Checkcircle_3 from "../../assets/icons/CheckCircle.jsx";
-import Checkcirclefill_3 from "../../assets/icons/CheckCircleFill.jsx";
-import Checkcirclestroke_3 from "../../assets/icons/CheckCircleStroke.jsx";
-import Chevrondown_3 from "../../assets/icons/ChevronDown.jsx";
-import Chevronright_3 from "../../assets/icons/ChevronRight.jsx";
-import Clock_3 from "../../assets/icons/Clock.jsx";
-import Completeinscription_3 from "../../assets/icons/CompleteInscription.jsx";
-import Consentdone_3 from "../../assets/icons/ConsentDone.jsx";
-import Download_3 from "../../assets/icons/Download.jsx";
-import Editpen_3 from "../../assets/icons/EditPen.jsx";
-import Editpenlight_3 from "../../assets/icons/EditPenLight.jsx";
-import Erroricon_3 from "../../assets/icons/ErrorIcon.jsx";
-import Erroriconfill_3 from "../../assets/icons/ErrorIconFill.jsx";
-import Eye_3 from "../../assets/icons/Eye.jsx";
-import Eyeoff_3 from "../../assets/icons/EyeOff.jsx";
-import Informationcircle_3 from "../../assets/icons/InformationCircle.jsx";
-import Linearmap_3 from "../../assets/icons/LinearMap.jsx";
-import Linkto_3 from "../../assets/icons/LinkTo.jsx";
-import Locationmarker_3 from "../../assets/icons/LocationMarker.jsx";
-import Login_3 from "../../assets/icons/Login.jsx";
-import Medaille_3 from "../../assets/icons/Medaille.jsx";
-import Paperclip_3 from "../../assets/icons/PaperClip.jsx";
-import Pencil_3 from "../../assets/icons/Pencil.jsx";
-import Prepa_3 from "../../assets/icons/Prepa.jsx";
-import Preparesejour_3 from "../../assets/icons/PrepareSejour.jsx";
-import Questionbubble_3 from "../../assets/icons/QuestionBubble.jsx";
-import Questionmarkblue_3 from "../../assets/icons/QuestionMarkBlue.jsx";
-import Questionmarkbluecircle_3 from "../../assets/icons/QuestionMarkBlueCircle.jsx";
-import Rightarrow_3 from "../../assets/icons/RightArrow.jsx";
-import Search_3 from "../../assets/icons/Search.jsx";
-import Simplefileicon_3 from "../../assets/icons/SimpleFileIcon.jsx";
-import Sixdotsvertical_3 from "../../assets/icons/SixDotsVertical.jsx";
-import Sun_3 from "../../assets/icons/Sun.jsx";
-import Trophy_3 from "../../assets/icons/Trophy.jsx";
-import Unlock_3 from "../../assets/icons/Unlock.jsx";
-import Warning_3 from "../../assets/icons/Warning.jsx";
-import Xcircle_3 from "../../assets/icons/XCircle.jsx";
-import Xcirclefill_3 from "../../assets/icons/XCircleFill.jsx";
-import Citoyennete_4 from "../../assets/mission-domaines/citoyennete.jsx";
-import Culture_4 from "../../assets/mission-domaines/culture.jsx";
-import Defenseetmemoire_4 from "../../assets/mission-domaines/defense-et-memoire.jsx";
-import Education_4 from "../../assets/mission-domaines/education.jsx";
-import Environment_4 from "../../assets/mission-domaines/environment.jsx";
-import Preparationmilitaire_4 from "../../assets/mission-domaines/preparation-militaire.jsx";
-import Sante_4 from "../../assets/mission-domaines/sante.jsx";
-import Securite_4 from "../../assets/mission-domaines/securite.jsx";
-import Solidarite_4 from "../../assets/mission-domaines/solidarite.jsx";
-import Sport_4 from "../../assets/mission-domaines/sport.jsx";
 import Citizenshipsvg_5 from "../../assets/mission-domains/citizenship.svg";
 import Culturesvg_5 from "../../assets/mission-domains/culture.svg";
 import Defaultsvg_5 from "../../assets/mission-domains/default.svg";
@@ -179,6 +114,10 @@ import Sapeurpompierjpg_6 from "../../assets/programmes-engagement/sapeur-pompie
 import Serviceciviqueinternationaljpg_6 from "../../assets/programmes-engagement/service-civique-international.jpg";
 import Serviceciviquejpg_6 from "../../assets/programmes-engagement/service-civique.jpg";
 import Volontariatsolidariteinternationalejpg_6 from "../../assets/programmes-engagement/volontariat-solidarite-internationale.jpg";
+import Temoignageellyjpg_7 from "../../assets/temoignages/temoignage-elly.jpg";
+import Temoignagejuliepng_7 from "../../assets/temoignages/temoignage-julie.png";
+import Temoignageleilasamuelelisapng_7 from "../../assets/temoignages/temoignage-leila-samuel-elisa.png";
+import Temoignageorianemaellejpg_7 from "../../assets/temoignages/temoignage-oriane-maelle.jpg";
 
 export default function AssetsPresentationPage() {
   const [filter, setFilter] = useState("");
@@ -213,48 +152,16 @@ export default function AssetsPresentationPage() {
           className="ml-2 w-[24px] h-[24px] text-[#BBBBBB] hover:border-[1px] hover:border-[#DDDDDD] rounded-md hover:text-[#808080] cursor-pointer flex items-center justify-center"
           onClick={resetFilter}>
           <div className="w-[10px] h-[10px]">
-            <Close_1 />
+            <HiX />
           </div>
         </div>
       </div>
       <div className="">
         <div className="text-3xl font-bold text-[#000000] my-8">assets</div>
         <div className="grid grid-cols-8 gap-4">
-          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="close.jsx">
-            <Close_1 />
-            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Close.js</div>
-          </div>
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="closeblue.svg">
             <img src={Closebluesvg_1} alt="CloseBlue.svg" crossOrigin="anonymous" className="" />
             <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">CloseBlue.svg</div>
-          </div>
-          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="fileicon.jsx">
-            <Fileicon_1 />
-            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">FileIcon.js</div>
-          </div>
-          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="iceberg.jsx">
-            <Iceberg_1 />
-            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Iceberg.js</div>
-          </div>
-          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="iconfrance.jsx">
-            <Iconfrance_1 />
-            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">IconFrance.js</div>
-          </div>
-          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="questionmark.jsx">
-            <Questionmark_1 />
-            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">QuestionMark.js</div>
-          </div>
-          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="roundwarning.jsx">
-            <Roundwarning_1 />
-            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">RoundWarning.js</div>
-          </div>
-          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="voiture.jsx">
-            <Voiture_1 />
-            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Voiture.js</div>
-          </div>
-          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="yellowwarning.jsx">
-            <Yellowwarning_1 />
-            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">YellowWarning.js</div>
           </div>
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="arrowrightblue.svg">
             <img src={Arrowrightbluesvg_2} alt="arrowRightBlue.svg" crossOrigin="anonymous" className="" />
@@ -279,10 +186,6 @@ export default function AssetsPresentationPage() {
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="burger.svg">
             <img src={Burgersvg_2} alt="burger.svg" crossOrigin="anonymous" className="" />
             <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">burger.svg</div>
-          </div>
-          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="calendar.jsx">
-            <Calendar_1 />
-            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">calendar.js</div>
           </div>
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="cancel.png">
             <img src={Cancelpng_2} alt="cancel.png" crossOrigin="anonymous" className="" />
@@ -320,13 +223,17 @@ export default function AssetsPresentationPage() {
             <img src={Eyesvg_2} alt="eye.svg" crossOrigin="anonymous" className="" />
             <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">eye.svg</div>
           </div>
-          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="file.svg">
-            <img src={Filesvg_2} alt="file.svg" crossOrigin="anonymous" className="" />
-            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">file.svg</div>
-          </div>
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="fr.png">
             <img src={Frpng_2} alt="fr.png" crossOrigin="anonymous" className="" />
             <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">fr.png</div>
+          </div>
+          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="hero-2.png">
+            <img src={Hero2png_2} alt="hero-2.png" crossOrigin="anonymous" className="" />
+            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">hero-2.png</div>
+          </div>
+          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="hero-banner.png">
+            <img src={Herobannerpng_2} alt="hero-banner.png" crossOrigin="anonymous" className="" />
+            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">hero-banner.png</div>
           </div>
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="hero.png">
             <img src={Heropng_2} alt="hero.png" crossOrigin="anonymous" className="" />
@@ -504,28 +411,24 @@ export default function AssetsPresentationPage() {
             <img src={Tabrulesyoungpng_6} alt="tabRulesYoung.png" crossOrigin="anonymous" className="" />
             <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">tabRulesYoung.png</div>
           </div>
-          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="tick.svg">
-            <img src={Ticksvg_6} alt="tick.svg" crossOrigin="anonymous" className="" />
-            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">tick.svg</div>
-          </div>
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="tools.png">
-            <img src={Toolspng_6} alt="tools.png" crossOrigin="anonymous" className="" />
+            <img src={Toolspng_7} alt="tools.png" crossOrigin="anonymous" className="" />
             <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">tools.png</div>
           </div>
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="trophy.svg">
-            <img src={Trophysvg_6} alt="trophy.svg" crossOrigin="anonymous" className="" />
+            <img src={Trophysvg_7} alt="trophy.svg" crossOrigin="anonymous" className="" />
             <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">trophy.svg</div>
           </div>
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="validatedphase2.png">
-            <img src={Validatedphase2png_6} alt="validatedPhase2.png" crossOrigin="anonymous" className="" />
+            <img src={Validatedphase2png_7} alt="validatedPhase2.png" crossOrigin="anonymous" className="" />
             <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">validatedPhase2.png</div>
           </div>
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="validatedphase2mobile.png">
-            <img src={Validatedphase2mobilepng_6} alt="validatedPhase2Mobile.png" crossOrigin="anonymous" className="" />
+            <img src={Validatedphase2mobilepng_7} alt="validatedPhase2Mobile.png" crossOrigin="anonymous" className="" />
             <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">validatedPhase2Mobile.png</div>
           </div>
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="warning.png">
-            <img src={Warningpng_6} alt="warning.png" crossOrigin="anonymous" className="" />
+            <img src={Warningpng_7} alt="warning.png" crossOrigin="anonymous" className="" />
             <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">warning.png</div>
           </div>
         </div>
@@ -570,246 +473,12 @@ export default function AssetsPresentationPage() {
           </div>
           <div className="">
             <div className="text-3xl font-bold text-[#000000] my-8">icons</div>
-            <div className="grid grid-cols-8 gap-4">
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="academiccap.jsx">
-                <Academiccap_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">AcademicCap.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="addimage.jsx">
-                <Addimage_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">AddImage.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="arrowrightbluesquare.jsx">
-                <Arrowrightbluesquare_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">ArrowRightBlueSquare.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="arrowupright.jsx">
-                <Arrowupright_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">ArrowUpRight.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="bin.jsx">
-                <Bin_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Bin.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="burger.jsx">
-                <Burger_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Burger.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="calendar.jsx">
-                <Calendar_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Calendar.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="calendarbig.jsx">
-                <Calendarbig_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">CalendarBig.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="check.jsx">
-                <Check_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Check.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="check2.jsx">
-                <Check2_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Check2.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="checkcircle.jsx">
-                <Checkcircle_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">CheckCircle.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="checkcirclefill.jsx">
-                <Checkcirclefill_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">CheckCircleFill.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="checkcirclestroke.jsx">
-                <Checkcirclestroke_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">CheckCircleStroke.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="chevrondown.jsx">
-                <Chevrondown_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">ChevronDown.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="chevronright.jsx">
-                <Chevronright_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">ChevronRight.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="clock.jsx">
-                <Clock_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Clock.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="completeinscription.jsx">
-                <Completeinscription_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">CompleteInscription.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="consentdone.jsx">
-                <Consentdone_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">ConsentDone.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="download.jsx">
-                <Download_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Download.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="editpen.jsx">
-                <Editpen_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">EditPen.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="editpenlight.jsx">
-                <Editpenlight_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">EditPenLight.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="erroricon.jsx">
-                <Erroricon_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">ErrorIcon.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="erroriconfill.jsx">
-                <Erroriconfill_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">ErrorIconFill.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="eye.jsx">
-                <Eye_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Eye.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="eyeoff.jsx">
-                <Eyeoff_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">EyeOff.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="informationcircle.jsx">
-                <Informationcircle_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">InformationCircle.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="linearmap.jsx">
-                <Linearmap_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">LinearMap.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="linkto.jsx">
-                <Linkto_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">LinkTo.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="locationmarker.jsx">
-                <Locationmarker_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">LocationMarker.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="login.jsx">
-                <Login_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Login.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="medaille.jsx">
-                <Medaille_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Medaille.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="paperclip.jsx">
-                <Paperclip_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">PaperClip.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="pencil.jsx">
-                <Pencil_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Pencil.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="prepa.jsx">
-                <Prepa_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Prepa.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="preparesejour.jsx">
-                <Preparesejour_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">PrepareSejour.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="questionbubble.jsx">
-                <Questionbubble_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">QuestionBubble.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="questionmarkblue.jsx">
-                <Questionmarkblue_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">QuestionMarkBlue.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="questionmarkbluecircle.jsx">
-                <Questionmarkbluecircle_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">QuestionMarkBlueCircle.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="rightarrow.jsx">
-                <Rightarrow_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">RightArrow.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="search.jsx">
-                <Search_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Search.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="simplefileicon.jsx">
-                <Simplefileicon_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">SimpleFileIcon.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="sixdotsvertical.jsx">
-                <Sixdotsvertical_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">SixDotsVertical.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="sun.jsx">
-                <Sun_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Sun.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="trophy.jsx">
-                <Trophy_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Trophy.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="unlock.jsx">
-                <Unlock_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Unlock.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="warning.jsx">
-                <Warning_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">Warning.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="xcircle.jsx">
-                <Xcircle_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">XCircle.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="xcirclefill.jsx">
-                <Xcirclefill_3 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">XCircleFill.js</div>
-              </div>
-            </div>
+            <div className="grid grid-cols-8 gap-4"></div>
             <div className=""></div>
           </div>
           <div className="">
             <div className="text-3xl font-bold text-[#000000] my-8">mission-domaines</div>
-            <div className="grid grid-cols-8 gap-4">
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="citoyennete.jsx">
-                <Citoyennete_4 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">citoyennete.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="culture.jsx">
-                <Culture_4 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">culture.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="defense-et-memoire.jsx">
-                <Defenseetmemoire_4 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">defense-et-memoire.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="education.jsx">
-                <Education_4 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">education.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="environment.jsx">
-                <Environment_4 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">environment.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="preparation-militaire.jsx">
-                <Preparationmilitaire_4 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">preparation-militaire.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="sante.jsx">
-                <Sante_4 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">sante.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="securite.jsx">
-                <Securite_4 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">securite.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="solidarite.jsx">
-                <Solidarite_4 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">solidarite.js</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="sport.jsx">
-                <Sport_4 />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">sport.js</div>
-              </div>
-            </div>
+            <div className="grid grid-cols-8 gap-4"></div>
             <div className=""></div>
           </div>
           <div className="">
@@ -944,6 +613,30 @@ export default function AssetsPresentationPage() {
                 data-name="volontariat-solidarite-internationale.jpg">
                 <img src={Volontariatsolidariteinternationalejpg_6} alt="volontariat-solidarite-internationale.jpg" crossOrigin="anonymous" className="" />
                 <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">volontariat-solidarite-internationale.jpg</div>
+              </div>
+            </div>
+            <div className=""></div>
+          </div>
+          <div className="">
+            <div className="text-3xl font-bold text-[#000000] my-8">temoignages</div>
+            <div className="grid grid-cols-8 gap-4">
+              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="temoignage-elly.jpg">
+                <img src={Temoignageellyjpg_7} alt="temoignage-elly.jpg" crossOrigin="anonymous" className="" />
+                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">temoignage-elly.jpg</div>
+              </div>
+              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="temoignage-julie.png">
+                <img src={Temoignagejuliepng_7} alt="temoignage-julie.png" crossOrigin="anonymous" className="" />
+                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">temoignage-julie.png</div>
+              </div>
+              <div
+                className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center"
+                data-name="temoignage-leila-samuel-elisa.png">
+                <img src={Temoignageleilasamuelelisapng_7} alt="temoignage-leila-samuel-elisa.png" crossOrigin="anonymous" className="" />
+                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">temoignage-leila-samuel-elisa.png</div>
+              </div>
+              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="temoignage-oriane-maelle.jpg">
+                <img src={Temoignageorianemaellejpg_7} alt="temoignage-oriane-maelle.jpg" crossOrigin="anonymous" className="" />
+                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">temoignage-oriane-maelle.jpg</div>
               </div>
             </div>
             <div className=""></div>

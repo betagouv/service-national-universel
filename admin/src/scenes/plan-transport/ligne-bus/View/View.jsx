@@ -43,13 +43,9 @@ export default function View(props) {
       }
       setData(reponseBus);
 
-      let body = {
-        query: { bool: { filter: [{ terms: { "ligneId.keyword": [id] } }, { terms: { "status.keyword": ["VALIDATED"] } }, { terms: { "cohort.keyword": [reponseBus.cohort] } }] } },
-        size: 0,
-      };
+      const responseYoungs = await api.post(`/elasticsearch/young/in-bus/${String(id)}/search`, { filters: {} });
 
-      const { responses } = await api.esQuery("young", body, null, "?showAffectedToRegionOrDep=1");
-      setNbYoung(responses[0].hits.total.value);
+      setNbYoung(responseYoungs.responses[0].hits.total.value);
 
       await getCohortDetails(reponseBus.cohort);
     } catch (e) {

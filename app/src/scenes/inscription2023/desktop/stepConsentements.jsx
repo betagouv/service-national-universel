@@ -5,7 +5,7 @@ import { COHESION_STAY_LIMIT_DATE } from "snu-lib";
 import EditPenLight from "../../../assets/icons/EditPenLight";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
-import CheckBox from "../../../components/inscription/checkbox";
+import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
@@ -100,10 +100,10 @@ export default function StepConsentements() {
               </div>
             </div>
           </div>
-          <div className="mt-4 flex cursor-pointer items-center justify-end gap-2 pb-4" onClick={() => setModal({ isOpen: true })}>
+          {/* <div className="mt-4 flex cursor-pointer items-center justify-end gap-2 pb-4" onClick={() => setModal({ isOpen: true })}>
             <EditPenLight />
             <div className="text-sm font-medium text-[#000091] ">Je souhaite modifier mes dates de séjour</div>
-          </div>
+          </div> */}
           <hr className="my-8 h-px border-0 bg-gray-200" />
           <div className="flex justify-end gap-4">
             <button
@@ -120,7 +120,7 @@ export default function StepConsentements() {
           </div>
         </div>
       </div>
-      <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
+      {/* <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} /> */}
     </>
   );
 }

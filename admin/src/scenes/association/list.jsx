@@ -19,6 +19,7 @@ export default function List() {
   const [paramData, setParamData] = React.useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   const filterArray = [
     { title: "Région", name: "coordonnees_adresse_region", missingLabel: "Non renseignée", defaultValues: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
@@ -152,6 +153,7 @@ export default function List() {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            size={size}
           />
           <div className="flex flex-row flex-wrap items-center mt-2">
             <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
@@ -169,7 +171,8 @@ export default function List() {
           paramData={paramData}
           setParamData={setParamData}
           currentEntryOnPage={data?.length}
-          size={data?.length}
+          size={size}
+          setSize={setSize}
           render={
             <div className="flex flex-col gap-5">
               <p className="text-lg text-gray-500">

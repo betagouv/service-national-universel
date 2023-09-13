@@ -12,6 +12,7 @@ import Invite from "./invite";
 
 import Avatar from "../Avatar";
 import { toastr } from "react-redux-toastr";
+import { HiOutlineAnnotation } from "react-icons/hi";
 
 export default function HeaderUser() {
   const dispatch = useDispatch();
@@ -77,6 +78,14 @@ export default function HeaderUser() {
               <div className="group flex cursor-pointer items-center gap-2  p-3 text-coolGray-800 hover:bg-coolGray-100  hover:text-coolGray-800">
                 <FiSettings className=" group-hover:scale-110" />
                 Paramétrage dynamique
+              </div>
+            </NavLink>
+          )}
+          {[ROLES.ADMIN].includes(user.role) && (
+            <NavLink to="/alerte">
+              <div className="group flex cursor-pointer items-center gap-2  p-3 text-coolGray-800 hover:bg-coolGray-100  hover:text-coolGray-800">
+                <HiOutlineAnnotation className=" group-hover:scale-110" />
+                Messages d'alerte
               </div>
             </NavLink>
           )}

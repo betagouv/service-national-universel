@@ -55,7 +55,7 @@ export default function DndFileInput({ optional, value, name, errorMessage = req
       if (!isFileSupported(newFiles[i].name)) return toastr.error(`Le type du fichier ${newFiles[i].name} n'est pas supporté.`);
       if (newFiles[i].size > 5000000) return toastr.error(`Ce fichier ${newFiles[i].name} est trop volumineux.`);
     }
-    const res = await api.uploadFile(`${path}`, newFiles);
+    const res = await api.uploadFiles(`${path}`, newFiles);
     if (res.code === "FILE_CORRUPTED") {
       return toastr.error(
         "Le fichier semble corrompu",

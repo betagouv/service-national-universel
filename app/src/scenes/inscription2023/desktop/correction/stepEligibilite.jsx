@@ -5,14 +5,14 @@ import validator from "validator";
 import dayjs from "dayjs";
 import IconFrance from "../../../../assets/IconFrance";
 import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
-import CheckBox from "../../../../components/inscription/checkbox";
-import Toggle from "../../../../components/inscription/toggle";
+import CheckBox from "../../../../components/dsfr/forms/checkbox";
+import Toggle from "../../../../components/dsfr/forms/toggle";
 import plausibleEvent from "../../../../services/plausible";
 import { getCorrectionByStep } from "../../../../utils/navigation";
 import SchoolInFrance from "../../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../../inscription2023/components/ShoolOutOfFrance";
 import Input from "../../components/Input";
-import Select from "../../components/Select";
+import Select from "../../../../components/dsfr/forms/Select";
 
 import { useDispatch, useSelector } from "react-redux";
 import { YOUNG_STATUS } from "snu-lib";
@@ -23,6 +23,7 @@ import { translate } from "../../../../utils";
 import DatePickerList from "../../components/DatePickerList";
 
 import ModalSejourCorrection from "../../components/ModalSejourCorrection";
+import { supportURL } from "@/config";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useState({});
@@ -204,7 +205,7 @@ export default function StepEligibilite() {
         <div className="mx-auto my-0 basis-[70%] bg-white px-[102px] py-[60px] drop-shadow-md">
           <div className="flex w-full items-center justify-between">
             <h1 className="text-xl text-[#161616]">Vérifiez votre éligibilité au SNU</h1>
-            <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
+            <a href={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"} target="_blank" rel="noreferrer">
               <QuestionMarkBlueCircle />
             </a>
           </div>

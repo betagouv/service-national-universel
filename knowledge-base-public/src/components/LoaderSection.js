@@ -1,17 +1,35 @@
-const LoaderSection = () => (
-  <div className="mx-2 my-4 flex w-72 min-w-1/4 flex-shrink grow-0">
-    <article className="relative flex flex-grow flex-col overflow-hidden rounded-lg bg-white shadow-lg">
-      <div className="flex h-32 w-full items-center justify-center overflow-hidden bg-gray-200">
-        <div className="h-full w-full bg-gray-200">
+import React from "react";
+
+const LoaderSection = ({ className = "" }) => (
+  <div className={`w-full max-w-[690px] md:w-72 ${className}`}>
+    <div className="relative flex flex-grow flex-col overflow-hidden rounded-lg bg-white shadow-lg">
+      <div className="flex h-[60px] w-full items-center justify-center overflow-hidden pl-4 pr-9 md:h-[80px]">
+        <div className="mr-4 h-8 w-8 rounded-md bg-gray-200" />
+        <div className="h-6 flex-1 rounded bg-gray-200">
           <div className="animated-background" />
         </div>
       </div>
-      <header className="mb-2 mt-2 flex flex-col items-start justify-start px-8 pt-6 pb-8 leading-tight">
-        <div className="mb-5  h-2 w-full bg-gray-200" />
-        <div className="mb-5  h-2 w-full bg-gray-200" />
-        <div className="mb-5  h-2 w-full bg-gray-200" />
-      </header>
-    </article>
+      <ul className="hidden flex-col items-start justify-start md:flex">
+        <li className="flex h-[56px] w-full px-4">
+          <div className="flex w-full border-t border-t-gray-200 py-4">
+            <span className="w-full rounded bg-gray-200" />
+          </div>
+        </li>
+        <li className="flex h-[56px] w-full px-4">
+          <div className="flex w-full border-t border-t-gray-200 py-4">
+            <span className="w-full rounded bg-gray-200" />
+          </div>
+        </li>
+        <li className="flex h-[56px] w-full px-4">
+          <div className="flex w-full border-t border-t-gray-200 py-4">
+            <span className="w-full rounded bg-gray-200" />
+          </div>
+        </li>
+        <li className="flex h-[52px] w-full border-t border-t-gray-200 bg-gray-50 p-4">
+          <span className="w-full rounded bg-gray-200" />
+        </li>
+      </ul>
+    </div>
   </div>
 );
 

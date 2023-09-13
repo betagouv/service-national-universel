@@ -56,7 +56,7 @@ export default function ModalFilesEquivalence({ isOpen, onCancel, initialValues,
 
   const uploadFiles = async (files) => {
     setUploading(true);
-    const res = await api.uploadFile("/referent/file/equivalenceFiles", files, { youngId: young._id });
+    const res = await api.uploadFiles("/referent/file/equivalenceFiles", files, { youngId: young._id });
     if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
     // We update it instant ( because the bucket is updated instant )
     setFilesList(res.data);

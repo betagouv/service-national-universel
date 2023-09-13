@@ -9,13 +9,12 @@ import api from "../../../services/api";
 
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
 import Help from "../components/Help";
 import Navbar from "../components/Navbar";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import StickyButton from "../../../components/inscription/stickyButton";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import MyDocs from "../components/MyDocs";
-import ErrorMessage from "../components/ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import Info from "../../../components/info";
 
 export default function StepDocuments() {
@@ -60,6 +59,8 @@ export default function StepDocuments() {
     if (!disabledUpload) history.push(`televersement/${doc.category}`);
   }
 
+  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
+
   if (young?.status === YOUNG_STATUS.WAITING_CORRECTION && corrections?.length === 0) return <Redirect to="/" />;
   if (corrections?.some((e) => ["MISSING_FRONT", "MISSING_BACK"].includes(e.reason))) return <Redirect to="televersement" />;
   if (corrections?.some((e) => e.field === "latestCNIFileExpirationDate") && young?.files.cniFiles.length) return <Redirect to="televersement" />;
@@ -70,7 +71,7 @@ export default function StepDocuments() {
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="flex w-full items-center justify-between">
           <h1 className="text-2xl font-semibold">Ma pièce d’identité</h1>
-          <a href={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`} target="_blank" rel="noreferrer">
+          <a href={supportLink} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
           </a>
         </div>
@@ -111,8 +112,7 @@ export default function StepDocuments() {
           </div>
         ))}
       </div>
-      <Help />
-      <Footer marginBottom="mb-[88px]" />
+      <Help supportLink={supportLink} />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/representants")} onClick={onSubmit} disabled={disabled} />
     </>
   );

@@ -2,19 +2,16 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { COHESION_STAY_LIMIT_DATE } from "snu-lib";
-import EditPenLight from "../../../assets/icons/EditPenLight";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
-import CheckBox from "../../../components/inscription/checkbox";
-import StickyButton from "../../../components/inscription/stickyButton";
+import CheckBox from "../../../components/dsfr/forms/checkbox";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
-import ModalSejour from "../components/ModalSejour";
 import Navbar from "../components/Navbar";
 
 export default function StepConsentements() {
@@ -23,7 +20,6 @@ export default function StepConsentements() {
   const [disabled, setDisabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState({});
-  const [modal, setModal] = React.useState({ isOpen: false });
   const dispatch = useDispatch();
   const [data, setData] = React.useState({
     consentment1: young?.consentment === "true",
@@ -100,14 +96,13 @@ export default function StepConsentements() {
             </div>
           </div>
         </div>
-        <div className="mt-4 flex items-center justify-end gap-2 pb-4" onClick={() => setModal({ isOpen: true })}>
+        {/* <div className="mt-4 flex items-center justify-end gap-2 pb-4" onClick={() => setModal({ isOpen: true })}>
           <EditPenLight />
           <div className="text-sm font-medium text-[#000091]">Je souhaite modifier mes dates de séjour</div>
-        </div>
+        </div> */}
       </div>
-      <Footer marginBottom="mb-[88px]" />
       <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/coordonnee")} onClick={onSubmit} disabled={disabled || loading} />
-      <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
+      {/* <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} /> */}
     </>
   );
 }

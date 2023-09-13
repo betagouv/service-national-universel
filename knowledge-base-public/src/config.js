@@ -9,6 +9,7 @@ let baseDeConnaissanceURL = "http://localhost:8084";
 
 if (environment === "staging") {
   snuApiUrl = "https://api.beta-snu.dev";
+  supportApiUrl = "https://api-support.beta-snu.dev";
   adminURL = "https://admin.beta-snu.dev";
   appURL = "https://moncompte.beta-snu.dev";
 }

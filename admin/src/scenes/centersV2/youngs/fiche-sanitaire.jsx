@@ -10,6 +10,7 @@ import { getAge, translate } from "../../../utils";
 import Panel from "../../volontaires/panel";
 import ModalMultiPointageFicheSanitaire from "../components/modals/ModalMultiPointageFicheSanitaire";
 import ModalPointageFicheSanitaire from "../components/modals/ModalPointageFicheSanitaire";
+import { captureMessage } from "../../../sentry";
 
 export default function FicheSanitaire({ updateFilter, focusedSession, filterArray, setHasYoungValidated }) {
   const [young, setYoung] = useState();
@@ -26,6 +27,7 @@ export default function FicheSanitaire({ updateFilter, focusedSession, filterArr
   const [paramData, setParamData] = useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   useEffect(() => {
     updateFilter(selectedFilters);
@@ -54,6 +56,10 @@ export default function FicheSanitaire({ updateFilter, focusedSession, filterArr
   };
 
   const handleClick = async (young) => {
+    if (!young?._id) {
+      captureMessage("Error with young :", { extra: { young } });
+      return;
+    }
     const { ok, data } = await api.get(`/referent/young/${young._id}`);
     if (ok) setYoung(data);
   };
@@ -71,7 +77,7 @@ export default function FicheSanitaire({ updateFilter, focusedSession, filterArr
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <div style={{ display: "flex", flexDirection: "column", flex: "1" }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
-          <div className="relative flex-1">
+          <div className="relative flex-1 mb-4 rounded-lg">
             <div className="mx-4 flex flex-col">
               <div className="flex w-full flex-row justify-between">
                 <div className="flex items-center gap-2">
@@ -89,6 +95,7 @@ export default function FicheSanitaire({ updateFilter, focusedSession, filterArr
                     setSelectedFilters={setSelectedFilters}
                     paramData={paramData}
                     setParamData={setParamData}
+                    size={size}
                   />
                   <div>
                     {youngSelected?.length > 0 ? (
@@ -192,6 +199,8 @@ export default function FicheSanitaire({ updateFilter, focusedSession, filterArr
               paramData={paramData}
               setParamData={setParamData}
               currentEntryOnPage={data?.length}
+              size={size}
+              setSize={setSize}
               render={
                 <table className="mt-6 w-full">
                   <thead className="">

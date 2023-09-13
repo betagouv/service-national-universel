@@ -18,7 +18,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canCreateTags(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateTags(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { name, type } = value;
     const tag = await TagsModel.create({ name, type });

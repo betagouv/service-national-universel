@@ -39,7 +39,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   try {
     const { user, body } = req;
     // Configuration
-    const searchFields = ["name", "city", "zip", "siret", "networkName"];
+    const searchFields = ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation", "siret", "networkName"];
     const filterFields = [
       "department.keyword",
       "region.keyword",
@@ -49,14 +49,14 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "networkName.keyword",
       "isMilitaryPreparation.keyword",
       "structurePubliqueEtatType.keyword",
+      "isNetwork.keyword",
     ];
     const sortFields = [];
-
     // Authorization
-    if (!canSearchInElasticSearch(req.user, "structure")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(req.user, "structure")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { structureContextFilters, structureContextError } = await buildStructureContext(user);
@@ -75,6 +75,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       page,
       sort,
       contextFilters,
+      size,
     });
 
     let structures;

@@ -24,9 +24,9 @@ import MobileTokenInvalide from "./mobile/token-invalide";
 import MobileImageRights from "./mobile/image-rights";
 import MobileImageRightsDone from "./mobile/image-rights-done";
 
-import Header from "./../../components/header";
-import HeaderMenu from "../../components/headerMenu";
-import Footer from "./../../components/footerV2";
+import Header from "@/components/dsfr/layout/Header";
+import HeaderMenu from "@/components/dsfr/nav/Menu";
+import Footer from "@/components/dsfr/layout/Footer";
 import FranceConnectCallback from "./components/FranceConnectCallback";
 import RepresentantsLegauxContextProvider from "../../context/RepresentantsLegauxContextProvider";
 
@@ -80,7 +80,7 @@ const Step = ({ step }) => {
   return (
     <div className="flex h-screen flex-col justify-between bg-white md:!bg-[#f9f6f2]">
       <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-      <Header setIsOpen={setIsOpen} />
+      <Header setIsOpen={setIsOpen} title="Inscription du volontaire" />
       {renderStep(step)}
       {device === "desktop" ? <Footer /> : null}
     </div>

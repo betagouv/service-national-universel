@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import queryString from "query-string";
 import { maintenance } from "../../config";
-
+import { environment } from "../../config";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -13,6 +13,8 @@ import Header from "./components/header";
 import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
 import { formatToActualTime } from "snu-lib/date";
+import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
+import { captureMessage } from "../../sentry";
 
 export default function Signin() {
   const history = useHistory();
@@ -59,7 +61,11 @@ export default function Signin() {
                     }
                     if (token) api.setToken(token);
                     if (user) {
-                      if (redirect?.startsWith("http")) return (window.location.href = redirect);
+                      if (environment === "development" ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
+                      if (redirect) {
+                        captureMessage("Invalid redirect url", { extra: { redirect } });
+                        toastr.error("Url de redirection invalide : " + redirect);
+                      }
                       dispatch(setUser(user));
                     }
                   } catch (e) {

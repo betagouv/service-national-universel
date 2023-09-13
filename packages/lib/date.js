@@ -1,3 +1,5 @@
+const MONTHS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+
 const formatDay = (date) => {
   if (!date) return "-";
   return new Date(date).toISOString().split("T")[0];
@@ -128,7 +130,8 @@ const COHESION_STAY_END = {
   "Avril 2023 - A": new Date("04/21/2023"),
   "Avril 2023 - B": new Date("04/28/2023"),
   "Juin 2023": new Date("06/23/2023"),
-  "Juillet 2023": new Date("07/13/2023"),
+  "Juillet 2023": new Date("07/17/2023"),
+  "Octobre 2023 - NC": new Date("10/20/2023"),
 };
 
 function isIsoDate(str) {
@@ -153,7 +156,18 @@ function calculateAge(birthDate, otherDate) {
   return years;
 }
 
+const formatDateForPostGre = (date) => {
+  if (!date) return "-";
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = (d.getMonth() + 1).toString().padStart(2, "0");
+  const day = d.getDate().toString().padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
 export {
+  MONTHS,
   formatDay,
   formatDateFR,
   formatToActualTime,
@@ -171,4 +185,5 @@ export {
   COHESION_STAY_END,
   isIsoDate,
   calculateAge,
+  formatDateForPostGre,
 };

@@ -8,7 +8,7 @@ const ModalForm = ({ isOpen, onClose }) => {
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-xl bg-white rounded-xl p-6">
       <div className="text-sm text-gray-700 leading-5 space-y-4">
         <IoWarning className="w-10 h-10 mx-auto text-gray-400" />
-        <p>Notre équipe support est extrêmement sollicitée, les délais de traitement des demandes ont été rallongés.</p>
+        <p>Pendant la période estivale, les délais de traitement des demandes ont été rallongés.</p>
         <p>90% des demandes reçues par notre équipe trouvent leur réponse grâce à nos articles.</p>
         <p>
           Pour obtenir une réponse rapide, consultez notre{" "}

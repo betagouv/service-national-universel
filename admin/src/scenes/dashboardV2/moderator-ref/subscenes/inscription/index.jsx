@@ -5,7 +5,7 @@ import { HorizontalBar } from "../../../components/graphs";
 
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { academyList, COHORTS, departmentToAcademy, ES_NO_LIMIT, REFERENT_ROLES, region2department, regionList, ROLES } from "snu-lib";
+import { academyList, COHORTS, departmentToAcademy, REFERENT_ROLES, region2department, regionList, ROLES } from "snu-lib";
 import api from "../../../../../services/api";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import StatutPhase from "../../../components/inscription/StatutPhase";
@@ -68,7 +68,7 @@ export default function Index() {
   }, [departmentOptions]);
 
   const [selectedFilters, setSelectedFilters] = React.useState({
-    cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
+    cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"],
   });
 
   async function fetchInscriptionGoals() {
@@ -153,16 +153,12 @@ export default function Index() {
 
 const getInscriptionGoals = async () => {
   let dataMerged = [];
-  const query = {
-    query: { bool: { must: { match_all: {} } } },
-    size: ES_NO_LIMIT,
-  };
-  const { responses } = await api.esQuery("inscriptiongoal", query);
-  if (!responses.length) {
+  const responses = await api.post("/elasticsearch/dashboard/inscription/inscriptionGoal");
+  if (!responses?.hits?.hits) {
     toastr.error("Une erreur est survenue");
     return [];
   }
-  const result = responses[0].hits.hits;
+  const result = responses.hits.hits;
   result.map((e) => {
     const { department, region, academy, cohort, max } = e._source;
     dataMerged[department] = { cohort, department, region, academy, max: (dataMerged[department]?.max ? dataMerged[department].max : 0) + max };
@@ -180,33 +176,7 @@ function filterByRegionAndDepartement(e, filters, user) {
 }
 
 async function getCurrentInscriptions(filters) {
-  const body = {
-    query: { bool: { must: { match_all: {} }, filter: [] } },
-    aggs: {
-      status: {
-        terms: {
-          field: "status.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-    },
-    size: 0,
-  };
-
-  if (filters?.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filters.cohort } });
-  if (filters?.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filters.academy } });
-  if (filters?.region?.length)
-    body.query.bool.filter.push({
-      bool: {
-        should: [
-          { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": filters.region } }] } },
-          { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": filters.region } }] } },
-        ],
-      },
-    });
-  if (filters?.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filters.department } });
-
-  const { responses } = await api.esQuery("young", body);
-  if (!responses.length) return {};
-  return api.getAggregations(responses[0]);
+  const responses = await api.post("/elasticsearch/dashboard/inscription/youngForInscription", {filters: filters} );
+  // if (!responses.length) return {};
+  return api.getAggregations(responses);
 }

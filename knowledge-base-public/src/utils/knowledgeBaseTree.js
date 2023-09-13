@@ -23,7 +23,7 @@ const findParents = (item, flattenedData) => {
   if (!item.parentId) return [];
   const fromRootToItem = [{ ...item }]; // we spread item to avoid circular reference in item.parents = parents
   let currentItem = item;
-  while (!!currentItem.parentId) {
+  while (currentItem.parentId) {
     const parent = flattenedData.find((i) => i._id === currentItem.parentId);
     fromRootToItem.unshift(parent);
     currentItem = parent;

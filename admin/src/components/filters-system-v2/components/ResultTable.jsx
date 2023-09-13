@@ -1,21 +1,28 @@
 import React from "react";
 
 import PaginationServerDriven from "../../PaginationServerDriven";
-export default function ResultTable({ render, currentEntryOnPage, pagination = true, paramData, setParamData, size = 20 }) {
-  const pageCount = Math.ceil(paramData?.count / size);
-
+export default function ResultTable({ render, currentEntryOnPage, pagination = true, paramData, setParamData, size = 10, setSize = null }) {
   return (
     <div>
+      {pagination && (
+        <PaginationServerDriven
+          currentPageNumber={paramData.page}
+          setCurrentPageNumber={(value) => setParamData((old) => ({ ...old, page: value }))}
+          itemsCountTotal={paramData?.count}
+          itemsCountOnCurrentPage={currentEntryOnPage}
+          size={size}
+          setSize={setSize}
+        />
+      )}
       {render}
       {pagination && (
         <PaginationServerDriven
-          pageCount={pageCount}
-          currentPage={paramData.page}
-          changePage={(value) => setParamData((old) => ({ ...old, page: value }))}
-          count={paramData?.count}
-          itemsPerPage={size}
-          itemsCount={currentEntryOnPage}
-          className="p-4"
+          currentPageNumber={paramData.page}
+          setCurrentPageNumber={(value) => setParamData((old) => ({ ...old, page: value }))}
+          itemsCountTotal={paramData?.count}
+          itemsCountOnCurrentPage={currentEntryOnPage}
+          size={size}
+          setSize={setSize}
         />
       )}
     </div>

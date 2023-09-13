@@ -30,6 +30,7 @@ import Panel from "../../volontaires/panel";
 import { SelectStatusApplicationPhase2 } from "../../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
 import MissionView from "./wrapper";
 import { currentFilterAsUrl } from "../../../components/filters-system-v2/components/filters/utils";
+import { captureMessage } from "../../../sentry";
 
 const genderTranslation = {
   male: "Masculin",
@@ -58,6 +59,7 @@ export default function Youngs({ mission, applications, updateMission }) {
   const [paramData, setParamData] = useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   //Filters
   const filterArray = [
@@ -112,22 +114,16 @@ export default function Youngs({ mission, applications, updateMission }) {
   const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
   const handleClick = async (application) => {
+    if (!application?.youngId) {
+      captureMessage("Error with application :", { extra: { application } });
+      return;
+    }
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
     if (ok) setYoung(data);
   };
 
   async function transform(data, values) {
     let all = data;
-    if (values && ["identity", "contact", "address", "location", "application", "status", "choices", "representative1", "representative2"].some((e) => values.includes(e))) {
-      const youngIds = [...new Set(data.map((item) => item.youngId))];
-      if (youngIds?.length) {
-        const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
-        if (responses.length) {
-          const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
-        }
-      }
-    }
     return all.map((data) => {
       if (!data.young) data.young = {};
       if (!data.young.domains) data.young.domains = [];
@@ -368,7 +364,7 @@ export default function Youngs({ mission, applications, updateMission }) {
               count={countAll}
               title="Toutes les candidatures"
               onClick={() => {
-                history.replace(`/mission/${mission._id}/youngs/all?${currentFilterAsUrl(selectedFilters, paramData?.page, filterArray)}`);
+                history.replace(`/mission/${mission._id}/youngs/all?${currentFilterAsUrl(selectedFilters, 0, filterArray)}`);
               }}
               active={currentTab === "all"}
             />
@@ -383,7 +379,7 @@ export default function Youngs({ mission, applications, updateMission }) {
               }
               title="À traiter"
               onClick={() => {
-                history.replace(`/mission/${mission._id}/youngs/pending?${currentFilterAsUrl(selectedFilters, paramData?.page, filterArray)}`);
+                history.replace(`/mission/${mission._id}/youngs/pending?${currentFilterAsUrl(selectedFilters, 0, filterArray)}`);
               }}
               active={currentTab === "pending"}
             />
@@ -391,7 +387,7 @@ export default function Youngs({ mission, applications, updateMission }) {
               count={countFollow}
               title="À suivre"
               onClick={() => {
-                history.replace(`/mission/${mission._id}/youngs/follow?${currentFilterAsUrl(selectedFilters, paramData?.page, filterArray)}`);
+                history.replace(`/mission/${mission._id}/youngs/follow?${currentFilterAsUrl(selectedFilters, 0, filterArray)}`);
               }}
               active={currentTab === "follow"}
             />
@@ -412,6 +408,7 @@ export default function Youngs({ mission, applications, updateMission }) {
                   setSelectedFilters={setSelectedFilters}
                   paramData={paramData}
                   setParamData={setParamData}
+                  size={size}
                 />
                 {currentTab !== "all" ? (
                   <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={[{ items: actionsFilteredByRole }]} />
@@ -445,6 +442,8 @@ export default function Youngs({ mission, applications, updateMission }) {
                 paramData={paramData}
                 setParamData={setParamData}
                 currentEntryOnPage={data?.length}
+                size={size}
+                setSize={setSize}
                 render={
                   <Table>
                     <thead>

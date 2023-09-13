@@ -1,18 +1,20 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { environment } from "../../../../config";
+import { environment, supportURL } from "../../../../config";
 import { permissionPhase1, permissionPhase2, permissionPhase3 } from "../../../../utils";
+import plausibleEvent from "@/services/plausible";
 
 import Diagoriente from "./Diagoriente";
 import IconHome from "../assets/IconHome";
 import IconPhase1 from "../assets/IconPhase1";
 import IconPhase2 from "../assets/IconPhase2";
 import IconPhase3 from "../assets/IconPhase3";
-import IconHelp from "../assets/IconHelp";
 import MenuGroup from "./MenuGroup";
 import MenuLink from "./MenuLink";
 import Socials from "./Socials";
 import { GoTools } from "react-icons/go";
+import MenuLinkExternal from "./MenuLinkExternal";
+import { HiOutlineQuestionMarkCircle } from "react-icons/hi";
 
 export default function NavigationMenu({ onClose = () => {} }) {
   const young = useSelector((state) => state.Auth.young);
@@ -29,7 +31,13 @@ export default function NavigationMenu({ onClose = () => {} }) {
           <MenuLink to="/phase3/valider" text="Valider ma phase 3" onClose={onClose} />
         </MenuGroup>
         <div className="m-8" />
-        <MenuLink to="/besoin-d-aide" icon={<IconHelp />} text="Besoin d'aide ?" onClose={onClose} />
+        <MenuLinkExternal
+          onClick={plausibleEvent("Compte/Besoin d'aide")}
+          href={supportURL}
+          icon={<HiOutlineQuestionMarkCircle className="text-lg stroke-[1.5]" />}
+          text="Besoin d'aide ?"
+          onClose={onClose}
+        />
         {environment === "development" && <MenuLink to="develop-assets" icon={<GoTools />} text="Dev tools" onClose={onClose} />}
       </ul>
       <Diagoriente />

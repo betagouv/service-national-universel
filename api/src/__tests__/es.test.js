@@ -95,7 +95,7 @@ describe("Es", () => {
 
       passport.user.role = ROLES.HEAD_CENTER;
       let res = await msearch("mission", buildMsearchQuery("mission", matchAll));
-      expect(res.statusCode).toEqual(418);
+      expect(res.statusCode).toEqual(403);
 
       passport.user.role = ROLES.ADMIN;
     });
@@ -129,16 +129,6 @@ describe("Es", () => {
       passport.user.role = ROLES.ADMIN;
     });
   });
-  describe("POST /es/missionapi/_msearch", () => {
-    describe("POST /es/missionapi/_msearch", () => {
-      it("Should call msearch with correct index", async () => {
-        const body = buildMsearchQuery("missionapi", matchAll);
-        const res = await msearch("missionapi", body);
-        expect(res.statusCode).toEqual(200);
-        expect(esClient.msearch).toHaveBeenCalledWith({ body, index: "missionapi" });
-      });
-    });
-  });
   describe("POST /es/school/_msearch", () => {
     describe("POST /es/school/_msearch", () => {
       it("Should call msearch with correct index", async () => {
@@ -150,6 +140,20 @@ describe("Es", () => {
     });
   });
   describe("POST /es/pointderassemblement/_msearch", () => {
+    it("should return 200", async () => {
+      let res = await msearch("pointderassemblement", buildMsearchQuery("pointderassemblement", matchAll));
+      expect(res.statusCode).toEqual(200);
+    });
+    it("should not be authorized to head center, responsible and supervisor", async () => {
+      const passport = require("passport");
+      let res;
+      for (const role of [ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR]) {
+        passport.user.role = role;
+        res = await msearch("pointderassemblement", buildMsearchQuery("pointderassemblement", matchAll));
+        expect(res.statusCode).toEqual(403);
+      }
+      passport.user.role = ROLES.ADMIN;
+    });
     it("Should call msearch with correct index", async () => {
       const body = buildMsearchQuery("pointderassemblement", matchAll);
       const res = await msearch("pointderassemblement", body);
@@ -197,7 +201,7 @@ describe("Es", () => {
 
       passport.user.role = ROLES.HEAD_CENTER;
       let res = await msearch("structure", buildMsearchQuery("structure", matchAll));
-      expect(res.statusCode).toEqual(418);
+      expect(res.statusCode).toEqual(403);
 
       passport.user.role = ROLES.ADMIN;
     });
@@ -238,7 +242,7 @@ describe("Es", () => {
       for (const role of [ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR]) {
         passport.user.role = role;
         res = await msearch("cohesioncenter", buildMsearchQuery("cohesioncenter", matchAll));
-        expect(res.statusCode).toEqual(418);
+        expect(res.statusCode).toEqual(403);
       }
       passport.user.role = ROLES.ADMIN;
     });
@@ -267,23 +271,6 @@ describe("Es", () => {
     });
   });
 
-  describe("POST /es/pointderassemblement/_msearch", () => {
-    it("should return 200", async () => {
-      let res = await msearch("pointderassemblement", buildMsearchQuery("pointderassemblement", matchAll));
-      expect(res.statusCode).toEqual(200);
-    });
-    it("should not be authorized to head center, responsible and supervisor", async () => {
-      const passport = require("passport");
-      let res;
-      for (const role of [ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR]) {
-        passport.user.role = role;
-        res = await msearch("pointderassemblement", buildMsearchQuery("pointderassemblement", matchAll));
-        expect(res.statusCode).toEqual(418);
-      }
-      passport.user.role = ROLES.ADMIN;
-    });
-  });
-
   describe("POST /es/application/_msearch", () => {
     it("should return 404 for a responsible/supervisor with no structureId", async () => {
       const passport = require("passport");
@@ -306,7 +293,7 @@ describe("Es", () => {
 
       passport.user.role = ROLES.HEAD_CENTER;
       let res = await msearch("application", buildMsearchQuery("application", matchAll));
-      expect(res.statusCode).toEqual(418);
+      expect(res.statusCode).toEqual(403);
 
       passport.user.role = ROLES.ADMIN;
     });
@@ -450,7 +437,7 @@ describe("Es", () => {
       for (const role of [ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR]) {
         passport.user.role = role;
         res = await msearch("cohesionyoung/foo", buildMsearchQuery("cohesionyoung", matchAll));
-        expect(res.statusCode).toEqual(418);
+        expect(res.statusCode).toEqual(403);
       }
       passport.user.role = ROLES.ADMIN;
     });
@@ -461,7 +448,7 @@ describe("Es", () => {
       passport.user.role = ROLES.REFERENT_DEPARTMENT;
       passport.user.department = ["plop"];
       let res = await msearch("cohesionyoung/" + center._id, buildMsearchQuery("referent", matchAll));
-      expect(res.statusCode).toEqual(418);
+      expect(res.statusCode).toEqual(403);
     });
     it("should return 403 for referent region with region without a cohesion center", async () => {
       const center = await createCohesionCenter(getNewCohesionCenterFixture());
@@ -470,7 +457,7 @@ describe("Es", () => {
       passport.user.role = ROLES.REFERENT_REGION;
       passport.user.region = "plop";
       let res = await msearch("cohesionyoung/" + center._id, buildMsearchQuery("referent", matchAll));
-      expect(res.statusCode).toEqual(418);
+      expect(res.statusCode).toEqual(403);
     });
     it("should return 200 for referent department with department with a cohesion center", async () => {
       const center = await createCohesionCenter({ ...getNewCohesionCenterFixture(), department: "bim" });

@@ -107,7 +107,7 @@ import Checkcircle_4 from "../../assets/icons/CheckCircle.jsx";
 import Chevrondown_4 from "../../assets/icons/ChevronDown.jsx";
 import Chevronright_4 from "../../assets/icons/ChevronRight.jsx";
 import Clipboardlist_4 from "../../assets/icons/ClipboardList.jsx";
-import Cni_4 from "../../assets/icons/Cni.jsx";
+import Cni_4 from "../../assets/icons/UploadedFileIcon.jsx";
 import Cursorclick_4 from "../../assets/icons/CursorClick.jsx";
 import Download_4 from "../../assets/icons/Download.jsx";
 import Exclamationcircle_4 from "../../assets/icons/ExclamationCircle.jsx";

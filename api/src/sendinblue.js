@@ -4,6 +4,7 @@ const queryString = require("querystring");
 const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
+const { rateLimiterContactSIB } = require("./rateLimiters");
 
 const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
@@ -271,6 +272,7 @@ async function sync(obj, type, { force } = { force: false }) {
     if (attributes.TYPE === "REFERENT") listIds.push(47);
     user.statusPhase1 === "WAITING_ACCEPTATION" && listIds.push(106);
     ["referent_region", "referent_department"].includes(user.role) && listIds.push(147);
+    user.role === "supervisor" && listIds.push(1049);
 
     delete attributes.EMAIL;
     delete attributes.PASSWORD;
@@ -291,7 +293,7 @@ async function sync(obj, type, { force } = { force: false }) {
 
 async function syncContact(email, attributes, listIds) {
   try {
-    const res = await createContact({ email, attributes, listIds, updateEnabled: true });
+    const res = await rateLimiterContactSIB.call(() => createContact({ email, attributes, listIds, updateEnabled: true }));
     if (!res || res?.code) throw new Error(JSON.stringify({ res, email, attributes, listIds }));
     return;
   } catch (e) {
@@ -299,21 +301,34 @@ async function syncContact(email, attributes, listIds) {
   }
 }
 
-async function unsync(obj, { force } = { force: false }) {
-  if (ENVIRONMENT !== "production" && !force) return console.log("no unsync sendinblue");
-  try {
-    if (obj.hasOwnProperty("parent1Email") && obj.parent1Email) {
-      await deleteContact(obj.parent1Email);
-    }
-    if (obj.hasOwnProperty("parent2Email") && obj.parent2Email) {
-      await deleteContact(obj.parent2Email);
-    }
+async function unsync(obj, options = { force: false }) {
+  if (ENVIRONMENT !== "production" && !options.force) {
+    console.log("no unsync sendinblue");
+    return;
+  }
 
-    await deleteContact(obj.email);
-  } catch (e) {
-    console.log("Can't delete in sendinblue", obj.email);
-    capture(e);
+  const emails = [obj.parent1Email, obj.parent2Email, obj.email].filter(Boolean);
+
+  try {
+    await Promise.all(emails.map(deleteContact));
+  } catch (error) {
+    console.log("Can't delete in sendinblue", emails);
+    capture(error);
   }
 }
 
-module.exports = { api, sync, unsync, sendSMS, sendEmail, getEmailsList, getEmailContent, sendTemplate, createContact, updateContact, deleteContact, getContact };
+module.exports = {
+  regexp_exception_staging,
+  api,
+  sync,
+  unsync,
+  sendSMS,
+  sendEmail,
+  getEmailsList,
+  getEmailContent,
+  sendTemplate,
+  createContact,
+  updateContact,
+  deleteContact,
+  getContact,
+};

@@ -19,10 +19,31 @@ on:
     paths:
       - app/**
       - packages/**
+  pull_request:
+    paths:
+      - app/**
+      - packages/**
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+
+      - name: Node 18.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18.x
+
+      - name: Lint code
+        working-directory: ${{ env.SUBFOLDER_NAME }}
+        continue-on-error: true
+        run: npm run lint
+
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     strategy:
       matrix:
         node-version: [18.x]
@@ -66,15 +87,3 @@ jobs:
           git push -f -u cloud master
         env:
           CLEVER_CLOUD_GIT_REMOTE: ${{ secrets.CLEVER_CLOUD_GIT_REMOTE_APP_PROD }}
-
-      - name: Notification on failure
-        if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@master
-        env:
-          SLACK_TITLE: Failed to deploy app
-
-      - name: Notification on success
-        if: ${{ success() }}
-        uses: rtCamp/action-slack-notify@master
-        env:
-          SLACK_TITLE: App deployed

@@ -8,7 +8,7 @@ const { SECRET_API_KEY, JWT_SECRET } = require("../config");
 router.get("/token", async (req, res) => {
   try {
     const apiKey = req.header("x-api-key");
-    if (!apiKey || apiKey !== SECRET_API_KEY) return res.status(418).send({ ok: false, code: "ACCESS_DENIED" });
+    if (!apiKey || apiKey !== SECRET_API_KEY) return res.status(403).send({ ok: false, code: "ACCESS_DENIED" });
     const token = jwt.sign({ apiKey }, JWT_SECRET, {
       expiresIn: "1d",
     });

@@ -1,4 +1,5 @@
-require("dotenv").config("../.env");
+require("dotenv").config();
+
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const express = require("express");
@@ -13,6 +14,8 @@ const registerSentryErrorHandler = initSentry(app);
 
 app.use(helmet());
 app.use(helmet.hsts({ maxAge: 5184000 }));
+
+require("./crons");
 
 // @todo: can it be removed?
 const origin = ["http://localhost:8085"];
@@ -34,7 +37,7 @@ app.get("/", async (req, res) => {
   }
 });
 
-app.get("/testsentry", async (req, res) => {
+app.get("/testsentry", async () => {
   try {
     throw new Error("Intentional error");
   } catch (error) {

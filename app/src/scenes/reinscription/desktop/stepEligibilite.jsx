@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import Toggle from "../../../components/inscription/toggle";
-import Input from "../../../components/inscription/input";
+import Toggle from "../../../components/dsfr/forms/toggle";
+import Input from "../../../components/dsfr/forms/input";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import { toastr } from "react-redux-toastr";
 import IconFrance from "../../../assets/IconFrance";
@@ -9,17 +9,18 @@ import validator from "validator";
 import plausibleEvent from "../../../services/plausible";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
-import SearchableSelect from "../../../components/SearchableSelect";
-import CheckBox from "../../../components/inscription/checkbox";
+import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
+import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { useDispatch, useSelector } from "react-redux";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import DatePickerList from "../../preinscription/components/DatePickerList";
+import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
 import { setYoung } from "../../../redux/auth/actions";
 import { translate } from "../../../utils";
 
 import { STEPS } from "../utils/navigation";
 import Navbar from "../components/Navbar";
+import { supportURL } from "@/config";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useState({});
@@ -186,7 +187,7 @@ export default function StepEligibilite() {
         <div className="mx-auto my-0 basis-[70%] bg-white px-[102px] py-[60px] drop-shadow-md">
           <div className="flex w-full items-center justify-between">
             <h1 className="text-xl text-[#161616]">Vérifiez votre éligibilité au SNU</h1>
-            <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
+            <a href={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"} target="_blank" rel="noreferrer">
               <QuestionMarkBlueCircle />
             </a>
           </div>

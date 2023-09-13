@@ -9,12 +9,14 @@ const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeR
 const cohesionCenterModel = require("../../models/cohesionCenter");
 const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
 const ReferentModel = require("../../models/referent");
+const CohortModel = require("../../models/cohort");
 const {
   canViewLigneBus,
   canEditLigneBusTeam,
   canEditLigneBusGeneralInfo,
   canEditLigneBusCenter,
   canEditLigneBusPointDeRassemblement,
+  isBusEditionOpen,
   ROLES,
   canViewPatchesHistory,
   formatStringLongDate,
@@ -57,7 +59,7 @@ router.get("/cohort/:cohort", passport.authenticate("referent", { session: false
       cohort: Joi.string().required(),
     }).validate(req.params);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    if (!canExportConvoyeur(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canExportConvoyeur(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { cohort } = value;
 
@@ -90,11 +92,18 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
     }).validate({ ...req.params, ...req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canEditLigneBusGeneralInfo(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let { id, busId, departuredDate, returnDate, youngCapacity, totalCapacity, followerCapacity, travelTime, lunchBreak, lunchBreakReturn, delayedForth, delayedBack } = value;
 
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.find({ name: ligne.cohort });
+    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.user.role === ROLES.TRANSPORTER) {
+      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (!canEditLigneBusGeneralInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     youngCapacity = parseInt(youngCapacity);
     totalCapacity = parseInt(totalCapacity);
@@ -165,10 +174,17 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
     }).validate({ ...req.params, ...req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canEditLigneBusTeam(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const ligne = await LigneBusModel.findById(value.id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.find({ name: ligne.cohort });
+    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.user.role === ROLES.TRANSPORTER) {
+      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (!canEditLigneBusTeam(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const NewMember = {
       role: value.role,
       lastName: value.lastname,
@@ -226,6 +242,14 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
     }
     const ligne = await LigneBusModel.findById(value.id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.find({ name: ligne.cohort });
+    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.user.role === ROLES.TRANSPORTER) {
+      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (!canEditLigneBusTeam(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const memberToDelete = ligne.team.id(value.idTeam);
     if (!memberToDelete) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -252,11 +276,18 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canEditLigneBusCenter(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let { id, centerArrivalTime, centerDepartureTime } = value;
 
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.find({ name: ligne.cohort });
+    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.user.role === ROLES.TRANSPORTER) {
+      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (!canEditLigneBusCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     //add some checks
 
@@ -290,12 +321,18 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
     }).validate({ ...req.params, ...req.body });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    if (!canEditLigneBusPointDeRassemblement(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const { id, transportType, meetingHour, busArrivalHour, departureHour, returnHour, meetingPointId, newMeetingPointId } = value;
 
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.find({ name: ligne.cohort });
+    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.user.role === ROLES.TRANSPORTER) {
+      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (!canEditLigneBusPointDeRassemblement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const ligneToPoint = await LigneToPointModel.findOne({ lineId: id, meetingPointId });
     if (!ligneToPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -363,7 +400,7 @@ router.post("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (req.user.role !== "admin") return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role !== "admin") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const { id, meetingPointId } = value;
 
     const ligne = await LigneBusModel.findById(id);
@@ -423,7 +460,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     }).validate(req.params);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    if (!canViewLigneBus(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { id } = value;
 
@@ -445,7 +482,7 @@ router.get("/:id/availablePDR", passport.authenticate("referent", { session: fal
     }).validate(req.params);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    if (!canViewLigneBus(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { id } = value;
 
@@ -479,7 +516,7 @@ router.get("/:id/ligne-to-points", passport.authenticate("referent", { session: 
     }).validate(req.params);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    if (!canViewLigneBus(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { id } = value;
 
@@ -507,7 +544,7 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
     }).validate(req.params);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    if (!canViewLigneBus(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { id } = value;
 
@@ -607,7 +644,7 @@ router.get("/cohort/:cohort/hasValue", passport.authenticate("referent", { sessi
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!canViewLigneBus(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let { cohort } = value;
 
     const ligne = await LigneBusModel.findOne({ cohort });
@@ -708,7 +745,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
     }
 
     // --- security
-    if (!canViewPatchesHistory(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // --- query
     // ------ find all patches ids
@@ -882,7 +919,7 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!isAdmin(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!isAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let { id } = value;
 
     const ligne = await LigneBusModel.findById(id);

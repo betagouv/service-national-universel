@@ -170,6 +170,12 @@ const Schema = new mongoose.Schema({
       description: "E-mail du volontaire",
     },
   },
+  emailVerified: {
+    type: String,
+    documentation: {
+      description: "L'utilisateur a validé son email : 2FA possible",
+    },
+  },
   phone: {
     type: String,
     documentation: {
@@ -198,6 +204,7 @@ const Schema = new mongoose.Schema({
   cohort: {
     type: String,
     enum: [
+      "Octobre 2023 - NC",
       "Juillet 2023",
       "Juin 2023",
       "Avril 2023 - B",
@@ -210,7 +217,7 @@ const Schema = new mongoose.Schema({
       "2021",
       "2020",
       "2019",
-      "à venir"
+      "à venir",
     ],
     documentation: {
       description: "Cohorte",
@@ -219,6 +226,7 @@ const Schema = new mongoose.Schema({
   originalCohort: {
     type: String,
     enum: [
+      "Octobre 2023 - NC",
       "Juillet 2023",
       "Juin 2023",
       "Avril 2023 - B",
@@ -459,6 +467,7 @@ const Schema = new mongoose.Schema({
       description: "Mot de passe du volontaire",
     },
   },
+  // ! To delete if trust_token works
   userIps: {
     type: [String],
     default: [],
@@ -477,6 +486,13 @@ const Schema = new mongoose.Schema({
     type: Date,
     documentation: {
       description: "Date limite de validité du token pour 2FA",
+    },
+  },
+  attempts2FA: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "Tentative de connexion 2FA. Max 3",
     },
   },
   loginAttempts: {
@@ -1864,7 +1880,7 @@ const Schema = new mongoose.Schema({
 
   latestCNIFileCategory: {
     type: String,
-    enum: ["cniOld", "cniNew", "passport"],
+    enum: ["cniOld", "cniNew", "passport", "deleted"],
     documentation: {
       description: "Catégorie du fichier le plus récent dans files.cniFiles",
     },
@@ -1953,29 +1969,9 @@ Schema.pre("save", function (next) {
   }
 });
 
-Schema.pre("save", async function (next) {
-  if (this.isModified("userIps") || this.isNew) {
-    if (!this.userIps) return next();
-    const _userIps = [];
-    for (let ip of this.userIps) {
-      const hashedIp = await bcrypt.hash(ip, 10);
-      _userIps.push(hashedIp);
-    }
-    this.userIps = _userIps;
-  }
-  return next();
-});
-
 Schema.methods.comparePassword = async function (p) {
   const user = await OBJ.findById(this._id).select("password");
   return bcrypt.compare(p, user.password || "");
-};
-
-Schema.methods.compareIps = async function (ip) {
-  const user = await OBJ.findById(this._id).select("userIps");
-  const promises = user.userIps.map((_ip) => bcrypt.compare(ip, _ip));
-  const responses = await Promise.all(promises);
-  return responses.some((e) => e);
 };
 
 //Sync with sendinblue

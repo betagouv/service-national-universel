@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import React, { useEffect, useRef, useState } from "react";
 import DatePicker from "../../../ui/forms/DatePicker";
 

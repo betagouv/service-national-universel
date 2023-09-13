@@ -1,9 +1,9 @@
 import { toastr } from "react-redux-toastr";
+import { COHESION_STAY_START } from "snu-lib";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
-import { COHESION_STAY_START } from "snu-lib";
 
-export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort) => {
+export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort, size = 10) => {
   try {
     const resAlternative = await api.post(route, {
       page,
@@ -12,11 +12,12 @@ export const buildQuery = async (route, selectedFilters, page = 0, filterArray, 
         return { ...e, [key]: value.filter.map((e) => String(e)) };
       }, {}),
       sort: sort ? { field: sort.field, order: sort.order } : null,
+      size,
     });
 
     const aggs = resAlternative.responses[1].aggregations;
     const data = resAlternative.responses[0].hits.hits.map((h) => ({ ...h._source, _id: h._id, sort: h?.sort }));
-    const count = resAlternative.responses[0].hits.total.value;
+    const count = resAlternative.responses[1].aggregations?.count?.total?.value || resAlternative.responses[0].hits?.total?.value || 0;
     const newFilters = {};
 
     // map a travers les aggregations pour recuperer les filtres

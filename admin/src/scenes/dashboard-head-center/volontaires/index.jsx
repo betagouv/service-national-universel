@@ -56,6 +56,7 @@ export default function Index() {
                       { value: "Avril 2023 - B", label: "Avril 2023 - B" },
                       { value: "Juin 2023", label: "Juin 2023" },
                       { value: "Juillet 2023", label: "Juillet 2023" },
+                      { value: "Octobre 2023 - NC", label: "Octobre 2023 - NC" },
                     ]}
                     onChange={(cohort) => updateFilter({ cohort })}
                     value={filter.cohort}

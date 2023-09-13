@@ -4,10 +4,10 @@ import { toastr } from "react-redux-toastr";
 import { Col, Input, Row } from "reactstrap";
 import styled from "styled-components";
 
-import validator from "validator";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import api from "../../../services/api";
-import { regexPhoneFrenchCountries, ROLES, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
+import { ROLES, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
+import { isPossiblePhoneNumber } from "libphonenumber-js";
 
 export default function Invite({ structure, onSent }) {
   const [sent, setSent] = useState();
@@ -28,7 +28,7 @@ export default function Invite({ structure, onSent }) {
               toastr.error("Vous devez remplir tous les champs", "nom, prénom et e-mail");
               return;
             }
-            if (!validator.matches(values.phone, regexPhoneFrenchCountries)) {
+            if (!isPossiblePhoneNumber(values.phone, "FR")) {
               toastr.error("Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX");
               return;
             }

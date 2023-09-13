@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
 import validator from "validator";
-import { copyToClipboard, formatPhoneNumberFR, getInitials, regexPhoneFrenchCountries, translate } from "../../../../utils";
+import { copyToClipboard, formatPhoneNumberFR, getInitials, translate } from "../../../../utils";
 import { AiOutlineClose } from "react-icons/ai";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle, HiOutlineTrash, HiPencil, HiPhone, HiPlus } from "react-icons/hi";
@@ -16,6 +16,7 @@ import ModalTailwind from "../../../../components/modals/ModalTailwind";
 import API from "../../../../services/api";
 import Select from "../../../centersV2/components/Select";
 import Button from "../Button";
+import { isPossiblePhoneNumber } from "libphonenumber-js";
 
 export default function TeamModal({ isOpen, onCancel, team, setTeam, structure }) {
   const user = useSelector((state) => state.Auth.user);
@@ -81,7 +82,7 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam, structure }
       if (!responsible?.lastName?.trim()) error.lastName = "Le nom est obligatoire";
       if (!responsible?.email?.trim()) error.email = "L'email est obligatoire";
       if (responsible?.email?.trim() && !validator.isEmail(responsible?.email?.trim())) error.email = "L'email est au mauvais format";
-      if (responsible.phone && !validator.matches(responsible.phone, regexPhoneFrenchCountries)) error.phone = "Le numéro de téléphone est au mauvais format";
+      if (responsible.phone && !isPossiblePhoneNumber(responsible.phone, "FR")) error.phone = "Le numéro de téléphone est au mauvais format";
 
       setErrors(error);
       if (Object.keys(error).length > 0) return;

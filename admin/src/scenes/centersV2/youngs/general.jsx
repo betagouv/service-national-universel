@@ -8,6 +8,7 @@ import api from "../../../services/api";
 import { YOUNG_STATUS_COLORS, formatDateFR, getAge, translatePhase1 } from "../../../utils";
 import Panel from "../../volontaires/panel";
 import { COHORTS_BEFORE_JULY_2023 } from "../../../utils";
+import { captureMessage } from "../../../sentry";
 
 export default function General({ updateFilter, focusedSession, filterArray, setHasYoungValidated }) {
   const [young, setYoung] = useState();
@@ -19,12 +20,17 @@ export default function General({ updateFilter, focusedSession, filterArray, set
   const [paramData, setParamData] = useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   useEffect(() => {
     updateFilter(selectedFilters);
   }, [selectedFilters]);
 
   const handleClick = async (young) => {
+    if (!young?._id) {
+      captureMessage("Error with young :", { extra: { young } });
+      return;
+    }
     const { ok, data } = await api.get(`/referent/young/${young._id}`);
     if (ok) setYoung(data);
   };
@@ -42,8 +48,8 @@ export default function General({ updateFilter, focusedSession, filterArray, set
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <div style={{ display: "flex", flexDirection: "column", flex: "1" }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
-          <div className="relative flex-1">
-            <div className="mx-4">
+          <div className="relative flex-1 mb-4 rounded-lg">
+            <div className="mx-4 ron">
               <div className="flex w-full flex-row justify-between">
                 <Filters
                   pageId={pageId}
@@ -58,6 +64,7 @@ export default function General({ updateFilter, focusedSession, filterArray, set
                   setSelectedFilters={setSelectedFilters}
                   paramData={paramData}
                   setParamData={setParamData}
+                  size={size}
                 />
               </div>
               <div className="mt-2 flex flex-row flex-wrap items-center">
@@ -75,6 +82,8 @@ export default function General({ updateFilter, focusedSession, filterArray, set
               paramData={paramData}
               setParamData={setParamData}
               currentEntryOnPage={data?.length}
+              size={size}
+              setSize={setSize}
               render={
                 <table className="mt-6 w-full">
                   <thead className="">
@@ -155,7 +164,7 @@ const Line = ({ hit, onClick, selected, focusedSession }) => {
               <div>{!value.departSejourAt ? "Renseigner un départ" : formatDateFR(value.departSejourAt)}</div>
             </div>
           ) : (
-            <None className="text-gray-500 ml-5" />
+            <None className="ml-5 text-gray-500" />
           )}
         </div>
       </td>

@@ -5,12 +5,11 @@ import { useHistory } from "react-router-dom";
 import validator from "validator";
 import IconFrance from "../../../assets/IconFrance";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import Footer from "../../../components/footerV2";
-import CheckBox from "../../../components/inscription/checkbox";
-import Input from "../../../components/inscription/input";
-import StickyButton from "../../../components/inscription/stickyButton";
-import Toggle from "../../../components/inscription/toggle";
-import SearchableSelect from "../../../components/SearchableSelect";
+import CheckBox from "../../../components/dsfr/forms/checkbox";
+import Input from "../../../components/dsfr/forms/input";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
+import Toggle from "../../../components/dsfr/forms/toggle";
+import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -18,9 +17,10 @@ import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
-import DatePickerList from "../../preinscription/components/DatePickerList";
+import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
 import Navbar from "../components/Navbar";
 import { STEPS } from "../utils/navigation";
+import { supportURL } from "@/config";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useState({});
@@ -186,7 +186,7 @@ export default function StepEligibilite() {
       <div className="bg-white p-4">
         <div className="flex w-full items-center justify-between">
           <h1 className="text-2xl font-semibold">Vérifiez votre éligibilité au SNU</h1>
-          <a href="/public-besoin-d-aide/" target="_blank" rel="noreferrer">
+          <a href={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
           </a>
         </div>
@@ -258,7 +258,6 @@ export default function StepEligibilite() {
           </>
         )}
       </div>
-      <Footer marginBottom={"mb-[88px]"} />
       <StickyButton text="Continuer" onClick={() => onSubmit()} disabled={loading} />
     </>
   );

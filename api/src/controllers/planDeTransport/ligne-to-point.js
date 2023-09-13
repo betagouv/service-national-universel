@@ -7,17 +7,18 @@ const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const { canViewLigneBus } = require("snu-lib");
 const { ERRORS } = require("../../utils");
+const { validateId } = require("../../utils/validator");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 
 router.get("/meeting-point/:meetingPointId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      meetingPointId: Joi.string().required(),
+      meetingPointId: Joi.string().length(24).hex().required(),
     }).validate(req.params);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    if (!canViewLigneBus(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { meetingPointId } = value;
 
@@ -38,12 +39,10 @@ router.get("/meeting-point/:meetingPointId", passport.authenticate("referent", {
 
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-    }).validate(req.params);
+    const { error, value } = validateId(req.params.id);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    if (req.user.role !== "admin") return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role !== "admin") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { id } = value;
 

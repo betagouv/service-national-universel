@@ -9,7 +9,6 @@ import { ROLES } from "../../../utils";
 import ModalConfirmDelete from "../../centersV2/components/ModalConfirmDelete";
 import { useHistory } from "react-router-dom";
 
-
 export default function Actions({ structure }) {
   const user = useSelector((state) => state.Auth.user);
   const [isOpen, setIsOpen] = useState(false);

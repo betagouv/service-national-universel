@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch, useHistory } from "react-router-dom";
+import { Redirect, Switch, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import List from "./list";
@@ -23,7 +23,16 @@ export default function Index() {
 
   return (
     <Switch>
-      <SentryRoute path="/mission/:id" component={getMissionView} />
+      <SentryRoute
+        path="/mission/:id"
+        render={({ match }) => {
+          const { id } = match.params;
+          if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+            return <Redirect to="/mission" />;
+          }
+          return <SentryRoute component={getMissionView} />;
+        }}
+      />
       <SentryRoute path="/mission" component={List} />
     </Switch>
   );

@@ -5,8 +5,8 @@ const {
   Integrations: NodeIntegrations,
   init,
   Handlers,
+  autoDiscoverNodePerformanceMonitoringIntegrations,
 } = require("@sentry/node");
-const { Integrations: TracingIntegrations } = require("@sentry/tracing");
 const { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE } = require("./config");
 
 function initSentry(app) {
@@ -20,8 +20,7 @@ function initSentry(app) {
       new RewriteFrames({ root: process.cwd() }),
       new NodeIntegrations.Http({ tracing: true }),
       new NodeIntegrations.Modules(),
-      new TracingIntegrations.Mongo({ useMongoose: true }),
-      new TracingIntegrations.Express({ app }),
+      ...autoDiscoverNodePerformanceMonitoringIntegrations(),
     ],
     tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE),
     ignoreErrors: [
@@ -67,7 +66,7 @@ function initSentry(app) {
 function capture(err, contexte) {
   console.log("capture", err);
   if (!err) {
-    captureMessage("Error not defined");
+    sentryCaptureMessage("Error not defined");
     return;
   }
 
@@ -86,7 +85,7 @@ function capture(err, contexte) {
 function captureMessage(mess, contexte) {
   console.log("captureMessage", mess);
   if (!mess) {
-    captureMessage("Error not defined");
+    sentryCaptureMessage("Error not defined");
     return;
   }
 

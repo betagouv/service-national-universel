@@ -1,8 +1,8 @@
 import React from "react";
 import useDevice from "../../hooks/useDevice";
 
-import Footer from "../../components/footerV2";
-import Header from "../../components/header";
+import Footer from "@/components/dsfr/layout/Footer";
+import Header from "@/components/dsfr/layout/Header";
 import DesktopView from "./desktop/EngagementsProgramDesktop";
 import MobileView from "./mobile/EngagementsProgramMobile";
 

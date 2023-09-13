@@ -25,7 +25,7 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
   };
 
   const handleCancel = async () => {
-    const res = await api.uploadFile(`/application/${application._id}/file/${type}`, application[type]);
+    const res = await api.uploadFiles(`/application/${application._id}/file/${type}`, application[type]);
     if (res.code === "FILE_CORRUPTED") {
       return toastr.error(
         "Le fichier semble corrompu",
@@ -92,7 +92,7 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
                           }
                         }}
                         onChange={async (e) => {
-                          const res = await api.uploadFile(`/application/${application._id}/file/${type}`, e.target.files);
+                          const res = await api.uploadFiles(`/application/${application._id}/file/${type}`, e.target.files);
                           if (res.code === "FILE_CORRUPTED") {
                             return toastr.error(
                               "Le fichier semble corrompu",

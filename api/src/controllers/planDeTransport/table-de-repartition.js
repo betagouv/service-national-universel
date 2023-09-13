@@ -16,11 +16,11 @@ router.post("/region", passport.authenticate("referent", { session: false, failW
     }).validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!canEditTableDeRepartitionRegion(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canEditTableDeRepartitionRegion(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { cohort, fromRegion, toRegion } = value;
     const exist = await tableDeRepartition.findOne(value);
-    if (exist) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXIST });
+    if (exist) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
     await tableDeRepartition.create({ cohort, fromRegion, toRegion });
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -38,7 +38,7 @@ router.post("/delete/region", passport.authenticate("referent", { session: false
     }).validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!canEditTableDeRepartitionRegion(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canEditTableDeRepartitionRegion(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const toRemove = await tableDeRepartition.find({ ...value });
     await tableDeRepartition.deleteMany({ _id: { $in: toRemove.map((e) => e._id) } });
@@ -61,7 +61,7 @@ router.post("/department", passport.authenticate("referent", { session: false, f
     }).validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!canEditTableDeRepartitionDepartment(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canEditTableDeRepartitionDepartment(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { cohort, fromRegion, toRegion, fromDepartment, toDepartment } = value;
 
@@ -97,7 +97,7 @@ router.post("/delete/department", passport.authenticate("referent", { session: f
     }).validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!canEditTableDeRepartitionDepartment(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canEditTableDeRepartitionDepartment(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { cohort, fromRegion, toRegion, fromDepartment, toDepartment } = value;
 
@@ -132,7 +132,7 @@ router.get("/national/:cohort", passport.authenticate("referent", { session: fal
     const { error, value } = Joi.object({ cohort: Joi.string().required() }).validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!canViewTableDeRepartition(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewTableDeRepartition(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { cohort } = value;
     const data = await tableDeRepartition.find({ cohort });
@@ -167,7 +167,7 @@ router.get("/fromRegion/:cohort/:region", passport.authenticate("referent", { se
     }).validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!canViewTableDeRepartition(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewTableDeRepartition(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { cohort, region } = value;
     const data = await tableDeRepartition.find({ cohort, fromRegion: region });
@@ -187,7 +187,7 @@ router.get("/toRegion/:cohort/:region", passport.authenticate("referent", { sess
     }).validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!canViewTableDeRepartition(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewTableDeRepartition(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { cohort, region } = value;
     const data = await tableDeRepartition.find({ cohort, toRegion: region });

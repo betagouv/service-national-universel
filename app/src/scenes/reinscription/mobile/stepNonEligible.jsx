@@ -6,8 +6,7 @@ import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
-import Footer from "../../../components/footerV2";
-import StickyButton from "../../../components/inscription/stickyButton";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import API from "../../../services/api";
@@ -124,7 +123,6 @@ export default function NonEligible() {
           </div>
         </div>
       </div>
-      <Footer marginBottom={"mb-[88px]"} />
       <StickyButton text="Revenir à l'accueil" onClick={logout} disabled={loading} />
     </>
   );

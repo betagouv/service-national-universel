@@ -16,7 +16,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
-    if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await DepartmentServiceModel.findOneAndUpdate({ department: checkedDepartementService.department }, checkedDepartementService, {
       new: true,
       upsert: true,
@@ -45,7 +45,7 @@ router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { s
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const departmentService = await DepartmentServiceModel.findById(value.id);
     if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -90,7 +90,7 @@ router.delete("/:id/cohort/:cohort/contact/:contactId", passport.authenticate("r
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const departmentService = await DepartmentServiceModel.findById(value.id);
     if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -118,8 +118,8 @@ router.get("/:department", passport.authenticate(["referent", "young"], { sessio
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (isYoung(req.user) && req.user.department !== department) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    if (isReferent(req.user) && !canViewDepartmentService(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isYoung(req.user) && req.user.department !== department) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isReferent(req.user) && !canViewDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await DepartmentServiceModel.findOne({ department });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data: serializeDepartmentService(data, req.user) });
@@ -132,7 +132,7 @@ router.get("/:department", passport.authenticate(["referent", "young"], { sessio
 router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const data = await DepartmentServiceModel.find({});
-    if (!canViewDepartmentService(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeDepartmentService) });
   } catch (error) {
     capture(error);
@@ -154,7 +154,7 @@ router.post("/:id/representant", passport.authenticate("referent", { session: fa
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const departmentService = await DepartmentServiceModel.findById(value.id);
     if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 

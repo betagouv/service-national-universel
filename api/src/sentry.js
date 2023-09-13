@@ -6,9 +6,11 @@ const {
   Integrations: NodeIntegrations,
   init,
   Handlers,
+  autoDiscoverNodePerformanceMonitoringIntegrations,
 } = require("@sentry/node");
-const { Integrations: TracingIntegrations } = require("@sentry/tracing");
-const { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE } = require("./config");
+const { ProfilingIntegration } = require("@sentry/profiling-node");
+
+const { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_PROFILE_SAMPLE_RATE } = require("./config");
 
 const regex = /[0-9a-fA-F]{24}/g;
 
@@ -34,10 +36,11 @@ function initSentry(app) {
       new RewriteFrames({ root: process.cwd() }),
       new NodeIntegrations.Http({ tracing: true }),
       new NodeIntegrations.Modules(),
-      new TracingIntegrations.Mongo({ useMongoose: true }),
-      new TracingIntegrations.Express({ app }),
+      new ProfilingIntegration(),
+      ...autoDiscoverNodePerformanceMonitoringIntegrations(),
     ],
     tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE || 0.01),
+    profilesSampleRate: Number(SENTRY_PROFILE_SAMPLE_RATE || 0.1), // Percent of Transactions profiled
     ignoreErrors: [
       /^No error$/,
       /__show__deepen/,
@@ -81,7 +84,7 @@ function initSentry(app) {
 function capture(err, contexte) {
   console.log("capture", err);
   if (!err) {
-    captureMessage("Error not defined");
+    sentryCaptureMessage("Error not defined");
     return;
   }
 
@@ -98,7 +101,7 @@ function capture(err, contexte) {
 function captureMessage(mess, contexte) {
   console.log("captureMessage", mess);
   if (!mess) {
-    captureMessage("Error not defined");
+    sentryCaptureMessage("Error not defined");
     return;
   }
 

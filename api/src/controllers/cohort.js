@@ -57,7 +57,7 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
     const today = new Date(new Date().setHours(0, 0, 0, 0));
 
     if (date <= today) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     let cohort = await CohortModel.findOne({ snuId: id });
@@ -70,7 +70,7 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
     }
 
     if (cohort.dsnjExportDates[exportDateKey] && cohort.dsnjExportDates[exportDateKey] <= today) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     cohort.dsnjExportDates[exportDateKey] = date;
@@ -170,7 +170,7 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
     const now = new Date();
 
     if (!exportAvailableFrom || now < exportAvailableFrom || now > exportAvailableUntil) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     const formattedDate = exportAvailableFrom.toLocaleDateString("fr-FR");
@@ -215,8 +215,8 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       dateStart: Joi.date().required(),
       dateEnd: Joi.date().required(),
       pdrChoiceLimitDate: Joi.date().required(),
-      validationDate: Joi.date().required(),
-      validationDateForTerminaleGrade: Joi.date().required(),
+      validationDate: Joi.date().allow(null, ""),
+      validationDateForTerminaleGrade: Joi.date().allow(null, ""),
       manualAffectionOpenForAdmin: Joi.boolean().required(),
       manualAffectionOpenForReferentRegion: Joi.boolean().required(),
       manualAffectionOpenForReferentDepartment: Joi.boolean().required(),
@@ -239,15 +239,15 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       schemaAccessForReferentDepartment: Joi.boolean(),
       busEditionOpenForTransporter: Joi.boolean(),
       uselessInformation: Joi.object().allow(null),
-      daysToValidate: Joi.number().required(),
-      daysToValidateForTerminalGrade: Joi.number().required(),
+      daysToValidate: Joi.number().allow(null, ""),
+      daysToValidateForTerminalGrade: Joi.number().allow(null, ""),
     }).validate(req.body, { stripUnknown: true });
     if (bodyError) {
       capture(bodyError);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    if (!isSuperAdmin(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (!isSuperAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const cohort = await CohortModel.findOne({ name: cohortName });
 

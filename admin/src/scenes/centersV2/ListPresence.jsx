@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -13,6 +13,7 @@ export default function ListPresence() {
   const [data, setData] = React.useState([]);
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({ page: 0 });
+  const [size, setSize] = useState(10);
 
   const pageId = "centrePresence";
   const selectedCohorts = selectedFilters?.cohorts?.filter;
@@ -83,6 +84,7 @@ export default function ListPresence() {
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
+              size={size}
             />
             <ExportComponent
               title="Exporter"
@@ -135,6 +137,8 @@ export default function ListPresence() {
           paramData={paramData}
           setParamData={setParamData}
           currentEntryOnPage={data?.length}
+          size={size}
+          setSize={setSize}
           render={
             <div className="mt-6 mb-2 flex w-full flex-col border-y-[1px] border-gray-100">
               <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400">

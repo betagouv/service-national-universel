@@ -5,9 +5,6 @@ const dayjs = require("dayjs");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const YoungModel = require("../../models/young");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 
 const { uploadFile } = require("../../utils");
 const { encrypt } = require("../../cryptoUtils");
@@ -108,7 +105,8 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
   const cohesionCenterIds = sessions.map(({ cohesionCenterId }) => cohesionCenterId);
   const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: cohesionCenterIds } }).select({ _id: 1, name: 1, code2022: 1 });
   const cohesionCenterParSessionId = {};
-  const youngs = await YoungModel.find({ cohort: cohort.name, status: { $in: ["VALIDATED", "WAITING_LIST"] } }).select({
+  const statusList = afterSession ? ["VALIDATED"] : ["WAITING_LIST", "VALIDATED"];
+  const youngs = await YoungModel.find({ cohort: cohort.name, status: { $in: statusList } }).select({
     _id: 1,
     sessionPhase1Id: 1,
     email: 1,
@@ -131,8 +129,6 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
     status: 1,
     cohort: 1,
     region: 1,
-    meetingPointId: 1,
-    ligneId: 1,
   });
 
   const formattedYoungs = [];
@@ -157,8 +153,6 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
       phoneZone,
       situation,
       statusPhase1,
-      ligneId,
-      meetingPointId,
     } = young;
 
     const isFrench = frenchNationality === "true";
@@ -172,17 +166,11 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
       }
     }
 
-    const pdr = await PointDeRassemblementModel.findById(meetingPointId);
-    let meetingPoint;
-    const bus = await LigneBusModel.findById(ligneId);
-    const ligneToPoint = await LigneToPointModel.findOne({ lineId: ligneId, meetingPointId, deletedAt: { $exists: false } });
-    if (pdr) {
-      meetingPoint = { ...pdr.toObject(), bus, ligneToPoint };
-    } else {
-      meetingPoint = { bus, ligneToPoint };
-    }
     const session = sessions.find(({ _id }) => _id.toString() === sessionPhase1Id);
-    const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
+    const departureDate = getDepartureDate(young, session, cohort);
+
+    // fixme: this should not be necessary after general date harmonization
+    departureDate.setHours(departureDate.getHours() + 2); // UTC+2
 
     const formattedYoung = {
       "Identifiant technique": _id.toString(),

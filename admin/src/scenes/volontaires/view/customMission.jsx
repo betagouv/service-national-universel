@@ -1,33 +1,32 @@
-import React, { useEffect, useState, useRef } from "react";
-import YoungHeader from "../../phase0/components/YoungHeader";
+import React, { useEffect, useRef, useState } from "react";
+import ReactLoading from "react-loading";
+import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+import ReactSelect from "react-select";
+import AsyncSelect from "react-select/async";
+import CreatableSelect from "react-select/creatable";
+import { translateApplication } from "snu-lib";
+import validator from "validator";
+import Toggle from "../../../components/Toggle";
+import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
+import { adminURL } from "../../../config";
 import api from "../../../services/api";
+import plausibleEvent from "../../../services/plausible";
 import {
-  ES_NO_LIMIT,
+  COHESION_STAY_END,
+  ENABLE_PM,
   MISSION_DOMAINS,
-  translate,
-  PERIOD,
   MISSION_PERIOD_DURING_HOLIDAYS,
   MISSION_PERIOD_DURING_SCHOOL,
-  regexPhoneFrenchCountries,
-  SENDINBLUE_TEMPLATES,
-  ENABLE_PM,
+  PERIOD,
   ROLES,
-  COHESION_STAY_END,
+  SENDINBLUE_TEMPLATES,
+  translate,
 } from "../../../utils";
-import { adminURL } from "../../../config";
-import Field from "../../missions/components/Field";
-import AsyncSelect from "react-select/async";
-import ReactSelect from "react-select";
-import CreatableSelect from "react-select/creatable";
-import validator from "validator";
+import Field from "@/components/ui/forms/Field";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
-import { toastr } from "react-redux-toastr";
-import Toggle from "../../../components/Toggle";
-import plausibleEvent from "../../../services/plausible";
-import ReactLoading from "react-loading";
-import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
-import { translateApplication } from "snu-lib";
+import YoungHeader from "../../phase0/components/YoungHeader";
+import { isPossiblePhoneNumber } from "libphonenumber-js";
 
 export default function CustomMission({ young, onChange }) {
   const history = useHistory();
@@ -54,6 +53,7 @@ export default function CustomMission({ young, onChange }) {
     applicationStatus: "",
     isMilitaryPreparation: "false",
   });
+
   const [newTutor, setNewTutor] = useState({ firstName: "", lastName: "", email: "", phone: "" });
   const [selectedStructure, setSelectedStructure] = useState(null);
   const [creationTutor, setCreationTutor] = useState(false);
@@ -64,10 +64,9 @@ export default function CustomMission({ young, onChange }) {
   const [loading, setLoading] = useState(false);
 
   async function initReferents() {
-    const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": values.structureId } }] } }, size: ES_NO_LIMIT };
-    const { responses } = await api.esQuery("referent", body);
-    if (responses?.length) {
-      const responseReferents = responses[0].hits.hits.map((hit) => ({ label: hit._source.firstName + " " + hit._source.lastName, value: hit._id, tutor: hit._source }));
+    const { data } = await api.post("/elasticsearch/referent/export", { filters: { structureId: [values.structureId] } });
+    if (data?.length) {
+      const responseReferents = data.map((hit) => ({ label: hit.firstName + " " + hit.lastName, value: hit._id, tutor: hit }));
       if (!responseReferents.find((ref) => ref.value === values.tutorId)) {
         if (referentSelectRef.current?.select?.select) referentSelectRef.current.select.select.setValue("");
         setValues({ ...values, tutorId: "", tutorName: "" });
@@ -85,7 +84,7 @@ export default function CustomMission({ young, onChange }) {
       if (!newTutor.lastName) error.lastName = "Ce champ est obligatoire";
       if (!validator.isEmail(newTutor.email)) error.email = "L'email est incorrect";
       if (!newTutor.phone) error.phone = "Ce champ est obligatoire";
-      if (!validator.matches(newTutor.phone, regexPhoneFrenchCountries)) error.phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
+      if (!isPossiblePhoneNumber(newTutor.phone, "FR")) error.phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
       setErrors(error);
       if (Object.keys(error).length > 0) return setLoading(false);
 
@@ -199,7 +198,9 @@ export default function CustomMission({ young, onChange }) {
     return data;
   };
   useEffect(() => {
-    initReferents();
+    if (values.structureId) {
+      initReferents();
+    }
   }, [values.structureId]);
   useEffect(() => {
     if (values.period.length === 0 || (values.period.length === 1 && values.period[0] === "WHENEVER")) {
@@ -274,7 +275,7 @@ export default function CustomMission({ young, onChange }) {
                 Donnez un nom à votre mission. Privilégiez une phrase précisant l&apos;action du volontaire. <br />
                 Exemple : « Je fais les courses de produits pour mes voisins les plus fragiles »
               </div>
-              <Field name="name" errors={errors} handleChange={(e) => setValues({ ...values, name: e.target.value })} label="Nom de la mission" value={values.name} />
+              <Field name="name" error={errors?.name} onChange={(name) => setValues({ ...values, name })} label="Nom de la mission" value={values.name} />
             </div>
             <div className="my-5">
               <div className="mb-2 text-xs font-medium">Structure rattachée</div>
@@ -349,24 +350,18 @@ export default function CustomMission({ young, onChange }) {
               </div>
               <div className="mb-2 text-xs font-medium">Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</div>
               <div className="w-1/2">
-                <Field
-                  errors={errors}
-                  name="duration"
-                  handleChange={(e) => setValues({ ...values, duration: e.target.value })}
-                  label="Heure(s)"
-                  value={translate(values.duration)}
-                />
+                <Field error={errors?.duration} name="duration" onChange={(duration) => setValues({ ...values, duration })} label="Heure(s)" value={translate(values.duration)} />
               </div>
             </div>
             <div className="flex flex-col gap-4">
               <div className="mt-5">
                 <div className="my-2 flex flex-row text-xs font-medium">Objectifs de la mission</div>
                 <Field
-                  errors={errors}
+                  error={errors?.description}
                   name="description"
                   type="textarea"
                   row={4}
-                  handleChange={(e) => setValues({ ...values, description: e.target.value })}
+                  onChange={(description) => setValues({ ...values, description })}
                   label="Décrivez votre mission"
                   value={translate(values.description)}
                 />
@@ -374,11 +369,11 @@ export default function CustomMission({ young, onChange }) {
               <div>
                 <div className="my-2 flex flex-row text-xs font-medium">Actions concrètes confiées au(x) volontaire(s)</div>
                 <Field
-                  errors={errors}
+                  error={errors?.textarea}
                   type="textarea"
                   name="actions"
                   row={4}
-                  handleChange={(e) => setValues({ ...values, actions: e.target.value })}
+                  onChange={(actions) => setValues({ ...values, actions })}
                   label="Listez les actions confiées au(x) volontaires"
                   value={translate(values.actions)}
                 />
@@ -394,7 +389,7 @@ export default function CustomMission({ young, onChange }) {
                 <Field
                   type="textarea"
                   row={4}
-                  handleChange={(e) => setValues({ ...values, contraintes: e.target.value })}
+                  onChange={(contraintes) => setValues({ ...values, contraintes })}
                   label="Précisez les informations complémentaires à préciser au volontaire."
                   value={translate(values.contraintes)}
                 />
@@ -408,24 +403,22 @@ export default function CustomMission({ young, onChange }) {
             <div className="text-xs font-medium">Dates de la mission</div>
             <div className="my-2 mb-4 flex flex-row justify-between gap-3">
               <Field
-                errors={errors}
+                error={errors?.startAt}
                 name="startAt"
                 label="Date de début"
                 type="date"
                 className="w-[50%]"
-                handleChange={(e) => setValues({ ...values, startAt: e })}
+                onChange={(startAt) => setValues({ ...values, startAt })}
                 value={values.startAt}
-                error={errors?.startAt}
               />
               <Field
-                errors={errors}
-                label="Date de fin"
+                error={errors?.endAt}
                 name="endAt"
+                label="Date de fin"
                 className="w-[50%]"
                 type="date"
-                handleChange={(e) => setValues({ ...values, endAt: e })}
+                onChange={(endAt) => setValues({ ...values, endAt })}
                 value={values.endAt}
-                error={errors?.endAt}
               />
             </div>
             <div className="my-2 flex flex-col text-xs font-medium">
@@ -436,13 +429,13 @@ export default function CustomMission({ young, onChange }) {
               </div>
             </div>
             <Field
-              errors={errors}
               name="frequence"
               type="textarea"
               row={4}
-              handleChange={(e) => setValues({ ...values, frequence: e.target.value })}
+              onChange={(frequence) => setValues({ ...values, frequence })}
               label="Fréquence estimée de la mission"
               value={values.frequence}
+              error={errors?.frequence}
             />
             <div className="mt-4">
               <div className="my-2 flex flex-row text-xs font-medium">
@@ -481,7 +474,7 @@ export default function CustomMission({ young, onChange }) {
                 Nombre de volontaire(s) recherché(s). Précisez ce nombre en fonction de vos contraintes logistiques et votre capacité à accompagner les volontaires.
               </div>
               <div className="w-1/2">
-                <Field name="placesTotal" errors={errors} handleChange={(e) => setValues({ ...values, placesTotal: e.target.value })} value={values.placesTotal} />
+                <Field name="placesTotal" error={errors?.placesTotal} onChange={(placesTotal) => setValues({ ...values, placesTotal })} value={values.placesTotal} />
               </div>
             </div>
 
@@ -527,34 +520,24 @@ export default function CustomMission({ young, onChange }) {
                 <div className="mb-2 text-xs font-medium">Identité et contact</div>
                 <div className="mb-4 flex flex-row justify-between gap-3">
                   <Field
-                    errors={errors}
                     label="Nom"
                     className="w-[50%]"
                     name="lastName"
-                    handleChange={(e) => setNewTutor({ ...newTutor, lastName: e.target.value })}
+                    onChange={(lastName) => setNewTutor({ ...newTutor, lastName })}
                     value={newTutor.lastName}
-                    error={errors}
+                    error={errors?.lastName}
                   />
                   <Field
-                    errors={errors}
                     label="Prénom"
                     name="firstName"
                     className="w-[50%]"
-                    handleChange={(e) => setNewTutor({ ...newTutor, firstName: e.target.value })}
+                    onChange={(firstName) => setNewTutor({ ...newTutor, firstName })}
                     value={newTutor.firstName}
-                    error={errors}
+                    error={errors?.firstName}
                   />
                 </div>
-                <Field errors={errors} label="Email" name="email" handleChange={(e) => setNewTutor({ ...newTutor, email: e.target.value })} value={newTutor.email} error={errors} />
-                <Field
-                  errors={errors}
-                  label="Téléphone"
-                  name="phone"
-                  className="my-4"
-                  handleChange={(e) => setNewTutor({ ...newTutor, phone: e.target.value })}
-                  value={newTutor.phone}
-                  error={errors}
-                />
+                <Field error={errors?.email} label="Email" name="email" onChange={(email) => setNewTutor({ ...newTutor, email })} value={newTutor.email} />
+                <Field label="Téléphone" name="phone" className="my-4" onChange={(phone) => setNewTutor({ ...newTutor, phone })} value={newTutor.phone} error={errors?.phone} />
                 <div className="flex w-full justify-end">
                   <div className="inline-block cursor-pointer rounded bg-blue-600 py-2.5 px-4 text-sm font-medium text-white" onClick={sendInvitation}>
                     Envoyer l&apos;invitation
@@ -578,31 +561,26 @@ export default function CustomMission({ young, onChange }) {
               <div className="mt-11 mb-4 text-lg font-medium text-gray-900">Lieu où se déroule la mission</div>
               <div className="mb-2 text-xs font-medium">Adresse</div>
               <Field
-                errors={errors}
                 label="Adresse"
                 name="address"
-                handleChange={(e) => {
-                  setValues({ ...values, address: e.target.value, addressVerified: false });
-                }}
+                onChange={(address) => setValues({ ...values, address, addressVerified: false })}
                 value={values.address}
                 error={errors?.address}
               />
               <div className="my-4 flex flex-row justify-between gap-3">
                 <Field
-                  errors={errors}
                   label="Code postal"
                   className="w-[50%]"
                   name="zip"
-                  handleChange={(e) => setValues({ ...values, zip: e.target.value, addressVerified: false })}
+                  onChange={(zip) => setValues({ ...values, zip, addressVerified: false })}
                   value={values.zip}
                   error={errors?.zip}
                 />
                 <Field
-                  errors={errors}
                   label="Ville"
                   name="city"
                   className="w-[50%]"
-                  handleChange={(e) => setValues({ ...values, city: e.target.value, addressVerified: false })}
+                  onChange={(city) => setValues({ ...values, city, addressVerified: false })}
                   value={values.city}
                   error={errors?.city}
                 />
@@ -677,45 +655,7 @@ export default function CustomMission({ young, onChange }) {
 }
 
 const fetchStructures = async (inputValue) => {
-  const body = {
-    query: { bool: { must: [] } },
-    size: 50,
-    track_total_hits: true,
-  };
-  if (inputValue) {
-    body.query.bool.must.push({
-      bool: {
-        should: [
-          {
-            multi_match: {
-              query: inputValue,
-              fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
-              type: "cross_fields",
-              operator: "and",
-            },
-          },
-          {
-            multi_match: {
-              query: inputValue,
-              fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
-              type: "phrase",
-              operator: "and",
-            },
-          },
-          {
-            multi_match: {
-              query: inputValue,
-              fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
-              type: "phrase_prefix",
-              operator: "and",
-            },
-          },
-        ],
-        minimum_should_match: "1",
-      },
-    });
-  }
-  const { responses } = await api.esQuery("structure", body);
+  const { responses } = await api.post("/elasticsearch/structure/search", { filters: { searchbar: [inputValue] }, size: 50 });
   return responses[0].hits.hits.map((hit) => {
     return { value: hit._source, _id: hit._id, label: hit._source.name, structure: hit._source };
   });

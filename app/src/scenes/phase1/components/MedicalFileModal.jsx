@@ -86,8 +86,8 @@ const MedicalFileModal = ({ isOpen, onClose, title = "Téléchargez votre fiche 
           </ButtonPrimaryOutline>
           <div className="my-6 h-[1px] w-full bg-gray-200"></div>
           <div className="text-[13px] text-gray-800">
-            Rappel : Entre 15 et 16 ans, vous devez réaliser un bilan de santé obligatoire auprès de votre médecin traitant. Il est fortement recommandé de le faire avant votre
-            séjour de cohésion.
+            Rappel <strong>(sauf en Nouvelle-Calédonie)</strong> : Entre 15 et 16 ans, vous devez réaliser un bilan de santé obligatoire auprès de votre médecin traitant. Il est
+            fortement recommandé de le faire avant votre séjour de cohésion.
           </div>
           <ExternalLink
             className="mt-2 self-start"

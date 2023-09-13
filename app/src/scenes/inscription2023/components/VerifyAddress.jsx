@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Spinner } from "reactstrap";
 import InfoIcon from "../../../components/InfoIcon";
 import { getSuggestions, formatResult } from "../../../services/api-adresse";
-import Button from "./Button";
-import GhostButton from "./GhostButton";
+import Button from "../../../components/dsfr/ui/buttons/Button";
+import GhostButton from "../../../components/dsfr/ui/buttons/GhostButton";
 
 export default function VerifyAddress({ address, zip, city, onSuccess, onFail, disabled = false, isVerified = false, buttonClassName = "", buttonContainerClassName = "" }) {
   const [loading, setLoading] = useState(false);

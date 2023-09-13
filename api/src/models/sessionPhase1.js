@@ -22,7 +22,20 @@ const Schema = new mongoose.Schema({
   },
   cohort: {
     type: String,
-    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2021", "2020", "2019", "Juillet 2023", "Juin 2023", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A"],
+    enum: [
+      "Juillet 2022",
+      "Juin 2022",
+      "Février 2022",
+      "2021",
+      "2020",
+      "2019",
+      "Octobre 2023 - NC",
+      "Juillet 2023",
+      "Juin 2023",
+      "Février 2023 - C",
+      "Avril 2023 - B",
+      "Avril 2023 - A",
+    ],
     documentation: {
       description: "Cohorte",
     },
@@ -130,6 +143,21 @@ const Schema = new mongoose.Schema({
     default: "false",
     documentation: {
       description: "La session possède au moins 1 fichier d'emploi du temps.",
+    },
+  },
+
+  pedagoProjectFiles: {
+    type: [File],
+    documentation: {
+      description: "Fichiers du projet pédagogique",
+    },
+  },
+  hasPedagoProject: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "La session possède au moins 1 fichier de projet pédagogique.",
     },
   },
 

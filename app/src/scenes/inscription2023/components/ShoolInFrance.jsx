@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
-import SearchableSelect from "../../../components/SearchableSelect";
+import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import CreatableSelect from "../../../components/CreatableSelect";
-import { ES_NO_LIMIT } from "snu-lib";
 import Input from "./Input";
 import VerifyAddress from "./VerifyAddress";
-import GhostButton from "./GhostButton";
+import GhostButton from "../../../components/dsfr/ui/buttons/GhostButton";
 import { FiChevronLeft } from "react-icons/fi";
 import validator from "validator";
-import ErrorMessage from "./ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
+import { toastr } from "react-redux-toastr";
 
 const addressValidationInfo = "Pour valider votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.";
 const addressValidationSuccess = "L'adresse a été vérifiée";
@@ -31,14 +31,11 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
 
   useEffect(() => {
     async function getCities() {
-      const body = {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "country.keyword": "FRANCE" } }] } },
-        size: 0,
-        aggs: {
-          cities: { terms: { field: "city.keyword", size: ES_NO_LIMIT } },
-        },
-      };
-      const { responses } = await api.esQuery("schoolramses", body);
+      const { responses } = await api.post("/elasticsearch/schoolramses/public/search?aggsByCities=true", { filters: { country: ["FRANCE"] } });
+      if (!responses[0].aggregations?.cities.buckets.length) {
+        toastr.error("Erreur", "Impossible de récupérer les établissements");
+        return;
+      }
       setCities(responses[0].aggregations?.cities.buckets.map((e) => e.key).sort());
     }
     getCities();
@@ -80,12 +77,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
   useEffect(() => {
     async function getSchools() {
       if (!city) return;
-      const body = {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "country.keyword": "FRANCE" } }] } },
-        size: ES_NO_LIMIT,
-      };
-      body.query.bool.filter.push({ term: { "city.keyword": city } });
-      const { responses } = await api.esQuery("schoolramses", body);
+      const { responses } = await api.post("/elasticsearch/schoolramses/public/search", { filters: { country: ["FRANCE"], city: [city] } });
       setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
     }
     getSchools();
@@ -181,7 +173,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
     <>
       <SearchableSelect
         label="Commune de l'établissement"
-        options={cities.map((c) => ({ value: c, label: c }))}
+        options={cities?.map((c) => ({ value: c, label: c }))}
         onChange={(value) => {
           setCity(value);
           setManualSchool({ city: value, addressVerified: undefined });

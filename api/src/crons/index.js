@@ -5,11 +5,8 @@ const apiEngagement = require("./syncApiEngagement");
 const missionOutdated = require("./missionOutdated");
 const computeGoalsInscription = require("./computeGoalsInscription");
 const noticePushMission = require("./noticePushMission");
-//const missionEnd = require("./missionEnd");
 const contratRelance = require("./contratRelance");
 const applicationPending = require("./applicationPending");
-//const newMissionReminder = require("./newMissionReminder");
-//const syncYoungStatsMetabase = require("./syncYoungStatsMetabase");
 const jeVeuxAiderDaily = require("./JeVeuxAiderDaily");
 const loginAttempts = require("./loginAttempts");
 const syncReferentSupport = require("./syncReferentSupport");
@@ -17,6 +14,7 @@ const syncContactSupport = require("./syncContactSupport");
 const applicationOutaded = require("./applicationWaitingAcceptationOutdated");
 const deleteInactiveRefs = require("./deleteInactiveRefs");
 const applicationPatches = require("./patch/application");
+const missionEquivalencePatches = require("./patch/missionEquivalence");
 const missionPatches = require("./patch/mission");
 const structurePatches = require("./patch/structure");
 const youngPatches = require("./patch/young");
@@ -42,8 +40,20 @@ const everyHours = (x) => `0 */${x} * * *`;
 // ! A jour du 16 juin 2023 (Source ChatGPT)
 // Voici les heures de déclenchement de chaque cron dans le fichier fourni (en UTC):
 
-// applicationPending.handler() : tous les lundis à 9h00
+// Crons de nuit :
 // deleteInactiveRefs.handler() : tous les jours à minuit
+// syncReferentSupport.handler() : tous les jours à 2h45
+// syncContactSupport.handler() : tous les jours à 1h15
+// structurePatches.handler() : tous les jours à 1h30
+// missionEquivalencePatches.handler() : tous les jours à 1h45
+// missionPatches.handler() : tous les jours à 2h00
+// applicationPatches.handler() : tous les jours à 2h30
+// youngPatches.handler() : tous les jours à 3h00
+// dsnjExport.handler() : tous les jours à 3h30
+// refreshMaterializedViews.handler() : tous les jours à 5h00
+
+// Crons qui peuvent être de  jour :
+// applicationPending.handler() : tous les lundis à 9h00
 // noticePushMission.handler() : tous les lundis à 9h00
 // apiEngagement.handler() : toutes les 6 heures
 // jeVeuxAiderDaily.handler() : toutes les 6 heures
@@ -52,48 +62,21 @@ const everyHours = (x) => `0 */${x} * * *`;
 // applicationOutaded.handler() : tous les jours à 7h00
 // computeGoalsInscription.handler() : toutes les heures
 // loginAttempts.handler() : tous les jours à 1h00
-// syncReferentSupport.handler() : tous les jours à 2h45
-// syncContactSupport.handler() : tous les jours à 1h15
-// structurePatches.handler() : tous les jours à 1h30
-// missionPatches.handler() : tous les jours à 2h00
-// applicationPatches.handler() : tous les jours à 2h30
-// youngPatches.handler() : tous les jours à 3h00
-// dsnjExport.handler() : tous les jours à 3h30
 // parentConsentementReminder.handler() : tous les jours à 8h27
 // reminderImageRightsParent2.handler() : tous les jours à 10h00
-// refreshMaterializedViews.handler() : tous les jours à 5h00
 // clotureMissionReminder.handler() : tous les jours à 14h02
 
 // See: https://www.clever-cloud.com/doc/administrate/cron/#deduplicating-crons (INSTANCE_NUMBER)
 if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
-  // every monday at 0800
-  // cron.schedule("0 8 * * 1", function () {
-  //   capture("START CRON RECAP REGION");
-  //   sendRecapRegion();
-  // });
-  // cron.schedule("0 9 * * 1", function () {
-  //   newMissionReminder.handler();
-  // });
-
   cron.schedule("0 9 * * 1", function () {
     applicationPending.handler();
   });
-
-  // cron.schedule("0 9 * * 1", function () {
-  //   missionEnd.handler();
-  // });
-
-  // desactivate for now because useless
-  // cron.schedule("0 1 * * *", function () {
-  //   syncYoungStatsMetabase.handler();
-  // });
   
 // Une fois par mois, le 1er du mois à 9h30
   cron.schedule("30 9 1 * *", () => {
     deleteCNIAdnSpecificAmenagementType.handler();
   });
   
-
   cron.schedule("0 9 * * 1", function () {
     noticePushMission.handler();
   });
@@ -145,6 +128,10 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule("30 1 * * *", () => {
     structurePatches.handler();
+  });
+
+  cron.schedule("45 1 * * *", () => {
+    missionEquivalencePatches.handler();
   });
 
   cron.schedule("0 2 * * *", () => {

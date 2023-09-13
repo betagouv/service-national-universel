@@ -245,8 +245,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
   const geographicTargetData = {
     region: originalTarget.region || structure?.region,
     // many users have an array like [""] for department
-    department:
-      originalTarget.department?.length && originalTarget.department[0] !== "" ? originalTarget.department : [structure?.department],
+    department: originalTarget.department?.length && originalTarget.department[0] !== "" ? originalTarget.department : [structure?.department],
   };
 
   const isActorAndTargetInTheSameRegion = actor.region === geographicTargetData.region;
@@ -360,12 +359,6 @@ const isBusEditionOpen = (actor, cohort) => {
       return true;
     case ROLES.TRANSPORTER:
       return cohort?.busEditionOpenForTransporter;
-    case ROLES.REFERENT_REGION:
-      return cohort?.busEditionOpenForTransporter;
-    case ROLES.REFERENT_DEPARTMENT:
-      return cohort?.busEditionOpenForTransporter;
-    case ROLES.HEAD_CENTER:
-      return cohort?.busEditionOpenForTransporter;
     default:
       return false;
   }
@@ -441,7 +434,7 @@ const canAssignCohesionCenter = (actor, target) => !FORCE_DISABLED_ASSIGN_COHESI
 const FORCE_DISABLED_ASSIGN_MEETING_POINT = false;
 const canAssignMeetingPoint = (actor, target) => !FORCE_DISABLED_ASSIGN_MEETING_POINT && isReferentOrAdmin(actor) && (!target?.statusPhase1Tmp || !isTemporaryAffected(target));
 
-const canEditPresenceYoung = (actor, _target) => {
+const canEditPresenceYoung = (actor) => {
   // todo affiner les droits
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 };
@@ -560,11 +553,15 @@ function canViewStructureChildren(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
 }
 
-function canDownloadYoungDocuments(actor, target, _applications) {
-  return (
-    canEditYoung(actor, target) || [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role)
-    // && applications?.length
-  );
+function canDownloadYoungDocuments(actor, target, type = null) {
+  if (type === "certificate" || type === "convocation") {
+    return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
+  } else {
+    return (
+      canEditYoung(actor, target) || [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role)
+      // && applications?.length
+    );
+  }
 }
 
 function canInviteYoung(actor) {
@@ -641,8 +638,6 @@ function canSearchInElasticSearch(actor, index) {
     return [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (index === "modificationbus") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-  } else if (index === "young-having-meeting-point-in-geography") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
   } else if (index === "young-by-school") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (index === "young") {
@@ -666,6 +661,14 @@ function canShareSessionPhase1(actor) {
 function canApplyToPhase2(young) {
   const now = new Date();
   return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= COHESION_STAY_END[young.cohort];
+}
+
+function canCreateAlerteMessage(actor) {
+  return [ROLES.ADMIN].includes(actor.role);
+}
+
+function canReadAlerteMessage(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.SUPERVISOR].includes(actor.role);
 }
 
 function canViewTableDeRepartition(actor) {
@@ -735,19 +738,19 @@ function canExportConvoyeur(actor) {
 }
 
 function canEditLigneBusTeam(actor) {
-  return [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
 function canEditLigneBusGeneralInfo(actor) {
-  return [ROLES.ADMIN, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN].includes(actor.role);
 }
 
 function canEditLigneBusCenter(actor) {
-  return [ROLES.ADMIN, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN].includes(actor.role);
 }
 
 function canEditLigneBusPointDeRassemblement(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function ligneBusCanCreateDemandeDeModification(actor) {
@@ -780,6 +783,10 @@ function canCreateTags(actor) {
 
 function isSuperAdmin(actor) {
   return [ROLES.ADMIN].includes(actor.role) && actor.subRole === "god";
+}
+
+function canCheckIfRefExist(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 export {
@@ -863,6 +870,8 @@ export {
   canEditPresenceYoung,
   canShareSessionPhase1,
   canApplyToPhase2,
+  canCreateAlerteMessage,
+  canReadAlerteMessage,
   canViewTableDeRepartition,
   canEditTableDeRepartitionDepartment,
   canEditTableDeRepartitionRegion,
@@ -897,4 +906,5 @@ export {
   isSupervisor,
   canPutSpecificDateOnSessionPhase1,
   isBusEditionOpen,
+  canCheckIfRefExist,
 };

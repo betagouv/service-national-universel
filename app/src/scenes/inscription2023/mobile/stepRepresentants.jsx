@@ -6,9 +6,8 @@ import { YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
-import CheckBox from "../../../components/inscription/checkbox";
-import StickyButton from "../../../components/inscription/stickyButton";
+import CheckBox from "../../../components/dsfr/forms/checkbox";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
@@ -20,8 +19,8 @@ import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 import Help from "../components/Help";
 import Input from "../components/Input";
 import Navbar from "../components/Navbar";
-import PhoneField from "../components/PhoneField";
-import RadioButton from "../components/RadioButton";
+import PhoneField from "../../../components/dsfr/forms/PhoneField";
+import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 
 const parentsStatus = [
   { label: "Mère", value: "mother" },
@@ -251,13 +250,15 @@ export default function StepRepresentants() {
     setLoading(false);
   };
 
+  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux`;
+
   return (
     <>
       <Navbar onSave={onSave} />
       <div className="bg-white p-4 text-[#161616]">
         <div className="mt-2 flex w-full items-center justify-between">
           <h1 className="text-xl font-bold">Mes représentants légaux</h1>
-          <a href={`${supportURL}/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux`} target="_blank" rel="noreferrer">
+          <a href={supportLink} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
           </a>
         </div>
@@ -272,8 +273,7 @@ export default function StepRepresentants() {
         </div>
         {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} young={young} /> : null}
       </div>
-      <Help />
-      <Footer marginBottom="mb-[88px]" />
+      <Help supportLink={supportLink} />
       {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
         <StickyButton text="Corriger" onClickPrevious={() => history.push("/")} onClick={onCorrection} disabled={loading} />
       ) : (

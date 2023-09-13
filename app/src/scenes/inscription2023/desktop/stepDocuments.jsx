@@ -11,7 +11,7 @@ import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DesktopPageContainer from "../components/DesktopPageContainer";
 import Error from "../../../components/error";
 import MyDocs from "../components/MyDocs";
-import ErrorMessage from "../components/ErrorMessage";
+import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import Info from "../../../components/info";
 
 export default function StepDocuments() {
@@ -64,7 +64,7 @@ export default function StepDocuments() {
       onClickPrevious={() => history.push("/inscription2023/representants")}
       onSubmit={onSubmit}
       disabled={!young?.files.cniFiles.length > 0 || corrections?.length > 0}
-      questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
+      supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       {corrections?.map((e) => (
         <ErrorMessage key={e._id}>

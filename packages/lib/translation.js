@@ -30,6 +30,8 @@ const translate = (value) => {
       return "Validée";
     case "DELETED":
       return "Supprimée";
+    case "deleted":
+        return "Supprimée";
     case "WAITING_LIST":
       return "Sur liste complémentaire";
     case "NOT_AUTORISED":
@@ -422,6 +424,8 @@ const translateCohort = (cohort) => {
       return "du 11 au 23 Juin 2023";
     case "Juillet 2023":
       return "du 4 au 16 Juillet 2023";
+    case "Octobre 2023 - NC":
+      return "du 9 au 20 Octobre 2023";
     default:
       return cohort;
   }
@@ -450,6 +454,8 @@ const translateCohortTemp = (young) => {
         return "du 4 au 16 Juillet 2023";
       }
       return "du 5 au 17 Juillet 2023";
+    case "Octobre 2023 - NC":
+      return "du 9 au 20 Octobre 2023";
     default:
       return cohort;
   }

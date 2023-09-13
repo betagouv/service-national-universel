@@ -20,6 +20,7 @@ const cohortList = [
   { label: "Séjour du <b>16 au 28 Avril 2023</b>", value: "Avril 2023 - B" },
   { label: "Séjour du <b>11 au 23 Juin 2023</b>", value: "Juin 2023" },
   { label: "Séjour du <b>4 au 16 Juillet 2023</b>", value: "Juillet 2023" },
+  { label: "Séjour du <b>9 au 20 Octobre 2023</b>", value: "Octobre 2023 - NC" },
 ];
 
 export default function List() {
@@ -92,6 +93,7 @@ const ReactiveList = ({ cohort }) => {
   const [youngs, setYoungs] = useState();
   const [allLines, setAllLines] = useState();
   const history = useHistory();
+  const [size, setSize] = useState(10);
 
   useEffect(() => {
     try {
@@ -146,6 +148,7 @@ const ReactiveList = ({ cohort }) => {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            size={size}
           />
         </div>
         {youngs && !youngs.length ? (
@@ -172,7 +175,9 @@ const ReactiveList = ({ cohort }) => {
       <ResultTable
         paramData={paramData}
         setParamData={setParamData}
-        currentEntryOnPage={lines?.length > 0}
+        currentEntryOnPage={lines?.length}
+        size={size}
+        setSize={setSize}
         render={
           <div className="overflow-x-scroll w-full mt-2">
             <table className="top-0 w-full divide-y divide-gray-100" style={{ borderCollapse: "separate", borderSpacing: "0 0.1em" }}>

@@ -1,4 +1,4 @@
-import Cni from "../../../assets/icons/Cni";
+import UploadedFileIcon from "../../../assets/icons/UploadedFileIcon";
 import { AddButton, DeleteButton, DownloadButton, MiniTitle, MoreButton } from "./commons";
 import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
@@ -13,7 +13,7 @@ import ConfirmationModal from "./ConfirmationModal";
 import Warning from "../../../assets/icons/Warning";
 import { capture } from "../../../sentry";
 import Field from "./Field";
-import DatePickerList from "./DatePickerList";
+import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
 import { resizeImage } from "../../../services/file.service";
 
 export function CniField({
@@ -83,7 +83,7 @@ export function CniField({
         onMouseEnter={() => setMouseIn(true)}
         onMouseLeave={() => setMouseIn(false)}>
         <div className="shrink-0">
-          <Cni />
+          <UploadedFileIcon />
           <MiniTitle>Pièce d&apos;identité</MiniTitle>
         </div>
         <div className="flex items-center justify-end">
@@ -179,7 +179,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
     if (!category || !date) return setError("Veuillez sélectionner une catégorie et une date d'expiration.");
 
     for (const file of files) {
-      const res = await api.uploadID(young._id, file, { category, expirationDate: date });
+      const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, file, { category, expirationDate: date });
 
       if (res.code === "FILE_CORRUPTED") {
         setError(
@@ -253,7 +253,13 @@ function CniModal({ young, onClose, mode, blockUpload }) {
               </div>
             ))
           ) : (
-            <div className="text-center text-[14px] text-[#6B7280]">Aucune pièce d&apos;identité</div>
+            young?.latestCNIFileCategory === 'deleted' ? (
+              <div className="text-center text-[14px] text-[#6B7280]">
+                Pour des raisons de sécurité, les documents ont été supprimés.
+              </div>
+            ) : (
+              <div className="text-center text-[14px] text-[#6B7280]">Aucune pièce d&apos;identité.</div>
+            )
           )}
           {error && <div className="mt-[16px] text-[12px] leading-[1.4em] text-[#EF4444]">{error}</div>}
           {mode === "edition" && (
@@ -299,18 +305,14 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                       </div>
                     )}
                   </div>
-                  <div className="mt-4 flex w-full space-x-2">
-                    <div className="relative w-1/2 rounded-[6px] border-[1px] border-[#D1D5DB] bg-white py-[9px] px-[13px]">
-                      <label className="text-[12px] font-normal leading-[16px] text-[#6B7280]">Date d&apos;expiration</label>
-                      <DatePickerList fromEdition={false} value={new Date(date)} onChange={(val) => setDate(val)} />
-                    </div>
+                  <div className="mt-4 w-full space-y-2">
+                    <DatePickerInput label="Date d'expiration" value={date} onChange={(date) => setDate(date)} />
                     <Field
                       label="Catégorie"
                       value={category}
                       transformer={translate}
                       mode="edition"
                       type="select"
-                      className="w-1/2"
                       options={["cniNew", "cniOld", "passport"].map((e) => ({ value: e, label: translate(e) }))}
                       onChange={(val) => setCategory(val)}
                     />

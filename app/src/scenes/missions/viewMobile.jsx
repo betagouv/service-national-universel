@@ -23,7 +23,6 @@ import {
   APPLICATION_STATUS,
   copyToClipboard,
   formatStringDateTimezoneUTC,
-  htmlCleaner,
   isYoungCanApplyToPhase2Missions,
   SENDINBLUE_TEMPLATES,
   translate,
@@ -40,6 +39,7 @@ import ModalPJ from "./components/ModalPJ";
 import House from "./components/HouseIcon";
 import AlertPrimary from "../../components/ui/alerts/AlertPrimary";
 import InformationCircle from "../../assets/icons/InformationCircle";
+import { htmlCleaner } from "snu-lib";
 
 export default function viewMobile() {
   const [mission, setMission] = useState();
@@ -134,7 +134,7 @@ export default function viewMobile() {
 
   const updateApplication = async (status) => {
     setLoading(true);
-    const { ok } = await api.put(`/application`, { _id: mission.application._id, status });
+    const { ok } = await api.put(`/application`, { _id: mission.application._id, status, ...(APPLICATION_STATUS.ABANDON === status ? { missionDuration: "0" } : {}) });
     if (!ok) toastr.error("Une erreur s'est produite lors de la mise à jour de  votre candidature");
     let template;
     if (status === APPLICATION_STATUS.ABANDON) template = SENDINBLUE_TEMPLATES.referent.ABANDON_APPLICATION;

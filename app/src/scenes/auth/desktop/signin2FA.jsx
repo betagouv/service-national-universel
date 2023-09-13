@@ -2,13 +2,16 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import RightArrow from "../../../assets/icons/RightArrow";
-import Input from "../../../components/inscription/input";
+import Input from "../../../components/dsfr/forms/input";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import Error from "../../../components/error";
 import queryString from "query-string";
 import { useHistory } from "react-router-dom";
 import { BsShieldLock } from "react-icons/bs";
+import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
+import { environment } from "../../../config";
+import { captureMessage } from "../../../sentry";
 
 export default function Signin() {
   const [disabled, setDisabled] = React.useState(true);
@@ -37,12 +40,19 @@ export default function Signin() {
       setLoading(false);
       if (response.token) api.setToken(response.token);
       if (response.user) {
-        if (redirect?.startsWith("http")) return (window.location.href = redirect);
+        if (environment === "development" ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
+        if (redirect) {
+          captureMessage("Invalid redirect url", { extra: { redirect } });
+          toastr.error("Url de redirection invalide : " + redirect);
+        }
         dispatch(setYoung(response.user));
       }
     } catch (e) {
       setLoading(false);
-      toastr.error("(Double authentification) Code non reconnu.", "Merci d'inscrire le dernier code reçu par email");
+      toastr.error(
+        "(Double authentification) Code non reconnu.",
+        "Merci d'inscrire le dernier code reçu par email. Après 3 tentatives ou plus de 10 minutes, veuillez retenter de vous connecter.",
+      );
     }
   };
 
@@ -85,7 +95,7 @@ export default function Signin() {
           <ul className="text-[#0063CB] text-xs mb-2 list-disc">
             <li className="ml-3 mb-1">L'adresse mail que vous utilisez est bien celle indiquée ci-dessus</li>
             <li className="ml-3 mb-1">Le mail ne se trouve pas dans vos spam</li>
-            <li className="ml-3 mb-1">L'adresse mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
+            <li className="ml-3 mb-1">L'adresse mail no_reply-auth@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boite mail</li>
             <li className="ml-3 mb-1">Votre boite de réception n'est pas saturée</li>
           </ul>
         </div>

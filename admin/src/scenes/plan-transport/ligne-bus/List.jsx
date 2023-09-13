@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -26,12 +26,13 @@ const cohortList = [
   { label: "Séjour du <b>16 au 28 Avril 2023</b>", value: "Avril 2023 - B" },
   { label: "Séjour du <b>11 au 23 Juin 2023</b>", value: "Juin 2023" },
   { label: "Séjour du <b>4 au 16 Juillet 2023</b>", value: "Juillet 2023" },
+  { label: "Séjour du <b>9 au 20 Octobre 2023</b>", value: "Octobre 2023 - NC" },
 ];
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
   const urlParams = new URLSearchParams(window.location.search);
-  const defaultCohort = user.role === ROLES.HEAD_CENTER && sessionPhase1 ? sessionPhase1.cohort : "Février 2023 - C";
+  const defaultCohort = user.role === ROLES.HEAD_CENTER && sessionPhase1 ? sessionPhase1.cohort : "Juillet 2023";
   const [cohort, setCohort] = React.useState(urlParams.get("cohort") || defaultCohort);
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasValue, setHasValue] = React.useState(false);
@@ -112,6 +113,7 @@ const ReactiveList = ({ cohort, history }) => {
   const [paramData, setParamData] = React.useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   const filterArray = [
     { title: "Numéro de la ligne", name: "busId", parentGroup: "Bus", missingLabel: "Non renseigné" },
@@ -194,6 +196,10 @@ const ReactiveList = ({ cohort, history }) => {
     },
   ].filter((e) => e);
 
+  React.useEffect(() => {
+    if (!selectedFilters.cohort) setSelectedFilters({ ...selectedFilters, ["cohort"]: { filter: [cohort] } });
+  }, [selectedFilters]);
+
   return (
     <>
       <div className="flex flex-1">
@@ -214,6 +220,7 @@ const ReactiveList = ({ cohort, history }) => {
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
+              size={size}
             />
           </div>
           <div className="flex items-center gap-2">
@@ -344,6 +351,8 @@ const ReactiveList = ({ cohort, history }) => {
           paramData={paramData}
           setParamData={setParamData}
           currentEntryOnPage={data?.length}
+          size={size}
+          setSize={setSize}
           render={
             <div className="mt-6 mb-2 flex w-full flex-col">
               <hr />

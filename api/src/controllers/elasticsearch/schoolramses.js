@@ -11,37 +11,6 @@ const { serializeRamsesSchools } = require("../../utils/es-serializer");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    // Configuration
-    const searchFields = ["fullName", "city", "zip", "code2022", "typology", "domain"];
-    const filterFields = ["region.keyword", "departmentName.keyword", "cohort", "academy"];
-    const sortFields = [];
-
-    // Authorization
-    if (!canSearchInElasticSearch(req.user, "schoolramses")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    // Context filters
-    let contextFilters = [];
-    if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
-    if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
-
-    // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
-      searchFields,
-      filterFields,
-      queryFilters: {
-        region: queryFilters["region"],
-        departmentName: queryFilters["departmentName"],
-        searchbar: queryFilters["searchbar"],
-      },
-      page,
-      sort,
-      contextFilters,
-    });
-
     async function getYoungsFromSchoolIds(schoolsIds) {
       const body = {
         query: {
@@ -86,6 +55,39 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       return reducedSchool;
     }
 
+    // Configuration
+    const { user, body } = req;
+    const searchFields = ["fullName", "city", "zip", "code2022", "typology", "domain"];
+    const filterFields = ["region.keyword", "departmentName.keyword", "cohort", "academy"];
+    const sortFields = [];
+
+    // Authorization
+    if (!canSearchInElasticSearch(req.user, "schoolramses")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // Body params validation
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // Context filters
+    let contextFilters = [];
+    if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
+
+    // Build request body
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields,
+      queryFilters: {
+        region: queryFilters["region"],
+        departmentName: queryFilters["departmentName"],
+        searchbar: queryFilters["searchbar"],
+      },
+      page,
+      sort,
+      contextFilters,
+      size,
+    });
+
     if (req.params.action === "export") {
       let response = serializeRamsesSchools(await allRecords("schoolramses", hitsRequestBody.query));
       const reducedSchool = await getYoungsFromSchoolIds(response.map((h) => h._id));
@@ -107,6 +109,61 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       });
       return res.status(200).send(response.body);
     }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/public/search", async (req, res) => {
+  try {
+    const { body } = req;
+
+    const filterFields = ["country.keyword", "city.keyword"];
+    const { queryFilters } = joiElasticSearch({ filterFields, body });
+
+    const query = {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [],
+        },
+      },
+      size: ES_NO_LIMIT,
+    };
+
+    if (queryFilters?.country) {
+      query.query.bool.filter.push({
+        terms: {
+          "country.keyword": queryFilters.country,
+        },
+      });
+    }
+
+    if (queryFilters?.city) {
+      query.query.bool.filter.push({
+        terms: {
+          "city.keyword": queryFilters.city,
+        },
+      });
+    }
+
+    if (req.query.aggsByCountries) {
+      query.size = 0;
+      query.aggs = {
+        countries: { terms: { field: "country.keyword", size: ES_NO_LIMIT } },
+      };
+    }
+
+    if (req.query.aggsByCities) {
+      query.size = 0;
+      query.aggs = {
+        cities: { terms: { field: "city.keyword", size: ES_NO_LIMIT } },
+      };
+    }
+
+    const response = await esClient.msearch({ index: "schoolramses", body: buildNdJson({ index: "schoolramses", type: "_doc" }, query) });
+    return res.status(200).send(response.body);
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

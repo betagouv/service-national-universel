@@ -9,7 +9,7 @@ import { ID } from "../../inscription2023/utils";
 import { supportURL } from "../../../config";
 import { formatDateFR, sessions2023 } from "snu-lib";
 
-import DatePickerList from "../../preinscription/components/DatePickerList";
+import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
 import DesktopPageContainer from "../../inscription2023/components/DesktopPageContainer";
 import Error from "../../../components/error";
 import plausibleEvent from "../../../services/plausible";
@@ -33,7 +33,7 @@ export default function StepUpload() {
             text: `Ce fichier ${files.name} est trop volumineux.`,
           });
       }
-      const res = await api.uploadFile(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
+      const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, Array.from(files), ID[category].category, new Date(date));
       if (res.code === "FILE_CORRUPTED") {
         setError({
           text: "Le fichier semble corrompu. Pouvez-vous changer le format ou régénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
@@ -68,7 +68,7 @@ export default function StepUpload() {
       childrenContinueButton={"Me réinscrire au SNU"}
       disabled={!date}
       loading={loading}
-      questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
+      supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       <div className="my-16 flex w-full justify-around">
         <img className="h-64" src={require(`../../../assets/IDProof/${ID[category].imgFront}`)} alt={ID[category].title} />

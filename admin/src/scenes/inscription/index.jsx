@@ -1,6 +1,4 @@
 import dayjs from "dayjs";
-import "dayjs/locale/fr";
-import relativeTime from "dayjs/plugin/relativeTime";
 import React, { Fragment, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -39,6 +37,7 @@ export default function Inscription() {
     page: 0,
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
+  const [size, setSize] = useState(10);
   //parentAllowSNU
   const filterArray = [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
@@ -232,6 +231,7 @@ export default function Inscription() {
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
+              size={size}
             />
             <SortOption
               sortOptions={[
@@ -261,6 +261,8 @@ export default function Inscription() {
             paramData={paramData}
             setParamData={setParamData}
             currentEntryOnPage={data?.length}
+            size={size}
+            setSize={setSize}
             render={
               <table className="mt-4 mb-2 w-full table-auto font-marianne">
                 <thead>
@@ -280,7 +282,7 @@ export default function Inscription() {
                 </thead>
                 <tbody>
                   {data.map((hit, i) => (
-                    <Hit key={hit._id} hit={hit} index={i + paramData.page * 20} onClick={() => setYoung(hit)} selected={young?._id === hit._id} />
+                    <Hit key={hit._id} hit={hit} index={i + paramData.page * size} onClick={() => setYoung(hit)} selected={young?._id === hit._id} />
                   ))}
                 </tbody>
               </table>
@@ -298,15 +300,19 @@ export default function Inscription() {
 }
 
 const Hit = ({ hit, index, onClick }) => {
-  dayjs.extend(relativeTime).locale("fr");
-  const diff = dayjs(new Date(hit.updatedAt)).fromNow();
+  const diffMaj = dayjs(new Date(hit.updatedAt)).fromNow();
+  const diffCreate = dayjs(new Date(hit.createdAt)).fromNow();
 
   return (
     <tr onClick={onClick} className="border-b-[1px] border-y-gray-100 hover:bg-gray-50">
       <td className="pl-4 py-3 w-[5%] tesxt-gray-900 text-base">{index + 1}</td>
       <td className="py-3 w-[35%]">
         <span className="font-bold text-gray-900 leading-6">{hit.status !== "DELETED" ? `${hit.firstName} ${hit.lastName}` : "Compte supprimé"}</span>
-        <p className="text-sm text-gray-600 leading-5">{`Mis à jour ${diff} • ${formatStringLongDate(hit.updatedAt)}`}</p>
+        {hit.updatedAt ? (
+          <p className="text-sm text-gray-600 leading-5">{`Mis à jour ${diffMaj} • ${formatStringLongDate(hit.updatedAt)}`}</p>
+        ) : hit.createdAt ? (
+          <p className="text-sm text-gray-600 leading-5">{`Créée ${diffCreate} • ${formatStringLongDate(hit.createdAt)}`}</p>
+        ) : null}
       </td>
       <td className="text-center">
         <Badge color="#3B82F6" backgroundColor="#EFF6FF" text={hit.cohort} className={hit.status === "DELETED" ? "opacity-50" : ""} />

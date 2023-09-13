@@ -4,8 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 
 import { Listbox, Transition } from "@headlessui/react";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "@/utils/dayjs.utils";
 import { BsDownload } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
 import { formatLongDateFR, getDepartmentNumber } from "snu-lib";
@@ -38,6 +37,7 @@ export default function List() {
     page: 0,
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
+  const [size, setSize] = useState(10);
 
   const filterArray = [
     {
@@ -155,6 +155,7 @@ export default function List() {
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
+              size={size}
             />
             <SortOption
               sortOptions={[
@@ -183,6 +184,8 @@ export default function List() {
             paramData={paramData}
             setParamData={setParamData}
             currentEntryOnPage={data?.length}
+            size={size}
+            setSize={setSize}
             render={
               <table className="mt-4 mb-2 w-full table-auto font-marianne">
                 <thead>
@@ -211,7 +214,6 @@ export default function List() {
 
 const Hit = ({ hit, onClick, user, structure }) => {
   const displayActionButton = canUpdateReferent({ actor: user, originalTarget: hit, structure });
-  dayjs.extend(relativeTime).locale("fr");
 
   return (
     <tr onClick={onClick} className="border-b-[1px] border-y-gray-100 hover:bg-gray-50">

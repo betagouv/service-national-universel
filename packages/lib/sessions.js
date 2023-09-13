@@ -81,9 +81,22 @@ const sessions2023 = [
       instructionEndDate: new Date("2023-05-12T22:00:00.000Z"), // 12 mai
     },
   },
+  {
+    id: "2023_10_NC",
+    name: "Octobre 2023 - NC",
+    dateStart: new Date("10/09/2023"),
+    dateEnd: new Date("10/20/2023"),
+    buffer: 99999,
+    event: "Phase0/CTA preinscription - sejour octobre NC",
+    eligibility: {
+      zones: ["NC"],
+      schoolLevels: ["NOT_SCOLARISE", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "CAP"],
+      bornAfter: new Date("10/22/2005"),
+      bornBefore: new Date("10/09/2008"),
+      inscriptionEndDate: new Date("2023-09-15T13:00:00.000Z"), // 15 septembre minuit heure de NC
+      instructionEndDate: new Date("2023-09-15T22:00:00.000Z"), // 15 septembre
+    },
+  },
 ];
 
-export {
-  sessions2023,
-  oldSessions,
-};
+export { sessions2023, oldSessions };

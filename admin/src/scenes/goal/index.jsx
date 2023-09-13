@@ -61,6 +61,7 @@ export default function Goal() {
               { key: "Avril 2023 - B", label: "Avril 2023 - B" },
               { key: "Juin 2023", label: "Juin 2023" },
               { key: "Juillet 2023", label: "Juillet 2023" },
+              { key: "Octobre 2023 - NC", label: "Octobre 2023 - NC" },
             ]}
             onChange={(c) => setCohort(c)}
             value={cohort}
