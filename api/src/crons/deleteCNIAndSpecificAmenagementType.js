@@ -16,7 +16,6 @@ exports.handler = async () => {
   const total = await YoungModel.countDocuments(where);
   console.log("🚀 ~ file: deleteCNiAndSpecificAmenagementType.js:21 ~ total:", total);
 
-  const stream = fs.createWriteStream(`${dir}/${new Date().toISOString()}_${fileName}.csv`);
   const youngIds = await YoungModel.find(where, "_id");
   try {
     for (let i = 0; i < youngIds.length; i = i + 100) {
