@@ -2,6 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { environment, supportURL } from "../../../../config";
 import { permissionPhase1, permissionPhase2, permissionPhase3 } from "../../../../utils";
+import plausibleEvent from "@/services/plausible";
 
 import Diagoriente from "./Diagoriente";
 import IconHome from "../assets/IconHome";
@@ -30,7 +31,13 @@ export default function NavigationMenu({ onClose = () => {} }) {
           <MenuLink to="/phase3/valider" text="Valider ma phase 3" onClose={onClose} />
         </MenuGroup>
         <div className="m-8" />
-        <MenuLinkExternal href={supportURL} icon={<HiOutlineQuestionMarkCircle className="text-lg stroke-[1.5]" />} text="Besoin d'aide ?" onClose={onClose} />
+        <MenuLinkExternal
+          onClick={plausibleEvent("Compte/Besoin d'aide")}
+          href={supportURL}
+          icon={<HiOutlineQuestionMarkCircle className="text-lg stroke-[1.5]" />}
+          text="Besoin d'aide ?"
+          onClose={onClose}
+        />
         {environment === "development" && <MenuLink to="develop-assets" icon={<GoTools />} text="Dev tools" onClose={onClose} />}
       </ul>
       <Diagoriente />
