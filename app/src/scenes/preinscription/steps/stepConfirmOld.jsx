@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
-import { bdcURL } from "@/config";
+import { supportURL } from "@/config";
 
 export default function StepConfirm() {
   const [error, setError] = useState({});
@@ -76,9 +76,8 @@ export default function StepConfirm() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer title="Ces informations sont-elles correctes ?" supportLink={`${bdcURL}/je-me-preinscris-et-cree-mon-compte-volontaire`}>
+      <DSFRContainer title="Ces informations sont-elles correctes ?" supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-
         <div className="space-y-4">
           <div className="my-2 flex flex-row items-center justify-between">
             <p className="text-lg font-semibold text-[#161616]">Mon éligibilité</p>
@@ -139,7 +138,6 @@ export default function StepConfirm() {
             <p className="text-right text-[#161616]">{data.email}</p>
           </div>
         </div>
-
         <SignupButtonContainer
           onClickNext={() => onSubmit()}
           labelNext="M'inscrire au SNU"
