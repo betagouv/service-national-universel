@@ -325,7 +325,7 @@ export default function StepCoordonnees() {
       } catch (error) {
         capture(error);
       }
-    }, 500),
+    }, 100),
     [],
   );
 

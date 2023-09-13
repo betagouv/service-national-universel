@@ -322,7 +322,7 @@ export default function StepCoordonnees() {
       } catch (error) {
         capture(error);
       }
-    }, 500),
+    }, 100),
     [],
   );
 
@@ -555,7 +555,7 @@ export default function StepCoordonnees() {
           <Input
             list="suggestions"
             value={birthCity}
-            label="Commune de naissance"
+            label="Commune de naissance wesh"
             onChange={wasBornInFranceBool ? updateBirthCity : updateData("birthCity")}
             error={errors.birthCity}
             correction={corrections.birthCity}
