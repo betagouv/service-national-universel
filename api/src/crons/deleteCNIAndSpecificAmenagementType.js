@@ -3,8 +3,7 @@ require("../mongo");
 const { capture } = require("../sentry");
 const slack = require("../slack");
 const YoungModel = require("../models/young");
-// const { deleteFilesByList, listFiles } = require("../utils/index");
-const { processYoung } = require("../crons/utils");
+const { deleteSensitiveData } = require("../services/gdpr");
 
 let countTotal = 0;
 let countModified = 0;
@@ -24,7 +23,7 @@ exports.handler = async () => {
 
       await Promise.all(
         subArray.map(async ({ _id }) => {
-          await processYoung(_id);
+          await deleteSensitiveData(_id);
           countModified++;
         }),
       );
