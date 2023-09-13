@@ -1,7 +1,6 @@
 const YoungModel = require("../models/young");
 const InscriptionGoal = require("../models/inscriptionGoal");
 const { regionList, departmentList } = require("snu-lib");
-const { deleteFilesByList, listFiles } = require("../utils/index");
 
 const getMinusDate = (v) => {
   const d = new Date();
