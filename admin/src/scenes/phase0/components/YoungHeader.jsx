@@ -419,6 +419,7 @@ const AttestationDownloadButton = ({ young }) => {
       fileName: `${young.firstName} ${young.lastName} - attestation ${phase}.pdf`,
     });
   };
+  if (young.statusPhase1 !== YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED && young.statusPhase3 !== YOUNG_STATUS_PHASE3.VALIDATED) return null;
   return (
     <>
       <ModalConfirm isOpen={modal?.isOpen} title={modal?.title} message={modal?.message} onCancel={() => setModal({ isOpen: false })} onConfirm={modal?.onConfirm} />
