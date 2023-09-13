@@ -609,7 +609,6 @@ async function addingDayToDate(days, dateStart) {
   }
 }
 
-// @todo : à clean sans les terminales
 async function autoValidationSessionPhase1Young({ young, sessionPhase1, cohort, user }) {
   let cohortWithOldRules = ["2021", "2022", "Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B"]
   let youngCohort = cohort;
