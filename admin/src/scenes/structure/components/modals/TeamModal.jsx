@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import { ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
 import validator from "validator";
-import { copyToClipboard, formatPhoneNumberFR, getInitials, translate } from "../../../../utils";
+import { copyToClipboard, formatPhoneNumberFR, getInitials, translate } from "@/utils";
 import { AiOutlineClose } from "react-icons/ai";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle, HiOutlineTrash, HiPencil, HiPhone, HiPlus } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
-import Field from "../../../../components/forms/Field";
-import ModalChangeTutor from "../../../../components/modals/ModalChangeTutor";
-import ModalConfirm from "../../../../components/modals/ModalConfirm";
-import ModalReferentDeleted from "../../../../components/modals/ModalReferentDeleted";
-import ModalTailwind from "../../../../components/modals/ModalTailwind";
-import API from "../../../../services/api";
+import Field from "@/components/forms/Field";
+import ModalChangeTutor from "@/components/modals/ModalChangeTutor";
+import ModalConfirm from "@/components/modals/ModalConfirm";
+import ModalReferentDeleted from "@/components/modals/ModalReferentDeleted";
+import ModalTailwind from "@/components/modals/ModalTailwind";
+import API from "@/services/api";
 import Select from "../../../centersV2/components/Select";
 import Button from "../Button";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
@@ -261,7 +261,7 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
 
   return (
     <div className="flex h-full flex-col space-y-6" onSubmit={handleSubmit}>
-      <p className="text-center text-lg font-medium">{responsible._id ? "L'équipe" : "Inviter un nouvel utilisateur"}</p>
+      <p className="text-center text-lg font-medium">{responsible._id ? "L'équipe" : "Inviter un nouveau responsable"}</p>
       {!responsible._id && (
         <p className="text-center text-gray-500">Vous pouvez partager les droits d&apos;administration de votre compte de structure d&apos;accueil SNU avec plusieurs personnes.</p>
       )}
