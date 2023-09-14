@@ -242,12 +242,13 @@ class Auth {
       const trustToken = jwt.sign({}, config.secret, { expiresIn: TRUST_TOKEN_MAX_AGE });
       res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(TRUST_TOKEN_MAX_AGE));
 
+      const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
+
       if (rememberMe) {
-        console.log("REMEMBER2", rememberMe);
-        const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
         if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(JWT_MAX_AGE));
         else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(JWT_MAX_AGE));
       }
+
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       return res.status(200).send({
         ok: true,
