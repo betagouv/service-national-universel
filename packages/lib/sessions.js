@@ -94,7 +94,7 @@ const sessions2023 = [
       bornAfter: new Date("10/22/2005"),
       bornBefore: new Date("10/09/2008"),
       inscriptionEndDate: new Date("2023-09-20T13:00:00.000Z"), // 20 septembre minuit heure de NC
-      instructionEndDate: new Date("2023-09-30T22:00:00.000Z"), // 30 septembre
+      instructionEndDate: new Date("2023-09-22T22:00:00.000Z"), // 22 septembre
     },
   },
 ];
