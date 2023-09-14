@@ -409,7 +409,7 @@ const AttestationDownloadButton = ({ young }) => {
       toastr.success(`Document envoyé à ${young.email}`);
     } catch (e) {
       capture(e);
-      toastr.error("Erreur lors de l'envoie du document", e.message);
+      toastr.error("Erreur lors de l'envoi du document", e.message);
     }
   };
 
@@ -472,7 +472,7 @@ const AttestationDownloadButton = ({ young }) => {
                 action: async () =>
                   setModal({
                     isOpen: true,
-                    title: "Envoie de document par mail",
+                    title: "Envoi de document par mail",
                     message: `Êtes-vous sûr de vouloir transmettre le document Attestation de réalisation de la phase 1 par mail à ${young.email} ?`,
                     onConfirm: () => handleSendAttestationByEmail(1),
                   }),
@@ -487,7 +487,7 @@ const AttestationDownloadButton = ({ young }) => {
                 action: async () =>
                   setModal({
                     isOpen: true,
-                    title: "Envoie de document par mail",
+                    title: "Envoi de document par mail",
                     message: `Êtes-vous sûr de vouloir transmettre le document Attestation de réalisation de la phase 2 par mail à ${young.email} ?`,
                     onConfirm: () => handleSendAttestationByEmail(2),
                   }),
@@ -502,7 +502,7 @@ const AttestationDownloadButton = ({ young }) => {
                 action: async () =>
                   setModal({
                     isOpen: true,
-                    title: "Envoie de document par mail",
+                    title: "Envoi de document par mail",
                     message: `Êtes-vous sûr de vouloir transmettre le document Attestation de réalisation de la phase 3 par mail à ${young.email} ?`,
                     onConfirm: () => handleSendAttestationByEmail(3),
                   }),
