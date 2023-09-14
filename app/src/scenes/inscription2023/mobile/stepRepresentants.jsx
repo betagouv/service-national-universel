@@ -250,13 +250,15 @@ export default function StepRepresentants() {
     setLoading(false);
   };
 
+  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux`;
+
   return (
     <>
       <Navbar onSave={onSave} />
       <div className="bg-white p-4 text-[#161616]">
         <div className="mt-2 flex w-full items-center justify-between">
           <h1 className="text-xl font-bold">Mes représentants légaux</h1>
-          <a href={`${supportURL}/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux`} target="_blank" rel="noreferrer">
+          <a href={supportLink} target="_blank" rel="noreferrer">
             <QuestionMarkBlueCircle />
           </a>
         </div>
@@ -271,7 +273,7 @@ export default function StepRepresentants() {
         </div>
         {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} young={young} /> : null}
       </div>
-      <Help />
+      <Help supportLink={supportLink} />
       {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
         <StickyButton text="Corriger" onClickPrevious={() => history.push("/")} onClick={onCorrection} disabled={loading} />
       ) : (

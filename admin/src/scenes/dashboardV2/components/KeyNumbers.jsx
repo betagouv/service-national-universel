@@ -40,7 +40,7 @@ export default function KeyNumbers() {
         </div>
         <CustomFilter setFromDate={setStartDate} setToDate={setEndDate} notesPhase={phase} setNotesPhase={setPhase} />
       </div>
-      <div className="">
+      <div className="overflow-hidden">
         {notes?.map((note) => (
           <Note key={note.id} note={note} />
         ))}

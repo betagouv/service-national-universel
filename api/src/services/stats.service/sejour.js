@@ -43,31 +43,49 @@ async function getYoungNotesPhase1(startDate, endDate, user) {
       id: "young-notes",
       value,
       label: `note${value > 1 ? "s" : ""} interne${value > 1 ? "s" : ""} déposée${value > 1 ? "s" : ""} - phase 1`,
-      icon: "other",
+      icon: "where",
     },
   ];
 }
 
-async function getTimeSchedule(startDate, endDate, user) {
+async function getTimeScheduleAndPedagoProject(startDate, endDate, user) {
   // ref dep and ref reg
   let body = {
     query: {
       bool: {
-        filter: [
-          {
-            nested: {
-              path: "timeScheduleFiles",
-              query: {
-                range: {
-                  "timeScheduleFiles.uploadedAt": {
-                    gte: new Date(startDate),
-                    lte: new Date(endDate),
-                  },
+        filter: [],
+      },
+    },
+    aggs: {
+      group_by_timeSchedule: {
+        filter: {
+          nested: {
+            path: "timeScheduleFiles",
+            query: {
+              range: {
+                "timeScheduleFiles.uploadedAt": {
+                  gte: new Date(startDate),
+                  lte: new Date(endDate),
                 },
               },
             },
           },
-        ],
+        },
+      },
+      group_by_pedagoProject: {
+        filter: {
+          nested: {
+            path: "pedagoProjectFiles",
+            query: {
+              range: {
+                "pedagoProjectFiles.uploadedAt": {
+                  gte: new Date(startDate),
+                  lte: new Date(endDate),
+                },
+              },
+            },
+          },
+        },
       },
     },
     size: 0,
@@ -77,20 +95,26 @@ async function getTimeSchedule(startDate, endDate, user) {
   if (user.role === ROLES.REFERENT_REGION) {
     body.query.bool.filter.push({ match: { "region.keyword": user.region } });
   }
-
   if (user.role === ROLES.REFERENT_DEPARTMENT) {
     body.query.bool.filter.push({ terms: { "department.keyword": user.department } });
   }
 
   const response = await esClient.search({ index: "sessionphase1", body });
-  const value = response.body.hits.total.value;
+  const time = response.body.aggregations.group_by_timeSchedule.doc_count;
+  const project = response.body.aggregations.group_by_pedagoProject.doc_count;
 
   return [
     {
       id: "time-schedule",
-      value,
-      label: `emploi${value > 1 ? "s" : ""} du temps déposé${value > 1 ? "s" : ""}`,
-      icon: "action",
+      value: time,
+      label: ` emploi${time > 1 ? "s" : ""} du temps déposé${time > 1 ? "s" : ""}`,
+      icon: "where",
+    },
+    {
+      id: "pedago-project",
+      value: project,
+      label: ` projet${project > 1 ? "s" : ""} pédagogique${project > 1 ? "s" : ""} déposé${project > 1 ? "s" : ""}`,
+      icon: "where",
     },
   ];
 }
@@ -134,13 +158,13 @@ async function getTransportCorrectionRequests(startDate, endDate, user) {
       id: "pdt-modificationbuses-refused",
       value: refusedCount,
       label: `demande${refusedCount > 1 ? "s" : ""} de modification du plan de transport refusée${refusedCount > 1 ? "s" : ""}`,
-      icon: "action",
+      icon: "where",
     },
     {
       id: "pdt-modificationbuses-validated",
       value: validatedCount,
       label: `demande${validatedCount > 1 ? "s" : ""} de modification du plan de transport validée${validatedCount > 1 ? "s" : ""}`,
-      icon: "action",
+      icon: "where",
     },
   ];
 }
@@ -208,7 +232,7 @@ async function getLineToPoints(startDate, endDate) {
 
 module.exports = {
   getYoungNotesPhase1,
-  getTimeSchedule,
+  getTimeScheduleAndPedagoProject,
   getTransportCorrectionRequests,
   getSessions,
   getLineToPoints,

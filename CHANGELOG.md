@@ -1,3 +1,128 @@
+# [1.332.0](https://github.com/betagouv/service-national-universel/compare/v1.331.0...v1.332.0) (2023-09-13)
+
+
+### Bug Fixes
+
+* **app:** fix form validation on public contact form ([1f5f570](https://github.com/betagouv/service-national-universel/commit/1f5f570c17eda3c8dec1ef4c8f110c889c610803))
+* **app:** wording ([0d3584c](https://github.com/betagouv/service-national-universel/commit/0d3584ce5c727340f88810097c2ed7a813f9f283))
+* **deps:** update dependency @elastic/elasticsearch to v7.17.12 ([#2960](https://github.com/betagouv/service-national-universel/issues/2960)) ([6d3fa6b](https://github.com/betagouv/service-national-universel/commit/6d3fa6b821ac96cbde18994d03b3c29d6284796f))
+* **deps:** update dependency @headlessui/react to v1.7.17 ([#2961](https://github.com/betagouv/service-national-universel/issues/2961)) ([7437bc0](https://github.com/betagouv/service-national-universel/commit/7437bc09601e4ceff8f1d80f3a800b96198b3db0))
+* **deps:** update dependency @headlessui/react to v1.7.17 ([#2962](https://github.com/betagouv/service-national-universel/issues/2962)) ([ed3b961](https://github.com/betagouv/service-national-universel/commit/ed3b9613baceef5136abd5c5458b9dcc785e9c3d))
+* **deps:** update dependency @rollup/plugin-commonjs to v25.0.4 ([#2963](https://github.com/betagouv/service-national-universel/issues/2963)) ([cccaef8](https://github.com/betagouv/service-national-universel/commit/cccaef8102f9982ddc83754e5d0309adffbc1aaf))
+* **deps:** update dependency autoprefixer to v10.4.15 ([#2964](https://github.com/betagouv/service-national-universel/issues/2964)) ([0e95e69](https://github.com/betagouv/service-national-universel/commit/0e95e690fd15a09499afd0d7fd1ad6cf3dc7852a))
+* **deps:** update dependency bootstrap to v4.6.2 ([#2966](https://github.com/betagouv/service-national-universel/issues/2966)) ([f80e2bb](https://github.com/betagouv/service-national-universel/commit/f80e2bb02b2874ed08ea937a3280877a2bc34d06))
+* **deps:** update dependency dayjs to v1.11.9 ([#2967](https://github.com/betagouv/service-national-universel/issues/2967)) ([1dc5426](https://github.com/betagouv/service-national-universel/commit/1dc54262f6be256baf037da09a50502cfca350a5))
+* **deps:** update dependency jsonwebtoken to v9.0.2 ([#2977](https://github.com/betagouv/service-national-universel/issues/2977)) ([2a5cfc9](https://github.com/betagouv/service-national-universel/commit/2a5cfc9466ff4ea513adcf15e348cffcee6153eb))
+
+
+### Features
+
+* **admin:** ajout des Key Numbers engagement sur le dashboard ([#2923](https://github.com/betagouv/service-national-universel/issues/2923)) ([c04303f](https://github.com/betagouv/service-national-universel/commit/c04303f5dba9142115a86fbf2598e2ebacd227fe))
+* **admin:** ajout du Key number engagement new missions ([#2927](https://github.com/betagouv/service-national-universel/issues/2927)) ([6e9b5c2](https://github.com/betagouv/service-national-universel/commit/6e9b5c2fab9a0a9130ac568e866e26239fa2866d))
+* **admin:** ajout Key Number engagement young proposed mission ([#2932](https://github.com/betagouv/service-national-universel/issues/2932)) ([43b2be4](https://github.com/betagouv/service-national-universel/commit/43b2be46f79271429f201d0c97333c691f5d944d))
+* **admin:** ajout Key Number engagement young start Phase2 in time ([#2931](https://github.com/betagouv/service-national-universel/issues/2931)) ([0423b1f](https://github.com/betagouv/service-national-universel/commit/0423b1f8022e1f457f0950491cf154c30e413583))
+
+# [1.331.0](https://github.com/betagouv/service-national-universel/compare/v1.330.0...v1.331.0) (2023-09-12)
+
+
+### Bug Fixes
+
+* **admin:** datepicker range ([#2969](https://github.com/betagouv/service-national-universel/issues/2969)) ([c2ad7e8](https://github.com/betagouv/service-national-universel/commit/c2ad7e8e505c433ecd38a7b0c933abf4beb99476))
+* **analytics:** model mig ([2f86ddc](https://github.com/betagouv/service-national-universel/commit/2f86ddc81c0f4d453ea113228cda545cb001bd96))
+* **analytics:** route log mig ([efe9573](https://github.com/betagouv/service-national-universel/commit/efe9573e51568909720b0804f1c46bf389f4616c))
+* **app:** improve address search and error mgmt ([#2917](https://github.com/betagouv/service-national-universel/issues/2917)) ([63f1c00](https://github.com/betagouv/service-national-universel/commit/63f1c005c47e149340a92097cede49d18edd55d6))
+
+
+### Features
+
+* **admin:** Ajout des Key Numbers Inscription sur le dashboard ([#2909](https://github.com/betagouv/service-national-universel/issues/2909)) ([25334f2](https://github.com/betagouv/service-national-universel/commit/25334f20a919c5c4d7aae7aca6cd09963cf27e32))
+* **admin:** ajout Key Number engagement contrats signés [#2937](https://github.com/betagouv/service-national-universel/issues/2937) ([eae6d2b](https://github.com/betagouv/service-national-universel/commit/eae6d2bb825a450692aa5cf457551166ae610dc0))
+* **admin:** ajout Key Number engagement missions a échéance ([#2936](https://github.com/betagouv/service-national-universel/issues/2936)) ([8d44826](https://github.com/betagouv/service-national-universel/commit/8d44826233d863cb7f5af6539dc97ddf5b1b46c8))
+* **bdc:** Add site map ([#2950](https://github.com/betagouv/service-national-universel/issues/2950)) ([0095331](https://github.com/betagouv/service-national-universel/commit/0095331d0b8c24046142c5f1a7f4104c04d624cb))
+
+# [1.330.0](https://github.com/betagouv/service-national-universel/compare/v1.329.0...v1.330.0) (2023-09-11)
+
+
+### Bug Fixes
+
+* **analytics:** rename equivalence mig route ([9d7a2dc](https://github.com/betagouv/service-national-universel/commit/9d7a2dc1d921650dd723daf062c5c40c2c13bcd1))
+* **app:** fix classname in app ([20f83dd](https://github.com/betagouv/service-national-universel/commit/20f83dd81ef4d272b4aa4e11e54c35eb2f8f7a78))
+* **app:** temporarily remove local storage maintenance override ([aaf3f52](https://github.com/betagouv/service-national-universel/commit/aaf3f525bce79659382a266608ca6315c10b5fae))
+* upgrade @sentry/integrations from 7.61.0 to 7.64.0 ([#2943](https://github.com/betagouv/service-national-universel/issues/2943)) ([d42c879](https://github.com/betagouv/service-national-universel/commit/d42c87955e160b2371c3b410781e7959353f16eb))
+* upgrade @sentry/nextjs from 7.61.0 to 7.64.0 ([#2945](https://github.com/betagouv/service-national-universel/issues/2945)) ([8664f61](https://github.com/betagouv/service-national-universel/commit/8664f611ad9ecea1bab1ed246c8f33ad83911dfe))
+
+
+### Features
+
+* **analytics:** creation missionEquivalence route & model ([85ada20](https://github.com/betagouv/service-national-universel/commit/85ada20fff269a9ee2e1840a8c6534f4b4d6bd83))
+
+
+### Reverts
+
+* Revert "feat(admin/api): change process for abandon application #2914" ([14b57a3](https://github.com/betagouv/service-national-universel/commit/14b57a3696f176072dd3b1adb1c63cadeaae84dd)), closes [#2914](https://github.com/betagouv/service-national-universel/issues/2914)
+* Revert "chore(deps): update dependency @swc/core to v1.3.83 (#2706)" ([eb664b2](https://github.com/betagouv/service-national-universel/commit/eb664b2bc67a990a01a1e27db72d5149529ae3fd)), closes [#2706](https://github.com/betagouv/service-national-universel/issues/2706)
+* Revert "chore(deps): update dependency tailwindcss to v3.3.3 (#2853)" ([d964ccd](https://github.com/betagouv/service-national-universel/commit/d964ccda7e8560d9837c185d7754b179c1e74b49)), closes [#2853](https://github.com/betagouv/service-national-universel/issues/2853)
+* Revert "fix(deps): update dependency regenerator-runtime to v0.14.0 (#2021)" ([537b759](https://github.com/betagouv/service-national-universel/commit/537b75935049604b9d462227549d53b8e7ebc62b)), closes [#2021](https://github.com/betagouv/service-national-universel/issues/2021)
+
+# [1.329.0](https://github.com/betagouv/service-national-universel/compare/v1.328.1...v1.329.0) (2023-09-07)
+
+
+### Bug Fixes
+
+* **app:** abandon mission validate phase 2 [#2951](https://github.com/betagouv/service-national-universel/issues/2951) ([3a49dbd](https://github.com/betagouv/service-national-universel/commit/3a49dbd559f7a23bbe7c1ab789d69949a88f8a85))
+
+
+### Features
+
+* **admin/api:** add total hit value for elasticSearch list ([#2948](https://github.com/betagouv/service-national-universel/issues/2948)) ([797b8c2](https://github.com/betagouv/service-national-universel/commit/797b8c22b68176a7d2ecc7bad9ae0b0901b7d1f9))
+* **app, bdc:** Nouveau workflow contact support ([#2940](https://github.com/betagouv/service-national-universel/issues/2940)) ([d86d525](https://github.com/betagouv/service-national-universel/commit/d86d525c4f128ee0b89a69bb252b8a253aceb905))
+
+## [1.328.1](https://github.com/betagouv/service-national-universel/compare/v1.328.0...v1.328.1) (2023-09-05)
+
+
+### Bug Fixes
+
+* **lib:** add missing dep number for saint-barthelemy ([51d918f](https://github.com/betagouv/service-national-universel/commit/51d918fd0eee7ce1f41814f3c3b9918faf2f80cc))
+
+# [1.328.0](https://github.com/betagouv/service-national-universel/compare/v1.327.1...v1.328.0) (2023-09-04)
+
+
+### Bug Fixes
+
+* **admin:** drom date managment ([#2901](https://github.com/betagouv/service-national-universel/issues/2901)) ([743fe17](https://github.com/betagouv/service-national-universel/commit/743fe1702965e0e1300ef872b6925bc653e5ba17))
+* **api:** add try catch ([97b5256](https://github.com/betagouv/service-national-universel/commit/97b525629eb21f3a742dc4aecbc701fd0c9bf69d))
+* **api:** Force structureId and tutorId to be defined for missions ([bcb2d06](https://github.com/betagouv/service-national-universel/commit/bcb2d0656eb131fafd062673ecda811d56a016cd))
+* **app:** fix role data in public contact form ([d72f80f](https://github.com/betagouv/service-national-universel/commit/d72f80f85118ad567b6bb543643e839b9ef08cda))
+
+
+### Features
+
+* **admin:** Add Key Number Sejour Pedago Project ([#2926](https://github.com/betagouv/service-national-universel/issues/2926)) ([3ae280d](https://github.com/betagouv/service-national-universel/commit/3ae280d8bc851f1e54b667e1b950ff4685dd2a73))
+* **admin:** ajout Key Number engagement New Structure ([#2928](https://github.com/betagouv/service-national-universel/issues/2928)) ([c7d0ed6](https://github.com/betagouv/service-national-universel/commit/c7d0ed652db80993082c59a0831b36c8ad73f2df))
+* **admin:** ajout Key Number engagement Notes internes Phase 2 ([#2929](https://github.com/betagouv/service-national-universel/issues/2929)) ([a17d3b0](https://github.com/betagouv/service-national-universel/commit/a17d3b0427e6456f9766c6abf3705e369776ab49))
+* **admin:** ajout Key Number engagement Phase 2 Validated ([#2930](https://github.com/betagouv/service-national-universel/issues/2930)) ([883713d](https://github.com/betagouv/service-national-universel/commit/883713d9b304ca7dd750e29a4f2ee4a834edc151))
+* **admin/api:** change process for abandon application [#2914](https://github.com/betagouv/service-national-universel/issues/2914) ([4b14bca](https://github.com/betagouv/service-national-universel/commit/4b14bca29b76a0256e2c6e6ccce56fc99b2891d5))
+
+## [1.327.1](https://github.com/betagouv/service-national-universel/compare/v1.327.0...v1.327.1) (2023-09-01)
+
+
+### Bug Fixes
+
+* **api:** validate email during contract edition ([af0d52b](https://github.com/betagouv/service-national-universel/commit/af0d52bac4910dce59b80c9b74af825dec98a33f))
+
+# [1.327.0](https://github.com/betagouv/service-national-universel/compare/v1.326.0...v1.327.0) (2023-08-31)
+
+
+### Bug Fixes
+
+* **admin:** dashboard horizontalbar with 0 objective ([#2920](https://github.com/betagouv/service-national-universel/issues/2920)) ([fcbab44](https://github.com/betagouv/service-national-universel/commit/fcbab44f8daa18e08d1ec7eaa8c7453fd26c3339))
+* **admin:** new sidebar -> we forgot the objectives tab ! ([21d8222](https://github.com/betagouv/service-national-universel/commit/21d82221ff222385e8a3a84afc3616602f5107e6))
+
+
+### Features
+
+* **test:** creation unit test lignetopoint/pointderassemblement ([#2905](https://github.com/betagouv/service-national-universel/issues/2905)) ([9d04ee3](https://github.com/betagouv/service-national-universel/commit/9d04ee3561c692c56732239603602f306441a2bc))
+
 # [1.326.0](https://github.com/betagouv/service-national-universel/compare/v1.325.0...v1.326.0) (2023-08-30)
 
 

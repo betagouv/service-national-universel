@@ -76,14 +76,31 @@ const SideBar = (props) => {
   const Session = () => <SwitchSession sideBarOpen={open} sessionsList={props.sessionsList} sessionPhase1={sessionPhase1} />;
 
   //NavLinks
-  const Dashboard = () => <SimpleNavItem sideBarOpen={open} Icon={DashboardIcon} title="Tableau de bord" link="/dashboard" active={path === "dashboard"} />;
-  const Volontaire = () => <SimpleNavItem sideBarOpen={open} Icon={VolontaireIcon} title="Volontaires" link="/volontaire" active={path === "volontaire"} />;
-  const Contenus = () => <SimpleNavItem sideBarOpen={open} Icon={ContenuIcon} title="Contenus" link="/contenu" active={path === "contenu"} />;
-  const Inscriptions = () => <SimpleNavItem sideBarOpen={open} Icon={InscriptionIcon} title="Inscriptions" link="/inscription" active={path === "inscription"} />;
-  const Utilisateurs = () => <SimpleNavItem sideBarOpen={open} Icon={AdminIcon} title="Utilisateurs" link="/user" active={path === "user"} />;
-  const Schema = () => <SimpleNavItem sideBarOpen={open} Icon={SchemaIcon} title="Schéma de répartition" link="/schema-repartition" active={path === "schema-repartition"} />;
-  const Candidature = () => <SimpleNavItem sideBarOpen={open} Icon={VolontaireIcon} title="Candidatures" link="/volontaire/list/all" active={path === "volontaire"} />;
-  const Missions = () => <SimpleNavItem sideBarOpen={open} Icon={EngagementIcon} title="Missions" link="/mission" active={path === "mission"} />;
+  const Dashboard = () => (
+    <SimpleNavItem sideBarOpen={open} Icon={DashboardIcon} title="Tableau de bord" link="/dashboard" active={path === "dashboard"} setCurrentOpen={setDropDownOpen} />
+  );
+  const Volontaire = () => (
+    <SimpleNavItem sideBarOpen={open} Icon={VolontaireIcon} title="Volontaires" link="/volontaire" active={path === "volontaire"} setCurrentOpen={setDropDownOpen} />
+  );
+  const Contenus = () => <SimpleNavItem sideBarOpen={open} Icon={ContenuIcon} title="Contenus" link="/contenu" active={path === "contenu"} setCurrentOpen={setDropDownOpen} />;
+  const Inscriptions = () => (
+    <SimpleNavItem sideBarOpen={open} Icon={InscriptionIcon} title="Inscriptions" link="/inscription" active={path === "inscription"} setCurrentOpen={setDropDownOpen} />
+  );
+  const Utilisateurs = () => <SimpleNavItem sideBarOpen={open} Icon={AdminIcon} title="Utilisateurs" link="/user" active={path === "user"} setCurrentOpen={setDropDownOpen} />;
+  const Schema = () => (
+    <SimpleNavItem
+      sideBarOpen={open}
+      Icon={SchemaIcon}
+      title="Schéma de répartition"
+      link="/schema-repartition"
+      active={path === "schema-repartition"}
+      setCurrentOpen={setDropDownOpen}
+    />
+  );
+  const Candidature = () => (
+    <SimpleNavItem sideBarOpen={open} Icon={VolontaireIcon} title="Candidatures" link="/volontaire/list/all" active={path === "volontaire"} setCurrentOpen={setDropDownOpen} />
+  );
+  const Missions = () => <SimpleNavItem sideBarOpen={open} Icon={EngagementIcon} title="Missions" link="/mission" active={path === "mission"} setCurrentOpen={setDropDownOpen} />;
   const Network = () => (
     <SimpleNavItem
       sideBarOpen={open}
@@ -91,10 +108,22 @@ const SideBar = (props) => {
       title="Tête de réseau"
       link={`/structure/${user?.structureId}`}
       active={new RegExp("/structure/" + user?.structureId).test(exactPath)}
+      setCurrentOpen={setDropDownOpen}
     />
   );
-  const ExportDsnj = () => <SimpleNavItem sideBarOpen={open} Icon={ClipboardIcon} title="Export DSNJ" link="/dsnj-export" active={path === "dsnj-export"} />;
-  const Structure = () => <SimpleNavItem sideBarOpen={open} Icon={SejourIcon} title="Structures" link={`/structure/${user?.structureId}`} active={path === "structure"} />;
+  const ExportDsnj = () => (
+    <SimpleNavItem sideBarOpen={open} Icon={ClipboardIcon} title="Export DSNJ" link="/dsnj-export" active={path === "dsnj-export"} setCurrentOpen={setDropDownOpen} />
+  );
+  const Structure = () => (
+    <SimpleNavItem
+      sideBarOpen={open}
+      Icon={SejourIcon}
+      title="Structures"
+      link={`/structure/${user?.structureId}`}
+      active={path === "structure"}
+      setCurrentOpen={setDropDownOpen}
+    />
+  );
   const StructureSupervisor = () => (
     <SimpleNavItem
       sideBarOpen={open}
@@ -102,10 +131,13 @@ const SideBar = (props) => {
       title="Structures affiliées"
       link={`/structure`}
       active={path === "structure" && !new RegExp("/structure/" + user?.structureId).test(exactPath)}
+      setCurrentOpen={setDropDownOpen}
     />
   );
-  const Centre = () => <SimpleNavItem sideBarOpen={open} Icon={SejourIcon} title="Centres" link="/centre" active={path === "centre"} />;
-  const PlanDeTransport = () => <SimpleNavItem sideBarOpen={open} Icon={MapIcon} title="Plan de transport" link="/ligne-de-bus" active={path === "ligne-de-bus"} />;
+  const Centre = () => <SimpleNavItem sideBarOpen={open} Icon={SejourIcon} title="Centres" link="/centre" active={path === "centre"} setCurrentOpen={setDropDownOpen} />;
+  const PlanDeTransport = () => (
+    <SimpleNavItem sideBarOpen={open} Icon={MapIcon} title="Plan de transport" link="/ligne-de-bus" active={path === "ligne-de-bus"} setCurrentOpen={setDropDownOpen} />
+  );
   const Point = () => (
     <SimpleNavItem
       sideBarOpen={open}
@@ -113,6 +145,7 @@ const SideBar = (props) => {
       title="Points de rassemblement"
       link="/point-de-rassemblement/liste/liste-points"
       active={path === "point-de-rassemblement"}
+      setCurrentOpen={setDropDownOpen}
     />
   );
   const VolontaireHeadCenter = () => (
@@ -122,10 +155,18 @@ const SideBar = (props) => {
       title="Volontaires"
       link={`/centre/${sessionPhase1?.cohesionCenterId}/${sessionPhase1?._id}/general`}
       active={volontaireHeadCenterRegex.test(exactPath)}
+      setCurrentOpen={setDropDownOpen}
     />
   );
   const CentresHeadCenter = () => (
-    <SimpleNavItem sideBarOpen={open} Icon={SejourIcon} title="Centre" link={`/centre/${sessionPhase1?.cohesionCenterId}`} active={centerHeadCenterRegex.test(exactPath)} />
+    <SimpleNavItem
+      sideBarOpen={open}
+      Icon={SejourIcon}
+      title="Centre"
+      link={`/centre/${sessionPhase1?.cohesionCenterId}`}
+      active={centerHeadCenterRegex.test(exactPath)}
+      setCurrentOpen={setDropDownOpen}
+    />
   );
 
   //MultiNavLinks

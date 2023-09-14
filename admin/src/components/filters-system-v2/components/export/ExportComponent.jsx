@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import * as FileSaver from "file-saver";
 import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";

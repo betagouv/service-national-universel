@@ -145,7 +145,7 @@ function listFiles(path) {
 function deleteFilesByList(filesList) {
   return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    const params = { Bucket: BUCKET_NAME, Delete:{Objects: filesList}};
+    const params = { Bucket: BUCKET_NAME, Delete: { Objects: filesList } };
     s3bucket.deleteObjects(params, (err, data) => {
       if (err) return reject(`error in callback:${err}`);
       resolve(data);
@@ -631,15 +631,14 @@ async function addingDayToDate(days, dateStart) {
   }
 }
 
-// @todo : à clean sans les terminales
 async function autoValidationSessionPhase1Young({ young, sessionPhase1, cohort, user }) {
+  let cohortWithOldRules = ["2021", "2022", "Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B"]
   let youngCohort = cohort;
   if (!cohort) {
     youngCohort = await CohortModel.findOne({ name: young.cohort });
   }
   const {
     daysToValidate: daysToValidate,
-    daysToValidateForTerminalGrade: daysToValidateForTerminalGrade,
     validationDate: dateDeValidation,
     validationDateForTerminaleGrade: dateDeValidationTerminale,
     dateStart: dateStartcohort,
@@ -651,21 +650,19 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, cohort, 
   const isTerminale = young?.grade === "Terminale";
   // cette constante nous permet d'avoir la date de validation d'un séjour en fonction du grade d'un Young
   const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
-  // cette constante nous permet d'avoir le nombre de jour nécessaire à la validation d'un séjour en fonction du grade d'un Young
-  const days = isTerminale ? daysToValidateForTerminalGrade : daysToValidate;
-  const validationDateWithDays = await addingDayToDate(days, dateStart);
+  const validationDateWithDays = await addingDayToDate(daysToValidate, dateStart);
 
   if (young.cohort === "Juin 2023") {
     await updateStatusPhase1WithSpecificCase(young, validationDate, user);
-  } else if (young.cohort === "Juillet 2023") {
-    await updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithDays, user);
+  } else if (cohortWithOldRules.includes(young.cohort)) {
+    await updateStatusPhase1WithOldRules(young, validationDate, isTerminale, user);
   } else {
-    await updateStatusPhase1(young, validationDate, isTerminale, user);
+    await updateStatusPhase1(young, validationDateWithDays, user);
   }
-  return { dateStart, days, validationDateWithDays, dateStartcohort };
+  return { dateStart, daysToValidate, validationDateWithDays, dateStartcohort };
 }
 
-async function updateStatusPhase1(young, validationDate, isTerminale, user) {
+async function updateStatusPhase1WithOldRules(young, validationDate, isTerminale, user) {
   try {
     const now = new Date();
     // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
@@ -702,7 +699,7 @@ async function updateStatusPhase1(young, validationDate, isTerminale, user) {
   }
 }
 
-async function updateStatusPhase1WithSpecificCaseJuly(young, validationDateWithDays, user) {
+async function updateStatusPhase1(young, validationDateWithDays, user) {
   const initialState = young.statusPhase1;
   try {
     const now = new Date();
@@ -821,33 +818,38 @@ const getReferentManagerPhase2 = async (department) => {
 };
 
 const updateYoungApplicationFilesType = async (application, user) => {
-  const young = await YoungModel.findById(application.youngId);
-  const applications = await ApplicationModel.find({ youngId: application.youngId });
+  try {
+    const young = await YoungModel.findById(application.youngId);
+    const applications = await ApplicationModel.find({ youngId: application.youngId });
 
-  const listFiles = [];
-  applications.map(async (application) => {
-    const currentListFiles = [];
-    if (application.contractAvenantFiles.length > 0) {
-      currentListFiles.push("contractAvenantFiles");
-      listFiles.indexOf("contractAvenantFiles") === -1 && listFiles.push("contractAvenantFiles");
-    }
-    if (application.justificatifsFiles.length > 0) {
-      currentListFiles.push("justificatifsFiles");
-      listFiles.indexOf("justificatifsFiles") === -1 && listFiles.push("justificatifsFiles");
-    }
-    if (application.feedBackExperienceFiles.length > 0) {
-      currentListFiles.push("feedBackExperienceFiles");
-      listFiles.indexOf("feedBackExperienceFiles") === -1 && listFiles.push("feedBackExperienceFiles");
-    }
-    if (application.othersFiles.length > 0) {
-      currentListFiles.push("othersFiles");
-      listFiles.indexOf("othersFiles") === -1 && listFiles.push("othersFiles");
-    }
-    application.set({ filesType: currentListFiles });
-    await application.save({ fromUser: user });
-  });
-  young.set({ phase2ApplicationFilesType: listFiles });
-  await young.save({ fromUser: user });
+    const listFiles = [];
+    applications.map(async (application) => {
+      const currentListFiles = [];
+      if (application.contractAvenantFiles.length > 0) {
+        currentListFiles.push("contractAvenantFiles");
+        listFiles.indexOf("contractAvenantFiles") === -1 && listFiles.push("contractAvenantFiles");
+      }
+      if (application.justificatifsFiles.length > 0) {
+        currentListFiles.push("justificatifsFiles");
+        listFiles.indexOf("justificatifsFiles") === -1 && listFiles.push("justificatifsFiles");
+      }
+      if (application.feedBackExperienceFiles.length > 0) {
+        currentListFiles.push("feedBackExperienceFiles");
+        listFiles.indexOf("feedBackExperienceFiles") === -1 && listFiles.push("feedBackExperienceFiles");
+      }
+      if (application.othersFiles.length > 0) {
+        currentListFiles.push("othersFiles");
+        listFiles.indexOf("othersFiles") === -1 && listFiles.push("othersFiles");
+      }
+      application.set({ filesType: currentListFiles });
+      await application.save({ fromUser: user });
+    });
+    young.set({ phase2ApplicationFilesType: listFiles });
+    await young.save({ fromUser: user });
+  } catch (e) {
+    capture(e);
+    console.log(e);
+  }
 };
 
 const updateHeadCenter = async (headCenterId, user) => {
@@ -996,5 +998,5 @@ module.exports = {
   updateHeadCenter,
   getTransporter,
   getMetaDataFile,
-  deleteFilesByList
+  deleteFilesByList,
 };

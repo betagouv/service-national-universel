@@ -13,7 +13,7 @@ import ConfirmationModal from "./ConfirmationModal";
 import Warning from "../../../assets/icons/Warning";
 import { capture } from "../../../sentry";
 import Field from "./Field";
-import DatePickerList from "./DatePickerList";
+import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
 import { resizeImage } from "../../../services/file.service";
 
 export function CniField({
@@ -305,18 +305,14 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                       </div>
                     )}
                   </div>
-                  <div className="mt-4 flex w-full space-x-2">
-                    <div className="relative w-1/2 rounded-[6px] border-[1px] border-[#D1D5DB] bg-white py-[9px] px-[13px]">
-                      <label className="text-[12px] font-normal leading-[16px] text-[#6B7280]">Date d&apos;expiration</label>
-                      <DatePickerList fromEdition={false} value={new Date(date)} onChange={(val) => setDate(val)} />
-                    </div>
+                  <div className="mt-4 w-full space-y-2">
+                    <DatePickerInput label="Date d'expiration" value={date} onChange={(date) => setDate(date)} />
                     <Field
                       label="Catégorie"
                       value={category}
                       transformer={translate}
                       mode="edition"
                       type="select"
-                      className="w-1/2"
                       options={["cniNew", "cniOld", "passport"].map((e) => ({ value: e, label: translate(e) }))}
                       onChange={(val) => setCategory(val)}
                     />

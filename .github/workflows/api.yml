@@ -37,7 +37,7 @@ jobs:
           node-version: 18.x
 
       - name: Start MongoDB 4.0
-        uses: supercharge/mongodb-github-action@1.7.0
+        uses: supercharge/mongodb-github-action@v1.10.0
         with:
           mongodb-version: "4.0"
 
@@ -118,15 +118,3 @@ jobs:
         env:
           CLEVER_CLOUD_GIT_REMOTE_STAGING: ${{ secrets.CLEVER_CLOUD_GIT_REMOTE_API_STAGING }}
           CLEVER_CLOUD_GIT_REMOTE_PROD: ${{ secrets.CLEVER_CLOUD_GIT_REMOTE_API_PROD }}
-
-      - name: Notification on failure
-        if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@master
-        env:
-          SLACK_TITLE: Failed to deploy api
-
-      - name: Notification on success
-        if: ${{ success() }}
-        uses: rtCamp/action-slack-notify@master
-        env:
-          SLACK_TITLE: api deployed

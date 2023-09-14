@@ -126,7 +126,7 @@ const JVA_MISSION_DOMAINS = {
   sante: "santé",
   "benevolat-competences": "bénévolat/compétences",
   "prevention-protection": "prévention/protection",
-}
+};
 
 const YOUNG_SITUATIONS = {
   GENERAL_SCHOOL: "GENERAL_SCHOOL",
@@ -555,7 +555,7 @@ const PHASE1_YOUNG_ACCESS_LIMIT = {
   "Avril 2023 - B": new Date(2023, 1, 28), // before 28 fevrier 2023 morning
   "Juin 2023": new Date(2023, 3, 19), // before 19 avril 2023 morning
   "Juillet 2023": new Date(2023, 4, 11), // before 11 mai 2023 morning
-  "Octobre 2023 - NC": new Date(2023, 9, 1), // before 1 september 2023 morning  @todo: A modifier quand on connaitra la date
+  "Octobre 2023 - NC": new Date(2023, 8, 21), // before 21 september 2023 morning  @todo: A modifier quand on connaitra la date
 };
 
 const CONSENTMENT_TEXTS = {
@@ -634,7 +634,7 @@ const MINISTRES = [
       chargée de la Jeunesse et du Service national universel",
     ],
     template: "certificates/certificateTemplate2023-08-18.png",
-  }
+  },
 ];
 
 const FILE_KEYS = [

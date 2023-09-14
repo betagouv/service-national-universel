@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import * as FileSaver from "file-saver";
 import { ROLES, sessions2023, translate } from "snu-lib";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 
 import { Title } from "../plan-transport/components/commons";
 import Select from "../plan-transport/components/Select";
@@ -63,7 +63,7 @@ const DSNJExport = () => {
   };
 
   const updateExportDate = (key) => async (date) => {
-    const { ok, code, data: updatedCohort } = await api.put(`/cohort/${cohortId}/export/${key}`, { date: dayjs(date).locale("fr").format("YYYY-MM-DD") });
+    const { ok, code, data: updatedCohort } = await api.put(`/cohort/${cohortId}/export/${key}`, { date: dayjs(date).format("YYYY-MM-DD") });
     if (!ok) return toastr.error("Une erreur est survenue lors de l'enregistrement de la date d'export", translate(code));
     const updatedCohorts = cohorts.map((currentCohort) => {
       if (currentCohort.id === updatedCohort.snuId) {

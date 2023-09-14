@@ -16,10 +16,11 @@ export default function history({ young, onChange }) {
   useEffect(() => {
     const getContract = async () => {
       if (!young) return;
-      let { ok, data, code } = await api.get(`/application/${applicationId}/contract`);
+      let { ok, data } = await api.get(`/application/${applicationId}/contract`);
       if (!ok) {
-        capture(code);
-        return toastr.error("Oups, une erreur est survenue", code);
+        return;
+        // capture(code);
+        // return toastr.error("Oups, une erreur est survenue", code);
       }
 
       setContract(data);

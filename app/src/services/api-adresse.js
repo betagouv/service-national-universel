@@ -23,45 +23,25 @@ const apiAdress = async (query, filters = {}, options = {}) => {
     });
     return await res.json();
   } catch (e) {
-    capture(e, { extra: { url: url } });
+    if (e.name !== "AbortError") capture(e, { extra: { url: url } });
   }
 };
 
-const putLocation = async (city, zip) => {
-  try {
-    if (!city && !zip) return;
-    // try with municipality = city + zip
-    const resMunicipality = await apiAdress(city, { postcode: zip, type: "municipality" });
-    if (resMunicipality?.features?.length > 0) {
-      return {
-        lon: resMunicipality.features[0].geometry.coordinates[0],
-        lat: resMunicipality.features[0].geometry.coordinates[1],
-      };
-    }
-    // try with locality = city + zip
-    const resLocality = await apiAdress(city, { postcode: zip, type: "locality" });
-    if (resLocality?.features?.length > 0) {
-      return {
-        lon: resLocality.features[0].geometry.coordinates[0],
-        lat: resLocality.features[0].geometry.coordinates[1],
-      };
-    }
-    // try with postcode = zip
-    const resPostcode = await apiAdress(city || zip, { postcode: zip });
-    if (resPostcode?.features?.length > 0) {
-      return {
-        lon: resPostcode.features[0].geometry.coordinates[0],
-        lat: resPostcode.features[0].geometry.coordinates[1],
-      };
-    }
-    return {
-      lon: 2.352222,
-      lat: 48.856613,
-    };
-  } catch (e) {
-    console.log("Erreur in putLocation", e);
-    capture(e);
+const putLocation = async (query, postcode, signal) => {
+  if (!postcode) {
+    capture(new Error("No postcode"), { extra: { query: query } });
+    return null;
   }
+  let res = await apiAdress(query, { postcode }, { signal });
+  if (res?.features?.length) {
+    return { lat: res?.features[0]?.geometry?.coordinates[1], lon: res?.features[0]?.geometry?.coordinates[0] };
+  }
+  // if no result, try with zip code only
+  res = await apiAdress(postcode, { postcode }, { signal });
+  if (res?.features?.length) {
+    return { lat: res?.features[0]?.geometry?.coordinates[1], lon: res?.features[0]?.geometry?.coordinates[0] };
+  }
+  return null;
 };
 
 const getSuggestions = async (address, city, zip) => {

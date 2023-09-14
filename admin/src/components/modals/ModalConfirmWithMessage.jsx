@@ -35,14 +35,13 @@ export default function ModalConfirmWithMessage({
           placeholder={placeholder}
           onChange={(e) => {
             const value = e.target.value;
-            var re = new RegExp(/^((?!(0))[0-9]{1,2})$/);
+            var re = new RegExp(/^([0-9]{1,2})$/);
             if (re.test(value) || !value) {
               setMessageTextArea(e.target.value);
             }
           }}
           value={messageTextArea}
           type="number"
-          min={1}
           max={99}
         />
       );

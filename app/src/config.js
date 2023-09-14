@@ -3,6 +3,7 @@ const environment = import.meta.env.MODE;
 let apiURL = "http://localhost:8080";
 let adminURL = "http://localhost:8082";
 let appURL = "http://localhost:8081";
+
 // knowledgeBase URL
 let supportURL = "http://localhost:8084";
 let maintenance = false;

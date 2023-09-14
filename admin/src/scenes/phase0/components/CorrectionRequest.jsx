@@ -2,7 +2,7 @@ import { MiniTitle } from "./commons";
 import Bin from "../../../assets/Bin";
 import React, { useEffect, useState } from "react";
 import ChevronDown from "../../../assets/icons/ChevronDown";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 
 export default function CorrectionRequest({ name, label, correctionRequest, onChangeRequest, reasons, messagePlaceholder }) {
   const [requestText, setRequestText] = useState("");
@@ -14,11 +14,7 @@ export default function CorrectionRequest({ name, label, correctionRequest, onCh
     if (correctionRequest ? correctionRequest.status !== "CANCELED" : false) {
       setRequestText(correctionRequest.message);
       setRequestReason(correctionRequest.reason && correctionRequest.reason !== "" ? correctionRequest.reason : "");
-      setLastDate(
-        dayjs(correctionRequest.remindedAt ? correctionRequest.remindedAt : correctionRequest.sentAt)
-          .locale("fr")
-          .format("DD/MM/YYYY"),
-      );
+      setLastDate(dayjs(correctionRequest.remindedAt ? correctionRequest.remindedAt : correctionRequest.sentAt).format("DD/MM/YYYY"));
     } else {
       setRequestText("");
       setRequestReason("");

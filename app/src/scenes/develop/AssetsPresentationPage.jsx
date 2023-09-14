@@ -24,7 +24,6 @@ import Editiconsvg_2 from "../../assets/editIcon.svg";
 import Externallinksvg_2 from "../../assets/external-link.svg";
 import Eyeslashsvg_2 from "../../assets/eye-slash.svg";
 import Eyesvg_2 from "../../assets/eye.svg";
-import Filesvg_2 from "../../assets/file.svg";
 import Frpng_2 from "../../assets/fr.png";
 import Hero2png_2 from "../../assets/hero-2.png";
 import Herobannerpng_2 from "../../assets/hero-banner.png";
@@ -223,10 +222,6 @@ export default function AssetsPresentationPage() {
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="eye.svg">
             <img src={Eyesvg_2} alt="eye.svg" crossOrigin="anonymous" className="" />
             <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">eye.svg</div>
-          </div>
-          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="file.svg">
-            <img src={Filesvg_2} alt="file.svg" crossOrigin="anonymous" className="" />
-            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">file.svg</div>
           </div>
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="fr.png">
             <img src={Frpng_2} alt="fr.png" crossOrigin="anonymous" className="" />

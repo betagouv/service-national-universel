@@ -23,18 +23,8 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   const [top5Article, setTop5Article] = useState([]);
   const topArticles = (item?.children?.filter((c) => c.type === "article") || []).sort((a, b) => b.read - a.read);
   const [searchOpen, setSearchOpen] = useState(false);
-
   const scrollRef = useRef(null);
 
-  // const articleFromSection = [];
-  // sections.map(({ children }) => {
-  //   for (const index in children) {
-  //     if (children[index].type === "article") {
-  //       articleFromSection.push(children[index]);
-  //     }
-  //   }
-  // });
-  // const Top5Articles = articleFromSection.sort((a, b) => b.read - a.read);
 
   useEffect(() => {
     const fetchTop5 = async () => {
@@ -168,7 +158,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
         </div>
       </div>
       <div className="mx-auto mt-[-50px] flex w-full max-w-[730px] flex-col items-center justify-center px-4">
-        {environment !== "production" && articles.length > 5 && item.parents.length > 0 && (
+        {articles.length >= 5 && !item.parents[1] && (
           <>
             <div className="px-auto mt-6 flex w-full max-w-[730px] flex-col rounded-lg bg-[#E3E3FB] pb-4 pt-2 shadow-md md:px-2">
               <div className="ml-2 flex cursor-pointer flex-row items-center justify-between md:ml-[0px]">

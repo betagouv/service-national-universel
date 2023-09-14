@@ -2,7 +2,7 @@ import { Transition, Popover } from "@headlessui/react";
 import React, { Fragment, useEffect, useState } from "react";
 import DatePicker from "../../../../../../components/ui/forms/DatePicker";
 import { HiChevronDown } from "react-icons/hi";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 
 export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNotesPhase }) {
   const [selectedPeriod, setSelectedPeriod] = React.useState("30"); //15, 30, 7, lastmonth, custom
@@ -199,7 +199,7 @@ const DatePickerPopOver = ({ selectedPeriod, setSelectedPeriod, dateRange, setDa
         />
         {range?.from && range?.to ? (
           <span className="text-left text-sm font-bold leading-5 text-gray-700">
-            Du {dayjs(range?.from).locale("fr").format("DD/MM/YYYY")} au {dayjs(range?.to).locale("fr").format("DD/MM/YYYY")}
+            Du {dayjs(range?.from).format("DD/MM/YYYY")} au {dayjs(range?.to).format("DD/MM/YYYY")}
           </span>
         ) : (
           <span className="text-sm font-normal leading-5 text-gray-700">Une date spécifique</span>

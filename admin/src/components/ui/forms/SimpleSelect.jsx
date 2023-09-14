@@ -63,10 +63,6 @@ export default function SimpleSelect({ value, transformer, options, onChange, fi
     onChange && onChange(opt);
   }
 
-  function changeFilter(e) {
-    setFilter(e.target.value);
-  }
-
   return (
     <div ref={selectOptionsRef}>
       <div className={`flex cursor-pointer items-center justify-between p-[5px] ${showBackgroundColor && "bg-gray-50"}`} onClick={toggleSelectOptions}>
@@ -75,7 +71,7 @@ export default function SimpleSelect({ value, transformer, options, onChange, fi
             type="text"
             className="w-[100%] bg-[transparent] text-[14px] font-normal leading-[20px] text-[#1F2937]"
             value={filter}
-            onChange={changeFilter}
+            onChange={(e) => setFilter(e.target.value)}
             onFocus={() => setInputHasFocus(true)}
             onBlur={() => setInputHasFocus(false)}
           />

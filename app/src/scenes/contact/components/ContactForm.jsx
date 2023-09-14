@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
@@ -7,7 +7,7 @@ import { capture } from "@/sentry";
 import { articleSummaries, questions, categories } from "../contact.utils";
 
 import Button from "@/components/dsfr/ui/buttons/Button";
-import FileImport from "@/components/dsfr/forms/FileImport";
+import FileUpload, { useFileUpload } from "@/components/FileUpload";
 import { HiArrowRight } from "react-icons/hi";
 import QuestionBubble from "@/assets/icons/QuestionBubbleReimport";
 import Select from "@/components/dsfr/forms/Select";
@@ -17,6 +17,7 @@ import Solutions from "./Solutions";
 
 export default function ContactForm() {
   const history = useHistory();
+  const { files, addFiles, deleteFile, error } = useFileUpload();
 
   // Form state
   const [showForm, setShowForm] = useState(false);
@@ -27,11 +28,16 @@ export default function ContactForm() {
   const [category, setCategory] = useState(null);
   const [question, setQuestion] = useState(null);
   const [message, setMessage] = useState("");
-  const [files, setFiles] = useState([]);
 
   // Derived state
   const questionOptions = questions.filter((e) => e.category === category && e.roles.includes("young"));
   const articles = articleSummaries.filter((e) => questionOptions.find((e) => e.value === question)?.articles?.includes(e.slug));
+
+  useEffect(() => {
+    if (error) {
+      toastr.error(error, "");
+    }
+  }, [error]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,7 +51,7 @@ export default function ContactForm() {
           const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
           return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(translationKey), { timeOut: 5000 });
         }
-        uploadedFiles = filesResponse.uploadFiles;
+        uploadedFiles = filesResponse.data;
       }
 
       const response = await API.post("/zammood/ticket", {
@@ -113,8 +119,7 @@ export default function ContactForm() {
       {question && (articles.length === 0 || showForm) && (
         <form onSubmit={handleSubmit}>
           <Textarea label="Votre message" value={message} onChange={(e) => setMessage(e.target.value)} />
-          <p>Ajouter un fichier</p>
-          <FileImport id="file" file={files[0]} setFile={(file) => setFiles([file])} />
+          <FileUpload disabled={loading} files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
           <hr />
           <Button type="submit" className="my-8 ml-auto" disabled={!message || loading}>
             Envoyer

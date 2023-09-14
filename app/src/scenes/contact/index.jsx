@@ -1,17 +1,18 @@
 import React from "react";
 import { useSelector } from "react-redux";
+import useDocumentTitle from "@/hooks/useDocumentTitle";
+
+import ContactForm from "./components/ContactForm";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import ContactForm from "./components/ContactForm";
 import PublicContactForm from "./components/PublicContactForm";
-import { environment } from "@/config";
-import { Redirect } from "react-router-dom";
 
 export default function Contact() {
+  useDocumentTitle("Formulaire de contact");
   const young = useSelector((state) => state.Auth.young);
+
   // TODO: fetch questions and articles from API
 
-  if (environment === "production") return <Redirect to="/public-besoin-d-aide" />;
   return (
     <DSFRLayout title="Formulaire de contact">
       <DSFRContainer title="Je n'ai pas trouvé de réponse à ma question">

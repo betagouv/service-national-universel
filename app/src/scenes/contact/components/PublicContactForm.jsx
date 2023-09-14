@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { department2region, departmentList, translate } from "snu-lib";
@@ -7,7 +7,7 @@ import { capture } from "@/sentry";
 import { articleSummaries, questions, categories } from "../contact.utils";
 
 import Button from "@/components/dsfr/ui/buttons/Button";
-import FileImport from "@/components/dsfr/forms/FileImport";
+import FileUpload, { useFileUpload } from "@/components/FileUpload";
 import Input from "@/components/dsfr/forms/input";
 import SearchableSelect from "@/components/dsfr/forms/SearchableSelect";
 import Select from "@/components/dsfr/forms/Select";
@@ -16,12 +16,14 @@ import Textarea from "@/components/dsfr/forms/Textarea";
 
 export default function PublicContactForm() {
   const history = useHistory();
+  const { files, addFiles, deleteFile, error } = useFileUpload();
 
   // Form state
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Form data
+  const [role, setRole] = useState(null);
   const [category, setCategory] = useState(null);
   const [question, setQuestion] = useState(null);
   const [firstName, setFirstName] = useState("");
@@ -29,13 +31,18 @@ export default function PublicContactForm() {
   const [department, setDepartment] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [files, setFiles] = useState([]);
 
   // Derived state
-  const disabled = !message || !firstName || !lastName || !email || !department || !category || !question || loading;
+  const disabled = !message || !firstName || !lastName || !email || !department || !category || !question || !role || loading;
   const departmentOptions = departmentList.map((d) => ({ value: d, label: d }))?.sort((a, b) => a.label.localeCompare(b.label));
   const questionOptions = questions.filter((e) => e.category === category && e.roles.includes("public"));
   const articles = articleSummaries.filter((e) => questionOptions.find((e) => e.value === question)?.articles?.includes(e.slug));
+
+  useEffect(() => {
+    if (error) {
+      toastr.error(error, "");
+    }
+  }, [error]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,7 +56,7 @@ export default function PublicContactForm() {
           const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
           return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(translationKey), { timeOut: 5000 });
         }
-        uploadedFiles = filesResponse.uploadFiles;
+        uploadedFiles = filesResponse.data;
       }
 
       const response = await API.post("/zammood/ticket/form", {
@@ -59,10 +66,10 @@ export default function PublicContactForm() {
         lastName,
         email,
         department,
+        role,
         subjectStep1: category,
         subjectStep2: question,
         region: department2region[department],
-        role: "young exterior",
         fromPage: new URLSearchParams(window.location.search).get("from "),
         files: uploadedFiles,
       });
@@ -87,13 +94,23 @@ export default function PublicContactForm() {
 
       {question && (articles.length === 0 || showForm) && (
         <form onSubmit={handleSubmit} disabled={disabled}>
+          <Select
+            label="Je suis"
+            options={[
+              { label: "Un volontaire", value: "young" },
+              { label: "Un représentant légal", value: "parent" },
+            ]}
+            value={role}
+            onChange={setRole}
+          />
+
           <label>Nom du volontaire</label>
           <Input value={firstName} onChange={setFirstName} required />
 
           <label className="mt-8">Prénom du volontaire</label>
           <Input value={lastName} onChange={setLastName} required />
 
-          <label className="mt-8">Email du volontaire</label>
+          <label className="mt-8">E-mail du volontaire</label>
           <Input label="Votre email" type="email" value={email} onChange={setEmail} required />
 
           <br />
@@ -101,8 +118,7 @@ export default function PublicContactForm() {
 
           <Textarea label="Votre message" value={message} onChange={(e) => setMessage(e.target.value)} />
 
-          <p>Ajouter un fichier</p>
-          <FileImport id="file" file={files[0]} setFile={(file) => setFiles([file])} />
+          <FileUpload disabled={loading} files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
 
           <hr />
           <Button type="submit" className="my-8 ml-auto" disabled={disabled}>

@@ -39,7 +39,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   try {
     const { user, body } = req;
     // Configuration
-    const searchFields = ["name", "city", "zip", "siret", "networkName"];
+    const searchFields = ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation", "siret", "networkName"];
     const filterFields = [
       "department.keyword",
       "region.keyword",
@@ -49,6 +49,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "networkName.keyword",
       "isMilitaryPreparation.keyword",
       "structurePubliqueEtatType.keyword",
+      "isNetwork.keyword",
     ];
     const sortFields = [];
     // Authorization

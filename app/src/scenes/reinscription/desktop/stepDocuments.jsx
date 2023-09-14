@@ -57,7 +57,7 @@ export default function StepDocuments() {
       onSubmit={onSubmit}
       disabled={young?.files.cniFiles?.length === 0}
       childrenContinueButton={"Me réinscrire au SNU"}
-      questionMarckLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
+      supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       {docs.map((doc) => (
         <div key={doc.category} className="my-4 cursor-pointer hover:bg-gray-50" onClick={() => history.push(`televersement/${doc.category}`)}>

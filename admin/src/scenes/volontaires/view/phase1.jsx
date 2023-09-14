@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import { AiOutlineExclamationCircle } from "react-icons/ai";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import Refresh from "../../../assets/icons/Refresh";
@@ -190,11 +190,11 @@ export default function Phase1(props) {
                         />
                         <Field
                           title="Heure&nbsp;de&nbsp;départ"
-                          value={dayjs(meetingPoint?.bus.departuredDate).locale("fr").format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.departureHour}
+                          value={dayjs(meetingPoint?.bus.departuredDate).format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.departureHour}
                         />
                         <Field
                           title="Heure&nbsp;de&nbsp;retour"
-                          value={dayjs(meetingPoint?.bus.returnDate).locale("fr").format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.returnHour}
+                          value={dayjs(meetingPoint?.bus.returnDate).format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.returnHour}
                         />
                         <Field title="N˚&nbsp;transport" value={meetingPoint?.bus.busId} externalLink={`${adminURL}/ligne-de-bus/${meetingPoint?.bus._id}`} />
                       </div>
