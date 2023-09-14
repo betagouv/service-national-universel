@@ -16,17 +16,16 @@ import {
   YOUNG_STATUS_PHASE2,
   YOUNG_STATUS_PHASE3,
 } from "snu-lib";
-import Bin from "../../../assets/Bin";
-import ChevronDown from "../../../assets/icons/ChevronDown";
-import History from "../../../assets/icons/History";
-import TakePlace from "../../../assets/icons/TakePlace";
-import Warning from "../../../assets/icons/Warning";
-import Badge from "../../../components/Badge";
-import TabList from "../../../components/views/TabList";
-import Title from "../../../components/views/Title";
-import { appURL } from "../../../config";
-import api from "../../../services/api";
-import plausibleEvent from "../../../services/plausible";
+import Bin from "@/assets/Bin";
+import ChevronDown from "@/assets/icons/ChevronDown";
+import History from "@/assets/icons/History";
+import Warning from "@/assets/icons/Warning";
+import Badge from "@/components/Badge";
+import TabList from "@/components/views/TabList";
+import Title from "@/components/views/Title";
+import { appURL } from "@/config";
+import api from "@/services/api";
+import plausibleEvent from "@/services/plausible";
 import { Button } from "./Buttons";
 import { ChangeCohortPen } from "./ChangeCohortPen";
 import ConfirmationModal from "./ConfirmationModal";
@@ -36,8 +35,8 @@ import PhaseStatusSelector from "./PhaseStatusSelector";
 import NoteIcon from "../../volontaires/view/notes/components/NoteIcon";
 import { PHASE_1, PHASE_2, PHASE_3, PHASE_INSCRIPTION } from "../../volontaires/view/notes/utils";
 import NoteDisplayModal from "../../volontaires/view/notes/components/NoteDisplayModal";
-import ModalConfirmDeleteYoung from "../../../components/modals/young/ModalConfirmDeleteYoung";
-import PanelActionButton from "../../../components/buttons/PanelActionButton";
+import ModalConfirmDeleteYoung from "@/components/modals/young/ModalConfirmDeleteYoung";
+import PanelActionButton from "@/components/buttons/PanelActionButton";
 import SelectAction from "@/components/SelectAction";
 import downloadPDF from "@/utils/download-pdf";
 import ModalConfirm from "@/components/modals/ModalConfirm";
