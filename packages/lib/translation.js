@@ -297,7 +297,7 @@ const translate = (value) => {
     case "EMAIL_OR_PASSWORD_INVALID":
       return "Email ou mot de passe invalide";
     case "PASSWORD_INVALID":
-      return "Mot de passe invalide";
+      return "Le mot de passe est incorrect";
     case "EMAIL_INVALID":
       return "Email invalide";
     case "EMAIL_ALREADY_USED":

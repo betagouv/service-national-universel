@@ -22,15 +22,21 @@ const changeEmailSteps = {
 };
 
 const ChangeAddressModal = ({ onClose, isOpen, young }) => {
-  const [step, setStep] = useState(changeEmailSteps.CONFIRMATION);
+  const [step, setStep] = useState(changeEmailSteps.ENTER_EMAIL);
+  const [password, setPassword] = useState("");
   const onCancel = () => {
     onClose();
+  };
+
+  const onPasswordSuccess = (validatedPassword) => {
+    setPassword(validatedPassword);
+    setStep(changeEmailSteps.ENTER_EMAIL);
   };
 
   return (
     <Modal isOpen={isOpen} onClose={() => {}} className="w-full bg-white p-4 md:w-[520px] md:p-6">
       <>
-        {step === changeEmailSteps.ENTER_PASSWORD && <PasswordModalContent onCancel={onClose} onConfirm={() => setStep(changeEmailSteps.ENTER_EMAIL)} />}
+        {step === changeEmailSteps.ENTER_PASSWORD && <PasswordModalContent onCancel={onClose} onSuccess={onPasswordSuccess} />}
         {step === changeEmailSteps.ENTER_EMAIL && <EmailModalContent onCancel={onClose} onConfirm={() => setStep(changeEmailSteps.ENTER_CODE)} />}
         {step === changeEmailSteps.ENTER_CODE && <ActivationCodeModalContent onCancel={onClose} onConfirm={() => setStep(changeEmailSteps.ENTER_CODE)} />}
         {step === changeEmailSteps.DID_NOT_RECEIVE_CODE && <DidNotReceiveActivationCodeModalContent onCancel={onClose} onConfirm={() => setStep(changeEmailSteps.ENTER_CODE)} />}

@@ -83,6 +83,7 @@ router.get("/signin_token", passport.authenticate("young", { session: false, fai
 router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
 router.post("/forgot_password_reset", async (req, res) => YoungAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => YoungAuth.resetPassword(req, res));
+router.post("/check_password", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => YoungAuth.checkPassword(req, res));
 
 router.post("/signup_verify", async (req, res) => {
   try {

@@ -421,6 +421,28 @@ class Auth {
     }
   }
 
+  async checkPassword(req, res) {
+    const { error, value } = Joi.object({
+      password: Joi.string().required(),
+    })
+      .unknown()
+      .validate(req.body);
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    const { password } = value;
+
+    try {
+      const match = await req.user.comparePassword(password);
+      if (!match) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
+
+      return res.status(200).send({ ok: true });
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  }
+
   async resetPassword(req, res) {
     const { error, value } = Joi.object({
       password: Joi.string().required(),
