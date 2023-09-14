@@ -114,12 +114,6 @@ export default function Create(props) {
     createMission();
   };
 
-  useEffect(() => {
-    if (values?.period?.length === 0 || (values?.period?.length === 1 && values?.period[0] === "WHENEVER")) {
-      setValues({ ...values, subPeriod: [] });
-    }
-  }, [values?.period]);
-
   const createMission = async () => {
     try {
       // build object from array of keys
@@ -579,7 +573,13 @@ export default function Create(props) {
                     isMulti
                     options={Object.values(PERIOD).map((el) => ({ value: el, label: translate(el) }))}
                     placeholder={"Sélectionnez une ou plusieurs périodes"}
-                    onChange={(e) => setValues({ ...values, period: e })}
+                    onChange={(e) => {
+                      if (e.length === 0 || (e.length === 1 && e[0] === "WHENEVER")) {
+                        setValues({ ...values, period: e, subPeriod: [] });
+                      } else {
+                        setValues({ ...values, period: e });
+                      }
+                    }}
                     value={values.period}
                   />
                   <div className="mt-4">
