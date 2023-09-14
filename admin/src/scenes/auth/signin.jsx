@@ -8,7 +8,6 @@ import { maintenance } from "../../config";
 import { environment } from "../../config";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
@@ -121,12 +120,12 @@ export default function Signin() {
                         Mot de passe perdu ?
                       </Link>
                       <div className="w-full flex justify-end">
-                        <LoadingButton
-                          className="block cursor-pointer !rounded-xl border-0  bg-brand-purple py-2 px-5 text-base font-medium text-white transition-colors"
+                        <button
                           loading={isSubmitting}
-                          type="submit">
+                          type="submit"
+                          className="block cursor-pointer !rounded-xl border-0 bg-[#2563EB] py-3 px-4 mt-2 text-base font-medium text-white transition-colors">
                           Se connecter
-                        </LoadingButton>
+                        </button>
                       </div>
                     </form>
                   );
