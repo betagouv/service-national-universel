@@ -3,9 +3,11 @@ import { HiSortAscending } from "react-icons/hi";
 
 const SortOption = ({ sortOptions, paramData, setParamData, selectedFilters }) => {
   const [isSearching, setIsSearching] = React.useState(false);
+  const [lastChoice, setLastChoice] = React.useState(null);
   const handleClick = (value) => {
     const param = sortOptions.find((item) => item.label === value);
     setParamData((old) => ({ ...old, sort: param }));
+    setLastChoice(param);
   };
   React.useEffect(() => {
     if (!paramData?.sort) setParamData((old) => ({ ...old, sort: sortOptions[0] }));
@@ -15,7 +17,7 @@ const SortOption = ({ sortOptions, paramData, setParamData, selectedFilters }) =
   React.useEffect(() => {
     if (selectedFilters?.searchbar?.filter?.length > 0 && selectedFilters.searchbar.filter[0] !== "") setIsSearching(true);
     else {
-      setParamData((old) => ({ ...old, sort: sortOptions[0] }));
+      setParamData((old) => ({ ...old, sort: lastChoice }));
       setIsSearching(false);
     }
   }, [selectedFilters]);
