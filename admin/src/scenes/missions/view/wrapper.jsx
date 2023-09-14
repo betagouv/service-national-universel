@@ -14,6 +14,7 @@ import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import Bin from "../../../assets/Bin";
 import Duplicate from "../../../assets/Duplicate";
 import Clock from "../../../assets/Clock";
+import plausibleEvent from "@/services/plausible";
 
 export default function Wrapper({ mission, tab, children, getMission }) {
   const history = useHistory();
@@ -44,6 +45,7 @@ export default function Wrapper({ mission, tab, children, getMission }) {
   };
 
   const onConfirmDuplicate = async () => {
+    plausibleEvent(`Admin/Dupliquer une mission`);
     return history.push(`/mission/create/${mission.structureId}?duplicate=${mission._id}`);
   };
 

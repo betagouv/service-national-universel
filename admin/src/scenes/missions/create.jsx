@@ -49,7 +49,7 @@ export default function Create(props) {
     //init structure
     const { ok, data, code } = await api.get(`/structure/${structureId}`);
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
-    setValues({ ...values, structureName: data.name, structureId: data._id.toString });
+    setValues({ ...values, structureName: data.name, structureId: data._id.toString() });
 
     //init list tutor
     const { responses } = await api.post("/elasticsearch/referent/structure/" + structureId);
@@ -111,7 +111,6 @@ export default function Create(props) {
       if (values.name && values.tutorId && values.structureId) setModalConfirmation(true);
       return setLoading(false);
     }
-
     createMission();
   };
 
@@ -125,7 +124,8 @@ export default function Create(props) {
     try {
       // build object from array of keys
       values.addressVerified = values?.addressVerified?.toString();
-      if (errors) values.status = "DRAFT";
+      console.log(Object.keys(errors).length > 0);
+      if (Object.keys(errors).length > 0) values.status = "DRAFT";
       else values.status = "WAITING_VALIDATION";
       const { ok, code, data } = await api.post(`/mission`, values);
       if (!ok) {
