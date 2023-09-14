@@ -101,7 +101,7 @@ export default function Create(props) {
     //check duration only if specified
     if (values.duration && isNaN(values.duration)) error.duration = "Le format est incorrect";
     if (!error.tutorId && !referents.find((ref) => ref.value === values.tutorId)) error.tutorId = "Erreur";
-    if (values.startAt && values.startAt < new Date() && ![ROLES.ADMIN].includes(user.role)) error.startAt = "La date est incorrect";
+    if (values.startAt && values.startAt < new Date() && ![ROLES.ADMIN].includes(user.role)) error.startAt = "La date est incorrecte";
     if (values.startAt > values.endAt) error.endAt = "La date de fin est incorrect";
     if ((values.startAt && values.endAt && values.placesTotal === "") || isNaN(values.placesTotal) || values.placesTotal < 0)
       error.placesTotal = "Le nombre de places est incorrect";
