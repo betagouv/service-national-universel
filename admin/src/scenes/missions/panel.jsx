@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import { Link, useHistory } from "react-router-dom";
+import { React, useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
+import { Link, useHistory } from "react-router-dom";
+import styled from "styled-components";
 
-import { translate, formatStringDateTimezoneUTC, MISSION_STATUS_COLORS, MISSION_STATUS } from "../../utils";
-import api from "../../services/api";
-import PanelActionButton from "../../components/buttons/PanelActionButton";
-import Panel, { Info, Details } from "../../components/Panel";
-import Badge from "../../components/Badge";
-import ModalConfirm from "../../components/modals/ModalConfirm";
-import { ROLES } from "snu-lib/roles";
+import plausibleEvent from "@/services/plausible";
 import { useSelector } from "react-redux";
+import { ROLES } from "snu-lib/roles";
+import Badge from "../../components/Badge";
+import Panel, { Details, Info } from "../../components/Panel";
+import PanelActionButton from "../../components/buttons/PanelActionButton";
+import ModalConfirm from "../../components/modals/ModalConfirm";
+import api from "../../services/api";
+import { MISSION_STATUS_COLORS, formatStringDateTimezoneUTC, translate } from "../../utils";
 
 export default function PanelView({ onChange, mission }) {
   const [tutor, setTutor] = useState();
@@ -65,6 +66,7 @@ export default function PanelView({ onChange, mission }) {
   };
 
   const onConfirmDuplicate = async () => {
+    plausibleEvent(`Admin/Dupliquer une mission`);
     return history.push(`/mission/create/${mission.structureId}?duplicate=${mission._id}`);
   };
 
