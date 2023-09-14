@@ -18,6 +18,7 @@ export default function Signin() {
   const [error, setError] = React.useState({});
   const history = useHistory();
   const [token2FA, setToken2FA] = React.useState("");
+  const [rememberMe, setRememberMe] = React.useState(false);
 
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
@@ -30,12 +31,12 @@ export default function Signin() {
     if (young) history.push("/" + (redirect || ""));
   }, [young]);
 
-  const onSubmit = async ({ email, token }) => {
+  const onSubmit = async ({ email, token, rememberMe }) => {
     if (loading || disabled) return;
     setLoading(true);
     try {
       setLoading(true);
-      const response = await api.post(`/young/signin-2fa`, { email, token_2fa: token.trim() });
+      const response = await api.post(`/young/signin-2fa`, { email, token_2fa: token.trim(), rememberMe });
       setLoading(false);
       if (response.token) api.setToken(response.token);
       if (response.user) {
@@ -79,6 +80,22 @@ export default function Signin() {
           </label>
           <label className="text-[14px] text-[#3A3A3A] mb-2">Saisir le code reçu par email</label>
           <Input placeholder="123abc" value={token2FA} onChange={(e) => setToken2FA(e)} />
+        </div>
+        <div>
+          <label htmlFor="rememberMe" className="text-sm text-brand-black/80 mt-2">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              name="rememberMe"
+              className="mr-2 cursor-pointer"
+              checked={rememberMe}
+              onChange={() => {
+                setRememberMe(!rememberMe);
+              }}
+            />
+            <strong>Faire confiance à ce navigateur :</strong> la double authentification vous sera demandée à nouveau dans un délai d’un mois. Ne pas cocher cette case si vous
+            utilisez un ordinateur partagé ou public
+          </label>
         </div>
         <button className="flex w-full cursor-pointer items-center justify-center p-2 bg-[#000091] text-white" onClick={() => onSubmit({ email, token: token2FA })}>
           Connexion
