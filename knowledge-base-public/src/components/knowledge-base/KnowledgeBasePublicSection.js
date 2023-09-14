@@ -21,10 +21,9 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   const [sections, setSections] = useState(item?.children?.filter((c) => c.type === "section") || []);
   const [articles, setArticles] = useState(item?.children?.filter((c) => c.type === "article") || []);
   const [top5Article, setTop5Article] = useState([]);
-  const topArticles = (item?.children?.filter((c) => c.type === "article") || []).sort((a, b) => b.read - a.read);
+  // const topArticles = (item?.children?.filter((c) => c.type === "article") || []).sort((a, b) => b.read - a.read);
   const [searchOpen, setSearchOpen] = useState(false);
   const scrollRef = useRef(null);
-
 
   useEffect(() => {
     const fetchTop5 = async () => {
@@ -52,6 +51,26 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
     fetchTop5();
   }, [item]);
 
+  const getAllArticles = (children) => {
+    let articles = [];
+
+    if (!children || !Array.isArray(children)) {
+      return articles;
+    }
+
+    for (let child of children) {
+      if (child.type === "article") {
+        articles.push(child);
+      }
+      if (child.type === "section" && Array.isArray(child.children)) {
+        articles = articles.concat(getAllArticles(child.children));
+      }
+    }
+
+    return articles;
+  };
+  const topArticles = getAllArticles(item?.children).sort((a, b) => b.read - a.read);
+
   useEffect(() => {
     function handleScroll() {
       const el = scrollRef.current;
@@ -61,7 +80,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
         if (isScrollEnd) {
           el.style.borderRight = "none";
         } else {
-          el.style.borderRight = "1px solid #ccc"; // Remplacez #ccc par la couleur de votre choix
+          el.style.borderRight = "1px solid #ccc";
         }
       }
     }
@@ -175,7 +194,10 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
                       key={_id}
                       className="mx-3.5 my-2 flex min-h-[130px] min-w-[200px] flex-col justify-between rounded-lg border-[1px] border-gray-300 bg-white px-4 py-2 md:m-2 md:min-w-[30%] md:max-w-[30%] md:flex-grow"
                     >
-                      <h3 className="mb-4 text-sm font-bold leading-5 text-gray-900">{emoji}{text}</h3>
+                      <h3 className="mb-4 text-sm font-bold leading-5 text-gray-900">
+                        {emoji}
+                        {text}
+                      </h3>
                       <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
                         <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p>
                       </Link>

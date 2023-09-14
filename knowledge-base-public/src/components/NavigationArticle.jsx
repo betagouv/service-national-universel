@@ -43,17 +43,6 @@ const NavigationArticle = ({ item }) => {
     fetchSiblings();
   }, [item]);
 
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        element?.current?.scrollIntoView({ behavior: "smooth" });
-      }, 500);
-      setTimeout(() => {
-        toggleAccordion();
-      }, 1000);
-    }
-  }, [isOpen]);
-
   function toggleAccordion() {
     setActive((prevState) => !prevState);
     setHeight(active ? "0px" : `${contentSpace?.current?.scrollHeight}px`);
