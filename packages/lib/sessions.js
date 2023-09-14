@@ -93,8 +93,8 @@ const sessions2023 = [
       schoolLevels: ["NOT_SCOLARISE", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "CAP"],
       bornAfter: new Date("10/22/2005"),
       bornBefore: new Date("10/09/2008"),
-      inscriptionEndDate: new Date("2023-09-15T13:00:00.000Z"), // 15 septembre minuit heure de NC
-      instructionEndDate: new Date("2023-09-15T22:00:00.000Z"), // 15 septembre
+      inscriptionEndDate: new Date("2023-09-20T13:00:00.000Z"), // 20 septembre minuit heure de NC
+      instructionEndDate: new Date("2023-09-30T22:00:00.000Z"), // 30 septembre
     },
   },
 ];
