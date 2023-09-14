@@ -555,7 +555,15 @@ router.post("/young-having-school-in-dep-or-region/:action(_msearch|export)", pa
 
     if (req.params.action === "export") {
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+      let data = serializeYoungs(response);
+      //School
+      if (exportFields.includes("schoolId")) {
+        const schoolIds = [...new Set(data.map((item) => item.schoolId).filter(Boolean))];
+        const schools = await allRecords("schoolramses", { bool: { must: { ids: { values: schoolIds } } } });
+        data = data.map((item) => ({ ...item, school: schools?.find((e) => e._id.toString() === item.schoolId) }));
+      }
+
+      return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(response.body);

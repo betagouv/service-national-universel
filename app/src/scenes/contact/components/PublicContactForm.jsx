@@ -33,7 +33,7 @@ export default function PublicContactForm() {
   const [message, setMessage] = useState("");
 
   // Derived state
-  const disabled = !message || !firstName || !lastName || !email || !department || !category || !question || loading;
+  const disabled = !message || !firstName || !lastName || !email || !department || !category || !question || !role || loading;
   const departmentOptions = departmentList.map((d) => ({ value: d, label: d }))?.sort((a, b) => a.label.localeCompare(b.label));
   const questionOptions = questions.filter((e) => e.category === category && e.roles.includes("public"));
   const articles = articleSummaries.filter((e) => questionOptions.find((e) => e.value === question)?.articles?.includes(e.slug));

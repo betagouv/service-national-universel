@@ -806,39 +806,7 @@ export default function Settings() {
                         <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Par défaut 9e jour après le début du séjour.</p>
                       </ReactTooltip>
                     </div>
-                    {data.name === "Juillet 2023" ? (
-                      <>
-                        <NumberInput
-                          days={data.daysToValidate}
-                          label={"Nombre de jour pour validation(non Terminales)"}
-                          onChange={(e) => setData({ ...data, daysToValidate: e })}
-                        />
-                        <NumberInput
-                          days={data.daysToValidateForTerminalGrade}
-                          label={"Nombre de jour pour validation(Terminales)"}
-                          onChange={(e) => setData({ ...data, daysToValidateForTerminalGrade: e })}
-                        />
-                      </>
-                    ) : (
-                      <>
-                        <DatePickerInput
-                          mode="single"
-                          label="Volontaires (non Terminales)"
-                          value={data.validationDate}
-                          disabled={isLoading}
-                          readOnly={readOnly}
-                          onChange={(e) => setData({ ...data, validationDate: e })}
-                        />
-                        <DatePickerInput
-                          mode="single"
-                          label="Volontaires (Terminales)"
-                          disabled={isLoading}
-                          readOnly={readOnly}
-                          value={data.validationDateForTerminaleGrade}
-                          onChange={(e) => setData({ ...data, validationDateForTerminaleGrade: e })}
-                        />
-                      </>
-                    )}
+                    <NumberInput days={data.daysToValidate} label={"Nombre de jour pour validation"} onChange={(e) => setData({ ...data, daysToValidate: e })} />
                   </div>
                 </div>
               </div>

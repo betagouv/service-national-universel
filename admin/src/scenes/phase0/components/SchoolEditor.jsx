@@ -106,26 +106,12 @@ export default function SchoolEditor({ young, onChange, className, showBackgroun
   }
 
   async function loadCities() {
-    const body = {
-      query: { bool: { must: { match_all: {} }, filter: [{ term: { "country.keyword": "FRANCE" } }] } },
-      size: 0,
-      aggs: {
-        cities: { terms: { field: "city.keyword", size: ES_NO_LIMIT } },
-      },
-    };
-    const { responses } = await api.esQuery("schoolramses", body);
+    const { responses } = await api.post("/elasticsearch/schoolramses/public/search?aggsByCities=true", { filters: { country: ["FRANCE"] } });
     setCities(responses[0].aggregations ? responses[0].aggregations.cities.buckets.map((e) => e.key).sort() : []);
   }
 
   async function loadCountries() {
-    const body = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
-      size: 0,
-      aggs: {
-        countries: { terms: { field: "country.keyword", size: ES_NO_LIMIT } },
-      },
-    };
-    const { responses } = await api.esQuery("schoolramses", body);
+    const { responses } = await api.post("/elasticsearch/schoolramses/public/search?aggsByCountries=true");
     if (responses && responses.length > 0) {
       setCountries(
         responses[0].aggregations.countries.buckets
@@ -141,12 +127,7 @@ export default function SchoolEditor({ young, onChange, className, showBackgroun
     if (!young.schoolCity || young.schoolCity.length === 0) {
       setSchools([]);
     } else {
-      const body = {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "country.keyword": "FRANCE" } }] } },
-        size: ES_NO_LIMIT,
-      };
-      body.query.bool.filter.push({ term: { "city.keyword": young.schoolCity } });
-      const { responses } = await api.esQuery("schoolramses", body);
+      const { responses } = await api.post("/elasticsearch/schoolramses/public/search", { filters: { city: [young.schoolCity], country: ["FRANCE"] } });
       if (responses && responses.length > 0) {
         setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
       }
@@ -159,12 +140,7 @@ export default function SchoolEditor({ young, onChange, className, showBackgroun
     if (!young.schoolCountry || young.schoolCountry.length === 0 || young.schoolCountry === "FRANCE") {
       setSchools([]);
     } else {
-      const body = {
-        query: { bool: { must: { match_all: {} }, filter: [] } },
-        size: ES_NO_LIMIT,
-      };
-      body.query.bool.filter.push({ term: { "country.keyword": young.schoolCountry } });
-      const { responses } = await api.esQuery("schoolramses", body);
+      const { responses } = await api.post("/elasticsearch/schoolramses/public/search", { filters: { country: [young.schoolCountry] } });
       if (responses && responses.length > 0) {
         setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
       }

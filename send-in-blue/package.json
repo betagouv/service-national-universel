@@ -14,7 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@sentry/integrations": "^7.61.0",
+    "@sentry/integrations": "^7.64.0",
     "@sentry/node": "^7.61.0",
     "body-parser": "^1.20.2",
     "dotenv": "^16.3.1",

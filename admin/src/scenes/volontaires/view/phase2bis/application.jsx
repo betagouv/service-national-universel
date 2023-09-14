@@ -155,15 +155,15 @@ export default function Phase2Application({ young, onChange }) {
               {translateApplication(application.status)}
             </p>
           </div>
-          {application?.contractId && (
-            <div className="flex justify-end">
-              <button
-                className="flex items-center gap-2 rounded border-[1px] border-gray-100 bg-gray-100 py-2 px-4 hover:border-gray-300"
-                onClick={() => history.push(`/volontaire/${young._id.toString()}/phase2/application/${application._id.toString()}/historique`)}>
-                <img src={Clock} /> <div className="text-xs text-gray-800 ">Historique</div>
-              </button>
-            </div>
-          )}
+          {/* {application?.contractId && ( */}
+          <div className="flex justify-end">
+            <button
+              className="flex items-center gap-2 rounded border-[1px] border-gray-100 bg-gray-100 py-2 px-4 hover:border-gray-300"
+              onClick={() => history.push(`/volontaire/${young._id.toString()}/phase2/application/${application._id.toString()}/historique`)}>
+              <img src={Clock} /> <div className="text-xs text-gray-800 ">Historique</div>
+            </button>
+          </div>
+          {/* )} */}
         </div>
 
         <div className="space-y-16">

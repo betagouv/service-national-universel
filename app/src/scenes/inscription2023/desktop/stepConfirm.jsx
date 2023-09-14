@@ -66,12 +66,7 @@ export default function StepConfirm() {
         <div className="mx-auto my-0 basis-[60%] bg-white px-[102px] py-[60px]">
           <div className="p-4 text-[#161616]">
             {error?.text && <Error {...error} onClose={() => setError({})} />}
-            <div className="flex items-center justify-between">
-              <h1 className="mt-2 text-[32px] font-bold ">Vous y êtes presque...</h1>
-              <a href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer">
-                <QuestionMark className="cursor-pointer hover:scale-105" />
-              </a>
-            </div>
+            <h1 className="mt-2 text-[32px] font-bold ">Vous y êtes presque...</h1>
 
             <div className="mt-2 text-sm text-[#666666]">
               Vous êtes sur le point de soumettre votre dossier à l&apos;administration du SNU. Veuillez vérifier vos informations avant de valider votre demande

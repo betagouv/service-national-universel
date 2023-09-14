@@ -43,7 +43,7 @@ async function getYoungNotesPhase1(startDate, endDate, user) {
       id: "young-notes",
       value,
       label: `note${value > 1 ? "s" : ""} interne${value > 1 ? "s" : ""} déposée${value > 1 ? "s" : ""} - phase 1`,
-      icon: "other",
+      icon: "where",
     },
   ];
 }
@@ -88,7 +88,7 @@ async function getTimeScheduleAndPedagoProject(startDate, endDate, user) {
         },
       },
     },
-    size: ES_NO_LIMIT,
+    size: 0,
     track_total_hits: true,
   };
 
@@ -158,13 +158,13 @@ async function getTransportCorrectionRequests(startDate, endDate, user) {
       id: "pdt-modificationbuses-refused",
       value: refusedCount,
       label: `demande${refusedCount > 1 ? "s" : ""} de modification du plan de transport refusée${refusedCount > 1 ? "s" : ""}`,
-      icon: "action",
+      icon: "where",
     },
     {
       id: "pdt-modificationbuses-validated",
       value: validatedCount,
       label: `demande${validatedCount > 1 ? "s" : ""} de modification du plan de transport validée${validatedCount > 1 ? "s" : ""}`,
-      icon: "action",
+      icon: "where",
     },
   ];
 }

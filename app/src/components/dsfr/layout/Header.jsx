@@ -29,14 +29,14 @@ const Header = ({ title }) => {
     <>
       <Menu isOpen={isOpen} setIsOpen={setIsOpen} />
       <header className="flex h-[7rem] w-full items-center justify-between bg-white px-[1rem] py-3 shadow-[0px_16px_16px_-16px_rgba(0,0,0,0.32)] md:px-[7rem] md:shadow-none">
-        <div className="flex items-center space-x-6">
+        <Link to="/" className="flex items-center space-x-6">
           <img src={LogoFr} alt="Logo de la République française" className="w-18 h-16" />
           <img src={SNU} alt="Logo du SNU" className="w-16" />
           <div className="hidden lg:block">
             <h1 className="text-xl font-bold">Service National Universel</h1>
             <div className="text-sm">{title}</div>
           </div>
-        </div>
+        </Link>
         <div
           className="flex cursor-pointer items-start pb-10 md:hidden"
           onClick={() => {
