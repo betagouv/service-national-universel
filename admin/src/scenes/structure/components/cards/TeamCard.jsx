@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import API from "@/services/api";
 import { getInitials } from "@/utils";
-import AddUser from "@/components/drawer/icons/AddUser";
+import Plus from "@/assets/icons/Plus";
 import Card from "../Card";
 import TeamModal from "../modals/TeamModal";
 import { useHistory } from "react-router-dom";
@@ -63,7 +63,7 @@ export default function TeamCard({ structure }) {
                   );
               })}
               <div className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs text-blue-600`}>
-                <AddUser />
+                <Plus />
               </div>
             </div>
           </div>
