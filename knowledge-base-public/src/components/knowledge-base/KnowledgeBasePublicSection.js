@@ -10,7 +10,6 @@ import { useRouter } from "next/router";
 import KnowledgeBaseSearch from "./KnowledgeBaseSearch";
 import { HiSearch, HiStar } from "react-icons/hi";
 import Link from "next/link";
-import { environment } from "../../config";
 import useUser from "../../hooks/useUser";
 import API from "../../services/api";
 import { separateEmojiAndText } from "../../utils/index";
@@ -21,7 +20,6 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   const [sections, setSections] = useState(item?.children?.filter((c) => c.type === "section") || []);
   const [articles, setArticles] = useState(item?.children?.filter((c) => c.type === "article") || []);
   const [top5Article, setTop5Article] = useState([]);
-  // const topArticles = (item?.children?.filter((c) => c.type === "article") || []).sort((a, b) => b.read - a.read);
   const [searchOpen, setSearchOpen] = useState(false);
   const scrollRef = useRef(null);
 
@@ -119,9 +117,9 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
           </button>
         </div>
         <div className="flex justify-center bg-[#32257F]">
-          <div className="mx-auto mt-4 flex max-w-[70%] flex-row flex-wrap justify-center">
+          <div className="mx-auto mt-4 flex max-w-[90%] lg:max-w-[70%] flex-row flex-wrap justify-center">
             {top5Article.map(({ _id, slug, text }) => (
-              <div key={_id} className="m-1 rounded-2xl bg-blue-100 px-2 py-1 text-center">
+              <div key={_id} className="m-1 w-full lg:w-auto rounded-2xl bg-blue-100 px-2 py-1 text-center">
                 <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${text}`} alt={`Lire l'article ${text}`}>
                   <h3 className="text-sm font-medium leading-5 text-blue-800">{text}</h3>
                 </Link>
