@@ -4,7 +4,7 @@ const { capture } = require("../../sentry");
 const ES_NO_LIMIT = 10000;
 
 function searchSubQuery([value], fields) {
-  const words = value?.split(" ");
+  const words = value?.trim().split(" ");
 
   const shouldClauses = words.map((word, index) => {
     return [
