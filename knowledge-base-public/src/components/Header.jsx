@@ -21,7 +21,7 @@ export default function Header({ home }) {
           universel
         </p>
 
-        <p className="font-bold text-white md:ml-6">Base de connaissance</p>
+        <p className="font-bold text-white md:ml-6 hidden md:block">Base de connaissance</p>
       </Link>
 
       <div className="flex items-center gap-4">

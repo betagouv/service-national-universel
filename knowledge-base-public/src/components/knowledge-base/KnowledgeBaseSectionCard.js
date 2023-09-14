@@ -6,7 +6,7 @@ import FolderIcon from "../FolderIcon";
 const KnowledgeBaseSectionCard = ({ _id, position, title, icon, slug: slugTheme, children = [], path, className }) => {
   return (
     <article data-position={position} data-id={_id} className={`flex w-72 flex-col items-start overflow-hidden rounded-lg bg-white shadow-lg ${className}`}>
-      <div className="flex flex-1 flex-col p-4">
+      <div className="flex flex-1 flex-col w-full p-4">
         <h3 className="mb-4 flex h-[48px] flex-grow-0 items-center">
           {icon && <BlueIcon icon={icon} className="mr-4" />}
           <span className="line-clamp-3 font-bold text-gray-900">{title}</span>
