@@ -16,7 +16,8 @@
     "packages/*",
     "app",
     "admin",
-    "api"
+    "api",
+    "analytics"
   ],
   "engines": {
     "node": "^18.16.0",
