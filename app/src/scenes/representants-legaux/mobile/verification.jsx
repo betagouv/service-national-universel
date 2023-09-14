@@ -12,6 +12,7 @@ import dayjs from "dayjs";
 import Check from "../components/Check";
 import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import { supportURL } from "../../../config";
+import Footer from "@/components/dsfr/layout/Footer";
 
 export default function Verification({ step, parentId }) {
   const history = useHistory();
@@ -116,6 +117,7 @@ export default function Verification({ step, parentId }) {
           </>
         )}
       </div>
+      <Footer />
       <StickyButton text={"Suivant"} onClick={() => onNext()} onClickPrevious={onPrevious} disabled={saving} />
     </>
   );
@@ -157,7 +159,7 @@ function SectionField(field, idx) {
     content = (
       <div className="flex w-full justify-between">
         <p className="font-400 text-[16px] text-[#666666]">{field.label}&nbsp;:</p>
-        <p className="font-400 text-right text-[16px] text-[#161616]">{field.value ? field.value : "-"}</p>
+        <p className="font-400 text-right text-[16px] text-[#161616] break-all">{field.value ? field.value : "-"}</p>
       </div>
     );
   }
