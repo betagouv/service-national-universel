@@ -1,3 +1,16 @@
+# [1.333.0](https://github.com/betagouv/service-national-universel/compare/v1.332.0...v1.333.0) (2023-09-14)
+
+
+### Bug Fixes
+
+* **app:** representants legaux - fix display of data on mobile verification page ([c3d004f](https://github.com/betagouv/service-national-universel/commit/c3d004fc2af72db9abb7c1255bccd5f76f60413d))
+* **lib:** instruction end date for october ([b069fac](https://github.com/betagouv/service-national-universel/commit/b069fac0f4d1fe6dde4c184b6991d228deebd452))
+
+
+### Features
+
+* **lib:** update inscription end date for cohort in october ([7239ab6](https://github.com/betagouv/service-national-universel/commit/7239ab6a90ada5c25178fe537d16e247cbb6b552))
+
 # [1.332.0](https://github.com/betagouv/service-national-universel/compare/v1.331.0...v1.332.0) (2023-09-13)
 
 
