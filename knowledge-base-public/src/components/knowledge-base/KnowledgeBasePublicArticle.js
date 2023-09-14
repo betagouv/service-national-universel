@@ -7,7 +7,7 @@ import Breadcrumbs from "../breadcrumbs";
 import FeedbackComponent from "../FeedBack";
 import NavigationArticle from "../NavigationArticle";
 import { HiPrinter } from "react-icons/hi";
-import { environment } from "../../config";
+import { separateEmojiAndText } from "../../utils/index";
 
 const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
   const group = useMemo(() => {
@@ -15,25 +15,22 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
   }, [item]);
 
   if (!item || isLoading) return <ArticleLoader />;
+  const [emoji, text] = separateEmojiAndText(item.title);
   return (
     <div className="w-full bg-white">
       <section className="mx-auto flex max-w-[950px] flex-shrink flex-grow flex-col overflow-hidden px-4 text-gray-800 print:bg-transparent print:pb-12">
         <Breadcrumbs parents={item?.parents || []} path="/base-de-connaissance" />
-        <div className={`align-center flex flex-col ${item.parents.length > 2 ? 'md:flex-row' : ''}`}>
-          {environment !== "production" && (
-            <>
-              {item.parents.length > 2 && (
-                <div className="mt-4 w-full md:mr-12 md:max-w-[30%]">
-                  <NavigationArticle item={item} />
-                </div>
-              )}
-            </>
+        <div className={`align-center flex flex-col ${item.parents.length > 2 ? "md:flex-row" : ""}`}>
+          {item.parents.length > 2 && (
+            <div className="mt-4 w-full md:mr-12 md:max-w-[30%]">
+              <NavigationArticle item={item} />
+            </div>
           )}
-          <div className={item.parents.length > 2 ? "max-w-[70%]" : ""}>
+          <div className={item.parents.length > 2 ? "md:max-w-[70%]" : ""}>
             <div className="flew-row flex justify-between pb-2 pt-4">
               <div className="mr-4">
                 <h2 className="mb-2 text-[24px] font-bold print:mb-0 print:text-black">{group?.title}</h2>
-                <h1 className="mb-2 text-[24px] font-bold md:text-[30px] print:mb-0 print:text-black">{item?.title}</h1>
+                <h1 className="mb-2 text-[24px] font-bold md:text-[30px] print:mb-0 print:text-black">{emoji}{text}</h1>
                 <h6 className="text-[18px] text-snu-purple-100 md:text-[18px] lg:text-xl print:text-black">{item?.description}</h6>
               </div>
               <div>

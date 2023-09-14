@@ -8,10 +8,11 @@ import FolderIcon from "./FolderIcon";
 import { HiChevronLeft } from "react-icons/hi";
 import useUser from "../hooks/useUser";
 import { useMediaQuery } from "../hooks/useMediaQuery";
-
+import { separateEmojiAndText } from "../utils/index";
 // accessibility: https://www.w3.org/WAI/ARIA/apg/patterns/accordion/
 
 const NavigationArticle = ({ item }) => {
+  const [emoji, text] = separateEmojiAndText(item.title);
   const { restriction } = useUser();
   const router = useRouter();
   const { cache } = useSWRConfig();
@@ -53,7 +54,6 @@ const NavigationArticle = ({ item }) => {
       }, 1000);
     }
   }, [isOpen]);
-  
 
   function toggleAccordion() {
     setActive((prevState) => !prevState);
@@ -86,7 +86,7 @@ const NavigationArticle = ({ item }) => {
             </Link>
             <div className="mr-2 flex flex-col justify-center">
               <span className="line-clamp-2 flex-1 text-center text-sm font-medium text-gray-500 md:hidden">Articles liés</span>
-              <span className="line-clamp-2 flex-1 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-900">{title}</span>
+              <span className="line-clamp-2 flex-1 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-900">{text}</span>
             </div>
             <span className={`${rotate} material-icons text-gray-400 md:hidden`}>expand_more</span>
             <span className={`text-gray-400`}></span>
@@ -105,23 +105,27 @@ const NavigationArticle = ({ item }) => {
               {list
                 .slice()
                 .sort((a, b) => a.position - b.position)
-                .map(({ _id, title, slug, type }, index) => (
-                  <li
-                    className={`flex border-gray-200 text-sm font-medium leading-5 text-gray-600 ${
-                      _id === item._id ? "rounded-md bg-gray-200 text-gray-900" : "text-gray-600"
-                    }`}
-                    key={_id}
-                  >
-                    <Link
-                      tabIndex={active ? 0 : -1}
-                      className="flex flex-1 items-center px-6 py-4"
-                      href={`${path}/${type === "section" ? slugTheme : slug}${type === "section" ? `?loadingType=section&openTheme=${slug}` : ""}`}
+                .map(({ _id, title, slug, type }) => {
+                  const [emoji, text] = separateEmojiAndText(title);
+                  return (
+                    <li
+                      className={`flex border-gray-200 text-sm font-medium leading-5 text-gray-600 ${_id === item._id ? "rounded-md bg-gray-200 text-gray-900" : "text-gray-600"}`}
+                      key={_id}
                     >
-                      {type === "section" && <FolderIcon />}
-                      <span className="line-clamp-2">{title}</span>
-                    </Link>
-                  </li>
-                ))}
+                      <Link
+                        tabIndex={active ? 0 : -1}
+                        className="flex flex-1 items-center px-6 py-4"
+                        href={`${path}/${type === "section" ? slugTheme : slug}${type === "section" ? `?loadingType=section&openTheme=${slug}` : ""}`}
+                      >
+                        {type === "section" && <FolderIcon />}
+                        <div className="flex flex-row">
+                          {emoji}
+                          <span className="line-clamp-2">{text}</span>
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
             </ul>
           ) : (
             <div className="px-6 pb-4 text-sm font-medium text-gray-400">Articles en cours de rédaction ⏳</div>

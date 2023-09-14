@@ -110,11 +110,11 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
           </button>
         </div>
         <div className="flex justify-center bg-[#32257F]">
-          <div className="mx-auto flex flex-row flex-wrap justify-center mt-4">
+          <div className="mx-auto mt-4 flex max-w-[70%] flex-row flex-wrap justify-center">
             {top5Article.map(({ _id, slug, text }) => (
-              <div key={_id} className="m-1 rounded-2xl bg-blue-100 py-1 px-2">
+              <div key={_id} className="m-1 rounded-2xl bg-blue-100 px-2 py-1 text-center">
                 <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${text}`} alt={`Lire l'article ${text}`}>
-                  <h3 className="text-sm text-blue-800 font-medium leading-5">{text}</h3>
+                  <h3 className="text-sm font-medium leading-5 text-blue-800">{text}</h3>
                 </Link>
               </div>
             ))}
@@ -178,17 +178,20 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
                 </div>
               </div>
               <div className={`transition-max-height flex flex-row overflow-x-auto duration-700 md:gap-2`}>
-                {topArticles.slice(0, 3).map(({ _id, title, slug }) => (
-                  <div
-                    key={_id}
-                    className="mx-3.5 my-2 flex min-h-[130px] min-w-[200px] flex-col justify-between rounded-lg border-[1px] border-gray-300 bg-white px-4 py-2 md:m-2 md:min-w-[30%] md:max-w-[30%] md:flex-grow"
-                  >
-                    <h3 className="mb-4 text-sm font-bold leading-5 text-gray-900">{title}</h3>
-                    <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
-                      <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p>
-                    </Link>
-                  </div>
-                ))}
+                {topArticles.slice(0, 3).map(({ _id, title, slug }) => {
+                  const [emoji, text] = separateEmojiAndText(title);
+                  return (
+                    <div
+                      key={_id}
+                      className="mx-3.5 my-2 flex min-h-[130px] min-w-[200px] flex-col justify-between rounded-lg border-[1px] border-gray-300 bg-white px-4 py-2 md:m-2 md:min-w-[30%] md:max-w-[30%] md:flex-grow"
+                    >
+                      <h3 className="mb-4 text-sm font-bold leading-5 text-gray-900">{emoji}{text}</h3>
+                      <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
+                        <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p>
+                      </Link>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </>
