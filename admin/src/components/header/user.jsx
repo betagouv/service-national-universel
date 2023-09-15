@@ -66,10 +66,10 @@ export default function HeaderUser() {
             </div>
           ) : null}
           {[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && user.structureId ? (
-            <NavLink to={`/structure/${user.structureId}`}>
+            <NavLink to={`/structure/${user.structureId}?prompt=team`}>
               <div className="group flex cursor-pointer items-center gap-2  p-3 text-coolGray-800 hover:bg-coolGray-100  hover:text-coolGray-800">
                 <HiUserAdd className="group-hover:scale-110" />
-                Inviter&nbsp;un&nbsp;utilisateur
+                Inviter un responsable
               </div>
             </NavLink>
           ) : null}
