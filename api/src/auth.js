@@ -213,9 +213,15 @@ class Auth {
 
   async signin2FA(req, res) {
     try {
-      const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), token_2fa: Joi.string().required() }).unknown().validate(req.body);
+      const { error, value } = Joi.object({
+        email: Joi.string().lowercase().trim().email().required(),
+        token_2fa: Joi.string().required(),
+        rememberMe: Joi.boolean().required(),
+      })
+        .unknown()
+        .validate(req.body);
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-      const { email, token_2fa } = value;
+      const { email, token_2fa, rememberMe } = value;
       const user = await this.model.findOne({
         email,
         attempts2FA: { $lt: 3 },
@@ -233,8 +239,10 @@ class Auth {
       user.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
       await user.save();
 
-      const trustToken = jwt.sign({}, config.secret, { expiresIn: TRUST_TOKEN_MAX_AGE });
-      res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(TRUST_TOKEN_MAX_AGE));
+      if (rememberMe) {
+        const trustToken = jwt.sign({}, config.secret, { expiresIn: TRUST_TOKEN_MAX_AGE });
+        res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(TRUST_TOKEN_MAX_AGE));
+      }
 
       const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
       if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(JWT_MAX_AGE));
