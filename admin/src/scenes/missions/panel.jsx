@@ -3,7 +3,6 @@ import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 import styled from "styled-components";
 
-import plausibleEvent from "@/services/plausible";
 import { useSelector } from "react-redux";
 import { ROLES } from "snu-lib/roles";
 import Badge from "../../components/Badge";
@@ -66,7 +65,6 @@ export default function PanelView({ onChange, mission }) {
   };
 
   const onConfirmDuplicate = async () => {
-    plausibleEvent(`Admin/Dupliquer une mission`);
     return history.push(`/mission/create/${mission.structureId}?duplicate=${mission._id}`);
   };
 
