@@ -1,3 +1,20 @@
+# [1.334.0](https://github.com/betagouv/service-national-universel/compare/v1.333.0...v1.334.0) (2023-09-15)
+
+
+### Bug Fixes
+
+* **admin:** structure invite behavior ([#2998](https://github.com/betagouv/service-national-universel/issues/2998)) ([cb39124](https://github.com/betagouv/service-national-universel/commit/cb39124a54302f64344ee4ff54815a4cba3f6ed3))
+* **api:** searchbar with spaces ([#2970](https://github.com/betagouv/service-national-universel/issues/2970)) ([222496f](https://github.com/betagouv/service-national-universel/commit/222496f17988f08ad11b71dde69fe4b3d7ccb31f))
+* **app:** fix redirection in parent context ([#2992](https://github.com/betagouv/service-national-universel/issues/2992)) ([a10b76a](https://github.com/betagouv/service-national-universel/commit/a10b76a92300e2325405b55a62fbc322d2d76cc5))
+* **snu-lib:** translation phase2 status ([#2996](https://github.com/betagouv/service-national-universel/issues/2996)) ([d35b90b](https://github.com/betagouv/service-national-universel/commit/d35b90b08883595725ddba2782af01156c51cb66))
+
+
+### Features
+
+* **admin:** download/mail button attestation phase1/2/3 ([#2978](https://github.com/betagouv/service-national-universel/issues/2978)) ([2955e36](https://github.com/betagouv/service-national-universel/commit/2955e36cbe916f4750b78263d1243c1063732886))
+* **admin:** update process duplicate mission + refacto page create mission ([#2952](https://github.com/betagouv/service-national-universel/issues/2952)) ([95ac9c2](https://github.com/betagouv/service-national-universel/commit/95ac9c2a961907abada843a26f207f09a28e1e3e))
+* **app/admin/api:** bouton 2fa appareil ([#2997](https://github.com/betagouv/service-national-universel/issues/2997)) ([8d33a6a](https://github.com/betagouv/service-national-universel/commit/8d33a6ae31d4ebea649c20ef77ac2d651b92a8e3))
+
 # [1.333.0](https://github.com/betagouv/service-national-universel/compare/v1.332.0...v1.333.0) (2023-09-14)
 
 
