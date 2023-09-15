@@ -13,20 +13,21 @@ import Link from "next/link";
 import useUser from "../../hooks/useUser";
 import API from "../../services/api";
 import { separateEmojiAndText } from "../../utils/index";
+import { capture } from "../../../../";
 
 const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   const { restriction } = useUser();
   const router = useRouter();
   const [sections, setSections] = useState(item?.children?.filter((c) => c.type === "section") || []);
   const [articles, setArticles] = useState(item?.children?.filter((c) => c.type === "article") || []);
-  const [top5Article, setTop5Article] = useState([]);
+  const [top4Article, setTop4Article] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    const fetchTop5 = async () => {
+    const fetchTop4 = async () => {
       try {
-        const response = await API.get({ path: `/knowledge-base/${restriction}/top5Article` });
+        const response = await API.get({ path: `/knowledge-base/${restriction}/top4Article` });
         const rawData = response.data;
         const processedData = rawData.map((article) => {
           const { _id, title, slug } = article;
@@ -40,13 +41,13 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
           };
         });
 
-        setTop5Article(processedData);
+        setTop4Article(processedData);
       } catch (error) {
         console.error(error);
       }
     };
 
-    fetchTop5();
+    fetchTop4();
   }, [item]);
 
   const getAllArticles = (children) => {
@@ -106,7 +107,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   if (isRoot) {
     return (
       <>
-        <div className="flex h-40 w-full flex-col justify-end gap-6 border-t-[1px] border-white border-opacity-20 bg-[#32257F]">
+        <div className="flex h-44 w-full flex-col justify-center gap-6 border-t-[1px] border-white border-opacity-20 bg-[#32257F]">
           <p className="text-center text-3xl font-bold leading-9 text-white">J&apos;ai besoin d&apos;aide</p>
           <button
             onClick={() => setSearchOpen(true)}
@@ -117,11 +118,16 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
           </button>
         </div>
         <div className="flex justify-center bg-[#32257F]">
-          <div className="mx-auto mt-4 flex max-w-[90%] lg:max-w-[70%] flex-row flex-wrap justify-center">
-            {top5Article.map(({ _id, slug, text }) => (
-              <div key={_id} className="m-1 w-full lg:w-auto rounded-2xl bg-blue-100 px-2 py-1 text-center">
-                <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${text}`} alt={`Lire l'article ${text}`}>
-                  <h3 className="text-sm font-medium leading-5 text-blue-800">{text}</h3>
+          <div className="mx-auto flex max-w-[90%] flex-row flex-wrap justify-center lg:max-w-[70%]">
+            {top4Article.map(({ _id, slug, text }) => (
+              <div key={_id} className="m-1 w-full rounded-2xl bg-blue-100 px-2 py-1 text-center lg:w-auto">
+                <Link
+                  href={`/base-de-connaissance/${slug}`}
+                  aria-label={`Lire l'article ${text}`}
+                  alt={`Lire l'article ${text}`}
+                  className="text-sm font-medium leading-5 text-blue-800 flex justify-center"
+                >
+                  {text}
                 </Link>
               </div>
             ))}

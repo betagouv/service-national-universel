@@ -54,10 +54,10 @@ export const Accordion = ({ title, list = [], className = "", path, isOpen = fal
       >
         {list && list.length > 0 ? (
           <ul>
-            {list.map(({ title, slug, type }, index) => {
+            {list.map(({ title, slug, type }) => {
               const [emoji, text] = separateEmojiAndText(title);
               return (
-                <li className="flex border-t border-gray-200 text-sm font-medium text-gray-900" key={index}>
+                <li className="flex border-t border-gray-200 text-sm font-medium text-gray-900" key={slug}>
                   <Link
                     tabIndex={active ? 0 : -1}
                     className="flex flex-1 items-center px-6 py-4"

@@ -103,7 +103,7 @@ const NavigationArticle = ({ item }) => {
                       <Link
                         tabIndex={active ? 0 : -1}
                         className="flex flex-1 items-center px-6 py-4"
-                        href={`${path}/${type === "section" ? slugTheme : slug}${type === "section" ? `?loadingType=section&openTheme=${slug}` : ""}`}
+                        href={`${path}/${slug}${type === "section" ? `?loadingType=section&openTheme=${slug}` : ""}`}
                       >
                         {type === "section" && <FolderIcon />}
                         <div className="flex flex-row">

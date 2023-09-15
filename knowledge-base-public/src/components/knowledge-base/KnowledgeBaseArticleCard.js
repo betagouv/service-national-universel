@@ -9,11 +9,10 @@ const KnowledgeBaseArticleCard = ({ title, slug, path, className = "" }) => {
       className={`flex h-[60px] w-full max-w-[690px] flex-col justify-center align-center overflow-hidden rounded-lg bg-white px-4 shadow-md ${className}`}
       href={`${path}/${slug}${path === "/base-de-connaissance" ? "?loadingType=article" : ""}`}
     >
-      {/* <div className="flex flex-raw">
+      <h3 className="line-clamp-2 text-sm font-medium text-gray-900">
         {emoji}
-        <h3 className="line-clamp-2 text-sm font-medium text-gray-900">{text}</h3>
-      </div> */}
-        <h3 className="line-clamp-2 text-sm font-medium text-gray-900">{emoji}{text}</h3>
+        {text}
+      </h3>
     </Link>
   );
 };
