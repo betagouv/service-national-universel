@@ -4,16 +4,15 @@ import { SentryRoute } from "../../sentry";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import List from "./list";
-import Edit from "./edit";
 import View from "./view";
+import Create from "./create";
 
 export default function Index() {
   useDocumentTitle("Missions");
 
   return (
     <Switch>
-      <SentryRoute path="/mission/create/:structureId" component={Edit} />
-      <SentryRoute path="/mission/create" component={Edit} />
+      <SentryRoute path="/mission/create/:id" component={Create} />
       <SentryRoute
         path="/mission/:id"
         render={({ match }) => {
