@@ -523,6 +523,7 @@ export default function List() {
                   { label: "Nom de la mission (A > Z)", field: "name.keyword", order: "asc" },
                   { label: "Nom de la mission (Z > A)", field: "name.keyword", order: "desc" },
                 ]}
+                selectedFilters={selectedFilters}
                 paramData={paramData}
                 setParamData={setParamData}
               />
