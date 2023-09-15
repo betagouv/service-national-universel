@@ -49,10 +49,9 @@ export default function Signin() {
       }
     } catch (e) {
       setLoading(false);
-      toastr.error(
-        "(Double authentification) Code non reconnu.",
-        "Merci d'inscrire le dernier code reçu par email. Après 3 tentatives ou plus de 10 minutes, veuillez retenter de vous connecter.",
-      );
+      toastr.error("Code non reconnu", "Merci d'inscrire le dernier code reçu par email. Après 3 tentatives ou plus de 10 minutes, veuillez retenter de vous connecter.", {
+        timeOut: 10_000,
+      });
     }
   };
 
@@ -65,39 +64,40 @@ export default function Signin() {
     <>
       <div className="bg-white px-4 pt-4 pb-12">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <div className="text-[22px] font-bold text-[#161616]">Me connecter</div>
-        <div className="flex items-center gap-4 py-4">
-          <div className="flex items-center text-[#161616] text-[21px] gap-2">
-            <BsShieldLock className="text-4xl text-[#161616] text-[21px]" /> Authentification à deux facteurs
-          </div>
+        <h1 className="text-2xl font-bold">Me connecter</h1>
+
+        <div className="flex items-center gap-4 py-4 text-xl">
+          <BsShieldLock className="text-3xl flex-none" />
+          Authentification à deux facteurs
         </div>
-        <div className="flex flex-col gap-1 py-4">
-          <label className="text-[14px] text-[#3A3A3A] mb-1">
+
+        <div className="flex flex-col gap-1 py-4 text-sm leading-relaxed">
+          <p className="mb-1">
             Un mail contenant le code unique de connexion vous a été envoyé à l'adresse <b>{email}</b>.
-          </label>
-          <label className="text-[14px] text-[#3A3A3A] mb-4">
-            Ce code est valable pendant 10 minutes, si vous avez reçu plusieurs codes veuillez svp utiliser le dernier qui vous a été transmis par mail.
-          </label>
-          <label className="text-[14px] text-[#3A3A3A] mb-2">Saisir le code reçu par email</label>
-          <Input placeholder="123abc" value={token2FA} onChange={(e) => setToken2FA(e)} />
-        </div>
-        <div>
-          <label htmlFor="rememberMe" className="text-sm text-brand-black/80 mt-2">
-            <input
-              type="checkbox"
-              id="rememberMe"
-              name="rememberMe"
-              className="mr-2 cursor-pointer"
-              checked={rememberMe}
-              onChange={() => {
-                setRememberMe(!rememberMe);
-              }}
-            />
-            <strong>Faire confiance à ce navigateur :</strong> la double authentification vous sera demandée à nouveau dans un délai d’un mois. Ne pas cocher cette case si vous
-            utilisez un ordinateur partagé ou public
+          </p>
+          <p className="mb-4">Ce code est valable pendant 10 minutes, si vous avez reçu plusieurs codes veuillez svp utiliser le dernier qui vous a été transmis par mail.</p>
+          <label>
+            Saisir le code reçu par email
+            <Input placeholder="123abc" value={token2FA} onChange={(e) => setToken2FA(e)} />
           </label>
         </div>
-        <button className="flex w-full cursor-pointer items-center justify-center p-2 bg-[#000091] text-white" onClick={() => onSubmit({ email, token: token2FA })}>
+
+        <label htmlFor="rememberMe" className="text-sm text-brand-black/80 mb-4">
+          <input
+            type="checkbox"
+            id="rememberMe"
+            name="rememberMe"
+            className="mr-2 cursor-pointer"
+            checked={rememberMe}
+            onChange={() => {
+              setRememberMe(!rememberMe);
+            }}
+          />
+          <strong>Faire confiance à ce navigateur :</strong> la double authentification vous sera demandée à nouveau dans un délai d’un mois. Ne pas cocher cette case si vous
+          utilisez un ordinateur partagé ou public
+        </label>
+
+        <button className="flex w-full cursor-pointer items-center justify-center p-2 bg-[#000091] text-white" onClick={() => onSubmit({ email, token: token2FA, rememberMe })}>
           Connexion
         </button>
         <hr className="mt-4"></hr>

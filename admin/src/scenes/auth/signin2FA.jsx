@@ -78,12 +78,12 @@ export default function Signin() {
                     <p className="text-sm">Authentification à deux facteurs</p>
                   </div>
                   <div className="px-6">
-                    <div className="self-stretch mb-2 text-justify">
+                    <p className="self-stretch mb-2">
                       Un mail contenant le code unique de connexion vous a été envoyé à l'adresse <b>{email}</b>.
-                    </div>
-                    <div className="self-stretch mb-4 text-justify">
-                      Ce code est valable pendant <b>10 minutes</b>, si vous avez reçu plusieurs codes veuillez svp <b>utiliser le dernier</b> qui vous a été transmis par mail.
-                    </div>
+                    </p>
+                    <p className="self-stretch mb-2">
+                      Ce code est valable pendant <b>10 minutes</b>, si vous avez reçu plusieurs codes veuillez <b>utiliser le dernier</b> qui vous a été transmis par mail.
+                    </p>
                   </div>
                 </div>
                 <p className="mt-3 mb-2">Code</p>
@@ -98,26 +98,12 @@ export default function Signin() {
                     onChange={(e) => setToken2FA(e.target.value)}
                   />
                 </div>
-                <div className="text-sm text-brand-black/80 mt-2">
-                  <div
-                    className="cursor-pointer"
-                    onClick={() => {
-                      setRememberMe(!rememberMe);
-                    }}>
-                    <input
-                      type="checkbox"
-                      id="rememberMe"
-                      name="rememberMe"
-                      className="mr-2"
-                      checked={rememberMe}
-                      onChange={() => {
-                        setRememberMe(!rememberMe);
-                      }}
-                    />
-                    <strong>Faire confiance à ce navigateur :</strong> la double authentification vous sera demandée à nouveau dans un délai d’un mois. Ne pas cocher cette case si
-                    vous utilisez un ordinateur partagé ou public
-                  </div>
-                </div>
+
+                <label className="text-sm text-brand-black/80 mt-2">
+                  <input type="checkbox" id="rememberMe" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} className="mr-2" />
+                  <strong>Faire confiance à ce navigateur :</strong> la double authentification vous sera demandée à nouveau dans un délai d’un mois. Ne pas cocher cette case si
+                  vous utilisez un ordinateur partagé ou public
+                </label>
 
                 <div className="flex justify-end">
                   <button
