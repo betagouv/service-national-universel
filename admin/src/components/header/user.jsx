@@ -69,7 +69,7 @@ export default function HeaderUser() {
             <NavLink to={`/structure/${user.structureId}?prompt=team`}>
               <div className="group flex cursor-pointer items-center gap-2  p-3 text-coolGray-800 hover:bg-coolGray-100  hover:text-coolGray-800">
                 <HiUserAdd className="group-hover:scale-110" />
-                Inviter un responsable
+                Inviter un nouveau responsable
               </div>
             </NavLink>
           ) : null}
