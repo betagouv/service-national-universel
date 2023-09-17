@@ -632,7 +632,7 @@ async function addingDayToDate(days, dateStart) {
 }
 
 async function autoValidationSessionPhase1Young({ young, sessionPhase1, cohort, user }) {
-  let cohortWithOldRules = ["2021", "2022", "Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B"]
+  let cohortWithOldRules = ["2021", "2022", "Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B"];
   let youngCohort = cohort;
   if (!cohort) {
     youngCohort = await CohortModel.findOne({ name: young.cohort });
@@ -899,6 +899,7 @@ const ERRORS = {
   EMAIL_INVALID: "EMAIL_INVALID",
   EMAIL_AND_PASSWORD_REQUIRED: "EMAIL_AND_PASSWORD_REQUIRED",
   EMAIL_ALREADY_USED: "EMAIL_ALREADY_USED",
+  EMAIL_UNCHANGED: "EMAIL_UNCHANGED",
   PASSWORDS_NOT_MATCH: "PASSWORDS_NOT_MATCH",
   USER_NOT_EXISTS: "USER_NOT_EXISTS",
   NEW_PASSWORD_IDENTICAL_PASSWORD: "NEW_PASSWORD_IDENTICAL_PASSWORD",

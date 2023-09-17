@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import validator from "validator";
+import { translate } from "snu-lib";
 import Modal from "@/components/ui/modals/Modal";
 import Input from "@/components/forms/inputs/Input";
+import api from "@/services/api";
+import { capture } from "@/sentry";
 
-const PasswordModalContent = ({ onConfirm, onCancel }) => {
+const PasswordModalContent = ({ onSuccess, onCancel, password }) => {
   const [email, setEmail] = useState("");
   const [emailConfirmation, setEmailConfirmation] = useState("");
   const [errors, setErrors] = useState({});
@@ -25,6 +28,23 @@ const PasswordModalContent = ({ onConfirm, onCancel }) => {
     return errors;
   };
 
+  const requestEmailUpdate = async (newEmail, password) => {
+    try {
+      setLoading(true);
+      const { ok, code } = await api.post(`/young/email`, { email: newEmail, password });
+      if (!ok) return setErrors({ email: translate(code) });
+      setErrors({});
+      setEmail("");
+      setEmailConfirmation("");
+      return onSuccess(newEmail);
+    } catch (e) {
+      capture(e);
+      setErrors({ email: translate(e.code) });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onSubmit = async () => {
     let errors = {};
 
@@ -39,8 +59,7 @@ const PasswordModalContent = ({ onConfirm, onCancel }) => {
     setErrors(errors);
 
     if (!Object.keys(errors).length) {
-      // onEmailChange(email.trim());
-      console.log("onEmailChange", email.trim());
+      await requestEmailUpdate(email.trim(), password);
     }
   };
 
@@ -49,7 +68,13 @@ const PasswordModalContent = ({ onConfirm, onCancel }) => {
       <Modal.Title>Quelle est votre nouvelle adresse email ?</Modal.Title>
       <Input label="Nouvelle adresse email" name="email" onChange={setEmail} error={errors.email} value={email} />
       <Input label="Confirmer la nouvelle adresse email" name="emailConfirmation" onChange={setEmailConfirmation} error={errors.emailConfirmation} value={emailConfirmation} />
-      <Modal.Buttons onCancel={onCancel} cancelText="Annuler" onConfirm={onSubmit} confirmText="Recevoir le code d'activation" />
+      <Modal.Buttons
+        onCancel={onCancel}
+        cancelText="Annuler"
+        onConfirm={onSubmit}
+        confirmText="Recevoir le code d'activation"
+        disabled={isLoading || !email || !emailConfirmation}
+      />
     </>
   );
 };

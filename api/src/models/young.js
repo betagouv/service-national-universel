@@ -176,6 +176,13 @@ const Schema = new mongoose.Schema({
       description: "L'utilisateur a validé son email : 2FA possible",
     },
   },
+  newEmail: {
+    type: String,
+    trim: true,
+    documentation: {
+      description: "E-mail que le volontaire souhaite utiliser (valiation par code envoyé par email avant changement définitif de l'email)",
+    },
+  },
   phone: {
     type: String,
     documentation: {

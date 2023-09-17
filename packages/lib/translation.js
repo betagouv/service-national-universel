@@ -302,6 +302,8 @@ const translate = (value) => {
       return "Email invalide";
     case "EMAIL_ALREADY_USED":
       return "Cette adresse e-mail est déjà utilisée";
+    case "EMAIL_UNCHANGED":
+      return "L'adresse e-mail est indentique à l'actuelle";
     case "EMAIL_AND_PASSWORD_REQUIRED":
       return "Email et mot de passe requis";
     case "PASSWORD_NOT_MATCH":

@@ -141,6 +141,7 @@ class Auth {
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
+
       const user = await this.model.findOne({
         email: req.user.email,
         emailVerified: "false",
@@ -170,6 +171,52 @@ class Auth {
         ok: true,
         user: serializeYoung(user, user),
       });
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  }
+
+  async requestEmailUpdate(req, res) {
+    try {
+      const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), password: Joi.string().required() }).unknown().validate(req.body);
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      const { password, email } = value;
+
+      if (req.user.email === email) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_UNCHANGED });
+
+      // is new email already used?
+      const existingUser = await this.model.findOne({
+        email,
+      });
+      if (existingUser) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
+
+      const match = await req.user.comparePassword(password);
+      if (!match) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
+
+      const currentUser = await this.model.findOne({
+        email: req.user.email,
+      });
+
+      if (!currentUser) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+      const tokenEmailValidation = await crypto.randomInt(1000000);
+      currentUser.set({ newEmail: value.email, tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10 });
+
+      await currentUser.save();
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
+        emailTo: [{ name: `${currentUser.firstName} ${currentUser.lastName}`, email: value.email }],
+        params: {
+          registration_code: tokenEmailValidation,
+          params: { registration_code: tokenEmailValidation, cta: `${config.APP_URL}/account/general?token=${tokenEmailValidation}` },
+        },
+      });
+
+      return res.status(200).send({ ok: true });
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

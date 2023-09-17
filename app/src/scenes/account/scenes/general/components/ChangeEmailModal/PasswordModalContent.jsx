@@ -25,6 +25,7 @@ const PasswordModalContent = ({ onSuccess, onCancel }) => {
       setLoading(false);
     }
   };
+
   return (
     <>
       <Modal.Title>Saisir votre mot de passe de connexion</Modal.Title>
