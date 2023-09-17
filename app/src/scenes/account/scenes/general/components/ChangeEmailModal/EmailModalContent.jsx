@@ -15,19 +15,6 @@ const PasswordModalContent = ({ onSuccess, onCancel, password }) => {
   const trimmedEmail = email?.trim();
   const trimmedEmailConfirmation = emailConfirmation?.trim();
 
-  const validate = () => {
-    let errors = {};
-    //Email
-    if (trimmedEmail && !validator.isEmail(trimmedEmail)) {
-      errors.email = "L'e-mail renseigné est invalide";
-    }
-    //Email confirm
-    if (trimmedEmail && trimmedEmailConfirmation && trimmedEmail !== trimmedEmailConfirmation) {
-      errors.emailConfirmation = "Les emails ne correspondent pas";
-    }
-    return errors;
-  };
-
   const requestEmailUpdate = async (newEmail, password) => {
     try {
       setLoading(true);
@@ -55,7 +42,14 @@ const PasswordModalContent = ({ onSuccess, onCancel, password }) => {
       errors["emailConfirmation"] = "Ce champ est obligatoire";
     }
 
-    errors = { ...errors, ...validate() };
+    if (trimmedEmail && !validator.isEmail(trimmedEmail)) {
+      errors.email = "L'e-mail renseigné est invalide";
+    }
+
+    if (trimmedEmail && trimmedEmailConfirmation && trimmedEmail !== trimmedEmailConfirmation) {
+      errors.emailConfirmation = "Les emails ne correspondent pas";
+    }
+
     setErrors(errors);
 
     if (!Object.keys(errors).length) {
@@ -68,13 +62,7 @@ const PasswordModalContent = ({ onSuccess, onCancel, password }) => {
       <Modal.Title>Quelle est votre nouvelle adresse email ?</Modal.Title>
       <Input label="Nouvelle adresse email" name="email" onChange={setEmail} error={errors.email} value={email} />
       <Input label="Confirmer la nouvelle adresse email" name="emailConfirmation" onChange={setEmailConfirmation} error={errors.emailConfirmation} value={emailConfirmation} />
-      <Modal.Buttons
-        onCancel={onCancel}
-        cancelText="Annuler"
-        onConfirm={onSubmit}
-        confirmText="Recevoir le code d'activation"
-        disabled={isLoading || !email || !emailConfirmation}
-      />
+      <Modal.Buttons onCancel={onCancel} cancelText="Annuler" onConfirm={onSubmit} confirmText="Recevoir le code d'activation" disabled={isLoading} />
     </>
   );
 };

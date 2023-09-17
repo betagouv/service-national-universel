@@ -11,6 +11,9 @@ const PasswordModalContent = ({ onSuccess, onCancel }) => {
   const [isLoading, setLoading] = useState(false);
 
   const checkPassword = async (password) => {
+    if (!password) {
+      return setError("Merci d'entrer le mot de passe ");
+    }
     try {
       setLoading(true);
       const { ok, code } = await api.post(`/young/check_password`, { password });
@@ -33,7 +36,7 @@ const PasswordModalContent = ({ onSuccess, onCancel }) => {
         <div className="md:text-center mb-3">Pour sécuriser votre demande de changement d'adresse email, veuillez saisir votre mot de passe.</div>
       </Modal.Subtitle>
       <InputPassword label="Mot de passe" name="password" onChange={setPassword} error={error} value={password} />
-      <Modal.Buttons onCancel={onCancel} cancelText="Annuler" onConfirm={() => checkPassword(password)} confirmText="Continuer" disabled={isLoading || !password} />
+      <Modal.Buttons onCancel={onCancel} cancelText="Annuler" onConfirm={() => checkPassword(password)} confirmText="Continuer" disabled={isLoading} />
     </>
   );
 };

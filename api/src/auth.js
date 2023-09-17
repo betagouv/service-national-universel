@@ -223,6 +223,39 @@ class Auth {
     }
   }
 
+  async validateEmailUpdate(req, res) {
+    try {
+      const { error, value } = Joi.object({ token_email_validation: Joi.string().required() }).unknown().validate(req.body);
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      const { token_email_validation } = value;
+      const user = await this.model.findOne({
+        email: req.user.email,
+        attemptsEmailValidation: { $lt: 3 },
+        tokenEmailValidationExpires: { $gt: Date.now() },
+      });
+      if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      if (!user.newEmail) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+      if (user.tokenEmailValidation !== token_email_validation) {
+        user.set({ attemptsEmailValidation: (user.attemptsEmailValidation || 0) + 1 });
+        await user.save();
+        return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      }
+
+      user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, email: user.newEmail, newEmail: null });
+      await user.save();
+
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+
+      return res.status(200).send({
+        ok: true,
+        user: data,
+      });
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  }
+
   async signin(req, res) {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), password: Joi.string().required() }).unknown().validate(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_AND_PASSWORD_REQUIRED });
