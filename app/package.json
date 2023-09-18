@@ -75,7 +75,7 @@
     "react-select": "^5.6.0",
     "react-tooltip": "^4.4.3",
     "reactstrap": "8.10.1",
-    "redux": "4.2.0",
+    "redux": "4.2.1",
     "regenerator-runtime": "0.13.9",
     "sanitize-html": "^2.7.3",
     "slugify": "^1.6.5",
