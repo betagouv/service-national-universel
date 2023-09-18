@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from "react";
+import queryString from "query-string";
 import { BiLoaderAlt } from "react-icons/bi";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { youngCanChangeSession } from "snu-lib";
 import { PHONE_ZONES } from "snu-lib/phone-number";
 import { useDispatch, useSelector } from "react-redux";
-import { setYoung } from "../../../../redux/auth/actions";
-import { validateEmail, validatePhoneNumber } from "../../../../utils/form-validation.utils";
-import { updateYoung } from "../../../../services/young.service";
-import Input from "../../../../components/forms/inputs/Input";
-import Select from "../../../../components/forms/inputs/Select";
-import InputPhone from "../../../../components/forms/inputs/InputPhone";
-import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
+import { environment } from "@/config";
+import { setYoung } from "@/redux/auth/actions";
+import { validateEmail, validatePhoneNumber } from "@/utils/form-validation.utils";
+import { updateYoung } from "@/services/young.service";
+import Input from "@/components/forms/inputs/Input";
+import Select from "@/components/forms/inputs/Select";
+import InputPhone from "@/components/forms/inputs/InputPhone";
+import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import IdCardReader from "./components/IdCardReader";
 import SectionTitle from "../../components/SectionTitle";
 import Withdrawal from "./components/Withdrawal";
-import FormRow from "../../../../components/forms/layout/FormRow";
-import ButtonLight from "../../../../components/ui/buttons/ButtonLight";
+import FormRow from "@/components/forms/layout/FormRow";
+import ButtonLight from "@/components/ui/buttons/ButtonLight";
 import ChangeAddressModal from "./components/ChangeAddressModal";
 import ChangeEmailModal from "./components/ChangeEmailModal";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
@@ -37,18 +39,22 @@ const AccountGeneralPage = () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
 
+  const { search } = useLocation();
+  const { newEmailValidationToken } = queryString.parse(search);
+
   const [formValues, setFormValues] = useState(getInitialFormValues(young));
 
+  const shouldValidateEmail = newEmailValidationToken && young.newEmail;
+
   useEffect(() => {
-    console.log(young.email, formValues.email);
-    if (formValues.email === young.email) return;
+    if (environment === "production" || formValues.email === young.email) return;
     setFormValues({ ...formValues, email: young.email });
   }, [young.email, formValues]);
 
   const [errors, setErrors] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChangeAddressModalOpen, setChangeAddressModalOpen] = useState(false);
-  const [isChangeEmailModalOpen, setChangeEmailModalOpen] = useState(false);
+  const [isChangeEmailModalOpen, setChangeEmailModalOpen] = useState(shouldValidateEmail ? true : false);
 
   const validateForm = () => {
     const foundErrors = {};
@@ -107,7 +113,14 @@ const AccountGeneralPage = () => {
     <>
       <div className="overflow-hidden bg-white shadow-sm lg:rounded-lg">
         <ChangeAddressModal isOpen={isChangeAddressModalOpen} onClose={() => setChangeAddressModalOpen(false)} young={young} />
-        <ChangeEmailModal isOpen={isChangeEmailModalOpen} onClose={() => setChangeEmailModalOpen(false)} young={young} />
+        {environment !== "production" && (
+          <ChangeEmailModal
+            isOpen={isChangeEmailModalOpen}
+            onClose={() => setChangeEmailModalOpen(false)}
+            young={young}
+            validationToken={shouldValidateEmail ? newEmailValidationToken : ""}
+          />
+        )}
         <form onSubmit={handleSubmitGeneralForm}>
           <div className="grid grid-cols-1 lg:grid-cols-3">
             <div className="hidden py-6 pl-6 lg:col-start-1 lg:block">
@@ -139,11 +152,13 @@ const AccountGeneralPage = () => {
                   placeholder="example@example.com"
                   value={formValues.email}
                   onChange={handleChangeValue("email")}
-                  disabled
+                  disabled={environment !== "production"}
                 />
-                <InlineButton onClick={() => setChangeEmailModalOpen(true)} className="text-gray-500 hover:text-gray-700 text-sm font-medium mb-2">
-                  Modifier mon adresse email
-                </InlineButton>{" "}
+                {environment !== "production" && (
+                  <InlineButton onClick={() => setChangeEmailModalOpen(true)} className="text-gray-500 hover:text-gray-700 text-sm font-medium mb-4">
+                    Modifier mon adresse email
+                  </InlineButton>
+                )}
                 <InputPhone
                   label="Téléphone"
                   name="phone"

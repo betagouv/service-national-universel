@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
-import queryString from "query-string";
 import api from "@/services/api";
 import { capture } from "@/sentry";
 import Modal from "@/components/ui/modals/Modal";
@@ -11,13 +10,28 @@ import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 import { setYoung } from "@/redux/auth/actions";
 import plausibleEvent from "@/services/plausible";
 
-const ActivationCodeModalContent = ({ onSuccess, onCancel, newEmail, openDidNotReceiveCodeModal }) => {
+const ActivationCodeModalContent = ({ onSuccess, onCancel, newEmail, openDidNotReceiveCodeModal, validationToken = "" }) => {
   const dispatch = useDispatch();
-  const { search } = useLocation();
-  const { token } = queryString.parse(search);
+
   const [error, setError] = useState("");
-  const [emailValidationToken, setEmailValidationToken] = useState(token || "");
+  const [emailValidationToken, setEmailValidationToken] = useState(validationToken);
   const [isLoading, setLoading] = useState(false);
+
+  async function requestNewToken() {
+    try {
+      const { code, ok } = await api.get("/young/email-validation/token");
+      if (!ok) {
+        toastr.error(`Une erreur s'est produite : ${translate(code)}`, "");
+      } else {
+        toastr.success("Un nouveau code d'activation vous a été envoyé par e-mail", "", { timeOut: 6000 });
+        setEmailValidationToken("");
+        setError("");
+      }
+    } catch (e) {
+      capture(e);
+      toastr.error(`Une erreur s'est produite : ${translate(e.code)}`, "");
+    }
+  }
 
   async function onSubmit() {
     if (!emailValidationToken) {
@@ -51,9 +65,10 @@ const ActivationCodeModalContent = ({ onSuccess, onCancel, newEmail, openDidNotR
         </div>
       </Modal.Subtitle>
       <Input label="Code d'activation reçu par email" name="email" onChange={setEmailValidationToken} error={error} value={emailValidationToken} />
-      {/* refacto inline button gray en props */}
-      <InlineButton className="text-gray-500 hover:text-gray-700 text-sm font-medium" onClick={openDidNotReceiveCodeModal}>
-        Je n'ai rien reçu
+      <InlineButton
+        className={`text-sm font-medium ${error ? "text-red-500 hover:text-red-700" : "text-gray-500 hover:text-gray-700"}`}
+        onClick={error ? requestNewToken : openDidNotReceiveCodeModal}>
+        {error ? "Recevoir un nouveau code d’activation" : "Je n'ai rien reçu"}
       </InlineButton>
       <Modal.Buttons onCancel={onCancel} cancelText="Annuler" onConfirm={onSubmit} confirmText="Valider" disabled={isLoading} />
     </>

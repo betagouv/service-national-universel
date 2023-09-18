@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-
 import Modal from "@/components/ui/modals/Modal";
+
 import PasswordModalContent from "./PasswordModalContent";
 import EmailModalContent from "./EmailModalContent";
 import ActivationCodeModalContent from "./ActivationCodeModalContent";
@@ -15,14 +15,18 @@ const changeEmailSteps = {
   CONFIRMATION: "CONFIRMATION",
 };
 
-const ChangeAddressModal = ({ onClose, isOpen }) => {
+const ChangeEmailModal = ({ onClose, isOpen, young, validationToken = "" }) => {
   const [step, setStep] = useState(changeEmailSteps.ENTER_PASSWORD);
   const [password, setPassword] = useState("");
   const [newEmail, setNewEmail] = useState("");
 
   const onPasswordSuccess = (validatedPassword) => {
     setPassword(validatedPassword);
-    setStep(changeEmailSteps.ENTER_EMAIL);
+    if (validationToken) {
+      setStep(changeEmailSteps.ENTER_CODE);
+    } else {
+      setStep(changeEmailSteps.ENTER_EMAIL);
+    }
   };
 
   const onNewEmailRequestSuccess = (newEmail) => {
@@ -36,6 +40,8 @@ const ChangeAddressModal = ({ onClose, isOpen }) => {
 
   const onCancel = () => {
     setStep(changeEmailSteps.ENTER_PASSWORD);
+    setPassword("");
+    setNewEmail("");
     onClose();
   };
 
@@ -43,15 +49,18 @@ const ChangeAddressModal = ({ onClose, isOpen }) => {
     <Modal isOpen={isOpen} onClose={() => {}} className="w-full bg-white p-4 md:w-[520px] md:p-6">
       <>
         {step === changeEmailSteps.ENTER_PASSWORD && <PasswordModalContent onCancel={onCancel} onSuccess={onPasswordSuccess} />}
-        {step === changeEmailSteps.ENTER_EMAIL && <EmailModalContent onCancel={onCancel} onSuccess={onNewEmailRequestSuccess} password={password} />}
+        {step === changeEmailSteps.ENTER_EMAIL && (
+          <EmailModalContent onCancel={onCancel} onSuccess={onNewEmailRequestSuccess} password={password} enteredEmail={young.newEmail || newEmail} />
+        )}
         {step === changeEmailSteps.ENTER_CODE && (
           <ActivationCodeModalContent
             onCancel={onCancel}
             onSuccess={onNewEmailValidationSuccess}
-            newEmail={newEmail}
+            newEmail={newEmail || young.newEmail}
             openDidNotReceiveCodeModal={() => {
               setStep(changeEmailSteps.DID_NOT_RECEIVE_CODE);
             }}
+            validationToken={validationToken}
           />
         )}
         {step === changeEmailSteps.DID_NOT_RECEIVE_CODE && (
@@ -68,4 +77,4 @@ const ChangeAddressModal = ({ onClose, isOpen }) => {
   );
 };
 
-export default ChangeAddressModal;
+export default ChangeEmailModal;

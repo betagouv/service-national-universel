@@ -6,9 +6,9 @@ import Input from "@/components/forms/inputs/Input";
 import api from "@/services/api";
 import { capture } from "@/sentry";
 
-const PasswordModalContent = ({ onSuccess, onCancel, password }) => {
-  const [email, setEmail] = useState("");
-  const [emailConfirmation, setEmailConfirmation] = useState("");
+const PasswordModalContent = ({ onSuccess, onCancel, password, enteredEmail = "" }) => {
+  const [email, setEmail] = useState(enteredEmail);
+  const [emailConfirmation, setEmailConfirmation] = useState(enteredEmail);
   const [errors, setErrors] = useState({});
   const [isLoading, setLoading] = useState(false);
 
@@ -19,6 +19,7 @@ const PasswordModalContent = ({ onSuccess, onCancel, password }) => {
     try {
       setLoading(true);
       const { ok, code } = await api.post(`/young/email`, { email: newEmail, password });
+      setLoading(false);
       if (!ok) return setErrors({ email: translate(code) });
       setErrors({});
       setEmail("");
@@ -27,7 +28,6 @@ const PasswordModalContent = ({ onSuccess, onCancel, password }) => {
     } catch (e) {
       capture(e);
       setErrors({ email: translate(e.code) });
-    } finally {
       setLoading(false);
     }
   };

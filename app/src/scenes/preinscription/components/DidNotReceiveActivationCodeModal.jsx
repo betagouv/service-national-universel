@@ -1,10 +1,9 @@
 import React from "react";
 import Modal from "../../../components/ui/modals/Modal";
 import ArrowRightBlue from "../../../assets/icons/ArrowRightBlue";
-import { BsInfoSquareFill } from "react-icons/bs";
 import { HiX } from "react-icons/hi";
 import PrimaryButton from "../../../components/dsfr/ui/buttons/PrimaryButton";
-import InlinButton from "../../../components/dsfr/ui/buttons/InlineButton";
+import DidNotReceiveActivationReasons from "@/scenes/account/scenes/general/components/DidNotReceiveActivationReasons";
 
 const DidNotReceiveActivationCodeModal = ({ onClose, isOpen, onRequestNewToken, onRequestEmailModification }) => {
   return (
@@ -20,27 +19,7 @@ const DidNotReceiveActivationCodeModal = ({ onClose, isOpen, onRequestNewToken, 
           <ArrowRightBlue className="inline mr-2" /> Je n'ai pas reçu le code d'activation par e-mail
         </h1>
         <span className="text-[#3A3A3A]">Si vous ne recevez pas le mail, nous vous invitons à vérifier que :</span>
-        <ul className="mt-4 list-none text-[#0063CB] flex flex-col gap-1">
-          <li>
-            <BsInfoSquareFill className="inline mb-1 mr-1" />
-            L'adresse e-mail que vous utilisez est bien celle que vous avez renseigné
-            <InlinButton className="ml-1 text-[#0063CB]" onClick={onRequestEmailModification}>
-              Modifier mon adresse e-mail
-            </InlinButton>
-          </li>
-          <li>
-            <BsInfoSquareFill className="inline mb-1 mr-1" />
-            Le mail ne se trouve pas dans vos spam
-          </li>
-          <li>
-            <BsInfoSquareFill className="inline mb-1 mr-1" />
-            L'adresse e-mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boîte mail
-          </li>
-          <li>
-            <BsInfoSquareFill className="inline mb-1 mr-1" />
-            Votre boite de réception n'est pas saturée
-          </li>
-        </ul>
+        <DidNotReceiveActivationReasons modifiyEmail={onRequestEmailModification} />
       </div>
       <hr className="h-px border-0 md:bg-gray-200" />
       <div className="p-4 flex justify-end">

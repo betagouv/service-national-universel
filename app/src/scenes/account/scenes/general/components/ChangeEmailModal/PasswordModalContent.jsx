@@ -17,14 +17,15 @@ const PasswordModalContent = ({ onSuccess, onCancel }) => {
     try {
       setLoading(true);
       const { ok, code } = await api.post(`/young/check_password`, { password });
+      setLoading(false);
       if (!ok) return setError(translate(code));
       setError("");
       setPassword("");
+
       return onSuccess(password);
     } catch (e) {
       capture(e);
       setError(translate(e.code));
-    } finally {
       setLoading(false);
     }
   };

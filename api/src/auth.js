@@ -213,7 +213,7 @@ class Auth {
         emailTo: [{ name: `${currentUser.firstName} ${currentUser.lastName}`, email: value.email }],
         params: {
           registration_code: tokenEmailValidation,
-          cta: `${config.APP_URL}/account/general?token=${tokenEmailValidation}`,
+          cta: `${config.APP_URL}/account/general?newEmailValidationToken=${tokenEmailValidation}`,
         },
       });
 
@@ -234,6 +234,7 @@ class Auth {
         attemptsEmailValidation: { $lt: 3 },
         tokenEmailValidationExpires: { $gt: Date.now() },
       });
+
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       if (!user.newEmail) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
       if (user.tokenEmailValidation !== token_email_validation) {
@@ -241,6 +242,12 @@ class Auth {
         await user.save();
         return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
+
+      const existingUser = await this.model.findOne({
+        email: user.newEmail,
+      });
+
+      if (existingUser) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
 
       user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, email: user.newEmail, newEmail: null });
       await user.save();
@@ -445,7 +452,7 @@ class Auth {
       });
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
 
-      if (!(user.emailVerified === "false") || !user.newEmail) {
+      if (!(user.emailVerified === "false" || user.newEmail)) {
         return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
       }
 
@@ -459,7 +466,9 @@ class Auth {
         emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: req.user.email }],
         params: {
           registration_code: tokenEmailValidation,
-          cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}`,
+          cta: user.newEmail
+            ? `${config.APP_URL}/account/general?newEmailValidationToken=${tokenEmailValidation}`
+            : `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}`,
         },
       });
 
