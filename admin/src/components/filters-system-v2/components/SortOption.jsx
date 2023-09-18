@@ -17,7 +17,7 @@ const SortOption = ({ sortOptions, paramData, setParamData, selectedFilters }) =
   React.useEffect(() => {
     if (selectedFilters?.searchbar?.filter?.length > 0 && selectedFilters.searchbar.filter[0] !== "") setIsSearching(true);
     else {
-      setParamData((old) => ({ ...old, sort: lastChoice }));
+      if (lastChoice) setParamData((old) => ({ ...old, sort: lastChoice }));
       setIsSearching(false);
     }
   }, [selectedFilters]);
