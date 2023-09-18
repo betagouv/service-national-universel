@@ -25,7 +25,9 @@ dayjs.prototype.toUtcLocally = function () {
 };
 
 dayjs.prototype.shiftTimeToUtc = function () {
-  this.$d.setMinutes(this.$d.getMinutes() + new Date().getTimezoneOffset());
+  // Add the timezone offset to the date not the current date because getTimezoneOffset
+  // can vary depending on the date (daylight saving time)
+  this.$d.setMinutes(this.$d.getMinutes() + new Date(this.$d).getTimezoneOffset());
   return this;
 };
 
