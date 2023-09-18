@@ -23,7 +23,7 @@
     "@swc/plugin-styled-components": "^1.5.81",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "autoprefixer": "^10.4.13",
-    "eslint": "8.27.0",
+    "eslint": "8.49.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.32.2",
