@@ -81,7 +81,7 @@
     "sanitize-html": "^2.7.3",
     "slugify": "^1.6.5",
     "snu-lib": "*",
-    "styled-components": "5.3.6",
+    "styled-components": "5.3.11",
     "validator": "13.7.0",
     "xlsx": "0.17.4"
   },
