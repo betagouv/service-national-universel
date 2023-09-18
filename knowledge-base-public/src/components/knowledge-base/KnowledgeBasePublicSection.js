@@ -13,7 +13,7 @@ import Link from "next/link";
 import useUser from "../../hooks/useUser";
 import API from "../../services/api";
 import { separateEmojiAndText } from "../../utils/index";
-import { capture } from "../../../../";
+// import { capture } from "./sentry";
 
 const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   const { restriction } = useUser();
@@ -43,7 +43,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
 
         setTop4Article(processedData);
       } catch (error) {
-        console.error(error);
+        console.log(error);
       }
     };
 
