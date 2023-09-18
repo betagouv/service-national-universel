@@ -1,3 +1,18 @@
+## [1.334.1](https://github.com/betagouv/service-national-universel/compare/v1.334.0...v1.334.1) (2023-09-18)
+
+
+### Bug Fixes
+
+* **admin:** dayjs shift time to utc with daylight saving time ([#3010](https://github.com/betagouv/service-national-universel/issues/3010)) ([65f0b61](https://github.com/betagouv/service-national-universel/commit/65f0b61b64dcbe03cbe90e39cee18afb0f4c0550))
+* **admin:** sort options on load ([#3004](https://github.com/betagouv/service-national-universel/issues/3004)) ([d13cab9](https://github.com/betagouv/service-national-universel/commit/d13cab94dbf785c0f994f8f6daadd478fd8fded4))
+* **deps:** update dependency libphonenumber-js to v1.10.44 ([#2980](https://github.com/betagouv/service-national-universel/issues/2980)) ([bf3facd](https://github.com/betagouv/service-national-universel/commit/bf3facd436dd80775eea1167de4a46741387d38a))
+* **deps:** update dependency pg to v8.11.3 ([#2981](https://github.com/betagouv/service-national-universel/issues/2981)) ([d7c27f3](https://github.com/betagouv/service-national-universel/commit/d7c27f36ee9d1e8c1436c6334134354da9f507f6))
+* **deps:** update dependency redis to v4.6.8 ([#2982](https://github.com/betagouv/service-national-universel/issues/2982)) ([a238845](https://github.com/betagouv/service-national-universel/commit/a2388450255e6d0916d3d87d7d0f2f98d0c1e997))
+* **deps:** update dependency redux to v4.2.1 ([#2983](https://github.com/betagouv/service-national-universel/issues/2983)) ([5c847c9](https://github.com/betagouv/service-national-universel/commit/5c847c9cebd5138670c5955c47785b6c4c62521e))
+* **deps:** update dependency slate-react to v0.98.3 ([#2985](https://github.com/betagouv/service-national-universel/issues/2985)) ([34e2308](https://github.com/betagouv/service-national-universel/commit/34e2308d52900b5081915a3a8b4ceea6c6aab0a8))
+* **deps:** update dependency styled-components to v5.3.11 ([#2986](https://github.com/betagouv/service-national-universel/issues/2986)) ([333a2db](https://github.com/betagouv/service-national-universel/commit/333a2db061a9e9f016cc4e9dd20f9a907fa97f11))
+* **deps:** update dependency uuid to v9.0.1 ([#2987](https://github.com/betagouv/service-national-universel/issues/2987)) ([4b18519](https://github.com/betagouv/service-national-universel/commit/4b185194da0a5565cc52b308bde9c32376de49bb))
+
 # [1.334.0](https://github.com/betagouv/service-national-universel/compare/v1.333.0...v1.334.0) (2023-09-15)
 
 
