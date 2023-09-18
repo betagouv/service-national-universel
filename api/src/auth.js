@@ -163,7 +163,7 @@ class Auth {
         emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: value.email }],
         params: {
           registration_code: tokenEmailValidation,
-          params: { registration_code: tokenEmailValidation, cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}` },
+          cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}`,
         },
       });
 
@@ -208,11 +208,12 @@ class Auth {
 
       await currentUser.save();
 
+      //@todo: new template
       await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
         emailTo: [{ name: `${currentUser.firstName} ${currentUser.lastName}`, email: value.email }],
         params: {
           registration_code: tokenEmailValidation,
-          params: { registration_code: tokenEmailValidation, cta: `${config.APP_URL}/account/general?token=${tokenEmailValidation}` },
+          cta: `${config.APP_URL}/account/general?token=${tokenEmailValidation}`,
         },
       });
 
@@ -441,20 +442,24 @@ class Auth {
     try {
       const user = await this.model.findOne({
         email: req.user.email,
-        emailVerified: "false",
       });
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+
+      if (!(user.emailVerified === "false") || !user.newEmail) {
+        return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+      }
 
       const tokenEmailValidation = await crypto.randomInt(1000000);
 
       user.set({ tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10 });
       await user.save();
 
+      //@todo : different template for new account and existing account
       await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
         emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: req.user.email }],
         params: {
           registration_code: tokenEmailValidation,
-          params: { registration_code: tokenEmailValidation, cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}` },
+          cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}`,
         },
       });
 

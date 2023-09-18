@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BiLoaderAlt } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
@@ -39,10 +39,16 @@ const AccountGeneralPage = () => {
 
   const [formValues, setFormValues] = useState(getInitialFormValues(young));
 
+  useEffect(() => {
+    console.log(young.email, formValues.email);
+    if (formValues.email === young.email) return;
+    setFormValues({ ...formValues, email: young.email });
+  }, [young.email, formValues]);
+
   const [errors, setErrors] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChangeAddressModalOpen, setChangeAddressModalOpen] = useState(false);
-  const [isChangeEmailModalOpen, setChangeEmailModalOpen] = useState(true);
+  const [isChangeEmailModalOpen, setChangeEmailModalOpen] = useState(false);
 
   const validateForm = () => {
     const foundErrors = {};

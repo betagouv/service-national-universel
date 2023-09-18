@@ -11,7 +11,7 @@ import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 import { setYoung } from "@/redux/auth/actions";
 import plausibleEvent from "@/services/plausible";
 
-const ActivationCodeModalContent = ({ onSuccess, onCancel, newEmail }) => {
+const ActivationCodeModalContent = ({ onSuccess, onCancel, newEmail, openDidNotReceiveCodeModal }) => {
   const dispatch = useDispatch();
   const { search } = useLocation();
   const { token } = queryString.parse(search);
@@ -25,19 +25,19 @@ const ActivationCodeModalContent = ({ onSuccess, onCancel, newEmail }) => {
     }
     try {
       setLoading(true);
-      const { code, ok, user } = await api.post("/young/email/validate-update", { token_email_validation: emailValidationToken });
+      const { code, ok, user } = await api.post("/young/email-validation/new-email", { token_email_validation: emailValidationToken });
       if (!ok) {
         setError(`Une erreur s'est produite : ${translate(code)}`);
       }
       if (user) dispatch(setYoung(user));
       setError("");
       setEmailValidationToken("");
+      setLoading(false);
       plausibleEvent("Successful email update");
       onSuccess();
     } catch (e) {
       capture(e);
       setError(`Une erreur s'est produite : ${translate(e.code)}`);
-    } finally {
       setLoading(false);
     }
   }
@@ -52,7 +52,7 @@ const ActivationCodeModalContent = ({ onSuccess, onCancel, newEmail }) => {
       </Modal.Subtitle>
       <Input label="Code d'activation reçu par email" name="email" onChange={setEmailValidationToken} error={error} value={emailValidationToken} />
       {/* refacto inline button gray en props */}
-      <InlineButton className="text-gray-500 hover:text-gray-700 text-sm font-medium" onClick={() => {}}>
+      <InlineButton className="text-gray-500 hover:text-gray-700 text-sm font-medium" onClick={openDidNotReceiveCodeModal}>
         Je n'ai rien reçu
       </InlineButton>
       <Modal.Buttons onCancel={onCancel} cancelText="Annuler" onConfirm={onSubmit} confirmText="Valider" disabled={isLoading} />

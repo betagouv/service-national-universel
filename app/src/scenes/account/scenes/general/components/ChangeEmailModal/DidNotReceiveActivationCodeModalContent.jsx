@@ -1,9 +1,28 @@
 import React from "react";
 import { BsInfoSquareFill } from "react-icons/bs";
+import { translate } from "snu-lib";
+import { toastr } from "react-redux-toastr";
 import Modal from "@/components/ui/modals/Modal";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
+import api from "@/services/api";
+import { capture } from "@/sentry";
 
-const DidNotReceiveActivationCodeModalContent = ({ onConfirm, onCancel }) => {
+const DidNotReceiveActivationCodeModalContent = ({ onConfirm, modifiyEmail }) => {
+  async function requestNewToken() {
+    try {
+      const { code, ok } = await api.get("/young/email-validation/token");
+      if (!ok) {
+        toastr.success(`Une erreur s'est produite : ${translate(code)}`, "");
+      } else {
+        toastr.success("Un nouveau code d'activation vous a été envoyé par e-mail", "", { timeOut: 6000 });
+        onConfirm();
+      }
+    } catch (e) {
+      capture(e);
+      toastr.error(`Une erreur s'est produite : ${translate(e.code)}`, "");
+    }
+  }
+
   return (
     <>
       <Modal.Title>Je n'ai rien reçu</Modal.Title>
@@ -16,7 +35,7 @@ const DidNotReceiveActivationCodeModalContent = ({ onConfirm, onCancel }) => {
         <li>
           <BsInfoSquareFill className="inline mb-1 mr-1" />
           L'adresse e-mail que vous utilisez est bien celle que vous avez renseigné
-          <InlineButton className="ml-1 text-xs text-[#0063CB]" onClick={() => {}}>
+          <InlineButton className="ml-1 text-xs text-[#0063CB]" onClick={modifiyEmail}>
             Modifier mon adresse e-mail
           </InlineButton>
         </li>
@@ -33,7 +52,7 @@ const DidNotReceiveActivationCodeModalContent = ({ onConfirm, onCancel }) => {
           Votre boite de réception n'est pas saturée
         </li>
       </ul>
-      <Modal.Buttons onCancel={onCancel} cancelText="J'ai compris" onConfirm={() => onConfirm()} confirmText="Recevoir un nouveau code" />
+      <Modal.Buttons onCancel={onConfirm} cancelText="J'ai compris" onConfirm={requestNewToken} confirmText="Recevoir un nouveau code" />
     </>
   );
 };

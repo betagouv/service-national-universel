@@ -2,7 +2,7 @@ import React from "react";
 import Modal from "@/components/ui/modals/Modal";
 import Check from "@/assets/icons/Check";
 
-const ConfirmationModalContent = ({ onConfirm, onCancel }) => {
+const ConfirmationModalContent = ({ onCancel }) => {
   return (
     <>
       <div className="rounded-full bg-blue-100 w-[48px] h-[48px] mx-auto flex justify-center items-center">
