@@ -100,14 +100,21 @@ async function getTimeScheduleAndPedagoProject(startDate, endDate, user) {
   }
 
   const response = await esClient.search({ index: "sessionphase1", body });
-  const value = response.body.hits.total.value;
+  const time = response.body.aggregations.group_by_timeSchedule.doc_count;
+  const project = response.body.aggregations.group_by_pedagoProject.doc_count;
 
   return [
     {
       id: "time-schedule",
-      value,
-      label: `emploi${value > 1 ? "s" : ""} du temps déposé${value > 1 ? "s" : ""}`,
-      icon: "action",
+      value: time,
+      label: ` emploi${time > 1 ? "s" : ""} du temps déposé${time > 1 ? "s" : ""}`,
+      icon: "where",
+    },
+    {
+      id: "pedago-project",
+      value: project,
+      label: ` projet${project > 1 ? "s" : ""} pédagogique${project > 1 ? "s" : ""} déposé${project > 1 ? "s" : ""}`,
+      icon: "where",
     },
   ];
 }

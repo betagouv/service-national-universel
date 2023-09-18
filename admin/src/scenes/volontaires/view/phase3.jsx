@@ -143,11 +143,6 @@ export default function Phase3({ young, onChange }) {
             </Box>
           </>
         ) : null}
-        {young.statusPhase3 === "VALIDATED" ? (
-          <DownloadAttestationButton young={young} uri="3">
-            Télécharger l&apos;attestation de réalisation de la phase 3
-          </DownloadAttestationButton>
-        ) : null}
       </div>
     </>
   );

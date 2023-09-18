@@ -24,7 +24,7 @@ router.post("/refresh", async (req, res) => {
 router.post("/young-status/count", async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      region: Joi.array().items(Joi.string()),
+      region: Joi.string(),
       department: Joi.array().items(Joi.string()),
       status: Joi.string().valid("VALIDATED", "WAITING_VALIDATION", "WITHDRAWN").required(),
       startDate: Joi.string()
@@ -47,7 +47,8 @@ router.post("/young-status/count", async (req, res) => {
       result = await db.query(
         `
         select count (distinct young_id) from "public"."logs_by_day_user_status_change_event"
-        where region in (:region) and value = :status
+        where region = :region
+        and value = :status
         and "date" between :startDate and :endDate::date + 1;`,
         {
           type: db.QueryTypes.SELECT,
@@ -89,7 +90,7 @@ router.post("/young-status/count", async (req, res) => {
 router.post("/young-cohort/count", async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      region: Joi.array().items(Joi.string()),
+      region: Joi.string(),
       department: Joi.array().items(Joi.string()),
       startDate: Joi.string()
         .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -111,7 +112,7 @@ router.post("/young-cohort/count", async (req, res) => {
       result = await db.query(
         `
         select count (distinct young_id) from "public"."logs_by_day_user_cohort_change_event"
-        where region in (:region)
+        where region = :region
         and "date" between :startDate and :endDate::date + 1;`,
         {
           type: db.QueryTypes.SELECT,
@@ -316,7 +317,7 @@ router.post("/young-validated-from", async (req, res) => {
         and l2.young_id = l.young_id );`,
         {
           type: db.QueryTypes.SELECT,
-          replacements: { toStatus: value.status, fromStatus: value.fromStatus, region: value.region, startDate: value.startDate, endDate: value.endDate },
+          replacements: { toStatus: value.toStatus, fromStatus: value.fromStatus, region: value.region, startDate: value.startDate, endDate: value.endDate },
         },
       );
     } else {
@@ -482,6 +483,48 @@ router.post("/application-change-status/count", async (req, res) => {
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: "Error in application-change-status" });
+  }
+});
+
+router.post("/application-accepted-refused/count", async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      status: Joi.array().items(Joi.string().valid("VALIDATED", "REFUSED").required()),
+      department: Joi.array().items(Joi.string()),
+      startDate: Joi.string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .required(),
+      endDate: Joi.string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .required(),
+    }).validate(req.body);
+
+    if (error) {
+      console.log(error);
+      return res.status(400).send({ ok: false, code: "INVALID_PARAMS" });
+    }
+
+    let result = await db.query(
+      `
+      select value from "public"."logs_by_day_application_status_change_event" l
+      where value in (:status)
+      and "date" BETWEEN :startDate and :endDate::date + 1
+      and exists (
+        select 1 from "public"."logs_by_day_application_status_change_event" l2
+        where value = 'WAITING_VALIDATION'
+        and candidature_mission_department in (:department)
+        and l2.candidature_id = l.candidature_id
+      );`,
+      {
+        type: db.QueryTypes.SELECT,
+        replacements: { department: value.department, status: value.status, startDate: value.startDate, endDate: value.endDate },
+      },
+    );
+
+    return res.status(200).send({ ok: true, data: result });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: "Error in application-accepted-refused" });
   }
 });
 

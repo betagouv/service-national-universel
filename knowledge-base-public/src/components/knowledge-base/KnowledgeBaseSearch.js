@@ -79,6 +79,11 @@ export default function KnowledgeBaseSearch({ open = false, setOpen }) {
                     <Combobox.Input
                       className="w-full rounded-md border-0 bg-white p-3 px-10 text-gray-800 shadow-sm sm:text-sm sm:leading-6"
                       onChange={computeSearch}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                        }
+                      }}
                       displayValue={query}
                       placeholder="Rechercher un article"
                     />

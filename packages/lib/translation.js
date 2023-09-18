@@ -268,8 +268,6 @@ const translate = (value) => {
       return "Motorisé";
     case "CARPOOLING":
       return "Covoiturage";
-    case "WAITING_REALISATION":
-      return "En attente de réalisation";
     case "PUBLIC_TRANSPORT":
       return "Transport en commun";
     case "IN_COMING":

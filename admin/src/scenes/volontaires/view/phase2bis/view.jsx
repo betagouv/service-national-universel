@@ -434,19 +434,6 @@ export default function Phase2({ young, onChange }) {
             />
           )}
         </Box>
-
-        {young.statusPhase2 === "VALIDATED" ? (
-          <div style={{ display: "flex", alignItems: "flex-start" }}>
-            <div style={{ textAlign: "center" }}>
-              <DownloadAttestationButton young={young} uri="2">
-                Télécharger l&apos;attestation de réalisation de la phase 2
-              </DownloadAttestationButton>
-              <MailAttestationButton style={{ marginTop: ".5rem" }} young={young} type="2" template="certificate" placeholder="Attestation de réalisation de la phase 2">
-                Envoyer l&apos;attestation par mail
-              </MailAttestationButton>
-            </div>
-          </div>
-        ) : null}
       </div>
     </>
   );

@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import SelectStatusMission from "../../../components/selectStatusMission";
-import { translate, ROLES, MISSION_STATUS } from "../../../utils";
+import { translate, ROLES } from "../../../utils";
 import Badge from "../../../components/Badge";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
@@ -44,14 +44,7 @@ export default function Wrapper({ mission, tab, children, getMission }) {
   };
 
   const onConfirmDuplicate = async () => {
-    mission.name += " (copie)";
-    delete mission._id;
-    mission.placesLeft = mission.placesTotal;
-    mission.status = MISSION_STATUS.DRAFT;
-    const { data, ok, code } = await api.post("/mission", mission);
-    if (!ok) toastr.error("Oups, une erreur est survnue lors de la duplication de la mission", translate(code));
-    toastr.success("Mission dupliquée !");
-    return history.push(`/mission/${data._id}`);
+    return history.push(`/mission/create/${mission.structureId}?duplicate=${mission._id}`);
   };
 
   if (!mission || !user) return null;

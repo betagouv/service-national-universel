@@ -4,8 +4,8 @@ import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 import { ROLES, translate } from "snu-lib";
-import { setUser } from "../../../redux/auth/actions";
-import api from "../../../services/api";
+import { setUser } from "@/redux/auth/actions";
+import api from "@/services/api";
 import AddUser from "../icons/AddUser";
 import Logout from "../icons/Logout";
 import Message from "../icons/Message";
@@ -124,7 +124,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                           <NavItemAction Icon={AddUser} title="Inviter un nouvel utilisateur" onClick={() => setOpenInvite(true)} />
                         )}
                         {[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && user.structureId && (
-                          <NavItem Icon={AddUser} title="Inviter un nouvel utilisateur" link={`/structure/${user.structureId}`} />
+                          <NavItem Icon={AddUser} title="Inviter un nouveau responsable" link={`/structure/${user.structureId}?prompt=team`} />
                         )}
                         {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Settings} title="Paramétrages dynamiques" link="/settings" />}
                         {[ROLES.ADMIN].includes(user.role) && user.subRole === "god" && <NavItem Icon={Message} title="Messages d'alerte" link={"/alerte"} />}
@@ -159,7 +159,7 @@ const NavItem = ({ Icon, title, link }) => {
       <div className="flex items-center justify-center w-[22px] h-[22px]">
         <Icon className="text-[#30345B]" />
       </div>
-      <span className="ml-[11px] text-sm leading-5 h-[20px] text-left text-[#1B1F42] align-middle">{title}</span>
+      <span className="ml-[11px] text-sm leading-5 h-[20px] text-left text-[#1B1F42] align-middle text-ellipsis whitespace-nowrap overflow-hidden">{title}</span>
     </Link>
   );
 };
