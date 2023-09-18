@@ -107,11 +107,11 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   if (isRoot) {
     return (
       <>
-        <div className="flex h-44 w-full flex-col justify-center gap-6 border-t-[1px] border-white border-opacity-20 bg-[#32257F]">
-          <p className="text-center text-3xl font-bold leading-9 text-white">J&apos;ai besoin d&apos;aide</p>
+        <div className="w-full flex flex-col justify-center gap-6 border-t-[1px] border-white border-opacity-20 bg-[#32257F]">
+          <p className="text-center text-3xl mt-10 mb-2 font-bold leading-9 text-white">J&apos;ai besoin d&apos;aide</p>
           <button
             onClick={() => setSearchOpen(true)}
-            className={`mx-4 flex max-w-2xl cursor-text gap-4 rounded-lg bg-white p-3 text-gray-600 md:mx-auto md:w-full ${searchOpen && "invisible"}`}
+            className={`mx-4 mb-2 flex max-w-2xl cursor-text gap-4 rounded-lg bg-white p-3 text-gray-600 md:mx-auto md:w-full ${searchOpen && "invisible"}`}
           >
             <HiSearch className="text-2xl text-gray-500" />
             Rechercher un article
