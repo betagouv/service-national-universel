@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const { db } = require("../services/databases/postgresql.service");
+const { db } = require("../postgresql");
 
 const OBJ = db.define(
   "log_structures",

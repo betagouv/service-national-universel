@@ -282,6 +282,7 @@ async function getYoungValidatedFromWaitingStatus(startDate, endDate, user) {
 
   const result = await response.json();
   const data = result?.data;
+  console.log(`🐞 - file: inscription.js:285 - data:`, data);
   let resultArray = {
     [YOUNG_STATUS.WAITING_VALIDATION]: 0,
     [YOUNG_STATUS.WAITING_LIST]: 0,
@@ -415,7 +416,7 @@ async function getYoungWhoChangedCohort(startDate, endDate, user) {
   });
 
   const result = await response.json();
-  const value = result?.data;
+  const value = result?.data.count;
 
   return [
     {

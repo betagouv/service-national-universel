@@ -26,10 +26,10 @@ function initSentry(app) {
 }
 
 function capture(err, contexte) {
-  console.error("capture", err);
-
+  console.log("capture", err);
   if (!err) {
-    return sentryCaptureMessage("Error not defined");
+    sentryCaptureMessage("Error not defined");
+    return;
   }
 
   if (err instanceof Error) {
@@ -42,15 +42,16 @@ function capture(err, contexte) {
     sentryCaptureMessage("Error not defined well", { extra: { error: err, contexte: contexte } });
   }
 }
-
 function captureMessage(mess, contexte) {
   console.log("captureMessage", mess);
-
   if (!mess) {
-    return sentryCaptureMessage("Error message not defined");
+    sentryCaptureMessage("Error not defined");
+    return;
   }
 
-  sentryCaptureMessage(mess, contexte);
+  if (mess) {
+    sentryCaptureMessage(mess, contexte);
+  }
 }
 
 module.exports = {
