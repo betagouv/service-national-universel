@@ -5,7 +5,7 @@ const { capture } = require("../sentry");
 const slack = require("../slack");
 const Demarche = require("../models/demarche_JDMA");
 const { JDMA_LOGIN, JDMA_PASSWORD } = require("../config");
-const ONE_DAY_IN_MS = 86400000; // one day in milliseconds
+const ONE_DAY_IN_MS = 86400000; // one day in milliseconds.
 
 module.exports.handler = function () {
   let count = 0;
