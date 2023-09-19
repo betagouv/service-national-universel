@@ -407,6 +407,7 @@ function Actus({ stats }) {
                   key={"sejour_centre_à_déclarer" + item.cohort + item.department}
                   number=""
                   content={`Au moins 1 centre est en attente de déclaration pour le séjour de ${item.cohort} (${item.department})`}
+                  link={`/centre/liste/session?cohort=${item.cohort}&department=${item.department}`}
                   btnLabel="À déclarer"
                 />
               ),
@@ -418,23 +419,26 @@ function Actus({ stats }) {
                   title="Pointage"
                   key={"sejourPointage" + item.cohort}
                   number={item.count}
-                  content={`centres n’ont pas pointés tous leurs volontaires à l’arrivée au séjour de ${item.cohort}`}
+                  content={`centres n'ont pas pointés tous leurs volontaires à l'arrivée au séjour de ${item.cohort}`}
+                  link={null}
                   btnLabel="À renseigner"
                 />
               ),
           )}
-          {stats.sejour.sejour_pointage_jdm.map(
+          {/* ON A PLUS LA JDM DE MEMOIRE */}
+          {/* {stats.sejour.sejour_pointage_jdm.map(
             (item, key) =>
               shouldShow(stats.sejour, "sejour_pointage_jdm", key) && (
                 <NoteContainer
                   title="Pointage"
                   key={"sejour_pointage_jdm" + item.cohort}
                   number={item.count}
-                  content={`centres n’ont pas pointés tous leurs volontaires à la JDM sur le séjour de ${item.cohort}`}
+                  content={`centres n'ont pas pointés tous leurs volontaires à la JDM sur le séjour de ${item.cohort}`}
+                  link={null}
                   btnLabel="À renseigner"
                 />
               ),
-          )}
+          )} */}
         </div>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
