@@ -1,3 +1,24 @@
+# [1.335.0](https://github.com/betagouv/service-national-universel/compare/v1.334.1...v1.335.0) (2023-09-19)
+
+
+### Bug Fixes
+
+* **api:** bug city undefined ([7784467](https://github.com/betagouv/service-national-universel/commit/7784467a1282b7c7ccb7e6fa5ce40e34db9f51db))
+* **api:** bug packages ([bdcb5b0](https://github.com/betagouv/service-national-universel/commit/bdcb5b0541611fefa39ae0ed8fd90a3ae25c8cf3))
+* **api:** package ([d5b1e9f](https://github.com/betagouv/service-national-universel/commit/d5b1e9f403f41b6f02ddac8d44aac301b1398d25))
+* **api:** rerun api ([dad5750](https://github.com/betagouv/service-national-universel/commit/dad57502f4709bc6c438d571d7c6eb6849f15fa8))
+* **api:** rerun package lock ([406705d](https://github.com/betagouv/service-national-universel/commit/406705d0e23886aa5d48a8c5baec1deb9e834556))
+
+
+### Features
+
+* PR template ([#2975](https://github.com/betagouv/service-national-universel/issues/2975)) ([f1e4676](https://github.com/betagouv/service-national-universel/commit/f1e467678eaac1b181f6d4716ad86dee5e2f1c8f))
+
+
+### Reverts
+
+* Revert "refacto(analytics): naming, separation of concerns, imports and more (#3020)" ([5167ce4](https://github.com/betagouv/service-national-universel/commit/5167ce4f4bbbc45c23649fff6b57db1d50defaa6)), closes [#3020](https://github.com/betagouv/service-national-universel/issues/3020)
+
 ## [1.334.1](https://github.com/betagouv/service-national-universel/compare/v1.334.0...v1.334.1) (2023-09-18)
 
 
