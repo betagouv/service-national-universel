@@ -1,39 +1,17 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useHistory, useParams } from "react-router-dom";
-import { setYoung } from "../../../redux/auth/actions";
-import { capture } from "../../../sentry";
-import dayjs from "dayjs";
-import api from "../../../services/api";
-import plausibleEvent from "../../../services/plausible";
+import { useSelector } from "react-redux";
 import { ID } from "../utils";
-import { supportURL } from "../../../config";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 
 import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
-import DesktopPageContainer from "../components/DesktopPageContainer";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
-import FileImport from "../../../components/dsfr/forms/FileImport";
-import { getCorrectionsForStepUpload } from "../../../utils/navigation";
+import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import FileImport from "@/components/dsfr/forms/FileImport";
 
-export default function StepUpload() {
-  let { category } = useParams();
+export default function StepUploadDesktop({ recto, setRecto, verso, setVerso, date, setDate, error, setError, loading, setLoading, corrections, category, onSubmit, onCorrect }) {
   const young = useSelector((state) => state.Auth.young);
-  if (!category) category = young?.latestCNIFileCategory;
-  const history = useHistory();
-  const dispatch = useDispatch();
-  const corrections = getCorrectionsForStepUpload(young);
-
-  const [recto, setRecto] = useState();
-  const [verso, setVerso] = useState();
-  const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState({});
-  const expirationDate = dayjs(date).locale("fr").format("YYYY-MM-DD");
-
-  // Desktop
   const [hasChanged, setHasChanged] = useState(false);
   const isEnabled = validate();
   function validate() {
@@ -44,7 +22,6 @@ export default function StepUpload() {
     }
   }
 
-  // Desktop
   function resetState() {
     setRecto();
     setVerso();
@@ -52,102 +29,8 @@ export default function StepUpload() {
     setLoading(false);
   }
 
-  async function uploadFiles() {
-    const oversizedFiles = [recto, verso].filter((e) => e && e.size > 5000000).map((e) => e.name);
-    if (oversizedFiles.length) {
-      setError({ text: `Fichier(s) trop volumineux : ${oversizedFiles.join(", ")}.` });
-      resetState();
-      return { ok: false };
-    }
-
-    if (recto) {
-      const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, recto, { category, expirationDate, side: "recto" });
-      if (!res.ok) {
-        capture(res.code);
-        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
-        resetState();
-        return { ok: false };
-      }
-    }
-
-    if (verso) {
-      const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, verso, { category, expirationDate, side: "verso" });
-      if (!res.ok) {
-        capture(res.code);
-        setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
-        resetState();
-        return { ok: false };
-      }
-    }
-
-    return { ok: true };
-  }
-
-  async function onSubmit() {
-    try {
-      setLoading(true);
-
-      const { ok: uploadOk } = await uploadFiles();
-      if (!uploadOk) return;
-
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: expirationDate });
-
-      if (!ok) {
-        capture(code);
-        setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données." });
-        resetState();
-        return;
-      }
-
-      dispatch(setYoung(responseData));
-      plausibleEvent("Phase0/CTA inscription - CI desktop");
-      history.push("/inscription2023/confirm");
-    } catch (e) {
-      capture(e);
-      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données." });
-      resetState();
-    }
-  }
-
-  async function onCorrect() {
-    try {
-      setLoading(true);
-
-      const { ok: uploadOk } = await uploadFiles();
-      if (!uploadOk) return;
-
-      const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
-
-      if (!ok) {
-        capture(code);
-        setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: code });
-        resetState();
-        return;
-      }
-
-      plausibleEvent("Phase0/CTA demande correction - Corriger ID");
-      dispatch(setYoung(responseData));
-      history.push("/");
-    } catch (e) {
-      capture(e);
-      setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données." });
-      resetState();
-    }
-  }
-
-  if (!category) return <div>Loading</div>;
-
   return (
-    <DesktopPageContainer
-      title={ID[category].title}
-      subTitle={ID[category].subTitle}
-      onSubmit={onSubmit}
-      modeCorrection={corrections?.length > 0}
-      onCorrection={onCorrect}
-      disabled={!isEnabled}
-      loading={loading}
-      supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`}>
+    <>
       {corrections
         ?.filter(({ field }) => field === "cniFile")
         .map((e) => (
@@ -213,7 +96,12 @@ export default function StepUpload() {
       {(recto || verso || date) && <ExpirationDate date={date} setDate={setDate} onChange={() => setHasChanged(true)} corrections={corrections} category={category} />}
 
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-    </DesktopPageContainer>
+      {corrections?.length ? (
+        <SignupButtonContainer onClickNext={() => onCorrect(resetState)} labelNext={loading ? "Scan antivirus en cours" : "Corriger"} disabled={!isEnabled} />
+      ) : (
+        <SignupButtonContainer onClickNext={() => onSubmit(resetState)} labelNext={loading ? "Scan antivirus en cours" : "Continuer"} disabled={!isEnabled} />
+      )}
+    </>
   );
 }
 
