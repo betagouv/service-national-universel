@@ -11,4 +11,6 @@ module.exports = {
   SLACK_BOT_CHANNEL: process.env.SLACK_BOT_CHANNEL || "",
   SENTRY_URL: process.env.SENTRY_URL || "",
   SENTRY_TRACING_SAMPLE_RATE: process.env.SENTRY_TRACING_SAMPLE_RATE || 1,
+  UPTIME_ROBOT_TOKEN: process.env.UPTIME_ROBOT_TOKEN || "",
+  CODE_CLIMATE_TOKEN: process.env.CODE_CLIMATE_TOKEN || "",
 };
