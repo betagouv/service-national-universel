@@ -21,11 +21,17 @@ module.exports.handler = async function () {
     });
     const data = await response.json();
     if (data.stat !== "ok") return capture(data.error.message);
+
+    // get date from yesterday
+    const date = new Date();
+    date.setDate(date.getDate() - 1);
+
     data.monitors.forEach((monitor) => {
       // pour chaque monitor, save date + uptime_ratio
       uptimeRobot.create({
         uptime_ratio: monitor.custom_uptime_ratio,
         monitor_id: monitor.id,
+        date,
       });
     });
   } catch (error) {

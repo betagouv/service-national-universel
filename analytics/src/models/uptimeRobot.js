@@ -2,10 +2,11 @@ const { DataTypes } = require("sequelize");
 const { db } = require("../postgresql");
 
 const uptimeRobot = db.define(
-  "uptimeRobots",
+  "uptimeRobot",
   {
-    uptime_ratio: DataTypes.INTEGER,
-    monitor_id: DataTypes.TEXT,
+    uptime_ratio: DataTypes.STRING,
+    monitor_id: DataTypes.STRING,
+    date: DataTypes.DATE,
   },
   {
     defaultScope: {

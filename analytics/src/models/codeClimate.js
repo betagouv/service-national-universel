@@ -4,8 +4,9 @@ const { db } = require("../postgresql");
 const codeClimate = db.define(
   "codeClimate",
   {
-    technical_debt_ratio: DataTypes.FLOAT,
-    test_coverage: DataTypes.FLOAT,
+    technical_debt_ratio: DataTypes.STRING,
+    test_coverage: DataTypes.STRING,
+    date: DataTypes.DATE,
   },
   {
     defaultScope: {

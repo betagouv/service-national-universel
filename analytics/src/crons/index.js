@@ -32,4 +32,3 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     addUptimeRobotData.handler();
   });
 }
-addCodeClimateData.handler();

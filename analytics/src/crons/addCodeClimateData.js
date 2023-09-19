@@ -9,11 +9,11 @@ const fetch = require("node-fetch");
 module.exports.handler = async function () {
   // post request only
   const date = new Date();
-  const today = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+  const yesterday = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate() - 1}`;
   // filter[to] and filter[from] query paramerets
 
   try {
-    const url = `https://api.codeclimate.com/v1/repos/6034fa54fc4de61073009538/metrics/technical_debt_ratio?filter[from]=${today}&filter[to]=${today}`;
+    const url = `https://api.codeclimate.com/v1/repos/6034fa54fc4de61073009538/metrics/technical_debt_ratio?filter[from]=${yesterday}&filter[to]=${yesterday}`;
     // today date in YYYY/MM/DD format
     const response = await fetch(url, {
       headers: { "Content-Type": "application/json" },
@@ -21,7 +21,7 @@ module.exports.handler = async function () {
     const { data } = await response.json();
     const technical_debt_ratio = data.attributes.points[0].value;
 
-    const url_test_coverage = `https://api.codeclimate.com/v1/repos/6034fa54fc4de61073009538/metrics/test_coverage?filter[from]=${today}&filter[to]=${today}`;
+    const url_test_coverage = `https://api.codeclimate.com/v1/repos/6034fa54fc4de61073009538/metrics/test_coverage?filter[from]=${yesterday}&filter[to]=${yesterday}`;
     const response_test_coverage = await fetch(url_test_coverage, {
       headers: { "Content-Type": "application/json" },
     });
@@ -31,8 +31,8 @@ module.exports.handler = async function () {
     codeClimate.create({
       technical_debt_ratio,
       test_coverage,
+      date: yesterday,
     });
-    console.log(technical_debt_ratio, test_coverage);
   } catch (error) {
     capture(error);
   }
