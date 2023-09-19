@@ -34,6 +34,7 @@ const getCohesionCenterLocation = (cohesionCenter) => {
       t += `, ${cohesionCenter.zip}`;
     }
   }
+
   return t;
 };
 
