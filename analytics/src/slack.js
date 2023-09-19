@@ -44,7 +44,6 @@ const postMessage = async ({ title, text, author_name, color }) => {
       })
       .catch((error) => {
         capture(error);
-        console.log(error);
       });
   } else {
     console.log("slack", payload?.attachments);
