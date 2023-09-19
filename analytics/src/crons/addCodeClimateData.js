@@ -7,7 +7,6 @@ const codeClimate = require("../models/codeClimate");
 const fetch = require("node-fetch");
 
 module.exports.handler = async function () {
-  // post request only
   const date = new Date();
   const yesterday = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate() - 1}`;
   // filter[to] and filter[from] query paramerets

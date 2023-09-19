@@ -1,12 +1,11 @@
 const { DataTypes } = require("sequelize");
 const { db } = require("../postgresql");
 
-const codeClimate = db.define(
-  "codeClimate",
+const sentryInfo = db.define(
+  "sentryInfo",
   {
-    technical_debt_ratio: DataTypes.STRING,
-    test_coverage: DataTypes.STRING,
-    date: DataTypes.STRING,
+    nb_errors: DataTypes.INTEGER,
+    date: DataTypes.TEXT,
   },
   {
     defaultScope: {
@@ -15,4 +14,4 @@ const codeClimate = db.define(
   },
 );
 
-module.exports = codeClimate;
+module.exports = sentryInfo;

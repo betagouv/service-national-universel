@@ -25,13 +25,14 @@ module.exports.handler = async function () {
     // get date from yesterday
     const date = new Date();
     date.setDate(date.getDate() - 1);
+    const dateString = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
 
     data.monitors.forEach((monitor) => {
       // pour chaque monitor, save date + uptime_ratio
       uptimeRobot.create({
         uptime_ratio: monitor.custom_uptime_ratio,
         monitor_id: monitor.id,
-        date,
+        date: dateString,
       });
     });
   } catch (error) {

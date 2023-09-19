@@ -5,6 +5,7 @@ const { ENVIRONMENT } = require("../config");
 const addJdmaData = require("./add-jdma-data.job");
 const addUptimeRobotData = require("./addUptimeRobotData");
 const addCodeClimateData = require("./addCodeClimateData");
+const addSentryData = require("./addSentryData");
 
 // doubt ? -> https://crontab.guru/
 
@@ -30,5 +31,6 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     addJdmaData.handler();
     addCodeClimateData.handler();
     addUptimeRobotData.handler();
+    addSentryData.handler();
   });
 }

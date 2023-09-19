@@ -6,7 +6,7 @@ const uptimeRobot = db.define(
   {
     uptime_ratio: DataTypes.STRING,
     monitor_id: DataTypes.STRING,
-    date: DataTypes.DATE,
+    date: DataTypes.STRING,
   },
   {
     defaultScope: {
