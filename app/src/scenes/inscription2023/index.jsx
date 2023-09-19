@@ -6,7 +6,7 @@ import { SentryRoute } from "../../sentry";
 import StepConfirm from "./mobile/stepConfirm";
 import StepConsentements from "./mobile/stepConsentements";
 import StepCoordonnees from "./mobile/stepCoordonnees";
-import SteapDocuments from "./mobile/stepDocuments";
+import StepDocuments from "./mobile/stepDocuments";
 import StepDone from "./mobile/stepDone";
 import StepRepresentants from "./mobile/stepRepresentants";
 import StepUpload from "./mobile/stepUpload";
@@ -24,10 +24,10 @@ function renderStep(step) {
   if (step === STEPS.COORDONNEES) return <StepCoordonnees />;
   if (step === STEPS.REPRESENTANTS) return <StepRepresentants />;
   if (step === STEPS.CONSENTEMENTS) return <StepConsentements />;
-  if (step === STEPS.DOCUMENTS) return <SteapDocuments />;
+  if (step === STEPS.DOCUMENTS) return <StepDocuments />;
   if (step === STEPS.UPLOAD) return <StepUpload />;
   if (step === STEPS.CONFIRM) return <StepConfirm />;
-  if (step === STEPS.WAITING_CONSENT) <StepDone />;
+  if (step === STEPS.WAITING_CONSENT) return <StepDone />;
   if (step === STEPS.DONE) return <StepDone />;
   return <StepCoordonnees />;
 }
@@ -63,7 +63,7 @@ function renderStepCorrection(step) {
   if (step === CORRECTION_STEPS.PROFIL) return <MobileCorrectionProfil />;
   if (step === CORRECTION_STEPS.COORDONNEES) return <StepCoordonnees />;
   if (step === CORRECTION_STEPS.REPRESENTANTS) return <StepRepresentants />;
-  if (step === CORRECTION_STEPS.DOCUMENTS) return <SteapDocuments />;
+  if (step === CORRECTION_STEPS.DOCUMENTS) return <StepDocuments />;
   if (step === CORRECTION_STEPS.UPLOAD) return <StepUpload />;
   return false;
 }
