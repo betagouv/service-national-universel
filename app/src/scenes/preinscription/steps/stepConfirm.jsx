@@ -76,7 +76,7 @@ export default function StepConfirm() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer title="Ces informations sont-elles correctes ?" supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
+      <DSFRContainer title="Ces informations sont-elles correctes ?" supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}>
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
 
         <div className="space-y-4">
