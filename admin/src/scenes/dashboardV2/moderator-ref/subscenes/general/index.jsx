@@ -19,6 +19,7 @@ import Sejour from "../../../components/ui/icons/Sejour";
 import VolontaireSection from "./components/VolontaireSection";
 import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 import KeyNumbers from "../../../components/KeyNumbers";
+import { Link } from "react-router-dom";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -177,7 +178,7 @@ export default function Index() {
   );
 }
 
-const NoteContainer = ({ title, number, content, btnLabel }) => {
+const NoteContainer = ({ title, number, content, btnLabel, link }) => {
   return (
     <div className="flex h-36 w-full flex-col justify-between rounded-lg bg-blue-50 py-3.5 px-3">
       <div className="flex flex-col gap-2">
@@ -187,12 +188,14 @@ const NoteContainer = ({ title, number, content, btnLabel }) => {
           {content}
         </p>
       </div>
-      <div className="flex justify-end">
-        <button className="flex items-center gap-2 rounded-full bg-blue-600 py-1 pr-2 pl-3 text-xs font-medium text-white">
-          <span>{btnLabel}</span>
-          <HiChevronRight className="h-4 w-4" />
-        </button>
-      </div>
+      {link && (
+        <div className="flex justify-end">
+          <Link className="flex items-center gap-2 rounded-full bg-blue-600 py-1 pr-2 pl-3 text-xs font-medium text-white" to={link}>
+            <span>{btnLabel}</span>
+            <HiChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
@@ -249,7 +252,8 @@ function Actus({ stats }) {
             <NoteContainer
               title="Dossier"
               number={stats.inscription.inscription_en_attente_de_validation}
-              content="dossier d’inscriptions sont en attente de validation."
+              content="dossier d'inscriptions sont en attente de validation."
+              link="/inscription?status=WAITING_VALIDATION"
               btnLabel="À instruire"
             />
           )}
@@ -257,7 +261,8 @@ function Actus({ stats }) {
             <NoteContainer
               title="Dossier"
               number={stats.inscription.inscription_corrigé_à_instruire_de_nouveau}
-              content="dossiers d’inscription corrigés sont à instruire de nouveau."
+              content="dossiers d'inscription corrigés sont à instruire de nouveau."
+              link="/inscription?status=WAITING_VALIDATION"
               btnLabel="À instruire"
             />
           )}
@@ -265,7 +270,8 @@ function Actus({ stats }) {
             <NoteContainer
               title="Dossier"
               number={stats.inscription.inscription_en_attente_de_correction}
-              content="dossiers d’inscription en attente de correction."
+              content="dossiers d'inscription en attente de correction."
+              link="/inscription?status=WAITING_CORRECTION"
               btnLabel="À relancer"
             />
           )}
@@ -274,9 +280,10 @@ function Actus({ stats }) {
               shouldShow(stats.inscription, "inscription_en_attente_de_validation_cohorte", key) && (
                 <NoteContainer
                   key={"inscription_en_attente_de_validation_cohorte" + item.cohort}
-                  title="Droit à l'image"
+                  title="Dossier"
                   number={item.count}
-                  content={`dossiers d’inscription en attente de validation pour le séjour de ${item.cohort}`}
+                  content={`dossiers d'inscription en attente de validation pour le séjour de ${item.cohort}`}
+                  link={`/inscription?cohort=${item.cohort}&status=WAITING_VALIDATION`}
                   btnLabel="À relancer"
                 />
               ),
@@ -286,9 +293,10 @@ function Actus({ stats }) {
               shouldShow(stats.inscription, "inscription_sans_accord_renseigné", key) && (
                 <NoteContainer
                   key={"inscription_sans_accord_renseigné" + item.cohort}
-                  title="Droit à l'image"
+                  title=""
                   number={item.count}
                   content={`volontaires sans accord renseigné pour le séjour de ${item.cohort}`}
+                  link={`volontaire?status=VALIDATED~WAITING_LIST&cohort=${item.cohort}&parentAllowSNU=N/A`}
                   btnLabel="À relancer"
                 />
               ),
@@ -307,7 +315,8 @@ function Actus({ stats }) {
                   title="Point de rassemblement"
                   key={"sejour_rassemblement_non_confirmé" + item.cohort}
                   number={item.count}
-                  content={`volontaires n’ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                  content={`volontaires n'ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                  link={`/volontaire?status=VALIDATED&hasMeetingInformation=false~N/A&statusPhase1=AFFECTED&cohort=${item.cohort}`}
                   btnLabel="À déclarer"
                 />
               ),
@@ -319,7 +328,8 @@ function Actus({ stats }) {
                   title="Point de rassemblement"
                   key={"sejour_participation_non_confirmée" + item.cohort}
                   number={item.count}
-                  content={`volontaires n’ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                  content={`volontaires n'ont pas confirmé leur participation pour le séjour de ${item.cohort}`}
+                  link={`/volontaire?status=VALIDATED&youngPhase1Agreement=false~N/A&statusPhase1=AFFECTED&cohort=${item.cohort}`}
                   btnLabel="À déclarer"
                 />
               ),
@@ -332,6 +342,7 @@ function Actus({ stats }) {
                   key={"sejour_point_de_rassemblement_à_déclarer" + item.cohort + item.department}
                   number=""
                   content={`Au moins 1 point de rassemblement est à déclarer pour le séjour de ${item.cohort} (${item.department})`}
+                  link={`/point-de-rassemblement/liste/liste-points?cohort=${item.cohort}&department=${item.department}`}
                   btnLabel="À déclarer"
                 />
               ),
@@ -343,7 +354,8 @@ function Actus({ stats }) {
                   title="Emploi du temps"
                   key={"sejour_emploi_du_temps_non_déposé" + item.cohort}
                   number={item.count}
-                  content={`emplois du temps n’ont pas été déposés. ${item.cohort}`}
+                  content={`emplois du temps n'ont pas été déposés. ${item.cohort}`}
+                  link={`/centre/liste/session?hasTimeSchedule=false&cohort=${item.cohort}`}
                   btnLabel="À relancer"
                 />
               ),
@@ -356,6 +368,7 @@ function Actus({ stats }) {
                   key={"sejour_contact_à_renseigner" + item.cohort + item.department}
                   number=""
                   content={`Au moins 1 contact de convocation doit être renseigné pour le séjour de ${item.cohort} (${item.department})`}
+                  link={ROLES.REFERENT_DEPARTMENT ? `/team` : null}
                   btnLabel="À renseigner"
                 />
               ),
@@ -368,6 +381,7 @@ function Actus({ stats }) {
                   key={"sejour_volontaires_à_contacter" + item.cohort}
                   number={item.count}
                   content={`volontaires à contacter pour préparer leur accueil pour le séjour de ${item.cohort}`}
+                  link={null}
                   btnLabel="À contacter"
                 />
               ),
@@ -380,6 +394,7 @@ function Actus({ stats }) {
                   key={"sejour_chef_de_centre" + item.cohort}
                   number={item.count}
                   content={`chefs de centre sont à renseigner pour le séjour de  ${item.cohort}`}
+                  link={`centre/liste/session?headCenterExist=Non&cohort=${item.cohort}`}
                   btnLabel="À renseigner"
                 />
               ),

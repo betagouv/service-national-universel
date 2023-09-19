@@ -53,6 +53,8 @@ function aggsSubQuery(keys, aggsSearchQuery, queryFilters, contextFilters, custo
       if (subKey === key) continue;
       if (!queryFilters[subKeyWithoutKeyword]?.length) continue;
       filter = hitsSubQuery(filter, subKey, queryFilters[subKeyWithoutKeyword], customQueries);
+      //add agg for count all of documents that maths the query
+      if (!aggs?.count) aggs.count = { filter: { bool: { must: [], filter } }, aggs: { total: { value_count: { field: "_id" } } } };
     }
 
     if (customQueries?.[keyWithoutKeyword + "Aggs"]) {
@@ -62,8 +64,6 @@ function aggsSubQuery(keys, aggsSearchQuery, queryFilters, contextFilters, custo
     } else {
       aggs[key] = { filter, aggs: { names: { histogram: { field: key, interval: 1, min_doc_count: 1 } } } };
     }
-    //add agg for count all of documents that maths the query
-    aggs.count = { filter: { bool: { must: [], filter } }, aggs: { total: { value_count: { field: "_id" } } } };
   }
   return aggs;
 }
