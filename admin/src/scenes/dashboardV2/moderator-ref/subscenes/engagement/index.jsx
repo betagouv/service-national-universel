@@ -50,7 +50,7 @@ export default function Index() {
             id: "academy",
             name: "Académie",
             fullValue: "Toutes",
-            options: academyOptions,
+            options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
           }
         : null,
       {

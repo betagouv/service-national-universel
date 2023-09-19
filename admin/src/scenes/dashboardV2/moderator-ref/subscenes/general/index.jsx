@@ -52,7 +52,7 @@ export default function Index() {
           id: "academy",
           name: "Académie",
           fullValue: "Toutes",
-          options: academyOptions,
+          options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
         }
       : null,
     {
@@ -177,6 +177,14 @@ export default function Index() {
   );
 }
 
+const NotePlaceholder = () => {
+  return (
+    <div className="flex h-36 w-full items-center justify-center rounded-lg bg-gray-50">
+      <div className="text-sm text-center text-gray-400">Aucune notification</div>
+    </div>
+  );
+};
+
 const NoteContainer = ({ title, number, content, btnLabel }) => {
   return (
     <div className="flex h-36 w-full flex-col justify-between rounded-lg bg-blue-50 py-3.5 px-3">
@@ -245,6 +253,7 @@ function Actus({ stats }) {
             <div className="text-sm font-bold leading-5 text-gray-900">Inscriptions</div>
             <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.inscription)}</div>
           </div>
+          {!total(stats.inscription) && <NotePlaceholder />}
           {shouldShow(stats.inscription, "inscription_en_attente_de_validation") && (
             <NoteContainer
               title="Dossier"
@@ -300,6 +309,7 @@ function Actus({ stats }) {
             <div className="text-sm font-bold leading-5 text-gray-900">Séjours</div>
             <div className=" rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.sejour)}</div>
           </div>
+          {!total(stats.sejour) && <NotePlaceholder />}
           {stats.sejour.sejour_rassemblement_non_confirmé.map(
             (item, key) =>
               shouldShow(stats.sejour, "sejour_rassemblement_non_confirmé", key) && (
@@ -427,6 +437,7 @@ function Actus({ stats }) {
             <div className="text-sm font-bold leading-5 text-gray-900">Engagement</div>
             <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.engagement)}</div>
           </div>
+          {!total(stats.engagement) && <NotePlaceholder />}
           {shouldShow(stats.engagement, "engagement_contrat_à_éditer") && (
             <NoteContainer
               title="Contrat"

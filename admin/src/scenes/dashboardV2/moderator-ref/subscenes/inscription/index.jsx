@@ -47,7 +47,7 @@ export default function Index() {
             id: "academy",
             name: "Académie",
             fullValue: "Toutes",
-            options: academyOptions,
+            options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
           }
         : null,
       {
@@ -176,7 +176,7 @@ function filterByRegionAndDepartement(e, filters, user) {
 }
 
 async function getCurrentInscriptions(filters) {
-  const responses = await api.post("/elasticsearch/dashboard/inscription/youngForInscription", {filters: filters} );
+  const responses = await api.post("/elasticsearch/dashboard/inscription/youngForInscription", { filters: filters });
   // if (!responses.length) return {};
   return api.getAggregations(responses);
 }

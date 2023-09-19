@@ -11,7 +11,7 @@ export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArr
     <div className="flex w-full flex-row justify-between rounded-lg border-[1px] border-gray-200 bg-white py-4 px-4">
       <div className="flex h-[50px] flex-row items-center justify-center gap-2 self-start">
         <FilterSvg className="h-4 w-4 text-gray-300" />
-        <div className="text-lg font-bold text-gray-900">Filtrer</div>
+        <div className="text-lg font-bold text-gray-900">Filtres</div>
       </div>
       <div className="w-7/10 flex flex-row flex-wrap items-center justify-end gap-2">
         {filterArray.map((filter) => (
@@ -154,7 +154,7 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
       leave="transition ease-in duration-150"
       leaveFrom="opacity-100 translate-y-0"
       leaveTo="opacity-0 translate-y-1">
-      <Popover.Panel className={`absolute right-0 z-20 w-[305px] translate-y-[4px]`}>
+      <Popover.Panel className={`absolute right-0 z-30 w-[305px] translate-y-[4px]`}>
         <div ref={ref} className="rounded-lg shadow-lg ">
           <div className="relative grid rounded-lg border-[1px] border-gray-100 bg-white py-2">
             {filter?.customComponent ? (

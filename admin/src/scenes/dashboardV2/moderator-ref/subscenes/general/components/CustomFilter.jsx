@@ -16,7 +16,7 @@ export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNo
   return (
     <Popover className="relative">
       <Popover.Button className="inline-flex items-center gap-x-1 text-sm font-bold text-gray-500 outline-none">
-        <span>Filtrer (2)</span>
+        <span>Filtres (2)</span>
         <HiChevronDown className="h-5 w-5 text-gray-400" aria-hidden="true" />
       </Popover.Button>
 
@@ -34,10 +34,10 @@ export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNo
               <span className="mb-1 px-4 text-sm text-gray-500">Phase</span>
               <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("all")}>
                 <input
-                  id="candidates"
-                  aria-describedby="candidates-description"
-                  name="candidates"
-                  type="checkbox"
+                  id="phase-all"
+                  aria-describedby="Toutes les phases"
+                  name="phase-all"
+                  type="radio"
                   className="h-4 w-4 cursor-pointer"
                   readOnly
                   checked={notesPhase === "all"}
@@ -46,10 +46,10 @@ export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNo
               </div>
               <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("inscription")}>
                 <input
-                  id="candidates"
-                  aria-describedby="candidates-description"
-                  name="candidates"
-                  type="checkbox"
+                  id="phase-inscription"
+                  aria-describedby="Phase inscription"
+                  name="phase-inscription"
+                  type="radio"
                   className="h-4 w-4 cursor-pointer"
                   readOnly
                   checked={notesPhase === "inscription"}
@@ -58,10 +58,10 @@ export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNo
               </div>
               <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("sejour")}>
                 <input
-                  id="candidates"
-                  aria-describedby="candidates-description"
-                  name="candidates"
-                  type="checkbox"
+                  id="phase-sejour"
+                  aria-describedby="Phase séjour"
+                  name="phase-sejour"
+                  type="radio"
                   className="h-4 w-4 cursor-pointer"
                   readOnly
                   checked={notesPhase === "sejour"}
@@ -70,10 +70,10 @@ export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNo
               </div>
               <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("engagement")}>
                 <input
-                  id="candidates"
-                  aria-describedby="candidates-description"
-                  name="candidates"
-                  type="checkbox"
+                  id="phase-engagement"
+                  aria-describedby="Phase engagement"
+                  name="phase-engagement"
+                  type="radio"
                   className="h-4 w-4 cursor-pointer"
                   readOnly
                   checked={notesPhase === "engagement"}
@@ -89,10 +89,10 @@ export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNo
                   setSelectedPeriod("7");
                 }}>
                 <input
-                  id="candidates"
-                  aria-describedby="candidates-description"
-                  name="candidates"
-                  type="checkbox"
+                  id="period-7"
+                  aria-describedby="Période des 7 derniers jours"
+                  name="period-7"
+                  type="radio"
                   className="h-4 w-4 cursor-pointer"
                   readOnly
                   checked={selectedPeriod === "7"}
@@ -106,10 +106,10 @@ export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNo
                   setSelectedPeriod("15");
                 }}>
                 <input
-                  id="candidates"
-                  aria-describedby="candidates-description"
-                  name="candidates"
-                  type="checkbox"
+                  id="period-15"
+                  aria-describedby="Périodes des 15 derniers jours"
+                  name="period-15"
+                  type="radio"
                   className="h-4 w-4 cursor-pointer"
                   readOnly
                   checked={selectedPeriod === "15"}
@@ -123,10 +123,10 @@ export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNo
                   setSelectedPeriod("30");
                 }}>
                 <input
-                  id="candidates"
-                  aria-describedby="candidates-description"
-                  name="candidates"
-                  type="checkbox"
+                  id="period-30"
+                  aria-describedby="Période des 30 derniers jours"
+                  name="period-30"
+                  type="radio"
                   className="h-4 w-4 cursor-pointer"
                   readOnly
                   checked={selectedPeriod === "30"}
@@ -141,10 +141,10 @@ export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNo
                   setSelectedPeriod("lastmonth");
                 }}>
                 <input
-                  id="candidates"
-                  aria-describedby="candidates-description"
-                  name="candidates"
-                  type="checkbox"
+                  id="period-last-month"
+                  aria-describedby="Période du mois dernier"
+                  name="period-last-month"
+                  type="radio"
                   className="h-4 w-4 cursor-pointer"
                   readOnly
                   checked={selectedPeriod === "lastmonth"}
@@ -189,10 +189,10 @@ const DatePickerPopOver = ({ selectedPeriod, setSelectedPeriod, dateRange, setDa
     <Popover className="relative">
       <Popover.Button className="flex w-full cursor-pointer items-center gap-3 px-4 py-1.5 outline-none hover:bg-gray-50">
         <input
-          id="candidates"
-          aria-describedby="candidates-description"
-          name="candidates"
-          type="checkbox"
+          id="period-custom"
+          aria-describedby="Période personnalisée"
+          name="period-custom"
+          type="radio"
           className="h-4 w-4 cursor-pointer"
           readOnly
           checked={selectedPeriod === "custom"}
@@ -202,7 +202,7 @@ const DatePickerPopOver = ({ selectedPeriod, setSelectedPeriod, dateRange, setDa
             Du {dayjs(range?.from).format("DD/MM/YYYY")} au {dayjs(range?.to).format("DD/MM/YYYY")}
           </span>
         ) : (
-          <span className="text-sm font-normal leading-5 text-gray-700">Une date spécifique</span>
+          <span className="text-sm font-normal leading-5 text-gray-700">Période spécifique</span>
         )}
       </Popover.Button>
 

@@ -12,9 +12,9 @@ import {
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
 } from "snu-lib";
-import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
-import api from "../../../../../services/api";
-import plausibleEvent from "../../../../../services/plausible";
+import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
+import api from "@/services/api";
+import plausibleEvent from "@/services/plausible";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
@@ -25,9 +25,9 @@ import OccupationCardHorizontal from "./components/OccupationCardHorizontal";
 import Presences from "./components/Presences";
 import StatusPhase1 from "./components/StatusPhase1";
 import TabSession from "./components/TabSession";
-import { getLink as getOldLink } from "../../../../../utils";
-import { getNewLink } from "../../../../../utils";
-import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
+import { getLink as getOldLink } from "@/utils";
+import { getNewLink } from "@/utils";
+import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -83,7 +83,7 @@ export default function Index() {
             id: "academy",
             name: "Académie",
             fullValue: "Toutes",
-            options: academyOptions,
+            options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
           }
         : null,
       {
