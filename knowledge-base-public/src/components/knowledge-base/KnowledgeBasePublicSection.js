@@ -120,7 +120,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
         <div className="flex justify-center bg-[#32257F]">
           <div className="mx-auto flex max-w-[90%] flex-row flex-wrap justify-center lg:max-w-[70%]">
             {top4Article.map(({ _id, slug, text }) => (
-              <div key={_id} className="m-1 w-full rounded-2xl bg-blue-100 px-2 py-1 text-center lg:w-auto">
+              <div key={_id} className="m-1 rounded-2xl bg-blue-100 px-2 py-1 text-center lg:w-auto">
                 <Link
                   href={`/base-de-connaissance/${slug}`}
                   aria-label={`Lire l'article ${text}`}
