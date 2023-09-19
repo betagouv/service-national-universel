@@ -25,14 +25,14 @@ export default function AdminMenu() {
 
   return (
     <>
-      {/* TODO: new role selector */}
       {withSeeAs && (
         <Popover className="relative mx-auto flex w-auto justify-end md:ml-auto md:flex-none lg:flex-1">
           <Popover.Button className="flex items-center justify-center gap-3 rounded-none border-none bg-[#32257F] p-0 text-left shadow-none">
-            {/* <img src="/assets/change-user.png" className="h-5 w-5 grayscale" /> */}
             <div className="flex h-full flex-raw justify-center align-center">
               <span className="text-xs md:text-sm leading-8 font-medium text-white truncate">Voir en tant que</span>
-              <span className="text-xs md:text-sm leading-8 font-medium text-blue-300 ml-1 capitalize truncate">{seeAs !== null ? translateRoleBDC[seeAs] : translateRoleBDC[user.role]}</span>
+              <span className="text-xs md:text-sm leading-8 font-medium text-blue-300 ml-1 capitalize truncate">
+                {seeAs !== null ? translateRoleBDC[seeAs] : translateRoleBDC[user.role]}
+              </span>
               <span className={`material-icons mt-1 lg:mt-0 text-blue-300 text-md flex-none`}>expand_more</span>
             </div>
           </Popover.Button>
@@ -42,7 +42,11 @@ export default function AdminMenu() {
               {roles
                 .filter((role) => (user.role === "admin" ? true : categoryAccessibleReferent.includes(role)))
                 .map((role) => (
-                  <a key={role} onClick={() => setSeeAs(role)} className={`text-sm font-${seeAs === role ? "bold" : "medium"} flex flex-raw justify-between cursor-pointer text-gray-700`}>
+                  <a
+                    key={role}
+                    onClick={() => setSeeAs(role)}
+                    className={`text-sm font-${seeAs === role ? "bold" : "medium"} flex flex-raw justify-between cursor-pointer text-gray-700`}
+                  >
                     {translateRoleBDC[role]}
                     <HiCheck className={`text-xl text-blue-600 " ${seeAs === role ? "inline" : "hidden"}`} />
                   </a>
