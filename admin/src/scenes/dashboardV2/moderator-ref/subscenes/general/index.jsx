@@ -204,6 +204,7 @@ function Actus({ stats }) {
   const [fullNote, setFullNote] = useState(false);
 
   function shouldShow(parent, key, index = null) {
+    true;
     if (fullNote) return true;
 
     const entries = Object.entries(parent);
@@ -450,7 +451,7 @@ function Actus({ stats }) {
             <NoteContainer
               title="Contrat"
               number={stats.engagement.engagement_contrat_à_éditer}
-              content="contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature."
+              content="contrats d'engagement sont à éditer par la structure d'accueil et à envoyer en signature."
               btnLabel="À suivre"
             />
           )}
@@ -458,7 +459,7 @@ function Actus({ stats }) {
             <NoteContainer
               title="Contrat"
               number={stats.engagement.engagement_contrat_en_attente_de_signature}
-              content="contrats d’engagement sont en attente de signature."
+              content="contrats d'engagement sont en attente de signature."
               btnLabel="À suivre"
             />
           )}
