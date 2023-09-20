@@ -56,8 +56,7 @@ export default function StepWaitingConsent() {
   const [error, setError] = React.useState({});
   const [loading, setLoading] = React.useState(false);
   const [isOpen, setIsOpen] = React.useState({});
-  // const notAuthorised = young?.parentAllowSNU === "false";
-  const notAuthorised = true;
+  const notAuthorised = young?.parentAllowSNU === "false";
 
   const history = useHistory();
   const dispatch = useDispatch();
