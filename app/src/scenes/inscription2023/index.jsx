@@ -115,7 +115,7 @@ export default function Index() {
   }
 
   // Si la periode de modification est finie, pour les volontaires en cours d'inscription qui n'ont pas encore été basculés sur "à venir"
-  if (!inscriptionCreationOpenForYoungs(young.cohort, young, environment) && young.status === YOUNG_STATUS.IN_PROGRESS) {
+  if (!inscriptionCreationOpenForYoungs(young.cohort, false, environment) && young.status === YOUNG_STATUS.IN_PROGRESS) {
     return <InscriptionClosed />;
   }
 
