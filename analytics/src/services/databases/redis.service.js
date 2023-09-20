@@ -3,7 +3,7 @@ const { REDIS_URL } = require("../../config");
 const { capture } = require("../../sentry");
 const REDIS_KEYS = require("./redis.constants");
 
-const redisClient = redis.createClient({ url: REDIS_URL });
+const redisClient = redis.createClient({ url: REDIS_URL, pingInterval: 60_000 });
 
 redisClient.on("connect", () => {
   console.info("Redis connection has been established successfully.");
