@@ -106,7 +106,7 @@ export default function Signin() {
         <hr className="mt-4 border-b-1 text-[#E5E5E5]" />
         <div className="mt-4 text-[#E5E5E5]">
           <div className="mt-4 mb-3 text-center text-[17px] font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
-          <p className="text-center text-base text-[#161616] mb-4">Les inscriptions sont actuellement fermées.</p>
+          {/* <p className="text-center text-base text-[#161616] mb-4">Les inscriptions sont actuellement fermées.</p> */}
           {/* <Link onClick={() => plausibleEvent("Connexion/Lien vers preinscription")} to="/preinscription">
             <p className="w-full my-4 text-center p-2 text-blue-france-sun-113 border-[1px] border-blue-france-sun-113 hover:bg-blue-france-sun-113">Pré-inscription</p>
           </Link> */}
