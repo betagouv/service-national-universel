@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const { db } = require("../postgresql");
+const { db } = require("../services/databases/postgresql.service");
 
 const OBJ = db.define(
   "log_missions",
@@ -23,6 +23,7 @@ const OBJ = db.define(
     raw_data: DataTypes.JSONB,
   },
   {
+    freezeTableName: true,
     defaultScope: {
       attributes: { exclude: ["createdAt", "updatedAt", "raw_data"] },
     },
