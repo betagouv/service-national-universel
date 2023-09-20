@@ -204,6 +204,7 @@ const Schema = new mongoose.Schema({
   cohort: {
     type: String,
     enum: [
+      "Janvier 2024",
       "Octobre 2023 - NC",
       "Juillet 2023",
       "Juin 2023",

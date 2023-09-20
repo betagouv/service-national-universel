@@ -101,8 +101,8 @@ const sessions2023 = [
     id: "2024_01_TEST",
     stagingOnly: true,
     name: "Janvier 2024",
-    dateStart: new Date("10/03/2024"),
-    dateEnd: new Date("10/04/2024"),
+    dateStart: new Date("01/10/2024"),
+    dateEnd: new Date("01/20/2024"),
     buffer: 99999,
     event: "Phase0/CTA preinscription - sejour test NC",
     eligibility: {

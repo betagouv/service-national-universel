@@ -424,6 +424,8 @@ const translateCohort = (cohort) => {
       return "du 4 au 16 Juillet 2023";
     case "Octobre 2023 - NC":
       return "du 9 au 20 Octobre 2023";
+    case "Janvier 2024":
+      return "du 10 au 20 Janvier 2024";
     default:
       return cohort;
   }
