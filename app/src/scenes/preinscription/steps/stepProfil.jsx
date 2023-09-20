@@ -70,7 +70,8 @@ export default function StepProfil() {
     setError(errors);
     if (!Object.keys(errors).length) {
       setData({ ...data, email: trimmedEmail, step: PREINSCRIPTION_STEPS.CONFIRM });
-      plausibleEvent("Phase0/CTA preinscription - infos persos", { callback: () => history.push("/preinscription/confirm") });
+      plausibleEvent("Phase0/CTA preinscription - infos persos");
+      history.push("/preinscription/confirm");
     }
   };
 
