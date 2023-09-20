@@ -275,7 +275,7 @@ function Actus({ stats, user, cohortsNotFinished }) {
               title="Dossier"
               number={stats.inscription.inscription_corrigé_à_instruire_de_nouveau}
               content="dossiers d'inscription corrigés sont à instruire de nouveau."
-              link="/inscription?status=WAITING_VALIDATION"
+              link={`/inscription?status=WAITING_VALIDATION&cohort=${cohortsNotFinished.join("~")}`}
               btnLabel="À instruire"
             />
           )}
@@ -284,7 +284,7 @@ function Actus({ stats, user, cohortsNotFinished }) {
               title="Dossier"
               number={stats.inscription.inscription_en_attente_de_correction}
               content="dossiers d'inscription en attente de correction."
-              link="/inscription?status=WAITING_CORRECTION"
+              link={`/inscription?status=WAITING_CORRECTION&cohort=${cohortsNotFinished.join("~")}`}
               btnLabel="À relancer"
             />
           )}
