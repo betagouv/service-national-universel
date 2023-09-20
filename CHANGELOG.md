@@ -1,3 +1,26 @@
+# [1.336.0](https://github.com/betagouv/service-national-universel/compare/v1.335.0...v1.336.0) (2023-09-20)
+
+
+### Bug Fixes
+
+* **admin:** places left on duplicate mission ([5c26e2a](https://github.com/betagouv/service-national-universel/commit/5c26e2ade2714c74b552625662e9a154961f4839))
+* **analytics:** redis client pingInterval ([1834bf3](https://github.com/betagouv/service-national-universel/commit/1834bf3db715db8607d4650f1b6b5e2718093f54))
+* **api:** Ping redis to not kill socket connection ([0488260](https://github.com/betagouv/service-national-universel/commit/048826046dc4e78c7d91edc4273bf259160289db))
+* **app:** only leave signup open in staging ([7ba77b2](https://github.com/betagouv/service-national-universel/commit/7ba77b2aaee3d04d5057dafead132446a1a7d4ed))
+* **app:** wording ([d583d18](https://github.com/betagouv/service-national-universel/commit/d583d18ed65d4cde060a1aba89aba3bfaeefac07))
+* redis connection ([4d34d2e](https://github.com/betagouv/service-national-universel/commit/4d34d2e9eb72873101f2d5ac89c2ee50f55ddd25))
+
+
+### Features
+
+* **analytics:** cron sentry + code climate + uptimeRobot ([#3025](https://github.com/betagouv/service-national-universel/issues/3025)) ([d959436](https://github.com/betagouv/service-national-universel/commit/d959436b2c6187eee836e36cd047303e7f67f429))
+
+
+### Reverts
+
+* Revert "Revert "fix(analytics): import deps redis (#3026)"" ([e55c129](https://github.com/betagouv/service-national-universel/commit/e55c1290eba7207be3e5b142c31dc41d8d368da2)), closes [#3026](https://github.com/betagouv/service-national-universel/issues/3026)
+* Revert "Revert "refacto(analytics): naming, separation of concerns, imports and more (#3020)"" ([2a390be](https://github.com/betagouv/service-national-universel/commit/2a390be671f7c3345fa1f4b2d0626d4e8f158ff4)), closes [#3020](https://github.com/betagouv/service-national-universel/issues/3020)
+
 # [1.335.0](https://github.com/betagouv/service-national-universel/compare/v1.334.1...v1.335.0) (2023-09-19)
 
 
