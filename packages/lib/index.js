@@ -68,7 +68,7 @@ function inscriptionCreationOpenForYoungs(cohort, allowed = false, env) {
     case "Juillet 2022":
       return new Date() < new Date(2022, 4, 2); // before 2 mai 2022 morning
     default:
-      return new Date() < new Date(2023, 8, 30, 23, 59); // before 15 septembre 2023 morning
+      return new Date() < new Date(2023, 8, 20, 12, 59); // before 20 septembre minuit heure de NC
   }
 }
 
