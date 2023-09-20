@@ -110,6 +110,15 @@ export default function Signin() {
           {/* <Link onClick={() => plausibleEvent("Connexion/Lien vers preinscription")} to="/preinscription">
             <p className="w-full my-4 text-center p-2 text-blue-france-sun-113 border-[1px] border-blue-france-sun-113 hover:bg-blue-france-sun-113">Pré-inscription</p>
           </Link> */}
+
+          {environment !== "production" && (
+            <Link
+              to="/preinscription"
+              className="w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-blue-france-sun-113 px-3 py-2 text-blue-france-sun-113 hover:bg-blue-france-sun-113 hover:text-white">
+              Pré-inscription (accès staging)
+            </Link>
+          )}
+
           <br />
           <p className="text-center text-base text-[#161616] mb-4">Soyez informé(e) lors de l’ouverture des prochaines inscriptions.</p>
           <a

@@ -117,6 +117,14 @@ export default function Signin() {
             Pré-inscription
           </Link> */}
 
+          {environment !== "production" && (
+            <Link
+              to="/preinscription"
+              className="w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-blue-france-sun-113 px-3 py-2 text-blue-france-sun-113 hover:bg-blue-france-sun-113 hover:text-white">
+              Pré-inscription (accès staging)
+            </Link>
+          )}
+
           <p className="text-center text-base text-[#161616] m-3">Soyez informé(e) lors de l’ouverture des prochaines inscriptions.</p>
           <a
             className="plausible-event-name=Clic+LP+Inscription w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-[#000091] px-3 py-2 text-[#000091] hover:bg-[#000091] hover:text-white"

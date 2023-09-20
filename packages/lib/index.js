@@ -17,7 +17,7 @@ function isEndOfInscriptionManagement2021() {
 //force redeploy
 
 function inscriptionModificationOpenForYoungs(cohort, young, env) {
-  // if (env !== undefined && env !== "production") return true; // only use when inscriptions are closed on production
+  if (env !== undefined && env !== "production") return true; // only use when inscriptions are closed on production
 
   switch (cohort) {
     case "2019":
@@ -58,7 +58,7 @@ function inscriptionModificationOpenForYoungs(cohort, young, env) {
 }
 
 function inscriptionCreationOpenForYoungs(cohort, allowed = false, env) {
-  // if ((env !== undefined && env !== "production") || allowed) return true; //only use when inscriptions are closed on production
+  if ((env !== undefined && env !== "production") || allowed) return true; //only use when inscriptions are closed on production
   switch (cohort) {
     case "Février 2022":
       return new Date() < new Date(2022, 0, 10); // before 10 janvier 2022 morning
