@@ -9,7 +9,7 @@ export default function InscriptionClosed() {
   return (
     <DSFRLayout title="Inscription au séjour de cohésion">
       <DSFRContainer title="Vous n'avez pas complété votre dossier d'inscription à temps.">
-        <p className="mb-16">Les inscriptions pour le séjour du {translateCohort(young?.cohort)} sont clôturées. Vous ne pourrez donc pas participer au séjour.</p>
+        <p className="mb-16">Les inscriptions pour le séjour {translateCohort(young?.cohort)} sont clôturées. Vous ne pourrez donc pas participer au séjour.</p>
       </DSFRContainer>
     </DSFRLayout>
   );
