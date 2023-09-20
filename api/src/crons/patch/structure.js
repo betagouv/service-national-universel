@@ -1,7 +1,7 @@
 require("dotenv").config({ path: "./../../../.env-prod" });
 require("../../mongo");
 
-const { ObjectId } = require("mongodb");
+const { ObjectId } = require("mongoose").Types;
 const fetch = require("node-fetch");
 
 const { capture } = require("../../sentry");

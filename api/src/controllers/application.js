@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
-const { ObjectId } = require("mongodb");
+const { ObjectId } = require("mongoose").Types;
 
 const { capture, captureMessage } = require("../sentry");
 const ApplicationObject = require("../models/application");

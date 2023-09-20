@@ -32,7 +32,7 @@
     "jsonwebtoken": "^9.0.1",
     "node-cron": "^3.0.2",
     "node-fetch": "^2.6.12",
-    "pg": "^8.11.2",
+    "pg": "^8.11.3",
     "redis": "^4.6.8",
     "sequelize": "^6.32.1"
   },
