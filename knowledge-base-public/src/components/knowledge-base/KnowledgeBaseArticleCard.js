@@ -1,6 +1,7 @@
 import Link from "next/link";
 import React from "react";
 import { separateEmojiAndText } from "../../utils/index";
+import { Emoji } from "../Emoji";
 
 const KnowledgeBaseArticleCard = ({ title, slug, path, className = "" }) => {
   const [emoji, text] = separateEmojiAndText(title);
@@ -10,7 +11,7 @@ const KnowledgeBaseArticleCard = ({ title, slug, path, className = "" }) => {
       href={`${path}/${slug}${path === "/base-de-connaissance" ? "?loadingType=article" : ""}`}
     >
       <h3 className="line-clamp-2 text-sm font-medium text-gray-900">
-        {emoji}
+        <Emoji emoji={emoji} />
         {text}
       </h3>
     </Link>

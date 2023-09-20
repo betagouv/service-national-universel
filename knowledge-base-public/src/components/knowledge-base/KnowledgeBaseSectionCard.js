@@ -3,6 +3,7 @@ import BlueIcon from "../BlueIcon";
 import React from "react";
 import FolderIcon from "../FolderIcon";
 import { separateEmojiAndText } from "../../utils/index";
+import { Emoji } from "../Emoji";
 
 const KnowledgeBaseSectionCard = ({ _id, position, title, icon, slug: slugTheme, children = [], path, className }) => {
   return (
@@ -25,7 +26,7 @@ const KnowledgeBaseSectionCard = ({ _id, position, title, icon, slug: slugTheme,
                 >
                   {type === "section" && <FolderIcon />}
                   <h4 className="mr-2 flex-1 text-sm">
-                    {emoji}
+                    <Emoji emoji={emoji} />
                     {text}
                   </h4>
                   <span className="material-icons text-gray-400">keyboard_arrow_right</span>

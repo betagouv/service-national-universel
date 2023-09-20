@@ -8,6 +8,7 @@ import FeedbackComponent from "../FeedBack";
 import NavigationArticle from "../NavigationArticle";
 import { HiPrinter } from "react-icons/hi";
 import { separateEmojiAndText } from "../../utils/index";
+import { Emoji } from "../Emoji";
 
 const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
   const group = useMemo(() => {
@@ -31,7 +32,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
               <div className="mr-4">
                 <h2 className="mb-2 text-[24px] font-bold print:mb-0 print:text-black">{group?.title}</h2>
                 <h1 className="mb-2 text-[24px] font-bold md:text-[30px] print:mb-0 print:text-black">
-                  {emoji}
+                  <Emoji emoji={emoji} />
                   {text}
                 </h1>
                 <h6 className="text-[18px] text-snu-purple-100 md:text-[18px] lg:text-xl print:text-black">{item?.description}</h6>

@@ -9,6 +9,7 @@ import { HiChevronLeft } from "react-icons/hi";
 import useUser from "../hooks/useUser";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { separateEmojiAndText } from "../utils/index";
+import { Emoji } from "./Emoji";
 // accessibility: https://www.w3.org/WAI/ARIA/apg/patterns/accordion/
 
 const NavigationArticle = ({ item }) => {
@@ -51,7 +52,10 @@ const NavigationArticle = ({ item }) => {
 
   return (
     <>
-      <Link href={`/base-de-connaissance/${item.parents[0].slug}?openTheme=${item.parents[1].slug}`} className=" align-center mb-2 flex flex-row justify-start text-center md:hidden">
+      <Link
+        href={`/base-de-connaissance/${item.parents[0].slug}?openTheme=${item.parents[1].slug}`}
+        className=" align-center mb-2 flex flex-row justify-start text-center md:hidden"
+      >
         <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-500" />
         <p className="text-sm leading-5 text-gray-500">Retour</p>
       </Link>
@@ -69,7 +73,10 @@ const NavigationArticle = ({ item }) => {
             } py-4 px-4 shadow-none md:py-[0.5rem] md:pr-[2rem]`}
             onClick={toggleAccordion}
           >
-            <Link href={`/base-de-connaissance/${item.parents[0].slug}?openTheme=${item.parents[1].slug}`} className="align-center flex hidden flex-row justify-between text-center md:mr-2 md:block">
+            <Link
+              href={`/base-de-connaissance/${item.parents[0].slug}?openTheme=${item.parents[1].slug}`}
+              className="align-center flex hidden flex-row justify-between text-center md:mr-2 md:block"
+            >
               <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-400 md:mr-4 md:border-r md:border-gray-200" />
             </Link>
             <div className="mr-2 flex flex-col justify-center">
@@ -107,7 +114,7 @@ const NavigationArticle = ({ item }) => {
                       >
                         {type === "section" && <FolderIcon />}
                         <div className="flex flex-row">
-                          {emoji}
+                          <Emoji emoji={emoji} />
                           <span className="line-clamp-2">{text}</span>
                         </div>
                       </Link>

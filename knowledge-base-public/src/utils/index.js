@@ -18,13 +18,6 @@ export const separateEmojiAndText = (str) => {
   if (match) {
     let emoji = match[1] || null;
     const text = match[2];
-    if (emoji) {
-      emoji = (
-        <span className="mr-1" aria-hidden>
-          {emoji}
-        </span>
-      );
-    }
 
     return [emoji, text];
   }

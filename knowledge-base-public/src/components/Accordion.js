@@ -3,6 +3,7 @@ import Link from "next/link";
 import slugify from "slugify";
 import FolderIcon from "./FolderIcon";
 import { separateEmojiAndText } from "../utils/index";
+import { Emoji } from "./Emoji";
 // accessibility: https://www.w3.org/WAI/ARIA/apg/patterns/accordion/
 
 export const Accordion = ({ title, list = [], className = "", path, isOpen = false, slug: slugTheme }) => {
@@ -64,7 +65,7 @@ export const Accordion = ({ title, list = [], className = "", path, isOpen = fal
                     href={`${path}/${type === "section" ? slugTheme : slug}${type === "section" ? `?loadingType=section&openTheme=${slug}` : ""}`}
                   >
                     {type === "section" && <FolderIcon />}
-                    {emoji}
+                    <Emoji emoji={emoji} />
                     <span className="line-clamp-2">{text}</span>
                   </Link>
                 </li>

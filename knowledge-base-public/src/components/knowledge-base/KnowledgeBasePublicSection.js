@@ -13,7 +13,7 @@ import Link from "next/link";
 import useUser from "../../hooks/useUser";
 import API from "../../services/api";
 import { separateEmojiAndText } from "../../utils/index";
-// import { capture } from "./sentry";
+import { Emoji } from "../Emoji";
 
 const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   const { restriction } = useUser();
@@ -199,7 +199,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
                       className="mx-3.5 my-2 flex min-h-[130px] min-w-[200px] flex-col justify-between rounded-lg border-[1px] border-gray-300 bg-white px-4 py-2 md:m-2 md:min-w-[30%] md:max-w-[30%] md:flex-grow"
                     >
                       <h3 className="mb-4 text-sm font-bold leading-5 text-gray-900">
-                        {emoji}
+                        <Emoji emoji={emoji} />
                         {text}
                       </h3>
                       <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
