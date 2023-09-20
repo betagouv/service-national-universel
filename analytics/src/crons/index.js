@@ -3,6 +3,9 @@ const cron = require("node-cron");
 
 const { ENVIRONMENT } = require("../config");
 const addJdmaData = require("./add-jdma-data.job");
+const addUptimeRobotData = require("./add-uptime-robot-data.job");
+const addCodeClimateData = require("./add-code-climate-data.job");
+const addSentryData = require("./add-sentry-data.job");
 
 // doubt ? -> https://crontab.guru/
 
@@ -26,5 +29,8 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   // Every day at 02:00
   cron.schedule("0 2 * * *", () => {
     addJdmaData.handler();
+    addCodeClimateData.handler();
+    addUptimeRobotData.handler();
+    addSentryData.handler();
   });
 }
