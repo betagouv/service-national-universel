@@ -12,6 +12,5 @@ module.exports = {
   SENTRY_URL: process.env.SENTRY_URL || "",
   SENTRY_TRACING_SAMPLE_RATE: process.env.SENTRY_TRACING_SAMPLE_RATE || 1,
   UPTIME_ROBOT_TOKEN: process.env.UPTIME_ROBOT_TOKEN || "",
-  CODE_CLIMATE_TOKEN: process.env.CODE_CLIMATE_TOKEN || "",
   SENTRY_READ_TOKEN: process.env.SENTRY_READ_TOKEN || "",
 };

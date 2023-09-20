@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const { db } = require("../postgresql");
+const { db } = require("../services/databases/postgresql.service");
 
 const sentryInfo = db.define(
   "sentryInfo",

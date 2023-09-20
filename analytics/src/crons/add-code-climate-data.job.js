@@ -1,10 +1,10 @@
 require("dotenv").config();
 
-require("../postgresql");
+require("../services/databases/postgresql.service");
 const { capture } = require("../sentry");
-const codeClimate = require("../models/codeClimate");
-//const { CODE_CLIMATE_TOKEN } = require("../config");
+const codeClimate = require("../models/code-climate.model");
 const fetch = require("node-fetch");
+const slack = require("../slack");
 
 module.exports.handler = async function () {
   const date = new Date();
@@ -32,7 +32,9 @@ module.exports.handler = async function () {
       test_coverage,
       date: yesterday,
     });
+    slack.success({ title: "CodeClimate Add Data crons", text: "Data was added successfully!" });
   } catch (error) {
     capture(error);
+    slack.error({ title: `CodeClimate Add Data crons - ERROR`, text: JSON.stringify(error) });
   }
 };

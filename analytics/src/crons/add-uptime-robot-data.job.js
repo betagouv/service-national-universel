@@ -1,10 +1,11 @@
 require("dotenv").config();
 
-require("../postgresql");
+require("../services/databases/postgresql.service");
 const { capture } = require("../sentry");
-const uptimeRobot = require("../models/uptimeRobot");
+const uptimeRobot = require("../models/uptime-robot.model");
 const { UPTIME_ROBOT_TOKEN } = require("../config");
 const fetch = require("node-fetch");
+const slack = require("../slack");
 
 module.exports.handler = async function () {
   // post request only
@@ -35,7 +36,9 @@ module.exports.handler = async function () {
         date: dateString,
       });
     });
+    slack.success({ title: "UptimeRobot Add Data crons", text: "Data was added successfully!" });
   } catch (error) {
     capture(error);
+    slack.error({ title: `UptimeRobot Add Data crons - ERROR`, text: JSON.stringify(error) });
   }
 };
