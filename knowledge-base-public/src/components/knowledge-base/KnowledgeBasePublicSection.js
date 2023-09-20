@@ -109,7 +109,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
     return (
       <>
         <div className="w-full flex flex-col justify-center gap-6 border-t-[1px] border-white border-opacity-20 bg-[#32257F]">
-          <p className="text-center text-3xl mt-10 mb-2 font-bold leading-9 text-white">J&apos;ai besoin d&apos;aide</p>
+          <p className="text-center text-3xl mt-8 mb-1 font-bold leading-9 text-white">J&apos;ai besoin d&apos;aide</p>
           <button
             onClick={() => setSearchOpen(true)}
             className={`mx-4 mb-2 flex max-w-2xl cursor-text gap-4 rounded-lg bg-white p-3 text-gray-600 md:mx-auto md:w-full ${searchOpen && "invisible"}`}
