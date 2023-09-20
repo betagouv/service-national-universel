@@ -77,7 +77,7 @@ const cancelApplications = async (mission) => {
         APPLICATION_STATUS.WAITING_VALIDATION,
         APPLICATION_STATUS.WAITING_ACCEPTATION,
         APPLICATION_STATUS.WAITING_VERIFICATION,
-        // todo maybe add other status later
+        // todo maybe add other status later.
       ],
     },
   });

@@ -3,7 +3,7 @@ import Navigation from "./navigation/Navigation";
 import KnowledgeBaseSearch from "./knowledge-base/KnowledgeBaseSearch.js";
 import { useState } from "react";
 
-export default function Header({ home }) {
+export default function Header({ home, withSeeAs }) {
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
@@ -21,7 +21,7 @@ export default function Header({ home }) {
           universel
         </p>
 
-        <p className="font-bold text-white md:ml-6">Base de connaissance</p>
+        <p className={`font-bold text-white md:ml-6 ${withSeeAs ? "" : "md:block hidden"}`}>Base de connaissance</p>
       </Link>
 
       <div className="flex items-center gap-4">

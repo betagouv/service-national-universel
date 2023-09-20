@@ -8,7 +8,6 @@ import { maintenance } from "../../config";
 import { environment } from "../../config";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
@@ -34,9 +33,11 @@ export default function Signin() {
       <div className="flex flex-1 justify-center">
         <div className="hidden min-h-[400px] flex-[1] bg-[url('./assets/computer.jpeg')] bg-cover bg-center bg-no-repeat md:block" />
         <div className="flex flex-1 flex-col justify-center bg-gray-50 p-8">
-          <div>
+          <div className="px-16">
             <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">Espace Administrateur</h1>
-            <h2 className="mb-8 text-base font-normal text-brand-grey">A destination des référents et des structures d’accueil</h2>
+            <h2 className="mb-8 text-base font-normal text-brand-grey">
+              Plateforme à destination des modérateurs, des référents, des chefs de centre, des responsable de structure, des transporteurs et des superviseurs
+            </h2>
 
             {maintenance && !localStorage?.getItem("override_maintenance") ? (
               <div className="m-4 flex items-center">
@@ -115,15 +116,17 @@ export default function Signin() {
                         </label>
                         <PasswordEye autoComplete="current-password" value={values.password} onChange={handleChange} showError={false} />
                       </div>
-                      <Link to="/auth/forgot" className="text-sm text-brand-purple transition-colors hover:text-brand-darkPurple hover:underline">
+                      <Link to="/auth/forgot" className="text-sm text-[#2563EB] transition-colors hover:text-brand-darkPurple hover:underline">
                         Mot de passe perdu ?
                       </Link>
-                      <LoadingButton
-                        className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 text-base font-medium text-white transition-colors"
-                        loading={isSubmitting}
-                        type="submit">
-                        Se connecter
-                      </LoadingButton>
+                      <div className="w-full flex justify-end">
+                        <button
+                          loading={isSubmitting}
+                          type="submit"
+                          className="block cursor-pointer !rounded-xl border-0 bg-[#2563EB] py-3 px-4 mt-2 text-base font-medium text-white transition-colors">
+                          Se connecter
+                        </button>
+                      </div>
                     </form>
                   );
                 }}

@@ -224,13 +224,13 @@ export function isIsoDate(str) {
 }
 
 export function translateHistory(path, value) {
-  if (path === "/statusPhase1") {
+  if (path.includes("statusPhase1")) {
     return translatePhase1(value);
-  } else if (path === "/statusPhase2") {
+  } else if (path.includes("statusPhase2")) {
     return translatePhase2(value);
-  } else if (path === "/phase2ApplicationStatus") {
+  } else if (path.includes("phase2ApplicationStatus")) {
     return translateApplication(value);
-  } else if (path === "/statusPhase2Contract") {
+  } else if (path.includes("statusPhase2Contract")) {
     return translateEngagement(value);
   } else if (isIsoDate(value)) {
     return formatStringLongDate(value);

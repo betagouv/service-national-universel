@@ -1,3 +1,69 @@
+# [1.335.0](https://github.com/betagouv/service-national-universel/compare/v1.334.1...v1.335.0) (2023-09-19)
+
+
+### Bug Fixes
+
+* **api:** bug city undefined ([7784467](https://github.com/betagouv/service-national-universel/commit/7784467a1282b7c7ccb7e6fa5ce40e34db9f51db))
+* **api:** bug packages ([bdcb5b0](https://github.com/betagouv/service-national-universel/commit/bdcb5b0541611fefa39ae0ed8fd90a3ae25c8cf3))
+* **api:** package ([d5b1e9f](https://github.com/betagouv/service-national-universel/commit/d5b1e9f403f41b6f02ddac8d44aac301b1398d25))
+* **api:** rerun api ([dad5750](https://github.com/betagouv/service-national-universel/commit/dad57502f4709bc6c438d571d7c6eb6849f15fa8))
+* **api:** rerun package lock ([406705d](https://github.com/betagouv/service-national-universel/commit/406705d0e23886aa5d48a8c5baec1deb9e834556))
+
+
+### Features
+
+* PR template ([#2975](https://github.com/betagouv/service-national-universel/issues/2975)) ([f1e4676](https://github.com/betagouv/service-national-universel/commit/f1e467678eaac1b181f6d4716ad86dee5e2f1c8f))
+
+
+### Reverts
+
+* Revert "refacto(analytics): naming, separation of concerns, imports and more (#3020)" ([5167ce4](https://github.com/betagouv/service-national-universel/commit/5167ce4f4bbbc45c23649fff6b57db1d50defaa6)), closes [#3020](https://github.com/betagouv/service-national-universel/issues/3020)
+
+## [1.334.1](https://github.com/betagouv/service-national-universel/compare/v1.334.0...v1.334.1) (2023-09-18)
+
+
+### Bug Fixes
+
+* **admin:** dayjs shift time to utc with daylight saving time ([#3010](https://github.com/betagouv/service-national-universel/issues/3010)) ([65f0b61](https://github.com/betagouv/service-national-universel/commit/65f0b61b64dcbe03cbe90e39cee18afb0f4c0550))
+* **admin:** sort options on load ([#3004](https://github.com/betagouv/service-national-universel/issues/3004)) ([d13cab9](https://github.com/betagouv/service-national-universel/commit/d13cab94dbf785c0f994f8f6daadd478fd8fded4))
+* **deps:** update dependency libphonenumber-js to v1.10.44 ([#2980](https://github.com/betagouv/service-national-universel/issues/2980)) ([bf3facd](https://github.com/betagouv/service-national-universel/commit/bf3facd436dd80775eea1167de4a46741387d38a))
+* **deps:** update dependency pg to v8.11.3 ([#2981](https://github.com/betagouv/service-national-universel/issues/2981)) ([d7c27f3](https://github.com/betagouv/service-national-universel/commit/d7c27f36ee9d1e8c1436c6334134354da9f507f6))
+* **deps:** update dependency redis to v4.6.8 ([#2982](https://github.com/betagouv/service-national-universel/issues/2982)) ([a238845](https://github.com/betagouv/service-national-universel/commit/a2388450255e6d0916d3d87d7d0f2f98d0c1e997))
+* **deps:** update dependency redux to v4.2.1 ([#2983](https://github.com/betagouv/service-national-universel/issues/2983)) ([5c847c9](https://github.com/betagouv/service-national-universel/commit/5c847c9cebd5138670c5955c47785b6c4c62521e))
+* **deps:** update dependency slate-react to v0.98.3 ([#2985](https://github.com/betagouv/service-national-universel/issues/2985)) ([34e2308](https://github.com/betagouv/service-national-universel/commit/34e2308d52900b5081915a3a8b4ceea6c6aab0a8))
+* **deps:** update dependency styled-components to v5.3.11 ([#2986](https://github.com/betagouv/service-national-universel/issues/2986)) ([333a2db](https://github.com/betagouv/service-national-universel/commit/333a2db061a9e9f016cc4e9dd20f9a907fa97f11))
+* **deps:** update dependency uuid to v9.0.1 ([#2987](https://github.com/betagouv/service-national-universel/issues/2987)) ([4b18519](https://github.com/betagouv/service-national-universel/commit/4b185194da0a5565cc52b308bde9c32376de49bb))
+
+# [1.334.0](https://github.com/betagouv/service-national-universel/compare/v1.333.0...v1.334.0) (2023-09-15)
+
+
+### Bug Fixes
+
+* **admin:** structure invite behavior ([#2998](https://github.com/betagouv/service-national-universel/issues/2998)) ([cb39124](https://github.com/betagouv/service-national-universel/commit/cb39124a54302f64344ee4ff54815a4cba3f6ed3))
+* **api:** searchbar with spaces ([#2970](https://github.com/betagouv/service-national-universel/issues/2970)) ([222496f](https://github.com/betagouv/service-national-universel/commit/222496f17988f08ad11b71dde69fe4b3d7ccb31f))
+* **app:** fix redirection in parent context ([#2992](https://github.com/betagouv/service-national-universel/issues/2992)) ([a10b76a](https://github.com/betagouv/service-national-universel/commit/a10b76a92300e2325405b55a62fbc322d2d76cc5))
+* **snu-lib:** translation phase2 status ([#2996](https://github.com/betagouv/service-national-universel/issues/2996)) ([d35b90b](https://github.com/betagouv/service-national-universel/commit/d35b90b08883595725ddba2782af01156c51cb66))
+
+
+### Features
+
+* **admin:** download/mail button attestation phase1/2/3 ([#2978](https://github.com/betagouv/service-national-universel/issues/2978)) ([2955e36](https://github.com/betagouv/service-national-universel/commit/2955e36cbe916f4750b78263d1243c1063732886))
+* **admin:** update process duplicate mission + refacto page create mission ([#2952](https://github.com/betagouv/service-national-universel/issues/2952)) ([95ac9c2](https://github.com/betagouv/service-national-universel/commit/95ac9c2a961907abada843a26f207f09a28e1e3e))
+* **app/admin/api:** bouton 2fa appareil ([#2997](https://github.com/betagouv/service-national-universel/issues/2997)) ([8d33a6a](https://github.com/betagouv/service-national-universel/commit/8d33a6ae31d4ebea649c20ef77ac2d651b92a8e3))
+
+# [1.333.0](https://github.com/betagouv/service-national-universel/compare/v1.332.0...v1.333.0) (2023-09-14)
+
+
+### Bug Fixes
+
+* **app:** representants legaux - fix display of data on mobile verification page ([c3d004f](https://github.com/betagouv/service-national-universel/commit/c3d004fc2af72db9abb7c1255bccd5f76f60413d))
+* **lib:** instruction end date for october ([b069fac](https://github.com/betagouv/service-national-universel/commit/b069fac0f4d1fe6dde4c184b6991d228deebd452))
+
+
+### Features
+
+* **lib:** update inscription end date for cohort in october ([7239ab6](https://github.com/betagouv/service-national-universel/commit/7239ab6a90ada5c25178fe537d16e247cbb6b552))
+
 # [1.332.0](https://github.com/betagouv/service-national-universel/compare/v1.331.0...v1.332.0) (2023-09-13)
 
 
