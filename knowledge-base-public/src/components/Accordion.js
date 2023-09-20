@@ -2,7 +2,8 @@ import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import slugify from "slugify";
 import FolderIcon from "./FolderIcon";
-
+import { separateEmojiAndText } from "../utils/index";
+import { Emoji } from "./Emoji";
 // accessibility: https://www.w3.org/WAI/ARIA/apg/patterns/accordion/
 
 export const Accordion = ({ title, list = [], className = "", path, isOpen = false, slug: slugTheme }) => {
@@ -54,18 +55,22 @@ export const Accordion = ({ title, list = [], className = "", path, isOpen = fal
       >
         {list && list.length > 0 ? (
           <ul>
-            {list.map(({ title, slug, type }, index) => (
-              <li className="flex border-t border-gray-200 text-sm font-medium text-gray-900" key={index}>
-                <Link
-                  tabIndex={active ? 0 : -1}
-                  className="flex flex-1 items-center px-6 py-4"
-                  href={`${path}/${type === "section" ? slugTheme : slug}${type === "section" ? `?loadingType=section&openTheme=${slug}` : ""}`}
-                >
-                  {type === "section" && <FolderIcon />}
-                  <span className="line-clamp-2">{title}</span>
-                </Link>
-              </li>
-            ))}
+            {list.map(({ title, slug, type }) => {
+              const [emoji, text] = separateEmojiAndText(title);
+              return (
+                <li className="flex border-t border-gray-200 text-sm font-medium text-gray-900" key={slug}>
+                  <Link
+                    tabIndex={active ? 0 : -1}
+                    className="flex flex-1 items-center px-6 py-4"
+                    href={`${path}/${type === "section" ? slugTheme : slug}${type === "section" ? `?loadingType=section&openTheme=${slug}` : ""}`}
+                  >
+                    {type === "section" && <FolderIcon />}
+                    <Emoji emoji={emoji} />
+                    <span className="line-clamp-2">{text}</span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <div className="px-6 pb-4 text-sm font-medium text-gray-400">Articles en cours de rédaction ⏳</div>

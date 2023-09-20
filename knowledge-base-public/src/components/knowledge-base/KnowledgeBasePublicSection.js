@@ -10,13 +10,46 @@ import { useRouter } from "next/router";
 import KnowledgeBaseSearch from "./KnowledgeBaseSearch";
 import { HiSearch, HiStar } from "react-icons/hi";
 import Link from "next/link";
+import useUser from "../../hooks/useUser";
+import API from "../../services/api";
+import { separateEmojiAndText } from "../../utils/index";
+import { Emoji } from "../Emoji";
 
 const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
+  const { restriction } = useUser();
   const router = useRouter();
   const [sections, setSections] = useState(item?.children?.filter((c) => c.type === "section") || []);
   const [articles, setArticles] = useState(item?.children?.filter((c) => c.type === "article") || []);
+  const [top4Article, setTop4Article] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const scrollRef = useRef(null);
+
+  useEffect(() => {
+    const fetchTop4 = async () => {
+      const NumberOfTopArticle = 4
+      try {
+        const response = await API.get({ path: `/knowledge-base/${restriction}/top4Article/${NumberOfTopArticle}` });
+        const rawData = response.data;
+        const processedData = rawData.map((article) => {
+          const { _id, title, slug } = article;
+          const [emoji, text] = separateEmojiAndText(title);
+          return {
+            _id,
+            title,
+            slug,
+            emoji,
+            text,
+          };
+        });
+
+        setTop4Article(processedData);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchTop4();
+  }, [item]);
 
   const getAllArticles = (children) => {
     let articles = [];
@@ -47,7 +80,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
         if (isScrollEnd) {
           el.style.borderRight = "none";
         } else {
-          el.style.borderRight = "1px solid #ccc"; // Remplacez #ccc par la couleur de votre choix
+          el.style.borderRight = "1px solid #ccc";
         }
       }
     }
@@ -75,15 +108,31 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   if (isRoot) {
     return (
       <>
-        <div className="flex h-44 w-full flex-col justify-center gap-6 border-t-[1px] border-white border-opacity-20 bg-[#32257F]">
-          <p className="text-center text-3xl font-bold leading-9 text-white">J&apos;ai besoin d&apos;aide</p>
+        <div className="w-full flex flex-col justify-center gap-6 border-t-[1px] border-white border-opacity-20 bg-[#32257F]">
+          <p className="text-center text-3xl mt-8 mb-1 font-bold leading-9 text-white">J&apos;ai besoin d&apos;aide</p>
           <button
             onClick={() => setSearchOpen(true)}
-            className={`mx-4 flex max-w-2xl cursor-text gap-4 rounded-lg bg-white p-3 text-gray-600 md:mx-auto md:w-full ${searchOpen && "invisible"}`}
+            className={`mx-4 mb-2 flex max-w-2xl cursor-text gap-4 rounded-lg bg-white p-3 text-gray-600 md:mx-auto md:w-full ${searchOpen && "invisible"}`}
           >
             <HiSearch className="text-2xl text-gray-500" />
             Rechercher un article
           </button>
+        </div>
+        <div className="flex justify-center bg-[#32257F]">
+          <div className="mx-auto flex max-w-[90%] flex-row flex-wrap justify-center lg:max-w-[70%]">
+            {top4Article.map(({ _id, slug, text }) => (
+              <div key={_id} className="m-1 rounded-2xl bg-blue-100 px-2 py-1 text-center lg:w-auto">
+                <Link
+                  href={`/base-de-connaissance/${slug}`}
+                  aria-label={`Lire l'article ${text}`}
+                  alt={`Lire l'article ${text}`}
+                  className="text-sm font-medium leading-5 text-blue-800 flex justify-center"
+                >
+                  {text}
+                </Link>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="h-32 w-full bg-[#32257F]" />
@@ -143,17 +192,23 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
                 </div>
               </div>
               <div className={`transition-max-height flex flex-row overflow-x-auto duration-700 md:gap-2`}>
-                {topArticles.slice(0, 3).map(({ _id, title, slug }) => (
-                  <div
-                    key={_id}
-                    className="mx-3.5 my-2 flex min-h-[130px] min-w-[200px] flex-col justify-between rounded-lg border-[1px] border-gray-300 bg-white px-4 py-2 md:m-2 md:min-w-[30%] md:max-w-[30%] md:flex-grow"
-                  >
-                    <h3 className="mb-4 text-sm font-bold leading-5 text-gray-900">{title}</h3>
-                    <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
-                      <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p>
-                    </Link>
-                  </div>
-                ))}
+                {topArticles.slice(0, 3).map(({ _id, title, slug }) => {
+                  const [emoji, text] = separateEmojiAndText(title);
+                  return (
+                    <div
+                      key={_id}
+                      className="mx-3.5 my-2 flex min-h-[130px] min-w-[200px] flex-col justify-between rounded-lg border-[1px] border-gray-300 bg-white px-4 py-2 md:m-2 md:min-w-[30%] md:max-w-[30%] md:flex-grow"
+                    >
+                      <h3 className="mb-4 text-sm font-bold leading-5 text-gray-900">
+                        <Emoji emoji={emoji} />
+                        {text}
+                      </h3>
+                      <Link href={`/base-de-connaissance/${slug}`} aria-label={`Lire l'article ${title}`} alt={`Lire l'article ${title}`}>
+                        <p className="line-clamp-2 text-sm font-normal leading-5 text-blue-600">Lire L'article</p>
+                      </Link>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </>
