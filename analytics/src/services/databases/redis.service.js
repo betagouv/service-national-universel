@@ -5,10 +5,19 @@ const REDIS_KEYS = require("./redis.constants");
 
 const redisClient = redis.createClient({ url: REDIS_URL });
 
-redisClient
-  .connect()
-  .then(() => console.info("Redis connection has been established successfully."))
-  .catch(capture);
+redisClient.on("connect", () => {
+  console.info("Redis connection has been established successfully.");
+});
+
+redisClient.on("error", (error) => {
+  capture(error);
+});
+
+try {
+  redisClient.connect();
+} catch (error) {
+  capture(error);
+}
 
 const clearAllCache = async () => {
   try {
