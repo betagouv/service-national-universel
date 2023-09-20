@@ -26,8 +26,9 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
 
   useEffect(() => {
     const fetchTop4 = async () => {
+      const NumberOfTopArticle = 4
       try {
-        const response = await API.get({ path: `/knowledge-base/${restriction}/top4Article` });
+        const response = await API.get({ path: `/knowledge-base/${restriction}/top4Article/${NumberOfTopArticle}` });
         const rawData = response.data;
         const processedData = rawData.map((article) => {
           const { _id, title, slug } = article;
