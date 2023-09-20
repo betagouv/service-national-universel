@@ -358,7 +358,7 @@ router.post("/todo", passport.authenticate(["referent"], { session: false, failW
         index: "sessionphase1",
         body: buildArbitratyNdJson(
           { index: "sessionphase1", type: "_doc" },
-          withAggs(queryFromFilter([{ terms: { "cohort.keyword": cohorts } }, { exists: { field: "headCenterId" } }]), "cohort.keyword"),
+          withAggs(queryFromFilter([{ terms: { "cohort.keyword": cohorts } }, { bool: { must_not: { exists: { field: "headCenterId" } } } }]), "cohort.keyword"),
         ),
       });
 
@@ -370,36 +370,6 @@ router.post("/todo", passport.authenticate(["referent"], { session: false, failW
           };
         }),
       };
-    }
-
-    // Contrat (À renseigner) 1 représentant de l’État est à renseigner
-    // engagement_contrat_à_renseigner
-    async function contratÀRenseigner() {
-      if (!cohorts.length) return { engagement_contrat_à_renseigner: [] };
-      const departmentsCohortsFromRepartition = await departmentsFromTableRepartition(cohorts);
-      // On récupère les entrées de département service pour chaque cohorte groupés par département
-      // Si un département de la cohorte n'a pas de contact on l'ajoute dans la liste à signaler.
-      const response = await esClient.msearch({
-        index: "departmentservice",
-        body: buildArbitratyNdJson(
-          ...cohorts.flatMap((cohort) => {
-            return [
-              { index: "departmentservice", type: "_doc" },
-              withAggs(
-                queryFromFilter([
-                  { terms: { "cohort.keyword": [cohort] } },
-                  { bool: { must: { exists: { field: "contacts" } } } },
-                  { terms: { "department.keyword": departmentsCohortsFromRepartition.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
-                ]),
-                "department.keyword",
-              ),
-            ];
-          }),
-        ),
-      });
-      // Pour chaque département, si le département n'a pas de contact pour la cohorte on l'ajoute dans la liste à signaler
-      const engagement_contrat_à_renseigner = missingElementsByCohortDepartment(response, departmentsCohortsFromRepartition, cohorts);
-      return { engagement_contrat_à_renseigner };
     }
 
     // Centre (À déclarer) Au moins 1 centre est en attente de déclaration pour le séjour de [Février 2023-C].
@@ -521,6 +491,7 @@ router.post("/todo", passport.authenticate(["referent"], { session: false, failW
         {
           $match: {
             status: { $in: ["VALIDATED", "IN_PROGRESS"] },
+            // statusPhase2: { $in: ["IN_PROGRESS", "WAITING_REALISATION"] },
             contractStatus: { $in: ["DRAFT", "SENT"] },
             youngId: { $exists: true, $ne: "N/A" },
             missionId: { $exists: true },
@@ -733,12 +704,13 @@ router.post("/todo", passport.authenticate(["referent"], { session: false, failW
         body: buildArbitratyNdJson(
           // Contrat (À suivre) X contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature
           // engagement_contrat_à_éditer
-          { index: "application", type: "_doc" },
+          { index: "young", type: "_doc" },
           queryFromFilter(
             [
-              // { terms: { "youngCohort.keyword": cohortsNotFinished } },
-              { terms: { "contractStatus.keyword": ["WAITING_VALIDATION"] } },
-              { terms: { "status.keyword": ["VALIDATED", "IN_PROGRESS"] } },
+              { terms: { "status.keyword": ["VALIDATED"] } },
+              { terms: { "statusPhase2.keyword": ["WAITING_REALISATION", "IN_PROGRESS"] } },
+              { terms: { "phase2ApplicationStatus.keyword": ["VALIDATED", "IN_PROGRESS"] } },
+              { terms: { "statusPhase2Contract.keyword": ["DRAFT"] } },
             ],
             {
               regionField: "youngRegion",
@@ -747,23 +719,40 @@ router.post("/todo", passport.authenticate(["referent"], { session: false, failW
           ),
           // Contrat (À suivre) X contrats d’engagement sont en attente de signature.
           // engagement_contrat_en_attente_de_signature
-          { index: "application", type: "_doc" },
-          queryFromFilter([{ terms: { "contractStatus.keyword": ["SENT"] } }, { terms: { "status.keyword": ["VALIDATED", "IN_PROGRESS"] } }], {
-            regionField: "youngRegion",
-            departmentField: "youngDepartment",
-          }),
+          { index: "young", type: "_doc" },
+          queryFromFilter(
+            [
+              { terms: { "status.keyword": ["VALIDATED"] } },
+              { terms: { "statusPhase2.keyword": ["WAITING_REALISATION", "IN_PROGRESS"] } },
+              { terms: { "phase2ApplicationStatus.keyword": ["VALIDATED", "IN_PROGRESS"] } },
+              { terms: { "statusPhase2Contract.keyword": ["SENT"] } },
+            ],
+            {
+              regionField: "youngRegion",
+              departmentField: "youngDepartment",
+            },
+          ),
           // Dossier d’éligibilité (À vérifier)  X dossiers d’éligibilité en préparation militaire sont en attente de vérification.
           // engagement_dossier_militaire_en_attente_de_validation
           { index: "young", type: "_doc" },
-          queryFromFilter([{ terms: { "statusMilitaryPreparationFiles.keyword": ["WAITING_VERIFICATION"] } }]),
+          queryFromFilter([{ terms: { "status.keyword": ["VALIDATED"] } }, { terms: { "statusMilitaryPreparationFiles.keyword": ["WAITING_VERIFICATION"] } }], {
+            regionField: "youngRegion",
+            departmentField: "youngDepartment",
+          }),
           // Mission (À instruire) X missions sont en attente de validation
           // engagement_mission_en_attente_de_validation
           { index: "mission", type: "_doc" },
-          queryFromFilter([{ terms: { "status.keyword": ["WAITING_VALIDATION"] } }]),
+          queryFromFilter([{ terms: { "status.keyword": ["WAITING_VALIDATION"] } }], {
+            regionField: "youngRegion",
+            departmentField: "youngDepartment",
+          }),
           // Phase 3 (À suivre) X demandes de validation de phase 3 à suivre
           // engagement_phase3_en_attente_de_validation
           { index: "young", type: "_doc" },
-          queryFromFilter([{ terms: { "statusPhase3.keyword": ["WAITING_VALIDATION"] } }]),
+          queryFromFilter([{ terms: { "status.keyword": ["VALIDATED"] } }, { terms: { "statusPhase3.keyword": ["WAITING_VALIDATION"] } }], {
+            regionField: "youngRegion",
+            departmentField: "youngDepartment",
+          }),
         ),
       });
       const results = response.body.responses;
@@ -798,7 +787,6 @@ router.post("/todo", passport.authenticate(["referent"], { session: false, failW
         },
         engagement: {
           ...(await basicEngagement()),
-          ...(await contratÀRenseigner()),
           ...(await volontairesÀSuivreSansContrat()),
           ...(await volontairesÀSuivreSansStatut()),
           ...(await volontairesÀSuivreAchevéSansStatut()),

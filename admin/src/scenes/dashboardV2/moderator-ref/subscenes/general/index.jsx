@@ -3,13 +3,15 @@ import React, { useEffect, useMemo, useState } from "react";
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { Link } from "react-router-dom";
+import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList, translate } from "snu-lib";
+import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 import { capture } from "../../../../../sentry";
-import { translate } from "snu-lib";
-import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
 import api from "../../../../../services/api";
 import { getLink as getOldLink } from "../../../../../utils";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
+import KeyNumbers from "../../../components/KeyNumbers";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import HorizontalBar from "../../../components/graphs/HorizontalBar";
 import InfoMessage from "../../../components/ui/InfoMessage";
@@ -17,9 +19,6 @@ import Engagement from "../../../components/ui/icons/Engagement";
 import Inscription from "../../../components/ui/icons/Inscription";
 import Sejour from "../../../components/ui/icons/Sejour";
 import VolontaireSection from "./components/VolontaireSection";
-import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
-import KeyNumbers from "../../../components/KeyNumbers";
-import { Link } from "react-router-dom";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -30,6 +29,8 @@ export default function Index() {
 
   const [stats, setStats] = useState({});
   const [message, setMessage] = useState([]);
+
+  const [cohortsNotFinished, setCohortsNotFinished] = useState([]);
 
   const [departmentOptions, setDepartmentOptions] = useState([]);
 
@@ -83,7 +84,6 @@ export default function Index() {
     const res = await getCurrentInscriptions(selectedFilters);
     setVolontairesData(res);
   }
-
   async function fetchInOutCohort() {
     const res = await getInAndOutCohort(selectedFilters);
     setInAndOutCohort(res);
@@ -131,12 +131,24 @@ export default function Index() {
       setMessage(response.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
+      toastr.error("Oups, une erreur est survenue lors de la récupération des messages");
+    }
+  };
+
+  const getCohorts = async () => {
+    try {
+      const { ok, code, data: cohorts } = await api.get(`/cohort`);
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes", translate(code));
+      setCohortsNotFinished(cohorts.filter((c) => new Date(c.dateEnd) > Date.now()).map((e) => e.name));
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes");
     }
   };
 
   React.useEffect(() => {
     getMessage();
+    getCohorts();
   }, []);
 
   return (
@@ -145,7 +157,7 @@ export default function Index() {
         {message?.length ? message.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
         <div className="flex w-full gap-4">
-          <Actus stats={stats} />
+          <Actus stats={stats} user={user} cohortsNotFinished={cohortsNotFinished} />
           <KeyNumbers />
         </div>
         <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
@@ -200,7 +212,7 @@ const NoteContainer = ({ title, number, content, btnLabel, link }) => {
   );
 };
 
-function Actus({ stats }) {
+function Actus({ stats, user, cohortsNotFinished }) {
   const [fullNote, setFullNote] = useState(false);
 
   function shouldShow(parent, key, index = null) {
@@ -254,7 +266,7 @@ function Actus({ stats }) {
               title="Dossier"
               number={stats.inscription.inscription_en_attente_de_validation}
               content="dossier d'inscriptions sont en attente de validation."
-              link="/inscription?status=WAITING_VALIDATION"
+              link={`/inscription?status=WAITING_VALIDATION&cohort=${cohortsNotFinished.join("~")}`}
               btnLabel="À instruire"
             />
           )}
@@ -369,7 +381,7 @@ function Actus({ stats }) {
                   key={"sejour_contact_à_renseigner" + item.cohort + item.department}
                   number=""
                   content={`Au moins 1 contact de convocation doit être renseigné pour le séjour de ${item.cohort} (${item.department})`}
-                  link={ROLES.REFERENT_DEPARTMENT ? `/team` : null}
+                  link={user.role === ROLES.REFERENT_DEPARTMENT ? `/team` : null}
                   btnLabel="À renseigner"
                 />
               ),
@@ -453,6 +465,7 @@ function Actus({ stats }) {
               number={stats.engagement.engagement_contrat_à_éditer}
               content="contrats d'engagement sont à éditer par la structure d'accueil et à envoyer en signature."
               btnLabel="À suivre"
+              link={`/volontaire?status=VALIDATED&statusPhase2=IN_PROGRESS~WAITING_REALISATION&phase2ApplicationStatus=VALIDATED~IN_PROGRESS&statusPhase2Contract=DRAFT`}
             />
           )}
           {shouldShow(stats.engagement, "engagement_contrat_en_attente_de_signature") && (
@@ -461,14 +474,16 @@ function Actus({ stats }) {
               number={stats.engagement.engagement_contrat_en_attente_de_signature}
               content="contrats d'engagement sont en attente de signature."
               btnLabel="À suivre"
+              link={`/volontaire?status=VALIDATED&statusPhase2=IN_PROGRESS~WAITING_REALISATION&phase2ApplicationStatus=VALIDATED~IN_PROGRESS&statusPhase2Contract=SENT`}
             />
           )}
           {shouldShow(stats.engagement, "engagement_dossier_militaire_en_attente_de_validation") && (
             <NoteContainer
               title="Dossier d’éligibilité"
               number={stats.engagement.engagement_dossier_militaire_en_attente_de_validation}
-              content="dossiers d’éligibilité en préparation militaire sont en attente de vérification."
+              content="dossiers d'éligibilité en préparation militaire sont en attente de vérification."
               btnLabel="À vérifier"
+              link={`/volontaire?status=VALIDATED&statusMilitaryPreparationFiles=WAITING_VERIFICATION`}
             />
           )}
           {shouldShow(stats.engagement, "engagement_mission_en_attente_de_validation") && (
@@ -477,6 +492,7 @@ function Actus({ stats }) {
               number={stats.engagement.engagement_mission_en_attente_de_validation}
               content="missions sont en attente de validation."
               btnLabel="À instruire"
+              link={`/mission?status=WAITING_VALIDATION`}
             />
           )}
           {shouldShow(stats.engagement, "engagement_phase3_en_attente_de_validation") && (
@@ -485,20 +501,10 @@ function Actus({ stats }) {
               number={stats.engagement.engagement_phase3_en_attente_de_validation}
               content="demandes de validation de phase 3 à suivre."
               btnLabel="À suivre"
+              link={`/volontaire?status=VALIDATED&statusPhase3=WAITING_VALIDATION`}
             />
           )}
-          {stats.engagement.engagement_contrat_à_renseigner.map(
-            (item, key) =>
-              shouldShow(stats.engagement, "engagement_contrat_à_renseigner", key) && (
-                <NoteContainer
-                  title="Contact"
-                  key={"engagement_contrat_à_renseigner" + item.cohort + item.department}
-                  number=""
-                  content={`Au moins 1 représentant de l’État est à renseigner pour le séjour de ${item.cohort} (${item.department})`}
-                  btnLabel="À renseigner"
-                />
-              ),
-          )}
+
           {shouldShow(stats.engagement, "volontaires_à_suivre_sans_contrat") && (
             <NoteContainer
               title="Volontaires"
