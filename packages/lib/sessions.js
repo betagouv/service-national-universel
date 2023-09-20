@@ -97,6 +97,23 @@ const sessions2023 = [
       instructionEndDate: new Date("2023-09-22T22:00:00.000Z"), // 22 septembre
     },
   },
+  {
+    id: "2024_01_TEST",
+    stagingOnly: true,
+    name: "Janvier 2024",
+    dateStart: new Date("10/03/2024"),
+    dateEnd: new Date("10/04/2024"),
+    buffer: 99999,
+    event: "Phase0/CTA preinscription - sejour test NC",
+    eligibility: {
+      zones: ["A", "B", "C", "DOM", "PF", "NC", "Etranger"],
+      schoolLevels: ["NOT_SCOLARISE", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "CAP"],
+      bornAfter: new Date("10/22/2005"),
+      bornBefore: new Date("10/09/2008"),
+      inscriptionEndDate: new Date("2023-12-28T21:59:00.000Z"), // 28 décembre 23:59 à Paris
+      instructionEndDate: new Date("2023-12-31T21:59:00.000Z"), // 31 décembre 23:59 à Paris
+    },
+  },
 ];
 
 export { sessions2023, oldSessions };

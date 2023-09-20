@@ -2,10 +2,11 @@ const { YOUNG_STATUS, sessions2023, region2zone, oldSessions, getRegionForEligib
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
+const { ENVIRONMENT } = require("../config");
 
 async function getFilteredSessions(young) {
   const region = getRegionForEligibility(young);
-  const sessions = sessions2023.filter(
+  let sessions = sessions2023.filter(
     (session) =>
       session.eligibility.zones.includes(region2zone[region]) &&
       session.eligibility.schoolLevels.includes(young.grade) &&
@@ -15,6 +16,10 @@ async function getFilteredSessions(young) {
         ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && session.eligibility.instructionEndDate > Date.now())),
   );
 
+  if (ENVIRONMENT === "production") {
+    sessions = sessions.filter((session) => !session.stagingOnly);
+  }
+
   for (let session of sessions) {
     session.isEligible = true;
   }
@@ -23,10 +28,13 @@ async function getFilteredSessions(young) {
 
 async function getAllSessions(young) {
   const region = getRegionForEligibility(young);
-  const sessionsWithPlaces = await getPlaces([...oldSessions, ...sessions2023], region);
+  let sessionsWithPlaces = await getPlaces([...oldSessions, ...sessions2023], region);
   const availableSessions = await getFilteredSessions(young);
   for (let session of sessionsWithPlaces) {
     session.isEligible = availableSessions.includes(session);
+  }
+  if (ENVIRONMENT === "production") {
+    sessionsWithPlaces = sessionsWithPlaces.filter((session) => !session.stagingOnly);
   }
   return sessionsWithPlaces;
 }
