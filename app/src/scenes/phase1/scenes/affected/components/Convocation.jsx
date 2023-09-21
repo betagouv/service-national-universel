@@ -48,8 +48,8 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
   return (
     <Hero>
       <Content style={{ width: "100%" }}>
-        <ConvocText style={{ fontWeight: "500", textDecoration: "underline", display: "flex", justifyContent: "space-between" }}>
-          Affaire suivie par :
+        <ConvocText style={{ fontWeight: "500", textDecoration: "underline" }}>
+          <div>Affaire suivie par :</div>
           <div
             dangerouslySetInnerHTML={{
               __html: htmlCleaner(
@@ -62,6 +62,7 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
             }}
           />
         </ConvocText>
+
         <ConvocText style={{ textAlign: "center" }}>
           <b>CONVOCATION</b>
           <br /> au séjour de cohésion dans le cadre du service national universel (SNU)
