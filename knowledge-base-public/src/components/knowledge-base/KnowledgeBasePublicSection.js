@@ -24,32 +24,32 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
   const [searchOpen, setSearchOpen] = useState(false);
   const scrollRef = useRef(null);
 
-  useEffect(() => {
-    const fetchTop4 = async () => {
-      const NumberOfTopArticle = 4
-      try {
-        const response = await API.get({ path: `/knowledge-base/${restriction}/top4Article/${NumberOfTopArticle}` });
-        const rawData = response.data;
-        const processedData = rawData.map((article) => {
-          const { _id, title, slug } = article;
-          const [emoji, text] = separateEmojiAndText(title);
-          return {
-            _id,
-            title,
-            slug,
-            emoji,
-            text,
-          };
-        });
+  // useEffect(() => {
+  //   const fetchTop4 = async () => {
+  //     const NumberOfTopArticle = 4
+  //     try {
+  //       const response = await API.get({ path: `/knowledge-base/${restriction}/top4Article/${NumberOfTopArticle}` });
+  //       const rawData = response.data;
+  //       const processedData = rawData.map((article) => {
+  //         const { _id, title, slug } = article;
+  //         const [emoji, text] = separateEmojiAndText(title);
+  //         return {
+  //           _id,
+  //           title,
+  //           slug,
+  //           emoji,
+  //           text,
+  //         };
+  //       });
 
-        setTop4Article(processedData);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+  //       setTop4Article(processedData);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
 
-    fetchTop4();
-  }, [item]);
+  //   fetchTop4();
+  // }, [item]);
 
   const getAllArticles = (children) => {
     let articles = [];
@@ -118,7 +118,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
             Rechercher un article
           </button>
         </div>
-        <div className="flex justify-center bg-[#32257F]">
+        {/* <div className="flex justify-center bg-[#32257F]">
           <div className="mx-auto flex max-w-[90%] flex-row flex-wrap justify-center lg:max-w-[70%]">
             {top4Article.map(({ _id, slug, text }) => (
               <div key={_id} className="m-1 rounded-2xl bg-blue-100 px-2 py-1 text-center lg:w-auto">
@@ -133,7 +133,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
         <div className="h-32 w-full bg-[#32257F]" />
         <div className="mx-auto mt-[-100px] w-full px-4 md:w-auto">
