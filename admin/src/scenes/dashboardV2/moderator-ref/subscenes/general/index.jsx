@@ -301,7 +301,7 @@ function Actus({ stats, user, cohortsNotFinished }) {
                 />
               ),
           )}
-          {stats.inscription.inscription_sans_accord_renseigné.map(
+          {/* {stats.inscription.inscription_sans_accord_renseigné.map(
             (item, key) =>
               shouldShow(stats.inscription, "inscription_sans_accord_renseigné", key) && (
                 <NoteContainer
@@ -313,7 +313,7 @@ function Actus({ stats, user, cohortsNotFinished }) {
                   btnLabel="À relancer"
                 />
               ),
-          )}
+          )} */}
         </div>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
@@ -504,8 +504,7 @@ function Actus({ stats, user, cohortsNotFinished }) {
               link={`/volontaire?status=VALIDATED&statusPhase3=WAITING_VALIDATION`}
             />
           )}
-
-          {shouldShow(stats.engagement, "volontaires_à_suivre_sans_contrat") && (
+          {/* {shouldShow(stats.engagement, "volontaires_à_suivre_sans_contrat") && (
             <NoteContainer
               title="Volontaires"
               number={stats.engagement.volontaires_à_suivre_sans_contrat}
@@ -528,7 +527,7 @@ function Actus({ stats, user, cohortsNotFinished }) {
               content="volontaires ayant achevé leur mission sans statut à jour"
               btnLabel="À suivre"
             />
-          )}
+          )} */}
         </div>
       </div>
       <div className="flex justify-center">

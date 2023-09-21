@@ -770,8 +770,8 @@ router.post("/todo", passport.authenticate(["referent"], { session: false, failW
       data: {
         inscription: {
           ...(await basicInscriptions()),
-          ...(await droitImageParCohorte()),
           ...(await inscriptionAttenteValidationParCohorte()),
+          // ...(await droitImageParCohorte()),
         },
         sejour: {
           ...(await sejourRassemblementNonConfirmé()),
@@ -783,13 +783,13 @@ router.post("/todo", passport.authenticate(["referent"], { session: false, failW
           ...(await sejourVolontairesÀContacter()),
           ...(await sejourChefDeCentre()),
           ...(await sejourPointage()),
-          ...(await sejourPointageJDM()),
+          // ...(await sejourPointageJDM()), -> not use
         },
         engagement: {
           ...(await basicEngagement()),
-          ...(await volontairesÀSuivreSansContrat()),
-          ...(await volontairesÀSuivreSansStatut()),
-          ...(await volontairesÀSuivreAchevéSansStatut()),
+          // ...(await volontairesÀSuivreSansContrat()),
+          // ...(await volontairesÀSuivreSansStatut()),
+          // ...(await volontairesÀSuivreAchevéSansStatut()),
         },
       },
     });
