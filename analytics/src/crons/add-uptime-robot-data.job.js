@@ -33,6 +33,7 @@ module.exports.handler = async function () {
       uptimeRobot.create({
         uptime_ratio: monitor.custom_uptime_ratio,
         monitor_id: monitor.id,
+        monitor_name: monitor.friendly_name,
         date: dateString,
       });
     });
