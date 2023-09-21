@@ -83,7 +83,9 @@ export default function StepUpload() {
         return;
       }
 
-      plausibleEvent("Phase0/CTA inscription - CI mobile");
+      if (device === "mobile") await plausibleEvent("Phase0/CTA inscription - CI mobile");
+      else await plausibleEvent("Phase0/CTA inscription - CI desktop");
+
       dispatch(setYoung(responseData));
       history.push("/inscription2023/confirm");
     } catch (e) {
