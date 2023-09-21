@@ -145,14 +145,22 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
           du centre
         </ConvocText>
         <ConvocText>Nous vous félicitons pour votre engagement et vous souhaitons un excellent séjour de cohésion.</ConvocText>
-        <Sign>
-          Thibaut de SAINT POL
-          <br />
-          Le Directeur de la jeunesse, de l&apos;éducation populaire et de la vie associative
-        </Sign>
+        {young.cohort === "Octobre 2023 - NC" ? (
+          <Sign>
+            Louis Le Franc
+            <br />
+            Haut commissaire de la République en Nouvelle-Calédonie
+          </Sign>
+        ) : (
+          <Sign>
+            Thibaut de SAINT POL
+            <br />
+            Le Directeur de la jeunesse, de l&apos;éducation populaire et de la vie associative
+          </Sign>
+        )}
         <ConvocText style={{ border: "solid 1px #666", padding: "1rem" }}>
           Pour toute information complémentaire, rendez-vous sur votre compte volontaire (rubrique «{" "}
-          <a href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
+          <a className="underline" href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
             Besoin d&apos;aide
           </a>{" "}
           »).
