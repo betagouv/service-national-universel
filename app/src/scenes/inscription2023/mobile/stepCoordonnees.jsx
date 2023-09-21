@@ -578,7 +578,7 @@ export default function StepCoordonnees() {
         </div>
         <Input value={birthCityZip} label="Code postal de naissance" onChange={updateData("birthCityZip")} error={errors.birthCityZip} correction={corrections?.birthCityZip} />
         <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} error={errors?.gender} correction={corrections.gender} />
-        <PhoneField
+        {/* <PhoneField
           label="Votre téléphone"
           onChange={updateData("phone")}
           onChangeZone={updateData("phoneZone")}
@@ -587,7 +587,7 @@ export default function StepCoordonnees() {
           placeholder={PHONE_ZONES[phoneZone]?.example}
           error={errors.phone || errors.phoneZone}
           correction={corrections.phone}
-        />
+        /> */}
         <RadioButton
           label="Je réside..."
           options={inFranceOrAbroadOptions}
