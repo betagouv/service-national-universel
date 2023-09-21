@@ -28,7 +28,7 @@ function getTop() {
 function getBottom() {
   return getSignedUrl("convocation/bottom.png");
 }
-function getBGForNc(){
+function getBGForNc() {
   return getSignedUrl("convocation/convocation_template_baseV2.png");
 }
 
@@ -101,7 +101,7 @@ const render = async (young) => {
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
       .replace(/{{TOP}}/g, sanitizeAll(getTop()))
       .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
-      .replace(/{{GENERAL_BG}}/g, sanitizeAll(young.cohort ==="Octobre 2023 - NC" ? getBGForNc() : getBg()))
+      .replace(/{{GENERAL_BG}}/g, sanitizeAll(young.cohort === "Octobre 2023 - NC" ? getBGForNc() : getBg()))
       .replace(
         /{{SANITARY_INSTRUCTIONS}}/g,
         sanitizeAll(
@@ -188,7 +188,7 @@ const renderLocalTransport = async (young) => {
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
       .replace(/{{TOP}}/g, sanitizeAll(getTop()))
       .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
-      .replace(/{{GENERAL_BG}}/g, sanitizeAll(young.cohort ==="Octobre 2023 - NC" ? getBGForNc() : getBg()))
+      .replace(/{{GENERAL_BG}}/g, sanitizeAll(young.cohort === "Octobre 2023 - NC" ? getBGForNc() : getBg()));
   } catch (e) {
     throw e;
   }
