@@ -2,8 +2,35 @@ const { YOUNG_STATUS, sessions2023, region2zone, oldSessions, getRegionForEligib
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
+const { ENVIRONMENT } = require("../config");
 
 async function getFilteredSessions(young) {
+  if (ENVIRONMENT !== "production") {
+    return [
+      {
+        id: "2023_10_NC",
+        name: "Octobre 2023 - NC",
+        dateStart: new Date("10/09/2023"),
+        dateEnd: new Date("10/20/2023"),
+        buffer: 99999,
+        event: "Phase0/CTA preinscription - sejour octobre NC",
+        eligibility: {
+          zones: ["NC"],
+          schoolLevels: ["NOT_SCOLARISE", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "CAP"],
+          bornAfter: new Date("10/22/2005"),
+          bornBefore: new Date("10/09/2008"),
+          inscriptionEndDate: new Date("2023-11-20T13:00:00.000Z"), // 20 décembre minuit heure de NC
+          instructionEndDate: new Date("2023-11-22T22:00:00.000Z"), // 22 décembre
+        },
+        numberOfCandidates: 120,
+        numberOfValidated: 100,
+        goal: 300,
+        goalReached: false,
+        isFull: false,
+      },
+    ];
+  }
+
   const region = getRegionForEligibility(young);
   const sessions = sessions2023.filter(
     (session) =>
