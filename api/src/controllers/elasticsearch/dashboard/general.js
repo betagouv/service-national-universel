@@ -484,15 +484,15 @@ router.post("/todo", passport.authenticate(["referent"], { session: false, failW
     // Volontaires (À suivre) X volontaires ayant commencé leur mission sans contrat signé
     // volontaires_à_suivre_sans_contrat
     async function volontairesÀSuivreSansContrat() {
-      const match = { "youngInfo.statusPhase2": "IN_PROGRESS" };
+      const match = { "youngInfo.statusPhase2": "IN_PROGRESS", "youngInfo.status": "VALIDATED" };
       if (req.user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = req.user.region;
       if (req.user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: req.user.department };
       const query = [
         {
           $match: {
-            status: { $in: ["VALIDATED", "IN_PROGRESS"] },
+            status: { $in: ["IN_PROGRESS"] },
             // statusPhase2: { $in: ["IN_PROGRESS", "WAITING_REALISATION"] },
-            contractStatus: { $in: ["DRAFT", "SENT"] },
+            contractStatus: { $nin: ["VALIDATED"] },
             youngId: { $exists: true, $ne: "N/A" },
             missionId: { $exists: true },
           },
@@ -545,7 +545,7 @@ router.post("/todo", passport.authenticate(["referent"], { session: false, failW
     // Volontaires (À suivre) X volontaires ayant commencé leur mission sans statut à jour
     // volontaires_à_suivre_sans_statut
     async function volontairesÀSuivreSansStatut() {
-      const match = { "youngInfo.statusPhase2": "IN_PROGRESS" };
+      const match = { "youngInfo.statusPhase2": "IN_PROGRESS", "youngInfo.status": "VALIDATED" };
       if (req.user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = req.user.region;
       if (req.user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: req.user.department };
       const query = [
@@ -605,7 +605,7 @@ router.post("/todo", passport.authenticate(["referent"], { session: false, failW
     // Volontaires (À suivre) X volontaires ayant achevé leur mission sans statut à jour
     // volontaires_à_suivre_achevé_sans_statut
     async function volontairesÀSuivreAchevéSansStatut() {
-      const match = { "youngInfo.statusPhase2": "IN_PROGRESS" };
+      const match = { "youngInfo.statusPhase2": "IN_PROGRESS", "youngInfo.status": "VALIDATED" };
       if (req.user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = req.user.region;
       if (req.user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: req.user.department };
       const query = [
