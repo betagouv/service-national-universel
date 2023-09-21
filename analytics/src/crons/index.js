@@ -29,8 +29,17 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   // Every day at 02:00
   cron.schedule("0 2 * * *", () => {
     addJdmaData.handler();
+  });
+  // Every day at 02:10
+  cron.schedule("10 2 * * *", () => {
     addCodeClimateData.handler();
+  });
+  // Every day at 02:20
+  cron.schedule("20 2 * * *", () => {
     addUptimeRobotData.handler();
+  });
+  // Every day at 02:30
+  cron.schedule("30 2 * * *", () => {
     addSentryData.handler();
   });
 }
