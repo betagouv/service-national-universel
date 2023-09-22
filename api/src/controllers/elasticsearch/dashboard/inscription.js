@@ -195,7 +195,7 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
           ],
         },
       });
-      
+
     const result = await esClient.search({ index: "young", body: body });
     const response = result.body;
     return res.status(200).send(response);
@@ -263,7 +263,7 @@ router.post("/getInAndOutCohort", passport.authenticate(["referent"], { session:
 
 router.post("/youngForInscription", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const filterFields = ["statusPhase1", "statusPhase2", "statusPhase3", "status", "cohort", "academy", "departement"];
+    const filterFields = ["statusPhase1", "statusPhase2", "statusPhase3", "status", "cohort", "academy", "departement", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const body = {
@@ -274,6 +274,7 @@ router.post("/youngForInscription", passport.authenticate(["referent"], { sessio
             queryFilters?.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
             queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+            queryFilters?.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
           ].filter(Boolean),
         },
       },
