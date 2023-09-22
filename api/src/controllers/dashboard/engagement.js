@@ -311,6 +311,8 @@ router.post("/mission-proposed-places", passport.authenticate("referent", { sess
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
     const { filters, missionFilters } = value;
+    console.log("🚀 ~ file: engagement.js:314 ~ router.post ~ filters:", filters)
+    console.log("🚀 ~ file: engagement.js:314 ~ router.post ~ missionFilters:", missionFilters)
 
     // --- get data
     let pipeline = [

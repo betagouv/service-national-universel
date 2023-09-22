@@ -120,4 +120,13 @@ router.post("/structures", passport.authenticate(["referent"], { session: false,
   }
 });
 
+router.post("/mission-proposed-places", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const filterFields = [];
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;
