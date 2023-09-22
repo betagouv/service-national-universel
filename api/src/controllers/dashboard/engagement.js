@@ -191,8 +191,6 @@ router.post("/volontaires-equivalence-mig", passport.authenticate("referent", { 
     }
     const { filters } = value;
 
-    console.log("filters: ", filters);
-
     // --- get data
     // TODO: optimization
     const youngs = await YoungModel.find({ ...computeYoungFilter(filters), status_equivalence: { $exists: true } }, { phase2ApplicationStatus: 1, statusPhase2Contract: 1 });

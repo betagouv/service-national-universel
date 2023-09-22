@@ -83,18 +83,7 @@ export default function VolontairesEquivalenceMig({ filters }) {
                     ...st,
                     value: st.statuses[selected],
                     percentage: st.statuses[selected] / status.nb,
-                    url: `/volontaire?${queryString.stringify({
-                      status: filters.status,
-                      status_equivalence: selected,
-                      type_equivalence: t.label,
-                      sub_type_equivalence: st.label,
-                    })}`,
                   })),
-                url: `/volontaire?${queryString.stringify({
-                  status: filters.status,
-                  status_equivalence: selected,
-                  type_equivalence: t.label,
-                })}`,
               })),
     });
   }, [filters, selected, statuses, types]);
